@@ -1,0 +1,424 @@
+30.11.2011 - 15:47: Slow SQL-Query: SELECT newsettings.autorid AS autorid ,newsettings.editorid AS editorid ,newsettings.last_modified AS last_modified ,newsettings.class_name AS class_name ,newsettings.created AS created ,newsettings.id AS versionid,newsettings_state.id AS id , newsettings.* ,  metasettings.* ,  templatesettings.* ,  newsettings_state.* FROM gomacms_newsettings AS newsettings  LEFT JOIN gomacms_metasettings AS metasettings ON  metasettings.id = newsettings.id   LEFT JOIN gomacms_templatesettings AS templatesettings ON  templatesettings.id = newsettings.id   INNER JOIN gomacms_newsettings_state AS newsettings_state ON  newsettings_state.publishedid = newsettings.id  WHERE  newsettings_state.id = "1" AND  newsettings.class_name IN ("newsettings","metasettings","templatesettings") ORDER BY newsettings_state.id DESC (69.150924682617ms)
+
+30.11.2011 - 15:47: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  ( path LIKE 'startseite' AND `parentid` = 0 )  AND  (  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") )  ORDER BY pages.sort ASC LIMIT  0, 1 (43.586015701294ms)
+
+30.11.2011 - 15:47: Slow SQL-Query: INSERT INTO `gomacms_statistics_state`  (`stateid`,`publishedid`) VALUES ('0','0') (22.958993911743ms)
+
+30.11.2011 - 15:47: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322664475') (32.13906288147ms)
+
+30.11.2011 - 16:16: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:16: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:16: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:16: Slow SQL-Query: SHOW COLUMNS FROM `gomacms_pagecomments` (37.240982055664ms)
+
+30.11.2011 - 16:16: Slow SQL-Query: SHOW COLUMNS FROM `gomacms_rating` (40.108919143677ms)
+
+30.11.2011 - 16:16: Slow SQL-Query: SHOW COLUMNS FROM `gomacms_rating_state` (40.616989135742ms)
+
+30.11.2011 - 16:16: Code: 5, Name:Sie haben hier leider keinen Zugriff!, Details: , URL: /dev/rebuildcaches
+
+30.11.2011 - 16:16: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "304" (76.98392868042ms)
+
+30.11.2011 - 16:20: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322666401') (33.336162567139ms)
+
+30.11.2011 - 16:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1041.
+
+30.11.2011 - 16:20: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (224.08390045166ms)
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1042.
+
+30.11.2011 - 16:24: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights (36.870956420898ms)
+
+30.11.2011 - 16:24: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (39.04390335083ms)
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:24: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1043.
+
+30.11.2011 - 16:25: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:25: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:25: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:29: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322666982') (311.64002418518ms)
+
+30.11.2011 - 16:29: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:33: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:34: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322667271') (28.43189239502ms)
+
+30.11.2011 - 16:34: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:35: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322667323') (31.610012054443ms)
+
+30.11.2011 - 16:35: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:35: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:49: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322668183') (432.61122703552ms)
+
+30.11.2011 - 16:49: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322668183'  ,  `created` = '1322664475'  ,  `user` = '3'  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '317' (272.33290672302ms)
+
+30.11.2011 - 16:52: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:52: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 16:53: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 17:03: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322669033'  ,  `created` = '1322664475'  ,  `user` = '3'  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '321' (41.493892669678ms)
+
+30.11.2011 - 17:04: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 17:04: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 17:04: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 17:04: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 17:04: DEPRECATED:  is marked as DEPRECATED in  on line . Please use DataObject::get instead.
+
+30.11.2011 - 17:04: Code: 5, Name:PHP-Error, Details: group doesn't exist in this form in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 59, URL: /profile/edit/?ajax=1&dropdownDialog=1&dropElem=zKHiLxelVOBIMTkpHnNQ
+
+30.11.2011 - 17:04: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3?ajax=1&dropdownDialog=1&dropElem=EfTApMBBFOhKbR0li6gk
+
+30.11.2011 - 17:04: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:04: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:04: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:05: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322669130') (73.493003845215ms)
+
+30.11.2011 - 17:05: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322669130'  ,  `created` = '1322664475'  ,  `user` = '3'  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '323' (779.38795089722ms)
+
+30.11.2011 - 17:06: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 17:11: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322669515') (59.129953384399ms)
+
+30.11.2011 - 17:11: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322669515'  ,  `created` = '1322664475'  ,  `user` = '3'  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '326' (183.44902992249ms)
+
+30.11.2011 - 17:11: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "325" (44.680833816528ms)
+
+30.11.2011 - 17:15: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "326" (346.63414955139ms)
+
+30.11.2011 - 17:15: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 17:15: DEPRECATED:  is marked as DEPRECATED in  on line 
+
+30.11.2011 - 17:24: Code: 6, Name:PHP-Error, Details: <b>Fatal Error</b> Call to undefined method form::addfield in  on line , URL: /artikel/der-erste-artikel/
+
+30.11.2011 - 17:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:24: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:24: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "332" (26.389122009277ms)
+
+30.11.2011 - 17:24: Code: 6, Name:PHP-Error, Details: <b>Fatal Error</b> Call to undefined method form::addfield in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectSet.php on line 1338, URL: /artikel/der-erste-artikel/
+
+30.11.2011 - 17:26: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:26: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:26: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+30.11.2011 - 17:45: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '335'  ,  `stateid` = '335'  WHERE `id` = '45' (190.8848285675ms)
+
+30.11.2011 - 17:45: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:45: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:49: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "336" (24.368047714233ms)
+
+30.11.2011 - 17:50: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:50: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:50: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+30.11.2011 - 17:50: Slow SQL-Query: DELETE FROM 
+																`gomacms_Box_statistics`
+																 WHERE  id = "13" (150.40993690491ms)
+
+30.11.2011 - 17:50: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:50: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:52: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:52: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:52: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:56: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:57: Slow SQL-Query: INSERT INTO `gomacms_pagecomments`  (`last_modified`) VALUES ('1322672257') (153.63121032715ms)
+
+30.11.2011 - 17:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:58: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:58: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 17:58: Slow SQL-Query: DELETE FROM 
+																`gomacms_pagecomments`
+																 WHERE  id IN ("4") (59.512138366699ms)
+
+30.11.2011 - 17:58: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 17:58: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 18:09: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 18:09: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:09: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:13: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:13: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322673236') (1082.3729038239ms)
+
+30.11.2011 - 18:13: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322673236'  ,  `created` = '1322664475'  ,  `user` = '3'  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '344' (800.10008811951ms)
+
+30.11.2011 - 18:13: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:14: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:14: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:14: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:14: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:15: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:17: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:17: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:17: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:17: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:17: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:20: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:27: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+30.11.2011 - 18:27: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:27: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:28: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:28: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+30.11.2011 - 18:28: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+30.11.2011 - 21:57: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322686678'  ,  `created` = '1322664475'  ,  `user` = ''  ,  `phpsessid` = 'nurr989g74927l455caua4oiv6'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = ''  ,  `recordid` = '45'  ,  `snap_priority` = '2'  WHERE `id` = '352' (168.01404953003ms)
+
+30.11.2011 - 23:00: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+30.11.2011 - 23:00: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="{BASE_URI}" />
+		<title>Dropdown-Dialog-Test</title>
+		
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "loader" %>
+		
+		<% gload("dropdownDialog") %>
+		<script type="text/javascript">
+			$(function(){
+				$("#element").click(function(){
+					$(this).dropdownDialog("http://filmteam-kraus.de/tpl/kraus/images/slider/filmteam_gruppe_web.jpg");
+					return false;
+				});
+			});
+			
+		</script>
+		<style type="text/css">
+			#element {
+				position: absolute;
+				top: 200px;
+				left: 100px;
+			}
+		</style>
+	</head>
+	<body>
+		<a href="javascript:;" id="element">Click ME!</a>
+	</body>
+</html>

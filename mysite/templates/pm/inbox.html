@@ -1,0 +1,44 @@
+<h4>{$_lang_pm_inbox}</h4>
+<div id="inbox">
+	<% IF $this %>
+		<% CONTROL this() %>
+			<div class="ui-message record" id="message_{$this.tid}">
+				<div class="ui-left">
+					<% CONTROL from() %>
+						<% IF $from.avatar %>
+							<a href="member/{$from.id}{URLEND}">$from.avatar.setSize(50,50)</a>
+						<% ELSE %>
+							<a href="member/{$from.id}{URLEND}"><img height="50" width="50" src="images/no_avatar.png" /></a>
+						<% END %>
+					<% ENDCONTROL %>
+				</div>
+				<div class="ui-right delete">
+					<a title="{$_lang_delete}" rel="ajaxfy" href="pm/del/{$this.tid}{URLEND}"><img src="images/icons/fatcow-icons/16x16/delete.png" name="{$_lang_delete}" /></a>
+				</div>
+				<div onclick="location.href = '{BASE_URI}pm/{$this.tid}{URLEND}';" class="ui-body" style="cursor: pointer;margin-left: 70px;">
+					<div class="subject">
+						<a href="pm/{$this.tid}{URLEND}">$this.subject.text()</a>
+						<div class="preview">
+							$this.preview.bbcode()
+						</div>
+					</div>
+				</div>
+				<div class="clear"></div>
+			</div>
+		<% ENDCONTROL %>
+		<div class="pages">
+		<% lang("page", "Page") %>
+		<% CONTROL pages() %>
+			<% IF $pages.black %>
+				$pages.page
+			<% ELSE %>
+				<a href="pm{URLEND}?pa=$pages.page">$pages.page</a>
+			<% ENDIF %>
+		<% ENDCONTROL %>
+		</div>
+	<% ELSE %>
+		<div style="text-align: center; color: #555; padding: 10px; border-bottom: 3px double #efefef;">
+			<% lang("pm_no_message", "You don't have any message.") %>
+		</div>
+	<% END %>
+</div>

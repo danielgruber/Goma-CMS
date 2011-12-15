@@ -1,0 +1,995 @@
+<?php
+/**
+  *@package goma framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 18.09.2011
+*/
+
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+/**
+ * defines
+*/
+
+// REGEXP for your SQL
+define('SQL_REGEXP','RLIKE');
+// LIKE for your SQL without a differnet between A and a
+define('SQL_LIKE','LIKE');
+
+/* --- */
+
+/* class */
+
+class mysqliDriver extends object implements SQLDriver
+{
+		
+		/**
+		 *@access public
+		 *@var resource connection
+		 *@use for the mysql connetion
+		**/
+		public $_db;
+		/**
+		 *@access public
+		 *@use: connect to db
+		**/
+		public function __construct()
+		{
+				parent::__construct();
+				
+				/* --- */
+				if(!defined("NO_AUTO_CONNECT")) {
+					global $dbuser;
+					
+					global $dbdb;
+					global $dbpass;
+					global $dbhost;
+					if(!isset(self::$db))
+					{
+						self::connect($dbuser, $dbdb, $dbpass, $dbhost);
+					}
+				}
+				
+		}
+		/**
+		 *@access public
+		 *@use: connect to db
+		**/
+		public function connect($dbuser, $dbdb, $dbpass, $dbhost)
+		{
+				$this->db = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
+				if(!mysqli_connect_errno()) {
+					self::setCharsetUTF8();
+					return true;
+				} else {
+					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/mysql_connect_error.html')));
+				}
+		}
+		/**
+		 * tests the connection
+		 *@name test
+		 *@access public
+		*/
+		/**
+		 *@access public
+		 *@use: connect to db
+		**/
+		public static function test($dbuser, $dbdb, $dbpass, $dbhost)
+		{
+				$test = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
+				if(!mysqli_connect_errno()) {
+					$test->close();
+					return true;
+				} else {
+					return false;
+				}
+		}
+		/**
+		 *@access public
+		 *@use: run a query
+		**/
+		public  function query($sql, $unbuffered = false)
+		{
+				if($result = $this->db->query($sql))
+					return $result;
+				else {
+					$trace = debug_backtrace();
+					log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
+					return false;
+				}
+		}
+		/**
+		 *@access public
+		 *@use: fetch_row
+		**/
+		public  function fetch_row($result)
+		{
+				return $result->fetch_row();
+		}
+		/**
+		 *@access public
+		 *@use to diconnect
+		**/
+		public  function close()
+		{
+				$this->db->close();
+		}
+		/**
+		 *@access public
+		 *@use to fetch object
+		**/
+		public  function fetch_object($result)
+		{
+				return $result->fetch_object();
+		}
+		/**
+		 *@access public
+		 *@use to fetch array
+		 */
+		public  function fetch_array($result)
+		{
+				return $result->fetch_array();
+		}
+		/**
+		 *@access public
+		 *@use to fetch assoc
+		 */
+		public  function fetch_assoc($result)
+		{
+				return $result->fetch_assoc();
+		}
+		/**
+		  *@access public
+		  *@use to fetch num rows
+		  */
+		public  function num_rows($result)
+		{
+				return $result->num_rows;
+		}
+		/**
+		  *@access public
+		  *@use to fetch error
+		  */
+		public  function error()
+		{
+				return $this->db->error;
+		}
+		/**
+		  *@access public
+		  *@use to fetch errno
+		  */
+		public  function errno()
+		{
+				return $this->db->errno;
+		}
+		/**
+		*@access public
+		*@use to fetch insert id
+		*/
+		public  function insert_id()
+		{
+				return $this->db->insert_id;
+		}
+		/**
+		  *@access public
+		  *@use to get memory
+		  */
+		public  function free_result($result)
+		{
+				return $result->free();
+		}
+		/**
+		*@access public
+		*@use to protect
+		*/
+		public  function escape_string($str)
+		{
+				if(is_array($str))
+				{
+						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+				}
+				if(is_object($str))
+				{
+						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+				}
+				
+				return $this->db->real_escape_string((string) $str);
+		}
+		/**
+		  *@access public
+		  *@use to protect
+		  */
+		public  function real_escape_string($str)
+		{
+				if(is_array($str))
+				{
+						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+				}
+				if(is_object($str))
+				{
+						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+				}
+				
+				return $this->db->real_escape_string((string) $str);
+		}
+		/**
+		  *@access public
+		  *@use to protect
+		  */
+		public  function protect($str)
+		{
+				return self::real_escape_string($str);
+		}
+		/**
+		  *@access public
+		  *@use to split queries
+		  */
+		public  function split($sql)
+		{
+				$queries = preg_split('/;\s*\n/',$sql, -1 , PREG_SPLIT_NO_EMPTY);
+				return $queries;
+		}
+		/**
+		  *@access public
+		  *@use to view tables
+		  */
+		public  function list_tables($database)
+		{
+				$list = array();
+				if($result = sql::query("SHOW TABLES FROM ".$database."")) {
+					while($row = $this->fetch_array($result)) {
+						$list[] = $row[0];
+					}
+				}
+				return $list;
+		}
+		
+		/**
+		 * this function checks, if the table exists and get all fields
+		 *@name getFieldsOfTable
+		 *@param string - name of the table
+		 *@return array|bool
+		*/
+		public function getFieldsOfTable($table, $prefix = false, $track = true)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+						
+				
+				$sql = "SHOW COLUMNS FROM `".$prefix.$table."`";
+				if($result = sql::query($sql, false, $track))
+				{
+						$fields = array();
+						while($row = $this->fetch_object($result))
+						{
+								$fields[$row->Field] = $row->Type;
+						}
+						return $fields;
+				} else
+				{
+						return false;
+				}
+		}
+		/**
+		 * this function changes an field
+		 *@name changeField
+		 *@param string - table
+		 *@param string - field
+		 *@param string - new type
+		*/
+		public function changeField($table, $field, $type, $prefix = false)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+				
+			
+				$sql = "ALTER TABLE ".$prefix.$table." MODIFY ".$field." ".$type." ";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						return false;
+				}
+		}
+		/**
+		 * this function adds an field
+		 *@name addField
+		 *@param string - table
+		 *@param string - field
+		 *@param string - type
+		*/
+		public function addField($table, $field, $type, $prefix = false)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+				
+				
+				$sql = "ALTER TABLE ".$prefix.$table." ADD ".$field." ".$type." NOT NULL";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						return false;
+				}
+		}
+		/**
+		 * this function deletes an field
+		 *@name dropField
+		 *@param string - table
+		 *@param string - field
+		*/
+		public function dropField($table, $field, $prefix = false)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+				
+				
+				$sql = "ALTER TABLE " .$prefix . $table . " DROP ".$field."";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						return false;
+				}
+		}
+		/**
+		 * creates an table
+		 *@name creatTable
+		 *@param string - tablename
+		 *@param array - fields
+		*/
+		public function createTable($table, $fields, $prefix = false)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+				
+				
+				$fields_ = "";
+				$i = 0;
+				foreach($fields as $key => $value)
+				{
+						if($i != 0)
+						{
+								$fields_ .= ",\n";
+								
+						} else
+						{
+								$i = 1;
+						}
+						$fields_ .= "`".$key."` ".$value." NOT NULL ";
+				}
+				$sql = "CREATE TABLE 
+							" . $prefix . $table." 
+							(
+								".$fields_."
+							);";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						return false;
+						
+				}
+		}
+		/**
+		 * creates an table
+		 *@name creatTable
+		 *@param string - tablename
+		 *@param array - fields
+		*/
+		public function _createTable($table, $fields, $prefix = false)
+		{
+				if($prefix === false)
+								$prefix = DB_PREFIX;
+				
+				
+				$fields_ = "";
+				$i = 0;
+				foreach($fields as $key => $value)
+				{
+						if($i != 0)
+						{
+								$fields_ .= ",\n";
+								
+						} else
+						{
+								$i = 1;
+						}
+						$fields_ .= "`".$key."` ".$value." NOT NULL";
+				}
+				$sql = "CREATE TABLE 
+							".$prefix . $table." 
+							(
+								".$fields_."
+							);";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						return false;
+						
+				}
+		}
+		/**
+		 * INDEX FUNCTIONS
+		*/
+		/**
+		 * adds an index to a table
+		 *@name addIndex
+		 *@access public
+		 *@param string - table
+		 *@param string|array field/fields
+		 *@param string - type: unique|fulltext|index
+		 *@param string - db_prefix optional
+		*/
+		public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
+		{
+				if($db_prefix === null)
+						$db_prefix = DB_PREFIX;
+				
+				switch(strtolower($type))
+				{
+						case "unique":
+							$type = "UNIQUE";
+						break;
+						CASE "fulltext":
+							$type = "FULLTEXT";
+						break;
+						default:
+							$type = "INDEX";
+						break;
+				}
+				
+				if(is_array($field))
+				{
+						$field = implode(',', $field);
+				} else
+				{
+						$field = $field;
+				}
+				
+				$name = ($name === null) ? "" : '`'.$name.'`';
+				
+				$sql = "ALTER TABLE `".DB_PREFIX . $table ."` ADD ".$type." ".$name." (".$field.")";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						throwErrorByID(3);
+				}
+		}
+		/**
+		 * drops an index from a table
+		 *@name dropIndex
+		 *@param string - table
+		 *@param string - name
+		 *@param 
+		*/
+		public function dropIndex($table, $name, $db_prefix = null)
+		{
+				if($db_prefix === null)
+						$db_prefix = DB_PREFIX;
+				
+				$sql = "ALTER TABLE `".DB_PREFIX . $table ."` DROP INDEX `".$name."`";
+				if(sql::query($sql))
+				{
+						return true;
+				} else
+				{
+						throwErrorByID(3);
+				}
+		}
+		/**
+		 * gets the indexes of a table
+		 *@name getIndexes
+		 *@param string - table
+		 *@param string - DB_prefix - optional
+		*/
+		public function getIndexes($table, $db_prefix = null)
+		{
+				if($db_prefix === null)
+						$db_prefix = DB_PREFIX;
+				
+				$indexes = array();
+				$sql = "SHOW INDEXES FROM ".$db_prefix . $table ."";
+				if($result = sql::query($sql))
+				{
+						while($row = sql::fetch_object($result))
+						{
+								if(!isset($indexes[$row->Key_name]))
+								{
+										if($row->Index_type == "FULLTEXT")
+											$type = "FULLTEXT";
+										else if($row->Key_name == "PRIMARY")
+											$type = "PRIMARY";
+										else if($row->Non_unique == 0)
+											$type = "UNIQUE";
+										else
+											$type = "INDEX";
+										
+										
+										$indexes[$row->Key_name] = array("fields" => array(), "type" => $type);
+								}
+								$indexes[$row->Key_name]["fields"][] = $row->Column_name;
+						}
+						return $indexes;
+				} else
+				{
+						return false;
+				}
+		}
+		
+	
+		/**
+		 * table-functions V2
+		*/
+		
+		/**
+		 * gets much information about a table, e.g. field-names, default-values, field-types
+		 *
+		 *@name showTableDetails
+		 *@access public
+		 *@param string - table
+		 *@param bool - if track query
+		 *@param string - prefix
+		*/
+		public function showTableDetails($table, $track = true, $prefix = false) {
+			if($prefix === false)
+				$prefix = DB_PREFIX;
+					
+			
+			$sql = "SHOW COLUMNS FROM `".$prefix.$table."`";
+			if($result = sql::query($sql, false, $track))
+			{
+				$fields = array();
+				while($row = $this->fetch_object($result))
+				{
+					$fields[$row->Field] = array(
+						"type" 		=> $row->Type,
+						"key"		=> $row->Key,
+						"default"	=> $row->Default,
+						"extra"		=> $row->Extra
+					);
+				}
+				return $fields;
+			} else
+			{
+				return false;
+			}
+		}
+		/**
+		 * requires, that a table is exactly in this form
+		 *
+		 *@name requireTable
+		 *@access public
+		 *@param string - table
+		 *@param array - fields
+		 *@param array - indexes
+		 *@param array - defaults
+		 *@param string - prefix
+		*/
+		public function requireTable($table, $fields, $indexes, $defaults, $prefix = false) {
+			if($prefix === false)
+				$prefix = DB_PREFIX;
+				
+			$log = "";
+			
+			
+			
+			if($data = $this->showTableDetails($table, true, $prefix)) {
+				$editsql = 'ALTER TABLE '.$prefix . $table .' ';
+				// get fields missing
+				
+				foreach($fields as $name => $type) {
+					if($name == "id")
+						continue;
+					
+					if(!isset($data[$name])) {
+						$editsql .= ' ADD '.$name.' '.$type.' ';
+						if(isset($defaults[$name])) {
+							$editsql .= ' DEFAULT "'.addslashes($defaults[$name]).'"';
+						}
+						$editsql .= " NOT NULL,";
+						$log .= "ADD Field ".$name." ".$type."\n";
+					} else {
+						
+						// correct fields with edited type or default-value
+						if(str_replace('"', "'", $data[$name]["type"]) != $type && str_replace("'", '"', $data[$name]["type"]) != $type) {
+							$editsql .= " MODIFY ".$name." ".$type.",";
+							$log .= "Modify Field ".$name." to ".$type."\n";
+						}
+						
+						if(!isset($defaults[$name]) && $data[$name]["default"] != "") {
+							$editsql .= " ALTER COLUMN ".$name." DROP DEFAULT,";
+						}
+						
+						if(isset($defaults[$name]) && $data[$name]["default"] != $defaults[$name]) {
+							$editsql .= " ALTER COLUMN ".$name." SET DEFAULT \"".addslashes($defaults[$name])."\",";
+						}
+					}
+				}
+				
+				// get fields too much
+				foreach($data as $name => $_data) {
+					if($name != "id" && !isset($fields[$name])) {
+						// patch
+						if($name == "default") $name = '`default`';
+						if($name == "read") $name = '`read`';
+ 						$editsql .= ' DROP COLUMN '.$name.',';
+						$log .= "Drop Field ".$name."\n";
+					}
+				}
+				
+				// @todo indexes
+				
+				$currentindexes = $this->getIndexes($table, $prefix);
+				$allowed_indexes = array(); // for later delete
+				
+				// sort sql, so first drop and then add
+				$removeindexsql = "";
+				$addindexsql = "";
+				
+				// check indexes
+				foreach($indexes as $key => $data) {
+					if(is_array($data)) {
+						$name = $data["name"];
+						$ifields = $data["fields"];
+						$type = $data["type"];
+					} else if(_ereg("\(", $data)) {
+						$name = $key;
+						$allowed_indexes[$name] = true;
+						if(isset($currentindexes[$key])) {
+							$removeindexsql .= " DROP INDEX ".$key.",";
+						}
+						$addindexsql .= " ADD ".$data . ",";
+						continue;
+					} else {
+						$name = $key;
+						$ifields = array($key);
+						$type = $data;
+					}
+					$allowed_indexes[$name] = true;
+					switch(strtolower($type)) {
+						case "unique":
+							$type = "UNIQUE";
+						break;
+						case "fulltext":
+							$type = "FULLTEXT";
+						break;
+						case "index":
+							$type = "INDEX";
+						break;
+					}
+					
+					if(!isset($currentindexes[$name])) { // we have to create the index
+						$addindexsql .= " ADD ".$type." ".$name . " (".implode(",", $ifields)."),";
+						$log .= "Add Index ".$name."\n";
+					} else {
+						// create matchable fields
+						$mfields = array();
+						foreach($ifields as $key => $value) {
+							$mfields[$key] = preg_replace('/\((.*)\)/', "", $value);
+						}
+						
+						
+						
+						if($currentindexes[$name]["type"] != $type || $currentindexes[$name]["fields"] != $mfields) {
+							$removeindexsql .= " DROP INDEX ".$name.",";
+							$addindexsql .= " ADD ".$type." ".$name . "  (".implode(",", $ifields)."),";
+							$log .= "Change Index ".$name."\n";
+						}
+						unset($mfields, $ifields);
+					}
+				}
+				
+				// check not longer needed indexes
+				foreach($currentindexes as $name => $data) {
+					if($data["type"] != "PRIMARY" && !isset($allowed_indexes[$name])) {
+						// sry, it's a hack for older versions
+						if($name == "show") $name = '`'.$name.'`';
+						$removeindexsql .= " DROP INDEX ".$name.", ";
+						$log .= "Drop Index ".$name."\n";
+					}
+				}
+				
+				// add sql
+				$editsql .= $removeindexsql;
+				$editsql .= $addindexsql;
+				unset($removeindexsql, $addindexsql);
+				
+				// run query
+				$editsql = trim($editsql);
+				
+				if(substr($editsql, -1) == ",") {
+					$editsql = substr($editsql, 0, -1);
+				}
+				
+				if(sql::query($editsql)) {
+					ClassInfo::$database[$table] = $fields;
+					return $log;
+				} else
+					throwError(3,'SQL-Error', "SQL-Query ".$editsql." failed");
+				
+				
+			} else {
+				$sql = "CREATE TABLE ".$prefix . $table ." ( ";
+				$i = 0;
+				foreach($fields as $name => $value) {
+					if($i == 0) {
+						$i++;
+					} else {
+						$sql .= ",";
+					}
+					$sql .= ' '.$name.' '.$value.' ';
+					if(isset($defaults[$name])) {
+						$sql .= " DEFAULT '".addslashes($defaults[$name])."'";
+					}
+					
+				}
+				
+				foreach($indexes as $key => $data) {
+					if($i == 0) {
+						$i++;
+					} else {
+						$sql .= ",";
+					}
+					if(is_array($data)) {
+						$name = $data["name"];
+						$type = $data["type"];
+						$ifields = $data["fields"];
+					} else if(_ereg("\(", $data)) {
+						$sql .= $data;
+						continue;
+					} else {
+						$name = $field = $key;
+						$ifields = array($field);
+						$type = $data;
+					}
+					
+					switch(strtolower($type)) {
+						case "fulltext":
+							$type = "FULLTEXT";
+							break;
+						case "unique":
+							$type = "UNIQUE";
+							break;
+						case "index":
+						default:
+							$type = "INDEX";
+						break;
+					}
+					
+					$sql .= ''.$type.' '.$name.' ('.implode(',', $ifields).')';
+				}
+				$sql .= ") DEFAULT CHARACTER SET 'utf8'";
+				$log .= $sql . "\n";
+				
+				if(sql::query($sql)) {
+					ClassInfo::$database[$table] = $fields;
+					return $log;
+				} else {
+					throwError(3,'SQL-Error', "SQL-Query ".$sql." failed");
+					return false;
+				}
+			}
+		}
+		/**
+		 * deletes a table
+		 *
+		 *@name dontRequireTable
+		 *@access public
+		 *@param string - table
+		 *@param string - prefix
+		*/
+		public function dontRequireTable($table, $prefix = false) {
+			if($prefix === false)
+				$prefix = DB_PREFIX;
+			if($data = $this->showTableDetails($table, true, $prefix)) {
+				return sql::query('DROP TABLE '.$prefix . $table.'');
+			}
+			return true;
+		}
+		
+		/**
+		 * writes the manipulation-array in the database
+		 * there are three types of manipulation:
+		 * - insert
+		 * - update
+		 * - delete
+		 *
+		 *@name writeManipulation
+		 *@access public
+		 *@param array - manipulation
+		*/
+		public function writeManipulation($manipulation)
+		{
+				if(PROFILE) Profiler::mark("MySQLi::writeManipulation");
+				foreach($manipulation as $class => $data)
+				{
+						switch(strtolower($data["command"]))
+						{
+								case "update":
+									if(isset($data["id"]))
+									{
+											if(count($data["fields"]) > 0)
+											{
+													if (
+														(isset($data["table_name"]) && $table_name = $data["table_name"]) || 
+														(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+													)
+													{	
+															$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+															$i = 0;
+															foreach($data["fields"] as $field => $value)
+															{
+																	if($i == 0)
+																	{
+																			$i++;
+																	} else
+																	{
+																			$sql .= " , ";
+																	}
+																	$sql .= " `".$field."` = '".convert::raw2sql($value)."' ";
+																	
+															}
+															unset($i);
+															
+															if(isset($data["id"])) {
+																$id = $data["id"];
+																
+																$sql .= " WHERE `id` = '".convert::raw2sql($id)."'";
+															} else if(isset($data["where"])) {
+																$where = $data["where"];
+																$where = SQL::extractToWhere($where);
+																$sql .= $where;
+																unset($where);
+															} else {
+																return false;
+															}
+															
+															if(sql::query($sql))
+															{
+																	unset($id);
+																	// everything is fine
+															} else
+															{
+																	throwErrorById(3);
+															}
+													}
+											}
+									}
+								break;
+								case "insert":
+									if(count($data["fields"]) > 0)
+									{
+											if (
+												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
+												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+											)
+											{
+													$sql = 'INSERT INTO `'.DB_PREFIX.$table_name.'` ';
+													$fields = ' (';
+													$values = ' VALUES (';
+													
+													// multi data
+													if(isset($data["fields"][0]))
+													{
+															$a = 0;
+															foreach($data["fields"] as $fields_data)
+															{
+																	if($a == 0) {
+																			// do nothing, it will be done at the end, because we need it above
+																			
+																	} else {
+																			$values .= " ) , ( ";
+																	}
+																	
+																	$i = 0;
+																	foreach($fields_data as $field => $value) {	
+																			if($i == 0)	{
+																					$i++;
+																			} else {
+																					if($a == 0) {
+																							$fields .= ",";
+																					}
+																					
+																					$values .= ", ";
+																			}
+																			
+																			if($a == 0) {
+																					$fields .= '`'.convert::raw2sql($field).'`';
+																			}
+																			$values .= "'".convert::raw2sql($value)."'";
+																	}
+																	
+																	if($a == 0) {
+																			$a++; // now we can edit it
+																	}
+																	
+																	unset($i);
+															}
+															unset($a, $field_data);
+													
+													// just one record
+													} else
+													{
+															$i = 0;
+															foreach($data["fields"] as $field => $value)
+															{	
+																	if($i == 0)
+																	{
+																			$i++;
+																	} else
+																	{
+																			$fields .= ",";
+																			$values .= ",";
+																	}
+																	$fields .= '`'.convert::raw2sql($field).'`';
+																	$values .= "'".convert::raw2sql($value)."'";
+															}
+															unset($i);
+													}
+													$fields .= ")";
+													$values .= ")";
+													$sql .= $fields . $values;
+													if(sql::query($sql))
+													{
+															unset($fields, $values);
+															// everything is fine
+													} else
+													{
+															throwErrorById(3);
+													}
+											}
+									}
+								break;
+								case "delete":
+									if(isset($data["where"])) {
+											if (
+												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
+												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+											)
+											{
+													$where = $data["where"];
+													$where = SQL::extractToWhere($where);
+															
+													$sql = "DELETE FROM 
+																`".DB_PREFIX . $table_name."`
+																".$where."";
+																
+													if(sql::query($sql)) {
+															// everything is fine
+													} else {
+															throwErrorById(3);
+													}
+											}
+									}
+									
+								break;
+								default:
+									if(PROFILE) Profiler::unmark("MySQLi::writeManipulation");
+									return false;
+								break;
+						}
+				}
+				if(PROFILE) Profiler::unmark("MySQLi::writeManipulation");
+				return true;
+		}
+		/**
+		 * sets the charset to utf-8
+		 *
+		 *@name setCharsetUTF8
+		 *@access public
+		*/
+		public function setCharsetUTF8() {
+			$this->db->set_charset("utf8");
+		}
+}

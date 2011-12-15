@@ -1,0 +1,1124 @@
+01.12.2011 - 18:20: Slow SQL-Query: SELECT newsettings.autorid AS autorid ,newsettings.editorid AS editorid ,newsettings.last_modified AS last_modified ,newsettings.class_name AS class_name ,newsettings.created AS created ,newsettings.id AS versionid,newsettings_state.id AS id , newsettings.* ,  metasettings.* ,  templatesettings.* ,  newsettings_state.* FROM gomacms_newsettings AS newsettings  LEFT JOIN gomacms_metasettings AS metasettings ON  metasettings.id = newsettings.id   LEFT JOIN gomacms_templatesettings AS templatesettings ON  templatesettings.id = newsettings.id   INNER JOIN gomacms_newsettings_state AS newsettings_state ON  newsettings_state.publishedid = newsettings.id  WHERE  newsettings_state.id = "1" AND  newsettings.class_name IN ("newsettings","metasettings","templatesettings") ORDER BY newsettings_state.id DESC (66.869020462036ms)
+
+01.12.2011 - 18:20: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  ( path LIKE 'mitglieder' AND `parentid` = 0 )  AND  (  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") )  ORDER BY pages.sort ASC LIMIT  0, 1 (68.893909454346ms)
+
+01.12.2011 - 18:20: Slow SQL-Query: SELECT  count(*) as count  FROM gomacms_statistics AS statistics  INNER JOIN gomacms_statistics_state AS statistics_state ON  statistics_state.publishedid = statistics.id  WHERE  ( phpsessid = 'ml35ktf46ohfv28d8h5niksb27' AND last_modified > 1322702412 )  AND  (  statistics.class_name IN ("livecounter") )  ORDER BY statistics_state.id DESC (50.621032714844ms)
+
+01.12.2011 - 18:20: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322760012'  ,  `created` = '1322760012'  ,  `user` = ''  ,  `phpsessid` = 'ml35ktf46ohfv28d8h5niksb27'  ,  `mobile` = ''  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = ''  ,  `editorid` = ''  ,  `recordid` = '46'  ,  `snap_priority` = '2'  WHERE `id` = '356' (49.020051956177ms)
+
+01.12.2011 - 18:20: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 18:20: Slow SQL-Query: SELECT users.autorid AS autorid ,users.editorid AS editorid ,users.last_modified AS last_modified ,users.class_name AS class_name ,users.created AS created ,users.id AS versionid,users_state.id AS id , users.* ,  users_state.* FROM gomacms_users AS users  INNER JOIN gomacms_users_state AS users_state ON  users_state.publishedid = users.id  WHERE  users_state.id = "3" AND  users.class_name IN ("user") ORDER BY users_state.id DESC (196.89607620239ms)
+
+01.12.2011 - 18:20: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 18:20: Slow SQL-Query: SELECT advrights.autorid AS autorid ,advrights.editorid AS editorid ,advrights.last_modified AS last_modified ,advrights.class_name AS class_name ,advrights.created AS created ,advrights.id AS versionid,advrights_state.id AS id , advrights.* ,  advrights_state.* FROM gomacms_advrights AS advrights  INNER JOIN gomacms_advrights_state AS advrights_state ON  advrights_state.publishedid = advrights.id  INNER JOIN `gomacms_many_many_group_advrights_advrights` as `advrights_many` ON `advrights_many`.`advrightsid` = `advrights`.`id` INNER JOIN `gomacms_groups` AS `groups` ON `groups`.`id` = `advrights_many`.`groupid` WHERE  groups.recordid IN ("0") AND  advrights.class_name IN ("advrights") ORDER BY advrights_state.id DESC (23.75316619873ms)
+
+01.12.2011 - 18:57: Slow SQL-Query: SELECT  groupid FROM gomacms_many_many_user_groups_group AS many_many_user_groups_group WHERE  userid = "44" (31.880855560303ms)
+
+01.12.2011 - 18:57: Slow SQL-Query: UPDATE gomacms_users SET  `class_name` = 'user'  ,  `last_modified` = '1322762244'  ,  `created` = '1320527819'  ,  `nickname` = 'admin'  ,  `name` = 'Daniel Gruber'  ,  `email` = 'daniel@ibpg.eu'  ,  `password` = '75efdb520b7a07ffbba95d669036f8ed'  ,  `avatar` = 'mysite/uploaded/useruploads/dc080ef69f38da68edd17ef50b3ce6e6.jpg'  ,  `signatur` = ''  ,  `status` = '1'  ,  `phpsess` = 'ml35ktf46ohfv28d8h5niksb27'  ,  `code` = '7HKAqwr9P2a2MxWb39Y9'  ,  `timezone` = 'Europe/Berlin'  ,  `groupid` = '1'  ,  `autorid` = '1'  ,  `editorid` = ''  ,  `recordid` = '3'  ,  `snap_priority` = '2'  WHERE `id` = '45' (32.981872558594ms)
+
+01.12.2011 - 18:57: Slow SQL-Query: SELECT  DISTINCT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.tid AS tid  FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  pm.toid = "3" AND  pm.hasread = "0" AND  pm.class_name IN ("pm") ORDER BY pm_state.id DESC (21.460056304932ms)
+
+01.12.2011 - 18:57: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "358" (239.29905891418ms)
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 18:57: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3?ajax=1&dropdownDialog=1&dropElem=neSmA5lBUzqZJp0TbnNP
+
+01.12.2011 - 18:57: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 18:57: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 18:57: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 18:57: Slow SQL-Query: SHOW COLUMNS FROM `gomacms_rating_state` (24.770975112915ms)
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 18:57: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 82. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 90. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 92. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 100. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:06: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:07: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3?ajax=1&dropdownDialog=1&dropElem=I9uPxtltSTpX4ZmnkdWU
+
+01.12.2011 - 19:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:20: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:20: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322763654') (48.388004302979ms)
+
+01.12.2011 - 19:20: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:20: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:20: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 19:21: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: Code: 6, Name:PHP-Error, Details: Cannot initiate empty Class in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 317, URL: /admin/content/
+
+01.12.2011 - 19:21: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:21: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:21: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:21: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 238. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:24: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:25: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3?ajax=1&dropdownDialog=1&dropElem=W7xJdqmZuCi1QQ6EDQd5
+
+01.12.2011 - 19:25: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:25: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:25: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:25: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+01.12.2011 - 19:26: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: Code: 6, Name:PHP-Error, Details: Cannot initiate empty Class in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 318, URL: /admin/content/
+
+01.12.2011 - 19:45: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:45: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:45: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:45: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:46: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:47: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322765279'  ,  `created` = '1322760012'  ,  `user` = '3'  ,  `phpsessid` = 'ml35ktf46ohfv28d8h5niksb27'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '46'  ,  `snap_priority` = '2'  WHERE `id` = '365' (21.466970443726ms)
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:48: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC (496.20294570923ms)
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:49: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:50: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:51: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 19:52: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (637.37487792969ms)
+
+01.12.2011 - 19:56: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322765771'  ,  `created` = '1322760012'  ,  `user` = '3'  ,  `phpsessid` = 'ml35ktf46ohfv28d8h5niksb27'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '46'  ,  `snap_priority` = '2'  WHERE `id` = '367' (260.55097579956ms)
+
+01.12.2011 - 19:58: SQL-Error in Statement: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php on line 622.
+
+01.12.2011 - 19:58: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>Table 'filmteam_dev.gomacms_Page__testpage' doesn't exist<br /><br />
+
+ <strong>Query:</strong> <br />
+<code>SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1</code>
+, URL: /
+
+01.12.2011 - 19:58: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:58: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:58: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+01.12.2011 - 19:58: SQL-Error in Statement: ALTER TABLE gomacms_advrights_state  DROP INDEX publishedid, ADD INDEX publishedid  () in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 715.
+
+01.12.2011 - 19:58: Code: 3, Name:SQL-Error, Details: SQL-Query ALTER TABLE gomacms_advrights_state  DROP INDEX publishedid, ADD INDEX publishedid  () failed, URL: /dev/builddev
+
+01.12.2011 - 20:01: Slow SQL-Query: ALTER TABLE gomacms_advrights_state  DROP INDEX publishedid, ADD INDEX publishedid  (id,publishedid) (83.016872406006ms)
+
+01.12.2011 - 20:01: Slow SQL-Query: UPDATE gomacms_advrights SET  `class_name` = 'advrights'  ,  `autorid` = '3'  ,  `last_modified` = '1322766062'  ,  `created` = '1322766062'  ,  `name` = 'PAGES_INSERT'  ,  `_default` = '7'  ,  `title` = '{$_lang_pages_add}'  ,  `editorid` = '3'  ,  `recordid` = '10'  ,  `snap_priority` = '2'  WHERE `id` = '10' (161.18383407593ms)
+
+01.12.2011 - 20:01: Slow SQL-Query: UPDATE gomacms_advrights SET  `class_name` = 'advrights'  ,  `autorid` = '3'  ,  `last_modified` = '1322766062'  ,  `created` = '1322766062'  ,  `name` = 'RATING_ALL'  ,  `_default` = '7'  ,  `editorid` = '3'  ,  `recordid` = '13'  ,  `snap_priority` = '2'  WHERE `id` = '13' (45.612096786499ms)
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1071.
+
+01.12.2011 - 20:01: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '368'  ,  `stateid` = '368'  WHERE `id` = '46' (21.279811859131ms)
+
+01.12.2011 - 20:02: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322766118'  ,  `created` = '1322760012'  ,  `user` = '3'  ,  `phpsessid` = 'ml35ktf46ohfv28d8h5niksb27'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '46'  ,  `snap_priority` = '2'  WHERE `id` = '369' (1682.825088501ms)
+
+01.12.2011 - 20:02: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '369'  ,  `stateid` = '369'  WHERE `id` = '46' (350.74210166931ms)
+
+01.12.2011 - 20:07: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322766454') (28.984069824219ms)
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 407. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 407. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 407. Please use dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 20:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 20:09: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 20:09: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+01.12.2011 - 20:09: Slow SQL-Query: DELETE FROM 
+																`gomacms_pagecomments_state`
+																 WHERE  id IN ("3") (159.00802612305ms)
+
+01.12.2011 - 20:11: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+
+01.12.2011 - 20:11: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277
+

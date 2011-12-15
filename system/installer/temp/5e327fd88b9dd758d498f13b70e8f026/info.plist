@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>type</key><string>backup</string><key>created</key><date>2011-11-02T10:29:34Z</date><key>backuptype</key><string>full</string><key>excludedFiles</key><array/><key>excludedTables</key><array><string>users</string><string>users_state</string><string>statistics</string><string>statistics_state</string></array><key>DB_PREFIX</key><string>{!#PREFIX}</string></dict></plist>

@@ -1,0 +1,104 @@
+26.11.2011 - 00:00: 
+             Rebuilding Caches...
+
+              Rebuilding Database...
+ Checking Database of array_dataobject
+
+ Checking Database of advrights
+
+ Checking Database of group
+
+ Checking Database of livecounter
+
+ Checking Database of user
+
+ Checking Database of pages
+
+ Checking Database of page
+
+ Checking Database of _testpage
+
+ Checking Database of cms_filemanager
+
+ Checking Database of newsettings
+
+ Checking Database of metasettings
+
+ Checking Database of templatesettings
+
+ Checking Database of backups
+
+ Checking Database of boxes
+
+ Checking Database of box
+
+ Checking Database of login_meinaccount
+
+ Checking Database of boxpage
+
+ Checking Database of phpbox
+
+ Checking Database of statistics
+
+ Checking Database of pagecomments
+
+ Checking Database of articlecategory
+
+ Checking Database of article
+
+ Checking Database of articles
+
+ Checking Database of contact
+
+ Checking Database of errorpage
+
+ Checking Database of members
+
+ Checking Database of phppage
+
+ Checking Database of redirector
+
+ Checking Database of pm
+
+ Checking Database of rating
+
+ Checking Database of smilies
+
+
+
+26.11.2011 - 00:00: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:00: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:00: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:00: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:00: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:01: Warning: Call to undefined method viewaccessabledata::header in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 593
+
+26.11.2011 - 00:01: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::title in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::content in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::_GET_month in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::title in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::content in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:03: Warning: Call to undefined method admin::_GET_month in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:05: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 00:05: Warning: Call to undefined method viewaccessabledata::active in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 632
+
+26.11.2011 - 09:27: Login with wrong Password for User admin with IP: 80.137.81.124
+

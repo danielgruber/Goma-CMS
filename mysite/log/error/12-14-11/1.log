@@ -1,0 +1,628 @@
+14.12.2011 - 07:46: Slow SQL-Query: SELECT newsettings.autorid AS autorid ,newsettings.editorid AS editorid ,newsettings.last_modified AS last_modified ,newsettings.class_name AS class_name ,newsettings.created AS created ,newsettings.id AS versionid,newsettings_state.id AS id , newsettings.* ,  metasettings.* ,  templatesettings.* ,  newsettings_state.* FROM gomacms_newsettings AS newsettings  LEFT JOIN gomacms_metasettings AS metasettings ON  metasettings.id = newsettings.id   LEFT JOIN gomacms_templatesettings AS templatesettings ON  templatesettings.id = newsettings.id   INNER JOIN gomacms_newsettings_state AS newsettings_state ON  newsettings_state.publishedid = newsettings.id  WHERE  newsettings_state.id = "1" AND  newsettings.class_name IN ("newsettings","metasettings","templatesettings") ORDER BY newsettings_state.id DESC (86.167097091675ms)
+
+14.12.2011 - 07:46: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , pages.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (94.098091125488ms)
+
+14.12.2011 - 07:46: Slow SQL-Query: SELECT  count(*) as count  FROM gomacms_statistics AS statistics  INNER JOIN gomacms_statistics_state AS statistics_state ON  statistics_state.publishedid = statistics.id  WHERE  ( phpsessid = '8d5s9buv80h3a06ds2pjq9emh6' AND last_modified > 1323787564 )  AND  (  statistics.class_name IN ("livecounter") )  ORDER BY statistics_state.id DESC (45.722007751465ms)
+
+14.12.2011 - 07:46: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323845164') (21.950960159302ms)
+
+14.12.2011 - 07:46: Slow SQL-Query: SELECT advrights.autorid AS autorid ,advrights.editorid AS editorid ,advrights.last_modified AS last_modified ,advrights.class_name AS class_name ,advrights.created AS created ,advrights.id AS versionid,advrights_state.id AS id , advrights.* ,  advrights_state.* FROM gomacms_advrights AS advrights  INNER JOIN gomacms_advrights_state AS advrights_state ON  advrights_state.publishedid = advrights.id  INNER JOIN `gomacms_many_many_group_advrights_advrights` as `advrights_many` ON `advrights_many`.`advrightsid` = `advrights`.`id` INNER JOIN `gomacms_groups` AS `groups` ON `groups`.`id` = `advrights_many`.`groupid` WHERE  groups.recordid IN ("0") AND  advrights.class_name IN ("advrights") ORDER BY advrights_state.id DESC (47.109127044678ms)
+
+14.12.2011 - 07:46: Slow SQL-Query: SELECT boxes.autorid AS autorid ,boxes.editorid AS editorid ,boxes.last_modified AS last_modified ,boxes.class_name AS class_name ,boxes.created AS created ,boxes.id AS versionid,boxes_state.id AS id , boxes.* ,  Box_statistics.* ,  boxes_state.* FROM gomacms_boxes AS boxes  LEFT JOIN gomacms_Box_statistics AS Box_statistics ON  Box_statistics.id = boxes.id   INNER JOIN gomacms_boxes_state AS boxes_state ON  boxes_state.publishedid = boxes.id  WHERE  boxes.seiteid = "1" AND  boxes.class_name IN ("boxes","box","login_meinaccount","phpbox","statistics") ORDER BY boxes_state.id DESC (25.454998016357ms)
+
+14.12.2011 - 14:00: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "574" (147.02296257019ms)
+
+14.12.2011 - 16:36: Slow SQL-Query: INSERT INTO `gomacms_statistics_state`  (`stateid`,`publishedid`) VALUES ('0','0') (77.50391960144ms)
+
+14.12.2011 - 16:52: Slow SQL-Query: SELECT users.autorid AS autorid ,users.editorid AS editorid ,users.last_modified AS last_modified ,users.class_name AS class_name ,users.created AS created ,users.id AS versionid,users_state.id AS id , users.* ,  users_state.* FROM gomacms_users AS users  INNER JOIN gomacms_users_state AS users_state ON  users_state.publishedid = users.id  WHERE  users.nickname LIKE "admin" AND  users.class_name IN ("user") ORDER BY users_state.id DESC LIMIT  0, 1 (131.94394111633ms)
+
+14.12.2011 - 16:52: Slow SQL-Query: SELECT groups.autorid AS autorid ,groups.editorid AS editorid ,groups.last_modified AS last_modified ,groups.class_name AS class_name ,groups.created AS created ,groups.id AS versionid,groups_state.id AS id , groups.* ,  groups_state.* FROM gomacms_groups AS groups  INNER JOIN gomacms_groups_state AS groups_state ON  groups_state.publishedid = groups.id  WHERE  groups_state.id = "1" AND  groups.class_name IN ("group") ORDER BY groups_state.id DESC LIMIT  0, 1 (20.647048950195ms)
+
+14.12.2011 - 17:01: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323878473') (377.59208679199ms)
+
+14.12.2011 - 17:05: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323878703') (47.950983047485ms)
+
+14.12.2011 - 17:05: Slow SQL-Query: SELECT smilies.autorid AS autorid ,smilies.editorid AS editorid ,smilies.last_modified AS last_modified ,smilies.class_name AS class_name ,smilies.created AS created ,smilies.id AS versionid,smilies_state.id AS id , smilies.* ,  smilies_state.* FROM gomacms_smilies AS smilies  INNER JOIN gomacms_smilies_state AS smilies_state ON  smilies_state.publishedid = smilies.id  WHERE  smilies.class_name IN ("smilies") ORDER BY smilies_state.id DESC (22.151947021484ms)
+
+14.12.2011 - 17:06: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323878764') (527.10890769958ms)
+
+14.12.2011 - 17:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 17:06: Slow SQL-Query: SELECT uploads.autorid AS autorid ,uploads.editorid AS editorid ,uploads.last_modified AS last_modified ,uploads.class_name AS class_name ,uploads.created AS created ,uploads.id AS versionid,uploads_state.id AS id , CASE  WHEN uploads.collectionid IS NOT NULL THEN uploads.collectionid  WHEN imageuploads.collectionid IS NOT NULL THEN imageuploads.collectionid  ELSE NULL END AS collectionid, uploads.* ,  imageuploads.* ,  uploads_state.* FROM gomacms_uploads AS uploads  LEFT JOIN gomacms_imageuploads AS imageuploads ON  imageuploads.id = uploads.id   INNER JOIN gomacms_uploads_state AS uploads_state ON  uploads_state.publishedid = uploads.id  WHERE  uploads.path = "mysite/uploads//2fbab1d1a52fb6e4d04f1d8a970a363b/dumDSC0297.jpg" AND  uploads.class_name IN ("uploads","imageuploads") ORDER BY uploads_state.id DESC LIMIT  0, 1 (137.81094551086ms)
+
+14.12.2011 - 17:32: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323880366') (28.136014938354ms)
+
+14.12.2011 - 17:37: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323880623'  ,  `created` = '1323877005'  ,  `user` = '3'  ,  `phpsessid` = 'qjclmlkqbp2m08tcu8bkh07cl7'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '87'  ,  `snap_priority` = '2'  WHERE `id` = '588' (139.20402526855ms)
+
+14.12.2011 - 17:37: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '588'  ,  `stateid` = '588'  WHERE `id` = '87' (31.374931335449ms)
+
+14.12.2011 - 17:38: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3?dropdownDialog=1&dropElem=HWGmXqSzQgwmKqlZhRCc
+
+14.12.2011 - 17:39: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:39: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:39: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:39: Slow SQL-Query: SHOW COLUMNS FROM `gomacms_rating_state` (37.729024887085ms)
+
+14.12.2011 - 17:39: Code: 6, Name:PHP-Error, Details: No Method generateForm for Model stdClass in  on line ., URL: /pm/new/3
+
+14.12.2011 - 17:42: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:42: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:42: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 82. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 90. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 82. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 90. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:42: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:42: SQL-Error in Statement: SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php on line 622.
+
+14.12.2011 - 17:42: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC' at line 1<br /><br />
+
+ <strong>Query:</strong> <br />
+<code>SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC</code>
+, URL: /pm/
+
+14.12.2011 - 17:42: SQL-Error in Statement: SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php on line 622.
+
+14.12.2011 - 17:42: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC' at line 1<br /><br />
+
+ <strong>Query:</strong> <br />
+<code>SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC</code>
+, URL: /pm/
+
+14.12.2011 - 17:43: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:43: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:43: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 17:43: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:43: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 82. Please use DataObject::get instead.
+
+14.12.2011 - 17:43: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 90. Please use dataobjectset::Count instead.
+
+14.12.2011 - 17:43: SQL-Error in Statement: SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php on line 622.
+
+14.12.2011 - 17:43: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC' at line 1<br /><br />
+
+ <strong>Query:</strong> <br />
+<code>SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC</code>
+, URL: /pm/
+
+14.12.2011 - 17:44: SQL-Error in Statement: SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php on line 622.
+
+14.12.2011 - 17:44: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC' at line 1<br /><br />
+
+ <strong>Query:</strong> <br />
+<code>SELECT pm.autorid AS autorid ,pm.editorid AS editorid ,pm.last_modified AS last_modified ,pm.class_name AS class_name ,pm.created AS created ,pm.id AS versionid,pm_state.id AS id , pm.* ,  pm_state.* FROM gomacms_pm AS pm  INNER JOIN gomacms_pm_state AS pm_state ON  pm_state.publishedid = pm.id  WHERE  ( 0`toid` = "3" )  AND  (  pm.class_name IN ("pm") )  ORDER BY pm_state.id DESC</code>
+, URL: /pm/
+
+14.12.2011 - 17:51: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:51: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:51: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:51: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:52: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:52: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:53: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:53: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 50
+
+14.12.2011 - 17:55: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323881700'  ,  `created` = '1323877005'  ,  `user` = '3'  ,  `phpsessid` = 'qjclmlkqbp2m08tcu8bkh07cl7'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '87'  ,  `snap_priority` = '2'  WHERE `id` = '590' (163.73205184937ms)
+
+14.12.2011 - 17:55: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 49
+
+14.12.2011 - 17:59: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 49
+
+14.12.2011 - 17:59: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 49
+
+14.12.2011 - 17:59: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 49
+
+14.12.2011 - 17:59: Warning: Call to undefined method varchar::doObject in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/temp/tpl._var_www_vhosts_ibpg_eu_filmteam-dev_mysite_templates_pm_inbox_html.php on line 49
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights (95.784902572632ms)
+
+14.12.2011 - 17:59: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (147.18103408813ms)
+
+14.12.2011 - 17:59: Slow SQL-Query: INSERT INTO `gomacms_advrights`  (`last_modified`) VALUES ('1323881952') (21.462202072144ms)
+
+14.12.2011 - 17:59: Slow SQL-Query: UPDATE gomacms_imageuploads SET thumbwidth = '100' WHERE thumbwidth = '' OR thumbwidth IS NULL (21.784067153931ms)
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights (29.124021530151ms)
+
+14.12.2011 - 17:59: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (166.12815856934ms)
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 17:59: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , pages.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (166.29314422607ms)
+
+14.12.2011 - 18:00: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323882001') (227.26798057556ms)
+
+14.12.2011 - 18:00: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323882001'  ,  `created` = '1323877005'  ,  `user` = '3'  ,  `phpsessid` = 'qjclmlkqbp2m08tcu8bkh07cl7'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '87'  ,  `snap_priority` = '2'  WHERE `id` = '593' (33.475160598755ms)
+
+14.12.2011 - 18:00: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 18:00: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 18:00: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 18:00: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights (20.679950714111ms)
+
+14.12.2011 - 18:00: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (24.786949157715ms)
+
+14.12.2011 - 18:00: Slow SQL-Query: UPDATE gomacms_advrights_state SET  `publishedid` = '15'  ,  `stateid` = '15'  WHERE `id` = '15' (61.475992202759ms)
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:00: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 18:55: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 271
+
+14.12.2011 - 18:55: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 271
+
+14.12.2011 - 18:55: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 271
+
+14.12.2011 - 18:56: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 271
+
+14.12.2011 - 18:56: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 268
+
+14.12.2011 - 18:56: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 268
+
+14.12.2011 - 18:56: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 268
+
+14.12.2011 - 19:00: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:00: Slow SQL-Query: INSERT INTO `gomacms_uploads`  (`last_modified`) VALUES ('1323885656') (317.20018386841ms)
+
+14.12.2011 - 19:00: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:00: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: Slow SQL-Query: INSERT INTO `gomacms_uploads`  (`last_modified`) VALUES ('1323885674') (199.62906837463ms)
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:03: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323885816'  ,  `created` = '1323877005'  ,  `user` = '3'  ,  `phpsessid` = 'qjclmlkqbp2m08tcu8bkh07cl7'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '87'  ,  `snap_priority` = '2'  WHERE `id` = '598' (74.981927871704ms)
+
+14.12.2011 - 19:03: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:03: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:03: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:03: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:03: Slow SQL-Query: INSERT INTO `gomacms_uploads_state`  (`stateid`,`publishedid`) VALUES ('0','0') (618.52097511292ms)
+
+14.12.2011 - 19:03: Slow SQL-Query: INSERT INTO `gomacms_uploads`  (`last_modified`) VALUES ('1323885831') (78.092098236084ms)
+
+14.12.2011 - 19:03: Slow SQL-Query: UPDATE gomacms_uploads SET  `class_name` = 'imageuploads'  ,  `last_modified` = '1323885831'  ,  `created` = '1323885831'  ,  `filename` = 'dumDSC0297.jpg'  ,  `realfile` = 'mysite/uploads//2fbab1d1a52fb6e4d04f1d8a970a363b/bdumDSC0297.jpg'  ,  `path` = 'formupload/b/dumDSC0297.jpg'  ,  `type` = 'file'  ,  `collectionid` = '1'  ,  `autorid` = '3'  ,  `editorid` = '3'  ,  `recordid` = '131'  ,  `snap_priority` = '2'  WHERE `id` = '131' (175.15587806702ms)
+
+14.12.2011 - 19:03: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:03: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:03: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: Slow SQL-Query: INSERT INTO `gomacms_uploads_state`  (`stateid`,`publishedid`) VALUES ('0','0') (93.026161193848ms)
+
+14.12.2011 - 19:04: Slow SQL-Query: INSERT INTO `gomacms_imageuploads`  (`id`,`collectionid`,`autorid`,`editorid`) VALUES ('133','1','3','3') (399.67489242554ms)
+
+14.12.2011 - 19:04: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: Slow SQL-Query: INSERT INTO `gomacms_uploads`  (`last_modified`) VALUES ('1323885846') (284.50012207031ms)
+
+14.12.2011 - 19:04: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:04: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:05: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:05: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 19:05: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 19:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+14.12.2011 - 19:07: Slow SQL-Query: INSERT INTO `gomacms_uploads`  (`last_modified`) VALUES ('1323886077') (329.71596717834ms)
+
+14.12.2011 - 19:09: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323886180') (136.28482818604ms)
+
+14.12.2011 - 19:09: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323886180'  ,  `created` = '1323886180'  ,  `user` = ''  ,  `phpsessid` = 'l6q2e5aombkm83eks2sp24bso3'  ,  `mobile` = ''  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:8.0.1) Gecko/20100101 Firefox/8.0.1'  ,  `autorid` = ''  ,  `editorid` = ''  ,  `recordid` = '89'  ,  `snap_priority` = '2'  WHERE `id` = '602' (24.120807647705ms)
+
+14.12.2011 - 19:10: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323886243'  ,  `created` = '1323886180'  ,  `user` = '3'  ,  `phpsessid` = 'l6q2e5aombkm83eks2sp24bso3'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:8.0.1) Gecko/20100101 Firefox/8.0.1'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '89'  ,  `snap_priority` = '2'  WHERE `id` = '603' (31.752109527588ms)
+
+14.12.2011 - 19:10: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 19:10: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 19:10: SQL-Error in Statement: SHOW COLUMNS FROM `gomacms__state` in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php on line 262.
+
+14.12.2011 - 19:10: Slow SQL-Query: UPDATE gomacms_advrights_state SET  `publishedid` = '3'  ,  `stateid` = '3'  WHERE `id` = '3' (20.947933197021ms)
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 19:10: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1089.
+
+14.12.2011 - 22:13: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323897235') (58.748006820679ms)
+
+14.12.2011 - 22:14: Slow SQL-Query: DELETE FROM 
+																`gomacms_users`
+																 WHERE  id = "101" (29.024124145508ms)
+
+14.12.2011 - 22:14: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323897277'  ,  `created` = '1323877005'  ,  `user` = '3'  ,  `phpsessid` = 'qjclmlkqbp2m08tcu8bkh07cl7'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '87'  ,  `snap_priority` = '2'  WHERE `id` = '605' (158.53190422058ms)
+
+14.12.2011 - 22:14: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "603" (184.75699424744ms)
+
+14.12.2011 - 22:19: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1323897570') (102.47588157654ms)
+
+14.12.2011 - 22:20: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323897612'  ,  `created` = '1323886180'  ,  `user` = '3'  ,  `phpsessid` = 'l6q2e5aombkm83eks2sp24bso3'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:8.0.1) Gecko/20100101 Firefox/8.0.1'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '89'  ,  `snap_priority` = '2'  WHERE `id` = '609' (130.69605827332ms)
+
+14.12.2011 - 22:26: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1323898014'  ,  `created` = '1323886180'  ,  `user` = '3'  ,  `phpsessid` = 'l6q2e5aombkm83eks2sp24bso3'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:8.0.1) Gecko/20100101 Firefox/8.0.1'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '89'  ,  `snap_priority` = '2'  WHERE `id` = '615' (112.64491081238ms)
+
+14.12.2011 - 22:28: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '617'  ,  `stateid` = '617'  WHERE `id` = '89' (124.49598312378ms)
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:29: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php on line 391. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 67. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+14.12.2011 - 22:30: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php on line 68. Please use dataobjectset::Count instead.
+
+14.12.2011 - 22:30: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "618" (27.884960174561ms)
+
+14.12.2011 - 22:34: Slow SQL-Query: DELETE FROM 
+																`gomacms_users`
+																 WHERE  id = "103" (161.88883781433ms)
+
+14.12.2011 - 22:34: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 268
+
+14.12.2011 - 22:36: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:36: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:40: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:40: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:42: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:43: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:44: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:44: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:44: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+
+14.12.2011 - 22:44: DEPRECATED: DataObject::update is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php on line 266
+

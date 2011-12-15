@@ -1,0 +1,63 @@
+Profile v. 1.1 Log
+Time: 21.11.2011 - 08:19
+System: Goma v.2.0.0 - 017 PHP 5.3.3
+Profile-Time: 59.663057327271ms
+URL: /artikel/?profile
+Memory-Peak-Usage: 16591K
+Times: 
+
+calls   execution time     Memory             name
+---------------------------------------------------------------------
+
+1       12.7029ms (10.21%)  3304K (20.876%)     init
+1       0.051ms (0.04%)     3K (0.0209%)        session
+1       6.4199ms (5.16%)    1682K (10.6292%)    core_requires
+1       5.862ms (4.71%)     1608K (10.162%)     preloads
+111     2.5415ms (2.04%)    144K (0.9109%)      Object::__construct
+1       6.532ms (5.25%)     1510K (9.5407%)     loadFramework
+1       3.9949ms (3.21%)    1090K (6.8872%)     classinfo
+14      3.1114ms (2.5%)     29K (0.1837%)       resources::Add
+112     4.4224ms (3.55%)    26K (0.1654%)       Core::getCMSVar
+39      0.9508ms (0.76%)    66K (0.4156%)       classinfo::setSaveVars
+1       0.0131ms (0.01%)    1K (0.0077%)        autoloader
+1       1.4219ms (1.14%)    187K (1.1813%)      Core::Init
+1       0.6342ms (0.51%)    125K (0.7886%)      i18n::Init
+2       0.4482ms (0.36%)    136K (0.8578%)      cacher
+31      5.3475ms (4.3%)     1309K (8.2728%)     Object::instance
+1       3.6211ms (2.91%)    1128K (7.1262%)     settings
+33      0.6049ms (0.49%)    38K (0.2421%)       autoloader::load
+33      12.7923ms (10.28%)  4127K (26.076%)     autoloader_require
+26      1.8792ms (1.51%)    537K (3.3936%)      DataObject::__construct
+655     34.6899ms (27.87%)  2445K (15.4491%)    Object::method_exists
+512     11.5719ms (9.3%)    478K (3.0183%)      Object::method_exists after
+198     30.3054ms (24.35%)  2007K (12.6792%)    DataObject::getOffset
+15      60.2624ms (48.42%)  2244K (14.1798%)    DataObject::getRecords
+15      0.2964ms (0.24%)    17K (0.1066%)       getwholedata::hash
+17      59.9926ms (48.2%)   1807K (11.4178%)    DataObject::buildExtendedQuery
+17      55.4643ms (44.56%)  1109K (7.0088%)     DataObject::buildQuery
+17      2.3096ms (1.86%)    110K (0.6976%)      SelectQuery::build
+72      19.0117ms (15.28%)  104K (0.6583%)      sql::query
+24      4.3888ms (3.53%)    237K (1.4991%)      DataObject::__cancall
+4       135.6771ms (109.01%)8047K (50.8386%)    DataObject::getAggregate
+35      1.8885ms (1.52%)    123K (0.7791%)      ViewAccessableData::makeObject
+1       65.9049ms (52.95%)  4222K (26.6756%)    render
+26      0.6971ms (0.56%)    57K (0.3612%)       request::match
+1       0.689ms (0.55%)     204K (1.2903%)      livecounter
+4       111.8221ms (89.85%) 5411K (34.1845%)    tpl::parser
+7       1.8377ms (1.48%)    32K (0.1991%)       tpl::buildFilesForTemplate
+7       1.0397ms (0.84%)    10K (0.0661%)       tplcache
+4       111.192ms (89.34%)  5395K (34.084%)     tpl_run
+2       0.0341ms (0.03%)    2K (0.0144%)        HTMLNode::html
+1       8.1539ms (6.55%)    191K (1.2082%)      DataObjectSet::getRecordsByRange
+7       49.6316ms (39.88%)  2816K (17.789%)     loops
+31      4.3452ms (3.49%)    309K (1.9549%)      ViewAccessableData::getOffset
+1       66.5679ms (53.49%)  3411K (21.5485%)    serve
+5       0.3061ms (0.25%)    25K (0.1573%)       Object::__call
+1       0.6959ms (0.56%)    27K (0.17%)         DataObject::getGroupedRecords
+1       0.788ms (0.63%)     33K (0.2064%)       getBody
+1       0.6211ms (0.5%)     25K (0.1608%)       HTMLParser::parseHTML
+1       0.0231ms (0.02%)    3K (0.0162%)        HTMLParser::js
+1       0.417ms (0.34%)     14K (0.0879%)       Resources::get
+1       0.3619ms (0.29%)    3K (0.0205%)        Resources::generateFiles
+======================================================================
+        124.4588ms (100%)   15828K              Whole Execution

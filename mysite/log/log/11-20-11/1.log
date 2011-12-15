@@ -1,0 +1,2 @@
+20.11.2011 - 23:24: SiteController::addBreadCrumb is deprecated. Call From /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/contentcontroller.php on line 105
+

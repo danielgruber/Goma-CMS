@@ -1,0 +1,75 @@
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 26.01.2011
+*/
+
+.ComplexTableFieldTable {
+	width: 100%;
+	text-align: left;
+	border: 1px solid #efefef;
+	border-spacing: 0;
+}
+.ComplexTableFieldTable .firstcolumn {
+	width: 20px;
+}
+
+/* head */
+
+.ComplexTableFieldTable thead tr {
+	background: url(../../../../images/menu.png) repeat-x;
+}
+.ComplexTableFieldTable thead th {
+	border-bottom: 1px solid #9f9f9f;
+}
+
+.ComplexTableFieldTable thead .sortlink {
+	color: #4f4f4f;
+	padding-left: 12px;
+}
+.ComplexTableFieldTable thead .desc {
+	background: url(../../../../images/framework/sort.png) no-repeat 0px -9px;
+}
+.ComplexTableFieldTable thead .asc {
+	background: url(../../../../images/framework/sort.png) no-repeat -10px 1px;
+}
+.ComplexTableFieldTable thead .loading {
+	background: #ffffff url(../../../../images/16x16/loading.gif) no-repeat 3px right;
+}
+.ComplexTableFieldTable thead .searchfieldholder {
+	display: block;
+	position: relative;
+	width: 190px;
+}
+.ComplexTableFieldTable thead .searchfieldholder  input {
+	width: 150px !important;
+}
+.ComplexTableFieldTable thead .searchfieldholder .cancel {
+	position: absolute;
+	z-index: 999;
+	height: 16px;
+	width: 16px;
+	background: url(../../../../images/framework/cancel.png);
+	top: 7px;
+	right: 33px;
+}
+
+
+/* body */
+.ComplexTableFieldTable tbody {
+	
+}
+.ComplexTableFieldTable tbody td, .ComplexTableFieldTable tbody th {
+	height: 20px;
+	border-bottom: 1px solid #efefef;
+}
+.ComplexTableFieldTable tbody tr.gray {
+	background: #f5f5f5;
+}
+
+.ComplexTableFieldTable tbody th.pages {
+	padding: 5px;
+	border-top: 1px solid #9f9f9f;
+}

@@ -1,0 +1,213 @@
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2010  Goma-Team
+  * last modified: 10.05.2010
+*/ 
+#filemanager
+{
+	padding: 5px;
+	border: 1px solid #efefef;
+}
+#filemanager table
+{
+	width: 100%;
+}
+#filemanager > table
+{
+	width: 1170px;
+	margin: 0px 3px 0px 3px;
+	border-spacing: 0px;
+}
+#filemanager > table td
+{
+	vertical-align: top;
+}
+#left
+{
+	width: 300px !important;
+	border-right: 1px solid #efefef;
+}
+#right
+{
+	width: 840px;
+}
+.directorylink
+{
+	cursor: pointer;
+	outline: none;
+}
+#filemanager #files table
+{
+	border-spacing: 0px;
+	border: 1px solid #efefef;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+}
+#filemanager #files .active, #filemanager #files .file:hover, #filemanager #files .folder:hover
+{
+	background-color: #1f7fe5 !important;
+}
+#filemanager #files .active a, #filemanager #files .file:hover a, #filemanager #files .folder:hover a
+{
+	color: #000000;
+}
+#filemanager #files table td
+{
+	padding: 3px;
+	cursor: pointer;
+}
+#filemanager #files table .grey
+{
+	background: #f5f5f5;
+}
+#filemanager #files table .bold
+{
+	font-weight: bold;
+	background: url(../../../../images/menu.png);
+}
+
+#filemanager #files table .bold td
+{
+	padding: 5px !important;
+}
+#filemanager #dirs .filetree span.folder
+{
+	color: #000000;
+	padding: 2px 2px 2px 20px;
+	border: 1px solid #ffffff;
+}
+#filemanager #dirs .filetree span.folder:hover, #filemanager #dirs .filetree li.active > a > span.folder
+{
+	background-color: #f0f0fa;
+	border: 1px solid #d4dce8;
+
+}
+
+#file
+{
+	border-top: 1px solid #efefef;
+	padding: 5px;
+	display: none;
+}
+#file_actions .loading
+{
+	background: url(../../../../images/16x16/loading.gif) no-repeat !important;
+}
+
+#pub_actions
+{
+	padding: 5px;
+	margin: 5px 0px 5px 0px;
+	border-top: 1px solid #efefef;
+	border-bottom: 1px solid #efefef;
+}
+
+#pub_actions .loading
+{
+	background: url(../../../../images/16x16/loading.gif) no-repeat !important;
+}
+
+
+.progressWrapper {
+	width: 357px;
+	overflow: hidden;
+}
+
+.progressContainer {
+	margin: 5px;
+	padding: 4px;
+	border: solid 1px #E8E8E8;
+	background-color: #F7F7F7;
+	overflow: hidden;
+}
+/* Message */
+.message {
+	margin: 1em 0;
+	padding: 10px 20px;
+	border: solid 1px #FFDD99;
+	background-color: #FFFFCC;
+	overflow: hidden;
+}
+/* Error */
+.red {
+	border: solid 1px #B50000;
+	background-color: #FFEBEB;
+}
+
+/* Current */
+.green {
+	border: solid 1px #DDF0DD;
+	background-color: #EBFFEB;
+}
+
+/* Complete */
+.blue {
+	border: solid 1px #CEE2F2;
+	background-color: #F0F5FF;
+}
+
+.progressName {
+	font-size: 8pt;
+	font-weight: 700;
+	color: #555;
+	width: 323px;
+	height: 14px;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.progressBarInProgress,
+.progressBarComplete,
+.progressBarError {
+	font-size: 0;
+	width: 0%;
+	height: 2px;
+	background-color: blue;
+	margin-top: 2px;
+}
+
+.progressBarComplete {
+	width: 100%;
+	background-color: green;
+	visibility: hidden;
+}
+
+.progressBarError {
+	width: 100%;
+	background-color: red;
+	visibility: hidden;
+}
+
+.progressBarStatus {
+	margin-top: 2px;
+	width: 337px;
+	font-size: 7pt;
+	font-family: Arial;
+	text-align: left;
+	white-space: nowrap;
+}
+
+a.progressCancel {
+	font-size: 0;
+	display: block;
+	height: 14px;
+	width: 14px;
+	background-image: url(../../../../images/16x16/del.png);
+	background-repeat: no-repeat;
+	float: right;
+}
+
+a.progressCancel:hover {
+	background-position: 0px 0px;
+}
+
+
+/* -- SWFUpload Object Styles ------------------------------- */
+.swfupload {
+	vertical-align: top;
+}
+	

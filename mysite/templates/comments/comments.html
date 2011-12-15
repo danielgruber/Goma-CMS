@@ -1,0 +1,23 @@
+<h4><% lang("co_comments", "comments") %></h4>
+<div class="comments">
+	<% CONTROL this() %>
+		
+		<div class="comment record" id="comment_{$this.id}">		
+				<% IF $this.writeaccess %>
+				
+					<div class="menu">
+						<a href="{PAGE_PATH}pagecomments/record/{$this.id}/edit{URLEND}?redirect={$_SERVER_REQUEST_URI.URL()}" title="{$_lang_edit}"><img src="images/icons/fatcow-icons/16x16/edit.png" alt="{$_lang_edit}" /></a>
+						<a href="{PAGE_PATH}pagecomments/record/{$this.id}/delete{URLEND}?redirect={$_SERVER_REQUEST_URI.URL()}" rel="ajaxfy" title="{$_lang_delete}"><img src="images/icons/fatcow-icons/16x16/delete.png" alt="{$_lang_delete}" /></a>
+					</div>
+					
+				<% END %>
+				<div class="from">{$_lang_co_of} $this.name.text() {$_lang_co_on} $this.timestamp.date()</div>
+				<div class="text">$this.text.bbcode()</div>	
+				<% IF $this.writeaccess %>
+					<div class="clear"></div>
+				<% END %>
+		</div>
+	<% ENDCONTROL %>
+	<h3><% lang("co_add_comment", "Add a new comment...") %></h3>
+	$form
+</div>

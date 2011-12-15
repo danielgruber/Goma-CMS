@@ -1,0 +1,25 @@
+<div id="message_{$id}" class="message record">
+	<div class="ui-left user">
+		<% CONTROL from() %>
+			<% IF $from.avatar %>
+				<a href="member/{$from.id}{URLEND}"><img src="images/resampled/50/50/{$from.avatar.raw()}" /></a>
+			<% ELSE %>
+				<a href="member/{$from.id}{URLEND}"><img src="images/no_avatar.png" height="50" width="50" /></a>
+			<% END %>
+		<% ENDCONTROL %>
+	</div>
+	<div class="ui-right delete">
+		<a title="{$_lang_delete}" rel="ajaxfy" href="pm/delm/{$id}{URLEND}"><img src="images/16x16/del.png" name="{$_lang_delete}" /></a>
+	</div>
+	<div class="body" style="margin-left: 60px;">
+		<div class="info">
+			<% CONTROL from() %>
+				<a class="username" href="member/{$from.id}{URLEND}">$from.nickname.text()</a> <span class="date">$time.date()</span>
+			<% ENDCONTROL %>
+		</div>
+		<div class="message-body">
+			$text.bbcode()
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>

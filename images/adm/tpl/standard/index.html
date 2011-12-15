@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>{$_cms_ptitle} - Administration</title>
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="copyright" content="Goma"  />
+		<meta name="keywords" content=""   />
+		<meta name="description" content=""   />
+		
+		<!-- some css -->
+		<% INCLUDE_CSS "standard.css" %>
+		<% INCLUDE_CSS "box.css" %>
+		<% INCLUDE_CSS "js/treeview/jquery.treeview.css" %>
+		<% INCLUDE_CSS "ui/ui-lightness/ui.css" %>
+		
+		<!-- some js -->
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "js/loader.js" %>
+		<% INCLUDE_JS "js/treeview/jquery.treeview.min.js"%>  
+		<% INCLUDE_JS "admin.js" %>
+		<script type="text/javascript">
+			// <![CDATA[
+				var x = new Image();
+				x.src = '{$_cms_root_path}images/16x16/loading.gif';
+				var y = new Image();
+				y.src = '{$_cms_root_path}images/loading.gif';
+				$(function(){					
+					setTimeout(function(){			
+						$("#body").css('display','block');
+						$("#l").css('display','none');
+					}, 100);
+				});
+			// ]]>
+		</script>
+		{$header}
+		<!--[if lte IE 6]>
+			<style type="text/css">
+				body{
+					text-align:center;
+				}
+				#page
+				{
+					width: 906px;
+					overflow: hidden;
+				}
+
+			</style>
+		<![endif]-->
+
+	</head>
+	<body>
+		<% IF permission("ADMIN_ALL") %>
+			<div id="header">  
+				<div id="header_inner">
+					<a href="http://goma-cms.org" target="_blank"><img src="adm/tpl/standard/images/logo.png" alt="logo" /></a>
+					&nbsp;&nbsp;&nbsp;
+					<div id="header_text">
+						<span id="pagetitle">
+							{$_cms_ptitle} - 
+						</span>
+						<span class="links">
+							<a href="{BASE_SCRIPT}adm/"><% lang("administration", "Administration") %></a>
+						</span>
+					</div>
+					<div id="_login">
+						<% lang("really welcome", "Welcome") %>, {$_cms_user}&nbsp;[ <a href="?action=logout"><% lang("logout", "logout") %></a> ]
+					</div>
+				</div>
+			</div>
+			
+			<div id="wrapper">	
+				<div name="table">
+					<div id="_nav">
+						<div id="nav">
+							<div id="nav_inner">
+								<a title="<% lang("administration", "Administration") %>" href="{BASE_SCRIPT}admin{URLEND}"><img src="{ROOT_PATH}images/home.png" alt="{$_cms_root_path}images/home.png" /></a>
+									<div class="overview" style="display:none;">
+										<img src="{ROOT_PATH}images/home.png" alt="" />
+										<br /><% lang("administration", "Administration") %>
+									</div>
+								<% CONTROL this() %>
+									<a title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}"><img src="{$this.img}" alt="{$this.img}" /></a>
+									<div class="overview" style="display:none;">
+										<img src="{$this.img}" alt="{$this.img}" />
+										<br />$this.text
+									</div>
+								<% ENDCONTROL %>
+								<a title="{$_lang_back}" href="{BASE_SCRIPT}"><img src="{$_cms_root_path}images/back.png" alt="{ROOT_PATH}images/back.png" /></a>
+									<div class="overview" style="display:none;">
+										<img src="{ROOT_PATH}images/back.png" alt="" />
+										<br /><% lang("back", "back") %>
+									</div>
+									
+								<a title="{$_lang_logout}" href="{BASE_SCRIPT}profile/logout/"><img src="{ROOT_PATH}images/logoff.png" alt="{$_cms_root_path}images/logoff.png" /></a>
+									<div class="overview" style="display:none;">
+										<img src="{ROOT_PATH}images/logoff.png" alt="" />
+										<br /><% lang("logout", "logout") %>
+									</div>
+							</div>
+						</div>
+						<div  style="clear:both;"></div>
+					</div>
+					
+					<div id="_page">	
+						<div id="l">
+							Loading...
+								<noscript> 
+									<div class="error">
+										<% lang("noscript", "You have to activte JavaScript to use this backend!") %>
+									</div>
+								</noscript>
+						</div>
+						<div id="body">
+							<div id="page_inner">
+								<% IF $content %>
+									<div id="addcontent" style="width: 900px;max-height: 150px;overflow: auto;">
+										$addcontent
+									</div>
+									$content
+								<% ELSE %>
+									
+									<table width="100%">
+										<tr>
+											<td style="width: 900px;" class="valign-top">
+												<div id="addcontent" style="width: 900px;max-height: 150px;overflow: auto;">
+													$addcontent
+												</div>
+												<% CONTROL this() %>
+														<div style="float: left;">																
+															<div onclick="location.href = '{BASE_SCRIPT}admin/{$this.uname}{URLEND}';" style="cursor:pointer;" class="admin_button">
+																<a  href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
+																	<img src="{$this.img}" />
+																	<br />
+																	&nbsp;$this.text
+																</a>
+															</div>																
+														</div>
+												<% ENDCONTROL %>
+												<div style="clear: both;"></div>
+												
+											</td>
+											<td class="align-center valign-top">
+												$overview
+											</td>
+										</tr>
+									</table>
+								<% END %>
+								<br />
+
+								
+							</div>
+							<div class="align-center"  id="footer">
+								<div><a href="adm/support.php" rel="bluebox" name="supportbox" title="<% lang("support", "get support") %>"><% lang("support", "get support") %></a>&nbsp;&nbsp;<a href="impressum/"><% lang("imprint", "imprint") %></a>&nbsp;&nbsp;<a href="kontakt/"><% lang("contact", "Contact Us") %></a>    </div>
+								<div id="footer_right">&copy; 2009 - $_cms_year $_cms_ptitle</div>
+								<div id="footer_center">  Powered by <a target="_blank" href="http://goma-cms.org">Goma</a> </div>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		<% ELSE IF $content %>
+		<div id="header">  
+				<div style="width: 900px;" id="header_inner">
+					<a href="http://goma-cms.org" target="_blank"><img src="adm/tpl/standard/images/logo.png" alt="logo" /></a>
+					&nbsp;&nbsp;&nbsp;
+					<div id="header_text">
+						<span id="pagetitle">
+							{$_cms_ptitle} - 
+						</span>
+						<span class="links">
+							<a href="{BASE_SCRIPT}admin/"><% lang("administration", "administration") %></a>
+						</span>
+					</div>
+				</div>
+		</div>
+
+		<div id="login">
+			<div id="login_inner">
+				{$addcontent}
+				{$content}
+				<a href="./">{$_lang_homepage}</a>
+			</div>
+		</div>
+		
+		<div class="align-center" id="_footer">
+			<div>&nbsp;<a href="impressum/"><% lang("imprint", "imprint") %></a>&nbsp;&nbsp;<a href="kontakt/"><% lang("contact", "Contact Us") %></a>   </div>
+			<div id="footer_right">&copy; 2009 - {$_cms_year} {$_cms_ptitle}</div>
+			<div id="footer_center">  Powered by <a target="_blank" href="http://goma-cms.org">Goma</a> </div>
+
+		</div>
+		<% ELSE %>
+			<div id="header">  
+				<div style="width: 900px;" id="header_inner">
+					<a href="http://goma-cms.org" target="_blank"><img src="adm/tpl/standard/images/logo.png" alt="logo" /></a>
+					&nbsp;&nbsp;&nbsp;
+					<div id="header_text">
+						<span id="pagetitle">
+							{$_cms_ptitle} - 
+						</span>
+						<span class="links">
+							<a href="{BASE_SCRIPT}admin/"><% lang("administration", "administration") %></a>
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<div id="login">
+				<div id="login_inner">
+					<form method="post" action="{BASE_SCRIPT}profile/login/">
+						<input type="hidden" value="{$_SERVER_REQUEST_URI}" name="redirect" />
+						<h3><% lang("administration", "administration") %></h3>
+						{$addcontent}
+						<table width="100%">
+							<tr>
+								<td><label for="user">{$_lang_username}</label></td><td><input type="text" name="user" />  </td>
+							</tr>
+							<tr>
+								<td><label for="pwd">{$_lang_password}</label></td><td><input type="password" name="pwd" />  </td>
+							</tr>
+							<tr>
+								<td><a href="profile/lost_password{URLEND}"><% lang("lost_password", "lost password") %></a></td><td><input type="submit" class="button" value="Login" />&nbsp;&nbsp; <input type="button" onclick="location.href = './';" value="{$_lang_cancel}" class="button" /> </td>
+							</tr>
+
+						</table>
+					</form>
+				</div>
+			</div>
+			<div class="align-center" id="_footer">
+				<div>&nbsp;<a href="impressum/"><% lang("imprint", "imprint") %></a>&nbsp;&nbsp;<a href="kontakt/"><% lang("contact", "Contact Us") %></a>   </div>
+				<div id="footer_right">&copy; 2009 - {$_cms_year} {$_cms_ptitle}</div>
+				<div id="footer_center">  Powered by <a target="_blank" href="http://goma-cms.org">Goma</a> </div>
+
+			</div>
+		<% END %>
+	</body>
+</html>

@@ -1,0 +1,40 @@
+.cke_dialog_ui_text {
+	position: relative;
+}
+.cke_dialog_ui_text .textDropDown {
+	position: absolute;
+	background: #fff;
+	min-height: 50px;
+	border: 1px solid #999;
+	-webkit-border-bottom-left-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+	margin-bottom: 5px;
+	padding-bottom: 3px;
+}
+.cke_dialog_ui_text .textDropDown ul {
+	list-style: none;
+}
+.cke_dialog_ui_text .textDropDown ul li {
+	
+}
+.cke_dialog_ui_text .textDropDown ul li a {
+	display: block;
+	padding: 5px;
+	margin: 0;
+}
+.cke_dialog_ui_text .textDropDown ul li a:hover {
+	background: #eee;
+}
+.cke_dialog_ui_text .cancelButton {
+	position: absolute;
+	right: -3px;
+	top: 2px;
+	height: 17px !important;
+	width: 17px !important;
+	background: url(images/cancel.png) no-repeat !important;
+	cursor: pointer !important;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>{$Title}</title>
+		
+		<% headerHTML() %>
+
+		<% INCLUDE_CSS "jqueryui/theme.css" %>
+		<% INCLUDE_CSS "style.css" %>
+		<% INCLUDE_CSS "typography.css" %>
+		<% if isMobile() %>
+			<% INCLUDE_CSS "mobile.css" %>
+			<meta name="viewport" content="width=device-width, initial-scale=1; user-scalable=no" />
+		<% end %>
+		
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "js/loader.js" %>
+
+		<style type="text/css">
+			{$own_css}
+			
+		</style>
+	</head>
+<% INCLUDE("layout.html") %>
+</html>

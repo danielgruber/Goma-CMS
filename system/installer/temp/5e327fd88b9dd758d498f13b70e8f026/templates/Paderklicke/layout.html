@@ -1,0 +1,171 @@
+	<body>
+		
+		<% INCLUDE "adminbar.html" %>
+	   	<div id="wrapper">
+			<div id="header">
+				<div id="header_inner">
+					<div id="header_text">
+						<a href="./">{$_cms_ptitle}</a>
+					</div>
+					<div id="header_search">
+						<form method="get" action="search{URLEND}">
+							<input type="text" name="q" class="field" value="{$_lang_search.search}" onfocus="if(this.value == '{$_lang_search.search}'){this.value = '';}" onblur="if(this.value == ''){this.value = '{$_lang_search.search}';}" />
+						</form>
+					</div>
+					<div class="clear"></div>
+				</div>
+				
+			</div>
+			
+			<!-- begin page -->
+			<div id="page">
+			
+				
+				<% IF NOT isMobile() %>
+					<!-- begin navi -->
+					<garea name="mainbar">
+						<ul id="nav">
+							<% CONTROL mainbar() %>
+								<li>
+									<a href="{$mainbar.url}" class="{$mainbar.LinkClass}"><span>$mainbar.mainbartitle.text()</span></a>
+								</li>
+							<% ENDCONTROL %>
+						</ul>
+					</garea>
+					<!-- end navi -->
+					<div style="clear: both;"></div>
+					
+					
+					<div id="page_wrapper"> <!-- start page_wrapper -->
+						<div id="left">
+							<garea name="sidebar" reload="1">
+								<% IF level(2) %>
+									<div class="box_with_title box_new subnav" style="width: 200px;  float: left;">			
+										<div class="header">
+											<strong class="title"><% active_mainbar_title() %></strong>
+										</div>
+										<div class="content" >
+											<ul class="subbar">
+												<% CONTROL mainbar(2) AS $subbar %>
+													<li class="$subbar.LinkClass">
+														<a href="$subbar.url">
+															<span>$subbar.mainbartitle.text()</span>
+														</a>
+														<% IF $subbar.active %>
+															<% IF level(3) %>
+																<ul class="subbar subsubbar">
+																	<% CONTROL mainbar(3) %>
+																		<li>
+																			<a href="{$mainbar.url}" class="{$mainbar.LinkClass}"><span>$mainbar.mainbartitle.text()</span></a>
+																		</li>
+																	<% ENDCONTROL %>
+																</ul>
+															<% END %>
+														<% END %>
+													</li>
+												<% ENDCONTROL %>
+											</ul>
+										</div>
+									</div>
+								<% END %>
+								
+								<!-- boxes in the sidebar -->
+								<% boxes("sidebar", 200) %>
+								<div class="clear"></div>
+							</garea>
+						</div>
+					<% ELSE %>
+						<ul id="mobilenavi">
+							<garea name="mainbar" reload="1">
+								<% CONTROL mainbar() %>
+									<li>
+										<a href="{$mainbar.url}" class="$mainbar.LinkClass">
+											<span>$mainbar.mainbartitle.text()</span>
+										</a>
+										<% IF $mainbar.active %>
+											<% IF level(2) %>
+												<ul>
+													<% CONTROL mainbar(2) %>
+														<li>
+															<a href="{$mainbar.url}" class="$mainbar.LinkClass">
+																<span>$mainbar.mainbartitle.text()</span>
+															</a>
+															<% IF $mainbar.active %>
+																<% IF level(3) %>
+																	<ul>
+																		<% CONTROL mainbar(3) %>
+																			<li>
+																				<a href="{$mainbar.url}" class="$mainbar.LinkClass">
+																					<span>$mainbar.mainbartitle.text()</span>
+																				</a>																		
+																			</li>
+																		<% ENDCONTROL %> 
+																	</ul>
+																<% END %>
+															<% END %>
+														</li>
+													<% ENDCONTROL %>
+												</ul>
+											<% END %>
+										<% END %>
+									</li>
+								<% ENDCONTROL %>
+							</garea>
+						</ul>
+					<% END %>
+				
+					<div id="content">
+						<div id="content_inner">
+							<!-- breadcrumbs -->
+								<div id="breadcrumbs">
+									{$_lang_you_are_here}: <a href="./">{$_lang_homepage}</a>
+									<% IF breadcrumbs() %>
+										<% CONTROL breadcrumbs() %>
+											 {BREADCRUMB_SEPERATOR} <a href="{$breadcrumbs.link}">{$breadcrumbs.title}</a>
+										<% ENDCONTROL %>
+									<% END %>
+								</div>
+							<!-- end breadcrumbs -->
+							$addcontent
+							<garea name="content">
+								<h1>404 - Not found!</h1>
+							</garea>
+							
+							<div class="clear"></div>
+						</div>
+					</div>
+					<div style="clear: both"></div>
+				<% IF NOT isMobile() %>
+					</div> <!-- end page_wrapper -->
+				<% END %>
+			</div> 
+			<!-- end page -->
+			<!-- footer -->
+			<div  id="footer">
+				<div id="footer_inner">
+					<% if not isMobile()  %>
+						<div id="footer_left">  Powered by <a target="_blank" href="http://goma-cms.org">Goma</a>       </div>
+						<div id="footer_right">
+							<a href="impressum{URLEND}">{$_lang_imprint}</a>&nbsp;&middot;&nbsp;<a href="kontakt{URLEND}">{$_lang_contact}</a>  
+						</div>
+						<div class="clear"></div>
+					<% else %>
+						<div id="footer_right">
+							<a href="impressum{URLEND}">{$_lang_imprint}</a>&nbsp;&middot;&nbsp;<a href="kontakt{URLEND}">{$_lang_contact}</a>  
+							<% IF login() %>
+								&middot;&nbsp;<a href="pm/">{$_lang_pm_inbox}</a>
+								&middot;&nbsp;<a href="profile/logout/">{$_lang_logout}</a>
+							<% ELSE %>
+							
+								&middot;&nbsp;<a href="profile/login/">{$_lang_login}</a> 
+							<% END %>
+						</div>
+						<div id="footer_left">  Powered by <a target="_blank" href="http://goma-cms.org">Goma</a>       </div>
+						
+					<% end %>
+					<% INCLUDE "mobile.html" %>
+					<div style="clear: both;"></div>
+				</div>
+			</div>
+		</div>
+	</body>

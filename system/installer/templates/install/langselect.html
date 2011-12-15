@@ -1,0 +1,14 @@
+
+<h3>Please select your Language:</h3>
+<form method="get" action="{BASE_URI}">
+	<select name="locale">
+		<% CONTROL languages() AS $lang %>
+			<% IF $lang.active %>
+				<option value="$lang.name" selected="selected">$lang.title</option>
+			<% ELSE %>
+				<option value="$lang.name">$lang.title</option>
+			<% END %>
+		<% ENDCONTROL %>
+	</select>
+	<input  class="button" type="submit" value="Okay" />
+</form>

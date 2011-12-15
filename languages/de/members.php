@@ -1,0 +1,23 @@
+<?php
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
+  *@Copyright (C) 2009 - 2010  Goma-Team
+  * last modified: 12.07.2010
+  * $Version 2.0.0 - 001
+*/   
+
+ 
+defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
+
+$mem_lang = array(
+	"members"		=> "Mitglieder",
+	"member"		=> "Mitglied",
+	"send_message"	=> "Nachricht senden",
+	"group"			=> "Benutzergruppe"
+);
+foreach($mem_lang as $key => $value)
+{
+	$GLOBALS["lang"]["mem_".$key] = $value;
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - Administration <% END %></title>
+		
+		<meta name="robots" content="noindex,nofollow" />
+		
+		<!-- some css -->
+		<% INCLUDE_CSS "standard.css" %>
+		<% INCLUDE_CSS "box.css" %>
+		<% INCLUDE_CSS "ui/ui-lightness/ui.css" %>
+		
+		<!-- some js -->
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "js/loader.js" %>
+		<script type="text/javascript">
+			// <![CDATA[
+				var x = new Image();
+				x.src = '{$_cms_root_path}images/16x16/loading.gif';
+				var y = new Image();
+				y.src = '{$_cms_root_path}images/loading.gif';
+				$(function(){					
+					setTimeout(function(){			
+						$("#body").css('display','block');
+						$("#l").css('display','none');
+					}, 100);
+				});
+			// ]]>
+		</script>
+		{$header}
+
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<a href="http://goma-cms.org" target="_blank"><img id="logo" src="adm/tpl/goma%20admin/images/logo.png" alt="logo" /></a>
+				<div class="header">
+					<h1>$_cms_ptitle - <% lang("administration", "Admin-Panel") %></h1>
+				</div>
+				<div class="content">
+					$addcontent
+					<% IF $content %>
+						$content
+					<% ELSE %>
+						
+						<form action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REQUEST_URI.url()}" method="post">
+							<table>
+								<!--<tr>
+									<td><label  style="cursor:pointer;" for="admin_name">{$_lang_username}:</label></td> 
+								</tr>-->
+								<tr>
+									<td><input type="text" placeholder="{$_lang_username}" name="user" id="admin_name" size="20" /></td>
+								</tr>
+								<!--<tr>
+									<td><label style="cursor:pointer;" for="admin_pwd"> {$_lang_password}:</label></td> 
+								</tr>-->
+								<tr>
+									<td><input type="password" placeholder="{$_lang_password}" id="admin_pwd" name="pwd" size="20" /></td>
+								</tr>
+								<tr>
+									<td>
+										<div><input class="button" type="submit" value="<% lang('perform_login', 'Login') %>"  /></div>
+										<div class="subline"><a href="{ROOT_PATH}"><% lang("back", "back") %></a>&nbsp;|&nbsp;<a href="{BASE_SCRIPT}profile/lost_password{URLEND}">{$_lang_lost_password}</a></div>
+									</td>
+								</tr>
+							</table>
+						</form>
+					<% END %>
+					
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

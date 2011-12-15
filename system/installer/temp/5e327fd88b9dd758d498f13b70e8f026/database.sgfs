@@ -1,0 +1,845 @@
+!GFS;V2.0
+
+-- Table pages
+
+DROP TABLE IF EXISTS {!#PREFIX}pages;
+  -- Create 
+CREATE TABLE {!#PREFIX}pages (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('page','boxpage','articlecategory','article','articles','contact','errorpage','members','phppage','redirector','pages') NOT NULL,
+ `created` int(90) NOT NULL,
+ `parentid` int(10) NOT NULL,
+ `path` varchar(500) NOT NULL,
+ `rights` int(2) NOT NULL,
+ `mainbar` int(1) NOT NULL DEFAULT '1',
+ `mainbartitle` varchar(200) NOT NULL,
+ `rating` int(1) NOT NULL,
+ `title` varchar(200) NOT NULL,
+ `data` text NOT NULL,
+ `sort` int(8) NOT NULL DEFAULT '10000',
+ `search` int(1) NOT NULL DEFAULT '1',
+ `editright` text NOT NULL,
+ `showcomments` int(1) NOT NULL,
+ `meta_description` varchar(200) NOT NULL,
+ `meta_keywords` varchar(200) NOT NULL,
+ `edit_type` varchar(10) NOT NULL,
+ `readpassword` varchar(50) NOT NULL,
+ `viewer_type` varchar(20) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `mainbar` (parentid, mainbar, class_name),
+KEY `parentid` (parentid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `path` (path(111), sort, class_name),
+KEY `sitesearch` (class_name, data(55), title(55), mainbartitle(55), meta_keywords(55), id),
+KEY `searchable_fields` (data(83), title(83), mainbartitle(83), meta_keywords(83)),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}pages (`id` , `autorid` , `last_modified` , `class_name` , `created` , `parentid` , `path` , `rights` , `mainbar` , `mainbartitle` , `rating` , `title` , `data` , `sort` , `search` , `editright` , `showcomments` , `meta_description` , `meta_keywords` , `edit_type` , `readpassword` , `viewer_type` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '1','1','1320012475','boxpage','1320011884','0','startseite','1','1','Startseite','0','Startseite','','0','1','','0','','','all','','all','1','1','2' )
+, ( '2','1','1320012475','errorpage','1320012085','0','seite-nicht-gefunden','1','1','Seite nicht gefunden','0','Seite nicht gefunden','<h3>\\n\\n	Ups! Ihre Seite konnte auch nach langer Suche leider nicht gefunden werden :(</h3>\\n\\n','5','1','','0','','','all','','all','1','2','2' )
+, ( '3','1','1320012475','errorpage','1320012085','0','seite-nicht-gefunden','1','0','Seite nicht gefunden','0','Seite nicht gefunden','<h3>\\n\\n	Ups! Ihre Seite konnte auch nach langer Suche leider nicht gefunden werden :(</h3>\\n\\n','5','0','','0','','','all','','all','1','2','2' )
+, ( '4','1','1320012475','contact','1320012159','0','kontaktformular','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','2' )
+, ( '5','1','1320012475','boxpage','1320012176','0','impressum','1','0','Impressum','0','Impressum','','4','1','','0','','','all','','all','1','4','2' )
+, ( '6','1','1320012475','articlecategory','1320012252','0','artikel','1','1','Artikel','0','Artikel','','1','1','','0','','','all','','all','1','5','2' )
+, ( '7','1','1320012401','article','1320012401','5','der-erste-artikel','1','1','Der Erste Artikel','0','Der Erste Artikel','<p>\\n\\n	Dies ist das Artikelsystem von Goma. Um einen neuen Artikel anzulegen, melden Sie sich in der Administration an. Dort w&auml;hlen Sie in der rechten Spalte die Kategorie Inhalt. Im rechten Bereich sehen Sie eine Box Erstellen, dort w&auml;hlen Sie Artikel aus und dr&uuml;cken auf Erstellen. Nun f&uuml;hrt Sie Goma durch die Erstellung automatisch hindurch.</p>\\n\\n','10000','1','','1','','','all','','all','1','6','2' )
+, ( '8','1','1320012475','members','1320012473','0','mitglieder','1','1','Mitglieder','0','Mitglieder','','2','1','','0','','','all','','all','1','7','2' )
+, ( '9','1','1320012784','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','2' )
+, ( '10','1','1320013312','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','1' )
+, ( '11','1','1320013316','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','2' )
+, ( '12','1','1320013428','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','1' )
+, ( '13','1','1320013431','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','2' )
+, ( '14','1','1320013439','contact','1320012159','0','kontakt','1','0','Kontaktformular','0','Kontaktformular','','3','1','','0','','','all','','all','1','3','2' )
+; 
+
+
+
+
+
+
+
+a:29:{s:22:"database/advrights.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:2447;s:11:"lastModfied";i:1320229775;s:8:"contents";s:2447:"-- Table advrights
+
+DROP TABLE IF EXISTS {!#PREFIX}advrights;
+  -- Create 
+CREATE TABLE {!#PREFIX}advrights (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('advrights') NOT NULL,
+ `created` int(90) NOT NULL,
+ `name` varchar(200) NOT NULL,
+ `_default` int(10) NOT NULL,
+ `title` varchar(200) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE `name` (name),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}advrights (`id` , `autorid` , `last_modified` , `class_name` , `created` , `name` , `_default` , `title` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '1','3','1320229623','advrights','1320229623','DATA_ALL','7','{$_lang_dataobject_all}','3','1','2' )
+, ( '2','3','1320229623','advrights','1320229623','DATA_EDIT','7','{$_lang_dataobject_edit}','3','2','2' )
+, ( '3','3','1320229623','advrights','1320229623','DATA_DELETE','7','{$_lang_dataobject_delete}','3','3','2' )
+, ( '4','3','1320229623','advrights','1320229623','DATA_INSERT','7','{$_lang_dataobject_add}','3','4','2' )
+, ( '5','3','1320229623','advrights','1320229623','ADMIN_ALL','7','{$_lang_administration}','3','5','2' )
+, ( '6','3','1320229623','advrights','1320229623','SETTINGS_ALL','7','{$_lang_edit_settings}','3','6','2' )
+, ( '7','3','1320229623','advrights','1320229623','BOXES_ALL','7','{$_lang_admin_boxes}','3','7','2' )
+, ( '8','3','1320229623','advrights','1320229623','PAGES_ALL','9','{$_lang_sites_edit}','3','8','2' )
+, ( '9','3','1320229623','advrights','1320229623','PAGES_DELETE','9','{$_lang_pages_delete}','3','9','2' )
+, ( '10','3','1320229623','advrights','1320229623','PAGES_INSERT','7','{$_lang_pages_add}','3','10','2' )
+, ( '11','3','1320229623','advrights','1320229623','PAGES_WRITE','7','{$_lang_pages_edit}','3','11','2' )
+, ( '12','3','1320229623','advrights','1320229623','PAGES_PUBLISH','7','{$_lang_publish}','3','12','2' )
+, ( '13','3','1320229623','advrights','1320229623','RATING_ALL','7','','3','13','2' )
+, ( '14','3','1320229623','advrights','1320229623','RATING_DELETE','7','{$_lang_rating.perms_delete}','3','14','2' )
+, ( '15','3','1320229623','advrights','1320229623','admin_smilies','7','{$_lang_admin_smilies}','3','15','2' )
+; 
+
+
+
+
+
+";}s:28:"database/advrights_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:694;s:11:"lastModfied";i:1320229775;s:8:"contents";s:694:"-- Table advrights_state
+
+DROP TABLE IF EXISTS {!#PREFIX}advrights_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}advrights_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}advrights_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','1','1' )
+, ( '2','2','2' )
+, ( '3','3','3' )
+, ( '4','4','4' )
+, ( '5','5','5' )
+, ( '6','6','6' )
+, ( '7','7','7' )
+, ( '8','8','8' )
+, ( '9','9','9' )
+, ( '10','10','10' )
+, ( '11','11','11' )
+, ( '12','12','12' )
+, ( '13','13','13' )
+, ( '14','14','14' )
+, ( '15','15','15' )
+; 
+
+
+
+
+
+";}s:19:"database/groups.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1052;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1052:"-- Table groups
+
+DROP TABLE IF EXISTS {!#PREFIX}groups;
+  -- Create 
+CREATE TABLE {!#PREFIX}groups (
+ `id` int(8) NOT NULL auto_increment,
+ `name` varchar(100) NOT NULL,
+ `rights` int(2) NOT NULL,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('group') NOT NULL,
+ `created` int(90) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `searchable_fields` (name),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}groups (`id` , `name` , `rights` , `autorid` , `last_modified` , `class_name` , `created` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '1','Superadministratoren','10','0','1312153318','group','1312153318','0','1','0' )
+, ( '3','Benutzer','4','0','1307994590','group','1307994590','0','3','0' )
+, ( '5','Administratoren','9','15','1318799188','group','1307994676','15','4','1' )
+; 
+
+
+
+
+
+";}s:25:"database/groups_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:448;s:11:"lastModfied";i:1320229775;s:8:"contents";s:448:"-- Table groups_state
+
+DROP TABLE IF EXISTS {!#PREFIX}groups_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}groups_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}groups_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','1','1' )
+, ( '3','3','3' )
+, ( '5','5','5' )
+; 
+
+
+
+
+
+";}s:24:"database/newsettings.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1218;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1218:"-- Table newsettings
+
+DROP TABLE IF EXISTS {!#PREFIX}newsettings;
+  -- Create 
+CREATE TABLE {!#PREFIX}newsettings (
+ `id` int(10) NOT NULL auto_increment,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('metasettings','templatesettings','newsettings') NOT NULL,
+ `created` int(90) NOT NULL,
+ `register` varchar(100) NOT NULL,
+ `register_enabled` enum('0','1') NOT NULL,
+ `titel` varchar(50) NOT NULL DEFAULT 'Goma - Open Source CMS / Framework',
+ `gzip` enum('0','1') NOT NULL,
+ `livecounter` enum('0','1') NOT NULL,
+ `autorid` int(10) NOT NULL,
+ `register_email` enum('0','1') NOT NULL DEFAULT '1',
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}newsettings (`id` , `last_modified` , `class_name` , `created` , `register` , `register_enabled` , `titel` , `gzip` , `livecounter` , `autorid` , `register_email` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '29','1320229616','newsettings','1317048275','','0','test','1','0','15','1','3','1','1' )
+; 
+
+
+
+
+
+";}s:30:"database/newsettings_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:434;s:11:"lastModfied";i:1320229775;s:8:"contents";s:434:"-- Table newsettings_state
+
+DROP TABLE IF EXISTS {!#PREFIX}newsettings_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}newsettings_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}newsettings_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','29','29' )
+; 
+
+
+
+
+
+";}s:25:"database/metasettings.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:530;s:11:"lastModfied";i:1320229775;s:8:"contents";s:530:"-- Table metasettings
+
+DROP TABLE IF EXISTS {!#PREFIX}metasettings;
+  -- Create 
+CREATE TABLE {!#PREFIX}metasettings (
+ `id` int(10) NOT NULL auto_increment,
+ `meta_keywords` varchar(100) NOT NULL,
+ `meta_description` varchar(100) NOT NULL,
+ `autorid` int(10) NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}metasettings (`id` , `meta_keywords` , `meta_description` , `autorid` , `editorid`) VALUES  ( '29','','','15','3' )
+; 
+
+
+
+
+
+";}s:29:"database/templatesettings.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:540;s:11:"lastModfied";i:1320229775;s:8:"contents";s:540:"-- Table templatesettings
+
+DROP TABLE IF EXISTS {!#PREFIX}templatesettings;
+  -- Create 
+CREATE TABLE {!#PREFIX}templatesettings (
+ `id` int(10) NOT NULL auto_increment,
+ `stpl` varchar(64) NOT NULL DEFAULT 'default',
+ `autorid` int(10) NOT NULL,
+ `css_standard` text NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}templatesettings (`id` , `stpl` , `autorid` , `css_standard` , `editorid`) VALUES  ( '29','Paderklicke','15','','3' )
+; 
+
+
+
+
+
+";}s:18:"database/boxes.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1682;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1682:"-- Table boxes
+
+DROP TABLE IF EXISTS {!#PREFIX}boxes;
+  -- Create 
+CREATE TABLE {!#PREFIX}boxes (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('box','login_meinaccount','phpbox','statistics','boxes') NOT NULL,
+ `created` int(90) NOT NULL,
+ `seiteid` varchar(50) NOT NULL,
+ `border` enum('0','1') NOT NULL,
+ `title` varchar(100) NOT NULL,
+ `sort` int(3) NOT NULL,
+ `text` text NOT NULL,
+ `width` varchar(5) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `_show` (seiteid, sort),
+KEY `searchable_fields` (text(166), title),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}boxes (`id` , `autorid` , `last_modified` , `class_name` , `created` , `seiteid` , `border` , `title` , `sort` , `text` , `width` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '13','1','1320014384','login_meinaccount','1320012114','sidebar','0','Login/Mein Account','2','','200','1','2','2' )
+, ( '9','1','1320012227','box','1320012186','4','0','','2','<h1>\\n\\n	Impressum</h1>\\n\\n<p>\\n\\n	Bitte f&uuml;gen Sie hier Ihr Impressum ein.</p>\\n\\n','630','1','3','1' )
+, ( '10','1','1320012231','box','1320011996','1','0','','2','<h1>\\n\\n	Ihre neue Goma-Seite</h1>\\n\\n<p>\\n\\n	Willkommen auf Ihrer neuen Goma-Seite. Bitte melden Sie sich im linken Bereich an oder klicken Sie auf <a href=\"./admin/\">Administration</a>, um direkt in die Administration zu gelangen.</p>\\n\\n','630','1','1','2' )
+; 
+
+
+
+
+
+";}s:24:"database/boxes_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:448;s:11:"lastModfied";i:1320229775;s:8:"contents";s:448:"-- Table boxes_state
+
+DROP TABLE IF EXISTS {!#PREFIX}boxes_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}boxes_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}boxes_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','10','10' )
+, ( '2','13','13' )
+, ( '3','9','9' )
+; 
+
+
+
+
+
+";}s:18:"database/pages.sql";a:5:{s:4:"type";s:3:"sql";s:4:"size";i:4815;s:11:"lastModfied";i:1320229775;s:8:"checksum";s:35:"GFSf12eb6ac0128d04a99f7d75a56d0f1a0";s:10:"startChunk";i:11;}s:24:"database/pages_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:518;s:11:"lastModfied";i:1320229775;s:8:"contents";s:518:"-- Table pages_state
+
+DROP TABLE IF EXISTS {!#PREFIX}pages_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}pages_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}pages_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','1','1' )
+, ( '2','3','3' )
+, ( '3','14','14' )
+, ( '4','5','5' )
+, ( '5','6','6' )
+, ( '6','7','7' )
+, ( '7','8','8' )
+; 
+
+
+
+
+
+";}s:27:"database/Box_statistics.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:692;s:11:"lastModfied";i:1320229775;s:8:"contents";s:692:"-- Table Box_statistics
+
+DROP TABLE IF EXISTS {!#PREFIX}Box_statistics;
+  -- Create 
+CREATE TABLE {!#PREFIX}Box_statistics (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `today` int(1) NOT NULL,
+ `last2` int(1) NOT NULL,
+ `last30d` int(1) NOT NULL,
+ `whole` int(1) NOT NULL,
+ `online` int(1) NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}Box_statistics (`id` , `autorid` , `today` , `last2` , `last30d` , `whole` , `online` , `editorid`) VALUES  ( '13','1','0','0','0','0','0','1' )
+, ( '9','1','0','0','0','0','0','1' )
+, ( '10','1','0','0','0','0','0','1' )
+; 
+
+
+
+
+
+";}s:25:"database/pagecomments.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:722;s:11:"lastModfied";i:1320229775;s:8:"contents";s:722:"-- Table pagecomments
+
+DROP TABLE IF EXISTS {!#PREFIX}pagecomments;
+  -- Create 
+CREATE TABLE {!#PREFIX}pagecomments (
+ `id` int(10) NOT NULL auto_increment,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('pagecomments') NOT NULL,
+ `autorid` int(10) NOT NULL,
+ `name` varchar(200) NOT NULL,
+ `text` text NOT NULL,
+ `timestamp` int(200) NOT NULL,
+ `pageid` int(10) NOT NULL,
+ `created` int(90) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `name` (name),
+KEY `pageid` (pageid),
+KEY `autorid` (autorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+; 
+
+
+
+
+
+";}s:31:"database/pagecomments_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:324;s:11:"lastModfied";i:1320229775;s:8:"contents";s:324:"-- Table pagecomments_state
+
+DROP TABLE IF EXISTS {!#PREFIX}pagecomments_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}pagecomments_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+; 
+
+
+
+
+
+";}s:25:"database/Page_article.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:804;s:11:"lastModfied";i:1320229775;s:8:"contents";s:804:"-- Table Page_article
+
+DROP TABLE IF EXISTS {!#PREFIX}Page_article;
+  -- Create 
+CREATE TABLE {!#PREFIX}Page_article (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `description` text NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}Page_article (`id` , `autorid` , `description` , `editorid`) VALUES  ( '1','1','','1' )
+, ( '2','1','','1' )
+, ( '3','1','','1' )
+, ( '4','1','','1' )
+, ( '5','1','','1' )
+, ( '6','1','','1' )
+, ( '7','1','<p>\\n\\n	Der Erste Artikel in dieser Brandneuen Goma-Installation.</p>\\n\\n','1' )
+, ( '8','1','','1' )
+, ( '9','1','','1' )
+, ( '10','1','','1' )
+, ( '11','1','','1' )
+, ( '12','1','','1' )
+, ( '13','1','','1' )
+, ( '14','1','','1' )
+; 
+
+
+
+
+
+";}s:25:"database/Page_contact.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:723;s:11:"lastModfied";i:1320229775;s:8:"contents";s:723:"-- Table Page_contact
+
+DROP TABLE IF EXISTS {!#PREFIX}Page_contact;
+  -- Create 
+CREATE TABLE {!#PREFIX}Page_contact (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `email` varchar(200) NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}Page_contact (`id` , `autorid` , `email` , `editorid`) VALUES  ( '1','1','','1' )
+, ( '2','1','','1' )
+, ( '3','1','','1' )
+, ( '4','1','','1' )
+, ( '5','1','','1' )
+, ( '6','1','','1' )
+, ( '7','1','','1' )
+, ( '8','1','','1' )
+, ( '9','1','','1' )
+, ( '10','1','','1' )
+, ( '11','1','','1' )
+, ( '12','1','','1' )
+, ( '13','1','','1' )
+, ( '14','1','','1' )
+; 
+
+
+
+
+
+";}s:27:"database/Page_errorpage.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:734;s:11:"lastModfied";i:1320229775;s:8:"contents";s:734:"-- Table Page_errorpage
+
+DROP TABLE IF EXISTS {!#PREFIX}Page_errorpage;
+  -- Create 
+CREATE TABLE {!#PREFIX}Page_errorpage (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `code` varchar(50) NOT NULL,
+ `editorid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}Page_errorpage (`id` , `autorid` , `code` , `editorid`) VALUES  ( '1','1','','1' )
+, ( '2','1','404','1' )
+, ( '3','1','404','1' )
+, ( '4','1','','1' )
+, ( '5','1','','1' )
+, ( '6','1','','1' )
+, ( '7','1','','1' )
+, ( '8','1','','1' )
+, ( '9','1','','1' )
+, ( '10','1','','1' )
+, ( '11','1','','1' )
+, ( '12','1','','1' )
+, ( '13','1','','1' )
+, ( '14','1','','1' )
+; 
+
+
+
+
+
+";}s:15:"database/pm.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1132;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1132:"-- Table pm
+
+DROP TABLE IF EXISTS {!#PREFIX}pm;
+  -- Create 
+CREATE TABLE {!#PREFIX}pm (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('pm') NOT NULL,
+ `fromid` int(10) NOT NULL,
+ `toid` int(10) NOT NULL,
+ `subject` varchar(200) NOT NULL,
+ `text` text NOT NULL,
+ `sig` int(1) NOT NULL,
+ `time` int(20) NOT NULL,
+ `tid` int(10) NOT NULL,
+ `created` int(90) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+ `hasread` int(1) NOT NULL,
+PRIMARY KEY (id),
+KEY `fromid` (fromid),
+KEY `toid` (toid),
+KEY `autorid` (autorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}pm (`id` , `autorid` , `last_modified` , `class_name` , `fromid` , `toid` , `subject` , `text` , `sig` , `time` , `tid` , `created` , `editorid` , `recordid` , `snap_priority` , `hasread`) VALUES  ( '1','15','1317062482','pm','15','15','test','[b]Hallo Welt[/b]','1','1317054596','0','1317054596','15','2','1','1' )
+; 
+
+
+
+
+
+";}s:21:"database/pm_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:414;s:11:"lastModfied";i:1320229775;s:8:"contents";s:414:"-- Table pm_state
+
+DROP TABLE IF EXISTS {!#PREFIX}pm_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}pm_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}pm_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','1','1' )
+, ( '2','1','1' )
+; 
+
+
+
+
+
+";}s:19:"database/rating.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:672;s:11:"lastModfied";i:1320229775;s:8:"contents";s:672:"-- Table rating
+
+DROP TABLE IF EXISTS {!#PREFIX}rating;
+  -- Create 
+CREATE TABLE {!#PREFIX}rating (
+ `id` int(10) NOT NULL auto_increment,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('rating') NOT NULL,
+ `created` int(90) NOT NULL,
+ `name` varchar(200) NOT NULL,
+ `rates` int(10) NOT NULL,
+ `rating` int(11) NOT NULL,
+ `rators` text NOT NULL,
+ `autorid` int(10) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `name` (name),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `autorid` (autorid),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+; 
+
+
+
+
+
+";}s:25:"database/rating_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:306;s:11:"lastModfied";i:1320229775;s:8:"contents";s:306:"-- Table rating_state
+
+DROP TABLE IF EXISTS {!#PREFIX}rating_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}rating_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+; 
+
+
+
+
+
+";}s:20:"database/smilies.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1911;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1911:"-- Table smilies
+
+DROP TABLE IF EXISTS {!#PREFIX}smilies;
+  -- Create 
+CREATE TABLE {!#PREFIX}smilies (
+ `id` int(10) NOT NULL auto_increment,
+ `autorid` int(10) NOT NULL,
+ `last_modified` int(90) NOT NULL,
+ `class_name` enum('smilies') NOT NULL,
+ `image` varchar(200) NOT NULL,
+ `description` varchar(200) NOT NULL,
+ `code` varchar(200) NOT NULL,
+ `created` int(90) NOT NULL,
+ `editorid` int(10) NOT NULL,
+ `recordid` int(10) NOT NULL,
+ `snap_priority` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `autorid` (autorid),
+KEY `class_name` (class_name),
+KEY `last_modified` (last_modified),
+KEY `editorid` (editorid),
+KEY `recordid` (recordid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}smilies (`id` , `autorid` , `last_modified` , `class_name` , `image` , `description` , `code` , `created` , `editorid` , `recordid` , `snap_priority`) VALUES  ( '1','15','1308435474','smilies','mysite/uploaded/useruploads/0527433041grinsen.gif',':D',':D','1308435474','15','1','2' )
+, ( '2','15','1277481040','smilies','mysite/uploaded/useruploads/1308406650auge.gif',';)',';)','0','15','2','2' )
+, ( '3','15','1277486058','smilies','mysite/uploaded/useruploads/1372182154lachen.gif',':)',':)','0','15','3','2' )
+, ( '4','15','1277486103','smilies','mysite/uploaded/useruploads/6267288927cool.gif',':cool:',':cool:','0','15','4','2' )
+, ( '5','15','1277486115','smilies','mysite/uploaded/useruploads/9180382154lachen.gif',':-)',':-)','0','15','5','2' )
+, ( '6','15','1277486125','smilies','mysite/uploaded/useruploads/3400206650auge.gif',';-)',';-)','0','15','6','2' )
+, ( '7','15','1277486140','smilies','mysite/uploaded/useruploads/7959782319hoch.gif',':hoch:',':hoch:','0','15','7','2' )
+, ( '8','15','1277486160','smilies','mysite/uploaded/useruploads/7310660502idee.gif',':idee:',':idee:','0','15','8','2' )
+, ( '9','15','1277486277','smilies','mysite/uploaded/useruploads/5304942169frage.gif',':?:',':?:','0','15','9','2' )
+; 
+
+
+
+
+
+";}s:26:"database/smilies_state.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:560;s:11:"lastModfied";i:1320229775;s:8:"contents";s:560:"-- Table smilies_state
+
+DROP TABLE IF EXISTS {!#PREFIX}smilies_state;
+  -- Create 
+CREATE TABLE {!#PREFIX}smilies_state (
+ `id` int(10) NOT NULL auto_increment,
+ `stateid` int(10) NOT NULL,
+ `publishedid` int(10) NOT NULL,
+PRIMARY KEY (id),
+KEY `publishedid` (publishedid),
+KEY `stateid` (stateid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}smilies_state (`id` , `stateid` , `publishedid`) VALUES  ( '1','1','1' )
+, ( '2','2','2' )
+, ( '3','3','3' )
+, ( '4','4','4' )
+, ( '5','5','5' )
+, ( '6','6','6' )
+, ( '7','7','7' )
+, ( '8','8','8' )
+, ( '9','9','9' )
+; 
+
+
+
+
+
+";}s:48:"database/many_many_group_advrights_advrights.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:1066;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1066:"-- Table many_many_group_advrights_advrights
+
+DROP TABLE IF EXISTS {!#PREFIX}many_many_group_advrights_advrights;
+  -- Create 
+CREATE TABLE {!#PREFIX}many_many_group_advrights_advrights (
+ `id` int(10) NOT NULL auto_increment,
+ `groupid` int(10) NOT NULL,
+ `advrightsid` int(10) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE `dataindexunique` (groupid, advrightsid),
+KEY `dataindex` (groupid, advrightsid));
+
+-- INSERT 
+ INSERT INTO {!#PREFIX}many_many_group_advrights_advrights (`id` , `groupid` , `advrightsid`) VALUES  ( '151','4','14' )
+, ( '150','4','13' )
+, ( '149','4','12' )
+, ( '148','4','11' )
+, ( '147','4','9' )
+, ( '146','4','8' )
+, ( '145','4','7' )
+, ( '144','4','6' )
+, ( '143','4','5' )
+, ( '142','4','4' )
+, ( '141','4','3' )
+, ( '140','4','2' )
+, ( '139','4','1' )
+, ( '152','5','1' )
+, ( '153','5','2' )
+, ( '154','5','3' )
+, ( '155','5','4' )
+, ( '156','5','5' )
+, ( '157','5','6' )
+, ( '158','5','7' )
+, ( '159','5','8' )
+, ( '160','5','9' )
+, ( '161','5','10' )
+, ( '162','5','11' )
+, ( '163','5','12' )
+, ( '164','5','14' )
+, ( '165','5','15' )
+; 
+
+
+
+
+
+";}s:40:"database/many_many_user_groups_group.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:367;s:11:"lastModfied";i:1320229775;s:8:"contents";s:367:"-- Table many_many_user_groups_group
+
+DROP TABLE IF EXISTS {!#PREFIX}many_many_user_groups_group;
+  -- Create 
+CREATE TABLE {!#PREFIX}many_many_user_groups_group (
+ `id` int(10) NOT NULL auto_increment,
+ `userid` int(10) NOT NULL,
+ `groupid` int(10) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE `dataindexunique` (userid, groupid),
+KEY `dataindex` (userid, groupid));
+
+; 
+
+
+
+
+
+";}s:46:"database/many_many_pages_edit_groups_group.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:388;s:11:"lastModfied";i:1320229775;s:8:"contents";s:388:"-- Table many_many_pages_edit_groups_group
+
+DROP TABLE IF EXISTS {!#PREFIX}many_many_pages_edit_groups_group;
+  -- Create 
+CREATE TABLE {!#PREFIX}many_many_pages_edit_groups_group (
+ `id` int(10) NOT NULL auto_increment,
+ `pagesid` int(10) NOT NULL,
+ `groupid` int(10) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE `dataindexunique` (pagesid, groupid),
+KEY `dataindex` (pagesid, groupid));
+
+; 
+
+
+
+
+
+";}s:48:"database/many_many_pages_viewer_groups_group.sql";a:4:{s:4:"type";s:3:"sql";s:4:"size";i:394;s:11:"lastModfied";i:1320229775;s:8:"contents";s:394:"-- Table many_many_pages_viewer_groups_group
+
+DROP TABLE IF EXISTS {!#PREFIX}many_many_pages_viewer_groups_group;
+  -- Create 
+CREATE TABLE {!#PREFIX}many_many_pages_viewer_groups_group (
+ `id` int(10) NOT NULL auto_increment,
+ `pagesid` int(10) NOT NULL,
+ `groupid` int(10) NOT NULL,
+PRIMARY KEY (id),
+UNIQUE `dataindexunique` (pagesid, groupid),
+KEY `dataindex` (pagesid, groupid));
+
+; 
+
+
+
+
+
+";}s:10:"info.plist";a:4:{s:4:"type";s:5:"plist";s:4:"size";i:1379;s:11:"lastModfied";i:1320229775;s:8:"contents";s:1379:"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>type</key><string>backup</string><key>backuptype</key><string>SQLBackup</string><key>foldername</key><string>mysite</string><key>excludedTables</key><array><string>statistics</string><string>statistics_state</string><string>users</string><string>users_state</string></array><key>includedTables</key><array><string>advrights</string><string>advrights_state</string><string>groups</string><string>groups_state</string><string>newsettings</string><string>newsettings_state</string><string>metasettings</string><string>templatesettings</string><string>boxes</string><string>boxes_state</string><string>pages</string><string>pages_state</string><string>Box_statistics</string><string>pagecomments</string><string>pagecomments_state</string><string>Page_article</string><string>Page_contact</string><string>Page_errorpage</string><string>pm</string><string>pm_state</string><string>rating</string><string>rating_state</string><string>smilies</string><string>smilies_state</string><string>many_many_group_advrights_advrights</string><string>many_many_user_groups_group</string><string>many_many_pages_edit_groups_group</string><string>many_many_pages_viewer_groups_group</string></array></dict></plist>
+";}}
+26578

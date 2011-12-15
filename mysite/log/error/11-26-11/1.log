@@ -1,0 +1,58 @@
+26.11.2011 - 00:00: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights (164.17598724365ms)
+
+26.11.2011 - 00:00: Slow SQL-Query: TRUNCATE TABLE gomacms_advrights_state (74.037075042725ms)
+
+26.11.2011 - 00:00: Slow SQL-Query: INSERT INTO `gomacms_advrights_state`  (`stateid`,`publishedid`) VALUES ('0','0') (56.663036346436ms)
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_pages SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_Page__testpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_newsettings SET status = '1' WHERE status = '' OR status IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_metasettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_templatesettings SET titel = 'Goma - Open Source CMS / Framework' WHERE titel = '' OR titel IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_Page_article SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_Page_contact SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: SQL-Error in Statement: UPDATE gomacms_Page_errorpage SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 1004.
+
+26.11.2011 - 00:00: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322262012') (448.68206977844ms)
+
+26.11.2011 - 00:00: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322262012'  ,  `created` = '1322260886'  ,  `user` = '3'  ,  `phpsessid` = 'psldgidb1urkgbk3lccnndtae2'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko) Version/5.1.1 Safari/534.51.22'  ,  `autorid` = '3'  ,  `editorid` = '3'  ,  `recordid` = '31'  ,  `snap_priority` = '2'  WHERE `id` = '200' (33.55598449707ms)
+
+26.11.2011 - 00:00: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (92.647075653076ms)
+
+26.11.2011 - 00:01: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322262083') (44.489145278931ms)
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::getObject is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/controller/controller.php on line 163. Please use DataObject::get instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php on line 552. Please use DataObject::get instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 68. Please use DataObject::get instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php on line 69. Please use dataobjectset::Count instead.
+
+26.11.2011 - 00:01: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php on line 53. Please use DataObject::get instead.
+
+26.11.2011 - 09:24: Slow SQL-Query: SELECT newsettings.autorid AS autorid ,newsettings.editorid AS editorid ,newsettings.last_modified AS last_modified ,newsettings.class_name AS class_name ,newsettings.created AS created ,newsettings.id AS versionid,newsettings_state.id AS id , newsettings.* ,  metasettings.* ,  templatesettings.* ,  newsettings_state.* FROM gomacms_newsettings AS newsettings  LEFT JOIN gomacms_metasettings AS metasettings ON  metasettings.id = newsettings.id   LEFT JOIN gomacms_templatesettings AS templatesettings ON  templatesettings.id = newsettings.id   INNER JOIN gomacms_newsettings_state AS newsettings_state ON  newsettings_state.publishedid = newsettings.id  WHERE  newsettings_state.id = "1" AND  newsettings.class_name IN ("newsettings","metasettings","templatesettings") ORDER BY newsettings_state.id DESC (40.36808013916ms)
+
+26.11.2011 - 09:24: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , CASE  WHEN Page__testpage.description IS NOT NULL THEN Page__testpage.description  WHEN Page_article.description IS NOT NULL THEN Page_article.description  ELSE NULL END AS description, pages.* ,  Page__testpage.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page__testpage AS Page__testpage ON  Page__testpage.id = pages.id   LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","_testpage","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (20.402193069458ms)
+
+26.11.2011 - 09:24: Slow SQL-Query: SELECT  count(*) as count  FROM gomacms_statistics AS statistics  INNER JOIN gomacms_statistics_state AS statistics_state ON  statistics_state.publishedid = statistics.id  WHERE  ( phpsessid = 'psldgidb1urkgbk3lccnndtae2' AND last_modified > 1322238269 )  AND  (  statistics.class_name IN ("livecounter") )  ORDER BY statistics_state.id DESC (24.209022521973ms)
+
+26.11.2011 - 09:27: Slow SQL-Query: SELECT users.autorid AS autorid ,users.editorid AS editorid ,users.last_modified AS last_modified ,users.class_name AS class_name ,users.created AS created ,users.id AS versionid,users_state.id AS id , users.* ,  users_state.* FROM gomacms_users AS users  INNER JOIN gomacms_users_state AS users_state ON  users_state.publishedid = users.id  WHERE  users.nickname LIKE "admin" AND  users.class_name IN ("user") ORDER BY users_state.id DESC LIMIT  0, 1 (468.11008453369ms)
+
+26.11.2011 - 22:00: Slow SQL-Query: INSERT INTO `gomacms_statistics_state`  (`stateid`,`publishedid`) VALUES ('0','0') (631.28399848938ms)
+
+26.11.2011 - 23:43: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322347409'  ,  `created` = '1322347409'  ,  `user` = ''  ,  `phpsessid` = 'un1t7iquel4iflei24ch9fpqp4'  ,  `mobile` = ''  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.51.22 (KHTML, like Gecko)'  ,  `autorid` = ''  ,  `editorid` = ''  ,  `recordid` = '34'  ,  `snap_priority` = '2'  WHERE `id` = '210' (43.612003326416ms)
+
+26.11.2011 - 23:47: Slow SQL-Query: INSERT INTO `gomacms_statistics_state`  (`stateid`,`publishedid`) VALUES ('0','0') (33.475875854492ms)
+

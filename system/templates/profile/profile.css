@@ -1,0 +1,57 @@
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2010  Goma-Team
+  * last modified: 12.12.2011
+  * $Version 001
+*/
+
+.profile-left {
+	float: left;
+	width: 150px;
+	padding: 10px;
+}
+.profile-content {
+	margin-left: 170px;
+	padding: 1px;
+}
+.profile-actions {
+	margin-top: 3px;
+}
+
+.profile-actions ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.profile-actions ul li {
+	float: left;
+}
+.profile-actions ul li a {
+	padding: 8px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	background: #eee;
+	border: 1px solid #999;
+	color: #555;
+	font-weight: bold;
+	font-size: 12px;
+	margin: 0px 4px;
+}
+.profile-actions ul li a:hover {
+	text-decoration: none;
+	color: #000;
+	border: 1px solid #666;
+}
+
+
+.profile-info tr td {
+	padding: 4px 0px;
+}
+.profile-info .title {
+	font-weight: bold;
+	width: 150px;
+	vertical-align: top;
+}

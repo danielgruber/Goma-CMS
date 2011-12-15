@@ -1,0 +1,372 @@
+<?php
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 26.11.2011
+*/
+
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+define("SESSION_TIMEOUT", 16*3600);
+
+class livecounter extends DataObject
+{
+		/**
+		 * the livecounter is live, so we need no caching
+		 *@name cacheable
+		*/
+		public $cacheable = false;
+		/**
+		 * database
+		*/
+		public $db_fields = array(
+				'user' 			=> 'varchar(200)', 
+				'phpsessid' 	=> 'varchar(800)', 
+				"mobile"		=> "int(1)",
+				"browser"		=> "varchar(200)"
+			);
+		/**
+		 * the name of the table isn't livecounter, it's statistics
+		*/
+		public $table_name = "statistics";
+		/**
+		 * allow writing
+		*/
+		public function canWrite() {
+			return true;
+		}
+		/**
+		 * allow insert
+		*/
+		public function canInsert() {
+			return true;
+		}
+}
+
+// load language for stats
+loadlang('st');
+
+class livecounterController extends Controller
+{
+		/**
+		 * a regexp to use to intentify browsers, which support cookies
+		 *
+		 *@name cookie_support
+		 *@access public
+		*/
+		public static $cookie_support = "(firefox|msie|AppleWebKit|opera|khtml|gecko|icab|irdier|teleca|kindle|webfront|iemobile|playstation)";
+		/**
+		 * counts how much users are online
+		*/
+		static private $useronline = 0;
+		
+		/**
+		 * this function updates the database and user-status for us, that we count all visitors
+		*/
+		public static function run($forceLive = false) {
+			
+			// first get userid
+			$userid = member::$id;
+			
+			// user identifier
+			if(!isset($_COOKIE['goma_sessid']) && !_eregi(self::$cookie_support, $_SERVER['HTTP_USER_AGENT'])) {
+				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);
+			} else if(isset($_COOKIE['goma_sessid'])) {
+				$user_identifier = $_COOKIE['goma_sessid'];
+			} else {
+				$user_identifier = session_id();
+			}
+			
+			/**
+			 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index
+			*/
+			if(isset($_SESSION["user_counted"])) {
+				if($_SESSION["user_counted"] < (NOW - 20) || $forceLive) {
+					$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
+					if(count($data) == 1) {
+						$data->first()->user = $userid;
+						$data->first()->write();
+						// we set last update to next know the last update and better use database-index
+						$_SESSION["user_counted"] = TIME;
+						return true;
+					}
+				} else {
+					return true;
+				}
+			}
+			
+			$timeout = TIME - SESSION_TIMEOUT;
+			
+			
+			// check if a cookie exists, that means that the user was here in the last 16 hours
+			if(isset($_COOKIE['goma_sessid']))
+			{
+				$sessid = $_COOKIE['goma_sessid'];
+				// if sessid is not the same the user has begun a new php-session, so we update our cookie
+				if($user_identifier != $sessid)
+				{
+					$data = DataObject::get("livecounter", "phpsessid = '".dbescape($sessid)."' AND last_modified > ".dbescape($timeout)."");
+					if(count($data) > 0) {
+						$data->first()->user = $userid;
+						$data->first()->phpsessid = $user_identifier;
+						$data->first()->write(false, true);
+					} else {
+						$data = new LiveCounter();
+						$data->user = $userid;
+						$data->phpsessid = $user_identifier;
+						$data->mobile = Core::isMobile();
+						$data->browser = $_SERVER["HTTP_USER_AGENT"];
+						$data->write(true, true);
+					}
+					unset($data);
+					// set cookie
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+					$_SESSION["user_counted"] = TIME;
+					return true;
+				} else {
+					// just rewirte cookie
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+				}
+			}
+			
+			
+			$data = DataObject::get("livecounter", "phpsessid = '".dbescape($user_identifier)."' AND last_modified > ".dbescape($timeout)."");
+			if(count($data) > 0) {
+				$data->first()->user = $userid;
+				$data->first()->write(false, true);
+			} else {
+				$data = new LiveCounter();
+				$data->user = $userid;
+				$data->phpsessid = $user_identifier;
+				$data->mobile = Core::isMobile();
+				$data->browser = $_SERVER["HTTP_USER_AGENT"];
+				$data->write(true, true);
+			}
+			
+			// just rewirte cookie
+			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+			// we set last update to next know the last update and better use database-index
+			$_SESSION["user_counted"] = TIME;
+			
+			return true;
+		}
+		/**
+		 * checks if a user is online by id
+		 *@name checkUserOnline
+		 *@param int - userid
+		 *@access public
+		*/
+		public function checkUserOnline($userid)
+		{
+				
+				$last = TIME - 300;
+				$c = dataobject::count("livecounter", '`last_modified` > '.dbescape($last).' AND `user` = "'.dbescape($userid).'"');
+				return ($c > 0) ? true : false;
+		}
+		/**
+		 * counts how much users are online
+		 *@name countMembersOnline
+		 *@access public
+		*/
+		public static function countMembersOnline()
+		{
+				$last = TIME - 300;
+				return dataobject::count("livecounter", '`last_modified` > '.dbescape($last).' AND `user` != ""');
+		}
+		/**
+		 * counts how much users AND guests online
+		 *@name countUsersOnline
+		 *@access public
+		*/
+		public function countUsersOnline()
+		{
+				if(self::$useronline != 0)
+				{
+						return self::$useronline;
+				}
+				$last = time() - 60;
+				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'"');
+				self::$useronline = $c;
+				return $c;
+		}
+		/**
+		 * counts how much users where online since...
+		 *@name countUsersByLast
+		 *@access public
+		 *@param timestamp
+		*/
+		public function countUsersByLast($last)
+		{
+
+				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'"');
+				return $c;
+		}
+		/**
+		 * counts user since and before..
+		*/
+		public function countUsersByLastFirst($last, $first)
+		{
+
+				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'" AND `last_modified` < "'.dbescape($first).'"');
+				return $c;
+		}
+		/**
+		 * gets stats for the last x days
+		 *
+		 *@name statisticsByDay
+		 *@access public
+		 *@param numeric - number of periods
+		 *@param numeric - length of a period in days
+		*/
+		public static function statisticsByDay($showcount = 10, $days = 1) {
+			$interval = $days * 24 * 60 * 60;
+			$day = mktime(0, 0, 0, date("n", NOW), date("j", NOW), date("Y", NOW));
+			$max = 0;
+			$data = array();
+			for($i = 0; $i < $showcount; $i++) {
+				
+				// gets last day
+				$last =$day + $interval;
+				$data[$day] = DataObject::count("livecounter", "last_modified > ".$day." AND last_modified < ". $last);
+				if($max < $data[$day]) {
+					$max = $data[$day];
+				}
+				$day = $day - $interval;
+			}
+			ksort($data);
+			$dataobject = new DataSet();
+			foreach($data as $timestamp => $count) {
+				$dataobject->push(array(
+					"timestamp"	=> $timestamp,
+					"count"		=> $count,
+					"max"		=> $max,
+					"percent"	=> ($max == 0) ? 0 : round($count / $max * 100),
+					"day"		=> true
+				));
+			}
+			
+			return $dataobject;
+		}
+		/**
+		 * gets stats for the last x month
+		 *
+		 *@name statisticsByMonth
+		 *@access public
+		 *@param numeric - number of periods
+		 *@param numeric - length of a period in month
+		*/
+		public static function statisticsByMonth($showcount = 10) {
+			// get last month
+			$month = date("n", NOW);
+			$year = date("Y", NOW);
+			$start = mktime(0, 0, 0, $month, 1, $year); // get 1st of last month 00:00:00
+			$endm = date("n", NOW);
+			$endy = date("Y", NOW);
+			if($endm == 12) {
+				$endm = 1;
+				$endy++;
+			} else {
+				$endm++;
+			}
+			$end = mktime(0, 0, 0, $endm, 1, $endy);
+			$max = 0;
+			$data = array();
+			for($i = 0; $i < $showcount; $i++) {
+				
+				
+				$data[$start] = DataObject::count("livecounter", "last_modified > ".$start." AND last_modified < ". $end);
+				if($max < $data[$start]) {
+					$max = $data[$start];
+				}
+				// recalculate the new start and end
+				$end = $start;
+				if($month == 1) {
+					$month = 12;
+					$year--;
+				} else {
+					$month--;
+				}
+				$start = mktime(0, 0, 0, $month, 1, $year); // get 1st of the month before month 00:00:00
+			}
+			unset($start, $end, $month, $year);
+			ksort($data);
+			$dataobject = new DataSet();
+			foreach($data as $timestamp => $count) {
+				$dataobject->push(array(
+					"timestamp"	=> $timestamp,
+					"count"		=> $count,
+					"max"		=> $max,
+					"percent"	=> ($max == 0) ? 0 : round($count / $max * 100),
+					"month"		=> true
+				));
+			}
+			
+			return $dataobject;
+		}
+}
+
+/**
+ *@link http://php.net/manual/en/function.get-browser.php
+*/
+class Browser extends Object { 
+    /** 
+        Figure out what browser is used, its version and the platform it is 
+        running on. 
+
+        The following code was ported in part from JQuery v1.3.1 
+    */ 
+    public static function detect() { 
+        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']); 
+
+        // Identify the browser. Check Opera and Safari first in case of spoof. Let Google Chrome be identified as Safari. 
+        if (preg_match('/opera/', $userAgent)) { 
+            $name = 'opera'; 
+        } 
+        elseif (preg_match('/webkit/', $userAgent)) { 
+            $name = 'safari'; 
+        } 
+        elseif (preg_match('/msie/', $userAgent)) { 
+            $name = 'msie'; 
+        } 
+        elseif (preg_match('/mozilla/', $userAgent) && !preg_match('/compatible/', $userAgent)) { 
+            $name = 'mozilla'; 
+        } 
+        else { 
+            $name = 'unrecognized'; 
+        } 
+
+        // What version? 
+        if (preg_match('/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/', $userAgent, $matches)) { 
+            $version = $matches[1]; 
+        } 
+        else { 
+            $version = 'unknown'; 
+        } 
+
+        // Running on what platform? 
+        if (preg_match('/linux/', $userAgent)) { 
+            $platform = 'linux'; 
+        } 
+        elseif (preg_match('/macintosh|mac os x/', $userAgent)) { 
+            $platform = 'mac'; 
+        } 
+        elseif (preg_match('/windows|win32/', $userAgent)) { 
+            $platform = 'windows'; 
+        } 
+        else { 
+            $platform = 'unrecognized'; 
+        } 
+
+        return array( 
+            'name'      => $name, 
+            'version'   => $version, 
+            'platform'  => $platform, 
+            'userAgent' => $userAgent 
+        ); 
+    } 
+}
+
+Autoloader::$loaded["livecounter"] = true;
+Autoloader::$loaded["livecountercontroller"] = true;

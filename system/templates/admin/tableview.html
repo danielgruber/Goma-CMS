@@ -1,0 +1,75 @@
+<script type="text/javascript">
+	// <![CDATA[
+		$(function(){
+			$(".tableview_wrapper .allcheckbox").click(function(){
+				if($(this).prop("checked")) {
+					$(this).parent().parent().parent().parent().find("input[type=checkbox]").prop("checked", "checked");
+				} else {
+					$(this).parent().parent().parent().parent().find("input[type=checkbox]").prop("checked", false);
+				}
+			});	
+		});
+	// ]]>
+</script>
+<div class="tableview_wrapper">
+	<form action="$adminURI/deletemany" method="post">
+		<input type="hidden" name="deletekey" value="$deletekey" />
+		<table width="100%" class="tableview">
+			<thead>
+				<tr>
+					<td class="first">
+						<% IF $deletable %>
+							<input type="checkbox" class="allcheckbox" name="data[all]" />
+						<% END %>
+					</td>
+					<% CONTROL datafields() as $fields %>
+					
+						<% IF $fields.orderdesc %>
+							<td><a href="{$adminURI}/?order=$fields.name.url()" class="orderdesc">$fields.title</a></td>
+						<% ELSEIF $fields.order %>
+							<td><a href="{$adminURI}/?order=$fields.name.url()&ordertype=desc" class="orderasc">$fields.title</a></td>
+						<% ELSE %>
+							<td><a href="{$adminURI}/?order=$fields.name.url()">$fields.title</a></td>
+						<% END %>
+						
+					<% ENDCONTROL %>
+					<td style="padding: 0;">
+						<% IF $deletable %>
+							<input class="button" type="submit" name="delete" value="{$_lang_delete_selected}" />
+						<% END %>
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				<% CONTROL this() %>
+					<% IF $this.white %> 
+						<tr>
+					<% ELSE %>
+						<tr class="grey">
+					<% END %>
+						<td class="first">
+							<% IF $deletable %>
+								<input type="checkbox" name="data[$this.id]" />
+							<% END %>
+						</td>
+						<% CONTROL datafields() AS $fields %>
+							<td>
+								<% this.getVar($fields.name) %>
+							</td>
+						<% ENDCONTROL %>
+						<td class="actions">
+							<% CONTROL Action() %>
+								<a href="{$action.url}/{$this.id}?redirect={$_SERVER_REQUEST_URI.url()}">{$action.title}</a>
+							<% ENDCONTROL %>
+						</td>
+					</tr>
+				<% ENDCONTROL %>
+			</tbody>
+		</table>
+		<% INCLUDE "pages.html" %>
+		<% CONTROL GlobalAction() AS $action %>
+			<a href="{$action.url}?redirect={$_SERVER_REQUEST_URI}" class="button">{$action.title}</a>
+		<% ENDCONTROL %>
+		
+	</form>
+</div>

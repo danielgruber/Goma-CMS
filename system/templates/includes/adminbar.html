@@ -1,0 +1,19 @@
+<% IF admin() %>
+	<% INCLUDE_CSS "../css/adminbar.css" %>
+	<div id="header_admin_bar">
+		<div>
+			{$_LANG_userstatus_admin}
+			{$_lang_ansicht_page} <strong>
+				<% IF adminAsUser() %>
+					{$_lang_user}
+				<% ELSE %>
+					{$_lang_admin}
+				<% END %>
+			</strong>
+			&nbsp;&nbsp;
+			<a href="{BASE_URI}{BASE_SCRIPT}system/switchView/?redirect={$_SERVER_REQUEST_URI.URL()}">{$_lang_switch_ansicht}</a>
+			&nbsp;&nbsp; <a href="{BASE_SCRIPT}admin{URLEND}">{$_LANG_administration}</a> 
+		</div>
+	</div>
+<% END %>
+<div style="clear: both"></div>

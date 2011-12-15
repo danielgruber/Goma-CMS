@@ -1,0 +1,16 @@
+<div>
+	<h5>{$filename}</h5>
+	<div align="center">
+		<img src="{$icon.big}" alt="{$icon.big}" />
+	</div>
+	<div id="file_actions">
+		<% CONTROL this() %>
+			<% IF $this.icon %>
+				<div style="padding-left: 20px;background: url({$this.icon}) no-repeat;"><a class="control" name="{$this.action}" href="javascript: void(0);">{$this.title}</a></div>
+			<% ELSE %>
+			
+				<div style="padding-left: 20px;"><a class="control" name="{$this.action}" href="javascript: void(0);">{$this.title}</a></div>
+			<% END %>
+		<% ENDCONTROL %>
+	</div>
+</div>

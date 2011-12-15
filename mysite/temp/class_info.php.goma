@@ -1,0 +1,5985 @@
+<?php $data = array (
+  'env' => 
+  array (
+    'framework' => 
+    array (
+      'type' => 'framework',
+      'name' => 'goma',
+      'autor' => 'Goma Team',
+      'version' => '2.0.0',
+      'build' => '017',
+    ),
+    'app' => 
+    array (
+      'type' => 'app',
+      'name' => 'gomacms',
+      'autor' => 'Goma Team',
+      'version' => '2.0.0',
+      'build' => '017',
+      'requireFrameworkVersion' => '2.0.0-017',
+      'SQL' => true,
+    ),
+  ),
+  'classes' => 
+  array (
+    'object' => 
+    array (
+      'parent' => '',
+      'extensions' => 
+      array (
+        'classinfo' => 
+        array (
+          'dataobjectclassinfo' => 'dataobjectclassinfo',
+          'controllerclassinfo' => 'controllerclassinfo',
+        ),
+        'form' => 
+        array (
+          'formdisabler' => 'formdisabler',
+        ),
+        'formfield' => 
+        array (
+          'infotextfield' => 'infotextfield',
+        ),
+        'profilecontroller' => 
+        array (
+          'lost_passwordextension' => 'lost_passwordextension',
+          'registerextension' => 'registerextension',
+          'pmprofileextension' => 'pmprofileextension',
+        ),
+        'testcontroller' => 
+        array (
+          'gfscreatetest' => 'gfscreatetest',
+          'gfsunpacktest' => 'gfsunpacktest',
+          'backupcreatetest' => 'backupcreatetest',
+          'backupunpacktest' => 'backupunpacktest',
+          'controllertest' => 'controllertest',
+          'complextablefieldtest' => 'complextablefieldtest',
+          'formtest' => 'formtest',
+          'dropdowndialogtest' => 'dropdowndialogtest',
+          'scaletest' => 'scaletest',
+          'pagestreetest' => 'pagestreetest',
+          'tabstest' => 'tabstest',
+        ),
+        'tplcaller' => 
+        array (
+          'boxestplextension' => 'boxestplextension',
+          'mainbartplextension' => 'mainbartplextension',
+        ),
+        'pages' => 
+        array (
+          'pagecommentsdataobjectextension' => 'pagecommentsdataobjectextension',
+          'ratingdataobjectextension' => 'ratingdataobjectextension',
+          'searchpageextension' => 'searchpageextension',
+        ),
+        'pagecontroller' => 
+        array (
+          'pagecommentscontrollerextension' => 'pagecommentscontrollerextension',
+        ),
+      ),
+      'extra_methods' => 
+      array (
+        'form' => 
+        array (
+          'disable' => 
+          array (
+            0 => 'EXT:formdisabler',
+            1 => 'disable',
+          ),
+          'reenable' => 
+          array (
+            0 => 'EXT:formdisabler',
+            1 => 'reenable',
+          ),
+          'disableActions' => 
+          array (
+            0 => 'EXT:formdisabler',
+            1 => 'disableActions',
+          ),
+          'enableActions' => 
+          array (
+            0 => 'EXT:formdisabler',
+            1 => 'enableActions',
+          ),
+        ),
+        'profilecontroller' => 
+        array (
+          'lost_password' => 
+          array (
+            0 => 'EXT:lost_passwordextension',
+            1 => 'lost_password',
+          ),
+          'register' => 
+          array (
+            0 => 'EXT:registerextension',
+            1 => 'register',
+          ),
+        ),
+        'tplcaller' => 
+        array (
+          'boxes' => 
+          array (
+            0 => 'EXT:boxestplextension',
+            1 => 'boxes',
+          ),
+          'level' => 
+          array (
+            0 => 'EXT:mainbartplextension',
+            1 => 'level',
+          ),
+          'mainbar' => 
+          array (
+            0 => 'EXT:mainbartplextension',
+            1 => 'mainbar',
+          ),
+          'active_mainbar_title' => 
+          array (
+            0 => 'EXT:mainbartplextension',
+            1 => 'active_mainbar_title',
+          ),
+        ),
+        'pagecontroller' => 
+        array (
+          'pagecomments' => 
+          array (
+            0 => 'EXT:pagecommentscontrollerextension',
+            1 => 'pagecomments',
+          ),
+        ),
+      ),
+      'abstract' => true,
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Object.php',
+      'child' => NULL,
+    ),
+    'classinfo' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/ClassInfo.php',
+    ),
+    'requesthandler' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php',
+      'child' => NULL,
+    ),
+    'filesystem' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/FileSystem.php',
+    ),
+    'tpl' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php',
+    ),
+    'tplcacher' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php',
+    ),
+    'tplcaller' => 
+    array (
+      'parent' => 'object',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php',
+    ),
+    'httpresponse' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/http/httpresponse.php',
+    ),
+    'htmlparser' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/http/httpresponse.php',
+    ),
+    'core' => 
+    array (
+      'parent' => 'object',
+      'rules' => 
+      array (
+        10 => 
+        array (
+          'dev' => 'dev',
+          'admin//$item' => 'adminController',
+          'adm//' => 'adminRedirectController',
+          'system/ajax//link/$id' => 'ajaxlink',
+          'system/ajax//popup/$id' => 'ajaxlink',
+          'api/v1//$ClassName!' => 'RestfulServer',
+          'treeserver' => 'TreeServer',
+          'uploaded/images/resampled/$width!/$height!' => 'imageResize',
+          'uploaded/images/resampled/$width!' => 'imageResize',
+          'images/resampled/$width!/$height!' => 'imageResize',
+          'images/resampled/$width!' => 'imageResize',
+          'profile//$Action' => 'ProfileController',
+          'member/$id!' => 'ProfileController',
+          'uploads' => 'UploadController',
+          'pm' => 'PMController',
+        ),
+        9 => 
+        array (
+          'system' => 'SystemController',
+        ),
+        1 => 
+        array (
+          '' => 'HomePageController',
+          '$path!//$Action/$id/$otherid' => 'SiteController',
+        ),
+        100 => 
+        array (
+          'forms/ajax//$form!/$handler!' => 'AjaxSubmitButton',
+        ),
+        50 => 
+        array (
+          'system/forms/$form!/$field!' => 'ExternalForm',
+          'api/pagelinks/' => 'PageLinksController',
+          'test//$test!' => 'TestController',
+        ),
+        11 => 
+        array (
+          'rate/$name/$rate' => 'ratingController',
+          'search' => 'searchController',
+          'boxes_new' => 'boxesController',
+        ),
+      ),
+      'hooks' => 
+      array (
+        'onafteroutput' => 
+        array (
+          0 => 
+          array (
+            0 => 'profiler',
+            1 => 'end',
+          ),
+        ),
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php',
+    ),
+    'dev' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php',
+      'allowed_actions' => 
+      array (
+        0 => 'builddev',
+        1 => 'rebuild',
+        2 => 'flush',
+        3 => 'builddistro',
+        4 => 'buildframework',
+      ),
+      'url_handlers' => 
+      array (
+        'build' => 'builddev',
+        'rebuildcaches' => 'rebuild',
+        'flush' => 'flush',
+        'buildDistro' => 'buildDistro',
+        'buildFramework' => 'buildFramework',
+      ),
+    ),
+    'sql' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/sql.php',
+    ),
+    'viewaccessabledata' => 
+    array (
+      'parent' => 'object',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php',
+      'child' => NULL,
+    ),
+    'extension' => 
+    array (
+      'parent' => 'viewaccessabledata',
+      'abstract' => true,
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Extension.php',
+      'child' => NULL,
+    ),
+    'dataobjectextension' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+      ),
+    ),
+    'dataobject' => 
+    array (
+      'parent' => 'viewaccessabledata',
+      'extensions' => 
+      array (
+        'classinfo' => 
+        array (
+          'dataobjectclassinfo' => 'dataobjectclassinfo',
+          'controllerclassinfo' => 'controllerclassinfo',
+        ),
+        'form' => 
+        array (
+          'formdisabler' => 'formdisabler',
+        ),
+        'formfield' => 
+        array (
+          'infotextfield' => 'infotextfield',
+        ),
+        'profilecontroller' => 
+        array (
+          'lost_passwordextension' => 'lost_passwordextension',
+          'registerextension' => 'registerextension',
+          'pmprofileextension' => 'pmprofileextension',
+        ),
+        'testcontroller' => 
+        array (
+          'gfscreatetest' => 'gfscreatetest',
+          'gfsunpacktest' => 'gfsunpacktest',
+          'backupcreatetest' => 'backupcreatetest',
+          'backupunpacktest' => 'backupunpacktest',
+          'controllertest' => 'controllertest',
+          'complextablefieldtest' => 'complextablefieldtest',
+          'formtest' => 'formtest',
+          'dropdowndialogtest' => 'dropdowndialogtest',
+          'scaletest' => 'scaletest',
+          'pagestreetest' => 'pagestreetest',
+          'tabstest' => 'tabstest',
+        ),
+        'tplcaller' => 
+        array (
+          'boxestplextension' => 'boxestplextension',
+          'mainbartplextension' => 'mainbartplextension',
+        ),
+        'pages' => 
+        array (
+          'pagecommentsdataobjectextension' => 'pagecommentsdataobjectextension',
+          'ratingdataobjectextension' => 'ratingdataobjectextension',
+          'searchpageextension' => 'searchpageextension',
+        ),
+        'pagecontroller' => 
+        array (
+          'pagecommentscontrollerextension' => 'pagecommentscontrollerextension',
+        ),
+      ),
+      'abstract' => true,
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObject.php',
+      'child' => 
+      array (
+        'array_dataobject' => 'array_dataobject',
+        'advrights' => 'advrights',
+        'group' => 'group',
+        'uploads' => 'uploads',
+        'imageuploads' => 'imageuploads',
+        'livecounter' => 'livecounter',
+        'user' => 'user',
+        'cms_filemanager' => 'cms_filemanager',
+        'newsettings' => 'newsettings',
+        'metasettings' => 'metasettings',
+        'templatesettings' => 'templatesettings',
+        'backups' => 'backups',
+        'boxes' => 'boxes',
+        'box' => 'box',
+        'login_meinaccount' => 'login_meinaccount',
+        'pages' => 'pages',
+        'page' => 'page',
+        'boxpage' => 'boxpage',
+        'phpbox' => 'phpbox',
+        'statistics' => 'statistics',
+        'pagecomments' => 'pagecomments',
+        'articlecategory' => 'articlecategory',
+        'article' => 'article',
+        'articles' => 'articles',
+        'contact' => 'contact',
+        'errorpage' => 'errorpage',
+        'members' => 'members',
+        'phppage' => 'phppage',
+        'redirector' => 'redirector',
+        'pm' => 'pm',
+        'rating' => 'rating',
+        'smilies' => 'smilies',
+      ),
+    ),
+    'autoloader' => 
+    array (
+      'parent' => 'object',
+      'preload' => 
+      array (
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/autoloader.php',
+    ),
+    'gloader' => 
+    array (
+      'parent' => 'object',
+      'resources' => 
+      array (
+        'dialog' => 
+        array (
+          'file' => 'system/libs/javascript/bluebox.js',
+          'required' => 
+          array (
+            0 => 'draggable',
+          ),
+        ),
+        'draggable' => 
+        array (
+          'file' => 'system/libs/javascript/ui/draggable.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'dropable' => 
+        array (
+          'file' => 'system/libs/javascript/ui/dropable.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'con' => 
+        array (
+          'file' => 'system/libs/javascript/container.min.js',
+          'required' => 
+          array (
+            0 => 'draggable',
+          ),
+        ),
+        'shadowbox' => 
+        array (
+          'file' => 'system/libs/javascript/shadowbox.min.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'sortable' => 
+        array (
+          'file' => 'system/libs/javascript/ui/sortable.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'selectable' => 
+        array (
+          'file' => 'system/libs/javascript/ui/selectable.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'resizable' => 
+        array (
+          'file' => 'system/libs/javascript/ui/resizable.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'accordion' => 
+        array (
+          'file' => 'system/libs/javascript/ui/accordion.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'autocomplete' => 
+        array (
+          'file' => 'system/libs/javascript/ui/autocomplete.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'button' => 
+        array (
+          'file' => 'system/libs/javascript/ui/button.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'uidialog' => 
+        array (
+          'file' => 'system/libs/javascript/ui/dialog.js',
+          'required' => 
+          array (
+            0 => 'button',
+            1 => 'resizable',
+            2 => 'draggable',
+          ),
+        ),
+        'slider' => 
+        array (
+          'file' => 'system/libs/javascript/ui/slider.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'tabs' => 
+        array (
+          'file' => 'system/libs/javascript/ui/tabs.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'gtabs' => 
+        array (
+          'file' => 'system/libs/tabs/tabs.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'progessbar' => 
+        array (
+          'file' => 'system/libs/javascript/ui/progessbar.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'tree' => 
+        array (
+          'file' => 'system/libs/javascript/tree.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'orangebox' => 
+        array (
+          'file' => 'system/libs/javascript/orangebox/js/orangebox.min.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'datepicker' => 
+        array (
+          'file' => 'system/libs/javascript/ui/datepicker.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'uiEffects' => 
+        array (
+          'file' => 'system/libs/javascript/ui/effects.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'touch' => 
+        array (
+          'file' => 'system/libs/javascript/ui/jquery.ui.touch.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'jquery.scale.rotate' => 
+        array (
+          'file' => 'system/libs/javascript/jquery.scale.rotate.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'g_infobox' => 
+        array (
+          'file' => 'system/libs/javascript/infobox.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'dropdownDialog' => 
+        array (
+          'file' => 'system/libs/javascript/dropdownDialog.js',
+          'required' => 
+          array (
+          ),
+        ),
+        'rating' => 
+        array (
+          'file' => 'mysite/application/sitefeatures/rating.js',
+          'required' => 
+          array (
+          ),
+        ),
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/javascript/gloader.php',
+    ),
+    'cacher' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/cache/cacher.php',
+    ),
+    'dbfield' => 
+    array (
+      'parent' => 'object',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+      'child' => NULL,
+    ),
+    'varchar' => 
+    array (
+      'parent' => 'dbfield',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+      'child' => NULL,
+    ),
+    'textsqlfield' => 
+    array (
+      'parent' => 'varchar',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+    ),
+    'intsqlfield' => 
+    array (
+      'parent' => 'varchar',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+    ),
+    'checkboxsqlfield' => 
+    array (
+      'parent' => 'dbfield',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+    ),
+    'switchsqlfield' => 
+    array (
+      'parent' => 'dbfield',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+    ),
+    'timezone' => 
+    array (
+      'parent' => 'dbfield',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/DBField.php',
+    ),
+    'mysqlidriver' => 
+    array (
+      'parent' => 'object',
+      'interfaces' => 
+      array (
+        0 => 'sqldriver',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/sql/driver/mysqli.php',
+    ),
+    'resources' => 
+    array (
+      'parent' => 'object',
+      'names' => 
+      array (
+        'loader' => 'system/libs/javascript/loader.js',
+        'jquery' => 'system/libs/thirdparty/jquery/jquery.js',
+        'js/jquery.js' => 'system/libs/thirdparty/jquery/jquery.js',
+        'treeview' => 'includes/framework/libs/thirdparty/treeview/jquery.treeview.min.js',
+        'treeview_css' => 'includes/framework/libs/thirdparty/treeview/jquery.treeview.css',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/resources.php',
+      'files' => 
+      array (
+        'system/templates/GFSUnpacker.html' => true,
+        'system/templates/admin/columnedadmin.html' => true,
+        'system/templates/admin/index.html' => true,
+        'system/templates/admin/index_not_permitted.html' => true,
+        'system/templates/admin/leftandmain.css' => true,
+        'system/templates/admin/leftandmain.html' => true,
+        'system/templates/admin/style.css' => true,
+        'system/templates/admin/switchlang.html' => true,
+        'system/templates/admin/tableview.html' => true,
+        'system/templates/admin/versionsview/main.html' => true,
+        'system/templates/admin/versionsview/versions.css' => true,
+        'system/templates/admin/versionsview/versions.js' => true,
+        'system/templates/blankpage.html' => true,
+        'system/templates/boxes/login.html' => true,
+        'system/templates/css/adminbar.css' => true,
+        'system/templates/css/box.css' => true,
+        'system/templates/css/ckeditor_goma.css' => true,
+        'system/templates/css/complexTableField.css' => true,
+        'system/templates/css/default.css' => true,
+        'system/templates/css/dropdown.css' => true,
+        'system/templates/css/form.css' => true,
+        'system/templates/css/orangebox/orangebox.css' => true,
+        'system/templates/css/tabs.css' => true,
+        'system/templates/css/tickbox.css' => true,
+        'system/templates/css/tree.css' => true,
+        'system/templates/dev_build.html' => true,
+        'system/templates/framework/503.html' => true,
+        'system/templates/framework/error.html' => true,
+        'system/templates/framework/mysql_connect_error.html' => true,
+        'system/templates/framework/permission_fail.html' => true,
+        'system/templates/framework/php5.html' => true,
+        'system/templates/includes/adminbar.html' => true,
+        'system/templates/includes/lang.html' => true,
+        'system/templates/includes/langform.html' => true,
+        'system/templates/includes/mobile.html' => true,
+        'system/templates/includes/pages.html' => true,
+        'system/templates/mail.html' => true,
+        'system/templates/page_maintenance.html' => true,
+        'system/templates/profile/info.html' => true,
+        'system/templates/profile/profile.css' => true,
+        'system/templates/profile/profile.html' => true,
+        'system/templates/restricted_access.html' => true,
+        'system/templates/test/dropdownDialog.html' => true,
+        'system/templates/test/jquery.scale.rotate.html' => true,
+        'mysite/templates/account/memberlist.html' => true,
+        'mysite/templates/admin/columnedadmin.html' => true,
+        'mysite/templates/admin/content_index.html' => true,
+        'mysite/templates/admin/index.html' => true,
+        'mysite/templates/admin/settings.html' => true,
+        'mysite/templates/admin/usergroup_index.html' => true,
+        'mysite/templates/articlesystem/article.css' => true,
+        'mysite/templates/articlesystem/article.html' => true,
+        'mysite/templates/articlesystem/category.html' => true,
+        'mysite/templates/boxes/boxes.css' => true,
+        'mysite/templates/boxes/boxes.html' => true,
+        'mysite/templates/comments/comments.html' => true,
+        'mysite/templates/comments/onecomment.html' => true,
+        'mysite/templates/includes/adminbar.html' => true,
+        'mysite/templates/pages/box.html' => true,
+        'mysite/templates/pages/mod.html' => true,
+        'mysite/templates/pages/page.html' => true,
+        'mysite/templates/pages/search.html' => true,
+        'mysite/templates/pm/inbox.html' => true,
+        'mysite/templates/pm/message.html' => true,
+        'mysite/templates/pm/thread.html' => true,
+        'mysite/templates/search/search.html' => true,
+        'mysite/templates/welcome/finish.html' => true,
+        'mysite/templates/welcome/step2.html' => true,
+        'mysite/templates/welcome/step3.html' => true,
+        'mysite/templates/welcome/welcome.html' => true,
+      ),
+    ),
+    'request' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/request.php',
+    ),
+    'dataobjectclassinfo' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectClassInfo.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'dataset' => 
+    array (
+      'parent' => 'viewaccessabledata',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'countable',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectSet.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+      ),
+    ),
+    'dataobjectset' => 
+    array (
+      'parent' => 'dataset',
+      'interfaces' => 
+      array (
+        0 => 'countable',
+        1 => 'iterator',
+        2 => 'traversable',
+        3 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectSet.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+      ),
+    ),
+    'hasmany_dataobjectset' => 
+    array (
+      'parent' => 'dataobjectset',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'countable',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectSet.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+      ),
+    ),
+    'manymany_dataobjectset' => 
+    array (
+      'parent' => 'hasmany_dataobjectset',
+      'interfaces' => 
+      array (
+        0 => 'countable',
+        1 => 'iterator',
+        2 => 'traversable',
+        3 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataObjectSet.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'formvalidator' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FormValidator.php',
+      'child' => NULL,
+    ),
+    'datavalidator' => 
+    array (
+      'parent' => 'formvalidator',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/DataValidator.php',
+    ),
+    'array_dataobject' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/DataObject/array_dataobject.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'baseclass' => 'array_dataobject',
+    ),
+    'selectquery' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/SelectQuery.php',
+    ),
+    'adminredirectcontroller' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/admincontroller.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action' => '$Action',
+      ),
+    ),
+    'controller' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/controller/controller.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'admincontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/admincontroller.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'handleitem',
+        1 => 'switchlang',
+      ),
+      'url_handlers' => 
+      array (
+        'switchlang' => 'switchlang',
+        'admincontroller:$item!' => 'handleItem',
+      ),
+    ),
+    'admin' => 
+    array (
+      'parent' => 'viewaccessabledata',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/admincontroller.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'adminitem' => 
+    array (
+      'parent' => 'admincontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/adminItem.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'cms_edit',
+        1 => 'cms_add',
+        2 => 'cms_del',
+        3 => 'handlerecordformodel',
+      ),
+      'url_handlers' => 
+      array (
+        'model/$model!/$id!' => 'handlerecordformodel',
+      ),
+    ),
+    'columnedadmin' => 
+    array (
+      'parent' => 'adminitem',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/ColumnedAdmin.php',
+      'allowed_actions' => 
+      array (
+        0 => 'cms_edit',
+        1 => 'cms_add',
+        2 => 'cms_del',
+        3 => 'handlerecordformodel',
+      ),
+      'url_handlers' => 
+      array (
+        'model/$model!/$id!' => 'handlerecordformodel',
+      ),
+    ),
+    'leftandmain' => 
+    array (
+      'parent' => 'adminitem',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/leftandmain.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'cms_edit',
+        1 => 'cms_add',
+        2 => 'cms_del',
+        3 => 'updatetree',
+        4 => 'savesort',
+        5 => 'versions',
+      ),
+      'url_handlers' => 
+      array (
+        'updateTree/$marked!/$search' => 'updateTree',
+        'edit/$id!/$model' => 'cms_edit',
+        'del/$id!/$model' => 'cms_del',
+        'add' => 'cms_add',
+        'versions' => 'versions',
+      ),
+    ),
+    'tableview' => 
+    array (
+      'parent' => 'adminitem',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/admin/tableview.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'deletemany',
+      ),
+      'url_handlers' => 
+      array (
+        'deletemany' => 'deletemany',
+      ),
+    ),
+    'imageresize' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/control/imageresize.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action' => '$Action',
+      ),
+    ),
+    'systemcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/control/systemController.php',
+      'allowed_actions' => 
+      array (
+        0 => 'disablemobile',
+        1 => 'enablemobile',
+        2 => 'setuserview',
+        3 => 'switchview',
+      ),
+      'url_handlers' => 
+      array (
+        'setMobile/0' => 'disableMobile',
+        'setMobile/1' => 'enableMobile',
+        'setUserView/$bool!' => 'setUserView',
+        0 => 'switchView',
+      ),
+    ),
+    'controllerextension' => 
+    array (
+      'parent' => 'controller',
+      'abstract' => true,
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/controller/ControllerExtension.php',
+      'child' => NULL,
+    ),
+    'controllerclassinfo' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/controller/controllerClassInfo.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'convert' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/convert.php',
+    ),
+    'imagesqlfield' => 
+    array (
+      'parent' => 'dbfield',
+      'interfaces' => 
+      array (
+        0 => 'databasefield',
+        1 => 'defaultconvert',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/Image.php',
+    ),
+    'selectsqlfield' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/selects.php',
+    ),
+    'radiossqlfield' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/fields/selects.php',
+    ),
+    'i18n' => 
+    array (
+      'parent' => 'object',
+      'languagefiles' => 
+      array (
+        0 => '/form',
+        1 => '/files',
+        2 => '/st',
+        3 => '/bbcode',
+        4 => '/members',
+        5 => '/backup',
+        6 => '/st',
+        7 => '/comments',
+        8 => '/article',
+        9 => '/pm',
+        10 => '/rating',
+        11 => '/search',
+      ),
+      'defaultLanguagefiles' => 
+      array (
+        '/form' => 'de',
+        '/files' => 'de',
+        '/st' => 'de',
+        '/bbcode' => 'de',
+        '/members' => 'de',
+        '/backup' => 'de',
+        '/comments' => 'de',
+        '/article' => 'de',
+        '/pm' => 'de',
+        '/rating' => 'de',
+        '/search' => 'de',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/i18n.php',
+    ),
+    'addcontent' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/model/addcontent.php',
+    ),
+    'advrights' => 
+    array (
+      'parent' => 'array_dataobject',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/model/advrights.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'autorid' => 'int(10)',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("advrights")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        '_default' => 'int(10)',
+        'title' => 'varchar(200)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'autorid' => 'int(10)',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("advrights")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        '_default' => 'int(10)',
+        'title' => 'varchar(200)',
+        'editorid' => 'int(10)',
+      ),
+      'belongs_many_many' => 
+      array (
+        'advrights' => 'group',
+      ),
+      'indexes' => 
+      array (
+        'name' => 'UNIQUE',
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+        'advrights' => 
+        array (
+          'table' => 'many_many_group_advrights_advrights',
+          'field' => 'advrightsid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'advrights',
+      'table_exists' => true,
+      'baseclass' => 'advrights',
+    ),
+    'group' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/model/group.php',
+      'child' => 
+      array (
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("group")',
+        'created' => 'int(90)',
+        'name' => 'varchar(100)',
+        'rights' => 'int(2)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'users' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("group")',
+        'created' => 'int(90)',
+        'name' => 'varchar(100)',
+        'rights' => 'int(2)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'advrights' => 'advrights',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'name',
+      ),
+      'indexes' => 
+      array (
+        'searchable_fields' => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'name',
+          ),
+          'name' => 'searchable_fields',
+        ),
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+        'advrights' => 
+        array (
+          'table' => 'many_many_group_advrights_advrights',
+          'field' => 'groupid',
+          'extfield' => 'advrightsid',
+        ),
+      ),
+      'table_name' => 'groups',
+      'table_exists' => true,
+      'baseclass' => 'group',
+      'belongs_many_many_extra' => 
+      array (
+        'groups' => 
+        array (
+          'table' => 'many_many_user_groups_group',
+          'field' => 'groupid',
+          'extfield' => 'userid',
+        ),
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'groupid',
+          'extfield' => 'redirectorid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'groupid',
+          'extfield' => 'redirectorid',
+        ),
+      ),
+    ),
+    'groupcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/core/model/group.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'formfield' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FormField.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'formaction' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FormAction.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'ajaxsubmitbutton' => 
+    array (
+      'parent' => 'formaction',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/AjaxSubmitButton.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'autoformfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/AutoFormField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'textarea' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Textarea.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'htmleditor' => 
+    array (
+      'parent' => 'textarea',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HTMLEditor.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'bbcodeeditor' => 
+    array (
+      'parent' => 'htmleditor',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/BBcodeEditor.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'dropdown' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/DropDown.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'getdata',
+        1 => 'checkvalue',
+        2 => 'uncheckvalue',
+        3 => 'nojs',
+      ),
+      'url_handlers' => 
+      array (
+        'nojs/$page' => 'nojs',
+        'getData/$page/$search' => 'getData',
+        'checkValue/$value' => 'checkValue',
+        'uncheckValue/$value' => 'uncheckValue',
+      ),
+    ),
+    'email' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/EMail.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'fieldset' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FieldSet.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'fileupload' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FileUpload.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'ajaxupload',
+        1 => 'frameupload',
+      ),
+      'url_handlers' => 
+      array (
+        'ajaxUpload' => 'ajaxUpload',
+        'frameUpload' => 'frameUpload',
+      ),
+    ),
+    'form' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Form.php',
+    ),
+    'externalform' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Form.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action' => '$Action',
+      ),
+    ),
+    'htmlnode' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/html/HTMLNode.php',
+    ),
+    'hiddenfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Hiddenfield.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'formdecorator' => 
+    array (
+      'parent' => 'extension',
+      'abstract' => true,
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FormDecorator.php',
+    ),
+    'formdisabler' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/FormDisabler.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'htmlaction' => 
+    array (
+      'parent' => 'formaction',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HTMLAction.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'htmlfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HTMLField.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'complextablefield' => 
+    array (
+      'parent' => 'formfield',
+      'abstract' => true,
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/complexTableField.php',
+      'child' => NULL,
+    ),
+    'hasmanycomplextablefield' => 
+    array (
+      'parent' => 'complextablefield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasManyComplexTableField.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'add',
+        2 => 'delete',
+        3 => 'updatebody',
+        4 => 'updatecheckbox',
+        5 => 'setradiobox',
+      ),
+      'url_handlers' => 
+      array (
+        'POST update/$search' => 'updateBody',
+        'POST setCheckbox/$id!/$bool!' => 'updateCheckBox',
+        'POST setRadio/$id!' => 'SetRadioBox',
+      ),
+    ),
+    'hasonecomplextablefield' => 
+    array (
+      'parent' => 'complextablefield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneComplexTableField.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'add',
+        2 => 'delete',
+        3 => 'updatebody',
+        4 => 'updatecheckbox',
+        5 => 'setradiobox',
+      ),
+      'url_handlers' => 
+      array (
+        'POST update/$search' => 'updateBody',
+        'POST setCheckbox/$id!/$bool!' => 'updateCheckBox',
+        'POST setRadio/$id!' => 'SetRadioBox',
+      ),
+    ),
+    'singleselectdropdown' => 
+    array (
+      'parent' => 'dropdown',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/SingleSelectDropDown.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'getdata',
+        1 => 'checkvalue',
+        2 => 'uncheckvalue',
+        3 => 'nojs',
+      ),
+      'url_handlers' => 
+      array (
+        'nojs/$page' => 'nojs',
+        'getData/$page/$search' => 'getData',
+        'checkValue/$value' => 'checkValue',
+        'uncheckValue/$value' => 'uncheckValue',
+      ),
+    ),
+    'hasonedropdown' => 
+    array (
+      'parent' => 'singleselectdropdown',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/HasOneDropdown.php',
+      'allowed_actions' => 
+      array (
+        0 => 'getdata',
+        1 => 'checkvalue',
+        2 => 'uncheckvalue',
+        3 => 'nojs',
+      ),
+      'url_handlers' => 
+      array (
+        'nojs/$page' => 'nojs',
+        'getData/$page/$search' => 'getData',
+        'checkValue/$value' => 'checkValue',
+        'uncheckValue/$value' => 'uncheckValue',
+      ),
+    ),
+    'javascriptfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/JavaScriptField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'manymanycomplextablefield' => 
+    array (
+      'parent' => 'complextablefield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyComplexTableField.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'add',
+        2 => 'delete',
+        3 => 'updatebody',
+        4 => 'updatecheckbox',
+        5 => 'setradiobox',
+      ),
+      'url_handlers' => 
+      array (
+        'POST update/$search' => 'updateBody',
+        'POST setCheckbox/$id!/$bool!' => 'updateCheckBox',
+        'POST setRadio/$id!' => 'SetRadioBox',
+      ),
+    ),
+    'multiselectdropdown' => 
+    array (
+      'parent' => 'dropdown',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/MultiSelectDropDown.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'getdata',
+        1 => 'checkvalue',
+        2 => 'uncheckvalue',
+        3 => 'nojs',
+      ),
+      'url_handlers' => 
+      array (
+        'nojs/$page' => 'nojs',
+        'getData/$page/$search' => 'getData',
+        'checkValue/$value' => 'checkValue',
+        'uncheckValue/$value' => 'uncheckValue',
+      ),
+    ),
+    'manymanydropdown' => 
+    array (
+      'parent' => 'multiselectdropdown',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ManyManyDropDown.php',
+      'allowed_actions' => 
+      array (
+        0 => 'getdata',
+        1 => 'checkvalue',
+        2 => 'uncheckvalue',
+        3 => 'nojs',
+      ),
+      'url_handlers' => 
+      array (
+        'nojs/$page' => 'nojs',
+        'getData/$page/$search' => 'getData',
+        'checkValue/$value' => 'checkValue',
+        'uncheckValue/$value' => 'uncheckValue',
+      ),
+    ),
+    'radiobutton' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Radiobutton.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'objectradiobutton' => 
+    array (
+      'parent' => 'radiobutton',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ObjectRadioButton.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'passwordfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/PasswordField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'requestform' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/RequestForm.php',
+    ),
+    'requiredfields' => 
+    array (
+      'parent' => 'formvalidator',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/RequiredFields.php',
+    ),
+    'select' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Select.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'tab' => 
+    array (
+      'parent' => 'fieldset',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/Tab.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'textfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/TextField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'timefield' => 
+    array (
+      'parent' => 'hiddenfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/TimeField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'ajaxexternalform' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/ajaxExternalForm.php',
+      'allowed_actions' => 
+      array (
+        0 => 'render',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'button' => 
+    array (
+      'parent' => 'formaction',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/button.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'cancelbutton' => 
+    array (
+      'parent' => 'formaction',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/cancelButton.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'captcha' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/captcha.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'checkbox' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/checkbox.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'imageupload' => 
+    array (
+      'parent' => 'fileupload',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/imageUpload.php',
+      'allowed_actions' => 
+      array (
+        0 => 'ajaxupload',
+        1 => 'frameupload',
+      ),
+      'url_handlers' => 
+      array (
+        'ajaxUpload' => 'ajaxUpload',
+        'frameUpload' => 'frameUpload',
+      ),
+    ),
+    'infofield' => 
+    array (
+      'parent' => 'htmlfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/infoField.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'infotextfield' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/infotext.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'langselect' => 
+    array (
+      'parent' => 'select',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/langSelect.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'linkaction' => 
+    array (
+      'parent' => 'formaction',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/link.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'numberfield' => 
+    array (
+      'parent' => 'formfield',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/number.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'tabset' => 
+    array (
+      'parent' => 'fieldset',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/form/tabset.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'gfs' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/GFS/gfs.php',
+      'child' => NULL,
+    ),
+    'gfs_package_installer' => 
+    array (
+      'parent' => 'gfs',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/GFS/gfs.php',
+    ),
+    'gfs_package_creator' => 
+    array (
+      'parent' => 'gfs',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/GFS/gfs.php',
+    ),
+    'ajaxlink' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/ajax/ajaxlink.php',
+      'allowed_actions' => 
+      array (
+        0 => 'action',
+        1 => 'popup',
+      ),
+      'url_handlers' => 
+      array (
+        'link/$id' => 'action',
+        'popup/$id' => 'popup',
+      ),
+    ),
+    'javascriptresponse' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/ajax/ajaxresponse.php',
+      'child' => NULL,
+    ),
+    'ajaxresponse' => 
+    array (
+      'parent' => 'javascriptresponse',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/ajax/ajaxresponse.php',
+      'child' => NULL,
+    ),
+    'dialog' => 
+    array (
+      'parent' => 'ajaxresponse',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/ajax/dialog.php',
+    ),
+    'restfulserver' => 
+    array (
+      'parent' => 'requesthandler',
+      'api_accesses' => 
+      array (
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/api/RestfulServer.php',
+      'allowed_actions' => 
+      array (
+        0 => 'handlewithdatatype',
+      ),
+      'url_handlers' => 
+      array (
+        '$ClassName!/$ID/$Relation' => 'handleWithDataType',
+      ),
+    ),
+    'arraylib' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/array/arraylib.php',
+    ),
+    'backup' => 
+    array (
+      'parent' => 'object',
+      'excludeList' => 
+      array (
+        0 => 'statistics',
+        1 => 'statistics_state',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/backup/Backup.php',
+    ),
+    'pagelinkscontroller' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/ckeditor_goma/pagelinks.php',
+      'allowed_actions' => 
+      array (
+        0 => 'search',
+      ),
+      'url_handlers' => 
+      array (
+        'search/$search' => 'search',
+      ),
+    ),
+    'cookies' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/cookies/cookies.php',
+    ),
+    'cssmin' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/css/cssmin.php',
+    ),
+    'csv' => 
+    array (
+      'parent' => 'object',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/csv/csv.php',
+    ),
+    'uploads' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/Uploads.php',
+      'child' => 
+      array (
+        'imageuploads' => 'imageuploads',
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("imageuploads","uploads")',
+        'created' => 'int(90)',
+        'filename' => 'varchar(100)',
+        'realfile' => 'varchar(300)',
+        'path' => 'varchar(200)',
+        'type' => 'enum(\'collection\',\'file\')',
+        'collectionid' => 'int(10)',
+      ),
+      'has_one' => 
+      array (
+        'collection' => 'uploads',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("imageuploads","uploads")',
+        'created' => 'int(90)',
+        'filename' => 'varchar(100)',
+        'realfile' => 'varchar(300)',
+        'path' => 'varchar(200)',
+        'type' => 'enum(\'collection\',\'file\')',
+        'collectionid' => 'int(10)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'collectionid' => true,
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'uploads',
+      'table_exists' => true,
+      'baseclass' => 'uploads',
+      'dataclasses' => 
+      array (
+        0 => 'imageuploads',
+      ),
+    ),
+    'uploadscontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/Uploads.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'imageuploads' => 
+    array (
+      'parent' => 'uploads',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/Uploads.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("imageuploads","uploads")',
+        'created' => 'int(90)',
+        'filename' => 'varchar(100)',
+        'realfile' => 'varchar(300)',
+        'path' => 'varchar(200)',
+        'type' => 'enum(\'collection\',\'file\')',
+        'collectionid' => 'int(10)',
+        'width' => 'int(5)',
+        'height' => 'int(5)',
+        'thumbleft' => 'int(3)',
+        'thumbtop' => 'int(3)',
+        'thumbwidth' => 'int(3)',
+        'thumbheight' => 'int(3)',
+      ),
+      'has_one' => 
+      array (
+        'collection' => 'uploads',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'width' => 'int(5)',
+        'height' => 'int(5)',
+        'thumbLeft' => 'int(3)',
+        'thumbTop' => 'int(3)',
+        'thumbWidth' => 'int(3)',
+        'thumbHeight' => 'int(3)',
+        'collectionid' => 'int(10)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'defaults' => 
+      array (
+        'thumbleft' => 0,
+        'thumbtop' => 0,
+        'thumbwidth' => 100,
+        'thumbheight' => 100,
+      ),
+      'indexes' => 
+      array (
+        'collectionid' => true,
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'imageuploads',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'imageuploads',
+      ),
+      'baseclass' => 'uploads',
+    ),
+    'imageuploadscontroller' => 
+    array (
+      'parent' => 'uploadscontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/Uploads.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'uploadcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/Uploads.php',
+      'allowed_actions' => 
+      array (
+        0 => 'handlefile',
+      ),
+      'url_handlers' => 
+      array (
+        '$collection/$hash/$filename' => 'handleFile',
+      ),
+    ),
+    'gd' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/gd/gd.php',
+      'child' => NULL,
+    ),
+    'image' => 
+    array (
+      'parent' => 'gd',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/gd/image.php',
+    ),
+    'rootimage' => 
+    array (
+      'parent' => 'gd',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/gd/rootimage.php',
+    ),
+    'rawheaders' => 
+    array (
+      'parent' => 'viewaccessabledata',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/http/rawheaders.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'livecounter' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/livecounter/livecounter.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("livecounter")',
+        'created' => 'int(90)',
+        'user' => 'varchar(200)',
+        'phpsessid' => 'varchar(800)',
+        'mobile' => 'int(1)',
+        'browser' => 'varchar(200)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("livecounter")',
+        'created' => 'int(90)',
+        'user' => 'varchar(200)',
+        'phpsessid' => 'varchar(800)',
+        'mobile' => 'int(1)',
+        'browser' => 'varchar(200)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'statistics',
+      'table_exists' => true,
+      'baseclass' => 'livecounter',
+    ),
+    'livecountercontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/livecounter/livecounter.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'browser' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/livecounter/livecounter.php',
+    ),
+    'mail' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/mail/mail.php',
+    ),
+    'stringlib' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/string/stringlib.php',
+    ),
+    'tabs' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/tabs/tabs.php',
+    ),
+    'template' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/template.php',
+    ),
+    'texttransformer' => 
+    array (
+      'parent' => 'object',
+      'abstract' => true,
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/texttransformer.php',
+      'child' => NULL,
+    ),
+    'bbcode' => 
+    array (
+      'parent' => 'texttransformer',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php',
+    ),
+    'text' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/text.php',
+    ),
+    'fastjson' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/thirdparty/json/fastjson.php',
+    ),
+    'versionsviewcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/versions/versionsViewController.php',
+      'allowed_actions' => 
+      array (
+        0 => 'getversion',
+      ),
+      'url_handlers' => 
+      array (
+        'getversion/$id!' => 'getversion',
+      ),
+    ),
+    'permission' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/Permission.php',
+    ),
+    'hash' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/hash.php',
+      'child' => NULL,
+    ),
+    'md5hash' => 
+    array (
+      'parent' => 'hash',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/hash.php',
+    ),
+    'gomahash' => 
+    array (
+      'parent' => 'hash',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/hash.php',
+    ),
+    'lost_passwordextension' => 
+    array (
+      'parent' => 'controllerextension',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/lost_password.php',
+      'allowed_actions' => 
+      array (
+        0 => 'lost_password',
+      ),
+      'url_handlers' => 
+      array (
+      ),
+    ),
+    'member' => 
+    array (
+      'parent' => 'object',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/member.php',
+    ),
+    'usercontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/member.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'user' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/member.php',
+      'child' => 
+      array (
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("user")',
+        'created' => 'int(90)',
+        'nickname' => 'varchar(200)',
+        'name' => 'varchar(200)',
+        'email' => 'varchar(200)',
+        'password' => 'varchar(200)',
+        'avatar' => 'Image',
+        'signatur' => 'text',
+        'status' => 'int(2)',
+        'phpsess' => 'varchar(200)',
+        'code' => 'varchar(200)',
+        'timezone' => 'timezone',
+        'groupid' => 'int(10)',
+      ),
+      'has_one' => 
+      array (
+        'group' => 'group',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("user")',
+        'created' => 'int(90)',
+        'nickname' => 'varchar(200)',
+        'name' => 'varchar(200)',
+        'email' => 'varchar(200)',
+        'password' => 'varchar(200)',
+        'avatar' => 'Image',
+        'signatur' => 'text',
+        'status' => 'int(2)',
+        'phpsess' => 'varchar(200)',
+        'code' => 'varchar(200)',
+        'timezone' => 'timezone',
+        'groupid' => 'int(10)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'status' => '1',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'nickname',
+        1 => 'name',
+        2 => 'email',
+        3 => 'signatur',
+      ),
+      'indexes' => 
+      array (
+        'groupid' => true,
+        'searchable_fields' => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'nickname(83)',
+            1 => 'name(83)',
+            2 => 'email(83)',
+            3 => 'signatur(83)',
+          ),
+          'name' => 'searchable_fields',
+        ),
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+        'groups' => 
+        array (
+          'table' => 'many_many_user_groups_group',
+          'field' => 'userid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'users',
+      'table_exists' => true,
+      'baseclass' => 'user',
+    ),
+    'frontedcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/FrontedController.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'sitecontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/FrontedController.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'homepagecontroller' => 
+    array (
+      'parent' => 'sitecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/FrontedController.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'profilecontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'login',
+        2 => 'logout',
+        3 => 'lost_password',
+        4 => 'register',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'registerextension' => 
+    array (
+      'parent' => 'controllerextension',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/security/register.php',
+      'allowed_actions' => 
+      array (
+        0 => 'register',
+      ),
+      'url_handlers' => 
+      array (
+      ),
+    ),
+    'treeserver' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/servers/treeserver.php',
+      'allowed_actions' => 
+      array (
+        0 => 'setcollapsed',
+        1 => 'setexpanded',
+        2 => 'getsubtree',
+      ),
+      'url_handlers' => 
+      array (
+        'setCollapsed/$name!/$id!' => 'setCollapsed',
+        'setExpanded/$name!/$id!' => 'setExpanded',
+        'getSubTree/$name!/$id!' => 'getSubTree',
+      ),
+    ),
+    'testcontroller' => 
+    array (
+      'parent' => 'requesthandler',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/core/Test.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+        '$Action' => '$Action',
+      ),
+    ),
+    'test' => 
+    array (
+      'parent' => 'extension',
+      'abstract' => true,
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/core/Test.php',
+      'child' => NULL,
+    ),
+    'gfscreatetest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/GFS/GFS.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'gfsunpacktest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/GFS/GFS.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'backupcreatetest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/backup/backup_create.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'backupunpacktest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/backup/backup_create.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'controllertest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/controller/controllertest.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'complextablefieldtest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/forms/complextablefieldtest.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'formtest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/forms/formtest.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'dropdowndialogtest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/jquery/dropdownDialog.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'scaletest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/jquery/scale.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'pagestreetest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/pages/treegeneration.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'tabstest' => 
+    array (
+      'parent' => 'test',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/system/test/tabs/tabs.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'backupadmin' => 
+    array (
+      'parent' => 'tableview',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/BackupAdmin.php',
+      'allowed_actions' => 
+      array (
+        0 => 'deletemany',
+      ),
+      'url_handlers' => 
+      array (
+        'deletemany' => 'deletemany',
+      ),
+    ),
+    'contentadmin' => 
+    array (
+      'parent' => 'leftandmain',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/content.php',
+      'allowed_actions' => 
+      array (
+        0 => 'revert_changes',
+        1 => 'unpublish',
+      ),
+      'url_handlers' => 
+      array (
+        'updateTree/$marked!/$search' => 'updateTree',
+        'edit/$id!/$model' => 'cms_edit',
+        'del/$id!/$model' => 'cms_del',
+        'add' => 'cms_add',
+        'versions' => 'versions',
+      ),
+    ),
+    'settingsadmin' => 
+    array (
+      'parent' => 'adminitem',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php',
+      'allowed_actions' => 
+      array (
+        0 => 'cms_edit',
+        1 => 'cms_add',
+        2 => 'cms_del',
+        3 => 'handlerecordformodel',
+      ),
+      'url_handlers' => 
+      array (
+        'model/$model!/$id!' => 'handlerecordformodel',
+      ),
+    ),
+    'smilieadmin' => 
+    array (
+      'parent' => 'tableview',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/smilieAdmin.php',
+      'allowed_actions' => 
+      array (
+        0 => 'deletemany',
+      ),
+      'url_handlers' => 
+      array (
+        'deletemany' => 'deletemany',
+      ),
+    ),
+    'usergroupadmin' => 
+    array (
+      'parent' => 'leftandmain',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/usergroupAdmin.php',
+      'allowed_actions' => 
+      array (
+        0 => 'cms_edit',
+        1 => 'cms_add',
+        2 => 'cms_del',
+        3 => 'updatetree',
+        4 => 'savesort',
+        5 => 'versions',
+      ),
+      'url_handlers' => 
+      array (
+        'updateTree/$marked!/$search' => 'updateTree',
+        'edit/$id!/$model' => 'cms_edit',
+        'del/$id!/$model' => 'cms_del',
+        'add' => 'cms_add',
+        'versions' => 'versions',
+      ),
+    ),
+    'cms_filemanager' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/cms_filemanager.php',
+      'casting' => 
+      array (
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'baseclass' => 'cms_filemanager',
+    ),
+    'cms_filemanagercontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/cms_filemanager.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'contentcontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/contentcontroller.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'newsettings' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/settingscontroller.php',
+      'child' => 
+      array (
+        'metasettings' => 'metasettings',
+        'templatesettings' => 'templatesettings',
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("metasettings","templatesettings","newsettings")',
+        'created' => 'int(90)',
+        'titel' => 'varchar(50)',
+        'register' => 'varchar(100)',
+        'register_enabled' => 'Switch',
+        'register_email' => 'Switch',
+        'gzip' => 'Switch',
+        'livecounter' => 'Switch',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("metasettings","templatesettings","newsettings")',
+        'created' => 'int(90)',
+        'titel' => 'varchar(50)',
+        'register' => 'varchar(100)',
+        'register_enabled' => 'Switch',
+        'register_email' => 'Switch',
+        'gzip' => 'Switch',
+        'livecounter' => 'Switch',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'defaults' => 
+      array (
+        'titel' => 'Goma - Open Source CMS / Framework',
+        'gzip' => '0',
+        'register_email' => '1',
+        'register_enabled' => '0',
+        'status' => '1',
+        'stpl' => 'default',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'newsettings',
+      'table_exists' => true,
+      'baseclass' => 'newsettings',
+      'dataclasses' => 
+      array (
+        0 => 'metasettings',
+        1 => 'templatesettings',
+      ),
+    ),
+    'settingscontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/settingscontroller.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'metasettings' => 
+    array (
+      'parent' => 'newsettings',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/settingscontroller.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("metasettings","templatesettings","newsettings")',
+        'created' => 'int(90)',
+        'titel' => 'varchar(50)',
+        'register' => 'varchar(100)',
+        'register_enabled' => 'Switch',
+        'register_email' => 'Switch',
+        'gzip' => 'Switch',
+        'livecounter' => 'Switch',
+        'meta_keywords' => 'varchar(100)',
+        'meta_description' => 'varchar(100)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'meta_keywords' => 'varchar(100)',
+        'meta_description' => 'varchar(100)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'defaults' => 
+      array (
+        'titel' => 'Goma - Open Source CMS / Framework',
+        'gzip' => '0',
+        'register_email' => '1',
+        'register_enabled' => '0',
+        'status' => '1',
+        'stpl' => 'default',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'metasettings',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'metasettings',
+      ),
+      'baseclass' => 'newsettings',
+    ),
+    'templatesettings' => 
+    array (
+      'parent' => 'newsettings',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/settingscontroller.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("metasettings","templatesettings","newsettings")',
+        'created' => 'int(90)',
+        'titel' => 'varchar(50)',
+        'register' => 'varchar(100)',
+        'register_enabled' => 'Switch',
+        'register_email' => 'Switch',
+        'gzip' => 'Switch',
+        'livecounter' => 'Switch',
+        'stpl' => 'varchar(64)',
+        'css_standard' => 'text',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'stpl' => 'varchar(64)',
+        'css_standard' => 'text',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'defaults' => 
+      array (
+        'titel' => 'Goma - Open Source CMS / Framework',
+        'gzip' => '0',
+        'register_email' => '1',
+        'register_enabled' => '0',
+        'status' => '1',
+        'stpl' => 'default',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'templatesettings',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'templatesettings',
+      ),
+      'baseclass' => 'newsettings',
+    ),
+    'welcomecontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/welcomeController.php',
+      'allowed_actions' => 
+      array (
+        0 => 'step2',
+        1 => 'step3',
+        2 => 'finish',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'backups' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/backups.php',
+      'casting' => 
+      array (
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'baseclass' => 'backups',
+    ),
+    'backupscontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/backups.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'boxes' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'child' => 
+      array (
+        'box' => 'box',
+        'login_meinaccount' => 'login_meinaccount',
+        'phpbox' => 'phpbox',
+        'statistics' => 'statistics',
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'text',
+        1 => 'title',
+      ),
+      'indexes' => 
+      array (
+        'view' => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'seiteid',
+            1 => 'sort',
+          ),
+          'name' => '_show',
+        ),
+        'searchable_fields' => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'text(166)',
+            1 => 'title',
+          ),
+          'name' => 'searchable_fields',
+        ),
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'boxes',
+      'table_exists' => true,
+      'baseclass' => 'boxes',
+      'dataclasses' => 
+      array (
+        0 => 'statistics',
+      ),
+    ),
+    'boxescontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        'add' => '->canedit',
+        'edit' => '->canedit',
+        'delete' => '->canedit',
+        'saveboxwidth' => '->canedit',
+        'saveboxorder' => '->canedit',
+      ),
+      'url_handlers' => 
+      array (
+        '$pid!/add' => 'add',
+        '$pid!/edit/$id!' => 'edit',
+        '$pid!/delete/$id' => 'delete',
+        '$pid!/saveBoxWidth/$id' => 'saveBoxWidth',
+        '$pid!/saveBoxOrder' => 'saveBoxOrder',
+      ),
+    ),
+    'box' => 
+    array (
+      'parent' => 'boxes',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'text',
+        1 => 'title',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'box',
+        1 => 'statistics',
+      ),
+      'baseclass' => 'boxes',
+    ),
+    'boxcontroller' => 
+    array (
+      'parent' => 'boxescontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'allowed_actions' => 
+      array (
+        'add' => '->canedit',
+        'edit' => '->canedit',
+        'delete' => '->canedit',
+        'saveboxwidth' => '->canedit',
+        'saveboxorder' => '->canedit',
+      ),
+      'url_handlers' => 
+      array (
+        '$pid!/add' => 'add',
+        '$pid!/edit/$id!' => 'edit',
+        '$pid!/delete/$id' => 'delete',
+        '$pid!/saveBoxWidth/$id' => 'saveBoxWidth',
+        '$pid!/saveBoxOrder' => 'saveBoxOrder',
+      ),
+    ),
+    'login_meinaccount' => 
+    array (
+      'parent' => 'box',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'text',
+        1 => 'title',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'login_meinaccount',
+        1 => 'box',
+      ),
+      'baseclass' => 'boxes',
+    ),
+    'boxestplextension' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'pagecontroller' => 
+    array (
+      'parent' => 'contentcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/page.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'mainbartplextension' => 
+    array (
+      'parent' => 'extension',
+      'interfaces' => 
+      array (
+        0 => 'iterator',
+        1 => 'traversable',
+        2 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'pages' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages.php',
+      'child' => 
+      array (
+        'page' => 'page',
+        'boxpage' => 'boxpage',
+        'articlecategory' => 'articlecategory',
+        'article' => 'article',
+        'articles' => 'articles',
+        'contact' => 'contact',
+        'errorpage' => 'errorpage',
+        'members' => 'members',
+        'phppage' => 'phppage',
+        'redirector' => 'redirector',
+      ),
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'data',
+        1 => 'title',
+        2 => 'mainbartitle',
+        3 => 'meta_keywords',
+      ),
+      'indexes' => 
+      array (
+        0 => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'path(111)',
+            1 => 'sort',
+            2 => 'class_name',
+          ),
+          'name' => 'path',
+        ),
+        1 => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'parentid',
+            1 => 'mainbar',
+            2 => 'class_name',
+          ),
+          'name' => 'mainbar',
+        ),
+        2 => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'class_name',
+            1 => 'data(55)',
+            2 => 'title(55)',
+            3 => 'mainbartitle(55)',
+            4 => 'meta_keywords(55)',
+            5 => 'id',
+          ),
+          'name' => 'sitesearch',
+        ),
+        'parentid' => true,
+        'searchable_fields' => 
+        array (
+          'type' => 'INDEX',
+          'fields' => 
+          array (
+            0 => 'data(83)',
+            1 => 'title(83)',
+            2 => 'mainbartitle(83)',
+            3 => 'meta_keywords(83)',
+          ),
+          'name' => 'searchable_fields',
+        ),
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'pages',
+      'table_exists' => true,
+      'baseclass' => 'pages',
+      'dataclasses' => 
+      array (
+        0 => 'article',
+        1 => 'contact',
+        2 => 'errorpage',
+      ),
+    ),
+    'page' => 
+    array (
+      'parent' => 'pages',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/page.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'page',
+        1 => 'article',
+        2 => 'contact',
+        3 => 'errorpage',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'boxpage' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'boxpage',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'boxpagecontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'phpbox' => 
+    array (
+      'parent' => 'box',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes/phpbox.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'text',
+        1 => 'title',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'phpbox',
+        1 => 'box',
+      ),
+      'baseclass' => 'boxes',
+    ),
+    'statistics' => 
+    array (
+      'parent' => 'box',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/boxes/statisticbox.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+        'created' => 'int(90)',
+        'title' => 'varchar(100)',
+        'text' => 'text',
+        'border' => 'switch',
+        'sort' => 'int(3)',
+        'seiteid' => 'varchar(50)',
+        'width' => 'varchar(5)',
+        'today' => 'int(1)',
+        'last2' => 'int(1)',
+        'last30d' => 'int(1)',
+        'whole' => 'int(1)',
+        'online' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'today' => 'int(1)',
+        'last2' => 'int(1)',
+        'last30d' => 'int(1)',
+        'whole' => 'int(1)',
+        'online' => 'int(1)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'searchable_fields' => 
+      array (
+        0 => 'text',
+        1 => 'title',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'Box_statistics',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'statistics',
+        1 => 'box',
+      ),
+      'baseclass' => 'boxes',
+    ),
+    'pagecomments' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pagecomments.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("pagecomments")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        'text' => 'text',
+        'timestamp' => 'int(200)',
+        'pageid' => 'int(10)',
+      ),
+      'has_one' => 
+      array (
+        'page' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("pagecomments")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        'text' => 'text',
+        'timestamp' => 'int(200)',
+        'pageid' => 'int(10)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'name' => true,
+        'pageid' => true,
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'pagecomments',
+      'table_exists' => true,
+      'baseclass' => 'pagecomments',
+    ),
+    'pagecommentscontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pagecomments.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'pagecommentsdataobjectextension' => 
+    array (
+      'parent' => 'dataobjectextension',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pagecomments.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'pagecommentscontrollerextension' => 
+    array (
+      'parent' => 'controllerextension',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pagecomments.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+      ),
+    ),
+    'articlecategory' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+        'categories' => 'articlecategory',
+        'articles' => 'article',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'articlecategory',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'articlecategorycontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'child' => NULL,
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'article' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+        'description' => 'text',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'description' => 'text',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 1,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'Page_article',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'article',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'articlecontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'articles' => 
+    array (
+      'parent' => 'articlecategory',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+        3 => 'permissionprovider',
+        4 => 'savevarsetter',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+        'categories' => 'articlecategory',
+        'articles' => 'article',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+        3 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'articles',
+        1 => 'articlecategory',
+        2 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'articlescontroller' => 
+    array (
+      'parent' => 'articlecategorycontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/article.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'contact' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/contact.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+        'email' => 'varchar(200)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'email' => 'varchar(200)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'Page_contact',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'contact',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'contactcontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/contact.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'errorpage' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/error.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+        'code' => 'varchar(50)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'code' => 'varchar(50)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => 'Page_errorpage',
+      'table_exists' => true,
+      'dataclasses' => 
+      array (
+        0 => 'errorpage',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'errorpagecontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/error.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'members' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'members',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'memberscontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php',
+      'allowed_actions' => 
+      array (
+        0 => 'showmember',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$id!' => 'showmember',
+        '$Action/$id/$otherid' => '$Action',
+      ),
+    ),
+    'phppage' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/phpPage.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'phppage',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'phppagecontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/phpPage.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'redirector' => 
+    array (
+      'parent' => 'page',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/redirectorpage.php',
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+        'created' => 'int(90)',
+        'path' => 'varchar(500)',
+        'rights' => 'int(2)',
+        'mainbar' => 'int(1)',
+        'mainbartitle' => 'varchar(200)',
+        'title' => 'varchar(200)',
+        'data' => 'text',
+        'sort' => 'int(8)',
+        'search' => 'int(1)',
+        'editright' => 'text',
+        'meta_description' => 'varchar(200)',
+        'meta_keywords' => 'varchar(200)',
+        'edit_type' => 'varchar(10)',
+        'viewer_type' => 'varchar(20)',
+        'readpassword' => 'varchar(50)',
+        'parentid' => 'int(10)',
+        'showcomments' => 'int(1)',
+        'rating' => 'int(1)',
+      ),
+      'has_one' => 
+      array (
+        'parent' => 'pages',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'has_many' => 
+      array (
+        'children' => 'pages',
+        'comments' => 'pagecomments',
+      ),
+      'many_many' => 
+      array (
+        'edit_groups' => 'group',
+        'viewer_groups' => 'group',
+      ),
+      'defaults' => 
+      array (
+        'parenttype' => 'root',
+        'search' => 1,
+        'mainbar' => 1,
+        'sort' => 10000,
+        'showcomments' => 0,
+        'rating' => 0,
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+        0 => 'viewer_type',
+        1 => 'viewer_type',
+        2 => 'viewer_type',
+      ),
+      'many_many_tables' => 
+      array (
+        'edit_groups' => 
+        array (
+          'table' => 'many_many_pages_edit_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+        'viewer_groups' => 
+        array (
+          'table' => 'many_many_pages_viewer_groups_group',
+          'field' => 'pagesid',
+          'extfield' => 'groupid',
+        ),
+      ),
+      'table_name' => false,
+      'table_exists' => false,
+      'dataclasses' => 
+      array (
+        0 => 'redirector',
+        1 => 'page',
+      ),
+      'baseclass' => 'pages',
+    ),
+    'redirectorcontroller' => 
+    array (
+      'parent' => 'pagecontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/redirectorpage.php',
+      'allowed_actions' => 
+      array (
+        0 => 'pagecomments',
+        1 => 'pagecomments',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action//$id/$otherid' => '$Action',
+      ),
+    ),
+    'pm' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("pm")',
+        'created' => 'int(90)',
+        'subject' => 'varchar(200)',
+        'text' => 'text',
+        'time' => 'int(20)',
+        'sig' => 'int(1)',
+        'hasread' => 'int(1)',
+        'tid' => 'int(10)',
+        'fromid' => 'int(10)',
+        'toid' => 'int(10)',
+      ),
+      'has_one' => 
+      array (
+        'from' => 'user',
+        'to' => 'user',
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("pm")',
+        'created' => 'int(90)',
+        'subject' => 'varchar(200)',
+        'text' => 'text',
+        'time' => 'int(20)',
+        'sig' => 'int(1)',
+        'hasread' => 'int(1)',
+        'tid' => 'int(10)',
+        'fromid' => 'int(10)',
+        'toid' => 'int(10)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'fromid' => true,
+        'toid' => true,
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'pm',
+      'table_exists' => true,
+      'baseclass' => 'pm',
+    ),
+    'pmcontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php',
+      'allowed_actions' => 
+      array (
+        'showinbox' => '2',
+        'showthread' => '2',
+        'new_message' => '2',
+        0 => 'deletethread',
+        1 => 'delete',
+      ),
+      'url_handlers' => 
+      array (
+        'inbox' => 'showInBox',
+        'new/$id' => 'new_message',
+        'del/$id!' => 'deleteThread',
+        'delm/$id!' => 'delete',
+        '$id!' => 'showThread',
+      ),
+    ),
+    'pmprofileextension' => 
+    array (
+      'parent' => 'controllerextension',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/pm.php',
+      'allowed_actions' => 
+      array (
+      ),
+      'url_handlers' => 
+      array (
+      ),
+    ),
+    'rating' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/rating.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("rating")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        'rates' => 'int(10)',
+        'rating' => 'int(11)',
+        'rators' => 'text',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("rating")',
+        'created' => 'int(90)',
+        'name' => 'varchar(200)',
+        'rates' => 'int(10)',
+        'rating' => 'int(11)',
+        'rators' => 'text',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'name' => 'INDEX',
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'rating',
+      'table_exists' => true,
+      'baseclass' => 'rating',
+    ),
+    'ratingcontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/rating.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'ratingdataobjectextension' => 
+    array (
+      'parent' => 'dataobjectextension',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/rating.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'searchcontroller' => 
+    array (
+      'parent' => 'frontedcontroller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/search.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+    'searchpageextension' => 
+    array (
+      'parent' => 'dataobjectextension',
+      'interfaces' => 
+      array (
+        0 => 'arrayaccess',
+        1 => 'traversable',
+        2 => 'iterator',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/search.php',
+      'casting' => 
+      array (
+      ),
+    ),
+    'smilies' => 
+    array (
+      'parent' => 'dataobject',
+      'interfaces' => 
+      array (
+        0 => 'savevarsetter',
+        1 => 'permissionprovider',
+        2 => 'iterator',
+        3 => 'traversable',
+        4 => 'arrayaccess',
+      ),
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/smilies.php',
+      'child' => NULL,
+      'casting' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("smilies")',
+        'created' => 'int(90)',
+        'image' => 'Image',
+        'description' => 'varchar(200)',
+        'code' => 'varchar(200)',
+      ),
+      'has_one' => 
+      array (
+        'autor' => 'user',
+        'editor' => 'user',
+      ),
+      'db_fields' => 
+      array (
+        'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+        'last_modified' => 'int(90)',
+        'class_name' => 'enum("smilies")',
+        'created' => 'int(90)',
+        'image' => 'Image',
+        'description' => 'varchar(200)',
+        'code' => 'varchar(200)',
+        'autorid' => 'int(10)',
+        'editorid' => 'int(10)',
+      ),
+      'indexes' => 
+      array (
+        'autorid' => 'INDEX',
+        'editorid' => 'INDEX',
+        'class_name' => 'INDEX',
+        'last_modified' => 'INDEX',
+      ),
+      'iDBFields' => 
+      array (
+      ),
+      'many_many_tables' => 
+      array (
+      ),
+      'table_name' => 'smilies',
+      'table_exists' => true,
+      'baseclass' => 'smilies',
+    ),
+    'smiliescontroller' => 
+    array (
+      'parent' => 'controller',
+      'file' => '/var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/sitefeatures/smilies.php',
+      'allowed_actions' => 
+      array (
+        0 => 'edit',
+        1 => 'delete',
+        2 => 'record',
+      ),
+      'url_handlers' => 
+      array (
+        '$Action/$id' => '$Action',
+      ),
+    ),
+  ),
+  'advrights' => 
+  array (
+    'DATA_ALL' => 
+    array (
+      'title' => '{$_lang_dataobject_all}',
+      'default' => 7,
+      'implements' => 
+      array (
+        0 => 'DATA_EDIT',
+        1 => 'DATA_DELETE',
+        2 => 'DATA_INSERT',
+      ),
+      'name' => 'DATA_ALL',
+    ),
+    'DATA_EDIT' => 
+    array (
+      'title' => '{$_lang_dataobject_edit}',
+      'default' => 7,
+      'name' => 'DATA_EDIT',
+    ),
+    'DATA_DELETE' => 
+    array (
+      'title' => '{$_lang_dataobject_delete}',
+      'default' => 7,
+      'name' => 'DATA_DELETE',
+    ),
+    'DATA_INSERT' => 
+    array (
+      'title' => '{$_lang_dataobject_add}',
+      'default' => 7,
+      'name' => 'DATA_INSERT',
+    ),
+    'ADMIN_ALL' => 
+    array (
+      'title' => '{$_lang_administration}',
+      'default' => 7,
+      'implements' => 
+      array (
+        0 => 'BOXES_ALL',
+      ),
+      'name' => 'ADMIN_ALL',
+    ),
+    'SETTINGS_ALL' => 
+    array (
+      'title' => '{$_lang_edit_settings}',
+      'default' => 7,
+      'implements' => 
+      array (
+        0 => 'ADMIN_ALL',
+      ),
+      'name' => 'SETTINGS_ALL',
+    ),
+    'BOXES_ALL' => 
+    array (
+      'title' => '{$_lang_admin_boxes}',
+      'default' => 7,
+      'name' => 'BOXES_ALL',
+    ),
+    'PAGES_ALL' => 
+    array (
+      'title' => '{$_lang_sites_edit}',
+      'default' => 9,
+      'implements' => 
+      array (
+        0 => 'ADMIN_ALL',
+        1 => 'PAGES_DELETE',
+        2 => 'PAGES_INSERT',
+        3 => 'PAGES_WRITE',
+        4 => 'PAGES_PUBLISH',
+      ),
+      'name' => 'PAGES_ALL',
+    ),
+    'PAGES_DELETE' => 
+    array (
+      'title' => '{$_lang_pages_delete}',
+      'default' => 9,
+      'implements' => 
+      array (
+        0 => 'ADMIN_ALL',
+      ),
+      'name' => 'PAGES_DELETE',
+    ),
+    'PAGES_INSERT' => 
+    array (
+      'title' => '{$_lang_pages_add}',
+      'default' => 7,
+      'implements' => 
+      array (
+        0 => 'ADMIN_ALL',
+      ),
+      'name' => 'PAGES_INSERT',
+    ),
+    'PAGES_WRITE' => 
+    array (
+      'title' => '{$_lang_pages_edit}',
+      'default' => 7,
+      'implements' => 
+      array (
+        0 => 'ADMIN_ALL',
+      ),
+      'name' => 'PAGES_WRITE',
+    ),
+    'PAGES_PUBLISH' => 
+    array (
+      'title' => '{$_lang_publish}',
+      'default' => 7,
+      'name' => 'PAGES_PUBLISH',
+    ),
+    'RATING_ALL' => 
+    array (
+      'default' => 7,
+      'hide' => true,
+      'implements' => 
+      array (
+        0 => 'RATING_DELETE',
+      ),
+      'name' => 'RATING_ALL',
+    ),
+    'RATING_DELETE' => 
+    array (
+      'title' => '{$_lang_rating.perms_delete}',
+      'default' => 7,
+      'name' => 'RATING_DELETE',
+    ),
+    'admin_smilies' => 
+    array (
+      'title' => '{$_lang_admin_smilies}',
+      'default' => 7,
+      'name' => 'admin_smilies',
+    ),
+  ),
+  'tables' => 
+  array (
+    'advrights' => 'advrights',
+    'groups' => 'group',
+    'uploads' => 'uploads',
+    'imageuploads' => 'imageuploads',
+    'statistics' => 'livecounter',
+    'users' => 'user',
+    'newsettings' => 'newsettings',
+    'metasettings' => 'metasettings',
+    'templatesettings' => 'templatesettings',
+    'boxes' => 'boxes',
+    'pages' => 'pages',
+    'Box_statistics' => 'statistics',
+    'pagecomments' => 'pagecomments',
+    'Page_article' => 'article',
+    'Page_contact' => 'contact',
+    'Page_errorpage' => 'errorpage',
+    'pm' => 'pm',
+    'rating' => 'rating',
+    'smilies' => 'smilies',
+  ),
+  'database' => 
+  array (
+    'advrights' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'autorid' => 'int(10)',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("advrights")',
+      'created' => 'int(90)',
+      'name' => 'varchar(200)',
+      '_default' => 'int(10)',
+      'title' => 'varchar(200)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'advrights_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'groups' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("group")',
+      'created' => 'int(90)',
+      'name' => 'varchar(100)',
+      'rights' => 'int(2)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'groups_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'uploads' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("imageuploads","uploads")',
+      'created' => 'int(90)',
+      'filename' => 'varchar(100)',
+      'realfile' => 'varchar(300)',
+      'path' => 'varchar(200)',
+      'type' => 'enum(\'collection\',\'file\')',
+      'collectionid' => 'int(10)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'uploads_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'imageuploads' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'width' => 'int(5)',
+      'height' => 'int(5)',
+      'thumbLeft' => 'int(3)',
+      'thumbTop' => 'int(3)',
+      'thumbWidth' => 'int(3)',
+      'thumbHeight' => 'int(3)',
+      'collectionid' => 'int(10)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'statistics' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("livecounter")',
+      'created' => 'int(90)',
+      'user' => 'varchar(200)',
+      'phpsessid' => 'varchar(800)',
+      'mobile' => 'int(1)',
+      'browser' => 'varchar(200)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'statistics_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'users' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("user")',
+      'created' => 'int(90)',
+      'nickname' => 'varchar(200)',
+      'name' => 'varchar(200)',
+      'email' => 'varchar(200)',
+      'password' => 'varchar(200)',
+      'avatar' => 'varchar(200)',
+      'signatur' => 'text',
+      'status' => 'int(2)',
+      'phpsess' => 'varchar(200)',
+      'code' => 'varchar(200)',
+      'timezone' => 'enum("Europe/Berlin","Europe/London","Europe/Paris","Europe/Helsinki","Europe/Moscow","Europe/Madrid","Pacific/Kwajalein","Pacific/Samoa","Pacific/Honolulu","America/Juneau","America/Los_Angeles","America/Denver","America/Mexico_City","America/New_York","America/Caracas","America/St_Johns","America/Argentina/Buenos_Aires","Atlantic/Azores","Atlantic/Azores","Asia/Tehran","Asia/Baku","Asia/Kabul","Asia/Karachi","Asia/Calcutta","Asia/Colombo","Asia/Bangkok","Asia/Singapore","Asia/Tokyo","Australia/Darwin","Pacific/Guam","Asia/Magadan","Asia/Kamchatka","Africa/Abidjan","Africa/Asmera","Africa/Blantyre","Africa/Ceuta","Africa/Douala","Africa/Johannesburg","Africa/Windhoek","Africa/Sao_Tome","Africa/Timbuktu","Africa/Niamey")',
+      'groupid' => 'int(10)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'users_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'newsettings' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("metasettings","templatesettings","newsettings")',
+      'created' => 'int(90)',
+      'titel' => 'varchar(50)',
+      'register' => 'varchar(100)',
+      'register_enabled' => 'enum("0","1")',
+      'register_email' => 'enum("0","1")',
+      'gzip' => 'enum("0","1")',
+      'livecounter' => 'enum("0","1")',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'newsettings_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'metasettings' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'meta_keywords' => 'varchar(100)',
+      'meta_description' => 'varchar(100)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'templatesettings' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'stpl' => 'varchar(64)',
+      'css_standard' => 'text',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'boxes' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("box","login_meinaccount","phpbox","statistics","boxes")',
+      'created' => 'int(90)',
+      'title' => 'varchar(100)',
+      'text' => 'text',
+      'border' => 'enum("0","1")',
+      'sort' => 'int(3)',
+      'seiteid' => 'varchar(50)',
+      'width' => 'varchar(5)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'boxes_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'pages' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector","pages")',
+      'created' => 'int(90)',
+      'path' => 'varchar(500)',
+      'rights' => 'int(2)',
+      'mainbar' => 'int(1)',
+      'mainbartitle' => 'varchar(200)',
+      'title' => 'varchar(200)',
+      'data' => 'text',
+      'sort' => 'int(8)',
+      'search' => 'int(1)',
+      'editright' => 'text',
+      'meta_description' => 'varchar(200)',
+      'meta_keywords' => 'varchar(200)',
+      'edit_type' => 'varchar(10)',
+      'viewer_type' => 'varchar(20)',
+      'readpassword' => 'varchar(50)',
+      'parentid' => 'int(10)',
+      'showcomments' => 'int(1)',
+      'rating' => 'int(1)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'pages_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'Box_statistics' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'today' => 'int(1)',
+      'last2' => 'int(1)',
+      'last30d' => 'int(1)',
+      'whole' => 'int(1)',
+      'online' => 'int(1)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'pagecomments' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("pagecomments")',
+      'created' => 'int(90)',
+      'name' => 'varchar(200)',
+      'text' => 'text',
+      'timestamp' => 'int(200)',
+      'pageid' => 'int(10)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'pagecomments_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'Page_article' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'description' => 'text',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'Page_contact' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'email' => 'varchar(200)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'Page_errorpage' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'code' => 'varchar(50)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+    ),
+    'pm' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("pm")',
+      'created' => 'int(90)',
+      'subject' => 'varchar(200)',
+      'text' => 'text',
+      'time' => 'int(20)',
+      'sig' => 'int(1)',
+      'hasread' => 'int(1)',
+      'tid' => 'int(10)',
+      'fromid' => 'int(10)',
+      'toid' => 'int(10)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'pm_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'rating' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("rating")',
+      'created' => 'int(90)',
+      'name' => 'varchar(200)',
+      'rates' => 'int(10)',
+      'rating' => 'int(11)',
+      'rators' => 'text',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'rating_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'smilies' => 
+    array (
+      'id' => 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
+      'last_modified' => 'int(90)',
+      'class_name' => 'enum("smilies")',
+      'created' => 'int(90)',
+      'image' => 'varchar(200)',
+      'description' => 'varchar(200)',
+      'code' => 'varchar(200)',
+      'autorid' => 'int(10)',
+      'editorid' => 'int(10)',
+      'recordid' => 'int(10)',
+      'snap_priority' => 'int(10)',
+    ),
+    'smilies_state' => 
+    array (
+      'id' => 'int(10)',
+      'stateid' => 'int(10)',
+      'publishedid' => 'int(10)',
+    ),
+    'many_many_group_advrights_advrights' => 
+    array (
+      'id' => 'int(10)',
+      'groupid' => 'int(10)',
+      'advrightsid' => 'int(10)',
+    ),
+    'many_many_user_groups_group' => 
+    array (
+      'id' => 'int(10)',
+      'userid' => 'int(10)',
+      'groupid' => 'int(10)',
+    ),
+    'many_many_pages_edit_groups_group' => 
+    array (
+      'id' => 'int(10)',
+      'pagesid' => 'int(10)',
+      'groupid' => 'int(10)',
+    ),
+    'many_many_pages_viewer_groups_group' => 
+    array (
+      'id' => 'int(10)',
+      'pagesid' => 'int(10)',
+      'groupid' => 'int(10)',
+    ),
+  ),
+);

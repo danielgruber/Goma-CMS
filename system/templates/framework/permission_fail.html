@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de" xml:lang="de">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>500 - Permission Error</title>
+		<link rel="stylesheet" href="system/templates/css/default.css" />
+		<link rel="stylesheet" href="system/templates/admin/style.css" />
+		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	</head>
+	<body id="wrapper_logout">
+		<!--<div id="wrapper_logout">-->
+			
+			<div class="wrapper_inner">
+				<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+				<div class="header">
+					<h1>Goma Framework</h1>
+				</div>
+				<div class="content">
+					<h3>500 - Permission Error</h3>
+					<p>Some Permissions are not set correctly. Please set the following Permissions:</p>
+					<ul>
+						{$permission_errors}
+					</ul>
+				</div>
+			</div>
+		<!--</div>-->
+	</body>
+</html>

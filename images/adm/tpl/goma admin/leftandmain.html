@@ -1,0 +1,53 @@
+
+<table width="100%" class="leftandmaintable">
+	<tr>
+		<td class="td main">
+			$CONTENT
+		</td>
+		<td class="td left">
+			<div id="leftwrapper">
+				<div class="topwrapper">
+					<div class="create content_container">
+						<h2><% lang("Create", "Create") %></h2>
+						<div>
+							<form method="get" action="{BASE_SCRIPT}$AdminURI/add/">
+								<select name="type">
+									<% CONTROL types() %>
+										<option value="{$types.value}">{$types.title.text()}</option>
+									<% ENDCONTROL %>
+								</select>
+								<input class="button" type="submit" value="<% lang("Create", "Create") %>" />
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="content_container">
+					<h2><% lang("tree", "Tree") %></h2>
+					<div>
+						<div class="classtree">
+							<div class="treesearch">
+								<form method="get" action="">
+									<input type="text" name="searchtree" value="{$searchtree}" />
+								</form>
+							</div>
+							<div class="treewrapper">
+								$SITETREE
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="legend content_container">
+					<h2>{$_lang_legend}</h2>
+					<div>
+						<% CONTROL legend() %>
+							<div class="{$legend.class}">
+								<span>&bull; {$legend.title}</span>
+							</div>
+						<% ENDCONTROL %>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>

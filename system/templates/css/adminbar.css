@@ -1,0 +1,16 @@
+/*adminbar*/
+#header_admin_bar
+{
+	padding-left: 30px;
+	text-align: center;
+	background: #6f6f6f;
+}
+#header_admin_bar div
+{
+	padding: 7px;
+	padding-right: 30px;
+}
+#header_admin_bar a
+{
+	color: #f5f5f5;
+}

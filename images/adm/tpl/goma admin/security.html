@@ -1,0 +1,122 @@
+<h1>{$_lang_sec_security}</h1>
+<div class="ui-state-highlight ui-corner-all" style="padding:5px;">
+		<span class="ui-icon ui-icon-info" style="float: left; margin-right: 0.3em;"  style="padding:0px;"></span>
+		{$_lang_sec_info}
+
+	</div>
+<h3>{$_lang_sec_this}</h3>
+<script type="text/javascript">
+    // <![CDATA[
+	  function checkall()
+	  {
+	        $("input[type=checkbox]").attr('checked','checked');
+	  }
+	  function uncheckall()
+	  {
+	        $("input[type=checkbox]").removeAttr('checked');
+	  }
+	// ]]>
+</script>
+<form method="post" action="admin/security.html?del">
+	<table width="100%" cellspacing="0" style="border: 1px solid #cfcfcf;">
+		<tr style="background-image: url(images/menu.png);background-repeat: repeat-x;height: 30px;">
+			<td>
+				 
+			</td>
+			<td width="100">
+				<strong>{$_lang_time}</strong>
+			</td>
+			<td width="150">
+				<strong>{$_lang_name}</strong>
+			</td>
+			<td>
+			</td>
+			<td width="60">
+				<strong>{$_lang_ip}</strong>
+			</td>
+			<td width="150">
+				<strong>{$_lang_browser}</strong>
+			</td>
+			<td width="150">
+				<strong>{$_lang_url}</strong>
+			</td>
+			<td width="150">
+				<strong>{$_lang_nickname}</strong>
+			</td>
+			<td width="10">
+				<strong>{$_lang_sec_level}</strong>
+			</td>
+
+		</tr>
+		<!-- CONTROL this -->
+		<tr>
+			<td  style="background-color: #f5f5f5;">
+				<input type="checkbox" name="this[]" value="{$this.id}" />
+			</td>
+			<td width="100">
+				{date:$this.date}
+			</td>
+			<td  style="background-color: #f5f5f5;" width="150">
+				{text:$this.name}
+			</td>
+			<td>
+				{parselang:$this.description}
+			</td>
+			<td  style="background-color: #f5f5f5;" width="60">
+				{text:$this.ip}
+			</td>
+			<td width="150">
+				{text:$this.browser}
+			</td>
+			<td  style="background-color: #f5f5f5;" width="150">
+				{text:$this.path}
+			</td>
+			<td width="150">
+				{text:$this.login}
+			</td>
+			<td  style="background-color: #f5f5f5;" width="10">
+				<strong>{text:$this.level}</strong>
+			</td>
+
+		</tr>
+		<!-- ENDCONTROL this -->
+		<tr style="background-image: url(images/menu.png);background-repeat: repeat-x;height: 30px;">
+			<td>
+				 
+			</td>
+			<td width="100">
+				<strong><a href="javascript: void(0);" onclick="checkall();">{$_lang_sec_checkall}</a></strong>
+			</td>
+			<td width="150">
+				<strong><a href="javascript: void(0);" onclick="uncheckall();">{$_lang_sec_uncheckall}</a></strong>
+			</td>
+			<td>
+				<div>{$_lang_sec_page}:	
+					<!-- CONTROL pages -->
+						<!-- IF pages.black -->
+							{$pages.page}
+						<!-- ELSE -->
+							<a href="admin/security.html?pa={$pages.page}">{$pages.page}</a>
+						<!-- ENDIF -->
+					<!-- ENDCONTROL pages -->
+				</div>
+			</td>
+			<td width="60">
+				{$_lang_sec_checked}: <input style="border: 0;" type="image" src="images/16x16/del.png" />
+			</td>
+			<td width="150">
+				
+			</td>
+			<td width="150">
+				<a href="{$_GET_mpage}.{$_GET_end}?delall">{$_lang_all} {$_lang_delete}</a>
+			</td>
+			<td width="150">
+				
+			</td>
+			<td width="10">
+				
+			</td>
+
+		</tr>
+	</table>
+</form>

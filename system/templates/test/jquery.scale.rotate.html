@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base href="{BASE_URI}" />
+		<title>Scale-Rotate-Test</title>
+		
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "loader" %>
+		
+		<% GLOAD "jquery.scale.rotate"
+	</head>
+	<body>
+		
+		<script type="text/javascript">
+			$(function(){
+				$("#scale-it").css("background", "red");
+				$("#scale-it").css("width", "300px");
+				$("#scale-it").css("height", "300px");
+				$("#scale-it").css("margin", "10px");
+				$("#scale-it").scale(0.5);
+				if($.browser.msie && getInternetExplorerVersion() < 9) {
+					$("#scale-it").hover(function(){
+						$(this).scale(1);
+					}, function(){
+						if($(this).scale() == 1) {
+							$(this).scale(0.5);	
+						} else {
+							$(this).scale(0.5);
+						}
+						
+					});
+
+				} else {
+					$("#scale-it").hover(function(){
+						$(this).stop().animate({scale: 1}, 250);
+					}, function(){
+						if($(this).scale() == 1) {
+							$(this).stop().delay(300).animate({scale: 0.5}, 250);	
+						} else {
+							$(this).stop().animate({scale: 0.5}, 250)
+						}
+						
+					});
+				}
+			});
+		</script>
+		<div id="scale-it">
+			This will be scaled ;)
+		</div>
+
+	</body>
+</html>

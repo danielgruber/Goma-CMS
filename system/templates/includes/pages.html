@@ -1,0 +1,10 @@
+<div class="pages">
+	<% lang("page", "Page") %>
+	<% CONTROL pages() %>
+		<% IF $pages.black %>
+			$pages.page
+		<% ELSE %>
+			<a href="{URL}{URLEND}?pa=$pages.page">$pages.page</a>
+		<% ENDIF %>
+	<% ENDCONTROL %>
+</div>

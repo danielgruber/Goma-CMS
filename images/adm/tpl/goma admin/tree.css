@@ -1,0 +1,132 @@
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 13.06.2011
+*/
+
+.tree {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow: hidden;
+	background: #eee;
+}
+.tree ul {
+	list-style: none;
+	padding-left: 0px;
+	background-image: none;
+}
+.tree > li {
+	padding: 0 !important;
+}
+
+
+/* fix for IE6 */
+* html .hitarea {
+	display: inline;
+	float:none;
+	background: transparent;
+}
+
+
+.tree li { 
+	margin: 0;
+	padding: 0;
+	padding-left: 25px;
+}
+
+.tree li .a > .b > a {
+	color: #000000;
+	display: block;
+}
+.tree li .a > .b > a :hover {
+	text-decoration: none;
+}
+
+
+.tree li.collapsed > ul {
+	display: none;
+}
+.tree li.expanded > ul {
+	display: block;
+}
+
+.tree li div {
+	width: 9px;
+	height: 9px;
+	display: block;
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	background: #ffffff;
+}
+.tree li div  a
+{
+	width: 9px;
+	height: 9px;
+	display: block;
+}
+
+.tree .a {
+	display: block;
+	margin: 0;
+	padding: 0;
+	margin-left: -300px;
+	padding-left: 300px;
+}
+
+.tree .a:hover {
+	background: url(images/tree_hover.png) repeat-x;
+	color: #fff;
+	font-weight: bold;
+}
+.tree .a:hover * {
+	color: #fff;
+}
+.tree .marked {
+	background: url(images/tree_hover.png) repeat-x;
+	color: #fff;
+	font-weight: bold;
+}
+.tree .marked * {
+	color: #fff;
+}
+
+.tree .b {
+	padding: 4px;
+	position: relative;
+	
+}
+.hitarea {
+	background: transparent !important;
+}
+.hitarea a {
+	margin: -4px -6px -9px -6px;
+	padding: 4px 6px 9px 6px;
+	background-position: 6px 6px !important;
+}
+.tree li.collapsed > .a > .b > div > a {
+	background: transparent url(images/pfeil_close.png) no-repeat;
+}
+.tree li.expanded  > .a > .b > div > a { 
+	background: transparent url(images/pfeil.png) no-repeat;
+}
+.tree li.collapsed > .marked > .b > div > a, .tree li.collapsed > .a:hover > .b > div > a {
+	background-image: url(images/pfeil_active_close.png);
+}
+.tree li.expanded > .marked > .b > div > a, .tree li.expanded > .a:hover > .b > div > a {
+	background-image: url(images/pfeil_active.png);
+}
+
+.tree .b { background: none; }
+.tree li.collapsable > .a > .b, .tree li.expandable > .a > .b { background-position: 0 -176px; }
+
+.tree li.last > .a > .b { background-position: 0 -1766px }
+.tree li.last > ul {
+	background-image: none;
+}
+.tree a.page span { background-image: url(../../../images/icons/fatcow-icons/16x16/file.png); }
+.tree a span { background-repeat: no-repeat; background-position: 0 0; }
+.tree .b, .tree .b a span { padding-left: 18px; display: block; } 

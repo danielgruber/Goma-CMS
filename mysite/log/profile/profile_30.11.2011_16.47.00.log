@@ -1,0 +1,65 @@
+Profile v. 1.1 Log
+Time: 30.11.2011 - 16:47
+System: Goma v.2.0.0 - 017 PHP 5.3.3
+Profile-Time: 46.100616455078ms
+URL: /?profile
+Memory-Peak-Usage: 15129K
+Times: 
+
+calls   execution time     Memory             name
+---------------------------------------------------------------------
+
+1       12.501ms (14.62%)   3268K (22.1668%)    init
+1       0.0532ms (0.06%)    4K (0.0297%)        session
+1       6.2001ms (7.25%)    1683K (11.4187%)    core_requires
+1       5.861ms (6.85%)     1570K (10.6498%)    preloads
+95      3.5913ms (4.2%)     211K (1.4289%)      Object::__construct
+57      2.6107ms (3.05%)    201K (1.3661%)      ClassInfo::setSaveVars
+1       6.3641ms (7.44%)    1265K (8.5774%)     loadFramework
+1       3.5419ms (4.14%)    839K (5.6909%)      classinfo
+14      3.0541ms (3.57%)    28K (0.1905%)       resources::Add
+108     2.8567ms (3.34%)    -49K (-0.3321%)     Core::getCMSVar
+1       0.0141ms (0.02%)    1K (0.0082%)        autoloader
+1       1.4431ms (1.69%)    190K (1.288%)       Core::Init
+1       0.706ms (0.83%)     127K (0.8632%)      i18n::Init
+2       0.5059ms (0.59%)    138K (0.937%)       cacher
+18      5.4696ms (6.4%)     1260K (8.5495%)     Object::instance
+1       4.1502ms (4.85%)    1298K (8.8025%)     settings
+30      0.531ms (0.62%)     39K (0.2643%)       autoloader::load
+30      13.438ms (15.72%)   4294K (29.1224%)    autoloader_require
+21      1.735ms (2.03%)     489K (3.3168%)      DataObject::__construct
+524     25.8367ms (30.22%)  1926K (13.0657%)    Object::method_exists
+338     7.5054ms (8.78%)    315K (2.1382%)      Object::method_exists after
+201     33.8404ms (39.58%)  2439K (16.5423%)    ViewAccessableData::getOffset
+11      17.2179ms (20.14%)  1461K (9.9066%)     DataObject::getRecords
+11      0.221ms (0.26%)     12K (0.0845%)       getwholedata::hash
+15      9.712ms (11.36%)    1133K (7.6849%)     DataObject::buildExtendedQuery
+15      6.0434ms (7.07%)    478K (3.2411%)      DataObject::buildQuery
+15      2.0511ms (2.4%)     102K (0.6948%)      SelectQuery::build
+19      8.6162ms (10.08%)   29K (0.1998%)       sql::query
+1       53.103ms (62.11%)   4450K (30.185%)     render
+25      0.6826ms (0.8%)     54K (0.3687%)       request::match
+1       11.74ms (13.73%)    572K (3.8773%)      livecounter
+4       3.7243ms (4.36%)    152K (1.0286%)      DataObject::getAggregate
+3       0.4077ms (0.48%)    6K (0.0412%)        classinfo::getChildren
+1       7.6201ms (8.91%)    223K (1.5126%)      DataObject::writeRecord
+4       3.0479ms (3.56%)    14K (0.0934%)       MySQLi::writeManipulation
+5       59.1524ms (69.18%)  4011K (27.2067%)    tpl::parser
+8       2.0256ms (2.37%)    36K (0.2434%)       tpl::buildFilesForTemplate
+8       1.117ms (1.31%)     12K (0.0805%)       tplcache
+1       25.918ms (30.31%)   1473K (9.9879%)     tpl_run /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/templates/pages/box.html
+2       0.025ms (0.03%)     2K (0.0154%)        HTMLNode::html
+2       34.3947ms (40.23%)  1997K (13.5462%)    tpl_run /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/templates/boxes/boxes.html
+34      1.7278ms (2.02%)    113K (0.7692%)      ViewAccessableData::makeObject
+4       31.5881ms (36.94%)  2238K (15.1792%)    loops
+1       40.786ms (47.7%)    2409K (16.3427%)    serve
+1       39.259ms (45.92%)   2342K (15.8881%)    tpl_run /var/www/vhosts/ibpg.eu/filmteam-dev/tpl/Paderklicke/site.html
+1       0.988ms (1.16%)     38K (0.2556%)       DataObject::getGroupedRecords
+1       0.9201ms (1.08%)    44K (0.2957%)       tpl_run /var/www/vhosts/ibpg.eu/filmteam-dev/system/templates/boxes/login.html
+1       0.9089ms (1.06%)    38K (0.2607%)       getBody
+1       0.7062ms (0.83%)    30K (0.2066%)       HTMLParser::parseHTML
+2       0.036ms (0.04%)     4K (0.024%)         HTMLParser::js
+1       0.4311ms (0.5%)     13K (0.0905%)       Resources::get
+1       0.3741ms (0.44%)    3K (0.0212%)        Resources::generateFiles
+======================================================================
+        85.5024ms (100%)    14743K              Whole Execution

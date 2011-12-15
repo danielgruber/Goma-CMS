@@ -1,0 +1,99 @@
+/**
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 08.06.2011
+  * $Version 2.0.0 - 001
+*/
+
+
+body {
+	color: #222;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+a, a:visited {
+	text-decoration: none;
+	color:  #288b0a;
+}
+a:hover
+{
+		 color:  inherit;
+         text-decoration: underline;
+}
+img
+{
+	border: 0;
+}
+p
+{
+	margin: 2px;
+}
+
+.button
+{
+	font-weight: bold;
+	background: url(images/buttons.png) repeat-x;
+	background-position: 0 -90px;
+	font-size: 10px;
+	padding: 4px 10px 4px 10px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #9f9f9f;
+	color: #222;
+	text-transform:uppercase;
+	text-shadow: #f5f5f5 1px 1px 1px;
+	font-family:	MS Shell Dlg;
+	margin: 5px;
+	cursor: pointer;
+}
+a.button
+{
+	color: #222;
+	width: auto;
+	text-decoration: none !important;
+	padding: 5px 10px 5px 10px;
+	display: inline-block;
+}
+.button:hover
+{
+	-moz-box-shadow:0 0  6px #999;
+	-webkit-box-shadow: 0 0 6px #999;
+	box-shadow: 0 0 6px #999;
+	border-color:#999 !important;
+}
+.button:active
+{
+	background-position: 0 0px;
+}
+
+input.red, a.red
+{
+	text-shadow: none;
+	border: 1px solid #ef4f3f;
+	background: url(images/buttons.png) repeat-x;
+	background-position: 0 -60px;
+}
+
+.red:hover
+{
+	-moz-box-shadow:0 0 6px #ed616b;
+	-webkit-box-shadow:0 0 6px #ed616b;
+	box-shadow:0 0 6px #ed616b;
+	border-color:#ef4f3f !important;
+}
+
+input.red:active, a.red:active
+{
+	background-position: 0 -30px;
+}
+.left {
+	float: left;
+}
+.right {
+	float: right;
+}
+

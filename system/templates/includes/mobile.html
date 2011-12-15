@@ -1,0 +1,9 @@
+<% IF isMobileAvailable() %>
+	<div id="mobileswitcher">
+		<% IF isMobile() %>
+			<a href="system/setMobile/0"><% lang("classic_version", "Classic Version") %></a>
+		<% ELSE %>
+			<a href="system/setMobile/1"><% lang("mobile_version", "Mobile Version") %></a>
+		<% END %>
+	</div>
+<% END %>

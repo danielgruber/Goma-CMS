@@ -1,0 +1,10 @@
+<select class="langselect" name="setlang">
+	<% CONTROL languages() AS $lang %>
+		<% IF $lang.active %>
+			<option value="$lang.name" selected="selected">$lang.title</option>
+		<% ELSE %>
+			<option value="$lang.name">$lang.title</option>
+		<% END %>
+		
+	<% ENDCONTROL %>
+</select>

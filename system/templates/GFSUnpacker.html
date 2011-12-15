@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<% IF $reload %>
+			<meta http-equiv="refresh" content="2" />
+		<% END %>
+		<title>Unpacking Archive $archive</title>
+		<base href="{BASE_URI}" />
+		<link rel="stylesheet" href="system/templates/css/default.css" />
+		<link rel="stylesheet" href="system/templates/admin/style.css" />
+		<style type="text/css">
+			h3 {
+				padding-left: 4px;
+			}
+			.current {
+				color: #888;
+				padding: 5px;
+			}
+			#progress {
+				margin: 0px 5px;
+			}
+			.wholeprogress {
+				width: 600px;
+				height: 20px;
+				border: 1px solid #999;
+				background: #fff;
+			}
+			.currentprogress {
+				height: 20px;
+				background: #aaa;
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function() {
+				document.getElementById("reload").style.display = "none";
+				setTimeout(function(){
+					location.reload();
+				}, 1900);
+			}
+		</script>
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+				<div class="header">
+					<a href=""><h1>Goma CMS</h1></a>
+				</div>
+				<div class="content">
+					<h3>$status</h3>
+					
+					<div id="progress">
+						<div class="wholeprogress">
+							<div class="currentprogress" style="width: <% echo $progress * 6 %>px;"></div>
+						</div>
+					</div>
+					<div class="current">$current &nbsp; $remaining</div>
+					<div id="reload">
+					<% IF $reload %>
+						If this page doesn't reload within 4 seconds, please click here: <a href="">Reload</a>
+					<% END %>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

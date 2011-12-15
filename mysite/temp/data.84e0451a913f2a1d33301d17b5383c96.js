@@ -1,0 +1,17 @@
+self.CSSLoadedResources['system/templates/css/box.css'] = '';self.CSSIncludedResources['system/templates/css/box.css'] = true;
+var current_project = 'mysite';var root_path = '/';var BASE_SCRIPT = '';var is_mobile = false;
+self.CSSLoadedResources['system/templates/css/default.css'] = '';self.CSSIncludedResources['system/templates/css/default.css'] = true;
+self.CSSLoadedResources['system/templates/css/dropdown.css'] = '';self.CSSIncludedResources['system/templates/css/dropdown.css'] = true;
+var loading_lang = 'Laden...';
+self.CSSLoadedResources['system/templates/css/form.css'] = '';self.CSSIncludedResources['system/templates/css/form.css'] = true;
+var lang_search = 'Suchen...';
+var lang_no_result = 'Es wurden keine Daten gefunden';
+self.CSSLoadedResources['system/templates/css/tabs.css'] = '';self.CSSIncludedResources['system/templates/css/tabs.css'] = true;
+var CKEDITOR_BASEPATH = "http://dev.filmteam-kraus.de/system/libs/thirdparty/ckeditor/";
+self.CSSLoadedResources['system/templates/css/ckeditor_goma.css'] = '';self.CSSIncludedResources['system/templates/css/ckeditor_goma.css'] = true;
+var lang_page = 'Seite';
+var url__submit = "/system/forms/edit_contentadmin3/_submit/";
+var url__publish = "/system/forms/edit_contentadmin3/_publish/";
+var gloader_data = {"dialog":{"file":"system\/libs\/javascript\/bluebox.js","required":["draggable"]},"draggable":{"file":"system\/libs\/javascript\/ui\/draggable.js","required":[]},"dropable":{"file":"system\/libs\/javascript\/ui\/dropable.js","required":[]},"con":{"file":"system\/libs\/javascript\/container.min.js","required":["draggable"]},"shadowbox":{"file":"system\/libs\/javascript\/shadowbox.min.js","required":[]},"sortable":{"file":"system\/libs\/javascript\/ui\/sortable.js","required":[]},"selectable":{"file":"system\/libs\/javascript\/ui\/selectable.js","required":[]},"resizable":{"file":"system\/libs\/javascript\/ui\/resizable.js","required":[]},"accordion":{"file":"system\/libs\/javascript\/ui\/accordion.js","required":[]},"autocomplete":{"file":"system\/libs\/javascript\/ui\/autocomplete.js","required":[]},"button":{"file":"system\/libs\/javascript\/ui\/button.js","required":[]},"uidialog":{"file":"system\/libs\/javascript\/ui\/dialog.js","required":["button","resizable","draggable"]},"slider":{"file":"system\/libs\/javascript\/ui\/slider.js","required":[]},"tabs":{"file":"system\/libs\/javascript\/ui\/tabs.js","required":[]},"gtabs":{"file":"system\/libs\/tabs\/tabs.js","required":[]},"progessbar":{"file":"system\/libs\/javascript\/ui\/progessbar.js","required":[]},"tree":{"file":"system\/libs\/javascript\/tree.js","required":[]},"orangebox":{"file":"system\/libs\/javascript\/orangebox\/js\/orangebox.min.js","required":[]},"datepicker":{"file":"system\/libs\/javascript\/ui\/datepicker.js","required":[]},"uiEffects":{"file":"system\/libs\/javascript\/ui\/effects.js","required":[]},"touch":{"file":"system\/libs\/javascript\/ui\/jquery.ui.touch.js","required":[]},"jquery.scale.rotate":{"file":"system\/libs\/javascript\/jquery.scale.rotate.js","required":[]},"g_infobox":{"file":"system\/libs\/javascript\/infobox.js","required":[]},"dropdownDialog":{"file":"system\/libs\/javascript\/dropdownDialog.js","required":[]}};
+gloader.loaded['modernizr'] = true;
+gloader.loaded['gtabs'] = true;

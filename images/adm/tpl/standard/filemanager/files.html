@@ -1,0 +1,61 @@
+<table>
+	<thead>
+		<tr class="grey bold">
+			<td>
+			
+			</td>
+			<td>
+				{$_lang_filemanager_filename}
+			</td>
+			<td>
+				{$_lang_filemanager_last_modified}
+			</td>
+			<td>
+				{$_lang_filemanager_filesize}
+			</td>
+		</tr>
+	</thead>
+	<tbody id="filesholder" style="overflow: auto;overflow-x: hidden;">
+		<% CONTROL this() %>
+			<% IF $this.dir %>
+				<% IF $this.grey %>
+					<tr class="grey folder" title="{$this.file}">
+				<% ELSE %>
+					<tr class="folder" title="{$this.file}">
+				<% END %>
+					<td>
+						<img src="{$this.icon.small}" alt="{$this.icon.small}" />
+					</td>
+					<td>
+						<a title="{$this.path}" class="directorylink" onclick="return false;">$this.filename</a>
+					</td>
+					<td>
+						$this.last_modified.date()
+					</td>
+					<td>
+						
+					</td>
+				</tr>
+			<% ELSE %>
+				<% IF $this.grey %>
+					<tr class="grey file" title="{$this.filename}">
+				<% ELSE %>
+					<tr class="file" title="{$this.filename}">
+				<% END %>
+					<td>
+						<img src="{$this.icon.small}" alt="{$this.icon.small}" />
+					</td>
+					<td>
+						$this.filename
+					</td>
+					<td>
+						$this.last_modified.date()
+					</td>
+					<td>
+						$this.filesize.text()
+					</td>
+				</tr>
+			<% END %>
+		<% ENDCONTROL %>
+	</tbody>
+</table>

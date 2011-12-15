@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %><% END %></title>
+		
+		<!-- some css -->
+		<% INCLUDE_CSS "admin/style.css" %>
+		<% INCLUDE_CSS "box.css" %>
+		<% INCLUDE_CSS "jqueryui/theme.css" %>
+		
+		{$header}
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<div class="logo_wrapper">
+					<div class="beside_logo">
+						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
+					</div>
+					<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+				</div>
+				<div class="header">
+					<h1>$_cms_ptitle - <% lang("administration", "Admin-Panel") %></h1>
+				</div>
+				<div class="content">
+					<% lang("page_wartung", "This Site is currently under maintenance. Please check back soon.") %>
+					
+					<% IF $content %>
+						$content
+					<% ELSE %>
+						
+						<form action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REQUEST_URI.url()}" method="post">
+							<table>
+								<tr class="hide-on-js">
+									<td><label  style="cursor:pointer;" for="admin_name">{$_lang_username}</label></td> 
+								</tr>
+								<tr>
+									<td><input style="width: 150px;" type="text" placeholder="{$_lang_username}" title="{$_lang_username}" name="user" id="admin_name" size="20" /></td>
+								</tr>
+								<tr class="hide-on-js">
+									<td><label style="cursor:pointer;" for="admin_pwd"> {$_lang_password}</label></td> 
+								</tr>
+								<tr>
+									<td><input style="width: 150px;" type="password" placeholder="{$_lang_password}" title="{$_lang_password}" id="admin_pwd" name="pwd" size="20" /></td>
+								</tr>
+								<!--<tr>
+									<td>
+										<% INCLUDE "lang.html" %>
+									</td>
+								</tr>-->
+								<tr>
+									<td>
+										<div><input class="button" type="submit" value="<% lang('perform_login', 'Login') %>"  /></div>
+										<div class="subline"><a href="{ROOT_PATH}"><% lang("back", "back") %></a>&nbsp;|&nbsp;<a href="{BASE_SCRIPT}profile/lost_password{URLEND}">{$_lang_lost_password}</a></div>
+									</td>
+								</tr>
+							</table>
+						</form>
+					<% END %>
+					
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

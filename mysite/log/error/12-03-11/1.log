@@ -1,0 +1,90 @@
+03.12.2011 - 00:07: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322867273'  ,  `created` = '1322832419'  ,  `user` = '3'  ,  `phpsessid` = 'q0apq1b4fq2a1k8htrnij3otp1'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '48'  ,  `snap_priority` = '2'  WHERE `id` = '381' (33.582210540771ms)
+
+03.12.2011 - 00:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+03.12.2011 - 00:07: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+03.12.2011 - 00:07: Slow SQL-Query: SELECT smilies.autorid AS autorid ,smilies.editorid AS editorid ,smilies.last_modified AS last_modified ,smilies.class_name AS class_name ,smilies.created AS created ,smilies.id AS versionid,smilies_state.id AS id , smilies.* ,  smilies_state.* FROM gomacms_smilies AS smilies  INNER JOIN gomacms_smilies_state AS smilies_state ON  smilies_state.publishedid = smilies.id  WHERE  smilies.class_name IN ("smilies") ORDER BY smilies_state.id DESC (76.176881790161ms)
+
+03.12.2011 - 00:08: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+03.12.2011 - 00:08: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+03.12.2011 - 00:16: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:20: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "386" (158.9720249176ms)
+
+03.12.2011 - 00:31: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322868696') (295.26305198669ms)
+
+03.12.2011 - 00:31: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322868696'  ,  `created` = '1322832419'  ,  `user` = '3'  ,  `phpsessid` = 'q0apq1b4fq2a1k8htrnij3otp1'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '48'  ,  `snap_priority` = '2'  WHERE `id` = '388' (264.59002494812ms)
+
+03.12.2011 - 00:31: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '388'  ,  `stateid` = '388'  WHERE `id` = '48' (156.50701522827ms)
+
+03.12.2011 - 00:31: Slow SQL-Query: DELETE FROM 
+																`gomacms_statistics`
+																 WHERE  id = "387" (202.18205451965ms)
+
+03.12.2011 - 00:31: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:31: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/model/pages/members.php on line 77. Please use DataObject::get instead.
+
+03.12.2011 - 00:31: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/text/bbcode.php on line 199. Please use DataObject::get instead.
+
+03.12.2011 - 00:31: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 00:31: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 01:02: Slow SQL-Query: SELECT pages.autorid AS autorid ,pages.editorid AS editorid ,pages.last_modified AS last_modified ,pages.class_name AS class_name ,pages.created AS created ,pages.id AS versionid,pages_state.id AS id , pages.* ,  Page_article.* ,  Page_contact.* ,  Page_errorpage.* ,  pages_state.* FROM gomacms_pages AS pages  LEFT JOIN gomacms_Page_article AS Page_article ON  Page_article.id = pages.id   LEFT JOIN gomacms_Page_contact AS Page_contact ON  Page_contact.id = pages.id   LEFT JOIN gomacms_Page_errorpage AS Page_errorpage ON  Page_errorpage.id = pages.id   INNER JOIN gomacms_pages_state AS pages_state ON  pages_state.publishedid = pages.id  WHERE  pages.parentid = "0" AND  pages.class_name IN ("pages","page","boxpage","articlecategory","article","articles","contact","errorpage","members","phppage","redirector") ORDER BY pages.sort ASC LIMIT  0, 1 (139.2560005188ms)
+
+03.12.2011 - 01:02: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322870562') (1298.9549636841ms)
+
+03.12.2011 - 01:02: Slow SQL-Query: UPDATE gomacms_statistics SET  `class_name` = 'livecounter'  ,  `last_modified` = '1322870562'  ,  `created` = '1322832419'  ,  `user` = '3'  ,  `phpsessid` = 'q0apq1b4fq2a1k8htrnij3otp1'  ,  `mobile` = '0'  ,  `browser` = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/534.52.7 (KHTML, like Gecko) Version/5.1.2 Safari/534.52.7'  ,  `autorid` = '0'  ,  `editorid` = '3'  ,  `recordid` = '48'  ,  `snap_priority` = '2'  WHERE `id` = '390' (474.34282302856ms)
+
+03.12.2011 - 01:02: DEPRECATED: DataSet::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 277. Please use hasmany_dataobjectset::Count instead.
+
+03.12.2011 - 01:05: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322870747') (166.88108444214ms)
+
+03.12.2011 - 11:21: Slow SQL-Query: SELECT advrights.autorid AS autorid ,advrights.editorid AS editorid ,advrights.last_modified AS last_modified ,advrights.class_name AS class_name ,advrights.created AS created ,advrights.id AS versionid,advrights_state.id AS id , advrights.* ,  advrights_state.* FROM gomacms_advrights AS advrights  INNER JOIN gomacms_advrights_state AS advrights_state ON  advrights_state.publishedid = advrights.id  INNER JOIN `gomacms_many_many_group_advrights_advrights` as `advrights_many` ON `advrights_many`.`advrightsid` = `advrights`.`id` INNER JOIN `gomacms_groups` AS `groups` ON `groups`.`id` = `advrights_many`.`groupid` WHERE  groups.recordid IN ("0") AND  advrights.class_name IN ("advrights") ORDER BY advrights_state.id DESC (43.293952941895ms)
+
+03.12.2011 - 11:23: Slow SQL-Query: UPDATE gomacms_users SET  `class_name` = 'user'  ,  `last_modified` = '1322907782'  ,  `created` = '1320527819'  ,  `nickname` = 'admin'  ,  `name` = 'Daniel Gruber'  ,  `email` = 'daniel@ibpg.eu'  ,  `password` = '75efdb520b7a07ffbba95d669036f8ed'  ,  `avatar` = 'mysite/uploaded/useruploads/dc080ef69f38da68edd17ef50b3ce6e6.jpg'  ,  `signatur` = ''  ,  `status` = '1'  ,  `phpsess` = '7upha351o96kasf5iq3dl33kf7'  ,  `code` = 'WtAaRDK3DxRpi7ds6zGK'  ,  `timezone` = 'Europe/Berlin'  ,  `groupid` = '1'  ,  `autorid` = '1'  ,  `editorid` = ''  ,  `recordid` = '3'  ,  `snap_priority` = '2'  WHERE `id` = '48' (239.09783363342ms)
+
+03.12.2011 - 11:23: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 11:25: Slow SQL-Query: INSERT INTO `gomacms_statistics`  (`last_modified`) VALUES ('1322907949') (39.556980133057ms)
+
+03.12.2011 - 11:41: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 11:41: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 11:41: Slow SQL-Query: UPDATE gomacms_statistics_state SET  `publishedid` = '399'  ,  `stateid` = '399'  WHERE `id` = '48' (28.419971466064ms)
+
+03.12.2011 - 11:45: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 17:05: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 17:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 17:06: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/admin/settingsAdmin.php on line 41. Please use DataObject::get instead.
+
+03.12.2011 - 17:08: Slow SQL-Query: INSERT INTO `gomacms_newsettings`  (`last_modified`) VALUES ('1322928480') (67.811012268066ms)
+
+03.12.2011 - 17:08: Slow SQL-Query: UPDATE gomacms_newsettings_state SET  `publishedid` = '34'  ,  `stateid` = '34'  WHERE `id` = '1' (32.016038894653ms)
+
+03.12.2011 - 17:08: Slow SQL-Query: INSERT INTO `gomacms_newsettings`  (`last_modified`) VALUES ('1322928504') (24.540901184082ms)
+

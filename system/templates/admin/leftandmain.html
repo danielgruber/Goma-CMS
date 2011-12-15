@@ -1,0 +1,62 @@
+<% INCLUDE_CSS "leftandmain.css" %>
+<table width="100%" class="leftandmaintable">
+	<tr>
+		<td class="td main">
+			$CONTENT
+		</td>
+		<td class="td left">
+			<div id="leftwrapper">
+				<div class="topwrapper">
+					<div class="create content_container">
+						<h2><% lang("Create", "Create") %></h2>
+						<div>
+							<form method="get" action="{BASE_SCRIPT}$AdminURI/add/">
+								<select name="model">
+									<% CONTROL types() %>
+										<option value="{$types.value}">{$types.title.text()}</option>
+									<% ENDCONTROL %>
+								</select>
+								<input class="button" type="submit" value="<% lang("Create", "Create") %>" />
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="content_container">
+					<h2><% lang("tree", "Tree") %></h2>
+					<div>
+						<div class="classtree">
+							<div class="treesearch">
+								<form method="get" action="">
+									<input type="text" placeholder="{$_lang_search}" name="searchtree" value="{$searchtree}" />
+								</form>
+							</div>
+							<div class="treewrapper">
+								$SITETREE
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="legend content_container">
+					<h2>{$_lang_legend}</h2>
+					<div>
+						<% CONTROL legend() %>
+							<div class="{$legend.class} legendpoint">
+								<span>
+									<% IF $legend.checkbox AND $legend.checked %> 
+										<input name="$legend.class" type="checkbox" checked="checked" /> 
+									<% ELSE IF $legend.checkbox %> 
+										<input name="$legend.class" type="checkbox" /> 
+									<% ELSE %> 
+										<input name="$legend.class" type="checkbox" checked="checked" disabled="disabled" />
+									<% END %>
+									{$legend.title}
+								</span>
+							</div>
+						<% ENDCONTROL %>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>

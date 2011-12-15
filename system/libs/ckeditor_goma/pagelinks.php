@@ -1,0 +1,64 @@
+<?php
+/**
+  *@package goma framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2011  Goma-Team
+  * last modified: 20.10.2011
+*/
+
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+class PageLinksController extends RequestHandler {
+	/**
+	 * limit for the list
+	*/
+	public $limit = 8;
+	/**
+	 * urls
+	*/
+	public $url_handlers = array(
+		"search/\$search" => "search"
+	);
+	/**
+	 * actions
+	*/
+	public $allowed_actions = array(
+		"search"
+	);
+	/**
+	 * index
+	*/
+	public function search() {
+		if($this->getParam("search")) {
+			$search = $this->getParam("search");
+		} else {
+			$search = "";
+		}
+		$data = DataObject::searchObject("pages", array($search), array(), array(), array(), $this->limit);
+		$output = array("count" => $data->count, "nodes" => array());
+		foreach($data as $record) {
+			$output["nodes"][$record["id"]] = array(
+				"id" 	=> $record["id"],
+				"title"	=> text::protect($record["title"]),
+				"url"	=> $record->path . URLEND
+			);
+		}
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::output("(" . json_encode($output) . ")");
+		exit;
+	}
+	/**
+	 * index
+	*/
+	public function index() {
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::setResHeader(400);
+		HTTPResponse::output(array("error" => "Bad Request", "errno" => 400));
+		exit;
+	}
+}
+
+Core::addRules(array(
+	"api/pagelinks/" => "PageLinksController"
+));

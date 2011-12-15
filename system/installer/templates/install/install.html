@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="de" xml:lang="de">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>Install Goma</title>
+		<% INCLUDE_CSS "admin/style.css" %>
+		<% INCLUDE_CSS "install.css" %>
+		
+		<% INCLUDE_JS_MAIN "jquery" %>
+		<% INCLUDE_JS_MAIN "loader" %>
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<div class="logo_wrapper">
+					<div class="beside_logo">
+						<a href="{BASE_SCRIPT}install/langselect/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
+					</div>
+					<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{$BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+				</div>
+				<div class="header">
+					<a href="{$BASE_URI}"><h1>Goma Framework</h1></a>
+				</div>
+				<div class="content">
+					$content
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

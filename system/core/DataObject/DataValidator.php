@@ -1,0 +1,75 @@
+<?php
+/**
+  * this class is a form-validator, used for dataobject's validation
+  *@package goma
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2010  Goma-Team
+  * last modified: 04.07.2010
+*/
+
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+class DataValidator extends FormValidator
+{
+		/**
+		 *@name __construct
+		 *@param object - dataobject
+		 *@return object
+		*/
+		public function __construct(object $data)
+		{
+				
+				if(!is_subclass_of($data, "dataobject"))
+				{
+						throwError(6, 'PHP-Error', '$data is no child of dataobject in '.__FILE__.' on line '.(__LINE__ - 3).'');
+				}
+				$this->data = $data;
+		}
+		/**
+		 * validates the data
+		 *@name valdiate
+		 *@access public
+		*/
+		public function validate()
+		{
+				$valid = true;
+				$errors = array();
+				if(is_object($this->form->result))
+						$result = $this->form->result->to_array();
+				else
+						$result = $this->form->result;
+				if(is_array($this->data->to_array()))
+				{
+						$_data = array_merge($this->data->to_array(), $result);
+				} else
+				{
+						$_data = $result;
+				}
+				
+				foreach($this->form->result as $field => $data)
+				{
+						if(Object::method_exists($this->data->class, "validate" . $field))
+						{
+								$method = "validate" . $field;
+								$str = $this->data->$method($_data);
+								if($str === true)
+								{
+										// everything ok
+								} else
+								{
+										$valid = false;
+										$errors[] = $str;
+								}
+						}
+				}
+				
+				if($valid)
+				{
+						return true;
+				} else
+				{
+						return implode(",", $errors);
+				}
+		}
+}

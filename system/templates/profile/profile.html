@@ -1,0 +1,39 @@
+<% INCLUDE_CSS "profile.css" %>
+
+<div>
+	<% IF NOT isMobile() %>
+		<div class="profile-left">
+	<% END %>
+		<div>
+		<div class="profile-photo">
+			<% IF $avatar %>
+				<a href="{$avatar.raw()}" rel="dropdownDialog">$avatar.setSize(150, 150)</a>
+			<% ELSE %>
+				<img src="images/no_avatar.png" alt="{$avatar}" />
+			<% END %>
+		</div>
+		</div>
+	<% IF NOT isMobile() %>
+		</div>
+		
+		<div class="profile-content">
+	<% END %>
+	<div>
+		<% IF NOT isMobile() %> 
+			<div class="profile-actions ui-right">
+				$profile_actions
+			</div>
+		<% ELSE %>
+			<div class="profile-actions" style="margin-top: 8px;">
+				$profile_actions
+				<div class="clear"></div>
+			</div>
+		<% END %>
+		<h1>$nickname.text()</h1>
+		$tabs
+	</div>
+	<% IF NOT isMobile() %>
+		</div>
+	<% END %>
+	<div class="clear"></div>
+</div>

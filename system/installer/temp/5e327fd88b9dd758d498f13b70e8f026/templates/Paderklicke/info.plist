@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Type</key>
+	<string>Template</string>
+	<key>Autor</key>
+	<string>Daniel Gruber</string>
+	<key>Settings</key>
+	<array>
+		<dict>
+			<key>name</key>
+			<string>slider</string>
+			<key>title</key>
+			<string>Enable Slider?</string>
+			<key>type</key>
+			<string>switch</string>
+			<key>default</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>image</string>
+			<key>title</key>
+			<string>Header Image, don't upload a file to disable it.</string>
+			<key>type</key>
+			<string>Image</string>
+			<key>default</key>
+			<string></string>
+		</dict>
+	</array>	
+</dict>
+</plist>
