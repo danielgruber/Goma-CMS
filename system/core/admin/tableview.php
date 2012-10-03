@@ -1,36 +1,50 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 21.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 10.05.2012
+  * $Version 1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableView extends AdminItem {
-	public $pages = true;
+	
 	public $perPage = 20;
+	
 	/**
 	 * this is the template for tableview
 	*/
 	public $template = "admin/tableview.html";
+	
 	/**
-	 * this 
+	 * actions 
+	 *
+	 *@name actions
+	 *@access public
 	*/
 	public $actions = array(
 		"edit"		=> '<img src="images/icons/fatcow-icons//16x16/edit.png" alt="{$_lang_edit}" title="{$_lang_edit}" />',
 		"delete"	=> '<img src="images/icons/fatcow-icons/16x16/delete.png" alt="{$_lang_delete}" title="{$_lang_delete}" />',
 		"add"		=> array("{\$_lang_add_data}")
 	);
+	
+	/**
+	 * fields
+	*/
 	public $fields = array();
-	public $url_handlers = array(
-		"deletemany"	=> "deletemany"
-	);
-	public $allowed_actions = array(
-		"deletemany"
-	);	
+	
+	/**
+	 * defines if search is enabled
+	 * you need at least one field with table-relation
+	 *
+	 *@name search
+	 *@access public
+	*/
+	public $search = true;
+
 	/**
 	 * this action will be called if no other action was found
 	 *
@@ -42,6 +56,11 @@ class TableView extends AdminItem {
 			$globalactions = array();
 			$actions = array();
 			$fields = array();
+			$search = false;
+			
+			if(isset($_POST) && isset($_POST["delete_many"])) {
+				$this->deleteMany();
+			}
 			
 			foreach($this->actions as $name => $data) {
 				if(is_array($data)) {
@@ -58,28 +77,38 @@ class TableView extends AdminItem {
 			}
 			
 			foreach($this->fields as $name => $title) {
-				if(isset($_GET["order"]) && $_GET["order"] == $name && isset($_GET["ordertype"]) && $_GET["ordertype"] == "desc")  {
-					array_push($fields,  array("name" => $name, "title" => parse_lang($title), "order" => true, "orderdesc" => true));
-				} else if(isset($_GET["order"]) && $_GET["order"] == $name) {
-					array_push($fields,  array("name" => $name, "title" => parse_lang($title), "order" => true));
-				} else {
-					array_push($fields,  array("name" => $name, "title" => parse_lang($title)));	
+				$arr = array("name" => $name, "title" => parse_lang($title), "sortable" => false);
+				
+				if(isset($this->fields[$name]) && isset(ClassInfo::$database[$this->modelInst()->table_name][$name])) {
+					$search = true;
+					$arr["sortable"] = true;
+					$arr["searchable"] = true;
+					if(isset($_GET["order"]) && $_GET["order"] == $name && isset($_GET["ordertype"]) && $_GET["ordertype"] == "desc")  {
+						$this->ModelInst()->sort($name, "desc");
+						$arr["order"] = true;
+						$arr["orderdesc"] = true;
+					} else if(isset($_GET["order"]) && $_GET["order"] == $name) {
+						$this->ModelInst()->sort($name, "asc");
+						$arr["order"] = true;
+					}
+					
+					if(isset($_POST["search_" . $name]) && $_POST["search_" . $name] != "" && !isset($_POST["search_" . $name . "_cancel"])) {
+						$this->modelInst()->addFilter(array($name => array("LIKE", "%".$_POST["search_" . $name]."%")));
+						$arr["searchval"] = $_POST["search_" . $name];
+					}
 				}
 				
+				array_push($fields, $arr);			
 			}
 			
-			if(isset($_GET["order"]) && isset($_GET["ordertype"]) && $_GET["ordertype"] == "desc") {
-				if(isset($this->fields[$_GET["order"]]))
-					$this->model_inst->orderby($_GET["order"], "desc");
-			} else if(isset($_GET["order"])) {
-				if(isset($this->fields[$_GET["order"]]))
-					$this->model_inst->orderby($_GET["order"], "asc");
-			}
+			if($this->search === false)
+				$search = $this->search;
 			
 			$_SESSION["deletekey"][$this->class] = randomString(10);
 
-			return $this->model_inst->customise(array("datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->class], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
+			return $this->modelInst()->customise(array("search" => $search, "perPage" => $this->perPage, "datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->class], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
 	}
+	
 	/**
 	 * checks if the user is allowed to call this action
 	 *
@@ -94,6 +123,7 @@ class TableView extends AdminItem {
 		}
 		return parent::checkPermission($action);
 	}
+	
 	/**
 	 * deletes some of the data
 	 *
@@ -105,9 +135,19 @@ class TableView extends AdminItem {
 			$data = $_POST["data"];
 			unset($data["all"]);
 			foreach($data as $key => $value) {
-				DataObject::get($this->model_inst, array("id" => $key))->remove();
+				DataObject::get($this->modelInst(), array("id" => $key))->remove();
 			}
 			$this->redirectBack();
 		}
+	}
+	
+	/**
+	 * adds content-class table-view to content-div
+	 *
+	 *@name contentClass
+	 *@access public
+	*/
+	public function contentClass() {
+		return parent::contentclass() . " table-view";
 	}
 }

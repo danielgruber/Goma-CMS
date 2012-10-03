@@ -3,28 +3,47 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 03.11.2011
-  * $Version 003
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.09.2012
+  * $Version 2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class LeftAndMain extends AdminItem {
 	
+	/**
+	 * the base template of the view
+	 *
+	 *@name baseTemplate
+	 *@access public
+	*/
 	public $baseTemplate = "admin/leftandmain.html";
 	
+	/**
+	 * defines the url-handlers
+	 *
+	 *@name url_handlers
+	 *@access public
+	*/
 	public $url_handlers = array(
 		"updateTree/\$marked!/\$search"	=> "updateTree",
 		"edit/\$id!/\$model"			=> "cms_edit",
 		"del/\$id!/\$model"				=> "cms_del",
-		"add"							=> "cms_add",
+		"add/\$model"					=> "cms_add",
 		"versions"						=> "versions"
 	);
 	
+	/**
+	 * defines the allowed actions
+	 *
+	 *@name allowed_actions
+	 *@access public
+	*/
 	public $allowed_actions = array(
 		"cms_edit", "cms_add", "cms_del", "updateTree", "savesort", "versions"
 	);
+	
 	/**
 	 * this var defines the tree-class
 	 *
@@ -32,6 +51,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $tree_class = "";
+	
 	/**
 	 * title of root-node
 	 *
@@ -39,6 +59,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $root_node = "";
+	
 	/**
 	 * colors of the nodes
 	 * key is class, value is a array with color and name
@@ -50,6 +71,7 @@ class LeftAndMain extends AdminItem {
 	 *@var array
 	*/
 	public $colors = array();
+	
 	/**
 	 * icons
 	 *
@@ -57,6 +79,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $icons = array("root" => "images/icons/fatcow-icons/16x16/world.png");
+	
 	/**
 	 * marked node
 	 *
@@ -64,12 +87,22 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $marked = 0;
+	
 	/**
 	 * just one time in the request resume should be called
 	 *
 	 *@name resumeNum
 	*/
 	static public $resumeNum = 0;
+	
+	/**
+	 * sort-field
+	 *
+	 *@name sort_field
+	 *@access protected
+	*/
+	protected $sort_field;
+	
 	/**
 	 * gets the icons from all classes and the $icons-var
 	 *
@@ -80,12 +113,12 @@ class LeftAndMain extends AdminItem {
 		$icons = $this->icons;
 		$icons["searchresult"] = "images/16x16/search.png";
 		foreach($this->models as $model) {
-			if(classinfo::hasStatic($model, "icon")) {
-				$icons[$model] = classinfo::getStatic($model, "icon");
+			if(ClassInfo::hasStatic($model, "icon")) {
+				$icons[$model] = ClassInfo::findFile(ClassInfo::getStatic($model, "icon"), $model);
 			}
-			foreach(classinfo::getChildren($model) as $child) {
-				if(classinfo::hasStatic($child, "icon")) {
-					$icons[$child] = classinfo::getStatic($child, "icon");
+			foreach(ClassInfo::getChildren($model) as $child) {
+				if(ClassInfo::hasStatic($child, "icon")) {
+					$icons[$child] = ClassInfo::findFile(ClassInfo::getStatic($child, "icon"), $child);
 				}
 			}
 		}
@@ -102,6 +135,17 @@ class LeftAndMain extends AdminItem {
 	public function getRootNode() {
 		return parse_lang($this->root_node);
 	}
+	
+	/**
+	 * removes Resume-Cache
+	 *
+	 *@name removeResume
+	 *@access public
+	*/
+	public function removeResume() {
+		unset($_SESSION["goma_resume_".$this->class.""]);
+	}
+	
 	/**
 	 * generates the options for the create-select-field
 	 *
@@ -115,6 +159,7 @@ class LeftAndMain extends AdminItem {
 		}
 		return $options;
 	}
+	
 	/**
 	 * inserts the data in the leftandmain-template
 	 *
@@ -133,7 +178,7 @@ class LeftAndMain extends AdminItem {
 		Resources::add(CACHE_DIRECTORY . "/" . $filename, "css");
 		Resources::add("system/core/admin/leftandmain.js", "js", "tpl");
 		
-		if(isset(Object::instance($this->tree_class)->orderby["field"])) {
+		if(isset($this->sort_field)) {
 			Resources::addData("var LaMsort = true;");
 		} else {
 			Resources::addData("var LaMsort = false;");
@@ -141,20 +186,24 @@ class LeftAndMain extends AdminItem {
 		
 		$search = isset($_GET["searchtree"]) ? text::protect($_GET["searchtree"]) : "";
 		
-		Resources::addData("var lang_unload_not_saved = '".lang("unload_not_saved")."';");
-		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."'; var lang_search = '".lang("search", "Search...")."';var unload_lang = '".lang("unload_lang")."';");
+
+		Resources::addData("var adminURI = '".$this->adminURI()."'; var marked_node = '".$this->marked."';");
 		
-		$data = $this->model_inst;
+		$data = $this->ModelInst();
 		
-		$this->model_inst->customise(array("legend" => $this->legend()));
+		$this->ModelInst()->customise(array("legend" => $this->legend()));
 		
-		$output = $data->customise(array(), array("CONTENT"	=> $content, "SITETREE" => $this->createTree(), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
+		if(defined("LAM_CMS_ADD"))
+			$this->ModelInst()->addmode = 1;
+		
+		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree(), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
 		
 		$_SESSION[$this->class . "_LaM_marked"] = $this->marked;
 		
 		// parent-serve
 		return parent::serve($output);
 	}
+	
 	/**
 	 * gets css-code from colors and icons
 	 *
@@ -189,6 +238,7 @@ class LeftAndMain extends AdminItem {
 		}
 		return $filename;	
 	}
+	
 	/**
 	 * creates the Tree
 	 *
@@ -230,25 +280,23 @@ class LeftAndMain extends AdminItem {
 			$marked = $this->marked;
 		
 		if(count($this->models) > 1) {
-			$default_tree = $object->renderTree($this->adminURI() . "/model/\$class_name/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
+			$default_tree = $object->renderTree($this->adminURI() . "model/\$class_name/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
 		} else {
-			$default_tree = $object->renderTree($this->adminURI() . "/record/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
+			$default_tree = $object->renderTree($this->adminURI() . "record/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
 		}
 		
-		if($marked == 0) {
+		if($marked == "0") {
 			$marked = "marked";
 		} else {
 			$marked = "";
 		}
-
-		
 		
 		if(!empty($search)) {
 			return '<ul class="tree">
 							<li class="expanded last" id="tree_'.$this->class.'">
 								<span class="a  '.$marked.'">
 									<span class="b">
-										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() . URLEND.'?noresume"><span>'.lang("result", "result").'</span></a>
+										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("result", "result").'</span></a>
 									</span>
 								</span>
 								<ul class="rootnode">
@@ -262,7 +310,7 @@ class LeftAndMain extends AdminItem {
 							<li class="expanded last" id="tree_'.$this->class.'">
 								<span class="a '.$marked.'">
 									<span class="b">
-										<a nodeid="0" class="treelink root" href="'.$this->adminURI() . URLEND.'?noresume"><span>'.$this->getRootNode().'</span></a>
+										<a nodeid="0" class="treelink root" href="'.$this->adminURI() .'"><span>'.$this->getRootNode().'</span></a>
 									</span>
 								</span>
 								<ul class="rootnode">
@@ -287,93 +335,7 @@ class LeftAndMain extends AdminItem {
 		HTTPResponse::output();
 		exit;
 	}
-	/**
-	 * edit of cms_edit, because we have to set $marked
-	 *
-	 *@name cms_edit
-	 *@access public
-	 *@param id
-	 *@param model
-	*/
-	public function cms_edit() {
-		
-		$id = $this->getParam("id");
-		if($id !== false) {
-			$this->marked = $id;
-		}
-		
-		if(Core::is_ajax()) {
-			$_SESSION["ajax_active_".$this->class.""] = ($id !== false) ? $id : $this->getParam("id");
-			if($this->model != "") {
-				$_SESSION["ajax_activemodel_".$this->class.""] = $this->model;
-			} else if($this->getParam("model")) {
-				$_SESSION["ajax_activemodel_".$this->class.""] = $this->getParam("model");
-			}
-		}
-		
-		
-		return parent::cms_edit();
-	}
 	
-	/**
-	 * marks cms_add as active
-	 *
-	 *@name cms_add
-	 *@access public
-	*/
-	public function cms_add($model = "") {
-			if(Core::is_ajax()) {
-				$_SESSION["ajax_active_".$this->class.""] = "add";
-				$_SESSION["ajax_activemodel_".$this->class.""] = $this->getParam("model");
-			}
-			if($model != "")
-				$this->request->params["model"] = $model;
-			return parent::cms_add();
-	}
-	/**
-	 * removes all marks
-	 *
-	 *@name cms_del
-	 *@access public
-	*/
-	public function cms_del($id = false,$model = "") {
-			$this->marked = ($id !== false) ? $id : $this->getParam("id");
-			unset($_SESSION["ajax_active_".$this->class.""]);
-			unset($_SESSION["ajax_activemodel_".$this->class.""]);
-			
-			return parent::cms_del($id, $model);
-	}
-	/**
-	 * index-function with special ajax-effects
-	 *
-	 *@nam index
-	 *@access public
-	*/
-	public function index() {
-		if(self::$resumeNum == 0 && count($this->model_inst->where) != 1 && isset($_SESSION["ajax_active_".$this->class.""]) && !Core::is_ajax()) {
-			self::$resumeNum++;
-			if($_SESSION["ajax_active_".$this->class.""] == "add") {
-					$this->request->params["model"] = $_SESSION["ajax_activemodel_".$this->class.""];
-					return $this->cms_add();
-			} else {
-					$model = isset($_SESSION["ajax_activemodel_".$this->class.""]) ? $_SESSION["ajax_activemodel_".$this->class.""] : "";
-					$this->selectModel($model, true);
-					$this->request->params["id"] = $_SESSION["ajax_active_".$this->class.""];
-					return $this->cms_edit();
-			}
-		} else if(self::$resumeNum == 0 && count($this->model_inst->where) != 1 && isset($_SESSION["goma_resume_".$this->class.""]) && !isset($_GET["noresume"])) {
-			self::$resumeNum++;
-			$resume = $_SESSION["goma_resume_".$this->class.""];
-			unset($_SESSION["goma_resume_".$this->class.""]);
-			Core::Render($resume);
-		} else {
-			if(isset($_SESSION["goma_resume_".$this->class.""]) && isset($_GET["noresume"])) unset($_SESSION["goma_resume_".$this->class.""]);
-			
-			unset($_SESSION["ajax_activemodel_".$this->class.""], $_SESSION["ajax_active_".$this->class.""]);
-			
-			return parent::index();
-		}
-	}
 	/**
 	 * Actions of editing 
 	*/
@@ -391,7 +353,7 @@ class LeftAndMain extends AdminItem {
 			$dialog = new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay", "Okay"));
 			$dialog->close(3);
 			$response->exec($dialog);
-			$response->exec("reloadTree(function(){ LoadTreeItem(".$model["id"]."); });");
+			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
@@ -408,7 +370,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function savesort() {
-		$field = Object::instance($this->tree_class)->orderby["field"];
+		$field = $this->sort_field;
 		foreach($_POST["treenode"] as $key => $value) {
 			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value));
 		}
@@ -428,6 +390,7 @@ class LeftAndMain extends AdminItem {
 		$response->exec("reloadTree(function(){ LoadTreeItem(0);});");
 		return $response;
 	}
+	
 	/**
 	 * gets the options for add
 	 *
@@ -451,6 +414,7 @@ class LeftAndMain extends AdminItem {
 			}
 		return new ViewAccessAbleData($arr);
 	}
+	
 	/**
 	 * publishes data for editing a site via ajax
 	 *
@@ -460,11 +424,12 @@ class LeftAndMain extends AdminItem {
 	 *@param object - response
 	*/
 	public function ajaxPublish($data, $response) {
+		
 		if($model = $this->save($data, 2)) {
 			$dialog = new Dialog(lang("successful_published", "The data was successfully published!"), lang("okay", "Okay"));
 			$dialog->close(3);
 			$response->exec($dialog);
-			$response->exec("reloadTree(function(){ LoadTreeItem(".$model["id"]."); });");
+			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
@@ -472,6 +437,7 @@ class LeftAndMain extends AdminItem {
 			return $response;
 		}
 	}
+	
 	/**
 	 * decorate model
 	 *
@@ -487,6 +453,7 @@ class LeftAndMain extends AdminItem {
 		
 		return parent::decorateModel($model, $add, $controller);
 	}
+	
 	/**
 	 * gets the options for add
 	 *
@@ -501,6 +468,7 @@ class LeftAndMain extends AdminItem {
 		}
 		return $arr;
 	}
+	
 	/**
 	 * hook in this function to decorate a created record of record()-method
 	 *
@@ -508,11 +476,12 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function decorateRecord(&$record) {
-		if(!$record->version) $record->version = "state";
+		if(!$record->getVersion()) $record->version = "state";
 		$_SESSION["goma_resume_".$this->class.""] = Core::$url;
 		unset($_SESSION["ajax_active_".$this->class.""]);
-		$this->marked = $record->recordid;
+		$this->marked = $record->class_name . "_" . $record->recordid;
 	}
+	
 	/**
 	 * view all versions
 	 *
@@ -521,11 +490,76 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function versions() {
 		unset($_SESSION["goma_resume_".$this->class.""]);
-		if($this->model_inst && $this->model_inst->versioned) {
-			$controller = new VersionsViewController($this->model_inst);
+		if($this->ModelInst() && $this->ModelInst()->versioned) {
+			$controller = new VersionsViewController($this->ModelInst());
 			return $controller->handleRequest($this->request);
 		}
 		return false;
+	}
+	
+	/**
+	 * removes resume and redirects back
+	 *
+	 *@name redirectback
+	 *@access public
+	*/
+	public function redirectback() {
+		$this->removeResume();
+		return parent::redirectBack();
+	}
+	
+	
+	/**
+	 * adds content-class left-and-main to content-div
+	 *
+	 *@name contentClass
+	 *@access public
+	*/
+	public function contentClass() {
+		return parent::contentclass() . " left-and-main";
+	}
+	
+	/**
+	 * add-form
+	 *
+	 *@name cms_add
+	 *@access public
+	*/
+	public function cms_add() {	
+		
+		define("LAM_CMS_ADD", 1);
+		
+		$model = clone $this->modelInst();
+		
+		if($this->getParam("model")) {
+			if(count($this->models) > 1) {
+				foreach($this->models as $_model) {
+					$_model = trim(strtolower($_model));
+					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+						$type = $this->getParam("model");
+						$model = new $type;
+						break;
+					}
+				}
+			} else {
+				$models = array_values($this->models);
+				$_model = trim(strtolower($models[0]));
+				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+					$type = $this->getParam("model");
+					$model = new $type;
+				}
+			}
+		} else {
+			
+			$model = new ViewAccessableData();
+			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
+		}
+		
+		if($model->versioned && $model->canWrite($model)) {
+			$model->queryVersion = "state";
+		}
+		
+		return $this->selectModel($model)->form();
 	}
 	
 }

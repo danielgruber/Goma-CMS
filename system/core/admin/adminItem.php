@@ -3,8 +3,9 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 31.08.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 23.03.2012
+  * $Version 2.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -13,41 +14,28 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 /**
  * new AdminItem
 */
-
-class adminItem extends AdminController {
+class adminItem extends AdminController implements PermProvider {
 	/**
 	 * rights of this item
 	 *@name rights
 	 *@access public
 	*/
 	public $rights = 7;
+	
 	/**
 	 * sort
 	 *@name sort
 	 *@access public
 	*/
 	public $sort = 0;
+	
 	/**
 	 * text of the link
 	 *@name text
 	 *@var lang
 	*/
-	public $text = "";
-	/**
-	 * picture of the link relational to ROOT . "images/"
-	 *@name pic
-	 *@access public
-	*/
-	public $pic = "";
-	/**
-	 * if is visible
-	 *@name visible
-	 *@return bool
-	*/
-	public function visible()
-	{
-			return true;
-	}
+	public $text;
+	
 	/**
 	 * url_handlers
 	*/
@@ -69,6 +57,7 @@ class adminItem extends AdminController {
 	 *@var array
 	*/
 	public $models = array();
+	
 	/**
 	 * instances of the models
 	 *
@@ -76,6 +65,7 @@ class adminItem extends AdminController {
 	 *@access public
 	*/
 	public $modelInstances = array();
+	
 	/**
 	 * controller inst of the model if set
 	 *
@@ -83,6 +73,7 @@ class adminItem extends AdminController {
 	 *@access public
 	*/ 
 	public $controllerInst;
+	
 	/**
 	 * the template 
 	 *@name template
@@ -90,12 +81,24 @@ class adminItem extends AdminController {
 	 *@var string
 	*/
 	public $template = "";
+	
 	/**
 	  * where
 	  *@name where
 	  *@access public
 	*/
 	public $where = array();
+	
+	/**
+	 * if is visible
+	 *@name visible
+	 *@return bool
+	*/
+	public function visible()
+	{
+			return true;
+	}
+	
 	/**
 	 * gives back the url of this admin-item
 	 *
@@ -108,12 +111,17 @@ class adminItem extends AdminController {
 	public function adminURI() {
 		return BASE_SCRIPT . "admin/".substr($this->class, 0, -5)."/";
 	}
+	
 	/**
 	 * gives back the title of this module
+	 *
+	 *@name adminItem
+	 *@access public
 	*/
-	public function AdminTitle() {
+	public function Title() {
 		return parse_lang($this->text);	
 	}
+	
 	/**
 	 * returns the current model
 	 *
@@ -126,6 +134,7 @@ class adminItem extends AdminController {
 			
 		return parent::model();
 	}
+	
 	/**
 	 * creates model-inst
 	 *
@@ -133,6 +142,9 @@ class adminItem extends AdminController {
 	 *@access public
 	*/
 	public function modelInst() {
+		
+		if(is_object($this->model_inst))
+			return $this->model_inst;
 		
 		if(count($this->models) == 1)
 		{
@@ -163,6 +175,7 @@ class adminItem extends AdminController {
 			throwError(6, 'PHP-Error', "No Model for Admin-Module ".$this->class."");
 		}
 	}
+	
 	/**
 	 * gives back a instance if this controller with the given model
 	 *
@@ -194,7 +207,8 @@ class adminItem extends AdminController {
 			
 			return $controller;
 		}
-	} 
+	}
+	
 	/**
 	 * auto selects the model
 	 *
@@ -232,10 +246,16 @@ class adminItem extends AdminController {
 		), $additional));
 		if($controller === null) $controller = clone $this;
 		
-		if($this->pages) {
-			$model->pages = true;
-			$model->perPage = $this->perPage;
+		// pagination-support
+		if(is_object($model) && is_a($model, "DataSet") && !$model->isPagination() && $this->pages) {
+			$page = isset($_GET["pa"]) ? $_GET["pa"] : null;
+			if($this->perPage)
+				$model->activatePagination($page, $this->perPage);
+			else
+				$model->activatePagination($page);
 		}
+		
+		// controller
 		$controller->model_inst = $model;
 		$controller->model = null;
 		$model->controller = $controller;
@@ -275,33 +295,65 @@ class adminItem extends AdminController {
 	public function cms_edit() {
 		return $this->edit();
 	}
+	
+	
+	/**
+	 * add-form
+	 *
+	 *@name cms_add
+	 *@access public
+	*/
 	public function cms_add() {	
 		
 		$model = clone $this->modelInst();
 		
 		if($this->getParam("model")) {
-			if(is_subclass_of($this->getParam("model"), $model->class) || $model->class == $this->getParam("model")) {
-				$type = $this->getParam("model");
-				$model = new $type;
+			if(count($this->models) > 1) {
+				foreach($this->models as $_model) {
+					$_model = trim(strtolower($_model));
+					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+						$type = $this->getParam("model");
+						$model = new $type;
+						break;
+					}
+				}
+			} else {
+				$models = array_values($this->models);
+				$_model = trim(strtolower($models[0]));
+				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+					$type = $this->getParam("model");
+					$model = new $type;
+				}
 			}
+		}
+		
+		if($model->versioned && $model->canWrite($model)) {
+			$model->queryVersion = "state";
 		}
 		
 		return $this->selectModel($model)->form();
 	}
 	/**
-	 * alias
+	 * alias for cms_add
+	 *
+	 *@name add
+	 *@access public
 	*/
 	public function add() {
 		return $this->cms_add();	
 	}
 	
 	/**
-	 *  provides perms
+	 *  provides no perms
+	 *
+	 *@name providePerms
+	 *@access public
 	*/ 
-	public function providePermissions()
+	public function providePerms()
 	{
 			return array();
 	}
+	
 	/**
 	 * generates the normal controller for the model inst
 	 *
@@ -323,6 +375,7 @@ class adminItem extends AdminController {
 		return $this->controllerInst;
 		
 	}
+	
 	/**
 	 * action-handler with implemented auto-model-selecting
 	 *
@@ -339,6 +392,7 @@ class adminItem extends AdminController {
 		
 		return parent::handleAction($name);
 	}
+	
 	/**
 	 * gets a controller for a record in a given model
 	 *
@@ -350,25 +404,23 @@ class adminItem extends AdminController {
 		$model = $this->getParam("model");
 		$id = $this->getParam("id");
 		
-		
-		if(!isset($this->modelInstances[$model])) {
+		if(!in_array($model, $this->models)) {
 			return $this->index();
 		}
 		
-		
 		$data = DataObject::get($model, array("id" => $id));
-		
 		
 		$this->callExtending("handleRecordForModel", $model);
 		$this->decorateRecord($data);
 		$data = $this->decorateModel($data);
-		if($data->_count() > 0) {
-			
-			return $this->selectModel($data)->handleRequest($this->request);
+		
+		if($data->Count() > 0) {
+			return $this->selectModel($data->first())->handleRequest($this->request);
 		} else {
 			return $this->index();
 		}
 	}
+	
 	/**
 	 * handles a request with a given record in it's controller
 	 *
@@ -386,18 +438,18 @@ class adminItem extends AdminController {
 		$this->decorateRecord($data);
 		$data = $this->decorateModel($data);
 		
-		
 		// check for deleted if no data is there
-		if($data->_count() > 0) {
-			return $this->selectModel($data)->handleRequest($this->request);
+		if($data->Count() > 0) {
+			return $this->selectModel($data->first())->handleRequest($this->request);
 		} else {
 			// get data
-			$data = DataObject::get_Versioned($model, "group", array("recordid" => $id));
+			$data = DataObject::get_versioned($model, "group", array("recordid" => $id));
 			$this->callExtending("handleRecord", $model);
 			$this->decorateRecord($data);
 			$data = $this->decorateModel($data);
-			if($data->_count() > 0) {
-				return $this->selectModel($data)->handleRequest($this->request);
+			
+			if($data->Count() > 0) {
+				return $this->selectModel($data->first())->handleRequest($this->request);
 			} else {
 				return $this->index();
 			}

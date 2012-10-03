@@ -1,17 +1,17 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 30.10.2011
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 31.08.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 $lang = array(
 	/*  OTHER THINGS*/
-	"okay"											=> "Okay",
+	"okay"											=> "OK",
 	"confirm"										=> "Bestätigen...",
 	"prompt"										=> "Text eingeben...",
 	"mysql_error"                                 	=> "<div class=\"error\"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>",
@@ -23,16 +23,20 @@ $lang = array(
 	"visitors"                                     	=> "Besucher",
 	"page_views"                                   	=> "Seitenaufrufe",
 	"username"                                     	=> "Benutzername",
+	"email_or_username"								=> "E-Mail oder Benutzername",
 	"register_disabled"								=> "Die Registrierung ist auf dieser Seite leider nicht verfügbar.",
 	"db_edit"                                      	=> "Datenbank",
 	"more"                                         	=> "mehr",
 	'content'										=> "Inhalt",
 	'version'										=> "Version",
+	"installed_version"								=> "Installierte Version",
 	"password"                                    	=> "Passwort",
-	'smilies'										=> "Smilies",
+	'smilies'										=> "Smileys",
 	"edit_password_ok"                             	=> "Das Passwort wurde ge&auml;ndert!",
 	"homepage"                                     	=> "Startseite",
 	"page"											=> "Seite",
+	"switch_view_edit_off"							=> "Bearbeitungsmodus deaktivieren",
+	"switch_view_edit_on"							=> "Bearbeitungsmodus aktivieren",
 	"switch_ansicht"                               	=> "Ansicht wechseln",
 	'support'										=> "Support",
 	"pic"                                          	=> "Bild",
@@ -43,11 +47,13 @@ $lang = array(
 	"smilie_title"									=> "Name des Smilies",
 	"register"                                     	=> "Registrieren",
 	"administration"                               	=> "Administration",
+	"manage_website"								=> "Webseite verwalten",
 	'default_admin'									=> "Normale Administration",
 	"my_account"                                   	=> "Mein Account" ,
 	"really welcome"                               	=> "Herzlich Willkommen",
 	"perform_login"                                	=> "Einloggen",
 	"edit_page"                                    	=> "Seite bearbeiten",
+	"edit_this_page"								=> "Aktuelle Seite bearbeiten",
 	"logout"                                       	=> "Ausloggen",
 	"email"                                        	=> "E-Mail",
 	"name"                                         	=> "Name",
@@ -56,14 +62,16 @@ $lang = array(
 	"imprint"                                      	=> "Impressum",
 	"contact"                                      	=> "Kontakt",
 	"user_groups"									=> "Benutzer & Gruppen",
+	"users"											=> "Benutzer",
+	"groups"										=> "Gruppen",
 	"upload file"                                  	=> "Datei hochladen",
 	"subject"                                      	=> "Betreff",
 	"message"                                      	=> "Nachricht",
 	"mandatory field"                              	=> "Pflichtfeld",
 	"rate_site"                                    	=>"Seite bewerten",
 	"php_not_run"                                  	=> "<div class=\"error\"><strong>Fehler</strong><br />Kann PHP code nicht ausf&uuml;hren!!</div>",
-	"not_sent"                                     	=> "Die E-Mail konnte nicht versendet werden!",
-	"sent"                                         	=> "Die E-Mail wurde gesendet!!",
+	"mail_not_sent"                                 => "Die E-Mail konnte nicht versendet werden!",
+	"sent"                                         	=> "Die E-Mail wurde gesendet!",
 	"error"                                        	=> "Fehler",
 	"whole"                                        	=> "Insgesamt",      // like Insgesamt x Stimmen
 	"votes"                                        	=> "Stimme(n)",
@@ -75,7 +83,7 @@ $lang = array(
 	"you_are_here"                                 	=> "Sie befinden sich hier",
 	"stats"                                        	=> "Statistiken",
 	"hits"                                         	=> "Aufrufe",
-	"edit"                                         	=> "ändern",
+	"edit"                                         	=> "bearbeiten",
 	"yes"                                          	=> "Ja",
 	"no"                                           	=> "Nein",
 	"code"                                         	=> "Code",
@@ -125,12 +133,14 @@ $lang = array(
 	"edit_settings"                                	=> "Einstellungen bearbeiten",
 	"registercode"                                 	=> "Registrierungscode",
 	"register_code"                                	=> "Registrierungscode",
-	"title"                                        	=> "Titel der Seite",
+	"title"                                        	=> "Titel",
+	"title_page"									=> "Titel der Seite",
 	/* SETTINGS END TPL START */
 	"available_styles"                             	=> "Verf&uuml;gbare Designs",
 	"available_adminstyles"                        	=> "Verf&uuml;gbare Admin-Designs",
 	/* TPL END USERGROUPS START */
 	"rights"                                       	=> "Rechte",
+	"rights_manage"									=> "Rechte verwalten",
 	"delete"                                       	=> "l&ouml;schen",
 	"group"											=> "Gruppe",
 	/* USERGROUPS END USERS START */
@@ -151,11 +161,12 @@ $lang = array(
 	'site'											=> "Seite",
 	"text"                                         	=> "Text",
 	"menupoint_title"								=> "Menü-Titel",
+	"menupoint_title_info"							=> "Titel in der Navigation. Wenn Sie dies aktivieren, haben Sie einen anderen Namen in der Navigation als den Titel der Seite.",
 	"js_disable_editor"                            	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
 	"overview"                                     	=> "&Uuml;bersicht",
 	"own_css"                                      	=> "Eigenes CSS (F&uuml;r Profis)",
 	"less_rights"                                  	=> "Sie haben hier leider keinen Zugriff!",
-	"wrong_login"                                  	=> "<div class=\"error\"><strong>Fehler</strong><br />Falscher Benutzername oder falsches Passwort!</div>",
+	"wrong_login"                                  	=> "<strong>Fehler</strong><br />Falscher Benutzername oder falsches Passwort!",
 	"edit_profile"                                 	=> "Profil ändern",
 	"show_profile"                                 	=> "Profil betrachten",
 	"profile"										=> "Profil",
@@ -165,20 +176,22 @@ $lang = array(
 	"userstatus_admin"                             	=> "Benutzerstatus: <strong>Adminstrator</strong>",
 	'lang'                                         	=> "Sprache",
 	'switchlang'									=> "Sprache wechseln",
+	"select_lang"									=> "Wählen Sie Ihre Sprache",
 	'filemanager'                                  	=> "Dateimanager",
 	"del_cache"                                    	=> "Cache leeren",
-	"cache_deleted"									=> "Cache geleert",
+	"cache_deleted"									=> "Der Cache wurde erfolgreich geleert.",
 	"cache_del_info"								=> "Der Cache ist ein Zwischenspeicher für einige Temporäre angelegte Dateien, um die Geschwindigkeit zu optimieren. Wenn Sie den Cache leeren, generiert Goma diese Dateien neu.",
 	"login"                                        	=> "Anmeldung" ,
 	/* infos */
 	"usergroups_info"								=> "<h3>Willkommen</h3>Hier k&ouml;nnen Sie Benutzer und Gruppen verwalten. W&auml;hlen Sie im Baum, was Sie bearbeiten möchten.",
-	"email_info"									=> "Sie k&ouml;nenn mehrere E-Mail-Adressen mit Komma(s) trennen.",
+	"email_info"									=> "Sie k&ouml;nenn mehrere E-Mail-Adressen mit Komma trennen.",
+	"email_correct_info"							=> "Diese E-Mail-Adresse sollte richtig sein und Ihnen gehören.",
 	'dragndrop_info'								=> "Ziehen Sie die Elemente, um sie zu sortieren.",
-	"noscript"                                      => "<strong>Warnung:</strong> Bitte aktivieren Sie Javascript um diese Funktion zu nutzen!",
+	"noscript"                                      => "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen!",
 	"checked"                                       => "Ausgew&auml;hlte",
 	/* edit tue 3.11.09 11:10 */
-	'login_locked'                                  => "<div class=\"error\">Der Benutzeraccount wurde gesperrt!</div>",
-	"login_not_unlocked"							=> "<div class=\"error\">Der Benutzeraccount wurde noch nicht aktiviert!</div>",
+	'login_locked'                                  => "Der Benutzeraccount wurde gesperrt!",
+	"login_not_unlocked"							=> "Der Benutzeraccount wurde noch nicht aktiviert!",
 	"not_unlocked"									=> "Noch nicht aktiviert",
 	"page_wartung"                                  => "Diese Seite befindet sich gerade im Wartungsmodus! Bitte kommen Sie sp&auml;ter wieder!",
 	"wartung"                                       => "Wartungsmodus aktiv",
@@ -192,7 +205,6 @@ $lang = array(
 	"site_keywords"									=> "Schlagwörter dieser Seite",
 	"site_description"								=> "Beschreibung dieser Seite",
 	"every"                                         => "Alle",
-	"adv_rights"                                    => "Erweiterte Rechte",
 	"captcha"                                       => "Sicherheitscode",
 	"captcha_wrong"                                 => "Der Sicherheitscode war falsch.",
 	"captcha_reload"                                => "Neu Laden",
@@ -224,10 +236,10 @@ $lang = array(
 	/*admin nitices*/
 	'maintenance'									=> "Der Wartungsmodus ist aktiv.",
 	'pagetree'										=> "Seitenbaum",
-	'meta'											=> "Meta-Daten",
+	'meta'											=> "Suchmaschinen",
 	'end'											=> "Endung",
 	'parentpage'									=> "&Uuml;bergeordnete Seite",
-	'no_parentpage'									=> "Keine übergeordnete Seite",
+	'no_parentpage'									=> "Übergeordnete Seite",
 	"subpage"										=> "Untergeordnete Seite",
 	'boxes_page'									=> "Seite mit Boxsystem",
 	'view_site'										=> "Seite aufrufen",
@@ -255,7 +267,7 @@ $lang = array(
 	"disabled"										=> "Deaktiviert",
 	"active"										=> "Aktiviert",
 	'page_not_active'								=> "Diese Seite ist nicht Aktiv!",
-	'unload_lang'									=> 'Soll die Seite wirklich verlassen werden?\n\nVorsicht: Die Änderungen wurden noch nicht gespeichert.\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.',
+	'unload_lang'									=> "Soll die Seite wirklich verlassen werden?\n\nVorsicht: Die Änderungen wurden noch nicht gespeichert.\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.",
 	"unload_not_saved"								=> "Vorsicht: Die Änderungen wurden noch nicht gespeichert.",
 	"date_format"									=> "Datumsformat",
 	"timezone"										=> "Zeitzone",
@@ -304,6 +316,7 @@ $lang = array(
 	"add_record"									=> "Eintrag hinzufügen",
 	"del_record"									=> "Eintrag löschen",
 	"loading"										=> "Laden...",
+	"waiting"										=> "Warten...",
 	"view_website"									=> "Webseite aufrufen",
 	"dashboard"										=> "Übersicht",
 	"visitors_by_day"								=> "Pro Tag",
@@ -326,7 +339,7 @@ $lang = array(
 	"sitestatus_info"								=> "Wenn sich die Seite im Wartungsmodus befindet, kann Sie nur von Mitgliedern angezeigt werden, die auch die Administration aufrufen können. Sie können diese Funktion z.B. verwenden, wenn Sie Wartungsarbeiten durchführen.",
 	
 	/* users and groups */
-	"rights_info"									=> "Die Rechte gehen von 1 (Gast) bis 10 (Superadministrator). Ab der Stufe 7 dürfen Mitglieder stanadardmäßig die Administration aufrufen. Sie können jedoch einer Gruppe später zusätzliche Rechte über Erweiterte Rechte zuweisen.",
+	"grouptype"										=> "Gruppentyp",
 	
 	/* global things */
 	"add_data"										=> "Eintrag hinzuf&uuml;gen...",
@@ -360,10 +373,17 @@ $lang = array(
 	/**
 	 * versions
 	*/
+	"preview"										=> "Vorschau",
 	"publish"										=> "Ver&ouml;ffentlichen",
 	"published_site"								=> "Veröffentlichte Seite",
+	"published"										=> "Veröffentlicht",
+	"draft"											=> "Entwurf",
+	"draft_save"									=> "Entwurf speichern",
+	"save_publish"									=> "Speichern & Veröffentlichen",
+	"draft_delete"									=> "Entwurf verwerfen",
 	"current_state"									=> "Aktueller Zustand",
 	"browse_versions"								=> "Versionen durchsuchen",
+	"open_in_new_tab"								=> "Auf neuer Seite öffnen",
 	"revert_changes"								=> "Änderungen zurücksetzen",
 	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Veröffentlichung zurückkehren?",
 	"revert_changes_success"						=> "Die letzte Version wurde erfolgreich wiederhergestellt.",
@@ -391,5 +411,104 @@ $lang = array(
 	"set_settings"									=> "Grundeinstellungen setzen...",
 	"install_success"								=> "Ihre Goma Installation war erfolgreich. Bitte nehmen Sie sich noch ein wenig Zeit, um Ihre Grundeinstellungen zu setzen.",
 	"next_step"										=> "Weiter zum nächsten Schritt",
-	"goma_let's_start"								=> "Goma - Los Gehts!"										
+	"goma_let's_start"								=> "Goma - Los Gehts!",
+	
+	"file_perm_error"								=> "Konnte Datei aufgrund fehlender Berechtigungen nicht öffnen!",
+	
+	"info"											=> "Informationen",
+	"unknown"										=> "Unbekannt",
+	
+	/* update algorythm */
+	
+	"update"										=> "Aktualisierung",
+	"updates"										=> "Aktualiserungen",
+	"update_install"								=> "Aktualisieren",
+	"update_file"									=> "Aktualisierungsdatei",
+	"update_file_download"							=> "Aktualisierungsdatei herunterladen",
+	"update_file_upload"							=> "Aktualisierungsdatei hochladen",
+	"update_file_info"								=> "Die Aktualisierungsdatei hat meist die Endung GFS.",
+	"update_type"									=> "Typ der Aktualisierung",
+	"update_framework"								=> "Basissystem",
+	"update_app"									=> "Applikation",
+	"update_success"								=> "Die Aktualisierung wurde erfolgreich durchgef&uuml;hrt",
+	"updatable"										=> "Aktualisierbar",
+	"installable"									=> "Installierbar",
+	"install_destination"							=> "Zielverzeichnis",
+	"permission_error"								=> "Die Dateiberechtigungen reichen nicht aus, um das Update zu installieren.\n Bitte setzen Sie die Dateiberechtigungen so, dass PHP die Systemdateien überschreiben kann.",
+	"update_version_error"							=> "Es ist bereits eine neuere Version installiert.",
+	"update_version_newer_required"					=> "Es wird eine neuere Version dieser Software erwartet, um zu aktualisieren. Aktualisieren Sie erst auf folgende Version:",
+	"updateSuccess"									=> "Die Aktualisierung war erfolgreich!",
+	"update_frameworkError"							=> "Die Aktualisierung erwartet eine neuere Version des Goma-Basissystems. Bitte aktualisieren Sie erst das Goma-Basis-System.",
+	"update_expansion"								=> "Add-On",
+	"update_changelog"								=> "Änderungen",
+	"update_no_available"							=> "Es sind keine Aktualisierungen verfügbar!",
+	"update_checking"								=> "Prüfe auf Aktualisierung",
+	"update_upload"									=> "Aktualisierungsdatei hochladen",
+	"update_connection_failed"						=> "Die Verbindung zum Goma-Server ist fehlgeschlagen. Bitte aktivieren Sie Allow-URL-fopen in Ihren PHP-Einstellungen. goma-cms.org könnte auch offline sein.",
+	
+	// permissions
+	"admins"										=> "Administratoren",
+	"invert_groups"									=> "Gruppen ausschliessen",
+	"require_login"									=> "Sie müssen sich anmelden, um die Seite anzuzeigen.",
+	
+	/* distro-building */
+	"distro_build"									=> "Version exportieren",
+	"distro_changelog"								=> "Was haben Sie zur vorherigen Version geändert?",
+	
+	"install_advanced_options"						=> "Erweiterte Installationsoptionen",
+	"install_option_preflight"						=> "postflight-PHP-Skript",
+	"install_option_postflight"						=> "preflight-PHP-Skript",
+	"install_option_getinfo"						=> "getinfo-PHP-Skript",
+	
+	"install_invalid_file"							=> "Sie können diese Datei nicht installieren.",
+	"install_not_update"							=> "Sie können diese Datei nur installieren, da diese Software noch nicht installiert ist.",
+	
+	
+	"gfs_invalid"									=> "Das GFS-Archiv ist beschädigt oder kann nicht geöffnet werden.",
+	
+	"inherit_from_parent"							=> "Von übergeordnetem Objekt übernehmen",
+	"hierarchy"										=> "Hierarchie",
+	
+	"full_admin_permissions"						=> "Volle Admin-Rechte",
+	"signed"										=> "Signatur",
+	"signed_true"									=> "Dieses Paket wurde vom Goma-Team geprüft und ist freigegeben!",
+	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
+	
+	/* install */
+	"install.folder"		=> "Installationsverzeichnis",
+	"install.folder_info"	=> "Goma legt auf der Festplatte ihres Servers ein Verzeichnis mit diesem Namen an, um die Daten in dieses Verzeichnis zu schreiben",
+	"install.db_user"		=> "Datenbankbenutzer",
+	"install.db_host"		=> "Datenbankserver",
+	"install.db_host_info"	=> "Meist localhost",
+	"install.db_name"		=> "Datenbankname",
+	"install.db_password"	=> "Datenbankpasswort",
+	"install.table_prefix"	=> "Tabellen-Pr&auml;fix",
+	"install.folder_error"	=> "Der Ordner existiert bereits oder ist auf Liste der nicht erlaubten Ordnernamen.",
+	"install.sql_error"		=> "Die Datenbankeinstellungen scheinen nicht korrekt zu sein.",
+	
+	"install.install"		=> "Installieren",
+	
+	/* date for ago */
+	
+	"ago.seconds"			=> "Vor %d Sekunden",
+	"ago.minute"			=> "Vor etwa einer Minute",
+	"ago.minutes"			=> "Vor %d Minuten",
+	"ago.hour"				=> "Vor etwa einer Stunde",
+	"ago.hours"				=> "Vor %d Stunden",
+	"ago.day"				=> "Vor etwa einem Tag",
+	"ago.days"				=> "Vor %d Tagen",
+	
+	"domain"				=> "Domain",
+	"restoreType"			=> "Wiederherstellungsmethode",
+	"restore_currentapp"	=> "Aktuelle Installation",
+	"restore_newapp"		=> "Neue Installation",
+	"restore_sql_sure"		=> "Sind Sie sicher, dass Sie die Datenbank auf den Stand vom %s zurücksetzen wollen?",
+	"restore_destination"	=> "Wiederherstellungsverzeichnis",
+	
+	"error_page_self"		=> "Sie können eine Seite nicht unter sich selbst anordnen.",
+	
+	"virtual_page"			=> "Klon-Seite",
+	"requireEmailField"		=> "E-Mail ist erforderlich",
+	
+	"author"				=> "Autor"
 );

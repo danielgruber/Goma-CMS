@@ -3,8 +3,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 02.07.2011
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 15.03.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,17 @@ $bb_lang = array(
 	"lists"              => "lists",
 	"lists_ol"           => "list with numbers",
 	"lists_ul"           => "list with bullet-points",
-	"lists_li"           => "bullet-point"
+	"lists_li"           => "bullet-point",
+	
+	"bold"				 => "bold",
+	"italic"			 => "italic",
+	"underlined"		 => "underlined",
+	
+	"img_prompt"		 => "Please insert the URL to the image you want to add.",
+	"link_prompt"		 => "Please insert the URL you want to add.",
+	"link_prompt_title"	 => "Please define the title of the link.",
+	"code"				 => "Code",
+	"quote"				 => "Quotation"
 );
 foreach($bb_lang as $key => $value) {
 	$GLOBALS['lang']['bb.'.$key] = $value;

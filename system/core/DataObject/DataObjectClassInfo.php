@@ -3,11 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 14.11.2011
-  * 002:
-  * - searchable_fields  
-  * $Version 005
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 23.07.2012
+  * $Version 4.0.7
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -21,9 +19,9 @@ class DataObjectClassInfo extends Extension
 		*/
 		public function generate($class)
 		{
-				logging($class);
+				if(PROFILE) Profiler::mark("DataObjectClassInfo::generate");
 				DataObject::$donothing = true;
-				if(is_subclass_of($class, "DataObject"))
+				if(class_exists($class) && class_exists("DataObject") && is_subclass_of($class, "DataObject"))
 				{
 						
 						// do nothing, so just get class
@@ -31,8 +29,6 @@ class DataObjectClassInfo extends Extension
 						// second fields
 						// third, force do nothing
 						$c = Object::instance($class);
-												
-						
 							
 						$has_one = $c->GenerateHas_One();
 						$has_many = $c->GenerateHas_Many();
@@ -48,11 +44,15 @@ class DataObjectClassInfo extends Extension
 						$many_many_tables = array();
 						
 						$has_one["autor"] = "user";
-						$indexes["autorid"] = "INDEX";
-						$indexes["editorid"] = "INDEX";
 						if(isset($db_fields["class_name"])) {
-							$indexes["class_name"] = "INDEX";
+							//$indexes["class_name"] = "INDEX";
 							$indexes["last_modified"] = "INDEX";
+						}
+						
+						if(count($db_fields) > 0)
+						{
+							$db_fields["autorid"] = "int(10)";
+							$db_fields["editorid"] = "int(10)";
 						}
 						
 						/* --- */
@@ -118,26 +118,24 @@ class DataObjectClassInfo extends Extension
 								} else if(isset($db_fields[$key]))
 								{
 										$indexes[$key] = $value;
+								} else if(!$value) {
+									unset($db_fields[$key]);
 								}
+								unset($key, $value, $fields, $maxlength, $fields_ordered, $i);
 						}
 						
 						
 						/*
 						 * get SQL-Types, so objects for parsing special data in sql-fields
 						*/
-						ClassInfo::$class_info[$class]["casting"] = $c->generateCasting();
-						$_db_fields = $c->generateDBFields(true);
+						if($casting = $c->generateCasting())
+							if(count($casting) > 0)
+								ClassInfo::$class_info[$class]["casting"] = $casting;
 						
 						$has_one = arraylib::map_key($has_one, "strtolower");
 						$has_many = arraylib::map_key($has_many, "strtolower");
 						$many_many = arraylib::map_key($many_many, "strtolower");
 						$belongs_many_many = arraylib::map_key($belongs_many_many, "strtolower");
-						
-						if(count($db_fields) > 0)
-						{
-							$db_fields["autorid"] = "int(10)";
-							$db_fields["editorid"] = "int(10)";
-						}
 						
 						$has_one["editor"] = "user";
 						$has_one["autor"] = "user";
@@ -154,7 +152,6 @@ class DataObjectClassInfo extends Extension
 						Classinfo::$class_info[$class]["iDBFields"] = arraylib::map_key($c->generateiDBFields(), "strtolower");
 						
 						
-
 						/* --- */
 						
 						
@@ -173,9 +170,11 @@ class DataObjectClassInfo extends Extension
 							
 							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$key] = array(
 								"table" 	=> $table,
-								"field"		=> $_class . "id",
-								"extfield"	=> $class . "id"
+								"field"		=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["extfield"],
+								"extfield"	=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["field"]
 							);
+							
+							unset($table, $many_many_table_belongs);
 						}
 						
 						unset($key, $data, $fields);
@@ -202,7 +201,7 @@ class DataObjectClassInfo extends Extension
 								}
 						}
 						
-						unset($db_fields, $many_many, $has_one, $has_many);
+						unset($db_fields, $many_many, $has_one, $has_many, $searchable_fields, $belongs_many_many);
 						
 						// get data classes
 						
@@ -235,12 +234,17 @@ class DataObjectClassInfo extends Extension
 								
 								$_c = strtolower(get_parent_class($_c));												
 						}
+						unset($_c, $parent, $c);
 				} else
 		
-				if(is_subclass_of($class, "viewaccessabledata") && !ClassInfo::isAbstract($class)) {
-					ClassInfo::$class_info[$class]["casting"] = Object::instance($class)->generateCasting();
+				if(class_exists($class) && class_exists("viewaccessabledata") && is_subclass_of($class, "viewaccessabledata") && !ClassInfo::isAbstract($class)) {
+					if($casting = Object::instance($class)->generateCasting())
+						if(count($casting) > 0)
+							ClassInfo::$class_info[$class]["casting"] = $casting;
 				}
 				DataObject::$donothing = false;
+				
+				if(PROFILE) Profiler::unmark("DataObjectClassInfo::generate");
 		}
 		
 }

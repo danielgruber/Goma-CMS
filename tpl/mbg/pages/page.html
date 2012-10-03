@@ -1,0 +1,17 @@
+<% IF level(2) OR level(3) %>
+	<div id="sidebar">
+		<% INCLUDE "sidebar.html" %>
+	</div>
+	<div id="main">
+<% END %>
+
+<div id="page_page">
+	<h1>$title.text()</h1>
+	$content
+</div>
+
+<div class="clear"></div>
+
+<% IF level(2) %>
+	</div>
+<% END %>

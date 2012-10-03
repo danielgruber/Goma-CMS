@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title><% title() %> {TITLE_SEPERATOR} {$_cms_ptitle}</title>
+		<% headerHTML() %>
+		
+		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
+		<% INCLUDE_CSS_MAIN "style.css" %>
+		<% INCLUDE_CSS_MAIN "typography.css" %>
+		
+		<style type="text/css">
+			{$own_css}
+		</style>
+	</head>
+	<body>
+		<div id="document">
+			<% INCLUDE "frontedbar.html" %>
+			<div id="topline"><div></div></div>
+			
+			<div id="header">
+				<div class="content_wrapper">
+					<div class="quickLinks">
+						<% IF login() %>
+							<form method="post" id="loginFormGlobe" action="profile/logout">
+								<input type="hidden" name="logout" value="1" />
+								<input type="hidden" name="redirect" value="{$_SERVER_REQUEST_URI}" />
+								<noscript>
+									<input class="logoutButton" type="submit" class="button" value="{$_lang_logout}" style="margin: 2px 0;" />
+								</noscript>
+							</form>
+							
+							<a href="#" onclick="$('#loginFormGlobe').submit();return false;">{$_lang_logout}</a>
+							|
+							<a href="profile/">{$_lang_profile}</a>
+							|
+							<a href="pm/">{$_lang_pm_inbox} (<% PM_Unread() %>)</a>
+						<% ELSE %>
+							<a href="profile/login/?redirect={$_SERVER_REQUEST_URI.URL()}">{$_lang_login}</a>
+							|
+							<a href="profile/register">{$_lang_register}</a>
+						<% END %>
+						
+					</div>
+					<div class="clear"></div>
+					<form id="search" method="get" action="search/">
+						<input class="input" type="search" name="q" placeholder="<% lang('search') %>" />
+						<input type="image" src="tpl/{$_cms_tpl}/images/loope.png" value="{$_lang_search.search}" />
+					</form>
+					<h3><a href="./">{$_cms_title}</a></h3>
+					<div id="navi">
+						<ul>
+							<% CONTROL mainbar(1) %>
+								<li>
+									<a href="{$mainbar.url}" class="{$mainbar.LinkClass}">$mainbar.mainbartitle.text()</a>
+								</li>
+							<% ENDCONTROL %>	
+						</ul>
+					</div>
+					<div class="clear"></div>
+				</div>
+				
+			</div>
+			
+			
+			<div id="content">
+				<div class="content_wrapper">
+					
+					
+					<div id="breadcrumb">
+						<div>
+							{$_lang_you_are_here}: <a href="./">{$_lang_homepage} </a>
+							<% CONTROL breadcrumbs() AS $breadcrumb %>
+								{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
+							<% ENDCONTROL %>
+						</div>
+					</div>
+					
+					
+					$addcontent
+					
+					<div id="prependedContent">
+						<% PrependedContent() %>
+					</div>
+					
+					<garea name="content">
+						<h1>404 - Not found!</h1>
+					</garea>
+					
+					<div id="appendedContent">
+						<% AppendedContent() %>
+					</div>
+					
+					<div class="clear"></div>
+					
+				</div>
+			</div>
+			
+			<div id="footer">
+				<div class="content_wrapper">
+					<div class="branding">
+						Powered by <a target="_blank" href="http://goma-cms.org">Goma</a>
+					</div>
+					<div class="quickLinks">
+						<a href="impressum/">{$_lang_imprint}</a>
+						<a href="kontakt/">{$_lang_contact}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -14,7 +14,14 @@ $files_lang = array(
 	"filetype_failure"	=> "This filetype isn't allowed here!",
 	"filesize_failure"	=> "This file is to big for this place!",
 	"upload_failure"	=> "The file couldn't uploaded to the server.",
-	"browse"			=> "Browse"
+	"browse"			=> "Browse",
+	"replace"			=> "Replace file",
+	"delete"			=> "Delete file",
+	"filename"			=> "filename",
+	"upload"			=> "upload",
+	"no_file"			=> "There is not file visible here",
+	"upload_success"	=> "The file was uploaded successfully!",
+	"size"				=> "filesize"
 );
 
 foreach($files_lang as $key => $value)

@@ -4,8 +4,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 04.07.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 14.03.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -36,12 +36,12 @@ class DataValidator extends FormValidator
 				$valid = true;
 				$errors = array();
 				if(is_object($this->form->result))
-						$result = $this->form->result->to_array();
+						$result = $this->form->result->ToArray();
 				else
 						$result = $this->form->result;
-				if(is_array($this->data->to_array()))
+				if(is_array($this->data->ToArray()))
 				{
-						$_data = array_merge($this->data->to_array(), $result);
+						$_data = array_merge($this->data->ToArray(), $result);
 				} else
 				{
 						$_data = $result;

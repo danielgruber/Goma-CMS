@@ -1,0 +1,32 @@
+/**
+  *@package Template "goma_simple"
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html
+  *@Copyright (C) 2011  Goma-Team
+  * last modified: 08.05.2012
+*/
+
+html, body {
+	font-family: Arial;	
+	font-size: 12pt;
+	line-height: 1.5em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: #444;
+	padding: 2px;
+	line-height: 1.35em;
+	margin: 0.2em 0;
+}
+
+a, a:visited {
+	color: #0060bb;
+	text-decoration: none;
+}
+a:hover, a:focus, a:active {
+	text-decoration: underline;
+}
+#header h3, #header h3 a {
+	color: #444;
+	font-size: 28pt;
+	text-decoration: none;
+}

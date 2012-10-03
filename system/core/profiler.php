@@ -2,11 +2,11 @@
 /**
   * this class allows you to profile the code
   *@class profiler
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 17.08.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 10.05.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -21,24 +21,6 @@ class Profiler
 		 *@name log
 		*/
 		public $log;
-		/**
-		 * this starts the profiler
-		 *@name __construct
-		 *@access public
-		*/
-		public function __construct()
-		{
-				$this->startTime = microtime(true);
-				$this->log .= "Starting Profiler\n";
-		}
-		/**
-		 *inits the profiler
-		 *@name init
-		*/
-		public static function init()
-		{
-				return self::inst();
-		}
 		/**
 		 * this contains an instance of this class
 		 *@name inst
@@ -81,6 +63,29 @@ class Profiler
 		 *@access public
 		*/
 		public $profile_time = 0;
+		
+		/**
+		 * this starts the profiler
+		 *@name __construct
+		 *@access public
+		*/
+		public function __construct()
+		{
+				$this->startTime = microtime(true);
+				$this->log .= "Starting Profiler\n";
+				
+				register_shutdown_function(array("profiler", "end"));
+		}
+		
+		/**
+		 *inits the profiler
+		 *@name init
+		*/
+		public static function init()
+		{
+				return self::inst();
+		}
+		
 		/**
 		 * this function marks a point in the code and gives information about memory and other things
 		 *@name mark
@@ -139,6 +144,7 @@ class Profiler
 				$t = microtime(true) - $start;
 				self::inst()->profile_time += $t;
 		}
+		
 		/**
 		 * ends a operation marked
 		 *@name mark
@@ -185,6 +191,7 @@ class Profiler
 				$t = microtime(true) - $start;
 				self::inst()->profile_time += $t;
 		}
+		
 		/**
 		 * end of the profiling
 		 *@name end
@@ -195,22 +202,31 @@ class Profiler
 		{
 				if(!PROFILE)
 					return false;
+					
+				if(!defined("CURRENT_PROJECT") || !defined("LOG_FOLDER"))
+					return false;
+				
 				$times = microtime(true) - self::inst()->startTime - self::inst()->profile_time;
 				
 				$currmemory = memory_get_usage();
 				
 				$profile_time = self::inst()->profile_time * 1000;
 				
+				$endWaitTime = microtime(true);
+				defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
+				$waitTime = END_WAIT_TIME - EXEC_START_TIME - self::inst()->profile_time;
+				
 				self::inst()->log .= "End of Profiling\n";
-				if(!file_exists(ROOT . CURRENT_PROJECT . "/log/profile"))
-					mkdir(ROOT . CURRENT_PROJECT . "/log/profile", 0777, true);
-				$logfile = ROOT . CURRENT_PROJECT . "/log/profile/profile_".date("d.m.Y_H.i.s", TIME).".log";
+				if(!file_exists(ROOT . CURRENT_PROJECT . "/".LOG_FOLDER."/profile"))
+					mkdir(ROOT . CURRENT_PROJECT . "/".LOG_FOLDER."/profile", 0777, true);
+				$logfile = ROOT . CURRENT_PROJECT . "/".LOG_FOLDER."/profile/profile_".date("d.m.Y_H.i.s", TIME).".log";
 				$content = "Profile v. 1.1 Log\n";
 				$content .= "Time: ".date(DATE_FORMAT, TIME)."\n";
 				$content .= "System: Goma v.".GOMA_VERSION." - ".BUILD_VERSION." PHP ". PHP_VERSION ."\n";
 				$content .= "Profile-Time: ".$profile_time."ms\n";
 				$content .= "URL: ".$_SERVER["REQUEST_URI"]."\n";
 				$content .= "Memory-Peak-Usage: ".round(memory_get_peak_usage()/1024) ."K\n";
+				$content .= "Wait-Time: " . round($waitTime * 1000, 2) . "ms\n";
 				$content .= "Times: \n\n";
 				$content .= "calls   execution time     Memory             name\n";
 				$content .= "---------------------------------------------------------------------\n\n";

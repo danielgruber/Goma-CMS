@@ -2,44 +2,55 @@
 /**
   * every goma-class extends this class
   * this class allows you to add methods to a class with __call-overloading
+  *
+  * this class implements since 3.1 the very basic of the new expansion-system of Goma 2, so the ability to create full extensions, which contains classes, views and other code
+  *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 29.11.2011
-  * $Version 006
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 10.09.2012
+  * $Version 3.1.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
+interface ExtensionModel {
+	public function setOwner($object);
+	public function getOwner();
+}
 
 abstract class Object
 {
 		/**
-		 * dynamical methods
+		 * caches
 		*/
 		static private 
-		$loaded_vars = array(),
+		$method_cache = array(),
 		$cache_extensions = array();
+		
 		/**
 		 * extensions
 		*/
 		public static
 		$extra_methods = array(),
 		$temp_extra_methods = array(),
+		$cache_extra_methods = array(),
 		$extensions = array(),
-		$extension_vars = array(),
 		$ci_funcs = array(),
 		$cache_singleton_classes = array(); // functions for generating classinfo
+		
 		/**
 		 * protected vars
 		*/
 		protected static
 		$extension_instances = array();
+		
 		/**
 		 * local extension instances
 		*/
 		private $ext_instances = array();
+		
 		/**
 		 * the current class-name in lowercase-letters
 		 *
@@ -47,6 +58,15 @@ abstract class Object
 		 *@access public
 		*/
 		public $class;
+		
+		/**
+		 * this variable has a value if the class belongs to an extension, else it is null
+		 *
+		 *@name inExtension
+		 *@access public
+		*/
+		public $inExpansion;
+		
 		/**
 		 * creates a method on the class
 		 *
@@ -66,6 +86,7 @@ abstract class Object
 				}
 				
 		}
+		
 		/**
 		 * links a real method to this class
 		 *
@@ -83,7 +104,10 @@ abstract class Object
 					self::$extra_methods[$class][$method] = $realfunc;
 				}
 				
+				self::$method_cache[$class . "::" . $method] = true;
+				
 		}
+		
 		/**
 		 * checks if an method exists
 		 *@name method_exists
@@ -101,62 +125,98 @@ abstract class Object
 						$class = strtolower(get_class($class));
 				}
 				
-				$class = trim(strtolower($class));
-				$method = trim(strtolower($offset));
+				$class = strtolower(trim($class));
+				$method = strtolower(trim($offset));
 				
-				if(empty($class))
+				if(empty($class) || empty($method)) {
+					unset($class, $method);
+					if(PROFILE) Profiler::unmark("Object::method_exists");
 					return false;
+				}
+										
+				if(isset(self::$method_cache[$class . "::" . $method])) {
+						
+					// object-case
+					if(!self::$method_cache[$class . "::" . $method] && isset($object)) {
+						if(method_exists($class, "__cancall") && $object->__canCall($offset)) {
+							unset($class, $method);
+							if(PROFILE) Profiler::unmark("Object::method_exists");
+							return true;
+						}
+					}
+					
+					if(PROFILE) Profiler::unmark("Object::method_exists");
+					return self::$method_cache[$class . "::" . $method];
+				}
 				
-				// else we have some 500-errors on some servers
-				if(!isset($object) && !defined("INSTALL") && !isset(Autoloader::$loaded[$class])) autoloader::load($class);
+				if(version_compare(phpversion(), "5.3", "<") && !isset(ClassManifest::$loaded[$class]))
+					ClassManifest::load($class);
 				
-				
-				
+				// check native
 				if(method_exists($class, $method))
 				{
-					if(PROFILE) Profiler::unmark("Object::method_exists");
-					return true; 
-				} else if(isset(self::$extra_methods[$class][$method]) || isset(self::$temp_extra_methods[$class][$method])) {
+					self::$method_cache[$class . "::" . $method] = true;
+					unset($class, $method);
 					if(PROFILE) Profiler::unmark("Object::method_exists");
 					return true;
-				} else if(isset($object) && method_exists($class, "__cancall") && $object->__canCall($offset)) {
-					return true;
-				} else
-				{
-						if(PROFILE) Profiler::mark("Object::method_exists after");
-						
-						$c = $class;
-						while($c = ClassInfo::get_parent_class($c))
-						{
-								if(isset(self::$extra_methods[$c][$method]))
-								{	
-										// cache result for current class
-										self::$extra_methods[$class][$method] = self::$extra_methods[$c][$method];
-										if(PROFILE) {
-											Profiler::unmark("Object::method_exists after");
-											Profiler::unmark("Object::method_exists");
-										}
-										return true;
-								}
-						}
-						unset($c);
-						if(PROFILE) {
-							Profiler::unmark("Object::method_exists after");
-							Profiler::unmark("Object::method_exists");
-						}
-						
-						return false;
 				}
+				
+				// check in DB
+				if(isset(self::$extra_methods[$class][$method]) || isset(self::$temp_extra_methods[$class][$method])) {
+					self::$method_cache[$class . "::" . $method] = true;
+					unset($class, $method);
+					if(PROFILE) Profiler::unmark("Object::method_exists");
+					return true;
+				}
+				
+				// check on object
+				if(isset($object) && method_exists($class, "__cancall") && $object->__canCall($offset)) {
+					unset($class, $method);
+					if(PROFILE) Profiler::unmark("Object::method_exists");
+					return true;
+				}
+				
+				// check parents
+				if(PROFILE) Profiler::mark("Object::method_exists after");
+				
+				$c = $class;
+				while($c = ClassInfo::get_parent_class($c))
+				{
+						if(isset(self::$extra_methods[$c][$method]))
+						{	
+								// cache result for current class
+								self::$method_cache[$class . "::" . $method] = true;
+								unset($c, $method, $class);
+								if(PROFILE) {
+									Profiler::unmark("Object::method_exists after");
+									Profiler::unmark("Object::method_exists");
+								}
+								
+								return true;
+						}
+				}
+				
+				self::$method_cache[$class . "::" . $method] = false;
+				
+				unset($c, $method, $class);
+				if(PROFILE) {
+					Profiler::unmark("Object::method_exists after");
+					Profiler::unmark("Object::method_exists");
+				}
+				
+				return false;
+				
 				
 				
 		}
-		 /**
-		  * extends the object
-		  *@name extend
-		  *@access public
-		  *@param string - object to extend
-		  *@param string - extension
-		 */
+		
+		/**
+	  	 * extends the object
+		 *@name extend
+		 *@access public
+		 *@param string - object to extend
+		 *@param string - extension
+		*/
 		public static function extend($obj, $ext)
 		{
 				if(defined("GENERATE_CLASS_INFO"))
@@ -164,40 +224,32 @@ abstract class Object
 						$obj = strtolower($obj);
 						$ext = strtolower($ext);
 						$arguments = "";
-						if(_ereg('^([a-zA-Z0-9_-]+)\((.*)\)$', $ext, $exts))
-						{
+						if(_ereg('^([a-zA-Z0-9_-]+)\((.*)\)$', $ext, $exts)) {
 								$ext = $exts[0];
 								$arguments = $exts[1];
 						}
-						/*if(class_exists($obj))
-						{*/
-								if(class_exists($ext))
-								{
-										if(is_subclass_of($ext, 'Extension') || is_subclass_of($ext, 'ControllerExtension'))
+						if(class_exists($ext))
+						{
+								if(ClassInfo::hasInterface($ext, "ExtensionModel")) {
+										if(classinfo::getStatic($ext, 'extra_methods'))
 										{
-												if(classinfo::getStatic($ext, 'extra_methods'))
+												foreach(classinfo::getStatic($ext, 'extra_methods') as $method)
 												{
-														foreach(classinfo::getStatic($ext, 'extra_methods') as $method)
-														{
-																self::$extra_methods[$obj][$method] = array("EXT:" . $ext,$method);
-														}
+														self::$extra_methods[$obj][strtolower($method)] = array("EXT:" . $ext,$method);
 												}
-												self::$extensions[$obj][$ext] = $ext;
-												self::$extension_vars[$obj][$ext] = $arguments;
-										} else
-										{
-												throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' isn\'t a Extension.');
 										}
+										self::$extensions[$obj][$ext] = $arguments;
 								} else
 								{
-										throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' does not exist.');
+										throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' isn\'t a Extension.');
 								}
-						/*} else
+						} else
 						{
-								throwError(6, 'PHP-Error', 'Extendable class '.text::protect($obj).' wasn\'t found!');
-						}*/
+								throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' does not exist.');
+						}
 				}
 		}
+		
 		/**
 		  * gets singletom of the given class
 		  *@name instance
@@ -234,11 +286,10 @@ abstract class Object
 						}
 						
 						if((defined("INSTALL") && class_exists($class)) || classinfo::exists($class)) {
-								
 								self::$cache_singleton_classes[$class] = new $class;
 								$class = clone self::$cache_singleton_classes[$class];
 						} else {
-								throwError(6, 'PHP-Error', "Class ".$class." not found in Object.php on line ".__FILE__."");
+								throwError(6, 'PHP-Error', "Class ".$class." not found in ".__FILE__." on line ".__LINE__."");
 						}
 						
 				}
@@ -247,8 +298,10 @@ abstract class Object
 				
 				return $class;
 		}
+		
 		/**
 		 * synonym for instance
+		 *
 		 *@name singleton
 		 *@access public
 		*/
@@ -259,32 +312,20 @@ abstract class Object
 		
 		
 		/**
-		 * construct
+		 * sets class-name and, if hasn't done, yet, the Save-Vars
+		 *
+		 *@name __construct
+		 *@access public
 		*/
 		public function __construct()
 		{
-				if(PROFILE) Profiler::mark("Object::__construct");
-
 				$this->class = strtolower(get_class($this));
+				
+				if(isset(ClassInfo::$class_info[$this->class]["inExpansion"]))
+					$this->inExpansion = ClassInfo::$class_info[$this->class]["inExpansion"];
 				
 				if(!isset(ClassInfo::$set_save_vars[$this->class]))
 					ClassInfo::setSaveVars($this->class);
-				
-				if(!isset(self::$loaded_vars[$this->class]) || defined("GENERATE_CLASS_INFO"))
-				{
-						self::$loaded_vars[$this->class] = true;
-						
-						foreach($this->getextensions() as $extension)
-						{
-								$arguments = $this->getExtArguments($extension);
-								self::$extension_instances[$this->class][$extension] = array($extension, $arguments);
-								unset($instance);
-						}					
-				}
-				
-				
-				
-				if(PROFILE) Profiler::unmark("Object::__construct");
 		}
 		
 		/**
@@ -305,25 +346,38 @@ abstract class Object
 			if(isset(self::$extra_methods[$this->class][$name]))
 			{
 				return $this->callExtraMethod($name, self::$extra_methods[$this->class][$name], $args);
-			} else if(isset(self::$temp_extra_methods[$this->class][$name])) {
-				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
-			} else if(method_exists($this, $name))
+			}
+			
+			if(isset(self::$cache_extra_methods[$this->class][$name])) {
+				return $this->callExtraMethod($name, self::$cache_extra_methods[$this->class][$name], $args);
+			}
+			
+			if(method_exists($this, $name))
 				return call_user_func_array(array($this, $name), $args);
 			
-			
+			// check parents
 			$c = $this->class;
-			if($c = ClassInfo::GetParentClass($c))
+			while($c = ClassInfo::GetParentClass($c))
 			{
-					while($c = ClassInfo::GetParentClass($c))
+					if(isset(self::$extra_methods[$c][$name]))
 					{
-							if(isset(self::$extra_methods[$c][$name]))
-							{
-									$extra_method = self::$extra_methods[$c][$name];
-									return $this->callExtraMethod($name, $extra_method, $args);
-							}
+							$extra_method = self::$extra_methods[$c][$name];
+							
+							// cache result
+							self::$cache_extra_methods[$this->class][$name] = self::$extra_methods[$c][$name];
+							
+							unset($c);
+							
+							return $this->callExtraMethod($name, $extra_method, $args);
 					}
 			}
-					
+			
+			
+			// check last
+			if(isset(self::$temp_extra_methods[$this->class][$name])) {
+				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
+			}
+			
 			$trace = debug_backtrace();
 			throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line'].'');
 				
@@ -366,58 +420,80 @@ abstract class Object
 		 	}
 
 	 		if($recursive === true) {
-	 			if(!defined("GENERATE_CLASS_INFO") && isset(self::$cache_extensions[$this->class])) {
-	 				return self::$cache_extensions[$this->class];
-	 			} else {
-	 				$parent = $this->class;
-	 				$extensions = array();
-	 				while($parent !== false) {
-	 					
-	 					$extensions = array_merge($extensions, isset(self::$extensions[$parent]) ? self::$extensions[$parent] : array());
-	 					$parent = classinfo::getParentClass($parent);
-	 				}
-	 				
-	 				self::$cache_extensions[$this->class] = $extensions;
-	 				return $extensions;
+	 			if(defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->class])) {
+	 				$this->buildExtCache();
 	 			}
+	 			return array_keys(self::$cache_extensions[$this->class]);
 	 		} else 
-				return (isset(self::$extensions[$this->class])) ? self::$extensions[$this->class] : array();
+				return (isset(self::$extensions[$this->class])) ? array_keys(self::$extensions[$this->class]) : array();
 		 }
+		 
+		 /**
+		  * builds the extension-cache
+		  *
+		  *@name buildExtCache
+		  *@access private
+		 */
+		 private function buildExtCache() {
+		 	$parent = $this->class;
+			$extensions = array();
+			while($parent !== false) {
+				if(isset(self::$extensions[$parent])) {
+					$extensions = array_merge(self::$extensions[$parent], $extensions);
+				}
+				$parent = ClassInfo::getParentClass($parent);
+			}
+			
+			self::$cache_extensions[$this->class] = $extensions;
+			return $extensions;
+		 }
+		
+		 
 		 /**
 		  * gets an extension-instance
 		  *
-		  *@name getinstance
+		  *@name getInstance
 		  *@param string - name of extension
 		 */
-		 public function getinstance($name)
+		 public function getInstance($name)
 		 {
+		 		$name = trim(strtolower($name));
+		 		
 		 		if(isset($this->ext_instances[$name]))
 		 			return $this->ext_instances[$name];
 		 		
-				if(isset(self::$extension_instances[$this->class][$name])) {
-					if(is_array(self::$extension_instances[$this->class][$name])) {
-						self::$extension_instances[$this->class][$name] = eval("return new ".self::$extension_instances[$this->class][$name][0]."(".self::$extension_instances[$this->class][$name][1].");");
-						self::$extension_instances[$this->class][$name]->setOwner($this);
-						$this->ext_instances[$name] = clone self::$extension_instances[$this->class][$name];
-						return $this->ext_instances[$name];
-					} else {
-						$this->ext_instances[$name] = clone self::$extension_instances[$this->class][$name];
-						return $this->ext_instances[$name];
-					}
-				} else {
-					return false;
-				}
+		 		if(defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->class])) {
+	 				$this->buildExtCache();
+	 			}
+
+	 			if(!isset(self::$extension_instances[$this->class][$name]) || !is_object(self::$extension_instances[$this->class][$name])) {
+	 				if(isset(self::$cache_extensions[$this->class][$name])) {
+	 					self::$extension_instances[$this->class][$name] = clone eval("return new ".$name."(".self::$cache_extensions[$this->class][$name].");");
+	 				} else {
+	 					return false;
+	 				}
+	 			}
+	 			
+	 			$this->ext_instances[$name] = clone self::$extension_instances[$this->class][$name];
+	 			$this->ext_instances[$name]->setOwner($this);
+	 			return $this->ext_instances[$name];
 		 }
+		 
 		 /**
 		  * gets arguments for given extension
+		  *
 		  *@name getExtArguments
 		  *@access public
 		  *@param string - extension
 		 */
 		 public function getExtArguments($extension)
 		 {
-				return isset(self::$extension_vars[$extension]) ? self::$extension_vars[$extension] : "";
+		 		if(defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->class])) {
+	 				$this->buildExtCache();
+	 			}
+				return isset(self::$cache_extensions[$this->class][$extension]) ? self::$cache_extensions[$this->class][$extension] : "";
 		 }
+		 
 		 /**
 		  * calls a named function on each extension
 		  *
@@ -433,23 +509,27 @@ abstract class Object
 		  *@access public
 		  *@return array - return values
 		 */
-		 public function callExtending($method, $p1 = null, $p2 = null, $p3 = null, $p4 = null, $p5 = null, $p6 = null, $p7 = null)
-		 {
-				$returns = array();
-				foreach($this->getextensions(true) as $extension)
-				{
-						if(Object::method_exists($extension, $method))
-						{
-								if($instance = $this->getinstance($extension))
-								{
-										$instance->setOwner($this);
-										$returns[] = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7);
-								}
-						}
+		 public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
+			$returns = array();
+			foreach($this->getextensions(true) as $extension) {
+				if(Object::method_exists($extension, $method)) {
+					if($instance = $this->getinstance($extension)) {
+						
+						// so let's call ;)
+						$return = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7);
+						if($return)
+							$returns[] = $return;
+						
+						unset($return);
+					} else {
+						log_error("Could not create instance of ".$extension." for class ".$this->class."");
+					}
 				}
-				
-				return $returns;
+			}
+			
+			return $returns;
 		 }
+		 
 		 /**
 		  * calls a named function on each extension, but just extensions, directly added to this class
 		  *
@@ -465,7 +545,7 @@ abstract class Object
 		  *@access public
 		  *@return array - return values
 		 */
-		 public function LocalCallExtending($method, $p1 = null, $p2 = null, $p3 = null, $p4 = null, $p5 = null, $p6 = null, $p7 = null)
+		 public function LocalCallExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
 		 {
 		 		
 				$returns = array();
@@ -485,8 +565,24 @@ abstract class Object
 				return $returns;
 		 }
 		 
+		 /**
+		  * some methods for extensions
+		 */
+		 
+		 /**
+		  * gets the resource-folder for an Expansion
+		  *
+		  *@name getResourceFolder
+		  *@access public
+		 */
+		 public function getResourceFolder($forceAbsolute = false) {
+		 	if(isset(ClassInfo::$class_info[$this->class]["inExpansion"]) && isset(ClassInfo::$appENV["expansion"][ClassInfo::$class_info[$this->class]["inExpansion"]])) {
+		 		$ext = ClassInfo::$class_info[$this->class]["inExpansion"];
+		 		$extFolder = ClassInfo::getExpansionFolder($ext, false, $forceAbsolute);
+		 		return isset(ClassInfo::$appENV["expansion"][$ext]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$ext]["resourceFolder"] : $extFolder . "resources";
+		 	}
+		 	
+		 	return null;
+		 }
+		 
 }
-
-require_once(FRAMEWORK_ROOT . 'core/ClassInfo.php');
-ClassInfo::addSaveVar("object", "extensions");
-ClassInfo::addSaveVar("object", "extra_methods");

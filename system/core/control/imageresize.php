@@ -3,8 +3,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 15.09.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 03.04.2012
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -13,6 +13,7 @@ class imageResize extends RequestHandler
 {
 		public function handleRequest(request $request)
 		{
+				session_write_close();
 				$this->request = $request;
 				
 				$this->init();
@@ -22,14 +23,14 @@ class imageResize extends RequestHandler
 						if(_ereg('^[0-9]+$',$request->getParam("height")))
 						{
 								if($request->getParam("width") == "x") {
-									if(_eregi('\.(jpg|png|bmp|gif)$', $request->remaining(), $ext))
+									if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->remaining(), $ext))
 									{
 											$extension = $ext[1];
 											$name = substr($request->remaining(), 0, 0 - strlen($ext[1]) - 1);
 											return $this->resizeByHeight($request->getParam("height"), $name, $extension);
 									}
 								} else {
-									if(_eregi('\.(jpg|png|bmp|gif)$', $request->remaining(), $ext))
+									if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->remaining(), $ext))
 									{
 											$extension = $ext[1];
 											$name = substr($request->remaining(), 0, 0 - strlen($ext[1]) - 1);
@@ -38,12 +39,12 @@ class imageResize extends RequestHandler
 								}
 						} else 
 						{
-								if(_eregi('\.(jpg|png|bmp|gif)$', $request->getParam("height") . '/' . $request->remaining(), $ext))
+								if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->getParam("height") . '/' . $request->remaining(), $ext))
 								{
 										$extension = $ext[1];
 										$name = substr($request->getParam("height") . '/' . $request->remaining(), 0, 0 - strlen($ext[1]) - 1);
 										return $this->resizeByWidth($request->getParam("width"),$name, $extension);
-								} else if(_eregi('\.(jpg|png|bmp|gif)$', $request->getParam("height"), $ext)) {
+								} else if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->getParam("height"), $ext)) {
 										$extension = $ext[1];
 										$name = substr($request->getParam("height"), 0, 0 - strlen($ext[1]) - 1);
 										return $this->resizeByWidth($request->getParam("width"),$name, $extension);
@@ -54,14 +55,14 @@ class imageResize extends RequestHandler
 						if(_ereg('^[0-9]+$',$request->getParam("height")))
 						{
 								if($request->getParam("width") == "x") {
-									if(_eregi('\.(jpg|png|bmp|gif)$', $request->remaining(), $ext))
+									if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->remaining(), $ext))
 									{
 											$extension = $ext[1];
 											$name = substr($request->remaining(), 0, 0 - strlen($ext[1]) - 1);
 											return $this->_resizeByHeight($request->getParam("height"), $name, $extension);
 									}
 								} else {
-									if(_eregi('\.(jpg|png|bmp|gif)$', $request->remaining(), $ext))
+									if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->remaining(), $ext))
 									{
 											$extension = $ext[1];
 											$name = substr($request->remaining(), 0, 0 - strlen($ext[1]) - 1);
@@ -70,12 +71,12 @@ class imageResize extends RequestHandler
 								}
 						} else 
 						{
-								if(_eregi('\.(jpg|png|bmp|gif)$', $request->getParam("height") . '/' . $request->remaining(), $ext))
+								if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->getParam("height") . '/' . $request->remaining(), $ext))
 								{
 										$extension = $ext[1];
 										$name = substr($request->getParam("height") . '/' . $request->remaining(), 0, 0 - strlen($ext[1]) - 1);
 										return $this->_resizeByWidth($request->getParam("width"),$name, $extension);
-								} else if(_eregi('\.(jpg|png|bmp|gif)$', $request->getParam("height"), $ext))
+								} else if(_eregi('\.(jpg|jpeg|png|bmp|gif)$', $request->getParam("height"), $ext))
 								{
 										$extension = $ext[1];
 										$name = substr($request->getParam("height"), 0, 0 - strlen($ext[1]) - 1);

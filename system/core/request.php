@@ -1,10 +1,13 @@
 <?php
 /**
-  *@package goma
+  * as simple class to parse a URL and hold POST and GET-vars 
+  *
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 19.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 29.09.2012
+  * $Version 2.0.1
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -17,6 +20,7 @@ class Request extends Object
 		 *@access public
 		*/
 		public $url;
+		
 		/**
 		 * the method of this request
 		 * POST, GET, PUT, DELETE or HEAD
@@ -24,42 +28,49 @@ class Request extends Object
 		 *@access public
 		*/
 		public $request_method;
+		
 		/**
 		 * all params
 		 *@name all_params
 		 *@access public
 		*/
 		public $all_params = array();
+		
 		/**
 		 * current params
 		 *@name params
 		 *@access public
 		*/
 		public $params = array();
+		
 		/**
 		 * get params
 		 *@name get_params
 		 *@access public
 		*/
 		public $get_params = array();
+		
 		/**
 		 * post params
 		 *@name post_params
 		 *@access public
 		*/
 		public $post_params = array();
+		
 		/**
 		 * url-parts
 		 *@name url_parts
 		 *@access public
 		*/
 		public $url_parts = array();
+		
 		/**
 		 * this var contains a sizeof params, which were parsed but not shifted
 		 *@name unshiftedButParsedParams
 		 *@access public
 		*/
 		public $unshiftedButParsedParams = 0;
+		
 		/**
 		 * shifted path until now
 		 *
@@ -67,6 +78,7 @@ class Request extends Object
 		 *@access public
 		*/
 		public $shiftedPart = "";
+		
 		/**
 		 *@name __construct
 		 *@param string - Request-method
@@ -78,8 +90,8 @@ class Request extends Object
 				
 				$this->request_method = $method;
 				$this->url = $url;
-				$this->get_params = $get_params;
-				$this->post_params = $post_params;
+				$this->get_params = ArrayLib::map_key("strtolower", $get_params);
+				$this->post_params = ArrayLib::map_key("strtolower", $post_params);
 				$this->url_parts = explode('/', $url);
 				
 		}
@@ -165,7 +177,7 @@ class Request extends Object
 		*/
 		public function match($pattern, $shiftOnSuccess = false, $class = null)
 		{
-				Profiler::mark("request::match");
+				if(PROFILE) Profiler::mark("request::match");
 				// class check
 				if(preg_match("/^([a-zA-Z0-9_]+)\:([a-zA-Z0-9\$_\-\/\!\s]+)$/si", $pattern, $matches))
 				{
@@ -228,7 +240,7 @@ class Request extends Object
 										$required = true;
 										if(!isset($this->url_parts[$i]) || $this->url_parts[$i] == "")
 										{
-												Profiler::unmark("request::match");
+												if(PROFILE) Profiler::unmark("request::match");
 												return false;
 										}
 										$name = substr($part, 1, -1);
@@ -245,23 +257,23 @@ class Request extends Object
 								$data = $this->url_parts[$i];
 								if($name == "controller" && !classinfo::exists($data))
 								{
-										Profiler::unmark("request::match");
+										if(PROFILE) Profiler::unmark("request::match");
 										return false;
 								}
 								
-								$params[$name] = $data;							
+								$params[strtolower($name)] = $data;							
 						} else 
 						{
 								// literal parts are important!
 								if(!isset($this->url_parts[$i]))
 								{
-										Profiler::unmark("request::match");
+										if(PROFILE) Profiler::unmark("request::match");
 										return false;
 								}
 								
 								if(strtolower($this->url_parts[$i]) != strtolower($part))
 								{
-										Profiler::unmark("request::match");
+										if(PROFILE) Profiler::unmark("request::match");
 										return false;
 								}
 								
@@ -280,7 +292,7 @@ class Request extends Object
 				$this->all_params = array_merge($this->all_params, $params);
 				
 				if($params === array()) $params['_matched'] = true;
-				Profiler::unmark("request::match");
+				if(PROFILE) Profiler::unmark("request::match");
 				return $params;
 				
 		}
@@ -309,6 +321,7 @@ class Request extends Object
 		*/
 		public function getParam($param, $useall = true)
 		{
+				$param = strtolower($param);
 				if(strtolower($useall) == "get") {
 					return isset($this->get_params[$param]) ? $this->get_params[$param] : null;
 				}
@@ -359,10 +372,7 @@ class Request extends Object
 		*/
 		public static function is_ajax()
 		{
-				return (
-					isset($_REQUEST['ajax']) ||
-					(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == "XMLHttpRequest")
-				);
+				return Core::is_ajax();
 		}
 		/**
 		 * Checks whether the browser supports GZIP (it should send in this case the header Accept-Encoding:gzip)

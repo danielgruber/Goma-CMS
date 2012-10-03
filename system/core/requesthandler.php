@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 26.10.2011
-  * $Version: 2.0.0 - 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 29.09.2012
+  * $Version: 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -16,6 +16,7 @@ class RequestHandler extends Object
 		 * current depth of request-handlers
 		*/
 		private $requestHandlerKey;
+		
 		/**
 		 * url-handlers
 		 *@name url_handlers
@@ -24,6 +25,7 @@ class RequestHandler extends Object
 		public $url_handlers = array(
 			'$Action'	=> '$Action'
 		);
+		
 		/**
 		 * defines whether shift on success or not
 		 *
@@ -31,6 +33,7 @@ class RequestHandler extends Object
 		 *@access protected
 		*/
 		protected $shiftOnSuccess = true;
+		
 		/**
 		 * requests, key is name of the request and value the function for it
 		 *
@@ -39,6 +42,7 @@ class RequestHandler extends Object
 		 *@var array
 		*/
 		public $allowed_actions = array();
+		
 		/**
 		 * the url base-path of this controller
 		 *
@@ -46,6 +50,7 @@ class RequestHandler extends Object
 		 *@access public
 		*/
 		public $namespace;
+		
 		/**
 		 * sets vars
 		 *
@@ -56,20 +61,27 @@ class RequestHandler extends Object
 			parent::__construct();
 			
 			/* --- */
+			
+			if(PROFILE) Profiler::mark("RequestHandler::__construct");
+			
+			$this->allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this->allowed_actions));
+			$this->url_handlers = array_map("strtolower", $this->url_handlers);
+			
 			if(isset(ClassInfo::$class_info[$this->class]["allowed_actions"]))
-				$this->allowed_actions = classinfo::$class_info[$this->class]["allowed_actions"];
+				$this->allowed_actions = array_merge($this->allowed_actions, ClassInfo::$class_info[$this->class]["allowed_actions"]);
 				
-			if(isset(ClassInfo::$class_info[$this->class]["url_params"]))
-				$this->allowed_actions = classinfo::$class_info[$this->class]["url_params"];
+			if(isset(ClassInfo::$class_info[$this->class]["url_handlers"]))
+				$this->url_handlers = array_merge($this->url_handlers, ClassInfo::$class_info[$this->class]["url_handlers"]);
+				
+			if(PROFILE) Profiler::unmark("RequestHandler::__construct");
 		}
+		
 		/**
 		 * handles requests
 		 *@name handleRequest
 		*/
 		public function handleRequest($request)
 		{
-				
-				
 				if($this->class == "")
 				{
 						throwError(6, 'PHP-Error', 'Class '.get_class($this).' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
@@ -95,21 +107,18 @@ class RequestHandler extends Object
 								continue;
 						}
 						
-						
 						foreach(Object::instance($class)->url_handlers as $pattern => $action)
 						{
 								if($argument = $request->match($pattern, $this->shiftOnSuccess, $this->class))
 								{
 										$this->request = $request;
 										
-										if($request->getParam("Action", false))
-										{
-												$action = $request->getParam("Action", false);
-										}
-										
-										if($action{0} == "$" && $action != '$Action')
+										if($action{0} == "$")
 										{
 												$action = substr($action, 1);
+												if($this->getParam($action)) {
+													$action = $this->getParam($action);
+												}
 										}
 										
 										$action = strtolower($action);
@@ -129,6 +138,7 @@ class RequestHandler extends Object
 				}
 				return $this->handleAction("index");
 		}
+		
 		/**
 		 * in the end this function is called to do last modifications
 		 *
@@ -139,21 +149,26 @@ class RequestHandler extends Object
 		public function serve($content) {
 			return $content;
 		}
+		
 		/**
 		 * checks if this class has a given action
 		 *@name hasAction
 		 *@access public
 		*/
-		public function hasaction($action)
+		public function hasAction($action)
 		{
-				if((!Object::method_exists($this, $action) && !method_exists($this, $action)) || !$this->checkPermission($action))
+				$hasAction = true;
+				if(!Object::method_exists($this, $action) || !$this->checkPermission($action))
 				{
-						return false;
-				} else
-				{
-						return true;
+						$hasAction = false;
 				}
+				
+				$this->extendHasAction($action, $hasAction);
+				$this->callExtending("extendHasAction", $action, $hasAction);
+				
+				return $hasAction;
 		}
+		
 		/**
 		 * handles the action
 		 *@name handleAction
@@ -161,8 +176,53 @@ class RequestHandler extends Object
 		*/
 		public function handleAction($action)
 		{
-				return call_user_func_array(array($this, $action), array());
+				$handleWithMethod = true;
+				$content = null;
+				
+				$this->onBeforeHandleAction($action, $content, $handleWithMethod);
+				$this->callExtending("onBeforeHandleAction", $action, $content, $handleWithMethod);
+				
+				if($handleWithMethod && Object::method_exists($this, $action))
+					$content = call_user_func_array(array($this, $action), array());
+				
+				$this->extendHandleAction($action, $content);
+				$this->callExtending("extendHandleAction", $action, $content);
+				
+				return $content;
 		}
+		
+		/**
+		 * on before handle action
+		 *
+		 *@name onBeforeHandleAction
+		 *@param string - action
+		 *@param string - content
+		 *@param bool - handleWithMethod
+		*/
+		public function onBeforeHandleAction($action, $content, &$handleWithMethod) {
+			
+		}
+		
+		/**
+		 *@name extendHandleAction
+		 *@access public
+		 *@param string - action
+		 *@param string - content
+		*/
+		public function extendHandleAction($action, $content) {
+			
+		}
+		
+		/**
+		 * extends hasAction
+		 *
+		 *@name extendHasAction
+		 *@access public
+		*/
+		public function extendHasAction($action, &$hasAction) {
+			
+		}
+		
 		/**
 		 * checks the permissions
 		 *@name checkPermission
@@ -172,6 +232,7 @@ class RequestHandler extends Object
 		protected function checkPermission($action)
 		{
 				if(PROFILE) Profiler::mark("RequestHandler::checkPermission");
+
 				$class = $this;
 				while($class->class != "object") {
 					if(in_array($action, $class->allowed_actions))
@@ -197,16 +258,22 @@ class RequestHandler extends Object
 											if(PROFILE) Profiler::unmark("RequestHandler::checkPermission");
 											return false;
 									}
+							} else if($data == "admins") {
+									return (member::$groupType == 2);
+							} else if($data == "users") {
+									return (member::$groupType == 1);
 							} else
 							{
 									if(PROFILE) Profiler::unmark("RequestHandler::checkPermission");
-									return right($data);
+									return Permission::check($data);
 							}
-					}	
+					}
+					
 					if(get_parent_class($class) == "Object") {
 						if(PROFILE) Profiler::unmark("RequestHandler::checkPermission");
 						return false;
 					}
+					
 					if(!classinfo::isAbstract(get_parent_class($class)))
 						$class = Object::instance(get_parent_class($class));
 					else
@@ -215,6 +282,7 @@ class RequestHandler extends Object
 				if(PROFILE) Profiler::unmark("RequestHandler::checkPermission");
 				return false;
 		}
+		
 		/**
 		 * init-function
 		 *@name init
@@ -226,6 +294,7 @@ class RequestHandler extends Object
 			$this->requestHandlerKey = count(Core::$controller);
 			Core::$controller[] = $this;
 		}
+		
 		/**
 		 * default Action
 		 *@name index
@@ -235,6 +304,7 @@ class RequestHandler extends Object
 		{
 				return "";
 		}
+		
 		/**
 		 * some developers don't want to use $this->request->getParam, because it's too long, so we have a simpler way
 		 * gets a param from the request
@@ -277,26 +347,32 @@ class RequestHandler extends Object
 		 *@access public
 		*/
 		public function __throwError($errcode, $errname, $errdetails) {
+			
 			if(Core::is_ajax()) {
 				HTTPresponse::sendHeader();
-				echo "<h1>".text::protect($errcode).": ".text::protect($errname)."</h1>\n";
+				echo "<h1>".convert::raw2text($errcode).": ".convert::raw2text($errname)."</h1>\n";
 				echo $errdetails;
 				exit;
 			} else if(Core::is_ajax() && isset($_GET["ajaxfy"])) {
 				
 			} else  {
-				$template = new template;
-				$template->assign('errcode',text::protect($errcode));
-				$template->assign('errname',text::protect($errname));
-				$template->assign('errdetails',$errdetails);
-				$template->assign("debug", print_r(debug_backtrace(), true));
-				HTTPresponse::sendHeader();
-				
-				echo $template->display('framework/error.html');
+				if(class_exists("ClassInfo", false)) {
+					$template = new template;
+					$template->assign('errcode',convert::raw2text($errcode));
+					$template->assign('errname',convert::raw2text($errname));
+					$template->assign('errdetails',$errdetails);
+					HTTPresponse::sendHeader();
+	 				
+					echo $template->display('framework/error.html');
+				} else {
+					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
+					echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails ;
+				}
 				
 				exit;
 			}
 		}
+		
 		/**
 		 * gets parent controller of this
 		 *

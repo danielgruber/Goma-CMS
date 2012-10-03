@@ -16,7 +16,7 @@ $form_lang = array(
 	"dropdown_nothing_select"	=> "Nothing selected",
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
-	"not_saved_yet"				=> "The data was successfully saved.!"
+	"not_saved_yet"				=> "The data hasn't been saved, yet."
 );
 foreach($form_lang as $key => $value)
 {

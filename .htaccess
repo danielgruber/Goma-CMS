@@ -1,0 +1,29 @@
+RewriteEngine on
+
+	RewriteBase /
+	
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_URI} !^/system/application.php
+	RewriteRule (.*) system/application.php [QSA]
+	
+	
+	<IfModule mod_headers.c>
+		<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
+			Header set Cache-Control "max-age=86400, public"
+		</FilesMatch>
+	</IfModule>
+	
+	<IfModule mod_headers.c>
+	  <FilesMatch "\.(gdf|ggz)\.(css|js)$">
+	    Header append Vary Accept-Encoding
+	  </FilesMatch>
+	</IfModule>
+	
+	AddEncoding x-gzip .ggz
+	AddEncoding deflate .gdf
+	
+	<files *.plist>
+		order allow,deny
+		deny from all
+	</files>
+	

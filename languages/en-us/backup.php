@@ -3,8 +3,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 31.10.2011
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 31.03.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,13 @@ $db_lang = array(
 	"create_date"			=> "Creation date",
 	"restore_success"		=> "The database was restored successfully!", 
 	"create_complete"		=> "Create complete Backup",
-	"create_sql"			=> "Create Database-Backup"
+	"create_sql"			=> "Create Database-Backup",
+	"restorable"			=> "restoreable",
+	"exclude_files"			=> "Exclude files from backup",
+	"write_error"			=> "Could not write to filesystem.",
+	"db"					=> "Database-Backup",
+	"full"					=> "Full backup",
+	"type"					=> "Backuptype"
 );
 foreach($db_lang as $key => $value) {
 	$GLOBALS['lang']['backup_'.$key] = $value;

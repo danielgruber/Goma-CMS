@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 28.11.2011
-  * $Version 007
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 31.08.2012
+  * $Version 2.1.10
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -18,7 +18,8 @@ class Controller extends RequestHandler
 		 *@name perPage
 		 *@access public
 		*/
-		public $perPage = 10;
+		public $perPage = null;
+		
 		/**
 		 * defines whether to use pages or not
 		 *
@@ -27,6 +28,7 @@ class Controller extends RequestHandler
 		 *@var bool
 		*/
 		public $pages = false;
+		
 		/**
 		 * defines which model is used for this controller
 		 *
@@ -35,18 +37,21 @@ class Controller extends RequestHandler
 		 *@var bool|string
 		*/
 		public $model = null;
+		
 		/**
 		 * instance of the model
 		 *@name model_inst
 		 *@access public
 		*/
 		public $model_inst = false;
+		
 		/**
 		 * where for the model_inst
 		 *@name where
 		 *@access public
 		*/
 		public $where = array();
+		
 		/**
 		 * allowed actions
 		 *@name allowed_actions
@@ -57,6 +62,7 @@ class Controller extends RequestHandler
 			"delete",
 			"record"
 		);
+		
 		/**
 		 * template for this controller
 		 *
@@ -64,12 +70,14 @@ class Controller extends RequestHandler
 		 *@acceess public
 		*/
 		public $template = "";
+		
 		/**
 		 * some vars for the template
 		 *@name tplVars
 		 *@access public
 		*/
 		public $tplVars = array();
+		
 		/**
 		 * url-handlers
 		 *@name url_handlers
@@ -77,6 +85,7 @@ class Controller extends RequestHandler
 		public $url_handlers = array(
 			'$Action/$id'	=> '$Action'
 		);
+		
 		/**
 		 * areas 
 		 *
@@ -84,6 +93,7 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public $areas = array();
+		
 		/**
 		 * content of areas
 		 *
@@ -91,6 +101,7 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public $areaData = array();
+		
 		/**
 		 * if this var is set to true areas are always used
 		 *
@@ -99,6 +110,7 @@ class Controller extends RequestHandler
 		 *@var bool
 		*/
 		public $useAreas;
+		
 		/**
 		 * showform if no edit right
 		 *
@@ -108,6 +120,15 @@ class Controller extends RequestHandler
 		 *@default false
 		*/
 		public $showWithoutRight = false;
+		
+		/**
+		 * activates the live-counter on this controller
+		 *
+		 *@name live_counter
+		 *@access public
+		*/
+		public static $live_counter = false;
+		
 		/**
 		 * inits the controller:
 		 * - determining and loading model
@@ -117,7 +138,7 @@ class Controller extends RequestHandler
 		 *@name init
 		 *@access public
 		*/
-		public function init()
+		public function Init()
 		{
 				parent::Init();
 				
@@ -125,6 +146,32 @@ class Controller extends RequestHandler
 				{
 						$this->template = $this->model() . ".html";
 				}
+				
+				if(ClassInfo::getStatic($this->class, "live_counter")) {
+					// run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
+					if(settingsController::get("livecounter") == 1 || !isset($_SESSION["user_counted"])  || member::login()) {
+					// livecounter
+						if(PROFILE) Profiler::mark("livecounter");			
+						livecounterController::run();				
+						if(PROFILE) Profiler::unmark("livecounter");
+						$_SESSION["user_counted"] = TIME; 
+					}
+				}
+				
+				if($title = $this->PageTitle()) {
+					Core::setTitle($title);
+					Core::addBreadCrumb($title, $this->namespace . URLEND);
+				}
+		}
+		
+		/**
+		 * if this method returns a title automatic title and breadcrumb will be set
+		 *
+		 *@name title
+		 *@access public
+		*/
+		public function PageTitle() {
+			return null;
 		}
 		
 		/**
@@ -150,10 +197,15 @@ class Controller extends RequestHandler
 					}
 				}
 			} else if(!isset($this->model)) {
-				if(is_a($this->model_inst, "DataObjectSet"))
-					$this->model = $this->model_inst->dataobject->class;
+				$this->model = $this->model_inst->dataClass;
+			}
+			
+			if(isset($this->modelInst) && is_object($this->modelInst) && is_a($this->modelInst, "DataSet") && !$this->modelInst->isPagination() && $this->pages && $this->perPage) {
+				$page = isset($_GET["pa"]) ? $_GET["pa"] : null;
+				if($this->perPage)
+					$this->modelInst->activatePagination($page, $this->perPage);
 				else
-					$this->model = $this->model_inst->class;
+					$this->modelInst->activatePagination($page);
 			}
 			
 			return (is_object($this->model_inst)) ? $this->model_inst : new ViewAccessAbleData();
@@ -179,10 +231,7 @@ class Controller extends RequestHandler
 						$this->model = $model;
 					}
 				} else {
-					if(is_a($this->model_inst, "DataObjectSet"))
-						$this->model = $this->model_inst->dataobject->class;
-					else
-						$this->model = $this->model_inst->class;
+					$this->model = $this->model_inst->dataClass;
 				}
 			}
 			
@@ -212,9 +261,8 @@ class Controller extends RequestHandler
 		*/
 		public function handleRequest(request $request)
 		{
-
 				$this->areaData = array();
-				$data = parent::handleRequest($request);
+				$data = $this->__output(parent::handleRequest($request));
 				
 				if(Core::is_ajax() && is_object($data) && Object::method_exists($data,"render")) {
 					HTTPResponse::setBody($data->render());
@@ -245,6 +293,16 @@ class Controller extends RequestHandler
 		}
 		
 		/**
+		 * output-layer
+		 *
+		 *@name __output
+		 *@access public
+		*/
+		public function __output($content) {
+			return $content;
+		}
+		
+		/**
 		 * this action will be called if no other action was found
 		 *
 		 *@name index
@@ -262,7 +320,7 @@ class Controller extends RequestHandler
 				}
 			} else {
 				$trace = @debug_backtrace();
-				throwError(6, "PHP-Error", "No Template for Controller ".$this->class." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
+				throwError(6, "Logical Exception", "No Template for Controller ".$this->class." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
 			}
 		}
 		/**
@@ -325,38 +383,45 @@ class Controller extends RequestHandler
 		 *@param bool - if calling getEditForm or getForm on model
 		 *@param string - submission
 		*/
-		public function form($name = null, $model = null, $fields = array(),$edit = false, $submission = "safe", $disabled = false)
+		public function form($name = null, $model = null, $fields = array(),$edit = false, $submission = "submit_form", $disabled = false)
 		{		
-		
-				if(!isset($model) || !$model) {
-					$model = clone $this->modelInst();
-				} else {
-					if(is_a($model, "DataObjectSet"))
-						$model = $model->first();
-				}
-				
-				if(!Object::method_exists($model, "generateForm")) {
-					$trace = @debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-					throwError(6, "PHP-Error", "No Method generateForm for Model ".get_class($model)." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
-				}
-				
-				// add the right controller
-				$controller = clone $this;
-				$model->controller($controller);
-				
-				$form = $model->generateForm($name, $edit, $disabled);
-				$form->setSubmission($submission);
-				
-				// we add where to the form
-				foreach($this->where as $key => $value)
-				{
-						$form->add(new HiddenField($key, $value));
-				}
-				
-				$this->callExtending("afterForm", $form);
-				
-				return $form->render();
+			return $this->buildForm($name, $model, $fields, $edit, $submission, $disabled)->render();
 		}
+		
+		/**
+		 * builds the form
+		 *
+		 *@name buildForm
+		 *@access public
+		*/
+		public function buildForm($name = null, $model = null, $fields = array(),$edit = false, $submission = "submit_form", $disabled = false) {
+			if(!isset($model) || !$model) {
+				$model = clone $this->modelInst();
+			}
+			
+			if(!Object::method_exists($model, "generateForm")) {
+				$trace = @debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+				throwError(6, "Logical Exception", "No Method generateForm for Model ".get_class($model)." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
+			}
+			
+			// add the right controller
+			$controller = clone $this;
+			$model->controller($controller);
+			
+			$form = $model->generateForm($name, $edit, $disabled, @$this->request);
+			$form->setSubmission($submission);
+			
+			// we add where to the form
+			foreach($this->where as $key => $value)
+			{
+				$form->add(new HiddenField($key, $value));
+			}
+			
+			$this->callExtending("afterForm", $form);
+			
+			return $form;
+		}
+		
 		/**
 		 * renders the form for this model
 		 *
@@ -375,15 +440,16 @@ class Controller extends RequestHandler
 		}
 		/**
 		 * edit-function
+		 *
 		 *@name edit
 		 *@access public
 		*/
 		public function edit()
 		{
-			if($this->countModelRecords() == 1) {
+			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
 				if(!$this->modelInst()->canWrite($this->modelInst()))
 				{
-					if($this->showWithoutRight || $data->showWithoutRight) {
+					if($this->showWithoutRight || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
 						AddContent::addNotice(lang("less_rights"));
 					} else {
@@ -396,15 +462,15 @@ class Controller extends RequestHandler
 				return $this->form("edit_" . $this->class . $this->modelInst()->id, $this->modelInst(), array(
 					
 				), true, "safe", $disabled);
-			} else {
-				
+			} else if($this->getParam("id")) {
 				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
-				
 				if($model) {
 					return $model->controller(clone $this)->edit();
 				} else {
-					return false;
+					throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
 				}
+			} else {
+				throwError(6, "Invalid Argument", "Controller::Edit should be called if you just have one Record or a given ID in URL.");
 			}
 		}
 		/**
@@ -454,6 +520,7 @@ class Controller extends RequestHandler
 				}
 			}
 		}
+		
 		/**
 		 * hides the deleted object
 		 *
@@ -464,6 +531,7 @@ class Controller extends RequestHandler
 			$response->exec("location.reload();");
 			return $response;
 		}
+		
 		/**
 		 * default save-function for forms
 		 *
@@ -474,13 +542,14 @@ class Controller extends RequestHandler
 		{
 				if($this->save($data) !== false)
 				{
-						addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
+						addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully saved.").'</div>');
 						$this->redirectback();
 				} else
 				{
 						throwError(6, 'Server-Error', 'Could not save data.');
 				}
 		}
+		
 		/**
 		 * default save-method for forms
 		 * it's the new one, the old one was @safe
@@ -491,7 +560,7 @@ class Controller extends RequestHandler
 		public function submit_form($data) {
 			if($this->save($data) !== false)
 			{
-				addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
+				addcontent::addSuccess(lang("successful_saved", "The data was successfully saved."));
 				$this->redirectback();
 			} else
 			{
@@ -506,11 +575,11 @@ class Controller extends RequestHandler
 		 *@access public
 		 *@param array - data
 		*/
-		public function save($data, $priority = 1)
-		{	
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false)
+		{
 				$this->callExtending("onBeforeSave", $data, $priority);
 				
-				$model = $this->modelInst();
+				$model = $this->modelInst()->_clone();
 				
 				if(is_object($data) && is_subclass_of($data, "ViewaccessableData"))
 				{
@@ -522,7 +591,7 @@ class Controller extends RequestHandler
 						$model[$key] = $value;
 				}
 				
-				if($model->write(false, false, $priority))
+				if($model->write($forceInsert, $forceWrite, $priority))
 				{
 						$this->callExtending("onAfterSave", $model, $priority);
 						$this->model_inst = $model;
@@ -545,7 +614,7 @@ class Controller extends RequestHandler
 		{	
 				if($this->save($data, 2) !== false)
 				{
-						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published!").'</div>');
+						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published.").'</div>');
 						$this->redirectback();
 				} else
 				{
@@ -581,24 +650,32 @@ class Controller extends RequestHandler
 		 *@access public
 		 *@param string - question
 		 *@param string - title of the okay-button, if you want to set it, default: "yes"
+		 *@param string|null - redirect on cancel button
 		*/
-		public function confirm($title, $btnokay = null) {
+		public function confirm($title, $btnokay = null, $redirectOnCancel = null) {
 			
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
-			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->class), array(), ($btnokay === null) ? lang("yes") : $btnokay);
+			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->class), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
 			$form->get();
-			return true;	
+			return true;
 			
 		}
 		/**
 		 * prompts the user
+		 *
+		 *@name prompt
+		 *@param string - message
+		 *@param array - validators
+		 *@param string - default value
+		 *@param string|null - redirect on cancel button
 		*/
-		public function prompt($title, $validators = array(), $value = null) {
-
+		public function prompt($title, $validators = array(), $value = null, $redirectOnCancel = null, $usePwdField = null) {
+			
+			$field = ($usePwdField) ? new PasswordField("prompt_text", $title, $value) : new TextField("prompt_text", $title, $value);
 			$form = new RequestForm(array(
-				new TextField("prompt_text", $title, $value)
-			), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->class), $validators);
+				$field
+			), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->class), $validators, null, $redirectOnCancel);
 			$data = $form->get();
 			return $data["prompt_text"];	
 			
