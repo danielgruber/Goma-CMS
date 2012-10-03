@@ -1,0 +1,55 @@
+<h3>{$_lang_info}</h3>
+<table  class="updateInfo">
+	<tr class="first">
+		<td class="left">
+			<% lang("files.filename") %>
+		</td>
+		<td class="value">
+			{$filename}
+		</td>
+	</tr>
+	<tr>
+		<td class="left">
+			{$_lang_version}
+		</td>
+		<td class="value">
+			$version
+		</td>
+	</tr>
+	<% IF NOT $installable AND $error %>
+		<tr>
+			<td class="left">
+				{$_lang_error}
+			</td>
+			<td class="value">
+				{$error}
+			</td>
+		</tr>
+	<% END %>
+	<tr>
+		<td class="left">
+			<% lang("install_destination") %>
+		</td>
+		<td class="value">
+			{$installFolders.destination.text()}
+		</td>
+	</tr>
+	<tr>
+		<td class="left">
+			{$_lang_installable}
+		</td>
+		<td class="value">
+			<% IF $installable %>
+				{$_lang_yes}
+			<% ELSE %>
+				{$_lang_no}
+			<% END %>
+		</td>
+	</tr>
+</table>
+
+<% IF $installable %>
+	<div class="updateActions">
+		<a href="{BASE_SCRIPT}install/execInstall/{$rand}" class="button">{$_lang_install.install}</a>
+	</div>
+<% END %>

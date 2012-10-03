@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>$title</title>
+		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<a href="http://goma-cms.org" target="_blank"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+				<div class="header">
+					<h1>$_cms_ptitle</h1>
+				</div>
+				<div class="content">
+					<div style="float: right;"><a class="button" href="{BASE_URI}{BASE_SCRIPT}admin/">{$_lang_administration}</a></div>
+					$content
+					<div class="clear"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+/* File system/libs/javascript/history/history.js */
+
+self.JSLoadedResources["system/libs/javascript/history/history.js"] = true;
+
+window.__oldHash=location.hash;var HistoryLib={binded:[],mode:null,lastPush:true,interval:250,bind:function(fn){if(typeof fn=="function"){HistoryLib.binded.push(fn);}
+if(this.mode=="hash"){if(location.hash.substr(0,2)=="#!"|| location.hash.substr(0,1)=="!"){fn(document.location.hash.substr(2));}}},push:function(url){HistoryLib.lastPush=true;if(HistoryLib.mode=="history"){window.history.pushState({},null,url);}else{location.hash="!"+url;}
+setTimeout(function(){HistoryLib.lastPush=false;},HistoryLib.interval+50);},Init:function(){if(typeof window.history.pushState=="function"){window.onpopstate=function(event){if(HistoryLib.lastPush){HistoryLib.lastPush=false;}else{for(i in HistoryLib.binded){HistoryLib.binded[i](document.location.pathname);}}};HistoryLib.mode="history";}else{HistoryLib.mode="hash";HistoryLib.push(location.pathname);if(typeof window.onhashchange=="object"){window.onhashchange=function(){if(location.hash.substr(0,2)=="#!"|| location.hash.substr(0,1)=="!"){if(HistoryLib.lastPush){HistoryLib.lastPush=false;}else{for(i in HistoryLib.binded){HistoryLib.binded[i](document.location.hash.substr(2));}}}};}else{setInterval(function(){if(window.__oldHash!=location.hash){window.__oldHash=location.hash;if(location.hash.substr(0,2)=="#!"|| location.hash.substr(0,1)=="!"){if(HistoryLib.lastPush){HistoryLib.lastPush=false;}else{for(i in HistoryLib.binded){HistoryLib.binded[i](document.location.hash.substr(2));}}}}},HistoryLib.interval)}}}};window.onload=function(){setTimeout(function(){HistoryLib.lastPush=false;},HistoryLib.interval+50);};HistoryLib.Init();
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="{$_cms_lang}">
+	<head>
+		<base href="{BASE_URI}" />
+		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - {$_lang_administration} <% END %></title>
+		
+		<% INCLUDE_CSS_MAIN "style.css" %>
+		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
+		
+		<style>
+			html, body {
+				background-image: none;
+			}
+			#preview_bottom_line {
+				position: absolute;
+				bottom: 0px;
+				left: 0px;
+				z-index: 900;
+				height: 50px;
+				width: 100%;
+				background: #ccc;
+			}
+		</style>
+		
+		{$header}
+	</head>
+	<body>
+		<iframe frameborder="0" width="100%" height="100%" src="{$src}" name="control_frame"></iframe>
+		<div id="preview_bottom_line">
+			test
+		</div>
+	</body>
+</html>

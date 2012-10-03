@@ -1,0 +1,8 @@
+19.04.2012 - 18:22: Code: 6, Name: PHP-Error, Details: Could not find Softwaretype 'framework'., URL: /install/install/?flush
+
+19.04.2012 - 18:43: Code: 7, Name: Could not open Templatefile, Details: Could not open install/index.html., URL: /
+
+19.04.2012 - 18:44: Could not open GFS system/installer/backup/syncStatus. Malformed file.
+
+19.04.2012 - 18:44: Could not open GFS system/installer/backup/syncStatus_1.1. Malformed file.
+

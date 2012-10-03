@@ -1,0 +1,180 @@
+Code: 9
+Name: FileSystem-Error
+Details: Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!
+URL: /
+Goma-Version: 2.0-038
+Application: Array
+(
+    [type] => installer
+    [name] => goma_installer
+    [autor] => Goma Team
+    [version] => 2.0
+    [build] => 007
+    [requireFrameworkVersion] => 2.0-038
+    [langPath] => lang
+    [langName] => install
+    [defaultLang] => en-us
+    [title] => Goma Installer
+    [enableAdmin] => 
+    [SQL] => 
+)
+
+
+
+Backtrace:
+Array
+(
+    [0] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 1153
+            [function] => throwError
+            [class] => Core
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => 9
+                    [1] => FileSystem-Error
+                    [2] => Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/ClassManifest.php
+            [line] => 85
+            [function] => throwerror
+            [args] => Array
+                (
+                    [0] => 9
+                    [1] => FileSystem-Error
+                    [2] => Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!
+                )
+
+        )
+
+    [2] => Array
+        (
+            [function] => load
+            [class] => ClassManifest
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => FrontedController
+                )
+
+        )
+
+    [3] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php
+            [line] => 15
+            [function] => spl_autoload_call
+            [args] => Array
+                (
+                    [0] => FrontedController
+                )
+
+        )
+
+    [4] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/ClassManifest.php
+            [line] => 83
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/security/profile.php
+                )
+
+            [function] => include_once
+        )
+
+    [5] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/ClassManifest.php
+            [line] => 298
+            [function] => load
+            [class] => ClassManifest
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => profilecontroller
+                )
+
+        )
+
+    [6] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/ClassInfo.php
+            [line] => 832
+            [function] => include_all
+            [class] => ClassManifest
+            [type] => ::
+            [args] => Array
+                (
+                )
+
+        )
+
+    [7] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 243
+            [function] => loadfile
+            [class] => ClassInfo
+            [type] => ::
+            [args] => Array
+                (
+                )
+
+        )
+
+    [8] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+            [line] => 13
+            [function] => loadFramework
+            [args] => Array
+                (
+                )
+
+        )
+
+    [9] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 356
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+                )
+
+            [function] => require
+        )
+
+    [10] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 360
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => system/installer
+                )
+
+        )
+
+    [11] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 229
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => mysite
+                )
+
+        )
+
+)

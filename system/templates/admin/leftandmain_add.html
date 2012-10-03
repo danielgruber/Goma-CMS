@@ -1,0 +1,16 @@
+<div class="adminContent">
+	<h1><% lang("Create") %></h1>
+	<ul class="create">
+		<% CONTROL types() %>
+			<% IF $types.value == $activeAdd %>
+				<li class="active">
+			<% ELSE %>
+				<li>
+			<% END %>
+				<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="node {$types.value}">
+					<span>$types.title.text()</span>
+				</a>
+			</li>
+		<% ENDCONTROL %>
+	</ul>
+</div>

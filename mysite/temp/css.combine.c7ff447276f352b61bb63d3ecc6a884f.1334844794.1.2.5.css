@@ -1,0 +1,13 @@
+/**
+ *@builder goma resources 1.2.5
+ *@license to see license of the files, go to the specified path for the file
+*/
+
+/* file mysite/templates/boxes/boxes.css */
+
+.boxes_new{width:100%;padding:0;margin:0}.box_new{margin:6px;padding:0;float:left;max-width:100% !important}.box_new > .content{padding:5px}.box_new > .adminhead{height:23px;background:url("/mysite/templates/boxes/../images/boxes_drag_area.png") repeat-x;line-height:100% !important}.box_new > .adminhead > .actions{float:right;margin:1px;line-height:100% !important}.boxes_new > .box_new > .adminhead > .actions > a{display:block;float:left;margin:1px}.boxes_new > .adminview:hover{border:1px dashed #aaa;margin:5px;-webkit-border-top-left-radius:0 !important;-webkit-border-top-right-radius:0 !important;-moz-border-radius-topleft:0 !important;-moz-border-radius-topright:0 !important;border-top-left-radius:0 !important;border-top-right-radius:0 !important}.box_new > .header > .title{font-weight:bold;padding:4px}.boxes_new > .box_new > .header{text-align:center}.boxes_new .no_box{padding:10px;border-top:3px double #ddd;border-bottom:3px double #ddd;text-align:center}.boxes_new .box_with_border{border:1px solid #ddd;margin:5px}.boxes_new > .placeholder{border:1px solid #ddd !important;background:#f5f5f5;margin:5px !important}
+
+/* file system/templates/includes/../css/frontedbar.css */
+
+#frontedbar_spacer{height:42px;width:100%}#frontedbar{position:fixed;top:0;left:0;width:100%;height:50px;background:url("/system/templates/includes/../css/images/frontedbar.png") repeat-x;z-index:800}#frontedbar_inner{width:800px;margin:auto;height:40px;background:url("/system/templates/includes/../css/images/logo_white_frontedbar.png") no-repeat left center;padding-left:80px;overflow:hidden}#frontedbar_inner div{float:left}#frontedbar_inner div a,#frontedbar_inner div span{display:block;color:#ddd;font-family:Helvetica;font-size:14px;line-height:16px;padding:8px 18px;margin:4px;border-left:1px solid #606060;text-decoration:none}#frontedbar_inner div a:hover{color:#fff}#frontedbar_inner div.endclear{float:none;clear:both}
+

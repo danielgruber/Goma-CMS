@@ -1,0 +1,222 @@
+/**
+  *@package goma form framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.05.2012
+*/
+
+/* fileuploadset */
+.fileuploadset .filetable {
+	width: 100%;
+	border-spacing: 0;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	margin: 5px 0; 
+}
+.fileuploadset .filetable.dragInDoc, .fileuploadset .filetable.dragInDoc tbody tr {
+	background: #eee;
+}
+.fileuploadset .filetable.dragOver, .fileuploadset .filetable.dragOver tbody tr {
+	background: #ddd;
+}
+.fileuploadset .filetable thead {
+	background: #eee url(../admin/images/table_bg.png) repeat-x;
+	font-weight: bold;
+	color: #333;
+}
+.fileuploadset .filetable thead td.icon {
+	width: 20px;
+}
+.fileuploadset .filetable tbody td.icon {
+	border-left: 1px solid #bbb;
+}
+.fileuploadset .filetable tbody td.filename a {
+	width: 330px;
+	word-wrap: break-word;
+	display: block;
+}
+.fileuploadset .filetable tbody tr:hover {
+	background: #777;
+	color: #fff;
+}
+.fileuploadset .filetable tbody tr:hover * {
+	color: #fff;
+	font-weight: bold;
+	text-decoration: none;
+}
+.fileuploadset .filetable thead td {
+	padding: 13px 7px;
+	border-bottom: 1px solid #999;
+}
+.fileuploadset .filetable thead th {
+	border-bottom: 1px solid #999;
+}
+.fileuploadset .filetable td, .fileuploadset .filetable th {
+	padding: 4px 7px;
+}
+.fileuploadset .filetable tbody {
+	
+}
+.fileuploadset .filetable tbody tr th.empty {
+	padding: 10px;
+	color: #333;
+	font-weight: bold;
+}
+.fileuploadset .filetable tbody tr th.empty:hover {
+	color: #eee;
+}
+.fileuploadset .filetable tbody td.actions {
+	width: 100px;
+}
+.fileuploadset .filetable tbody td.actions > div, .fileuploadset .filetable thead th.actions > div {
+	float: right;
+}
+.fileuploadset .filetable tbody td.actions > .delete > label {
+	font-weight: normal !important;
+}
+
+.fileuploadset .filetable tbody tr .progressbar {
+	margin: 4px 0px;
+	height: 20px;
+	border: 1px solid #999;
+	background: #eee;
+	position: relative;
+	line-height: 100%;
+}
+.fileuploadset .filetable tbody tr .progressbar .progress {
+	height: 20px;
+	background: url(images/progress.png) repeat-x;
+	width: 2px;
+	max-width: 100% !important;
+}
+.fileuploadset .filetable tbody tr .progressbar span {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 4px;
+	left: 0;
+	text-align: center;
+	color: #000 !important;
+	font-weight: normal !important;
+}
+.fileuploadset .filetable tbody tr td .filename {
+	display: block;
+}
+
+/* ------------------------------------------------------------------- */
+
+/* fileupload */
+
+.FileUpload_left {
+	width: 158px;
+	padding: 5px;
+	margin-right: 7px;
+}
+
+.FileUpload_left .icon a .img {
+	display: block;
+	padding: 6px;
+	margin: auto;
+	width: 128px;
+	height: 128px;
+	margin-bottom: 8px;
+}
+
+.FileUpload_left .icon a .img img {
+	margin: auto;
+	max-width: 128px;
+	max-height: 128px;
+}
+
+
+.FileUpload_left .icon a span {
+	padding: 4px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	line-height: 20px;
+	word-wrap: break-word;
+}
+
+.FileUpload_left .icon a {
+	text-decoration: none !important;
+}
+.FileUpload_left .icon:hover a span {
+	background: #444;
+	color: #eee;
+}
+
+.FileUpload_left .icon:hover a .img {
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	background: #777;
+}
+
+
+.FileUpload_left .icon {
+	width: 150px;
+	text-align: center;
+	border: 1px solid #ccc;
+	padding: 7px;
+	position: relative;
+}
+
+.FileUpload_left .icon .loading {
+	opacity: .7;
+	background: url(../../../images/loading.gif) no-repeat 50% 50%;
+}
+
+.FileUpload_left .progressbar {
+	margin: 4px 0px;
+	width: 157px;
+	height: 20px;
+	border: 1px solid #999;
+	background: #eee;
+	position: relative;
+}
+
+.FileUpload_left .icon.active {
+	background: #eee;
+}
+
+.FileUpload_left .icon.beforeDrop {
+	background: #ddd;
+}
+
+.FileUpload_left .progressbar .progress {
+	height: 20px;
+	background: url(images/progress.png) repeat-x;
+	width: 2px;
+}
+
+.FileUpload_left .progressbar .cancel {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	height: 17px;
+	width: 17px;
+	background: url(images/cancel.png) no-repeat;
+}
+
+.FileUpload_left .progressbar span {
+	position: absolute;
+	top: 3px;
+	left: 50%;
+	margin-left: -20px;
+	line-height: 110%;
+}
+
+.FileUpload_left > .actions {
+	text-align: center;
+	padding: 3px;
+	width: 164px;
+}
+
+.FileUpload_right {
+	margin-left: 190px;
+}
+.FileUpload_right .delete {
+	padding: 10px 0px;
+}

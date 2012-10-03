@@ -1,0 +1,864 @@
+Code: 7
+Name: Could not open Templatefile
+Details: Could not open install/selectApp.html.
+URL: /install/install/
+Goma-Version: 2.0-033
+Application: Array
+(
+    [type] => installer
+    [name] => goma_installer
+    [autor] => Goma Team
+    [version] => 2.0
+    [build] => 006
+    [requireFrameworkVersion] => 2.0-032
+    [langPath] => lang
+    [langName] => install
+    [defaultLang] => en-us
+    [title] => Goma Installer
+    [SQL] => 
+)
+
+
+
+Backtrace:
+Array
+(
+    [0] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 1141
+            [function] => throwError
+            [class] => Core
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => 7
+                    [1] => Could not open Templatefile
+                    [2] => Could not open install/selectApp.html.
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php
+            [line] => 186
+            [function] => throwerror
+            [args] => Array
+                (
+                    [0] => 7
+                    [1] => Could not open Templatefile
+                    [2] => Could not open install/selectApp.html.
+                )
+
+        )
+
+    [2] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php
+            [line] => 109
+            [function] => getFilename
+            [class] => tpl
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => install/selectApp.html
+                    [1] => DataSet Object
+                        (
+                            [pagination:protected] => 
+                            [perPage:protected] => 10
+                            [page] => 
+                            [dataCache:protected] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [filename] => gomacms.2.0-028.gfs
+                                            [type] => Applikation
+                                            [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                            [appInfo] => Array
+                                                (
+                                                    [type] => app
+                                                    [name] => gomacms
+                                                    [title] => Goma CMS
+                                                    [autor] => Goma Team
+                                                    [version] => 2.0
+                                                    [build] => 028
+                                                    [requireFrameworkVersion] => 2.0-027
+                                                    [icon] => templates/images/app-icon.png
+                                                    [excludeModelsFromDistro] => Array
+                                                        (
+                                                            [0] => pm
+                                                        )
+
+                                                )
+
+                                            [title] => Goma CMS
+                                            [version] => 2.0-028
+                                            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                            [plist_type] => backup
+                                        )
+
+                                )
+
+                            [defaults] => Array
+                                (
+                                )
+
+                            [protected_customised:protected] => Array
+                                (
+                                )
+
+                            [sortField:protected] => 
+                            [position:protected] => 0
+                            [convertDefault] => 
+                            [data] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [filename] => gomacms.2.0-028.gfs
+                                            [type] => Applikation
+                                            [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                            [appInfo] => Array
+                                                (
+                                                    [type] => app
+                                                    [name] => gomacms
+                                                    [title] => Goma CMS
+                                                    [autor] => Goma Team
+                                                    [version] => 2.0
+                                                    [build] => 028
+                                                    [requireFrameworkVersion] => 2.0-027
+                                                    [icon] => templates/images/app-icon.png
+                                                    [excludeModelsFromDistro] => Array
+                                                        (
+                                                            [0] => pm
+                                                        )
+
+                                                )
+
+                                            [title] => Goma CMS
+                                            [version] => 2.0-028
+                                            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                            [plist_type] => backup
+                                        )
+
+                                )
+
+                            [original] => Array
+                                (
+                                )
+
+                            [viewcache] => Array
+                                (
+                                )
+
+                            [customised] => Array
+                                (
+                                )
+
+                            [dataSetPosition] => 0
+                            [casting] => Array
+                                (
+                                )
+
+                            [changed] => 
+                            [dataset] => 
+                            [position:ViewAccessableData:private] => 0
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => dataset
+                            [inExpansion] => 
+                        )
+
+                    [2] => 
+                    [3] => 
+                )
+
+        )
+
+    [3] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php
+            [line] => 818
+            [function] => render
+            [class] => tpl
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => install/selectApp.html
+                    [1] => Array
+                        (
+                        )
+
+                    [2] => DataSet Object
+                        (
+                            [pagination:protected] => 
+                            [perPage:protected] => 10
+                            [page] => 
+                            [dataCache:protected] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [filename] => gomacms.2.0-028.gfs
+                                            [type] => Applikation
+                                            [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                            [appInfo] => Array
+                                                (
+                                                    [type] => app
+                                                    [name] => gomacms
+                                                    [title] => Goma CMS
+                                                    [autor] => Goma Team
+                                                    [version] => 2.0
+                                                    [build] => 028
+                                                    [requireFrameworkVersion] => 2.0-027
+                                                    [icon] => templates/images/app-icon.png
+                                                    [excludeModelsFromDistro] => Array
+                                                        (
+                                                            [0] => pm
+                                                        )
+
+                                                )
+
+                                            [title] => Goma CMS
+                                            [version] => 2.0-028
+                                            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                            [plist_type] => backup
+                                        )
+
+                                )
+
+                            [defaults] => Array
+                                (
+                                )
+
+                            [protected_customised:protected] => Array
+                                (
+                                )
+
+                            [sortField:protected] => 
+                            [position:protected] => 0
+                            [convertDefault] => 
+                            [data] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [filename] => gomacms.2.0-028.gfs
+                                            [type] => Applikation
+                                            [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                            [appInfo] => Array
+                                                (
+                                                    [type] => app
+                                                    [name] => gomacms
+                                                    [title] => Goma CMS
+                                                    [autor] => Goma Team
+                                                    [version] => 2.0
+                                                    [build] => 028
+                                                    [requireFrameworkVersion] => 2.0-027
+                                                    [icon] => templates/images/app-icon.png
+                                                    [excludeModelsFromDistro] => Array
+                                                        (
+                                                            [0] => pm
+                                                        )
+
+                                                )
+
+                                            [title] => Goma CMS
+                                            [version] => 2.0-028
+                                            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                            [plist_type] => backup
+                                        )
+
+                                )
+
+                            [original] => Array
+                                (
+                                )
+
+                            [viewcache] => Array
+                                (
+                                )
+
+                            [customised] => Array
+                                (
+                                )
+
+                            [dataSetPosition] => 0
+                            [casting] => Array
+                                (
+                                )
+
+                            [changed] => 
+                            [dataset] => 
+                            [position:ViewAccessableData:private] => 0
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => dataset
+                            [inExpansion] => 
+                        )
+
+                    [3] => Array
+                        (
+                        )
+
+                    [4] => 
+                )
+
+        )
+
+    [4] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/control/installController.php
+            [line] => 70
+            [function] => renderWith
+            [class] => ViewAccessableData
+            [object] => DataSet Object
+                (
+                    [pagination:protected] => 
+                    [perPage:protected] => 10
+                    [page] => 
+                    [dataCache:protected] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [filename] => gomacms.2.0-028.gfs
+                                    [type] => Applikation
+                                    [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                    [appInfo] => Array
+                                        (
+                                            [type] => app
+                                            [name] => gomacms
+                                            [title] => Goma CMS
+                                            [autor] => Goma Team
+                                            [version] => 2.0
+                                            [build] => 028
+                                            [requireFrameworkVersion] => 2.0-027
+                                            [icon] => templates/images/app-icon.png
+                                            [excludeModelsFromDistro] => Array
+                                                (
+                                                    [0] => pm
+                                                )
+
+                                        )
+
+                                    [title] => Goma CMS
+                                    [version] => 2.0-028
+                                    [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                    [plist_type] => backup
+                                )
+
+                        )
+
+                    [defaults] => Array
+                        (
+                        )
+
+                    [protected_customised:protected] => Array
+                        (
+                        )
+
+                    [sortField:protected] => 
+                    [position:protected] => 0
+                    [convertDefault] => 
+                    [data] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [filename] => gomacms.2.0-028.gfs
+                                    [type] => Applikation
+                                    [icon] => system/temp/app-icon.png-1c1c89a14bedbd47a96d5ae66767090a.png
+                                    [appInfo] => Array
+                                        (
+                                            [type] => app
+                                            [name] => gomacms
+                                            [title] => Goma CMS
+                                            [autor] => Goma Team
+                                            [version] => 2.0
+                                            [build] => 028
+                                            [requireFrameworkVersion] => 2.0-027
+                                            [icon] => templates/images/app-icon.png
+                                            [excludeModelsFromDistro] => Array
+                                                (
+                                                    [0] => pm
+                                                )
+
+                                        )
+
+                                    [title] => Goma CMS
+                                    [version] => 2.0-028
+                                    [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-028.gfs
+                                    [plist_type] => backup
+                                )
+
+                        )
+
+                    [original] => Array
+                        (
+                        )
+
+                    [viewcache] => Array
+                        (
+                        )
+
+                    [customised] => Array
+                        (
+                        )
+
+                    [dataSetPosition] => 0
+                    [casting] => Array
+                        (
+                        )
+
+                    [changed] => 
+                    [dataset] => 
+                    [position:ViewAccessableData:private] => 0
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => dataset
+                    [inExpansion] => 
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => install/selectApp.html
+                )
+
+        )
+
+    [5] => Array
+        (
+            [function] => install
+            [class] => InstallController
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/install
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => install
+                                )
+
+                            [params] => Array
+                                (
+                                    [Action] => install
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => install/install
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                )
+
+        )
+
+    [6] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 176
+            [function] => call_user_func_array
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [0] => InstallController Object
+                                (
+                                    [url_handlers] => Array
+                                        (
+                                            [installapp/$app!] => installApp
+                                            [execInstall] => execInstall
+                                            [restore] => selectRestore
+                                        )
+
+                                    [allowed_actions] => Array
+                                        (
+                                            [0] => install
+                                            [1] => installapp
+                                            [2] => langselect
+                                            [3] => execinstall
+                                            [4] => selectrestore
+                                            [5] => showrestore
+                                            [6] => installbackup
+                                            [7] => installformbackup
+                                        )
+
+                                    [requestHandlerKey:RequestHandler:private] => 1
+                                    [shiftOnSuccess:protected] => 1
+                                    [namespace] => install
+                                    [ext_instances:Object:private] => Array
+                                        (
+                                        )
+
+                                    [class] => installcontroller
+                                    [inExpansion] => 
+                                    [request] => Request Object
+                                        (
+                                            [url] => install/install
+                                            [request_method] => GET
+                                            [all_params] => Array
+                                                (
+                                                    [0] => install
+                                                    [Action] => install
+                                                )
+
+                                            [params] => Array
+                                                (
+                                                    [Action] => install
+                                                )
+
+                                            [get_params] => Array
+                                                (
+                                                )
+
+                                            [post_params] => Array
+                                                (
+                                                )
+
+                                            [url_parts] => Array
+                                                (
+                                                )
+
+                                            [unshiftedButParsedParams] => -1
+                                            [shiftedPart] => install/install
+                                            [ext_instances:Object:private] => Array
+                                                (
+                                                )
+
+                                            [class] => request
+                                            [inExpansion] => 
+                                        )
+
+                                )
+
+                            [1] => install
+                        )
+
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [7] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 125
+            [function] => handleAction
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/install
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => install
+                                )
+
+                            [params] => Array
+                                (
+                                    [Action] => install
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => install/install
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => install
+                )
+
+        )
+
+    [8] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 546
+            [function] => handleRequest
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/install
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => install
+                                )
+
+                            [params] => Array
+                                (
+                                    [Action] => install
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => install/install
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => Request Object
+                        (
+                            [url] => install/install
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => install
+                                )
+
+                            [params] => Array
+                                (
+                                    [Action] => install
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => install/install
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+        )
+
+    [9] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+            [line] => 22
+            [function] => render
+            [class] => Core
+            [object] => Core Object
+                (
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => core
+                    [inExpansion] => 
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => install/install
+                )
+
+        )
+
+    [10] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 352
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+                )
+
+            [function] => require
+        )
+
+    [11] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 356
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => system/installer
+                )
+
+        )
+
+    [12] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 225
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => mysite
+                )
+
+        )
+
+)

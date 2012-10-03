@@ -1,0 +1,829 @@
+Code: 7
+Name: Could not open Templatefile
+Details: Could not open install/index.html.
+URL: /
+Goma-Version: 2.0-033
+Application: Array
+(
+    [type] => installer
+    [name] => goma_installer
+    [autor] => Goma Team
+    [version] => 2.0
+    [build] => 006
+    [requireFrameworkVersion] => 2.0-032
+    [langPath] => lang
+    [langName] => install
+    [defaultLang] => en-us
+    [title] => Goma Installer
+    [SQL] => 
+)
+
+
+
+Backtrace:
+Array
+(
+    [0] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 1143
+            [function] => throwError
+            [class] => Core
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => 7
+                    [1] => Could not open Templatefile
+                    [2] => Could not open install/index.html.
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php
+            [line] => 186
+            [function] => throwerror
+            [args] => Array
+                (
+                    [0] => 7
+                    [1] => Could not open Templatefile
+                    [2] => Could not open install/index.html.
+                )
+
+        )
+
+    [2] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/template/tpl.php
+            [line] => 109
+            [function] => getFilename
+            [class] => tpl
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => install/index.html
+                    [1] => 
+                    [2] => 
+                    [3] => 
+                )
+
+        )
+
+    [3] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/control/installController.php
+            [line] => 35
+            [function] => render
+            [class] => tpl
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => install/index.html
+                )
+
+        )
+
+    [4] => Array
+        (
+            [function] => index
+            [class] => InstallController
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 2
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                )
+
+        )
+
+    [5] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 176
+            [function] => call_user_func_array
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [0] => InstallController Object
+                                (
+                                    [url_handlers] => Array
+                                        (
+                                            [installapp/$app!] => installApp
+                                            [execInstall] => execInstall
+                                            [restore] => selectRestore
+                                        )
+
+                                    [allowed_actions] => Array
+                                        (
+                                            [0] => install
+                                            [1] => installapp
+                                            [2] => langselect
+                                            [3] => execinstall
+                                            [4] => selectrestore
+                                            [5] => showrestore
+                                            [6] => installbackup
+                                            [7] => installformbackup
+                                        )
+
+                                    [requestHandlerKey:RequestHandler:private] => 2
+                                    [shiftOnSuccess:protected] => 1
+                                    [namespace] => 
+                                    [ext_instances:Object:private] => Array
+                                        (
+                                        )
+
+                                    [class] => installcontroller
+                                    [inExpansion] => 
+                                    [request] => Request Object
+                                        (
+                                            [url] => 
+                                            [request_method] => GET
+                                            [all_params] => Array
+                                                (
+                                                    [0] => 
+                                                )
+
+                                            [params] => Array
+                                                (
+                                                )
+
+                                            [get_params] => Array
+                                                (
+                                                )
+
+                                            [post_params] => Array
+                                                (
+                                                )
+
+                                            [url_parts] => Array
+                                                (
+                                                )
+
+                                            [unshiftedButParsedParams] => -1
+                                            [shiftedPart] => 
+                                            [ext_instances:Object:private] => Array
+                                                (
+                                                )
+
+                                            [class] => request
+                                            [inExpansion] => 
+                                        )
+
+                                )
+
+                            [1] => index
+                        )
+
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [6] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 125
+            [function] => handleAction
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 2
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => index
+                )
+
+        )
+
+    [7] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/control/HomePageController.php
+            [line] => 20
+            [function] => handleRequest
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installApp
+                            [execInstall] => execInstall
+                            [restore] => selectRestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 2
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+        )
+
+    [8] => Array
+        (
+            [function] => index
+            [class] => HomePageController
+            [object] => HomePageController Object
+                (
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [url_handlers] => Array
+                        (
+                            [$Action] => $Action
+                        )
+
+                    [shiftOnSuccess:protected] => 1
+                    [allowed_actions] => Array
+                        (
+                        )
+
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => homepagecontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                )
+
+        )
+
+    [9] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 176
+            [function] => call_user_func_array
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [0] => HomePageController Object
+                                (
+                                    [requestHandlerKey:RequestHandler:private] => 1
+                                    [url_handlers] => Array
+                                        (
+                                            [$Action] => $Action
+                                        )
+
+                                    [shiftOnSuccess:protected] => 1
+                                    [allowed_actions] => Array
+                                        (
+                                        )
+
+                                    [namespace] => 
+                                    [ext_instances:Object:private] => Array
+                                        (
+                                        )
+
+                                    [class] => homepagecontroller
+                                    [inExpansion] => 
+                                    [request] => Request Object
+                                        (
+                                            [url] => 
+                                            [request_method] => GET
+                                            [all_params] => Array
+                                                (
+                                                    [0] => 
+                                                )
+
+                                            [params] => Array
+                                                (
+                                                )
+
+                                            [get_params] => Array
+                                                (
+                                                )
+
+                                            [post_params] => Array
+                                                (
+                                                )
+
+                                            [url_parts] => Array
+                                                (
+                                                )
+
+                                            [unshiftedButParsedParams] => -1
+                                            [shiftedPart] => 
+                                            [ext_instances:Object:private] => Array
+                                                (
+                                                )
+
+                                            [class] => request
+                                            [inExpansion] => 
+                                        )
+
+                                )
+
+                            [1] => index
+                        )
+
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [10] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 125
+            [function] => handleAction
+            [class] => RequestHandler
+            [object] => HomePageController Object
+                (
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [url_handlers] => Array
+                        (
+                            [$Action] => $Action
+                        )
+
+                    [shiftOnSuccess:protected] => 1
+                    [allowed_actions] => Array
+                        (
+                        )
+
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => homepagecontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => index
+                )
+
+        )
+
+    [11] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 548
+            [function] => handleRequest
+            [class] => RequestHandler
+            [object] => HomePageController Object
+                (
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [url_handlers] => Array
+                        (
+                            [$Action] => $Action
+                        )
+
+                    [shiftOnSuccess:protected] => 1
+                    [allowed_actions] => Array
+                        (
+                        )
+
+                    [namespace] => 
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => homepagecontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => Request Object
+                        (
+                            [url] => 
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => 
+                                )
+
+                            [params] => Array
+                                (
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -1
+                            [shiftedPart] => 
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+        )
+
+    [12] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+            [line] => 22
+            [function] => render
+            [class] => Core
+            [object] => Core Object
+                (
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => core
+                    [inExpansion] => 
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => 
+                )
+
+        )
+
+    [13] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 352
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+                )
+
+            [function] => require
+        )
+
+    [14] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 356
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => system/installer
+                )
+
+        )
+
+    [15] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 225
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => mysite
+                )
+
+        )
+
+)

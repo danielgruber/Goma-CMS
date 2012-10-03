@@ -1,0 +1,32 @@
+/*comments*/
+.comments
+{
+	margin-top: 30px;
+}
+.comment
+{
+	background: #fff;
+	border: 1px solid #d0d0d0;
+	padding: 10px;
+	margin: 13px 0px;
+	-webkit-box-shadow: #d0d0d0 0 0 8px;
+	-moz-box-shadow: #d0d0d0 0 0 8px;
+	box-shadow: #d0d0d0 0 0 8px;
+}
+.comment .menu
+{
+	float: right;
+}
+.comment .from, .comment .from a
+{
+	color: #777;
+}
+.comment .text
+{
+	padding: 4px 0;
+	padding-right: 10px;
+}
+.comment .menu {
+	margin-bottom: 20px;
+	margin-left: 20px;
+}

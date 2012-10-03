@@ -1,0 +1,567 @@
+Code: 6
+Name: PHP-Error
+Details: Source and Destination are required for FileSystem::moveLogged.
+URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+Goma-Version: 2.0-038
+Application: Array
+(
+    [type] => installer
+    [name] => goma_installer
+    [autor] => Goma Team
+    [version] => 2.0
+    [build] => 007
+    [requireFrameworkVersion] => 2.0-038
+    [langPath] => lang
+    [langName] => install
+    [defaultLang] => en-us
+    [title] => Goma Installer
+    [enableAdmin] => 
+    [SQL] => 
+)
+
+
+
+Backtrace:
+Array
+(
+    [0] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 1153
+            [function] => throwError
+            [class] => Core
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => 6
+                    [1] => PHP-Error
+                    [2] => Source and Destination are required for FileSystem::moveLogged.
+                )
+
+        )
+
+    [1] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/file/FileSystem.php
+            [line] => 281
+            [function] => throwerror
+            [args] => Array
+                (
+                    [0] => 6
+                    [1] => PHP-Error
+                    [2] => Source and Destination are required for FileSystem::moveLogged.
+                )
+
+        )
+
+    [2] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/libs/GFS/SoftwareType.php
+            [line] => 280
+            [function] => moveLogged
+            [class] => FileSystem
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup
+                    [1] => 
+                )
+
+        )
+
+    [3] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/control/installController.php
+            [line] => 146
+            [function] => install
+            [class] => g_SoftwareType
+            [type] => ::
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [filename] => gomacms.2.0-031.gfs
+                            [type] => Applikation
+                            [version] => 2.0-031
+                            [installType] => install
+                            [preflightCode] => Array
+                                (
+                                    [0] => <?php if(!GFS_Package_Installer::wasUnpacked('/var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs') || !is_dir('/var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0')) { $gfs = new GFS_Package_installer('/var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs');$gfs->unpack('/var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0'); } $dbgfs = new GFS('/var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0' . "/database.sgfs"); $dbgfs->unpack('/var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/MeqF5A1FEGqR9sE-install/', "/database");
+                                )
+
+                            [postflightCode] => Array
+                                (
+                                    [0] => <?php FileSystem::Delete('/var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0');
+                                    [1] => writeProjectConfig(array (
+  'db' => 
+  array (
+    'user' => 'goma_dev_test',
+    'db' => 'goma_dev_test',
+    'pass' => 'Da220196:dg1996',
+    'host' => 'localhost',
+    'prefix' => 'gomacms_',
+  ),
+), $data["installFolders"]["destination"]);
+                                )
+
+                            [installFolders] => Array
+                                (
+                                    [source] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/
+                                    [destination] => /var/www/vhosts/ibpg.eu/filmteam-dev/mysite
+                                )
+
+                            [installable] => 1
+                            [rand] => PffFkHxCKNVDqMTiV12q
+                        )
+
+                )
+
+        )
+
+    [4] => Array
+        (
+            [function] => execInstall
+            [class] => InstallController
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installapp
+                            [execInstall/$rand!] => execinstall
+                            [restore] => selectrestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => execInstall
+                                    [1] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [params] => Array
+                                (
+                                    [0] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -2
+                            [shiftedPart] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                )
+
+        )
+
+    [5] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 188
+            [function] => call_user_func_array
+            [args] => Array
+                (
+                    [0] => Array
+                        (
+                            [0] => InstallController Object
+                                (
+                                    [url_handlers] => Array
+                                        (
+                                            [installapp/$app!] => installapp
+                                            [execInstall/$rand!] => execinstall
+                                            [restore] => selectrestore
+                                        )
+
+                                    [allowed_actions] => Array
+                                        (
+                                            [0] => install
+                                            [1] => installapp
+                                            [2] => langselect
+                                            [3] => execinstall
+                                            [4] => selectrestore
+                                            [5] => showrestore
+                                            [6] => installbackup
+                                            [7] => installformbackup
+                                        )
+
+                                    [requestHandlerKey:RequestHandler:private] => 1
+                                    [shiftOnSuccess:protected] => 1
+                                    [namespace] => install
+                                    [ext_instances:Object:private] => Array
+                                        (
+                                        )
+
+                                    [class] => installcontroller
+                                    [inExpansion] => 
+                                    [request] => Request Object
+                                        (
+                                            [url] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                                            [request_method] => GET
+                                            [all_params] => Array
+                                                (
+                                                    [0] => install
+                                                    [Action] => execInstall
+                                                    [1] => execInstall
+                                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                                )
+
+                                            [params] => Array
+                                                (
+                                                    [0] => execInstall
+                                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                                )
+
+                                            [get_params] => Array
+                                                (
+                                                )
+
+                                            [post_params] => Array
+                                                (
+                                                )
+
+                                            [url_parts] => Array
+                                                (
+                                                )
+
+                                            [unshiftedButParsedParams] => -2
+                                            [shiftedPart] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                                            [ext_instances:Object:private] => Array
+                                                (
+                                                )
+
+                                            [class] => request
+                                            [inExpansion] => 
+                                        )
+
+                                )
+
+                            [1] => execinstall
+                        )
+
+                    [1] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [6] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/requesthandler.php
+            [line] => 133
+            [function] => handleAction
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installapp
+                            [execInstall/$rand!] => execinstall
+                            [restore] => selectrestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => execInstall
+                                    [1] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [params] => Array
+                                (
+                                    [0] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -2
+                            [shiftedPart] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => execinstall
+                )
+
+        )
+
+    [7] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/Core.php
+            [line] => 553
+            [function] => handleRequest
+            [class] => RequestHandler
+            [object] => InstallController Object
+                (
+                    [url_handlers] => Array
+                        (
+                            [installapp/$app!] => installapp
+                            [execInstall/$rand!] => execinstall
+                            [restore] => selectrestore
+                        )
+
+                    [allowed_actions] => Array
+                        (
+                            [0] => install
+                            [1] => installapp
+                            [2] => langselect
+                            [3] => execinstall
+                            [4] => selectrestore
+                            [5] => showrestore
+                            [6] => installbackup
+                            [7] => installformbackup
+                        )
+
+                    [requestHandlerKey:RequestHandler:private] => 1
+                    [shiftOnSuccess:protected] => 1
+                    [namespace] => install
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => installcontroller
+                    [inExpansion] => 
+                    [request] => Request Object
+                        (
+                            [url] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => execInstall
+                                    [1] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [params] => Array
+                                (
+                                    [0] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -2
+                            [shiftedPart] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => Request Object
+                        (
+                            [url] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [request_method] => GET
+                            [all_params] => Array
+                                (
+                                    [0] => install
+                                    [Action] => execInstall
+                                    [1] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [params] => Array
+                                (
+                                    [0] => execInstall
+                                    [rand] => PffFkHxCKNVDqMTiV12q
+                                )
+
+                            [get_params] => Array
+                                (
+                                )
+
+                            [post_params] => Array
+                                (
+                                )
+
+                            [url_parts] => Array
+                                (
+                                )
+
+                            [unshiftedButParsedParams] => -2
+                            [shiftedPart] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                            [ext_instances:Object:private] => Array
+                                (
+                                )
+
+                            [class] => request
+                            [inExpansion] => 
+                        )
+
+                )
+
+        )
+
+    [8] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+            [line] => 22
+            [function] => render
+            [class] => Core
+            [object] => Core Object
+                (
+                    [ext_instances:Object:private] => Array
+                        (
+                        )
+
+                    [class] => core
+                    [inExpansion] => 
+                )
+
+            [type] => ->
+            [args] => Array
+                (
+                    [0] => install/execInstall/PffFkHxCKNVDqMTiV12q
+                )
+
+        )
+
+    [9] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 356
+            [args] => Array
+                (
+                    [0] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/application/application.php
+                )
+
+            [function] => require
+        )
+
+    [10] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 360
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => system/installer
+                )
+
+        )
+
+    [11] => Array
+        (
+            [file] => /var/www/vhosts/ibpg.eu/filmteam-dev/system/application.php
+            [line] => 229
+            [function] => loadApplication
+            [args] => Array
+                (
+                    [0] => mysite
+                )
+
+        )
+
+)

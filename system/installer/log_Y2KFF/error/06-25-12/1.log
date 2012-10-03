@@ -1,0 +1,16 @@
+25.06.2012 - 18:22: Code: 6, Name: PHP-Error, Details: Source and Destination are required for FileSystem::moveLogged., URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+
+25.06.2012 - 18:23: Code: 6, Name: PHP-Error, Details: Source and Destination are required for FileSystem::moveLogged., URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+
+25.06.2012 - 18:39: Code: 9, Name: FileSystem-Error, Details: Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!, URL: /
+
+25.06.2012 - 18:42: Code: 6, Name: PHP-Error, Details: Source and Destination are required for FileSystem::moveLogged., URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+
+25.06.2012 - 19:12: Code: 9, Name: FileSystem-Error, Details: Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!, URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+
+25.06.2012 - 19:12: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/PffFkHxCKNVDqMTiV12q
+
+25.06.2012 - 19:13: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/EiL281SKsSZcVhTRSgcG
+
+25.06.2012 - 22:13: Code: 9, Name: FileSystem-Error, Details: Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!, URL: /install/execInstall/EiL281SKsSZcVhTRSgcG
+

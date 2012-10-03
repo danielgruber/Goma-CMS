@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<title>Rewrite is required on nginx</title>
+		<link rel="stylesheet" href="system/templates/css/default.css" />
+		<link rel="stylesheet" href="system/templates/admin/style.css" />
+		<meta charset="UTF-8" />
+	</head>
+	<body>
+		<div id="wrapper_logout">
+			
+			<div class="wrapper_inner">
+				<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+				<div class="header">
+					<a href=""><h1>Goma Framework</h1></a>
+				</div>
+				<div class="content">
+					<h3>Rewrite is required on nginx</h3>
+					<p>If you want to run Goma on this Server you have to define a correct server-configuration.</p>
+					<p>Please define the following configuration:</p>
+					<pre style="background: #eee; padding: 10px;border: 1px solid #ccc;">
+if (!-f $request_filename) {
+        rewrite ^/(.*?)(\?|$)(.*)$ /system/application.php?$3 last;
+}
+
+# we need this for file-uploads
+client_max_body_size 50M;
+
+error_page  404  /system/application.php;
+					</pre>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

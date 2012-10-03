@@ -1,0 +1,27 @@
+/**
+  *@package goma css framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 17.09.2012
+*/
+
+.dialog {
+	
+}
+.dialog > .title {
+	padding: 10px;
+	font-weight: bold;
+	font-size: 1.4em;
+	color: #444;
+	border-bottom: 1px solid #ddd;
+	margin-bottom: 5px;
+}
+.dialog > .content {
+	padding: 5px;
+}
+.dialog > .content > form > .actions {
+	border-top: 1px solid #ddd;
+	margin-top: 8px;
+	padding: 5px;
+}

@@ -1,0 +1,13 @@
+/**
+ *@builder goma resources 1.2.5
+ *@license to see license of the files, go to the specified path for the file
+*/
+
+/* file system/templates/css/form.css */
+
+form{margin:0}fieldset{border:0;margin:5px 0;padding:0}.dropdown_widget{clear:both}.form_field.hiddenfield{padding:0;margin:0}.form_field{padding:4px}.form_field > label{font-weight:bold;width:250px}.hidden{padding:0 !important}.form_field > .fieldinfo{padding-left:265px;color:#444}.form_field > .err{padding-left:265px}.form_field > label{text-transform:capitalize}.form_field_tabs{padding:0 !important}.cke_browser_webkit{outline:0 !important;border:0 !important}.form > .actions{border-top:1px solid #ccc}.form_field.fullSize > label{display:block}.form_field.fullSize > .fieldInfo,.form_field.fullSize > .err{padding-left:4px !important}.tabs > .tab > h2{display:none}.form_field_captcha > label{margin-top:60px}.form_field_captcha > div{margin-left:260px;margin-top:-85px;width:250px;background:#ddd;border:1px solid #999;padding:5px;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px}.form_field_captcha > div img{display:block;margin:5px}.form_field.checkbox{margin-bottom:10px}.form_field.checkbox > .info_field{margin-top:12px;margin-bottom:-10px;text-align:right}
+
+/* file system/templates/css/tablefield.css */
+
+.tablefield-table{width:100%;border:1px solid #ddd;border-spacing:0}.tablefield-table thead{background:-moz-linear-gradient(#eee,#f5f5f5);background:-ms-linear-gradient(#eee,#f5f5f5);background:-o-linear-gradient(#5c5c5b,#424242);background:-webkit-linear-gradient(#eee 0%,#ccc 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b',endColorstr='#424242');-ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b',endColorstr='#424242')";background:linear-gradient(#eee,#f5f5f5)}.tablefield-table .sortable-header{}.tablefield-table .sortable-header td{font-weight:bold;padding:12px 8px}.tablefield-table .tablefield-items .tablefield-item td{padding:5px}.tablefield-table .tablefield-items .odd{background:#fff}.tablefield-table .tablefield-items .even{background:#f0f0f0}.tablefield-table .tablefield-items .tablefield-item td .no-value{font-style:italic;color:#666;font-size:0.9em}
+

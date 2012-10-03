@@ -1,0 +1,68 @@
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 20:48: DEPRECATED: ViewAccessableData::_count is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/system/core/viewaccessabledata.php on line 306
+
+24.06.2012 - 21:03: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:05: Code: 9, Name: FileSystem-Error, Details: Could not include /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/backup/application/control/FrontedController.php. ClassInfo seems to be old. Please reload!, URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:06: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:06: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/database.sgfs. Version not supported.
+
+24.06.2012 - 21:06: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:06: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/temp/99eb6e7e2b18d652ffcdf6645a87f8f0/database.sgfs. Version not supported.
+
+24.06.2012 - 21:06: Code: 6, Name: PHP-Error, Details: Could not move files of Update. Failed in file , URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:08: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:08: Code: 6, Name: PHP-Error, Details: Could not Create Folder '', URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:09: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 21:09: Code: 6, Name: PHP-Error, Details: Source and Destination are required for FileSystem::moveLogged., URL: /install/execInstall/Zj9vhX4RNe9SvgVsuPTp
+
+24.06.2012 - 21:59: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 21:59: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+
+24.06.2012 - 22:00: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 22:00: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 22:00: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 22:02: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 22:04: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/framework.2.0-033.gfs. Version not supported.
+
+24.06.2012 - 22:04: Could not open GFS /var/www/vhosts/ibpg.eu/filmteam-dev/system/installer/data/apps/gomacms.2.0-031.gfs. Version not supported.
+

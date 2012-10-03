@@ -1,0 +1,75 @@
+<script type="text/javascript">
+	$(function(){
+		$(".userbar div form .logoutButton").hover(function(){
+			$(this).attr("src", "system/templates/admin/images/power_off_hover.png");
+		}, function(){
+			$(this).attr("src", "system/templates/admin/images/power_off.png");
+		});
+		
+		
+		var hide = function(){
+			$(".userbar .langSelect").find(".langSelection").stop().slideUp(300);
+			$(".userbar .langSelect").find(".langSelection").removeClass("visisble");
+			$(".userbar .langSelect > a").removeClass("active");
+		}
+		
+		$(".userbar .langSelect > a").click(function(){
+			if(!$(this).parent().find(".langSelection").hasClass("visisble")) {
+				$(this).parent().find(".langSelection").stop().slideUp(1).slideDown(100);
+				$(this).parent().find(".langSelection").addClass("visisble");
+				$(this).addClass("active");
+			} else {
+				hide();
+			}
+			
+			return false;
+		});
+		
+		CallonDocumentClick(hide, [$(".userbar .langSelect > a"), $(".userbar .langSelect").find(".langSelection")]);
+	});
+</script>
+<div class="userbar">
+	<div class="spacer"></div>
+	<div class="langSelect">
+		<% CONTROL array(currentLang()) AS $currentLang %>
+			<a title="{$_lang_switchlang}" href="{BASE_SCRIPT}admin/switchLang{URLEND}?redirect={$_SERVER_REDIRECT.url()}">
+				<img src="$currentLang.icon" alt="$currentLang.code" />
+			</a>
+		<% ENDCONTROL %>
+		<div class="langSelection dropdowncontainer">
+			<ul>
+				<% CONTROL languages() AS $lang %>
+					<% IF $lang.code = $_cms_lang %>
+						<li class="active">
+					<% ELSE %>
+						<li>
+					<% END %>
+						<a href="<% addParamToUrl($_SERVER_REDIRECT, "setlang", $lang.code) %>">
+							<img src="$lang.icon" alt="$lang.code" />
+							<span>$lang.title</span>
+						</a>
+					</li>
+				<% ENDCONTROL %>
+			</ul>
+		</div>
+	</div>
+	<% IF $_cms_user %>
+		<div class="spacer"></div>
+		
+		<div>
+			<span>
+				<a href="profile/"><strong>{$_cms_user}</strong></a>
+			</span>
+		</div>
+	<% END %>
+	
+	$userbar
+	<div class="spacer"></div>
+	<div class="logout">
+		<form method="post" id="loginFormGlobe" action="{BASE_SCRIPT}profile/logout">
+			<input type="hidden" name="logout" value="1" />
+			<input type="hidden" name="redirect" value="{$_SERVER_REQUEST_URI.text()}" />
+			<input title="{$_lang_logout}" value="{$_lang_logout}" class="logoutButton" type="image" src="system/templates/admin/images/power_off.png" />
+		</form>
+	</div>
+</div>
