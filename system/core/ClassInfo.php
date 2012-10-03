@@ -660,11 +660,16 @@ class ClassInfo extends Object
 						}
 						
 						@chmod(ROOT . "system/temp/", 0777);
-						if(@fopen(ROOT . "system/temp/write.test", "w")) {
-							@unlink(ROOT . "system/temp/write.test");
+						if(!is_dir(ROOT . "system/temp/")) {
+							mkdir(ROOT . "system/temp/", 0777, true);
+							@chmod(ROOT . "system/temp/", 0777);
 						} else {
-							$permissionsValid = false;
-							$permissionsFalse .= '<li>./system/temp/</li>';
+							if(@fopen(ROOT . "system/temp/write.test", "w")) {
+								@unlink(ROOT . "system/temp/write.test");
+							} else {
+								$permissionsValid = false;
+								$permissionsFalse .= '<li>./system/temp/</li>';
+							}
 						}
 						
 						@chmod(APP_FOLDER . "temp/", 0777);
