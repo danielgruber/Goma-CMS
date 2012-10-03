@@ -540,7 +540,7 @@ class TableField_FormAction extends FormAction {
 	 * @param type $actionName
 	 * @param type $args 
 	 */
-	public function __construct(tableField $tableField, $name, $title, $actionName, $args) {
+	public function __construct($tableField = null, $name = null, $title = null, $actionName = null, $args = null) {
 		$this->tableField = $tableField;
 		$this->actionName = $actionName;
 		$this->args = $args;
