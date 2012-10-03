@@ -23,7 +23,7 @@ interface FormActionHandler {
 	 *@name canSubmit
 	 *@return bool
 	*/
-	public function canSubmit();
+	public function canSubmit($data);
 	
 	/**
 	 *@name getsubmit

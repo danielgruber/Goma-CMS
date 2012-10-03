@@ -102,7 +102,7 @@ class FormAction extends FormField implements FormActionHandler
 		 *@access public
 		 *@param submission
 		*/
-		public function canSubmit() {
+		public function canSubmit($data) {
 			return true;
 		}
 		

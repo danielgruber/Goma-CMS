@@ -45,7 +45,7 @@ class CancelButton extends FormAction {
 		/**
 		 * just don't let the system submit and redirect back
 		*/
-		public function canSubmit() {
+		public function canSubmit($data) {
 			if($this->redirect !== null)
 				HTTPResponse::redirect($this->redirect);
 			else if(isset($_POST["redirect"]))
