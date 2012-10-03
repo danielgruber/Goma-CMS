@@ -3,4 +3,5 @@ _config.php
 .htaccess
 .DS_Store
 mysite/*
-system/installer/log_Y2KFF/*
+system/installer/log_*****/*
+system/temp/
