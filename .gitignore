@@ -4,8 +4,11 @@ _config.php
 .DS_Store
 mysite/*
 !mysite/application/*
+!mysite/application
 !mysite/templates/*
+!mysite/templates
 !mysite/code/*
+!mysite/code
 !mysite/info.plist
 system/installer/log_*****/*
 system/temp/*

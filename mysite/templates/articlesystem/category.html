@@ -1,0 +1,43 @@
+<% INCLUDE_CSS "article.css" %>
+
+<h1>$Title</h1>
+
+$data
+
+<% IF $categories %>
+	<div id="articlecategories">
+		<ul>
+			<% CONTROL categories() AS $category %>
+				<li><h3><a href="$category.url">$category.Title</a></h3><div>$category.data</div></li>
+			<% ENDCONTROL %>
+		</ul>
+	</div>
+<% END %>
+
+<% IF $articles %>
+	<div id="articles">
+		<% articles.activatePages($_GET_articlepage) %>
+		<% CONTROL articles() AS $article %>
+			<div class="article">
+				<h2><a href="$article.url">$article.Title</a></h2>
+				<div class="info">
+					{$_lang_ar_written_by} $article.autor.nickname.text() | $article.comments.count {$_lang_co_comments}
+				</div>
+				<div class="description">$article.description</div>
+				<div class="read_more"><a href="$article.url">{$_lang_ar_read_more}</a></div>
+			</div>
+		<% ENDCONTROL %>
+		<div class="pages">
+			{$_lang_page}: 
+			<% CONTROL articles.pages() %>
+				<% IF $pages.black AND $pages.active %>
+					<span class="active">$pages.page</span>
+				<% ELSEIF $pages.black %>
+					$pages.page
+				<% ELSE %>
+					<a href="{URL}?pa=$pages.page" class="link">$pages.page</a>
+				<% END %>
+			<% ENDCONTROL %>
+		</div>
+	</div>
+<% END %>
