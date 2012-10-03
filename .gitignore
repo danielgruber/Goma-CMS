@@ -3,6 +3,10 @@ _config.php
 .htaccess
 .DS_Store
 mysite/*
+!mysite/application/*
+!mysite/templates/*
+!mysite/code/*
+!mysite/info.plist
 system/installer/log_*****/*
 system/temp/*
 system/installer/log/*

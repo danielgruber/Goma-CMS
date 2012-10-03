@@ -1072,6 +1072,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 								SQL::addIndex($table, array($data["field"], $data["extfield"]), "INDEX", "dataindex",$prefix);
 								SQL::addIndex($table, array($data["field"], $data["extfield"]), "UNIQUE", "dataindexunique",$prefix);
 						}
+						ClassInfo::$database[$data["table"]] = array('id' => 'int(10)', $data["field"] => 'int(10)', $data["extfield"] => 'int(10)');
 				}
 			}	
 		}
