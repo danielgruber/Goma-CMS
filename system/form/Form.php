@@ -335,12 +335,11 @@ class Form extends object
 		 *@access public
 		*/
 		public function defaultFields()
-		{
-							
+		{		
 				if($this->secret)
 				{
-						$this->add(new HiddenField("secret_".$this->ID()."", $this->secretKey));
-						$_SESSION["form_secrets"][$this->name()] = $this->secretKey; 
+						$this->add(new HiddenField("secret_".$this->ID(), $this->secretKey));
+						$this->state->secret = $this->secretKey; 
 				}
 				
 				$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
@@ -398,7 +397,7 @@ class Form extends object
 				if(isset($_POST["form_submit_" . $this->name()]))
 				{
 						// check secret
-						if($this->secret && isset($_SESSION["form_secrets"][$this->name()]) && $_POST["secret_" . $this->ID()] == $_SESSION["form_secrets"][$this->name()])
+						if($this->secret && $_POST["secret_" . $this->ID()] == $this->state->secret)
 						{
 								$this->defaultFields();
 								return $this->submit();
@@ -544,7 +543,6 @@ class Form extends object
 				session_store("form_state_" . $this->name, $this->state->ToArray());
 				
 				if(PROFILE) Profiler::unmark("Form::renderForm");
-
 				
 				return $data;
 				
