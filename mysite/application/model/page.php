@@ -1,10 +1,10 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 01.07.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 16.04.2012
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -74,5 +74,22 @@ class Page extends pages
 
 class pageController extends contentController
 {
-	
+	/**
+	 * generates a button edit this page
+	 *
+	 *@name frontedBar
+	 *@access public
+	*/
+	public function frontedBar() {
+		if(!$this->modelInst()->id)
+			return array();
+		
+		return array(
+			array(
+				"url" 			=> BASE_SCRIPT . "admin/content/record/" . $this->modelInst()->id . "/edit",
+				"title"			=> lang("edit_this_page", "edit this page"),
+				"attr_title"	=> $this->modelInst()->title
+			)
+		);
+	}
 }

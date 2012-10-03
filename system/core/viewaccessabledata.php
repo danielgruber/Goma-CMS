@@ -9,9 +9,9 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 14.11.2011
-  * $Version 008
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 31.08.2012
+  * $Version 2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -34,13 +34,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@acccess protected
 		 *@var array
 		*/
-		protected $data = array();
+		public $data = array();
+		
 		/**
-		 * new cache
+		 * contains the original data
 		 *
-		 *@name viewcache
+		 *@name original
+		 *@access public
 		*/
-		public $viewcache = array();
+		public $original = array();
+		
 		/**
 		 * default castings
 		 *@name defaultCasting
@@ -48,6 +51,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@var string
 		*/
 		public static $default_casting = "Varchar";
+		
 		/**
 		 * customised data
 		 *@name customised
@@ -55,6 +59,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@var array
 		*/
 		public $customised = array();
+		
 		/**
 		 * dataset-position
 		 *
@@ -62,12 +67,37 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public $dataSetPosition = 0;
+		
 		/**
 		 * casting
 		 *
 		 *@name casting
 		*/
 		public $casting = array();
+		
+		/**
+		 * indicates whether the data was changes or not
+		 *
+		 *@name changed
+		 *@access public
+		*/
+		public $changed = false;
+		
+		/**
+		 * dataset in which this DataObject is
+		 *
+		 *@name dataset
+		 *@access public
+		*/
+		public $dataset;
+		
+		/**
+		 * dataClass
+		 *
+		 *@name dataClass
+		*/
+		public $dataClass;
+		
 		/**
 		 * generates casting
 		 *
@@ -80,8 +110,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				$casting = array_merge($casting, $_casting);
 				unset($_casting);
 			}
-			
-			//$casting = array_map(array("viewaccessabledata", "parseCasting"), $casting);
 			
 			$parent = get_parent_class($this);
 			if($parent != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
@@ -121,7 +149,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"where",
 			"fields",
 			"getoffset",
-			"getversion"
+			"getversion",
+			"_get",
+			"getObject"
 		);
 		/**
 		 * defaults
@@ -137,9 +167,15 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		{
 				parent::__construct();
 				
+				$this->dataClass = $this->class;
+				
 				/* --- */
 				
-				$this->data = $data;
+				if(isset($data)) { 
+					$this->data = ArrayLib::map_key("strtolower", (array)$data);
+					$this->original = $this->data;
+				}
+				
 				if(isset(ClassInfo::$class_info[$this->class]["casting"]))
 					$this->casting = ClassInfo::$class_info[$this->class]["casting"];
 		}
@@ -179,6 +215,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			else
 				return null;
 		}
+		
 		/**
 		 * is field
 		 *
@@ -190,6 +227,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			return (isset($this->data[$name]) || isset($this->defaults[$name]));
 		}
+		
 		/**
 		 * sets the field
 		 *
@@ -197,6 +235,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function setField($name, $value) {
+			$this->changed = true;
 			$this->setOffset($name, $value);
 		}
 				
@@ -212,11 +251,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function __get($offset) {
-			
-			
 			// third call
 			return $this->getOffset($offset);
 		}
+		
 		/**
 		 * new set method
 		 *
@@ -224,11 +262,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function __set($name, $value) {
-			
+			$this->changed = true;
 			$name = strtolower(trim($name));
-			// unset cache
-			unset($this->viewcache["_" . $name]);
-			unset($this->viewcache["1_" . $name]);
 			
 			if($this->isSetMethod($name))
 			{
@@ -257,6 +292,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				{
 						$this->data = array($var => $value);
 				}
+				$this->changed = true;
 		}
 		/**
 		 * gets the offset
@@ -281,6 +317,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				$data = $this->customised[$lowername];
 			// methods
 			} else if(Object::method_exists($this->class, $name)) {
+				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset");
 				return parent::__call($name, $args);
 			} else
 			
@@ -301,17 +338,20 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			if(isset($data)) {
 				// casting-array
-				if(is_array($data) && isset($data["casting"], $data["value"]) && $casting = self::parseCasting($data["casting"])) {
-					$object = new $casting["name"]($lowername, $data["value"], isset($casting["args"]) ? $casting["args"] : array());
-					$data = $object->__toString();
-					unset($object);
+				if(is_array($data) && isset($data["casting"], $data["value"])) {
+					$data = DBField::convertByCasting($data["casting"], $lowername, $data["value"]);
 				}
 				
+				if(is_array($data))
+					$data = new ViewAccessableData($data);
+				
+				unset($lowername, $name);
 				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset");
 				
 				return $data;
 			} else {
-				if(DEV_MODE) {
+				unset($lowername, $name);
+				/*if(DEV_MODE) {
 					$trace = debug_backtrace();
 					if(isset($trace[1]['file']))
 						logging('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[1]['file'].' on line '.$trace[1]['line']);
@@ -319,22 +359,23 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 						logging('Warning: Call to undefined method ' . $this->class . '::' . $name . '');
 					}
 					
-				}
+				}*/
 				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset");
 				return null;
 			}
 		}
+		
 		/**
 		 * forces making an object of the given data
 		 *
 		 *@name makeObject
 		 *@access public
 		*/
-		public function makeObject($lowername, $data, $cachename = null) {
+		public function makeObject($name, $data, $cachename = null) {
 			if(PROFILE) Profiler::mark("ViewAccessableData::makeObject");
 			
 			if(!isset($cachename))
-				$cachename = "1_" . $lowername;
+				$cachename = "1_" . $name;
 			
 			// if is already an object
 			if(is_object($data)) {
@@ -343,9 +384,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				return $data;
 			
 			// casting-array
-			} else if(is_array($data) && isset($data["casting"], $data["value"]) && $casting = self::parseCasting($data["casting"])) {
+			} else if(is_array($data) && isset($data["casting"], $data["value"])) {
 			
-				$object = new $casting["name"]($lowername, $data["value"], isset($casting["args"]) ? $casting["args"] : array());
+				$object = DBField::getObjectByCasting($data["casting"], $name, $data["value"]);
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
 				return $object;
 			
@@ -357,14 +398,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			// default object
 			} else {
-				if(isset($this->casting[$lowername]) && $this->casting[$lowername] = self::parseCasting($this->casting[$lowername]))
-				{
-					
-					$c = $this->casting[$lowername]["class"];
-					$object = new $c($lowername, $data, isset($this->casting[$lowername]["args"]) ? $this->casting[$lowername]["args"] : array());
+				if(isset($this->casting[$name])) {
+					$object = DBField::getObjectByCasting($this->casting[$name], $name, $data);
 				} else {
 					$c = ClassInfo::getStatic("viewaccessabledata", "default_casting");
-					$object = new $c($lowername, $data);
+					$object = new $c($name, $data);
 				}
 				
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
@@ -372,52 +410,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			}
 		}
 		
-		/**
-		 * parses casting-args and gives back the result 
-		 *
-		 *@name parseCasting
-		 *@access public
-		 *@param string - casting
-		*/
-		public static function parseCasting($casting) {
-			if(is_array($casting))
-				return $casting;
-			
-			if(strpos($casting, "(")) {
-				
-				$name = trim(substr($casting, 0, strpos($casting, "(")));
-				preg_match('/\(([^\(\)]+)\)?/', $casting, $matches);
-				$args = $matches[1];
-				$args = eval('return array('.$args.');');
-			} else {
-				$args = array();
-				$name = trim($casting);
-			}
-			
-			
-			if(ClassInfo::exists($name) && ClassInfo::hasInterface($name, "DataBaseField")) {
-				$valid = true;
-			} else if (ClassInfo::exists($name . "SQLField") && ClassInfo::hasInterface($name . "SQLField", "DataBaseField")) {
-				$name = $name . "SQLField";
-				$valid = true;
-			}
-			
-			if(!isset($valid))
-				return null;
-			
-			$data = array(
-				"class" => $name
-			);
-			
-			if(!empty($args))
-				$data["args"] = $args;
-			
-			if(ClassInfo::hasInterface($name, "DefaultConvert")) {
-				$data["convert"] = true;
-			}
-			
-			return $data;
-		}
 		
 		/**
 		 * checks if object exists
@@ -428,6 +420,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		final public function isOffset($offset) {
 			return $this->__cancall($offset);
 		}
+		
 		/**
 		 * new call method
 		 *
@@ -488,14 +481,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				return true;
 			} else
 			
-			
 			// server
 			if($this->isServer($name, $lowername)) {
 				return true;
 			} else
 			// data
 			
-			if(isset($this->data[$name])) {
+			if(isset($this->data[$lowername])) {
 				return true;
 			}
 
@@ -536,7 +528,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(substr($lowerOffset, 0, 8) == "_server_")
 				{
 					$key = substr($offset, 8);
-					if(strtolower($key) == "redirect") {
+					if(strtolower($key) == "redirect" || strtolower($key) == "redirect_parent") {
 						return true;
 					}
 					return isset($_SERVER[$key]);
@@ -564,7 +556,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					
 					$key = substr($offset, 8);
 					if(strtolower($key) == "redirect") {
-						return true;
+						return getredirect();
+					} else if(strtolower($key) == "redirect_parent") {
+						return getredirect(true);
 					}
 					
 					if(strtolower($key) == "request_uri") {
@@ -609,7 +603,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		*/
 		public function offsetExists($offset)
 		{
-			
 			// third call
 			return Object::method_exists($this, $offset);
 		}
@@ -650,7 +643,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				$loops = Arraylib::map_key($loops, "strtolower");
 				$this->customised = array_merge($this->customised, $loops);
 				
-				$this->viewcache = array();
 				return $this;
 		}
 		
@@ -748,7 +740,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		public function reset()
 		{
 				$this->data = false;
-				$this->viewcache = array();
 				$this->position = 0;
 				$this->customised = array();
 		}
@@ -771,11 +762,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@name renderWith
 		 *@access public
 		 *@param string - template
-		 *@param array - replacement
+		 *@param array - areas
+		 *@param expansion-name of you want to use the expansion-path too
 		*/
-		public function renderWith($view, $areas = array())
+		public function renderWith($view, $areas = array(), $expansion = null)
 		{
-				return tpl::render($view,array(), $this, $areas);
+				return tpl::render($view,array(), $this, $areas, $expansion);
 		}
 		/**
 		 * bool - for IF in template
@@ -796,12 +788,24 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		{	
 				return ($this->dataSetPosition == 0);
 		}
+		
+		/**
+		 * returns if this is the last entry or not
+		 *@name last
+		 *@access public
+		*/
+		public function last()
+		{	
+				return ($this->dataSetPosition + 1 == $this->dataset->count());
+		}
+		
 		/**
 		 * returns current position
 		*/
 		public function position() {
 			return $this->dataSetPosition;
 		}
+		
 		/**
 		 * returns if this is a highlighted one
 		 *
@@ -812,6 +816,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			$r = ($this->dataSetPosition + 1) % 2;
 			return ($r == 0);
 		}
+		
 		/**
 		 * returns if this is a white one
 		 *
@@ -827,14 +832,43 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		public function getWhite() {
 			return $this->white();
 		}
+		
 		public function getHighlight() {
 			return $this->highlight();
 		}
-		public function getFirst() {
+		
+		public function isFirst() {
 			return $this->first();
 		}
+		
+		public function isLast() {
+			return $this->last();
+		}
+		
 		public function getPosition() {
 			return $this->dataSetPosition;
+		}
+		
+		/**
+		 * returns if the record was changed
+		 *
+		 *@name wasChanged
+		 *@access public
+		*/
+		public function wasChanged() {
+			return $this->changed;
+		}
+		
+		/**
+		 * sets the value of changed
+		 *
+		 *@name setChanged
+		 *@access public
+		 *@param bool
+		*/
+		public function setChanged($val) {
+			if(is_bool($val))
+				$this->changed = $val;
 		}
 		
 		/**
@@ -849,6 +883,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			Core::deprecate(2.0);
 			return 1;
+		}
+		
+		/**
+		 * gets a cloned object
+		 *
+		 *@name _clone
+		 *@access public
+		*/
+		public function _clone() {
+			return clone $this;
 		}
 		
 }

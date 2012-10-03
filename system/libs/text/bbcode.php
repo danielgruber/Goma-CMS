@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 13.12.2011
-  * $Version 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 04.03.2012
+  * $Version 1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -45,7 +45,7 @@ class BBcode extends TextTransformer
 										";
 				}
 				
-				$text = text::protect($text);
+				$text = convert::raw2text($text);
 				
 				preg_match_all('/\[noparse\](.*?)\[\/noparse\]/si',$text,$noparse);
 				
@@ -60,8 +60,9 @@ class BBcode extends TextTransformer
 				
 				$text = nl2br($text);
 				$text = str_replace('  ','&nbsp;&nbsp;',$text);
-								
-				$text = $this->smilies($text); // parse smilies
+				
+				$this->callExtending("parseBBCode", $text);		
+				
 				/* lists */
 				$text = str_replace('[li]','<li>',$text);
 				$text = str_replace('[/li]','</li>',$text);
@@ -86,6 +87,11 @@ class BBcode extends TextTransformer
 				$text = preg_replace('/\[i\](.*)\[\/i\]/Usi', '<span style="font-style: italic;">\\1</span>', $text);
 				$text = preg_replace('/\[b\](.*)\[\/b\]/Usi', '<strong>\\1</strong>', $text);
 				$text = preg_replace('/\[u\](.*)\[\/u\]/Usi', '<span style="text-decoration: underline;">\\1</span>', $text);
+				
+				$text = preg_replace('/\[left\](.*)\[\/left\]/Usi', '<div style="text-align: left;">\\1</div>', $text);
+				$text = preg_replace('/\[right\](.*)\[\/right\]/Usi', '<div style="text-align: right;">\\1</div>', $text);
+				$text = preg_replace('/\[center\](.*)\[\/center\]/Usi', '<div style="text-align: center;">\\1</div>', $text);
+				$text = preg_replace('/\[justify\](.*)\[\/justify\]/Usi', '<div style="text-align: justify;">\\1</div>', $text);
 				
 				/*heads*/
 				
@@ -132,6 +138,7 @@ class BBcode extends TextTransformer
 				return $text;
 				
 		}
+		
 		/**
 		 * for urls
 		 *@name url_callback
@@ -159,6 +166,7 @@ class BBcode extends TextTransformer
 						return '<a href="'.$url.'">'.$title.'</a>';
 				}
 		}
+		
 		/**
 		 * for urls
 		 *@name _url_callback
@@ -176,38 +184,5 @@ class BBcode extends TextTransformer
 				
 						return '<a href="'.$url.'">'.$title.'</a>';
 				}
-		}
-		/**
-		 * cache for smilie-object
-		 *@name smilies
-		*/
-		protected static $smilies;
-		/**
-		* parses smiliecodes, e.g. ;)
-		*@name: smilie parser
-		*@param: string - text
-		*@use: parse the smilies
-		*@return the parsed string
-		*/
-		public static function smilies($text)
-		{
-				/* parse smilies START */
-				if(isset(self::$smilies))
-				{
-						$smilies = self::$smilies;
-				} else
-				{
-						$smilies = DataObject::get("smilies");
-						self::$smilies = $smilies;						
-				}
-				
-				foreach($smilies as $d)
-				{
-					if($d->image()) {
- 						$text = str_replace($d->code,'<img src="'.$d->image()->raw().'" alt="'.text::protect($d->description).'" />',$text);
- 					}
-				}
-				/* parse smilies END */
-				return $text;
 		}
 }

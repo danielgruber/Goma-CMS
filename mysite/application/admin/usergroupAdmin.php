@@ -75,6 +75,8 @@ class userGroupAdmin extends LeftAndMain
 	 *@param object - response
 	*/
 	public function ajaxSave($data, $response) {
+		print_r($data);
+		exit;
 		$model = $this->save($data);
 		$dialog = new Dialog(lang("successful_saved", "The data was successfully written!"), "Okay");
 		$dialog->close(5);

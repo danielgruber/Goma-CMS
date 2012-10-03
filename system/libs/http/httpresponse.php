@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.10.2011
-  * $Version: 003
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.09.2012
+  * $Version: 2.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -134,11 +134,10 @@ class HTTPresponse extends object
 		*/
 		public static function getBody()
 		{
-				Profiler::mark("getBody");
+				if(PROFILE) Profiler::mark("getBody");
 				$body = self::$body;
 				
 				// gloader
-				Resources::addData("var gloader_data = ".json_encode(gloader::$resources).";");
 				foreach(gloader::$preloaded as $file => $true) {
 					Resources::addData("gloader.loaded['".$file."'] = true;");
 				}
@@ -161,7 +160,7 @@ class HTTPresponse extends object
 					self::addHeader("X-CSS-Load", implode(";", $data["css"]));
 				}
 				
-				Profiler::unmark("getBody");
+				if(PROFILE) Profiler::unmark("getBody");
 				
 				
 				
@@ -182,7 +181,15 @@ class HTTPresponse extends object
 				
 				self::sendHeader();
 				Core::callHook("onbeforeoutput");
+				
+				$data = ob_get_contents();
+				ob_end_clean();
+				
+				if(PROFILE) Profiler::mark("sendDataToClient");
 				echo $body;
+				echo $data;
+				if(PROFILE) Profiler::unmark("sendDataToClient");
+				
 				Core::callHook("onafteroutput");
 				
 		}
@@ -196,11 +203,13 @@ class HTTPresponse extends object
 		{
 				if(!self::$XPoweredBy)
 				{
-						self::$XPoweredBy	= "Goma ". GOMA_VERSION . " - ".BUILD_VERSION." with PHP " . PHP_MAIOR_VERSION;
+						self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
 				}
 				
 				self::addHeader('X-Powered-By', self::$XPoweredBy);
-				self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " ".APPLICATION_VERSION." - ".APPLICATION_BUILD."");
+				if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
+					self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));
+				
 				if(!self::$response)
 				{
 						self::setResHeader(200);
@@ -223,11 +232,12 @@ class HTTPresponse extends object
 				
 				if(DEV_MODE) {
 					global $start;
-					$time =  microtime(true) - $start;
+					$time =  microtime(true) - EXEC_START_TIME;
 					self::addHeader("X-Time", $time);
 				}
 				
-				
+				$endWaitTime = microtime(true);
+				define("END_WAIT_TIME", $endWaitTime);
 				
 				header('HTTP/1.1 ' . self::$response);
 				foreach(self::$headers as $name => $content)
@@ -334,7 +344,7 @@ class HTTPresponse extends object
 		*/
 		public static function redirect($url, $_301 = false)
 		{	
-			
+				
 				$hash = md5($url . $_SERVER["HTTP_HOST"]);
 				if(defined('SPEEDCACHE_ACTIVE'))
 				{
@@ -366,7 +376,9 @@ class HTTPresponse extends object
 				}
 				self::addHeader('Location', $url);
 				self::sendheader();
-				echo getPage('<script type="text/javascript">location.href = "'.$url.'";</script><br /> Redirecting to: <a href="'.$url.'">'.$url.'</a>', 'Redirect');
+				echo '<script type="text/javascript">location.href = "'.$url.'";</script><br /> Redirecting to: <a href="'.$url.'">'.$url.'</a>';
+				
+				Core::callHook("onBeforeShutdown");
 				exit;
 		}	
 }
@@ -381,7 +393,9 @@ class htmlparser extends object
 		*/
 		public function parseHTML($html)
 		{
-				Profiler::mark("HTMLParser::parseHTML");
+				if(PROFILE) Profiler::mark("HTMLParser::parseHTML");
+				
+				if(PROFILE) Profiler::mark("HTMLParser scriptParse");
 				if(!HTTPResponse::$disabledparsing)
 				{
 						preg_match_all('/<script[^>]*>(.*)<\/script\s*>/Usi', $html, $no_tags);
@@ -393,27 +407,28 @@ class htmlparser extends object
 								}
 						}
 				}
+				if(PROFILE) Profiler::unmark("HTMLParser scriptParse");
 				
 				if(!Core::is_ajax())
 					if(_eregi('</title>',$html)) {
 						if(_eregi('\<base',$html)) {
-							$html = str_replace('</title>', "</title>\n\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
+							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
 						} else {
-							$html = str_replace('</title>', "</title>\n<base href=\"".BASE_URI."\" />\n\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
+							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n<base href=\"".BASE_URI."\" />\n\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
 						}
 					} else {
 						if(_eregi('\<base',$html)) {
-							$html = resources::get() . $html;
+							$html = '<meta charset="utf-8" />' . resources::get() . $html;
 						} else {
-							$html = '<!DOCTYPE html><html><head><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get() . "\n</head><body>" . $html . "\n</body></html>";
+							$html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get() . "\n</head><body>" . $html . "\n</body></html>";
 						}
 					}
 				
-				if(!MOD_REWRITE && !HTTPResponse::$disabledparsing)
+				if(!HTTPResponse::$disabledparsing)
 				{
 						$html = self::process_links($html);
 				}
-				Profiler::unmark("HTMLParser::parseHTML");
+				if(PROFILE) Profiler::unmark("HTMLParser::parseHTML");
 				return $html;
 		}
 		/**
@@ -424,7 +439,7 @@ class htmlparser extends object
 		*/
 		public static function process_links($html)
 		{
-				Profiler::mark("HTMLParser::process_links");
+				if(PROFILE) Profiler::mark("HTMLParser::process_links");
 				preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $html, $links);
 				foreach($links[2] as $key => $href)
 				{
@@ -441,6 +456,11 @@ class htmlparser extends object
 						{
 								continue;
 						}
+						if(preg_match('/^mailto:/', $href))
+						{
+								continue;
+						}
+						
 						// check ROOT_PATH
 						if(preg_match('/^' . preg_quote(ROOT_PATH, '/') . '/Usi', $href))
 						{
@@ -455,7 +475,7 @@ class htmlparser extends object
 								}
 						}
 						
-						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
+						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href) || preg_match('/^.\/' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
 						{
 						
 						} else
@@ -490,7 +510,7 @@ class htmlparser extends object
 										continue;
 								}
 						}
-						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
+						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href) || preg_match('/^.\/' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
 						{
 						
 						} else
@@ -512,7 +532,7 @@ class htmlparser extends object
 						$html = str_replace($images[0][$key], $newframes, $html);
 				}
 				
-				Profiler::unmark("HTMLParser::process_links");
+				if(PROFILE) Profiler::unmark("HTMLParser::process_links");
 				return $html;
 		}
 		/**
@@ -522,9 +542,7 @@ class htmlparser extends object
 		*/
 		public function js($js)
 		{
-				Profiler::mark("HTMLParser::js");
 				Resources::addJS($js, "scripts");
-				Profiler::unmark("HTMLParser::js");
 		}
 		/**
 		 * csshandler

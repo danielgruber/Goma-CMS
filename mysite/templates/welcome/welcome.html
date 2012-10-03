@@ -3,9 +3,9 @@
 	<head>
 		<base href="{BASE_URI}" />
 		<title>Goma CMS</title>
-		<% INCLUDE_CSS "admin/style.css" %>
-		<% INCLUDE_CSS "install.css" %>
-		<meta charset="utf-8">
+		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+		<% INCLUDE_CSS "welcome.css" %>
+		<meta charset="utf-8" />
 	</head>
 	<body>
 		<div id="wrapper_logout">
@@ -15,10 +15,10 @@
 					<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{$BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
 				</div>
 				<div class="header">
-					<a href="{$BASE_URI}"><h1><% lang("before_you_begin") %>...</h1></a>
+					<h1><% lang("before_you_begin") %>...</h1>
 				</div>
 				<div class="content">
-					<p>{$_lang_install_success}</p>
+					<p class="success">{$_lang_install_success}</p>
 					<a class="button" href="./step2/">{$_lang_next_step}</a>
 				</div>
 			</div>

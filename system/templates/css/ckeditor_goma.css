@@ -1,7 +1,19 @@
-.cke_dialog_ui_text {
+/**
+  *@package goma framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 04.01.2012
+  * $Version 1.0.2
+*/
+
+.pageLinkHolder {
 	position: relative;
 }
-.cke_dialog_ui_text .textDropDown {
+.pageLinkHolder > label {
+	display: none;
+}
+.pageLinkHolder .textDropDown {
 	position: absolute;
 	background: #fff;
 	min-height: 50px;
@@ -15,21 +27,21 @@
 	margin-bottom: 5px;
 	padding-bottom: 3px;
 }
-.cke_dialog_ui_text .textDropDown ul {
+.pageLinkHolder .textDropDown ul {
 	list-style: none;
 }
-.cke_dialog_ui_text .textDropDown ul li {
+.pageLinkHolder .textDropDown ul li {
 	
 }
-.cke_dialog_ui_text .textDropDown ul li a {
+.pageLinkHolder .textDropDown ul li a {
 	display: block;
 	padding: 5px;
 	margin: 0;
 }
-.cke_dialog_ui_text .textDropDown ul li a:hover {
+.pageLinkHolder .textDropDown ul li a:hover {
 	background: #eee;
 }
-.cke_dialog_ui_text .cancelButton {
+.pageLinkHolder .cancelButton {
 	position: absolute;
 	right: -3px;
 	top: 2px;

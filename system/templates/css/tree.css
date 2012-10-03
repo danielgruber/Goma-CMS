@@ -39,7 +39,7 @@
 }
 
 .tree li .a > .b > a {
-	color: #000000;
+	color: #222;
 	display: block;
 }
 .tree li .a > .b > a :hover {
@@ -81,9 +81,10 @@
 }
 
 .tree .a:hover {
-	background: url(../admin/images/tree_hover.png) repeat-x;
+	background: url(../admin/images/tree_hover.png) repeat-x #555;
 	color: #fff;
 	font-weight: bold;
+	text-shadow: -1px -1px 0px #666;
 }
 .tree .a:hover * {
 	color: #fff;
@@ -92,6 +93,7 @@
 	background: url(../admin/images/tree_hover.png) repeat-x;
 	color: #fff;
 	font-weight: bold;
+	text-shadow: -1px -1px 0px #666;
 }
 .tree .marked * {
 	color: #fff;

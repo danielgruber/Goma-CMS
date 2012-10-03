@@ -1,21 +1,18 @@
 <?php
 
-$domains = {domains};
+defined("IN_GOMA") OR die();
+
+$apps = {apps};
 
 /**
- * this option allows you to speed up your site
- * It saves all generated content 60 second as a static html-page in the cache
- * Your Site should be much faster, BUT some data could be old and if you use data which mustn't be old on each page you shouldn't activate this feature
+ * sql-driver of this application
 */
-$speedcache = {speedcache};
-
 $sql_driver = {sql_driver};
 
-$dev = {dev};
 /**
- * you should activate this method to allow the browser store the sites in the cache and if the user presses the back-button, the browser load the data from the cache
+ * development-mode
 */
-$browsercache = {browsercache};
+$dev = {dev};
 
 /**
  * this will be added on each url at the end
@@ -27,3 +24,33 @@ $urlend = {urlend};
 */
 
 $profile_detail = {profile_detail};
+
+/**
+ * you should activate this method to allow the browser store the sites in the cache and if the user presses the back-button, the browser load the data from the cache
+*/
+$browsercache = {browsercache};
+
+/**
+ * defines log-folder
+*/
+$logFolder = {logFolder};
+
+/**
+ * defines private key of this application
+*/
+$privateKey = {privateKey};
+
+/**
+ * defines SSL-private-key of this application
+*/
+$SSLprivateKey = {SSLprivateKey};
+
+/**
+ * defines SSL-public-key of this application
+*/
+$SSLpublicKey = {SSLpublicKey};
+
+/**
+ * default lang
+*/
+$defaultLang = {defaultLang};

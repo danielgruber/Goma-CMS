@@ -14,7 +14,7 @@ class smilieAdmin extends TableView
 		// config
 		public $text = '{$_lang_smilies}';
 		
-		public $rights = "admin_smilies";
+		public $rights = "SMILIE_ADMIN";
 		
 		
 		public $models = array("smilies");	
@@ -23,5 +23,5 @@ class smilieAdmin extends TableView
 			"code"			=> '{$_lang_smiliecode}',
 			"image"			=> '{$_lang_pic}',
 			"description"	=> '{$_lang_smilie_title}'
-		);		
+		);
 }

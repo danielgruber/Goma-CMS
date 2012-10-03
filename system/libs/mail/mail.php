@@ -1,12 +1,11 @@
 <?php
 /**
-  * this class let you know much about other classes or your class
-  * you can get childs or other things
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 23.06.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 26.06.2012
+  * $Version 2.0
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,6 +19,7 @@ class Mail extends Object
 		 *@var string
 		**/
 		public $senderemail;
+		
 		/**
 		 * the name of the sender
 		 *
@@ -27,6 +27,7 @@ class Mail extends Object
 		 *@access public
 		*/
 		public $sendername;
+		
 		/**
 		 * This var defines if the message is html
 		 *@name html
@@ -34,6 +35,7 @@ class Mail extends Object
 		 *@var bool
 		**/
 		public $html;
+		
 		/**
 		 * This var defines if the message schould be replied
 		 *@name reply
@@ -85,29 +87,27 @@ class Mail extends Object
 		**/
 		public function send($adresse, $subject, $message)
 		{
-				$header = "";
+				$mail = new libMail();
 				
 				if(!empty($this->senderemail))
 				{
-						$header = "From: ".$this->sendername." <" . $this->senderemail . ">\r\n";
+						$mail->from($this->senderemail);
 						if($this->reply)
 						{
-								$header .= "Reply-To: ".$this->sendername." <" . $this->senderemail . ">\r\n";
+								$mail->ReplyTo($this->reply);
 						}
 				}
 				if($this->html)
 				{
-						$header .= "Content-Type: text/html\r\n";
-				}
-				$header .= 'X-Mailer: Goma '.GOMA_VERSION.' - '.BUILD_VERSION.'';
-				
-				
-				if(mail($adresse, $subject, $message, $header))
-				{
-						return true;
+						$mail->Html($message, "UTF-8");
+				} else {
+						$mail->text($message, "UTF-8");
 				}
 				
-				return false;
+				$mail->Subject($subject);
+				$mail->To($adresse);
+				
+				return $mail->send();
 		}
 		/**
 		 * sends HTML with predefined template
@@ -119,10 +119,12 @@ class Mail extends Object
 		*/
 		public function sendHTML($adresse,$subject,$message)
 		{
+				$this->html = true;
 				$template = new Template();
 				$template->assign("subject", $subject);
 				$template->assign("message", $message);
 				$text = $template->display('mail.html');
+				
 				return $this->send($adresse,$subject, $text);
 		}
 }

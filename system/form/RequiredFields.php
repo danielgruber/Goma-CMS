@@ -1,16 +1,34 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 11.06.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 30.08.2012
+  * $Version 1.3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class RequiredFields extends FormValidator
 {
+		/**
+		 *@name __construct
+		 *@param mixed - datas
+		 *@return object
+		*/
+		public function __construct($data)
+		{
+				parent::__construct();
+				
+				if(!is_array($data)) {
+					throwError(6, "Invalid Argument", "RequiredFields requires an array to be given.");
+				}
+				
+				$this->data = $data;
+		}
+		
+		
 		/**
 		 * validates the data
 		 *@name validate
@@ -27,7 +45,7 @@ class RequiredFields extends FormValidator
 						if(isset($this->form->fields[$field]))
 						{
 								$f = $this->form->fields[$field];
-								if(!isset($this->form->result[$field]) || empty($this->form->result[$field]))
+								if(!isset($this->form->result[$field]) || empty($this->form->result[$field]) || (is_object($this->form->result[$field]) && is_a($this->form->result[$field], "ViewAccessableData") && !$this->form->result[$field]->bool()))
 								{
 										$valid = false;
 										$missing[] = $f->title;
@@ -69,6 +87,9 @@ class RequiredFields extends FormValidator
 		}
 		/**
 		 * javascript for client-side validation
+		 *
+		 *@name JS
+		 *@access public
 		*/
 		public function JS()
 		{

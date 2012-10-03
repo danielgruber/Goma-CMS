@@ -5,117 +5,266 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 2.09.2011
-  * $Version 2.0.0 - 003
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.05.2012
+  * $Version 2.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Permission extends Object
+ClassInfo::addSaveVar("Permission","providedPermissions");
+
+class Permission extends DataObject
 {
 		/**
-		 * current permission-level
-		 *@name currrights
+		 * defaults
+		 *
+		 *@name defaults
+		 *@access public
 		*/
-		public static $currrights = false;
+		public $defaults = array(
+			"type"	=> "admins"
+		);
+		
 		/**
-		 * current groupid
-		 *@name groupid
+		 * all permissions, which are available in this object
+		 *
+		 *@name providedPermissions
+		 *@access public
 		*/
-		public static $groupid = "";
+		public static $providedPermissions = array(
+			"superadmin"	=> array(
+				"title"		=> '{$_lang_full_admin_permissions}',
+				"default"	=> array(
+					"type"	=> "admins"
+				)
+			)
+		);
+		
 		/**
-		 * cache for grouprights
+		 * fields of this set
+		 *
+		 *@name db_fields
+		 *@access public 
 		*/
-		public static $groupcache = array();
+		public $db_fields = array(
+			"name"			=> "varchar(100)",
+			"type"			=> "enum('all', 'users', 'admins', 'password', 'groups')",
+			"password"		=> "varchar(100)",
+			"invert_groups"	=> "int(1)",
+			"forModel"		=> "varchar(100)"
+		);
+		
+		/**
+		 * every permission can be inherited by a parent permission, here we define this relation-ship
+		 *
+		 *@name has_one
+		 *@access public
+		*/
+		public $has_one = array(
+			"inheritor"	=> "Permission"
+		);
+		
+		/**
+		 * groups-relation of this set
+		 *
+		 *@name many_many
+		 *@access public
+		*/
+		public $many_many = array(
+			"groups"	=> "group"
+		);
+		
+		/**
+		 * indexes
+		 *
+		 *@name indexes
+		 *@access public
+		*/
+		public $indexes = array(
+			"name" => "INDEX"
+		);
+		
+		/**
+		 * perm-cache
+		 *
+		 *@name perm_cache
+		 *@access private
+		*/
+		private static $perm_cache = array();
+		
+		/**
+		 * adds available Permission-groups
+		 *
+		 *@name addPermissions
+		 *@access public
+		*/
+		public function addPermissions($perms) {
+			self::$providedPermissions = ArrayLib::map_key("strtolower", array_merge(self::$providedPermissions, $perms));
+		}
+		
 		/**
 		 * checks if the user has the given permission 
+		 *
+		 *@name check
+		 *@param string - permission
 		*/
 		public static function check($r)
 		{
+				$r = strtolower($r);
+				
 				if(!defined("SQL_INIT"))
 					return true;
-					
+				
+				if(isset(self::$perm_cache[$r]))
+					return self::$perm_cache[$r];
+				
+				if($r != "superadmin" && self::check("superadmin")) {
+					return true;
+				}
+				
 				if(_ereg('^[0-9]+$',$r)) {
 					return self::right($r);
-				} else if(self::right(10)) {
-					return true;
 				} else {
-					return self::advrights($r, member::groupids());
+					if(isset(self::$providedPermissions[$r])) {
+						if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
+							self::$perm_cache[$r] = $data->hasPermission();
+							$data->forModel = "permission";
+							if($data->type != "groups") {
+								$data->write(false, true, 2);
+							}
+							return self::$perm_cache[$r];
+						} else {
+							
+							$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
+							if(isset($perm->inherit)) {
+								if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
+									$data->consolidate();
+									$data->inheritorid = $data->id;
+									$data->forModel = "permission";
+									$data = $data->_clone();
+									$data->name = $perm->name;
+									self::$perm_cache[$r] = $data->hasPermission();
+									$data->write(true, true, 2);
+									return self::$perm_cache[$r];
+								}
+							} else
+							if($perm->inheritorid) {
+								if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
+									$data->consolidate();
+									$data->inheritorid = $perm->inheritorid;
+									$data->forModel = "permission";
+									$data = $data->_clone();
+									$data->name = $perm->name;
+									self::$perm_cache[$r] = $data->hasPermission();
+									$data->write(true, true, 2);
+									return self::$perm_cache[$r];
+								}
+							}
+							
+							if(isset(self::$providedPermissions[$r]["default"]["type"]))
+								$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
+							
+							self::$perm_cache[$r] = $perm->hasPermission();
+							$perm->write(true, true, 2);
+							return self::$perm_cache[$r];
+						}
+					} else {
+						if(Member::Admin()) {
+							return true; // soft allow
+						}
+						
+						return false; // soft deny
+					}
 				}
 		}
-		/**
-		 * gets the current numeric rank
+		
+		/** 
+		 * writing
 		 *
-		 *@name getRank
+		 *@name onBeforeWrite
 		 *@access public
 		*/
-		public function getRank() {
-			if(!defined("SQL_INIT"))
-					return 10;
+		public function onBeforeWrite() {
+			if($this->inheritorid == $this->id)
+				$this->inheritorid = 0;
 			
-			if(self::$currrights === false) {
-				self::right(2); // for generate
-			}
-			$max = arraylib::first(self::$currrights);
-			if(is_int($max))
-				return $max;
-			else
-				return 1;
-		}
-		/**
-		 * checks if a group have the rights
-		 *@name advrights
-		 *@param string - name of the rights
-		 *@param string - name of group
-		 *@return bool
-		*/
-		public static function advrights($name, $ids)
-		{
-			if(!defined("SQL_INIT"))
-					return true;
-			
-			if(($ids == member::groupids() || (!is_array($ids) && array($ids) == member::groupids())) && self::right(10)) {
-				return true;
-			}
-			
-			
-			if(is_array($ids))
-				$rang = md5(implode("", $ids));
-			else
-				$rang = $ids;
-				
-			if(!isset(self::$groupcache[$rang])) {
-				$data = DataObject::get(
-					"advrights", // class
-					array("groups.recordid" => $ids), // filter
-					array(), // sort
-					array(), // limits
-					array(
-						"INNER JOIN `".DB_PREFIX."many_many_group_advrights_advrights` as `advrights_many` ON `advrights_many`.`advrightsid` = `advrights`.`id`",
-						"INNER JOIN `".DB_PREFIX."groups` AS `groups` ON `groups`.`id` = `advrights_many`.`groupid`"
-					) // joins
-				);
-				
-				$advrights = array();
-				foreach($data as $record) {
-					$advrights[] = $record->name;
+			if($this->name) {
+				if($this->type != "groups") {
+					switch($this->type) {
+						case "all":
+						case "users":
+							$this->groups()->addMany(DataObject::get("group"));
+						break;
+						case "admins":
+							$this->groups()->addMany(DataObject::get("group", array("type" => 2)));
+						break;
+					}
+					$this->groups = $this->groups();
+					$this->type = "groups";
 				}
-				
-				unset($data, $record);
-				self::$groupcache[$rang] = $advrights;
-			} else {
-				$advrights = self::$groupcache[$rang];
 			}
 			
-			if(in_array($name, $advrights)) {
-				return true;
-			} else {
-				return false;
+			if($this->id != 0) {
+				// inherit permissions to subordinated perms
+				$data = DataObject::Get("Permission", array("inheritorid" => $this->id));
+				if($data->Count() > 0) {
+					foreach($data as $record) {
+						if($record->id != $record->inheritorid) {
+							$newrecord = $this->_clone();
+							$newrecord->name = $record->name;
+							$newrecord->inheritorid = $record->inheritorid;
+							$newrecord->write(true, true);
+						}
+					}
+				}
 			}
-				
-				
+			
+			parent::onBeforeWrite();
 		}
+		
+		/**
+		 * sets the type
+		 *
+		 *@name setType
+		 *@access public
+		*/
+		public function setType($type) {
+			switch($type) {
+				case "all":
+				case "every":
+				case "everyone":
+					$type = "all";
+				break;
+				
+				case "group":
+				case "groups":
+					$type = "groups";
+				break;
+				
+				case "admin":
+				case "admins":
+				case "root":
+					$type = "admins";
+				break;
+				
+				case "password":
+					$type = "password";
+				break;
+				
+				case "user":
+				case "users":
+					$type = "users";
+				break;
+				
+				default:
+					$type = "users";
+				break;
+			}
+			
+			$this->setField("type", $type);
+		}
+		
 		/**
 		 * checks whether a user have the rights for an action
 		 *@name rechte
@@ -127,48 +276,64 @@ class Permission extends Object
 				if(!defined("SQL_INIT"))
 					return true;
 				
-				if(isset($_SESSION["user_id"])) {
-					if($needed == 1 || $needed == 2)
+				if($needed < 2) {
+					return true;
+				}
+				
+				if($needed < 7) {
+					return (member::$groupType > 0);
+				}
+				
+				if($needed < 11) {
+					return (member::$groupType > 1);
+				}
+		}
+		
+		
+		/**
+		 * checks if the current user has the permission to do this
+		 *
+		 *@name hasPermission
+		 *@access public
+		*/
+		public function hasPermission() {
+			if(!defined("SQL_INIT"))
+				return true;
+			
+			if($this->type == "all") {
+				return true;
+			}
+			
+			if($this->type == "users") {
+				return (member::$groupType > 0);
+			}
+			
+			if($this->type == "admins") {
+				return (member::$groupType > 1);
+			}
+			
+			if($this->type == "password") {
+				
+			}
+			
+			if($this->type == "groups") {
+				$groups = $this->Groups()->fieldToArray("id");
+				if($this->invert_groups) {
+					if(count(array_intersect($groups, member::groupids())) > 0) {
+						return false;
+					} else {
 						return true;
-					
-					if(self::$currrights === false) {
-						$user = DataObject::get("user", array("id" => $_SESSION["user_id"]));
-						$group = $user->group(array(), array("rights"));
-						
-						if($group->rights == 10) {
-							$rights = 10;
-							self::$currrights = array($group->id => 10);
-							return true;
-						} else {
-							self::$currrights = array($group->id => $group->rights);
-							foreach($user->groups() as $group) {
-								self::$currrights[$group->id] = $group->rights;
-							}		
-						}
-						arsort(self::$currrights);
-					}
-					foreach(self::$currrights as $right) {
-						if($right >= $needed) {
-							return true;
-						} else {
-							return false;
-						}
 					}
 				} else {
-					if($needed == 1) {
+					if(count(array_intersect($groups, member::groupids())) > 0) {
 						return true;
+					} else {
+						return false;
 					}
 				}
-				return false;
-		}
-		/**
-		 * to use in advrights
-		 *@name getcurrentgroup
-		 *@return string
-		*/
-		public static function getcurrentgroup()
-		{
-				return member::$groupid;
+			}
+			
+			return (member::$groupType > 0);
 		}
 
 }

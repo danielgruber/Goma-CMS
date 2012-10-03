@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.06.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 21.09.2012
+  * $Version 1.4.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -13,6 +14,9 @@ class DropDown extends FormField
 {
 		/**
 		 * request stuff
+		 *
+		 *@name url_handlers
+		 *@access public
 		*/
 		public $url_handlers = array(
 			"nojs/\$page"				=> "nojs",
@@ -20,15 +24,64 @@ class DropDown extends FormField
 			"checkValue/\$value"		=> "checkValue",
 			"uncheckValue/\$value"		=> "uncheckValue",
 		);
-		public $allowed_actions = array("getData", "checkValue", "uncheckValue", "nojs");
+		
 		/**
-		 * dataset
+		 * allowed actions
+		 *
+		 *@name allowed_actions
+		 *@access public
+		*/
+		public $allowed_actions = array("getData", "checkValue", "uncheckValue", "nojs");
+		
+		/**
+		 * dataset of this dropdown
+		 *
+		 *@name dataset
+		 *@access public
 		*/
 		public $dataset;
+		
 		/**
 		 * whether multiple values are selectable
+		 *
+		 *@name multiselect
+		 *@access protected
 		*/
-		public $mutliselect = false;
+		protected $multiselect = false;
+		
+		/**
+		 * options of this dropdown
+		 *
+		 *@name options
+		 *@access public
+		*/
+		public $options;
+		
+		/**
+		 * unique key for this field
+		 *
+		 *@name key
+		 *@access protected
+		*/
+		protected $key;
+		
+		/**
+		 * value
+		 *
+		 *@name value
+		 *@access public
+		*/
+		public $value = "";
+		
+		/**
+		 * this field needs to have the full width
+		 *
+		 *@name fullSizedField
+		*/
+		protected $fullSizedField = true;
+		
+		
+		
 		/**
 		 *@param string - name
 		 *@param string - title
@@ -36,12 +89,13 @@ class DropDown extends FormField
 		 *@param array|int - selected items
 		 *@param object - parent
 		*/
-		public function __construct($name = "", $title = null, $options = array(), $value = null, $parent = null)
+		public function __construct($name = "", $title = null, $options = array(), $value = null, &$parent = null)
 		{
 				
 				parent::__construct($name, $title, $value, $parent);
 				$this->options = $options;
 		}
+		
 		/**
 		 * generates the key and array of selected data
 		 *
@@ -52,14 +106,17 @@ class DropDown extends FormField
 			// if mutliselect, we have to store an array
 			if($this->multiselect) {
 				
-				if($this->POST && isset($this->form()->post[$this->name]) && session_store_exists("dropdown_" . $this->name . "_" . $this->form()->post[$this->name])) {
-					$dataset = session_restore("dropdown_" . $this->name . "_" . $this->key);		
+				if($this->POST && isset($this->form()->post[$this->PostName()]) && session_store_exists("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()])) {
+					$dataset = session_restore("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()]);
 					if(is_array($dataset)) {
 						$this->dataset = $dataset;
-						$this->key = $this->form()->post[$this->name];
+						$this->key = $this->form()->post[$this->PostName()];
+						$this->input->value = $this->key;
 						return true;
 					}
-				} else if($this->value) {
+				}
+				
+				if($this->value !== null && $this->value !== false && !is_object($this->value)) {
 					if(is_array($this->value)) {
 						$this->dataset = $this->value;
 					} else {
@@ -67,10 +124,10 @@ class DropDown extends FormField
 					}
 					$this->key = randomString(5);
 				} else if($this->POST && isset($this->form()->result[$this->name]) && $this->value == null) {
-					$this->value = $this->form()->result[$this->name];
+					$this->dataset = $this->form()->result[$this->name];
 					$this->key = randomString(5);
 				} else {
-					$this->value = array();
+					$this->dataset = array();
 					$this->key = randomString(5);
 				}
 				$this->input->value = $this->key;
@@ -80,8 +137,12 @@ class DropDown extends FormField
 			 	$this->input->value = $this->value;
 			 }
 		}
+		
 		/**
-		  * creates the input-field
+		  * creates the hidden input-field
+		  *
+		  *@name createNode
+		  *@access public
 		*/
 		public function createNode() {
 			$node = parent::createNode();
@@ -94,8 +155,12 @@ class DropDown extends FormField
 				
 			return $node;
 		}
+		
 		/**
 		 * renders after setForm the whole field
+		 *
+		 *@name renderAfterSetForm
+		 *@access public
 		*/
 		public function renderAfterSetForm() {
 			parent::renderAfterSetForm();
@@ -103,8 +168,6 @@ class DropDown extends FormField
 			Resources::add("dropdown.css");
 			Resources::add("system/form/dropdown.js", "js", "tpl");
 			
-			
-			Resources::addData("var loading_lang = '".lang("loading", "loading...")."';");
 			$this->widget = new HTMLNode("div", array(
 				"class"		=> "dropdown_widget",
 				"id"		=> $this->ID() . "_widget"
@@ -127,7 +190,7 @@ class DropDown extends FormField
 					), array(
 						new HTMLNode("input", array(
 							"type"			=> "text",
-							"id"			=> $this->ID() . "_serach",
+							"id"			=> $this->ID() . "_search",
 							"class"			=> "search",
 							"placeholder"	=> lang("search", "search...")
 						)),
@@ -159,8 +222,12 @@ class DropDown extends FormField
 			
 			
 		}
+		
 		/**
 		 * renders the data in the input
+		 *
+		 *@name renderInput
+		 *@access public
 		*/
 		public function renderInput() {
 			if($this->multiselect) {
@@ -172,7 +239,7 @@ class DropDown extends FormField
 					} else {
 						$str .= ", ";
 					}
-					$str .= isset($this->options[$id]) ? text::protect($this->options[$id]) : text::protect($id);
+					$str .= isset($this->options[$id]) ? convert::raw2text($this->options[$id]) : convert::raw2text($id);
 				}
 				if($str == "")
 					return lang("form_dropdown_nothing_select", "Nothing Selected");
@@ -180,11 +247,15 @@ class DropDown extends FormField
 				
 				return $str;
 			} else {
-				return ($this->value == "") ? lang("form_dropdown_nothing_select", "Nothing Selected") : isset($this->options[$this->value]) ? text::protect($this->options[$this->value]) : text::protect($this->value);
+				return ($this->value == "") ? lang("form_dropdown_nothing_select", "Nothing Selected") : isset($this->options[$this->value]) ? convert::raw2text($this->options[$this->value]) : convert::raw2text($this->value);
 			}
 		}
+		
 		/**
 		 * returns the result
+		 *
+		 *@name result
+		 *@access public
 		*/
 		public function result() {
 			if(!$this->disabled)
@@ -195,6 +266,7 @@ class DropDown extends FormField
 			else
 				return null;
 		}
+		
 		/**
 		 * renders the field
 		 *@name field
@@ -203,13 +275,11 @@ class DropDown extends FormField
 		public function field()
 		{
 				if(PROFILE) Profiler::mark("FormField::field");
-				session_store("dropdown_" . $this->name . "_" . $this->key, $this->dataset);
+				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 				$this->callExtending("beforeField");
 				
 				if(!$this->disabled)
-					Resources::addJS("$(function(){ var dropdown_".$this->ID()." = new DropDown('".$this->ID()."', ".var_export($this->externalURL(), true).", ".var_export($this->multiselect, true)."); });");
-					Resources::addData("var lang_search = '".lang("search", "search...")."';");
-					Resources::addData("var lang_no_result = '".lang("no_result", "There is no data to show.")."';");
+					Resources::addJS("$(function(){ var _".md5("dropdown_".$this->ID()) . " = new DropDown('".$this->ID()."', ".var_export($this->externalURL(), true).", ".var_export($this->multiselect, true)."); });");
 				
 				if($this->disabled) {
 					$this->field->disabled = "disabled";
@@ -224,6 +294,7 @@ class DropDown extends FormField
 				
 				$this->container->append($this->input);
 				$this->container->append(new HTMLNode("div", array("class" => "widgetwrapper"), array($this->widget)));
+				$this->container->addClass("dropdownContainer");
 				
 				$this->callExtending("afterField");
 				
@@ -231,6 +302,7 @@ class DropDown extends FormField
 				
 				return $this->container;
 		}
+		
 		/**
 		 * getDataFromModel
 		 *
@@ -277,9 +349,9 @@ class DropDown extends FormField
 				return array("data"	=> $arr, "right" => $right, "left" => $left);
 			} else {
 				if(isset($this->options[0])) {
-					return array("data" => array_map(array("text", "protect"), ArrayLib::key_value($this->options)));
+					return array("data" => array_map(array("convert", "raw2text"), ArrayLib::key_value($this->options)));
 				} else {
-					return array("data" => array_map(array("text", "protect"), $this->options));
+					return array("data" => array_map(array("convert", "raw2text"), $this->options));
 				}
 			}
 		}
@@ -296,7 +368,7 @@ class DropDown extends FormField
 			$result = array();
 			foreach($data as $key => $val) {
 				if(_eregi(preg_quote($search), $val)) {
-					$result[$key] = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", text::protect($val));
+					$result[$key] = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
 				}
 			}
 			// second order result
@@ -361,24 +433,23 @@ class DropDown extends FormField
 				$data = $this->getDataFromModel($page);
 			}
 			
-			
-			
 			$arr = $data["data"];
+			
 			//print_r($this);
-			$value = ($this->multiselect) ? $this->dataset : array($this->value);
+			$value = ($this->multiselect) ? array_values($this->dataset) : array($this->value);
 			
 			HTTPResponse::addHeader("content-type", "text/x-json");
 			
-			if(empty($value) || (isset($value[0]) && $value[0] == null)) {
+			if(empty($value) || $value[0] === null) {
 				$value = array();
 			} else {
 				$value = array_flip($value);
 			}
 			
-			
 			// left and right is pagination (left arrow and right)
 			return json_encode(array("data" => $arr, "left" => (isset($data["left"])) ? $data["left"] : false, "right" => (isset($data["right"])) ? $data["right"] : false, "value" => $value));
 		}
+		
 		/**
 		 * checks a value
 		 *
@@ -389,17 +460,21 @@ class DropDown extends FormField
 			
 			if($this->multiselect) {
 				$this->dataset[] = $this->getParam("value");
-				session_store("dropdown_" . $this->name . "_" . $this->key, $this->dataset);
+				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			} else {
 				$this->value = $this->getParam("value");
 			}
 			if(Core::is_ajax()) {
 				return $this->renderInput();
 			} else {
-				$this->form()->post[$this->name] = $this->value;
+				if($this->multiselect)
+					$this->form()->post[$this->PostName()] = $this->key;
+				else
+					$this->form()->post[$this->PostName()] = $this->value;
 				$this->form()->redirectToForm();
 			}
 		}
+		
 		/**
 		 * unchecks a value
 		 *
@@ -410,12 +485,15 @@ class DropDown extends FormField
 			if($this->multiselect) {
 				$key = array_search($this->getParam("value"), $this->dataset);
 				unset($this->dataset[$key]);
-				session_store("dropdown_" . $this->name . "_" . $this->key, $this->dataset);
+				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			}
 			if(Core::is_ajax()) {
 				return $this->renderInput();
 			} else {
-				
+				if($this->multiselect)
+					$this->form()->post[$this->PostName()] = $this->key;
+				else
+					$this->form()->post[$this->PostName()] = $this->value;
 				$this->form()->redirectToForm();
 			}
 		}
@@ -471,13 +549,13 @@ class DropDown extends FormField
 			$page = ($page === null) ? 1 : $page;
 			$data = $this->getDataFromModel($page);
 			
-			if($data["right"]) {
+			if(isset($data["right"]) && $data["right"]) {
 				$p = $page + 1;
 				$right->href = URL . "?field_action_" . $this->name . "_nojs&page=" . $p;
 				$right->removeClass("disabled");
 			}
 			
-			if($data["left"]) {
+			if(isset($data["left"]) && $data["left"]) {
 				$p = $page - 1;
 				$left->href = URL . "?field_action_" . $this->name . "_nojs&page=" . $p;
 				$left->removeClass("disabled");
@@ -486,19 +564,27 @@ class DropDown extends FormField
 			if($data["data"]) {
 				$list = new HTMLNode("ul");
 				foreach($data["data"] as $id => $value) {
-					if($this->multiselect) {
-						if(in_array($id, $this->dataset)) {
-							$list->append("<li><a href=\"".$this->externalURL()."/uncheckValue/".urlencode($id)."\" class=\"checked\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a></li>");
-						} else {
-							$list->append("<li><a href=\"".$this->externalURL()."/checkValue/".urlencode($id)."\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a></li>");
-						}
-					} else {
-						if($id == $this->value) {
-							$list->append("<li><a href=\"".$this->externalURL()."/checkValue/".urlencode($id)."\" class=\"checked\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a></li>");
-						} else {
-							$list->append("<li><a href=\"".$this->externalURL()."/checkValue/".urlencode($id)."\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a></li>");
-						}
+					$li = new HTMLNode("li");
+					
+					if(is_array($value)) {
+						$value = array_values($value);
+						$smallText = $value[1];
+						$value = $value[0];
 					}
+					
+					if(($this->multiselect && in_array($id, $this->dataset)) || $this->value == $id) {
+						$li->append("<a href=\"".$this->externalURL()."/uncheckValue/".urlencode($id)."\" class=\"checked\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a>");
+					} else {
+						$li->append("<a href=\"".$this->externalURL()."/checkValue/".urlencode($id)."\" id=\"dropdown_".$this->id()."_".dbescape($id)."\">".$value."</a>");
+					}
+					
+					if(isset($smallText)) {
+						$li->append('<span class="record_info">'.$smallText.'</span>');
+						unset($smallText);
+					}
+					
+					$list->append($li);
+					unset($li, $value, $id);
 				}
 			
 				$content->append($list);
@@ -509,7 +595,6 @@ class DropDown extends FormField
 			$container = new HTMLNode("div", array("id" => $this->divID(), "class" => $this->container->__get("class")), array(
 				new HTMLNode("label", array(), $this->title),
 				new HTMLNode("div", array("class" => "widget_wrapper"), array(
-					
 					$widget
 				))
 				
@@ -517,8 +602,23 @@ class DropDown extends FormField
 			
 			$widget->addClass("nojs");
 			
-			
+			unset($data);
 			
 			return $container->render();
+		}
+		
+		/**
+		 * validation for security reason
+		 *
+		 *@name validate
+		*/
+		public function validate($value) {
+			if(!$this->multiselect && $this->options) {
+				if(!isset($this->options[$value])) {
+					return false;
+				}
+			}
+		
+			return true;
 		}
 }

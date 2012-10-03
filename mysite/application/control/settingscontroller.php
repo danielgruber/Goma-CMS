@@ -1,12 +1,15 @@
 <?php
 /**
   * Settings
-  *@package goma
+  *
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.11.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 08.08.2012
+  * $Version 1.2.2
 */
+
 
 class Newsettings extends DataObject {
 	/**
@@ -17,8 +20,7 @@ class Newsettings extends DataObject {
 		"register"			=> "varchar(100)",
 		"register_enabled"	=> "Switch",
 		"register_email"	=> "Switch",
-		"gzip"				=> "Switch",
-		"livecounter"		=> "Switch"
+		"gzip"				=> "Switch"
 	);
 	public $defaults = array(
 		"titel"				=> "Goma - Open Source CMS / Framework",
@@ -32,7 +34,6 @@ class Newsettings extends DataObject {
 		"register_enabled"	=> "{\$_lang_register_enabled_info}",
 		"register"			=> "{\$_lang_registercode_info}",
 		"gzip"				=> "{\$_lang_gzip_info}",
-		"livecounter"		=> "{\$_lang_livecounter_info}",
 		"register_email"	=> "{\$_lang_register_require_email_info}"
 	);
 	/**
@@ -44,8 +45,7 @@ class Newsettings extends DataObject {
 			"register_enabled"	=> lang("register_enabled", "Enable Registration"),
 			"register_email"	=> lang("register_require_email", "Send Registration Mail"),
 			"titel"				=> lang("title"),
-			"gzip"				=> lang("gzip", "G-Zip"),
-			"livecounter"		=> lang("livecounter")
+			"gzip"				=> lang("gzip", "G-Zip")
 		);
 	}
 	/**
@@ -60,37 +60,51 @@ class Newsettings extends DataObject {
 		$this->getFormFromDB($general);
 		$general->add(new langselect('lang',lang("lang"),PROJECT_LANG));
 		$general->add(new select("timezone",lang("timezone"),i18n::$timezones ,Core::getCMSVar("TIMEZONE")));
-		$general->add($date_format = new textfield("date_format", lang("date_format"), DATE_FORMAT));			
+		$general->add($date_format = new Select("date_format", lang("date_format"), $this->generateDate(), DATE_FORMAT));			
 						
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => $GLOBALS['lang']['normal'], STATUS_MAINTANANCE => $GLOBALS['lang']['wartung']), SITE_MODE));
 		if(STATUS_DISABLED)
 			$status->disable();
 			
 		$status->info = lang("sitestatus_info");
-		$date_format->info = lang("date_format_info");
 		//$general->add();
 		foreach(ClassInfo::getChildren("newsettings") as $child) {
 			$tabs->add($currenttab = new Tab($child, array(),parse_lang(Object::instance($child)->tab)));
-			$inst = Object::Instance($child);
+			$inst = new $child($this->data);
 			// sync data
-			$inst->sync($this);
 			$inst->getFormFromDB($currenttab);
 		}
 		
-		$form->addAction(new FormAction("submit", lang("save")));
+		$form->addAction(new CancelButton('cancel',lang("cancel")));
+		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
+	}
+	
+	/**
+	 * generates the date-formats
+	 *
+	 *@name generateDate
+	 *@access public
+	*/
+	public function generateDate() {
+		$formats = array();
+		foreach(i18n::$date_formats as $format) {
+			$formats[$format] = goma_date($format);
+		}
+		return $formats;
 	}
 	
 	/**
 	 * provides permissions
 	*/
-	public function providePermissions() {
+	public function providePerms() {
 		return array(
-			"SETTINGS_ALL" => array(
-				"title" 	=> '{$_lang_edit_settings}',
-				"default"	=> 7,
-				"implements"=> array(
-					"ADMIN_ALL"
-				)
+			"SETTINGS_ADMIN" 	=> array(
+				"title" 		=> '{$_lang_edit_settings}',
+				"default"		=> array(
+					"type"	=> "admins",
+				),
+				"forceGroups"	=> true,
+				"inherit"		=> "ADMIN"
 			)
 		);
 	}
@@ -113,7 +127,7 @@ class SettingsController extends Controller {
 	 *@access public
 	*/
 	public static function PreInit() {
-		self::$settingsCache = DataObject::get("newsettings", array("id" => 1));
+		self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
 	}
 	/**
 	 * gets one static
@@ -125,6 +139,7 @@ class SettingsController extends Controller {
 	{
 			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
 	}
+
 }
 
 class metaSettings extends Newsettings {
@@ -175,6 +190,9 @@ class TemplateSettings extends NewSettings {
 	}
 	/**
 	 * gets the form
+	 *
+	 *@name getFormFromDB
+	 *@access public
 	*/
 	public function getFormFromDB(&$form) {
 		$form->add(new Select("stpl", lang("available_styles"), $this->getTemplates()));

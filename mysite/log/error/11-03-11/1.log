@@ -1,2 +1,0 @@
-03.11.2011 - 23:03: SQL-Error in Statement: UPDATE gomacms_ SET parenttype = 'root' WHERE parenttype = '' OR parenttype IS NULL
-

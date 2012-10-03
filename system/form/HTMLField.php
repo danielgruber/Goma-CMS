@@ -1,28 +1,55 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 15.06.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.03.2012
+  * $Version 1.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class HTMLField extends FormField 
 {
-		public function __construct($name, $html = null, $form = null)
+		/**
+		 * this var stores the html for this field
+		 *
+		 *@name html
+		 *@access public
+		*/
+		public $html;
+		
+		/**
+		 * defines that these fields doesn't have a value
+		 *
+		 *@name hasNoValue
+		*/
+		public $hasNoValue = true;
+		
+		/**
+		 * constructor
+		*/
+		public function __construct($name, $html = null, &$form = null)
 		{
 				parent::__construct($name, null, null, $form);
 				$this->html = $html;
 		}
+		/**
+		 * generates the field
+		 *
+		 *@name field
+		 *@access public
+		*/
 		public function field()
 		{
 				$this->callExtending("beforeField");
 				
 								
 				$this->container->append($this->html);
+				$this->container->addClass("hidden");
 				
+				// some patch
 				if($this->html == "" || strlen($this->html) < 15) {
 					$this->container->addClass("hidden");
 				}

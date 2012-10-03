@@ -4,20 +4,24 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 04.09.2011
-  * $Version - 2.0.0 - 003
+  * last modified: 21.12.2011
+  * $Version - 1.1
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class FormDisabler extends Extension {
+class FormDisabler extends FormDecorator {
 	/**
 	 * if form is disabled
+	 *
 	 *@name disabled
+	 *@access public
 	*/
 	public $disabled = false;
 	/**
 	 * if actions are not disabled
+	 *
 	 *@name actions
+	 *@access public
 	*/
 	public $actions = false;
 	/**

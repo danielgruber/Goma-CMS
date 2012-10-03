@@ -4,8 +4,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 14.12.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.09.2012
+  * $Version 1.4.4
 */
 
 // prevent from being executed twice
@@ -18,43 +19,46 @@ if(typeof self.loader == "undefined") {
 	var html_regexp = new RegExp("<body");
 	var external_regexp = /https?\:\/\/|ftp\:\/\//;
 	
-	/*bluebox*/
-	var boxcount = 0;
-	var blueboxes = [];
-	
 	// the gloader
 	var gloader = {
 		load: function(component, fn)
 		{
 			if(gloader.loaded[component] == null)
 			{
-				if(self.gloader_data[component] != null)
-				{
-					var i;
-					if(self.gloader_data[component]["required"])
-						for(i in self.gloader_data[component]["required"])
-						{
-							gloader.load(self.gloader_data[component]["required"][i]);
-						}
-					$("body").css("cursor", "wait");
-					$.ajax({
-						cache: true,
-						noRequestTrack: true,
-						url: self.gloader_data[component]["file"],
-						dataType: "script",
-						async: false
-					});
-					$("body").css("cursor", "auto");
-					if(fn != null)
-							fn();
-					
-				}
+				$("body").css("cursor", "wait");
+				$.ajax({
+					cache: true,
+					noRequestTrack: true,
+					url: BASE_SCRIPT + "gloader/" + component + ".js",
+					dataType: "script",
+					error: function(jqXHR, textStatus, errorThrown) {
+						alert(textStatus);
+						alert(errorThrown);
+					},
+					async: false
+				});
+				$("body").css("cursor", "auto");
+				
 				gloader.loaded[component] = true;
+				
+				if(fn != null)
+					fn();
 			}
 		},
 		loaded: []
 	};
 	
+	// shuffle
+	array_shuffle = function(array){
+	  var tmp, rand;
+	  for(var i =0; i < array.length; i++){
+	    rand = Math.floor(Math.random() * array.length);
+	    tmp = array[i]; 
+	    array[i] = array[rand]; 
+	    array[rand] =tmp;
+	  }
+	  return array;
+	};
 	
 	// put methods into the right namespace
 	(function($, w){
@@ -98,13 +102,6 @@ if(typeof self.loader == "undefined") {
 				$(this).removeAttr("rel");
 				$(this).click();
 			});
-			
-			// containers
-			
-			$(".con_open").live('click',function(){
-				con_open($(this).attr('name'), $(this).attr('title'),true);
-				return false;
-			});
 	
 			$("a[rel*=bluebox], a[rel*=facebox]").live('click',function(){
 				gloader.load("dialog");
@@ -117,24 +114,11 @@ if(typeof self.loader == "undefined") {
 				}
 				return false;
 			});
-			
-			// shadowbox
-			$("a[rel*=shadow],a[rel*=light]").live("click", function () {
-				gloader.load("shadowbox", function(){
-					Shadowbox.init();
-					return false;
-				});
-		        Shadowbox.open({
-		            content: $(this).attr("href"),
-		            rel: $(this).attr("rel"),
-		            title: $(this).attr("title")
-		        });
-		        return false
-		    });
 		    
 		    $("a[rel*=dropdownDialog]").live("click", function()
 			{
 				gloader.load("dropdownDialog");
+				
 				var options = {
 					uri: $(this).attr("href")
 				};
@@ -144,6 +128,8 @@ if(typeof self.loader == "undefined") {
 					options.position = "center";
 				else if($(this).attr("rel") == "dropdownDialog[right]")
 					options.position = "right";
+				else if($(this).attr("rel") == "dropdownDialog[bottom]")
+					options.position = "bottom";
 				
 				$(this).dropdownDialog(options);
 				return false;
@@ -159,16 +145,10 @@ if(typeof self.loader == "undefined") {
 				$(this).parent().css("z-index", 901);
 			});
 			
-			// hide and show if js
-			$(".hide-on-js").css("display", "none");
-			$(".show-on-js").css("display", "block");
-			
 			// html5 placeholder
 			$("input").each(
 				function(){
-					
-					if(($(this).attr("type") == "text" || $(this).attr("type") == "password" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
-						gloader.load("modernizr");
+					if(($(this).attr("type") == "text" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
 						if(!Modernizr.input.placeholder) {
 							$(this).val($(this).attr("placeholder"));
 							$(this).css("color", "#999");
@@ -191,69 +171,105 @@ if(typeof self.loader == "undefined") {
 				}
 			);
 			
-			// checkbox-ajax-save
-			$("input[type=checkbox]").live("click",function(){
-				if($(this).attr("href")) {
-					// make loader
-					var id = $(this).attr("id")+'_c';
-					var position = $(this).position();
-					$("body").append('<img src="images/16x16/loader.gif" style="position: absolute;left: '+position.left+'px; top: '+position.top+'px;z-index: 999;" alt="…" class="checkbox_loader" id="'+id+'" />');
-					if($(this).attr("checked")) {
-						$.ajax({
-							url: $(this).attr("href") + "/" + $(this).attr("value") + "/1",
-							complete: function(){
-								$("#" + id).remove();
-							}
-						});
-					} else {
-						$.ajax({
-							url: $(this).attr("href") + "/0",
-							complete: function(){
-								$("#" + id).remove();
-							}
-						});
-					}
-				}
-			});
-			
-			// radio-box-ajax-save
-			$("input[type=radio]").live("click",function(){
-				if($(this).attr("href")) {
-					// make loader
-					var id = $(this).attr("id")+'_c';
-					var position = $(this).position();
-					$("body").append('<img src="images/16x16/loader.gif" style="position: absolute;left: '+position.left+'px; top: '+position.top+'px;z-index: 999;" alt="…" class="checkbox_loader" id="'+id+'" />');
-					$.ajax({
-						url: $(this).attr("href") + "/" + $(this).attr("value"),
-						complete: function(){
-							$("#" + id).remove();
-						}
-					});
-				}
-			});
 		});
 		
 		// SOME GLOBAL METHODS
 		
-		// containers
-		w.con_open = function(url, title, mouse)
-		{
-			gloader.load("con");
-			_con_open(url, title, mouse);
+		// language
+		var lang = [];
+		w.lang = function(name, _default) {
+			if(typeof profiler != "undefined") profiler.mark("lang");
+			
+			if(typeof lang[name] == "undefined") {
+				var jqXHR = $.ajax({
+					async: false,
+					cache: true,
+					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name),
+					dataType: "json"
+				});
+				
+				try {
+					var data = eval('('+jqXHR.responseText+')');
+					for(i in data) {
+						lang[i] = data[i];
+					}
+				} catch(e) {
+					lang[name] = null;
+				}
+			}
+			
+			if(typeof profiler != "undefined") profiler.unmark("lang");
+			
+			if(lang[name] == null) {
+				return _default;
+			} else {
+				return lang[name];
+			}
 		}
 		
+		w.getDocRoot = function() {
+			if($(".documentRoot").length == 1) {
+				return $(".documentRoot");
+			} else {
+				return $("body");
+			}
+		}
 		
-		
+		// preloads lang
+		w.preloadLang = function(_names, async) {
+			if(typeof profiler != "undefined") profiler.mark("preloadLang");
+			
+			if(typeof async == "undefined")
+				async = false;
+			
+			var names = [];
+			// check names
+			for(i in _names) {
+				if(typeof lang[_names[i]] == "undefined")
+					names.push(_names[i]);
+			}
+			
+			if(names.length == 0)
+				return true;
+			
+			var jqXHR = $.ajax({
+				async: false,
+				cache: true,
+				data: {"lang": names},
+				url: ROOT_PATH + "system/getLang/",
+				dataType: "json"
+			});
+			
+			try {
+				var data = eval('('+jqXHR.responseText+')');
+				for(i in data) {
+					lang[i] = data[i];
+				}
+			} catch(e) { }
+			
+			if(typeof profiler != "undefined") profiler.unmark("preloadLang");
+		}
+			
 		// some response handlers
 		w.eval_script = function(html, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
+			
+			if(typeof profiler != "undefined") profiler.mark("eval_script");
+			
 			var content_type = ajaxreq.getResponseHeader("content-type");
 			if(content_type == "text/javascript") {
 				if(typeof object != "undefined") {
-					var method = eval_global('(function(){' + html + '});');
+					var method;
+					if (window.execScript)
+					  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+					else
+					  	var method = eval_global('(function(){' + html + '});');
 					method.call(object);
 				} else {
-					eval_global(html);
+					 if (window.execScript)
+					 	window.execScript(html, ''); // execScript doesn’t return anything
+					 else
+					 	eval(html);
 				}
 			} else if(content_type == "text/x-json") {
 				var object = eval_global("("+html+")");
@@ -277,11 +293,17 @@ if(typeof self.loader == "undefined") {
 					$("#" + id + "_link").click();
 				}
 			}
+			
+			if(typeof profiler != "undefined") profiler.unmark("eval_script");
+			
 			RunAjaxResources(ajaxreq);
 		}
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
+			
+			if(typeof profiler != "undefined") profiler.mark("renderResponseTo");
+			
 			if(ajaxreq != null) {
 				var content_type = ajaxreq.getResponseHeader("content-type");
 				if(content_type == "text/javascript") {
@@ -301,6 +323,7 @@ if(typeof self.loader == "undefined") {
 					}
 				}
 			}
+			
 			var regexp = new RegExp("<body");
 			if(regexp.test(html)) {
 				var id = randomString(5);
@@ -309,6 +332,9 @@ if(typeof self.loader == "undefined") {
 			} else {
 				node.html(html);
 			}
+			
+			if(typeof profiler != "undefined") profiler.unmark("renderResponseTo");
+			
 			RunAjaxResources(ajaxreq);
 		}
 		
@@ -386,11 +412,13 @@ if(typeof self.loader == "undefined") {
 			if(js != null) {
 				var jsfiles = js.split(";");
 				var i;
+				
 				for(i in jsfiles) {
 					var file = jsfiles[i];
 					if(file != "") {
-						var regexp = /\/[^\/]+(script|raw)[^\/]+\.js/;
-						if(!regexp.test(file) && w.JSLoadedResources[file] !== true) {
+						var regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
+						var alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
+						if((!regexp.test(file) && w.JSLoadedResources[file] !== true) || alwaysLoad.test(file)) {
 							w.JSLoadedResources[file] = true;
 							$.ajax({
 								cache: true,
@@ -407,6 +435,7 @@ if(typeof self.loader == "undefined") {
 			}
 			
 		}
+		
 		w.RunAjaxResources = function(request) {
 			var js = request.getResponseHeader("X-JavaScript-Load");
 			if(js != null) {
@@ -416,7 +445,7 @@ if(typeof self.loader == "undefined") {
 					
 					var file = jsfiles[i];
 					if(file != "") {
-						var regexp = /\/[^\/]+(script|raw)[^\/]+\.js/;
+						var regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
 						if(regexp.test(file)) {
 							$.ajax({
 								cache: true,
@@ -525,6 +554,7 @@ if(typeof self.loader == "undefined") {
 					})
 			});
 		}
+		w.callOnDocumentClick = w.CallonDocumentClick;
 		
 		// jQuery Extensions
 		
@@ -551,17 +581,18 @@ if(typeof self.loader == "undefined") {
 		w.request_history = [];
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-	 		 w.request_history.push(originalOptions);
+			if(originalOptions.noRequestTrack == null) {
+				var data = originalOptions;
+				jqXHR.always(function(){
+					w.request_history.push(data);
+				});
+				
+			}
+				
+	 		jqXHR.setRequestHeader("X-Referer", location.href);
 		});
 		
 	})(jQuery, window);
-	
-	
-	
-	function getblueboxbyid(id)
-	{
-			return self.blueboxes[id];
-	}
 	
 	// trim
 	// thanks to @url http://www.somacon.com/p355.php
@@ -589,13 +620,11 @@ if(typeof self.loader == "undefined") {
 	    return (typeof(input) == 'string');
 	}
 	
-	
-	
 	function getLastRequest() {
 		return self.request_history[self.request_history.length -1];
 	}
 	function getPreRequest(i) {
-		return self.request_history[self.request_history.length - parseInt(i)];
+		return self.request_history[self.request_history.length - 1 - parseInt(i)];
 	}
 	
 	
@@ -629,7 +658,6 @@ if(typeof self.loader == "undefined") {
 		}
 		return rv;
 	}
-	
 	
 	/**
 	 * cookies, thanks to @url http://www.w3schools.com/JS/js_cookies.asp
@@ -670,7 +698,6 @@ if(typeof self.loader == "undefined") {
 	}
 	
 	// patch for IE eval
-	var code_evaled;
 	function eval_global(codetoeval) {
 	    if (window.execScript)
 	        window.execScript('code_evaled = ' + '(' + codetoeval + ')',''); // execScript doesn’t return anything
@@ -678,4 +705,31 @@ if(typeof self.loader == "undefined") {
 	        code_evaled = eval(codetoeval);
 	    return code_evaled;
 	}
+	
+	function microtime (get_as_float) {
+	    // Returns either a string or a float containing the current time in seconds and microseconds  
+	    // 
+	    // version: 1109.2015
+	    // discuss at: http://phpjs.org/functions/microtime
+	    // +   original by: Paulo Freitas
+	    // *     example 1: timeStamp = microtime(true);
+	    // *     results 1: timeStamp > 1000000000 && timeStamp < 2000000000
+	    var now = new Date().getTime() / 1000;
+	    var s = parseInt(now, 10);
+	 
+	    return (get_as_float) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
+	}
+	
+	function str_repeat (input, multiplier) {
+	    // Returns the input string repeat mult times  
+	    // 
+	    // version: 1109.2015
+	    // discuss at: http://phpjs.org/functions/str_repeat
+	    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	    // +   improved by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+	    // *     example 1: str_repeat('-=', 10);
+	    // *     returns 1: '-=-=-=-=-=-=-=-=-=-='
+	    return new Array(multiplier + 1).join(input);
+	}
 }
+var code_evaled;

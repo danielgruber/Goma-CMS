@@ -1,2 +1,0 @@
-18.11.2011 - 23:59: DEPRECATED: DataObject::_get is marked as DEPRECATED in /var/www/vhosts/ibpg.eu/filmteam-dev/mysite/application/control/settingscontroller.php on line 116. Please use DataObject::get instead.
-

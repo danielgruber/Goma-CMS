@@ -19,12 +19,14 @@
 	padding: 5px;
 }
 .box_new > .adminhead {
-	height: 20px;
+	height: 23px;
 	background: url(../images/boxes_drag_area.png) repeat-x;
+	line-height: 100% !important;
 }
 .box_new > .adminhead > .actions {
 	float: right;
 	margin: 1px;
+	line-height: 100% !important;
 }
 .boxes_new > .box_new > .adminhead > .actions > a {
 	display: block;

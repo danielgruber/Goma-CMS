@@ -3,15 +3,14 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 13.12.2011
-  * $Version 019
- ^
- 
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 08.09.2012
+  * $Version 2.3.12
 */
+
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Pages extends DataObject implements PermissionProvider
+class Pages extends DataObject implements PermProvider
 {
 		/**
 		 * show read-only edit if not enough rights
@@ -32,23 +31,16 @@ class Pages extends DataObject implements PermissionProvider
 									'search'			=> 'int(1)',
 									'editright'			=> 'text',
 									'meta_description'	=> 'varchar(200)',
-									'meta_keywords'		=> 'varchar(200)',
-									"edit_type"			=> "varchar(10)",
-									"viewer_type"		=> "varchar(20)",
-									"readpassword"		=> "varchar(50)");
+									'meta_keywords'		=> 'varchar(200)');
 									
 		/**
-		 * important fields
-		*/
-		public $important_db_fields = array(
-			"viewer_type"
-		);
-		/**
-		 * has one
+		 * has-one-relation
 		 *@name has_one
 		 *@var array
 		*/
-		public $has_one = array('parent' => 'pages');	
+		public $has_one = array(	'parent' 			=> 'pages', 
+									"read_permission" 	=> "Permission",
+									"edit_permission"	=> "Permission");	
 		/**
 		 * has many
 		 *@name has_many
@@ -125,7 +117,7 @@ class Pages extends DataObject implements PermissionProvider
 			$rank = Permission::getRank() - 1;
 			
 			// rights
-			if(Permission::check(10) && (!isset($_SESSION['sites_ansicht']) || $_SESSION['sites_ansicht'] != $GLOBALS['lang']['user'])) {
+			if(Permission::check(10) && (!isset($_SESSION['sites_ansicht']) || $_SESSION['sites_ansicht'] != lang("user"))) {
 				// just add nothing ;)
 			} else if(member::login()) {
 				if(isset($this->many_many_tables["viewer_groups"]))
@@ -150,8 +142,13 @@ class Pages extends DataObject implements PermissionProvider
 		*/
 		public function geturl()
 		{
+			if($this->path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
+				return ROOT_PATH . BASE_SCRIPT;
+			} else {
 				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
+			}
 		}
+		
 		/**
 		 * gets the parenttype
 		 *@name getParentType
@@ -167,6 +164,7 @@ class Pages extends DataObject implements PermissionProvider
 						return "subpage";
 				}
 		}
+		
 		/**
 		 * gets prepended content
 		 *
@@ -178,8 +176,9 @@ class Pages extends DataObject implements PermissionProvider
 				"class" => "prependedContent"
 			));
 			$this->callExtending("prependContent", $object);
-			return $object->render();
+			return $object->html();
 		}
+		
 		/**
 		 * gets appended content
 		 *
@@ -191,8 +190,9 @@ class Pages extends DataObject implements PermissionProvider
 				"class" => "appendedContent"
 			));
 			$this->callExtending("appendContent", $object);
-			return $object->render();
+			return $object->html();
 		}
+		
 		/**
 		 * sets parentid
 		 *@name setParentId
@@ -207,6 +207,7 @@ class Pages extends DataObject implements PermissionProvider
 						$this->setField("parentid", $value);
 				
 		}
+		
 		/**
 		 * gets the filename
 		 *@name getFilename
@@ -224,8 +225,10 @@ class Pages extends DataObject implements PermissionProvider
 				}
 				return $filename;
 		}
+		
 		/**
 		 * sets the filename
+		 *
 		 *@name setFilename
 		 *@access public
 		*/
@@ -233,8 +236,10 @@ class Pages extends DataObject implements PermissionProvider
 		{
 				$this->setPath($value);
 		}
+		
 		/**
 		 * sets the path
+		 *
 		 *@name setPath
 		 *@access public
 		*/
@@ -259,8 +264,10 @@ class Pages extends DataObject implements PermissionProvider
 				$this->setField("path", $value);					
 
 		}
+		
 		/**
 		 * validates the path
+		 *
 		 *@name validatePath
 		 *@access public
 		*/
@@ -277,7 +284,7 @@ class Pages extends DataObject implements PermissionProvider
 				
 				if(isset($data["id"]))
 				{
-						$add = " AND `pages`.`id` != '".dbescape($data["id"])."'";
+						$add = " AND pages.id != '".convert::raw2text($data["id"])."'";
 				} else
 				{
 						$add = "";
@@ -285,63 +292,7 @@ class Pages extends DataObject implements PermissionProvider
 				
 				return true;
 		}
-		/**
-		 * gets the edit-type
-		 *@name getedit_type
-		 *@access public
-		*/
-		public function getedit_type()
-		{
-				if($this->fieldGet("edit_type") == "")
-				{
-						return "all";
-				} else
-				{
-						return $this->fieldGet("edit_type");
-				}
-		}
-	
-		/**
-		 * viewer_types
-		 *@name setviewer_types
-		 *@access public
-		*/
-		public function setviewer_type($value)
-		{
-				if($value == "all")
-				{
-						$this->rights = 1;
-				} else if($value == "login")
-				{
-						$this->rights = 2;
-				}
-				$this->setField("viewer_type", $value);
-		}
-		/**
-		 * gets the viewer-type
-		 *
-		 *@name getViewerType
-		*/
-		public function getviewer_type() {
-			if($this->fieldGet("viewer_type") == "")
-				return "all";
-			else
-				return $this->fieldGet("viewer_type");
-		}
-		/**
-		 * sets rights
-		 *@name setRights
-		 *@access public
-		*/
-		public function setviewer_types($value)
-		{
-				$viewer_type = $this->fieldGet("viewer_type");
-				if($viewer_type == "all" || $viewer_type == "login")
-				{
-						return true;
-				}
-				$this->setField("rights", $value);
-		}
+
 		/**
 		 * validates the field parentid
 		 *@name validateParentId
@@ -361,11 +312,14 @@ class Pages extends DataObject implements PermissionProvider
 						$pclassname = "pages";
 				} else
 				{
-						$d = DataObject::_get("pages", array("id" => $parentid), array("class_name"));
+						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
+							return lang("error_page_self");
+						}
+						$d = DataObject::get("pages", array("id" => $parentid));
 						$pclassname = strtolower($d["class_name"]);
 				}
 
-				if(in_array(strtolower($pclassname), Object::instance($classname)->can_parent))
+				if(Object::instance($classname)->can_parent == "*" || Object::instance($classname)->can_parent == "all" || in_array(strtolower($pclassname), Object::instance($classname)->can_parent))
 				{
 						return true;
 				} else if($d->_count() > 0 && in_array(strtolower($classname), Object::instance($pclassname)->allowed_children))
@@ -375,6 +329,61 @@ class Pages extends DataObject implements PermissionProvider
 				
 				return lang("form_bad_pagetype");
 		}
+		
+		/**
+		 * gets edit_permission
+		 *
+		 *@name getEdit_Permission
+		 *@access public
+		*/
+		public function Edit_Permission() {
+			$args = func_get_args();
+			array_unshift($args, "edit_permission");
+			
+			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
+				return $data;
+			/*} else if($this->parent) {
+				return $this->parent()->edit_permission;
+			*/} else {
+				$perm = new Permission(array("type" => "admins"));
+				$perm->forModel = "pages";
+				if($this->ID != 0) {
+					$perm->write(true, true);
+					$this->edit_permissionid = $perm->id;
+					$this->write(false, true);
+				}
+				
+				return $perm;
+			}
+		}
+		
+		/**
+		 * gets read_permission
+		 *
+		 *@name getRead_Permission
+		 *@access public
+		*/
+		public function Read_Permission() {
+			$args = func_get_args();
+			array_unshift($args, "read_permission");
+			
+			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
+				return $data;
+			/*} else if($this->parent) {
+				return $this->parent()->read_permission;
+			*/} else {
+				$perm = new Permission(array("type" => "all"));
+				$perm->forModel = "pages";
+				if($this->ID != 0) {
+					$perm->write(true, true);
+					$this->read_permissionid = $perm->id;
+					$this->write(false, true);
+				}
+				
+				return $perm;
+			}
+		}
+		
 		/**
 		 * validates page-filename
 		 *
@@ -399,6 +408,7 @@ class Pages extends DataObject implements PermissionProvider
 			}
 				
 		}
+		
 		/**
 		 * gets class of a link
 		 *
@@ -408,6 +418,7 @@ class Pages extends DataObject implements PermissionProvider
 		public function getLinkClass() {
 			return ($this->active) ? "active" : ""; 
 		}
+		
 		/**
 		 * writes the form
 		 *
@@ -419,6 +430,8 @@ class Pages extends DataObject implements PermissionProvider
 		{
 				parent::getForm($form);
 				
+				Resources::add(APPLICATION . "/application/model/pages.js");
+				
 				$allowed_parents = $this->allowed_parents();
 				
 				$form->addValidator(new requiredFields(array('path','title', 'parenttype')), "default_required_fields"); // valiadte it!
@@ -426,18 +439,23 @@ class Pages extends DataObject implements PermissionProvider
 				$form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 				
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
+					$html = "<div class=\"pageinfo versionControls\">";
 					if($this->versions()->count > 1) {
-						$html = '<div style="text-align: right;" class="pagelinks"><a href="'.Core::$requestController->namespace.'/versions/?redirect='.Core::$url.'">'.lang("browse_versions", "Browse all Versions").'</a>&nbsp;&middot;&nbsp;';
-						if($this->publishedid != 0)
-							$html .= '<a href="'.Core::$requestController->namespace.'/revert_changes" rel="ajaxfy">'.lang("revert_changes", "Revert Changes").'</a>&nbsp;&middot;&nbsp;';
-					} else
-						$html = '<div style="text-align: right;" class="pagelinks">';
-					
-					if($this->publishedid != 0) {
-						$html .= '<a target="_blank" class="published" href="'.BASE_URI.BASE_SCRIPT."/?r=".$this->id.'&">'.lang("published_site", 'Published Site').'</a>&nbsp;&middot;&nbsp;';
+						$html .= '<a class="version" href="'.Core::$requestController->namespace.'/versions/?redirect='.Core::$url.'">'.lang("browse_versions", "Browse all Versions").'</a>';
 					}
-					$html .= '<a class="state" target="_blank" href="'.BASE_URI.BASE_SCRIPT."/?r=".$this->id.'&'.$this->baseClass.'_state">'.lang("current_state", 'Current State').'</a>';
-					$html .= "</div>";
+					
+					if($this->isPublished()) {
+						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
+					} else {
+						$html .= '<div class="state"><div class="draft active">'.lang("draft", "draft").'</div><div class="publish">'.lang("published", "published").'</div></div>';
+					}
+					
+					if($this->everPublished()) {
+						$html .= '<a href="#" onclick="show_preview(\''.BASE_URI . BASE_SCRIPT.'?r='.$this->id.'&preview=1\', \''.BASE_URI . BASE_SCRIPT . "?r=" . $this->id .'&'.$this->baseClass.'_state&preview=1\', '.(($this->isPublished()) ? 'true' : 'false').');return false;" class="flatButton preview">'.lang("preview").' &raquo;</a>';
+					} else {
+						$html .= '<a onclick="show_preview(false, \''.BASE_URI . BASE_SCRIPT . "?r=" . $this->id .'&'.$this->baseClass.'_state&preview=1\', '.(($this->isPublished()) ? 'true' : 'false').');return false;" href="#" class="preview flatButton">'.lang("preview").' &raquo;</a>';
+					}
+					$html .= '</div><div style="clear:right;"></div>';
 					
 					$form->add($links = new HTMLField('links', $html));
 					$links->container->addClass("hidden");
@@ -445,59 +463,57 @@ class Pages extends DataObject implements PermissionProvider
 				
 				$form->add(new TabSet('tabs', array(
 						new Tab('content', array(
-						
-							$title = new textField('title',$GLOBALS['lang']['title']),
-							$mainbartitle = new textField('mainbartitle',$GLOBALS['lang']['menupoint_title'])
-
-						),$GLOBALS['lang']['content']),
-						
-						new Tab('meta', array(
-							$parenttype = new ObjectRadioButton("parenttype", lang("parentpage", "Parent Page"), array(
+							$title = new textField('title', lang("title_page", "title of the page")),
+							$mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")),
+							
+							$parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
 								"root" => lang("no_parentpage", "Root Page"),
 								"subpage" => array(
 									lang("subpage","sub page"),
 									"parentid"
 								)
 							)),
-							new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),
+							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),
+							
+						), lang("content", "content")),
+						
+						new Tab('meta', array(
 							
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
 							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
-							new checkbox('search', $GLOBALS['lang']['show_in_search']),		
-							$filename = new textField('filename',$GLOBALS['lang']['filename'])
-						),$GLOBALS['lang']['meta']),
+							new checkbox('search', lang("show_in_search", "show in search?")),		
+							$filename = new textField('filename', lang("filename"))
+						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(
-							new ObjectRadioButton("viewer_type", lang("viewer_types", "Viewer Groups"), array(
-								"all" 	  	=> lang("everybody", "everybody"),
-								"login" 	=> lang("login_groups", "Everybody, who can login"),
-								"rights"	=> array(
-									lang("following_rights", "following rights"),
-									"rights"
-								),
-								"password"	=> array(
-									lang("password", "password"),
-									"readpassword"
-								),
-								"groups"	=> array(
-									lang("following_groups", "Following Groups"),
-									"viewer_groups"
-								)
-							)),
-							new select('rights',$GLOBALS['lang']['min_rights'],  array(1, 2, 3, 4,5,6,7,8,9, 10)),
-							new TextField("readpassword"),
-							new ManyManyDropDown("viewer_groups", lang("viewer_groups", "Viewer Groups"), "name")
-						), $GLOBALS['lang']['rights']),
+							$read = new PermissionField("read_permission", lang("viewer_types"), null, true),
+							$write = new PermissionField("edit_permission", lang("editors"), null, false, array("all"))
+						), lang("rights", "permissions"))
 						
 					) 
 				));
 				
+				// permissions
+				if($this->parent) {
+					if($this->parent()->read_permission) {
+						$read->setInherit($this->parent()->read_permission(), $this->parent()->title);
+					}
+					
+					if($this->parent()->edit_permission) {
+						$write->setInherit($this->parent()->edit_permission(), $this->parent()->title);
+					}
+				}
+				
+				// infos for users
+				$parentDropdown->info_field = "url";
 				$description->info = lang("description_info");
 				$keywords->info = lang("keywords_info");
+				$mainbartitle->info = lang("menupoint_title_info");
 				
-				if(!in_array("pages", $allowed_parents))
-						$parenttype->disable("root");
+				if(!in_array("pages", $allowed_parents)) {
+					$parenttype->disableOption("root");
+				}
 				
 				// add some js
 				$form->add(new JavaScriptField("change",'$(function(){
@@ -506,40 +522,29 @@ class Pages extends DataObject implements PermissionProvider
 							var value = $(this).val();
 							$("#'.$mainbartitle->ID().'").val(value);
 							if($("#'.$filename->ID().'").length > 0) {
-								// generate filename
-								var filename = value.toLowerCase();
-								filename = filename.trim();
-								filename = filename.replace("ä", "ae");
-								filename = filename.replace("ö", "oe");
-								filename = filename.replace("ü", "ue");
-								filename = filename.replace("ß", "ss");
-								while(filename.match(/[^a-zA-Z0-9-_]/))
-									filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
-								
-								while(filename.match(/\-\-/))
-									filename = filename.replace("--", "-");
-								
-								
-								if(confirm("'.lang("confirm_change_url").' " + filename)) {
+								if($("#'.$filename->ID().'").val() == "") {
+									// generate filename
+									var filename = value.toLowerCase();
+									filename = filename.trim();
+									filename = filename.replace("ä", "ae");
+									filename = filename.replace("ö", "oe");
+									filename = filename.replace("ü", "ue");
+									filename = filename.replace("ß", "ss");
+									while(filename.match(/[^a-zA-Z0-9-_]/))
+										filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
+									
+									while(filename.match(/\-\-/))
+										filename = filename.replace("--", "-");
+									
+
 									$("#'.$filename->ID().'").val(filename);
+									
 								}
 							}
 						}
 						
 					});
 				});'));
-				
-				if(right(10))
-				{
-						$rightstab->add(new ObjectRadioButton("edit_type", lang("editors", "Editors"), array(
-								"all"	 => lang("content_edit_users", "All Users, who can edit pages."),
-								"groups" => array(
-									lang("following_groups", "The following groups"),
-									"edit_groups"
-								)
-							)));
-						$rightstab->add(new manymanydropdown("edit_groups", lang("editor_groups", "Editor Groups"),  "name", array("advrights" => array("name" => "PAGES_WRITE"))));
-				}
 				
 				
 		}
@@ -551,24 +556,34 @@ class Pages extends DataObject implements PermissionProvider
 		 *@access public
 		*/
 		public function getActions(&$form) {
-			if($this->isDeleted() && $this->id != 0) {
+		
+			if(false) { //$this->isDeleted() && $this->id != 0) {
 				$form->addAction(new AjaxSubmitButton('_submit',lang("restore", "Restore"),"AjaxSave"));
 			} else if($this->id != 0) {
-					if($this->canDelete($this))
-							$form->addAction(new HTMLAction("deletebutton", '<a rel="ajaxfy" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button">'.lang("delete").'</a>'));
-					
-					$form->addAction(new AjaxSubmitButton('_submit',lang("save", "Save"),"AjaxSave"));
-					if($this->everPublished())
-						$form->addAction(new HTMLAction("unpublish", '<a class="button" href="'.Core::$requestController->namespace.'/unpublish" rel="ajaxfy">'.lang("unpublish", "Unpublish").'</a>'));
-					$form->addAction(new AjaxSubmitButton('_publish',lang("publish", "Publish"),"AjaxPublish", "Publish"));
+				
+				if($this->canDelete($this)) {
+					$form->addAction(new HTMLAction("deletebutton", '<a rel="ajaxfy" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
+				}
+				
+				if($this->everPublished() && !$this->isPublished()) {
+					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="ajaxfy">'.lang("draft_delete", "delete draft").'</a>'));
+				}
+				
+				if($this->everPublished()) {
+					$form->addAction(new HTMLAction("unpublish", '<a class="button" href="'.Core::$requestController->namespace.'/unpublish" rel="ajaxfy">'.lang("unpublish", "Unpublish").'</a>'));
+				}
+				
+				$form->addAction(new AjaxSubmitButton("save_draft",lang("draft_save", "Save draft"),"AjaxSave"));
+				
+				$form->addAction(new AjaxSubmitButton('publish',lang("publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
 					
 					
 					
 			} else {
-				$form->addAction(new button('cancel',$GLOBALS['lang']['cancel'], "LoadTreeItem(0);"));
+				$form->addAction(new button('cancel',lang("cancel"), "LoadTreeItem(0);"));
 				// we need special submit-button for adding
 				$form->addAction(new AjaxSubmitButton('_submit',lang("save", "Save"),"AjaxSave"));
-				$form->addAction(new AjaxSubmitButton('_publish',lang("publish", "Publish"),"AjaxPublish", "Publish"));
+				$form->addAction(new AjaxSubmitButton('_publish',lang("save_publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
 				
 			}	
 			
@@ -589,13 +604,16 @@ class Pages extends DataObject implements PermissionProvider
 				if($this->cache_parent == array())
 				{
 						$allowed_parents = array();
+						if(Object::instance($this->class)->can_parent == "*" || Object::instance($this->class)->can_parent == "all") {
+							return array_merge(array("pages"), ClassInfo::getChildren("pages"));
+						}
 						$can_parent =  array_map("strtolower",Object::instance($this->class)->can_parent);
 						
 						$allowed_parents = $can_parent;
 						
 						foreach(ClassInfo::getChildren("pages") as $child)
 						{
-								if(in_array($this->getRecordClass(), array_map("strtolower",Object::instance($child)->allowed_children)))
+								if(in_array($this->RecordClass(), array_map("strtolower",Object::instance($child)->allowed_children)))
 								{
 										if(!in_array($child, $allowed_parents) && $child != $this->class)
 										{
@@ -621,12 +639,13 @@ class Pages extends DataObject implements PermissionProvider
 		{
 				if(in_array("pages", $this->allowed_parents()))
 				{
-						return array(0 => $GLOBALS['lang']['no_parentpage']);
+						return array(0 => lang("no_parentpage"));
 				} else
 				{
 						return array();
 				}
 		}
+		
 		/**
 		 * gets the content
 		*/
@@ -634,6 +653,7 @@ class Pages extends DataObject implements PermissionProvider
 		{
 				return $this->fieldGet("data");
 		}
+		
 		/**
 		 * checks if this site is active in mainbar
 		 *@name getActive
@@ -647,7 +667,6 @@ class Pages extends DataObject implements PermissionProvider
 						return false;
 		}
 		
-		
 		/**
 		 * gets controller
 		 *@name controller
@@ -655,26 +674,30 @@ class Pages extends DataObject implements PermissionProvider
 		*/
 		public function controller($controller = null)
 		{
-				if(parent::controller($controller))
+				if(parent::controller($controller)) {
 						return parent::controller($controller);
-				else
-				{
+				} else {
 						$this->controller = Object::instance("contentController");
 						$this->controller->model_inst = $this;
 						return $this->controller;
 				}				
 		}
+		
 		/**
 		 * the path
+		 *
+		 *@name getPath
+		 *@access public
 		*/
 		public function getPath()
 		{
-			if($this->fieldGet("parentid") != 0)
-			{
+			if($this->parent) {
 				return $this->parent()->getPath() . "/" . $this->fieldGet("path");
 			}
+			
 			return $this->fieldGet("path");
 		}
+		
 		/**
 		 * permission-checks
 		*/
@@ -745,25 +768,25 @@ class Pages extends DataObject implements PermissionProvider
 		*/
 		public function canInsert($row)
 		{	
-				if(right(10))
-						return true;
-				
 				if(parent::canInsert($row))
 				{
 						// now get parent
-						$parentid = $row["parentid"];
-						if($parentid == 0)
+						if(!isset($row["parentid"]) || $row["parentid"] == 0)
 						{
 								return true;
 						} else
 						{
-								$data = DataObject::get_by_id("pages", $parentid);
-								if($data->canWrite($data))
-								{
+								$data = DataObject::get_versioned("pages", "state", array("id" => $row["parentid"]));
+								if($data->count() > 0 && $data->first()) {
+									if($data->first()->canWrite($data))
+									{
 										return true;
-								} else
-								{
+									} else
+									{
 										return false;
+									}
+								} else {
+									return false;
 								}
 						}
 				}
@@ -775,44 +798,32 @@ class Pages extends DataObject implements PermissionProvider
 		 *@name providePermissions
 		 *@access public
 		*/
-		public function providePermissions()
+		public function providePerms()
 		{
 			return array(
-				"PAGES_ALL"	=> array(
-					"title"		=> '{$_lang_sites_edit}',
-					"default"	=> 9,
-					"implements"=> array(
-						"ADMIN_ALL",
-						"PAGES_DELETE",
-						"PAGES_INSERT",
-						"PAGES_WRITE",
-						"PAGES_PUBLISH"
-					)
-				),
 				"PAGES_DELETE"	=> array(
 					"title"		=> '{$_lang_pages_delete}',
-					"default"	=> 9,
-					"implements"=> array(
-						"ADMIN_ALL"
+					"default"	=> array(
+						"type" => "admins"
 					)
 				),
 				"PAGES_INSERT"	=> array(
 					"title"		=> '{$_lang_pages_add}',
-					"default"	=> 7,
-					"implements"=> array(
-						"ADMIN_ALL"
+					"default"	=> array(
+						"type" => "admins"
 					)
 				),
 				"PAGES_WRITE"	=> array(
 					"title"		=> '{$_lang_pages_edit}',
-					"default"	=> 7,
-					"implements"=> array(
-						"ADMIN_ALL"
+					"default"	=> array(
+						"type" => "admins"
 					)
 				),
 				"PAGES_PUBLISH"	=> array(
 					"title"		=> '{$_lang_publish}',
-					'default'	=> 7
+					'default'	=> array(
+						"type" => "admins"
+					)
 				)
 			);
 		}
@@ -836,7 +847,7 @@ class Pages extends DataObject implements PermissionProvider
 		*/
 		public function getTree($parentid = 0, $fields = array(), $activenode = 0, $params = array())
 		{
-			Profiler::mark("pages::getTree");
+			if(PROFILE) Profiler::mark("pages::getTree");
 			
 			/* --- */
 			
@@ -849,7 +860,7 @@ class Pages extends DataObject implements PermissionProvider
 				$data = DataObject::get($this, $where);
 			}
 			
-			if(Permission::check("ADMIN_WRITE") && (!isset($params["deleted"]) || !$params["deleted"])) $data->version = "state";
+			if(Permission::check("PAGES_WRITE") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
 			
 			foreach($data as $record) {
 				
@@ -891,9 +902,9 @@ class Pages extends DataObject implements PermissionProvider
 					// we prefetch a maximum of 5 sites
 					if($childcount < 6) {
 						$id = $record["recordid"];
-						Profiler::unmark("pages::getTree");
+						if(PROFILE) Profiler::unmark("pages::getTree");
 						$children = $this->getTree($id, $fields, $activenode, $params);
-						Profiler::mark("pages::getTree");
+						if(PROFILE) Profiler::mark("pages::getTree");
 					} else {
 						$children = "ajax";
 					}
@@ -911,7 +922,7 @@ class Pages extends DataObject implements PermissionProvider
 				
 				unset($state);
 			}
-			Profiler::unmark("pages::getTree");
+			if(PROFILE) Profiler::unmark("pages::getTree");
 			
 			return $arr;
 		}
@@ -956,7 +967,7 @@ class Pages extends DataObject implements PermissionProvider
 		*/
 		public function searchTree($words = array(), $fields = array(), $activenode = 0)
 		{
-			Profiler::mark("pages::searchTree");
+			if(PROFILE) Profiler::mark("pages::searchTree");
 			
 			/* --- */
 			
@@ -964,9 +975,9 @@ class Pages extends DataObject implements PermissionProvider
 		
 			$where = array();
 			
-			$data = DataObject::_search($this, $words, $where, array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
-			$data->version = false;
-			if(Permission::check("ADMIN_WRITE")) $data->version = "state";
+			$data = DataObject::search_Object($this, $words, $where, array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
+			$data->setVersion(false);
+			if(Permission::check("ADMIN_WRITE")) $data->setVersion("state");
 			
 			$parentid_cache = array();
 			
@@ -1052,7 +1063,7 @@ class Pages extends DataObject implements PermissionProvider
 										$arr["_" . $data["parentid"]]["children"]["_" . $data["id"]] = array(
 											"title" 		=> $data["title"],
 											"attributes"	=> array("class" => $class),
-											"data"			=> $data->ToArray(),
+											"data"			=> $data->first()->ToArray(),
 											"collapsed"		=> false,
 											"collapsable"	=> false,
 											"children"		=> array()
@@ -1088,7 +1099,7 @@ class Pages extends DataObject implements PermissionProvider
 										$arr["_" . $data["id"]] = array(
 											"title" 		=> $data["title"],
 											"attributes"	=> array("class" => $class),
-											"data"			=> $data->ToArray(),
+											"data"			=> $data->first()->ToArray(),
 											"collapsed"		=> false,
 											"collapsable"	=> false,
 											"children"		=> array()
@@ -1121,7 +1132,7 @@ class Pages extends DataObject implements PermissionProvider
 					}
 				}
 			}
-			Profiler::unmark("pages::searchTree");
+			if(PROFILE) Profiler::unmark("pages::searchTree");
 			return $arr;
 		}
 		
@@ -1138,6 +1149,9 @@ class Pages extends DataObject implements PermissionProvider
 			$arr = array();
 			if(isset($to_insert[$id])) {
 				foreach($to_insert[$id] as $record) {
+					if(!$record["id"])
+						continue;
+					
 					if($record->isDeleted()) {
 						$state = "deleted";
 					}				
@@ -1173,23 +1187,19 @@ class Pages extends DataObject implements PermissionProvider
 		 *@name getByURL
 		 *@access public
 		 *@param string - url
-		 *@param array - fields
 		*/
-		public static function getByURL($url, $fields = array()) {
-			if($fields != array()) {
-				$fields = array_merge(array("path", "id", "parentid"), $fields);
-			}
+		public static function getByURL($url) {
 			$request = new Request("GET", $url);
 			// check if a path is given, else give back homepage
 			if($params = $request->match("\$path!")) {
 				// first get the site with the first url-part
-				$currentdata = DataObject::_get("pages", array("path" => $params["path"], "parentid" => 0), $fields);
+				$currentdata = DataObject::get("pages", array("path" => $params["path"], "parentid" => 0));
 				if($currentdata > 0) {
 					// then go part for part
 					while($request->remaining() != "") {
 						if($params = $request->match("\$path!")) {
-							$newdata = DataObject::_get("pages", array("path" => $params["path"], "parentid" => $currentdata["id"]), $fields);
-							if($newdata->_count() == 0) {
+							$newdata = DataObject::get("pages", array("path" => $params["path"], "parentid" => $currentdata["id"]));
+							if($newdata->count() == 0) {
 								break;
 							} else {
 								$currentdata = $newdata;
@@ -1199,28 +1209,97 @@ class Pages extends DataObject implements PermissionProvider
 							break;
 						}
 					}
-					return $currentdata;
+					return $currentdata->first();
 				} else {
 					return false;
 				}	
 			} else {
-				return DataObject::getone("pages", array(), $fields);
+				return DataObject::get_one("pages", array());
 			}
 			
 		}
 		
 }
 
-
-class MainbarTPLExtension extends Extension {
+/**
+ * extension for the template to use mainbar-methods
+ *
+ *@name ContentTPLExtension
+ *@access public
+*/
+class ContentTPLExtension extends Extension {
+	/**
+	 * prepended content
+	 *
+	 *@name prependedContent
+	 *@access public
+	*/
+	public static $prependedContent = array();
+	
+	/**
+	 * appended content
+	 *
+	 *@name appendedContent
+	 *@access public
+	*/
+	public static $appendedContent = array();
+	
+	/**
+	 * active mainbar cache
+	 *
+	 *@name active_mainbar
+	 *@access protected
+	*/
+	protected static $active_mainbar;
+	
 	/**
 	 * methods
 	*/
 	public static $extra_methods = array(
 		"level",
 		"mainbar",
-		"active_mainbar_title"
+		"active_mainbar_title",
+		"mainbarByID",
+		"prendedContent",
+		"appendedContent",
+		"active_mainbar_url",
+		"pageByID",
+		"pageByPath",
+		"active_mainbar"
 	);
+	
+	/**
+	 * appends content
+	 *
+	 *@name appendContent
+	 *@param string|object|array - content
+	 *@access public
+	*/
+	public function appendContent($content) {
+		if(is_array($content))
+			self::$appendedContent = array_merge(self::$appendedContent, $content);
+		else
+			self::$appendedContent[] = $content;
+			
+		return true;
+	}
+	
+	/**
+	 * prepends content
+	 *
+	 *@name prependContent
+	 *@param string|object|array - content
+	 *@access public
+	*/
+	public function prependContent($content) {
+		if(is_array($content))
+			self::$prependedContent = array_merge(self::$prependedContent, $content);
+		else
+			self::$prependedContent[] = $content;
+			
+		return true;
+	}
+	
 	/**
 	 * mainbar
 	*/
@@ -1256,25 +1335,104 @@ class MainbarTPLExtension extends Extension {
 					$id = contentController::$activeids[$level - 2];
 					return DataObject::get("pages", array("parentid"	=> $id, "mainbar"	=> 1));
 			}
-			
-			
 	}
+	
+	/**
+	 * gets mainbar items by parentid of page
+	 *
+	 *@name mainbarByID
+	 *@access public
+	*/
+	public function mainbarByID($id) {
+		return DataObject::get("pages", array("parentid"	=> $id, "mainbar"	=> 1));
+	}
+	
+	/**
+	 * returns a page-object by id
+	 *
+	 *@name pageByID
+	 *@access public
+	*/
+	public function pageByID($id) {
+		return DataObject::get_by_id("pages", $id);
+	}
+	
+	/**
+	 * returns a page-object by path
+	 *
+	 *@name pageByPath
+	 *@access public
+	*/
+	public function pageByPath($path) {
+		return DataObject::get_one("pages", array("path" => $path));
+	}
+	
 	/**
 	 * gets the title of the active mainbar
 	 *@name active_mainbar_title
 	*/
 	public function active_mainbar_title($level = 2)
 	{
+		return ($this->active_mainbar()) ? $this->active_mainbar()->mainbartitle : "";
+	}
+	
+	/**
+	 * gets the url of the active mainbar
+	 *@name active_mainbar_title
+	*/
+	public function active_mainbar_url($level = 2)
+	{
+		return ($this->active_mainbar()) ? $this->active_mainbar()->url : null;
+	}
+	
+	/**
+	 * returns the active-mainbar-object
+	 *
+	 *@name active_mainbar
+	 *@access public
+	*/
+	public function active_mainbar($level = 2)
+	{
 
-			if(!isset(contentController::$activeids[$level - 2]))
-			{
-					return false;
-			}
-			$id = contentController::$activeids[$level - 2];
+		if(!isset(contentController::$activeids[$level - 2]))
+		{
+				return false;
+		}
+		$id = contentController::$activeids[$level - 2];
+		if($level == 2 && isset(self::$active_mainbar)) {
+			$data = self::$active_mainbar;
+		} else { 
 			$data = DataObject::get("pages", array("id"	=> $id));
-			return $data->mainbartitle;
+			if($level == 2)
+				self::$active_mainbar = $data;
+		}
+		return $data;
 			
 	}
+	
+	/**
+	 * returns the prepended content
+	 *
+	 *@prependedContent
+	 *@access public
+	*/
+	public function prependedContent() {
+		$div = new HTMLNode('div', array(), self::$prependedContent);
+		
+		return $div->html();
+	}
+	
+	/**
+	 * returns the appended content
+	 *
+	 *@appendedContent
+	 *@access public
+	*/
+	public function appendedContent() {
+		$div = new HTMLNode('div', array(), self::$appendedContent);
+		
+		return $div->html();
+	} 
 }
 
-Object::Extend("tplCaller", "MainbarTPLExtension");
+Object::Extend("tplCaller", "ContentTPLExtension");

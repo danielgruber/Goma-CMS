@@ -1,13 +1,12 @@
 <?php
 /**
   *@package goma framework
-  *
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
+  *@Copyright (C) 2009 - 2012  Goma-Team
   ********
-  * last modified: 11.12.2011
-  * $Version: 005
+  * last modified: 03.04.2012
+  * $Version: 2.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -263,6 +262,8 @@ class GD extends Object
 		 *@access public
 		*/
 		public function createThumb($width = null, $height = null, $cornerLeft, $cornerTop, $thumbWidth, $thumbHeight, $forceSize = false) {
+		
+		
 			if($cornerLeft + $thumbWidth > 100) {
 				$thumbWidth = 100 - $cornerLeft;
 			}
@@ -276,11 +277,11 @@ class GD extends Object
 			// first define the src-points
 			$cornerTop = round($this->height * $cornerTop / 100);
 			$cornerLeft = round($this->width * $cornerLeft / 100);
-			$resampledWidth = $resampledWidthSrc = round($this->width * $thumbWidth);
-			$resampledHeight = $resampledHeightSrc = round($this->width * $thumbHeight);
+			$resampledWidth = $resampledWidthSrc = round($this->width * $thumbWidth / 100);
+			$resampledHeight = $resampledHeightSrc = round($this->height * $thumbHeight / 100);
 			
 			// get the apect ratio
-			$aspectRadio = $resampledWidth / $resampledHeight;
+			$aspectRatio = $resampledWidth / $resampledHeight;
 			
 			// if both are set
 			if(isset($width, $height)) {
@@ -293,7 +294,8 @@ class GD extends Object
 						$multiplier = 1;
 						
 					$resampledWidth = $width;
-					$cornerTop = $cornerTop + $resampledHeightSrc - $height * ($resampledHeightSrc / $resampledHeight);
+					$resampledHeight = round($resampledWidth / $aspectRatio);
+					$cornerTop = $cornerTop + ($resampledHeightSrc - $height * ($resampledHeightSrc / $resampledHeight)) / 2;
 					$resampledHeightSrc = $height * ($resampledHeightSrc / $resampledHeight);
 					$resampledHeight = $height;
 					
@@ -306,10 +308,12 @@ class GD extends Object
 					}
 				
 					$resampledHeight = $height;
-					$resampledCornerTop = round($multiplier * $resampledCornerTop);
 					
-					$cornerLeft = $cornerLeft + $resampledWidthSrc - $width * ($resampledWidthSrc / $resampledWidth);
+					$resampledWidth = round($aspectRatio * $resampledHeight);
+					$cornerLeft = $cornerLeft + ($resampledWidthSrc - $width * ($resampledWidthSrc / $resampledWidth)) / 2;
+					$resampledWidthSrc = ($width / $resampledWidth) * $resampledWidthSrc;
 					$resampledWidth = $width;
+					
 				}
 			// we've got the width, so just calculate height
 			} else if(isset($width)) {
@@ -484,6 +488,7 @@ class GD extends Object
 		*/
 		public function output($quality = 70)
 		{
+				
 				HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
 				HTTPResponse::addHeader('content-type', $this->content_type);
 				HTTPResponse::addHeader("pragma","Public");
@@ -500,6 +505,9 @@ class GD extends Object
 								{
 										HTTPResponse::setResHeader(304);
 										HTTPResponse::sendHeader();
+										if(PROFILE)
+											Profiler::End();
+											
 										exit;
 								}
 						}
@@ -510,6 +518,10 @@ class GD extends Object
 								{
 										HTTPResponse::setResHeader(304);
 										HTTPResponse::sendHeader();
+										
+										if(PROFILE)
+											Profiler::End();
+										
 										exit;
 								}
 						}
@@ -529,6 +541,9 @@ class GD extends Object
 						{
 								imagegif($this->gd(),null, $quality);
 						}
+						if(PROFILE)
+							Profiler::End();
+							
 						exit;
 				} else if($this->extension == "jpg")
 				{						
@@ -541,6 +556,9 @@ class GD extends Object
 						{
 								imagejpeg($this->gd(),null, $quality);
 						}
+						if(PROFILE)
+							Profiler::End();
+							
 						exit;
 				} else if($this->extension == "png")
 				{					
@@ -559,6 +577,9 @@ class GD extends Object
 								}
 								imagepng($this->gd(),null, $quality);
 						}
+						if(PROFILE)
+							Profiler::End();
+						
 						exit;
 				} else if($this->extension == "bmp") {
 					HTTPResponse::addHeader('content-type', "image/jpeg");
@@ -571,6 +592,10 @@ class GD extends Object
 								
 								imagejpeg($this->gd(), null, 70);
 						}
+						
+						if(PROFILE)
+							Profiler::End();
+						
 						exit;
 				}
 				return false;

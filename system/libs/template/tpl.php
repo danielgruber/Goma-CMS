@@ -1,31 +1,33 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
+  *@subpackage template framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.11.2011
-  * $Version 006
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 15.07.2012
+  * $Version 3.3.7
 */   
  
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-
-class tpl extends object
+class tpl extends Object
 {
-       /**
+        /**
          *@access private
          *@var string
          *@use: for the root path of the tpl standard: ./tpl/
          */
          static $tplpath = "tpl/";
+         
 		 /**
-		 *@access public
-		 *@var array - cache
+		  *@access public
+		  *@var array - cache
 		 */
 		 public static $cache = array();
+		 
 		 /**
 		  * found areas
 		  *
@@ -33,6 +35,7 @@ class tpl extends object
 		  *@access private
 		 */
 		 private static $areas = array();
+		 
 		 /**
 		  * important areas
 		  *
@@ -40,6 +43,7 @@ class tpl extends object
 		  *@access private
 		 */
 		 private static $iAreas = array();
+		 
 		 /**
 		  * currently parsed template
 		  *
@@ -47,6 +51,7 @@ class tpl extends object
 		  *@access public
 		 */
 		 public static $tpl = "";
+		 
 		 /**
 		  * dataStack
 		  *
@@ -63,16 +68,19 @@ class tpl extends object
 			"INCLUDE_JS_MAIN",
 			"INCLUDE_JS",
 			"INCLUDE_CSS",
-			"INCLUDE"
+			"INCLUDE",
+			"INCLUDE_CSS_MAIN",
+			"GLOAD"
 		 );
-		 /**
+		 
+		/**
 		  * this is a static array for convert_vars
 		  *@name convert_var_temp
 		  *@access public
 		 */
-		 private static $convert_vars_temp = array();
+		private static $convert_vars_temp = array();
 		 
-       /**
+       	/**
          *@access public
          *@param string - filename
          *@param bollean - to follow <!tpl inc:"neu"> or not
@@ -81,11 +89,11 @@ class tpl extends object
          */
 		public static function init($name,$follow = true,$replacement = array(),$ifsa = array(), $blockvars = array(), $class = "", $required_areas = array())
 		{
-				$trace = debug_backtrace();
-				logging("Use of Method tpl::init is deprecated, please use tpl::render. Call from ".$trace[0]["file"]." ".$trace[0]["line"]."");
+				Core::deprecate(2.0, "TPL::render");
 				$file = self::getFilename($name, $class);
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
 		}
+		
 		/**
 		 * new init method
 		 *@name render
@@ -96,11 +104,12 @@ class tpl extends object
          *@param array - required areas
          *@use: parse tpl
          */
-		public static function render($name,$replacement = array(),$class = "", $required_areas = array())
+		public static function render($name,$replacement = array(),$class = "", $required_areas = array(), $expansion = null)
 		{
-				$file = self::getFilename($name, $class);
+				$file = self::getFilename($name, $class, false, $expansion);
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
 		}
+		
 		/**
 		 * gets the filename of a given template-name
 		 *
@@ -109,8 +118,8 @@ class tpl extends object
 		 *@param string - name
 		 *@param use include-folders
 		*/
-		public static function getFilename($name, $class = "", $inc = false) {
-				if(_ereg('^/', $name))
+		public static function getFilename($name, $class = "", $inc = false, $expansion = null) {
+				if(preg_match('/^\//', $name))
 				{
 						if(is_file(ROOT . $name))
 						{
@@ -122,33 +131,63 @@ class tpl extends object
 						}
 				} else
 				{
-						
 						if(is_file(ROOT . self::$tplpath . Core::getTheme() . "/" . $name))
 						{
 								return ROOT . self::$tplpath . Core::getTheme() . "/" . $name;
-						} else if($inc === true && is_file(ROOT . self::$tplpath . "includes/" . Core::getTheme() . "/" . $name))
+						}
+						
+						if($inc === true && is_file(ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name))
 						{
-								return ROOT . self::$tplpath . "includes/" . Core::getCMSVar("tpl") . "/" . $name;
-						} else if(Resources::file_exists(APPLICATION_TPL_PATH . "/" . $name))
+								return ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name;
+						}
+						
+						if(Resources::file_exists(APPLICATION_TPL_PATH . "/" . $name))
 						{
 								return ROOT . APPLICATION_TPL_PATH . '/' . $name;
-						} else if($inc === true && Resources::file_exists(APPLICATION_TPL_PATH . "/includes/" . $name))
+						}
+						
+						if($inc === true && Resources::file_exists(APPLICATION_TPL_PATH . "/includes/" . $name))
 						{
 								return ROOT . APPLICATION_TPL_PATH . '/includes/' . $name;
-						} else if(Resources::file_exists(SYSTEM_TPL_PATH . "/" . $name))
+						}
+						
+						if(is_object($class) && $class->inExpansion) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							if(Resources::file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && Resources::file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(isset($expansion)) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							if(Resources::file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && Resources::file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(Resources::file_exists(SYSTEM_TPL_PATH . "/" . $name))
 						{
 								return ROOT . SYSTEM_TPL_PATH . '/' . $name;
-						} else if($inc === true && Resources::file_exists(SYSTEM_TPL_PATH . '/includes/' . $name))
+						}
+						
+						if($inc === true && Resources::file_exists(SYSTEM_TPL_PATH . '/includes/' . $name))
 						{
 								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
-						} else
-						{
-								HTTPresponse::setResHeader(500);
-								/* an error so show an error ;-) */
-								throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
 						}
+								
+						HTTPresponse::setResHeader(500);
+						/* an error so show an error ;-) */
+						throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+						
 				}
 		}
+		
 		/**
 		 * build all files needed for a template
 		 *
@@ -199,6 +238,7 @@ class tpl extends object
 
 			
 		}
+		
         /**
          *@access public
          *@param string - filename
@@ -238,6 +278,9 @@ class tpl extends object
 				include($filename);
 				
 				$content = ob_get_contents(); // get contents
+				
+				unset($data, $callerStack, $dataStack, $caller);
+				
 				ob_end_clean(); // clean contents
 				
 				if($contents = explode($hash, $content))
@@ -258,10 +301,9 @@ class tpl extends object
 				if(PROFILE) Profiler::unmark("tpl::parser Run");
 				if(PROFILE) Profiler::unmark("tpl::parser");
 				
-				
-				
 				return $tpl;
 		}
+		
 		/**
 		 * compiles a tpl-file
 		 *@name compile
@@ -290,17 +332,18 @@ class tpl extends object
 				preg_match_all("/<%(.*)%>/Usi", $tpl, $percent);
 				foreach($percent[1] as $key => $data)
 				{
-						$data = preg_replace_callback('/([a-zA-Z0-9_\.]+)\((.*?)\)/si', array("tpl", "functions"), $data);
-						$data = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("tpl", "convert_vars"), $data);
-						$data = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("tpl", "percent_vars"), $data);
-						
-						
+					$data = preg_replace_callback('/([a-zA-Z0-9_\.]+)\(/si', array("tpl", "functions"), $data);
 					
-						
-						$_key = md5($data);
-						$percents[$_key] = $data;
-						$tpl = preg_replace('/' . preg_quote($percent[0][$key], '/') . '/si', '<%' . $_key . '%>', $tpl, 1);
-						unset($data);
+					$data = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("tpl", "convert_vars"), $data);
+					$data = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("tpl", "percent_vars"), $data);
+					
+					$data = preg_replace('/exit;?\s*$/Usi', "", $data);
+					$data = str_replace('$caller->.', '->', $data);
+					
+					$_key = md5($data);
+					$percents[$_key] = $data;
+					$tpl = preg_replace('/' . preg_quote($percent[0][$key], '/') . '/si', '<%' . $_key . '%>', $tpl, 1);
+					unset($data);
 				}
 				unset($percent);
 				
@@ -334,55 +377,72 @@ class tpl extends object
 				$tpl = preg_replace('/<%\s*echo\s+(.*)\s*%>/Usi', '<?php echo \\1; ?>', $tpl);
 				$tpl = preg_replace('/<%\s*print\s+(.*)\s*%>/Usi', '<?php print \\1; ?>', $tpl);
 				
+				$controlCount = 0;
+				
 				// CONTROL
 				$tpl = preg_replace('/<%\s*CONTROL\s+(\$)([a-z0-9_\.\-\>\(\)\s]+)\->([a-zA-Z0-9_]+)\(([^%]*)\)\s+as\s+\$data\[["\']([a-zA-Z0-9_\-]+)["\']\]\s*%>/Usi', 
 									'
 <?php 
-// begin control
-if(PROFILE) 
-	Profiler::mark("loops"); 
+	// begin control
 	array_push($callerStack, clone $caller); 
 	array_push($dataStack, clone $data); 
 	$value = \\1\\2->\\3(\\4);
 	if(is_object($value) && is_a($value, "DataObject")) {
 		$value = new DataSet(array($value));
 	}
-	if(is_array($value) || (is_object($value) && ClassInfo::hasInterface($value, "traversable"))) 
-		foreach($value as $data_loop) { 
-			$data->customised["\\5"] = $data_loop; 
-			unset($data->viewcache["_" . strtolower("\\5")]);  
-			unset($data->viewcache["1_" . strtolower("\\5")]); 
+	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
+		foreach($value as $data_loop) {
+			$data->customised["\\5"] = $data_loop;
 			if(is_object($data_loop)) 
 				$caller->callers[strtolower("\\5")] = new tplCaller($data_loop); 
 			else  
 				$caller->callers[strtolower("\\5")] = new tplCaller(new ViewAccessableData(array($data_loop))); 
 ?>
-', $tpl);
-				
+', $tpl, -1, $controlCount);
+				$controlCount2 = 0;
 				$tpl = preg_replace('/<%\s*CONTROL\s+(\$)([a-z0-9_\.\-\>\(\)]+?)\->([a-z0-9_]+)\((.*)\)\s*%>/Usi', 
 									'
 <?php 
-// begin control
-if(PROFILE) 
-	Profiler::mark("loops"); 
+	// begin control
 	array_push($callerStack, clone $caller); 
 	array_push($dataStack, clone $data); 
 	$value = \\1\\2->\\3(\\4);
 	if(is_object($value) && is_a($value, "DataObject")) {
 		$value = new DataSet(array($value));
 	}
-	if(is_array($value) || (is_object($value) && ClassInfo::hasInterface($value, "traversable"))) 
-		foreach($value as $data_loop) { 
+	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
+		foreach($value as $data_loop) {
 			$data->customised[strtolower("\\3")] = $data_loop; 
-			unset($data->viewcache["_" . strtolower("\\3")]);  
-			unset($data->viewcache["1_" . strtolower("\\3")]); 
 			if(is_object($data_loop)) 
 				$caller->callers[strtolower("\\3")] = new tplCaller($data_loop); 
 			else  
 				$caller->callers[strtolower("\\3")] = new tplCaller(new ViewAccessableData(array($data_loop))); 
 ?>
-', $tpl);
-								
+', $tpl, -1, $controlCount2);
+				
+				$controlCount3 = 0;
+				$tpl = preg_replace('/<%\s*CONTROL\s+array\((.*)\)\s+as\s+\$data\[["\']([a-zA-Z0-9_\-]+)["\']\]\s*%>/Usi', 
+									'
+<?php 
+	// begin control
+	array_push($callerStack, clone $caller); 
+	array_push($dataStack, clone $data); 
+	$value = array(\\1);
+	if(is_object($value) && is_a($value, "DataObject")) {
+		$value = new DataSet(array($value));
+	}
+	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
+		foreach($value as $data_loop) {
+			$data->customised[strtolower("\\2")] = $data_loop;
+			if(is_object($data_loop)) 
+				$caller->callers[strtolower("\\2")] = new tplCaller($data_loop); 
+			else  
+				$caller->callers[strtolower("\\2")] = new tplCaller(new ViewAccessableData(array($data_loop))); 
+?>
+', $tpl, -1, $controlCount3);
+				
+				$endControlCount = 0;
+	
 				$tpl = preg_replace('/<%\s*ENDCONTROL(.*)\s*%>/Usi', '
 <?php 
 // end control
@@ -390,10 +450,18 @@ if(PROFILE)
 
 $caller = array_pop($callerStack); 
 $data = array_pop($dataStack); 
-if(PROFILE) 
-	Profiler::unmark("loops"); 
 ?>
-', $tpl);
+', $tpl, -1, $endControlCount);
+				
+				$controlCount = $controlCount + $controlCount2 + $controlCount3;
+				unset($controlCount2);
+				
+				// validate counters
+				if($controlCount > $endControlCount) {
+					throwError(10, 'Template-Parse-Error.','Expected <% ENDCONTROL %> '.($controlCount - $endControlCount).' more time(s) in '.self::$tpl.'.');
+				} else if($endControlCount > $controlCount) {
+					throwError(10, 'Template-Parse-Error.','Expected <% CONTROL [method] %> '.($endControlCount - $controlCount).' more time(s) in '.self::$tpl.'.');
+				}
 				
 				// areas
 				self::$areas = array();
@@ -466,7 +534,7 @@ if(PROFILE)
 		public function functions(array $matches)
 		{
 				$name = trim(strtolower($matches[1]));
-				if($name == "print" || $name == "echo") {
+				if($name == "print" || $name == "echo" || $name == "array") {
 					return $matches[0];
 				} else {
 					if(strpos($name, "."))
@@ -489,11 +557,12 @@ if(PROFILE)
 					{
 						$name = '$caller->' . $matches[1];
 					}
-					$params = $matches[2];
-					$php = $name . '('.$params.')';
+					
+					$php = $name . '(';
 					return $php;
 				}
 		}
+		
 		/**
 		 * parses areas
 		 *
@@ -513,6 +582,7 @@ if(PROFILE)
 			' . $matches[3] . '
 			<?php } ?></div>';
 		}
+		
 		/**
 		 * parses areas
 		 *
@@ -533,6 +603,7 @@ if(PROFILE)
 			' . $matches[5] . '
 			<?php } ?></div>';
 		}
+		
 		/**
 		 * renders the IF with php-tags
 		 *@name PHPRenderIF
@@ -542,6 +613,7 @@ if(PROFILE)
 		{
 				return '<?php ' . self::renderIF($matches) . ' ?>';
 		}
+		
 		/**
 		 * renders the ELSEIF with php-tags
 		 *@name PHPRenderELSEIF
@@ -551,6 +623,7 @@ if(PROFILE)
 		{
 				return '<?php ' . self::renderELSEIF($matches) . ' ?>';
 		}
+		
 		/**
 		 * callback for vars in <% %>
 		 *@name percent_vars
@@ -575,12 +648,12 @@ if(PROFILE)
 						$point = "";
 				}
 				
-				if(_eregi('^_lang_([a-zA-Z0-9_-]+)', $name, $data))
+				if(preg_match('/^_lang_([a-zA-Z0-9\._-]+)/i', $name, $data))
 				{
 						return 'lang("'.$data[1].'", "'.$data[1].'")'  . $point;
 				}
 				
-				if(_eregi('^_cms_([a-zA-Z0-9_-]+)', $name, $data))
+				if(preg_match('/^_cms_([a-zA-Z0-9_-]+)/i', $name, $data))
 				{
 						return 'Core::getCMSVar('.var_export($data[1], true).')' . $point;
 				}
@@ -600,6 +673,7 @@ if(PROFILE)
 						return '$data['.var_export($name, true).']' . $point;
 				}
 		}
+		
 		/**
 		 * vars with convertion
 		 *@name convert_vars
@@ -653,6 +727,7 @@ if(PROFILE)
 				self::$convert_vars_temp[$key] = $php;
 				return '\\convert_var_'.$key.'\\';
 		}
+		
 		/**
 		 * convert vars with echo
 		 *@name convert_vars_echo
@@ -662,6 +737,7 @@ if(PROFILE)
 		{
 				return '<?php echo '.self::convert_vars($matches).'; ?>';
 		}
+		
 		/**
 		 * callback for vars
 		 *@name vars
@@ -669,12 +745,12 @@ if(PROFILE)
 		public static function vars($matches)
 		{
 				$name = $matches[1];
-				if(_eregi('^_lang_([a-zA-Z0-9_-]+)', $name, $data))
+				if(preg_match('/^_lang_([a-zA-Z0-9\._-]+)/i', $name, $data))
 				{
 						return '<?php echo lang("'.$data[1].'", "'.$data[1].'"); ?>';
 				}
 				
-				if(_eregi('^_cms_([a-zA-Z0-9_-]+)', $name, $data))
+				if(preg_match('/^_cms_([a-zA-Z0-9_-]+)/i', $name, $data))
 				{
 						return '<?php echo Core::getCMSVar('.var_export($data[1], true).'); ?>';
 				}
@@ -693,6 +769,7 @@ if(PROFILE)
 						return '<?php echo $data["'.$name.'"]; ?>';
 				}
 		}
+		
 		/**
 		 * renders IF-clauses
 		 *@name renderIF
@@ -716,7 +793,7 @@ if(PROFILE)
 					} else if(strtolower($part) == " or " || $part == "||") {
 						$newclause .= "||";
 					} else {
-						if(_eregi("\=", $part)) { // clause with =
+						if(preg_match("/\=/", $part)) { // clause with =
 							$newclause .= $part;
 						} else if(preg_match('/\$data\[["\'](.*)["\']\]$/', trim($part), $matches)) {
 							$dataparts = preg_split('/["\']\]\[["\']/', $matches[1]);
@@ -725,7 +802,7 @@ if(PROFILE)
 								$cond .= '->doObject("'.$_part.'")';
 							}
 							unset($dataparts, $_part, $matches);
-							if(_ereg('!', trim($part))) {
+							if(preg_match('/!/', trim($part))) {
 								$newclause .= '(!' . $cond . ' || !' . $cond . "->bool())";
 							} else {
 								$newclause .= '(' . $cond . ' && ' . $cond . "->bool())";
@@ -744,6 +821,7 @@ if(PROFILE)
 				else
 					return 'if(' . $newclause . ') {';
 		}
+		
 		/**
 		 * renders ELSEIF-clauses
 		 *@name renderELSEIF
@@ -753,6 +831,7 @@ if(PROFILE)
 		{
 				return '$data->convertDefault = false; } else ' . self::renderIF($matches, false) . "  \$data->convertDefault = null;";
 		}
+		
 		/**
 		 * returns a filename, which you can include
 		 *@name getIncludeName
@@ -769,7 +848,8 @@ if(PROFILE)
 				unset($tpl);
 				return array($filename, $file);
 		}
-		 /**
+		
+		/**
          *@access public
          *@param string - filename
          *@param bollean - to follow <!tpl inc:"neu"> or not
@@ -804,6 +884,7 @@ if(PROFILE)
 				
 				return $cacher->filename();
 		}
+		
 		/**
 		 * getAvailableArea
 		 *
@@ -915,6 +996,10 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function __clone() {
 			$this->dataobject = clone $this->dataobject;
+			if($this->callers)
+				foreach($this->callers as $key => $caller) {
+					$this->callers[$key] = clone $caller;
+				}
 		}
 		/**
 		 * sets tpl-paths
@@ -925,7 +1010,9 @@ class tplCaller extends Object implements ArrayAccess
 		public function setTplPath($tpl) {
 			
 			$this->tplBase = substr($tpl, 0, strrpos($tpl, "/"));
-			$this->tplBase = substr($this->tplBase, strlen(ROOT));
+			if(substr($this->tplBase, 0, strlen(ROOT)) == ROOT)
+				$this->tplBase = substr($this->tplBase, strlen(ROOT));
+			
 			if(substr($this->tplBase,0, strlen("tpl/" . Core::getTheme())) == "tpl/" . Core::getTheme()) {
 				$this->subPath = substr($this->tplBase, strlen("tpl/" . Core::getTheme()));
 			} else if(substr($this->tplBase,0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH) {
@@ -981,6 +1068,32 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				unset($this->dataobject[$offset]);
 		}
+		
+		
+		/**
+		 * returns addcontent
+		*/
+		public function addcontent() {
+			return addcontent::get();
+		}
+		
+		/**
+		 * prints a debug
+		 *
+		 *@name printDebug
+		 *@access public
+		*/
+		public function printDebug() {
+			if(count(debug_backtrace()) > 30) {
+				debug_print_backtrace();
+			} else {
+				$data = debug_backtrace();
+				unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
+				echo convert::raw2text(print_r(array_values($data), true));
+			}
+			
+		}
+		
 		/**
 		 * __call-access-layer
 		 *@name __call
@@ -990,7 +1103,6 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function __call($name,$args)
 		{
-				
 				if(Object::method_exists($this->class, $name))
 				{
 					if(method_exists($this->class, $name))
@@ -1013,6 +1125,27 @@ class tplCaller extends Object implements ArrayAccess
 						}
 				}
 		}
+		
+		/**
+		 * gets resource-path of given expansion or class-expansion
+		 *
+		 *@name resource_path
+		 *@access public
+		*/
+		public function resource_path($exp = null) {
+			if(!isset($exp))
+				$exp = $this->dataobject->inExpansion;
+			
+			if(!$exp)
+				return "";
+			
+			if(!isset(ClassInfo::$appENV["expansion"][$exp]))
+				return "";	
+			
+			$extFolder = ClassInfo::getExpansionFolder($exp, false);
+		 	return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
+		}
+		
 		/**
 		 * gets current object
 		 *
@@ -1022,6 +1155,7 @@ class tplCaller extends Object implements ArrayAccess
 		public function doObject() {
 			return $this;
 		}
+		
 		/**
 		 * checks if method can call
 		 *@name __cancall
@@ -1066,6 +1200,7 @@ class tplCaller extends Object implements ArrayAccess
 				$dataStack = array();
 				include($tpl[0]);
 		}
+		
 		/**
 		 * gets a variable of this dataobject by name
 		 *
@@ -1076,6 +1211,7 @@ class tplCaller extends Object implements ArrayAccess
 		public function getVar($name) {
 			return isset($this->dataobject[$name]) ? $this->dataobject[$name] : null;
 		}
+		
 		/**
 		 * to include another template
 		 *@name include
@@ -1085,6 +1221,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return Core::is_ajax();
 		}
+		
 		/**
 		 * to include another template
 		 *@name include
@@ -1094,6 +1231,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return (Core::is_ajax() && isset($_GET["ajaxfy"]));
 		}
+		
 		/**
 		 * returns if the current admin wants to see the view as user
 		 *@name adminAsUser
@@ -1103,6 +1241,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return Core::adminAsUser();
 		}
+		
 		/**
 		 * shows statistics 
 		 *@name stats
@@ -1121,6 +1260,7 @@ class tplCaller extends Object implements ArrayAccess
 				$c->online = $parts[5];
 				return $c->getBoxContent( );
 		}
+		
 		/**
 		 * gets the current theme
 		 *
@@ -1130,13 +1270,14 @@ class tplCaller extends Object implements ArrayAccess
 		public function getTheme() {
 			return self::getTheme();
 		}
+		
 		/**
 		 * includes CSS
 		 *@name INCLUDE_CSS
 		 *@access public
 		*/
 		public function include_css($name) {
-			if(_eregi("\.css$", $name)) {
+			if(preg_match("/\.css$/i", $name)) {
 				if(isset($this->subPath)) {
 					if(self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
 						$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
@@ -1159,6 +1300,37 @@ class tplCaller extends Object implements ArrayAccess
 			Resources::add($name, "css");
 			return "";
 		}
+		
+		/**
+		 * includes CSS in main-class
+		 *@name INCLUDE_CSS_MAIN
+		 *@access public
+		*/
+		public function include_css_main($name) {
+			if(preg_match("/\.css$/i", $name)) {
+				if(isset($this->subPath)) {
+					if(self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
+						$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
+						Resources::add($name, "css", "main");
+						return "";
+					} else if(self::file_exists(APPLICATION_TPL_PATH . $this->subPath . "/" . $name)) {
+						$name = APPLICATION_TPL_PATH . $this->subPath . "/" . $name;
+						Resources::add($name, "css", "main");
+						return "";
+					} else if(self::file_exists(SYSTEM_TPL_PATH . $this->subPath . "/" . $name)) {
+						$name = SYSTEM_TPL_PATH . $this->subPath . "/" . $name;
+						Resources::add($name, "css", "main");
+						return "";
+					}
+				}
+				if(self::file_exists($this->tplBase . "/" . $name)) {
+					$name = $this->tplBase . "/" . $name;
+				}
+			}
+			Resources::add($name, "css", "main");
+			return "";
+		}
+		
 		/**
 		 * includes JS
 		 *@name INCLUDE_JS
@@ -1166,7 +1338,7 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function include_js($name)
 		{
-			if(_eregi("\.js", $name)) {
+			if(preg_match("/\.js$/i", $name)) {
 				if(isset($this->subPath)) {
 					if(self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
 						$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
@@ -1190,6 +1362,7 @@ class tplCaller extends Object implements ArrayAccess
 			}
 			Resources::add($name, "js", "tpl");
 		}
+		
 		/**
 		 * returns the directory of the current template
 		 *
@@ -1199,6 +1372,7 @@ class tplCaller extends Object implements ArrayAccess
 		public function FileDirectory() {
 			return $this->specialBase;
 		}
+		
 		/**
 		 * includes JS as "main"
 		 *@name INCLUDE_JS_MAIN
@@ -1206,7 +1380,7 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function include_js_main($name)
 		{
-				if(_eregi("\.js$", $name)) {
+				if(preg_match("/\.js$/i", $name)) {
 					if(isset($this->subPath)) {
 						if(self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
 							$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
@@ -1230,6 +1404,7 @@ class tplCaller extends Object implements ArrayAccess
 				}
 				Resources::add($name, "js", "main");
 		}
+		
 		/**
 		 * checks if a file exists
 		 *
@@ -1239,6 +1414,7 @@ class tplCaller extends Object implements ArrayAccess
 		protected static function file_exists($filename) {
 			return Resources::file_exists($filename);
 		}
+		
 		/**
 		 * Mobility Functions
 		*/
@@ -1285,6 +1461,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return lang($name, $else);
 		}
+		
 		/**
 		 * gloader::load
 		 *@name gload
@@ -1305,8 +1482,9 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function admin()
 		{
-				return Permission::check("ADMIN_ALL");
+				return Permission::check("ADMIN");
 		}
+		
 		/**
 		 * returns true if the user is logged in
 		 *@name login
@@ -1316,6 +1494,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return member::login();
 		}
+		
 		/**
 		 * returns true if the current user is not logged in
 		 *@name logout
@@ -1325,6 +1504,7 @@ class tplCaller extends Object implements ArrayAccess
 		{
 				return member::logout();
 		}
+		
 		/**
 		 * checks given permission
 		 *@name permission
@@ -1365,19 +1545,28 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function languages() {
 			$arr = array();
-			$files = scandir(ROOT . LANGUAGE_DIRECTORY);
-			foreach($files as $file) {
-				if($file != "." && $file != ".." && is_dir(ROOT . LANGUAGE_DIRECTORY . $file) && file_exists(ROOT . LANGUAGE_DIRECTORY . $file . "/description.php")) {
-					include(ROOT . LANGUAGE_DIRECTORY . $file . "/description.php");
-					if($file == Core::$lang)
-						$arr[] = array("name" => $file, "title" => $name, "active" => true);
-					else
-						$arr[] = array("name" => $file, "title" => $name, "active" => false);
-				}
+			$data = i18n::listLangs();
+			foreach($data as $lang => $contents) {
+				if($lang == Core::$lang)
+					$arr[] = array_merge($contents, array("code" => $lang, "name" => $lang, "active" => true));
+				else
+					$arr[] = array_merge($contents, array("code" => $lang, "name" => $lang, "active" => false));
+				
 			}
 			
 			return new ViewAccessAbleData($arr);
 		}
+		
+		/**
+		 * returns info about current lang
+		 *
+		 *@name currentLang
+		 *@access public
+		*/
+		public function currentLang() {
+			return array_merge(i18n::getLangInfo(), array("code" => Core::$lang));
+		}
+		
 		/**
          * breadcrumbs
         */
@@ -1386,11 +1575,12 @@ class tplCaller extends Object implements ArrayAccess
                 $data = new DataSet();
                 foreach(Core::$breadcrumbs as $link => $title)
                 {
-                        $data->push(array('link' => $link, 'title' => text::protect($title)));
+                        $data->push(array('link' => $link, 'title' => convert::raw2text($title)));
                 }
               	
                 return $data;
         }
+        
         /**
          * gets all headers
          *
@@ -1400,14 +1590,111 @@ class tplCaller extends Object implements ArrayAccess
         public function header() {
         	return Core::getHeader();
         }
+        
         /**
-         * gets all headers
+         * gets all headers as HTML
          *
          *@name headers
          *@access public
         */
         public function headerHTML() {
         	return Core::getHeaderHTML();
+        }
+        
+        /**
+         * some math operations
+        */
+        
+        /**
+         * sums all given values
+         *
+         *@sum
+         *@access public
+        */
+        public function sum() {
+        	$args = func_get_args();
+        	$value = 0;
+        	foreach($args as $val) {
+        		$value += $val;
+        	}
+        	
+        	return $value;
+        }
+        
+        /**
+         * multiply
+         *
+         *@name multiply
+         *@access public
+        */
+        public function multiply() {
+        	$args = func_get_args();
+        	foreach($args as $val) {
+        		if(!isset($value)) {
+        			$value = $val;
+        		} else {
+        			$value = $value * $val;
+        		}
+        	}
+        	
+        	return $value;
+        }
+        
+        /**
+         * devide
+         *
+         *@name devide
+         *@access public
+        */
+        public function devide() {
+        	$args = func_get_args();
+        	foreach($args as $val) {
+        		if(!isset($value)) {
+        			$value = $val;
+        		} else {
+        			$value = $value / $val;
+        		}
+        	}
+        	
+        	return $value;
+        }
+        
+        /**
+         * date-method
+         *
+         *@name date
+         *@access public
+        */
+        public function date($format, $time = NOW) {
+        	return goma_date($format, $time);
+        }
+        
+        /**
+         * adds URL-param to URL
+         *
+         *@addParamToURL
+         *@access public
+        */
+        public function addParamToUrl($url, $param, $value) {
+        	if(!strpos($url, "?")) {
+        		$modified = $url . "?" . $param . "=" . urlencode($value);
+        	} else {
+        		$url = preg_replace('/'.preg_quote($param, "/").'\=([^\&]+)\&/Usi', "", $url);
+        		$url = preg_replace('/'.preg_quote($param, "/").'\=([^\&]+)$/Usi', "", $url);
+        		$modified = str_replace(array("?&", "&&"), array('?', "&"), $url . "&" . $param . "=" . urlencode($value));
+        	}
+        	
+	        return convert::raw2text($modified);
+        }
+        
+        /**
+         * returns Core::$title
+         *
+         *@name title
+         *@access public
+        */
+        public function title() {
+        	return Core::$title;
         }
 }
 /**

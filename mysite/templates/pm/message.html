@@ -1,21 +1,21 @@
+<% INCLUDE_CSS "pm.css" %>
 <div id="message_{$id}" class="message record">
 	<div class="ui-left user">
 		<% CONTROL from() %>
 			<% IF $from.avatar %>
-				<a href="member/{$from.id}{URLEND}"><img src="images/resampled/50/50/{$from.avatar.raw()}" /></a>
+				<a href="member/{$from.id}{URLEND}">$from.avatar.setSize(50,50)</a>
 			<% ELSE %>
 				<a href="member/{$from.id}{URLEND}"><img src="images/no_avatar.png" height="50" width="50" /></a>
 			<% END %>
 		<% ENDCONTROL %>
 	</div>
-	<div class="ui-right delete">
+	<!--<div class="ui-right delete">
 		<a title="{$_lang_delete}" rel="ajaxfy" href="pm/delm/{$id}{URLEND}"><img src="images/16x16/del.png" name="{$_lang_delete}" /></a>
-	</div>
+	</div>-->
 	<div class="body" style="margin-left: 60px;">
 		<div class="info">
-			<% CONTROL from() %>
-				<a class="username" href="member/{$from.id}{URLEND}">$from.nickname.text()</a> <span class="date">$time.date()</span>
-			<% ENDCONTROL %>
+			<span class="date">$time.date()</span>
+			<a class="username" href="member/{$this.from.id}{URLEND}">$this.from.nickname.text()</a>
 		</div>
 		<div class="message-body">
 			$text.bbcode()

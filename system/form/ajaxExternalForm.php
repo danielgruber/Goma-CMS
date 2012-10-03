@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 30.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 08.05.2012
+  * $Version 1.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -29,7 +30,7 @@ class AjaxExternalForm extends FormField
 		 *@param form - external form
 		 *@param form - form for this field
 		*/
-		public function __construct($name = "", $title = null, $value = null, $external = "", $form = null, $code = "")
+		public function __construct($name = "", $title = null, $value = null, $external = "", &$form = null, $code = "")
 		{
 				if(is_object($external))
 					$this->external_form = $external;
@@ -67,7 +68,7 @@ class AjaxExternalForm extends FormField
 					new HTMLNode("div", array(
 						"style" => array("float" => "right"),
 						"class"	=> "edit"
-					), '<a href="'.$this->externalURL().'/render/?redirect='.urlencode(getredirect()).'" title="'.text::protect($this->title).'" rel="bluebox">'.lang("edit").'</a>&nbsp;<img src="images/icons/fatcow-icons/16x16/edit.png" alt="{$_lang_edit}" style="height: 13px; width: 13px;" />'),
+					), '<a href="'.$this->externalURL().'/render/?redirect='.urlencode(getredirect()).'" title="'.convert::raw2text($this->title).'" rel="dropdownDialog[left]" class="button hideClose noAutoHide">'.lang("edit").'</a>'),
 					$this->value,
 					new HTMLNode("div", array(
 						"class"	=> "clear"
@@ -91,9 +92,10 @@ class AjaxExternalForm extends FormField
 					$form->addAction(new Button("cancel", lang("cancel", "Cancel"), "var id = $(this).parents('.bluebox').attr('id').replace('bluebox_','');getblueboxbyid(id).close();"));
 					return $form->render();
 				} else {
-					$form->add(new HTMLField("head","<h1>".text::protect($this->title)."</h1>"), 1);
+					$form->add(new HTMLField("head","<h1>".convert::raw2text($this->title)."</h1>"), 1);
 					$form->addAction(new LinkAction("cancel", lang("cancel"), $this->form()->url));
-					return showSite($form->render(), $this->title);
+					$fronted = new FrontedController();
+					return $fronted->serve($form->render());
 				}
 		}
 		/**

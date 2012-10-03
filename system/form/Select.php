@@ -1,23 +1,45 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 08.09.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.09.2012
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Select extends FormField 
 {
+		/**
+		 * options of this select-field
+		 *
+		 *@name options
+		 *@access public
+		*/
+		public $options;
+		
+		/**
+		 *@name __construct
+		 *@access public
+		 *@param string - name
+		 *@param string - title
+		 *@param array - options
+		 *@param string - selected id
+		 *@param null|object - parent form
+		*/
 		public function __construct($name, $title = null, $options = array(), $selected = null, $parent = null)
 		{
 				$this->options = $options;
 				parent::__construct($name, $title, $selected, $parent);
 		}
+		
 		/**
 		 * creates the node
+		 *
+		 *@name createNode
+		 *@access public
 		*/
 		public function createNode()
 		{
@@ -25,8 +47,21 @@ class Select extends FormField
 				$node->setTag("select");
 				return $node;
 		}
+		
 		/**
-		 * renders the node
+		 * gets the options
+		 *
+		 *@name options
+		 *@access public
+		*/
+		public function options() {
+			$this->callExtending("onBeforeOptions");
+			return $this->options;
+		}
+		
+		/**
+		 * renders the field
+		 *
 		 *@name field
 		 *@access public
 		*/
@@ -41,9 +76,12 @@ class Select extends FormField
 				));
 				
 				$node = $this->input;
-				if(isset($this->options[0])) // this is no associative array
+				
+				$options = $this->options();
+				
+				if(isset($options[0])) // this is no associative array
 				{
-						foreach($this->options as $key => $value)
+						foreach($options as $key => $value)
 						{
 								if(_ereg('^[0-9]+$', $key) && is_numeric($key))
 								{
@@ -71,7 +109,7 @@ class Select extends FormField
 						}
 				} else
 				{
-						foreach($this->options as $key => $value)
+						foreach($options as $key => $value)
 						{
 								if($key == $this->value)
 										$node->append(new HTMLNode('option', array(
@@ -91,6 +129,7 @@ class Select extends FormField
 				
 				return $this->container;
 		}
+		
 		/**
 		 * sets the value
 		 *@name setValue
@@ -98,9 +137,22 @@ class Select extends FormField
 		*/
 		public function setValue()
 		{
-				
 				// we already inserted the value
 		}
+	
+		/**
+		 * validation for security reason
+		 *
+		 *@name validate
+		*/
+		public function validate($value) {
+			if(!isset($this->options[$value])) {
+				return false;
+			}
+		
+			return true;
+		}
+		
 		/**
 		 * adds an option
 		 *@name addOption

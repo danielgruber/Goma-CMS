@@ -1,16 +1,15 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
+  *@subpackage template
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011
-  * Goma-Team
+  *@Copyright (C) 2009 - 2011 Goma-Team
   * last modified: 05.02.2011
 */  
 
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 
 class template extends object
 {
@@ -19,19 +18,13 @@ class template extends object
 		 *@var array - vars
 		 *@access public
 		 */
-        public $vars = array();
+        protected $vars = array();
 		/**
 		 * the ifs
 		 *@var array - ifs
 		 *@access public
 		**/
-		public $ifs = array();
-		/**
-		 * the blockvars
-		 *@var array - blockvars
-		 *@access public
-		**/
-		public $blockvars = array();
+		protected $ifs = array();
 		/**
 		 * this var contains the object
 		 *@var object
@@ -64,7 +57,7 @@ class template extends object
 		public function init($name)
 		{
 				
-		       	return $this->object->customise($this->blockvars, $this->vars)->renderWith($name);
+		       	return $this->object->customise($this->vars)->renderWith($name);
 		}
 		/**
 		 * to init a template
@@ -74,7 +67,6 @@ class template extends object
 		**/
 		public function display($name)
 		{
-				
 		       	return $this->init($name);
 		}
 		/**
@@ -86,7 +78,6 @@ class template extends object
 		 */
 		public function assign($name, $value)
 		{
-				
 		        $this->vars[$name] = $value;
 		}
 		/**
@@ -98,6 +89,6 @@ class template extends object
 		 */
 		public function assign_vars($name, $arr)
 		{
-		        $this->blockvars[$name][] = $arr;
+		        $this->vars[$name][] = $arr;
 		}
 }

@@ -2,8 +2,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 06.11..2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 19.05.2012
 */
 
 self.dropdownDialogs = [];
@@ -56,6 +56,10 @@ self.dropdownDialogs = [];
 		},
 		Init: function() {
 			
+			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
+			
+			var $this = this;
+			
 			// first validate id
 			if(this.elem.attr("id") == undefined) {
 				this.elem.attr("id", "link_dropdown_dialog_" + counter);
@@ -64,13 +68,22 @@ self.dropdownDialogs = [];
 			
 			// second check if an dialog for this element doesnt exist, and if not, create the element
 			if($("#dropdownDialog_" + this.elem.attr("id")).length == 0) {
-				$("body").append('<div id="dropdownDialog_'+this.elem.attr("id")+'" class="dropdownDialog"></div>');
+				getDocRoot().append('<div id="dropdownDialog_'+this.elem.attr("id")+'" class="dropdownDialog windowindex"></div>');
 				this.dropdown = $("#dropdownDialog_" + this.elem.attr("id"));
 				this.dropdown.append('<div><div class="content"></div></div>');
 				this.dropdown.css({
 					display: "none",
 					"position": "absolute"
 				});
+				
+				this.dropdown.find(" > div > .content").resize(function(){
+					$this.definePosition();
+				});
+				
+				$(window).resize(function(){
+					$this.definePosition();
+				});
+				
 				var loading = true;
 			} else {
 				this.dropdown = $("#dropdownDialog_" + this.elem.attr("id"));
@@ -100,6 +113,8 @@ self.dropdownDialogs = [];
 			
 			if(loading)
 				this.setLoading();
+				
+			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
 		},
 		/**
 		 * defines the position of the dropdown
@@ -109,6 +124,8 @@ self.dropdownDialogs = [];
 		 *@param string - position: if to set this.position
 		*/
 		definePosition: function(position) {
+			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
+			
 			if(position != null) {
 	 			this.setPosition(position);
 			}
@@ -145,12 +162,21 @@ self.dropdownDialogs = [];
 				position = this.position;
 			}
 			
+			// validate
+			if(position == "bottom") {
+				var elemtop = this.elem.offset().top;
+				if((elemtop - this.dropdown.height() - 2) < -10)
+					position = "top";
+			}
+			
 			// add position as class
 			this.dropdown.find(" > div").attr("class", "");
 			this.dropdown.find(" > div").addClass("position_" + position);
 			
 			// now move dropdown
 			this.moveDropdown(position);
+			
+			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
 			
 		},
 		/**
@@ -181,6 +207,10 @@ self.dropdownDialogs = [];
 		*/ 
 		moveDropdown: function(position) {
 			
+			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.moveDropdown");
+			
+			this.triangle_position = "center";
+			
 			// first get position of element
 			var elemtop = this.elem.offset().top;
 			var elemleft = this.elem.offset().left;
@@ -189,7 +219,7 @@ self.dropdownDialogs = [];
 			var elemwidth = this.elem.outerWidth();
 
 			
-			this.dropdown.find(" > div > img").remove();
+			this.dropdown.find(" > div > .triangle").remove();
 			
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
@@ -197,10 +227,15 @@ self.dropdownDialogs = [];
 			
 			switch(position) {
 				case "bottom":
+					var positionTop = elemtop - this.dropdown.height() - 2;
+				
 				case "top":
 				case "center":
+
 					
-					var positionTop = elemtop + elemheight - 2;
+					if(typeof positionTop == "undefined")
+						var positionTop = elemtop + elemheight - 2;
+					
 					var positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
 					var contentwidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
@@ -209,11 +244,13 @@ self.dropdownDialogs = [];
 					// check if this is logical
 					if(contentwidth + positionLeft > $(document).width()) {
 						this.triangle_position = "right";
-						var positionLeft = elemleft + elemwidth - contentwidth;
+						var positionLeft = elemleft + elemwidth - contentwidth + 14;
 					}
+					
+					
 					if(positionLeft < 0) {
 						this.triangle_position = "left";
-						var positionLeft = elemleft - 10;
+						var positionLeft = elemleft - 18;
 					}
 						
 					this.dropdown.css({
@@ -251,11 +288,13 @@ self.dropdownDialogs = [];
 			}
 			
 			// now set the triangle
-			this.dropdown.find(" > div").prepend('<img class="position_'+this.triangle_position+'" src="system/templates/images/dropdownDialog/triangle_white_'+position+'.png" alt="" />');
+			this.dropdown.find(" > div").prepend('<div class="triangle_position_'+this.triangle_position+' triangle"><div></div></div>');
 			if(display)
 				this.dropdown.css("display", "block");
 			else
 				this.dropdown.fadeIn("fast");
+			
+			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.moveDropdown");
 		},
 		/**
 		 * sets the dropdown in loading state
@@ -273,6 +312,8 @@ self.dropdownDialogs = [];
 		 *@access public
 		*/ 
 		setContent: function(content) {
+			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.setContent");
+			
 			this.dropdown.find(" > div > .content").css("width", ""); // unlock width
 			// check if string or jquery object
 			if(typeof content == "string")
@@ -284,7 +325,7 @@ self.dropdownDialogs = [];
 			// close-button
 			this.dropdown.find(" > div  > .content > .close").remove();
 			if(!this.elem.hasClass("hideClose") && this.closeButton)
-				this.dropdown.find(" > div > .content > div").prepend('<a class="close" href="javascript:;"></a>');
+				this.dropdown.find(" > div > .content > div").prepend('<a class="close" href="javascript:;">&times;</a>');
 			
 			// closing over elements in dropdown
 			var that = this;
@@ -296,6 +337,10 @@ self.dropdownDialogs = [];
 			// if is shown also now, we we'll move it to the right position
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
+				
+			if(typeof profiler != "undefined") {
+				profiler.unmark("dropdownDialog.setContent");
+			}
 
 		},
 		/**
@@ -309,8 +354,10 @@ self.dropdownDialogs = [];
 			this.dropdown.attr("name", uri);
 			var i;
 			for(i in this.players) {
-				if(this.players[i].regexp.test(this.uri)) {
-					return this.players[i].method(this, this.uri);
+				if(typeof this.players[i] == "object") {
+					if(typeof this.players[i].regexp != "undefined" && this.players[i].regexp.test(this.uri)) {
+						return this.players[i].method(this, this.uri);
+					}
 				}
 			}
 			
@@ -380,24 +427,32 @@ self.dropdownDialogs = [];
 					LoadAjaxResources(jqXHR);
 					var content_type = jqXHR.getResponseHeader("content-type");
 					if(content_type == "text/x-json") {
-						var data = eval_global('('+html+')');
-						var html = data.content;
-						if(data.position != null) {
-							that.position = data.position;
-						}
-						if(data.closeButton != null) {
-							that.closeButton = data.closeButton;
-						}
-						
-						if(typeof data.exec != "undefined") {
-							eval_global('(' + data.exec + ')').call(that);
+						try {
+							var data = eval_global('('+html+')');
+							var html = data.content;
+							if(data.position != null) {
+								that.position = data.position;
+							}
+							if(data.closeButton != null) {
+								that.closeButton = data.closeButton;
+							}
+							that.setContent(html);
+							if(typeof data.exec != "undefined") {
+								eval_global('(' + data.exec + ')').call(that);
+							}
+							
+							
+						} catch(e) {
+							that.setContent("error");
 						}
 					} else if(content_type == "text/javascript") {
 						var method = eval_global('(function() { ' + html + '})');
 						method.call(this);
 						
+					} else {
+						that.setContent(html);
 					}
-					that.setContent(html);
+					
 					RunAjaxResources(jqXHR);
 				}
 			});

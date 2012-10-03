@@ -1,16 +1,23 @@
 <?php
 /**
-  *@package goma framework
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.10.2011
+  * last modified: 29.08.2011
+  * $Version 1.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class HTMLEditor extends Textarea
 {
+		/**
+		 * generates the field
+		 *
+		 *@name field
+		 *@access public
+		*/
 		public function field()
 		{
 				$this->callExtending("beforeField");
@@ -18,7 +25,7 @@ class HTMLEditor extends Textarea
 				$this->setValue();
 				
 				$this->container->append(new HTMLNode("label", array(
-					'for'	=> $this->ID(),"style"	=> "display: block;"
+					'for'	=> $this->ID()
 				), $this->title));
 				
 				$this->container->append(array(
@@ -36,6 +43,13 @@ class HTMLEditor extends Textarea
 				
 				return $this->container;
 		}
+		
+		/**
+		 * generates the JavaScript
+		 *
+		 *@name JS
+		 *@access public
+		*/
 		public function JS()
 		{
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor/";');
@@ -43,7 +57,10 @@ class HTMLEditor extends Textarea
 				Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
 				Resources::addData("var lang_page = '".lang("page")."';");
-
+				
+				$accessToken = randomString(20);
+				$_SESSION["uploadTokens"][$accessToken] = true;
+				
 				$js = '
 $(function(){
 	// apple bug with contenteditable of iOS 4 and lower
@@ -54,10 +71,10 @@ $(function(){
 			if(CKEDITOR.instances.'.$this->input->id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$this->input->id.');
 			CKEDITOR.replace("'.$this->input->id.'", {
         		toolbar : "Goma",
-        		resize_enabled: false,
         		language: "'.Core::getCMSVar("lang").'",
         		baseHref: "'.BASE_URI.'",
-        		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
+        		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/editor.css",
+        		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'"
     		});
     		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 				self.leave_check = false;
@@ -81,10 +98,10 @@ window.toggleEditor_'.$this->input->id.' = function() {
 	} else {
 		CKEDITOR.replace("'.$this->input->id.'", {
     		toolbar : "Goma",
-    		resize_enabled: false,
     		language: "'.Core::getCMSVar("lang").'",
     		baseHref: "'.BASE_URI.'",
     		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
+    		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/"
 		});
 		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 			self.leave_check = false;

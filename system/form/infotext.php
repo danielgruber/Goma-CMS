@@ -15,7 +15,7 @@ class InfoTextField extends Extension {
 	 * adds the info to the field
 	*/
 	public function afterField() {
-		if($this->owner->info)
+		if(isset($this->owner->info) && $this->owner->info)
 			$this->owner->container->append(new HTMLNode("div", array("class" => "info_field"), $this->owner->info));
 		
 	}

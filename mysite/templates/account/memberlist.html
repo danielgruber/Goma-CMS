@@ -1,23 +1,36 @@
+
 <h1>{$_lang_mem_members}</h1>
 $prependedContent
 <div class="memberlist">
 	<% member.activatePagination($_GET_pa); %>
 	<% CONTROL member() %>
 		<div class="member">
-			<div style="float: left;">
+			<div style="float: left;" class="image">
 				<% IF $member.avatar %>
-					<a href="{URL}/{$member.id}{URLEND}">$member.avatar.setSize(50,50)</a>
+					<a href="{URL}/{$member.id}{URLEND}">$member.avatar.setSize(128,128)</a>
 				<% ELSE %>
-					<a href="{URL}/{$member.id}{URLEND}"><img height="50" width="50" src="images/no_avatar.png" alt="no avatar" /></a>
+					<a href="{URL}/{$member.id}{URLEND}"><img height="128" width="128" src="images/no_avatar.png" alt="no avatar" /></a>
 				<% END %>
 					
 			</div>
 			<div class="data">
-				<a href="{URL}/{$member.id}{URLEND}">$member.nickname.text()</a>
+				<a href="{URL}/{$member.id}{URLEND}">
+					<% IF $member.name %>
+						$member.name.text()
+					<% ELSE %>
+						$member.nickname.text()
+					<% END %>
+				</a>
+				<span>
+					<% IF $member.name %>
+						$member.nickname.text()
+					<% END %>
+				</span>
 			</div>
 			<div class="clear"></div>
 		</div>
 	<% ENDCONTROL %>
+	<div class="clear"></div>
 	<div class="pages">
 		<% lang("page", "Page") %>
 		<% CONTROL member.pages() %>

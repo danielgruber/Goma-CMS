@@ -1,21 +1,22 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 18.05.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.02.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class CancelButton extends FormAction {
-		public function createNode()
-		{
-				$node = parent::createNode();
-				$node->onClick = $this->js;
-				return $node;
-		}
+		/**
+		 * the javascript for this button on cancel
+		 *
+		 *@name js
+		 *@access public
+		*/
+		public $js;
 		/**
 		 *@name __construct
 		 *@access public
@@ -24,11 +25,22 @@ class CancelButton extends FormAction {
 		 *@param string - optional submission
 		 *@param object - form
 		*/
-		public function __construct($name, $value, $redirect = null, $js = "", $form = null)
+		public function __construct($name, $value, $redirect = null, $js = "", &$form = null)
 		{
 				$this->js = $js;
-				parent::__construct($name, $value, null, null);
+				parent::__construct($name, $value);
 				$this->redirect = ($redirect === null) ? getredirect() : $redirect;
+		}
+		/**
+		 * creates the node
+		 *
+		 *@name createNodes
+		*/
+		public function createNode()
+		{
+				$node = parent::createNode();
+				$node->onClick = $this->js;
+				return $node;
 		}
 		/**
 		 * just don't let the system submit and redirect back

@@ -16,7 +16,7 @@
  * @example example-read-02.php Read a Binary PropertyList
  * @example example-read-03.php Read a PropertyList without knowing the type
  */
-abstract class CFBinaryPropertyList {
+abstract class CFBinaryPropertyList extends Object {
   /**
    * Content of the plist (unparsed string)
    * @var string

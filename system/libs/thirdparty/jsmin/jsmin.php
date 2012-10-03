@@ -45,7 +45,7 @@
 * @link http://code.google.com/p/jsmin-php/
 */
 
-class JSMin {
+class JSMin extends Object {
   const ORD_LF = 10;
   const ORD_SPACE = 32;
 

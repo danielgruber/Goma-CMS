@@ -1,5 +1,5 @@
 <h1><% lang("search.search", "Search") %></h1>
-$prependedContent
+<% INCLUDE_CSS "search.css" %>
 <div class="searchbox">
 	<form method="get" action="">
 		<input type="text" name="q" value="{$word}" /> <input type="submit" value="<% lang("search.search", "Search") %>" class="button" />
@@ -28,4 +28,3 @@ $prependedContent
 		<% lang("search.no_word", "Please insert a word") %>
 	<% END %>
 </div>
-$appendedContent

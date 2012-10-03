@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 21.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.09.2012
+  * $Version 2.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -18,31 +19,41 @@ class FormField extends RequestHandler
 		 *@access public
 		*/
 		public $randomKey = "";
+		
 		/**
 		 * this var defines if the value of $this->form()->post[$name] should be set as value if it is set
+		 *
 		 *@name POST
 		 *@access protected
 		*/
 		protected $POST = true;
+		
 		/**
 		 * data of this field
+		 *
 		 *@name data
 		 *@access public
 		*/
 		private $data = array();
+		
 		/**
 		 * the parent field of this field, e.g. a form or a fieldset
+		 *
+		 *@name parent
 		 *@access protected
 		*/
 		protected $parent;
+		
 		/**
 		 * this var contains the node-object of the input-element
+		 *
 		 *@see HTMLNode
 		 *@name input
 		 *@access public
 		 *@var object
 		*/
 		public $input;
+		
 		/**
 		 * this var contains the container
 		 *@see HTMLNode
@@ -53,10 +64,50 @@ class FormField extends RequestHandler
 		public $conatiner;
 		
 		public $url_handlers = array(
-			'$Action/$id/$otherid'	=> '$Action'
+			'$Action//$id/$otherid'	=> '$Action'
 		);
 		
+		/**
+		 * value
+		 *
+		 *@name value
+		 *@access public
+		*/
+		public $value;
+		
+		/**
+		 * name of this field
+		 *
+		 *@name name
+		 *@access public
+		*/
 		public $name;
+		
+		/**
+		 * overrides the post-name
+		 *
+		 *@name overridePostName
+		 *@access public
+		*/
+		public $overridePostName;
+		
+		/**
+		 * defines if this field is disabled
+		 *
+		 *@name disabled
+		 *@access public
+		*/
+		public $disabled = false;
+		
+		/**
+		 * defines if this field should use the full width or not
+		 * this is good, for example for textarea or something else to get correct position of info and label-area
+		 *
+		 *@name fullSizedField
+		 *@access public
+		*/
+		protected $fullSizedField = false;
+		
 		/**
 		 *@name __construct
 		 *@param string - name
@@ -64,7 +115,7 @@ class FormField extends RequestHandler
 		 *@param mixed - value
 		 *@param object - form
 		*/
-		public function __construct($name = null, $title = null, $value = null, $parent = null)
+		public function __construct($name = null, $title = null, $value = null, &$parent = null)
 		{
 				parent::__construct();
 				
@@ -75,7 +126,7 @@ class FormField extends RequestHandler
 				$this->name = $name;
 				$this->title = $title;
 				$this->value = $value;
-				$this->parent = $parent;
+				$this->parent =& $parent;
 				if($parent)
 				{
 						$this->form()->fields[$name] = $this;
@@ -98,11 +149,13 @@ class FormField extends RequestHandler
 					"class"	=> "form_field ". $this->class ." form_field_".$name.""
 				));
 				
+				if($this->fullSizedField)
+					$this->container->addClass("fullSize");
+				
 				if($this->parent)
 					$this->renderAfterSetForm();
-				
-				
 		}
+		
 		/**
 		 * creates the Node
 		 *@name createNode
@@ -111,11 +164,12 @@ class FormField extends RequestHandler
 		public function createNode()
 		{
 				return new HTMLNode("input", array(
-					'name'	=> $this->name,
+					'name'	=> $this->PostName(),
 					"class"	=> "input",
 					"type"	=> "text"
 				));
 		}
+		
 		/**
 		 * sets the value
 		 *@name setValue
@@ -123,8 +177,10 @@ class FormField extends RequestHandler
 		*/
 		public function setValue()
 		{
+			if(($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->class, "__toString"))))
 				$this->input->val($this->value);
 		}
+		
 		/**
 		 * renders the field
 		 *@name field
@@ -152,6 +208,7 @@ class FormField extends RequestHandler
 				
 				return $this->container;
 		}
+		
 		/**
 		 * field function for mobile version
 		 *
@@ -161,6 +218,7 @@ class FormField extends RequestHandler
 		public function mobileField() {
 			return $this->field();
 		}
+		
 		/**
 		 * this function generates some JavaScript for this formfield
 		 *@name js
@@ -170,6 +228,7 @@ class FormField extends RequestHandler
 		{
 				return "";
 		}
+		
 		/**
 		 * this function generates some JavaScript for the validation of the field
 		 *@name jsValidation
@@ -179,8 +238,10 @@ class FormField extends RequestHandler
 		{
 				return "";
 		}
+		
 		/**
 		 * this is the validation for this field if it is required
+		 *
 		 *@name validation
 		 *@access public
 		*/
@@ -188,6 +249,7 @@ class FormField extends RequestHandler
 		{
 				return true;
 		}
+		
 		/**
 		 * this function returns the result of this field
 		 *@name result
@@ -195,12 +257,12 @@ class FormField extends RequestHandler
 		*/
 		public function result()
 		{
-			
 			if($this->disabled)
 				return $this->value;
 			else
-				return isset($this->form()->post[$this->name]) ? $this->form()->post[$this->name] : null;
+				return isset($this->form()->post[$this->PostName()]) ? $this->form()->post[$this->PostName()] : null;
 		}
+		
 		/**
 		 * sets the parent form-object
 		 *@name setForm
@@ -210,41 +272,51 @@ class FormField extends RequestHandler
 		{
 				if(is_object($form))
 				{
-						$this->parent = $form;
-						$this->form()->fields[$this->name] = $this;
+						$this->parent =& $form;
+						
+						if($this->form()->state)
+							$this->state = $this->form()->state->{$this->class . $this->name};
+						
+						$this->form()->registerField($this->name, $this);
+						if(is_object($this->input))
+							$this->input->name = $this->PostName();
+						
 						$this->getValue();
 						$this->renderAfterSetForm();
 						
-				}
-				else
+				} else
 						throwError(6, 'PHP-Error', '$form is no object in '.__FILE__.' on line '.__LINE__.'');
 		}
+		
 		/**
 		 * gets value if is in result or post-data
+		 *
+		 *@name getValue
+		 *@access public
 		*/
 		public function getValue() {
-			
-			
-			
-			if(!$this->disabled && $this->POST && isset($this->form()->post[$this->name])) {
-				$this->value = $this->form()->post[$this->name];
-			} else if($this->POST && $this->value == null && isset($this->form()->result[$this->name]) && is_object($this->form()->result)) {
-				$this->value = ($this->form()->result->doObject($this->name)) ? $this->form()->result->doObject($this->name)->raw() : null;
-			} else if($this->POST && $this->value == null && isset($this->form()->result[$this->name]))
-				$this->value = $this->form()->result[$this->name];
-				
-			
-				
-			
-
+			if(!isset($this->hasNoValue) || !$this->hasNoValue) {
+				if(!$this->disabled && $this->POST && isset($this->form()->post[$this->PostName()])) {
+					$this->value = $this->form()->post[$this->PostName()];
+				} else if($this->POST && $this->value == null && is_object($this->form()->result) && is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->name])) {
+					$this->value = ($this->form()->result->doObject($this->name)) ? $this->form()->result->doObject($this->name)->raw() : null;
+				} else if($this->POST && $this->value == null && is_array($this->form()->result) && isset($this->form()->result[$this->name])) {
+					$this->value = $this->form()->result[$this->name];
+				}
+			}
 		}
+		
 		/**
 		 * renders some field contents after setForm
+		 *
+		 *@name renderAfterSetForm
+		 *@access public
 		*/
 		public function renderAfterSetForm() {
 			if(is_object($this->input)) $this->input->id = $this->ID();
 			if(is_object($this->container)) $this->container->id = $this->divID();
 		}
+		
 		/**
 		 * removes this field
 		 *@name remove
@@ -252,8 +324,9 @@ class FormField extends RequestHandler
 		*/
 		public function remove()
 		{
-				unset($this->form()->fields[$this->name]);
+				$this->form()->unregisterField($this->name);
 		}
+		
 		/**
 		 * generates an id for the field
 		 *@name id
@@ -261,12 +334,9 @@ class FormField extends RequestHandler
 		*/
 		public function ID()
 		{
-				if(Core::is_ajax()) {
-					return "form_field_" .  $this->class . "_" . md5($this->form()->name . $this->title) . "_" . $this->name . "_ajax";
-				} else {
-					return "form_field_" .  $this->class . "_" . md5($this->form()->name . $this->title) . "_" . $this->name . "_ajax";
-				}
+			return "form_field_" .  $this->class . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
 		}
+		
 		/**
 		 * generates an id for the div
 		 *@name divID
@@ -276,58 +346,28 @@ class FormField extends RequestHandler
 		{
 				return $this->ID() . "_div";
 		}
+		
 		/**
 		 * the url for ajax
+		 *
+		 *@name externalURL
+		 *@access public
 		*/
 		public function externalURL()
 		{
-				return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->form()->name . "/" . $this->name;
+				return $this->form()->externalURL() . "/" . $this->name;
 		}
-		/**
-		 * Overloading
-		*/
 		
 		/**
-		 * get
-		 *@name __get
+		 * returns the post-name
+		 *
+		 *@name PostName
 		 *@access public
 		*/
-		public function __get($offset)
-		{
-				// patching
-				if (isset($this->data[$offset]) && is_array($this->data[$offset])) {
-					return (array) $this->data[$offset];
-        		}
-				return (isset($this->data[$offset])) ? $this->data[$offset] : false;
+		public function PostName() {
+			return isset($this->overridePostName) ? $this->overridePostName : $this->name;
 		}
-		/**
-		 * set
-		 *@name __set
-		 *@access public
-		*/
-		public function __set($offset, $value)
-		{
-			
-				$this->data[$offset] = $value;
-		}
-		/**
-		 * isset
-		 *@name __isset
-		 *@access public
-		*/
-		public function __isset($offset)
-		{
-				return (isset($this->data[$offset]));
-		}
-		/**
-		 * unset
-		 *@name __unset
-		 *@access public
-		*/
-		public function __unset($offset)
-		{
-				unset($this->data[$offset]);
-		}
+		
 		/**
 		 * returns the current real form-object
 		 *@name form
@@ -335,9 +375,10 @@ class FormField extends RequestHandler
 		*/
 		public function &form()
 		{
-				if(is_object($this->parent))
-						return $this->parent->form();
-				else {
+				if(is_object($this->parent)) {
+						$data =& $this->parent->form();
+						return $data;
+				} else {
 						$debug = debug_backtrace(false);
 						throwError(6,'PHP-Error', 'No Form for Field '.$this->class.' in '.$debug[0]["file"].' on line '.$debug[0]["line"].'');
 				}
@@ -345,6 +386,9 @@ class FormField extends RequestHandler
 		
 		/**
 		 * disables this field
+		 *
+		 *@name disable
+		 *@access public
 		*/
 		public function disable()
 		{
@@ -353,6 +397,7 @@ class FormField extends RequestHandler
 				
 			$this->disabled = true;
 		}
+		
 		/**
 		 * reenables the field
 		 *@name enable
@@ -362,5 +407,16 @@ class FormField extends RequestHandler
 		{
 				unset($this->input->disabled);
 				$this->disabled = false;
+		}
+		
+		/**
+		 * creates a HTMLNode
+		 *
+		 *@name createTag
+		 *@access public
+		*/
+		public function createTag($tag, $attr, $content) {
+			$node = new HTMLNode($tag, $attr, $content);
+			return $node->render();
 		}
 }

@@ -3,14 +3,15 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 31.10.2011
-  * $Version 001
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 29.08.2012
+  * $Version 1.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::addSaveVar("Backup", "excludeList");
+ClassInfo::addSaveVar("Backup", "fileExcludeList");
 
 class Backup extends Object {
 	/**
@@ -20,6 +21,15 @@ class Backup extends Object {
 	 *@access public
 	*/
 	public static $excludeList = array("statistics", "statistics_state");
+	
+	/**
+	 * excludes files
+	 *
+	 *@name fileExcludeList
+	 *@access public
+	*/
+	public static $fileExcludeList = array("/uploads/d05257d352046561b5bfa2650322d82d","temp", "/backups", "/config.php", "/backup");
+	
 	/**
 	 * generates a database-backup
 	 *
@@ -39,6 +49,7 @@ class Backup extends Object {
 		$dict->add("type", new CFString("backup"));
 		$dict->add("backuptype", new CFString("SQLBackup"));
 		$dict->add("foldername", new CFString(APPLICATION));
+		$dict->add("created", new CFDate(NOW));
 		
 		$td = new CFTypeDetector();  
 		$excludeListPlist = $td->toCFType( $excludeList );
@@ -49,84 +60,89 @@ class Backup extends Object {
 		
 		foreach(ClassInfo::$database as $table => $fields)
 		{
-			if(!in_array($table, $excludeList)) {
-				$tables->add(new CFString($table));
-				$data = "-- Table ".$table . "\n\n";
+			
+			$tables->add(new CFString($table));
+			$data = "-- Table ".$table . "\n\n";
+			
+			// exclude drop
+			if(!in_array($table, $excludeList))
 				$data .= "DROP TABLE IF EXISTS ".$prefix.$table.";\n";
-				
-				// Create table
-				$data .= "  -- Create \n";
-				$sql = "DESCRIBE ".DB_PREFIX."".$table."";
-				if($result = sql::query($sql)){
-						$num = sql::num_rows($result);
-						$end = 0;
-						$data .= "CREATE TABLE ".$prefix.$table . " (\n";
-						
-						// get all fields
-						while($array = sql::fetch_array($result))
-						{
-								$tab_name = '`'.$array["Field"].'`';
-								$tab_type = $array["Type"];
-								$tab_null = " NOT NULL";
-								$tab_default = (empty($array["Default"])) ? "" : " DEFAULT '" . $array["Default"] . "'";
-								$tab_extra = (empty($array["Extra"])) ? "" : " " . $array["Extra"];
-								$end++;
-								$tab_komma = ($end<$num) ? ",\n" : "";
-								$data .= " " . $tab_name . " " . $tab_type . $tab_null . $tab_default . $tab_extra . $tab_komma;
-						}
-				}
-				
-				// indexes
-				$keyarray = array();
-				$sql = "SHOW KEYS FROM ".DB_PREFIX."".$table;
-				if($result = sql::query($sql))
-				{
-						while($info = sql::fetch_array($result))
-						{
-								$keyname = $info["Key_name"];
-								$comment = (isset($info["Comment"])) ? $info["Comment"] : "";
-								$sub_part = (isset($info["Sub_part"])) ? $info["Sub_part"] : "";
-								if($keyname != "PRIMARY" && $info["Non_unique"] == 0) 
-								{
-										$keyname = "UNIQUE `".$keyname."`";
-								}
-								if($comment == "FULLTEXT") 
-								{
-										$keyname="FULLTEXT `".$keyname."`";
-								}
-								if(!isset($keyarray[$keyname])) 
-								{
-										$keyarray[$keyname] = array();
-								}
-								$keyarray[$keyname][] = ($sub_part > 1) ? $info["Column_name"] . "(" . $sub_part . ")" : $info["Column_name"];
+			
+			// Create table
+			$data .= "  -- Create \n";
+			$sql = "DESCRIBE ".DB_PREFIX."".$table."";
+			if($result = sql::query($sql)){
+					$num = sql::num_rows($result);
+					$end = 0;
+					$data .= "CREATE TABLE IF NOT EXISTS ".$prefix.$table . " (\n";
+					
+					// get all fields
+					while($array = sql::fetch_array($result))
+					{
+							$tab_name = '`'.$array["Field"].'`';
+							$tab_type = $array["Type"];
+							$tab_null = " NOT NULL";
+							$tab_default = (empty($array["Default"])) ? "" : " DEFAULT '" . $array["Default"] . "'";
+							$tab_extra = (empty($array["Extra"])) ? "" : " " . $array["Extra"];
+							$end++;
+							$tab_komma = ($end<$num) ? ",\n" : "";
+							$data .= " " . $tab_name . " " . $tab_type . $tab_null . $tab_default . $tab_extra . $tab_komma;
+					}
+			}
+			
+			// indexes
+			$keyarray = array();
+			$sql = "SHOW KEYS FROM ".DB_PREFIX."".$table;
+			if($result = sql::query($sql))
+			{
+					while($info = sql::fetch_array($result))
+					{
+							$keyname = $info["Key_name"];
+							$comment = (isset($info["Comment"])) ? $info["Comment"] : "";
+							$sub_part = (isset($info["Sub_part"])) ? $info["Sub_part"] : "";
+							if($keyname != "PRIMARY" && $info["Non_unique"] == 0) 
+							{
+									$keyname = "UNIQUE `".$keyname."`";
+							}
+							if($comment == "FULLTEXT") 
+							{
+									$keyname="FULLTEXT `".$keyname."`";
+							}
+							if(!isset($keyarray[$keyname])) 
+							{
+									$keyarray[$keyname] = array();
+							}
+							$keyarray[$keyname][] = ($sub_part > 1) ? $info["Column_name"] . "(" . $sub_part . ")" : $info["Column_name"];
 
-						} // endwhile
-						if(is_array($keyarray)) 
-						{
-								foreach($keyarray as $keyname => $columns) 
-								{
-										$data .= ",\n";
-										if($keyname == "PRIMARY") 
-										{
-												$data .= "PRIMARY KEY (";
-										} else if(substr($keyname, 0, 6) == "UNIQUE") {
-										
-												$data .= "UNIQUE " . substr($keyname, 7) . " (";
-										} else if(substr($keyname, 0, 8) == "FULLTEXT") 
-										{
-												$data .= "FULLTEXT " . substr($keyname, 9) . " (";
-										} else 
-										{
-												$data .= "KEY `" . $keyname . "` (";
-										}
-										$data .= implode($columns, ", ") . ")";
+					} // endwhile
+					if(is_array($keyarray)) 
+					{
+							foreach($keyarray as $keyname => $columns) 
+							{
+									$data .= ",\n";
+									if($keyname == "PRIMARY") 
+									{
+											$data .= "PRIMARY KEY (";
+									} else if(substr($keyname, 0, 6) == "UNIQUE") {
+									
+											$data .= "UNIQUE " . substr($keyname, 7) . " (";
+									} else if(substr($keyname, 0, 8) == "FULLTEXT") 
+									{
+											$data .= "FULLTEXT " . substr($keyname, 9) . " (";
+									} else 
+									{
+											$data .= "KEY `" . $keyname . "` (";
+									}
+									$data .= implode($columns, ", ") . ")";
 
-								}    // end foreach
-						}   // end if
+							}    // end foreach
+					}   // end if
 
-						$data .= ");\n";
-						$data .= "\n";
-				}
+					$data .= ");\n";
+					$data .= "\n";
+			}
+			
+			if(!in_array($table, $excludeList)) {
 				
 				// values
 				$sql = "SELECT * FROM `".DB_PREFIX."".$table."`";
@@ -145,6 +161,7 @@ class Backup extends Object {
 										{
 												$row[$key] = str_replace(array("\n\r", "\n", "\r"), '\n', $value);
 												$row[$key] = addSlashes($row[$key]);
+												$row[$key] = str_replace(APPLICATION, '{!#CURRENT_PROJECT}', $row[$key]);
 										}
 										if($i == 0)
 										{
@@ -161,13 +178,15 @@ class Backup extends Object {
 				{
 						throwErrorById(3);
 				}
-				
-				$gfs->addFile("database/" . $table . ".sql", $data);
-				unset($data);
+			
 			}
+			
+			$gfs->addFile("database/" . $table . ".sql", $data);
+			unset($data);
+		
 		}
 		
-		$gfs->addFile("info.plist", $plist->toXML());
+		$gfs->write("info.plist", $plist->toXML());
 		$gfs->close();
 		return $file;
 	}
@@ -179,12 +198,19 @@ class Backup extends Object {
 	*/
 	public static function generateFileBackup($file, $excludeList = array(), $includeTPL = true) {
 		$backup = new GFS_Package_Creator($file);
+		
+		// for converting the PHP-Array to a plist-structure
+		$detector = new CFTypeDetector();
+		
 		$plist = new CFPropertyList();
 		$plist->add($dict = new CFDictionary());
 		$dict->add("type", new CFString("backup"));
+		$dict->add("name", new CFString(ClassInfo::$appENV["app"]["name"]));
 		$dict->add("created", new CFDate(NOW));
-		$dict->add("backuptype", new CFString("filesonly"));
+		$dict->add("backuptype", new CFString("files"));
 		$dict->add("templates", $templates = new CFArray());
+		$dict->add("framework_version", new CFString(GOMA_VERSION . "-" . BUILD_VERSION));
+		$dict->add("appENV", $detector->toCFType(ClassInfo::$appENV["app"]));
 		
 		foreach(scandir(ROOT . "tpl/") as $template) {
 			if($template != "." && $template != ".." && is_dir(ROOT . "tpl/" . $template)) {
@@ -197,10 +223,38 @@ class Backup extends Object {
 		$dict->add("excludedFiles", $excludeListPlist);
 		
 		
-		$backup->addFile("info.plist", $plist->toXML());
-		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(array("temp", "/backups", "/log", "/config.php", "/backup"), $excludeList));
-		if($includeTPL)
-			$backup->add(ROOT . "tpl/", "/templates/", $excludeList);
+		$backup->write("info.plist", $plist->toXML());
+		$backup->setAutoCommit(false);
+		
+		if($includeTPL) {
+			$plist = new CFPropertyList();
+			foreach(scandir(ROOT . "tpl/") as $file) {
+				
+				// first validate if it looks good
+				if($file != "." && $file != ".." && file_exists(ROOT . "tpl/".$file."/info.plist")) {
+					
+					// then validate properties
+					$plist->load(ROOT . "tpl/".$file."/info.plist");
+					$info = $plist->ToArray();
+					
+					if(isset($info["type"]) && $info["type"] == "Template") {
+						if(!isset($info["requireApp"]) || $info["requireApp"] == ClassInfo::$appENV["app"]["name"]) {
+							if(!isset($info["requireAppVersion"]) || version_compare($info["requireAppVersion"], ClassInfo::appVersion(), "<=")) {
+								if(!isset($info["requireFrameworkVersion"]) || version_compare($info["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
+									$backup->add(ROOT . "tpl/" . $file . "/", "/templates/" . $file, $excludeList);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if(defined("LOG_FOLDER"))
+			self::$fileExcludeList[] = "/" . LOG_FOLDER;
+		
+		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::$fileExcludeList, $excludeList));
+		$backup->commit();
 		
 		$backup->close();
 		return true;
@@ -212,20 +266,43 @@ class Backup extends Object {
 	 *@name generateBackup
 	 *@access public
 	*/
-	public static function generateBackup($file, $excludeList = array(), $excludeSQLList = array(), $SQLprefix = DB_PREFIX, $includeTPL = true) {
-		self::generateFileBackup($file, $excludeList, $includeTPL);
+	public static function generateBackup($file, $excludeList = array(), $excludeSQLList = array(), $SQLprefix = DB_PREFIX, $includeTPL = true, $framework = null, $changelog = null) {
+		if(GFS_Package_Creator::wasPacked() && isset($_SESSION["backup"]) && GFS_Package_Creator::wasPacked($_SESSION["backup"])) {
+			$file = $_SESSION["backup"];
+		} else {
+			$_SESSION["backup"] = $file;
+			self::generateFileBackup($file, $excludeList, $includeTPL);
+		}
 		$DBfile = self::generateDBBackup(ROOT . CACHE_DIRECTORY ."/database.sgfs", $SQLprefix, $excludeSQLList);
 		$backup = new GFS($file);
 		$backup->addFromFile($DBfile,basename($DBfile));
 		@unlink($DBfile);
 		unset($sql);
+		
+		// for converting the PHP-Array to a plist-structure
+		$td = new CFTypeDetector();
+		
 		$plist = new CFPropertyList();
 		$plist->add($dict = new CFDictionary());
 		$dict->add("type", new CFString("backup"));
 		$dict->add("created", new CFDate(NOW));
 		$dict->add("backuptype", new CFString("full"));
+		$dict->add("name", new CFString(ClassInfo::$appENV["app"]["name"]));
+		$dict->add("version", new CFString(ClassInfo::appVersion()));
 		
-		$td = new CFTypeDetector();  
+		// append changelog
+		if(isset($changelog))
+			$dict->add("changelog", new CFString($changelog));
+		
+		// append framework-version we need
+		if(!isset($framework))
+			$dict->add("framework_version", new CFString(GOMA_VERSION . "-" . BUILD_VERSION));
+		else
+			$dict->add("framework_version", new CFString($framework));
+		
+		// append current appENV
+		$dict->add("appENV", $td->toCFType(ClassInfo::$appENV["app"]));
+		
 		$excludeListPlist = $td->toCFType( $excludeList );
 		$dict->add("excludedFiles", $excludeListPlist);
 		
@@ -236,8 +313,7 @@ class Backup extends Object {
 		$dict->add("DB_PREFIX", new CFString($SQLprefix));
 		
 		$backup->write("info.plist", $plist->toXML());
-		
+		$backup->close();
 		unset($plist);
 	}
 }
-

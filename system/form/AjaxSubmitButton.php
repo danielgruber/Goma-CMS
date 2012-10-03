@@ -1,17 +1,25 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 04.10.2011
-  * $Version 2.0.0 - 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.09.2012
+  * $Version 2.1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class AjaxSubmitButton extends FormAction
 {
+		/**
+		 * the action for ajax-submission
+		 *
+		 *@name ajaxsubmit
+		 *@acccess protected
+		*/
+		protected $ajaxsubmit;
+		
 		/**
 		 *@name __construct
 		 *@access public
@@ -21,10 +29,10 @@ class AjaxSubmitButton extends FormAction
 		 *@param string - optional submission
 		 *@param object - form
 		*/
-		public function __construct($name = "", $value = "", $ajaxsubmit = null, $submit = null, $form = null)
+		public function __construct($name = "", $value = "", $ajaxsubmit = null, $submit = null, $classes = null, &$form = null)
 		{
 				
-				parent::__construct($name, $value, null, null);
+				parent::__construct($name, $value, null, $classes);
 				if($submit === null)
 						$submit = "@default";
 				
@@ -32,11 +40,11 @@ class AjaxSubmitButton extends FormAction
 				$this->ajaxsubmit = $ajaxsubmit;
 				if($form != null)
 				{
-						$this->parent = $form;
+						$this->parent =& $form;
 						$this->setForm($form);
-				}
-				
+				}	
 		}
+		
 		/**
 		 * generates the js
 		 *@name js
@@ -44,10 +52,12 @@ class AjaxSubmitButton extends FormAction
 		*/
 		public function js()
 		{
-				if(isset($_GET["boxid"]))
-						$boxid =  '+ "?boxid='.convert::raw2js($_GET["boxid"]).'&redirect='.urlencode(getRedirect()).'"';
-				else
-						$boxid = ' + "?redirect='.urlencode(getRedirect()) . '"';
+				// appendix to the url
+				$append = ' + "?redirect='.urlencode(getRedirect()) . '"';
+				foreach($_GET as $key => $val) {
+					$append .= ' + "&'.urlencode($key).'='.urlencode($val).'"';
+				}
+				
 				Resources::addData('var url_'.$this->name.' = "'.$this->externalURL().'/";');
 				return '$(function(){
 					var button = $("#'.$this->ID().'");
@@ -68,7 +78,7 @@ class AjaxSubmitButton extends FormAction
 						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
 						$("body").css("cursor", "wait");
 						$.ajax({
-							url: url_'.$this->name.''.$boxid.',
+							url: url_'.$this->name.''.$append.',
 							type: "post",
 							data: $("#'.$this->form()->id().'").serialize(),
 							dataType: "html",
@@ -78,9 +88,15 @@ class AjaxSubmitButton extends FormAction
 								$("body").css("cursor", "auto");
 								container.find(".loading").remove();
 								button.css("display", "inline");
+								
+								var eventb = jQuery.Event("ajaxresponded");
+								$("#'.$this->form()->id().'").trigger(eventb);
 							},
 							success: function(script) {
-								var method = eval("(function(){" + script + "});");
+								 if (window.execScript)
+								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
+								 else
+								 	method = eval("(function(){" + script + "});");
 								return method.call($("#'.$this->form()->id().'").get(0));
 							},
 							error: function(jqXHR, textStatus, errorThrown)
@@ -92,6 +108,7 @@ class AjaxSubmitButton extends FormAction
 					});
 				});';
 		}
+		
 		/**
 		 * handles submits via AJAX
 		 *@name handleRequest
@@ -133,8 +150,6 @@ class AjaxSubmitButton extends FormAction
 		*/
 		public function submit()
 		{
-				
-				
 				$response = new AjaxResponse;
 				$response->exec('$("#' . $this->form()->ID() . '").find(".error").remove();');
 				$response->exec('var ajax_button = $("#'.$this->ID().'");');
@@ -148,6 +163,10 @@ class AjaxSubmitButton extends FormAction
 				
 				foreach($form->fields as $field)
 				{
+						// patch for correct behaviour on non-ajax and ajax-side
+						$field->getValue();
+						
+						// now get results
 						$result = $field->result();
 						if($result !== null)
 						{
@@ -155,8 +174,6 @@ class AjaxSubmitButton extends FormAction
 								$allowed_result[$field->name] = true;
 						}
 				}
-
-				
 				
 				// validation
 				$valid = true;
@@ -183,7 +200,6 @@ class AjaxSubmitButton extends FormAction
 				
 				if($valid !== true)
 				{
-						
 						$response->prepend("#" . $form->ID(), $errors->render());
 						return $response->render();
 				}
@@ -216,7 +232,42 @@ class AjaxSubmitButton extends FormAction
 					$result = call_user_func_array($callback, array($result));
 				}
 				
-				return $form->controller->$submission($result, $response, $form);
+
+				return call_user_func_array(array($form->controller, $submission), array($result, $response, $form));
+		}
+		
+		/**
+		 * sets the submit-method and ajax-submit-method
+		 *
+		 *@name setSubmit
+		 *@access public
+		 *@param string - submit
+		 *@param string - ajaxsubmit
+		*/
+		public function setSubmit($submit, $ajaxsubmit = null) {
+			$this->submit = $submit;
+			if(isset($ajaxsubmit))
+				$this->ajaxsubmit = $ajaxsubmit;
+		}
+		
+		/**
+		 * returns the submit-method
+		 *
+		 *@name getSubmit
+		 *@access public
+		*/
+		public function getSubmit() {
+			return $this->submit;
+		}
+		
+		/**
+		 * returns the ajax-submit-method
+		 *
+		 *@name getAjaxSubmit
+		 *@access public
+		*/
+		public function getAjaxSubmit() {
+			return $this->ajaxsubmit;
 		}
 }
 

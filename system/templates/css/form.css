@@ -1,9 +1,10 @@
 /**
-  *@package goma
+  *@package goma framework
+  *@subpacke css
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 10.12.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 18.01.2012
 */
 
 form { 
@@ -11,25 +12,24 @@ form {
 }
 fieldset { 
 	border: 0; 
-	margin: 0; 
+	margin: 5px 0; 
 	padding: 0; 
 }
 
-
-.form_field > label
-{
-	font-weight: bold;
-	color: #222;
-	display: inline-block;
-	width: 250px;
-	padding: 3px;
-}
 .dropdown_widget {
 	clear: both;
 }
 
+.form_field.hiddenfield {
+	padding: 0;
+	margin: 0;
+}
 .form_field {
 	padding: 4px;
+}
+.form_field > label {
+	font-weight: bold;
+	width: 250px;
 }
 /*.one {
 	
@@ -43,9 +43,6 @@ fieldset {
 .form_field > .fieldinfo {
 	padding-left: 265px;
 	color: #444;
-}
-.form_field {
-	padding-bottom: 4px;
 }
 .form_field > .err {
 	padding-left: 265px;
@@ -68,109 +65,46 @@ fieldset {
 	border-top: 1px solid #ccc;
 }
 
-/* fileupload */
-
-.FileUpload_left {
-	width: 158px;
-	padding: 5px;
-	margin-right: 7px;
-}
-
-.FileUpload_left .icon a .img {
+/* full-sized-fields */
+.form_field.fullSize > label {
 	display: block;
-	padding: 6px;
-	margin: auto;
-	width: 128px;
-	height: 128px;
-	margin-bottom: 8px;
 }
-
-.FileUpload_left .icon a .img img {
-	margin: auto;
-	max-width: 128px;
-	max-height: 128px;
+.form_field.fullSize > .fieldInfo, .form_field.fullSize > .err {
+	padding-left: 4px !important;
 }
 
 
-.FileUpload_left .icon a span {
-	padding: 4px;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	line-height: 20px;
-	word-wrap: break-word;
+.tabs > .tab > h2 {
+	display: none;
 }
 
-.FileUpload_left .icon a {
-	text-decoration: none !important;
-}
-.FileUpload_left .icon:hover a span {
-	background: #444;
-	color: #eee;
-}
+/* captcha */
 
-.FileUpload_left .icon:hover a .img {
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	background: #777;
+.form_field_captcha > label {
+	margin-top: 60px;
 }
-
-
-.FileUpload_left .icon {
-	width: 150px;
-	text-align: center;
-	border: 1px solid #ccc;
-	padding: 7px;
-	position: relative;
-}
-
-.FileUpload_left .icon .loading {
-	opacity: .7;
-	background: url(../../../images/loading.gif) no-repeat 50% 50%;
-}
-
-.FileUpload_left .progressbar {
-	margin: 4px 0px;
-	width: 157px;
-	height: 20px;
-	border: 1px solid #999;
-	background: #eee;
-	position: relative;
-}
-
-.FileUpload_left .icon.active {
-	background: #eee;
-}
-
-.FileUpload_left .icon.beforeDrop {
+.form_field_captcha > div {
+	margin-left: 260px;
+	margin-top: -85px;
+	width: 250px;
 	background: #ddd;
+	border: 1px solid #999;
+	padding: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+.form_field_captcha > div img {
+	display: block;
+	margin: 5px;
 }
 
-.FileUpload_left .progressbar .progress {
-	height: 20px;
-	background: url(images/progress.png) repeat-x;
-	width: 2px;
-}
 
-.FileUpload_left .progressbar .cancel {
-	position: absolute;
-	top: 2px;
-	right: 2px;
-	height: 17px;
-	width: 17px;
-	background: url(images/cancel.png) no-repeat;
+.form_field.checkbox {
+	margin-bottom: 10px;
 }
-
-.FileUpload_left .progressbar span {
-	position: absolute;
-	top: 3px;
-	left: 50%;
-	margin-left: -20px;
-}
-
-.FileUpload_left > .actions {
-	text-align: center;
-	padding: 3px;
-	width: 164px;
+.form_field.checkbox > .info_field {
+	margin-top: 12px;
+	margin-bottom: -10px;
+	text-align: right;
 }

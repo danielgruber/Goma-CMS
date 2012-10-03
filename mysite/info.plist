@@ -6,13 +6,25 @@
 	<string>app</string>
 	<key>name</key>
 	<string>gomacms</string>
+	<key>title</key>
+	<string>Goma CMS</string>
 	<key>autor</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0.0</string>
+	<string>2.0</string>
 	<key>build</key>
-	<string>017</string>
+	<string>034</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0.0-017</string>
+	<string>2.0-044</string>
+	<key>icon</key>
+	<string>templates/images/app-icon.png</string>
+	<key>excludeModelsFromDistro</key>
+	<array>
+		<string>pm</string>
+	</array>
+	<key>excludeFiles</key>
+	<array>
+		<string>application/.WELCOME_RUN</string>
+	</array>
 </dict>
 </plist>

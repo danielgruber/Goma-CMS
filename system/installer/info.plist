@@ -9,10 +9,20 @@
 	<key>autor</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0.0</string>
+	<string>2.0</string>
 	<key>build</key>
-	<string>001</string>
+	<string>008</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0.0-016</string>
+	<string>2.0-040</string>
+	<key>langPath</key>
+	<string>lang</string>
+	<key>langName</key>
+	<string>install</string>
+	<key>defaultLang</key>
+	<string>en-us</string>
+	<key>title</key>
+	<string>Goma Installer</string>
+	<key>enableAdmin</key>
+	<false />
 </dict>
 </plist>

@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 26.11.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.05.2012
+  * $Version 2.1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,23 +15,29 @@ define("SESSION_TIMEOUT", 16*3600);
 class livecounter extends DataObject
 {
 		/**
-		 * the livecounter is live, so we need no caching
-		 *@name cacheable
-		*/
-		public $cacheable = false;
-		/**
 		 * database
 		*/
 		public $db_fields = array(
 				'user' 			=> 'varchar(200)', 
 				'phpsessid' 	=> 'varchar(800)', 
 				"mobile"		=> "int(1)",
-				"browser"		=> "varchar(200)"
+				"browser"		=> "varchar(200)",
+				"referer"		=> "varchar(400)",
+				"ip"			=> "varchar(30)"
 			);
+			
 		/**
 		 * the name of the table isn't livecounter, it's statistics
 		*/
 		public $table_name = "statistics";
+		
+		/**
+		 * indexes
+		*/
+		public $indexes = array(
+			"recordid" => false
+		);
+		
 		/**
 		 * allow writing
 		*/
@@ -56,16 +63,25 @@ class livecounterController extends Controller
 		 *@name cookie_support
 		 *@access public
 		*/
-		public static $cookie_support = "(firefox|msie|AppleWebKit|opera|khtml|gecko|icab|irdier|teleca|kindle|webfront|iemobile|playstation)";
+		public static $cookie_support = "(firefox|msie|AppleWebKit|opera|khtml|icab|irdier|teleca|webfront|iemobile|playstation)";
 		/**
 		 * counts how much users are online
 		*/
 		static private $useronline = 0;
+		/**
+		 * just run once per request
+		*/
+		static public $alreadyRun = false;
 		
 		/**
 		 * this function updates the database and user-status for us, that we count all visitors
 		*/
 		public static function run($forceLive = false) {
+			if(self::$alreadyRun) {
+				return true;
+			}
+			
+			self::$alreadyRun = true;
 			
 			// first get userid
 			$userid = member::$id;
@@ -118,21 +134,23 @@ class livecounterController extends Controller
 						$data->phpsessid = $user_identifier;
 						$data->mobile = Core::isMobile();
 						$data->browser = $_SERVER["HTTP_USER_AGENT"];
+						$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
+						$data->ip = $_SERVER["REMOTE_ADDR"];
 						$data->write(true, true);
 					}
 					unset($data);
 					// set cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 					$_SESSION["user_counted"] = TIME;
 					return true;
 				} else {
 					// just rewirte cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 				}
 			}
 			
 			
-			$data = DataObject::get("livecounter", "phpsessid = '".dbescape($user_identifier)."' AND last_modified > ".dbescape($timeout)."");
+			$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
 			if(count($data) > 0) {
 				$data->first()->user = $userid;
 				$data->first()->write(false, true);
@@ -142,11 +160,13 @@ class livecounterController extends Controller
 				$data->phpsessid = $user_identifier;
 				$data->mobile = Core::isMobile();
 				$data->browser = $_SERVER["HTTP_USER_AGENT"];
+				$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
+				$data->ip = $_SERVER["REMOTE_ADDR"];
 				$data->write(true, true);
 			}
 			
 			// just rewirte cookie
-			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/');
+			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 			// we set last update to next know the last update and better use database-index
 			$_SESSION["user_counted"] = TIME;
 			
@@ -162,7 +182,7 @@ class livecounterController extends Controller
 		{
 				
 				$last = TIME - 300;
-				$c = dataobject::count("livecounter", '`last_modified` > '.dbescape($last).' AND `user` = "'.dbescape($userid).'"');
+				$c = DataObject::count("livecounter", array("last_modified" => array(">", $last), "user" => $userid));
 				return ($c > 0) ? true : false;
 		}
 		/**
@@ -173,7 +193,7 @@ class livecounterController extends Controller
 		public static function countMembersOnline()
 		{
 				$last = TIME - 300;
-				return dataobject::count("livecounter", '`last_modified` > '.dbescape($last).' AND `user` != ""');
+				return DataObject::count("livecounter", array('last_modified > '.$last.' AND user != ""'));
 		}
 		/**
 		 * counts how much users AND guests online
@@ -187,7 +207,7 @@ class livecounterController extends Controller
 						return self::$useronline;
 				}
 				$last = time() - 60;
-				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'"');
+				$c = DataObject::count("livecounter",array("last_modified" => array(">", $last)));
 				self::$useronline = $c;
 				return $c;
 		}
@@ -200,8 +220,7 @@ class livecounterController extends Controller
 		public function countUsersByLast($last)
 		{
 
-				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'"');
-				return $c;
+				return DataObject::count("livecounter", array("last_modified" => array(">", $last)));
 		}
 		/**
 		 * counts user since and before..
@@ -209,9 +228,9 @@ class livecounterController extends Controller
 		public function countUsersByLastFirst($last, $first)
 		{
 
-				$c = dataobject::count("livecounter", ' `last_modified` > "'.dbescape($last).'" AND `last_modified` < "'.dbescape($first).'"');
-				return $c;
+				return DataObject::count("livecounter", ' last_modified > "'.convert::raw2sql($last).'" AND `last_modified` < "'.convert::raw2sql($first).'"');
 		}
+		
 		/**
 		 * gets stats for the last x days
 		 *
@@ -219,10 +238,18 @@ class livecounterController extends Controller
 		 *@access public
 		 *@param numeric - number of periods
 		 *@param numeric - length of a period in days
+		 *@param start-period
 		*/
-		public static function statisticsByDay($showcount = 10, $days = 1) {
+		public static function statisticsByDay($showcount = 10, $days = 1, $page = 1) {
+			if(!isset($page) || !preg_match('/^[0-9]+$/', $page) || $page < 1)
+				$page = 1;
+				
 			$interval = $days * 24 * 60 * 60;
 			$day = mktime(0, 0, 0, date("n", NOW), date("j", NOW), date("Y", NOW));
+			
+			$page--;
+			$day = $day - ($interval * $page * $showcount);
+			
 			$max = 0;
 			$data = array();
 			for($i = 0; $i < $showcount; $i++) {
@@ -249,6 +276,7 @@ class livecounterController extends Controller
 			
 			return $dataobject;
 		}
+		
 		/**
 		 * gets stats for the last x month
 		 *
@@ -257,10 +285,25 @@ class livecounterController extends Controller
 		 *@param numeric - number of periods
 		 *@param numeric - length of a period in month
 		*/
-		public static function statisticsByMonth($showcount = 10) {
+		public static function statisticsByMonth($showcount = 10, $page = 1) {
+			if(!isset($page) || !preg_match('/^[0-9]+$/', $page) || $page < 1)
+				$page = 1;
+			
+			$page--;
+			
 			// get last month
 			$month = date("n", NOW);
 			$year = date("Y", NOW);
+			
+			for($i = 0; $i < $page * $showcount; $i++) {
+				if($month == 1) {
+					$month = 12;
+					$year--;
+				} else {
+					$month--;
+				}
+			}
+			
 			$start = mktime(0, 0, 0, $month, 1, $year); // get 1st of last month 00:00:00
 			$endm = date("n", NOW);
 			$endy = date("Y", NOW);
@@ -270,6 +313,16 @@ class livecounterController extends Controller
 			} else {
 				$endm++;
 			}
+			
+			for($i = 0; $i < $page * $showcount; $i++) {
+				if($endm == 1) {
+					$endm = 12;
+					$endy--;
+				} else {
+					$endm--;
+				}
+			}
+			
 			$end = mktime(0, 0, 0, $endm, 1, $endy);
 			$max = 0;
 			$data = array();
@@ -306,67 +359,3 @@ class livecounterController extends Controller
 			return $dataobject;
 		}
 }
-
-/**
- *@link http://php.net/manual/en/function.get-browser.php
-*/
-class Browser extends Object { 
-    /** 
-        Figure out what browser is used, its version and the platform it is 
-        running on. 
-
-        The following code was ported in part from JQuery v1.3.1 
-    */ 
-    public static function detect() { 
-        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']); 
-
-        // Identify the browser. Check Opera and Safari first in case of spoof. Let Google Chrome be identified as Safari. 
-        if (preg_match('/opera/', $userAgent)) { 
-            $name = 'opera'; 
-        } 
-        elseif (preg_match('/webkit/', $userAgent)) { 
-            $name = 'safari'; 
-        } 
-        elseif (preg_match('/msie/', $userAgent)) { 
-            $name = 'msie'; 
-        } 
-        elseif (preg_match('/mozilla/', $userAgent) && !preg_match('/compatible/', $userAgent)) { 
-            $name = 'mozilla'; 
-        } 
-        else { 
-            $name = 'unrecognized'; 
-        } 
-
-        // What version? 
-        if (preg_match('/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/', $userAgent, $matches)) { 
-            $version = $matches[1]; 
-        } 
-        else { 
-            $version = 'unknown'; 
-        } 
-
-        // Running on what platform? 
-        if (preg_match('/linux/', $userAgent)) { 
-            $platform = 'linux'; 
-        } 
-        elseif (preg_match('/macintosh|mac os x/', $userAgent)) { 
-            $platform = 'mac'; 
-        } 
-        elseif (preg_match('/windows|win32/', $userAgent)) { 
-            $platform = 'windows'; 
-        } 
-        else { 
-            $platform = 'unrecognized'; 
-        } 
-
-        return array( 
-            'name'      => $name, 
-            'version'   => $version, 
-            'platform'  => $platform, 
-            'userAgent' => $userAgent 
-        ); 
-    } 
-}
-
-Autoloader::$loaded["livecounter"] = true;
-Autoloader::$loaded["livecountercontroller"] = true;

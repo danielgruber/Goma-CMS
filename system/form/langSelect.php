@@ -1,12 +1,14 @@
 <?php
 /**
   * shows a dropdown-select, where the user can choose a language from the available languages
-  *@package goma
+  *
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 10.09.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.03.2012
 */
+
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class langSelect extends Select
@@ -21,9 +23,9 @@ class langSelect extends Select
 		*/
 		public function __construct($name, $title = null, $selected = null, $form = null)
 		{
-				
-				parent::__construct($name, $title, $this->options(), $selected, $form);
+				parent::__construct($name, $title, null, $selected, $form);
 		}
+		
 		/**
 		 * gets all options
 		 *@name options
@@ -32,21 +34,9 @@ class langSelect extends Select
 		public function options()
 		{
 				$options = array();
-				$files = scandir(ROOT . LANGUAGE_DIRECTORY);
-				foreach($files as  $file)
-				{
-						if(filetype(ROOT . LANGUAGE_DIRECTORY . $file) == "dir" && $file != "." && $file != "..")
-						{
-								if(file_exists(ROOT . LANGUAGE_DIRECTORY . $file . '/description.php'))
-								{
-										include(ROOT . LANGUAGE_DIRECTORY . $file . '/description.php');
-										$description = "(".$name.")";
-								} else
-								{
-										$description = "";
-								}
-								$options[$file] = $file . " " .  $description; 
-						}
+				$data = i18n::listLangs();
+				foreach($data as $lang => $contents) {
+					$options[$lang] = $contents["title"];
 				}
 				return $options;
 		}

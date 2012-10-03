@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 10.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 19.02.2012
+  * $Version 2.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,8 +38,10 @@ class contentAdmin extends LeftAndMain
 		);
 		
 		public $allowed_actions = array(
-			"revert_changes", "unpublish"
+			"revert_changes", "unpublish", "preview"
 		);
+		
+		protected $sort_field = "sort";
 		
 		/**
 		 * redirect back
@@ -61,9 +64,10 @@ class contentAdmin extends LeftAndMain
 		 *@access public
 		*/
 		public function createOptions() {
-			$data = array();
-			foreach(classinfo::getChildren("pages") as $page) {
-				if(classinfo::exists($page)) {
+			$p = new Page;
+			$data = array("page" => parse_lang($p->name));
+			foreach(ClassInfo::getChildren("page") as $page) {
+				if(ClassInfo::exists($page)) {
 					$c = new $page;
 					if(!Object::method_exists($c, "hidden") || $c->hidden() !== true)
 						$data[$page] = parse_lang($c->name);
@@ -82,15 +86,15 @@ class contentAdmin extends LeftAndMain
 	public function revert_changes() {
 
 		if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
-			$data = DataObject::getObject($this->model_inst->class, array("id" => $this->model_inst->id));
-			if($data->_count() > 0) {
+			$data = DataObject::get_one($this->modelInst()->class, array("id" => $this->model_inst->id));
+			if($data) {
 				$data->write(false, false, 2);
 				if(Core::is_ajax()) {
 					$response = new AjaxResponse();
 					$dialog = new Dialog(lang("revert_changes_success", "The last version was recovered successfully."), lang("okay", "Okay"));
 					$dialog->close(3);
 					$response->exec($dialog);
-					$response->exec("reloadTree(function(){ LoadTreeItem(".$data["id"]."); });");
+					$response->exec("reloadTree(function(){ LoadTreeItem('".$data["class_name"] . "_" . $data["id"]."'); });");
 					HTTPResponse::setBody($response->render());
 					HTTPResponse::output();
 					exit;
@@ -111,34 +115,38 @@ class contentAdmin extends LeftAndMain
 	 *@access public
 	*/
 	public function unpublish() {
-		if($this->model_inst->unpublish()) {
+		if($this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
 				$response = new AjaxResponse();
 				$dialog = new Dialog(lang("unpublish_success", "The site was successfully unpublished."), lang("okay", "Okay"));
 				$dialog->close(3);
 				$response->exec($dialog);
-				$response->exec("reloadTree(function(){ LoadTreeItem(".$this->model_inst->id."); });");
+				$response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" .$this->modelInst()->id."'); });");
+				$this->removeResume();
 				HTTPResponse::setBody($response->render());
 				HTTPResponse::output();
 				exit;
 			} else {
 				AddContent::addSuccess(lang("unpublish_success", "The site was successfully unpublished."));
+				$this->removeResume();
 				$this->redirectBack();
 				exit;
 			}
 		}
 		if(Core::is_ajax()) {
-				$response = new AjaxResponse();
-				$dialog = new Dialog(lang("less_rights"), lang("error", "error"));
-				$dialog->close(3);
-				$response->exec($dialog);
-				HTTPResponse::setBody($response->render());
-				HTTPResponse::output();
-				exit;
-			} else {
-				AddContent::addError(lang("less_rights"));
-				$this->redirectBack();
-				exit;
-			}
+			$response = new AjaxResponse();
+			$dialog = new Dialog(lang("less_rights"), lang("error", "error"));
+			$dialog->close(3);
+			$response->exec($dialog);
+			$this->removeResume();
+			HTTPResponse::setBody($response->render());
+			HTTPResponse::output();
+			exit;
+		} else {
+			AddContent::addError(lang("less_rights"));
+			$this->removeResume();
+			$this->redirectBack();
+			exit;
+		}
 	}
 }

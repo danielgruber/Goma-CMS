@@ -1,19 +1,26 @@
 /**
-  *@package goma
+  *@package goma css framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 10.12.2011
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 31.08.2012
 */
 
 /* defaults */
 body, html {
 	padding: 0;
 	margin: 0;
-    background: #ffffff;
-    color: #000000;
-    font-size: 10pt;
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
     font-family: Verdana, Arial;
+}
+
+/* box-sizing */
+html, body, html * {    
+    box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box;
 }
 
 /**
@@ -69,7 +76,20 @@ small { font-size: 85%; }
 	text-shadow: none; 
 }
 
-textarea { overflow: auto; vertical-align: top; resize: vertical; }
+input[type=text], input[type=password], input[type=email] {
+	width: 150px;
+}
+
+textarea { 
+	overflow: auto; 
+	vertical-align: top; 
+	resize: vertical; 
+	
+	/* improve box-model here */
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
 
 /* 
  * Remove inner padding and border in FF3/4: h5bp.com/l 
@@ -82,7 +102,13 @@ button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
  * 2. Allow styling of clickable form elements in iOS
  */
 
-button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; }
+button, input[type="button"], input[type="reset"], input[type="submit"], .border-box, .button { 
+	cursor: pointer; 
+	-webkit-appearance: button;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
 
 /*
  * Reintroduce inner spacing in 'table' to avoid overlap and whitespace issues in IE6/7
@@ -96,9 +122,16 @@ table button, table input { *overflow: auto; }
  * 3. Define consistent vertical alignment display in all browsers
  */
 
-button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; outline: none; }
 
 /* the following code is some of goma-standard-style */
+
+label
+{
+	color: #222;
+	display: inline-block;
+	padding: 3px;
+}
 
 a.icon {
     padding: 1px;
@@ -114,24 +147,11 @@ a.button {
 
 input[type="checkbox"], input[type="radio"] {
 	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	margin: 2px 1px;
 }
 
-.ui-valign-top
-{
-    vertical-align: top;
-}
-.ui-header
-{
-    border-top: 3px solid #afafaf;
-    border-bottom: 1px solid #cfcfcf;
-    padding: 5px;
-    font-weight: bold;
-}
-.ui-content
-{
-    padding: 3px;
-}
 .ui-right
 {
     float: right;
@@ -140,41 +160,6 @@ input[type="checkbox"], input[type="radio"] {
 {
     float: left;
 }
-.ui-line
-{
-    border-top: 1px solid #cfcfcf;
-}
-.ui-label
-{
-    font-weight: bold;
-}
-.ui-box
-{
-    margin: 5px;
-}
-.ui-default-table {
-    border-spacing: 0;
-    width: 100%;
-}
-
-/*align*/
-.align-center {
-    text-align: center
-}
-.align-right {
-    text-align: right
-}
-.align-left {
-    text-align: left
-}
-/*valign*/
-.valign-top {
-    vertical-align: top
-}
-.valign-bottom {
-    vertical-align: bottom
-}
-
 
 
 .clear
@@ -182,15 +167,7 @@ input[type="checkbox"], input[type="radio"] {
     clear: both;
 }
 
-/*fields*/
-.field
-{
-    margin: 2px;
-}
-.field label
-{
-    display: block;
-}
+/* fields */
 .actions
 {
     text-align: center;
@@ -230,8 +207,12 @@ input[type="checkbox"], input[type="radio"] {
 	color: #252525;
 }
 
-.clear {
-	clear: both;
+.info_box {
+	padding: 10px;
+	margin: 10px 0px;
+	border: 1px solid #6cd2ff;
+	background: #bfebff;
+	color: #222;
 }
 
 /* placeholders */
@@ -247,8 +228,127 @@ input[disabled] {
 }
 
 /**
- * some iOS5-magic
+ * - some iOS5-magic
+ * - no border
 */
 iframe {
 	-webkit-overflow-scrolling: touch;
+	border-style:hidden;
+	border:none;
+}
+
+/**
+ * default-pages-style
+*/
+.pages a, .pages span.black {
+	padding: 4px;
+}
+
+#login_page .left {
+	float: left;
+	padding: 10px;
+	width: 250px;
+}
+#login_page .right {
+	margin-left: 280px;
+	border-left: 1px solid #eee;
+	padding: 0 10px;
+}
+
+.login_form > label {
+	font-weight: 8pt;
+	display: block;
+	font-weight: bold;
+}
+
+.login_form input[type=text], .login_form input[type=password] {
+	width: 90%;
+}
+
+.login_form > ._actions {
+	padding-top: 5px;
+}
+.login_form > ._actions a {
+	display: block;
+	margin: 5px 4px;
+}
+.login_form > ._actions div a {
+	float: right;
+	margin: 13px 20px;
+	color: #777;
+}
+
+#langSelect {
+	padding: 10px;
+}
+#langSelect .back {
+	float: right;
+	margin-top: 14px;
+}
+#langSelect .selectBox {
+	margin: -8px;
+}
+#langSelect ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+#langSelect ul li {
+	margin: 5px;
+	float: left;
+}
+#langSelect ul li a {
+	display: block;
+	text-decoration: none;
+	color: #555;
+	padding: 5px;
+}
+#langSelect ul li a img {
+	margin-top: -1px;
+}
+#langSelect ul li a:hover, #langSelect ul li.active a {
+	background: #eee;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.icon.arrow_left {
+	height: 10px;
+	width: 8px;
+	background: url(../images/arrow_left.png) no-repeat;
+	display: inline-block;
+	margin: 0 5px;
+}
+
+/* js */
+.show-on-js {
+	display: block;
+}
+.hide-on-js {
+	display: none;
+}
+
+/* clear-fix */
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+ 
+.clearfix {
+	display: inline-block;
+	*zoom: 1;
+}
+ 
+html[xmlns] .clearfix {
+	display: block;
+}
+ 
+* html .clearfix {
+	height: 1%;
 }

@@ -3,8 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 23.08.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 02.04.2012
+  * $Version 1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -12,13 +13,14 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 i18n::AddLang("/members");
 
 class ProfileController extends FrontedController {
+	
 	/**
 	 * allowed actions
 	 *
 	 *@name allowed_actions
 	 *@access public
 	*/
-	public $allowed_actions = array("edit", "login", "logout");
+	public $allowed_actions = array("edit", "login", "logout", "switchlang");
 	/**
 	 * profile actions
 	 *
@@ -50,7 +52,7 @@ class ProfileController extends FrontedController {
 		Core::addBreadCrumb(lang("edit_profile"), "profile/edit/");
 		Core::setTitle(lang("edit_profile"));
 		
-		$userdata = DataObject::_get("user", array("id" => member::$id));
+		$userdata = DataObject::get("user", array("id" => member::$id))->first();
 		return '<h1>'.lang("edit_profile").'</h1>' . $userdata->controller()->edit();
 	}
 	/**
@@ -77,13 +79,13 @@ class ProfileController extends FrontedController {
 		$this->tabs = new Tabs("profile_tabs");
 		$this->profile_actions = new HTMLNode("ul");
 		
-		if((isset($_SESSION["user_id"]) && $id == $_SESSION["user_id"])) {
-			$this->profile_actions->append(new HTMLNode("li", array(), new HTMLNode("a", array("href" => "profile/edit/", "rel" => "dropdownDialog", "class" => "noAutoHide"), lang("edit_profile"))));
+		if((isset(member::$id) && $id == member::$id)) {
+			$this->profile_actions->append(new HTMLNode("li", array(), new HTMLNode("a", array("href" => "profile/edit/", "class" => "noAutoHide"), lang("edit_profile"))));
 		}
 		
 		// get info-tab
 		$userdata = DataObject::get("user", array("id" => $id));	
-		$userdata->editable = ((isset($_SESSION["user_id"]) && $id == $_SESSION["user_id"])) ? true : false;
+		$userdata->editable = ((isset(member::$id) && $id == member::$id)) ? true : false;
 		$info = $userdata->renderWith("profile/info.html");
 		$this->tabs->addTab(lang("general", "General Information"), $info, "info");
 		
@@ -106,17 +108,10 @@ class ProfileController extends FrontedController {
 		// if login and a user want's to login as someone else, we should log him out
 		if(member::login() && isset($_POST["pwd"]))
 		{
-				member::doLogout();
-		
+			member::doLogout();
 		// if a user goes to login and is logged in, we redirect him home
 		} else if(member::login()) {
-			if(isset($_GET["redirect"]))
-				HTTPResponse::redirect($_GET["redirect"]);
-			if(isset($_POST["redirect"]))
-				HTTPResponse::redirect($_POST["redirect"]);
-				
-				
-			HTTPResponse::redirect(BASE_URI);
+			HTTPResponse::redirect(getRedirection(true));
 		}
 			
 			
@@ -125,36 +120,36 @@ class ProfileController extends FrontedController {
 		{
 				if(member::doLogin($_POST['user'], $_POST['pwd']))
 				{
-						if(isset($_GET["redirect"]))
-								HTTPResponse::redirect($_GET["redirect"]);
-						if(isset($_POST["redirect"]))
-								HTTPResponse::redirect($_POST["redirect"]);
-				
-				
-						HTTPResponse::redirect(BASE_URI);
-				} else
-				{
-						addcontent::add(member::$error);
+						HTTPResponse::redirect(getRedirection(true));
 				}
 		}
 		
 		// else we show template
 		
-		return tpl::render("boxes/login.html");
+		return tpl::render("profile/login.html");
 	}
+	
+	/**
+	 * switch-lang
+	 *
+	 *@name switchlang
+	 *@access public
+	*/
+	public function switchlang() {
+		return tpl::render("switchlang.html");
+	}
+	
 	/**
 	 * logout-method
 	*/
 	public function	logout()
 	{
-			member::doLogout();
+			if(ClassInfo::$appENV["app"]["name"] == "gomacms" && version_compare(ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "2.0.0-030", "<")) {
+				member::doLogout();
+			} else if(isset($_POST["logout"])) {
+				member::doLogout();
+			}
 							
-			if(isset($_GET["redirect"]))
-					HTTPResponse::redirect($_GET["redirect"]);
-			if(isset($_POST["redirect"]))
-					HTTPResponse::redirect($_POST["redirect"]);
-	
-	
-			HTTPResponse::redirect(BASE_URI);
+			HTTPResponse::redirect(getRedirection(true));
 	}
 }

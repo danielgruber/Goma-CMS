@@ -1,16 +1,43 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 11.07.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 15.01.2012
+  * $Version 1.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class LinkAction extends FormAction
 {
+		/**
+		 * whether to open in new window or not
+		 *
+		 *@name newwindow
+		 *@access public
+		 *@var bool
+		*/
+		public $newwindow = false;
+		/**
+		 * target url to link to 
+		 *
+		 *@name href
+		 *@access public
+		*/
+		public $href;
+		/**
+		 * constructor
+		 *
+		 *@name __construct
+		 *@access public
+		 *@param string - name
+		 *@param string - title
+		 *@param string - href
+		 *@param bool - whether to open in new window or not
+		 *@param null|object - form
+		*/
 		public function __construct($name, $title = null, $href = null,$newwindow = false, $form = null)
 		{
 				$this->newwindow = $newwindow;
@@ -45,7 +72,7 @@ class LinkAction extends FormAction
 		*/
 		public function field()
 		{
-				Profiler::mark("FormAction::field");
+				if(PROFILE) Profiler::mark("FormAction::field");
 				
 				$this->callExtending("beforeField");
 				$this->input->val($this->title);
@@ -58,7 +85,7 @@ class LinkAction extends FormAction
 				
 				$this->callExtending("afterField");
 				
-				Profiler::unmark("FormAction::field");
+				if(PROFILE) Profiler::unmark("FormAction::field");
 				
 				return $this->container;
 		}

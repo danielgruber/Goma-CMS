@@ -1,64 +1,162 @@
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 03.01.2010
+  * last modified: 16.08.2012
 */
 
+.lam_noscript p {
+	font-size: 20pt;
+	color: #777;
+	margin: 20% auto;
+	text-align: center;
+}
+
+#content .left-and-main {
+	padding: 0 !important;
+	height: 100%;
+	margin-right: 0 !important;
+}
 
 .leftandmaintable  {
-	border-spacing: 10px;
+	border-spacing: 0;
 }
 .leftandmaintable tr > .td {
 	vertical-align: top;
-	padding: 5px;
+	position: relative;
+	padding: 0;
 }
+.leftandmaintable tr > .td.left {
+	overflow: auto;
+}
+
+/* main-part */
+
+.leftandmaintable tr > .main {
+	min-width: 600px;
+	overflow: auto;
+}
+.leftandmaintable tr > .main textarea {
+	max-width: 650px !important;
+}
+.leftandmaintable tr > .main > .inner {
+	overflow-y: auto;
+	ms-overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	padding: 5px 0;
+}
+
+/* sidebar */
 
 .leftandmaintable tr > .left {
-	width: 260px;
+	width: 280px !important;
+	background: #eee;
+	height: 100%;
+	border-right: 1px solid #ccc;
 }
-
-.leftandmaintable tr > .left .classtree {
-	background: #ffffff;
+.leftandmaintable tr > .left > .LaM_tabs {
+	height: 100%;
+	min-width: 280px;
 }
-
-.leftandmaintable tr > .left .classtree {
-	border: 1px solid #cfcfcf;
+.leftandmaintable tr > .left > .LaM_tabs > ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	height: 36px;
+	border-bottom: 1px solid #ccc;
+	background: #fff; 
+}
+.leftandmaintable tr > .left > .LaM_tabs > ul > li {
+	float: left;
+}
+.leftandmaintable tr > .left > .LaM_tabs > ul > li > a {
+	display: block;
+	padding: 10px;
+	font-size: 14px;
+	line-height: 16px;
+	border-right: 1px solid #ccc;
+	background: #fff;
+	text-decoration: none;
+}
+.leftandmaintable tr > .left > .LaM_tabs > ul > li.active > a {
+	background: #eee;
+	padding-bottom: 11px !important;
 }
 
 .leftandmaintable tr > .left .classtree .treesearch input {
 	border-radius: 0;
 	margin: 0;
 	border: 0;
-	width: 250px;
+	padding: 5px;
+	width: 260px;
 	padding-right: 20px;
 	border-bottom: 1px solid #cfcfcf !important;
+	background: #eee;
+}
+.leftandmaintable tr > .left .create ul, ul.create {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	padding-top: 1px;
+}
+.create li:hover,.create li.active {
+	background: url(images/tree_hover.png) repeat-x;
+}
+.create li a {
+	display: block;
+}
+.create .node span {
+	background-repeat: no-repeat;
+	background-image: url(../../../images/icons/fatcow-icons/16x16/file.png);
+	background-position: 4px 4px;
+	color: 222;
+	text-decoration: none;
+	padding: 4px 6px 4px 23px;
+	display: block;
+}
+.create li:hover .node span, .create li.active .node span {
+	color: #fff;
+	font-weight: bold;
+}
+.create .node {
+	text-decoration: none !important;
 }
 .leftandmaintable tr > .left .classtree .treesearch input:focus {
 	border: 0;
 }
-
-.leftandmaintable tr > .left .classtree .treewrapper {
+.leftandmaintable tr > .left {
+	overflow: hidden;
+}
+.leftandmaintable tr > .left > .LaM_tabs > .tree, .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree {
+	height: 100%;
+}
+.leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
-        -webkit-overflow-scrolling: touch;
-	height: 350px;
+    -webkit-overflow-scrolling: touch;
+	background: #eee;
+	-webkit-box-shadow: inset 0 0 5px #ccc;
+	padding-bottom: 15px;
+}
+.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend {
+	position: absolute;
+	bottom: 0;
+	left: 0;
 	background: #eee;
 }
-
-.leftandmaintable tr > .main {
-	min-width: 800px;
+.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend > div {
+	padding: 10px;
 }
-.leftandmaintable tr > .main textarea {
-	max-width: 650px !important;
+.leftandmaintable tr > .left .classtree .treewrapper > ul > li {
+	padding-left: 0;
 }
 
+.legend h2 {
+	margin: 0;
+	margin-bottom: 7px;
+}
 .legend div span {
 	background-image: none !important;
 }
 
 .loading span { background-image: url(../../../images/16x16/ajax-loader.gif) !important; }
-
-.leftandmaintable tr > .main {
-
-}

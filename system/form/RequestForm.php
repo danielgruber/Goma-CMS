@@ -1,45 +1,65 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 21.06.2011
-  * $Version 2.0.0 - 004
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.05.2012
+  * $Version 1.4.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class RequestForm extends Object {
+	/**
+	 * title of the form
+	*/
 	protected $title;
+	
 	/**
 	 * form
 	*/
 	protected $realform;
+	
 	/**
 	 * fields
 	*/
 	public $fields = array();
+	
 	/**
 	 * results
 	*/
 	public $results = array();
+	
 	/**
 	 * dialog
 	*/
 	public $dialog;
+	
 	/**
 	 * return value
 	*/
 	public $arr;
+	
 	/**
 	 * key for unique assignment
 	*/
 	public $key;
+	
 	/**
 	 * validators
 	*/
 	public $validators;
+	
+	/**
+	 * user-set-redirect
+	 *
+	 *@name redirect
+	 *@access public
+	 *@var null - string
+	*/
+	public $redirect;
+	
 	/**
 	 * constructing the form
 	 *
@@ -51,7 +71,7 @@ class RequestForm extends Object {
 	 *@param array - validators
 	 *@param string - title of the okay-button
 	*/
-	public function __construct($fields, $title, $key = "", $validators = array(), $btnokay = null) {
+	public function __construct($fields, $title, $key = "", $validators = array(), $btnokay = null, $redirect = null) {
 		parent::__construct();
 		
 		
@@ -73,6 +93,8 @@ class RequestForm extends Object {
 		} else {
 			$this->btnokay = lang("okay", "OK");
 		}
+		
+		$this->redirect = $redirect;
 	}
 	
 	/**
@@ -102,9 +124,11 @@ class RequestForm extends Object {
 				$fields[] = new HiddenField($key, $value);
 		}
 		
+		$redirect = isset($this->redirect) ? $this->redirect : getredirect();
+		
 		// get the submit-button
 		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
-			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), getredirect(), $this->dialog->getcloseJS() . "return false;");
+			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), $redirect, $this->dialog->getcloseJS() . "return false;");
 			if(isset($_GET["dropdownDialog"]))
 				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit");
 			else
@@ -141,8 +165,9 @@ class RequestForm extends Object {
 				HTTPResponse::output();
 				exit;
 		} else {
-				$this->dialog->content = $data;
-				showsite($this->dialog->renderHTML(), /*$this->title*/ "");
+				$view = new ViewAccessableData();
+				return showSite($view->customise(array("content" => $data, "title" => $this->title))->renderWith("framework/dialog.html"), null);
+
 		}
 	}
 	

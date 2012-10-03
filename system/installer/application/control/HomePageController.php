@@ -3,14 +3,12 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 26.08.2011
-  * $Version 001
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 13.01.2012
+  * $Version 1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-loadlang("install");
 
 class HomePageController extends RequestHandler {
 	/**
@@ -31,6 +29,6 @@ class HomePageController extends RequestHandler {
 	*/
 	public function langSelect() {
 		$data = new ViewAccessAbleData();
-		return $data->customise(array("content" => tpl::Render("install/langselect.html")))->renderWith("install/install.html");
+		return $data->customise(array("firstrun" => 1,"content" => tpl::Render("install/langselect.html")))->renderWith("install/install.html");
 	}
 }

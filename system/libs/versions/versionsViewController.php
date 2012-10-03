@@ -1,11 +1,10 @@
 <?php
 /**
-  *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 06.09.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.022012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,19 +36,32 @@ class VersionsViewController extends Controller {
 	 *@name template
 	*/
 	public $template = "admin/versionsview/main.html";
+	
+	/**
+	 * title of the view
+	 *
+	 *@name title
+	 *@access public
+	*/
+	public $title;
+	
 	/**
 	 *@name __consturct
 	 *@access public
 	 *@param object - model: you should give any dataobject, but not versioned, for example: DataObject::_get("id" => 1234); it will decrease performance, if you directly give all versions
 	*/
-	public function __construct($model = null) {
+	public function __construct($model = null, $title = null) {
 		parent::__construct();
 		
+		$this->title = $title;
 		if($model) {
 			$this->model_inst = clone $model;
 			$this->model_inst->controller = $this;
 			$this->model_inst->stateid = null;
 			$this->model_inst->publishedid = null;
+			if(!isset($title)) {
+				$this->title = $this->model_inst->title;
+			}
 		}
 	}
 	/**
@@ -62,8 +74,8 @@ class VersionsViewController extends Controller {
 		if($name === false)
 				$name = "form_versioned_" . $this->class;
 				
-		if(!$model && is_object($this->model_inst)) {
-			$model = clone $this->model_inst;
+		if(!$model && is_object($this->modelInst())) {
+			$model = clone $this->modelInst();
 		}
 		
 		$name .= "_" . $model->versionid;
@@ -74,16 +86,11 @@ class VersionsViewController extends Controller {
 		$controller = clone $this;
 		$controller->model_inst = $model;
 		
-		$form = new Form($controller, $name, $fields);
-		if($disabled)
-			$form->disable();
+		$form = $model->generateForm($name, $edit, $disabled);
 		
 		// set submission
 		$form->setSubmission("saveVersion");
 		$form->setSubmission($submission);
-		
-		// draw form
-		$model->drawForm($form, $edit);
 		
 		// we add where to the form
 		foreach($this->where as $key => $value)
@@ -114,7 +121,7 @@ class VersionsViewController extends Controller {
 	public function saveVersion($data) {
 		if($this->save($data) !== false)
 		{
-				addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
+				AddContent::addSuccess(lang("successful_saved", "The data was successfully written!"));
 				$this->redirectback();
 		} else
 		{
@@ -130,7 +137,9 @@ class VersionsViewController extends Controller {
 	public function getVersion() {
 		$id = $this->getParam("id");
 		
-		$data = DataObject::_get($this->model_inst, array("versionid" => $id));
+		$data = DataObject::get_one($this->model_inst, array("versionid" => $id));
+		if(!$data)
+			return false;
 		if(Core::is_ajax()) {
 			HTTPResponse::addHeader("content-type", "text/x-json");
 			return json_encode(array("form" => $data->controller($this)->renderForm("version_".$data->id."_" . $data->versionid), "active" => $data->versionid));
@@ -149,7 +158,7 @@ class VersionsViewController extends Controller {
 	public function index() {
 		Resources::addData("var version_namespace = '".$this->namespace."';");
 		if(!isset($this->tplVars["versionform"])) {
-			if($this->model_inst->versions("1,1")->count > 0) {
+			if($this->modelInst()->versions("1,1")->count > 0) {
 				$data = $this->model_inst->versions("1,1");
 				$this->tplVars["versionform"] = $data->controller($this)->renderForm("version_".$data->id."_" . $data->versionid);
 				$this->tplVars["active"]	  = $data->versionid;
@@ -159,9 +168,10 @@ class VersionsViewController extends Controller {
 			}
 		}
 		if(!Core::is_ajax())
-			$this->tplVars["currentform"] = $this->model_inst->controller($this)->renderForm();
+			$this->tplVars["currentform"] = $this->modelInst()->controller($this)->renderForm();
 			
 		if(isset($_GET["redirect"])) $_SESSION["redirect"] = $_GET["redirect"];
+		$this->tplVars["title"] = $this->title;
 		return parent::index();
 	}
 	/**

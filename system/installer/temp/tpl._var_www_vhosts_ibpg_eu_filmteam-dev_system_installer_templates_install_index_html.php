@@ -3,15 +3,8 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 if(!isset($data))
 	return false;
 ?>
-<?php if(isset($required_areas)) { 
-								$available_areas = array (
-); 
-								foreach($required_areas as $area) { 
-									if(!isset($available_areas[$area])) {
-										throwError("6", "PHP-Error", "Error in Template-File ".$tpl.". Area ".$area." not found! Please add <code>&lt;garea name=\"".$area."\"&gt;...&lt;/garea&gt;");
-									}
-								}
-							} ?>
+
+
 <strong><?php echo $caller->lang("install.welcome"); ?></strong>
 <div id="installitems">
 	<div class="item install">

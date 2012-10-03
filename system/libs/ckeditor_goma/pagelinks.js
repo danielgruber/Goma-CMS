@@ -4,9 +4,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 09.10.2011
-  * $Version 2.0.0 - 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 21.03.2012
+  * $Version 1.0.3
 */
 $(function(){
 	CKEDITOR.on( 'dialogDefinition', function( ev )
@@ -27,7 +27,7 @@ $(function(){
 			
 			var linkTypeField = dialogDefinition.getContents("info").get("linkType");
 			var oldevent = linkTypeField.onChange;
-			linkTypeField.items.push([self.lang_page, 'page']);
+			linkTypeField.items.push([self.lang("page"), 'page']);
 			dialogDefinition.getContents("info").add({
 				id: 	"pageOptions",
 				type : 'hbox',
@@ -46,10 +46,12 @@ $(function(){
 								dialog.setValueOf("info", "url", url);
 							}
 						},
+						
 						onLoad: function() {
 							var timeout;
 							var ajax;
 							var $edit = this;
+							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').addClass("pageLinkHolder");
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').css('position', 'relative');
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').append('<a href="javascript:;" class="cancelButton"></a>');
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').append('<div class="textDropDown"><ul></ul></div>');
@@ -75,6 +77,7 @@ $(function(){
 							$("#" + this.getInputElement().getId() ).keydown(function(){
 								if($("#" + $edit.getInputElement().getId() ).val() == "") {
 									$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(".cancelButton").css("display", "none");
+									$("#" + $edit.getInputElement().getId() ).prop("disabled", false);
 								} else {
 									$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(".cancelButton").css("display", "block");
 								}
@@ -124,9 +127,11 @@ $(function(){
 			
 			content.onChange = CKEDITOR.tools.override(content.onChange, function(original) {
 				return function() {
+					var dialog = this.getDialog();
+					uploadTab = dialog.definition.getContents( 'upload' ),
+					uploadInitiallyHidden = uploadTab && uploadTab.hidden
 					
 					original.call(this);
-					var dialog = this.getDialog();
 					var element = dialog.getContentElement( 'info',"pageOptions" ).getElement().getParent().getParent();
 					if(this.getValue() == "page") {
 						element.show();
@@ -134,12 +139,19 @@ $(function(){
               		 	 	dialog.showPage('target');
              		 	}
              		 	dialog.hidePage( 'advanced' );
+             		 	
+             		 	if ( !uploadInitiallyHidden )
+							dialog.showPage( 'upload' );
+							
+						$("#" + dialog.getContentElement("info", "pageOptions").getElement().getId()).find(".cke_dialog_ui_input_text").keydown();
 					} else {
               			element.hide();
               			if(editor.config.linkShowAdvancedTab)
               				dialog.showPage( 'advanced' );
+              			
+              			if ( !uploadInitiallyHidden )
+							dialog.showPage( 'upload' );
             		}
-					
 					
 					
 					dialog.layout();

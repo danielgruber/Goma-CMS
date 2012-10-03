@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 30.10.2011
-  * $Version 001
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 13.07.2012
+  * $Version 1.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -23,6 +23,7 @@ class welcomeController extends Controller {
 	 * index
 	*/ 
 	public function index() {
+		$_SESSION["welcome_screen"] = true;
 		// make some correction to database
 		if(defined("SQL_LOADUP")) {
             // remake db
@@ -46,6 +47,7 @@ class welcomeController extends Controller {
 	public function step2() {
 		$form = new Form($this, "user_create", array(
 			new TextField("username", lang("username")),
+			new TextField("email", lang("email")),
 			new PasswordField("password", lang("password")),
 			new PasswordField("repeat", lang("repeat"))
 		), array(
@@ -79,8 +81,10 @@ class welcomeController extends Controller {
 		$data = new User();
 		$data->nickname = $result["username"];
 		$data->password = $result["password"]; // we don't need to hash, it's implemented in the user-model
-		$data->groupid = 1;
+		$data->email = $result["email"];
 		$data->write(true, true);
+		$data->groups()->add(DataObject::get_one("group", array("type" => 2)));
+		$data->groups()->write(false, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "step3/");
 	}
 	/**
@@ -92,6 +96,8 @@ class welcomeController extends Controller {
 			return lang("passwords_not_match");
 		} else if(empty($result["username"])) {
 			return lang("form_required_fields") . ' "' .  lang("username") . '"';
+		} else if(empty($result["email"])) {
+			return lang("form_required_fields") . ' "' .  lang("email") . '"';
 		} else {
 			return true;
 		}
@@ -113,7 +119,12 @@ class welcomeController extends Controller {
 	 *@access public
 	*/
 	public function finish() {
-		@unlink(APP_FOLDER . "application/ENABLE_WELCOME");
+		unset($_SESSION["welcome_screen"]);
+		if(@fopen(APP_FOLDER . "application/.WELCOME_RUN", "w")) {
+			fclose(APP_FOLDER . "application/.WELCOME_RUN");
+		} else {
+			throwError(6, "PHP-Error", "Write-Error: Could not write " . CURRENT_PROJECT . "/application/.WELCOME_RUN. Please create this file for security reason!");
+		}
 		return tpl::render("welcome/finish.html");
 	}
 }

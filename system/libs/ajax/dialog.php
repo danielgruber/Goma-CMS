@@ -17,32 +17,38 @@ class Dialog extends AjaxResponse
 		 *@name key
 		*/
 		public $key;
+		
 		/**
 		 * addon-js
 		 *@name js
 		 *@access public
 		*/
 		public $js = "";
+		
 		/**
 		 * the content of the dialog
 		 *@name content
 		 *@access public
 		*/
 		public $content;
+		
 		/**
 		 * title
 		 *@name title
 		 *@access public
 		*/
 		public $title;
+		
 		/**
 		 * close-button
 		*/
 		public $closeButton = true;
+		
 		/**
 		 * drop-position
 		*/
 		public $dropPosition = "auto";
+		
 		/**
 		 * renders a dialig
 		 *
@@ -59,6 +65,7 @@ class Dialog extends AjaxResponse
 				if($closetime != 0) 
 					$this->close($closetime);
 		}
+		
 		/**
 		 * close-function
 		 *@name close
@@ -80,6 +87,7 @@ class Dialog extends AjaxResponse
 				}
 				
 		}
+		
 		/**
 		 * getCloseJS
 		 *
@@ -124,8 +132,13 @@ $("body").append("'.convert::raw2js($this->renderHTML()).'");
 self.'.$this->key.' = new ExistingBluebox("dialog_'.$this->key.'");' . $this->js;
 				}
 		}
+		
 		/**
 		 * you can also render this as HTML, so without any javascript-functionallity and just for styling
+		 *
+		 *@name renderHTML
+		 *@access public
+		 *@param bool - close-button
 		*/
 		public function renderHTML($close = true) {
 			$html = '<div id="dialog_'.$this->key.'" class="bluebox bluebox_wrapper" style="display: block;">
@@ -165,6 +178,7 @@ self.'.$this->key.' = new ExistingBluebox("dialog_'.$this->key.'");' . $this->js
 						</div>';
 			return $html;
 		}
+		
 		/**
 		 * closes the dialog by given id
 		 *@name closeByID

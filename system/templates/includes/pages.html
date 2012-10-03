@@ -2,9 +2,9 @@
 	<% lang("page", "Page") %>
 	<% CONTROL pages() %>
 		<% IF $pages.black %>
-			$pages.page
+			<span class="black">$pages.page</span>
 		<% ELSE %>
-			<a href="{URL}{URLEND}?pa=$pages.page">$pages.page</a>
+			<a href="<% echo addParamToURL($_SERVER_REDIRECT, "pa", $pages.page) %>">$pages.page</a>
 		<% ENDIF %>
 	<% ENDCONTROL %>
 </div>

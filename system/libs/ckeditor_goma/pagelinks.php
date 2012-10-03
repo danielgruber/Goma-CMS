@@ -3,8 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 20.10.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 10.09.2012
+  * $Version 1.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -35,12 +36,12 @@ class PageLinksController extends RequestHandler {
 		} else {
 			$search = "";
 		}
-		$data = DataObject::searchObject("pages", array($search), array(), array(), array(), $this->limit);
+		$data = DataObject::search_object("pages", array($search), array(), array(), $this->limit);
 		$output = array("count" => $data->count, "nodes" => array());
 		foreach($data as $record) {
 			$output["nodes"][$record["id"]] = array(
 				"id" 	=> $record["id"],
-				"title"	=> text::protect($record["title"]),
+				"title"	=> convert::raw2xml($record["title"]),
 				"url"	=> $record->path . URLEND
 			);
 		}

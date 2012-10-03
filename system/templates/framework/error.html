@@ -25,7 +25,7 @@
 					</div>
 					<% IF $errcode != 1 AND $errcode != 2 AND $errcode != 5 %>
 						<strong>Debug:</strong>
-						<textarea style="width: 99%; height: 200px;">$debug.text()</textarea>
+						<textarea style="width: 99%; height: 200px;"><% printDebug() %></textarea>
 					<% END %>
 					<div id="back">
 					 <a href="{BASE_URI}">{$_lang_back}</a>

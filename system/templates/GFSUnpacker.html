@@ -2,9 +2,13 @@
 <html lang="de">
 	<head>
 		<% IF $reload %>
-			<meta http-equiv="refresh" content="2" />
+			<% IF $destination %>
+				<meta http-equiv="refresh" content="2; URL=$destination" />
+			<% ELSE %>
+				<meta http-equiv="refresh" content="2" />
+			<% END %>
 		<% END %>
-		<title>Unpacking Archive $archive</title>
+		<title>Archive $archive</title>
 		<base href="{BASE_URI}" />
 		<link rel="stylesheet" href="system/templates/css/default.css" />
 		<link rel="stylesheet" href="system/templates/admin/style.css" />
@@ -34,7 +38,11 @@
 			window.onload = function() {
 				document.getElementById("reload").style.display = "none";
 				setTimeout(function(){
-					location.reload();
+					<% IF $destination %>
+						location.href = '$destination';
+					<% ELSE %>
+						location.reload();
+					<% END %>
 				}, 1900);
 			}
 		</script>
@@ -45,7 +53,7 @@
 			<div class="wrapper_inner">
 				<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
 				<div class="header">
-					<a href=""><h1>Goma CMS</h1></a>
+					<h1>Goma Framework</h1>
 				</div>
 				<div class="content">
 					<h3>$status</h3>

@@ -1,4 +1,7 @@
-<h4><% lang("co_comments", "comments") %></h4>
+<% INCLUDE_CSS "comments.css" %>
+<% IF $this %>
+	<h4><% lang("co_comments", "comments") %></h4>
+<% END %>
 <div class="comments">
 	<% CONTROL this() %>
 		
@@ -11,7 +14,7 @@
 					</div>
 					
 				<% END %>
-				<div class="from">{$_lang_co_of} $this.name.text() {$_lang_co_on} $this.timestamp.date()</div>
+				<div class="from"><a href="{URL}{URLEND}#comment_{$this.id}">{$_lang_co_of} $this.name.text() {$_lang_co_on} $this.timestamp.date()</a></div>
 				<div class="text">$this.text.bbcode()</div>	
 				<% IF $this.writeaccess %>
 					<div class="clear"></div>

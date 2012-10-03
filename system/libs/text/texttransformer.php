@@ -9,32 +9,3 @@
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-abstract class TextTransformer extends Object
-{
-		/**
-		 * the text
-		 *@name text
-		 *@var string
-		*/
-		protected $text = "";
-		/**
-		 *@name __construct
-		 *@param string - text 
-		 *@access public
-		*/
-		public function __construct($text)
-		{
-				$this->text = $text;
-		}
-		/**
-		 * transforms the text and gives back the result
-		 *@name transform
-		 *@access public
-		*/
-		public function transform()
-		{
-				
-		}
-		
-}

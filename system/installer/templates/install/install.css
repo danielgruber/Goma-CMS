@@ -1,3 +1,15 @@
+/**
+  *@package goma installer
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 19.04.2012
+*/
+
+body, html {
+	background-image: none;
+}
+
 #installitems {
 	width: 600px;
 }
@@ -21,4 +33,58 @@
 	height: 32px;
 	width: 32px;
 	margin: 1px auto;
+}
+
+.backup_restore {
+	width: 100%;
+	border-collapse: collapse;
+	border-bottom: 1px solid #ccc;
+}
+.backup_restore td {
+	padding: 10px;
+	text-align: center;
+}
+.backup_restore td.grey {
+	font-weight: bold;
+	border-right: 1px solid #ccc;
+	background: #eee;
+}
+
+#welcome_animation {
+	-webkit-box-shadow: inset 0 0 10px #999;
+	margin: -8px -10px;
+	padding-top: 5px;
+}
+
+#apps {
+	
+}
+#apps > .app {
+	padding: 10px;
+	border-bottom: 1px solid #ddd;
+}
+#apps > .app > .icon, #apps > .app > .info {
+	float: left;
+}
+#apps > .app > .info {
+	margin-left: 15px;
+}
+#apps > .app h1 {
+	font-size: 12pt;
+	color: #555;
+}
+#apps > .app > .button_right {
+	float: right;
+}
+#apps .app .info p {
+	margin: 7px 0;
+}
+#apps > .no_app {
+	margin: 0 auto;
+	padding: 150px 0;
+	
+	text-align: center;
+	
+	font-size: 12pt;
+	color: #999;
 }

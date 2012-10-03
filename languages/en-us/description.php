@@ -1,2 +1,0 @@
-<?php
-    $name = "English (US)";

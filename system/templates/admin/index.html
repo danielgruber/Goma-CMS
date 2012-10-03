@@ -1,206 +1,205 @@
 <!DOCTYPE html>
-<html lang="{$_cms_lang}">
+<html id="adminPanel" lang="{$_cms_lang}">
 	<head>
 		<base href="{BASE_URI}" />
 		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - {$_lang_administration} <% END %></title>
 		
-		<% INCLUDE_CSS "style.css" %>
-		<% INCLUDE_CSS "box.css" %>
-		<% INCLUDE_CSS "jqueryui/theme.css" %>
+		<% INCLUDE_CSS_MAIN "style.css" %>
+		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
 		
-		<% INCLUDE_JS "admin.js" %>
-		<script type="text/javascript">
-			// <![CDATA[
-				var x = new Image();
-				x.src = '{$_cms_root_path}images/16x16/loading.gif';
-				var y = new Image();
-				y.src = '{$_cms_root_path}images/loading.gif';
-				$(function(){					
-					setTimeout(function(){			
-						$("#body").css('display','block');
-						$("#l").css('display','none');
-					}, 100);
-					$("#langselect_page").change(function(){
-						$(this).parent().submit();
-					});
-				});
-				
-				$(function(){
-					$(window).resize(function(){
-						$("#content > .header").css("min-width",0);
-						$("#content > .header").css("min-width", $(document).width() - 220);
-					});
-					setInterval(function(){
-						$("#content > .header").css("min-width",0);
-						$("#content > .header").css("min-width", $(document).width() - 220);
-					}, 2000);
-					$("#content > .header").css("min-width",0);
-					$("#content > .header").css("min-width", $(document).width() - 220);
-					
-				});
-			// ]]>
-		</script>
+		<% INCLUDE_JS_MAIN "admin.js" %>
+		
 		{$header}
 	</head>
-	<body>
+	<body id="adminPanel">
 		<!--<div id="viewport">-->
 			<div id="wrapper">
 			
-				<div id="leftbar">
-					<div id="leftbar_inner">
-						<img src="system/templates/admin/images/logo.png" alt="logo" />
-						<div class="container">
-							<span class="pagetitle">$_cms_ptitle</span>
-						</div>
-						<div class="container">
-							<% lang("really welcome", "Welcome") %>, <strong>{$_cms_user}</strong>
-							<div>[ <a href="profile/edit{URLEND}">{$_lang_edit_profile}</a> ]  </div><div> [ <a href="{ROOT_PATH}profile/logout/?redirect={$_SERVER_REQUEST_URI}"><% lang("logout", "logout") %></a> ]</div>
-						</div>
-						<div class="container">
-							<span class="weblink"><a href="{ROOT_PATH}"><% lang("view_website", "Browse Website") %></a></span>
-						</div>
-						<div id="navi">
-							<ul>
-								<li>
-									<% IF URL == "admin" %>
-										<a href="{BASE_SCRIPT}admin/" class="active">
-											<span><% lang("dashboard", "Dashboard") %></span>
-										</a>
-									<% ELSE %>
-										<a href="{BASE_SCRIPT}admin/">
-											<span><% lang("dashboard", "Dashboard") %></span>
-										</a>
-									<% END %>
-									
-								</li>
-								<li>
-									<% CONTROL this() %>
-										<% IF $this.active %>
-											<a class="active"  title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
-												<span>$this.text</span>
-											</a>
-										<% ELSE %>
-											<a title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
-												<span>$this.text</span>
-											</a>
-										<% END %>
-									<% ENDCONTROL %>
-		
-								</li>
-							</ul>
-						</div>
-						<div id="langselect" class="container">
-							<form method="get" action="">
-								<select id="langselect_page" name="setlang">
-									<% CONTROL languages() AS $lang %>
-										<% IF $lang.active %>
-											<option value="$lang.name" selected="selected">$lang.title</option>
-										<% ELSE %>
-											<option value="$lang.name">$lang.title</option>
-										<% END %>
-										
-									<% ENDCONTROL %>
-								</select>
-							</form>
-						</div>
-						<div id="footer">
-							Powered by <a href="http://goma-cms.org" target="_blank">Goma</a>
-						</div>
-					</div>
-				</div>
 				<garea name="content" reload="1">
 					<div id="content">
+						<!-- top header bar in black -->
+						<div class="header">
+							<% INCLUDE "admin/header_userbar.html" %>
+							<div id="navi" class="clearfix">
+								<ul>
+									<% IF NOT $content %>
+										<li class="active">
+									<% ELSE %>
+										<li>
+									<% END %>
+										<% IF NOT $content %>
+											<a href="{BASE_SCRIPT}admin/" class="active">
+												<span><% lang("dashboard", "Dashboard") %></span>
+											</a>
+										<% ELSE %>
+											<a href="{BASE_SCRIPT}admin/">
+												<span><% lang("dashboard", "Dashboard") %></span>
+											</a>
+										<% END %>
+										
+									</li>
+									<% CONTROL this() %>
+										<% IF $this.active %>
+											<li class="active">
+												<a class="active"  title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
+													<span>$this.text</span>
+												</a>
+											</li>
+										<% ELSE %>
+											<li>
+												<a title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
+													<span>$this.text</span>
+												</a>
+											</li>
+										<% END %>
+									<% ENDCONTROL %>
+									<li id="navMore" style="display: none">
+										<a href="javascript:;">
+											<span>&raquo;</span>
+										</a>
+										<ul id="navMore-sub" style="display: none"></ul>
+									</li>
+								</ul>
+							</div>
+							<div class="clear"></div>
+						</div>
+						
+						<!-- header subbar in grey -->
+						<div id="head">
+							<div id="head_inner">
+								<a href="http://goma-cms.org" target="_blank">
+									<img src="system/templates/admin/images/logo.png" id="logo" alt="logo" />
+								</a>
+								<span class="weblink"> <strong>{$_cms_ptitle}</strong> <a class="button" id="visit_webpage" href="{ROOT_PATH}"><% lang("view_website", "Browse Website") %> &raquo;</a></span>
+								<p>
+									<% IF $title %>
+										<span class="title">$Title</span>
+									<% ELSE %>
+										<span class="title">{$_lang_overview}</span>
+									<% END %>
+								</p>
+									
+								<div class="clear"></div>
+							</div>
+						</div>
+						
+						<!-- content -->
 						<% IF $content %>
-							<div class="header">
-								<h1>$title</h1>
-							</div>	
-							<div class="content_inner">
+							<div class="addcontent">
 								$addcontent
+							</div>
+							<div class="content_inner $content_class">
 								$content
 							</div>
 						<% ELSE %>
-							<div class="header">
-								<h1><% lang("dashboard", "Dashboard") %></h1>
-							</div>	
-							<div class="content_inner">
-								<div id="addcontent" style="width: 900px;max-height: 150px;overflow: auto;">
+							<div class="content_inner overview">
+								<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
 									$addcontent
 								</div>
-								<div id="statistics">
+								<% IF isMobile() %>
+									<div id="statistics" class="mobile">
+								<% ELSE %>
+									<div id="statistics">
+								<% END %>
 									<div class="title">
 										<% lang("visitors", "Visitors") %>
 									</div>
 									<div class="controls">
 										<span style="color: #24acb8;">&middot;</span> <a style="color: #24acb8;" href="{BASE_SCRIPT}{URL}{URLEND}"><% lang("visitors_by_day", "By Day") %></a> <span style="color: #da097a;">&middot; </span> <a style="color: #da097a;" href="{BASE_SCRIPT}{URL}{URLEND}?month=1"><% lang("visitors_by_month", "By Month") %></a>
 									</div>
+									<div id="buttonLeft">
+										<% IF $_GET_stat_page %>
+											<% IF $_GET_month %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
+											<% ELSE %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
+											<% END %>
+										<% ELSE %>
+											<% IF $_GET_month %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=2" class="left"></a>
+											<% ELSE %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=2" class="left"></a>
+											<% END %>
+										<% END %>
+									</div>
+									<div id="buttonRight">
+										<% IF $_GET_stat_page AND $_GET_stat_page > 1 %>
+											<% IF $_GET_month %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
+											<% ELSE %>
+												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
+											<% END %>
+										<% END %>
+									</div>
 									<% IF $_GET_month %>
-										<% CONTROL statistics() %>
+										<% CONTROL statistics(true, $_GET_stat_page) %>
 											<div class="stat month">
 												<div class="data">
 													<div style="height:<% echo $statistics.percent*2 %>px">
 													</div>
 												</div>
 												<div>$statistics.count</div>
-												<div>$statistics.timestamp.date("F")</div>
+												<% IF $statistics.timestamp.date("F Y") = date("F Y") %>
+													<div class="date today">$statistics.timestamp.date("F")</div>
+												<% ELSE %>
+													<div class="date">$statistics.timestamp.date("F")</div>
+												<% END %>
 											</div>
 										<% ENDCONTROL %>
 									<% ELSE %>
-										<% CONTROL statistics(false) %>
+										<% CONTROL statistics(false, $_GET_stat_page) %>
 											<div class="stat">
 												<div class="data">
 													<div style="height:<% echo $statistics.percent*2 %>px">
 													</div>
 												</div>
 												<div>$statistics.count</div>
-												<div>$statistics.timestamp.date("j M")</div>
+												<% IF $statistics.timestamp.date("j M Y") = date("j M Y") %>
+													<div class="today date">$statistics.timestamp.date("D j M")</div>
+												<% ELSE %>
+													<div class="date">$statistics.timestamp.date("D j M")</div>
+												<% END %>
 											</div>
 										<% ENDCONTROL %>
 									<% END %>
-									<form action="" method="get">
-										
-									</form>
 									<div class="clear"></div>
 								</div>
-								<script type="text/javascript">
-									var update_url = "http://download.goma-cms.org/api/v1/gomadownloads.json?version={GOMA_VERSION}-{BUILD_VERSION}&add_fields=UpdateFile,UpdateVersion";
-									$(function(){
-										$("#loading").css("display", "block");
-										$.ajax({
-											dataType: "jsonp",
-											url: update_url,
-											success: function(data)
-											{
-												if(data.data[0] == null)
-												{
-													$("#update_response").html('<span style="color: #00aa00;">{$_lang_version_current}</span>');
-												} else
-												{
-														if(data.data[0].UpdateFile === false)
-														{
-															$("#update_response").html('<span style="color: #00aa00;">{$_lang_version_current}</span>');
-														} else
-														{
-															$("#update_response").html('<div style="color: #cc0000;">{$_lang_version_available}</div> <a href="http://download.goma-cms.org/download_goma/update/{GOMA_VERSION}-{BUILD_VERSION}">{$_lang_upgrade_to_next}</a>');
-														}
-												}
-												$("#loading").css("display", "none");
-											}
-										});
-									});
-								</script>
+								
 								<div id="home-container">
 									
 									<div id="left">
 										<div id="version" class="content_container">
 											<h2>Goma {$_lang_version}</h2>
 											<div>
-												<div>{$_lang_version}: {GOMA_VERSION} - {BUILD_VERSION}</div>
-												<div id="loading" style="display: none;">Checking updates ...</div>
-												<div>
-													<div id="update_response"></div>
-												</div>
+												<table class="versionTable" width="100%">
+													<% CONTROL Software() %>
+														<% IF NOT $software.white %>
+															<tr class="grey">
+														<% ELSE %>
+															<tr class="white">
+														<% END %>
+															<td class="icon">
+																<% IF $software.icon %>
+																	<img src="$software.icon" alt="" />
+																<% END %>
+															</td>
+															<td class="name">
+																$software.title
+															</td>
+															<td class="version">
+																$software.version
+															</td>
+														</tr>
+													<% ENDCONTROL %>
+												</table>
+												<a href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}</a>
+												<% IF DEV_MODE %>
+													<a href="{BASE_SCRIPT}dev/buildDistro" class="button"><% lang("distro_build", "build a version") %></a>
+												<% END %>
 											</div>
 										</div>
+									</div>
+									<div id="right">
 										<div id="cache" class="content_container">
 											<h2>{$_lang_del_cache}</h2>
 											<div>
@@ -208,19 +207,20 @@
 												<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
 											</div>
 										</div>
-									</div>
-									<div id="right">
-									
-										<div id="database" class="content_container">
-											<h2>{$_lang_database}</h2>
-											<div>
-												<p class="info">{$_lang_db_update_info}</p>
-												<a href="dev">{$_lang_db_update}</a>
+										<% IF DEV_MODE %>
+											<div id="database" class="content_container">
+												<h2>{$_lang_database}</h2>
+												<div>
+													<p class="info">{$_lang_db_update_info}</p>
+													<a class="button" href="dev">{$_lang_db_update}</a>
+												</div>
 											</div>
-										</div>
+										<% END %>
 									</div>
 									
 									<div class="clear"></div>
+									
+									
 								</div>
 							</div>
 						<% END %>

@@ -98,7 +98,7 @@ class ROOTImage extends GD
 		 *@access public
 		*/
 		public function createThumb($width = null, $height = null, $cornerLeft, $cornerTop, $thumbWidth, $thumbHeight, $forceSize = false) {
-			$file = ROOT . CACHE_DIRECTORY . "/thumb.{$width}_{$height}_{$cornerLeft}_{$cornerTop}_{$thumbWidth}_{$thumbHeight}_{$forceSize}_{$this->md5}.{$this->extensions}";
+			$file = ROOT . CACHE_DIRECTORY . "/thumb.{$width}_{$height}_{$cornerLeft}_{$cornerTop}_{$thumbWidth}_{$thumbHeight}_{$forceSize}_{$this->md5}.{$this->extension}";
 			if(file_exists($file))
 			{
 					return new GD($file);

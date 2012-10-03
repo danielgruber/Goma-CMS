@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 13.06.2011
-  * $Version 2.0.0 - 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.05.2012
+  * $Version 2.0.5
 */   
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -15,23 +15,32 @@ loadlang("pm");
 class PM extends DataObject
 {
 		public $db_fields = array(
-			"subject"	=> "varchar(200)",
 			"text"		=> "text",
 			"time"		=> "int(20)",
 			"sig"		=> "int(1)",
 			"hasread"	=> "int(1)",
-			"tid"		=> "int(10)"
 		);
+		
+		/**
+		 * relations to the users
+		 *
+		 *@name has_one
+		 *@access public
+		*/
 		public $has_one = array(
 			"from"		=> "user", 
 			"to"		=> "user"
 		);
-		public $writeFields = array(
-			'fromid' => 'userids'
-		);
+		
+		/**
+		 * define insert-right
+		*/
 		public $add_rights = 2;
-		public $orderby = array("type" => "DESC", "field" => "time");
-		public $pages = true;
+		
+		/**
+		 * define default-sort
+		*/
+		public static $default_sort = array("field" => "time", "type" => "asc");
 		/**
 		 * from 
 		*/
@@ -46,55 +55,28 @@ class PM extends DataObject
 						return true;
 				} else
 				{
-						// check if new message
-						if($data["id"] == $data["tid"])
-								return true;
-						
-						// check if right thread
-						$d = DataObject::get("pm", array("id" => $data["tid"]));
-						if(($d["fromid"] == member::$id || $d["toid"] == member::$id) && member::$id != 0)
+						if($data["fromid"] == member::$id && member::login())
 								return true;
 								
 						return false;
 				}
 		}
-		public function getForm(&$form, $data)
+		/**
+		 * generates the form for this model
+		 *
+		 *@name getForm
+		 *@access public
+		*/
+		public function getForm(&$form)
 		{
-				if(defined("THREAD_ID"))
-				{
-						$form->addValidator(new RequiredFields(array("text")), "required_fields");
-						$form->name = "pm";
-						$_data = DataObject::get("pm", array("id" => THREAD_ID));
-						$form->add(new HiddenField("tid", THREAD_ID));
-						if($_data["fromid"] == $_SESSION["user_id"])
-								$form->add(new HiddenField("toid", $_data["toid"]));
-						else
-								$form->add(new HiddenField("toid", $_data["fromid"]));
-						
-						$form->add(new HiddenField("fromid", $_SESSION["user_id"]));
-						$form->add(new HiddenField("subject", $_data["subject"]));
-						$form->add(new BBCodeEditor("text", lang("pm_reply", "Reply")));
-						$form->add(new timefield("time"));
-						$form->add(new Checkbox("sig",lang("pm_add_sig"), 0));
-						$form->addAction(new AjaxSubmitButton("submit", lang("pm_send", "send"), "ajaxsave", "safe"));
-						
-				} else
-				{
-						$form->add(new HTMLField("title", "<h2>" . lang("mem_send_message") . "</h2>"));
-						$form->addValidator(new RequiredFields(array("text")), "required_fields");
-						$form->add(new HiddenField("fromid", $_SESSION["user_id"]));
-						$form->add(new HasOneDropDown("to", lang("pm_to", "to"), "nickname"));
-						$form->add(new TextField("subject", lang("pm_subject", "Subject")));
-						$form->add(new BBCodeEditor("text",  lang("message", "Message")));
-						$form->add(new timefield("time"));
-						$form->add(new Checkbox("sig",lang("pm_add_sig"), 1));
-						if(Core::is_ajax())
-								$form->addAction(new AjaxSubmitButton("send", lang("save", "save"), "ajaxsend", "safe"));
-						else
-								$form->addAction(new FormAction("send", lang("save", "save")));
-						
-				}
+				$form->addValidator(new RequiredFields(array("text", "toid")), "required_fields");
+				$form->add(new HiddenField("fromid", member::$id));
+				$form->add(new HasOneDropDown("to", lang("pm_to", "to"), "nickname"));
 				
+				$form->add(new BBCodeEditor("text",  lang("message", "Message")));
+				$form->add(new timefield("time"));
+				$form->add(new Checkbox("sig",lang("pm_add_sig"), 1));
+				$form->addAction(new AjaxSubmitButton("send", lang("lp_submit", "send"), "ajaxsave"));
 				
 		}
 		/**
@@ -113,24 +95,39 @@ class PM extends DataObject
 		*/
 		public function getPreview()
 		{
-				$data = DataObject::get("pm", array("tid" => $this->tid, "OR", "id" => $this->tid), array("pm.id", "DESC"), array(0, 1));
-				if(strlen($data["text"]) > 99)
-				{
-						return substr($this->fieldGet("text"), 0, 96) . "...";
-				} else
-				{
-						return $data["text"];
+				if($data = DataObject::get_one("pm", array("fromid" => $this->fromid, "OR", "toid" => $this->fromid), array("pm.id", "DESC"))) {
+					if(strlen($data["text"]) > 99)
+					{
+							return substr($this->fieldGet("text"), 0, 96) . "...";
+					} else
+					{
+							return $data["text"];
+					}	
+				} else {
+					return falsE;
 				}
 		}
+		
 		/**
-		 * sets the id
+		 * returns if thread was read
+		 *
+		 *@name threadRead
+		 *@access public
 		*/
-		public function setID($id)
-		{
-				$this->setField("id", $id);
-				if($this->fieldGet("tid") == "")
-					$this->setField("tid", $id);
+		public function threadRead() {
+			return !(DataObject::Count("pm", array("fromid" => $this->fromid, "hasread" => 0)) > 0);
 		}
+		
+		/**
+		 * returns the date the thread was last touched
+		 *
+		 *@name threadLastModified
+		 *@access public
+		*/
+		public function threadLastModified() {
+			return DataObject::get_one("pm", array(array("fromid" => $this->fromid, "OR", "toid" => $this->fromid)), array("id", "DESC"))->time;
+		}
+		
 		/**
 		 * gets the text
 		*/
@@ -151,16 +148,31 @@ class PM extends DataObject
 		 *@access public
 		*/
 		public function getTid() {
-			if($this->fieldGet("tid") == 0) {
-				return $this->id;
-			} else {
-				$this->fieldGet("tid");
-			}
+			return $this->fromid;
+		}
+		
+		/**
+		 * reply-form
+		 *
+		 *@name reply_form
+		 *@access public
+		*/
+		public function reply_form() {
+			$form = $this->controller()->buildForm("reply_form", new PM());
+			$form->remove("toid");
+			$form->add(new HiddenField("toid", $this->with->id));
+			return $form->render();
 		}
 }
 
 class PMController extends FrontedController
 {
+		/**
+		 * url handlers
+		 *
+		 *@name url_handlers
+		 *@access public
+		*/
 		public $url_handlers = array(
 			"inbox" 	=> "showInBox",
 			'new/$id'	=> "new_message",
@@ -169,6 +181,12 @@ class PMController extends FrontedController
 			'$id!'		=> "showThread"
 		);
 		
+		/**
+		 * allowed actions
+		 *
+		 *@name allowed_actions
+		 *@access public
+		*/
 		public $allowed_actions = array(
 			"showInBox"		=> 2,
 			"showThread"	=> 2,
@@ -177,6 +195,30 @@ class PMController extends FrontedController
 			"delete"
 		);
 		
+		/**
+		 * activates the live-counter on this controller
+		 *
+		 *@name live_counter
+		 *@access public
+		*/
+		public static $live_counter = true;
+		
+		/**
+		 * always show inbox in breadcrumb
+		 *
+		 *@name pagetitle
+		 *@access public
+		*/
+		public function pagetitle() {
+			return lang("pm_inbox");
+		}
+		
+		/**
+		 * gcreate new message
+		 *
+		 *@name new_message
+		 *@access public
+		*/
 		public function new_message()
 		{
 				$to = $this->getParam("id");
@@ -189,36 +231,7 @@ class PMController extends FrontedController
 				Core::setTitle(lang("mem_send_message", "send message"));
 				return $this->Form("pm", $model);
 		}
-		/**
-		 * deletes a thread
-		 *@name deleteThread
-		 *@access public
-		*/
-		public function deleteThread($object = null)
-		{
-				
-				$id = $this->request->getParam("id");
-				$data = DataObject::get($this->model, array("tid" => $id));
-				
-				if(!$this->modelInst()->canDelete($data))
-					return $GLOBALS["lang"]["less_rights"];
-				
-					
-				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"))) {
-					$_data = clone $data;
-					$data->_delete();
-					if(request::isJSResponse()) {
-						$response = new AjaxResponse();
-						if($object !== null)
-							return $object->hideDeletedObject($response, $_data);
-						else 
-							return $this->hideDeletedObject($response, $_data);
-					} else {
-						$this->redirectback();
-					}
-				}
-				
-		}
+		
 		/**
 		 * index
 		*/
@@ -234,10 +247,8 @@ class PMController extends FrontedController
 				if(!Member::login()) 
 					HTTPResponse::redirect(BASE_URI);
 				
-				Core::addBreadCrumb(lang("pm_inbox"), "pm/");
-				Core::setTitle(lang("pm_inbox"));
-				$object = DataObject::get("pm", ' `toid` = "'.member::$id.'"');
-				$data = $object->getGroupedSet("tid");
+				$object = DataObject::get("pm", array("toid" => member::$id));
+				$data = $object->getGroupedSet("fromid");
 				return $data->renderWith("pm/inbox.html");
 		}
 		/**
@@ -245,8 +256,8 @@ class PMController extends FrontedController
 		*/
 		public static function countNew()
 		{
-				if(isset($_SESSION["user_id"]))
-						return DataObject::count("pm", array("toid" => $_SESSION["user_id"], "hasread" => 0), array(), "tid");
+				if(isset(member::$id))
+						return DataObject::count("pm", array("toid" => member::$id, "hasread" => 0), array(), "fromid");
 				else
 						return 0;
 		}
@@ -259,22 +270,15 @@ class PMController extends FrontedController
 				$id = $this->getParam("id");
 				if($id == 0)
 					return false;
-				$data = DataObject::get("pm", array(array("tid" => $id, "OR", "id" => $id), array("fromid" => member::$id, "OR", "toid" => member::$id)));
-											
+				$data = DataObject::get("pm", array(array("fromid" => $id, "OR", "toid" => $id)));
 				if($data->Count() > 0)
 				{
-						DataObject::update("pm", array("hasread" => 1), "(pm.tid = '".dbescape($id)."' OR pm.id = '".dbescape($id)."') AND toid = '".dbescape(member::$id)."'");
+						DataObject::update("pm", array("hasread" => 1), array("fromid" => $id));
 						Core::addBreadCrumb(lang('pm_inbox', 'InBox'), 'pm/');
 						Core::addBreadCrumb(lang("pm_read", "read message"), "pm/" . $id . URLEND);
+						Core::setTitle(lang("pm_read", "read message"));
 						
-						
-						define("THREAD_ID", $id);
-						
-						if($data->first()->subject) {
-							Core::setTitle($data->first()->subject . " - " . lang("pm_read", "read message"));
-						} else {
-							Core::setTitle(lang("pm_read", "read message"));
-						}
+						$data->customise(array("with" => DataObject::Get_One("user", array("id" => $id))));
 						
 						return $data->renderWith("pm/thread.html");
 				} else
@@ -295,9 +299,10 @@ class PMController extends FrontedController
 						$model->avatar = $model->from()->avatar;
 						$model->user_id = member::$id;
 						
-						$response->prependHighlighted("#message_thread",$model->renderWith("pm/message.html"));
+						$response->appendHighlighted("#message_thread",$model->renderWith("pm/message.html"));
 						$response->exec("location.href = location.pathname + '#message_".$model->id."';");
 						$response->exec("$('#".$form->fields["text"]->id()."').val('');");
+						$response->exec('if(ajax_button.parents(".dropdownDialog").length > 0) { var dialog = dropdownDialog.get(ajax_button.parents(".dropdownDialog").attr("id")); dialog.closeButton = false; dialog.setContent("<div class=\"success\">'.lang("pm_sent").'</div>"); setTimeout(function(){ dialog.hide();}, 3000); }');
 						return $response->render();
 				} else
 				{
@@ -313,7 +318,7 @@ class PMController extends FrontedController
 		public function ajaxsend($data,$response)
 		{
 				$model = $this->save($data);
-				$response->exec(dialog::closeByID($_GET["boxid"]));
+				$response->exec('dropdownDialog.get(ajax_button.parents(".dropdownDialog").attr("id")).hide();');
 				return $response->render();
 		}
 		/**
@@ -325,6 +330,25 @@ class PMController extends FrontedController
 			}
 			
 			return parent::serve($content);
+		}
+		
+		/**
+		 * default save-method for forms
+		 * it's the new one, the old one was @safe
+		 *
+		 *@name submit_form
+		 *@access public
+		*/
+		public function submit_form($data) {
+			if($this->save($data) !== false)
+			{
+				AddContent::addSuccess(lang("pm_sent", "The message was successfully sent!"));
+				$this->redirectBack();
+			} else
+			{
+				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+				throwError(6, 'Server-Error', 'Could not save data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			}
 		}
 		
 }
@@ -341,5 +365,33 @@ class PMProfileExtension extends ControllerExtension {
 	}
 }
 Object::extend("ProfileController", "PMProfileExtension");
+
+class PMTemplateExtension extends Extension {
+	/**
+	 * adds a method to view in template how many message are unread
+	*/
+	
+	/**
+	 * register method
+	 *
+	 *@name extra_methods
+	 *@access public
+	*/
+	public static $extra_methods = array(
+		"PM_Unread"
+	);
+	
+	/**
+	 * method
+	 *
+	 *@name PM_Unread
+	 *@access public
+	*/
+	public function PM_Unread() {
+		return DataObject::get("pm", array("toid" => member::$id, "hasRead" => 0))->getGroupedSet("fromid")->Count();
+	}
+}
+
+Object::extend("tplCaller", "PMTemplateExtension");
 
 Core::addRules(array("pm" => "PMController"), 10);

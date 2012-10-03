@@ -1,30 +1,53 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 04.09.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 07.09.2012
+  * $Version 1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::addSaveVar("gLoader", "resources");
 
-class gLoader extends Object
+class gLoader extends Controller
 {
+		const VERSION = "1.1";
+		/**
+		 * url-handlers
+		 *
+		 *@name url_handlers
+		 *@access public
+		*/
+		public $url_handlers = array(
+			"\$name"	=> "deliver"
+		);
+		
+		/**
+		 * allowed actions
+		*/
+		public $allowed_actions = array(
+			"deliver"
+		);
+		
 		/**
 		 * loadable resources
+		 *
 		 *@name resources
 		 *@access public
 		*/
 		public static $resources = array();
+		
 		/**
 		 * preloaded resources
+		 *
 		 *@name preloaded
 		 *@access public
 		*/
 		public static $preloaded = array();
+		
 		/**
 		 * adds a loadable resource
 		 *@name addLoadAble
@@ -41,6 +64,7 @@ class gLoader extends Object
 					"required"	=> $required
 				);
 		}
+		
 		/**
 		 * this is the php-function for the js-function gloader.load, it loads it for pageload
 		 *@name load
@@ -60,5 +84,130 @@ class gLoader extends Object
 						}
 						self::$preloaded[$name] = true;
 				}
+		}
+		
+		/**
+		 * delivers a specified resource
+		 *
+		 *@name deliver
+		 *@access public
+		*/
+		public function deliver() {
+			$name = $this->getParam("name");
+			if(substr($name, -3) == ".js") {
+				$name = substr($name, 0, -3);
+			}
+			
+			HTTPResponse::addHeader('content-type', "text/javascript");
+			if(isset(self::$resources[$name])) {
+				HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
+				HTTPResponse::addHeader("pragma","Public");
+				
+				$data = self::$resources[$name];
+				if(file_exists($data["file"])) {
+					$mtime = 0;
+					$this->checkMTime($name, $data, $mtime);
+					
+					$etag = strtolower(md5("gload_" . $name . "_" . md5(var_export($data, true)) . "_" . $mtime));
+					HTTPResponse::addHeader("Etag", '"'.$etag.'"');
+					
+					// 304 by HTTP_IF_MODIFIED_SINCE
+					if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
+					{					
+							if(strtolower(gmdate('D, d M Y H:i:s', $mtime).' GMT') == strtolower($_SERVER['HTTP_IF_MODIFIED_SINCE']))
+							{
+									HTTPResponse::setResHeader(304);
+									HTTPResponse::sendHeader();
+									if(PROFILE)
+										Profiler::End();
+										
+									exit;
+							}
+					}
+					// 304 by ETAG
+					if(isset($_SERVER["HTTP_IF_NONE_MATCH"]))
+					{
+							if($_SERVER["HTTP_IF_NONE_MATCH"] == '"' . $etag . '"')
+							{
+									HTTPResponse::setResHeader(304);
+									HTTPResponse::sendHeader();
+									
+									if(PROFILE)
+										Profiler::End();
+									
+									exit;
+							}
+					}
+					
+					$temp = ROOT . CACHE_DIRECTORY . '/gloader.' . $name . self::VERSION . "." . md5(var_export($data, true)) . ".js";
+					$expiresAdd = defined("DEV_MODE") ? 3 * 60 * 60 : 48 * 60 * 60;
+					HTTPResponse::setCachable(NOW + $expiresAdd , $mtime, true);
+					if(!file_exists($temp) || filemtime($temp) < $mtime) {
+						FileSystem::write($temp, $this->buildFile($name, $data));
+					}
+
+					HTTPResponse::sendHeader();
+					readfile($temp);
+					exit;
+				} else {
+					exit;
+				}
+			} else {
+				exit;
+			}
+		}
+		
+		/**
+		 * this is building the file and modifiing mtime
+		 *
+		 *@name buildFile
+		 *@access protected
+		*/
+		protected function buildFile($name, $data) {
+			$js = "";
+			if($data["required"]) {
+				foreach($data["required"] as $_name) {
+					if(isset(self::$resources[$_name])) {
+						if(file_exists(self::$resources[$_name]["file"])) {
+							$js .= $this->buildFile($_name, self::$resources[$name]);
+						} else {
+							header("HTTP/1.1 404 Not Found");
+							exit;
+						}
+					}
+				}
+			}
+			
+			$js .= 'gloader.loaded["'.$name.'"] = true;' . "\n\n";
+			
+			$js .= jsmin::minify(file_get_contents($data["file"]));
+			
+			return $js;
+		}
+		
+		/**
+		 * this is for checking cache active
+		 *
+		 *@name buildMTime
+		 *@access protected
+		*/
+		protected function checkMTime($name, $data, &$mtime) {
+			if($data["required"]) {
+				foreach($data["required"] as $_name) {
+					if(isset(self::$resources[$_name])) {
+						if(file_exists(self::$resources[$_name]["file"])) {
+							$this->checkMTime($_name, self::$resources[$name], $mtime);
+						} else {
+							return false;
+						}
+					}
+				}
+			}
+			
+			if($mtime < filemtime($data["file"])) {
+				$mtime = filemtime($data["file"]);
+			}
+			
+			
 		}
 }

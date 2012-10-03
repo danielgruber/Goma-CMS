@@ -1,10 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 24.10.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 03.09.2012
+  * $Version 1.1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -39,12 +40,9 @@ class Boxes extends DataObject {
 		"view"	=> array("type"	=> "INDEX", "fields" => "seiteid,sort", "name"	=> "_show")
 	);
 	/**
-	 * orderby
+	 * sort
 	*/
-	public $orderby = array(
-		"field"	=> "sort",
-		"type"	=> "ASC"
-	);
+	public static $default_sort = "sort ASC";
 	/**
 	 * generates the form to add boxes
 	*/
@@ -59,7 +57,7 @@ class Boxes extends DataObject {
 	 * generates form-actions
 	*/
 	public function getActions(&$form) {
-		$form->addAction(new FormAction("cancel", lang("cancel")));
+		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		if(Core::is_ajax()) {
 			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave"));
 		} else {
@@ -84,12 +82,15 @@ class Boxes extends DataObject {
 	/**
 	 * permissions
 	*/
-	public function providePermissions()
+	public function providePerms()
 	{
 			return array(
-				"BOXES_ALL"	=> array(
+				"BOXES"	=> array(
 					"title"		=> '{$_lang_admin_boxes}',
-					"default"	=> 7
+					"default"	=> array(
+						"type"		=> "admins",
+						"inherit"	=> "ADMIN"
+					)
 				)
 			);
 	}
@@ -157,7 +158,7 @@ class BoxesController extends FrontedController {
 	 *@name canEdit
 	*/
 	public function canEdit() {
-		if(!Permission::check("BOXES_ALL"))
+		if(!Permission::check("BOXES"))
 			return false;
 		
 		if(_ereg("^[0-9]+$", $this->getParam("pid"))) {
@@ -235,7 +236,7 @@ class BoxesController extends FrontedController {
 		if(isset($pid)) {
 			$this->modelInst(DataObject::get("boxes", array("seiteid" => $pid)));
 		}
-		return $this->modelInst()->customise(array("id" => $this->model_inst->seiteid))->renderWith("boxes/boxes.html");
+		return $this->modelInst()->customise(array("pageid" => $this->model_inst->seiteid))->renderWith("boxes/boxes.html");
 	}
 	/**
 	 * hides the deleted object
@@ -386,6 +387,7 @@ class boxpage extends Page
 		{
 				return BoxesController::renderBoxes($this->fieldGet("id"));
 		}
+
 }
 class boxPageController extends PageController
 {
@@ -394,13 +396,29 @@ class boxPageController extends PageController
 		 *@var string
 		*/
 		public $template = "pages/box.html";
+		
+		
+		/**
+		 * generates a button switch-view
+		 *
+		 *@name frontedBar
+		 *@access public
+		*/
+		public function frontedBar() {
+			$arr = parent::frontedBar();
+			
+			if(isset($_SESSION["adminAsUser"])) {
+				$arr[] = array(
+						"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
+						"title"			=> lang("switch_view_edit_on", "enable edit-mode")
+					);
+			} else {
+				$arr[] = array(
+						"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
+						"title"			=> lang("switch_view_edit_off", "disable edit-mode")
+					);
+			}
+			
+			return $arr;
+		}
 }
-
-
-Autoloader::$loaded["box"] = true;
-Autoloader::$loaded["boxcontroller"] = true;
-Autoloader::$loaded["login_meinaccount"] = true;
-Autoloader::$loaded["boxes"] = true;
-Autoloader::$loaded["boxescontroller"] = true;
-Autoloader::$loaded["boxpage"] = true;
-Autoloader::$loaded["boxpagecontroller"] = true;

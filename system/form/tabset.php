@@ -1,17 +1,25 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 31.07.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 25.03.2012
+  * $Version 2.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TabSet extends FieldSet
 {
-		public function __construct($name, $fields, $form = null)
+		/**
+		 *@name __construct
+		 *@access public
+		 *@param string - name
+		 *@param array - fields
+		 *@param null|object - form
+		*/
+		public function __construct($name, $fields, &$form = null)
 		{
 				parent::__construct($name, $fields, null, $form);
 							
@@ -25,7 +33,7 @@ class TabSet extends FieldSet
 		*/
 		public function field()
 		{
-				Profiler::mark("FieldSet::field");
+				if(PROFILE) Profiler::mark("FieldSet::field");
 				
 				$this->callExtending("beforeField");
 				
@@ -99,8 +107,9 @@ class TabSet extends FieldSet
 				}
 				
 				$this->callExtending("afterField");
+				$this->container->addClass("hidden");
 				
-				Profiler::unmark("FieldSet::field");
+				if(PROFILE) Profiler::unmark("FieldSet::field");
 				
 				return $this->container;
 		}

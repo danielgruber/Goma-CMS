@@ -12,8 +12,6 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 loadFramework(); // set up the framework
 
-require(APP_FOLDER . "application/config.php");
-
 if(fopen(APP_FOLDER . "data/apps/write.test", "w")) {
 	@unlink(APP_FOLDER . "data/apps/write.test");
 } else {

@@ -2,8 +2,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 07.09.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.02.2012
 */
 
 $(function(){
@@ -102,7 +102,7 @@ function loadVersionToView(id) {
 			$("#version_name").html('' + $("#version_" + self.active_version).find("span").html());
 		},
 		error: function() {
-			alert("Error on parsing the data.");
+			alert("Error at parsing the data.");
 		}
 	});
 }

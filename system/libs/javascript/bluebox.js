@@ -7,6 +7,16 @@
  *@requires draggable
 */
 
+
+/* bluebox */
+var boxcount = 0;
+var blueboxes = [];
+
+function getblueboxbyid(id)
+{
+		return self.blueboxes[id];
+}
+
 function bluebox(url, title, _class, drag)
 {
 		this.url = url;
@@ -20,7 +30,7 @@ function bluebox(url, title, _class, drag)
 		{
 				var addclass = " " + _class;
 		}
-		$("body").append('<div id="bluebox_'+self.boxcount+'" class="bluebox bluebox_wrapper '+addclass+'">\
+		getDocRoot().append('<div id="bluebox_'+self.boxcount+'" class="bluebox bluebox_wrapper '+addclass+'">\
 							<table class="bluebox_container windowzindex" cellspacing="0" cellpadding="0">\
 								<tr>\
 									<td class="con_shadow" style="width: 16px;height: 16px;background-image: url(system/templates/css/images/tl.png);background-repeat: no-repeat;"></td>\

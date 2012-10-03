@@ -1,17 +1,32 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 18.05.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 25.08.2012
+  * $Version 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class FormAction extends FormField
+class FormAction extends FormField implements FormActionHandler
 {
-		public $submit;
+		/**
+		 * the submission-method on the controller for this form-action
+		 *
+		 *@name submit
+		 *@access protected
+		*/
+		protected $submit;
+		
+		/**
+		 * defines that these fields doesn't have a value
+		 *
+		 *@name hasNoValue
+		*/
+		public $hasNoValue = true;
+		
 		/**
 		 *@name __construct
 		 *@access public
@@ -20,9 +35,9 @@ class FormAction extends FormField
 		 *@param string - optional submission
 		 *@param object - form
 		*/
-		public function __construct($name, $value, $submit = null, $form = null)
+		public function __construct($name, $value, $submit = null, $classes = null, &$form = null)
 		{
-				parent::__construct($name, $value, null, null);
+				parent::__construct($name, $value);
 				if($submit === null)
 						$submit = "@default";
 				
@@ -32,7 +47,21 @@ class FormAction extends FormField
 						$this->parent = $form;
 						$this->setForm($form);
 				}
+				
+				if(isset($classes))
+					if(is_array($classes))
+						foreach($classes as $class)
+							$this->addClass($class);
+					else
+						$this->addClass($class);
 		}
+		
+		/**
+		 * generates the node
+		 *
+		 *@name createNode
+		 *@access public
+		*/
 		public function createNode()
 		{
 				$node = parent::createNode();
@@ -41,6 +70,7 @@ class FormAction extends FormField
 				$node->addClass("formaction");
 				return $node;
 		}
+		
 		/**
 		 * renders the field
 		 *@name field
@@ -48,7 +78,7 @@ class FormAction extends FormField
 		*/
 		public function field()
 		{
-				Profiler::mark("FormAction::field");
+				if(PROFILE) Profiler::mark("FormAction::field");
 				
 				$this->callExtending("beforeField");
 				$this->input->val($this->title);
@@ -60,31 +90,11 @@ class FormAction extends FormField
 				
 				$this->callExtending("afterField");
 				
-				Profiler::unmark("FormAction::field");
+				if(PROFILE) Profiler::unmark("FormAction::field");
 				
 				return $this->container;
 		}
-		/**
-		 * sets the parent form-object
-		 *@name setForm
-		 *@access public
-		*/
-		public function setForm($form)
-		{
-				if(is_object($form))
-				{
-						$this->parent = $form;
-						$this->form()->actions[$this->name] = array(
-							'field'	 	=> $this,
-							'submit'	=> $this->submit
-						);
-						$this->form()->fields[$this->name] = $this;
-						$this->renderAfterSetForm();
-						
-				}
-				else
-						throwError(6, 'PHP-Error', '$form is no object in '.__FILE__.' on line '.__LINE__.'');
-		}
+		
 		/**
 		 * returns if submit or not
 		 *
@@ -92,7 +102,51 @@ class FormAction extends FormField
 		 *@access public
 		 *@param submission
 		*/
-		public function canSubmit($submission) {
+		public function canSubmit() {
 			return true;
+		}
+		
+		/**
+		 * sets the submit-method
+		 *
+		 *@name setSubmit
+		 *@access public
+		*/
+		public function setSubmit($submit) {
+			$this->submit = $submit;
+		}
+		
+		/**
+		 * returns the submit-method
+		 *
+		 *@name getSubmit
+		 *@access public
+		*/
+		public function getSubmit() {
+			return $this->submit;
+		}
+		
+		/**
+		 * here you can add classes or remove some
+		*/
+		
+		/**
+		 * adds a class to the input
+		 *
+		 *@name addClass
+		 *@access public
+		*/
+		public function addClass($class) {
+			$this->input->addClass($class);
+		}
+		
+		/**
+		 * removes a class from the input
+		 *
+		 *@name removeClass
+		 *@access public
+		*/
+		public function removeClass($class) {
+			$this->input->removeClass($class);
 		}
 }

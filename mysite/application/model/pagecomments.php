@@ -1,15 +1,14 @@
 <?php
 /**
-  * Goma Test-Framework
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 14.09.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 13.07.2012
+  * $Version 1.1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 
 loadlang('comments');
 
@@ -19,17 +18,45 @@ class PageComments extends DataObject
 		public $db_fields = array('name' 		=> 'varchar(200)',
 								  'text'        => 'text',
 								  'timestamp'   => 'int(200)');
+								  
+		/**
+		 * has-one-relation to page
+		 *
+		 *@name has_one
+		 *@access public
+		*/
 		public $has_one = array('page' => 'pages'); // has one page
-		public $orderby = array("type" => "DESC", "field" => "timestamp"); // order
+		
+		/**
+		 * sort
+		 *
+		 *@name default_sort
+		 *@access public
+		*/
+		public static $default_sort = "timestamp DESC";
+		
 		/**
 		 * rights
 		*/
-		public $insertRights = 1;
 		public $writeField = "autorid";
+		
+		/**
+		 * indexes for faster look-ups
+		*/
 		public $indexes = array("name" => true);
 		
 		/**
-		 * forms
+		 * insert is always okay
+		*/ 
+		public function canInsert() {
+			return true;
+		}
+		
+		/**
+		 * generates the form
+		 *
+		 *@name getForm
+		 *@access public
 		*/
 		public function getForm(&$form)
 		{
@@ -41,12 +68,18 @@ class PageComments extends DataObject
 						$form->add(new TextField("name", lang("name", "Name")));
 				}
 				$form->add(new TimeField("timestamp"));
-				$form->add(new BBCodeEditor("text", lang("text", "text")));
-				$form->addAction(new AjaxSubmitButton("save", lang("save", "save"),  "ajaxsave","safe"));
-				$form->addValidator(new RequiredFields(array("text", "name")), "fields");
+				$form->add(new BBCodeEditor("text", lang("text", "text"), null, null, null, array("showAlign" => false)));
+				if(!member::login())
+					$form->add(new Captcha("captcha"));
+				$form->addAction(new AjaxSubmitButton("save", lang("co_add_comment", "add comment"),  "ajaxsave","safe"));
+				$form->addValidator(new RequiredFields(array("text", "name", "captcha")), "fields");
 		}
+		
 		/**
 		 * edit-form
+		 *
+		 *@name getEditForm
+		 *@access public
 		*/
 		public function getEditForm(&$form)
 		{
@@ -61,6 +94,7 @@ class PageComments extends DataObject
 class PageCommentsController extends FrontedController
 {
 		public $allowed_actions = array("edit", "delete");
+		
 		public $template = "comments/comments.html";
 		/**
 		 * ajax-save
@@ -75,6 +109,7 @@ class PageCommentsController extends FrontedController
 						return $response->render();
 				} else
 				{
+						debug_log(print_r(debug_backtrace(), true));
 						$response->exec(new Dialog("Could not save data.", "error"));
 						return $response->render();
 				}
@@ -117,13 +152,9 @@ class PageCommentsDataObjectExtension extends DataObjectExtension {
 	 * make extra fields to form
 	*/
 	public function getForm(&$form) {
-		$form->tabs->add($commentstab = new Tab("pagecomments", array(
-			
-			new ObjectRadioButton('showcomments',lang("co_comments"), array(1 => 
+		$form->meta->add(new ObjectRadioButton('showcomments',lang("co_comments"), array(1 => 
 				$GLOBALS['lang']['yes'],
-				0 => $GLOBALS['lang']['no'])),
-			//new HasManyComplexTableField("comments", "", array(), array("name" => lang("name", "Name"), "text" => lang("text", "Text")), null, null, array(), array("add"))
-		), lang("co_comments", "Pagecomments")), 2);
+				0 => $GLOBALS['lang']['no'])));
 	}
 	/**
 	 * append content to sites if needed
@@ -148,10 +179,10 @@ class PageCommentsControllerExtension extends ControllerExtension {
 		"pagecomments"
 	);
 	public function pagecomments()  {
-		if($this->getOwner()->showcomments)
-			return $this->getOwner()->model_inst->comments()->controller()->handleRequest($this->controller->request);
+		if($this->getOwner()->modelInst()->showcomments)
+			return $this->getOwner()->modelInst()->comments()->controller()->handleRequest($this->getOwner()->request);
 	}
 }
 
 Object::extend("pages", "PageCommentsDataObjectExtension");
-Object::extend("pageController", "PageCommentsControllerExtension");
+Object::extend("contentController", "PageCommentsControllerExtension");

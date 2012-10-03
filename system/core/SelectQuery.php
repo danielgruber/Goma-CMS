@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 07.11.2011
-  * $Version: 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 13.06.2012
+  * $Version: 2.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -379,7 +379,7 @@ class SelectQuery extends Object
 		*/
 		public function build($fields = null) {
 			
-			Profiler::mark("SelectQuery::build");
+			if(PROFILE) Profiler::mark("SelectQuery::build");
 			
 			
 			// first make a index of all fields and check for coliding fields
@@ -584,10 +584,16 @@ class SelectQuery extends Object
 						$sql .= " LIMIT ";
 						if(count($this->limit) == 2)
 						{
-								$sql .= " ".$this->limit[0].", ".$this->limit[1]."";
+							if($this->limit[0] < 0)
+								$this->limit[0] = 0;
+							
+							if($this->limit[1] < 0)
+								$this->limit[0] = 0;
+														
+							$sql .= " ".$this->limit[0].", ".$this->limit[1]."";
 						} else
 						{
-								$sql .= $this->limit[0];
+							$sql .= $this->limit[0];
 						}
 				}
 			} else if(!empty($this->limit))

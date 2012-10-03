@@ -3,27 +3,32 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 01.11.2011
-  * $Version 002
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 26.05.2012
+  * $Version 2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+loadlang('backup');
 
 class InstallController extends RequestHandler {
 	/**
 	 * url_handlers
 	*/
 	public $url_handlers = array(
-		"installapp/\$app!" => "installApp",
-		"execInstall"		=> "execInstall"
+		"installapp/\$app!" 		=> "installApp",
+		"execInstall/\$rand!"		=> "execInstall",
+		"restore"					=> "selectRestore"
 	);
+	
 	/**
 	 * actions
 	*/
 	public $allowed_actions = array(
-		"install", "installApp", "langselect", "execInstall"
+		"install", "installApp", "langselect", "execInstall", "selectRestore", "showRestore", "installBackup", "installFormBackup"
 	);
+	
 	/**
 	 * shows install fronted if language is already selected, else shows lang-select
 	*/
@@ -34,6 +39,7 @@ class InstallController extends RequestHandler {
 			HTTPResponse::Redirect(BASE_URI . BASE_SCRIPT . "/install/langselect/");
 		}
 	}
+	
 	/**
 	 * shows lang-select
 	 *
@@ -41,74 +47,34 @@ class InstallController extends RequestHandler {
 	*/
 	public function langSelect() {
 		$data = new ViewAccessAbleData();
-		return $data->renderWith("install/lang.html");
+		return $data->renderWith("install/langselect.html");
 	}
+	
 	/**
-	 * starts a goma-installation
+	 * lists apps to select
+	 *
+	 *@name install
+	 *@access public
 	*/
 	public function install() {
+		G_SoftwareType::forceLiveDB();
 		
-		$files = scandir(APP_FOLDER . "data/apps/");
-		$apps = array();
-		foreach($files as $app) {
-			if($app == "framework" || $app == "." || $app == ".." || !is_dir(APP_FOLDER . "data/apps/" . $app)) {
-				continue;
+		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+		if(!$data)
+			Dev::RedirectToDev();
+		
+		$apps = G_SoftwareType::listInstallPackages();
+		foreach($apps as $key => $val) {
+			$apps[$key]["app"] = $key;
+			if($val["plist_type"] != "backup") {
+				unset($apps[$key]);
 			}
-			
-			$appPackagePath = APP_FOLDER . "data/apps/" . $app ."/";
-			// then check updates for the app-setup
-			if(!file_exists($appPackagePath . ".latest_version") || filemtime($appPackagePath . "/.latest_version") < NOW + 86400 || filemtime($appPackagePath . "/.latest_version") < filemtime($appPackagePath)) {
-				$latestVersion = 0;
-				foreach(scandir($appPackagePath) as $file) {
-					if(preg_match('/^(.*)\.gfs$/i', $file, $matches)) {
-						if(version_compare($matches[1], $latestVersion, ">")) {
-							$latestVersion = $matches[1];
-						}
-					}
-				}
-				@chmod(APP_FOLDER . "data/apps/" . $app . "/", 0777);
-				file_put_contents($appPackagePath . "/.latest_version", $latestVersion);
-			}
-			
-			if(isset($latestVersion)) {
-				$version = $latestVersion;
-			} else {
-				$version = file_get_contents($appPackagePath . "/.latest_version");
-			}
-			
-			if($version == 0) {
-				continue;
-			}
-			
-			$apps[$app] = $app . " (V" . $version . ")";
 		}
 		
-		if(count($apps) == 1) {
-			$apps = array_keys($apps);
-			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "install/installApp/" . $apps[0]);
-		} else if(count($apps) == 0) {
-			return lang("install.no_app_found");
-		}
-		
-		$form = new Form($this, "appselect", array(
-			new HTMLField("select_app", '<p>' . lang("install.select_app") . '</p>'),
-			new Select("app", lang("install.app"), $apps)
-		), array(
-			new FormAction("save", lang("install.select"), "selectApp")
-		));
-		$form->addValidator(new RequiredFields(array("app")), "required");
-		
-		return $form->render();
+		$data = new DataSet($apps);
+		return $data->renderWith("install/selectApp.html");
 	}
-	/**
-	 * selects the app
-	 *
-	 *@name selectApp
-	*/
-	public function selectApp($data) {
-		HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "install/installApp/" . $data["app"]);
-		exit;
-	}
+	
 	/**
 	 * starts an installation of an specific app
 	 *
@@ -116,59 +82,33 @@ class InstallController extends RequestHandler {
 	 *@access public
 	*/
 	public function installApp() {
+		G_SoftwareType::forceLiveDB();
+		
+		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+		if(!$data)
+			Dev::RedirectToDev();
+		
+		$apps = G_SoftwareType::listInstallPackages();
+		
 		$app = $this->getParam("app");
-		if(file_exists(APP_FOLDER . "data/apps/" . $app . "/.latest_version")) {
-			$version = file_get_contents(APP_FOLDER . "data/apps/" . $app . "/.latest_version");
-			if(file_exists(APP_FOLDER . "data/apps/" . $app . "/" . $version . ".gfs")) {
+		
+		if(isset($apps[$app])) {
+			$t = G_SoftwareType::getByType($apps[$app]["plist_type"], $apps[$app]["file"]);
+			$data = $t->getInstallInfo();
+			if(is_array($data)) {
+				$rand = randomString(20);
+				$data["rand"] = $rand;
+				$_SESSION["install"] = array();
+				$_SESSION["install"][$rand] = $data;
 				
-				$form = new Form($this, "install", array(
-					$folder = new TextField("folder", lang("install.folder"), defined("PROJECT_LOAD_DIRECTORY") ? PROJECT_LOAD_DIRECTORY : "mysite"),
-					$host = new TextField("dbhost", lang("install.db_host"), "localhost"),
-					new TextField("dbuser", lang("install.db_user")),
-					new PasswordField("dbpwd", lang("install.db_password")),
-					new TextField("dbname", lang("install.db_name"), $app),
-					$tableprefix = new TextField("tableprefix", lang("install.table_prefix"), "".$app."_"),
-					new HiddenField("file", APP_FOLDER . "data/apps/" . $app . "/" . $version . ".gfs")
-				), array(
-					new FormAction("submit", lang("install.install"), "startInstall")
-				));
-				
-				$form->addValidator(new RequiredFields(array("folder", "dbhost", "dbuser", "dbname")), "fields");
-				$form->addValidator(new FormValidator(array($this, "validateInstall")), "validateInstall");
-				
-				@chmod(APP_FOLDER . "data/apps/" . $app . "/" . $version . ".gfs", 0777);
-				// check if table-prefix can be set
-				$gfs = new GFS(APP_FOLDER . "data/apps/" . $app . "/" . $version . ".gfs");
-				
-				if($gfs->valid === false) {
-					if($gfs->error == 1) {
-						
-					} else {
-						return "Package corrupted";
-					}					
-				}
-				
-				$plist = new CFPropertyList();
-				$plist->parse($gfs->getFileContents("info.plist"));
-				
-				$data = $plist->toArray();
-				
-				if($data["DB_PREFIX"] != "{!#PREFIX}") {
-					$tableprefix->value = $data["DB_PREFIX"];
-					$tableprefix->disable();
-				}
-				
-				$host->info = lang("install.db_host_info");
-				$folder->info = lang("install.folder_info");
-				return $form->render();
-				
+				$dataset = new ViewAccessableData($data);
+				return $dataset->renderWith("install/showInfo.html");
 			} else {
-				return "app not found!";
+				return $data;
 			}
-		} else {
-			return "app not found!";
 		}
 	}
+	
 	/**
 	 * validates the installation
 	 *
@@ -178,121 +118,229 @@ class InstallController extends RequestHandler {
 	public function validateInstall($obj) {
 		$result = $obj->form->result;
 		$notAllowedFolders = array(
-			"dev", "admin", "pm"
+			"dev", "admin", "pm", "system"
 		);
 		if(file_exists(ROOT . $result["folder"]) || in_array($result["folder"], $notAllowedFolders) || !preg_match('/^[a-z0-9_]+$/', $result["folder"])) {
 			return lang("install.folder_error");
 		}
 		
-		if(!SQL::test(SQL_DRIVER, $result["dbuser"], $result["dbname"], $result["dbpwd"], $result["dbhost"])) {
-			return lang("install.sql_error");
+		if(isset($result["dbuser"])) {
+			if(!SQL::test(SQL_DRIVER, $result["dbuser"], $result["dbname"], $result["dbpwd"], $result["dbhost"])) {
+				return lang("install.sql_error");
+			}
 		}
 		
 		return true;
 	}
-	/**
-	 * starts the installation
-	*/
-	public function startInstall($data) {
-	
-		return $this->execInstall($data["file"], $data["folder"], array(
-			"user" 	=> $data["dbuser"],
-			"db"	=> $data["dbname"],
-			"pass"	=> $data["dbpwd"],
-			"host"	=> $data["dbhost"],
-			"prefix"=> $data["tableprefix"]
-		));
-	}
+		
 	/**
 	 * executess the installation with a give file
 	 *
 	 *@name execInstall
 	 *@access public
 	*/
-	public function execInstall($file = null, $directory = null, $db = null) {
-		if(isset($file)) {
-			unset($_SESSION["install"]);
-			$_SESSION["install"]["file"] = $file;
-			$_SESSION["install"]["folder"] = $directory;
-			$_SESSION["install"]["db"] = $db;
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "install/execInstall/");
-		}
-		
-		if(!isset($_SESSION["install"])) {
-			throwError(8, "Install Error", "Session not initiated.");
-		}
-		$file = $_SESSION["install"]["file"];
-		$directory = $_SESSION["install"]["folder"];
-		$db = $_SESSION["install"]["db"];
-		
-		
-		$dir = ROOT . CACHE_DIRECTORY . md5($file);
-		FileSystem::requireDir($dir);
-		
-		FileSystem::createFile($dir . "/write.test");
-		
-		if(!isset($_SESSION["install"]["unpack1"])) {
-			$gfs = new GFS_Package_installer($file);
-			$gfs->unpack($dir);
-			
-			$_SESSION["install"]["unpack1"] = true;
-		}
-		
-		if(!isset($_SESSION["install"]["unpack2"])) {
-			$db_gfs = new GFS_Package_installer($dir . "/database.sgfs");
-			$db_gfs->unpack($dir . "/database/");
-			$_SESSION["install"]["unpack2"] = true;
-		}
-		
-		$plist = new CFPropertyList();
-		$plist->parse(file_get_contents($dir . "/database/info.plist"));
-				
-		$data = $plist->toArray();
-		
-		define("NO_AUTO_CONNECT", true);
-		define("DB_PREFIX", $db["prefix"]);
-		
-		SQL::Init();
-		SQL::connect($db["user"], $db["db"], $db["pass"], $db["host"]);
-		
-		foreach(scandir($dir . "/database/database/") as $sqlfile) {
-			$queries = file_get_contents($dir . "/database/database/" . $sqlfile);
-			$queries = sql::split($queries);
-			foreach($queries as $sql) {
-				$sql = str_replace('{!#PREFIX}', $db["prefix"], $sql);
-				$sql = str_replace($data["foldername"], $directory, $sql);
-				$sql = str_replace('\n', "\n", $sql);
-				
-				SQL::Query($sql);
-			}
-		}
-		
-		if(!file_exists(ROOT . $directory)) {
-			// first move in main directory
-			rename($dir . "/backup/", ROOT . $directory);
+	public function execInstall() {
+		$rand = $this->getParam("rand");
+		if(isset($_SESSION["install"][$rand])) {
+			$data = $_SESSION["install"][$rand];
+			G_SoftwareType::install($data);
+			HTTPResponse::redirect(BASE_URI);
 		} else {
-			return "Could not move Directory: Directory exists.";
+			HTTPResponse::redirect(BASE_URI);
 		}
-		
-		foreach(scandir($dir . "/templates/") as $template) {
-			if(!file_exists(ROOT . "tpl/" . $template)) {
-				@chmod(ROOT . "tpl/", 0777);
-				rename($dir . "/templates/" . $template, ROOT . "tpl/" . $template);
-			}
-		}
-		
-		writeProjectConfig(array("db" => $db), $directory);
-		
-		file_put_contents(ROOT . $directory . "/application/ENABLE_WELCOME", "");
-		
-		HTTPResponse::redirect(BASE_URI);
-		
 	}
+	
 	/**
 	 * serve
+	 *
+	 *@name content
+	 *@access public
 	*/
 	public function serve($content) {
 		$data = new ViewAccessAbleData();
 		return $data->customise(array("content" => $content))->renderWith("install/install.html");
+	}
+	
+	/**
+	 * shows a form to select a file to restore
+	 *
+	 *@name selectRestore
+	 *@access public
+	*/
+	public function selectRestore() {
+		$backups = array();
+		$files = scandir(APP_FOLDER . "data/restores/");
+		foreach($files as $file) {
+			if(preg_match('/\.gfs$/i', $file)) {
+				$backups[] = $file;
+			}
+		}
+		
+		if(empty($backups))
+			return '<div class="notice">' . lang("install.no_backup") . '</div>';
+		
+		$form = new Form($this, "selectRestore", array(
+			new Select("backup", lang("install.backup"), $backups)
+		), array(
+			new FormAction("submit", lang("install.restore"))
+		));
+		
+		$form->setSubmission("submitSelectRestore");
+		
+		return $form->render();
+	}
+	
+	/**
+	 * submit-action for selectRestore-form
+	 *
+	 *@name submitSelectRestore
+	 *@access public
+	*/
+	public function submitSelectRestore($data) {
+		HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "install/showRestore".URLEND."?restore=" . $data["backup"]);
+		exit;
+	}
+	
+	/**
+	 * shows up the file to restore and some information
+	 *
+	 *@name showRestore
+	 *@access public
+	*/
+	public function showRestore() {
+		if(!$this->getParam("restore")) {
+			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "install/selectRestore" . URLEND);
+			exit;
+		}
+			
+		if(file_exists(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")))) {
+			$gfs = new GFS(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
+			if(!$gfs->valid) {
+				if($gfs->error == 1) {
+					return lang("file_perm_error") . " (<strong>installer/data/restores/" . text::protect(basename($this->getParam("restore"))) ."</strong>)";
+				}
+				return "Package corrupded.";
+			}
+			$data = $gfs->parsePlist("info.plist");
+			$t = G_SoftwareType::getByType($data["type"], APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
+			
+			$data = $t->getRestoreInfo();
+			if(is_array($data)) {
+				$rand = randomString(20);
+				$data["rand"] = $rand;
+				$_SESSION["install"] = array();
+				$_SESSION["install"][$rand] = $data;
+				
+				$dataset = new ViewAccessableData($data);
+				return $dataset->renderWith("restore/showInfo.html");
+			} else {
+				return $data;
+			}
+		} else {
+			return "file not found";
+		}
+	}
+	
+	/**
+	 * shows the install form for the backup
+	*/
+	public function installFormBackup() {
+		if(!$this->getParam("restore")) {
+			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "install/selectRestore" . URLEND);
+			exit;
+		}
+		
+		if(file_exists(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")))) {
+			$gfs = new GFS(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
+			if(!$gfs->valid) {
+				if($gfs->error == 1) {
+					return '<div class="notice">' . lang("file_perm_error") . '</div>';
+				}
+				return "Package corrupded.";
+			}
+			$plist = new CFPropertyList();
+			$plist->parse($gfs->getFileContents("info.plist"));
+			
+			$data = $plist->ToArray();
+			
+			if(!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $data["framework_version"], ">=") || $data["backuptype"] != "full") {
+				return false;
+			}
+			
+			// find a good folder-name :)
+			if( defined("PROJECT_LOAD_DIRECTORY") && !file_exists(ROOT . PROJECT_LOAD_DIRECTORY)) {
+				$default = PROJECT_LOAD_DIRECTORY;
+			} else if(!file_exists(ROOT . "mysite")) {
+				$default = "mysite";
+			} else if(!file_exists(ROOT . "myproject")) {
+				$default = "myproject";
+			} else {
+				$default = null;
+			}
+			
+			$form = new Form($this, "installBackup", array(
+				$restore_info = new TextField("restore_info", lang("install.backup"), $this->getParam("restore")),
+				$folder = new TextField("folder", lang("install.folder"), $default),
+				new HiddenField("restore", $this->getParam("restore")),
+				$host = new TextField("dbhost", lang("install.db_host"), "localhost"),
+				new TextField("dbuser", lang("install.db_user")),
+				new PasswordField("dbpwd", lang("install.db_password")),
+				new TextField("dbname", lang("install.db_name"), "goma"),
+				$tableprefix = new TextField("tableprefix", lang("install.table_prefix"), "gf_"),
+			), array(
+				new FormAction("install", lang("restore"), "installBackup")
+			));
+			
+			$restore_info->disable();
+			
+			if($data["DB_PREFIX"] != "{!#PREFIX}") {
+				$tableprefix->value = $data["DB_PREFIX"];
+				$tableprefix->disable();
+			}
+			
+			$host->info = lang("install.db_host_info");
+			
+			$folder->info = lang("install.folder_info");
+			$form->addValidator(new FormValidator(array($this, "validateInstall")), "validate");
+			$form->addValidator(new RequiredFields(array("folder", "dbhost", "dbuser", "dbname")), "fields");
+			
+			return $form->render();
+		} else {
+			return "file not found";
+		}
+	}
+	
+	/**
+	 * installs the backup
+	*/
+	public function installBackup($data) {
+		$restore = basename($data["restore"]);
+		if(file_exists(APP_FOLDER . "data/restores/" . $restore)) {
+			$gfs = new GFS(APP_FOLDER . "data/restores/" . $restore);
+			if(!$gfs->valid) {
+				if($gfs->error == 1) {
+					return lang("file_perm_error");
+				}
+				return "Package corrupded.";
+			}
+			$plist = new CFPropertyList();
+			$plist->parse($gfs->getFileContents("info.plist"));
+			
+			$plist_data = $plist->ToArray();
+			
+			if(!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $plist_data["framework_version"], ">=")  || $plist_data["backuptype"] != "full") {
+				return false;
+			}
+			
+			return $this->execInstall(APP_FOLDER . "data/restores/" . $restore, $data["folder"], array(
+				"user" 	=> $data["dbuser"],
+				"db"	=> $data["dbname"],
+				"pass"	=> $data["dbpwd"],
+				"host"	=> $data["dbhost"],
+				"prefix"=> $data["tableprefix"]
+			), false);
+		} else {
+			return "file not found";
+		}
 	}
 }

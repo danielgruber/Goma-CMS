@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 30.10.2011
-  * $Version - 004
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 29.09.2012
+  * $Version - 2.4
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -16,8 +16,32 @@ require_once(FRAMEWORK_ROOT . "libs/html/HTMLNode.php");
 require_once(FRAMEWORK_ROOT . "form/FormAction.php");
 require_once(FRAMEWORK_ROOT . "form/Hiddenfield.php");
 
+interface FormActionHandler {
+	/**
+	 * returns if this action can submit the form
+	 *
+	 *@name canSubmit
+	 *@return bool
+	*/
+	public function canSubmit();
+	
+	/**
+	 *@name getsubmit
+	 *@return string - method on controller OR @default for Default-Submission
+	*/
+	public function getSubmit();
+}
+
 class Form extends object
 {
+		/**
+		 * name of the form
+		 *@name name
+		 *@access protected
+		 *@var string
+		*/
+		public $name;
+		
 		/**
 		 * you can use data-handlers, to edit data before it is given to the submission-method
 		 *
@@ -25,6 +49,7 @@ class Form extends object
 		 *@access public
 		*/
 		public $dataHandlers = array();
+		
 		/**
 		 * all available fields in this form
 		 *@name fields
@@ -32,6 +57,7 @@ class Form extends object
 		 *@var array
 		*/
 		public $fields = array();
+		
 		/**
 		 * already rendered fields
 		 *
@@ -39,6 +65,7 @@ class Form extends object
 		 *@access public
 		*/
 		public $renderedFields = array();
+		
 		/**
 		 * all fields the form has to generate from this object
 		 *@name showFields
@@ -46,6 +73,7 @@ class Form extends object
 		 *@var array
 		*/
 		public $showFields = array();
+		
 		/**
 		 * to sort fields
 		 *@name fieldSort
@@ -53,6 +81,7 @@ class Form extends object
 		 *@var array
 		*/
 		public $fieldSort = array();
+		
 		/**
 		  * actions
 		  *@name actions
@@ -60,31 +89,22 @@ class Form extends object
 		  *@var array
 		*/
 		public $actions = array();
+		
 		/**
 		 * the form-tag
 		 *@name form
 		 *@access public
 		*/
 		public $form;
-		/**
-		 * the div for the actions
-		 *@name actionDiv
-		 *@access public
-		*/
-		public $actionDiv;
-		/**
-		 * the div for the fields
-		 *@name fieldsDiv
-		 *@access public
-		*/
-		public $fieldsDiv;
+		
 		/**
 		 * default submission
 		 *@name submission
-		 *@access public
+		 *@access protected
 		 *@var string
 		*/
-		private $submission;
+		protected $submission;
+		
 		/**
 		 * controller of this form
 		 *@name controller
@@ -92,19 +112,22 @@ class Form extends object
 		 *@var object
 		*/
 		public $controller;
+		
+		/**
+		 * the model, which belongs to this form
+		 *
+		 *@name model
+		 *@access public
+		*/
+		public $model;
+		
 		/**
 		 * form-secret-key
 		 *@name secretKey
 		 *@access public
 		*/
-		public $secretKey;
-		/**
-		 * name of the form
-		 *@name name
-		 *@access public
-		 *@var string
-		*/
-		public $name;
+		protected $secretKey;
+		
 		/**
 		 * validators of the form
 		 *@name validators
@@ -112,6 +135,7 @@ class Form extends object
 		 *@var array
 		*/
 		public $validators = array();
+		
 		/**
 		 * result of the form
 		 *@name result
@@ -119,6 +143,7 @@ class Form extends object
 		 *@var array
 		*/
 		public $result = array();
+		
 		/**
 		 * if we add secret key to the form
 		 *@name secret
@@ -126,12 +151,7 @@ class Form extends object
 		 *@var bool
 		*/
 		protected $secret = true;
-		/**
-		 * url
-		 *
-		 *@name action
-		*/
-		public $action = "";
+		
 		/**
 		 * url of this form
 		 *
@@ -139,6 +159,7 @@ class Form extends object
 		 *@access public
 		*/
 		public $url;
+		
 		/**
 		 * post-data
 		 *
@@ -146,6 +167,7 @@ class Form extends object
 		 *@access public
 		*/ 
 		public $post;
+		
 		/**
 		 * restore-class
 		 *
@@ -155,6 +177,22 @@ class Form extends object
 		public $restorer;
 		
 		/**
+		 * defines if we should use state-data in sub-queries of this Form
+		 *
+		 *@name useStateData
+		 *@access public
+		*/
+		public $useStateData = false;
+		
+		/**
+		 * current state of this form
+		 *
+		 *@name state
+		 *@access public
+		*/
+		public $state;
+		
+		/**
 		 *@name __construct
 		 *@access public
 		 *@param object - controller
@@ -162,50 +200,75 @@ class Form extends object
 		 *@param array - fields
 		 *@param array - actions
 		 *@param array - validators
+		 *@param Request - request
 		*/
-		public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array())
+		public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null)
 		{
 				
 				parent::__construct();
 				
 				/* --- */
 				
-				Profiler::mark("form::__construct");
+				if(PROFILE) Profiler::mark("form::__construct");
 				
 				gloader::load("modernizr");
 				
 				if(!is_object($controller))
 				{
-						throwError(5, 'PHP-Error', 'Controller '.$controller.' is no object in '.__FILE__.' on line '.__LINE__.'');
+						throwError(6, 'Invalid Argument', 'Controller '.$controller.' is no object in '.__FILE__.' on line '.__LINE__.'');
 				}
 				
 				$this->controller = $controller;
 				$this->name = $name;
 				$this->secretKey = randomString(30);
-				$this->url = $_SERVER["REQUEST_URI"];
-				$this->post = $_POST;
+				$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
 				
+				if(isset($request)) {
+					$this->post = $request->post_params;
+				} else {
+					$this->post = $_POST;
+				}
 				
+				// set model
+				if(isset($model)) {
+					$this->model = $model;
+				} else if(Object::method_exists($controller, "modelInst") && $controller->modelInst()) {
+					$this->model = $controller->modelInst();
+				}
 				
+				// get form-state
+				if(session_store_exists("form_state_" . $this->name) && isset($this->post))
+					$this->state = new FormState(session_restore("form_state_" . $this->name));
+				else
+					$this->state = new FormState();
+				
+				// if we restore form
 				if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
 					$data = session_restore("form_" . strtolower($this->name));
 					$this->result = $data->result;
 					$this->post = $data->post;
+					$this->state = $data->state;
 					$this->restorer = $data;
 					unset($_SESSION["form_restore_" . $this->name]);
 				}
 				
+				// register fields
 				foreach($fields as $sort => $field)
 				{
 						$this->showFields[$field->name] = $field;
-						$this->fieldSort[$field->name] = $sort;
+						$this->fieldSort[$field->name] = 1 + $sort;
 						$field->setForm($this);
 						$sort++;
 				}
 				
+				// register actions
 				foreach($actions as $submit => $action)
 				{
 						$action->setForm($this);
+						$this->actions[$action->name] = array(
+							"field" 	=> $action,
+							"submit"	=> $action->getSubmit()
+						);
 				}
 				
 				if(!is_array($validators))
@@ -215,11 +278,11 @@ class Form extends object
 				
 				// create form tag
 				$this->form = $this->createFormTag();
-				$this->actionDiv = $this->createActionDiv();
-				$this->fieldsDiv = $this->createFieldsDiv();
 				
-				Profiler::unmark("form::__construct");
+				if(PROFILE) Profiler::unmark("form::__construct");
+				
 		}
+		
 		/**
 		 * creates the Form-Tag
 		*/
@@ -232,24 +295,7 @@ class Form extends object
 					"class"		=> "form " . $this->name
 				));
 		}
-		/**
-		 * creates the Action-Div
-		*/
-		public function createActionDiv()
-		{	
-				return new HTMLNode('div', array(
-					'class'	=> "actions"
-				));
-		}
-		/**
-		 * creates the Action-Div
-		*/
-		public function createFieldsDiv()
-		{	
-				return new HTMLNode('div', array(
-					'class'	=> "fields"
-				));
-		}
+		
 		/**
 		 * activates restore for next generate
 		 *
@@ -259,6 +305,7 @@ class Form extends object
 		public function activateRestore() {
 			$_SESSION["form_restore_" . $this->name] = true;
 		}
+		
 		/**
 		 * disables restore for next generate
 		 *
@@ -268,6 +315,7 @@ class Form extends object
 		public function disableRestore() {
 			unset($_SESSION["form_restore_" . $this->name]);
 		}
+		
 		/**
 		 * redirects to form
 		 *
@@ -280,6 +328,7 @@ class Form extends object
 			$this->activateRestore();
 			HTTPResponse::redirect($this->url);
 		}
+		
 		/**
 		 * generates default fields for this form
 		 *@name defaultFields
@@ -337,6 +386,7 @@ class Form extends object
 				if(!isset($this->fields["redirect"]))
 					$this->add(new HiddenField("redirect", getredirect()));
 		}
+		
 		/**
 		 * renders the form
 		 *@name render
@@ -367,6 +417,7 @@ class Form extends object
 				$this->defaultFields();
 				return $this->renderForm();
 		}
+		
 		/**
 		 * renders the form
 		 *@name renderForm
@@ -375,7 +426,7 @@ class Form extends object
 		public function renderForm()
 		{
 				$this->renderedFields = array();
-				Profiler::mark("Form::renderForm");
+				if(PROFILE) Profiler::mark("Form::renderForm");
 				$this->callExtending("beforeRender");
 				
 				// check get
@@ -400,14 +451,16 @@ class Form extends object
 				
 				$this->form->action = ($this->action != "") ? $this->action : $this->url;
 				
-				$this->form->append('<input type="submit" name="default_submit" value="" class="default_submit" style="position: absolute;bottom: 0px;right: 0px;height: 0px !important;width:0px !important;background: transparent;color: transparent;border: 0;" />');
+				$this->form->append('<input type="submit" name="default_submit" value="" class="default_submit" style="position: absolute;bottom: 0px;right: 0px;height: 0px !important;width:0px !important;background: transparent;color: transparent;border: none;-webkit-box-shadow: none;box-shadow:none;-moz-box-shadow:none;outline: 0;padding: 0;margin:0;" />');
 				
 				// first we have to sort the fields
 				usort($this->showFields, array($this, "sort"));			
-				$i = 0;	
+				$i = 0;
+				
+				$fields = "";
+				
 				foreach($this->showFields as $field)
 				{
-						
 						$name = $field->name;
 						if(isset($this->fields[$name]) && !isset($this->renderedFields[$name]))
 						{
@@ -421,16 +474,17 @@ class Form extends object
 										$i = 0;
 										$div->addClass("two");
 									}
-									
+									$div->addClass("visibleField");
 								}
-								$this->fieldsDiv->append($div);
+								$fields .= $div;
 						}
 				}
 				
+				
 				unset($field);
 				
-				
 				$i = 0;
+				$actions = "";
 				foreach($this->actions as $action)
 				{
 						$field = $action["field"];
@@ -442,14 +496,15 @@ class Form extends object
 							$i = 0;
 							$container->addClass("action_two");
 						}
-						$this->actionDiv->append($container);
+						$actions .= $container;
 				}
 				
 				unset($div, $i, $container);
 				
 				
 				// javascript
-				$js = '$(function(){ 
+				$js = '(function($){
+						$(function(){ 
 							$("#form_'.$this->form->name.' .err").remove(); 
 							$("#form_'.$this->form->name.'").bind("formsubmit", function() {
 								$("#form_'.$this->form->name.' .err").remove();
@@ -469,25 +524,54 @@ class Form extends object
 					}
 				}
 				
+				$js .= "})(jQuery);";
 				
-				$this->form->append($this->fieldsDiv);
-				$this->form->append($this->actionDiv);
+				$view = new ViewAccessableData();
+				$view->fields = $fields;
+				$view->actions = $actions;
+				
+				$this->form->append($view->renderWith("form/form.html"));
 			
 				$this->callExtending("afterRender");
 				
 				$this->form->id = $this->ID();
 				
-				Profiler::mark("Form::renderForm::render");
+				if(PROFILE) Profiler::mark("Form::renderForm::render");
 				$data = $this->form->render("          ");
 				Resources::addJS($js);
-				Profiler::unmark("Form::renderForm::render");
+				if(PROFILE) Profiler::unmark("Form::renderForm::render");
 				
-				Profiler::unmark("Form::renderForm");
+				session_store("form_state_" . $this->name, $this->state->ToArray());
 				
+				if(PROFILE) Profiler::unmark("Form::renderForm");
+
 				
 				return $data;
 				
 		}
+		
+		/**
+		 * sets the result
+		 *
+		 *@name setResult
+		 *@access public
+		*/
+		public function setResult($result) {
+			if(is_object($result)) {
+				if(is_a($result, "viewaccessabledata")) {
+					$this->useStateData = ($result->queryVersion == "state");
+				}
+			}
+			
+			
+			if(is_object($result) || is_array($result)) {
+				$this->result = $result;
+				return true;
+			}
+			
+			return false;
+		}
+		
 		/**
 		 * submission
 		 *@name submit
@@ -510,39 +594,6 @@ class Form extends object
 							return $this->fields[$matches[1]]->handleAction($matches[2]);
 						}
 					}
-				}
-				
-				
-				
-				// find action
-				foreach($this->actions as $action)
-				{
-						$field = $action["field"];
-						if(isset($_POST[$field->name]) || (isset($_POST["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel"))
-						{
-							$i++;
-							if($field->canSubmit($action["submit"])) {
-								if($action["submit"] == "@default")
-								{
-										$submission = $this->submission;
-								} else
-								{
-										$submission = $action["submit"];
-								}
-								break;
-							} else {
-								$this->defaultFields();
-								return $this->renderForm();
-							}
-						}
-				}
-				
-				
-				
-				// no registered action has submitted the form
-				if($i == 0) {
-					$this->defaultFields();
-					return $this->renderForm();
 				}
 				
 				
@@ -620,10 +671,46 @@ class Form extends object
 					$result = call_user_func_array($callback, array($result));
 				}
 				
+				
+				// find actions in fields
+				foreach($this->fields as $field) {
+					if(is_a($field, "FormActionHandler")) {
+						if(isset($_POST[$field->name]) || (isset($_POST["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel"))
+						{
+							$i++;
+							if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
+								if($submit == "@default")
+								{
+										$submission = $this->submission;
+								} else
+								{
+										$submission = $submit;
+								}
+								break;
+							} else {
+								$this->defaultFields();
+								return $this->renderForm();
+							}
+						}
+					}
+				}
+				
+				
+				// no registered action has submitted the form
+				if($i == 0) {
+					$this->defaultFields();
+					return $this->renderForm();
+				}
+				
+				
+				
 				$this->callExtending("afterSubmit", $result);
+				
+				session_store("form_state_" . $this->name, $this->state->ToArray());
 				
 				return $this->controller->$submission($result, $this);
 		}
+		
 		/**
 		 * you can use data-handlers, to edit data before it is given to the submission-method
 		 * you give a callback and you get a result
@@ -633,8 +720,12 @@ class Form extends object
 		 *@param callback
 		*/
 		public function addDataHandler($callback) {
-			$this->dataHandlers[] = $callback;
+			if(is_callable($callback))
+				$this->dataHandlers[] = $callback;
+			else
+				throwError(6, "Invalid Argument", "Argument 1 for Form::addDataHandler should be a valid callback.");
 		}
+		
 		/**
 		 * sorts the items
 		 *@name sort
@@ -649,6 +740,7 @@ class Form extends object
 				
 				return ($this->fieldSort[$a->name] > $this->fieldSort[$b->name]) ? 1 : -1;
 		}
+		
 		/**
 		 * gets the default submission
 		 *@name getSubmission
@@ -671,9 +763,10 @@ class Form extends object
 						$this->submission = $submission;
 				} else
 				{
-						throwError('6', 'PHP-Error', 'Unknowen function "'.$submission.'" for Controller '.get_class($this->controller).'. Please create function and run dev.');
+						throwError('6', 'Logical Exception', 'Unknowen function "'.$submission.'" for Controller '.get_class($this->controller).'. Please create function and run dev.');
 				}
 		}
+		
 		/**
 		 * removes a field
 		 *@name remove
@@ -702,6 +795,7 @@ class Form extends object
 					}
 				}
 		}
+		
 		/**
 		 * adds an field
 		 *@name add
@@ -711,9 +805,8 @@ class Form extends object
 		{
 				if($to == "this")
 				{
-						if($sort == 0)
-						{
-								$sort = count($this->showFields);
+						if($sort == 0) {
+							$sort = 1 + count($this->showFields);
 						}
 						$this->showFields[$field->name] = $field;
 						$this->fieldSort[$field->name] = $sort;
@@ -727,6 +820,7 @@ class Form extends object
 							
 				}
 		}
+		
 		/**
 		 * adds a field to a given field set
 		 *
@@ -736,6 +830,7 @@ class Form extends object
 		public function addToField($fieldname, $field, $sort = 0) {
 			return $this->add($field, $sort, $fieldname);
 		}
+		
 		/**
 		 * adds an action
 		 *@name addAction
@@ -744,7 +839,26 @@ class Form extends object
 		public function addAction($action)
 		{
 				$action->setForm($this);
+				$this->actions[$action->name] = array(
+					"field" 	=> $action,
+					"submit"	=> $action->getSubmit()
+				);
 		}
+		
+		/**
+		 * removes an action
+		 *@name removeAction
+		 *@access public
+		*/
+		public function removeAction($action)
+		{
+				if(is_object($action)) {
+					$action = $action->name;
+				}
+				
+				unset($this->actions[$action]);
+		}
+		
 		/**
 		 * adds a validator
 		 *@name addValidator
@@ -752,9 +866,14 @@ class Form extends object
 		*/
 		public function addValidator($validator, $name)
 		{		
+			if(is_object($validator) && isset($name)) {
 				$this->validators[$name] = $validator;
 				$validator->setForm($this);
+			} else {
+				throwError(6, "Invalid Argument", "Form::addValidator - No Object or name given. First parameter needs to be object and second string.");
+			}
 		}
+		
 		/**
 		 * removes an validator
 		 *@name removeValidator
@@ -764,6 +883,7 @@ class Form extends object
 		{
 				unset($this->validators[$name]);
 		}
+		
 		/**
 		 * removes the secret key
 		 * DON'T DO THIS IF YOU DON'T KNOW WHAT YOU DO!
@@ -774,6 +894,7 @@ class Form extends object
 		{
 				$this->secret = false;
 		}
+		
 		/**
 		 * adds the secret key
 		 *@name addSecret
@@ -783,6 +904,7 @@ class Form extends object
 		{
 				$this->secret = true;
 		}
+		
 		/**
 		 * gets the secret
 		 *@name getsecret
@@ -792,6 +914,7 @@ class Form extends object
 		{
 				return $this->secret;
 		}
+		
 		/**
 		 * returns the current real form-object
 		 *@name form
@@ -801,6 +924,7 @@ class Form extends object
 		{
 				return $this;
 		}
+		
 		/**
 		 * genrates an id for this form
 		 *@name ID
@@ -810,6 +934,7 @@ class Form extends object
 		{
 				return "form_" . md5($this->name);
 		}
+		
 		/**
 		 * generates an name for this form
 		 *@name name
@@ -819,6 +944,62 @@ class Form extends object
 		{
 				return $this->name;
 		}
+		
+		/**
+		 * registers a field in this form
+		 *
+		 *@name registerField
+		 *@access public
+		 *@param string - name
+		 *@param object - field
+		*/
+		public function registerField($name, $field) {
+			$this->fields[$name] = $field;
+		}
+		
+		/**
+		 * just unregisters the field in this form
+		 *
+		 *@name unRegister
+		 *@access public
+		*/
+		public function unRegister($name) {
+			unset($this->fields[$name]);
+		}
+		
+		/**
+		 * gets the field by the given name
+		 *
+		 *@name getField
+		 *@access public
+		 *@param string - name
+		*/
+		public function getField($offset) {
+			return (isset($this->fields[$offset])) ? $this->fields[$offset] : false;
+		}
+		
+		/**
+		 * registers the field as rendered
+		 *
+		 *@name registerRendered
+		 *@access public
+		 *@param string - name
+		*/
+		public function registerRendered($name) {
+			$this->renderedFields[$name] = true;
+		}
+		
+		/**
+		 * removes the registration as rendered
+		 *
+		 *@name unregisterRendered
+		 *@access public
+		 *@param string - name
+		*/
+		public function unregisterRendered($name) {
+			unset($this->renderedFields[$name]);
+		}
+		
 		/**
 		 * Overloading
 		*/
@@ -830,7 +1011,7 @@ class Form extends object
 		*/
 		public function __get($offset)
 		{
-				return (isset($this->fields[$offset])) ? $this->fields[$offset] : false;
+			return $this->getField($offset);
 		}
 		/**
 		 * set
@@ -866,11 +1047,33 @@ class Form extends object
 			session_store("form_" . strtolower($this->name), $this);
 		}
 		
+		/**
+		 * external url of this form
+		 *
+		 *@name externalURL
+		 *@access public
+		*/
+		public function externalURL() {
+			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
+		}
 		
 }
 
+/**
+ * handler for externel urls
+ *
+ *@name ExternalForm
+ *@parent RequestHandler
+*/
 class ExternalForm extends RequestHandler
 {
+		/**
+		 * handles the request
+		 *
+		 *@name handleRequest
+		 *@access public
+		 *@param Request
+		*/
 		public function handleRequest($request)
 		{
 				$this->request = $request;
@@ -905,6 +1108,39 @@ class ExternalForm extends RequestHandler
 				}
 				return false;
 		}
+}
+
+class FormState extends Object {
+	protected $data;
+	
+	function __construct($data = array()) {
+		$this->data = $data;
+	}
+	
+	function __get($name) {
+		if(!isset($this->data[$name])) $this->data[$name] = new FormState;
+		if(is_array($this->data[$name])) $this->data[$name] = new FormState($this->data[$name]);
+		return $this->data[$name];
+	}
+	function __set($name, $value) {
+		$this->data[$name] = $value;
+	}
+	function __isset($name) {
+		return isset($this->data[$name]);
+	}
+
+	function __toString() {
+		if(!$this->data) return "";
+		else return json_encode($this->toArray());
+	}
+
+	function toArray() {
+		$output = array();
+		foreach($this->data as $k => $v) {
+			$output[$k] = (is_object($v) && method_exists($v, 'toArray')) ? $v->toArray() : $v;
+		}
+		return $output;
+	}
 }
 
 Core::addRules(array(

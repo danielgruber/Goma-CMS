@@ -4,8 +4,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 27.08.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 26.03.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -18,10 +18,12 @@ class lost_passwordExtension extends ControllerExtension
 		 * add action
 		*/
 		public $allowed_actions = array("lost_password");
+		
 		/**
 		 * register method
 		*/
 		public static $extra_methods = array("lost_password");
+		
 		/**
 		 * renders the action
 		*/
@@ -88,7 +90,7 @@ class lost_passwordExtension extends ControllerExtension
 		*/
 		public function pwdsave($data)
 		{
-				$user = new User(array("id" => $data["id"]));
+				$user = DataObject::get_by_id("User", array("id" => $data["id"]));
 				$user->password = $data["password"];
 				$user->code = randomString(20);
 				if($user->write(false, true))
@@ -108,22 +110,25 @@ class lost_passwordExtension extends ControllerExtension
 		public function validate($obj)
 		{
 				$data = $obj->form->result["email"];
-				if($data != "" && DataObject::count("user",' `nickname` = "'.convert::raw2sql($data).'" OR `email` = "'.convert::raw2sql($data).'"') > 0)
-				{
-						return true;
-				} else
-				{
-						return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
+				if(!$data)
+					return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
+				
+				$object = DataObject::get("user", array("nickname" => array("LIKE", $data), "OR", "email" => $data));
+				if($object->Count() > 0 && $object->email) {
+					return true;
+				} else {
+					return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
 				}
 		}
 		
 		public function submit($data)
 		{
-				$data = DataObject::_get("user", ' `nickname` = "'.convert::raw2sql($data["email"]).'" OR `email` = "'.convert::raw2sql($data["email"]).'"');
+				$data = DataObject::get_one("user", array("nickname" => $data["email"], "OR", "email" => $data["email"]));
 				
 				// update code
 				$key = randomString(20);
-				DataObject::update("user", array("code" => $key), array("id" => $data["id"]));
+				$data->code = $key;
+				$data->write(false, true);
 				
 				$id = $data["id"];
 				$email = $data["email"];
@@ -139,12 +144,13 @@ class lost_passwordExtension extends ControllerExtension
 
 				<br /><br />
 				".lang("lp_mfg", "Kind Regards")."";
+				
 				if($mail->sendHTML($email, lang("lost_password"), $text))
 				{
 						return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_mail_sent", "The E-mail was sent!");
 				} else
 				{
-						return lang("error", "Error");
+						return lang("mail_not_sent", "Mail couldn't be transmitted.");
 				}
 				
 		}

@@ -1,16 +1,23 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 23.06.2011
+  * last modified: 21.12.2011
+  * $Version 1.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Email extends FormField 
 {
+		/**
+		 * creates the node
+		 *
+		 *@name createNode
+		 *@access public
+		*/
 		public function createNode()
 		{
 				$node = parent::createNode();

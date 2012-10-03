@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 18.09.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 20.05.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -31,6 +31,7 @@ class mysqliDriver extends object implements SQLDriver
 		 *@use for the mysql connetion
 		**/
 		public $_db;
+		
 		/**
 		 *@access public
 		 *@use: connect to db
@@ -59,7 +60,7 @@ class mysqliDriver extends object implements SQLDriver
 		**/
 		public function connect($dbuser, $dbdb, $dbpass, $dbhost)
 		{
-				$this->db = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
+				$this->_db = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
 				if(!mysqli_connect_errno()) {
 					self::setCharsetUTF8();
 					return true;
@@ -92,7 +93,7 @@ class mysqliDriver extends object implements SQLDriver
 		**/
 		public  function query($sql, $unbuffered = false)
 		{
-				if($result = $this->db->query($sql))
+				if($result = $this->_db->query($sql))
 					return $result;
 				else {
 					$trace = debug_backtrace();
@@ -114,7 +115,7 @@ class mysqliDriver extends object implements SQLDriver
 		**/
 		public  function close()
 		{
-				$this->db->close();
+				$this->_db->close();
 		}
 		/**
 		 *@access public
@@ -154,7 +155,7 @@ class mysqliDriver extends object implements SQLDriver
 		  */
 		public  function error()
 		{
-				return $this->db->error;
+				return $this->_db->error;
 		}
 		/**
 		  *@access public
@@ -162,7 +163,7 @@ class mysqliDriver extends object implements SQLDriver
 		  */
 		public  function errno()
 		{
-				return $this->db->errno;
+				return $this->_db->errno;
 		}
 		/**
 		*@access public
@@ -170,7 +171,7 @@ class mysqliDriver extends object implements SQLDriver
 		*/
 		public  function insert_id()
 		{
-				return $this->db->insert_id;
+				return $this->_db->insert_id;
 		}
 		/**
 		  *@access public
@@ -195,7 +196,7 @@ class mysqliDriver extends object implements SQLDriver
 						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
 				}
 				
-				return $this->db->real_escape_string((string) $str);
+				return $this->_db->real_escape_string((string) $str);
 		}
 		/**
 		  *@access public
@@ -212,7 +213,7 @@ class mysqliDriver extends object implements SQLDriver
 						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
 				}
 				
-				return $this->db->real_escape_string((string) $str);
+				return $this->_db->real_escape_string((string) $str);
 		}
 		/**
 		  *@access public
@@ -231,6 +232,17 @@ class mysqliDriver extends object implements SQLDriver
 				$queries = preg_split('/;\s*\n/',$sql, -1 , PREG_SPLIT_NO_EMPTY);
 				return $queries;
 		}
+		
+		/**
+		 * affected rows
+		 *
+		 *@name affected_rows
+		 *@access public
+		*/
+		public function affected_rows() {
+			return $this->_db->affected_rows;
+		}
+		
 		/**
 		  *@access public
 		  *@use to view tables
@@ -258,7 +270,7 @@ class mysqliDriver extends object implements SQLDriver
 								$prefix = DB_PREFIX;
 						
 				
-				$sql = "SHOW COLUMNS FROM `".$prefix.$table."`";
+				$sql = "SHOW COLUMNS FROM ".$prefix.$table."";
 				if($result = sql::query($sql, false, $track))
 				{
 						$fields = array();
@@ -361,7 +373,7 @@ class mysqliDriver extends object implements SQLDriver
 						{
 								$i = 1;
 						}
-						$fields_ .= "`".$key."` ".$value." NOT NULL ";
+						$fields_ .= "".$key." ".$value." NOT NULL ";
 				}
 				$sql = "CREATE TABLE 
 							" . $prefix . $table." 
@@ -401,7 +413,7 @@ class mysqliDriver extends object implements SQLDriver
 						{
 								$i = 1;
 						}
-						$fields_ .= "`".$key."` ".$value." NOT NULL";
+						$fields_ .= $key." ".$value." NOT NULL";
 				}
 				$sql = "CREATE TABLE 
 							".$prefix . $table." 
@@ -455,9 +467,9 @@ class mysqliDriver extends object implements SQLDriver
 						$field = $field;
 				}
 				
-				$name = ($name === null) ? "" : '`'.$name.'`';
+				$name = ($name === null) ? "" : $name;
 				
-				$sql = "ALTER TABLE `".DB_PREFIX . $table ."` ADD ".$type." ".$name." (".$field.")";
+				$sql = "ALTER TABLE ".DB_PREFIX . $table ." ADD ".$type." ".$name." (".$field.")";
 				if(sql::query($sql))
 				{
 						return true;
@@ -478,7 +490,7 @@ class mysqliDriver extends object implements SQLDriver
 				if($db_prefix === null)
 						$db_prefix = DB_PREFIX;
 				
-				$sql = "ALTER TABLE `".DB_PREFIX . $table ."` DROP INDEX `".$name."`";
+				$sql = "ALTER TABLE ".DB_PREFIX . $table ." DROP INDEX ".$name;
 				if(sql::query($sql))
 				{
 						return true;
@@ -487,6 +499,7 @@ class mysqliDriver extends object implements SQLDriver
 						throwErrorByID(3);
 				}
 		}
+		
 		/**
 		 * gets the indexes of a table
 		 *@name getIndexes
@@ -546,7 +559,7 @@ class mysqliDriver extends object implements SQLDriver
 				$prefix = DB_PREFIX;
 					
 			
-			$sql = "SHOW COLUMNS FROM `".$prefix.$table."`";
+			$sql = "SHOW COLUMNS FROM ".$prefix.$table;
 			if($result = sql::query($sql, false, $track))
 			{
 				$fields = array();
@@ -565,6 +578,7 @@ class mysqliDriver extends object implements SQLDriver
 				return false;
 			}
 		}
+		
 		/**
 		 * requires, that a table is exactly in this form
 		 *
@@ -607,12 +621,14 @@ class mysqliDriver extends object implements SQLDriver
 							$log .= "Modify Field ".$name." to ".$type."\n";
 						}
 						
-						if(!isset($defaults[$name]) && $data[$name]["default"] != "") {
-							$editsql .= " ALTER COLUMN ".$name." DROP DEFAULT,";
-						}
-						
-						if(isset($defaults[$name]) && $data[$name]["default"] != $defaults[$name]) {
-							$editsql .= " ALTER COLUMN ".$name." SET DEFAULT \"".addslashes($defaults[$name])."\",";
+						if(!_eregi('enum', $fields[$name])) {
+							if(!isset($defaults[$name]) && $data[$name]["default"] != "") {
+								$editsql .= " ALTER COLUMN ".$name." DROP DEFAULT,";
+							}
+							
+							if(isset($defaults[$name]) && $data[$name]["default"] != $defaults[$name]) {
+								$editsql .= " ALTER COLUMN ".$name." SET DEFAULT \"".addslashes($defaults[$name])."\",";
+							}
 						}
 					}
 				}
@@ -639,6 +655,9 @@ class mysqliDriver extends object implements SQLDriver
 				
 				// check indexes
 				foreach($indexes as $key => $data) {
+					if(!$data)
+						continue;
+					
 					if(is_array($data)) {
 						$name = $data["name"];
 						$ifields = $data["fields"];
@@ -776,11 +795,31 @@ class mysqliDriver extends object implements SQLDriver
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else {
-					throwError(3,'SQL-Error', "SQL-Query ".$sql." failed");
-					return false;
+					throwErrorByID(3);
 				}
 			}
 		}
+		
+		/**
+		 * sets the default sort of a specific table
+		 *
+		 *@name setDefaultSort
+		 *@access public
+		 *@param string - table
+		 *@param string - field
+		 *@param string - optional type: DESC/ASC
+		*/
+		public function setDefaultSort($table, $field, $type = "ASC", $prefix = false) {
+			if(!$prefix)
+				$prefix = DB_PREFIX;
+			
+			$sql = "ALTER TABLE " . $prefix . $table . " ORDER BY ".$field." ".$type."";
+			if(SQL::Query($sql))
+				return true;
+			else
+				throwErrorByID(3);
+		}
+		
 		/**
 		 * deletes a table
 		 *
@@ -837,7 +876,7 @@ class mysqliDriver extends object implements SQLDriver
 																	{
 																			$sql .= " , ";
 																	}
-																	$sql .= " `".$field."` = '".convert::raw2sql($value)."' ";
+																	$sql .= " ".$field." = '".convert::raw2sql($value)."' ";
 																	
 															}
 															unset($i);
@@ -845,7 +884,7 @@ class mysqliDriver extends object implements SQLDriver
 															if(isset($data["id"])) {
 																$id = $data["id"];
 																
-																$sql .= " WHERE `id` = '".convert::raw2sql($id)."'";
+																$sql .= " WHERE id = '".convert::raw2sql($id)."'";
 															} else if(isset($data["where"])) {
 																$where = $data["where"];
 																$where = SQL::extractToWhere($where);
@@ -855,7 +894,7 @@ class mysqliDriver extends object implements SQLDriver
 																return false;
 															}
 															
-															if(sql::query($sql))
+															if(SQL::query($sql))
 															{
 																	unset($id);
 																	// everything is fine
@@ -875,7 +914,7 @@ class mysqliDriver extends object implements SQLDriver
 												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
 											)
 											{
-													$sql = 'INSERT INTO `'.DB_PREFIX.$table_name.'` ';
+													$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
 													$fields = ' (';
 													$values = ' VALUES (';
 													
@@ -905,7 +944,7 @@ class mysqliDriver extends object implements SQLDriver
 																			}
 																			
 																			if($a == 0) {
-																					$fields .= '`'.convert::raw2sql($field).'`';
+																					$fields .= convert::raw2sql($field);
 																			}
 																			$values .= "'".convert::raw2sql($value)."'";
 																	}
@@ -932,7 +971,7 @@ class mysqliDriver extends object implements SQLDriver
 																			$fields .= ",";
 																			$values .= ",";
 																	}
-																	$fields .= '`'.convert::raw2sql($field).'`';
+																	$fields .= convert::raw2sql($field);
 																	$values .= "'".convert::raw2sql($value)."'";
 															}
 															unset($i);
@@ -952,19 +991,20 @@ class mysqliDriver extends object implements SQLDriver
 									}
 								break;
 								case "delete":
+									if(!isset($data["where"]) && isset($data["id"]))
+										$data["where"]["id"] = $data["id"];
+									
 									if(isset($data["where"])) {
 											if (
 												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+												(isset(ClassInfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
 											)
 											{
 													$where = $data["where"];
 													$where = SQL::extractToWhere($where);
 															
-													$sql = "DELETE FROM 
-																`".DB_PREFIX . $table_name."`
-																".$where."";
-																
+													$sql = "DELETE FROM ".DB_PREFIX . $table_name.$where;
+															
 													if(sql::query($sql)) {
 															// everything is fine
 													} else {
@@ -983,6 +1023,7 @@ class mysqliDriver extends object implements SQLDriver
 				if(PROFILE) Profiler::unmark("MySQLi::writeManipulation");
 				return true;
 		}
+		
 		/**
 		 * sets the charset to utf-8
 		 *
@@ -990,6 +1031,6 @@ class mysqliDriver extends object implements SQLDriver
 		 *@access public
 		*/
 		public function setCharsetUTF8() {
-			$this->db->set_charset("utf8");
+			$this->_db->set_charset("utf8");
 		}
 }

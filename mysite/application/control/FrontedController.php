@@ -3,16 +3,22 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 18.08.2011
-  * $Version 2.0.0 - 005
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.04.2012
+  * $Version 2.0.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-
 class FrontedController extends Controller
 {
+		/**
+		 * activates the live-counter on this controller
+		 *
+		 *@name live_counter
+		 *@access public
+		*/
+		public static $live_counter = true;
 		/**
          * gets $view
          *@name getView
@@ -63,7 +69,16 @@ class FrontedController extends Controller
                 return settingsController::get('css_standard');
         }
         
-		
+		/**
+		 * fronted-bar for admins
+		 *
+		 *@name frontedBar
+		 *@access public
+		 *@return array
+		*/
+		public function frontedBar() {
+			return array();
+		}
 		
 		/**
 		 * handles the request with showing as site
@@ -81,7 +96,8 @@ class FrontedController extends Controller
 				"title"		=> $this->Title(),
 				"own_css"	=> $this->own_css(),
 				"addcontent"=> $this->addcontent(),
-				"view"		=> $this->view()
+				"view"		=> $this->view(),
+				"frontedbar"=> new DataSet($this->frontedBar())
 			));
 			
 			
@@ -95,27 +111,17 @@ class siteController extends Controller
 		public $shiftOnSuccess = false;
 		public static $keywords;
 		public static $description;
-		
-        /**
-         * we can set the content 
-         *@name __construct
-         *@access public
-        */
-        public function __construct($content = "", $title = "")
-        {
-                
-                parent::__construct();
-        }
         
         public function handleRequest(request $request)
         {
                 
-                if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN_ALL"))
+                if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN"))
                 {
                        $data = new ViewAccessAbleData();
                        HTTPResponse::output($data->customise()->renderWith("page_maintenance.html"));
                        exit;
                 }
+                
                 return parent::handleRequest($request);
         }
         
@@ -178,7 +184,12 @@ class siteController extends Controller
 
 class HomePageController extends SiteController
 {
-		
+		/**
+		 * shows the homepage of this page
+		 *
+		 *@name index
+		 *@access public
+		*/
 		public function index() {
 			
 			define("HOMEPAGE", true);

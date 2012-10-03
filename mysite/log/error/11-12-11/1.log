@@ -1,6 +1,0 @@
-12.11.2011 - 10:45: Code: 3, Name:Zugriff fehlgeschlagen!, Details: <div class="error"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'count(statistics.id) as count  FROM gomacms_statistics AS statistics  LEFT JOIN ' at line 1<br /><br />
-
- <strong>Query:</strong> <br />
-<code>SELECT  CASE  WHEN statistics.id IS NOT NULL THEN statistics.id  WHEN statistics_state.id IS NOT NULL THEN statistics_state.id  ELSE NULL END AS id  count(statistics.id) as count  FROM gomacms_statistics AS statistics  LEFT JOIN gomacms_statistics_state AS statistics_state ON  statistics_state.id = statistics.recordid  WHERE  statistics.id = "130" AND  statistics.class_name IN ("livecounter")</code>
-, URL: /favicon.ico
-

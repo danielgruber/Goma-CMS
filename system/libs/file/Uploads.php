@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 07.12.2011
-  * $Version 001
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 30.08.2012
+  * $Version 1.3.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -16,6 +16,14 @@ loadlang("files");
 
 class Uploads extends DataObject {
 	/**
+	 * max-filesize for md5
+	 *
+	 *@name FILESIZE_MD5
+	 *@access public
+	*/
+	const FILESIZE_MD5 = 52428800; // 50 MB
+
+	/**
 	 * database-table
 	 *
 	 *@name db_fields
@@ -25,8 +33,11 @@ class Uploads extends DataObject {
 		"filename"	=> "varchar(100)",
 		"realfile"	=> "varchar(300)",
 		"path"		=> "varchar(200)",
-		"type"		=> "enum('collection','file')"
+		"type"		=> "enum('collection','file')",
+		"deletable"	=> "enum('0', '1')",
+		"md5"		=> "text"
 	);
+	
 	/**
 	 * relations
 	 *
@@ -36,6 +47,7 @@ class Uploads extends DataObject {
 	public $has_one = array(
 		"collection"		=> "Uploads"
 	);
+	
 	/**
 	 * extensions in this files are by default handled by this class
 	 *
@@ -50,23 +62,30 @@ class Uploads extends DataObject {
 	 *@name addFile
 	 *@access public
 	*/
-	public static function addFile($filename, $realfile, $collectionPath, $class_name = null) {
+	public static function addFile($filename, $realfile, $collectionPath, $class_name = null, $deletable = null) {
 		if(!file_exists($realfile) || empty($collectionPath)) {
 			return false;
 		}
 		
+		if(!isset($deletable))
+			$deletable = false;
+		
 		if(!is_object($collectionPath)) {
-			// determine id of collection
-			$collectionTree = explode(".", $collectionPath);
-			foreach($collectionTree as $collection) {
-				$data = DataObject::get_one("Uploads", array("filename" => $collection, "type" => "collection"));
-				if($data) {
-					$id = $data->id;
-				} else {
-					$collection = new Uploads(array("filename" => $collection, "type" => "collection", "collectionid" => isset($id) ? $id : 0));
-					$collection->write();
-					$id = $collection->id;
-				}
+			if(defined("SQL_LOADUP")) {
+				// determine id of collection
+				$collectionTree = explode(".", $collectionPath);
+				foreach($collectionTree as $collection) {
+					$data = DataObject::get_one("Uploads", array("filename" => $collection, "type" => "collection"));
+					if($data) {
+						$id = $data->id;
+					} else {
+						$collection = new Uploads(array("filename" => $collection, "type" => "collection", "collectionid" => isset($id) ? $id : 0));
+						$collection->write(false, true);
+						$id = $collection->id;
+					}
+				}	
+			} else {
+				$id = 0;
 			}
 		} else {
 			$collection = $collectionPath;
@@ -74,38 +93,74 @@ class Uploads extends DataObject {
 			$id = $collection->id;
 		}
 		
-		if(!isset($id))
+		if(!isset($id)) {
 			return false;
+		}
+		
 		
 		// determine file-position
 		FileSystem::requireFolder(UPLOAD_DIR . "/" . md5($collectionPath));
 		
-		$hash = strtolower(randomString(1));
-		while(file_exists(UPLOAD_DIR . "/" . md5($collectionPath) . "/" . $hash . $filename) && 
-				(	(filesize($realfile) > 1000000) || 
-					(filesize(UPLOAD_DIR . "/" . md5($collectionPath) . "/" . $hash . $filename) > 1000000) || 
-					(md5_file($realfile) != md5_file(UPLOAD_DIR . "/" . md5($collectionPath) . "/" . $hash . $filename))
-				)
-			) {
-			$hash .= strtolower(randomString(1));
+		if(filesize($realfile) < self::FILESIZE_MD5) {
+			$md5 = md5_file($realfile);
+			$object = DataObject::get("Uploads", array("md5" => $md5));
+			if($object->Count() > 0 && file_exists($object->realfile) && md5_file($object->realfile) == $md5) {
+				$file = clone $object->first();
+				$file->collectionid = $id;
+				$file->path = strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename;
+			} else {
+				// check if md5 is old
+				if($object->Count() > 0 && file_exists($object->realfile) && md5_file($object->realfile) != $md5) {
+					$object->md5 = md5_file($object->realfile);
+					$object->write(false, true);
+				}
+				$file = new Uploads(array(
+					"filename" 		=> $filename,
+					"type"			=> "file",
+					"realfile"		=> UPLOAD_DIR . "/" . md5($collectionPath) . "/" . randomString(6) . $filename,
+					"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename,
+					"collectionid" 	=> $id,
+					"deletable"		=> $deletable,
+					"md5"			=> md5_file($realfile)
+				));
+			}
+		} else {
+			$file = new Uploads(array(
+				"filename" 		=> $filename,
+				"type"			=> "file",
+				"realfile"		=> UPLOAD_DIR . "/" . md5($collectionPath) . "/" . randomString(6) . $filename,
+				"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename,
+				"collectionid" 	=> $id,
+				"deletable"		=> $deletable
+			));
 		}
 		
-		$file = new Uploads(array(
-			"filename" 		=> $filename,
-			"type"			=> "file",
-			"realfile"		=> UPLOAD_DIR . "/" . md5($collectionPath) . "/" . $hash . $filename,
-			"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . $hash . "/" . $filename,
-			"collectionid" => $id
-		));
+		// make it a valid class-name
+		if(isset($class_name)) {
+			$class_name = trim(strtolower($class_name));
+		}
 		
+		// guess class-name
+		$guessed_class_name = self::guessFileClass($filename);
 		if(!isset($class_name)) {
-			$class_name = self::guessFileClass($filename);
+			$class_name = $guessed_class_name;
+		} else if(is_subclass_of($guessed_class_name, $class_name)) {
+			$class_name = $guessed_class_name;
 		}
-
+		
+		// now reinit the file-object
 		$file = $file->getClassAs($class_name);
 		
-		if(copy($realfile, UPLOAD_DIR . "/" . md5($collectionPath) . "/" . $hash . $filename)) {
-			if($file->write()) {
+		if(copy($realfile, $file->realfile)) {
+			if(!defined("SQL_LOADUP")) {
+				$file->path = $file->realfile;
+				return $file;
+			}
+			
+			if($deletable)
+				$file->forceDeletable = true;
+			
+			if($file->write(true, true)) {
 				return $file;
 			} else {
 				return false;
@@ -113,6 +168,38 @@ class Uploads extends DataObject {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * removes the file after remvoing from Database
+	 *
+	 *@name onAfterRemove
+	 *@access public
+	*/
+	public function onAfterRemove() {
+		if(file_exists($this->realfile)) {
+			$data = DataObject::get("Uploads", array("realfile" => $this->realfile));
+			if($data->Count() == 0) {
+				@unlink($this->realfile);
+			}
+		}
+		parent::onAfterRemove();
+	}
+	
+	/**
+	 * gets the object for the given file-path
+	 *
+	 *@name getFile
+	 *@access public
+	*/
+	public function getFile($path) {
+		if(($data = DataObject::get_one("Uploads", array("path" => $this->value))) !== false) {
+			return $data;
+		} else if(($data = DataObject::get_one("Uploads", array("realfile" => $this->value))) !== false) {
+			return $data;
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -130,6 +217,39 @@ class Uploads extends DataObject {
 		}
 		
 		return "Uploads";
+	}
+	
+	/**
+	 * event on before write
+	 *
+	 *@name onBeforeWrite
+	 *@access public
+	*/
+	public function onBeforeWrite() {
+		if(!$this->forceDeletable)
+			$this->deletable = true;
+	}
+	
+	/**
+	 * clean up DB
+	 *
+	 *@name cleanUpDB
+	 *@åccess public
+	*/
+	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
+		parent::cleanUpDB($prefix, $log);
+		
+		$data = DataObject::get("Uploads", array("deletable" => 1, "last_modified" => array(">", NOW - 60 * 60 * 24 * 14)));
+		foreach($data as $record) {
+			if(!file_exists($record->realfile)) {
+				$record->remove(true);
+				continue;
+			}
+			// in test
+			//@unlink($record->realfile);
+			logging("removing file ".$record->realfile."");
+			//$record->remove(true);
+		}
 	}
 	
 	/**
@@ -208,6 +328,11 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function raw() {
+		if($this->deletable) {
+			$this->deletable = true;
+			$this->write(false, true);
+		}
+		
 		return $this->path;
 	}
 	
@@ -218,7 +343,32 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function getPath(){
-		return 'Uploads/' . $this->fieldGET("path");
+		if(!$this->fieldGET("path") || $this->fieldGet("path") == "Uploads/" || $this->fieldGet("path") == "Uploads")
+			return $this->fieldGET("path");
+		
+		return BASE_SCRIPT . 'Uploads/' . $this->fieldGET("path");
+	}
+	
+	/**
+	 * sets the path
+	 *
+	 *@name setPath
+	 *@access public
+	*/
+	public function setPath($path) {
+		if(substr($path, 0, strlen(BASE_SCRIPT)) == BASE_SCRIPT) {
+			$path = substr($path, strlen(BASE_SCRIPT));
+		}
+		
+		if(substr($path, 0, strlen("index.php/")) == "index.php/") {
+			$path = substr($path, strlen("index.php/"));
+		}
+		
+		if(substr($path, 0, 8) == "Uploads/") {
+			$this->setField("path", substr($path, 8));
+		} else {
+			$this->setField("path", $path);
+		}
 	}
 	
 	/**
@@ -228,7 +378,11 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function __toString() {
-		return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
+		if($this->bool()) {
+			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
+		} else {
+			return null;
+		}
 	}
 	
 	/**
@@ -238,7 +392,21 @@ class Uploads extends DataObject {
 	 *@access public
 	 *@param int - size; support for 16, 32, 64 and 128
 	*/
-	public function getIcon() {
+	public function getIcon($size = 128) {
+		switch($size) {
+			case 16:
+				return "images/icons/goma/16x16/file.png";
+			break;
+			case 32:
+				return "images/icons/goma/32x32/file.png";
+			break;
+			case 64:
+				return "images/icons/goma/64x64/file.png";
+			break;
+			case 128:
+				return "images/icons/goma/128x128/file.png";
+			break;
+		}
 		return "images/icons/goma/128x128/file.png";
 	}
 	
@@ -253,12 +421,43 @@ class Uploads extends DataObject {
 		parent::argumentQuery($query);
 		
 		if(isset($query->filter["path"])) {
+			if(substr($query->filter["path"], 0, strlen(BASE_SCRIPT)) == BASE_SCRIPT) {
+				$query->filter["path"] = substr($query->filter["path"], strlen(BASE_SCRIPT));
+			}
+			
+			if(substr($query->filter["path"], 0, strlen("index.php/")) == "index.php/") {
+				$query->filter["path"] = substr($query->filter["path"], strlen("index.php/"));
+			}
+
 			if(substr($query->filter["path"],0,strlen("Uploads")) == "Uploads") {
 				$query->filter["path"] = substr($query->filter["path"], strlen("Uploads") + 1);
 			}
 		}
 	}
 	
+	/**
+	 * gets the file-size nice written
+	 *
+	 *@name filesize
+	 *@access public
+	*/
+	public function filesize() {
+		return FileSystem::filesize_nice($this->realfile);
+	}
+	
+	/**
+	 * returns if this dataobject is valid
+	 *
+	 *@name bool
+	 *@access public
+	*/
+	public function bool() {
+		if(parent::bool()) {
+			return ($this->realfile !== "" && is_file($this->realfile));
+		} else {
+			return false;
+		}
+	}
 	
 }
 
@@ -271,8 +470,13 @@ class UploadsController extends Controller {
 	 *@access public
 	*/
 	public function index() {
-		HTTPResponse::sendFile($this->modelInst()->realfile);
-		FileSystem::readfile_chunked($this->modelInst()->realfile);
+		if(preg_match('/\.(pdf)$/i', $this->modelInst()->filename)) {
+			HTTPResponse::setHeader("content-type", "application/pdf");
+			HTTPResponse::sendHeader();
+			readfile($this->modelInst()->realfile);
+			exit;
+		}
+		FileSystem::sendFile($this->modelInst()->realfile, $this->modelInst()->filename);
 	}
 }
 
@@ -325,7 +529,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function raw() {
-		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->filename)) {
+		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->realfile)) {
 			return $this->realfile;
 		}
 		
@@ -344,7 +548,91 @@ class ImageUploads extends Uploads {
 			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
 	}
 	
+	/**
+	 * returns the path to the icon of the file
+	 *
+	 *@name getIcon
+	 *@access public
+	 *@param int - size; support for 16, 32, 64 and 128
+	*/
+	public function getIcon($size = 128) {
+		switch($size) {
+			case 16:
+				return "images/icons/goma/16x16/image.png";
+			break;
+			case 32:
+				return "images/icons/goma/32x32/image.png";
+			break;
+			case 64:
+				return "images/icons/goma/64x64/image.png";
+			break;
+			case 128:
+				return "images/icons/goma/128x128/image.png";
+			break;
+		}
+		return "images/icons/goma/128x128/image.png";
+	}
 	
+	/**
+	 * sets the height
+	 *
+	 *@name setHeight
+	 *@access public
+	*/
+	public function setHeight($height) {
+		return '<img src="' . $this->path . "/setHeight/" . $height . '" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * sets the width
+	 *
+	 *@name setWidth
+	 *@access public
+	*/
+	public function setWidth($width) {
+		return '<img src="' . $this->path . "/setWidth/" . $width . '" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * sets the Size
+	 *
+	 *@name setSize
+	 *@access public
+	*/
+	public function setSize($width, $height) {
+		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * sets the size on the original
+	 *
+	 *@name orgSetSize
+	 *@access public
+	*/
+	public function orgSetSize($width, $height) {
+		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * sets the width on the original
+	 *
+	 *@name orgSetWidth
+	 *@access public
+	*/
+	public function orgSetWidth($width) {
+		return '<img src="' . $this->path . "/orgSetWidth/" . $width . '" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * sets the height on the original
+	 *
+	 *@name orgSetHeight
+	 *@access public
+	*/
+	public function orgSetHeight($height) {
+		return '<img src="' . $this->path . "/orgSetHeight/" . $height . '" alt="'.$this->filename.'" />';
+	}
+
 }
 
 class ImageUploadsController extends UploadsController {
@@ -354,10 +642,26 @@ class ImageUploadsController extends UploadsController {
 	 *@name handlers
 	 *@access public
 	*/
-	public $handlers = array(
-		"setWidth/\$width" 			=> "setWidth",
-		"setHeight/\$height"		=> "setHeight",
-		"setSize/\$width/\$height"	=> "setSize"
+	public $url_handlers = array(
+		"setWidth/\$width" 				=> "setWidth",
+		"setHeight/\$height"			=> "setHeight",
+		"setSize/\$width/\$height"		=> "setSize",
+		"orgSetWidth/\$width" 			=> "orgSetWidth",
+		"orgSetHeight/\$height"			=> "orgSetHeight",
+		"orgSetSize/\$width/\$height"	=> "orgSetSize"
+	);
+	
+	/**
+	 * allowed actions
+	*/
+	
+	public $allowed_actions = array(
+		"setWidth",
+		"setHeight",
+		"setSize",
+		"orgSetSize",
+		"orgSetWidth",
+		"orgSetHeight"
 	);
 	/**
 	 * sends the image to the browser
@@ -404,6 +708,72 @@ class ImageUploadsController extends UploadsController {
 		
 		exit;
 	}
+	
+	/**
+	 * sets the size
+	 *
+	 *@name setSize
+	 *@access public
+	*/
+	public function setSize() {
+		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			$height = $this->getParam("height");
+			$width = $this->getParam("width");
+			$image = new RootImage($this->modelInst()->realfile);
+			$image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+		}
+		
+		exit;
+	}
+	
+	/**
+	 * sets the size on the original 
+	 *
+	 *@name orgSetSize
+	 *@åccess public
+	*/
+	public function orgSetSize() {
+		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			$height = $this->getParam("height");
+			$width = $this->getParam("width");
+			$image = new RootImage($this->modelInst()->realfile);
+			$image->createThumb($width, $height, 0, 0, 100, 100)->Output();
+		}
+		
+		exit;
+	}
+	
+	/**
+	 * sets the width on the original 
+	 *
+	 *@name orgSetWidth
+	 *@åccess public
+	*/
+	public function orgSetWidth() {
+		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			$width = $this->getParam("width");
+			$image = new RootImage($this->modelInst()->realfile);
+			$image->createThumb($width, nukk, 0, 0, 100, 100)->Output();
+		}
+		
+		exit;
+	}
+	
+	/**
+	 * sets the height on the original
+	 *
+	 *@name orgSetHeight
+	 *@access public
+	*/
+	public function orgSetHeight() {
+		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			$height = $this->getParam("height");
+			$image = new RootImage($this->modelInst()->realfile);
+			$image->createThumb(null, $height,0,0,100,100)->Output();
+		}
+		
+		exit;
+	}
 }
 
 class UploadController extends Controller {
@@ -442,6 +812,14 @@ class UploadController extends Controller {
 	*/
 	public function handleFile() {
 		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
+		
+		if(!file_exists($data->first()->realfile)) {
+			$data->first()->remove(true);
+			exit;
+		}
+		
+		session_write_close();
+		
 		return $data->first()->controller()->handleRequest($this->request);
 	}
 	

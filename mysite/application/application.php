@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 30.10.2011
-  * $Version 001
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 05.08.2012
+  * $Version 1.1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -15,38 +15,29 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 */
 define('TITLE_SEPERATOR',' - ');
 
-
 SQL::Init();
 
 loadFramework();
 
-if(file_exists(APP_FOLDER . "application/ENABLE_WELCOME")) {
+if(isset($_SESSION["welcome_screen"]) || (!file_exists(APP_FOLDER . "application/.WELCOME_RUN") && !isset($_SESSION["dev_without_perms"]) && DataObject::count("user") == 0)) {
 	$request = new Request(
 						(isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'],
 						URL
 						);
 	$welcomeController = new welcomeController();
 	return Core::serve($welcomeController->handleRequest($request));
-	
 }
-
-
-// first load config
-require(APP_FOLDER . "config.php");
-
 
 if(PROFILE) Profiler::mark("settings");
 
-require_once(ROOT . APPLICATION . "/application/control/settingscontroller.php");
-
-Autoloader::$loaded["settingscontroller"] = true;
-Autoloader::$loaded["newsettings"] = true;
 settingsController::preInit();
 
-
-
 if(PROFILE) Profiler::unmark("settings");
+
 Resources::$gzip = settingsController::get("gzip");
+RegisterExtension::$enabled = settingsController::get("register_enabled");
+RegisterExtension::$validateMail = settingsController::get("register_email");
+RegisterExtension::$registerCode = settingsController::get("register");
 Core::setCMSVar("ptitle", settingsController::get("titel"));
 Core::setCMSVar("title", settingsController::get("titel"));
 Core::setTheme(settingsController::Get("stpl"));
@@ -59,7 +50,7 @@ date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
 
 if(PROFILE) Profiler::unmark("settings");
 
-userController::execute();
+member::checkLogin();
 
 $core = new Core();
 $core->render(URL);

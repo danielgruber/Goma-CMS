@@ -9,7 +9,7 @@
 			<% IF $avatar %>
 				<a href="{$avatar.raw()}" rel="dropdownDialog">$avatar.setSize(150, 150)</a>
 			<% ELSE %>
-				<img src="images/no_avatar.png" alt="{$avatar}" />
+				<img src="images/no_avatar.png" alt="" />
 			<% END %>
 		</div>
 		</div>
@@ -29,7 +29,7 @@
 				<div class="clear"></div>
 			</div>
 		<% END %>
-		<h1>$nickname.text()</h1>
+		<h1 class="profile-title">$nickname.text()</h1>
 		$tabs
 	</div>
 	<% IF NOT isMobile() %>

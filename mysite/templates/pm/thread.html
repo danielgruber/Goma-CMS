@@ -1,24 +1,36 @@
-<h3>$subject.text()</h3>
+<% INCLUDE_CSS "pm.css" %>
+<div class="pm_controls_right">
+	<a href="pm/" class="button"><span class="icon arrow_left"></span><span><% lang("pm_inbox", "Inbox") %></a>
+</div>
+<h3 id="message_conversation_info">$with.nickname</h3>
 <div id="message_thread">
+	<% activatePagination() %>
+	<% IF $_GET_message_page %>
+		<% setPage($_GET_message_page) %>
+	<% ELSE %>
+		<% goToLastPage() %>
+	<% END %>
+	<% IF isPageBefore() %>
+		<a href="{URL}{URLEND}?message_page={$pageBefore}#message_conversation_info" class="older pagination">{$_lang_pm_earlier}</a>
+	<% END %>
 	<% CONTROL this() %>
 		<div  id="message_{$this.id}"  class="message record">
 			<div class="ui-left user">
 				<% CONTROL this.from() %>
 					<% IF $from.avatar %>
-						<a href="member/{$from.id}{URLEND}"><img src="images/resampled/50/50/{$from.avatar.raw()}" /></a>
+						<a href="member/{$from.id}{URLEND}">$from.avatar.setSize(50,50)</a>
 					<% ELSE %>
 						<a href="member/{$from.id}{URLEND}"><img src="images/no_avatar.png" height="50" width="50" /></a>
 					<% END %>
 				<% ENDCONTROL %>
 			</div>
-			<div class="ui-right delete">
+			<!--<div class="ui-right delete">
 				<a title="{$_lang_delete}" rel="ajaxfy" href="pm/delm/{$this.id}{URLEND}"><img src="images/icons/fatcow-icons/16x16/delete.png" name="{$_lang_delete}" /></a>
-			</div>
+			</div>-->
 			<div class="body" style="margin-left: 60px;">
 				<div class="info">
-					<% CONTROL this.from() %>
-						<a class="username" href="member/{$from.id}{URLEND}">$from.nickname.text()</a> <span class="date">$time.date()</span>
-					<% ENDCONTROL %>
+					<span class="date">$this.time.date()</span>
+					<a class="username" href="member/{$this.from.id}{URLEND}">$this.from.nickname.text()</a>
 				</div>
 				<div class="message-body">
 					$this.text.bbcode()
@@ -27,5 +39,9 @@
 			<div class="clear"></div>
 		</div>
 	<% ENDCONTROL %>
+	<% IF isPageNext() %>
+		<a href="{URL}{URLEND}?message_page={$nextPage}#message_conversation_info" class="newer
+		 pagination">{$_lang_pm_later}</a>
+	<% END %>
 </div>
-{$form}
+{$reply_form}

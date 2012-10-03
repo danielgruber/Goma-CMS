@@ -3,26 +3,38 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 11.12.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 15.09.2012
+  * $Version 1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class contact extends Page
 {
+		public $can_parent = "all";
 		/**
 		 * the icon for this page
 		*/
 		public static $icon = "images/icons/fatcow-icons/16x16/email.png";
+		
 		/**
 		 * we need an e-mail-adress
 		*/
-		public $db_fields = array('email'	=> 'varchar(200)');
+		public $db_fields = array('email'	=> 'varchar(200)', "requireemailfield" => "Checkbox");
+		
+		/**
+		 * defaults
+		*/
+		public $defaults = array(
+			"requireemailfield" => 1
+		);
+		
 		/**
 		 * the name of this page
 		*/
 		public $name = '{$_lang_contact}';
+		
 		/**
 		 * generate the extended form
 		 *
@@ -35,15 +47,17 @@ class contact extends Page
 				parent::getForm($form);
 				
 				$form->add($email = new TextField('email',  $GLOBALS["lang"]["email"]),0, "content");
+				$form->add(new AutoFormField("requireemailfield", lang("requireEmailField", "email is required")), 0, "content");
 				$form->add(new HTMLEditor('data', $GLOBALS["lang"]["text"]),0, "content");
-				
-				$form->remove("pagecomments");
-				$form->remove("rating");
 				
 				$email->info = lang("email_info", "e-mail-info");
 		}
+		
 		/**
 		 * gets the content of this page
+		 *
+		 *@name getContent
+		 *@access public
 		*/
 		public function getContent()
 		{
@@ -51,7 +65,7 @@ class contact extends Page
 					new TextField('name', $GLOBALS["lang"]["name"]),
 					new TextField('subject', $GLOBALS["lang"]["subject"]),
 					new email("email",  $GLOBALS["lang"]["email"]),
-					new textarea("text", $GLOBALS["lang"]["text"]),
+					new textarea("text", $GLOBALS["lang"]["text"], null, "300px"),
 					new captcha("captcha")
 				),
 				array(
@@ -61,8 +75,11 @@ class contact extends Page
 				
 				
 				$form->setSubmission("send");
-				$form->addValidator(new RequiredFields(array("name", "text", "email")), "Required Fields");
-				
+				if($this->requireEmailField) {
+					$form->addValidator(new RequiredFields(array("name", "text", "email")), "Required Fields");
+				} else {
+					$form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
+				}
 				return $this->data["data"] . $form->render();
 		}
 		
@@ -72,6 +89,10 @@ class contactController extends PageController
 {
 		/**
 		 * sends out the mail
+		 *
+		 *@name send
+		 *@access public
+		 *@param data
 		*/
 		public function send($data)
 		{
@@ -83,7 +104,7 @@ class contactController extends PageController
 										".$GLOBALS["lang"]["name"]."
 									</td>
 									<td>
-										".text::protect($data["name"])."
+										".convert::raw2text($data["name"])."
 									</td>
 								</tr>
 								<tr>
@@ -91,7 +112,7 @@ class contactController extends PageController
 										".$GLOBALS["lang"]["subject"]."
 									</td>
 									<td>
-										".text::protect($data["subject"])."
+										".convert::raw2text($data["subject"])."
 									</td>
 								</tr>
 								<tr>
@@ -99,7 +120,7 @@ class contactController extends PageController
 										".$GLOBALS["lang"]["email"]."
 									</td>
 									<td>
-										".text::protect($data["email"])."
+										".convert::raw2text($data["email"])."
 									</td>
 								</tr>
 								<tr>
@@ -107,7 +128,7 @@ class contactController extends PageController
 										".$GLOBALS["lang"]["text"]."
 									</td>
 									<td>
-										".text::protect($data["text"])."
+										".convert::raw2text($data["text"])."
 									</td>
 								</tr>
 							</table>
@@ -118,7 +139,7 @@ class contactController extends PageController
 				if($mail->sendHTML($this->model_inst->email, lang("contact"),$message))
 					AddContent::addSuccess(lang("successful_saved"));
 				else
-					AddContent::addError(lang("Error"));
+					AddContent::addError(lang("mail_not_sent", "There was an error transmitting the data."));
 				$this->redirectback();
 		}
 }

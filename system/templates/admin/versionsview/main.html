@@ -2,13 +2,11 @@
 <html>
 	<head>
 		<base href="{BASE_URI}" />
-		<title><% lang("browse_versions", "Browse Versions") %></title>
+		<title><% lang("browse_versions", "Browse Versions") %>: $Title</title>
 		
 		<meta name="robots" content="noindex,nofollow" />
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 		
-		<% INCLUDE_JS_MAIN "jquery" %>
-		<% INCLUDE_JS_MAIN "js/loader.js" %>
 		<% INCLUDE_JS "versions.js" %>
 		
 		<% INCLUDE_CSS "jqueryui/theme.css" %>
@@ -29,7 +27,7 @@
 		<div id="wrapper" style="display: none;" class="show-on-js">
 			<div id="content">
 				<div class="header">
-					<h1>{$_lang_browse_versions}</h1>
+					<h1>{$_lang_browse_versions}: $Title</h1>
 				</div>
 				<div id="timeline" class="content_container">
 					<h2><% lang("versions_timeline", "Timeline") %></h2>

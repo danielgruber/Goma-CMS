@@ -1,11 +1,11 @@
 <?php
 /**
-  *@todo comments
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 23.06.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 16.08.2012
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -13,9 +13,39 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 class RegisterExtension extends ControllerExtension
 {
 		
+		/**
+		 * some settings
+		*/
+		
+		/**
+		 * a bool which indicates whether registration is enabled or disabled
+		 *
+		 *@name enabled
+		 *@access public
+		*/
+		public static $enabled = false;
+		
+		/**
+		 * a bool which indicates whether a new user needs to validate his email-adresse or not
+		 *
+		 *@name validateMail
+		 *@access public
+		*/
+		public static $validateMail = true;
+		
+		/**
+		 * registration code, if set to null or "" no code is required
+		 *
+		 *@name registerCode
+		 *@access public
+		*/
+		public static $registerCode;
 		
 		/**
 		 * add custom actions
+		 *
+		 *@name allowed_actions
+		 *@access public
 		*/
 		public $allowed_actions = array(
 			"register"
@@ -23,21 +53,31 @@ class RegisterExtension extends ControllerExtension
 		
 		/**
 		 * register custom method
+		 *
+		 *@name extra_methods
 		*/
 		public static $extra_methods = array("register");
 		
 		/**
-		 * add custom method
+		 * add custom method to handle the action
+		 *
+		 *@name register
+		 *@access public
 		*/
 		public function register()
 		{
+				// define title of this page
 				Core::setTitle(lang("register"));
 				Core::addBreadCrumb(lang("register"), "profile/register/");
+				
+				// check if logged in
 				if(member::login()) {
 					HTTPResponse::Redirect(BASE_URI);
 					exit;
+					
+				// check if link from e-mail
 				} else if(isset($_GET["activate"])) {
-					$data = DataObject::_get("user", array("code" => $_GET["activate"]));
+					$data = DataObject::get("user", array("code" => $_GET["activate"]));
 					
 					if($data->_count() > 0 && $data->status != 2) {
 						$data->status = 1; // activation
@@ -51,8 +91,12 @@ class RegisterExtension extends ControllerExtension
 						// pssst ;)
 						return '<div class="success">'.lang("register_ok").'</div>';
 					}
-				} else if(!SettingsController::get("register_enabled")) {
+				
+				// check if registering is not available on this page
+				} else if(!self::$enabled) {
 					return "<div class=\"notice\">" . lang("register_disabled", "You cannot register on this site!") . "</div>";
+					
+				// great, let's show a form
 				} else {
 					$this->model_inst = new user();
 					return $this->form(false, false, array(), false, "doregister");
@@ -67,7 +111,7 @@ class RegisterExtension extends ControllerExtension
 		*/
 		public function doregister($data)
 		{
-				if(settingsController::get("register_email")) {
+				if(self::$validateMail) {
 					$data["status"] = 0;
 					$data["code"] = randomString(10);
 					// send out mail

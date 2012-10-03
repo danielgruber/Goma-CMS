@@ -1,23 +1,64 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 02.04.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 01.08.2012
+  * $Version 2.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class ObjectRadioButton extends RadioButton
 {
-		// vars for disabling all or some of this radios
-		public $disabled = array();
-		public $all_disabled = false;
 		
-		public $ids = array();
 		/**
-		 * renders the node
+		 * these fields need javascript
+		 *
+		 *@name javaScriptNeeded
+		 *@access protected
+		*/
+		protected $javaScriptNeeded = array();
+			
+		/**
+		 * defines if we hide disabled nodes
+		 *
+		 *@name hideDisabled
+		 *@access public
+		*/
+		public $hideDisabled = true;
+		
+		/**
+		 * renders a option-record
+		 *
+		 *@name renderOption
+		 *@access public
+		*/
+		public function renderOption($name, $value, $title, $checked = null, $disabled = null, $field = null) { 
+			$node = parent::renderOption($name, $value, $title, $checked, $disabled);
+			
+			$children = $node->children();
+			$input = $children[0];
+				
+			$id = $input->id;
+			
+			$this->javaScriptNeeded[] = $id;
+			
+			if(isset($field)) {
+				$node->append(new HTMLNode('div', array(
+					"id" 	=> "displaycontainer_" . $id,
+					"class"	=> "displaycontainer"
+				), $field->field()));
+				$this->form()->registerRendered($field->name);
+			}
+			
+			return $node;
+		}
+		
+		/**
+		 * renders the field
+		 *
 		 *@name field
 		 *@access public
 		*/
@@ -27,145 +68,35 @@ class ObjectRadioButton extends RadioButton
 				
 				$this->container->append(new HTMLNode(
 					"label",
-					array("for"	=> $this->ID()),
+					array(),
 					$this->title
 				));
 				
 				$node = new HTMLNode("div");
-
-				foreach($this->options as $value => $title)
-				{
-						if(is_array($title) && isset($title[1]))
-						{
-								
-								$otherid = $this->form()->fields[$title[1]]->id();
-								$this->ids[] = $otherid;
-								$name = $title[1];
-								$title = $title[0];
-										
-								if($value == $this->value)
-								{
-										if($this->all_disabled || isset($this->disabled[$value]))
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"checked"	=> "checked",
-													"id"		=> "radio_out_" . $otherid,
-													"disabled"	=> "disabled",
-												), $value));
-										} else
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"checked"	=> "checked",
-													"id"		=> "radio_out_" . $otherid
-												), $value));
-										}
-										$node->append(new HTMLNode("label", array(
-											"style"	=> array("display" => "inline"), // inline hack
-											"for"	=> "radio_out_" . $otherid
-										), $title));
-										$node->append(new HTMLNode("div", array(
-											"id"	=> "container_" . $otherid
-										), array(
-											$this->form()->fields[$name]->field()
-										)));					
-										$this->form()->renderedFields[$name] = true;	
-								} else
-								{
-										if($this->all_disabled || isset($this->disabled[$value]))
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"id"		=> "radio_out_" . $otherid,
-													"disabled"	=> "disabled"
-												), $value));
-										} else
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"	=> "radio",
-													"name"	=> $this->name,
-													"value"	=> $value,
-													"id"	=> "radio_out_" . $otherid
-												), $value));
-										}
-										$node->append(new HTMLNode("label", array(
-											"style"	=> array("display" => "inline"), // inline hack
-											"for"	=> "radio_out_" . $otherid
-										), $title));
-										$node->append(new HTMLNode("div", array(
-											"id"	=> "container_" . $otherid
-										), array(
-											$this->form()->fields[$name]->field()
-										)));					
-										$this->form()->renderedFields[$name] = true;	
-								}
-								
-						} else
-						{
-								if($value == $this->value)
-								{
-										$key = randomString(3);
-										if($this->all_disabled || isset($this->disabled[$value]))
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"checked"	=> "checked",
-													"disabled"	=> "disabled",
-													"id"		=> "radio_" . $key
-												), $value));
-										} else
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"checked"	=> "checked",
-													"id"		=> "radio_" . $key
-												), $value));
-										}
-										$node->append(new HTMLNode("label", array(
-											"style"	=> array("display" => "inline"), // inline hack
-											"for"	=> "radio_" . $key
-										), $title));
-								} else
-								{
-										$key = randomString(3);
-										if($this->all_disabled || isset($this->disabled[$value]))
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"		=> "radio",
-													"name"		=> $this->name,
-													"value"		=> $value,
-													"disabled"	=> "disabled",
-													"id"		=> "radio_" . $key
-												), $value));
-										} else
-										{
-												$node->append(new HTMLNode('input', array(
-													"type"	=> "radio",
-													"name"	=> $this->name,
-													"value"	=> $value,
-													"id"		=> "radio_" . $key
-												), $value));
-										}
-										$node->append(new HTMLNode("label", array(
-											"style"	=> array("display" => "inline"), // inline hack
-											"for"	=> "radio_" . $key
-										), $title));
-								}
-								
-								$node->append(new HTMLNode("br"));
+				
+				if(!$this->fullSizedField)
+					$node->addClass("inputHolder");
+				
+				foreach($this->options as $value => $title) {
+					$field = null;
+					if(is_array($title) && isset($title[1])) {
+						$field = $this->form()->getField($title[1]);
+						$title = $title[0];
+					}
+					
+					if($value == $this->value) {
+						if($this->disabled || isset($this->disabledNodes[$value])) {
+							$node->append($this->renderOption($this->PostName(), $value, $title, true, true, $field));
+						} else {
+							$node->append($this->renderOption($this->PostName(), $value, $title, true, false, $field));
 						}
-						unset($otherid, $value, $title);
+					} else {
+						if($this->disabled || isset($this->disabledNodes[$value])) {
+							$node->append($this->renderOption($this->PostName(), $value, $title, false, true, $field));
+						} else {
+							$node->append($this->renderOption($this->PostName(), $value, $title, false, false, $field));
+						}
+					}
 				}
 			
 				$this->container->append($node);
@@ -175,72 +106,43 @@ class ObjectRadioButton extends RadioButton
 				return $this->container;
 		}
 		
+		/**
+		 * generates the javascript for this field
+		 *
+		 *@name JS
+		 *@access public
+		*/
 		public function JS()
 		{
-				return '$(function(){
-					var radioids =  '.json_encode($this->ids).';
-					$container = $("#'.$this->divID().'");
-					for(i in radioids)
-					{	
-						
-						var id = "radio_out_" + radioids[i];
-						if(!$("#" + id).attr("checked"))
-						{
-							var otherid =  radioids[i] + "_div";
-							$("#" + otherid).css("display", "none");
+				$js = '$(function(){
+					var radioids = '.json_encode($this->javaScriptNeeded).';
+					for(i in radioids) {
+						var id = radioids[i];
+						if(!$("#" + id).prop("checked")) {
+							$("#displaycontainer_" + id).css("display", "none");
 						}
 					}
-					$container.find(" > div > input[type=radio]").click(function(){
-						var radioids =  '.json_encode($this->ids).';
+				
+					$("#'.$this->divID().' > div > .option > input[type=radio]").click(function(){
+						var radioids =  '.json_encode($this->javaScriptNeeded).';
 						for(i in radioids)
 						{
-							var id = "radio_out_" + radioids[i];
+							var id = radioids[i];
 							if(!$("#" + id).prop("checked"))
 							{
-								var otherid = radioids[i] + "_div";
+								var otherid = "displaycontainer_" + radioids[i];
 								$("#" + otherid).slideUp("fast");
 							}
 						}
 						
-						var currid = $(this).attr("id").replace("radio_out_", "") + "_div";
+						var currid = "displaycontainer_" + $(this).attr("id");
 						$("#" + currid).slideDown("fast");
+						if($("#" + currid).find(".form_field:first-child").find(".field").length > 0)
+							$("#" + currid).find(".form_field:first-child").find(".field").click();
+						else
+							$("#" + currid).find(".form_field:first-child").find(".input").click();
 					});
 				});';
-		}
-		
-		/**
-		 * disables the field or a given key
-		 *@name disable
-		 *@access public
-		 *@param string - optional, if just field
-		*/
-		public function disable($num = 0)
-		{
-				if($num === 0)
-				{
-						$this->all_disabled = true;
-				} else
-				{
-						$this->disabled[$num] = true;
-				}
-		}
-		/**
-		 * reenables the field or a given key
-		 *@name enable
-		 *@access public
-		 *@param string - optional, if just field
-		*/
-		public function enable($num = 0)
-		{
-				if($num === 0)
-				{
-						$this->all_disabled = false;
-						$this->disabled = array();
-				} else
-				{
-
-						unset($this->disabled[$num]);
-						
-				}
+				return $js;
 		}
 }

@@ -1,28 +1,52 @@
+<% INCLUDE_CSS "pm.css" %>
+<a href="pm/new/" id="inbox_compose" class="button noAutoHide" rel="dropdownDialog">{$_lang_pm_compose}</a>
 <h4>{$_lang_pm_inbox}</h4>
 <div id="inbox">
 	<% IF $this %>
 		<% CONTROL this() %>
-			<div class="ui-message record" id="message_{$this.tid}">
+			<% IF $this.threadRead %>
+				<% IF $this.first %>
+					<div class="message record first" id="message_{$this.fromid}">
+				<% ELSE %>
+			 		<div class="message record" id="message_{$this.fromid}">
+				<% END %>
+			<% ELSE %>
+				<% IF $this.first %>
+					<div class="message record first unread" id="message_{$this.fromid}">
+				<% ELSE %>
+			 		<div class="message record unread" id="message_{$this.fromid}">
+				<% END %>
+			<% END %>
+			
 				<div class="ui-left">
 					<% CONTROL from() %>
 						<% IF $from.avatar %>
-							<a href="member/{$from.id}{URLEND}">$from.avatar.setSize(50,50)</a>
+							<a href="{BASE_URI}pm/{$this.fromid}{URLEND}">$from.avatar.setSize(50,50)</a>
 						<% ELSE %>
-							<a href="member/{$from.id}{URLEND}"><img height="50" width="50" src="images/no_avatar.png" /></a>
+							<a href="{BASE_URI}pm/{$this.fromid}{URLEND}"><img height="50" width="50" src="images/no_avatar.png" /></a>
 						<% END %>
 					<% ENDCONTROL %>
 				</div>
-				<div class="ui-right delete">
-					<a title="{$_lang_delete}" rel="ajaxfy" href="pm/del/{$this.tid}{URLEND}"><img src="images/icons/fatcow-icons/16x16/delete.png" name="{$_lang_delete}" /></a>
-				</div>
-				<div onclick="location.href = '{BASE_URI}pm/{$this.tid}{URLEND}';" class="ui-body" style="cursor: pointer;margin-left: 70px;">
-					<div class="subject">
-						<a href="pm/{$this.tid}{URLEND}">$this.subject.text()</a>
-						<div class="preview">
-							$this.preview.bbcode()
-						</div>
-					</div>
-				</div>
+				<!--<div class="ui-right delete">
+					<a title="{$_lang_delete}" rel="ajaxfy" href="pm/del/{$this.fromid}{URLEND}"><img src="images/icons/fatcow-icons/16x16/delete.png" name="{$_lang_delete}" /></a>
+				</div>-->
+				
+				<span class="date">
+					$this.threadLastModified.date()
+				</span>
+				<% IF $this.threadRead %>
+					<span class="read_indicator"></span>
+				<% ELSE %>
+					<span class="unread_indicator"></span>
+				<% END %>
+				<a class="content" href="{BASE_URI}pm/{$this.fromid}{URLEND}">
+					<span class="author">
+						$this.from.nickname
+					</span>
+					<span class="preview">
+						$this.preview.bbcode()
+					</span>
+				</a>
 				<div class="clear"></div>
 			</div>
 		<% ENDCONTROL %>
@@ -37,7 +61,7 @@
 		<% ENDCONTROL %>
 		</div>
 	<% ELSE %>
-		<div style="text-align: center; color: #555; padding: 10px; border-bottom: 3px double #efefef;">
+		<div class="no_message">
 			<% lang("pm_no_message", "You don't have any message.") %>
 		</div>
 	<% END %>

@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 15.09.2011
-  * $Version 2.0.0 - 003
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 31.08.2012
+  * $Version 1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,48 +14,63 @@ class HTMLNode extends Object
 {
 		/**
 		 * tag
+		 *
 		 *@name tag
 		 *@access protected
 		*/
 		protected $tag;
+		
 		/**
 		 * attributes
+		 *
 		 *@name attr
 		 *@access protected
 		*/
 		protected $attr;
+		
 		/**
 		 * content
+		 * this can be an array of arrays or objects or strings or can be a simple string
+		 *
 		 *@name content
 		 *@access public
 		 *@var array
 		*/
 		public $content;
+		
 		/**
 		 * css
+		 *
 		 *@name css
 		 *@access protected
 		*/
 		protected $css;
+		
 		/**
 		 * if a parent node exists this is a link to it
+		 *
 		 *@name parentNode
 		 *@access public
 		*/
 		public $parentNode;
+		
 		/**
 		 * this array contains all non-closing-tags
+		 *
 		 *@name non_closing_tags
 		 *@access public
 		*/
 		public static $non_closing_tags = array('input', 'img', 'embed', 'br');
+		
 		/**
 		 * these tags are inline-tags, so they don't need whitespace between the content
+		 *
 		 *@name inline_tags
 		 *@access public
 		 *@var array
 		*/
 		public static $inline_tags = array("span", "label", "pre", "textarea", "a", "legend");
+		
 		/**
 		 *@name __construct
 		 *@access public
@@ -66,6 +81,10 @@ class HTMLNode extends Object
 		public function __construct($tag, $attr = array(), $content = null)
 		{
 				$this->tag = trim(strtolower($tag));
+				
+				if(is_string($attr)) {
+					throwError(6, 'PHP-Error', "HTMLNode::__construct: Second argument must be Array");
+				}
 				
 				if(isset($attr["style"]))
 				{
@@ -92,6 +111,7 @@ class HTMLNode extends Object
 		/**
 		 * gets the content of the node as HTML
 		 * if you give a argument, you can set html
+		 *
 		 *@name HTML
 		 *@access public
 		 *@param html - if you want to set it
@@ -100,7 +120,7 @@ class HTMLNode extends Object
 		public function html($new = null, $whitespace = null)
 		{
 				
-				Profiler::mark("HTMLNode::html");
+				if(PROFILE) Profiler::mark("HTMLNode::html");
 				if($new !== null)
 				{
 						if(is_array($new))
@@ -112,33 +132,39 @@ class HTMLNode extends Object
 						}
 				}
 				$content = "";
-				foreach($this->content as $node)
-				{
-						if(is_object($node))
-						{
-								if($whitespace !== null)
-								{
-										$content .= $whitespace . $node->render($whitespace . '          ') . "\n\n";
-								} else
-								{
-										$content .= $node->render();
-								}
-						} else 
-						{
-								if($whitespace !== null)
-								{
-										$content .= $whitespace . $node;
-								} else
-								{
-										$content .= $node;
-								}
-						}
-				}
-				Profiler::unmark("HTMLNode::html");
+				if(is_array($this->content)) {
+					foreach($this->content as $node)
+					{
+							if(is_object($node))
+							{
+									if($whitespace !== null)
+									{
+											$content .= $whitespace . $node->render($whitespace . '          ') . "\n\n";
+									} else
+									{
+											$content .= $node->render();
+									}
+							} else 
+							{
+									if($whitespace !== null)
+									{
+											$content .= $whitespace . $node;
+									} else
+									{
+											$content .= $node;
+									}
+							}
+					}
+				} else {
+					$content = $this->content;
+				}		
+				if(PROFILE) Profiler::unmark("HTMLNode::html");
 				return $content;			
 		}
+		
 		/**
 		 * gets the content of the node as text
+		 *
 		 * if you give a argument, you can set text
 		 *@name text
 		 *@access public
@@ -153,25 +179,21 @@ class HTMLNode extends Object
 						{
 								throwError(6, 'PHP-Error', '$new is not a string in '.__FILE__.' on line '.__LINE__.'');
 						}
-						$this->content = array(text::protect($new));	
-						return text::protect($new);						
+						$this->content = array(convert::raw2xml($new));	
+						return convert::raw2xml($new);						
 				}
 				
 				$content = "";
 				foreach($this->content as $node)
 				{
-						if(is_object($node))
-						{
-								$content .= text::protect($node->render());
-						} else 
-						{
-								$content .= text::protect($node);
-						}
+						$content .= convert::raw2xml((string) $node);
 				}
 				return $content;
 		}
+		
 		/**
 		 * if this field is an textarea or an input you can set or get the value
+		 *
 		 *@name val
 		 *@access public
 		*/
@@ -184,7 +206,7 @@ class HTMLNode extends Object
 								return $this->value = $value;
 						} else
 						{
-								return $this->html(text::protect($value));
+								return $this->html(convert::raw2xml($value));
 						}
 				}
 				
@@ -196,8 +218,10 @@ class HTMLNode extends Object
 						return $this->html();
 				}
 		}
+		
 		/**
 		 * gets the parent node
+		 *
 		 *@name parent
 		 *@access public
 		*/
@@ -205,8 +229,10 @@ class HTMLNode extends Object
 		{
 				return isset($this->parentNode) ? $this->parentNode : false;
 		}
+		
 		/**
 		 * next silbing
+		 *
 		 *@name next
 		 *@access public
 		 *@return HTMLNode
@@ -224,8 +250,10 @@ class HTMLNode extends Object
 						return false;
 				}
 		}
+		
 		/**
 		 * gets a note by its index
+		 *
 		 *@name getNode
 		 *@access public
 		 *@param int - index
@@ -238,8 +266,10 @@ class HTMLNode extends Object
 				}
 				return false;
 		}
+		
 		/**
 		 * sets the parent Node
+		 *
 		 *@name setParentNode
 		 *@access public
 		*/
@@ -247,8 +277,10 @@ class HTMLNode extends Object
 		{
 				$this->parentNode = $node;
 		}
+		
 		/**
 		 * gets the children of a node
+		 *
 		 *@name children
 		 *@access public
 		*/
@@ -256,9 +288,11 @@ class HTMLNode extends Object
 		{
 				return $this->content;
 		}
+		
 		/**
 		 * sets or gets an attrbute
-		 * Please use the direct edit instead
+		 * Please just edit the attributes on the Object instead of using this
+		 *
 		 *@name attr
 		 *@access public
 		 *@param name 
@@ -272,14 +306,20 @@ class HTMLNode extends Object
 				}
 				return $this->__get($name);
 		}
+		
 		/**
 		 * removes an attribute
+		 *
+		 *@name removeAttr
+		 *@param string - name
 		*/
 		public function removeAttr($name) {
 				$this->__unset($name);
 		}
+		
 		/**
 		 * sets or gets a css-attribute
+		 *
 		 *@name css
 		 *@access public
 		 *@param string - name of the attrbiute
@@ -299,8 +339,10 @@ class HTMLNode extends Object
 						return null;
 				}
 		}
+		
 		/**
-		 * appends a node
+		 * appends a node to the children
+		 *
 		 *@name append
 		 *@access public
 		 *@param node
@@ -328,8 +370,10 @@ class HTMLNode extends Object
 						unset($node);
 				}
 		}
+		
 		/**
-		 * appends a node
+		 * prepends a node before the children
+		 *
 		 *@name append
 		 *@access public
 		 *@param node
@@ -358,8 +402,10 @@ class HTMLNode extends Object
 						unset($node);
 				}
 		}
+		
 		/**
 		 * adds a class to this node
+		 *
 		 *@name addClass
 		 *@access public
 		*/
@@ -367,8 +413,10 @@ class HTMLNode extends Object
 		{
 				return $this->attr("class", $this->attr("class") . " " . $class);
 		}
+		
 		/**
 		 * removes a class
+		 *
 		 *@name removeClass
 		 *@access public
 		*/
@@ -378,8 +426,10 @@ class HTMLNode extends Object
 				$classes = str_replace($class, "", $classes);
 				return $this->attr("class", $classes);
 		}
+		
 		/**
-		 * checks if a class exists
+		 * checks if a class exists on this node
+		 *
 		 *@name hasClass
 		 *@access public
 		*/
@@ -395,8 +445,10 @@ class HTMLNode extends Object
 						return false;
 				}
 		}
+		
 		/**
 		 * parses CSS or an array of key-value pairs
+		 *
 		 *@name parseCSS
 		 *@access public
 		 *@param string|array - css
@@ -425,8 +477,10 @@ class HTMLNode extends Object
 						}
 				}
 		}
+		
 		/**
 		 * renders the attributes
+		 *
 		 *@name renderAttributes
 		 *@access protected
 		*/
@@ -454,8 +508,10 @@ class HTMLNode extends Object
 				}
 				return $attr;
 		}
+		
 		/**
 		  * renders the object as html
+		  *
 		  *@name render
 		  *@access public
 		  *@param optional - whitespace, if you want to have code, which is more readable
@@ -484,8 +540,10 @@ class HTMLNode extends Object
 								return "<".$this->tag.$this->renderAttributes()." />";
 				}
 		}
+		
 		/**
 		 * gets the current tag-name
+		 *
 		 *@name getTag
 		 *@access public
 		*/
@@ -493,8 +551,10 @@ class HTMLNode extends Object
 		{
 				return $this->tag;
 		}
+		
 		/**
 		 * sets the current tag
+		 *
 		 *@name setTag
 		 *@access public
 		 *@param tag-name
@@ -503,6 +563,7 @@ class HTMLNode extends Object
 		{
 				$this->tag = $tag;
 		}
+		
 		/**
 		 * attributes with overloading
 		*/

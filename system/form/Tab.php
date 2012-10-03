@@ -1,22 +1,36 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 02.07.2011
+  * last modified: 21.12.2011
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Tab extends FieldSet
 {
-		public function __construct($name, $fields, $title = null, $form = null)
+		/**
+		 *@name __construct
+		 *@access public
+		 *@param string - name
+		 *@param array - fields in this set
+		 *@param string - title
+		 *@param null|object - form
+		*/
+		public function __construct($name, $fields, $title = null, &$form = null)
 		{
 				parent::__construct($name, $fields,  $title, $form);
 							
 				$this->container->setTag("div");
 		}
+		/**
+		 * generates the DOM
+		 *
+		 *@name createNode
+		 *@access public
+		*/
 		public function createNode()
 		{
 				$node = parent::createNode();

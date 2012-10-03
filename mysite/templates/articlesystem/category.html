@@ -2,8 +2,6 @@
 
 <h1>$Title</h1>
 
-$prependedContent
-
 $data
 
 <% IF $categories %>
@@ -23,7 +21,7 @@ $data
 			<div class="article">
 				<h2><a href="$article.url">$article.Title</a></h2>
 				<div class="info">
-					{$_lang_ar_written_by} <% CONTROL article.autor() %> $autor.nickname.text() <% ENDCONTROL %> | $article.comments.count {$_lang_co_comments}
+					{$_lang_ar_written_by} $article.autor.nickname.text() | $article.comments.count {$_lang_co_comments}
 				</div>
 				<div class="description">$article.description</div>
 				<div class="read_more"><a href="$article.url">{$_lang_ar_read_more}</a></div>
@@ -43,5 +41,3 @@ $data
 		</div>
 	</div>
 <% END %>
-
-$appendedContent

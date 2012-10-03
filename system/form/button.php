@@ -1,20 +1,36 @@
 <?php
 /**
-  *@package goma
+  *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 30.07.2010
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.03.2012
+  * $Version 1.1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Button extends FormAction
 {
-		public function __construct($name, $title = null, $action = null, $form = null)
+		/**
+		 * action of this button
+		 *
+		 *@name action
+		 *@access public
+		*/
+		public $action;
+		/**
+		 *@name __construct
+		 *@access public
+		 *@param string - name
+		 *@param string - title
+		 *@param string - action in JavaScript
+		 *@param object|null - field
+		*/
+		public function __construct($name, $title = null, $action = null, $classes = null, &$form = null)
 		{
 				$this->action = $action;
-				parent::__construct($name, $title, null, $form);
+				parent::__construct($name, $title, null, $classes, $form);
 		}
 		/**
 		 * creates the Node
@@ -41,7 +57,7 @@ class Button extends FormAction
 		*/
 		public function field()
 		{
-				Profiler::mark("FormAction::field");
+				if(PROFILE) Profiler::mark("FormAction::field");
 				
 				$this->callExtending("beforeField");
 				$this->input->val($this->title);
@@ -54,7 +70,7 @@ class Button extends FormAction
 				
 				$this->callExtending("afterField");
 				
-				Profiler::unmark("FormAction::field");
+				if(PROFILE) Profiler::unmark("FormAction::field");
 				
 				return $this->container;
 		}
