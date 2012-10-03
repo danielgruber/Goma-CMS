@@ -1,13 +1,6 @@
-
 _config.php
-
-mysite/config.php
+.DS_Store
 .htaccess
 .DS_Store
-
-.htaccess
-
-.DS_Store
-
 mysite/*
 system/installer/log_Y2KFF/*
