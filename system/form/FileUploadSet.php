@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.05.2012
-  * $Version 1.1.6
+  * last modified: 04.08.2012
+  * $Version 1.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -44,12 +44,18 @@ class FileUploadSet extends FormField {
 		"jpg",
 		"png",
 		"bmp",
+		"jpeg",
 		"zip",
 		"rar",
 		"doc",
 		"txt",
 		"text",
-		"pdf"
+		"pdf",
+		"dmg",
+		"7z",
+		"gif",
+		"mp3",
+		"xls"
 	);
 	
 	/**
@@ -271,25 +277,40 @@ class FileUploadSet extends FormField {
 	*/
 	public function frameUpload() {
 		if(isset($_FILES["file"])) {
-			$response = $this->handleUpload($_FILES["file"]);
-			if(is_object($response)) {
-				HTTPResponse::sendHeader();
-				$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
-				if(!$this->link) {
-					unset($filedata["realpath"]);
-					unset($filedata["path"]);
+			if(is_array($_FILES["file"]["name"])) {
+				$files = $this->handleUpload($_FILES["file"]);
+				$filedata = array();
+				foreach($files as $data) {
+					$filedata[] = array("name" => $data->filename, "realpath" => $data->fieldGet("path"), "icon16" => $data->getIcon(16), "path" => $data->path, "id" => $data->id);
+					if(!$this->link) {
+						unset($filedata[count($filedata) - 1]["realpath"]);
+						unset($filedata[count($filedata) - 1]["path"]);
+					}
 				}
 				
-				echo json_encode(array("status" => 1, "file" => $filedata));
-				exit;
-			} else if(is_string($response)) {
-				HTTPResponse::sendHeader();
-				echo json_encode(array("status" => 0, "errstring" => $response));
+				echo json_encode(array("status" => 1, "multiple" => true, "files" => $filedata));
 				exit;
 			} else {
-				HTTPResponse::sendHeader();
-				echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-				exit;
+				$response = $this->handleUpload($_FILES["file"]);
+				if(is_object($response)) {
+					HTTPResponse::sendHeader();
+					$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
+					if(!$this->link) {
+						unset($filedata["realpath"]);
+						unset($filedata["path"]);
+					}
+					
+					echo json_encode(array("status" => 1, "file" => $filedata));
+					exit;
+				} else if(is_string($response)) {
+					HTTPResponse::sendHeader();
+					echo json_encode(array("status" => 0, "errstring" => $response));
+					exit;
+				} else {
+					HTTPResponse::sendHeader();
+					echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
+					exit;
+				}
 			}
 		} else {	
 			HTTPResponse::sendHeader();
@@ -330,6 +351,7 @@ class FileUploadSet extends FormField {
 		if(is_array($upload["name"])) {
 			// we make a error-stack
 			$errStack = array();
+			$fileStack = array();
 			foreach($upload["name"]  as $key => $name) {
 				if($this->max_filesize == -1 || $upload["size"][$key] <= $this->max_filesize) {
 					$ext = strtolower(substr($name, strrpos($name, ".") + 1));
@@ -337,6 +359,7 @@ class FileUploadSet extends FormField {
 						$name = preg_replace('/[^a-zA-Z0-9_\-\.]/i','_',$name);
 						if($data = call_user_func_array(array($this->uploadClass, "addFile"), array($name, $upload["tmp_name"][$key], $this->collection, $this->uploadClass))) {
 							$this->value->add($data);
+							$fileStack[] = $data;
 						} else {
 							$errStack[] = lang("files.upload_failure") . "(".convert::raw2text($name).")";
 						}
@@ -351,7 +374,7 @@ class FileUploadSet extends FormField {
 			}
 			if(count($errStack) == 0) {
 				$this->storeData();
-				return true;
+				return $fileStack;
 			} else {
 				$this->storeData();
 				return '<ul>
@@ -423,6 +446,7 @@ class FileUploadSet extends FormField {
 		$files = $this->FileList();
 		
 		if(count($files) > 0) {
+			$b = 0;
 			$i = 0;
 			foreach($files as $data) {
 				if(strlen($data["filename"]) > 43) {
@@ -433,7 +457,7 @@ class FileUploadSet extends FormField {
 				$this->tbody->append(
 					new HTMLNode('tr', array(
 						"class" => ($i == 0) ? "white" : "grey",
-						"id"	=> $this->name . "_upload_" . $i,
+						"id"	=> $this->name . "__upload_" . $b,
 						"name"	=> $data["id"]
 					), array(
 						new HTMLNode('td', array("class" => "icon"), array(
@@ -450,6 +474,7 @@ class FileUploadSet extends FormField {
 					$a->removeAttr("href");
 				
 				$i = ($i == 0) ? 1 : 0;
+				$b++;
 			}
 		} else {
 			$this->tbody->append(

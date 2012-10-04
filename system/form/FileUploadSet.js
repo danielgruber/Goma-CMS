@@ -177,23 +177,74 @@ var FileUploadSet = function(name, table, url) {
 						}, 2000);
 						tablerow.find(".delete img").remove();
 					} else {
-						tablerow.find(".filename").fadeTo(200, 0.0);
-						tablerow.attr("name", data.file.id);
-						tablerow.find(".icon").fadeTo(200, 0.0, function(){
-							tablerow.find(".icon").html('<img src="'+data.file.icon16+'" alt="icon" />');
-							tablerow.find(".filename").attr("title", data.file.name);
-							if(data.file.path)
-								tablerow.find(".filename").html('<a href="'+data.file.path+'" target="_blank">'+data.file.name+'</a>');
-							else
-								tablerow.find(".filename").html('<a target="_blank">'+data.file.name+'</a>');	
-						});
-						setTimeout(function(){
-							tablerow.find(".filename").fadeTo(200, 1.0);
-							tablerow.find(".icon").fadeTo(200, 1.0);
-						}, 220);
-						
-						tablerow.find(".delete img").unbind("click");
-						bindDeleteEvent(tablerow.find(".delete img"));
+						if(data.multiple) {
+							for(i in data.files) {
+								file = data.files[i];
+								
+								// the current we can just update
+								if(i == 0) {
+									tablerow.find(".filename").fadeTo(200, 0.0);
+									tablerow.attr("name", file.id);
+									tablerow.find(".icon").fadeTo(200, 0.0, function(){
+										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
+										tablerow.find(".filename").attr("title", file.name);
+										if(file.path)
+											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
+										else
+											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');	
+									});
+
+									tablerow.find(".filename").fadeTo(200, 1.0);
+									tablerow.find(".icon").fadeTo(200, 1.0);
+									
+									tablerow.find(".delete img").unbind("click");
+									bindDeleteEvent(tablerow.find(".delete img"));
+								} else {
+									
+									
+									// now add some records
+									var id = $this.name+'_frameupload_'+ ++this.currentIndex;
+									tablerow.after('<tr class="" id="'+id+'">\
+				<td class="icon"></td>\
+				<td class="filename" title="'+file.name+'"><span class="filename">'+file.name+'</span></div></td>\
+				<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>\
+			</tr>');
+									tablerow = $("#" + id);
+									tablerow.find(".icon").fadeTo(200, 0.0, function(){
+										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
+										tablerow.find(".filename").attr("title", file.name);
+										if(file.path)
+											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
+										else
+											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');	
+									});
+
+									tablerow.find(".filename").fadeTo(200, 1.0);
+									tablerow.find(".icon").fadeTo(200, 1.0);
+									
+									tablerow.find(".delete img").unbind("click");
+									bindDeleteEvent(tablerow.find(".delete img"));
+								}
+							}
+						} else {
+							tablerow.find(".filename").fadeTo(200, 0.0);
+							tablerow.attr("name", data.file.id);
+							tablerow.find(".icon").fadeTo(200, 0.0, function(){
+								tablerow.find(".icon").html('<img src="'+data.file.icon16+'" alt="icon" />');
+								tablerow.find(".filename").attr("title", data.file.name);
+								if(data.file.path)
+									tablerow.find(".filename").html('<a href="'+data.file.path+'" target="_blank">'+data.file.name+'</a>');
+								else
+									tablerow.find(".filename").html('<a target="_blank">'+data.file.name+'</a>');	
+							});
+							setTimeout(function(){
+								tablerow.find(".filename").fadeTo(200, 1.0);
+								tablerow.find(".icon").fadeTo(200, 1.0);
+							}, 220);
+							
+							tablerow.find(".delete img").unbind("click");
+							bindDeleteEvent(tablerow.find(".delete img"));
+						}
 					}
 				} catch(err) {
 					if(this.isAbort) {

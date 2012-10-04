@@ -454,7 +454,7 @@ AjaxUpload.prototype = {
 			return false;
 		
 		var $this = this;
-		if(field.files) {
+		if(false) { //field.files) {
 			this.hideBrowseHandler();
 			
 			var form = $(field).parents("form");
@@ -549,6 +549,11 @@ AjaxUpload.prototype = {
 			$("#" + this.id + "_uploadForm").find(".fileSelectInput").change(function(){
 				$this.transportFrame(this);
 			});
+			
+			if(this.multiple) {
+				$("#" + this.id + "_uploadForm").find(".fileSelectInput").attr("multiple", "multiple");
+				$("#" + this.id + "_uploadForm").find(".fileSelectInput").attr("name", "file[]");
+			}
 			
 			$("#" + this.id + "_uploadForm").hover(function(){
 				if(!$this.loading) {

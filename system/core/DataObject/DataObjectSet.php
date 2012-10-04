@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 29.09.2012
-  * $Version: 1.3
+  * last modified: 04.10.2012
+  * $Version: 1.3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -291,7 +291,21 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	public function first()
 	{	
 		if(isset($this->data[key($this->data)])) {
-			$data = $this->getConverted($this->data[key($this->data)]);
+			if(!$this->data[key($this->data)]) {
+				$pos = key($this->data);
+				while(isset($this->data[$pos]) && !$this->data[$pos]) {
+					$pos;
+				}
+				
+				if(!isset($this->data[$pos])) {
+					return null;
+				}
+				
+				$d = $this->data[$pos];
+			} else {
+				$d = $this->data[key($this->data)];
+			}
+			$data = $this->getConverted($d);
 			$this->data[key($this->data)] = $data;
 			return $data;
 		} else
@@ -346,39 +360,67 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@access protected
 	*/
 	protected $position = 0;
+	
 	/**
 	 * rewind $position to 0
+	 *
 	 *@name rewind
 	*/
-	public function rewind()
-	{
-			reset($this->data);
-			$this->position = key($this->data);
+	public function rewind() {
+		reset($this->data);
+		$this->position = key($this->data);
+		
+		
+		if($this->pagination) {
+			while(isset($this->dataSet[$this->position]) && !$this->dataSet[$this->position]) {
+				$this->position++;
+			}
+		} else {
+			while(isset($this->data[$this->position]) && !$this->data[$this->position]) {
+				$this->position++;
+			}
+		}
 	}
+	
 	/**
 	 * check if data exists
+	 *
 	 *@name valid
 	*/
 	public function valid()
 	{	
 		return ($this->position >= key($this->data) && $this->position < count($this->data));
 	}
+	
 	/**
 	 * gets the key
+	 *
 	 *@name key
 	*/
 	public function key()
 	{
 		return $this->position;
 	}
+	
 	/**
 	 * gets the next one
+	 *
 	 *@name next
 	*/
 	public function next()
 	{
 		$this->position++;
+		if($this->pagination) {
+			while(isset($this->dataSet[$this->position]) && !$this->dataSet[$this->position]) {
+				$this->position++;
+			}
+		} else {
+			while(isset($this->data[$this->position]) && !$this->data[$this->position]) {
+				$this->position++;
+			}
+		}
 	}
+	
 	/**
 	 * gets the current value
 	 *@name current
@@ -775,29 +817,24 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 		if($this->pagination) { 
 			if(is_array($position)) {
 				foreach($position as $p) {
-					unset($this->dataCache[$p]);
+					$this->dataCache[$p] = false;
 				}
 			} else {
-				unset($this->dataCache[$position]);
+				$this->dataCache[$position] = false;
 			}
 	
-			// reindex
-			$this->dataCache = array_values($this->dataCache);
 			// rebuild
 			$this->reRenderSet();
 		} else {
 			if(is_array($position)) {
 				foreach($position as $p) {
-					unset($this->data[$p]);
-					unset($this->dataCache[$p]);
+					$this->data[$p] = false;
+					$this->dataCache[$p] = false;
 				}
 			} else {
-				unset($this->data[$position]);
-				unset($this->dataCache[$position]);
+				$this->data[$position] = false;
+				$this->dataCache[$position] = false;
 			}
-	
-			// reindex
-			$this->data = array_values($this->data);
 		}
 		
 		if(empty($this->data))
@@ -1016,7 +1053,8 @@ class DataObjectSet extends DataSet {
 		if($length > 0) {
 			$count = $start;
 			foreach($this->dataobject->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search) as $record) {
-				$data[$count] = $record;
+				if(!isset($data[$count])) 
+					$data[$count] = $record;
 				$count++;
 				unset($record);
 			}
