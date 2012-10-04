@@ -7,8 +7,6 @@ mysite/*
 !mysite/application
 !mysite/templates/*
 !mysite/templates
-!mysite/code/*
-!mysite/code
 !mysite/info.plist
 system/installer/log_*****/*
 system/temp/*
