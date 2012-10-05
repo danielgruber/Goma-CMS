@@ -54,3 +54,9 @@ $SSLpublicKey = {SSLpublicKey};
  * default lang
 */
 $defaultLang = {defaultLang};
+
+/**
+ * defines from which time of ms a query is logged as slow
+ * -1 disables slow-query-logger
+*/
+$slowQuery = {slowQuery};

@@ -158,6 +158,7 @@ if(file_exists(ROOT . '_config.php'))
 		define("BROWSERCACHE", $browsercache);
 		
 		define('SQL_DRIVER', $sql_driver);
+		define("SLOW_QUERY", isset($slowQuery) ? $slowQuery : 50);
 		if(isset($defaultLang)) {
 			define("DEFAULT_LANG", $defaultLang);
 		} else {
@@ -807,6 +808,7 @@ function writeSystemConfig($data = array()) {
 	$privateKey = randomString(15);
 	$browsercache = true;
 	$defaultLang = defined("DEFAULT_LANG") ? DEFAULT_LANG : "de";
+	$slowQuery = 50;
 	
 	if(file_exists(ROOT . "_config.php"))
 		include(ROOT . "_config.php");

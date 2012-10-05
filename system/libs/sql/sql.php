@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.05.2012
-  * $Version 2.1
+  * last modified: 05.10.2012
+  * $Version 2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -131,7 +131,7 @@ class SQL extends object
 				$start = microtime(true);
 				
 				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
-				//echo $_sql;
+				//logging($_sql);
 				
 				if($track)
 					self::$last_query = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql);
@@ -145,8 +145,8 @@ class SQL extends object
 				$time = (microtime(true) - $start) * 1000;
 				//echo  $time . "\n\n";
 				
-				if($time > 50) {
-					log_error("Slow SQL-Query: ".$sql." (".$time."ms)");
+				if(defined("SLOW_QUERY") && SLOW_QUERY != -1 && $time > SLOW_QUERY) {
+					slow_query_log("Slow SQL-Query: ".$sql." (".$time."ms)");
 				}
 			
 				
@@ -610,7 +610,27 @@ interface SQLDriver
 		
 		public function setCharsetUTF8();
 		
-		
-		
-		
+}
+
+/**
+ * logs slow queries
+ *
+ * this information may uploaded to the goma-server for debug-use
+ *
+ *@name slow_query_log
+ *@access public
+ *@param string - debug-string
+*/
+function slow_query_log($data) {
+	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/slow_queries/".date("m-d-y"));
+	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/slow_queries/".date("m-d-y")."/" . date("H_i_s");
+	$file = $folder . "-1.log";
+	$i = 1;
+	while(file_exists($folder. "-" . $i.".log")) {
+		$i++;
+		$file = $folder. "-" . $i.".log";
+	}
+
+	FileSystem::write($file,$data, null, 0777);
 }
