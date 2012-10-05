@@ -179,6 +179,49 @@ class Permission extends DataObject
 				}
 		}
 		
+		/**
+		 * forces that a specific permission exists
+		 *
+		 *@name forceExisting
+		 *@return Permission
+		*/
+		public function forceExisting($r) {
+			if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
+				return $data;
+			} else {
+				$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
+				if(isset($perm->inherit)) {
+					if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
+						$data->consolidate();
+						$data->inheritorid = $data->id;
+						$data->forModel = "permission";
+						$data = $data->_clone();
+						$data->name = $perm->name;
+						$data->write(true, true, 2);
+						return $data;
+					}
+				} else
+				if($perm->inheritorid) {
+					if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
+						$data->consolidate();
+						$data->inheritorid = $perm->inheritorid;
+						$data->forModel = "permission";
+						$data = $data->_clone();
+						$data->name = $perm->name;
+						$data->write(true, true, 2);
+						return $data;
+					}
+				}
+				
+				if(isset(self::$providedPermissions[$r]["default"]["type"]))
+					$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
+				
+				$perm->write(true, true, 2);
+				
+				return $perm;
+			}
+		}
+		
 		/** 
 		 * writing
 		 *

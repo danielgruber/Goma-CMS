@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 29.09.2012
-  * $Version: 4.6.2
+  * last modified: 05.10.2012
+  * $Version: 4.6.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1900,7 +1900,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						}
 					}
 					
-					$this->callExtending("deleteOldVersions", $manipulation);
+					// clean-up-many-many
+					foreach($this->generateManyManyTables() as $data) {
+						$manipulation[$data["table"]] = array(
+							"table" 	=> $data["table"],
+							"command"	=> "delete",
+							"where"		=> array(
+								$data["field"] => $oldid
+							)
+						);
+					}
+					
+					$this->callExtending("deleteOldVersions", $manipulation, $oldid);
 					
 					SQL::manipulate($manipulation);
 					if(PROFILE) Profiler::unmark("DataObject::write");
@@ -2676,7 +2687,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$c = $this->class;
 			while($c = ClassInfo::getParentClass($c))
 			{
-				if($key = array_search($c, classinfo::$class_info[$class]["has_one"]))
+				if($key = array_search($c, classInfo::$class_info[$class]["has_one"]))
 				{
 					break;
 				}
@@ -2745,7 +2756,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$name = trim(strtolower($name));
 		
 		// first a little bit of caching ;)
-		$cache = "many_many_{$name}_{$filter}_{$sort}_{$limit}";
+		$cache = "many_many_".$name."_".md5(var_export($filter, true))."_".md5(var_export($sort, true))."_".md5(var_export($limit, true))."";
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.09.2012
+  * last modified: 05.09.2012
   * $Version 1.1
 */
 
@@ -118,6 +118,8 @@ class Group extends DataObject implements PermProvider
 					}
 				}
 				
+				$form->addDataHandler(array($this, "handlePerms"));
+				
 				$form->addValidator(new RequiredFields(array("name")), "validator");
 				
 				$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/del/'.$this->id . '/group' .URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
@@ -125,6 +127,28 @@ class Group extends DataObject implements PermProvider
 				$form->addAction(new Button("cancel", lang("cancel", "cancel"), "LoadTreeItem(0);"));
 				$form->addAction(new AjaxSubmitButton("savegroup", lang("save", "Save"), "AjaxSave", null, array("green")));
 		}
+		
+		/**
+		 * rewrites permissions to object
+		 *
+		 *@name handlePerms
+		 *@access public
+		*/
+		public function handlePerms($data) {
+			$dataset = new ManyMany_DataObjectSet("permission");
+			foreach($data["permissions"] as $key => $val) {
+				if($val) {
+					// check for created
+					Permission::forceExisting($key);
+					if($record = DataObject::get_one("Permission", array("name" => $key)))
+						$dataset->add($record);
+				}
+			}
+			$data["permissions"] = $dataset;
+			
+			return $data;
+		}
+		
 		/**
 		 * TREE-API v2
 		 * this API renders trees more flexibel and with better performance

@@ -513,14 +513,14 @@ class Member extends Object {
 	public static function checkDefaults() {
 		if(DataObject::count("group", array("type" => 2)) == 0) {
 			$group = new Group();
-			$group->name = lang("admins");
+			$group->name = lang("admins", "admins");
 			$group->type = 2;
 			$group->write(true, true);
 		}
 		
 		if(DataObject::count("group", array("type" => 1)) == 0) {
 			$group = new Group();
-			$group->name = lang("user");
+			$group->name = lang("user", "users");
 			$group->type = 1;
 			$group->write(true, true);
 		}
