@@ -513,8 +513,7 @@ abstract class g_SoftwareType {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
 		
-		if($f = @fsockopen("goma-cms.org", 80, $errno, $errstr, 1)) {
-			fclose($f);
+		if(strpos(@file_get_contents("http://goma-cms.org"), "<html")) {
 			self::$gomaAvailable = true;
 			return true;
 		} else {
