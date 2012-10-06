@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.09.2012
-  * $Version 1.1
+  * last modified: 07.10.2012
+  * $Version 1.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -21,7 +21,7 @@ class contact extends Page
 		/**
 		 * we need an e-mail-adress
 		*/
-		public $db_fields = array('email'	=> 'varchar(200)', "requireemailfield" => "Checkbox");
+		public $db_fields = array('email'	=> 'varchar(200)'/*, "requireemailfield" => "Checkbox"*/);
 		
 		/**
 		 * defaults
@@ -46,9 +46,9 @@ class contact extends Page
 		{
 				parent::getForm($form);
 				
-				$form->add($email = new TextField('email',  $GLOBALS["lang"]["email"]),0, "content");
-				$form->add(new AutoFormField("requireemailfield", lang("requireEmailField", "email is required")), 0, "content");
-				$form->add(new HTMLEditor('data', $GLOBALS["lang"]["text"]),0, "content");
+				$form->add($email = new TextField('email',  lang("email")),0, "content");
+				//$form->add(new AutoFormField("requireemailfield", lang("requireEmailField", "email is required")), 0, "content");
+				$form->add(new HTMLEditor('data', lang("text")),0, "content");
 				
 				$email->info = lang("email_info", "e-mail-info");
 		}
@@ -62,14 +62,14 @@ class contact extends Page
 		public function getContent()
 		{
 				$form = new Form($this->controller(), "mailer", array(
-					new TextField('name', $GLOBALS["lang"]["name"]),
-					new TextField('subject', $GLOBALS["lang"]["subject"]),
-					new email("email",  $GLOBALS["lang"]["email"]),
-					new textarea("text", $GLOBALS["lang"]["text"], null, "300px"),
+					new TextField('name', lang("name")),
+					new TextField('subject', lang("subject")),
+					new email("email",  lang("email")),
+					new textarea("text", lang("text"), null, "300px"),
 					new captcha("captcha")
 				),
 				array(
-					new FormAction("submit",$GLOBALS["lang"]["save"])
+					new FormAction("submit", lang("save"))
 				));
 				
 				
@@ -101,7 +101,7 @@ class contactController extends PageController
 				$message .= "<table width=\"100%\">
 								<tr>
 									<td>
-										".$GLOBALS["lang"]["name"]."
+										".lang("name")."
 									</td>
 									<td>
 										".convert::raw2text($data["name"])."
@@ -109,7 +109,7 @@ class contactController extends PageController
 								</tr>
 								<tr>
 									<td>
-										".$GLOBALS["lang"]["subject"]."
+										".lang("subject")."
 									</td>
 									<td>
 										".convert::raw2text($data["subject"])."
@@ -117,7 +117,7 @@ class contactController extends PageController
 								</tr>
 								<tr>
 									<td>
-										".$GLOBALS["lang"]["email"]."
+										".lang("email")."
 									</td>
 									<td>
 										".convert::raw2text($data["email"])."
@@ -125,7 +125,7 @@ class contactController extends PageController
 								</tr>
 								<tr>
 									<td>
-										".$GLOBALS["lang"]["text"]."
+										".lang("text")."
 									</td>
 									<td>
 										".convert::raw2text($data["text"])."
