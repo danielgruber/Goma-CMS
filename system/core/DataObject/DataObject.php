@@ -2268,6 +2268,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 									}
 							}
 					}
+					
+					// clean-up-many-many
+					foreach($this->generateManyManyTables() as $data) {
+						$manipulation[$data["table"]] = array(
+							"table" 	=> $data["table"],
+							"command"	=> "delete",
+							"where"		=> array(
+								$data["field"] => $ids
+							)
+						);
+					}
+					
 				}
 		} else {
 			return false;
