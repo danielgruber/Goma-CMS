@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
-  * $Version 1.5.2
+  * last modified: 07.10.2012
+  * $Version 1.5.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -889,7 +889,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		
 		// add some files
 		$gfs->addFromFile(ROOT . "index.php", "/data/index.php");
-		$gfs->addFromFile(ROOT . ".htaccess", "/data/.htaccess");
+		//$gfs->addFromFile(ROOT . ".htaccess", "/data/.htaccess");
 		$gfs->close();
 		
 		return true;
