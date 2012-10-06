@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.05.2012
+  * last modified: 07.05.2012
   * $Version 2.0.1
 */
 
@@ -183,19 +183,21 @@ var FileUploadSet = function(name, table, url) {
 								
 								// the current we can just update
 								if(i == 0) {
-									tablerow.find(".filename").fadeTo(200, 0.0);
+									tablerow.find(".filename").fadeTo(0, 0.0);
 									tablerow.attr("name", file.id);
-									tablerow.find(".icon").fadeTo(200, 0.0, function(){
+									tablerow.find(".icon").fadeTo(0, 0.0, function(){
 										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
 										tablerow.find(".filename").attr("title", file.name);
 										if(file.path)
 											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
 										else
-											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');	
+											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');
+										
+										tablerow.find(".filename").fadeTo(200, 1.0);
+										tablerow.find(".icon").fadeTo(200, 1.0);	
 									});
 
-									tablerow.find(".filename").fadeTo(200, 1.0);
-									tablerow.find(".icon").fadeTo(200, 1.0);
+									
 									
 									tablerow.find(".delete img").unbind("click");
 									bindDeleteEvent(tablerow.find(".delete img"));
@@ -203,29 +205,33 @@ var FileUploadSet = function(name, table, url) {
 									
 									
 									// now add some records
-									var id = $this.name+'_frameupload_'+ ++this.currentIndex;
+									this.currentIndex++;
+									var id = $this.name+'_frameupload_'+ this.currentIndex;
 									tablerow.after('<tr class="" id="'+id+'">\
 				<td class="icon"></td>\
 				<td class="filename" title="'+file.name+'"><span class="filename">'+file.name+'</span></div></td>\
 				<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>\
 			</tr>');
 									tablerow = $("#" + id);
-									tablerow.find(".icon").fadeTo(200, 0.0, function(){
+									tablerow.find(".icon").fadeTo(0, 0.0, function(){
 										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
 										tablerow.find(".filename").attr("title", file.name);
 										if(file.path)
 											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
 										else
 											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');	
+											
+										tablerow.find(".filename").fadeTo(200, 1.0);
+										tablerow.find(".icon").fadeTo(200, 1.0);
 									});
-
-									tablerow.find(".filename").fadeTo(200, 1.0);
-									tablerow.find(".icon").fadeTo(200, 1.0);
 									
 									tablerow.find(".delete img").unbind("click");
 									bindDeleteEvent(tablerow.find(".delete img"));
 								}
 							}
+							
+							$this.table.find("tr").removeClass("grey").removeClass("white");
+							$this.table.find("tr:even").addClass("grey");
 						} else {
 							tablerow.find(".filename").fadeTo(200, 0.0);
 							tablerow.attr("name", data.file.id);

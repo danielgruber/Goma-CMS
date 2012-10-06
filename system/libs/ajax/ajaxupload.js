@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.05.2012
-  * $Version 2.0.2
+  * last modified: 07.10.2012
+  * $Version 2.0.3
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -454,7 +454,7 @@ AjaxUpload.prototype = {
 			return false;
 		
 		var $this = this;
-		if(false) { //field.files) {
+		if(field.files) {
 			this.hideBrowseHandler();
 			
 			var form = $(field).parents("form");
