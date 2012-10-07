@@ -52,8 +52,8 @@
 .fileuploadset .filetable thead th {
 	border-bottom: 1px solid #999;
 }
-.fileuploadset .filetable td, .fileuploadset .filetable th {
-	padding: 4px 7px;
+.fileuploadset .filetable tbody td, .fileuploadset .filetable tbody th {
+	padding: 10px;
 }
 .fileuploadset .filetable tbody {
 	

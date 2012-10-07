@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 30.08.2012
-  * $Version 1.3.6
+  * last modified: 07.10.2012
+  * $Version 1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -558,16 +558,32 @@ class ImageUploads extends Uploads {
 	public function getIcon($size = 128) {
 		switch($size) {
 			case 16:
-				return "images/icons/goma/16x16/image.png";
+				if($this->width > 15) {
+					return $this->path . "/setWidth/16";
+				} else {
+					return "images/icons/goma/16x16/image.png";
+				}
 			break;
 			case 32:
-				return "images/icons/goma/32x32/image.png";
+				if($this->width > 31) {
+					return $this->path . "/setWidth/32";
+				} else {
+					return "images/icons/goma/16x16/image.png";
+				}
 			break;
 			case 64:
-				return "images/icons/goma/64x64/image.png";
+				if($this->width > 63) {
+					return $this->path . "/setWidth/64";
+				} else {
+					return "images/icons/goma/16x16/image.png";
+				}
 			break;
 			case 128:
-				return "images/icons/goma/128x128/image.png";
+				if($this->width > 127) {
+					return $this->path . "/setWidth/128";
+				} else {
+					return "images/icons/goma/16x16/image.png";
+				}
 			break;
 		}
 		return "images/icons/goma/128x128/image.png";
@@ -631,6 +647,40 @@ class ImageUploads extends Uploads {
 	*/
 	public function orgSetHeight($height) {
 		return '<img src="' . $this->path . "/orgSetHeight/" . $height . '" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * returns width
+	 *
+	 *@name width
+	 *@access public
+	*/
+	public function width() {
+		if(preg_match('/^[0-9]+$/', $this->fieldGET("width")) && $this->fieldGET("width") != 0) {
+			return $this->fieldGet("width");
+		}
+		
+		$image = new RootImage($this->realfile);
+		$this->setField("width", $image->width);
+		$this->write(false, true);
+		return $image->width;
+	}
+	
+	/**
+	 * returns height
+	 *
+	 *@name height
+	 *@access public
+	*/
+	public function height() {
+		if(preg_match('/^[0-9]+$/', $this->fieldGET("height"))  && $this->fieldGET("height") != 0) {
+			return $this->fieldGet("height");
+		}
+		
+		$image = new RootImage($this->realfile);
+		$this->setField("height", $image->height);
+		$this->write(false, true);
+		return $image->height;
 	}
 
 }
