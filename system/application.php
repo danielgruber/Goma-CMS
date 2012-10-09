@@ -21,6 +21,8 @@ error_reporting(E_ALL);
  * PHP 5.2 is necessary
 */
 
+// hallo welt
+
 if(version_compare(phpversion(), "5.2.0", "<"))
 {
 		header("HTTP/1.1 500 Server Error");
