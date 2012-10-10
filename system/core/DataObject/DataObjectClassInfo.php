@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.07.2012
-  * $Version 4.0.7
+  * last modified: 10.10.2012
+  * $Version 4.0.8
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -177,6 +177,13 @@ class DataObjectClassInfo extends Extension
 							unset($table, $many_many_table_belongs);
 						}
 						
+						foreach(ClassInfo::$class_info[$class]["many_many_tables"] as $data) {
+							if(defined("SQL_LOADUP") && $fields = SQL::getFieldsOfTable($data["table"])) {
+								ClassInfo::$database[$data["table"]] = $fields;
+								unset($fields, $data);
+							}
+						}
+						
 						unset($key, $data, $fields);
 						
 						/*
@@ -190,8 +197,8 @@ class DataObjectClassInfo extends Extension
 						} else
 						{
 								ClassInfo::$class_info[$class]["table_name"] = $table_name;
-								classinfo::addTable($table_name, $class);
-								if(defined("SQL_LOADUP") && $fields = sql::getFieldsOfTable($table_name))
+								ClassInfo::addTable($table_name, $class);
+								if(defined("SQL_LOADUP") && $fields = SQL::getFieldsOfTable($table_name))
 								{
 										ClassInfo::$database[$table_name] = $fields;
 										ClassInfo::$class_info[$class]["table_exists"] = true;

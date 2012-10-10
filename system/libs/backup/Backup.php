@@ -56,7 +56,6 @@ class Backup extends Object {
 		$dict->add("excludedTables", $excludeListPlist);
 		
 		$dict->add("includedTables", $tables = new CFArray());
-
 		
 		foreach(ClassInfo::$database as $table => $fields)
 		{

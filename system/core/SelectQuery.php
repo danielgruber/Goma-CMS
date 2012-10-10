@@ -533,7 +533,16 @@ class SelectQuery extends Object
 			// FROM
 				
 			$sql .= " FROM ";
-				
+			
+			// validate from
+			foreach($this->from as $table => $data) {
+				if(is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
+					if(!isset(ClassInfo::$database[$table])) {
+						throwError(6, "SQL-Missing-Error", "Table ".$table." doesn't exist!");
+					}
+				}
+			}
+			
 			$sql .= implode(" ", $this->from);
 			
 			// WHERE

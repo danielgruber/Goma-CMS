@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-  * $Version 2.3.3
+  * last modified: 10.10.2012
+  * $Version 2.3.4
 */
 
 body, html {
@@ -339,6 +339,9 @@ a:hover {
 	background: #fff url(images/logout_bg.png) repeat-x;
 	min-width: 850px;
 	min-height: 100%;
+}
+#wrapper_logout #head {
+	background: #fff;
 }
 #wrapper_logout .wrapper_inner {
 	width: 650px;

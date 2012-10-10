@@ -829,7 +829,7 @@ class Dev extends RequestHandler
 				
 				HTTPResponse::unsetCacheable();
 				
-				if(!Permission::check("ADMIN") && !isset($_SESSION["dev_without_perms"]))
+				if(!isset($_SESSION["dev_without_perms"]) && !Permission::check("ADMIN"))
 				{
 					makeProjectAvailable();
 					

@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 05.10.2012
-  * $Version: 4.6.3
+  * last modified: 10.10.2012
+  * $Version: 4.6.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -3525,6 +3525,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			else
 				$query = $this->buildSearchQuery($search, $filter, $sort, $limit, $joins, $version);
 			
+			// validate from
+			foreach($query->from as $table => $data) {
+				if(is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
+					if(!isset(ClassInfo::$database[$table])) {
+						// try to create the tables
+						$this->buildDev();
+					}
+				}
+			}
 			
 			$query->execute();
 			
