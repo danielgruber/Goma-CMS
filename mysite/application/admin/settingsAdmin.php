@@ -30,6 +30,9 @@ class settingsAdmin extends adminItem
 		
 		public function submit_form($data, $form, $model = null) {
 			if(isset($data["lang"], $data["status"], $data["timezone"], $data["date_format"])) {
+				if(!file_exists(ROOT . LANGUAGE_DIRECTORY . $data["lang"])) {
+					throwError(6, "Invalid-Error", "Selected language not existing!");
+				}
 				$status = (SITE_MODE == STATUS_DISABLED) ? STATUS_DISABLED : $data["status"]; 
 				writeProjectConfig(array('lang' => $data["lang"], "status" => $status, "timezone" => $data["timezone"], "date_format" => $data["date_format"]));
 			} else {
