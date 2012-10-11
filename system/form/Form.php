@@ -394,7 +394,7 @@ class Form extends object
 		public function render()
 		{
 				Resources::add("form.css", "css");
-				if(isset($_POST["form_submit_" . $this->name()]))
+				if(isset($_POST["form_submit_" . $this->name()]) && session_store_exists("form_" . strtolower($this->name)))
 				{
 						// check secret
 						if($this->secret && $_POST["secret_" . $this->ID()] == $this->state->secret)
@@ -446,7 +446,7 @@ class Form extends object
 				}
 				
 				
-				$this->saveToSession();
+				//$this->saveToSession();
 				
 				$this->form->action = ($this->action != "") ? $this->action : $this->url;
 				
@@ -542,6 +542,8 @@ class Form extends object
 				
 				session_store("form_state_" . $this->name, $this->state->ToArray());
 				
+				$this->saveToSession();
+				
 				if(PROFILE) Profiler::unmark("Form::renderForm");
 				
 				return $data;
@@ -594,6 +596,8 @@ class Form extends object
 					}
 				}
 				
+				$data = session_restore("form_" . strtolower($this->name));
+				$data->post = $this->post;
 				
 				// just write it
 				$this->saveToSession();
@@ -602,7 +606,7 @@ class Form extends object
 				$this->result = array(); // reset result
 				
 				// get data
-				foreach($this->fields as $field)
+				foreach($data->fields as $field)
 				{
 					$result = $field->result();
 
@@ -625,9 +629,9 @@ class Form extends object
 				
 				
 				
-				foreach($this->validators as $validator)
+				foreach($data->validators as $validator)
 				{
-						$validator->setForm($this);
+						$validator->setForm($data);
 						$v = $validator->validate();
 						if($v !== true)
 						{
@@ -660,20 +664,21 @@ class Form extends object
 					}
 				}
 				
-				$this->callExtending("getResult", $realresult);
+				$data->callExtending("getResult", $realresult);
 				
 				$result = $realresult;
 				unset($realresult, $allowed_result);
 				
-				foreach($this->dataHandlers as $callback) {
+				foreach($data->dataHandlers as $callback) {
 					$result = call_user_func_array($callback, array($result));
 				}
+
 				
 				
 				// find actions in fields
-				foreach($this->fields as $field) {
+				foreach($data->fields as $field) {
 					if(is_a($field, "FormActionHandler")) {
-						if(isset($_POST[$field->name]) || (isset($_POST["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel"))
+						if(isset($_POST[$field->postname()]) || (isset($_POST["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel"))
 						{
 							$i++;
 							if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
@@ -702,11 +707,11 @@ class Form extends object
 				
 				
 				
-				$this->callExtending("afterSubmit", $result);
+				$data->callExtending("afterSubmit", $result);
 				
 				session_store("form_state_" . $this->name, $this->state->ToArray());
 				
-				return $this->controller->$submission($result, $this);
+				return $this->controller->$submission($result, $data);
 		}
 		
 		/**
