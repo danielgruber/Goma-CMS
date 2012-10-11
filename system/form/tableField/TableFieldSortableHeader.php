@@ -73,6 +73,7 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 		if ($state->sortColumn == "") {
 			return $data;
 		}
+		
 		return $data->sort($state->sortColumn, $state->sortDirection);
 	}
 	
