@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.08.2012
-  * $Version 2.5.12
+  * last modified: 12.10.2012
+  * $Version 2.5.13
 */
 
 error_reporting(E_ALL);
