@@ -547,6 +547,8 @@ class TableField_FormAction extends FormAction {
 		$this->actionName = $actionName;
 		$this->args = $args;
 		parent::__construct($this->tableField->name . "_" . $name, $title);
+		
+		$this->setForm($tableField->Form());
 	}
 	
 	/**
@@ -558,5 +560,15 @@ class TableField_FormAction extends FormAction {
 	public function canSubmit($data) {
 		$this->tableField->handleAction($this->actionName, $this->args, $data);
 		return false;
+	}
+	
+	/**
+	 * adds an extra-class
+	 *
+	 *@name addExtraClass
+	 *@access public
+	*/
+	public function addExtraClass($class) {
+		$this->input->addClass($class);
 	}
 }

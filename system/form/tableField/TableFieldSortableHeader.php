@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
+  * last modified: 10.10.2012
   * $Version - 1.0
  */
  
@@ -29,24 +29,23 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 			$currentColumn++;
 			$metadata = $tableField->getColumnMetadata($columnField);
 			$title = $metadata['title'];
-			if(false) { //$title && $tableField->getData()->canSortBy($columnField)) {
+			if($title && $tableField->getData()->canSortBy($columnField)) {
 				$dir = 'asc';
 				if($state->sortColumn == $columnField && $state->sortDirection == 'asc') {
 					$dir = 'desc';
 				}
 				
-				$field = Object::create(
-					'GridField_FormAction', $gridField, 'SetOrder'.$columnField, $title, 
-					"sort$dir", array('SortColumn' => $columnField)
-				)->addExtraClass('ss-gridfield-sort');
+				$field = new TableField_FormAction($tableField, "SetOrder" . $columnField, $title, "sort" . $dir, array("SortColumn" => $columnField));
+				
+				$field->addExtraClass("tablefield-sortable");
 
 				if($state->sortColumn == $columnField){
-					$field->addExtraClass('ss-gridfield-sorted');
+					$field->addExtraClass('tablefield-sorted');
 
 					if($state->sortDirection == 'asc')
-						$field->addExtraClass('ss-gridfield-sorted-asc');
+						$field->addExtraClass('tablefield-sorted-asc');
 					else
-						$field->addExtraClass('ss-gridfield-sorted-desc');
+						$field->addExtraClass('tablefield-sorted-desc');
 				}
 			} else {
 				if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
@@ -69,7 +68,12 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 	 *@name manipulate
 	*/
 	public function manipulate($tableField, $data) {
-		return $data;
+		$state = $tableField->state->tableFieldSortableHeader;
+		
+		if ($state->sortColumn == "") {
+			return $data;
+		}
+		return $data->sort($state->sortColumn, $state->sortDirection);
 	}
 	
 	/**
@@ -79,9 +83,28 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 	 *@access public
 	*/
 	public function getActions($tableField) {
-		
+		return array("sortasc", "sortdesc");
 	}
+	
+	/**
+	 * handles the actions, so it pushes the states
+	 *
+	 *@name handleAction
+	 *@access public
+	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
+		$state = $tableField->state->tableFieldSortableHeader;
 		
+		switch($actionName) {
+			case 'sortasc':
+				$state->sortColumn = $arguments['SortColumn'];
+				$state->sortDirection = 'asc';
+				break;
+
+			case 'sortdesc':
+				$state->sortColumn = $arguments['SortColumn'];
+				$state->sortDirection = 'desc';
+				break;
+		}
 	}
 }
