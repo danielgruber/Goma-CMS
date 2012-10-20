@@ -11,3 +11,5 @@ Team
 
 * iGruber - Daniel Gruber
 * MatorKalen - Fabian Parzefall
+* Patrick Lemke
+* Nick - Dominik Hardtke
