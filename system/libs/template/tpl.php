@@ -928,6 +928,7 @@ $data = array_pop($dataStack);
 /**
  * this class is a class for calling functions from the template
  * it provides functions to add allowed methods to the template
+ *
  *@name tplCaller
  *@package goma
  *@subpackage template

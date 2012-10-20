@@ -473,6 +473,7 @@ class Controller extends RequestHandler
 				throwError(6, "Invalid Argument", "Controller::Edit should be called if you just have one Record or a given ID in URL.");
 			}
 		}
+		
 		/**
 		 * delete-function
 		 * this delete-function also implements ajax-functions
@@ -568,6 +569,7 @@ class Controller extends RequestHandler
 				throwError(6, 'Server-Error', 'Could not save data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
 			}
 		}
+		
 		/**
 		 * saves data to database, it does not matter if edit or add
 		 *
@@ -602,6 +604,7 @@ class Controller extends RequestHandler
 						return false;
 				}
 		}
+		
 		/**
 		 * saves data to database, it does not matter if edit or add
 		 * it publishes the data
@@ -622,27 +625,34 @@ class Controller extends RequestHandler
 						throwError(6, 'Server-Error', 'Could not publish data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
 				}
 		}
+		
 		/**
 		 * redirects back
 		 *@name redirectback
 		 *@access public
 		*/
-		public function redirectback()
+		public function redirectback($param = null, $value = null)
 		{
 				if(isset($_GET["redirect"]))
 				{
-						HTTPResponse::redirect($_GET["redirect"]);
+						$redirect = $_GET["redirect"];
 				} else if(isset($_POST["redirect"]))
 				{
-						HTTPResponse::redirect($_POST["redirect"]);
+						$redirect = $_POST["redirect"];
 				} else if(isset($_SERVER["HTTP_REFERER"]))
 				{
-						HTTPResponse::redirect($_SERVER["HTTP_REFERER"]);
+						$redirect = $_SERVER["HTTP_REFERER"];
 				} else
 				{
-						HTTPResponse::redirect(BASE_URI);
+						$redirect = BASE_URI;
 				}
+				
+				if(isset($param) && isset($value))
+					$redirect = TPLCaller::addParamToURL($redirect, $param, $value);
+					
+				HTTPResponse::redirect($redirect);
 		}
+		
 		/**
 		 * asks the user if he want's to do sth
 		 *
@@ -661,6 +671,7 @@ class Controller extends RequestHandler
 			return true;
 			
 		}
+		
 		/**
 		 * prompts the user
 		 *
@@ -680,5 +691,66 @@ class Controller extends RequestHandler
 			return $data["prompt_text"];	
 			
 		}
-	
+		
+		/**
+		 * keychain
+		*/
+		
+		/**
+		 * adds a password to the keychain
+		 *
+		 *@name keyChainAdd
+		 *@access public
+		 *@param string - password
+		 *@param bool - use cookie
+		 *@param int - cookie-livetime
+		*/
+		public static function keyChainAdd($password, $cookie = null, $cookielt = null) {
+			if(!isset($cookie)) {
+				$cookie = true;
+			}
+			
+			if(!isset($cookielt)) {
+				$cookielt = 14 * 24 * 60 * 60;
+			}
+			
+			if(isset($_SESSION["keychain"])) {
+				$_SESSION["keychain"] = array();
+			}
+			$_SESSION["keychain"][] = $password;
+			
+			if($cookie) {
+				setCookie("keychain_" . md5(md5($password)), md5($password), NOW + $cookielt);
+			}
+		}
+		
+		/**
+		 * checks if a password is in keychain
+		 *
+		 *@name keyChainCheck
+		 *@access public
+		*/
+		public static function KeyChainCheck($pwd) {
+			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password))) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		/**
+		 * removes a password from keychain
+		 *
+		 *@name keyChainRemove
+		 *@access public
+		*/
+		public static function keyChainRemove($pwd) {
+			if(isset($_SESSION["keychain"])) {
+				if($key = array_search($pwd, $_SESSION["keychain"])) {
+					unset($_SESSION["keychain"][$key]);
+				}
+			}
+			
+			setCookie("keychain_" . md5(md5($password)), null, -1);
+		}
 }
