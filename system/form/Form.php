@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.09.2012
-  * $Version - 2.4
+  * last modified: 22.10.2012
+  * $Version - 2.4.1
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -672,8 +672,6 @@ class Form extends object
 				foreach($data->dataHandlers as $callback) {
 					$result = call_user_func_array($callback, array($result));
 				}
-
-				
 				
 				// find actions in fields
 				foreach($data->fields as $field) {
@@ -691,6 +689,7 @@ class Form extends object
 								}
 								break;
 							} else {
+								$this->state = $data->state;
 								$this->defaultFields();
 								return $this->renderForm();
 							}
@@ -701,6 +700,7 @@ class Form extends object
 				
 				// no registered action has submitted the form
 				if($i == 0) {
+					$this->state = $data->state;
 					$this->defaultFields();
 					return $this->renderForm();
 				}

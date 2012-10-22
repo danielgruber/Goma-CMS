@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.09.2012
-  * $Version 2.2.4
+  * last modified: 22-10.2012
+  * $Version 2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -274,9 +274,6 @@ class FormField extends RequestHandler
 				{
 						$this->parent =& $form;
 						
-						if($this->form()->state)
-							$this->state = $this->form()->state->{$this->class . $this->name};
-						
 						$this->form()->registerField($this->name, $this);
 						if(is_object($this->input))
 							$this->input->name = $this->PostName();
@@ -418,5 +415,16 @@ class FormField extends RequestHandler
 		public function createTag($tag, $attr, $content) {
 			$node = new HTMLNode($tag, $attr, $content);
 			return $node->render();
+		}
+		
+		/**
+		 * getter-method for state
+		*/
+		public function __get($name) {
+			if(strtolower($name) == "state") {
+				return $this->form()->state->{$this->class . $this->name};
+			} else {
+				return $this->$name;
+			}
 		}
 }
