@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
+  * last modified: 25.10.2012
   * $Version 2.2
 */
 
@@ -489,6 +489,7 @@ class LeftAndMain extends AdminItem {
 	public function versions() {
 		if($this->ModelInst() && $this->ModelInst()->versioned) {
 			$controller = new VersionsViewController($this->ModelInst());
+			$controller->subController = true;
 			return $controller->handleRequest($this->request);
 		}
 		return false;
