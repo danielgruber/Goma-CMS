@@ -135,12 +135,13 @@ class Pages extends DataObject implements PermProvider
 			
 			
 		}
+		
 		/**
 		 * makes the url
 		 *@name geturl
 		 *@return string
 		*/
-		public function geturl()
+		public function getURL()
 		{
 			if($this->path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
 				return ROOT_PATH . BASE_SCRIPT;
