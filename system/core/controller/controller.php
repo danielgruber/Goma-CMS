@@ -259,8 +259,9 @@ class Controller extends RequestHandler
 		 * handles requests
 		 *@name handleRequest
 		*/
-		public function handleRequest(request $request)
+		public function handleRequest(request $request, $subController = false)
 		{
+				$this->subController = false;
 				$this->areaData = array();
 				$data = $this->__output(parent::handleRequest($request));
 				

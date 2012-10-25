@@ -77,10 +77,24 @@ class RequestHandler extends Object
 		}
 		
 		/**
+		 * init-function
+		 *@name init
+		 *@access public
+		*/
+		public function Init($subController = false)
+		{
+			if(!$this->subController) {
+				Core::$requestController = $this;
+				Core::$controller[] = $this;
+			}
+			$this->requestHandlerKey = count(Core::$controller);
+		}
+		
+		/**
 		 * handles requests
 		 *@name handleRequest
 		*/
-		public function handleRequest($request)
+		public function handleRequest($request, $subController = false)
 		{
 				if($this->class == "")
 				{
@@ -89,7 +103,7 @@ class RequestHandler extends Object
 				$this->request = $request;
 				$this->namespace = $request->shiftedPart;
 				
-				
+				$this->subController = $subController;
 				$this->Init();			
 				
 				$class = $this->class;
@@ -281,18 +295,6 @@ class RequestHandler extends Object
 				}
 				if(PROFILE) Profiler::unmark("RequestHandler::checkPermission");
 				return false;
-		}
-		
-		/**
-		 * init-function
-		 *@name init
-		 *@access public
-		*/
-		public function init()
-		{
-			Core::$requestController = $this;
-			$this->requestHandlerKey = count(Core::$controller);
-			Core::$controller[] = $this;
 		}
 		
 		/**
