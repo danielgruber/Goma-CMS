@@ -32,8 +32,6 @@
 							<a href="#" onclick="$('#loginFormGlobe').submit();return false;">{$_lang_logout}</a>
 							|
 							<a href="profile/">{$_lang_profile}</a>
-							|
-							<a href="pm/">{$_lang_pm_inbox} (<% PM_Unread() %>)</a>
 						<% ELSE %>
 							<a href="profile/login/?redirect={$_SERVER_REQUEST_URI.URL()}">{$_lang_login}</a>
 							|
