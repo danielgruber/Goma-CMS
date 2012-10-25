@@ -477,8 +477,6 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function decorateRecord(&$record) {
 		if(!$record->getVersion()) $record->version = "state";
-		$_SESSION["goma_resume_".$this->class.""] = Core::$url;
-		unset($_SESSION["ajax_active_".$this->class.""]);
 		$this->marked = $record->class_name . "_" . $record->recordid;
 	}
 	
@@ -489,7 +487,6 @@ class LeftAndMain extends AdminItem {
 	 *@access public 
 	*/
 	public function versions() {
-		unset($_SESSION["goma_resume_".$this->class.""]);
 		if($this->ModelInst() && $this->ModelInst()->versioned) {
 			$controller = new VersionsViewController($this->ModelInst());
 			return $controller->handleRequest($this->request);
