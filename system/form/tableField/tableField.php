@@ -365,14 +365,14 @@ class tableField extends FormField {
 		
 		reset($content);
 		while(list($k,$v) = each($content)) {
-			if(preg_match_all('/\$DefineFragment\(([a-z0-9\-_]+)\)/i', $v, $matches)) {
+			if(preg_match_all('/DefineFragment\(([a-z0-9\-_]+)\)/i', $v, $matches)) {
 				foreach($matches[1] as $match) {
 					$fragmentName = strtolower($match);
 					$fragmentDefined[$fragmentName] = true;
 					$fragment = isset($content[$fragmentName]) ? $content[$fragmentName] : "";
 
 					// If the fragment still has a fragment definition in it, when we should defer this item until later.
-					if(preg_match('/\$DefineFragment\(([a-z0-9\-_]+)\)/i', $fragment, $matches)) {
+					if(preg_match('/DefineFragment\(([a-z0-9\-_]+)\)/i', $fragment, $matches)) {
 						// If we've already deferred this fragment, then we have a circular dependency
 						if(isset($fragmentDeferred[$k]) && $fragmentDeferred[$k] > 5) {
 							throwError(6, "Logical Exception", "Fragment ".$k." is a circular dependency.");
@@ -388,7 +388,7 @@ class tableField extends FormField {
 						}
 						break;
 					} else {
-						$content[$k] = preg_replace('/\$DefineFragment\(' . $fragmentName . '\)/i', $fragment, $content[$k]);
+						$content[$k] = preg_replace('/DefineFragment\(' . $fragmentName . '\)/i', $fragment, $content[$k]);
 					}
 				}
 			}

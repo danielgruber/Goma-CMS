@@ -33,6 +33,7 @@
 	padding: 12px;
 	border-bottom: 1px solid #bbb;
 	border-right: 1px solid #bbb;
+	border-top: 1px solid #eee;
 	padding: 0;
 	margin: 0;
 }
@@ -69,6 +70,15 @@
 }
 .tablefield-table .sortable-header td .tablefield-sortable.tablefield-sorted-desc {
 	background-image: url(images/tablefield/arrow_desc.png) !important;
+}
+
+.tablefield-table .toolbar_header h2 {
+	text-align: left;
+	margin: 5px;
+	color: #555
+}
+.tablefield-table .toolbar_header th {
+	border-bottom: 1px solid #bbb;
 }
 
 /* content */
