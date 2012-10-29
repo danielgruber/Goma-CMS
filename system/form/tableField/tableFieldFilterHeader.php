@@ -28,7 +28,19 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@name manipulate
 	*/
 	public function manipulate($tableField, $data) {
-		return $data;
+		$state = $gridField->state->gridFieldFilterHeader;
+		if(!isset($state->columns)) {
+			return $dataList;
+		} 
+		
+		$filterArguments = $state->columns->toArray();
+		$dataListClone = null;
+		foreach($filterArguments as $columnName => $value ) {
+			if($dataList->canFilterBy($columnName) && $value) {
+				$dataListClone = $dataList->filter($columnName.':PartialMatch', $value);
+			}
+		}
+		return ($dataListClone) ? $dataListClone : $dataList;
 	}
 	
 	/**
@@ -38,9 +50,19 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@access public
 	*/
 	public function getActions($tableField) {
-		
+		return array("filter", "reset");
 	}
+	
 	public function handleAction($tableField, $actionName, $arguments, $data) {
-		
+		$state = $tableField->state->tableFieldFilterHeader;
+		if($actionName === 'filter') {
+			if(isset($data['filter'])){
+				foreach($data['filter'] as $key => $filter ){
+					$state->columns->$key = $filter;
+				}
+			}
+		} elseif($actionName === 'reset') {
+			$state->columns = null;
+		}
 	}
 }
