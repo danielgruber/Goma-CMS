@@ -561,14 +561,4 @@ class TableField_FormAction extends FormAction {
 		$this->tableField->handleAction($this->actionName, $this->args, $data);
 		return false;
 	}
-	
-	/**
-	 * adds an extra-class
-	 *
-	 *@name addExtraClass
-	 *@access public
-	*/
-	public function addExtraClass($class) {
-		$this->input->addClass($class);
-	}
 }

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22-10.2012
+  * last modified: 29.10.2012
   * $Version 2.3
 */
 
@@ -426,5 +426,19 @@ class FormField extends RequestHandler
 			} else {
 				return $this->$name;
 			}
+		}
+		
+		/**
+		 * adds an extra-class to the field
+		*/
+		public function addExtraClass($class) {
+			$this->container->addClass($class);
+		}
+		
+		/**
+		 * removes an extra-class from the field
+		*/
+		public function removeExtraClass($class) {
+			$this->container->removeClass($class);
 		}
 }
