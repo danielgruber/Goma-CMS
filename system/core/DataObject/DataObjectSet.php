@@ -183,7 +183,14 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 		return true; //! TODO: find a method to get this information
 	}
 	
-	
+	/**
+	 * checks if we can sort by a specefied field
+	 *
+	 *@name canSortBy
+	*/
+	public function canFilterBy($field) {
+		return false; //! TODO: Implement Filter in DataSet
+	}
 	
 	/**
 	 * helper for Desc-sort
