@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2010  Goma-Team
-  * last modified: 02.07.2010
+  * last modified: 29.10.2010
 */   
 $form_lang = array(
 	'email_not_valid'			=> 'Bitte geben Sie eine g&uuml;ltige Email-Adresse in das Feld ein',
@@ -16,7 +16,10 @@ $form_lang = array(
 	"dropdown_nothing_select"	=> "Nichts ausgew&auml;hlt",
 	"number_not_valid"			=> "Bitte geben Sie eine g&uuml;ltige Zahl ein!",
 	"bad_pagetype"				=> "Bitte geben Sie einen korrekten Seitentype ein!",
-	"not_saved_yet"				=> "Die Daten wurden noch nicht gespeichert!"
+	"not_saved_yet"				=> "Die Daten wurden noch nicht gespeichert!",
+	
+	"tablefield.reset"			=> "Zurücksetzen",
+	"tablefield.filterBy"		=> "Sortieren nach "
 );
 foreach($form_lang as $key => $value)
 {

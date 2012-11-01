@@ -423,8 +423,10 @@ class FormField extends RequestHandler
 		public function __get($name) {
 			if(strtolower($name) == "state") {
 				return $this->form()->state->{$this->class . $this->name};
-			} else {
+			} else if(isset($this->$name)) {
 				return $this->$name;
+			} else {
+				throwError(6, "Unknowen Attribute", "" . $name . " is not defined in ".$this->class." with name ".$this->name.".");
 			}
 		}
 		

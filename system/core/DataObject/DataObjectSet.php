@@ -1372,6 +1372,15 @@ class DataObjectSet extends DataSet {
 	}
 	
 	/**
+	 * checks if we can sort by a specefied field
+	 *
+	 *@name canSortBy
+	*/
+	public function canFilterBy($field) {
+		return $this->canSortBy($field); //! TODO: Implement Filter in DataObjectSet
+	}
+	
+	/**
 	 * sets version-type
 	 *
 	 *@name version

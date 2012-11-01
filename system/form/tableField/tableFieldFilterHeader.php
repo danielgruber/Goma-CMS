@@ -19,7 +19,64 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@name provideFragments
 	*/
 	public function provideFragments($tableField) {
+		$forTemplate = new ViewAccessableData();
+		$fields = new DataSet();
 		
+		$state = $tableField->state->tableFieldFilterHeader;
+		$filterArguments = $state->columns->toArray();
+		$columns = $tableField->getColumns();
+		$currentColumn = 0;
+		
+		foreach($columns as $columnField) {
+			$currentColumn++;
+			$metadata = $tableField->getColumnMetadata($columnField);
+			$title = $metadata['title'];
+		
+			
+			if($title && $tableField->getData()->canFilterBy($columnField)) {
+				$value = '';
+				if(isset($filterArguments[$columnField])) {
+					$value = $filterArguments[$columnField];
+				}
+				$field = new TextField('filter['.$columnField.']', '', $value);
+				$field->addExtraClass('tablefield-filter');
+				$field->addExtraClass('no-change-track');
+
+				$field->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
+				
+				$action = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
+				$action->addExtraClass("tablefield-button-reset");
+				$action->addExtraClass("no-change-track");
+				
+				$field = new FieldSet($columnField . "_sortActions", array(
+					$field,
+					$action
+				));
+			} else {
+				/*if($currentColumn == count($columns)){
+					$field = new FieldGroup(
+						GridField_FormAction::create($gridField, 'filter', false, 'filter', null)
+							->addExtraClass('ss-gridfield-button-filter')
+							->setAttribute('title', _t('GridField.Filter', "Filter"))
+							->setAttribute('id', 'action_filter_' . $gridField->getModelClass() . '_' . $columnField),
+						GridField_FormAction::create($gridField, 'reset', false, 'reset', null)
+							->addExtraClass('ss-gridfield-button-close')
+							->setAttribute('title', _t('GridField.ResetFilter', "Reset"))
+							->setAttribute('id', 'action_reset_' . $gridField->getModelClass() . '_' . $columnField)
+					);
+					$field->addExtraClass('filter-buttons');
+					$field->addExtraClass('no-change-track');
+				}else{
+					$field = new LiteralField('', '');
+				}*/
+			}
+
+			$fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
+		}
+
+		return array(
+			'header' => $forTemplate->customise(array("fields" => $fields))->renderWith("form/tableField/filterHeader.html")
+		);
 	}
 	
 	/**
@@ -28,19 +85,18 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@name manipulate
 	*/
 	public function manipulate($tableField, $data) {
-		$state = $gridField->state->gridFieldFilterHeader;
+		$state = $tableField->state->tableFieldFilterHeader;
 		if(!isset($state->columns)) {
-			return $dataList;
+			return $data;
 		} 
 		
 		$filterArguments = $state->columns->toArray();
-		$dataListClone = null;
 		foreach($filterArguments as $columnName => $value ) {
-			if($dataList->canFilterBy($columnName) && $value) {
-				$dataListClone = $dataList->filter($columnName.':PartialMatch', $value);
+			if($data->canFilterBy($columnName) && $value) {
+				$data->AddFilter(array($columnName => array("LIKE", $value)));
 			}
 		}
-		return ($dataListClone) ? $dataListClone : $dataList;
+		return $data;
 	}
 	
 	/**
