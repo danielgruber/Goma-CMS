@@ -61,7 +61,7 @@ class FormField extends RequestHandler
 		 *@access public
 		 *@var object
 		*/
-		public $conatiner;
+		public $container;
 		
 		public $url_handlers = array(
 			'$Action//$id/$otherid'	=> '$Action'

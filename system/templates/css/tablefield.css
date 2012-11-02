@@ -25,6 +25,22 @@
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
 	background: linear-gradient(#eee, #f5f5f5); /* the standard */ 
 }
+.tablefield-table .filter-header {
+	background: #ddd;
+}
+.tablefield-table .filter-header td {
+	border-bottom: 1px solid #aaa;
+}
+.tablefield-table .filter-header td fieldset {
+	position: relative;
+}
+.tablefield-table .filter-header td fieldset .form_field {
+	margin: 0;
+	padding: 0;
+}
+.tablefield-table .filter-header td fieldset .form_field label {
+	display: none;
+}
 .tablefield-table .sortable-header {
 	
 }

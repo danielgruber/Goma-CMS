@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
+  * last modified: 01.11.2012
   * $Version - 1.0
  */
  
@@ -31,27 +31,27 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 			$currentColumn++;
 			$metadata = $tableField->getColumnMetadata($columnField);
 			$title = $metadata['title'];
-		
 			
 			if($title && $tableField->getData()->canFilterBy($columnField)) {
 				$value = '';
 				if(isset($filterArguments[$columnField])) {
 					$value = $filterArguments[$columnField];
 				}
-				$field = new TextField('filter['.$columnField.']', '', $value);
-				$field->addExtraClass('tablefield-filter');
-				$field->addExtraClass('no-change-track');
+				$f = new TextField('filter['.$columnField.']', '', $value);
+				$f->addExtraClass('tablefield-filter');
+				$f->addExtraClass('no-change-track');
 
-				$field->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
+				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 				
 				$action = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
 				$action->addExtraClass("tablefield-button-reset");
 				$action->addExtraClass("no-change-track");
 				
 				$field = new FieldSet($columnField . "_sortActions", array(
-					$field,
+					$f,
 					$action
 				));
+				$field->setForm($tableField->Form());
 			} else {
 				/*if($currentColumn == count($columns)){
 					$field = new FieldGroup(
