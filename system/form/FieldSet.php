@@ -144,12 +144,22 @@ class FieldSet extends FormField
 		*/
 		public function add($field, $sort = 0)
 		{
+			if($this->parent) {
 				if($sort == 0) {
-					$sort = 1 + count($this->items);
+-					$sort = 1 + count($this->items);
+ 				}
+-				$this->sort[$field->name] = $sort;
+-				$this->items[$field->name] = $field;
+-				$field->setForm($this);
+			} else {
+				if($sort == 0) {
+					$sort = 1 + count($this->fields);
+					while(isset($this->fields[$sort]))
+						$sort++;
 				}
-				$this->sort[$field->name] = $sort;
-				$this->items[$field->name] = $field;
-				$field->setForm($this);
+				
+				$this->fields[$sort] = $field;
+			}
 		}
 		
 		/**
@@ -159,27 +169,41 @@ class FieldSet extends FormField
 		*/
 		public function remove($field = null)
 		{
+			if($this->parent) {
 				if($field === null)
 				{
 						parent::remove();
 				} else
 				{
-						if(isset($this->form()->fields[$field]))
-						{
-								unset($this->form()->fields[$field]);
+					if(is_object($field)) {
+						$field = $field->name;
+					}
+					
+					if(isset($this->form()->fields[$field]))
+					{
+							unset($this->form()->fields[$field]);
+					}
+					
+					if(isset($this->items[$field]))
+					{
+							unset($this->items[$field]);
+					}
+					
+					foreach($this->items as $_field) {
+						if(is_subclass_of($_field, "FieldSet")) {
+							$_field->remove($field);
 						}
-						
-						if(isset($this->items[$field]))
-						{
-								unset($this->items[$field]);
-						}
-						
-						foreach($this->items as $_field) {
-							if(is_subclass_of($_field, "FieldSet")) {
-								$_field->remove($field);
-							}
-						}
+					}
 				}
+			} else {
+				foreach($this->fields as $key => $_field) {
+					if(is_subclass_of($_field, "FieldSet")) {
+						$_field->remove($field);
+					} else if($_field->name == $field->name) {
+						unset($this->fields[$key]);
+					}
+				}
+			}
 		}
 		
 		/**
