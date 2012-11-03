@@ -36,6 +36,7 @@ class adminController extends Controller
 		public $url_handlers = array(
 			"switchlang"				=> "switchlang",
 			"update"					=> "handleUpdate",
+			"flushLog"					=> "flushLog",
 			"admincontroller:\$item!"	=> "handleItem"
 		);
 		
@@ -45,7 +46,7 @@ class adminController extends Controller
 		 *@name allowed_actions
 		 *@access public
 		*/
-		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate");
+		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate", "flushLog");
 		
 		/**
 		 * returns current controller
@@ -130,6 +131,17 @@ class adminController extends Controller
 		*/
 		public function switchLang() {
 			return tpl::render("switchlang.html");
+		}
+		
+		/**
+		 * flushes all log-files
+		 *
+		 *@name flushLog
+		*/
+		public function flushLog() {
+			FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
+			AddContent::addSuccess(lang("flush_log_success"));
+			$this->redirectBack();
 		}
 		
 		/**

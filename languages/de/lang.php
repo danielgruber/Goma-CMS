@@ -510,5 +510,8 @@ $lang = array(
 	"virtual_page"			=> "Klon-Seite",
 	"requireEmailField"		=> "E-Mail ist erforderlich",
 	
-	"author"				=> "Autor"
+	"author"				=> "Autor",
+	
+	"flush_log"				=> "Log-Dateien löschen",
+	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht."
 );
