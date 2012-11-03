@@ -43,33 +43,43 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 
 				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 				
-				$action = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
-				$action->addExtraClass("tablefield-button-reset");
-				$action->addExtraClass("no-change-track");
-				
-				$field = new FieldSet($columnField . "_sortActions", array(
-					$f,
-					$action
-				));
-				$field->setForm($tableField->Form());
+				if($currentColumn == count($columns)){
+					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
+					$raction->addExtraClass("tablefield-button-reset");
+					$raction->addExtraClass("no-change-track");
+					
+					$action = new TableField_FormAction($tableField, "filter" . $columnField, lang("search"), "filter", null);
+					$action->addExtraClass("tablefield-button-filter");
+					$action->addExtraClass("no-change-track");
+					
+					$field = new FieldSet($columnField . "_sortActions", array(
+						$f,
+						$raction,
+						$action
+					));
+					$field->addExtraClass("sortActionsWithField");
+				} else {
+					$field = $f;
+				}
 			} else {
-				/*if($currentColumn == count($columns)){
-					$field = new FieldGroup(
-						GridField_FormAction::create($gridField, 'filter', false, 'filter', null)
-							->addExtraClass('ss-gridfield-button-filter')
-							->setAttribute('title', _t('GridField.Filter', "Filter"))
-							->setAttribute('id', 'action_filter_' . $gridField->getModelClass() . '_' . $columnField),
-						GridField_FormAction::create($gridField, 'reset', false, 'reset', null)
-							->addExtraClass('ss-gridfield-button-close')
-							->setAttribute('title', _t('GridField.ResetFilter', "Reset"))
-							->setAttribute('id', 'action_reset_' . $gridField->getModelClass() . '_' . $columnField)
-					);
-					$field->addExtraClass('filter-buttons');
-					$field->addExtraClass('no-change-track');
-				}else{
-					$field = new LiteralField('', '');
-				}*/
+				if($currentColumn == count($columns)){
+					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
+					$raction->addExtraClass("tablefield-button-reset");
+					$raction->addExtraClass("no-change-track");
+					
+					$action = new TableField_FormAction($tableField, "filter" . $columnField, lang("search"), "filter", null);
+					$action->addExtraClass("tablefield-button-filter");
+					$action->addExtraClass("no-change-track");
+					
+					$field = new FieldSet($columnField . "_sortActions", array(
+						$raction,
+						$action
+					));
+				} else {
+					$field = new HTMLField("", "");
+				}
 			}
+			$field->setForm($tableField->Form());
 
 			$fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
 		}

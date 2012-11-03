@@ -34,13 +34,61 @@
 .tablefield-table .filter-header td fieldset {
 	position: relative;
 }
-.tablefield-table .filter-header td fieldset .form_field {
+.tablefield-table .filter-header .form_field {
 	margin: 0;
 	padding: 0;
 }
-.tablefield-table .filter-header td fieldset .form_field label {
+.tablefield-table .filter-header .form_field label {
 	display: none;
 }
+.tablefield-table .filter-header .form_field input[type=text] {
+	width: 99% !important;
+	margin: 3px;
+	padding: 4px 8px;
+	background: #fff;
+	border: 1px solid #aaa;
+}
+.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input  {
+	font-size: 0;
+	height: 26px;
+	width: 26px;
+	background:  #eee url(images/loope_16.png) no-repeat 4px 4px;
+}
+.tablefield-table .filter-header td fieldset .tablefield-button-reset input   {
+	background-image: url(images/delete_16.png);
+}
+
+/**
+ * arrange buttons
+*/
+.tablefield-table .filter-header td fieldset.sortActionsWithField input[type=text] {
+	padding-right: 60px;
+}
+.tablefield-table .filter-header td fieldset.sortActionsWithField span {
+	position: absolute;
+	right: 0;
+	top: -2px;
+}
+.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-filter input {
+	-webkit-border-top-left-radius: 0;
+	-webkit-border-bottom-left-radius: 0;
+	-moz-border-radius-topleft: 0;
+	-moz-border-radius-bottomleft: 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-reset {
+	right: 26px;
+}
+.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-reset input {
+	-webkit-border-top-right-radius: 0;
+	-webkit-border-bottom-right-radius: 0;
+	-moz-border-radius-topright: 0;
+	-moz-border-radius-bottomright: 0;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
 .tablefield-table .sortable-header {
 	
 }

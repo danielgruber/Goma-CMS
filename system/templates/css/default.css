@@ -78,6 +78,10 @@ small { font-size: 85%; }
 
 input[type=text], input[type=password], input[type=email] {
 	width: 150px;
+	
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
 textarea { 
