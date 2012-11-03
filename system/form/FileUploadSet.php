@@ -571,6 +571,8 @@ class FileUploadSet extends FormField {
 	 *@access public
 	*/
 	public function result() {
+		$this->getValue();
+		
 		if(isset($this->form()->post[$this->PostName() . "__key"]) && session_store_exists("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
 			$this->value = session_restore("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
 			$this->key = $this->form()->post[$this->PostName() . "__key"];

@@ -395,6 +395,7 @@ class FileUpload extends FormField
 	*/
 	public function result()
 	{
+		$this->getValue();
 		return $this->value;
 	}
 }
