@@ -83,7 +83,7 @@ class RequestHandler extends Object
 		*/
 		public function Init($subController = false)
 		{
-			if(!isset($this->subController) || !$this->subController) {
+			if(!isset($this->subController) || !$this->subController) {
 				Core::$requestController = $this;
 				Core::$controller[] = $this;
 			}
