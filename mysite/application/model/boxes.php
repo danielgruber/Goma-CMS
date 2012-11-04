@@ -317,8 +317,9 @@ class Box extends Boxes
 		{
 			$form->add(new HiddenField("seiteid", $this->seiteid));
 			$form->add(new TextField("title", lang("box_title")));
-			if($this->RecordClass == "box")
-				$form->add(new HTMLEditor("text", lang("content")));
+			if($this->RecordClass == "box") {
+				$form->add(new HTMLEditor("text", lang("content"), null, null, $this->width . "px"));
+			}
 			$form->add(new AutoFormField("border", lang("border")));
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}

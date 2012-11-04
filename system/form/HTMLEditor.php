@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 29.08.2011
-  * $Version 1.2.2
+  * last modified: 04.11.2011
+  * $Version 1.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -52,6 +52,9 @@ class HTMLEditor extends Textarea
 		*/
 		public function JS()
 		{
+				if(strpos("px", $this->width) && (int) $this->width < 350) {
+					$this->width = "350px";
+				}
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor/";');
 				Resources::add("system/libs/thirdparty/ckeditor/ckeditor.js", "js");
 				Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
@@ -74,7 +77,11 @@ $(function(){
         		language: "'.Core::getCMSVar("lang").'",
         		baseHref: "'.BASE_URI.'",
         		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/editor.css",
-        		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'"
+        		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
+        		width: "'.$this->width.'",
+        		resize_dir: "vertical",
+        		extraPlugins : "autogrow",
+        		autoGrow_maxHeight: $(window).height()
     		});
     		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 				self.leave_check = false;
@@ -101,7 +108,11 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		language: "'.Core::getCMSVar("lang").'",
     		baseHref: "'.BASE_URI.'",
     		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
-    		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/"
+    		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
+        	width: "'.$this->width.'",
+        	resize_dir: "vertical",
+        	extraPlugins : "autogrow",
+        	autoGrow_maxHeight : $(window).height()
 		});
 		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 			self.leave_check = false;
