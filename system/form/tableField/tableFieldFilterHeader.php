@@ -37,30 +37,11 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 				if(isset($filterArguments[$columnField])) {
 					$value = $filterArguments[$columnField];
 				}
-				$f = new TextField('filter['.$columnField.']', '', $value);
-				$f->addExtraClass('tablefield-filter');
-				$f->addExtraClass('no-change-track');
+				$field = new TextField('filter['.$columnField.']', '', $value);
+				$field->addExtraClass('tablefield-filter');
+				$field->addExtraClass('no-change-track');
 
-				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
-				
-				if($currentColumn == count($columns)){
-					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
-					$raction->addExtraClass("tablefield-button-reset");
-					$raction->addExtraClass("no-change-track");
-					
-					$action = new TableField_FormAction($tableField, "filter" . $columnField, lang("search"), "filter", null);
-					$action->addExtraClass("tablefield-button-filter");
-					$action->addExtraClass("no-change-track");
-					
-					$field = new FieldSet($columnField . "_sortActions", array(
-						$f,
-						$raction,
-						$action
-					));
-					$field->addExtraClass("sortActionsWithField");
-				} else {
-					$field = $f;
-				}
+				$field->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 			} else {
 				if($currentColumn == count($columns)){
 					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
