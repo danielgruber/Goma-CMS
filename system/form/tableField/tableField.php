@@ -287,7 +287,7 @@ class tableField extends FormField {
 			}
 			return $metadata;
 		} else {
-			throwErro(6, "Invalid-Exception", "Bad Column " . $column);
+			throwError(6, "Invalid-Exception", "Bad Column " . $column);
 		}
 	}
 	

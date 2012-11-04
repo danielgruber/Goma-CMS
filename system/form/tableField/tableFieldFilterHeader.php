@@ -163,13 +163,13 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 * @return type 
 	 */
 	public function getColumnsHandled($tableField) {
-		return array();
+		return array("Actions");
 	}
 	
 	/**
 	 * this shouldn't do anything
 	*/
 	public function getColumnContent($tableField, $record, $columnName) {
-
+		return null;
 	}
 }

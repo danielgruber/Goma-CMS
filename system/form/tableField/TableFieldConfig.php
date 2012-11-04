@@ -142,10 +142,10 @@ class TableFieldConfig_Base extends TableFieldConfig {
 	public function __construct($itemsPerPage=null) {
 		parent::__construct();
 		
+		$this->addComponent(new TableFieldDataColumns());
 		$this->addComponent(new TableFieldToolbarHeader());
 		$this->addComponent($sort = new TableFieldSortableHeader());
 		$this->addComponent($filter = new TableFieldFilterHeader());
-		$this->addComponent(new TableFieldDataColumns());
 		$this->addComponent($pagination = new TableFieldPaginator($itemsPerPage));
 
 	}
