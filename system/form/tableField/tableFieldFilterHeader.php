@@ -96,10 +96,12 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	*/
 	public function manipulate($tableField, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
-		if(!isset($state->filterRun))
+		if(!$state->reset)
 			$this->handleAction($tableField, "filter", array(), $_POST);
 		else
-			$state->filterRun = null;
+			$state->reset = false;
+		$state = $tableField->state->tableFieldFilterHeader;
+		
 		if(!isset($state->columns)) {
 			return $data;
 		} 
@@ -125,7 +127,6 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
-		$state->filterRun = true;
 		if($actionName === 'filter') {
 			if(isset($data['filter'])){
 				foreach($data['filter'] as $key => $filter ){
@@ -134,6 +135,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 			}
 		} elseif($actionName === 'reset') {
 			$state->columns = null;
+			$state->reset = true;
 		}
 	}
 }
