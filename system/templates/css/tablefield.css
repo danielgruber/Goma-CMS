@@ -92,6 +92,14 @@
 .tablefield-table .sortable-header {
 	
 }
+.tablefield-table .sortable-header .tablefield-button-filter {
+	font-size: 0;
+	height: 26px;
+	width: 26px;
+	background:  transparent url(images/loope_16.png) no-repeat 4px 4px;
+	margin: 4px 10px;
+	border: 0;
+}
 .tablefield-table .sortable-header td {
 	font-weight: bold;
 	padding: 12px;

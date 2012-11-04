@@ -7,7 +7,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.10.2012
+  * last modified: 04.11.2012
   * $Version - 1.0
  */
  
@@ -169,7 +169,7 @@ class tableField extends FormField {
 		$columns = array();
 		foreach($this->getComponents() as $comp) {
 			if($comp instanceof TableField_ColumnProvider) {
-				$comp->augumentColumns($this, $columns);
+				$comp->augmentColumns($this, $columns);
 			}
 		}
 		return $columns;

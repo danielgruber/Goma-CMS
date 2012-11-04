@@ -44,6 +44,7 @@ class userAdmin extends adminItem {
 			"email"		=> lang("email")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
+		$config->addComponent(new TableFieldEditButton());
 		
 		$form = new Form($this, "form", array(
 			new TableField("userTable", lang("users"), $this->modelInst(), $config)

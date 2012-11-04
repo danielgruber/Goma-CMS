@@ -46,7 +46,7 @@ interface TableField_ColumnProvider extends TableFieldComponent {
 	 *@name augmentColumns
 	 *@access public
 	*/
-	public function augumentColumns($tableField, &$columns);
+	public function augmentColumns($tableField, &$columns);
 	
 	/**
 	 * similiar to augmentColumns, but with the difference that you just give back an unsorted list of all the columns you handle in this class
