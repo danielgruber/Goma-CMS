@@ -146,11 +146,16 @@ var LaM_type_timeout;
 			var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
 			if(tableHeight < 405)
 				tableHeight = 405;
+				
 			$(".left-and-main").css("min-height", tableHeight);
 			$(".left-and-main > table").css("height", tableHeight);
+			
+			// set height for main-area
 			OuterDiff = $(".left-and-main > table td.main > .inner").outerHeight() - $(".left-and-main > table td.main > .inner").height();
 			$(".left-and-main > table td.main > .inner").css("height", tableHeight - OuterDiff);
-			var otherSideBar = $(".leftandmaintable tr > .left > .LaM_tabs > ul").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree > .treesearch").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree .legend").outerHeight();
+			
+			// set height for sidebar
+			var otherSideBar = $(".leftandmaintable tr > .left > .LaM_tabs > ul").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree > .treesearch").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree .legend").outerHeight() + 15;
 			$(".leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper").css("height", tableHeight - otherSideBar - 30);
 		}
 		$(window).resize(renderSideBar);

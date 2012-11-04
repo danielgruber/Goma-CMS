@@ -128,9 +128,6 @@
 .leftandmaintable tr > .left {
 	overflow: hidden;
 }
-.leftandmaintable tr > .left > .LaM_tabs > .tree, .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree {
-	height: 100%;
-}
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
