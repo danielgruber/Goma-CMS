@@ -440,7 +440,7 @@ class tableField extends FormField {
 			$content['body'] = $this->createTag(
 				'tr',
 				array("class" => 'tablefield-item tablefield-no-items'),
-				$this->createTag('td', array('colspan' => count($columns)), _t('TableField.NoItemsFound', 'No items found'))
+				$this->createTag('td', array('colspan' => count($columns)), lang("no_result", "No items found!"))
 			);
 		}
 		

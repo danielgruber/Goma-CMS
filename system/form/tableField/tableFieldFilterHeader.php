@@ -96,6 +96,10 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	*/
 	public function manipulate($tableField, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
+		if(!isset($state->filterRun))
+			$this->handleAction($tableField, "filter", array(), $_POST);
+		else
+			$state->filterRun = null;
 		if(!isset($state->columns)) {
 			return $data;
 		} 
@@ -103,7 +107,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 		$filterArguments = $state->columns->toArray();
 		foreach($filterArguments as $columnName => $value ) {
 			if($data->canFilterBy($columnName) && $value) {
-				$data->AddFilter(array($columnName => array("LIKE", $value)));
+				$data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
 			}
 		}
 		return $data;
@@ -121,6 +125,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
+		$state->filterRun = true;
 		if($actionName === 'filter') {
 			if(isset($data['filter'])){
 				foreach($data['filter'] as $key => $filter ){
