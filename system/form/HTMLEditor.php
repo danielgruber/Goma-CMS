@@ -85,7 +85,7 @@ $(function(){
         		width: "'.$width.'",
         		resize_dir: "vertical",
         		extraPlugins : "autogrow",
-        		autoGrow_maxHeight: $(window).height()
+        		autoGrow_maxHeight: $(document).height() - 300
     		});
     		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 				self.leave_check = false;
@@ -116,7 +116,7 @@ window.toggleEditor_'.$this->input->id.' = function() {
         	width: "'.$width.'",
         	resize_dir: "vertical",
         	extraPlugins : "autogrow",
-        	autoGrow_maxHeight : $(window).height()
+        	autoGrow_maxHeight : $(document).height() - 300
 		});
 		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
 			self.leave_check = false;

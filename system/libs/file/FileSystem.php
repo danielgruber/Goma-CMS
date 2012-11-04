@@ -43,7 +43,7 @@ class FileSystem extends Object {
 	public static function requireDir($dir, $mode = 0777, $throwOnFail = true) {
 		if(!file_exists($dir)) {
 			if(mkdir($dir, $mode, true)) {
-				chmod($dir, $mode);
+				@chmod($dir, $mode);
 				return true;
 			} else {
 				if($throwOnFail) {
