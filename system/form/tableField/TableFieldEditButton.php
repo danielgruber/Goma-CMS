@@ -16,7 +16,7 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 class TableFieldEditButton implements TableField_ColumnProvider {
 	
 	/**
-	 * Add a column 'Delete'
+	 * Add a column 'Actions'
 	 * 
 	 * @param type $tableField
 	 * @param array $columns 

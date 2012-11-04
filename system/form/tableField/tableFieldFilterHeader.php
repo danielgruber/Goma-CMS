@@ -12,7 +12,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider {
+class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider, TableField_ColumnProvider {
 	/**
 	 * provides HTML-fragments
 	 *
@@ -137,5 +137,58 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 			$state->columns = null;
 			$state->reset = true;
 		}
+	}
+	
+	/**
+	 * Add a column 'Actions'
+	 * 
+	 * @param type $tableField
+	 * @param array $columns 
+	 */
+	public function augmentColumns($tableField, &$columns) {
+		if(!in_array('Actions', $columns))
+			$columns[] = 'Actions';
+	}
+	
+	/**
+	 * Return any special attributes that will be used for the column
+	 *
+	 * @param GridField $tableField
+	 * @param DataObject $record
+	 * @param string $columnName
+	 * @return array
+	 */
+	public function getColumnAttributes($tableField, $record, $columnName) {
+		return array('class' => 'col-buttons');
+	}
+	
+	/**
+	 * Add the title 
+	 * 
+	 * @param TableField $tableField
+	 * @param string $columnName
+	 * @return array
+	 */
+	public function getColumnMetadata($tableField, $columnName) {
+		if($columnName == 'Actions') {
+			return array('title' => '');
+		}
+	}
+	
+	/**
+	 * Which columns are handled by this component
+	 * 
+	 * @param type $tableField
+	 * @return type 
+	 */
+	public function getColumnsHandled($tableField) {
+		return array();
+	}
+	
+	/**
+	 * this shouldn't do anything
+	*/
+	public function getColumnContent($tableField, $record, $columnName) {
+
 	}
 }
