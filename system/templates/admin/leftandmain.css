@@ -37,9 +37,9 @@
 	min-width: 600px;
 	overflow: auto;
 }
-.leftandmaintable tr > .main textarea {
+/*.leftandmaintable tr > .main textarea {
 	max-width: 650px !important;
-}
+}*/
 .leftandmaintable tr > .main > .inner {
 	overflow-y: auto;
 	ms-overflow-y: auto;

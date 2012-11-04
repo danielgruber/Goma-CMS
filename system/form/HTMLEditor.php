@@ -52,8 +52,12 @@ class HTMLEditor extends Textarea
 		*/
 		public function JS()
 		{
-				if(strpos("px", $this->width) && (int) $this->width < 350) {
-					$this->width = "350px";
+				if($this->width == "100%") {
+					$width = "";
+				} else if(strpos("px", $this->width) && (int) $this->width < 350) {
+					$width = "350px";
+				} else {
+					$width = $this->width;
 				}
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor/";');
 				Resources::add("system/libs/thirdparty/ckeditor/ckeditor.js", "js");
@@ -78,7 +82,7 @@ $(function(){
         		baseHref: "'.BASE_URI.'",
         		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/editor.css",
         		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
-        		width: "'.$this->width.'",
+        		width: "'.$width.'",
         		resize_dir: "vertical",
         		extraPlugins : "autogrow",
         		autoGrow_maxHeight: $(window).height()
@@ -109,7 +113,7 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		baseHref: "'.BASE_URI.'",
     		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
     		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
-        	width: "'.$this->width.'",
+        	width: "'.$width.'",
         	resize_dir: "vertical",
         	extraPlugins : "autogrow",
         	autoGrow_maxHeight : $(window).height()
