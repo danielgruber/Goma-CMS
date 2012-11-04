@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.07.2012
-  * $Version 3.3.16
+  * last modified: 04.11.2012
+  * $Version 3.3.17
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1197,7 +1197,7 @@ function throwErrorById($code)
 function log_error($string)
 {
 	if(PROFILE) Profiler::mark("log_error");
-	
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/");
 	if(isset($GLOBALS["error_logfile"])) {
 		$file = $GLOBALS["error_logfile"];	
 	} else {
@@ -1234,6 +1234,7 @@ function logging($string)
 {
 	if(PROFILE) Profiler::mark("logging");
 	
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/");
 	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
 	if(isset($GLOBALS["log_logfile"])) {
 		$file = $GLOBALS["log_logfile"];	
@@ -1267,6 +1268,7 @@ function logging($string)
  *@param string - debug-string
 */
 function debug_log($data) {
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/");
 	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
 	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y"));
 	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y")."/" . date("H_i_s");

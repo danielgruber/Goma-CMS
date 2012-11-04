@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.10.2012
+  * last modified: 04.11.2012
   * $Version 2.2
 */
 
@@ -622,6 +622,7 @@ interface SQLDriver
  *@param string - debug-string
 */
 function slow_query_log($data) {
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/slow_queries/");
 	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
 	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/slow_queries/".date("m-d-y"));
 	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/slow_queries/".date("m-d-y")."/" . date("H_i_s");

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
+  * last modified: 04.11.2012
   * $Version 1.4.2
 */
 
@@ -129,6 +129,7 @@ class systemController extends Controller {
 	 *@access public
 	*/
 	public function logJSProfile() {
+		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/");
 		if(Core::is_ajax() && isset($_POST["JSProfile"]) && (strlen($_POST["JSProfile"]) / 1024) <= self::JS_DEBUG_LIMIT && DEV_MODE) {
 			$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/".date("m-d-y");
 			FileSystem::requireFolder($folder);
