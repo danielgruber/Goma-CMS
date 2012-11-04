@@ -34,11 +34,6 @@ class userAdmin extends adminItem {
 	);
 	
 	/**
-	 * default-template
-	*/
-	public $template = "admin/users.html";
-	
-	/**
 	 * logic
 	*/
 	public function index() {
