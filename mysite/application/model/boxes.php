@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 1.1.4
+  * last modified: 05.11.2012
+  * $Version 1.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -371,6 +371,15 @@ Object::extend("tplCaller", "BoxesTPLExtension");
 class boxpage extends Page
 {
 		public $name = '{$_lang_boxes_page}';
+		
+		/**
+		 * pretty nice icon for that
+		*/
+		public static $icon = "images/icons/fatcow-icons/16x16/layout_content.png";
+		
+		/**
+		 * we render boxes if it is already created
+		*/
 		public function getForm(&$form)
 		{
 				parent::getForm($form);
@@ -384,6 +393,10 @@ class boxpage extends Page
 				}
 				$form->add(new HTMLField("boxes", $boxes . '<div style="clear: both;"></div>'),0, "content");
 		}
+		
+		/**
+		 * renders all boxes
+		*/
 		public function getBoxes()
 		{
 				return BoxesController::renderBoxes($this->fieldGet("id"));
@@ -397,8 +410,6 @@ class boxPageController extends PageController
 		 *@var string
 		*/
 		public $template = "pages/box.html";
-		
-		public static $icon = "images/icons/fatcow-icons/16x16/layout_content.png";
 		
 		
 		/**
