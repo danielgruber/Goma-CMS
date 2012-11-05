@@ -345,7 +345,7 @@ class RatingDataObjectExtension extends DataObjectExtension {
 	 * renders the field in the form
 	*/
 	public function getForm(&$form) {
-		$form->meta->add(new radiobutton('rating', lang('ar_allow_rate'), array(1 => $GLOBALS['lang']['yes'], 0 => $GLOBALS['lang']['no'])), 7);
+		$form->meta->add(new Checkbox('rating', lang('exp_gomacms_rating.allow_rate')), 7);
 	}
 }
 

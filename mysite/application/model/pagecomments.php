@@ -152,9 +152,7 @@ class PageCommentsDataObjectExtension extends DataObjectExtension {
 	 * make extra fields to form
 	*/
 	public function getForm(&$form) {
-		$form->meta->add(new ObjectRadioButton('showcomments',lang("co_comments"), array(1 => 
-				$GLOBALS['lang']['yes'],
-				0 => $GLOBALS['lang']['no'])));
+		$form->meta->add(new Checkbox("showcomments", lang("co_comments")));
 	}
 	/**
 	 * append content to sites if needed
