@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 04.10.2012
-  * $Version: 1.3.2
+  * last modified: 05.11.2012
+  * $Version: 1.3.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -820,32 +820,52 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@name removeRecord
 	 *@access public
 	*/
-	public function removeRecord($position) {
-		if($this->pagination) { 
-			if(is_array($position)) {
-				foreach($position as $p) {
-					$this->dataCache[$p] = false;
+	public function removeRecord($record) {
+		if(is_object($record)) {
+			foreach($this->data as $k => $r) {
+				if($r == $record) {
+					$this->data[$k] = false;
 				}
-			} else {
-				$this->dataCache[$position] = false;
-			}
-	
-			// rebuild
-			$this->reRenderSet();
+ 			}
+ 			
+ 			foreach($this->dataCache as $k => $r) {
+	 			if($r == $record) {
+					$this->dataCache[$k] = false;
+				}
+ 			}
+ 			
+ 			$this->reRenderSet();
+ 			
+ 			if(empty($this->data))
+				$this->data = array();
 		} else {
-			if(is_array($position)) {
-				foreach($position as $p) {
-					$this->data[$p] = false;
-					$this->dataCache[$p] = false;
+			$position = $record;
+			if($this->pagination) { 
+				if(is_array($position)) {
+					foreach($position as $p) {
+						$this->dataCache[$p] = false;
+					}
+				} else {
+					$this->dataCache[$position] = false;
 				}
-			} else {
-				$this->data[$position] = false;
-				$this->dataCache[$position] = false;
-			}
-		}
 		
-		if(empty($this->data))
-			$this->data = array();
+				// rebuild
+				$this->reRenderSet();
+			} else {
+				if(is_array($position)) {
+					foreach($position as $p) {
+						$this->data[$p] = false;
+						$this->dataCache[$p] = false;
+					}
+				} else {
+					$this->data[$position] = false;
+					$this->dataCache[$position] = false;
+				}
+			}
+			
+			if(empty($this->data))
+				$this->data = array();
+		}
 	}
 	
 	/**
