@@ -13,3 +13,4 @@ Team
 * MatorKalen - Fabian Parzefall
 * Patrick Lemke
 * Nick - Dominik Hardtke
+* hansau22 - Julian Frielinghaus
