@@ -398,6 +398,8 @@ class boxPageController extends PageController
 		*/
 		public $template = "pages/box.html";
 		
+		public static $icon = "images/icons/fatcow-icons/16x16/layout_content.png";
+		
 		
 		/**
 		 * generates a button switch-view
