@@ -8,7 +8,7 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
   * last modified: 05.11.2012
-  * $Version: 1.3.3
+  * $Version: 1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -249,6 +249,13 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 			
 		$this->reRenderSet();
 		return true;
+	}
+	
+	/**
+	 * alias for push
+	*/
+	public function add($item, $write = false) {
+		return $this->push($item, $write);
 	}
 	
 	/**
@@ -819,9 +826,10 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *
 	 *@name removeRecord
 	 *@access public
+	 *@return record
 	*/
 	public function removeRecord($record) {
-		if(is_object($record)) {
+		if(is_object($record)) {
 			foreach($this->data as $k => $r) {
 				if($r == $record) {
 					$this->data[$k] = false;
@@ -838,7 +846,10 @@ class DataSet extends ViewAccessAbleData implements CountAble {
  			
  			if(empty($this->data))
 				$this->data = array();
+			
+			return $record;
 		} else {
+			$r = null;
 			$position = $record;
 			if($this->pagination) { 
 				if(is_array($position)) {
@@ -846,6 +857,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 						$this->dataCache[$p] = false;
 					}
 				} else {
+					$r = $this->dataCache[$position];
 					$this->dataCache[$position] = false;
 				}
 		
@@ -858,6 +870,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 						$this->dataCache[$p] = false;
 					}
 				} else {
+					$r = $this->dataCache[$position];
 					$this->data[$position] = false;
 					$this->dataCache[$position] = false;
 				}
@@ -865,6 +878,8 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 			
 			if(empty($this->data))
 				$this->data = array();
+			
+			return $r;
 		}
 	}
 	
@@ -1443,14 +1458,17 @@ class DataObjectSet extends DataSet {
 	 *@name add
 	 *@access public
 	*/
-	public function add(DataObject $record) {
+	public function push(DataObject $record, $write = false) {
 		foreach($this->defaults as $key => $value) {
 			if(empty($record[$key]))
 				$record[$key] = $value;
 		}
 		
-		$this->push($record);
-		return true;
+		$return = parent::push($record);
+		if($write) {
+			$record->write(false, true);
+		}
+		return $return;
 	}
 	
 	/**
@@ -1638,7 +1656,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - if cancel on error, or resume
 	 *@param bool - if force to delete versions, too
 	*/
-	public function remove($force = false, $forceAll = false) {
+	private function remove($force = false, $forceAll = false) {
 		foreach($this as $key => $record) {
 			if($record->remove($force, $forceAll)) {
 				unset($this->data[$key]);
@@ -1744,6 +1762,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@access protected
 	*/
 	protected $field;
+	
 	/**
 	 * name of the relation
 	 *
@@ -1751,6 +1770,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@access protected
 	*/
 	protected $relationName;
+	
 	/**
 	 * sets the relation-props
 	 *
@@ -1786,6 +1806,43 @@ class HasMany_DataObjectSet extends DataObjectSet {
 		}
 		return $form;
 	}
+	
+	/**
+	 * sets the has-one-relation when adding to has-many-set
+	 *
+	 *@name push
+	*/
+	public function push(DataObject $record, $write = false) {
+		if($this->class == "hasmany_dataobjectset") {
+			if(isset($this[$this->field])) {
+				$record[$this->field] = $this[$this->field];
+			} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
+				$record[$this->field] = $this->filter[$this->field];
+			}
+		}
+		
+		$return = parent::push($record);
+		if($write) {
+			$record->write(false, true);
+		}
+		return $return;
+	}
+	
+	/**
+	 * removes the relation on writing
+	 *
+	 *@name removeRecord
+	*/
+	public function removeRecord($record, $write = false) {
+		$record = parent::removeRecord($record);
+		if($write) {
+			$record[$this->field] = 0;
+			if(!$record->write()) {
+				throwError(6, "Permission-Error", "Could not remove Relation from Record ".$record->class.": ".$record->ID."");
+			}
+		}
+		return $record;
+	}
 }
 
 /**
@@ -1802,6 +1859,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	 *@access protected
 	*/
 	protected $relationTable;
+	
 	/**
 	 * external field, for many-many-relations only
 	 *
@@ -1809,6 +1867,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	 *@access protected
 	*/
 	protected $ownField;
+	
 	/**
 	 * value of $ownField
 	 *
@@ -1816,6 +1875,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	 *@access protected
 	*/
 	protected $ownValue;
+	
 	/**
 	 * sets the relation-props
 	 *
@@ -1837,30 +1897,6 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			
 		if(isset($ownValue))
 			$this->ownValue = $ownValue;
-	}
-	
-	/**
-	 * adds some ids to this DataSet
-	 *
-	 *@name addMany
-	 *@access public
-	 *@param array - ids
-	*/
-	public function addMany($data) {
-		$addedIDs = array();
-		foreach($data as $record) {
-			if(is_integer($record)) {
-				$_data = DataObject::get_one($this->dataobject, array("id" => $record));
-				if($_data) {
-					$this->add($_data);
-					$addedIDs = $record;
-				}
-			} else {
-				$this->add($record);
-				$addedIDs = $record->ID;
-			}
-		}
-		return $addedIDs;
 	}
 
 	/**
@@ -1935,5 +1971,54 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * writes the many-many-relation immediatly if writing
+	 *
+	 *@name push
+	*/
+	public function push(DataObject $record, $write = false) {
+		$return = parent::push($record);
+		if($write) {
+			$record->write(false, true);
+			$manipulation = array(
+				array(
+					"command"	=> "insert",
+					"table_name"=> $this->relationTable,
+					"fields"	=> array(
+						array(
+							$this->ownField => $this->ownValue,
+							$this->field	=> $record->versionid
+						)
+					)
+				)
+			);
+			SQL::manipulate($manipulation);
+		}
+		return $return;
+	}
+	
+	/**
+	 * removes the relation on writing
+	 *
+	 *@name removeRecord
+	*/
+	public function removeRecord($record, $write = false) {
+		$record = parent::removeRecord($record);
+		if($write) {
+			$manipulation = array(
+				array(
+					"command"	=> "delete",
+					"table_name"=> $this->relationTable,
+					"where"		=> array(
+						$this->field 	=> $record->versionid,
+						$this->ownField => $this->ownValue
+					)
+				)
+			);
+			SQL::manipulate($manipulation);
+		}
+		return $record;
 	}
 }

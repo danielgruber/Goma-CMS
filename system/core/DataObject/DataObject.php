@@ -1767,13 +1767,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					if(isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
 					{
 							// find field
-							$key = array_search($this->class, classinfo::$class_info[$class]["has_one"]);
+							$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
 							if($key === false)
 							{
 									$c = $this->class;
 									while($c = strtolower(get_parent_class($c)))
 									{
-											if($key = array_search($c, classinfo::$class_info[$class]["has_one"]))
+											if($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
 											{
 													break;
 											}
@@ -1790,8 +1790,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 								$editdata[$key . "id"] = $this->id;
 								$editdata->write(false, true, $snap_priority);
 								unset($editdata);
-							}
-													
+							}				
 					}						
 			}
 			
@@ -2699,7 +2698,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$c = $this->class;
 			while($c = ClassInfo::getParentClass($c))
 			{
-				if($key = array_search($c, classInfo::$class_info[$class]["has_one"]))
+				if($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
 				{
 					break;
 				}
