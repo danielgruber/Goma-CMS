@@ -53,8 +53,8 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 					$action->addExtraClass("no-change-track");
 					
 					$field = new FieldSet($columnField . "_sortActions", array(
-						$raction,
-						$action
+						$action,
+						$raction
 					));
 				} else {
 					$field = new HTMLField("", "");
