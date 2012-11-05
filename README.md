@@ -15,9 +15,10 @@ Team
 * Nick - Dominik Hardtke
 * hansau22 - Julian Frielinghaus
 
-External Libraries
+Important External Libraries
 ------------------
 * jQuery - http://jquery.com
 * jQuery UI - http://jqueryui.com
 * Fatcow-Webhosting Icons - http://www.fatcow.com/free-icons
 * CKEditor - http://ckeditor.com/
+* Modenizr - http://modernizr.com/
