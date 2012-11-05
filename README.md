@@ -14,3 +14,9 @@ Team
 * Patrick Lemke
 * Nick - Dominik Hardtke
 * hansau22 - Julian Frielinghaus
+
+External Libraries
+------------------
+* jQuery - http://jquery.com
+* jQuery UI - http://jqueryui.com
+* Fatcow-Webhosting Icons - http://www.fatcow.com/free-icons
