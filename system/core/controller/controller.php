@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
-  * $Version 2.1.10
+  * last modified: 06.11.2012
+  * $Version 2.1.11
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -731,7 +731,7 @@ class Controller extends RequestHandler
 		 *@name keyChainCheck
 		 *@access public
 		*/
-		public static function KeyChainCheck($pwd) {
+		public static function KeyChainCheck($password) {
 			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password))) {
 				return true;
 			} else {
@@ -745,9 +745,9 @@ class Controller extends RequestHandler
 		 *@name keyChainRemove
 		 *@access public
 		*/
-		public static function keyChainRemove($pwd) {
+		public static function keyChainRemove($password) {
 			if(isset($_SESSION["keychain"])) {
-				if($key = array_search($pwd, $_SESSION["keychain"])) {
+				if($key = array_search($password, $_SESSION["keychain"])) {
 					unset($_SESSION["keychain"][$key]);
 				}
 			}
