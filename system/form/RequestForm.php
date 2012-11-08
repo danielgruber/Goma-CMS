@@ -136,7 +136,7 @@ class RequestForm extends Object {
 			
 		} else {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), getredirect(true));
-			$submit = new FormAction("submit", $this->btnokay);
+			$submit = new FormAction("okay", $this->btnokay);
 		}
 			
 		// add field to identify current submit
