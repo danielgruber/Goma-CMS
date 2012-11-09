@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-  * $Version: 2.1.5
+  * last modified: 09.11.2012
+  * $Version: 2.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -406,6 +406,15 @@ class htmlparser extends object
 										$html = str_replace($no_tags[0][$key], $this->js($js), $html );
 								}
 						}
+						
+						preg_match_all('/<script[^>]*src="(.+)"[^>]*>(.*)<\/script\s*>/Usi', $html, $no_tags);
+						foreach($no_tags[1] as $key => $js)
+						{
+								if(!empty($js) && file_exists(ROOT . $js))
+								{
+										$html = str_replace($no_tags[0][$key], $this->jsFile(ROOT . $js), $html );
+								}
+						}
 				}
 				if(PROFILE) Profiler::unmark("HTMLParser scriptParse");
 				
@@ -535,6 +544,17 @@ class htmlparser extends object
 				if(PROFILE) Profiler::unmark("HTMLParser::process_links");
 				return $html;
 		}
+		
+		/**
+		 * jshandler
+		 *@name jsFile
+		 *@return string
+		*/
+		public function jsFile($file)
+		{
+				Resources::add($file, "js", "tpl");
+		}
+		
 		/**
 		 * jshandler
 		 *@name js
@@ -544,6 +564,7 @@ class htmlparser extends object
 		{
 				Resources::addJS($js, "scripts");
 		}
+		
 		/**
 		 * csshandler
 		 *@name css
