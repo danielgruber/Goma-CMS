@@ -49,7 +49,9 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 				}
 			} else {
 				if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
-					$field = new HTMLField($columnField, '<button name="showFilter" class="tablefield-button-filter trigger"></button>');				
+					$field = new TableField_FormAction($tableField, "toggleFilter", "", "toggleFilterVisibility", null);
+					$field->addExtraClass("tablefield-button-filter");
+					$field->addExtraClass("trigger");		
 				} else {
 					$field = new HTMLField($columnField, '<span class="non-sortable">' . $title . '</span>');
 				}

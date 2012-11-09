@@ -27,6 +27,10 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 		$columns = $tableField->getColumns();
 		$currentColumn = 0;
 		
+		if($state->visible !== true) {
+			return null;
+		}
+		
 		foreach($columns as $columnField) {
 			$currentColumn++;
 			$metadata = $tableField->getColumnMetadata($columnField);
@@ -37,11 +41,20 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 				if(isset($filterArguments[$columnField])) {
 					$value = $filterArguments[$columnField];
 				}
-				$field = new TextField('filter['.$columnField.']', '', $value);
-				$field->addExtraClass('tablefield-filter');
-				$field->addExtraClass('no-change-track');
+				$f = new TextField('filter['.$columnField.']', '', $value);
+				$f->addExtraClass('tablefield-filter');
+				$f->addExtraClass('no-change-track');
 
-				$field->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
+				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
+				
+				$raction = new TableField_FormAction($tableField, "resetFields" . $columnField, lang("form_tablefield.reset"), "resetFields", null);
+				$raction->addExtraClass("tablefield-button-resetFields");
+				$raction->addExtraClass("no-change-track");
+				
+				$field = new FieldSet($columnField . "_sortActions", array(
+					$f,
+					$raction
+				));
 			} else {
 				if($currentColumn == count($columns)){
 					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
@@ -103,7 +116,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@access public
 	*/
 	public function getActions($tableField) {
-		return array("filter", "reset");
+		return array("filter", "reset", "resetFields", "toggleFilterVisibility");
 	}
 	
 	public function handleAction($tableField, $actionName, $arguments, $data) {
@@ -114,9 +127,19 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 					$state->columns->$key = $filter;
 				}
 			}
-		} elseif($actionName === 'reset') {
+		} else if($actionName === 'reset') {
 			$state->columns = null;
 			$state->reset = true;
+			$state->visible = false;
+		} else if($actionName === "resetfields") {
+			$state->columns = null;
+			$state->reset = true;
+		} else if($actionName === "togglefiltervisibility") {
+			if($state->visible === true) {
+				$state->visible = false;
+			} else {
+				$state->visible = true;
+			}
 		}
 	}
 	

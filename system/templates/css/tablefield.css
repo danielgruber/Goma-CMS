@@ -92,7 +92,7 @@
 .tablefield-table .sortable-header {
 	
 }
-.tablefield-table .sortable-header .tablefield-button-filter {
+.tablefield-table .sortable-header .tablefield-button-filter input {
 	font-size: 0;
 	height: 26px;
 	width: 50px;
