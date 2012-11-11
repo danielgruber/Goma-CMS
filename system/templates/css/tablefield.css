@@ -48,14 +48,22 @@
 	background: #fff;
 	border: 1px solid #aaa;
 }
-.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input  {
+.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
 	font-size: 0;
 	height: 26px;
 	width: 26px;
 	background:  #eee url(images/loope_16.png) no-repeat 4px 4px;
 }
-.tablefield-table .filter-header td fieldset .tablefield-button-reset input   {
+.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input   {
 	background-image: url(images/delete_16.png);
+}
+.tablefield-table .filter-header td fieldset {
+	position: relative;
+}
+.tablefield-table .filter-header td fieldset .tablefield-button-resetFields {
+	position: absolute;
+	right: -1px;
+	top: -2px;
 }
 
 /**

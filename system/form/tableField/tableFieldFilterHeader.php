@@ -47,14 +47,18 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 
 				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 				
-				$raction = new TableField_FormAction($tableField, "resetFields" . $columnField, lang("form_tablefield.reset"), "resetFields", null);
-				$raction->addExtraClass("tablefield-button-resetFields");
-				$raction->addExtraClass("no-change-track");
-				
-				$field = new FieldSet($columnField . "_sortActions", array(
-					$f,
-					$raction
-				));
+				if($value != "") {
+					$raction = new TableField_FormAction($tableField, "resetFields" . $columnField, lang("form_tablefield.reset"), "resetFields", null);
+					$raction->addExtraClass("tablefield-button-resetFields");
+					$raction->addExtraClass("no-change-track");
+					
+					$field = new FieldSet($columnField . "_sortActions", array(
+						$f,
+						$raction
+					));
+				} else {
+					$field = $f;
+				}
 			} else {
 				if($currentColumn == count($columns)){
 					$raction = new TableField_FormAction($tableField, "reset" . $columnField, lang("form_tablefield.reset"), "reset", null);
