@@ -94,6 +94,9 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	*/
 	public function manipulate($tableField, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
+		if($state->visible !== true) {
+			return $data;
+		}
 		if(!$state->reset)
 			$this->handleAction($tableField, "filter", array(), $_POST);
 		else
