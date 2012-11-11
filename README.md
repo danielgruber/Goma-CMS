@@ -6,19 +6,21 @@ This is Web Content Managment System, which allows you, to create fast and easy 
 At the moment we're developing version 2.0 of Goma, so please be patient. It's done, when it's done.
 
 
-Dev-Team
+Team
 ----
+
+### Development
 
 * iGruber - Daniel Gruber
 * MatorKalen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
-User-Experience
-----
+#### User-Experience
+
 * Patrick Lemke
 
-Server-Management
-----
+#### Server-Management
+
 * Nick - Dominik Hardtke
 
 Important External Libraries
