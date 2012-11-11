@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 10.10.2012
-  * $Version: 4.6.4
+  * last modified: 05.11.2012
+  * $Version: 4.6.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -196,6 +196,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public $versioned = false;
+	
+	/**
+	 * enables or disabled history
+	 *
+	 *@name history
+	 *@access public
+	*/
+	public static $history = true;
 	
 	/**
 	 * this var identifies with which version a DataObjectSet got the data
@@ -1874,6 +1882,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			$this->onBeforeManipulate($manipulation);
 			if(SQL::manipulate($manipulation)) {
+				
+				if(ClassInfo::getStatic($this->class, "history")) {
+					History::push($this->class, isset($oldid) ? $oldid : 0, $this->versionid, $this->id, $command);
+				}
 				unset($manipulation);
 				// if we don't version this dataobject, we need to delete the old record
 				if(!$this->versioned && isset($oldid) && $command != "insert") {
@@ -1958,7 +1970,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$this->onBeforeManipulate($manipulation);
 		
-		return SQL::manipulate($manipulation);
+		if(SQL::manipulate($manipulation)) {
+			History::push($this->class, 0, $this->versionid, $this->id, "unpublish");
+			return true;
+		}
+		
+		return false;
 	}
 	/**
 	 * returns if this version of the record is published
@@ -2291,6 +2308,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
 		if(SQL::manipulate($manipulation)) {
+			History::push($this->class, 0, $this->versionid, $this->id, "remove");
 			$this->onAfterRemove($this);
 			$this->callExtending("onAfterRemove", $this);
 			unset($this->data);
@@ -2490,6 +2508,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $fields;
 	}
 	
+	
+	//! Todo: Check if we need Permissions here
 	/**
 	  * set many-many-connection-data
 	  *@name set_many_many
@@ -2506,6 +2526,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return SQL::manipulate($manipulation);
 			
 	}
+	
 	/**
 	 * checks if the current id is connected with the given id
 	 *@name is_many_many

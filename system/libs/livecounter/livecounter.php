@@ -14,6 +14,7 @@ define("SESSION_TIMEOUT", 16*3600);
 
 class livecounter extends DataObject
 {
+		public static $history = false;
 		/**
 		 * database
 		*/
