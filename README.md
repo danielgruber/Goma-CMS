@@ -10,12 +10,12 @@ Team
 ----
 
 ### Development
-* iGruber - Daniel Gruber
-* MatorKalen - Fabian Parzefall
+* @Daniel_Gruber - Daniel Gruber
+* @MatorKalen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
 #### Quality & User-Experience
-* Patrick Lemke
+* @PatrickLemke - Patrick Lemke
 
 #### Server-Management
 * Nick - Dominik Hardtke
