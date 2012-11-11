@@ -10,17 +10,14 @@ Team
 ----
 
 ### Development
-
 * iGruber - Daniel Gruber
 * MatorKalen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
 #### User-Experience
-
 * Patrick Lemke
 
 #### Server-Management
-
 * Nick - Dominik Hardtke
 
 Important External Libraries
