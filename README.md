@@ -11,7 +11,7 @@ Team
 
 ### Development
 * @Daniel_Gruber - Daniel Gruber
-* @MatorKalen - Fabian Parzefall
+* @MatorKaleen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
 #### Quality & User-Experience
