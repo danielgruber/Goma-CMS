@@ -29,7 +29,7 @@
 	background: #ddd;
 }
 .tablefield-table .filter-header td {
-	border-bottom: 1px solid #aaa;
+	border-bottom: 1px solid #c5c5c5;
 }
 .tablefield-table .filter-header td fieldset {
 	position: relative;
@@ -46,13 +46,14 @@
 	margin: 3px;
 	padding: 4px 8px;
 	background: #fff;
-	border: 1px solid #aaa;
+	border: 1px solid #c0c0c0;
 }
 .tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
 	font-size: 0;
 	height: 26px;
 	width: 26px;
 	background:  #eee url(images/loope_16.png) no-repeat 4px 4px;
+	border: 1px solid #c0c0c0;
 }
 .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input   {
 	background-image: url(images/delete_16.png);
