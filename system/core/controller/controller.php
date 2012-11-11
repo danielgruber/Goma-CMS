@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.11.2012
+  * last modified: 11.11.2012
   * $Version 2.1.11
 */
 
@@ -12,6 +12,34 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Controller extends RequestHandler
 {
+				
+		/**
+		 * if this var is set to true areas are always used
+		 *
+		 *@name useAreas
+		 *@access public
+		 *@var bool
+		*/
+		public static $useAreas;
+		
+		/**
+		 * showform if no edit right
+		 *
+		 *@name showWithoutRight
+		 *@access public
+		 *@var bool
+		 *@default false
+		*/
+		public static $showWithoutRight = false;
+		
+		/**
+		 * activates the live-counter on this controller
+		 *
+		 *@name live_counter
+		 *@access public
+		*/
+		public static $live_counter = false;
+		
 		/**
 		 * how much data is on one page?
 		 *
@@ -101,33 +129,6 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public $areaData = array();
-		
-		/**
-		 * if this var is set to true areas are always used
-		 *
-		 *@name useAreas
-		 *@access public
-		 *@var bool
-		*/
-		public $useAreas;
-		
-		/**
-		 * showform if no edit right
-		 *
-		 *@name showWithoutRight
-		 *@access public
-		 *@var bool
-		 *@default false
-		*/
-		public $showWithoutRight = false;
-		
-		/**
-		 * activates the live-counter on this controller
-		 *
-		 *@name live_counter
-		 *@access public
-		*/
-		public static $live_counter = false;
 		
 		/**
 		 * inits the controller:
@@ -279,7 +280,7 @@ class Controller extends RequestHandler
 					}
 					return array("areas" => $this->areaData, "class" => $this->model_inst->class);					
 				} else {
-					if(count($this->areaData) > 0 || $this->useAreas === true) {
+					if(count($this->areaData) > 0 || ClassInfo::getStatic($this->class, "useAreas") === true) {
 						if(!empty($data) && !is_bool($data)) {
 							$this->areaData["content"] = $data;
 						}
@@ -450,7 +451,7 @@ class Controller extends RequestHandler
 			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
 				if(!$this->modelInst()->canWrite($this->modelInst()))
 				{
-					if($this->showWithoutRight || $this->modelInst()->showWithoutRight) {
+					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
 						AddContent::addNotice(lang("less_rights"));
 					} else {

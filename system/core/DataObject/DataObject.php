@@ -6,7 +6,7 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 05.11.2012
+  * last modified: 11.11.2012
   * $Version: 4.6.5
 */
 
@@ -27,7 +27,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	static $default_sort = "id";
 	
-	/**
+	 /**
 	 * show read-only edit if not enough rights
 	 *
 	 *@name showWithoutRight
@@ -36,6 +36,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@default false
 	*/
 	public $showWithoutRight = false;
+
 	
 	/**
 	 * database
@@ -43,15 +44,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@var array
 	*/
 	public $db_fields = array();
-	
-	/**
-	 * important db-fields are for example fields you need to validate something in canRead or sth else you need to get specific data, which is very important
-	 *
-	 *@name important_db_fields
-	 *@access public
-	 *@var array
-	*/
-	public $important_db_fields = array();
 	
 	/**
 	 * table-name
@@ -182,14 +174,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public $fieldInfo = array();
 	
 	/**
-	 * view-cache
-	 *
-	 *@name viewcache
-	 *@access public
-	*/
-	public $viewcache = array();
-	
-	/**
 	 * this var specifies if this dataclass will be versioned
 	 *
 	 *@name versioned
@@ -214,6 +198,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public $queryVersion = "published";
 	
+	/**
+	 * view-cache
+	 *
+	 *@name viewcache
+	 *@access protected
+	*/
+	protected $viewcache = array();
 	
 	/**
 	 * gets default SQL-Fields
@@ -270,30 +261,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$fields = array_merge($this->DefaultSQLFields(strtolower(get_class($this))), $fields);
 		
 		return $fields;
-	}
-	
-	/**
-	 * gets all important dbfields
-	 *
-	 *@name DBFields
-	 *@access public
-	*/
-	public function generateiDBFields() {
-		
-		
-		$iDBFields = (array) $this->important_db_fields;
-		foreach($this->LocalcallExtending("iDBFields") as $_iDBFields) {
-			$iDBFields = array_merge($iDBFields, $_iDBFields);
-			unset($_iDBFields);
-		}
-		
-		$parent = get_parent_class($this);
-		if($parent != "DataObject") {
-			$iDBFields = array_merge(Object::instance($parent)->generateiDBFields(), $iDBFields);
-		}
-
-		$iDBFields = array_map("strtolower", $iDBFields);
-		return $iDBFields;
 	}
 	
 	/**
@@ -4069,12 +4036,6 @@ abstract class DataObjectExtension extends Extension
 		*/
 		public function DBFields() {
 				return isset($this->db_fields) ? $this->db_fields : array();
-		}
-		/**
-		 * important DB-Fields
-		*/
-		public function iDBFields() {
-			return $this->important_db_fields;
 		}
 		/**
 		 * gets has_one

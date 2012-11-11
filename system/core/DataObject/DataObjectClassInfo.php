@@ -149,7 +149,7 @@ class DataObjectClassInfo extends Extension
 						//ClassInfo::$class_info[$class]["prefix"] = $c->prefix;
 						if(count($searchable_fields) > 0) ClassInfo::$class_info[$class]["searchable_fields"] = $searchable_fields;
 						if(count($indexes) > 0) ClassInfo::$class_info[$class]["indexes"] = $indexes;
-						Classinfo::$class_info[$class]["iDBFields"] = arraylib::map_key($c->generateiDBFields(), "strtolower");
+						//Classinfo::$class_info[$class]["iDBFields"] = arraylib::map_key($c->generateiDBFields(), "strtolower");
 						
 						
 						/* --- */
