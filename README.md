@@ -10,7 +10,7 @@ Team
 ----
 
 ### Development
-* @Daniel_Gruber - Daniel Gruber
+* @Daniel_Gruber(http://twitter.com/Daniel_Gruber/) - Daniel Gruber
 * @MatorKalen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
