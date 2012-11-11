@@ -14,7 +14,7 @@ Team
 * MatorKalen - Fabian Parzefall
 * hansau22 - Julian Frielinghaus
 
-#### User-Experience
+#### Quality & User-Experience
 * Patrick Lemke
 
 #### Server-Management
