@@ -208,6 +208,13 @@ a:hover {
 	color: #ddd;
 	position: relative;
 }
+#content > .header .userbar > div.history {
+	margin: -10px 0;
+	padding: 0;
+}
+#content > .header .userbar > div.history a {
+	padding: 5px 15px;
+}
 
 #content > .header .userbar .langSelect {
 	padding: 0;

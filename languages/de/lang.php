@@ -513,5 +513,7 @@ $lang = array(
 	"author"				=> "Autor",
 	
 	"flush_log"				=> "Log-Dateien löschen",
-	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht."
+	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht.",
+	
+	"history"				=> "Änderungs-Geschichte"
 );

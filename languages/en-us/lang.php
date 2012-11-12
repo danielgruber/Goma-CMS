@@ -511,7 +511,8 @@ $lang = array(
 	"author"				=> "author",
 	
 	"flush_log"				=> "Delete log-files",
-	"flush_log_success"		=> "All log-files were deleted successfully."
-
+	"flush_log_success"		=> "All log-files were deleted successfully.",
+	
+	"history"				=> "Modification-History"
 
 );

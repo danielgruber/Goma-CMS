@@ -29,6 +29,14 @@
 	});
 </script>
 <div class="userbar">
+
+	<div class="spacer"></div>
+	<div class="history">
+		<a href="{BASE_URI}admin/history/?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_history}">
+			<img src="images/icons/modernui/halflight/48x48/appbar.timer.forward.png" height="32" width="32" alt="{$_lang_history}" />
+		</a>
+	</div>
+	
 	<div class="spacer"></div>
 	<div class="langSelect">
 		<% CONTROL array(currentLang()) AS $currentLang %>
