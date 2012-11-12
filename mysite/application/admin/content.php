@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.02.2012
+  * last modified: 12.11.2012
   * $Version 2.0.2
 */
 
@@ -42,6 +42,16 @@ class contentAdmin extends LeftAndMain
 		);
 		
 		protected $sort_field = "sort";
+		
+		/**
+		 * returns the URL for the View Website-Button
+		 *
+		 *@name PreviewURL
+		 *@access public
+		*/
+		public function PreviewURL() {
+			return defined("PREVIEW_URL") ? PREVIEW_URL : BASE_URI;
+		}
 		
 		/**
 		 * redirect back

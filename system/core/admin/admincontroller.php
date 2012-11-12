@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.04.2012
-  * $Version 1.4.1
+  * last modified: 12.11.2012
+  * $Version 1.4.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -121,6 +121,16 @@ class adminController extends Controller
 		*/
 		final public function adminTitle() {
 			return $this->Title();
+		}
+		
+		/**
+		 * returns the URL for the View Website-Button
+		 *
+		 *@name PreviewURL
+		 *@access public
+		*/
+		public function PreviewURL() {
+			return BASE_URI;
 		}
 		
 		/**
@@ -265,6 +275,14 @@ class admin extends ViewAccessableData implements PermProvider
 			return adminController::activeController()->ContentClass();
 		}
 		
+		/**
+		 * returns the URL for the view Website button
+		 *
+		 *@name PreviewURL
+		*/
+		public function PreviewURL() {
+			return adminController::activeController()->PreviewURL();
+		}
 		
 		/**
 		 * provies all permissions of this dataobject

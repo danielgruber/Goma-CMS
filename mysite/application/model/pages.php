@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.09.2012
+  * last modified: 12.11.2012
   * $Version 2.3.12
 */
 
@@ -452,9 +452,9 @@ class Pages extends DataObject implements PermProvider
 					}
 					
 					if($this->everPublished()) {
-						$html .= '<a href="#" onclick="show_preview(\''.BASE_URI . BASE_SCRIPT.'?r='.$this->id.'&preview=1\', \''.BASE_URI . BASE_SCRIPT . "?r=" . $this->id .'&'.$this->baseClass.'_state&preview=1\', '.(($this->isPublished()) ? 'true' : 'false').');return false;" class="flatButton preview">'.lang("preview").' &raquo;</a>';
+						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
 					} else {
-						$html .= '<a onclick="show_preview(false, \''.BASE_URI . BASE_SCRIPT . "?r=" . $this->id .'&'.$this->baseClass.'_state&preview=1\', '.(($this->isPublished()) ? 'true' : 'false').');return false;" href="#" class="preview flatButton">'.lang("preview").' &raquo;</a>';
+						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
 					}
 					$html .= '</div><div style="clear:right;"></div>';
 					
