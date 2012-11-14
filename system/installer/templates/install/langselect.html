@@ -66,7 +66,7 @@
 		<ul>
 			<% CONTROL languages() AS $lang %>
 				<li>
-					<a href="<% echo addParamToURL($_SERVER_REDIRECT, "setlang", $lang.code) %>">
+					<a href="<% echo addParamToURL($_SERVER['REQUEST_URI'], "setlang", $lang.code) %>">
 						<img src="$lang.icon" alt="$currentLang.code" />
 						<span>$lang.title</span>
 					</a>
