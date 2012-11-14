@@ -5,6 +5,18 @@ This is Web Content Managment System, which allows you, to create fast and easy 
 
 At the moment we're developing version 2.0 of Goma, so please be patient. It's done, when it's done.
 
+### Installation of Goma
+
+Please follow the git_readme.txt if you want to clone the project to your server directly.
+Otherwise just get a source package and extract it in your servers document root.
+Then point your browser to the url, you gave it.
+The first time you start Goma CMS, an installer will appear to guide you through the
+neccessary steps of installation.
+If not, please check, if the webserver hast the rights to read, write and execute Goma.
+
+Notice for RedHat-related OS:
+you need to install the package php-xml to make Goma run.
+
 
 Team
 ----
