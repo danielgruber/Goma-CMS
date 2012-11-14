@@ -822,7 +822,7 @@ class Dev extends RequestHandler
 		/**
 		 * shows dev-site or not 
 		*/
-		public function handleRequest($request)
+		public function handleRequest($request, $subController = false)
 		{
 				
 				define("DEV_CONTROLLER", true);
@@ -837,7 +837,7 @@ class Dev extends RequestHandler
 				}
 				
 				
-				return parent::handleRequest($request);
+				return parent::handleRequest($request, $subcontroller);
 				
 		}
 		
