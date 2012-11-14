@@ -13,7 +13,7 @@
   * $Version 2.5.13
 */
 
-error_reporting(E_ALL);
+error_reporting(E_ALL ^ E_STRICT);
 
 /**
  * first check if we use a good version ;)
