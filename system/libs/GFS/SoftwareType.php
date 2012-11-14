@@ -1288,6 +1288,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 			
 			return $data;
 		}
+		$data["framework_version"] = $info["framework_version"];
 		
 		// check if we use install-method
 		if($appInfo["name"] != ClassInfo::$appENV["app"]["name"]) {
@@ -1919,10 +1920,11 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		$plist = new CFPropertyList();
 		$plist->add($dict = new CFDictionary());
 		$dict->add("type", new CFString("expansion"));
-		$dict->add("name", new CFString($exp));
+		$dict->add("name", new CFString($name));
 		$dict->add("version", new CFString(ClassInfo::expVersion($name)));
 		$dict->add("created", new CFDate(NOW));
 		$dict->add("isDistro", new CFString("1"));
+		$dict->add("changelog", new CFString($changelog));
 		
 		$gfs->write("info.plist", $plist->toXML());
 		$gfs->close();
@@ -2068,11 +2070,14 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		
 		
 		// check if we have the correct framework-version
-		if(isset($appInfo["requireFrameworkVersion"]) && version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-			$data["error"] = lang("update_frameworkError");
-			$data["installable"] = false;
-			
-			return $data;
+		if(isset($appInfo["requireFrameworkVersion"])) {
+			if(version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+				$data["error"] = lang("update_frameworkError");
+				$data["installable"] = false;
+				
+				return $data;
+			}
+			$data["framework_version"] = $appInfo["requireFrameworkVersion"];
 		}
 		
 		// check if we use install-method
