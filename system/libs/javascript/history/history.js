@@ -69,8 +69,13 @@ var HistoryLib = {
 				if(HistoryLib.lastPush) {
 					HistoryLib.lastPush = false;
 				} else {
+					var path = document.location.pathname;
+					// now strip path with root_path
+					if(path.substring(0, ROOT_PATH.length) == ROOT_PATH) {
+						path = path.substr(ROOT_PATH.length);
+					}
 					for(i in HistoryLib.binded) {
-						HistoryLib.binded[i](document.location.pathname);
+						HistoryLib.binded[i](path);
 					}
 				}
 			};

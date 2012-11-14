@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.11.2012
-  * $Version 2.3.12
+  * last modified: 14.11.2012
+  * $Version 2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -431,8 +431,6 @@ class Pages extends DataObject implements PermProvider
 		{
 				parent::getForm($form);
 				
-				Resources::add(APPLICATION . "/application/model/pages.js");
-				
 				$allowed_parents = $this->allowed_parents();
 				
 				$form->addValidator(new requiredFields(array('path','title', 'parenttype')), "default_required_fields"); // valiadte it!
@@ -453,8 +451,10 @@ class Pages extends DataObject implements PermProvider
 					
 					if($this->everPublished()) {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
+						Resources::addJS("$(function(){ pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false")."); });");
 					} else {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
+						Resources::addJS("$(function(){ pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
 					}
 					$html .= '</div><div style="clear:right;"></div>';
 					

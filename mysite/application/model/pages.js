@@ -3,9 +3,37 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.05.2012
-  * $Version 1.1.1
+  * last modified: 14.11.2012
+  * $Version 1.2
 */
+
+function pages_pushPreviewURL(publish, state, usePublish) {
+	if(publish !== false) {
+		$("#visit_webpage").attr("href", publish);	
+	} else {
+		$("#visit_webpage").attr("href", state);
+	}
+	
+	if($("#visit_webpage").hasClass("preview")) {
+		$("#visit_webpage").unbind("click");
+	} else {
+		$("#visit_webpage").addClass("preview");
+	}
+	
+	$("#visit_webpage").click(function(){
+		if(publish !== false) {
+			publish = publish + "&preview=1";
+		}
+		show_preview(publish, state + "&preview=1", usePublish);
+		return false;	
+	});
+}
+
+function pages_unbindPreviewURL() {
+	$("#visit_webpage").unbind("click");
+	$("#visit_webpage").attr("href", ROOT_PATH);
+	$("#visit_webpage").removeClass("preview");
+}
 
 function show_preview(publish, state, usePublish) {
 	$("body").append('<div id="preview"></div>');

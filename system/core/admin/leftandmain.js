@@ -29,11 +29,6 @@ var LaM_type_timeout;
 			gloader.load("history");
 			HistoryLib.bind(function(url){
 				
-				// remove leading slash
-				if(url.substr(0, 1) == "/") {
-					url = url.substr(1);
-				}
-				
 				if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 					return false;
 				}
@@ -43,6 +38,7 @@ var LaM_type_timeout;
 					$this.addClass("loading");
 					
 				}
+				
 				$.ajax({
 					url: url,
 					data: {"ajaxfy": true},
