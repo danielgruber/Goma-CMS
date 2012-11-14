@@ -167,7 +167,7 @@ if(file_exists(ROOT . '_config.php'))
 		
 		if(DEV_MODE) {
 			// error-reporting
-			error_reporting(E_ALL);
+			error_reporting(E_ALL ^ E_STRICT);
 		} else {
 			error_reporting(E_ERROR | E_WARNING);
 		}
