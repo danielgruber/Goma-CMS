@@ -8,8 +8,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
-  * $Version 3.2.4
+  * last modified: 14.11.2012
+  * $Version 3.2.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -253,7 +253,7 @@ class ClassManifest {
 							$class_info[$class] = array();
 						
 						if($parts[4][$key]) {
-							$class_info[$class]["parent"] = strtolower($parts[4][$key]);
+							$class_info[$class]["parent"] = trim(strtolower($parts[4][$key]));
 						}
 						
 						if($parts[6][$key]) {
@@ -263,6 +263,10 @@ class ClassManifest {
 						
 						if($parts[1][$key]) {
 							$class_info[$class]["abstract"] = true;
+						}
+						
+						if($class_info[$class]["parent"] == $class) {
+							throwError(6, "Class-Definition-Error", "Class '".$class."' can not extend itself in ".$dir . "/" . $file .".");
 						}
 					}
 					
@@ -308,6 +312,10 @@ class ClassManifest {
 
 						$class_info[$class]["abstract"] = true;
 						$class_info[$class]["interface"] = true;
+						
+						if($class_info[$class]["parent"] == $class) {
+							throwError(6, "Interface-Definition-Error", "Interface '".$class."' can not extend itself in ".$dir . "/" . $file .".");
+						}
 						
 					}
 					
