@@ -57,6 +57,22 @@ class History extends DataObject {
 	}
 	
 	/**
+	 * renders the history for given filter
+	 *
+	 *@name renderHistory
+	 *@access public
+	*/
+	public static function renderHistory($filter) {
+		if(!is_a($filter, "DataObjectSet")) {
+			$data = DataObject::get("History", $filter);
+		} else {
+			$data = $filter;
+		}
+		
+		return $data->renderWith("history/history.html");
+	}
+	
+	/**
 	 * returns the text for a history-element
 	 * makes $content in template available or $object->content
 	 *

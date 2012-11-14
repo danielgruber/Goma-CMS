@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.10.2012
-  * $Version 1.5.3
+  * last modified: 14.11.2012
+  * $Version 1.5.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -2025,7 +2025,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 					$data["version"] = $data["version"];
 					
 				if(isset($data["icon"]) && $data["icon"])
-					$data["icon"] = $data["folder"] . "/" . $data["icon"];
+					$data["icon"] = ClassInfo::getExpansionFolder($name) . "/" . $data["icon"];
 				
 				if(!isset($data["title"]))
 					$data["title"] = $name;

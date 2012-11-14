@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 11.11.2012
-  * $Version: 4.6.5
+  * last modified: 14.11.2012
+  * $Version: 4.6.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -2679,6 +2679,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			throwError(6, "PHP-Error", "No Has-many-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
 		
+		$cache = "has_many_{$name}";
+		if(isset($this->viewcache[$cache])) {
+			return $this->viewcache[$cache];
+		}
+		
 		$class = $this->has_many[$name];
 		$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
 		if($key === false)
@@ -2706,6 +2711,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$set->setVersion("state");
 		}
 		
+		$this->viewcache[$cache] = $set;
+		
 		return $set;
 	}
 	
@@ -2718,7 +2725,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getHasOne($name, $filter = array(), $sort = array()) {
 		$name = trim(strtolower($name));
 		
-		$cache = "has_one_{$name}_{$filter}_{$sort}";
+		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true);
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
@@ -2788,7 +2795,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$instance->setVersion("state");
 			}
 			
-			$this->viewcache[$cache] = $instance;
+			$this->viewcache[$cache] =& $instance;
 			
 			return $instance;
 		}

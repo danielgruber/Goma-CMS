@@ -635,7 +635,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@name isPageNext
 	 *@access public
 	*/
-	public function isPageNext() {
+	public function isNextPage() {
 		$pages = ceil($this->Count() / $this->perPage);
 		return ($this->page < $pages);
 	}
@@ -1361,6 +1361,34 @@ class DataObjectSet extends DataSet {
 		}
 		$this->purgeData();
 		return $this;
+	}
+	
+	/**
+	 * activates pagination
+	 *
+	 *@name activatePagination
+	 *@access public
+	*/
+	public function activatePagination($page = null, $perPage = null) {
+		if(isset($perPage) && $perPage > 0)
+			$this->perPage = $perPage;
+		
+		if(isset($page)) {
+			
+			// first validate the data
+			$pages = ceil($this->Count() / $this->perPage);
+			if($pages < $page) {
+				$page = $pages;
+			}
+			
+			$this->page = $page;
+		}
+		if(!isset($this->page)) {
+			$this->page = 1;
+		}
+		
+		$this->pagination = true;
+		$this->purgeData();
 	}
 	
 	/**

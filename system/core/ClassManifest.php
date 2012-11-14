@@ -254,6 +254,9 @@ class ClassManifest {
 						
 						if($parts[4][$key]) {
 							$class_info[$class]["parent"] = trim(strtolower($parts[4][$key]));
+							if($class_info[$class]["parent"] == $class) {
+								throwError(6, "Class-Definition-Error", "Class '".$class."' can not extend itself in ".$dir . "/" . $file .".");
+							}
 						}
 						
 						if($parts[6][$key]) {
@@ -263,10 +266,6 @@ class ClassManifest {
 						
 						if($parts[1][$key]) {
 							$class_info[$class]["abstract"] = true;
-						}
-						
-						if($class_info[$class]["parent"] == $class) {
-							throwError(6, "Class-Definition-Error", "Class '".$class."' can not extend itself in ".$dir . "/" . $file .".");
 						}
 					}
 					
@@ -308,14 +307,13 @@ class ClassManifest {
 						
 						if($parts[3][$key]) {
 							$class_info[$class]["parent"] = strtolower($parts[3][$key]);
+							if($class_info[$class]["parent"] == $class) {
+								throwError(6, "Interface-Definition-Error", "Interface '".$class."' can not extend itself in ".$dir . "/" . $file .".");
+							}
 						}
 
 						$class_info[$class]["abstract"] = true;
 						$class_info[$class]["interface"] = true;
-						
-						if($class_info[$class]["parent"] == $class) {
-							throwError(6, "Interface-Definition-Error", "Interface '".$class."' can not extend itself in ".$dir . "/" . $file .".");
-						}
 						
 					}
 					
