@@ -188,7 +188,16 @@
 	font-style: italic;
 	text-align: center;
 }
-
+.tablefield-table .tablefield-editbutton input {
+	border: 0;
+	background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
+	color: #000;
+	font-size: 0px;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	margin: 0;
+}
 
 /* here goes some retina-stuff */
 @media
@@ -203,6 +212,10 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
  	
  	.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
 		background-image: url(images/delete@2x.png);
+		background-size: 16px 16px;
+	}
+	.tablefield-table .tablefield-editbutton input {
+		background-image: url(../../../images/icons/fatcow16/edit@2x.png);
 		background-size: 16px 16px;
 	}
 }

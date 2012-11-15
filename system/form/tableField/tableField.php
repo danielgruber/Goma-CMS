@@ -456,6 +456,8 @@ class tableField extends FormField {
 			'cellspacing' => '0'
 		);
 		
+		$this->form()->disableRestore();
+		
 		return $this->createTag('fieldset', array(), 
 				$content['before'] .
 				$this->createTag('table', $tableAttrs, $head."\n".$foot."\n".$body) .
@@ -558,6 +560,7 @@ class TableField_FormAction extends FormAction {
 	 *@name canSubmit
 	*/
 	public function canSubmit($data) {
+		$this->tableField->form()->activateRestore();
 		$this->tableField->_handleAction($this->actionName, $this->args, $data);
 		return false;
 	}

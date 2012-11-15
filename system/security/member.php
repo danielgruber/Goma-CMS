@@ -138,6 +138,7 @@ class User extends DataObject
 		);
 		
 		public $insertRights = 1;
+		
 		/**
 		 * gets all groups if a object
 		 *
@@ -415,6 +416,20 @@ class User extends DataObject
 			{
 				return lang("password_wrong");
 			}
+		}
+		
+		/**
+		 * returns the title of the person
+		 *
+		 *@name title
+		 *@access public
+		*/
+		public function title() {
+			if($this->fieldGet("name")) {
+				return $this->fieldGet("name");
+			}
+			
+			return $this->nickname;
 		}
 		
 		/**

@@ -13,7 +13,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler {
+class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler, TableField_ActionProvider {
 	
 	/**
 	 * Add a column 'Actions'
@@ -73,9 +73,12 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			return;
 		}
 		
+		$action = new TableField_FormAction($tableField, "editbtn_" . $record->ID, lang("edit"), "editbtn_redirect", array("id" => $record->ID));
+		$action->addExtraClass("tablefield-editbutton");
+		
 		$data = new ViewAccessableData();
 		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode(getRedirect());
-		return $data->renderWith("form/tableField/editButton.html");
+		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/editButton.html");
 	}
 	
 	/**
@@ -90,6 +93,26 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 		return array(
 			'editbtn/$id' => "edit"
 		);
+	}
+	
+	/**
+	 * provide some actions of this tablefield
+	 *
+	 *@name getActions
+	 *@access public
+	*/
+	public function getActions($tableField) {
+		return array("editbtn_redirect");
+	}
+	
+	/**
+	 * handles the actions
+	*/
+	public function handleAction($tableField, $actionName, $arguments, $data) {
+		if($actionName == "editbtn_redirect") {
+			HTTPResponse::redirect($tableField->externalURL() . "/editbtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
+		}
+		return false;
 	}
 	
 	/**
