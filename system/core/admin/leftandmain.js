@@ -160,7 +160,7 @@ var LaM_type_timeout;
 		/**
 		 * tab-rendering
 		*/
-		$(".left-and-main .LaM_tabs > ul > li > a").click(function(){
+		$(".left-and-main .LaM_tabs > ul.tabArea > li > a").click(function(){
 			if($(".left-and-main .LaM_tabs").find("." + $(this).attr("class")).length > 0) {
 				if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 					return false;
@@ -171,6 +171,7 @@ var LaM_type_timeout;
 				$(this).parent().addClass("active");
 				if(typeof HistoryLib.push == "function")
 					HistoryLib.push($(this).attr("href"));
+				
 				$.ajax({
 					url: $(this).attr("href"),
 					data: {"ajaxfy": true},
@@ -371,7 +372,10 @@ var LaM_type_timeout;
 			return true;
 		}
 		
-		$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+		// switch to tree-tab if necessary
+		if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
+			$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+		}
 		
 		$this.addClass("loading");
 		$this.parent().parent().addClass("marked");
