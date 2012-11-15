@@ -141,11 +141,11 @@ class adminItem extends AdminController implements PermProvider {
 	 *@name createModelInst
 	 *@access public
 	*/
-	public function modelInst($model = null) {
+	public function modelInst($m = null) {
 		
 		
-		if(isset($model) && is_object($this->modelInst)) {
-			$this->autoSelectModel(true, $model);
+		if(isset($m) && is_object($this->modelInst)) {
+			$this->autoSelectModel(true, $m);
 			return $this->modelInst;
 		} else if(is_object($this->model_inst))
 			return $this->model_inst;
@@ -171,7 +171,7 @@ class adminItem extends AdminController implements PermProvider {
 			
 			$this->modelInstances = $models;
 			// select model
-			$this->autoSelectModel(true, $model);
+			$this->autoSelectModel(true, $m);
 			
 			return $this->model_inst;
 				
@@ -221,7 +221,7 @@ class adminItem extends AdminController implements PermProvider {
 	*/
 	public function autoSelectModel($onThis = false, $model = null) {
 		
-		if(isset($model)) {
+		if(isset($model) && is_string($model)) {
 			if(isset($this->modelInstances[$model])) {
 				return $this->selectModel($model, $onThis);
 			}

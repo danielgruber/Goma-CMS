@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.11.2012
+  * last modified: 15.11.2012
   * $Version 2.4
 */
 
@@ -451,10 +451,10 @@ class Pages extends DataObject implements PermProvider
 					
 					if($this->everPublished()) {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
-						Resources::addJS("$(function(){ pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false")."); });");
+						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false")."); });");
 					} else {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
-						Resources::addJS("$(function(){ pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
+						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
 					}
 					$html .= '</div><div style="clear:right;"></div>';
 					
