@@ -37,15 +37,13 @@ class userAdmin extends adminItem {
 	 * logic
 	*/
 	public function index() {
-		$config = TableFieldConfig_Base::create();
+		$config = TableFieldConfig_Editable::create();
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(
 			"nickname" 	=> lang("username"),
 			"name"		=> lang("name"),
 			"email"		=> lang("email")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
-		$config->addComponent(new TableFieldEditButton());
-		$config->addComponent(new TableFieldDeleteButton());
 		
 		$form = new Form($this, "form", array(
 			new TableField("userTable", lang("users"), $this->modelInst(), $config)

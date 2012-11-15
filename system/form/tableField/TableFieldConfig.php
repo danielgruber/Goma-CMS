@@ -150,3 +150,29 @@ class TableFieldConfig_Base extends TableFieldConfig {
 
 	}
 }
+
+/**
+ * A simple editable, paginated view of records,
+ * with sortable and searchable headers.
+ */
+class TableFieldConfig_Editable extends TableFieldConfig_Base {
+	/**
+	 *
+	 * @param int $itemsPerPage - How many items per page should show up per page
+	 * @return GridFieldConfig_Base
+	 */
+	public static function create($itemsPerPage=null){
+		return new TableFieldConfig_Editable($itemsPerPage);
+	}
+
+	/**
+	 *
+	 * @param int $itemsPerPage - How many items per page should show up
+	 */
+	public function __construct($itemsPerPage=null) {
+		parent::__construct($itemsPerPage);
+		
+		$this->addComponent(new TableFieldEditButton());
+		$this->addComponent(new TableFieldDeleteButton());
+	}
+}

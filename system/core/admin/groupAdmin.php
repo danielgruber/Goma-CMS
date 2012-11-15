@@ -37,7 +37,7 @@ class groupAdmin extends adminItem {
 	 * logic
 	*/
 	public function index() {
-		$config = TableFieldConfig_Base::create();
+		$config = TableFieldConfig_Editable::create();
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(
 			"name"		=> lang("name")
 		));
