@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.07.2012
-  * $Version 3.3.7
+  * last modified: 15.11.2012
+  * $Version 3.3.8
 */   
  
  

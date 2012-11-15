@@ -900,7 +900,7 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 		@chmod($config, 0600);
 		return true;
 	} else {
-		die("6: Could not write Project-Config");
+		die("6: Could not write Project-Config '".$config."'. Please set Permissions to 0777!");
 	}
 }
 
