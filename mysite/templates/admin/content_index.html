@@ -3,6 +3,8 @@
 </div>
 <script type="text/javascript">
 	$(function(){
-		pages_unbindPreviewURL();
+		if(typeof pages_unbindPreviewURL != "undefined") {
+			pages_unbindPreviewURL();
+		}
 	});
 </script>
