@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-  * $Version 1.1
+  * last modified: 15.11.2012
+  * $Version 1.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -122,10 +122,8 @@ class Group extends DataObject implements PermProvider
 				
 				$form->addValidator(new RequiredFields(array("name")), "validator");
 				
-				$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/del/'.$this->id . '/group' .URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
-				
-				$form->addAction(new Button("cancel", lang("cancel", "cancel"), "LoadTreeItem(0);"));
-				$form->addAction(new AjaxSubmitButton("savegroup", lang("save", "Save"), "AjaxSave", null, array("green")));
+				$form->addAction(new CancelButton("cancel", lang("cancel", "cancel")));
+				$form->addAction(new FormAction("savegroup", lang("save", "Save"), null, array("green")));
 		}
 		
 		/**
