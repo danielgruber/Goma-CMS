@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.10.2012
-  * $Version 3.6.1
+  * last modified: 15.11.2012
+  * $Version 3.6.2
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -812,6 +812,7 @@ class ClassInfo extends Object
 								$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
 								$error = str_replace('{$error}', 'You need to have a installed GD-Library 2.', $error);
 								$error = str_replace('{BASE_URI}', BASE_URI, $error);
+								header("HTTP/1.1 500 Server Error");
 								echo $error;
 								exit;
 							}
@@ -820,6 +821,7 @@ class ClassInfo extends Object
 							$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
 							$error = str_replace('{$error}', 'You need to have a installed GD-Library 2.', $error);
 							$error = str_replace('{BASE_URI}', BASE_URI, $error);
+							header("HTTP/1.1 500 Server Error");
 							echo $error;
 							exit;
 						}
@@ -828,6 +830,7 @@ class ClassInfo extends Object
 							$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
 							$error = str_replace('{$error}', 'You need to have the Reflection-API installed.', $error);
 							$error = str_replace('{BASE_URI}', BASE_URI, $error);
+							header("HTTP/1.1 500 Server Error");
 							echo $error;
 							exit;
 						}
