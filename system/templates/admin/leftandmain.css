@@ -84,12 +84,17 @@
 	padding-bottom: 11px !important;
 }
 
+.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
+	padding-left: 22px;
+	background: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png) no-repeat left center;
+}
+
 .leftandmaintable tr > .left .classtree .treesearch input {
 	border-radius: 0;
 	margin: 0;
 	border: 0;
 	padding: 5px;
-	width: 260px;
+	width: 280px;
 	padding-right: 20px;
 	border-bottom: 1px solid #cfcfcf !important;
 	background: #eee;
@@ -157,3 +162,19 @@
 }
 
 .loading span { background-image: url(../../../images/16x16/ajax-loader.gif) !important; }
+
+/* here goes some retina-stuff */
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1) { 
+  
+ 	.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
+		padding-left: 22px;
+		background: url(../../../images/icons/modernui/halfdark/48x48/appbar.add.png) no-repeat left center;
+		background-size: 24px 24px;
+	}
+	.create .node span {
+		background-image: url(../../../images/icons/fatcow-icons/32x32/document_empty.png);
+	}
+}

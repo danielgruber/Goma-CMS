@@ -104,7 +104,7 @@ class FileSystem extends Object {
 			return @file_put_contents($file, $content, $modifier);
 		}
 		
-		if(file_put_contents($file, $content, $modifier)) {
+		if(@file_put_contents($file, $content, $modifier)) {
 			if(!isset($mode))
 				$mode = 0777;
 			

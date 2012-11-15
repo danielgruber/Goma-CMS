@@ -78,7 +78,7 @@ class LeftAndMain extends AdminItem {
 	 *@name icons
 	 *@access public
 	*/
-	public $icons = array("root" => "images/icons/fatcow-icons/16x16/world.png");
+	public $icons = array("root" => "images/icons/fatcow16/world.png");
 	
 	/**
 	 * marked node
@@ -214,7 +214,12 @@ class LeftAndMain extends AdminItem {
 		$filename = "left_and_main_on_the_fly_".$this->class.".css";
 		if(!file_exists(ROOT . CACHE_DIRECTORY . "/" . $filename)) {
 			$css = "";
+			$retinaCSS = "";
 			foreach($this->getIcons() as $class => $icon) {
+				$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
+				if(file_exists($retinaPath)) {
+					$retinaCSS .= '.'.$class.' span { background-image: url(../../'.$retinaPath.') !important; background-size: 16px 16px }';
+				}
 				$css .= '.'.$class.' span { background-image: url(../../'.$icon.') !important }';
 			}
 			
@@ -233,7 +238,15 @@ class LeftAndMain extends AdminItem {
 				}
 			}
 			
-			FileSystem::write(ROOT . CACHE_DIRECTORY . "/" . $filename, $css);
+			$wholecss = $css . "\n\n/* here goes some retina-stuff */
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1) { 
+  ".$retinaCSS."
+}";
+			
+			FileSystem::write(ROOT . CACHE_DIRECTORY . "/" . $filename, $wholecss);
 			unset($file, $css);
 		}
 		return $filename;	

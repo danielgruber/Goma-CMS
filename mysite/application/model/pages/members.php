@@ -10,7 +10,7 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class members extends Page
 {
-		static public $icon = "images/icons/fatcow-icons/16x16/group.png";
+		static public $icon = "images/icons/fatcow16/group.png";
 		
 		/**
 		 *@name name

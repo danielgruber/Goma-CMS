@@ -16,7 +16,7 @@ class contact extends Page
 		/**
 		 * the icon for this page
 		*/
-		public static $icon = "images/icons/fatcow-icons/16x16/email.png";
+		public static $icon = "images/icons/fatcow16/email.png";
 		
 		/**
 		 * we need an e-mail-adress
