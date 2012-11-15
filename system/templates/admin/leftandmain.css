@@ -86,7 +86,9 @@
 
 .leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
 	padding-left: 22px;
-	background: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png) no-repeat left center;
+	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
+	background-repeat: no-repeat;
+	background-position: left center;
 }
 
 .leftandmaintable tr > .left .classtree .treesearch input {
@@ -171,10 +173,13 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
   
  	.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
 		padding-left: 22px;
-		background: url(../../../images/icons/modernui/halfdark/48x48/appbar.add.png) no-repeat left center;
+		background-image: url(../../../images/icons/modernui/halfdark/48x48/appbar.add.png);
+		background-repeat: no-repeat;
+		background-position: left center;
 		background-size: 24px 24px;
 	}
 	.create .node span {
 		background-image: url(../../../images/icons/fatcow-icons/32x32/document_empty.png);
+		background-size: 16px 16px;
 	}
 }
