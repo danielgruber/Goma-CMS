@@ -52,11 +52,11 @@
 	font-size: 0;
 	height: 26px;
 	width: 26px;
-	background:  #eee url(images/loope_16.png) no-repeat 4px 4px;
+	background:  #eee url(images/loope.png) no-repeat 4px 4px;
 	border: 1px solid #c0c0c0;
 }
-.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input   {
-	background-image: url(images/delete_16.png);
+.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
+	background-image: url(images/delete.png);
 }
 .tablefield-table .filter-header td fieldset {
 	position: relative;
@@ -187,4 +187,22 @@
 	color: #999;
 	font-style: italic;
 	text-align: center;
+}
+
+
+/* here goes some retina-stuff */
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1) { 
+  
+ 	.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
+	 	background-image: url(images/loope@2x.png);
+	 	background-size: 16px 16px;
+ 	}
+ 	
+ 	.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
+		background-image: url(images/delete@2x.png);
+		background-size: 16px 16px;
+	}
 }

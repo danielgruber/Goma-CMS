@@ -111,7 +111,7 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function getIcons() {
 		$icons = $this->icons;
-		$icons["searchresult"] = "images/16x16/search.png";
+		$icons["searchresult"] = "images/icons/fatcow16/magnifier.png";
 		foreach($this->models as $model) {
 			if(ClassInfo::hasStatic($model, "icon")) {
 				$icons[$model] = ClassInfo::findFile(ClassInfo::getStatic($model, "icon"), $model);

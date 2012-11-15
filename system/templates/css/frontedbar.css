@@ -42,3 +42,13 @@
 	float: none;
 	clear: both;
 }
+
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1) {
+	#frontedbar_inner {
+		background-image: url(images/logo_white_frontedbar@2x.png);
+		background-size: 70px 22px;
+	}
+}
