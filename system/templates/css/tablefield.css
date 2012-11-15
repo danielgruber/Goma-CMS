@@ -188,7 +188,7 @@
 	font-style: italic;
 	text-align: center;
 }
-.tablefield-table .tablefield-editbutton input {
+.tablefield-table .tablefield-editbutton input, .tablefield-table .tablefield-deletebutton input {
 	border: 0;
 	background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
 	color: #000;
@@ -197,6 +197,9 @@
 	height: 20px;
 	padding: 0;
 	margin: 0;
+}
+.tablefield-table .tablefield-deletebutton input {
+	background-image: url(../../../images/icons/fatcow16/delete.png);
 }
 
 /* here goes some retina-stuff */
@@ -216,6 +219,10 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	}
 	.tablefield-table .tablefield-editbutton input {
 		background-image: url(../../../images/icons/fatcow16/edit@2x.png);
+		background-size: 16px 16px;
+	}
+	.tablefield-table .tablefield-deletebutton input {
+		background-image: url(../../../images/icons/fatcow16/delete@2x.png);
 		background-size: 16px 16px;
 	}
 }

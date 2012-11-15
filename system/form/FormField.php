@@ -166,7 +166,8 @@ class FormField extends RequestHandler
 				return new HTMLNode("input", array(
 					'name'	=> $this->PostName(),
 					"class"	=> "input",
-					"type"	=> "text"
+					"type"	=> "text",
+					"title" => $this->title
 				));
 		}
 		

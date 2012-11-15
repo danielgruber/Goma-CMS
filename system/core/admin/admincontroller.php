@@ -266,8 +266,11 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function title() {
 			$adminTitle = adminController::activeController()->Title();
-			if($adminTitle)
+			if($adminTitle) {
+				if(Core::$title)
+					return $adminTitle . " / " . Core::$title;
 				return $adminTitle;
+			}
 			
 			if(Core::$title)
 				return Core::$title;

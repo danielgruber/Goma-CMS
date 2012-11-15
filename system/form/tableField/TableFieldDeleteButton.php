@@ -1,20 +1,16 @@
 <?php
 /**
-  * inspiration by Silverstripe 3.0 GridField
-  * http://silverstripe.org
-  *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
-  * $Version - 1.0
- */
- 
+  *@Copyright (C) 2009 -  2012 Goma-Team
+  * last modified: 15.11.12
+  * $Version 1.0
+*/
+
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler, TableField_ActionProvider {
-	
+class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_ActionProvider, TableField_URLHandler {
 	/**
 	 * Add a column 'Actions'
 	 * 
@@ -69,16 +65,15 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 * @return string - the HTML for the column 
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
-		if(!$record->canWrite($record)){
+		if(!$record->canDelete($record)){
 			return;
 		}
 		
-		$action = new TableField_FormAction($tableField, "editbtn_" . $record->ID, lang("edit"), "editbtn_redirect", array("id" => $record->ID));
-		$action->addExtraClass("tablefield-editbutton");
+		$action = new TableField_FormAction($tableField, "deletebtn_" . $record->ID, lang("delete"), "deletebtn_redirect", array("id" => $record->ID));
+		$action->addExtraClass("tablefield-deletebutton");
 		
 		$data = new ViewAccessableData();
-		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode(getRedirect());
-		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/editButton.html");
+		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/deleteButton.html");
 	}
 	
 	/**
@@ -91,7 +86,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	*/
 	public function getURLHandlers($tableField) {
 		return array(
-			'editbtn/$id' => "edit"
+			'deletebtn/$id' => "delete"
 		);
 	}
 	
@@ -102,15 +97,15 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 *@access public
 	*/
 	public function getActions($tableField) {
-		return array("editbtn_redirect");
+		return array("deletebtn_redirect");
 	}
 	
 	/**
 	 * handles the actions
 	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
-		if($actionName == "editbtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/editbtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
+		if($actionName == "deletebtn_redirect") {
+			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
 		}
 		return false;
 	}
@@ -121,18 +116,19 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 *@name edit
 	 *@access public
 	*/
-	public function edit($tableField, $request) {
+	public function delete($tableField, $request) {
 		$data = clone $tableField->getData();
 		$data->filter(array("id" => $request->getParam("id")));
 		if($data->Count() > 0) {
-			$title = lang("edit");
+			$title = $data->ID . " " . lang("delete");
 			if($data->title) {
 				$title = $data->title;
 			} else if($data->name) {
 				$title = $data->name;
 			}
 			Core::setTitle($title);
-			$content = $data->first()->controller()->edit();
+			Core::$requestController = $tableField->form()->controller;
+			$content = $data->first()->controller()->delete();
 		} else {
 			$tableField->Form()->redirectToForm();
 			exit;
