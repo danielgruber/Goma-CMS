@@ -966,6 +966,11 @@ form h2 {
 	padding: 6px;
 }
 
+.tableview_wrapper .pages {
+	float: right;
+	margin: 10px;
+}
+
 /**
  * pages-style of admin
 */
