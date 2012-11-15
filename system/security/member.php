@@ -264,7 +264,7 @@ class User extends DataObject
 				
 				
 				// group selection for admin
-				if(defined("IS_BACKEND") && $this["id"] != member::$id && Permission::check(10))
+				if($this["id"] != member::$id && Permission::check(10))
 				{
 					
 					// if a user is not activated by mail, admin should have a option to activate him manually

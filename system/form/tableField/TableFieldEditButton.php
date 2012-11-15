@@ -13,7 +13,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldEditButton implements TableField_ColumnProvider {
+class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler {
 	
 	/**
 	 * Add a column 'Actions'
@@ -74,6 +74,48 @@ class TableFieldEditButton implements TableField_ColumnProvider {
 		}
 		
 		$data = new ViewAccessableData();
+		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode(getRedirect());
 		return $data->renderWith("form/tableField/editButton.html");
+	}
+	
+	/**
+	 * provides url-handlers as in controller, but without any permissions-functionallity
+	 *
+	 * this is NOT namespaced, so please be unique
+	 *
+	 *@name getURLHandlers
+	 *@access public
+	*/
+	public function getURLHandlers($tableField) {
+		return array(
+			'editbtn/$id' => "edit"
+		);
+	}
+	
+	/**
+	 * edit-action
+	 *
+	 *@name edit
+	 *@access public
+	*/
+	public function edit($tableField, $request) {
+		$data = clone $tableField->getData();
+		$data->filter(array("id" => $request->getParam("id")));
+		if($data->Count() > 0) {
+			$title = lang("edit");
+			if($data->title) {
+				$title = $data->title;
+			} else if($data->name) {
+				$title = $data->name;
+			}
+			Core::setTitle($title);
+			$content = $data->first()->controller()->edit();
+		} else {
+			$tableField->Form()->redirectToForm();
+			exit;
+		}
+		
+		$controller = $tableField->form()->controller;
+		return $controller->serve($content);
 	}
 }
