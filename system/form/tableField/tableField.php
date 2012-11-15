@@ -7,7 +7,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
+  * last modified: 15.11.2012
   * $Version - 1.0
  */
  
@@ -468,7 +468,7 @@ class tableField extends FormField {
 	 * 
 	 * @todo There is too much code copied from RequestHandler here.
 	 */
-	function handleRequest($request) {
+	function handleRequest($request, $subController = false) {
 
 		$this->request = $request;
 		
@@ -504,7 +504,7 @@ class tableField extends FormField {
 			}
 		}
 		
-		return parent::handleRequest($request);
+		return parent::handleRequest($request, $subController);
 	}
 	
 	/**
@@ -516,7 +516,7 @@ class tableField extends FormField {
 	 * @return type
 	 * @throws InvalidArgumentException
 	 */
-	public function handleAction($actionName, $args, $data) {
+	public function _handleAction($actionName, $args, $data) {
 		$actionName = strtolower($actionName);
 		foreach($this->getComponents() as $component) {
 			if(!($component instanceof TableField_ActionProvider)) {
@@ -558,7 +558,7 @@ class TableField_FormAction extends FormAction {
 	 *@name canSubmit
 	*/
 	public function canSubmit($data) {
-		$this->tableField->handleAction($this->actionName, $this->args, $data);
+		$this->tableField->_handleAction($this->actionName, $this->args, $data);
 		return false;
 	}
 }

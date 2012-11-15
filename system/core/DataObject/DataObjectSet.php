@@ -225,7 +225,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@access public
 	 *@param string - field
 	*/
-	public function fieldToArray($field = "id") {
+	public function fieldToArray($field) {
 		
 		$arr = array();
 		foreach((array)$this->data as $record) {
@@ -471,7 +471,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@name getPosition
 	 *@access public
 	*/
-	public function getPosition($pos) {
+	public function getPosition() {
 		return $this->position;
 	}
 	

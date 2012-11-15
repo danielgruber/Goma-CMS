@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.09.2012
-  * $Version 1.1
+  * last modified: 15.10.2012
+  * $Version 1.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -56,7 +56,7 @@ class gLoader extends Controller
 		 *@param string - filename
 		 *@param array - required other resources
 		*/
-		public function addLoadAble($name, $file, $required = array())
+		public static function addLoadAble($name, $file, $required = array())
 		{
 				
 				self::$resources[$name] = array(
@@ -70,7 +70,7 @@ class gLoader extends Controller
 		 *@name load
 		 *@access public
 		*/
-		public function load($name)
+		public static function load($name)
 		{
 				if(!isset(self::$preloaded[$name]))
 				{					

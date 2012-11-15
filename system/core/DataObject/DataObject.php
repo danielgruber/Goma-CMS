@@ -1268,7 +1268,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	 *@param array - reocrd
 	*/
-	public function canDelete($row)
+	public function canDelete($row = null)
 	{
 		$provided = $this->providePerms();
 		if(count($provided) == 1) {
@@ -1307,7 +1307,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	 *@param array - reocrd
 	*/
-	public function canInsert($row)
+	public function canInsert($row = null)
 	{
 		if($this->insertRights) {
 			if(Permission::check($this->insertRights))

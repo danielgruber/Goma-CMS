@@ -531,7 +531,7 @@ $data = array_pop($dataStack);
 		 * this function parses functions in the tpl
 		 *@name functions
 		*/
-		public function functions(array $matches)
+		public static function functions(array $matches)
 		{
 				$name = trim(strtolower($matches[1]));
 				if($name == "print" || $name == "echo" || $name == "array") {
@@ -679,7 +679,7 @@ $data = array_pop($dataStack);
 		 *@name convert_vars
 		 *@access public
 		*/
-		public function convert_vars($matches)
+		public static function convert_vars($matches)
 		{
 				
 				$php = '$data';

@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.05.2012
-  * Version: 1.2.5
+  * last modified: 15.011.2012
+  * Version: 1.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -346,7 +346,7 @@ class Resources extends Object {
 	 *@access public
 	 *@param string - js
 	*/
-	public function addJS($js, $combine_name = "scripts") {
+	public static function addJS($js, $combine_name = "scripts") {
 		if(self::$combine && $combine_name != "") {
 			if(!isset(self::$resources_js[$combine_name])) {
 				self::$resources_js[$combine_name] = array("files" => array(), "raw" => array(), "mtime"	=> 1, "name"	=> $combine_name);
@@ -363,7 +363,7 @@ class Resources extends Object {
 	 *@access public
 	 *@param string - js
 	*/
-	public function addCSS($css) {
+	public static function addCSS($css) {
 		self::$resources_css["raw"]["data"][] = $css;
 	}
 	
@@ -373,7 +373,7 @@ class Resources extends Object {
 	 *@access public
 	 *@param string - javascript-code
 	*/
-	public function addData($js) {
+	public static function addData($js) {
 	
 		self::$resources_data[md5($js)] = $js;
 	}
@@ -619,7 +619,7 @@ class Resources extends Object {
 	/**
 	 * sorts js files, main at first and scripts at last
 	*/
-	public function sortJS($a, $b) {
+	public static function sortJS($a, $b) {
 		if(preg_match("/main/", $a)) 
 			return -1;
 			

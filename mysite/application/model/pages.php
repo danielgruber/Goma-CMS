@@ -556,7 +556,7 @@ class Pages extends DataObject implements PermProvider
 		 *@name getActions
 		 *@access public
 		*/
-		public function getActions(&$form) {
+		public function getActions(&$form, $edit = false) {
 		
 			if(false) { //$this->isDeleted() && $this->id != 0) {
 				$form->addAction(new AjaxSubmitButton('_submit',lang("restore", "Restore"),"AjaxSave"));
@@ -702,7 +702,7 @@ class Pages extends DataObject implements PermProvider
 		/**
 		 * permission-checks
 		*/
-		public function canWrite($row = array())
+		public function canWrite($row = null)
 		{
 				
 				if(right(10))
@@ -735,7 +735,7 @@ class Pages extends DataObject implements PermProvider
 		/**
 		 * permission-checks
 		*/
-		public function canDelete($row)
+		public function canDelete($row = null)
 		{
 				if(right(10))
 						return true;
@@ -767,7 +767,7 @@ class Pages extends DataObject implements PermProvider
 		/**
 		 * permission-checks
 		*/
-		public function canInsert($row)
+		public function canInsert($row = null)
 		{	
 				if(parent::canInsert($row))
 				{
@@ -1276,7 +1276,7 @@ class ContentTPLExtension extends Extension {
 	 *@param string|object|array - content
 	 *@access public
 	*/
-	public function appendContent($content) {
+	public static function appendContent($content) {
 		if(is_array($content))
 			self::$appendedContent = array_merge(self::$appendedContent, $content);
 		else
@@ -1292,7 +1292,7 @@ class ContentTPLExtension extends Extension {
 	 *@param string|object|array - content
 	 *@access public
 	*/
-	public function prependContent($content) {
+	public static function prependContent($content) {
 		if(is_array($content))
 			self::$prependedContent = array_merge(self::$prependedContent, $content);
 		else
@@ -1417,7 +1417,7 @@ class ContentTPLExtension extends Extension {
 	 *@prependedContent
 	 *@access public
 	*/
-	public function prependedContent() {
+	public static function prependedContent() {
 		$div = new HTMLNode('div', array(), self::$prependedContent);
 		
 		return $div->html();
@@ -1429,7 +1429,7 @@ class ContentTPLExtension extends Extension {
 	 *@appendedContent
 	 *@access public
 	*/
-	public function appendedContent() {
+	public static function appendedContent() {
 		$div = new HTMLNode('div', array(), self::$appendedContent);
 		
 		return $div->html();

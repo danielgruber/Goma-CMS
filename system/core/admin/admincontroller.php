@@ -73,12 +73,12 @@ class adminController extends Controller
 		 *@name handleRequest
 		 *@access public
 		*/
-		public function handleRequest($request) {
+		public function handleRequest($request, $subController = false) {
 			if(isset(ClassInfo::$appENV["app"]["enableAdmin"]) && !ClassInfo::$appENV["app"]["enableAdmin"]) {
 				HTTPResponse::redirect(BASE_URI);
 			}
 			
-			return parent::handleRequest($request);
+			return parent::handleRequest($request, $subController);
 		}
 		
 		/**
@@ -372,14 +372,5 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function Software($number = 7) {
 			return G_SoftwareType::listAllSoftware();
-		}
-		
-		
-				
-}
-
-class adminRedirectController extends RequestHandler {
-	public function handleRequest($request) {
-		HTTPResponse::redirect(ROOT_PATH . "admin/" . $request->remaining());
-	}
+		}				
 }

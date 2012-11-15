@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
-  * $Version 2.2
+  * last modified: 15.11.2012
+  * $Version 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -98,7 +98,7 @@ class SQL extends object
 		 *@access public
 		 *@use: connect to db
 		**/
-		public static function connect($dbuser, $dbdb, $dbpass, $dbhost)
+		static function connect($dbuser, $dbdb, $dbpass, $dbhost)
 		{
 				$return = self::$driver->connect($dbuser, $dbdb, $dbpass, $dbhost);
 				sql::setCharsetUTF8();
@@ -109,7 +109,7 @@ class SQL extends object
 		 * tests the connection
 		 *@name test
 		*/
-		public static function test($driver,$dbuser, $dbdb, $dbpass, $dbhost)
+		static function test($driver,$dbuser, $dbdb, $dbpass, $dbhost)
 		{
 				if($driver == "mysql")
 					$driver = "mysqli";
@@ -127,7 +127,7 @@ class SQL extends object
 		 *@access public
 		 *@use: run a query
 		**/
-		public static function query($sql, $unbuffered = false, $track = true) {
+		static function query($sql, $unbuffered = false, $track = true) {
 				$start = microtime(true);
 				
 				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
@@ -161,7 +161,7 @@ class SQL extends object
 		 *@access public
 		 *@use: show counter
 		*/
-		public static function viewcount()
+		static function viewcount()
 		{
 				return self::$qcounter;
 		}
@@ -169,8 +169,8 @@ class SQL extends object
 		/**
 		 *@access public
 		 *@use: fetch_row
-		**/
-		public static function fetch_row($result)
+		*/
+		static function fetch_row($result)
 		{
 				return self::$driver->fetch_row($result);
 		}
@@ -179,15 +179,16 @@ class SQL extends object
 		 *@access public
 		 *@use to diconnect
 		**/
-		public static function close()
+		static function close()
 		{
 				return self::$driver->close();
 		}
+		
 		/**
 		 *@access public
 		 *@use to fetch object
 		**/
-		public static function fetch_object($result)
+		static function fetch_object($result)
 		{
 				return self::$driver->fetch_object($result);
 		}
@@ -196,79 +197,88 @@ class SQL extends object
 		 *@access public
 		 *@use to fetch array
 		 */
-		public static function fetch_array($result)
+		static function fetch_array($result)
 		{
 				return self::$driver->fetch_array($result);
 		}
+		
 		/**
 		 *@access public
 		 *@use to fetch assoc
 		 */
-		public static function fetch_assoc($result)
+		static function fetch_assoc($result)
 		{
 				return self::$driver->fetch_assoc($result);
 		}
+		
 		/**
 		  *@access public
 		  *@use to fetch num rows
 		  */
-		public static function num_rows($result)
+		static function num_rows($result)
 		{
 				return self::$driver->num_rows($result);
 		}
+		
 		/**
 		  *@access public
 		  *@use to fetch error
 		  */
-		public static function error()
+		static function error()
 		{
 				return self::$error;
 		}
+		
 		/**
 		  *@access public
 		  *@use to fetch errno
 		  */
-		public static function errno()
+		static function errno()
 		{
 				return self::$errno;
 		}
+		
 		/**
 		*@access public
 		*@use to fetch insert id
 		*/
-		public static function insert_id()
+		static function insert_id()
 		{
 				return self::$driver->insert_id();
 		}
+		
 		/**
 		  *@access public
 		  *@use to get memory
 		  */
-		public static function free_result($result)
+		static function free_result($result)
 		{
 				return self::$driver->free_result($result);
 		}
+		
 		/**
 		*@access public
 		*@use to protect
 		*/
-		public static function escape_string($result)
+		static function escape_string($result)
 		{
 				return self::$driver->escape_string($result);
 		}
+		
 		/**
 		  *@access public
 		  *@use to protect
 		  */
-		public static function real_escape_string($result)
+		static function real_escape_string($result)
 		{
 				return self::$driver->real_escape_string($result);
 		}
+		
 		/**
 		  *@access public
 		  *@use to protect
 		  */
-		public static function protect($result)
+		static function protect($result)
 		{
 				return self::$driver->protect($result);
 		}
@@ -279,7 +289,7 @@ class SQL extends object
 		 *@name affected_rows
 		 *@access public
 		*/
-		public static function affected_rows() {
+		static function affected_rows() {
 			return self::$driver->affected_rows();
 		}
 		
@@ -287,68 +297,73 @@ class SQL extends object
 		  *@access public
 		  *@use to split queries
 		  */
-		public static function split($sql)
+		static function split($sql)
 		{
 				return preg_split('/;\s*\n/',$sql, -1 , PREG_SPLIT_NO_EMPTY);
 		}
+		
 		/**
 		  *@access public
 		  *@use to view tables
 		  */
-		public static function list_tables($db)
+		static function list_tables($db)
 		{
 				return self::$driver->list_tables($db);
 		}
+		
 		/**
 		  *@access public
 		  *@use to view tablename
 	  	  */
-		public static function tablename($res, $i)
+		static function tablename($res, $i)
 		{
 				return self::$driver->tablename($res, $i);
 		}
+		
 		/**
 		 * table-functions
 		*/
-		public function getFieldsOfTable($table, $prefix = false, $track = true)
+		static function getFieldsOfTable($table, $prefix = false, $track = true)
 		{
 				return self::$driver->getFieldsOfTable($table, $prefix, $track);
 		}
-		public function changeField($table, $field, $type, $prefix = false)
+		static function changeField($table, $field, $type, $prefix = false)
 		{
 				return self::$driver->changeField($table, $field, $type, $prefix);
 		}
-		public function addField($table, $field, $type, $prefix = false)
+		static function addField($table, $field, $type, $prefix = false)
 		{
 				return self::$driver->addField($table, $field, $type, $prefix);
 		}
-		public function dropField($table, $field, $prefix = false)
+		static function dropField($table, $field, $prefix = false)
 		{
 				return self::$driver->dropField($table, $field, $prefix );
 		}
-		function createTable($table, $fields, $prefix = false)
+		static function createTable($table, $fields, $prefix = false)
 		{
 				return self::$driver->createTable($table, $fields, $prefix);
 		}
-		function _createTable($table, $fields, $prefix = false)
+		static function _createTable($table, $fields, $prefix = false)
 		{
 				return self::$driver->_createTable($table, $fields, $prefix);
 		}
+		
 		/**
 		 * INDEX-functions
 		*/
-		public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
+		static function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
 		{
 				return self::$driver->addIndex($table, $field, $type,$name ,$db_prefix);
 		}
-		public function dropIndex($table, $name, $db_prefix = null)
+		static function dropIndex($table, $name, $db_prefix = null)
 		{
 				return self::$driver->dropIndex($table, $name, $db_prefix);
 		}
-		public function getIndexes($table, $db_prefix = null)
+		static function getIndexes($table, $db_prefix = null)
 		{
 				return self::$driver->getIndexes($table, $db_prefix );
 		}
+		
 		/**
 		 * writes the manipulation-array in the database
 		 * e.g. array(
@@ -364,16 +379,17 @@ class SQL extends object
 		 *@access public
 		 *@param array - manipulation
 		*/
-		public static function writeManipulation($ma)
+		static function writeManipulation($ma)
 		{
 				return self::$driver->writeManipulation($ma);
 		}
+		
 		/**
 		 * the same like writeManipulation
 		 *@name manipulate
 		 *@access public
 		*/
-		public static function manipulate($ma)
+		static function manipulate($ma)
 		{
 				return self::writeManipulation($ma);
 		}
@@ -391,9 +407,10 @@ class SQL extends object
 		 *@param bool - if track query
 		 *@param string - prefix
 		*/
-		public function showTableDetails($table, $track = true, $prefix = false) {
+		static function showTableDetails($table, $track = true, $prefix = false) {
 			return self::$driver->showTableDetails($table, $track, $prefix);
 		}
+		
 		/**
 		 * requires, that a table is exactly in this form
 		 *
@@ -405,9 +422,10 @@ class SQL extends object
 		 *@param array - defaults
 		 *@param string - prefix
 		*/
-		public function requireTable($table, $fields, $indexes, $defaults, $prefix = false) {
+		static function requireTable($table, $fields, $indexes, $defaults, $prefix = false) {
 			return self::$driver->requireTable($table, $fields, $indexes, $defaults, $prefix);
 		}
+		
 		/**
 		 * deletes a table
 		 *
@@ -416,7 +434,7 @@ class SQL extends object
 		 *@param string - table
 		 *@param string - prefix
 		*/
-		public function dontRequireTable($table, $prefix = false) {
+		static function dontRequireTable($table, $prefix = false) {
 			return self::$driver->dontRequireTable($table, $prefix);
 		}
 		
@@ -426,7 +444,7 @@ class SQL extends object
 		 *
 		 *@name setCharsetUTF8
 		*/
-		public static function setCharsetUTF8() {
+		static function setCharsetUTF8() {
 			return self::$driver->setCharsetUTF8();
 		}
 		
@@ -440,7 +458,7 @@ class SQL extends object
 		 *@param string - type
 		 *@param bool|string - prefix
 		*/
-		public function setDefaultSort($table, $field, $type = "ASC", $prefix = false) {
+		static function setDefaultSort($table, $field, $type = "ASC", $prefix = false) {
 			return self::$driver->setDefaultSort($table, $field, $type, $prefix);
 		}
 		
@@ -453,7 +471,7 @@ class SQL extends object
 		 *@param bool - if to include the WHERE
 		 *@param array - to set field tables if you have various multi-table-fields
 		*/
-		public static function extractToWhere($where, $includeWhere = true, $DBFields = array()) {
+		static function extractToWhere($where, $includeWhere = true, $DBFields = array()) {
 			// WHERE
 			$sql = "";
 			if(is_array($where) && count($where) > 0) {

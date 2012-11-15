@@ -260,7 +260,7 @@ class Controller extends RequestHandler
 		 * handles requests
 		 *@name handleRequest
 		*/
-		public function handleRequest(request $request, $subController = false)
+		public function handleRequest($request, $subController = false)
 		{
 				$this->subController = false;
 				$this->areaData = array();

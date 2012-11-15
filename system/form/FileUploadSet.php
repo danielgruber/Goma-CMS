@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.08.2012
-  * $Version 1.1.7
+  * last modified: 15.11.2012
+  * $Version 1.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -136,9 +136,9 @@ class FileUploadSet extends FormField {
 	 *@access public
 	 *@param request-object
 	*/
-	public function handleRequest($request)
+	public function handleRequest($request, $subController = false)
 	{
-		$data = parent::handleRequest($request);
+		$data = parent::handleRequest($request, $subController);
 		$this->storeData();
 		return $data;
 	}

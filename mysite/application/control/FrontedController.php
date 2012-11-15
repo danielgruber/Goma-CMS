@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.04.2012
-  * $Version 2.0.5
+  * last modified:  15.11.2012
+  * $Version 2.0.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -112,7 +112,7 @@ class siteController extends Controller
 		public static $keywords;
 		public static $description;
         
-        public function handleRequest(request $request)
+        public function handleRequest($request, $subController = false)
         {
                 
                 if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN"))
@@ -122,7 +122,7 @@ class siteController extends Controller
                        exit;
                 }
                 
-                return parent::handleRequest($request);
+                return parent::handleRequest($request, $subController);
         }
         
         /**

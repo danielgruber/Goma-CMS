@@ -41,7 +41,7 @@ class Rating extends DataObject
 		 *@name canWrite
 		 *@access public
 		*/
-		public function canWrite()
+		public function canWrite($record = null)
 		{
 				return true;
 		}
@@ -52,7 +52,7 @@ class Rating extends DataObject
 		 *@name canInsert
 		 *@access public
 		*/
-		public function canInsert($data, $check = false)
+		public function canInsert($data = null, $check = false)
 		{
 				if($data["rators"] == "")
 						return true;
@@ -214,10 +214,12 @@ class ratingController extends Controller
 		 *@name handleRequet
 		 *@access public
 		*/
-		public function handleRequest($request)
+		public function handleRequest($request, $subController = false)
 		{
 				$this->request = $request;
 				
+				$this->Init();
+						
 				$name = strtolower($request->getParam("name"));
 				$rate = $request->getParam("rate");
 				if(DataObject::count("rating", array("name" => $name)) == 0)

@@ -1312,7 +1312,11 @@ class GFS_Package_installer extends GFS {
 	 *@access public
 	 *@param string - directory to which we unpack
 	*/
-	public function unpack($destination) {
+	public function unpack($destination, $path = "") {
+		if($path != "") {	
+			//! TODO: Support Subfolders!
+			throwError(6, "Wrong-Argument-Error", "GFS_Package_Installer doesn't support subfolders.");
+		}
 		if(!$this->valid) {
 			return false;
 		}

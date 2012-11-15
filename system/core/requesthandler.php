@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.11.2012
-  * $Version: 2.2.2
+  * last modified: 15.11.2012
+  * $Version: 2.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -81,7 +81,7 @@ class RequestHandler extends Object
 		 *@name init
 		 *@access public
 		*/
-		public function Init($subController = false)
+		public function Init()
 		{
 			if(!isset($this->subController) || !$this->subController) {
 				Core::$requestController = $this;
@@ -223,7 +223,7 @@ class RequestHandler extends Object
 		 *@param string - action
 		 *@param string - content
 		*/
-		public function extendHandleAction($action, $content) {
+		public function extendHandleAction($action, &$content) {
 			
 		}
 		

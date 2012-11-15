@@ -122,7 +122,7 @@ class ClassManifest {
 	 *@name generate_all_class_manifest
 	 *@access public
 	*/
-	public function generate_all_class_manifest(&$classes, &$class_info, &$env) {
+	public static function generate_all_class_manifest(&$classes, &$class_info, &$env) {
 		foreach(self::$directories as $dir) {
 			self::generate_class_manifest($dir, $classes, $class_info, $env);
 		}
@@ -333,7 +333,7 @@ class ClassManifest {
 	 *@access public
 	 *@param string - file
 	*/
-	public function addPreload($file)
+	public static function addPreload($file)
 	{
 		self::$preload[$file] = $file;
 	}
@@ -344,7 +344,7 @@ class ClassManifest {
 	 *@name include_all
 	 *@access public
 	*/
-	public function include_all() {
+	public static function include_all() {
 		foreach(ClassInfo::$files as $class => $file) {
 			self::load($class);
 		}

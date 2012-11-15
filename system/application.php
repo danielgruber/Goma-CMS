@@ -13,7 +13,7 @@
   * $Version 2.5.13
 */
 
-error_reporting(E_ALL ^ E_STRICT);
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 
 /**
  * first check if we use a good version ;)
@@ -167,9 +167,9 @@ if(file_exists(ROOT . '_config.php'))
 		
 		if(DEV_MODE) {
 			// error-reporting
-			error_reporting(E_ALL ^ E_STRICT);
+			error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 		} else {
-			error_reporting(E_ERROR | E_WARNING);
+			error_reporting(E_ERROR | E_WARNING | E_PARSE);
 		}
 		
 		// END define vars

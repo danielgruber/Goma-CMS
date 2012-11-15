@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.03.2012
-  * $Version 2.2
+  * last modified: 15.11.2012
+  * $Version 2.3
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -128,11 +128,11 @@ class adminItem extends AdminController implements PermProvider {
 	 *@name model
 	 *@access public
 	*/
-	public function model() {
+	public function model($model = null) {
 		if(!is_object($this->model_inst))
-			$this->modelInst();
+			$this->modelInst($model);
 			
-		return parent::model();
+		return parent::model($model);
 	}
 	
 	/**
@@ -141,9 +141,13 @@ class adminItem extends AdminController implements PermProvider {
 	 *@name createModelInst
 	 *@access public
 	*/
-	public function modelInst() {
+	public function modelInst($model = null) {
 		
-		if(is_object($this->model_inst))
+		
+		if(isset($model) && is_object($this->modelInst)) {
+			$this->autoSelectModel(true, $model);
+			return $this->modelInst;
+		} else if(is_object($this->model_inst))
 			return $this->model_inst;
 		
 		if(count($this->models) == 1)
@@ -167,7 +171,7 @@ class adminItem extends AdminController implements PermProvider {
 			
 			$this->modelInstances = $models;
 			// select model
-			$this->autoSelectModel();
+			$this->autoSelectModel(true, $model);
 			
 			return $this->model_inst;
 				
@@ -215,19 +219,23 @@ class adminItem extends AdminController implements PermProvider {
 	 *@name auotSelectModel
 	 *@access public
 	*/
-	public function autoSelectModel($onThis = false) {
+	public function autoSelectModel($onThis = false, $model = null) {
 		
+		if(isset($model)) {
+			if(isset($this->modelInstances[$model])) {
+				return $this->selectModel($model, $onThis);
+			}
+		}
 		
 		// get
 		if(isset($_GET["model"]))
 			if(isset($this->modelInstances[$_GET["model"]])) {
-				$this->selectModel($_GET["model"], true);
-				return true;
+				return $this->selectModel($_GET["model"], $onThis);
 			}
 			
 		
 		// preselect first model
-		$this->selectModel(ArrayLib::firstkey($this->modelInstances), true);
+		return $this->selectModel(ArrayLib::firstkey($this->modelInstances), $onThis);
 			
 	}
 	/**
@@ -364,12 +372,15 @@ class adminItem extends AdminController implements PermProvider {
 		if(!isset($this->controllerInst)) {
 			$controller = $this->modelInst()->controller;
 			$this->model_inst->controller = Object::instance($this->model())->controller;
-			$c = $this->model_inst->controller();
-			$c->model_inst = $this->model_inst;
-			$c->model = null;
-			$this->model_inst->controller = $controller;
-			unset($controller);
-			$this->controllerInst = $c;
+			if($c = $this->model_inst->controller()) {
+				$c->model_inst = $this->model_inst;
+				$c->model = null;
+				$this->model_inst->controller = $controller;
+				unset($controller);
+				$this->controllerInst = $c;
+			} else {
+				return false;
+			}
 		}
 		
 		return $this->controllerInst;

@@ -1,20 +1,21 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.04.2012
+  * last modified: 15.11.2012
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class imageResize extends RequestHandler
 {
-		public function handleRequest(request $request)
+		public function handleRequest($request, $subController = false)
 		{
 				session_write_close();
 				$this->request = $request;
+				$this->subController = $subController;
 				
 				$this->init();
 				

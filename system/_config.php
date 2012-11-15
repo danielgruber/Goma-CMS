@@ -11,7 +11,6 @@
 Core::addRules(array(
 	"dev" 											=> "dev",
 	'admin//$item' 									=> "adminController",
-	"adm//"											=> "adminRedirectController",
 	'system/ajax//link/$id'							=> 'ajaxlink',
 	'system/ajax//popup/$id'						=> 'ajaxlink',
 	"api/v1//\$ClassName!"							=> "RestfulServer",

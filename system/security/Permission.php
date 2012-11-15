@@ -99,7 +99,7 @@ class Permission extends DataObject
 		 *@name addPermissions
 		 *@access public
 		*/
-		public function addPermissions($perms) {
+		public static function addPermissions($perms) {
 			self::$providedPermissions = ArrayLib::map_key("strtolower", array_merge(self::$providedPermissions, $perms));
 		}
 		

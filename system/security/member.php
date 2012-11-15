@@ -157,7 +157,7 @@ class User extends DataObject
 		 *@access public
 		*/
 		
-		public function canWrite($data)
+		public function canWrite($data = null)
 		{
 			if($data["id"] == member::$id)
 				return true;
@@ -171,7 +171,7 @@ class User extends DataObject
 		 *@name canInsert
 		 *@access public
 		*/
-		public function canInsert($data)
+		public function canInsert($data = null)
 		{
 			return true;
 		}

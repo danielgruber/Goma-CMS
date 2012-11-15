@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 3.6
+  * last modified: 15.10.2012
+  * $Version 3.6.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -120,7 +120,7 @@ class ClassInfo extends Object
 		 *@access public
 		 *@param mixed - callback
 		*/
-		public function onClassInfoLoaded($call) {
+		public static function onClassInfoLoaded($call) {
 			if(!is_callable($call)) {
 				return false;
 			}
@@ -428,7 +428,7 @@ class ClassInfo extends Object
 		 *@name get_parent_class
 		 *@access public
 		*/
-		public function get_parent_class($class) {
+		public static function get_parent_class($class) {
 			if(isset(self::$class_info[$class]["parent"])) {
 				return self::$class_info[$class]["parent"];
 			} else {
@@ -501,7 +501,7 @@ class ClassInfo extends Object
 		 *@param string - extension or class-name
 		 *@param bool - if force to use as class-name
 		*/
-		public function getExpansionFolder($name, $forceClass = false, $forceAbsolute = false) {
+		public static function getExpansionFolder($name, $forceClass = false, $forceAbsolute = false) {
 			if(is_object($name)) {
 				if(!$forceClass && isset($name->inExpansion) && isset(self::$appENV["expansion"][strtolower($name->inExpansion)])) {
 					$name = $name->inExpansion;

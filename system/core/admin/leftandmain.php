@@ -496,18 +496,6 @@ class LeftAndMain extends AdminItem {
 	}
 	
 	/**
-	 * removes resume and redirects back
-	 *
-	 *@name redirectback
-	 *@access public
-	*/
-	public function redirectback() {
-		$this->removeResume();
-		return parent::redirectBack();
-	}
-	
-	
-	/**
 	 * adds content-class left-and-main to content-div
 	 *
 	 *@name contentClass

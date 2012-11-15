@@ -109,7 +109,7 @@ class ArrayLib extends Object
 		 *@name map_key
 		 *@access public
 		*/
-		public function map_key($array, $callback) {
+		public static function map_key($array, $callback) {
 			if(is_string($array)) {
 				$_callback = $array;
 				$array = $callback;

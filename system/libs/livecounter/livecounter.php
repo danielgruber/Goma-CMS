@@ -42,13 +42,13 @@ class livecounter extends DataObject
 		/**
 		 * allow writing
 		*/
-		public function canWrite() {
+		public function canWrite($data = null) {
 			return true;
 		}
 		/**
 		 * allow insert
 		*/
-		public function canInsert() {
+		public function canInsert($data = null) {
 			return true;
 		}
 }

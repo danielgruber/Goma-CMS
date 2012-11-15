@@ -56,14 +56,14 @@ class contentAdmin extends LeftAndMain
 		/**
 		 * redirect back
 		*/
-		public function redirectback()
+		public function redirectback($param = null, $value = null)
 		{
 				if($this->getParam(0) == "del" || $this->request->getParam(1) == "add")
 				{
 						HTTPresponse::redirect(ROOT_PATH . 'admin/content' . URLEND);
 				} else
 				{
-						parent::redirectback();
+						parent::redirectback($param, $value);
 				}
 		}
 		

@@ -301,7 +301,7 @@ class i18n extends Object
 		 *@access public
 		 *@param string - language
 		*/
-		public function getLangInfo($lang = null) {
+		public static function getLangInfo($lang = null) {
 			if(!isset($lang))
 				$lang = Core::$lang;
 			

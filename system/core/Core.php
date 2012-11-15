@@ -612,7 +612,7 @@ class Core extends object
 		 *@name thorwError
 		 *@access public
 		*/		
-		public function throwError($code, $name, $message, $callDebug = true) {
+		public static function throwError($code, $name, $message, $callDebug = true) {
  	 	 	
 			if(defined("ERROR_CODE")) {
 				echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
@@ -768,7 +768,7 @@ class Core extends object
 		 *@name adminAsUser
 		 *@access public
 		*/
-		public function adminAsUser() {
+		public static function adminAsUser() {
 			return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
 		}
 }
