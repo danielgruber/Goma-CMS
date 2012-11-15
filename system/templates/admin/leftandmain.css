@@ -115,7 +115,7 @@
 }
 .create .node span {
 	background-repeat: no-repeat;
-	background-image: url(../../../images/icons/fatcow-icons/16x16/file.png);
+	background-image: url(../../../images/icons/fatcow16/file.png);
 	background-position: 4px 4px;
 	color: 222;
 	text-decoration: none;
@@ -173,13 +173,13 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
   
  	.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
 		padding-left: 22px;
-		background-image: url(../../../images/icons/modernui/halfdark/48x48/appbar.add.png);
+		background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add@2x.png);
 		background-repeat: no-repeat;
 		background-position: left center;
 		background-size: 24px 24px;
 	}
 	.create .node span {
-		background-image: url(../../../images/icons/fatcow-icons/32x32/document_empty.png);
+		background-image: url(../../../images/icons/fatcow16/file@2x.png);
 		background-size: 16px 16px;
 	}
 }
