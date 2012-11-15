@@ -26,7 +26,7 @@ class Group extends DataObject implements PermProvider
 		 *@name icon
 		 *@access public
 		*/
-		static public $icon = "images/icons/fatcow-icons/16x16/group.png";
+		static public $icon = "images/icons/fatcow16/group.png";
 		
 		
 		/**

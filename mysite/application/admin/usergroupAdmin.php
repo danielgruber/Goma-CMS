@@ -30,7 +30,7 @@ class userGroupAdmin extends LeftAndMain
 		 *@name icons
 		 *@access public
 		*/
-		public $icons = array("root"	=> "images/icons/fatcow-icons/16x16/group.png","user"	=> "images/icons/fatcow-icons/16x16/user.png");
+		public $icons = array("root"	=> "images/icons/fatcow16/group.png","user"	=> "images/icons/fatcow16/user.png");
 		
 		public $colors = array(
 			"activated"	=> array(
