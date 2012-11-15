@@ -525,7 +525,6 @@ class DropDown extends FormField
 					new HTMLNode("div", array(
 						"class"	=> "header"
 					), array(
-						
 						new HTMLNode("div", array("class" => "pagination"), array(
 							new HTMLNode("span", array("class" => "left"), array(
 								$left = new HTMLNode("a", array(

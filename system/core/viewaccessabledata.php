@@ -136,7 +136,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"get_has_one",
 			"get_many",
 			"get",
-			"setField",
+			"setfield",
 			"setwholedata",
 			"write",
 			"writerecord",
@@ -151,7 +151,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"getoffset",
 			"getversion",
 			"_get",
-			"getObject"
+			"getobject"
 		);
 		/**
 		 * defaults
