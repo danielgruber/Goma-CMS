@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 31.08.2012
+  * last modified: 16.11.2012
 */
 
 /* defaults */
@@ -183,7 +183,7 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 .notice {
-    background: #fae98c url(../../../images/icons/fatcow-icons/24x24/alert.png) no-repeat 2px center;
+    background: #fae98c url(../../../images/icons/fatcow16/bullet_error.png) no-repeat 2px center;
     border: 1px solid #d7c143;
     padding: 10px;
     padding-left: 25px;
@@ -197,7 +197,7 @@ input[type="checkbox"], input[type="radio"] {
     background-color: #afe37b;
     color: #222;
     margin:10px 0px;
-    background-image: url(../../../images/icons/fatcow-icons/24x24/success.png);
+    background-image: url(../../../images/icons/fatcow16/success.png);
     background-repeat: no-repeat;
     padding-left: 36px;
     background-position: 5px center;
@@ -355,4 +355,19 @@ html[xmlns] .clearfix {
  
 * html .clearfix {
 	height: 1%;
+}
+
+@media
+only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (   min--moz-device-pixel-ratio: 2),
+only screen and (     -o-min-device-pixel-ratio: 2/1) {  
+	.success {
+		background-image: url(../../../images/icons/fatcow16/success@2x.png);
+		background-size: 16px 16px;
+	}
+	
+	.notice {
+		background-image: url(../../../images/icons/fatcow16/bullet_error@2x.png);
+		background-size: 16px 16px;
+	}
 }
