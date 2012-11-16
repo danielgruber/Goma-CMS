@@ -16,14 +16,14 @@
 }
 
 /* headers */
-.tablefield-table thead {
-	background: -moz-linear-gradient(#eee, #f5f5f5);
-	background: -ms-linear-gradient(#eee, #f5f5f5);
-	background: -o-linear-gradient(#5c5c5b, #424242);
+.tablefield-table thead, .tablefield_pagination th {
+	background: -moz-linear-gradient(#eee, #ccc);
+	background: -ms-linear-gradient(#eee, #ccc);
+	background: -o-linear-gradient(#eee, #ccc);
 	background: -webkit-linear-gradient(#eee 0%, #ccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242'); /* IE6 & IE7 */  
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
-	background: linear-gradient(#eee, #f5f5f5); /* the standard */ 
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc'); /* IE6 & IE7 */  
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc')"; /* IE8+ */
+	background: linear-gradient(#eee, #ccc); /* the standard */ 
 }
 .tablefield-table .filter-header {
 	background: #ddd;
@@ -206,13 +206,6 @@
 	padding: 10px;
 	border-top: 1px solid #ccc;
 	font-weight: normal;
-	background: -moz-linear-gradient(#eee, #f5f5f5);
-	background: -ms-linear-gradient(#eee, #f5f5f5);
-	background: -o-linear-gradient(#5c5c5b, #424242);
-	background: -webkit-linear-gradient(#eee 0%, #ccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242'); /* IE6 & IE7 */  
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
-	background: linear-gradient(#eee, #f5f5f5); /* the standard */ 
 }
 .tablefield_pagination th .pages {
 	float: left;
@@ -223,6 +216,7 @@
 }
 .tablefield_pagination th .actions {
 	float: right;
+	margin: -8px;
 }
 
 /* here goes some retina-stuff */

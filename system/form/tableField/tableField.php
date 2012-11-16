@@ -368,7 +368,7 @@ class tableField extends FormField {
 			if(preg_match_all('/DefineFragment\(([a-z0-9\-_]+)\)/i', $v, $matches)) {
 				foreach($matches[1] as $match) {
 					$fragmentName = strtolower($match);
-					$fragmentDefined[$fragmentName] = true;
+					$fragmentsDefined[$fragmentName] = true;
 					$fragment = isset($content[$fragmentName]) ? $content[$fragmentName] : "";
 
 					// If the fragment still has a fragment definition in it, when we should defer this item until later.

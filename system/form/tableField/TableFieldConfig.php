@@ -174,5 +174,6 @@ class TableFieldConfig_Editable extends TableFieldConfig_Base {
 		
 		$this->addComponent(new TableFieldEditButton());
 		$this->addComponent(new TableFieldDeleteButton());
+		$this->addComponent(new TableFieldAddButton());
 	}
 }

@@ -221,15 +221,8 @@ class User extends DataObject
 				}
 				$form->addValidator(new FormValidator(array($this, '_validateuser')), "validate_user");
 				
-				if(defined("IS_BACKEND")) {
-					$form->addAction(new Button("cancel", lang("cancel"), "LoadTreeItem(0);"));
-					$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxsave", null, array("green")));
-				} else {
-					$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
-				}
-				
-				
-				
+				$form->addAction(new CancelButton("cancel", lang("cancel")));
+				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 		}
 		
 		/**
@@ -287,13 +280,8 @@ class User extends DataObject
 						$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/model/user/'.$this->id.'/delete'.URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
 				}
 				
-				if(defined("IS_BACKEND")) {
-					$form->addAction(new Button("cancel", lang("cancel"), 'LoadTreeItem(0);'));
-					$form->addAction(new AjaxSubmitButton("saveuser", lang("save"), "ajaxsave", null, array("green")));
-				} else {
-					$form->addAction(new LinkAction("cancel", lang("cancel"), "profile/"));
-					$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
-				}
+				$form->addAction(new CancelButton("cancel", lang("cancel")));
+				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 		}
 		
 		/**

@@ -33,6 +33,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 		}
 		$this->perPage = $perPage;
 	}
+	
 	/**
 	 * provides HTML-fragments
 	 *

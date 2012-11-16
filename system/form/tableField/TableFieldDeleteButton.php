@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 -  2012 Goma-Team
-  * last modified: 15.11.12
+  * last modified: 16.11.12
   * $Version 1.0
 */
 
@@ -128,7 +128,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 			}
 			Core::setTitle($title);
 			Core::$requestController = $tableField->form()->controller;
-			$content = $data->first()->controller()->delete();
+			$content = $data->first()->controller($tableField->form()->controller)->delete();
 		} else {
 			$tableField->Form()->redirectToForm();
 			exit;
