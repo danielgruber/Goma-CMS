@@ -1,0 +1,17 @@
+<tr class="tablefield_pagination">
+	<th colspan="$columnCount">
+		<div class="pages">	
+			<strong>{$_lang_page}</strong>
+			<% CONTROL this() %>
+				$this.field
+			<% ENDCONTROL %>
+		</div>
+		<div class="actions">
+			DefineFragment(pagination-footer-right)
+		</div>
+		<div>
+			$showStart - $showEnd {$_lang_tablefield_out_of} $whole
+		</div>
+		<div lass="clear"></div>
+	</th>
+</tr>

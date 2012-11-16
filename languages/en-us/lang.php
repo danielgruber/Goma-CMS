@@ -513,6 +513,8 @@ $lang = array(
 	"flush_log"				=> "Delete log-files",
 	"flush_log_success"		=> "All log-files were deleted successfully.",
 	
-	"history"				=> "Modification-History"
+	"history"				=> "Modification-History",
+
+	"tablefield_out_of"		=> "out of"
 
 );
