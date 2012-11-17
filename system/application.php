@@ -525,19 +525,6 @@ function lang($name, $default = "")
 {
 		return nl2br(isset($GLOBALS["lang"][$name]) ? $GLOBALS["lang"][$name] : $default);
 }
-
-/**
- * Permission-provider
-*/
-interface PermissionProvider
-{
-		public function providePermissions();
-}
-
-interface PermProvider {
-	public function providePerms();
-}
-
 /**
  * right management
 */

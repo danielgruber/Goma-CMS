@@ -838,7 +838,7 @@ class Dev extends RequestHandler
 				}
 				
 				
-				return parent::handleRequest($request, $subcontroller);
+				return parent::handleRequest($request, $subController);
 				
 		}
 		
