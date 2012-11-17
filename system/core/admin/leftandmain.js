@@ -142,7 +142,7 @@ var LaM_type_timeout;
 			var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
 			if(tableHeight < 405)
 				tableHeight = 405;
-				
+			
 			$(".left-and-main").css("min-height", tableHeight);
 			$(".left-and-main > table").css("height", tableHeight);
 			

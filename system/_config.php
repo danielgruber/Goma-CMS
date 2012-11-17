@@ -36,7 +36,7 @@ Core::addRules(array(
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));
 gloader::addLoadAble("draggable", "system/libs/javascript/ui/draggable.js");
-gloader::addLoadAble("dropable", "system/libs/javascript/ui/dropable.js");
+gloader::addLoadAble("dropable", "system/libs/javascript/ui/droppable.js");
 gloader::addLoadAble("sortable", "system/libs/javascript/ui/sortable.js");
 gloader::addLoadAble("selectable", "system/libs/javascript/ui/selectable.js");
 gloader::addLoadAble("resizable", "system/libs/javascript/ui/resizable.js");
@@ -54,7 +54,6 @@ gloader::addLoadAble("datepicker", "system/libs/javascript/ui/datepicker.js");
 gloader::addLoadAble("uiEffects", "system/libs/javascript/ui/effects.js");
 gloader::addLoadAble("touch", "system/libs/javascript/ui/jquery.ui.touch.js");
 gloader::addLoadAble("jquery.scale.rotate", "system/libs/javascript/jquery.scale.rotate.js");
-gloader::addLoadAble("g_infobox", "system/libs/javascript/infobox.js");
 gloader::addLoadAble("dropdownDialog", "system/libs/javascript/dropdownDialog.js");
 gloader::addLoadAble("ajaxupload", "system/libs/ajax/ajaxupload.js");
 gloader::addLoadAble("htmllib", "system/libs/javascript/html.js");
