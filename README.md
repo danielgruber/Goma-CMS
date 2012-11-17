@@ -13,6 +13,7 @@ Then point your browser to the url, you gave it.
 The first time you start Goma CMS, an installer will appear to guide you through the
 neccessary steps of installation.
 If not, please check, if the webserver hast the rights to read, write and execute Goma.
+The installer will also provide information about what to install on your system to make Goma run.
 
 Notice for RedHat-related OS:
 you need to install the package php-xml to make Goma run.
