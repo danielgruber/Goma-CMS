@@ -39,6 +39,14 @@ class History extends DataObject {
 	private static $supportHistoryView;
 	
 	/**
+	 * cache for history-data
+	 *
+	 *@name data
+	 *@access private
+	*/
+	private $historyData;
+	
+	/**
 	 * you can push history-events by yourself into this
 	 *
 	 *@name push
@@ -80,7 +88,7 @@ class History extends DataObject {
 		} else {
 			$filter["dbobject"] = self::supportHistoryView();
 		}
-		$filter[] = "autorid != 0";
+		//$filter[] = "autorid != 0";
 		
 		if(!is_a($filter, "DataObjectSet")) {
 			$data = DataObject::get("History", $filter);
@@ -119,9 +127,74 @@ class History extends DataObject {
 	 *@access public
 	*/
 	public function getContent() {
+		if($data = $this->historyData()) {
+			$text = $data["text"];
+			// generate user
+			if($this->autor) {
+				$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
+			} else {
+				$user = '<span style="font-style: italic;">System</span>';
+			}
+			return str_replace('$user', $user, $text);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * returns the icon for a history-element
+	 * makes $content in template available or $object->content
+	 *
+	 *@name getIcon
+	 *@access public
+	*/
+	public function getIcon() {
+		if($data = $this->historyData()) {
+			return $data["icon"];
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * returns the retina-icon for a history-element
+	 * makes $content in template available or $object->content
+	 *
+	 *@name getIcon
+	 *@access public
+	*/
+	public function getRetinaIcon() {
+		if($data = $this->historyData()) {
+			$icon = $data["icon"];
+			$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
+			if(file_exists($retinaPath))
+				return $retinaPath;
+			
+			return $icon;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * gets history-data
+	 *
+	 *@name historyData
+	*/
+	public function historyData() {
+		if(isset($this->historyData)) {
+			return $this->historyData;
+		}
+		
 		if(ClassInfo::exists($this->dbobject)) {
-			if(Object::method_exists($this->dbobject, "generateHistoryText")) {
-				return call_user_func_array(array($this->dbobject, "generateHistoryText"), array($this));
+			if(Object::method_exists($this->dbobject, "generateHistoryData")) {
+				$data = call_user_func_array(array($this->dbobject, "generateHistoryData"), array($this));
+				if(isset($data["text"], $data["icon"])) {
+					$this->historyData = $data;
+				} else {
+					throwError(6, "Invalid Result", "Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
+				}
+				return $data;
 			} else {
 				return false;
 			}
@@ -193,8 +266,9 @@ interface HistoryView {
 	/**
 	 * returns text what to show about the event
 	 *
-	 *@name generateHistoryText
+	 *@name generateHistoryData
 	 *@access public
+	 *@return array("icon" => ..., "text" => ...)
 	*/
-	public static function generateHistoryText($record);
+	public static function generateHistoryData($record);
 }

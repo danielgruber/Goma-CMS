@@ -7,7 +7,7 @@
 */
 
 .history {
-	
+	border-top: 1px solid #ddd;
 }
 .history .event {
 	display: block;
@@ -17,4 +17,8 @@
 .history .event img {
 	margin-right: 5px;
 	margin-top: -3px;
+}
+.history .event .date {
+	float: right;
+	color: #888;
 }

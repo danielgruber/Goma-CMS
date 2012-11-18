@@ -2,7 +2,9 @@
 <div class="history">
 	<% CONTROL this() %>
 		<div class="event">
+			<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
 			$this.content
+			<span class="date">$this.created.date()</span>
 		</div>
 	<% ENDCONTROL %>
 </div>

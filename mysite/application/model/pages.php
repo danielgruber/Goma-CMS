@@ -1241,43 +1241,32 @@ class Pages extends DataObject implements PermProvider, HistoryView
 		/**
 		 * returns text what to show about the event
 		 *
-		 *@name generateHistoryText
+		 *@name generateHistoryData
 		 *@access public
 		*/
-		public static function generateHistoryText($record) {
+		public static function generateHistoryData($record) {
 			switch($record->action) {
 				case "update":
-					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a> on $date.');
+					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_edit.png";
-					$iconRetina = "images/icons/fatcow16/page_white_edit@2x.png";
 				break;
 				case "insert":
-					$lang = lang("h_pages_create", '$user created the page <a href="$pageUrl">$page</a> on $date.');
+					$lang = lang("h_pages_create", '$user created the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_add.png";
-					$iconRetina = "images/icons/fatcow16/page_white_add@2x.png";
 				break;
 				case "publish":
-					$lang = lang("h_pages_publish", '$user published the page <a href="$pageUrl">$page</a> on $date.');
+					$lang = lang("h_pages_publish", '$user published the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_get.png";
-					$iconRetina = "images/icons/fatcow16/page_white_get@2x.png";
 				break;
 				case "remove":
-					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a> on $date.');
+					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_delete.png";
-					$iconRetina = "images/icons/fatcow16/page_white_delete@2x.png";
 				break;
 			}
+			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
+			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			
-			if($record->autor) {
-				$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title . '</a>';
-				$lang = str_replace('$user', $user, $lang);
-				$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
-				$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
-				$lang = str_replace('$date', goma_date($record->created), $lang);
-				
-				return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
-			}
-			return null;
+			return array("icon" => $icon, "text" => $lang);
 		}
 		
 }

@@ -55,7 +55,7 @@ class userController extends Controller
 }
 
 
-class User extends DataObject
+class User extends DataObject implements HistoryView
 {
 		/**
 		 * the name of this dataobject
@@ -138,6 +138,13 @@ class User extends DataObject
 		);
 		
 		public $insertRights = 1;
+		
+		/**
+		 * use versions here
+		 *
+		 *@name versioned
+		*/
+		public $versioned = true;
 		
 		/**
 		 * gets all groups if a object
@@ -451,6 +458,38 @@ class User extends DataObject
 			if($this->wasChanged()) {
 				$this->write(false, true);
 			}
+		}
+		
+		/**
+		 * returns text what to show about the event
+		 *
+		 *@name generateHistoryData
+		 *@access public
+		*/
+		public static function generateHistoryData($record) {
+			switch($record->action) {
+				case "update":
+				case "publish":
+					$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+					$icon = "images/icons/fatcow16/user_edit.png";
+				break;
+				case "insert":
+					$lang = lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
+					$icon = "images/icons/fatcow16/user_add.png";
+				break;
+				case "remove":
+					$lang = lang("h_user_remove", '$user removed the user $euser');
+					$icon = "images/icons/fatcow16/user_delete.png";
+				break;
+				case "login":
+					$lang = lang("h_user_login", '$euser logged in');
+					$icon = "images/icons/fatcow16/user_go.png";
+				break;
+			}
+			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
+			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
+			
+			return array("icon" => $icon, "text" => $lang);
 		}
 }
 

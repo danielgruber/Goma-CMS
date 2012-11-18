@@ -520,10 +520,15 @@ $lang = array(
 	"history"				=> "Änderungs-Geschichte",
 	
 	// history
-	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a> am $date.',
-	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a> am $date.',
-	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a> am $date.',
-	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a> am $date.',
+	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
 	
-	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a> am $date.'
+	"h_user_update"			=> '$user bearbeitete den Benutzer <a href="$userUrl">$euser</a>',
+	"h_user_remove"			=> '$user löschte den Benutzer <a href="$userUrl">$euser</a>',
+	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
+	"h_user_login"			=> '$euser hat sich eingeloggt',
+	
+	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>'
 );

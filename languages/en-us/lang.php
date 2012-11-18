@@ -518,10 +518,15 @@ $lang = array(
 	"history"				=> "Modification-History",
 	
 	// history
-	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a> on $date.',
-	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a> on $date.',
-	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a> on $date.',
-	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a> on $date.',
-	"h_settings"			=> '$user updated the <a href="$url">settings</a> on $date.'
+	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a>',
+	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a>',
+	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a>',
+	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a>',
+	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
+	
+	"h_user_update"			=> '$user updated the user <a href="$userUrl">$euser</a>',
+	"h_user_remove"			=> '$user removed the user <a href="$userUrl">$euser</a>',
+	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
+	"h_user_login"			=> '$euser logged in',
 
 );
