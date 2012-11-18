@@ -54,6 +54,10 @@ class History extends DataObject {
 		if(is_object($newrecord))
 			$newrecord = $newrecord->versionid;
 		
+		if(!ClassInfo::getStatic($class, "history")) {
+			return false;
+		}
+		
 		$record = new History(array(
 			"dbobject" 		=> $class,
 			"oldversion"	=> $oldrecord,
