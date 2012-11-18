@@ -1268,13 +1268,16 @@ class Pages extends DataObject implements PermProvider, HistoryView
 				break;
 			}
 			
-			$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title() . '</a>';
-			$lang = str_replace('$user', $user, $lang);
-			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
-			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
-			$lang = str_replace('$date', goma_date($record->created), $lang);
-			
-			return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+			if($record->autor) {
+				$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title . '</a>';
+				$lang = str_replace('$user', $user, $lang);
+				$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
+				$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
+				$lang = str_replace('$date', goma_date($record->created), $lang);
+				
+				return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+			}
+			return null;
 		}
 		
 }
