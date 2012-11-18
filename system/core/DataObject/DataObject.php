@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 14.11.2012
-  * $Version: 4.6.6
+  * last modified: 18.11.2012
+  * $Version: 4.6.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1465,6 +1465,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
 		}
+		
+		// check if table in db and if not, create it
+		if($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
+			foreach(array_merge(ClassInfo::getChildren($this->class), array($this->class)) as $child) {
+				Object::instance($child)->buildDB();
+			}
+			ClassInfo::write();
+		}
+		
 		if($this->data === null)
 			return true;
 		
@@ -2190,6 +2199,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function remove($force = false, $forceAll = false)
 	{
+		// check if table in db and if not, create it
+		if($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
+			foreach(array_merge(ClassInfo::getChildren($this->class), array($this->class)) as $child) {
+				Object::instance($child)->buildDB();
+			}
+			ClassInfo::write();
+		}
+		
 		$manipulation = array();
 		$baseClass = ClassInfo::$class_info[$this->RecordClass]["baseclass"];
 			
