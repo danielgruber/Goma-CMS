@@ -156,7 +156,7 @@ class SelectQuery extends Object
 			if(is_string($this->filter)) {
 				$this->filter = array($this->filter, $filter);
 			} else if(is_array($filter)) {
-				foreach($filter $k => $v) {
+				foreach($filter as $k => $v) {
 					if(is_int($k)) {
 						$this->filter[] = $v;
 					} else if(isset($this->filter[$k])) {
