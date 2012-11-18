@@ -55,7 +55,7 @@ class userController extends Controller
 }
 
 
-class User extends DataObject implements HistoryView
+class User extends DataObject implements HistoryData
 {
 		/**
 		 * the name of this dataobject

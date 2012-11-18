@@ -11,7 +11,7 @@
 */
 
 
-class Newsettings extends DataObject implements HistoryView {
+class Newsettings extends DataObject implements HistoryData {
 	/**
 	 * fields for general tab
 	 *

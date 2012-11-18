@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Pages extends DataObject implements PermProvider, HistoryView
+class Pages extends DataObject implements PermProvider, HistoryData
 {
 		/**
 		 * show read-only edit if not enough rights

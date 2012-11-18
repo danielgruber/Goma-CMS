@@ -111,7 +111,7 @@ class History extends DataObject {
 			
 		self::$supportHistoryView = array();
 		foreach(ClassInfo::getChildren("DataObject") as $child) {
-			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryView")) {
+			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData")) {
 				self::$supportHistoryView[] = $child;
 			}
 		}
@@ -262,7 +262,7 @@ class History extends DataObject {
 	}
 }
 
-interface HistoryView {
+interface HistoryData {
 	/**
 	 * returns text what to show about the event
 	 *
@@ -272,3 +272,5 @@ interface HistoryView {
 	*/
 	public static function generateHistoryData($record);
 }
+
+interface HistoryView {}
