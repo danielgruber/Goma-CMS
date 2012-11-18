@@ -512,15 +512,16 @@ $lang = array(
 	
 	"flush_log"				=> "Delete log-files",
 	"flush_log_success"		=> "All log-files were deleted successfully.",
-	
-	"history"				=> "Modification-History",
 
 	"tablefield_out_of"		=> "out of",
+	
+	"history"				=> "Modification-History",
 	
 	// history
 	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a> on $date.',
 	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a> on $date.',
 	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a> on $date.',
 	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a> on $date.',
+	"h_settings"			=> '$user updated the <a href="$url">settings</a> of this page on $date.'
 
 );

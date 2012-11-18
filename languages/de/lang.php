@@ -514,14 +514,16 @@ $lang = array(
 	
 	"flush_log"				=> "Log-Dateien löschen",
 	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht.",
-	
-	"history"				=> "Änderungs-Geschichte",
-	
+
 	"tablefield_out_of"		=> "von",
+
+	"history"				=> "Änderungs-Geschichte",
 	
 	// history
 	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a> am $date.',
 	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a> am $date.',
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a> am $date.',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a> am $date.',
+	
+	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a> dieser Seite am $date.'
 );

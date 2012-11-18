@@ -6,14 +6,16 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.08.2012
-  * $Version 1.2.2
+  * last modified: 18.11.2012
+  * $Version 1.2.3
 */
 
 
-class Newsettings extends DataObject {
+class Newsettings extends DataObject implements HistoryView {
 	/**
-	 * fields for general
+	 * fields for general tab
+	 *
+	 *@name db_fields
 	*/
 	public $db_fields = array(
 		"titel"				=> "varchar(50)",
@@ -22,6 +24,12 @@ class Newsettings extends DataObject {
 		"register_email"	=> "Switch",
 		"gzip"				=> "Switch"
 	);
+	
+	/**
+	 * defaults of these fields
+	 *
+	 *@name defaults
+	*/
 	public $defaults = array(
 		"titel"				=> "Goma - Open Source CMS / Framework",
 		"gzip"				=> "0",
@@ -30,14 +38,25 @@ class Newsettings extends DataObject {
 		"status"			=> "1",
 		"stpl"				=> "default"
 	);
+	
+	/**
+	 * information above each textfield about a specific field
+	 *
+	 *@name fieldInfo
+	*/
 	public $fieldInfo = array(
 		"register_enabled"	=> "{\$_lang_register_enabled_info}",
 		"register"			=> "{\$_lang_registercode_info}",
 		"gzip"				=> "{\$_lang_gzip_info}",
 		"register_email"	=> "{\$_lang_register_require_email_info}"
 	);
+	
+	public $controller = "SettingsController";
+	
 	/**
-	 * gets field titles
+	 * returns the titles for the fields for automatic form generation
+	 *
+	 *@name getFieldTitles
 	*/
 	public function getFieldTitles() {
 		return  array(
@@ -48,6 +67,7 @@ class Newsettings extends DataObject {
 			"gzip"				=> lang("gzip", "G-Zip")
 		);
 	}
+	
 	/**
 	 * generates the Form
 	 *
@@ -109,7 +129,24 @@ class Newsettings extends DataObject {
 		);
 	}
 	
-	public $controller = "SettingsController";
+	/**
+	 * returns text what to show about the event
+	 *
+	 *@name generateHistoryText
+	 *@access public
+	*/
+	public static function generateHistoryText($record) {
+		$lang = lang("h_settings");
+		$icon = "images/icons/fatcow16/setting_tools.png";
+		$iconRetina = "images/icons/fatcow16/setting_tools@2x.png";
+		
+		$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title() . '</a>';
+		$lang = str_replace('$user', $user, $lang);
+		$lang = str_replace('$date', goma_date($record->created), $lang);
+		$lang = str_replace('$url', "admin/settings" . URLEND, $lang);
+		
+		return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+	}
 }
 
 class SettingsController extends Controller {

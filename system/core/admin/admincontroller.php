@@ -222,6 +222,7 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public function history() {
+			Core::setTitle(lang("history"));
 			return History::renderHistory(array());
 		}
 		
