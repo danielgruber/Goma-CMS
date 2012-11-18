@@ -136,16 +136,18 @@ class Newsettings extends DataObject implements HistoryView {
 	 *@access public
 	*/
 	public static function generateHistoryText($record) {
-		$lang = lang("h_settings");
-		$icon = "images/icons/fatcow16/setting_tools.png";
-		$iconRetina = "images/icons/fatcow16/setting_tools@2x.png";
-		
-		$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title() . '</a>';
-		$lang = str_replace('$user', $user, $lang);
-		$lang = str_replace('$date', goma_date($record->created), $lang);
-		$lang = str_replace('$url', "admin/settings" . URLEND, $lang);
-		
-		return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+		if($record->autor) {
+			$lang = lang("h_settings");
+			$icon = "images/icons/fatcow16/setting_tools.png";
+			$iconRetina = "images/icons/fatcow16/setting_tools@2x.png";
+			
+			$user = '<a href="member/'.$record->autor->ID . URLEND .'" class="user">' . $record->autor->title() . '</a>';
+			$lang = str_replace('$user', $user, $lang);
+			$lang = str_replace('$date', goma_date($record->created), $lang);
+			$lang = str_replace('$url', "admin/settings" . URLEND, $lang);
+			
+			return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+		}
 	}
 }
 

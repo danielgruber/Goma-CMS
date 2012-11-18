@@ -80,6 +80,7 @@ class History extends DataObject {
 		} else {
 			$filter["dbobject"] = self::supportHistoryView();
 		}
+		$filter[] = "autorid != 0";
 		
 		if(!is_a($filter, "DataObjectSet")) {
 			$data = DataObject::get("History", $filter);
