@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 31.08.2012
+  * last modified: 18.11.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -515,6 +515,12 @@ $lang = array(
 	
 	"history"				=> "Modification-History",
 
-	"tablefield_out_of"		=> "out of"
+	"tablefield_out_of"		=> "out of",
+	
+	// history
+	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a> on $date.',
+	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a> on $date.',
+	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a> on $date.',
+	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a> on $date.',
 
 );

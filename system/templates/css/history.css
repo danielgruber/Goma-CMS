@@ -1,0 +1,20 @@
+/**
+  *@package goma css framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 18.11.2012
+*/
+
+.history {
+	
+}
+.history .event {
+	display: block;
+	padding: 15px;
+	border-bottom: 1px solid #ddd;
+}
+.history .event img {
+	margin-right: 5px;
+	margin-top: -3px;
+}

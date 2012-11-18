@@ -4,18 +4,19 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 2.4
+  * last modified: 18.11.2012
+  * $Version 2.4.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Pages extends DataObject implements PermProvider
+class Pages extends DataObject implements PermProvider, HistoryView
 {
 		/**
 		 * show read-only edit if not enough rights
 		*/
 		public $showWithoutRight = true;
+		
 		/**
 		 * the db-fields
 		 *@name db_fields
@@ -34,51 +35,60 @@ class Pages extends DataObject implements PermProvider
 									'meta_keywords'		=> 'varchar(200)');
 									
 		/**
-		 * has-one-relation
+		 * a page has a parent page
+		 * a page has permissions
+		 *
 		 *@name has_one
 		 *@var array
 		*/
 		public $has_one = array(	'parent' 			=> 'pages', 
 									"read_permission" 	=> "Permission",
-									"edit_permission"	=> "Permission");	
+									"edit_permission"	=> "Permission");
+									
 		/**
-		 * has many
+		 * a page has many children
+		 *
 		 *@name has_many
 		 *@var array
 		*/
 		public $has_many = array('children' => 'pages');
-		/**
-		 * many-many
-		 *@name many_many
-		 *@access public
-		 *@var array
-		*/
-		public $many_many = array('edit_groups' => 'group', "viewer_groups"	=> "group");
+		
 		/**
 		 * searchable fields
 		*/
 		public $searchable_fields = array("data", "title", "mainbartitle", "meta_keywords");
+		
 		/**
-		 * indexes 
+		 * indexes to improve performance
+		 *
+		 *@name indexes
+		 *@access public
 		*/
 		public $indexes = array(
 			array("type" => "INDEX", "fields" => "path,sort,class_name", "name" => "path"),
 			array("type" => "INDEX", "fields" => "parentid,mainbar,class_name", "name"	=> "mainbar"),
 			array("type" => "INDEX", "fields" => "class_name,data,title,mainbartitle,meta_keywords,id","name" => "sitesearch")
 		);
+		
 		/**
 		 * which parents are allowed
+		 *
+		 *@name can_parent
 		*/
 		public $can_parent = array();
+		
 		/**
 		 * childs that are allowed
+		 *
 		 *@name allowed_children
 		*/
 		public $allowed_children = array();
+		
 		/**
 		 * default sort
 		*/
 		public static $default_sort = "sort ASC";
+		
 		/**
 		 * defaults
 		*/
@@ -86,18 +96,26 @@ class Pages extends DataObject implements PermProvider
 									"search" 		=> 1,
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
+		
 		/**
 		 * activate versions
+		 * 
+		 *@name versioned
 		*/
 		public $versioned = true;
+		
 		/**
-		 * delete
+		  * we remove child-pages after removing parent page
+		  *
+		 *@name onAfterRemove
+		 *@return bool
 		*/
-		/*public function onAfterDelete() {
-			foreach($this as $record) {
-				$record->children()->_delete(true);
+		public function onAfterRemove()
+		{
+			foreach($this->children() as $record) {
+				$record->remove(true);
 			}
-		}*/
+		}
 		
 		/**
 		 * can-publish-rights
@@ -112,7 +130,6 @@ class Pages extends DataObject implements PermProvider
 		 *@name argumentSQL
 		 *@access public
 		*/
-		
 		public function argumentSQL(&$query) {
 			$rank = Permission::getRank() - 1;
 			
@@ -595,6 +612,7 @@ class Pages extends DataObject implements PermProvider
 		 *@access public
 		*/
 		private $cache_parent = array();
+		
 		/**
 		 * gets allowed parents
 		 *@name allowed_parents
@@ -1217,6 +1235,47 @@ class Pages extends DataObject implements PermProvider
 			} else {
 				return DataObject::get_one("pages", array());
 			}
+			
+		}
+		
+		/**
+		 * returns text what to show about the event
+		 *
+		 *@name generateHistoryText
+		 *@access public
+		*/
+		public static function generateHistoryText($record) {
+			switch($record->action) {
+				case "update":
+					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a> on $date.');
+					$icon = "images/icons/fatcow16/page_white_edit.png";
+					$iconRetina = "images/icons/fatcow16/page_white_edit@2x.png";
+				break;
+				case "insert":
+					$lang = lang("h_pages_create", '$user created the page <a href="$pageUrl">$page</a> on $date.');
+					$icon = "images/icons/fatcow16/page_white_add.png";
+					$iconRetina = "images/icons/fatcow16/page_white_add@2x.png";
+				break;
+				case "publish":
+					$lang = lang("h_pages_publish", '$user published the page <a href="$pageUrl">$page</a> on $date.');
+					$icon = "images/icons/fatcow16/page_white_get.png";
+					$iconRetina = "images/icons/fatcow16/page_white_get@2x.png";
+				break;
+				case "remove":
+					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a> on $date.');
+					$icon = "images/icons/fatcow16/page_white_delete.png";
+					$iconRetina = "images/icons/fatcow16/page_white_delete@2x.png";
+				break;
+			}
+			
+			$user = '<a href="member/'.$record->autor->ID.'" class="user">' . $record->autor->title() . '</a>';
+			$lang = str_replace('$user', $user, $lang);
+			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
+			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
+			$lang = str_replace('$date', goma_date($record->created), $lang);
+			
+			return '<img src="'.$icon.'" data-retina="'.$iconRetina.'" alt="" />&nbsp;'.$lang.'';
+			
 			
 		}
 		

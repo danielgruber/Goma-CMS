@@ -16,12 +16,12 @@ body, html {
 
 
 a, a:visited {
-	color: #555;
+	color: #24ACB8;
 	text-decoration: none;
 	outline: none;
 }
 a:hover, a:active {
-	color: #555;
+	color: #24ACB8;
 	text-decoration: underline;
 }
 
@@ -575,10 +575,6 @@ a:hover {
 {
 	background:transparent url(../../../images/menu.png) repeat-x scroll 0 0;
 }
-
-
-
-
 
 /*tables*/
 .grey

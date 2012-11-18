@@ -1836,6 +1836,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						"stateid"		=> $this->versionid
 					)
 				));
+				
+				$command = "publish";
 			} else {
 				$manipulation = array($baseClass . "_state" => array(
 					"command"		=> "update",

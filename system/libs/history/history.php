@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 11.11.2012
+  * last modified: 18.11.2012
   * $Version 1.0
 */
 
@@ -29,6 +29,14 @@ class History extends DataObject {
 	 *@access public
 	*/
 	public static $history = false;
+	
+	/**
+	 * small cache for classes supporting HistoryView
+	 *
+	 *@name supportHistoryView
+	 *@access private
+	*/
+	private static $supportHistoryView;
 	
 	/**
 	 * you can push history-events by yourself into this
@@ -63,6 +71,12 @@ class History extends DataObject {
 	 *@access public
 	*/
 	public static function renderHistory($filter) {
+		if(isset($filter["dbobject"])) {
+			$filter["dbobject"] = array_intersect($filter["class_name"], self::supportHistoryView());
+		} else {
+			$filter["dbobject"] = self::supportHistoryView();
+		}
+		
 		if(!is_a($filter, "DataObjectSet")) {
 			$data = DataObject::get("History", $filter);
 		} else {
@@ -70,6 +84,26 @@ class History extends DataObject {
 		}
 		
 		return $data->renderWith("history/history.html");
+	}
+	
+	/**
+	 * returns a list of classes supporting HistoryView
+	 *
+	 *@name supportHistoryView
+	 *@access public
+	*/
+	public static function supportHistoryView() {
+		if(isset(self::$supportHistoryView))
+			return self::$supportHistoryView;
+			
+		self::$supportHistoryView = array();
+		foreach(ClassInfo::getChildren("DataObject") as $child) {
+			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryView")) {
+				self::$supportHistoryView[] = $child;
+			}
+		}
+		
+		return self::$supportHistoryView;
 	}
 	
 	/**
@@ -92,25 +126,6 @@ class History extends DataObject {
 	}
 	
 	/**
-	 * returns the url for a history-element
-	 * makes $url or $object->url available
-	 *
-	 *@name getURL
-	 *@access public
-	*/
-	public function getURL() {
-		if(ClassInfo::exists($this->dbobject)) {
-			if(Object::method_exists($this->dbobject, "generateHistoryURL")) {
-				return call_user_func_array(array($this->dbobject, "generateHistoryURL"), array($this));
-			} else {
-				return false;
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
 	 * returns the new version
 	 * it's a object of $this->dbobject
 	 * returns false if not available, because of versions disabled
@@ -119,13 +134,13 @@ class History extends DataObject {
 	 *@access public
 	*/
 	public function newversion() {
-		if($this->newversion && ClassInfo::exists($this->dbobject)) {
+		if($this->fieldGet("newversion") && ClassInfo::exists($this->dbobject)) {
 			$temp = new $this->dbobject();
 			$versioned = $temp->versioned;
 			$temp = null;
 			
 			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->newversion));
+				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
 		}
 		
@@ -167,4 +182,14 @@ class History extends DataObject {
 		
 		return false;
 	}
+}
+
+interface HistoryView {
+	/**
+	 * returns text what to show about the event
+	 *
+	 *@name generateHistoryText
+	 *@access public
+	*/
+	public static function generateHistoryText($record);
 }

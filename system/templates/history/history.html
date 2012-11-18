@@ -1,6 +1,8 @@
 <% INCLUDE_CSS "history.css" %>
 <div class="history">
-	<div class="event">
-	
-	</div>
+	<% CONTROL this() %>
+		<div class="event">
+			$this.content
+		</div>
+	<% ENDCONTROL %>
 </div>

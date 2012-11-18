@@ -78,6 +78,7 @@
 	border-right: 1px solid #ccc;
 	background: #fff;
 	text-decoration: none;
+	color: #555;
 }
 .leftandmaintable tr > .left > .LaM_tabs > ul > li.active > a {
 	background: #eee;
@@ -164,6 +165,10 @@
 }
 
 .loading span { background-image: url(../../../images/16x16/ajax-loader.gif) !important; }
+
+.create li a {
+	color: #555;
+}
 
 /* here goes some retina-stuff */
 @media

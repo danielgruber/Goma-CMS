@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 1.4.3
+  * last modified: 17.11.2012
+  * $Version 1.4.4
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,6 +37,7 @@ class adminController extends Controller
 			"switchlang"				=> "switchlang",
 			"update"					=> "handleUpdate",
 			"flushLog"					=> "flushLog",
+			"history"					=> "history",
 			"admincontroller:\$item!"	=> "handleItem"
 		);
 		
@@ -46,7 +47,7 @@ class adminController extends Controller
 		 *@name allowed_actions
 		 *@access public
 		*/
-		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate", "flushLog");
+		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate", "flushLog", "history");
 		
 		/**
 		 * returns current controller
@@ -212,6 +213,16 @@ class adminController extends Controller
 			
 			$this->template = "admin/index_not_permitted.html";
 			return parent::index();
+		}
+		
+		/**
+		 * history
+		 *
+		 *@name history
+		 *@access public
+		*/
+		public function history() {
+			return History::renderHistory(array());
 		}
 		
 		/**
