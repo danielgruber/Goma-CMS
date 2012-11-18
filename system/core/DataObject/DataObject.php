@@ -1940,7 +1940,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeManipulate($manipulation);
 		
 		if(SQL::manipulate($manipulation)) {
-			History::push($this->class, 0, $this->versionid, $this->id, "unpublish");
+			if(ClassInfo::getStatic($this->class, "history")) {
+				History::push($this->class, 0, $this->versionid, $this->id, "unpublish");
+			}
 			return true;
 		}
 		
@@ -2277,7 +2279,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
 		if(SQL::manipulate($manipulation)) {
-			History::push($this->class, 0, $this->versionid, $this->id, "remove");
+			if(ClassInfo::getStatic($this->class, "history")) {
+				History::push($this->class, 0, $this->versionid, $this->id, "remove");
+			}
 			$this->onAfterRemove($this);
 			$this->callExtending("onAfterRemove", $this);
 			unset($this->data);
