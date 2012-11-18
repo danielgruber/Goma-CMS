@@ -738,6 +738,7 @@ a:hover {
 	padding: 6px 12px;
 	display: block;
 	text-decoration: none !important;
+	color: #555;
 	
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -1154,6 +1155,8 @@ form h2 {
 #preview #bottomBar .new_window {
 	margin: 16px 10px;
 	float: right;
+	color: #000;
+	font-weight: bold;
 }
 
 /*.form_field_save_draft .formaction {
