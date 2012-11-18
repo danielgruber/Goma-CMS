@@ -525,5 +525,5 @@ $lang = array(
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a> am $date.',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a> am $date.',
 	
-	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a> dieser Seite am $date.'
+	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a> am $date.'
 );
