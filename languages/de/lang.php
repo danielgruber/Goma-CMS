@@ -526,6 +526,7 @@ $lang = array(
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
 	
 	"h_user_update"			=> '$user bearbeitete den Benutzer <a href="$userUrl">$euser</a>',
+	"h_profile_update"		=> '$user bearbeitete das eigene Profil.',
 	"h_user_remove"			=> '$user löschte den Benutzer <a href="$userUrl">$euser</a>',
 	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser hat sich eingeloggt',

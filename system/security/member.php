@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.08.2012
-  * $Version 2.3.4
+  * last modified: 18.11.2012
+  * $Version 2.4
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -229,7 +229,7 @@ class User extends DataObject implements HistoryView
 				$form->addValidator(new FormValidator(array($this, '_validateuser')), "validate_user");
 				
 				$form->addAction(new CancelButton("cancel", lang("cancel")));
-				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
+				$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
 		}
 		
 		/**
@@ -288,7 +288,7 @@ class User extends DataObject implements HistoryView
 				}
 				
 				$form->addAction(new CancelButton("cancel", lang("cancel")));
-				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
+				$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
 		}
 		
 		/**
@@ -470,7 +470,11 @@ class User extends DataObject implements HistoryView
 			switch($record->action) {
 				case "update":
 				case "publish":
-					$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+					if($record->autorid == $record->newversion()->id) {
+						$lang = lang("h_profile_update", '$user updated the own profile');
+					} else {
+						$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+					}
 					$icon = "images/icons/fatcow16/user_edit.png";
 				break;
 				case "insert":

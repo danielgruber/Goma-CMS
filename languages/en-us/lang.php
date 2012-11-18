@@ -525,6 +525,7 @@ $lang = array(
 	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
 	
 	"h_user_update"			=> '$user updated the user <a href="$userUrl">$euser</a>',
+	"h_profile_update"		=> '$user updated the own profile.',
 	"h_user_remove"			=> '$user removed the user <a href="$userUrl">$euser</a>',
 	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser logged in',
