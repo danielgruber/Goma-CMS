@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.06.2012
-  * $Version: 2.0.1
+  * last modified: 18.11.2012
+  * $Version: 2.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -19,18 +19,21 @@ class SelectQuery extends Object
 		 *@access public
 		*/
 		public $data = array();
+		
 		/**
 		 * this var contains the SQL-Stament
 		 *@name SQL
 		 *@access protected
 		*/
 		protected $sql = "";
+		
 		/**
 		 * this var contains the WHERE-clause-Array
 		 *@name filter
 		 *@access public
 		*/
 		public $filter = array();
+		
 		/**
 		 * this var contains the limit
 		 * e.g. array(0, 1); or array(1);
@@ -39,12 +42,14 @@ class SelectQuery extends Object
 		 *@var array
 		*/
 		protected $limit = array();
+		
 		/**
 		 * this var contains the result after the query
 		 *@name result
 		 *@access public
 		*/
 		public $result;
+		
 		/**
 		 * from-part
 		 *@name from
@@ -52,6 +57,7 @@ class SelectQuery extends Object
 		 *@var array
 		*/
 		public $from = array();
+		
 		/**
 		 * orderby
 		 *@name orderby
@@ -59,12 +65,14 @@ class SelectQuery extends Object
 		 *@var array
 		*/
 		public $orderby = array();
+		
 		/**
 		 * this var defines if this is a DISTINCT-Query
 		 *@name distinct
 		 *@var bool
 		*/
 		public $distinct = false;
+		
 		/**
 		 * this var contains the HAVING-part as array
 		 *
@@ -73,12 +81,14 @@ class SelectQuery extends Object
 		 *@var array
 		*/
 		public $having = array();
+		
 		/**
 		 * group by
 		 *@name groupby
 		 *@var string
 		*/
 		public $groupby = array();
+		
 		/**
 		 * the fields 
 		 *
@@ -87,6 +97,7 @@ class SelectQuery extends Object
 		 *@var array
 		*/
 		public $fields = array();
+		
 		/**
 		 * here you can define some db_fields, so for example if you want to define, that id is get from a specific table, define it here in the form:
 		 * "id" => "myTable"
@@ -95,6 +106,7 @@ class SelectQuery extends Object
 		 *@access public
 		*/
 		public $db_fields = array();
+		
 		/**
 		 * __construct
 		 *@name __consturct
@@ -112,6 +124,7 @@ class SelectQuery extends Object
 				$this->filter = $filter;
 				
 		}
+		
 		/**
 		 * this var adds a table to the from-part
 		 *@name from
@@ -123,6 +136,7 @@ class SelectQuery extends Object
 				$this->from[str_replace(array('`', '"'), '', $str)] = DB_PREFIX  . $str . ' AS '.$str.'';
 				return $this;
 		}
+		
 		/**
 		 * filters
 		 *
@@ -131,6 +145,7 @@ class SelectQuery extends Object
 		public function filter($filter) {
 			$this->filter = $filter;
 		}
+		
 		/**
 		 * adds a filter
 		 *
@@ -141,11 +156,24 @@ class SelectQuery extends Object
 			if(is_string($this->filter)) {
 				$this->filter = array($this->filter, $filter);
 			} else if(is_array($filter)) {
-				$this->filter = array_merge($this->filter, $filter);
+				foreach($filter $k => $v) {
+					if(is_int($k)) {
+						$this->filter[] = $v;
+					} else if(isset($this->filter[$k])) {
+						if(is_array($this->filter[$k])) {
+							$this->filter[$k] = array_intersect($this->filter[$k], $v);
+						} else {
+							$this->filter[$k] = array_merge((array) $this->filter[$k], (array) $v);
+						}
+					} else {
+						$this->filter[$k] = $v;
+					}
+				}
 			} else {
 				$this->filter[] = $filter;
 			}
 		}
+		
 		/**
 		 * removes filter
 		 *
@@ -167,6 +195,7 @@ class SelectQuery extends Object
 			 		}
 			 	}
 		}
+		
 		/**
 		 * adds one rule to orderby
 		 *@name sort
@@ -216,6 +245,7 @@ class SelectQuery extends Object
 			
 			return $this;
 		}
+		
 		/**
 		 * adds group-by
 		 *
@@ -236,6 +266,7 @@ class SelectQuery extends Object
 			
 			return $this;
 		}
+		
 		/**
 		 * adds one to the having-part
 		 *@name having
@@ -247,6 +278,7 @@ class SelectQuery extends Object
 				$this->having[] = $str;
 				return $this;
 		}
+		
 		/**
 		 * adds a field or more than one field as array to field-list
 		 *
@@ -285,6 +317,7 @@ class SelectQuery extends Object
 				}
 				return $this;
 		}
+		
 		/**
 		 * sets the fields
 		 *@name setFields
@@ -295,6 +328,7 @@ class SelectQuery extends Object
 		{
 				$this->fields = $fields;
 		}
+		
 		/**
 		 * adds an outer-join
 		 *
@@ -310,6 +344,7 @@ class SelectQuery extends Object
 				$this->from[$alias] = " OUTER JOIN ".DB_PREFIX.$table." AS ".$alias." ON ".$statement." ";
 				return $this;
 		}
+		
 		/**
 		 * adds an inner-join
 		 *
@@ -324,6 +359,7 @@ class SelectQuery extends Object
 				$this->from[$alias] = " INNER JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
 				return $this;
 		}
+		
 		/**
 		 * adds an left-join
 		 *
@@ -338,6 +374,7 @@ class SelectQuery extends Object
 				$this->from[$alias] = " LEFT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
 				return $this;
 		}
+		
 		/**
 		 * adds an right-join
 		 *
@@ -352,6 +389,7 @@ class SelectQuery extends Object
 				$this->from[$alias] = " RIGHT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
 				return $this;
 		}
+		
 		/**
 		 * checks if joined
 		 *
@@ -364,12 +402,14 @@ class SelectQuery extends Object
 		{
 				return isset($this->form[$table]);
 		}
+		
 		/**
 		 * this is a cache for generating field-list and coliding fields
 		 *@name new_field_cache
 		 *@access protected
 		*/
 		protected static $new_field_cache = array();
+		
 		/**
 		 * builds the SQL-Query
 		 *
@@ -614,7 +654,6 @@ class SelectQuery extends Object
 				
 			return $sql;
 		}
-
 		
 		/**
 		 * sets an limit
@@ -627,6 +666,7 @@ class SelectQuery extends Object
 				$this->limit = $limit;
 				return $this;
 		}
+		
 		/**
 		 * executes the query
 		 *@name execute
@@ -643,6 +683,7 @@ class SelectQuery extends Object
 						throwErrorById(3);
 				}
 		}
+		
 		/**
 		 * gets the result as object
 		 *@name fetch_object
@@ -652,6 +693,7 @@ class SelectQuery extends Object
 		{
 			return sql::fetch_object($this->result);
 		}
+		
 		/**
 		 * gets the result as array
 		 *@name fetch_array
@@ -661,6 +703,7 @@ class SelectQuery extends Object
 		{
 			return sql::fetch_assoc($this->result);
 		}
+		
 		/**
 		 * frees the result and query-cleanup
 		 *
