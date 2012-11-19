@@ -470,12 +470,18 @@ class User extends DataObject implements HistoryData
 			switch($record->action) {
 				case "update":
 				case "publish":
-					if($record->autorid == $record->newversion()->id) {
-						$lang = lang("h_profile_update", '$user updated the own profile');
+					if($record->oldversion() && $record->newversion() && $record->oldversion()->phpsess != $record->newversion()->phpsess) {
+						$icon = "images/icons/fatcow16/user_go.png";
+						$lang = lang("h_user_login");
+						$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
 					} else {
-						$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+						if($record->autorid == $record->newversion()->id) {
+							$lang = lang("h_profile_update", '$user updated the own profile');
+						} else {
+							$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+						}
+						$icon = "images/icons/fatcow16/user_edit.png";
 					}
-					$icon = "images/icons/fatcow16/user_edit.png";
 				break;
 				case "insert":
 					$lang = lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
@@ -484,10 +490,6 @@ class User extends DataObject implements HistoryData
 				case "remove":
 					$lang = lang("h_user_remove", '$user removed the user $euser');
 					$icon = "images/icons/fatcow16/user_delete.png";
-				break;
-				case "login":
-					$lang = lang("h_user_login", '$euser logged in');
-					$icon = "images/icons/fatcow16/user_go.png";
 				break;
 			}
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);

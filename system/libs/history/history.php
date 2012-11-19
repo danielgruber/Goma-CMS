@@ -234,13 +234,13 @@ class History extends DataObject {
 	 *@access public
 	*/
 	public function oldversion() {
-		if($this->oldversion && ClassInfo::exists($this->dbobject)) {
+		if($this->fieldGet("oldversion") && ClassInfo::exists($this->dbobject)) {
 			$temp = new $this->dbobject();
 			$versioned = $temp->versioned;
 			$temp = null;
 			
 			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->oldversion));
+				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
 			}
 		}
 		
@@ -255,7 +255,7 @@ class History extends DataObject {
 	*/
 	public function record() {
 		if(ClassInfo::exists($this->dbobject)) {
-			return DataObject::get_by_id($this->dbobject, $this->record);
+			return DataObject::get_by_id($this->dbobject, $this->fieldGet("record"));
 		}
 		
 		return false;
