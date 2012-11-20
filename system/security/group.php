@@ -86,7 +86,7 @@ class Group extends DataObject implements PermProvider
 				
 				$form->addValidator(new RequiredFields(array("name")), "valdiator");
 				$form->addAction(new Button("cancel", lang("cancel", "cancel"), "LoadTreeItem(0);"));
-				$form->addAction(new AjaxSubmitButton("savegroup", lang("save", "Save"), "AjaxSave", null, array("green")));
+				$form->addAction(new FormAction("savegroup", lang("save", "Save"), null, array("green")));
 				
 		}
 		/**

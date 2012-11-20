@@ -17,6 +17,7 @@ class FormDisabler extends FormDecorator {
 	 *@access public
 	*/
 	public $disabled = false;
+	
 	/**
 	 * if actions are not disabled
 	 *
@@ -24,12 +25,14 @@ class FormDisabler extends FormDecorator {
 	 *@access public
 	*/
 	public $actions = false;
+	
 	/**
 	 * decorate methods
 	*/ 
 	public static $extra_methods = array(
 		"disable", "reenable", "disableActions", "enableActions"
 	);
+	
 	/**
 	 * before render disable all fields if form is disabled
 	 *
@@ -37,7 +40,7 @@ class FormDisabler extends FormDecorator {
 	*/
 	public function beforeRender() {
 		if($this->disabled) {
-			foreach($this->owner->fields as $field) {
+			foreach($this->getOwner()->fields as $field) {
 				if($this->actions !== true || !is_a($field, "FormAction"))
 					$field->disable();
 			}

@@ -277,6 +277,7 @@ $lang = array(
 	"pages_delete"									=> "delete page",
 	"pages_edit"									=> "edit page",
 	"pages_add"										=> "create page",
+	"pages_publish"									=> "publish page",
 	// default DataObjects
 	"dataobject_all"								=> "Full access to various dataobjects.",
 	"dataobject_edit"								=> "Edit data of various dataobjects.",

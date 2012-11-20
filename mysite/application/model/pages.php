@@ -721,13 +721,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		 * permission-checks
 		*/
 		public function canWrite($row = null)
-		{
-				
-				if(right(10))
-						return true;
-				
+		{		
 				// first validate if it is an object
-				if(!is_object($row))
+				if(!is_object($row) && isset($row["id"]))
 				{
 						if($this->id == $row["id"])
 						{
@@ -736,8 +732,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						{
 								$row = DataObject::get_by_id($this->class, $row["id"]);
 						}
-				}
-				if(!$row)
+				} else if(!$row)
 					return false;
 				
 				if(parent::canWrite($row))
@@ -823,25 +818,39 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				"PAGES_DELETE"	=> array(
 					"title"		=> '{$_lang_pages_delete}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_INSERT"	=> array(
 					"title"		=> '{$_lang_pages_add}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_WRITE"	=> array(
 					"title"		=> '{$_lang_pages_edit}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_PUBLISH"	=> array(
-					"title"		=> '{$_lang_publish}',
+					"title"		=> '{$_lang_pages_publish}',
 					'default'	=> array(
-						"type" => "admins"
+						"type"		=> "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
+				),
+				"ADMIN_CONTENT"	=> array(
+					"title" => '{$_lang_administration}: {$_lang_content}',
+					"default"	=> array(
+						"type"	=> "admins"
 					)
 				)
 			);
