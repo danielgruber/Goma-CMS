@@ -363,7 +363,12 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			/*} else if($this->parent) {
 				return $this->parent()->edit_permission;
 			*/} else {
-				$perm = new Permission(array("type" => "admins"));
+				if($this->parentid) {
+					$inheritor = $this->parent->edit_permission();
+				} else {
+					$inheritor = Permission::forceExisting("PAGES_WRITE");
+				}
+				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true);
@@ -506,7 +511,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(
 							$read = new PermissionField("read_permission", lang("viewer_types"), null, true),
-							$write = new PermissionField("edit_permission", lang("editors"), null, false, array("all"))
+							$write = new PermissionField("edit_permission", lang("editors"), array("type" => "inherit"), false, array("all"))
 						), lang("rights", "permissions"))
 						
 					) 
@@ -521,6 +526,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					if($this->parent()->edit_permission) {
 						$write->setInherit($this->parent()->edit_permission(), $this->parent()->title);
 					}
+				} else {
+					$write->setInherit(Permission::forceExisting("PAGES_WRITE"));
 				}
 				
 				// infos for users
@@ -735,15 +742,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				} else if(!$row)
 					return false;
 				
-				if(parent::canWrite($row))
-						if($row->edit_type == "all")
-								return true;
-						else if($row->is_many_many("edit_groups", member::groupids()))
-						{
-								return true;
-						}
-				else
-						return false;
+				return $this->edit_permission->hasPermission();
 		}
 		/**
 		 * permission-checks
