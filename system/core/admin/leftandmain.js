@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.09.2012
+  * last modified: 22.11.2012
 */
 
 
@@ -32,6 +32,7 @@ var LaM_type_timeout;
 				if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 					return false;
 				}
+				self.leave_check = true;
 				
 				if($(".treewrapper a[href='"+url+"']").length > 0) {
 					var $this = $(".treewrapper a[href='"+url+"']");
@@ -165,6 +166,7 @@ var LaM_type_timeout;
 				if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 					return false;
 				}
+				self.leave_check = true;
 				$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
 				$(".left-and-main .LaM_tabs > div").css("display", "none");
 				$(".left-and-main .LaM_tabs").find("." + $(this).attr("class")).css("display", "block");
