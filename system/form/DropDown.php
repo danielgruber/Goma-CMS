@@ -284,6 +284,7 @@ class DropDown extends FormField
 				if($this->disabled) {
 					$this->field->disabled = "disabled";
 					$this->field->css("background-color", "#ddd");
+					$this->widget->getNode(0)->attr("disabled", "disabled");
 				}
 				
 				$this->container->append(new HTMLNode(
