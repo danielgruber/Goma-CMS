@@ -1240,13 +1240,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("write$", $key))
+				if(preg_match("/write$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1254,8 +1254,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
-			return Permission::check(Object::instance($this->RecordClass)->admin_rights);
+			return Permission::check($this->admin_rights);
 		}
 		
 		return false;
@@ -1279,13 +1283,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("delete$", $key))
+				if(preg_match("/delete$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1293,10 +1297,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
 			return Permission::check($this->admin_rights);
 		}
-
+		
 		return false;
 	}
 	
@@ -1322,13 +1330,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("insert$", $key))
+				if(preg_match("/insert$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1336,8 +1344,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
-			return Permission::check(Object::instance($this->RecordClass)->admin_rights);
+			return Permission::check($this->admin_rights);
 		}
 		
 		return false;
@@ -1513,7 +1525,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$oldid = 0;
 		
 		self::$query_cache = array();
-
 		
 		// if we don't insert we merge the old record with the new one
 		if($forceInsert || $this->versionid == 0) {
@@ -1572,8 +1583,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			
 		}
-		
-		
 		
 		// first step: decorate the important fields
 		if($command == "insert") {
@@ -2406,9 +2415,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$form = new Form($this->controller(), $name, array(), array(), array(), $request, $this);
 		
-		if($disabled)
-			$form->disable();
-			
 		// default submission
 		$form->setSubmission("submit_form");	
 			
@@ -2435,6 +2441,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->callExtending('getForm', $form, $edit);
 		$this->getActions($form, $edit);
 		$this->callExtending('getActions', $form, $edit);
+		
+		if($disabled) {
+			$form->disable();
+		}
 		
 		return $form;
 	}
@@ -2712,7 +2722,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$class = $this->has_many[$name];
 		$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
-		
 		if($key === false)
 		{
 			$c = $this->class;
