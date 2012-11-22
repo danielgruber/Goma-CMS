@@ -880,7 +880,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			$gfs->setAutoCommit(false);
-			$gfs->add(FRAMEWORK_ROOT, "/data/system/", array("temp", LOG_FOLDER, "/installer/data"));
+			$gfs->add(FRAMEWORK_ROOT, "/data/system/", array("temp", LOG_FOLDER, "/installer/data", "version.php"));
 			$gfs->add(ROOT . "images/", "/data/images/");
 			$gfs->add(ROOT . "languages/", "/data/languages/");
 			$gfs->commit();
@@ -1914,7 +1914,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		$gfs = new GFS_Package_Creator($file);
 		
 		if(!GFS_Package_Creator::wasPacked($file)) {
-			$gfs->add($folder, "/contents/");
+			$gfs->add($folder, "/contents/", "", array("version.php"));
 		}
 		
 		$plist = new CFPropertyList();

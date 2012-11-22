@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.10.2012
-  * $Version 2.5.13
+  * last modified: 22.11.2012
+  * $Version 2.6
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -330,6 +330,40 @@ function loadFramework() {
 	
 	// let's init Core
 	Core::Init();
+	
+	if(PROFILE) Profiler::mark("checkVersion");
+	
+	if(file_exists(ROOT . "system/version.php")) {
+		include("system/version.php");
+	} else {
+		$version = 0;
+	}
+	
+	if(goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $version, ">")) {
+		// run upgrade-scripts
+		if(is_dir(ROOT . "system/upgrade")) {
+			$files = scandir(ROOT . "system/upgrade");
+			$versions = array();
+			foreach($files as $file) {
+				if(is_file(ROOT . "system/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
+					if(goma_version_compare(substr($file, 0, -4), $version, ">")) {
+						$versions[] = substr($file, 0, -4);
+					}
+				}
+			}
+			usort($versions, "goma_version_compare");
+			foreach($versions as $v) {
+				FileSystem::write("system/version.php", '<?php $version = '.var_export($v, true).';');
+				include(ROOT . "system/upgrade/" . $v . ".php");
+			}
+			FileSystem::write("system/version.php", '<?php $version = '.var_export(GOMA_VERSION . "-" . BUILD_VERSION, true).';');
+			ClassInfo::delete();
+			header("Location: " . $_SERVER["REQUEST_URI"]);
+			exit;
+		}
+	}
+	
+	if(PROFILE) Profiler::unmark("checkVersion");
 }
 
 /**
@@ -1127,63 +1161,66 @@ function showsite($content, $title)
  *@name goma_version_compare
  *@access public
 */
-function goma_version_compare($v1, $v2, $operator) {
+function goma_version_compare($v1, $v2, $operator = null) {
 	// first split version
-	if(strpos($v1, "-") != -1 && strpos($v, "-") != -1) {
+	if(strpos($v1, "-") !== false) {
 		$version1 = substr($v1, 0, strpos($v1, "-"));
-		$build1 = substr($v1, strpos($v1, "-"));
-		
-		$version2 = substr($v2, 0, strpos($v2, "-"));
-		$build2 = substr($v2, strpos($v2, "-"));
+		$build1 = substr($v1, strpos($v1, "-") + 1);
 	} else {
-		return version_compare($v1, $v2, $operator);
+		$version1 = $v1;
 	}
 	
-	switch($operator) {
-		case "gt":
-		case ">":
-			if(version_compare($version1, $version2, ">") || version_compare($build1, $build2, ">")) {
-				return true;
-			}
-			return false;
-		break;
-		case "lt":
-		case "<":
-			if(version_compare($version1, $version2, "<") && version_compare($build1, $build2, "<")) {
-				return true;
-			}
-			return false;
-		break;
-		case "eq":
-		case "=":
-		case "==":
-			if(version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
-				return true;
-			}
-			return false;
-		break;
-		case ">=":
-		case "ge":
-			if(version_compare($version1, $version2, ">=") || version_compare($build1, $build2, ">=")) {
-				return true;
-			}
-			return false;
-		break;
-		case "<=":
-		case "le":
-			if(version_compare($version1, $version2, "<=") && version_compare($build1, $build2, "<=")) {
-				return true;
-			}
-			return false;
-		break;
-		case "!=":
-		case "<>":
-		case "ne":
-			if(version_compare($version1, $version2, "<>") || version_compare($build1, $build2, "<>")) {
-				return true;
-			}
-			return false;
-		break;
+	if(strpos($v2, "-") !== false) {
+		$version2 = substr($v2, 0, strpos($v2, "-"));
+		$build2 = substr($v2, strpos($v2, "-") + 1);
+	} else {
+		$version2 = $v2;
+	}
+	
+	if(!isset($build1) || !isset($build2)) {
+		return version_compare($version1, $version2, $operator);
+	}
+	
+	if(isset($operator)) {
+		switch($operator) {
+			case "gt":
+			case ">":
+				return version_compare($build1, $build2, ">");
+			break;
+			case "lt":
+			case "<":
+				return version_compare($build1, $build2, "<");
+			break;
+			case "eq":
+			case "=":
+			case "==":
+				if(version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
+					return true;
+				}
+				return false;
+			break;
+			case ">=":
+			case "ge":
+				return version_compare($build1, $build2, ">=");
+			break;
+			case "<=":
+			case "le":
+				return version_compare($build1, $build2, "<=");
+			break;
+			case "!=":
+			case "<>":
+			case "ne":
+				return version_compare($build1, $build2, "<>");
+			break;
+		}
+	} else {
+		if(version_compare($build1, $build2, ">")) {
+			return 1;
+		} else if(version_compare($build1, $build2, "==")) {
+			return 0;
+		} else {
+			return -1;
+		}
 	}
 	
 	return false;

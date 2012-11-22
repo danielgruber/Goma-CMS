@@ -28,7 +28,7 @@ class Backup extends Object {
 	 *@name fileExcludeList
 	 *@access public
 	*/
-	public static $fileExcludeList = array("/uploads/d05257d352046561b5bfa2650322d82d","temp", "/backups", "/config.php", "/backup");
+	public static $fileExcludeList = array("/uploads/d05257d352046561b5bfa2650322d82d","temp", "/backups", "/config.php", "/backup", "version.php");
 	
 	/**
 	 * generates a database-backup
