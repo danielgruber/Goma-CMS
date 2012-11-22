@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.03.2012
-  * $Version 2.0.1
+  * last modified: 21.11.2012
+  * $Version 2.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -47,6 +47,11 @@ class TabSet extends FieldSet
 				$i = 0;
 				foreach($this->items as $key => $item)
 				{
+						// if a FieldSet is disabled all subfields should disabled, too
+						if($this->disabled) {
+							$item->disable();
+						}
+						
 						$name = $item->name;
 						// if a field is deleted the field does not exist in that array
 						if(isset($this->form()->fields[$name]))

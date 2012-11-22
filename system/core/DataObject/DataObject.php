@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 18.11.2012
-  * $Version: 4.6.7
+  * last modified: 22.11.2012
+  * $Version: 4.6.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1240,13 +1240,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("write$", $key))
+				if(preg_match("/write$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1254,8 +1254,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
-			return Permission::check(Object::instance($this->RecordClass)->admin_rights);
+			return Permission::check($this->admin_rights);
 		}
 		
 		return false;
@@ -1279,13 +1283,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("delete$", $key))
+				if(preg_match("/delete$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1293,10 +1297,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
 			return Permission::check($this->admin_rights);
 		}
-
+		
 		return false;
 	}
 	
@@ -1322,13 +1330,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(count($provided) > 1) {
 			foreach($provided as $key => $arr)
 			{
-				if(_eregi("all$", $key))
+				if(preg_match("/all$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
 				}
 				
-				if(_eregi("insert$", $key))
+				if(preg_match("/insert$/i", $key))
 				{
 					if(Permission::check($key))
 						return true;
@@ -1336,8 +1344,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
+		if(is_object($row) && $row->admin_rights) {
+			return Permission::check($row->admin_rights);
+		}
+		
 		if($this->admin_rights) {
-			return Permission::check(Object::instance($this->RecordClass)->admin_rights);
+			return Permission::check($this->admin_rights);
 		}
 		
 		return false;
@@ -1350,10 +1362,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getWriteAccess()
 	{
-			if($this->canWrite($this->data))
+			if($this->canWrite($this))
 			{
 					return true;
-			} else if($this->canDelete($this->data))
+			} else if($this->canDelete($this))
 			{
 					return true;
 			}
@@ -1367,7 +1379,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name canPublish
 	 *@access public
 	*/
-	public function canPublish() {
+	public function canPublish($record = null) {
 		return true;
 	}
 	
@@ -1519,7 +1531,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			// check rights
 			if(!$forceInsert && !$forceWrite) {
-				if(!$this->canInsert($this->data)) {
+				if(!$this->canInsert($this)) {
 					return false;
 				}
 			}
@@ -1535,7 +1547,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if($data->count() > 0) {
 				// check rights
 				if(!$forceWrite)
-					if(!$this->canWrite($this->data))
+					if(!$this->canWrite($this))
 						return false;
 				
 				$command = "update";
@@ -1829,7 +1841,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					$this->onBeforePublish();
 					$this->callExtending("onBeforePublish");
 					if(!$forceWrite) {
-						if(!$this->canPublish()) {
+						if(!$this->canPublish($this)) {
 							if(PROFILE) Profiler::unmark("DataObject::write");
 							return false;
 						}
@@ -1929,7 +1941,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function unpublish($force = false) {
-		if((!$this->canWrite($this->data) || !$this->canPublish()) && !$force)
+		if((!$this->canWrite($this) || !$this->canPublish($this)) && !$force)
 			return false;
 		
 		$manipulation = array(
@@ -2403,9 +2415,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$form = new Form($this->controller(), $name, array(), array(), array(), $request, $this);
 		
-		if($disabled)
-			$form->disable();
-			
 		// default submission
 		$form->setSubmission("submit_form");	
 			
@@ -2432,6 +2441,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->callExtending('getForm', $form, $edit);
 		$this->getActions($form, $edit);
 		$this->callExtending('getActions', $form, $edit);
+		
+		if($disabled) {
+			$form->disable();
+		}
 		
 		return $form;
 	}
@@ -3905,8 +3918,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				(!isset($nodedata["collapsable"]) || $nodedata["collapsable"] === true) // if not collapsable, we don't need + or -
 			) {
 				if($nodedata["children"] == "ajax") {
-					if(isset($data["collapsed"])) {
-						$status = (!$data["collapsed"]);
+					if(isset($nodedata["collapsed"])) {
+						$status = (!$nodedata["collapsed"]);
 					} else {
 						if(isset($_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]])) {
 							$status = $_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]];
@@ -3934,8 +3947,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						)));
 					}
 				} else {
-					if(isset($data["collapsed"])) {
-						$status = (!$data["collapsed"]);
+					if(isset($nodedata["collapsed"])) {
+						$status = (!$nodedata["collapsed"]);
 					} else {
 						if(isset($_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]])) {
 							$status = $_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]];

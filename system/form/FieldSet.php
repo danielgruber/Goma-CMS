@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.11.2012
-  * $Version: 2.1.6
+  * last modified: 21.11.2012
+  * $Version: 2.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -110,8 +110,14 @@ class FieldSet extends FormField
 				uasort($this->items, array($this, "sort"));
 				
 				$i = 0;
-				foreach($this->items as $item)
-				{
+				foreach($this->items as $item) {
+						
+						// if a FieldSet is disabled all subfields should disabled, too
+						if($this->disabled) {
+							$item->disable();
+						}
+						
+						
 						$name = $item->name;
 						// if a field is deleted the field does not exist in that array
 						if(isset($this->form()->fields[$name]) && !isset($this->form()->renderedFields[$name]))

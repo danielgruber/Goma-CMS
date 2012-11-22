@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.10.2012
-  * $Version 2.5.13
+  * last modified: 22.11.2012
+  * $Version 2.6
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -116,7 +116,7 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "050");
+define("BUILD_VERSION", "051");
 define("GOMA_VERSION", "2.0");
 
 // fix for debug_backtrace
@@ -1119,4 +1119,75 @@ function showsite($content, $title)
 	}
 		
 	return Core::serve($content);
+}
+
+/**
+ * in goma we now compare version and buildnumber seperate
+ *
+ *@name goma_version_compare
+ *@access public
+*/
+function goma_version_compare($v1, $v2, $operator = null) {
+	// first split version
+	if(strpos($v1, "-") !== false) {
+		$version1 = substr($v1, 0, strpos($v1, "-"));
+		$build1 = substr($v1, strpos($v1, "-") + 1);
+	} else {
+		$version1 = $v1;
+	}
+	
+	if(strpos($v2, "-") !== false) {
+		$version2 = substr($v2, 0, strpos($v2, "-"));
+		$build2 = substr($v2, strpos($v2, "-") + 1);
+	} else {
+		$version2 = $v2;
+	}
+	
+	if(!isset($build1) || !isset($build2)) {
+		return version_compare($version1, $version2, $operator);
+	}
+	
+	if(isset($operator)) {
+		switch($operator) {
+			case "gt":
+			case ">":
+				return version_compare($build1, $build2, ">");
+			break;
+			case "lt":
+			case "<":
+				return version_compare($build1, $build2, "<");
+			break;
+			case "eq":
+			case "=":
+			case "==":
+				if(version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
+					return true;
+				}
+				return false;
+			break;
+			case ">=":
+			case "ge":
+				return version_compare($build1, $build2, ">=");
+			break;
+			case "<=":
+			case "le":
+				return version_compare($build1, $build2, "<=");
+			break;
+			case "!=":
+			case "<>":
+			case "ne":
+				return version_compare($build1, $build2, "<>");
+			break;
+		}
+	} else {
+		if(version_compare($build1, $build2, ">")) {
+			return 1;
+		} else if(version_compare($build1, $build2, "==")) {
+			return 0;
+		} else {
+			return -1;
+		}
+	}
+	
+	return false;
 }

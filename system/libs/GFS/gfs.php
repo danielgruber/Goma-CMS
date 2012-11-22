@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.09.2012
-  * $Version 2.6.4
+  * last modified: 22.11.2012
+  * $Version 2.6.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -904,9 +904,10 @@ class GFS extends Object {
 				}
 				return $this->updateDB();
 			} else {
-				$new = substr($path, 0, strrpos("/", $path)) . "/" . $new;
+				$new = substr($path, 0, strrpos($path, "/")) . "/" . $new;
 				if(substr($new, 0, 1) == "/")
 					$new = substr($new, 1);
+
 				if(!isset($this->db[$new])) {
 					$this->db[$new] = $this->db[$path];
 					$this->db[$new]["type"] = $this->getFileType($new);

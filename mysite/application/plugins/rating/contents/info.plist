@@ -26,5 +26,7 @@
 	<string>classes</string>
 	<key>defaultLang</key>
 	<string>en-us</string>
+	<key>icon</key>
+	<string>resources/rating.png</string>
 </dict>
 </plist>

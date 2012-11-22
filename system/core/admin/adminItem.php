@@ -42,6 +42,7 @@ class adminItem extends AdminController implements PermProvider {
 	public $url_handlers = array(
 		"model/\$model!/\$id!" => "handlerecordformodel"
 	);
+	
 	/**
 	 * allowed_actions
 	 *@access public
@@ -50,6 +51,7 @@ class adminItem extends AdminController implements PermProvider {
 	(
 		"cms_edit", "cms_add", "cms_del", "handlerecordformodel"
 	);
+	
 	/**
 	 * this property contains all models, this model uses
 	 *@name models
