@@ -11,6 +11,7 @@ mysite/*
 !mysite/version.php
 !mysite/upgrade/*
 !mysite/upgrade
+!mysite/.htaccess
 system/installer/log_*****/*
 system/temp/*
 system/installer/log/*
