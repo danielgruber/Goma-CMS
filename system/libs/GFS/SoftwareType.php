@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.11.2012
-  * $Version 1.5.4
+  * last modified: 22.11.2012
+  * $Version 1.5.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -385,9 +385,9 @@ abstract class g_SoftwareType {
 						$appdata = self::getByType($type, $dir . $_data["file"])->getPackageInfo();
 						$appdata["file"] = $dir . $_data["file"];
 						$appdata["plist_type"] = $type;
-						if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && version_compare($appdata["version"], $appdata["installed_version"], ">")) {
+						if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && goma_version_compare($appdata["version"], $appdata["installed_version"], ">")) {
 							if(isset($updates[$type])) {
-								if(version_compare($updates[$type]["version"], $version, "<")) {
+								if(goma_version_compare($updates[$type]["version"], $version, "<")) {
 									$updates[$type] = $appdata;
 								}
 							} else {
@@ -400,9 +400,9 @@ abstract class g_SoftwareType {
 								$appdata = self::getByType($type, $dir . $__data["file"])->getPackageInfo();
 								$appdata["file"] = $dir . $__data["file"];
 								$appdata["plist_type"] = $type;
-								if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && version_compare($appdata["version"], $appdata["installed_version"], ">")) {
+								if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && goma_version_compare($appdata["version"], $appdata["installed_version"], ">")) {
 									if(isset($updates[$app])) {
-										if(version_compare($updates[$version]["version"], $version, "<")) {
+										if(goma_version_compare($updates[$version]["version"], $version, "<")) {
 											$updates[$version] = $appdata;
 										}
 									} else {
@@ -424,10 +424,10 @@ abstract class g_SoftwareType {
 				$data["AppStore"] = $data["download"];
 				
 				if(isset($updates[$app])) {
-					if(version_compare($updates[$app]["version"], $data["version"], "<=")) {
+					if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
 						$updates[$app] = $data;
 					}
-				} else if(version_compare($data["version"], ClassInfo::appVersion(), ">")) {
+				} else if(goma_version_compare($data["version"], ClassInfo::appVersion(), ">")) {
 					$updates[$app] = $data;
 				}
 			}
@@ -440,10 +440,10 @@ abstract class g_SoftwareType {
 				$data["AppStore"] = $data["download"];
 				
 				if(isset($updates[$app])) {
-					if(version_compare($updates[$app]["version"], $data["version"], "<=")) {
+					if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
 						$updates[$app] = $data;
 					}
-				} else if(version_compare($data["version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+				} else if(goma_version_compare($data["version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 					$updates[$app] = $data;
 				}
 			}
@@ -457,10 +457,10 @@ abstract class g_SoftwareType {
 						$data["AppStore"] = $data["download"];
 						
 						if(isset($updates[$app])) {
-							if(version_compare($updates[$app]["version"], $data["version"], "<=")) {
+							if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
 								$updates[$app] = $data;
 							}
-						} else if(version_compare($data["version"], ClassInfo::expVersion($app), ">")) {
+						} else if(goma_version_compare($data["version"], ClassInfo::expVersion($app), ">")) {
 							$updates[$app] = $data;
 						}
 					}
@@ -601,7 +601,7 @@ abstract class g_SoftwareType {
 						$appdata["plist_type"] = $type;
 						if($appdata && (!isset($appdata["installType"]) || $appdata["installType"] != "update") && (!isset($appdata["installable"]) || $appdata["installable"])) {
 							if(isset($updates[$type])) {
-								if(version_compare($updates[$type]["version"], $version, "<")) {
+								if(goma_version_compare($updates[$type]["version"], $version, "<")) {
 									$updates[$type] = $appdata;
 								}
 							} else {
@@ -616,7 +616,7 @@ abstract class g_SoftwareType {
 								$appdata["plist_type"] = $type;
 								if($appdata && (!isset($appdata["installType"]) || $appdata["installType"] != "update") && (!isset($appdata["installable"]) || $appdata["installable"])) {
 									if(isset($updates[$app])) {
-										if(version_compare($updates[$version]["version"], $version, "<")) {
+										if(goma_version_compare($updates[$version]["version"], $version, "<")) {
 											$updates[$version] = $appdata;
 										}
 									} else {
@@ -673,13 +673,13 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			$data["version"] = $info["version"];
 			$data["installed"] = GOMA_VERSION . "-" . BUILD_VERSION;
 			
-			if(!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
+			if(!goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
 				$data["installable"] = false;
 				$data["error"] = lang("update_version_error");
 				return $data;
 			}
 			
-			/*if(isset($appInfo["required_version"]) && version_compare($appInfo["requiredVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+			/*if(isset($appInfo["required_version"]) && goma_version_compare($appInfo["requiredVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 				$data["installable"] = false;
 				$data["error"] = lang("update_version_newer_required") . " <strong>".$appInfo["requiredVersion"]."</strong>";
 				return $data;
@@ -775,7 +775,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			$data["changelog"] = $info["changelog"];
 		
 		if(isset($info["type"]) && $info["type"] == "framework") {
-			if(!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
+			if(!goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
 				$data["installable"] = false;
 				$data["error"] = lang("update_version_error");
 				return $data;
@@ -1089,7 +1089,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		}
 		
 		// check if we have the correct framework-version
-		if(version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 			$data["error"] = lang("update_frameworkError");
 			$data["installable"] = false;
 			
@@ -1197,7 +1197,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 			$data["installType"] = "update";
 			$data["installed"] = ClassInfo::AppVersion();
 			
-			/*if(isset($appInfo["require_version"]) && version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
+			/*if(isset($appInfo["require_version"]) && goma_version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
 				$data["error"] = lang("update_version_newer_required") . " " . $appInfo["require_version"];
 				$data["installable"] = false;
 				
@@ -1282,7 +1282,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		}
 		
 		// check if we have the correct framework-version
-		if(version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 			$data["error"] = lang("update_frameworkError");
 			$data["installable"] = false;
 			
@@ -1449,7 +1449,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		}
 		
 		// check if we have the correct framework-version
-		if(version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 			$data["error"] = lang("update_frameworkError");
 			$data["installable"] = false;
 			
@@ -1783,7 +1783,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			return false;
 		
 		// check if we have the correct framework-version
-		if(isset($appInfo["requireFrameworkVersion"]) && version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+		if(isset($appInfo["requireFrameworkVersion"]) && goma_version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 			$data["error"] = lang("update_frameworkError");
 			$data["installable"] = false;
 			
@@ -1832,7 +1832,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			$data["installType"] = "update";
 			$data["installed"] = ClassInfo::ExpVersion($appInfo["name"]);
 			
-			/*if(isset($appInfo["require_version"]) && version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
+			/*if(isset($appInfo["require_version"]) && goma_version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
 				$data["error"] = lang("update_version_newer_required") . " " . $appInfo["require_version"];
 				$data["installable"] = false;
 				
@@ -2071,7 +2071,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		
 		// check if we have the correct framework-version
 		if(isset($appInfo["requireFrameworkVersion"])) {
-			if(version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
+			if(goma_version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
 				$data["error"] = lang("update_frameworkError");
 				$data["installable"] = false;
 				

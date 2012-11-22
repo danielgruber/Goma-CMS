@@ -1120,3 +1120,71 @@ function showsite($content, $title)
 		
 	return Core::serve($content);
 }
+
+/**
+ * in goma we now compare version and buildnumber seperate
+ *
+ *@name goma_version_compare
+ *@access public
+*/
+function goma_version_compare($v1, $v2, $operator) {
+	// first split version
+	if(strpos($v1, "-") != -1 && strpos($v, "-") != -1) {
+		$version1 = substr($v1, 0, strpos($v1, "-"));
+		$build1 = substr($v1, strpos($v1, "-"));
+		
+		$version2 = substr($v2, 0, strpos($v2, "-"));
+		$build2 = substr($v2, strpos($v2, "-"));
+	} else {
+		return version_compare($v1, $v2, $operator);
+	}
+	
+	switch($operator) {
+		case "gt":
+		case ">":
+			if(version_compare($version1, $version2, ">") || version_compare($build1, $build2, ">")) {
+				return true;
+			}
+			return false;
+		break;
+		case "lt":
+		case "<":
+			if(version_compare($version1, $version2, "<") && version_compare($build1, $build2, "<")) {
+				return true;
+			}
+			return false;
+		break;
+		case "eq":
+		case "=":
+		case "==":
+			if(version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
+				return true;
+			}
+			return false;
+		break;
+		case ">=":
+		case "ge":
+			if(version_compare($version1, $version2, ">=") || version_compare($build1, $build2, ">=")) {
+				return true;
+			}
+			return false;
+		break;
+		case "<=":
+		case "le":
+			if(version_compare($version1, $version2, "<=") && version_compare($build1, $build2, "<=")) {
+				return true;
+			}
+			return false;
+		break;
+		case "!=":
+		case "<>":
+		case "ne":
+			if(version_compare($version1, $version2, "<>") || version_compare($build1, $build2, "<>")) {
+				return true;
+			}
+			return false;
+		break;
+	}
+	
+	return false;
+}
