@@ -10,6 +10,7 @@ mysite/*
 !mysite/info.plist
 !mysite/version.php
 !mysite/upgrade/*
+!mysite/upgrade
 system/installer/log_*****/*
 system/temp/*
 system/installer/log/*
