@@ -1037,7 +1037,11 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		$domain = isset($data["domain"]) ? $data["domain"] : null;
 		
+		// write config
 		$_data["postflightCode"][] = '<?php writeProjectConfig('.var_export($info, true).', '.var_export($data["folder"], true).'); setProject('.var_export($data["folder"], true).', '.var_export($domain, true).');';
+		
+		// write version file
+		$_data["postflightCode"][] = '<?php FileSystem::write('.var_export($data["folder"] . "/version.php", true).', "<?php $version = '.var_export($_data["version"], true).';");';
 		
 		return $_data;
 	}
@@ -1821,6 +1825,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			$data["postflightCode"] = array(
 				'<?php FileSystem::Delete('.var_export($dir, true).');'
 			);
+			
+			// write version file
+			$_data["postflightCode"][] = '<?php FileSystem::write($data["installfolders"]["destination"] . "/version.php", "<?php $version = '.var_export($data["version"], true).';");';
 			
 			$data["installFolders"] = array(
 				"source"		=> $dir . "/contents/"

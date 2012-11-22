@@ -330,40 +330,6 @@ function loadFramework() {
 	
 	// let's init Core
 	Core::Init();
-	
-	if(PROFILE) Profiler::mark("checkVersion");
-	
-	if(file_exists(ROOT . "system/version.php")) {
-		include("system/version.php");
-	} else {
-		$version = 0;
-	}
-	
-	if(goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $version, ">")) {
-		// run upgrade-scripts
-		if(is_dir(ROOT . "system/upgrade")) {
-			$files = scandir(ROOT . "system/upgrade");
-			$versions = array();
-			foreach($files as $file) {
-				if(is_file(ROOT . "system/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
-					if(goma_version_compare(substr($file, 0, -4), $version, ">")) {
-						$versions[] = substr($file, 0, -4);
-					}
-				}
-			}
-			usort($versions, "goma_version_compare");
-			foreach($versions as $v) {
-				FileSystem::write("system/version.php", '<?php $version = '.var_export($v, true).';');
-				include(ROOT . "system/upgrade/" . $v . ".php");
-			}
-			FileSystem::write("system/version.php", '<?php $version = '.var_export(GOMA_VERSION . "-" . BUILD_VERSION, true).';');
-			ClassInfo::delete();
-			header("Location: " . $_SERVER["REQUEST_URI"]);
-			exit;
-		}
-	}
-	
-	if(PROFILE) Profiler::unmark("checkVersion");
 }
 
 /**

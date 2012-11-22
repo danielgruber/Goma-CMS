@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 3.6.2
+  * last modified: 22.11.2012
+  * $Version 3.6.3
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -1033,6 +1033,22 @@ class ClassInfo extends Object
 						}
 					
 						if(PROFILE) Profiler::unmark("generate_class_info");
+						
+						// now check for upgrade-scripts
+						if(PROFILE) Profiler::mark("checkVersion");
+	
+						// first framework!
+						self::checkForUpgradeScripts(ROOT . "system", GOMA_VERSION . "-" . BUILD_VERSION);
+						
+						// second application!
+						self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
+						
+						// expansions
+						foreach(self::$appENV["expansion"] as $expansion => $data) {
+							self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+						}
+						
+						if(PROFILE) Profiler::unmark("checkVersion");
 				} else
 				{
 						defined("CLASS_INFO_LOADED") OR define("CLASS_INFO_LOADED", true);
@@ -1147,6 +1163,47 @@ class ClassInfo extends Object
 				}
 				
 				ClassInfo::write();
+			}
+		}
+		
+		/**
+		 * this function checks for upgrade-scripts in a given folder with given current version
+		 *
+		 *@name checkForUpgradeScripts
+		 *@access public
+		 *@param folder
+		 *@param version
+		*/
+		public static function checkForUpgradeScripts($folder, $current_version) {
+			if(file_exists($folder . "/version.php")) {
+				include($folder . "/version.php");
+			} else {
+				$version = 0;
+			}
+			
+			if(goma_version_compare($current_version, $version, ">")) {
+				// run upgrade-scripts
+				if(is_dir($folder. "/upgrade")) {
+					$files = scandir($folder . "/upgrade");
+					$versions = array();
+					foreach($files as $file) {
+						if(is_file($folder . "/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
+							if(goma_version_compare(substr($file, 0, -4), $version, ">")) {
+								$versions[] = substr($file, 0, -4);
+							}
+						}
+					}
+					usort($versions, "goma_version_compare");
+					foreach($versions as $v) {
+						FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';');
+						include($folder . "/upgrade/" . $v . ".php");
+					}
+					FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
+					ClassInfo::delete();
+					header("Location: " . $_SERVER["REQUEST_URI"]);
+					exit;
+				}
+				FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
 			}
 		}
 		
