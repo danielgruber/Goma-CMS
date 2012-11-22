@@ -1200,7 +1200,10 @@ class ClassInfo extends Object
 					}
 					FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
 					ClassInfo::delete();
-					header("Location: " . $_SERVER["REQUEST_URI"]);
+					
+					$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
+					$port = $_SERVER["SERVER_PORT"];
+					header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 					exit;
 				}
 				FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
