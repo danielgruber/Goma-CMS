@@ -291,9 +291,15 @@ var LaM_type_timeout;
 	
 	var last_dragged = 0;
 	
-	function tree_bind_ajax(sortable, node) {
+	function tree_bind_ajax(sortable, node, findPos) {
+		// normally we trigger the javascript to find optimal scroll-position
+		if(typeof findPos == "undefined") {
+			findPos = true;
+		}
+		
+		
 		// find optimal scroll by position of active element
-		if(node.parents(".treewrapper").find(".marked").length > 0) {
+		if(findPos && node.parents(".treewrapper").find(".marked").length > 0) {
 			var oldscroll = $(".treewrapper").scrollTop();
 			$(".treewrapper").scrollTop(0);
 			var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
@@ -304,6 +310,7 @@ var LaM_type_timeout;
 				$(".treewrapper").scrollTop(0);
 		}
 		
+		// bind events to the nodes to load the content then
 		node.find(".treelink").click(function(){
 			if($(this).attr("nodeid") == 0 || self.last_dragged != $(this).attr("nodeid")) {
 				// no ajax in IE
@@ -315,6 +322,7 @@ var LaM_type_timeout;
 			return false;
 		});
 		
+		// bind the sort
 		if(sortable && self.LaMsort) {
 			gloader.load("sortable");
 			node.find("ul").each(function(){
@@ -353,22 +361,29 @@ var LaM_type_timeout;
 		
 	}
 	
+	// bind the treeupdate, when the tree was updated
 	$(function(){
 		$(".left .treewrapper").bind("treeupdate", function(event, node){
-			tree_bind_ajax(true, node);
+			tree_bind_ajax(true, node, false);
 		});
 	});
 	
+	// function to load content of a tree-item
 	w.LoadTreeItem = function (id) {
+		
+		// check if we are on a current unsaved page
 		if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 			return false;
 		}
 		self.leave_check = true;
+		
+		
 		var $this = $("a[nodeid="+id+"]");
 		if($this.length == 0) {
 			return false;
 		}
 		
+		// Internet Explorer seems not to work correctly with Ajax, maybe we'll fix it later on, but until then, we will just load the whole page ;)
 		if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) {
 			$this.click();
 			return true;
