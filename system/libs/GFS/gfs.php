@@ -971,14 +971,7 @@ class GFS extends Object {
 			
 		if(isset($this->db[$path])) {
 			if($err = $this->addFile($path . ".tmp", $text) === true) {
-				if($path == "backup/info.plist") {
-					logging(print_r($this->db, true));
-				}
 				$this->unlink($path);
-				if($path == "backup/info.plist") {
-					logging(print_r($this->db, true));
-				}
-
 				return $this->rename($path . ".tmp", $path);
 			} else {
 				return $err;
