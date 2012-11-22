@@ -133,8 +133,10 @@ var LaM_type_timeout;
 			}
 		});
 		
-		// bind now!
-		tree_bind_ajax(sort, $(".left .tree"));
+		setTimeout(function(){
+			// bind now!
+			tree_bind_ajax(sort, $(".left div.tree ul"));
+		}, 150);
 		
 		/**
 		 * rendering of the whole page via javascript
@@ -180,7 +182,7 @@ var LaM_type_timeout;
 					success: function(html, code, request) {
 						$("#content .success, #content .error, #content .notice").hide("fast");
 						renderResponseTo(html, $(".leftandmaintable").find("td.main > .inner"), request);
-						$(".tree .marked").removeClass("marked");
+						$("div.tree .marked").removeClass("marked");
 						$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
 													
 						// find optimal scroll by position of active element
@@ -255,7 +257,7 @@ var LaM_type_timeout;
 					
 					renderResponseTo(html, treewrapper, jqXHR);
 					tree_bind(treewrapper.find(".tree"));
-					tree_bind_ajax(true, $(".left .tree"));
+					tree_bind_ajax(true, $(".left div.tree ul"));
 					
 					
 					if(fn != null) {
@@ -279,7 +281,7 @@ var LaM_type_timeout;
 				success: function(html, code, jqXHR) {
 					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR);
 					tree_bind($this.parents(".classtree").find(".treewrapper").find(".tree"));
-					tree_bind_ajax(false, $(".left .tree"));
+					tree_bind_ajax(false, $(".left div.tree ul"));
 					
 					if(fn != null) {
 						fn();
@@ -296,7 +298,6 @@ var LaM_type_timeout;
 		if(typeof findPos == "undefined") {
 			findPos = true;
 		}
-		
 		
 		// find optimal scroll by position of active element
 		if(findPos && node.parents(".treewrapper").find(".marked").length > 0) {
@@ -350,7 +351,7 @@ var LaM_type_timeout;
 							{
 								renderResponseTo(html, $(".left .treewrapper"), jqXHR);
 								tree_bind($(".left .treewrapper").find(".tree"));
-								tree_bind_ajax(true, $(".left .tree"));
+								tree_bind_ajax(true, $(".left div.tree ul"));
 							}
 						});
 					},

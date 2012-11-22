@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 2.4.1
+  * last modified: 22.11.2012
+  * $Version 2.4.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -484,6 +484,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					$links->container->addClass("hidden");
 				}
 				
+				define("EDIT_ID", $this->id);
+				
 				$form->add(new TabSet('tabs', array(
 						new Tab('content', array(
 							$title = new textField('title', lang("title_page", "title of the page")),
@@ -880,6 +882,16 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			$arr = array();
 			
+			// get ids that are NOT collapsed cause of current edit-node
+			$ids = array();
+			if(defined("EDIT_ID") && EDIT_ID != 0 && $d = DataObject::get_by_id("pages", EDIT_ID)) {
+				while($d->parent) {
+					$ids[] = $d->parent->id;
+					$d = $d->parent;
+				}
+			}
+			
+			// create filter
 			$where = array("parentid" => $parentid);
 			if(isset($params["deleted"]) && $params["deleted"]) {
 				$data = DataObject::get_Versioned($this, "group", $where);
@@ -890,6 +902,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			if(Permission::check("PAGES_WRITE") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
 			
 			foreach($data as $record) {
+				
+				$collapsed = null;
 				
 				if($record->id != $activenode && isset($params["published"]) && !$params["published"] && $record->isPublished() === true)
 					if(!isset($params["deleted"]) || !$params["deleted"] || $record->isDeleted() === false)
@@ -927,11 +941,14 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				
 				if($childcount > 0) {
 					// we prefetch a maximum of 5 sites
-					if($childcount < 6) {
+					if($childcount < 6 || in_array($record["recordid"], $ids)) {
 						$id = $record["recordid"];
 						if(PROFILE) Profiler::unmark("pages::getTree");
 						$children = $this->getTree($id, $fields, $activenode, $params);
 						if(PROFILE) Profiler::mark("pages::getTree");
+						if(in_array($record["recordid"], $ids)) {
+							$collapsed = false;
+						}
 					} else {
 						$children = "ajax";
 					}
@@ -944,7 +961,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					"title" 		=> $record["title"],
 					"attributes"	=> array("class" => $class),
 					"data"			=> $record->ToArray(),
-					"children"		=> $children
+					"children"		=> $children,
+					"collapsed"		=> $collapsed
 				);
 				
 				unset($state);
@@ -953,6 +971,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			return $arr;
 		}
+		
 		/**
 		 * provides tree-arguments
 		 *

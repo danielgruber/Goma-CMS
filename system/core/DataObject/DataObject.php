@@ -3918,8 +3918,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				(!isset($nodedata["collapsable"]) || $nodedata["collapsable"] === true) // if not collapsable, we don't need + or -
 			) {
 				if($nodedata["children"] == "ajax") {
-					if(isset($data["collapsed"])) {
-						$status = (!$data["collapsed"]);
+					if(isset($nodedata["collapsed"])) {
+						$status = (!$nodedata["collapsed"]);
 					} else {
 						if(isset($_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]])) {
 							$status = $_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]];
@@ -3947,8 +3947,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						)));
 					}
 				} else {
-					if(isset($data["collapsed"])) {
-						$status = (!$data["collapsed"]);
+					if(isset($nodedata["collapsed"])) {
+						$status = (!$nodedata["collapsed"]);
 					} else {
 						if(isset($_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]])) {
 							$status = $_SESSION["treestatus_" . $this->class . "_" . $nodedata["data"]["recordid"]];
