@@ -453,7 +453,6 @@ class Controller extends RequestHandler
 				{
 					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
-						AddContent::addNotice(lang("less_rights"));
 					} else {
 						return lang("less_rights");
 					}

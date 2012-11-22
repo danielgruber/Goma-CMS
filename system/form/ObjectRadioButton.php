@@ -74,6 +74,10 @@ class ObjectRadioButton extends RadioButton
 				
 				$node = new HTMLNode("div");
 				
+				if($this->disabled) {
+					$this->hideDisabled = false;
+				}
+				
 				if(!$this->fullSizedField)
 					$node->addClass("inputHolder");
 				

@@ -8,6 +8,10 @@ mysite/*
 !mysite/templates/*
 !mysite/templates
 !mysite/info.plist
+!mysite/version.php
+!mysite/upgrade/*
+!mysite/upgrade
+!mysite/.htaccess
 system/installer/log_*****/*
 system/temp/*
 system/installer/log/*

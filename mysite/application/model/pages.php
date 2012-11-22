@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 2.4.1
+  * last modified: 22.11.2012
+  * $Version 2.4.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -363,7 +363,12 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			/*} else if($this->parent) {
 				return $this->parent()->edit_permission;
 			*/} else {
-				$perm = new Permission(array("type" => "admins"));
+				if($this->parentid) {
+					$inheritor = $this->parent->edit_permission();
+				} else {
+					$inheritor = Permission::forceExisting("PAGES_WRITE");
+				}
+				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true);
@@ -479,6 +484,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					$links->container->addClass("hidden");
 				}
 				
+				define("EDIT_ID", $this->id);
+				
 				$form->add(new TabSet('tabs', array(
 						new Tab('content', array(
 							$title = new textField('title', lang("title_page", "title of the page")),
@@ -506,7 +513,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(
 							$read = new PermissionField("read_permission", lang("viewer_types"), null, true),
-							$write = new PermissionField("edit_permission", lang("editors"), null, false, array("all"))
+							$write = new PermissionField("edit_permission", lang("editors"), array("type" => "inherit"), false, array("all"))
 						), lang("rights", "permissions"))
 						
 					) 
@@ -521,6 +528,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					if($this->parent()->edit_permission) {
 						$write->setInherit($this->parent()->edit_permission(), $this->parent()->title);
 					}
+				} else {
+					$write->setInherit(Permission::forceExisting("PAGES_WRITE"));
 				}
 				
 				// infos for users
@@ -721,13 +730,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		 * permission-checks
 		*/
 		public function canWrite($row = null)
-		{
-				
-				if(right(10))
-						return true;
-				
+		{		
 				// first validate if it is an object
-				if(!is_object($row))
+				if(!is_object($row) && isset($row["id"]))
 				{
 						if($this->id == $row["id"])
 						{
@@ -736,19 +741,10 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						{
 								$row = DataObject::get_by_id($this->class, $row["id"]);
 						}
-				}
-				if(!$row)
+				} else if(!$row)
 					return false;
 				
-				if(parent::canWrite($row))
-						if($row->edit_type == "all")
-								return true;
-						else if($row->is_many_many("edit_groups", member::groupids()))
-						{
-								return true;
-						}
-				else
-						return false;
+				return $this->edit_permission->hasPermission();
 		}
 		/**
 		 * permission-checks
@@ -823,25 +819,39 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				"PAGES_DELETE"	=> array(
 					"title"		=> '{$_lang_pages_delete}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_INSERT"	=> array(
 					"title"		=> '{$_lang_pages_add}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_WRITE"	=> array(
 					"title"		=> '{$_lang_pages_edit}',
 					"default"	=> array(
-						"type" => "admins"
-					)
+						"type" => "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
 				),
 				"PAGES_PUBLISH"	=> array(
-					"title"		=> '{$_lang_publish}',
+					"title"		=> '{$_lang_pages_publish}',
 					'default'	=> array(
-						"type" => "admins"
+						"type"		=> "admins",
+						"inherit"	=> "ADMIN_CONTENT"
+					),
+					"category"	=> "ADMIN_CONTENT"
+				),
+				"ADMIN_CONTENT"	=> array(
+					"title" => '{$_lang_administration}: {$_lang_content}',
+					"default"	=> array(
+						"type"	=> "admins"
 					)
 				)
 			);
@@ -872,6 +882,16 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			$arr = array();
 			
+			// get ids that are NOT collapsed cause of current edit-node
+			$ids = array();
+			if(defined("EDIT_ID") && EDIT_ID != 0 && $d = DataObject::get_by_id("pages", EDIT_ID)) {
+				while($d->parent) {
+					$ids[] = $d->parent->id;
+					$d = $d->parent;
+				}
+			}
+			
+			// create filter
 			$where = array("parentid" => $parentid);
 			if(isset($params["deleted"]) && $params["deleted"]) {
 				$data = DataObject::get_Versioned($this, "group", $where);
@@ -882,6 +902,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			if(Permission::check("PAGES_WRITE") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
 			
 			foreach($data as $record) {
+				
+				$collapsed = null;
 				
 				if($record->id != $activenode && isset($params["published"]) && !$params["published"] && $record->isPublished() === true)
 					if(!isset($params["deleted"]) || !$params["deleted"] || $record->isDeleted() === false)
@@ -919,11 +941,14 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				
 				if($childcount > 0) {
 					// we prefetch a maximum of 5 sites
-					if($childcount < 6) {
+					if($childcount < 6 || in_array($record["recordid"], $ids)) {
 						$id = $record["recordid"];
 						if(PROFILE) Profiler::unmark("pages::getTree");
 						$children = $this->getTree($id, $fields, $activenode, $params);
 						if(PROFILE) Profiler::mark("pages::getTree");
+						if(in_array($record["recordid"], $ids)) {
+							$collapsed = false;
+						}
 					} else {
 						$children = "ajax";
 					}
@@ -936,7 +961,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					"title" 		=> $record["title"],
 					"attributes"	=> array("class" => $class),
 					"data"			=> $record->ToArray(),
-					"children"		=> $children
+					"children"		=> $children,
+					"collapsed"		=> $collapsed
 				);
 				
 				unset($state);
@@ -945,6 +971,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			return $arr;
 		}
+		
 		/**
 		 * provides tree-arguments
 		 *

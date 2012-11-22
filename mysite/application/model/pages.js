@@ -67,6 +67,7 @@ function show_preview(publish, state, usePublish) {
 		$("#bottomBar .state, #bottomBar .publish").removeClass("active");
 		$(this).addClass("active");
 		$("#bottomBar .new_window").attr("href", $(this).attr("href"));
+		changeCount--;
 	});
 	
 	
@@ -96,8 +97,10 @@ function show_preview(publish, state, usePublish) {
 		
 		setTimeout(function(){
 			$("#preview").remove();
-			
 		}, 400);
+		
+		clearInterval(interval);
+		
 		return false;
 	});
 	
@@ -108,9 +111,28 @@ function show_preview(publish, state, usePublish) {
 		});
 		$("#preview").animate({top: 0 - $(window).height()},300);
 		
+		clearInterval(interval);
+		
 		setTimeout(function(){
 			$("#preview").remove();
-			
 		}, 400);
 	});
+	
+	var current = state;
+	var changeCount = -1;
+	interval = setInterval(function(){
+		if($("#previewFrame").length == 0) {
+			clearInterval(interval);
+		}
+		
+		if(current != $("#previewFrame").get(0).contentWindow.location.href) {
+			current = $("#previewFrame").get(0).contentWindow.location.href;
+			changeCount++;
+			if(changeCount == 1) {
+				location.href = current;
+				$("#preview .edit").click();
+			}
+		}
+		
+	}, 500);
 }

@@ -49,6 +49,7 @@
 	border: 1px solid #c0c0c0;
 }
 .tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
+	color: transparent !important;
 	font-size: 0;
 	height: 26px;
 	width: 26px;
@@ -191,8 +192,8 @@
 .tablefield-table .tablefield-editbutton input, .tablefield-table .tablefield-deletebutton input {
 	border: 0;
 	background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
-	color: #000;
-	font-size: 0px;
+	color: transparent !important;
+	font-size: 0;
 	width: 16px;
 	height: 16px;
 	padding: 0;

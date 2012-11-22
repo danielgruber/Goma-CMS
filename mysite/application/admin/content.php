@@ -4,28 +4,65 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.11.2012
-  * $Version 2.0.3
+  * last modified: 20.11.2012
+  * $Version 2.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class contentAdmin extends LeftAndMain
 {
+		/**
+		 * the class from which the tree should be rendered
+		 *
+		 *@name tree_class
+		*/
 		public $tree_class = "pages";
-		// config
+		
+		/**
+		 * the text in the admin-panel
+		 *
+		 *@name text
+		*/
 		public $text = '{$_lang_content}';
 		
-		public $rights = "PAGES_WRITE";
+		/**
+		 * permissions you need to view the adminItem
+		 *
+		 *@name rights
+		*/
+		public $rights = "ADMIN_CONTENT";
 		
+		/**
+		 * template of the admin-panel (default)
+		 *
+		 *@name template
+		 *@access public
+		*/
 		public $template = "admin/content_index.html";
 		
+		/**
+		 * models this admin-panel manages
+		 *
+		 *@name models
+		*/
 		public $models = array("pages");		
 		
 		public $sort = 990;
 		
+		
+		/**
+		 * title of the first node of the tree
+		 *
+		 *@name root_node
+		*/
 		public $root_node = "{\$_lang_pagetree}";
 		
+		/**
+		 * colors in the tree
+		 *
+		 *@name colors
+		*/
 		public $colors = array(
 			"withmainbar"	=> array(
 				"color"	=> "#036",
@@ -37,10 +74,20 @@ class contentAdmin extends LeftAndMain
 			)
 		);
 		
+		/**
+		 * extend actions
+		 *
+		 *@name allowed_actions
+		*/
 		public $allowed_actions = array(
 			"revert_changes", "unpublish", "preview"
 		);
 		
+		/**
+		 * sort in the tree
+		 *
+		 *@name sort_field
+		*/
 		protected $sort_field = "sort";
 		
 		/**

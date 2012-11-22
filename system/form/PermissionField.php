@@ -166,6 +166,7 @@ class PermissionField extends ClusterFormField {
 			//$val->versionid = $this->value->versionid;
 			$this->value = $val;
 		} else {
+			$this->value->inheritorid = 0;
 			// now remodify it by the given fields
 			foreach($this->fields as $key => $val) {
 				if($result = $val->result()) {
