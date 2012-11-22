@@ -6,5 +6,10 @@
 		if(typeof pages_unbindPreviewURL != "undefined") {
 			pages_unbindPreviewURL();
 		}
+		
+		// seems as we need to wrap it here
+		setTimeout(function(){
+			$("#tree_contentadmin > span").addClass("marked");
+		}, 1);
 	});
 </script>
