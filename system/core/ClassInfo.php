@@ -1203,6 +1203,13 @@ class ClassInfo extends Object
 					
 					$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
 					$port = $_SERVER["SERVER_PORT"];
+					if($http == "http" && $port == 80){
+						$port = "";
+					} else if($http == "https" && $port == 443){
+						$port = "";
+					} else {
+						$port = ":" . $port;
+					}
 					header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 					exit;
 				}
