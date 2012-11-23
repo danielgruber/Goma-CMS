@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
-  * $Version 3.6.3
+  * last modified: 23.11.2012
+  * $Version 3.6.4
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -1043,9 +1043,11 @@ class ClassInfo extends Object
 						// second application!
 						self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
 						
-						// expansions
-						foreach(self::$appENV["expansion"] as $expansion => $data) {
-							self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+						if(isset(self::$appENV["expansion"])) {
+							// expansions
+							foreach(self::$appENV["expansion"] as $expansion => $data) {
+								self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+							}
 						}
 						
 						if(PROFILE) Profiler::unmark("checkVersion");
