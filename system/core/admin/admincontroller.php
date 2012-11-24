@@ -150,9 +150,14 @@ class adminController extends Controller
 		 *@name flushLog
 		*/
 		public function flushLog() {
-			FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
-			AddContent::addSuccess(lang("flush_log_success"));
-			$this->redirectBack();
+			if(Permission::check("ADMIN")) {
+				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
+				AddContent::addSuccess(lang("flush_log_success"));
+				$this->redirectBack();
+			}
+			
+			$this->template = "admin/index_not_permitted.html";
+			return parent::index();
 		}
 		
 		/**
@@ -222,8 +227,13 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public function history() {
-			Core::setTitle(lang("history"));
-			return History::renderHistory(array());
+			if(Permission::check("ADMIN")) {
+				Core::setTitle(lang("history"));
+				return History::renderHistory(array());
+			}
+			
+			$this->template = "admin/index_not_permitted.html";
+			return parent::index();
 		}
 		
 		/**
