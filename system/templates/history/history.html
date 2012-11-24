@@ -3,8 +3,9 @@
 	<% CONTROL this() %>
 		<div class="event">
 			<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
-			$this.content
 			<span class="date">$this.created.date()</span>
+			<p>$this.content</p>
+			<div class="clear"></div>
 		</div>
 	<% ENDCONTROL %>
 </div>

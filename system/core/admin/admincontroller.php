@@ -37,7 +37,7 @@ class adminController extends Controller
 			"switchlang"				=> "switchlang",
 			"update"					=> "handleUpdate",
 			"flushLog"					=> "flushLog",
-			"history"					=> "history",
+			"history/\$c/\$i"			=> "history",
 			"admincontroller:\$item!"	=> "handleItem"
 		);
 		
@@ -228,8 +228,23 @@ class adminController extends Controller
 		*/
 		public function history() {
 			if(Permission::check("ADMIN")) {
-				Core::setTitle(lang("history"));
-				return History::renderHistory(array());
+				$filter = array();
+				$class = $this->getParam("c");
+				if(isset($class))
+					$filter["dbobject"] = $class;
+				
+				$item = $this->getParam("i");
+				if(isset($item))
+					$filter["recordid"] = $item;
+				
+				if(Core::is_ajax() && isset($_GET["dropdownDialog"])) {
+					HTTPResponse::setBody(History::renderHistory($filter));
+					HTTPResponse::output();
+					exit;
+				} else {
+					Core::setTitle(lang("history"));
+					return History::renderHistory($filter);
+				}
 			}
 			
 			$this->template = "admin/index_not_permitted.html";

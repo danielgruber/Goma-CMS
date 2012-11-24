@@ -3,10 +3,26 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 18.11.2012
+  * last modified: 25.11.2012
 */
 
-.history {
+.dropdownDialog .history {
+	width: 300px;
+	height: 400px;
+	overflow: auto;
+	margin-top: 30px;
+}
+.dropdownDialog .history .event {
+	position: relative;
+	padding-bottom: 30px;
+}
+.dropdownDialog .history .event .date {
+	float: none;
+	position: absolute;
+	left: 33px;
+	bottom: 5px;
+}
+.content_inner .history, .content .history {
 	border-top: 1px solid #ddd;
 }
 .history .event {
@@ -16,9 +32,17 @@
 }
 .history .event img {
 	margin-right: 5px;
-	margin-top: -3px;
+	margin-top: 4px;
+	float: left;
 }
+.history .event p {
+	margin: 5px;
+	margin-left: 22px;
+	line-height: 150%;
+}
+
 .history .event .date {
 	float: right;
 	color: #888;
+	margin: 5px;
 }
