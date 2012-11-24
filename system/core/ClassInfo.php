@@ -1190,7 +1190,7 @@ class ClassInfo extends Object
 					$versions = array();
 					foreach($files as $file) {
 						if(is_file($folder . "/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
-							if(goma_version_compare(substr($file, 0, -4), $version, ">")) {
+							if(goma_version_compare(substr($file, 0, -4), $version, ">") && goma_version_compare(substr($file, 0, -4), $current_version, "<=")) {
 								$versions[] = substr($file, 0, -4);
 							}
 						}
@@ -1200,7 +1200,11 @@ class ClassInfo extends Object
 						FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';');
 						include($folder . "/upgrade/" . $v . ".php");
 					}
-					FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
+					if(FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
+						
+					} else {
+						throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php");
+					}
 					ClassInfo::delete();
 					
 					$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
