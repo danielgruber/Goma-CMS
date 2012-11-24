@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.10.2012
-  * $Version 2.3.4
+  * last modified: 24.11.2012
+  * $Version 2.3.5
 */
 
 body, html {
@@ -396,6 +396,9 @@ a:hover {
 	position: absolute;
 	width: 624px;
 	
+}
+#wrapper_logout .wrapper_inner .header a h1 {
+	color: #333;
 }
 #wrapper_logout .wrapper_inner .logo_wrapper {
 	position: relative;

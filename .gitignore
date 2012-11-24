@@ -3,6 +3,8 @@ _config.php
 .htaccess
 .DS_Store
 mysite/*
+mysite/application/.WELCOME_RUN
+mysite/application/WELCOME_RUN.php
 !mysite/application/*
 !mysite/application
 !mysite/templates/*

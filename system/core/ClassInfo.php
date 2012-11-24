@@ -1197,13 +1197,13 @@ class ClassInfo extends Object
 					}
 					usort($versions, "goma_version_compare");
 					foreach($versions as $v) {
-						FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';');
+						if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';')) {
+							throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
+						}
 						include($folder . "/upgrade/" . $v . ".php");
 					}
-					if(FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
-						
-					} else {
-						throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php");
+					if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
+						throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
 					}
 					ClassInfo::delete();
 					
@@ -1219,7 +1219,10 @@ class ClassInfo extends Object
 					header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 					exit;
 				}
-				FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
+				
+				if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
+					throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
+				}
 			}
 		}
 		
