@@ -399,7 +399,7 @@ class login_meinaccount extends Box
 		public $name = '{$_lang_login_myaccount}';
 		public function getContent()
 		{
-				 return tpl::render('boxes/login.html',array('new_messages' => PMController::countNew(), 'users_online'	=> LiveCounterController::countMembersOnline()));
+				 return tpl::render('boxes/login.html',array('users_online'	=> LiveCounterController::countMembersOnline()));
 		}
 }
 
