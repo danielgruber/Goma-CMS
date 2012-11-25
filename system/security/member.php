@@ -63,7 +63,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name name
 		 *@access public
 		*/
-		public $name = '{$_lang_user}';
+		public static $cname = '{$_lang_user}';
 		
 		/**
 		 * the database fields of a user

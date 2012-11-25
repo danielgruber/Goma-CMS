@@ -12,7 +12,11 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class contact extends Page
 {
-		public $can_parent = "all";
+		/**
+		 * the name of this page
+		*/
+		public static $cname = '{$_lang_contact}';
+		
 		/**
 		 * the icon for this page
 		*/
@@ -30,10 +34,7 @@ class contact extends Page
 			"requireemailfield" => 1
 		);
 		
-		/**
-		 * the name of this page
-		*/
-		public $name = '{$_lang_contact}';
+		public $can_parent = "all";
 		
 		/**
 		 * generate the extended form

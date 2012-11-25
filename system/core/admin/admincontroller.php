@@ -240,13 +240,19 @@ class adminController extends Controller
 				if(isset($item))
 					$filter["recordid"] = $item;
 				
+				if(isset($filter["dbobject"])) {
+					$tabs = new Tabs("history");
+					$tabs->add();
+				}
+				$output = istory::renderHistory($filter);
+				
 				if(Core::is_ajax()) {
-					HTTPResponse::setBody(History::renderHistory($filter));
+					HTTPResponse::setBody($output);
 					HTTPResponse::output();
 					exit;
 				} else {
 					Core::setTitle(lang("history"));
-					return History::renderHistory($filter);
+					return $output;
 				}
 			}
 			

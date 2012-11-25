@@ -15,7 +15,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		/**
 		 * name
 		*/
-		public $name = '{$_lang_content}';
+		public static $cname = '{$_lang_content}';
 		
 		/**
 		 * show read-only edit if not enough rights
