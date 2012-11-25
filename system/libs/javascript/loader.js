@@ -261,7 +261,7 @@ if(typeof self.loader == "undefined") {
 				if(typeof object != "undefined") {
 					var method;
 					if (window.execScript)
-					  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+					  	window.execScript('method = function(' + html + ')',''); // execScript doesn’t return anything
 					else
 					  	var method = eval('(function(){' + html + '});');
 					method.call(object);

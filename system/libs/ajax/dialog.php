@@ -1,10 +1,10 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 15.10.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 26.11.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -115,10 +115,7 @@ class Dialog extends AjaxResponse
 		{
 				if(Core::is_ajax() && isset($_GET["dropdownDialog"])) {
 					HTTPResponse::addHeader("content-type", "text/x-json");
-					$array = array("content" => $this->content, "exec" => 'function(){
-						var $this = this;
-						'.$this->js.'
-					}');
+					$array = array("content" => $this->content, "exec" => 'var $this = this;'.$this->js);
 					if($this->dropPosition != "auto") {
 						$array["position"] = $this->dropPosition;
 					}

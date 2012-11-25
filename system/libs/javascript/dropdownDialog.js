@@ -428,7 +428,7 @@ self.dropdownDialogs = [];
 					var content_type = jqXHR.getResponseHeader("content-type");
 					if(content_type == "text/x-json") {
 						try {
-							var data = eval_global('('+html+')');
+							var data = parseJSON(html);
 							var html = data.content;
 							if(data.position != null) {
 								that.position = data.position;
@@ -437,16 +437,32 @@ self.dropdownDialogs = [];
 								that.closeButton = data.closeButton;
 							}
 							that.setContent(html);
+							
 							if(typeof data.exec != "undefined") {
-								eval_global('(' + data.exec + ')').call(that);
+								try {
+									var method;
+									if (window.execScript) {
+									  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+									} else
+									  	method = eval('(function(){' + data.exec + '})');
+									
+									method.call(that);
+								} catch(e) {
+									alert(e);
+								}
 							}
 							
 							
 						} catch(e) {
-							that.setContent("error");
+							alert(e);
+							that.setContent("error parsing JSON");
 						}
 					} else if(content_type == "text/javascript") {
-						var method = eval_global('(function() { ' + html + '})');
+						var method;
+						if (window.execScript)
+						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+						else
+						  	method = eval('(function(){' + html + '});');
 						method.call(this);
 						
 					} else {
