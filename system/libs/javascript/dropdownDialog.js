@@ -465,7 +465,7 @@ self.dropdownDialogs = [];
 				}
 			},
 			{
-				"regexp": /^.*\.(img|png|jpg|gif|bmp)$/i,
+				"regexp": /^.*\.(img|png|jpg|jpeg|gif|bmp)$/i,
 				"method": function(obj,uri) {
 					obj.player_img(uri);
 				}

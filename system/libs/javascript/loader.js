@@ -189,7 +189,7 @@ if(typeof self.loader == "undefined") {
 				});
 				
 				try {
-					var data = eval('('+jqXHR.responseText+')');
+					var data = parseJSON(jqXHR.responseText);
 					for(i in data) {
 						lang[i] = data[i];
 					}
@@ -241,7 +241,7 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			try {
-				var data = eval('('+jqXHR.responseText+')');
+				var data = parseJSON(jqXHR.responseText);
 				for(i in data) {
 					lang[i] = data[i];
 				}
@@ -263,16 +263,13 @@ if(typeof self.loader == "undefined") {
 					if (window.execScript)
 					  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
 					else
-					  	var method = eval_global('(function(){' + html + '});');
+					  	var method = eval('(function(){' + html + '});');
 					method.call(object);
 				} else {
-					 if (window.execScript)
-					 	window.execScript(html, ''); // execScript doesn’t return anything
-					 else
-					 	eval(html);
+					 eval_global(html);
 				}
 			} else if(content_type == "text/x-json") {
-				var object = eval_global("("+html+")");
+				var object = parseJSON(html);
 				var _class = object["class"];
 				var i;
 				for(i in object["areas"]) {
@@ -308,19 +305,22 @@ if(typeof self.loader == "undefined") {
 				var content_type = ajaxreq.getResponseHeader("content-type");
 				if(content_type == "text/javascript") {
 					if(typeof object != "undefined") {
-						var method = eval_global('(function(){' + html + '});');
+						var method = eval('(function(){' + html + '});');
 						method.call(object);
 					} else {
 						eval_global(html);
 					}
+					RunAjaxResources(ajaxreq);
 					return true;
 				} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-					var object = eval_global("("+html+")");
+					var object = parseJSON(html);
 					var _class = object["class"];
 					var i;
 					for(i in object["areas"]) {
 						$("#"+_class+"_"+i+"").html(object["areas"][i]);
 					}
+					RunAjaxResources(ajaxreq);
+					return true;
 				}
 			}
 			
@@ -425,7 +425,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "script"
+								dataType: "html",
+								success: function(js) {
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;
@@ -700,10 +703,22 @@ if(typeof self.loader == "undefined") {
 	// patch for IE eval
 	function eval_global(codetoeval) {
 	    if (window.execScript)
-	        window.execScript('code_evaled = ' + '(' + codetoeval + ')',''); // execScript doesn’t return anything
+	        window.execScript(codetoeval); // execScript doesn’t return anything
 	    else
-	        code_evaled = eval(codetoeval);
-	    return code_evaled;
+	        eval(codetoeval);
+	}
+	
+	// parse JSON
+	function parseJSON(str) {
+		if(str.substring(0, 1) == "(") {
+			str = str.substr(1);
+		}
+		
+		if(str.substr(str.length - 1) == ")") {
+			str = str.substr(0, str.length -1);
+		}
+		
+		return $.parseJSON(str);
 	}
 	
 	function microtime (get_as_float) {
@@ -732,4 +747,3 @@ if(typeof self.loader == "undefined") {
 	    return new Array(multiplier + 1).join(input);
 	}
 }
-var code_evaled;
