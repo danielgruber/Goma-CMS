@@ -19,7 +19,7 @@ class userAdmin extends adminItem {
 	/**
 	 * permissions
 	*/
-	public $rights = "10";
+	public $rights = "USERS_MANAGE";
 	
 	/**
 	 * sort
