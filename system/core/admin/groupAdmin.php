@@ -55,7 +55,7 @@ class groupAdmin extends adminItem {
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
 		
 		$form = new Form($this, "form", array(
-			new TableField("userTable", lang("users"), $this->modelInst(), $config)
+			new TableField("groupTable", lang("groups"), $this->modelInst(), $config)
 		));
 		
 		return $form->render();
