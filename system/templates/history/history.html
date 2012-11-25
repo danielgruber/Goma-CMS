@@ -1,10 +1,23 @@
 <% INCLUDE_CSS "history.css" %>
+<% INCLUDE_JS "history.js" %>
+<% activatePagination($_GET_page, 10) %>
 <div class="history">
+	<% IF isPageBefore() %>
+		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
+	<% END %>
 	<% CONTROL this() %>
-		<div class="event">
+		<% IF $this.first %>
+			<div class="event first">
+		<% ELSE %>
+			<div class="event">
+		<% END %>
 			<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
-			$this.content
 			<span class="date">$this.created.date()</span>
+			<p>$this.content</p>
+			<div class="clear"></div>
 		</div>
 	<% ENDCONTROL %>
+	<% IF isNextPage() %>
+		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
+	<% END %>
 </div>

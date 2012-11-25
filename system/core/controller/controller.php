@@ -182,9 +182,14 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public function modelInst($model = null) {
-			if(isset($model) && ClassInfo::exists($model)) {
+			
+			if(is_object($model) && is_a($model, "ViewAccessableData")) {
+				$this->model_inst = $model;
+				$this->model = $model->dataClass;
+			} else if(isset($model) && ClassInfo::exists($model)) {
 				$this->model = $model;
 			}
+			
 			if(!is_object($this->model_inst) || (isset($model) && ClassInfo::exists($model))) {
 				if(isset($this->model)) {
 					$this->model_inst = Object::instance($this->model);
@@ -201,12 +206,12 @@ class Controller extends RequestHandler
 				$this->model = $this->model_inst->dataClass;
 			}
 			
-			if(isset($this->modelInst) && is_object($this->modelInst) && is_a($this->modelInst, "DataSet") && !$this->modelInst->isPagination() && $this->pages && $this->perPage) {
+			if(isset($this->model_inst) && is_object($this->model_inst) && is_a($this->model_inst, "DataSet") && !$this->model_inst->isPagination() && $this->pages && $this->perPage) {
 				$page = isset($_GET["pa"]) ? $_GET["pa"] : null;
 				if($this->perPage)
-					$this->modelInst->activatePagination($page, $this->perPage);
+					$this->model_inst->activatePagination($page, $this->perPage);
 				else
-					$this->modelInst->activatePagination($page);
+					$this->model_inst->activatePagination($page);
 			}
 			
 			return (is_object($this->model_inst)) ? $this->model_inst : new ViewAccessAbleData();

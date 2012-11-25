@@ -37,7 +37,7 @@ class adminController extends Controller
 			"switchlang"				=> "switchlang",
 			"update"					=> "handleUpdate",
 			"flushLog"					=> "flushLog",
-			"history"					=> "history",
+			"history/\$c/\$i"			=> "history",
 			"admincontroller:\$item!"	=> "handleItem"
 		);
 		
@@ -150,9 +150,14 @@ class adminController extends Controller
 		 *@name flushLog
 		*/
 		public function flushLog() {
-			FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
-			AddContent::addSuccess(lang("flush_log_success"));
-			$this->redirectBack();
+			if(Permission::check("ADMIN")) {
+				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
+				AddContent::addSuccess(lang("flush_log_success"));
+				$this->redirectBack();
+			}
+			
+			$this->template = "admin/index_not_permitted.html";
+			return parent::index();
 		}
 		
 		/**
@@ -222,8 +227,28 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public function history() {
-			Core::setTitle(lang("history"));
-			return History::renderHistory(array());
+			if(Permission::check("ADMIN")) {
+				$filter = array();
+				$class = $this->getParam("c");
+				if(isset($class))
+					$filter["dbobject"] = $class;
+				
+				$item = $this->getParam("i");
+				if(isset($item))
+					$filter["recordid"] = $item;
+				
+				if(Core::is_ajax()) {
+					HTTPResponse::setBody(History::renderHistory($filter));
+					HTTPResponse::output();
+					exit;
+				} else {
+					Core::setTitle(lang("history"));
+					return History::renderHistory($filter);
+				}
+			}
+			
+			$this->template = "admin/index_not_permitted.html";
+			return parent::index();
 		}
 		
 		/**

@@ -731,83 +731,29 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		*/
 		public function canWrite($row = null)
 		{		
-				// first validate if it is an object
-				if(!is_object($row) && isset($row["id"]))
-				{
-						if($this->id == $row["id"])
-						{
-								$row = $this;
-						} else
-						{
-								$row = DataObject::get_by_id($this->class, $row["id"]);
-						}
-				} else if(!$row)
-					return false;
+				if(Permission::check("superadmin"))
+					return true;
 				
-				return $this->edit_permission->hasPermission();
+				if(isset($row))
+					return $row->edit_permission->hasPermission();
+				
+				return Permission::check("PAGES_WRITE");
 		}
 		/**
 		 * permission-checks
 		*/
 		public function canDelete($row = null)
 		{
-				if(right(10))
-						return true;
-				
-				// first validate if it is an object
-				if(!is_object($row))
-				{
-						if($this->id == $row["id"])
-						{
-								$row = $this;
-						} else
-						{
-								$row = DataObject::get_by_id($this->class, $row["id"]);
-						}
-				}
-				
-				
-				
-				if(parent::canDelete($row))
-						if($row->edit_type == "all")
-								return true;
-						else if($row->is_many_many("edit_groups", member::$groupid))
-						{
-								return true;
-						}
-				else
-						return false;
+				return Permission::check("PAGES_DELETE");
 		}
 		/**
 		 * permission-checks
 		*/
 		public function canInsert($row = null)
 		{	
-				if(parent::canInsert($row))
-				{
-						// now get parent
-						if(!isset($row["parentid"]) || $row["parentid"] == 0)
-						{
-								return true;
-						} else
-						{
-								$data = DataObject::get_versioned("pages", "state", array("id" => $row["parentid"]));
-								if($data->count() > 0 && $data->first()) {
-									if($data->first()->canWrite($data))
-									{
-										return true;
-									} else
-									{
-										return false;
-									}
-								} else {
-									return false;
-								}
-						}
-				}
-				else
-						return false;
+				return Permission::check("PAGES_INSERT");
 		}
+		
 		/**
 		 * permissions
 		 *@name providePermissions

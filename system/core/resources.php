@@ -28,7 +28,7 @@ class Resources extends Object {
 	 *@access public
 	 *@var CONST
 	*/
-	const VERSION = "1.2.5";
+	const VERSION = "1.2.6";
 	
 	/**
 	 * defines if gzip is enabled

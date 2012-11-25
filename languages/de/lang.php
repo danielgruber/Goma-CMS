@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 18.11.2012
+  * last modified: 25.11.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -532,5 +532,8 @@ $lang = array(
 	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser hat sich eingeloggt',
 	
-	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>'
+	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>',
+	
+	"older"					=> "Ältere Einträge",
+	"newer"					=> "Neuere Einträge"
 );

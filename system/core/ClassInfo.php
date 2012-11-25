@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
-  * $Version 3.6.3
+  * last modified: 23.11.2012
+  * $Version 3.6.4
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -1043,9 +1043,11 @@ class ClassInfo extends Object
 						// second application!
 						self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
 						
-						// expansions
-						foreach(self::$appENV["expansion"] as $expansion => $data) {
-							self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+						if(isset(self::$appENV["expansion"])) {
+							// expansions
+							foreach(self::$appENV["expansion"] as $expansion => $data) {
+								self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+							}
 						}
 						
 						if(PROFILE) Profiler::unmark("checkVersion");
@@ -1188,17 +1190,21 @@ class ClassInfo extends Object
 					$versions = array();
 					foreach($files as $file) {
 						if(is_file($folder . "/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
-							if(goma_version_compare(substr($file, 0, -4), $version, ">")) {
+							if(goma_version_compare(substr($file, 0, -4), $version, ">") && goma_version_compare(substr($file, 0, -4), $current_version, "<=")) {
 								$versions[] = substr($file, 0, -4);
 							}
 						}
 					}
 					usort($versions, "goma_version_compare");
 					foreach($versions as $v) {
-						FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';');
+						if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($v, true).';')) {
+							throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
+						}
 						include($folder . "/upgrade/" . $v . ".php");
 					}
-					FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
+					if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
+						throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
+					}
 					ClassInfo::delete();
 					
 					$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
@@ -1213,7 +1219,10 @@ class ClassInfo extends Object
 					header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 					exit;
 				}
-				FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';');
+				
+				if(!FileSystem::write($folder . "/version.php", '<?php $version = '.var_export($current_version, true).';')) {
+					throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
+				}
 			}
 		}
 		

@@ -4,17 +4,21 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.11.2012
+  * last modified: 23.11.2012
   * $Version 1.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Boxes extends DataObject {
+	
 	/**
-	 * controller
+	 * enable versions
+	 *
+	 *@name versioned
 	*/
-	public $controller = "boxesController";
+	public $versioned = true;
+	
 	/**
 	 * some database fields
 	*/
@@ -26,6 +30,7 @@ class Boxes extends DataObject {
 		"seiteid"	=> "varchar(50)",
 		"width"		=> "varchar(5)"
 	);
+	
 	/**
 	 * some searchable fields
 	*/
@@ -33,16 +38,19 @@ class Boxes extends DataObject {
 		"text",
 		"title"
 	);
+	
 	/**
 	 * for performance, some indexes
 	*/
 	public $indexes = array(
 		"view"	=> array("type"	=> "INDEX", "fields" => "seiteid,sort", "name"	=> "_show")
 	);
+	
 	/**
 	 * sort
 	*/
 	public static $default_sort = "sort ASC";
+	
 	/**
 	 * generates the form to add boxes
 	*/
@@ -53,6 +61,7 @@ class Boxes extends DataObject {
 		$form->add(new Select("class_name", lang("boxtype", "boxtype"),$this->getBoxTypes()));
 		$form->add(new Hiddenfield("width", "auto"));
 	}
+	
 	/**
 	 * generates form-actions
 	*/
@@ -64,6 +73,7 @@ class Boxes extends DataObject {
 			$form->addAction(new FormAction("submit", lang("save")));
 		}
 	}
+	
 	/**
 	 * gets all available types
 	 *
@@ -79,21 +89,7 @@ class Boxes extends DataObject {
 		}
 		return $boxes;
 	}
-	/**
-	 * permissions
-	*/
-	public function providePerms()
-	{
-			return array(
-				"BOXES"	=> array(
-					"title"		=> '{$_lang_admin_boxes}',
-					"default"	=> array(
-						"type"		=> "admins",
-						"inherit"	=> "ADMIN"
-					)
-				)
-			);
-	}
+	
 	/**
 	 * gets the width
 	 *
@@ -107,6 +103,7 @@ class Boxes extends DataObject {
 			return $this->fieldGet("width");
 		}
 	}
+	
 	/**
 	 * gets the class box_with_border if border is set
 	 *
@@ -117,12 +114,58 @@ class Boxes extends DataObject {
 		return ($this->fieldGet("border")) ? "box_with_border" : "";
 	}
 	
+	/**
+	 * returns if edit is on
+	 *
+	 *@name canWrite
+	*/
+	public function canWrite($row) {
+		$data = DataObject::get_by_id("pages", $row->seiteid);
+		if($data && $data->canWrite($data)) {
+			return true;
+		}
+		
+		return Permission::check("PAGES_WRITE");
+	}
+	
+	/**
+	 * returns if deletion is allowed
+	 *
+	 *@name canDelete
+	*/
+	public function canDelete($row = null)
+	{
+		$data = DataObject::get_by_id("pages", $row->seiteid);
+		if($data && $data->canDelete($data)) {
+			return true;
+		}
+		
+		return Permission::check("PAGES_DELETE");
+	}
+	
+	/**
+	 * returns if inserting is allowed
+	 *
+	 *@name canInsert
+	*/
+	public function canInsert($row = null)
+	{	
+		$data = DataObject::get_by_id("pages", $row->seiteid);
+		if($data && $data->canInsert($data)) {
+			return true;
+		}
+		
+		return Permission::check("PAGES_INSERT");
+	}
 	
 }
 
 class BoxesController extends FrontedController {
 	/**
-	 * some actions
+	 * some urls
+	 *
+	 *@name url_handlers
+	 *@access public
 	*/
 	public $url_handlers = array(
 		"\$pid!/add"				=> "add",
@@ -131,8 +174,12 @@ class BoxesController extends FrontedController {
 		"\$pid!/saveBoxWidth/\$id"	=> "saveBoxWidth",
 		"\$pid!/saveBoxOrder"		=> "saveBoxOrder"
 	);
+	
 	/**
 	 * rights
+	 *
+	 *@name allowed_actions
+	 *@access public
 	*/
 	public $allowed_actions = array(
 		"add"			=> "->canEdit",
@@ -141,8 +188,25 @@ class BoxesController extends FrontedController {
 		"saveBoxWidth"	=> "->canEdit",
 		"saveBoxOrder"	=> "->canEdit"
 	);
+	
+	/**
+	 * returns if edit is on
+	 *
+	 *@name canEdit
+	*/
+	public function canEdit() {
+
+		$data = DataObject::get_by_id("pages", $this->getParam("pid"));
+		if($data && $data->canWrite($data)) {
+			return true;
+		}
+		
+		return Permission::check("PAGES_WRITE");
+	}
+	
 	/**
 	 * renders boxes
+	 *
 	 *@name renderBoxes
 	 *@access public
 	 *@param string - id
@@ -150,25 +214,7 @@ class BoxesController extends FrontedController {
 	public static function renderBoxes($id)
 	{
 			$data = DataObject::get("boxes", array("seiteid" => $id));
-			return $data->controller()->render();
-	}
-	/**
-	 * returns if edit is on
-	 *
-	 *@name canEdit
-	*/
-	public function canEdit() {
-		if(!Permission::check("BOXES"))
-			return false;
-		
-		if(_ereg("^[0-9]+$", $this->getParam("pid"))) {
-			$data = DataObject::get("pages", array("id" => $this->getParam("pid")));
-			if(!$data->canWrite())
-				return false;
-			
-		}
-		
-		return true;
+			return $data->controller()->render($id);
 	}
 	
 	/**
@@ -194,6 +240,7 @@ class BoxesController extends FrontedController {
 		));
 		return $this->form("add", $boxes);
 	}
+	
 	/**
 	 * saves box width
 	 *
@@ -201,8 +248,8 @@ class BoxesController extends FrontedController {
 	 *@access public
 	*/
 	public function saveBoxWidth() {
-		$data = DataObject::get("boxes", array("id" => $this->getParam("id")));
-		if($data->count > 0) {
+		$data = DataObject::get_by_id("boxes", $this->getParam("id"));
+		if($data) {
 			$data->width = $_POST["width"];
 			if($data->write()) {
 				return true;
@@ -211,6 +258,7 @@ class BoxesController extends FrontedController {
 		HTTPResponse::sendHeader();
 		exit;
 	}
+	
 	/**
 	 * saves box orders
 	 *
@@ -219,13 +267,15 @@ class BoxesController extends FrontedController {
 	*/
 	public function saveBoxOrder() {
 		foreach($_POST["box_new"] as $sort => $id) {
-			$data = DataObject::get("boxes", array("id" => $id));
-			$data->sort = $sort;
-			$data->write();
+			if($data = DataObject::get_by_id("boxes", $id)) {
+				$data->sort = $sort;
+				$data->write();
+			}
 		}
 		HTTPResponse::sendHeader();
 		exit;
 	}
+	
 	/**
 	 * renders boxes
 	 *
@@ -234,10 +284,12 @@ class BoxesController extends FrontedController {
 	*/
 	final public function render($pid = null) {
 		if(isset($pid)) {
-			$this->modelInst(DataObject::get("boxes", array("seiteid" => $pid)));
+			$data = DataObject::get("boxes", array("seiteid" => $pid));
+			$this->model_inst = $data;
 		}
-		return $this->modelInst()->customise(array("pageid" => $this->model_inst->seiteid))->renderWith("boxes/boxes.html");
+		return $this->modelInst()->customise(array("pageid" => $pid))->renderWith("boxes/boxes.html");
 	}
+	
 	/**
 	 * hides the deleted object
 	 *
@@ -245,7 +297,6 @@ class BoxesController extends FrontedController {
 	 *@access public
 	*/
 	public function hideDeletedObject($response, $data) {
-		 
 		$response->exec('$("#box_new_'.$data["id"].'").hide(300, function(){
 			$(this).remove();
 			if($("#boxes_new_'.$data["seiteid"].'").find(" > .box_new").length == 0) {
@@ -254,12 +305,14 @@ class BoxesController extends FrontedController {
 		});');
 		return $response;
 	}
+	
 	/**
 	 * index
 	*/
 	public function index() {
-		$this->redirectBack();
+		return '<div class="error">' . lang("less_rights") . '</div>';
 	}
+	
 	/**
 	 * saves via ajax
 	 *
@@ -267,7 +320,7 @@ class BoxesController extends FrontedController {
 	 *@access public
 	*/ 
 	public function ajaxSave($data, $response) {
-		if($this->save($data) !== false)
+		if($this->save($data, 2) !== false)
 		{
 			//$response->exec(new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay"), 3));
 			$response->exec('$("#boxes_new_'.convert::raw2js($data["seiteid"]).'").html("'.convert::raw2js(BoxesController::renderBoxes($data["seiteid"])).'");');
@@ -346,7 +399,7 @@ class login_meinaccount extends Box
 		public $name = '{$_lang_login_myaccount}';
 		public function getContent()
 		{
-				 return tpl::render('boxes/login.html',array('new_messages' => PMController::countNew(), 'users_online'	=> LiveCounterController::countMembersOnline()));
+				 return tpl::render('boxes/login.html',array('users_online'	=> LiveCounterController::countMembersOnline()));
 		}
 }
 
@@ -399,7 +452,7 @@ class boxpage extends Page
 		*/
 		public function getBoxes()
 		{
-				return BoxesController::renderBoxes($this->fieldGet("id"));
+				return BoxesController::renderBoxes($this->id);
 		}
 
 }

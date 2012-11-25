@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.07.2012
-  * $Version 1.2.3
+  * last modified: 24.11.2012
+  * $Version 1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -120,10 +120,10 @@ class welcomeController extends Controller {
 	*/
 	public function finish() {
 		unset($_SESSION["welcome_screen"]);
-		if(@fopen(APP_FOLDER . "application/.WELCOME_RUN", "w")) {
-			fclose(APP_FOLDER . "application/.WELCOME_RUN");
+		if(@fopen(APP_FOLDER . "application/WELCOME_RUN.php", "w")) {
+			fclose(APP_FOLDER . "application/WELCOME_RUN.php");
 		} else {
-			throwError(6, "PHP-Error", "Write-Error: Could not write " . CURRENT_PROJECT . "/application/.WELCOME_RUN. Please create this file for security reason!");
+			throwError(6, "PHP-Error", "Write-Error: Could not write '" . CURRENT_PROJECT . "/application/WELCOME_RUN.php'. Please create this file for security reason!");
 		}
 		return tpl::render("welcome/finish.html");
 	}

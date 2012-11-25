@@ -313,6 +313,7 @@ class tableField extends FormField {
 	public function field() {
 		
 		Resources::add("tablefield.css");
+		Resources::add("system/form/tableField/tableField.js");
 		
 		$container = $this->container;
 		

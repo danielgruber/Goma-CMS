@@ -31,7 +31,7 @@ class userController extends Controller
 	public function pwdsave($result)
 	{
 		AddContent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
-		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('id' => $result["id"]));
+		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
 		$this->redirectback();
 	}
 	/**
