@@ -1,5 +1,10 @@
 <% INCLUDE_CSS "history.css" %>
 <% INCLUDE_JS "history.js" %>
+<script type="text/javascript">
+	jQuery(function(){
+		bindHistory();
+	});
+</script>
 <% activatePagination($_GET_page, 10) %>
 <div class="history">
 	<% IF isPageBefore() %>

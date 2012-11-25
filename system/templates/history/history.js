@@ -5,8 +5,8 @@
   *@Copyright (C) 2009 - 2012 Goma-Team
   * last modified: 25.11.2012
 */
-(function($){
-	$(function(){
+(function($, w){
+	w.bindHistory = function() {
 		var load = function(o){
 			var history = o.parent();
 			var older = o;
@@ -35,5 +35,5 @@
 		$(".history .older").click(function(){
 			return load($(this));
 		});
-	});
-})(jQuery);
+	};
+})(jQuery, window);
