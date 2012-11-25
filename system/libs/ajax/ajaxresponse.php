@@ -1,13 +1,32 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 06.04.2011
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 24.11.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+
+class JavaScriptResponse extends Object
+{
+		/**
+		 * renders the response
+		 *@name render
+		 *@access public
+		*/
+		public function render()
+		{
+				
+		}
+		
+		public function __toString()
+		{
+				return $this->render();
+		}
+}
 
 class AjaxResponse extends JavaScriptResponse
 {
@@ -130,22 +149,4 @@ class AjaxResponse extends JavaScriptResponse
 			$this->exec('$("'.convert::raw2js($node).'").slideDown('.var_export($duration, true).', function(){
 				'.$exec.'
 			});');		}
-}
-
-class JavaScriptResponse extends Object
-{
-		/**
-		 * renders the response
-		 *@name render
-		 *@access public
-		*/
-		public function render()
-		{
-				
-		}
-		
-		public function __toString()
-		{
-				return $this->render();
-		}
 }

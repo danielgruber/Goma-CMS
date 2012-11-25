@@ -3,10 +3,26 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 18.11.2012
+  * last modified: 25.11.2012
 */
 
-.history {
+.dropdownDialog .history {
+	width: 300px;
+	height: 400px;
+	overflow: auto;
+	margin-top: 30px;
+}
+.dropdownDialog .history .event {
+	position: relative;
+	padding-bottom: 30px;
+}
+.dropdownDialog .history .event .date {
+	float: none;
+	position: absolute;
+	left: 33px;
+	bottom: 5px;
+}
+.history .event.first {
 	border-top: 1px solid #ddd;
 }
 .history .event {
@@ -16,9 +32,39 @@
 }
 .history .event img {
 	margin-right: 5px;
-	margin-top: -3px;
+	margin-top: 4px;
+	float: left;
 }
+.history .event p {
+	margin: 5px;
+	margin-left: 22px;
+	line-height: 150%;
+}
+
 .history .event .date {
 	float: right;
 	color: #888;
+	margin: 5px;
+}
+.history .newer, .history .older {
+	margin: 8px auto;
+	display: block;
+	width: 100px;
+	text-align: center;
+	padding: 7px 10px;
+	border: 1px solid #ccc;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	
+	background: -moz-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -ms-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -o-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -webkit-linear-gradient(#f5f5f5 0%, #e0e0e0 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0')";
+	background: linear-gradient(#f5f5f5, #e0e0e0); 
+	
+	text-decoration: none;
+	color: #444;
 }

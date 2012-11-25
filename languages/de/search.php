@@ -9,7 +9,7 @@
 $se_lang = array(
 	"search"              	=> "Suchen",
 	"result"             	=> "Suchergebniss",
-	"no_word"             	=> "Bitte geben sie einen Suchbegriff ein!",
+	"no_word"             	=> "Bitte geben Sie einen Suchbegriff ein!",
 	'no_title'            	=> "Kein Titel",
 	'no'                  	=> "Ihre suche ergab 0 Treffer!",
 	'search_sites'        	=> "Suchen..." ,

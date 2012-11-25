@@ -2,11 +2,13 @@
 	<script type="text/javascript">
 		(function(){
 			$(function(){
-				if($("#login_name").val() == "" || $("#login_name").val() == $("#login_name").attr("placeholder")) {
-					$("#login_name").focus();
-				} else {
-					$("#login_pwd").focus();
-				}
+				setTimeout(function(){
+					if($("#login_name").val() == "" || $("#login_name").val() == $("#login_name").attr("placeholder")) {
+						$("#login_name").focus();
+					} else {
+						$("#login_pwd").focus();
+					}
+				}, 100);
 			});
 		})(jQuery);
 	</script>
