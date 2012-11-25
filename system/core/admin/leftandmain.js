@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
+  * last modified: 25.11.2012
 */
 
 
@@ -25,7 +25,7 @@ var LaM_type_timeout;
 			return false;
 		});
 		
-		if(getInternetExplorerVersion() > 9 || getInternetExplorerVersion() == -1) {
+		if(getInternetExplorerVersion() > 7 || getInternetExplorerVersion() == -1) {
 			gloader.load("history");
 			HistoryLib.bind(function(url){
 				
@@ -56,6 +56,12 @@ var LaM_type_timeout;
 						
 						// find optimal scroll by position of active element
 						if($(".treewrapper").find(".marked").length > 0) {
+							// switch to tree-tab if necessary
+							if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
+								$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+							}
+							
+							// correct scroll-position
 							var oldscroll = $(".treewrapper").scrollTop();
 							$(".treewrapper").scrollTop(0);
 							var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
@@ -74,7 +80,7 @@ var LaM_type_timeout;
 		// create-form-binding
 		$(".left .create form").submit(function(){
 			// no ajax in IE
-			if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) {
+			if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
 				return true;
 			}
 			$this = $(this);
@@ -315,7 +321,7 @@ var LaM_type_timeout;
 		node.find(".treelink").click(function(){
 			if($(this).attr("nodeid") == 0 || self.last_dragged != $(this).attr("nodeid")) {
 				// no ajax in IE
-				if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) {
+				if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
 					return true;
 				}
 				LoadTreeItem($(this).attr("nodeid"));
@@ -385,7 +391,7 @@ var LaM_type_timeout;
 		}
 		
 		// Internet Explorer seems not to work correctly with Ajax, maybe we'll fix it later on, but until then, we will just load the whole page ;)
-		if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) {
+		if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
 			$this.click();
 			return true;
 		}

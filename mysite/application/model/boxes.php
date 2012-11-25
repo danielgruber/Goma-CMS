@@ -4,13 +4,18 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.11.2012
-  * $Version 1.1.5
+  * last modified: 25.11.2012
+  * $Version 1.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Boxes extends DataObject {
+	
+	/**
+	 * title of this dataobject
+	*/
+	public static $cname = '{$_lang_boxes}';
 	
 	/**
 	 * enable versions
@@ -84,8 +89,7 @@ class Boxes extends DataObject {
 		$available_types = ClassInfo::getChildren("boxes");
 		$boxes = array();
 		foreach($available_types as $class) {
-			$c = new $class;
-			$boxes[$class] = parse_lang($c->name);
+			$boxes[$class] = ClassInfo::getClassTitle($class);
 		}
 		return $boxes;
 	}
@@ -339,27 +343,37 @@ class BoxesController extends FrontedController {
 class Box extends Boxes
 {
 		/**
+		 * the name of the box with language, e.g. {$_lang_textarea}
+		 *@name name
+		 *@var string
+		*/
+		public static $cname = '{$_lang_textarea}';
+		
+		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
 		public $db_fields = array();
+		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
 		public $has_one = array();
+		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
 		public $many_many = array();
-		public $prefix = "Box_";
+		
 		/**
-		 * the name of the box with language, e.g. {$_lang_textarea}
-		 *@name name
-		 *@var string
+		 * prefix of table
+		 *
+		 *@name prefix
 		*/
-		public $name = '{$_lang_textarea}';
+		public $prefix = "Box_";
+		
 		/**
 		 * get Edit-form
 		 *@name getEditForm
@@ -396,7 +410,13 @@ class boxController extends BoxesController
 
 class login_meinaccount extends Box
 {
-		public $name = '{$_lang_login_myaccount}';
+		public static $cname = '{$_lang_login_myaccount}';
+		
+		/**
+		 * renders the box
+		 *
+		 *@name getContent
+		*/
 		public function getContent()
 		{
 				 return tpl::render('boxes/login.html',array('users_online'	=> LiveCounterController::countMembersOnline()));
@@ -423,7 +443,7 @@ Object::extend("tplCaller", "BoxesTPLExtension");
 */
 class boxpage extends Page
 {
-		public $name = '{$_lang_boxes_page}';
+		public static $cname = '{$_lang_boxes_page}';
 		
 		/**
 		 * pretty nice icon for that

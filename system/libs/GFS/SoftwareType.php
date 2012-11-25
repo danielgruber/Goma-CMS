@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
-  * $Version 1.5.5
+  * last modified: 25.11.2012
+  * $Version 1.5.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1041,7 +1041,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		$_data["postflightCode"][] = '<?php writeProjectConfig('.var_export($info, true).', '.var_export($data["folder"], true).'); setProject('.var_export($data["folder"], true).', '.var_export($domain, true).');';
 		
 		// write version file
-		$_data["postflightCode"][] = '<?php FileSystem::write('.var_export($data["folder"] . "/version.php", true).', "<?php $version = '.var_export($_data["version"], true).';");';
+		$_data["postflightCode"][] = '<?php FileSystem::write('.var_export($data["folder"] . "/version.php", true).', "<?php \$version = '.var_export($_data["version"], true).';");';
 		
 		return $_data;
 	}

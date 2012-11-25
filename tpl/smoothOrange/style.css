@@ -38,10 +38,16 @@ html, body {
 	margin-top: 20px;
 	margin-right: 20px;
 }
+#header .quickLinks .user img {
+	margin-top: -3px;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+}
 #header .quickLinks .logoutButton {
 	position: absolute;
 	top: 12px;
-	right: 190px;
+	right: 0px;
 	padding: 8px;
 }
 #header h3 {

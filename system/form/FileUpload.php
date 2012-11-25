@@ -230,7 +230,7 @@ class FileUpload extends FormField
 			if(is_object($response)) {
 				HTTPResponse::setHeader("Content-Type", "text/x-json");
 				HTTPResponse::sendHeader();
-				$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
+				$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id, "icon" => $response->getIcon());
 			/*if(!$this->link) {
 				unset($filedata["realpath"]);
 				unset($filedata["path"]);
@@ -267,7 +267,7 @@ class FileUpload extends FormField
 			$response = $this->handleUpload($_FILES["file"]);
 			if(is_object($response)) {
 				HTTPResponse::sendHeader();
-				$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "path" => $response->path, "id" => $response->id);
+				$filedata = array("name" => $response->filename, "realpath" => $response->fieldGet("path"), "icon16" => $response->getIcon(16), "icon" => $response->getIcon(), "path" => $response->path, "id" => $response->id);
 				/*if(!$this->link) {
 					unset($filedata["realpath"]);
 					unset($filedata["path"]);

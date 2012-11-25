@@ -293,8 +293,18 @@ a:hover {
 	text-shadow: 1px 1px 0px #333;
 }
 #content > .header .userbar div a:hover {
-	color: #fff;
+	color: #eee;
 	text-decoration: none;
+}
+
+#content > .header .userbar .user a img {
+	margin-top: -9px;
+	border: 2px solid #bbb;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+}
+#content > .header .userbar .user a:hover img {
+	border-color: #fff;
 }
 
 #content > .header .userbar .logout {
@@ -628,7 +638,7 @@ a:hover {
 	font-weight: normal;
 	font-family: sans-serif;;
 	display: inline-block;
-	border: 1px solid #aaa;
+	border: 1px solid #bbb;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;

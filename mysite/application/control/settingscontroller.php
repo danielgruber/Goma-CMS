@@ -6,12 +6,20 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 1.2.3
+  * last modified: 25.11.2012
+  * $Version 1.2.4
 */
 
 
 class Newsettings extends DataObject implements HistoryData {
+	/**
+	 * name of this dataobject
+	 *
+	 *@name name
+	 *@access public
+	*/
+	public static $cname = '{$_lang_settings}';
+	
 	/**
 	 * fields for general tab
 	 *

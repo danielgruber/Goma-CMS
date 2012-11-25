@@ -1,10 +1,10 @@
 <?php
 /**
-  *@package goma
+  *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 22.02.2011
+  * last modified: 25.11.2011
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -13,7 +13,16 @@ loadlang('st');
 
 class statistics extends box
 {
-		public $name = '{$_lang_st_stats}';
+		/**
+		 * title of this dataobject
+		*/
+		public static $cname = '{$_lang_st_stats}';
+		
+		/**
+		 * additional database-fields needed for this box
+		 *
+		 *@name db_fields
+		*/
 		public $db_fields = array
 		(
 			"today" 		=> "int(1)",
@@ -22,8 +31,11 @@ class statistics extends box
 			"whole"			=> 'int(1)',
 			'online'		=> 'int(1)'
 		);
+		
 		/**
 		 * gets checkboxes for editing
+		 *
+		 *@name getEditForm
 		*/
 		public function getEditForm(&$form)
 		{
@@ -36,8 +48,12 @@ class statistics extends box
 				if(settingsController::get("livecounter"))
 					$form->add(new checkbox("online", $GLOBALS["lang"]["st_online"]));
 		}
+		
 		/**
 		 * renders the whole box
+		 *
+		 *@name getContent
+		 *@access public
 		*/
 		public function getContent()
 		{

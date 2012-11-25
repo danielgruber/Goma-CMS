@@ -527,9 +527,15 @@ $lang = array(
 	
 	"h_user_update"			=> '$user updated the user <a href="$userUrl">$euser</a>',
 	"h_profile_update"		=> '$user updated the own profile.',
-	"h_user_remove"			=> '$user removed the user <a href="$userUrl">$euser</a>',
+	"h_user_remove"			=> '$user removed the user $euser',
 	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser logged in',
+	
+	"h_group_update"		=> '$user updated the group <a href="$groupUrl">$group</a>',
+	"h_group_remove"		=> '$user removed the group $group',
+	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',
+	
+	"h_all"					=> "All Events",
 	
 	"older"					=> "older entries",
 	"newer"					=> "newer entries"

@@ -4,13 +4,13 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 1.1.1
+  * last modified: 25.11.2012
+  * $Version 1.1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Group extends DataObject implements PermProvider
+class Group extends DataObject implements HistoryData, PermProvider
 {
 		/**
 		 * name of this model
@@ -18,7 +18,7 @@ class Group extends DataObject implements PermProvider
 		 *@name name
 		 *@access public
 		*/
-		public $name = '{$_lang_group}';
+		public static $cname = '{$_lang_group}';
 		
 		/**
 		 * icon for this model
@@ -280,6 +280,36 @@ class Group extends DataObject implements PermProvider
 				)
 			);
 		}
+		
+		/**
+		 * returns text what to show about the event
+		 *
+		 *@name generateHistoryData
+		 *@access public
+		*/
+		public static function generateHistoryData($record) {
+			switch($record->action) {
+				case "update":
+				case "publish":
+					$lang = lang("h_group_update", '$user updated the group <a href="$groupUrl">$group</a>');
+					$icon = "images/icons/fatcow16/group_edit.png";
+				break;
+				case "insert":
+					$lang = lang("h_group_create", '$user created the group <a href="$groupUrl">$group</a>');
+					$icon = "images/icons/fatcow16/group_add.png";
+				break;
+				case "remove":
+					$lang = lang("h_user_remove", '$user removed the group $group');
+					$icon = "images/icons/fatcow16/group_delete.png";
+				break;
+			}
+			
+			$lang = str_replace('$groupUrl', "admin/group/" . $record->record()->id . URLEND, $lang);
+			$lang = str_replace('$group', convert::Raw2text($record->record()->name), $lang);
+			
+			return array("icon" => $icon, "text" => $lang);
+		}
+		
 }
 
 /**
