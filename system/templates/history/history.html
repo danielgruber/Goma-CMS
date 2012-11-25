@@ -2,11 +2,11 @@
 <% INCLUDE_JS "history.js" %>
 <script type="text/javascript">
 	jQuery(function(){
-		bindHistory();
+		bindHistory($("#{$id}"));
 	});
 </script>
 <% activatePagination($_GET_page, 10) %>
-<div class="history">
+<div id="$id" class="history">
 	<% IF isPageBefore() %>
 		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
 	<% END %>
@@ -23,6 +23,6 @@
 		</div>
 	<% ENDCONTROL %>
 	<% IF isNextPage() %>
-		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
+		<a id="{$id}_link" href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
 	<% END %>
 </div>

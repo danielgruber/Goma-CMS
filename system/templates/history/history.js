@@ -6,19 +6,16 @@
   * last modified: 25.11.2012
 */
 (function($, w){
-	w.bindHistory = function() {
-		$("div.history .older").unbind("click");
-		$("div.history .event").unbind("mouseover");
-		
+	w.bindHistory = function(div) {
 		/**
 		 * loads new elements based on the older-button
 		*/
-		var load = function(o){
-			
+		var load = function(o) {
 			// define which history is meant, maybe there are more than one on a page
 			var history = o.parent();
 			var older = o;
 			var olderText = older.html();
+			var id = o.attr("id").replace("_link", "");
 			older.html('<img src="images/16x16/loading.gif" alt="loading" />');
 			
 			// load data from server
@@ -34,14 +31,14 @@
 					older.remove();
 					
 					// append all events
-					node.find(".event").each(function(){
+					node.find("#"+id+" .event").each(function(){
 						$(this).removeClass("first");
 						$(this).appendTo(history);
 					});
 				
 					// append older button if existing
-					if(node.find(".older").length > 0) {
-						node.find(".older").appendTo(history);
+					if(node.find("#"+id+" .older").length > 0) {
+						node.find("#"+id+" .older").appendTo(history);
 					}
 					
 					// rebind events
@@ -72,7 +69,7 @@
 		};
 		
 		// bind mouseover events
-		$("div.history").each(function(){
+		div.each(function(){
 			var history = $(this);
 			if(history.find(".older").length > 0) {
 				var evLength = history.find(".event").length - 10;
@@ -90,7 +87,7 @@
 		});
 		
 		// bind click event
-		$("div.history .older").click(function(){
+		div.find(".older").click(function(){
 			return load($(this));
 		});
 	};

@@ -100,7 +100,9 @@ class History extends DataObject {
 			$data = $filter;
 		}
 		
-		return $data->renderWith("history/history.html");
+		$id = "history_" . md5(var_export($filter, true));
+		
+		return $data->customise(array("id" => $id))->renderWith("history/history.html");
 	}
 	
 	/**
