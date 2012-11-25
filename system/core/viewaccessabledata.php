@@ -528,7 +528,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(substr($lowerOffset, 0, 8) == "_server_")
 				{
 					$key = substr($offset, 8);
-					if(strtolower($key) == "redirect" || strtolower($key) == "redirect_parent") {
+					if(strtolower($key) == "redirect" || strtolower($key) == "redirect_parent" || strtolower($key) == "real_request_uri") {
 						return true;
 					}
 					return isset($_SERVER[$key]);
@@ -562,10 +562,15 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					}
 					
 					if(strtolower($key) == "request_uri") {
-						if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
+						if(Core::is_ajax() && (isset($_SERVER["HTTP_X_REFERER"]))) {
 							return $_SERVER["HTTP_X_REFERER"];
 						}
 					}
+					
+					if(strtolower($key) == "real_request_uri") {
+						return $_SERVER["REQUEST_URI"];
+					}
+					
 					return $_SERVER[$key];
 				} else if(substr($loweroffset, 0, 6) == "_post_") {
 					$key = substr($offset, 6);

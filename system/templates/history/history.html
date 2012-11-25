@@ -1,8 +1,9 @@
 <% INCLUDE_CSS "history.css" %>
+<% INCLUDE_JS "history.js" %>
 <% activatePagination($_GET_page, 10) %>
 <div class="history">
 	<% IF isPageBefore() %>
-		<a href="<% addParamToURL($_SERVER_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
+		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
 	<% END %>
 	<% CONTROL this() %>
 		<% IF $this.first %>
@@ -17,6 +18,6 @@
 		</div>
 	<% ENDCONTROL %>
 	<% IF isNextPage() %>
-		<a href="<% addParamToURL($_SERVER_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
+		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
 	<% END %>
 </div>
