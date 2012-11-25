@@ -570,7 +570,7 @@ class ClassInfo extends Object
 		 *@param string - file
 		 *@param string - class
 		*/
-		public function findFile($file, $class) {
+		public static function findFile($file, $class) {
 			if($folder = self::getExpansionFolder($class)) {
 				if(file_exists($folder . "/" . $file)) {
 					return $folder . "/" . $file;
@@ -601,7 +601,7 @@ class ClassInfo extends Object
 		 *@param string - file
 		 *@param string - class
 		*/
-		public function findFileAbsolute($file, $class) {
+		public static function findFileAbsolute($file, $class) {
 			if($path = self::findFile($file, $class))
 				return realpath($path);
 			else
@@ -616,7 +616,7 @@ class ClassInfo extends Object
 		 *@param string - file
 		 *@param string - class
 		*/
-		public function findFileRelative($file, $class) {
+		public static function findFileRelative($file, $class) {
 			if($path = self::findFile($file, $class)) {
 				if(substr($path, 0, strlen(ROOT)) == ROOT) {
 					return substr($path, strlen(ROOT));
@@ -625,6 +625,22 @@ class ClassInfo extends Object
 				}
 			} else
 				return false;
+		}
+		
+		/**
+		 * gets the title of a class
+		 *
+		 *@name getClassTitle
+		 *@access public
+		*/
+		public static function getClassTitle($class) {
+			if(self::hasStatic($class, "cname")) {
+				return parse_lang(self::getStatic($class, "cname"));
+			}
+			
+			$c = new $class;
+			
+			return parse_lang($c->name);
 		}
 		
 		/**

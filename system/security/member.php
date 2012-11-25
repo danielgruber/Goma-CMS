@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 2.4
+  * last modified: 25.11.2012
+  * $Version 2.4.1
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -55,7 +55,7 @@ class userController extends Controller
 }
 
 
-class User extends DataObject implements HistoryData
+class User extends DataObject implements HistoryData, PermProvider
 {
 		/**
 		 * the name of this dataobject
@@ -63,7 +63,7 @@ class User extends DataObject implements HistoryData
 		 *@name name
 		 *@access public
 		*/
-		public $name = '{$_lang_user}';
+		public static $cname = '{$_lang_user}';
 		
 		/**
 		 * the database fields of a user
@@ -170,7 +170,19 @@ class User extends DataObject implements HistoryData
 			if($data["id"] == member::$id)
 				return true;
 			
-			return parent::canWrite($data);
+			return Permission::check("USERS_MANAGE");
+		}
+		
+		/**
+		 * returns true if you can write
+		 *
+		 *@name canDelete
+		 *@access public
+		*/
+		
+		public function canDelete($data = null)
+		{
+			return Permission::check("USERS_MANAGE");
 		}
 		
 		/**
@@ -293,23 +305,35 @@ class User extends DataObject implements HistoryData
 		
 		/**
 		 * form for password-edit
+		 *
 		 *@name pwdform
 		*/
 		public function pwdform($id)
 		{
-				$pwdform = new Form($this->controller(), "editpwd", array(
-					new HiddenField("id", $id),
-					new PasswordField("oldpwd", $GLOBALS["lang"]["old_password"]),
-					new PasswordField("password",$GLOBALS["lang"]["new_password"]),
-					new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
-				));
-				$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
-				$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+				if(Permission::check("USERS_MANAGE") && $id != member::$id) {
+					$pwdform = new Form($this->controller(), "editpwd", array(
+						new HiddenField("id", $id),
+						new PasswordField("password",$GLOBALS["lang"]["new_password"]),
+						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
+					));
+					$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
+					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+				} else {
+					$pwdform = new Form($this->controller(), "editpwd", array(
+						new HiddenField("id", $id),
+						new PasswordField("oldpwd", $GLOBALS["lang"]["old_password"]),
+						new PasswordField("password",$GLOBALS["lang"]["new_password"]),
+						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
+					));
+					$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
+					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+				}
 				return $pwdform;
 		}
 		
 		/**
 		 * validates an new user
+		 *
 		 *@name validateuser
 		 *@access public
 		*/
@@ -330,6 +354,7 @@ class User extends DataObject implements HistoryData
 		}
 		/**
 		 * sets the password with md5
+		 *
 		 *@name setpassword
 		 *@access public
 		*/
@@ -341,6 +366,7 @@ class User extends DataObject implements HistoryData
 		
 		/**
 		 * valdiates code
+		 *
 		 *@name validatecode
 		 *@access public
 		 *@param string - value
@@ -362,22 +388,22 @@ class User extends DataObject implements HistoryData
 		}
 		
 		/**
-		 * gets the password
+		 * password should not be visible
+		 *
 		 *@name getpassword
 		 *@access public
 		*/
-		public function getpassword()
-		{
+		public function getpassword() {
 				return "";
 		}
 		
 		/**
 		 * validates the pwd
+		 *
 		 *@name validatepwd
 		 *@access public		 
 		*/
-		public function validatepwd($obj)
-		{
+		public function validatepwd($obj) {
 			if(isset($obj->form->result["oldpwd"]))
 			{
 				$data = DataObject::get_one("user", array("id" => $obj->form->result["id"]));
@@ -410,6 +436,27 @@ class User extends DataObject implements HistoryData
 			} else
 			{
 				return lang("password_wrong");
+			}
+		}
+		
+		/**
+		 * validates the pwd if you're an admin and set the password
+		 *
+		 *@name admin_validatepwd
+		 *@access public		 
+		*/
+		public function admin_validatepwd($obj) {
+			if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
+			{
+				if($obj->form->result["password"] == $obj->form->result["repeat"])
+				{
+					return true;
+				} else
+				{
+					return lang("passwords_not_match");
+				}
+			} else {
+				return lang("passwords_not_match");
 			}
 		}
 		
@@ -496,6 +543,41 @@ class User extends DataObject implements HistoryData
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 			
 			return array("icon" => $icon, "text" => $lang);
+		}
+		
+		/**
+		 * provides some permissions
+		 *
+		 *@name providePerms
+		 *@access public
+		*/
+		public function providePerms() {
+			return array(
+				"USERS_MANAGE"	=> array(
+					"title"		=> '{$_lang_administration}: {$_lang_user}',
+					"default"	=> array(
+						"type"	 	=> "admins",
+						"inherit"	=> "superadmin"
+					),
+					"category"	=> "superadmin"
+				)
+			);
+		}
+		
+		/**
+		 * gets the avatar
+		 *
+		 *@name getImage
+		 *@access public
+		*/
+		public function getImage() {
+			if($this->avatar) {
+				return $this->avatar;
+			} else {
+				$this->avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "ImageUploads", false);
+				$this->write(false, true);
+				return $this->avatar;
+			}
 		}
 }
 

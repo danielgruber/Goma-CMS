@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.09.2012
-  * $Version 1.0
+  * last modified: 25.11.2012
+  * $Version 1.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -19,7 +19,7 @@ class userAdmin extends adminItem {
 	/**
 	 * permissions
 	*/
-	public $rights = "10";
+	public $rights = "USERS_MANAGE";
 	
 	/**
 	 * sort
@@ -32,6 +32,16 @@ class userAdmin extends adminItem {
 	public $models = array(
 		"user"
 	);
+	
+	/**
+	 * history-url
+	 *
+	 *@name historyURL
+	 *@access public
+	*/
+	public function historyURL() {
+		return "admin/history/user";
+	}
 	
 	/**
 	 * logic

@@ -54,11 +54,14 @@ class HTMLEditor extends Textarea
 		{
 				if($this->width == "100%") {
 					$width = "";
-				} else if(strpos("px", $this->width) && (int) $this->width < 350) {
+				} else if(strpos($this->width, "px") && (int) $this->width < 350) {
+					$width = "350px";
+				} else if($this->width < 350) {
 					$width = "350px";
 				} else {
 					$width = $this->width;
 				}
+				
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor/";');
 				Resources::add("system/libs/thirdparty/ckeditor/ckeditor.js", "js");
 				Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");

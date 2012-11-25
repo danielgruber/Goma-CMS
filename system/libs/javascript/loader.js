@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-  * $Version 1.4.4
+  * last modified: 25.11.2012
+  * $Version 1.5
 */
 
 // prevent from being executed twice
@@ -189,7 +189,7 @@ if(typeof self.loader == "undefined") {
 				});
 				
 				try {
-					var data = eval('('+jqXHR.responseText+')');
+					var data = parseJSON(jqXHR.responseText);
 					for(i in data) {
 						lang[i] = data[i];
 					}
@@ -241,7 +241,7 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			try {
-				var data = eval('('+jqXHR.responseText+')');
+				var data = parseJSON(jqXHR.responseText);
 				for(i in data) {
 					lang[i] = data[i];
 				}
@@ -261,18 +261,15 @@ if(typeof self.loader == "undefined") {
 				if(typeof object != "undefined") {
 					var method;
 					if (window.execScript)
-					  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+					  	window.execScript('method = function(' + html + ')',''); // execScript doesn’t return anything
 					else
-					  	var method = eval_global('(function(){' + html + '});');
+					  	var method = eval('(function(){' + html + '});');
 					method.call(object);
 				} else {
-					 if (window.execScript)
-					 	window.execScript(html, ''); // execScript doesn’t return anything
-					 else
-					 	eval(html);
+					 eval_global(html);
 				}
 			} else if(content_type == "text/x-json") {
-				var object = eval_global("("+html+")");
+				var object = parseJSON(html);
 				var _class = object["class"];
 				var i;
 				for(i in object["areas"]) {
@@ -308,19 +305,22 @@ if(typeof self.loader == "undefined") {
 				var content_type = ajaxreq.getResponseHeader("content-type");
 				if(content_type == "text/javascript") {
 					if(typeof object != "undefined") {
-						var method = eval_global('(function(){' + html + '});');
+						var method = eval('(function(){' + html + '});');
 						method.call(object);
 					} else {
 						eval_global(html);
 					}
+					RunAjaxResources(ajaxreq);
 					return true;
 				} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-					var object = eval_global("("+html+")");
+					var object = parseJSON(html);
 					var _class = object["class"];
 					var i;
 					for(i in object["areas"]) {
 						$("#"+_class+"_"+i+"").html(object["areas"][i]);
 					}
+					RunAjaxResources(ajaxreq);
+					return true;
 				}
 			}
 			
@@ -425,7 +425,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "script"
+								dataType: "html",
+								success: function(js) {
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;
@@ -514,44 +517,44 @@ if(typeof self.loader == "undefined") {
 			var mouseover = false;
 			var timeout;
 			var i;
-			if(exceptions) {
-				var i;
-				for(i in exceptions) {
-					$(exceptions[i]).mousedown(function(){
-						clearTimeout(timeout);
-						mouseover = true;
-						timeout = setTimeout(function(){
-							mouseover = false;
-						}, 300);
-					});
-					$(exceptions[i]).mouseup(function(){
-						clearTimeout(timeout);
-						mouseover = true;
-						timeout = setTimeout(function(){
-							mouseover = false;
-						}, 300);
-					});
-				}
+			
+			
+			// function if we click or tap on an exception
+			var exceptionFunc = function(){
+				clearTimeout(timeout);
+				mouseover = true;
+				timeout = setTimeout(function(){
+					mouseover = false;
+				}, 300);
 			}
-			// init mouseover-events
-			$(document).mouseup(function(){
+			
+			// function if we click anywhere
+			mouseDownFunc = function(){
 				setTimeout(function(){		
 					if(mouseover === false) {
 						fn();
 					}
 				}, 10);
-			});
+			}
+			
+			if(exceptions) {
+				var i;
+				for(i in exceptions) {
+					$(exceptions[i]).on("mousedown", exceptionFunc);
+					$(exceptions[i]).on("mouseup", exceptionFunc);
+					$(exceptions[i]).on("touchstart", exceptionFunc);
+					$(exceptions[i]).on("touchend", exceptionFunc);
+				}
+			}
+			// init mouseover-events
+			$(document).on("mouseup", mouseDownFunc);
+			$(document).on("touchend", mouseDownFunc);
 			$("iframe").each(function(){
 				var w = $(this).get(0).contentWindow;
-				if(w)
-					$(w).mouseup(function(){
-						setTimeout(function(){
-							if(mouseover === false) {
-								fn();
-							}
-						}, 10);
-						
-					})
+				if(w) {
+					$(w).on("mouseup", mouseDownFunc);
+					$(w).on("touchend", mouseDownFunc);
+				}
 			});
 		}
 		w.callOnDocumentClick = w.CallonDocumentClick;
@@ -700,10 +703,22 @@ if(typeof self.loader == "undefined") {
 	// patch for IE eval
 	function eval_global(codetoeval) {
 	    if (window.execScript)
-	        window.execScript('code_evaled = ' + '(' + codetoeval + ')',''); // execScript doesn’t return anything
+	        window.execScript(codetoeval); // execScript doesn’t return anything
 	    else
-	        code_evaled = eval(codetoeval);
-	    return code_evaled;
+	        window.eval(codetoeval);
+	}
+	
+	// parse JSON
+	function parseJSON(str) {
+		if(str.substring(0, 1) == "(") {
+			str = str.substr(1);
+		}
+		
+		if(str.substr(str.length - 1) == ")") {
+			str = str.substr(0, str.length -1);
+		}
+		
+		return $.parseJSON(str);
 	}
 	
 	function microtime (get_as_float) {
@@ -732,4 +747,3 @@ if(typeof self.loader == "undefined") {
 	    return new Array(multiplier + 1).join(input);
 	}
 }
-var code_evaled;

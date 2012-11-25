@@ -11,6 +11,11 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Page extends pages
 {
+				
+		/**
+		 * name
+		*/
+		public static $cname = '{$_lang_just_content_page}';
 		
 		/**
 		 * don't use from parent-class
@@ -45,14 +50,12 @@ class Page extends pages
 		);
 		
 		public $prefix = "Page_";
+		
 		/**
 		 * orderby
 		*/
 		public $orderby = array('field' => 'sort', 'type' => 'ASC');
-		/**
-		 * name
-		*/
-		public $name = '{$_lang_just_content_page}';
+		
 		/**
 		 * which parents are allowed
 		*/

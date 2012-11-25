@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.11.2012
-  * $Version 2.0.4
+  * last modified: 25.11.2012
+  * $Version 2.0.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -100,6 +100,17 @@ class contentAdmin extends LeftAndMain
 			return defined("PREVIEW_URL") ? PREVIEW_URL : BASE_URI;
 		}
 		
+		
+		/**
+		 * history-url
+		 *
+		 *@name historyURL
+		 *@access public
+		*/
+		public function historyURL() {
+			return "admin/history/pages";
+		}
+		
 		/**
 		 * redirect back
 		*/
@@ -129,13 +140,11 @@ class contentAdmin extends LeftAndMain
 		 *@access public
 		*/
 		public function createOptions() {
-			$p = new Page;
-			$data = array("page" => parse_lang($p->name));
+			$data = array("page" => ClassInfo::getClassTitle("Page"));
 			foreach(ClassInfo::getChildren("page") as $page) {
 				if(ClassInfo::exists($page)) {
-					$c = new $page;
-					if(!Object::method_exists($c, "hidden") || $c->hidden() !== true)
-						$data[$page] = parse_lang($c->name);
+					if(!Object::method_exists($page, "hidden") || class_user_func_array(array($page, "hidden"), array()) !== true)
+						$data[$page] = ClassInfo::getClassTitle($page);
 				}
 			}
 			

@@ -299,7 +299,7 @@ $lang = array(
 	"upgrade_to_next"								=> "N&auml;chste Version herunterladen",
 	"version_current"								=> "Sie haben die aktuellste Version!",
 	"Create"										=> "Erstellen",
-	"no_result"										=> "Es wurden keine Daten gefunden",
+	"no_result"										=> "Keine Elemente",
 	"delete_okay"									=> "Die Daten wurden erfolgreich gelöscht!",
 	
 	/*mobile*/
@@ -528,11 +528,17 @@ $lang = array(
 	
 	"h_user_update"			=> '$user bearbeitete den Benutzer <a href="$userUrl">$euser</a>',
 	"h_profile_update"		=> '$user bearbeitete das eigene Profil.',
-	"h_user_remove"			=> '$user löschte den Benutzer <a href="$userUrl">$euser</a>',
+	"h_user_remove"			=> '$user löschte den Benutzer $euser',
 	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser hat sich eingeloggt',
 	
 	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>',
+	
+	"h_group_update"		=> '$user bearbeitete die Gruppe <a href="$groupUrl">$group</a>',
+	"h_group_remove"		=> '$user löschte die Gruppe $group',
+	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
+	
+	"h_all"					=> "Alle Ereignisse",
 	
 	"older"					=> "Ältere Einträge",
 	"newer"					=> "Neuere Einträge"
