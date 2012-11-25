@@ -42,7 +42,7 @@
 					}
 					
 					// rebind events
-					history.find(".event").unbind("mouseover");
+					history.find(".event").off(".history");
 					if(history.find(".older").length > 0) {
 						
 						// bind click
@@ -53,15 +53,18 @@
 						// bind mouseover
 						var evLength = history.find(".event").length - 10;
 						var timeout;
-						history.find(".event:gt("+evLength+")").mouseover(function(){
-							history.find(".event").unbind("mouseover");
+						var func = function(){
+							history.find(".event").off(".history");
 							
 							// we need the timeout to prevent from firing multiple times
 							clearTimeout(timeout);
 							timeout = setTimeout(function(){
 								history.find(".older").click();
 							}, 80);
-						});
+						}
+						history.find(".event:gt("+evLength+")").on("mouseover.history", func);
+						history.find(".event:gt("+evLength+")").on("touchmove.history", func);
+						history.on("scoll.history", func);
 					}
 				}
 			});
@@ -74,15 +77,18 @@
 			if(history.find(".older").length > 0) {
 				var evLength = history.find(".event").length - 10;
 				var timeout;
-				history.find(".event:gt("+evLength+")").mouseover(function(){
-					history.find(".event").unbind("mouseover");
+				var func = function(){
+					history.find(".event").off(".history");
 					
 					// we need the timeout to prevent from firing multiple times
 					clearTimeout(timeout);
 					timeout = setTimeout(function(){
 						history.find(".older").click();
 					}, 80);
-				});
+				}
+				history.find(".event:gt("+evLength+")").on("mouseover.history", func);
+				history.find(".event:gt("+evLength+")").on("touchmove.history", func);
+				history.on("scoll.history", func);
 			}
 		});
 		
