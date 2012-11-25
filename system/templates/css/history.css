@@ -10,6 +10,7 @@
 	width: 300px;
 	height: 400px;
 	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 	margin-top: 30px;
 }
 .dropdownDialog .history .event {

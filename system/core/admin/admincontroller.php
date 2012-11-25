@@ -165,6 +165,9 @@ class adminController extends Controller
 		*/
 		public function serve($content) {
 			Core::setHeader("robots", "noindex,nofollow");
+			if(!Permission::check("ADMIN") && Core::is_ajax()) {
+				Resources::addJS("location.reload();");
+			}
 			if(!_eregi('</html', $content)) {
 				if(!Permission::check("ADMIN")) {
 					$admin = new Admin();
