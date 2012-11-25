@@ -10,18 +10,24 @@
 	<% IF isPageBefore() %>
 		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
 	<% END %>
-	<% CONTROL this() %>
-		<% IF $this.first %>
-			<div class="event first">
-		<% ELSE %>
-			<div class="event">
-		<% END %>
-			<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
-			<span class="date">$this.created.date()</span>
-			<p>$this.content</p>
-			<div class="clear"></div>
+	<% IF $this %>
+		<% CONTROL this() %>
+			<% IF $this.first %>
+				<div class="event first">
+			<% ELSE %>
+				<div class="event">
+			<% END %>
+				<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
+				<span class="date">$this.created.date()</span>
+				<p>$this.content</p>
+				<div class="clear"></div>
+			</div>
+		<% ENDCONTROL %>
+	<% ELSE %>
+		<div class="no_entries">
+			{$_lang_no_result}
 		</div>
-	<% ENDCONTROL %>
+	<% END %>
 	<% IF isNextPage() %>
 		<a id="{$id}_link" href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", NextPage()) %>" class="older">{$_lang_older}</a>
 	<% END %>

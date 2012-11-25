@@ -27,6 +27,12 @@
 	left: 33px;
 	bottom: 5px;
 }
+.history .no_entries {
+	color: #999;
+	font-size: 16pt;
+	padding: 130px 0;
+	text-align: center;
+}
 .history .event {
 	display: block;
 	padding: 15px;
