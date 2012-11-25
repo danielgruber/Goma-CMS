@@ -40,6 +40,7 @@ html, body {
 	float: right;
 	font-size: 0.8em;
 	color: #777;
+	position: relative;
 }
 #header .quickLinks a {
 	color: #555;
@@ -49,6 +50,12 @@ html, body {
 	border: 1px solid #fff;
 	border-radius: 2px;
 	-webkit-border-radius: 2px;
+}
+
+#loginFormGlobe {
+	position: absolute;
+	top: -3px;
+	right: -15px;
 }
 
 #header #navi {
