@@ -21,6 +21,8 @@
 				<div class="content_wrapper">
 					<div class="quickLinks">
 						<% IF login() %>
+							<a href="profile/">$loggedInUser.image.setSize(16, 16)  <strong>{$_cms_user}</strong></a> | 
+							<a href="#" onclick="$('#loginFormGlobe').submit();return false;">{$_lang_logout}</a>
 							<form method="post" id="loginFormGlobe" action="profile/logout">
 								<input type="hidden" name="logout" value="1" />
 								<input type="hidden" name="redirect" value="{$_SERVER_REQUEST_URI}" />
@@ -28,10 +30,6 @@
 									<input class="logoutButton" type="submit" class="button" value="{$_lang_logout}" style="margin: 2px 0;" />
 								</noscript>
 							</form>
-							
-							<a href="#" onclick="$('#loginFormGlobe').submit();return false;">{$_lang_logout}</a>
-							|
-							<a href="profile/">{$_lang_profile}</a>
 						<% ELSE %>
 							<a href="profile/login/?redirect={$_SERVER_REQUEST_URI.URL()}">{$_lang_login}</a>
 							|

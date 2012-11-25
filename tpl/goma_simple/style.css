@@ -44,6 +44,12 @@ html, body {
 #header .quickLinks a {
 	color: #555;
 }
+#header .quickLinks .user img {
+	margin-top: -3px;
+	border: 1px solid #fff;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+}
 
 #header #navi {
 	padding-top: 10px;

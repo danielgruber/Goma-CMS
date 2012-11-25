@@ -64,9 +64,9 @@
 	<% IF $_cms_user %>
 		<div class="spacer"></div>
 		
-		<div>
+		<div class="user">
 			<span>
-				<a href="profile/"><strong>{$_cms_user}</strong></a>
+				<a href="profile/">$loggedInUser.image.setSize(24,24) <strong>{$_cms_user}</strong></a>
 			</span>
 		</div>
 	<% END %>

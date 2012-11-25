@@ -10,8 +10,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 31.08.2012
-  * $Version 2.2
+  * last modified: 25.11.2012
+  * $Version 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -852,6 +852,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		
 		public function getPosition() {
 			return $this->dataSetPosition;
+		}
+		
+		/**
+		 * returns the object of the current logged in user
+		 *
+		 *@name loggedInUser
+		 *@access public
+		*/
+		public function loggedInUser() {
+			return member::$loggedIn;
 		}
 		
 		/**

@@ -293,8 +293,23 @@ a:hover {
 	text-shadow: 1px 1px 0px #333;
 }
 #content > .header .userbar div a:hover {
-	color: #fff;
+	color: #eee;
 	text-decoration: none;
+}
+#content > .header .userbar .user a {
+	position: relative;
+	padding-left: 29px;
+}
+#content > .header .userbar .user a img {
+	position: absolute;
+	top: -7px;
+	left: -5px;
+	border: 2px solid #bbb;
+	border-radius: 2px;
+	-webkit-border-radius: 2px;
+}
+#content > .header .userbar .user a:hover img {
+	border-color: #fff;
 }
 
 #content > .header .userbar .logout {
