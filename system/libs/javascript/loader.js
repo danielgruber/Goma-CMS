@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-  * $Version 1.4.4
+  * last modified: 25.11.2012
+  * $Version 1.5
 */
 
 // prevent from being executed twice
@@ -517,44 +517,44 @@ if(typeof self.loader == "undefined") {
 			var mouseover = false;
 			var timeout;
 			var i;
-			if(exceptions) {
-				var i;
-				for(i in exceptions) {
-					$(exceptions[i]).mousedown(function(){
-						clearTimeout(timeout);
-						mouseover = true;
-						timeout = setTimeout(function(){
-							mouseover = false;
-						}, 300);
-					});
-					$(exceptions[i]).mouseup(function(){
-						clearTimeout(timeout);
-						mouseover = true;
-						timeout = setTimeout(function(){
-							mouseover = false;
-						}, 300);
-					});
-				}
+			
+			
+			// function if we click or tap on an exception
+			var exceptionFunc = function(){
+				clearTimeout(timeout);
+				mouseover = true;
+				timeout = setTimeout(function(){
+					mouseover = false;
+				}, 300);
 			}
-			// init mouseover-events
-			$(document).mouseup(function(){
+			
+			// function if we click anywhere
+			mouseDownFunc = function(){
 				setTimeout(function(){		
 					if(mouseover === false) {
 						fn();
 					}
 				}, 10);
-			});
+			}
+			
+			if(exceptions) {
+				var i;
+				for(i in exceptions) {
+					$(exceptions[i]).on("mousedown", exceptionFunc);
+					$(exceptions[i]).on("mouseup", exceptionFunc);
+					$(exceptions[i]).on("touchstart", exceptionFunc);
+					$(exceptions[i]).on("touchend", exceptionFunc);
+				}
+			}
+			// init mouseover-events
+			$(document).on("mouseup", mouseDownFunc);
+			$(document).on("touchend", mouseDownFunc);
 			$("iframe").each(function(){
 				var w = $(this).get(0).contentWindow;
-				if(w)
-					$(w).mouseup(function(){
-						setTimeout(function(){
-							if(mouseover === false) {
-								fn();
-							}
-						}, 10);
-						
-					})
+				if(w) {
+					$(w).on("mouseup", mouseDownFunc);
+					$(w).on("touchend", mouseDownFunc);
+				}
 			});
 		}
 		w.callOnDocumentClick = w.CallonDocumentClick;
@@ -705,7 +705,7 @@ if(typeof self.loader == "undefined") {
 	    if (window.execScript)
 	        window.execScript(codetoeval); // execScript doesn’t return anything
 	    else
-	        eval(codetoeval);
+	        window.eval(codetoeval);
 	}
 	
 	// parse JSON
