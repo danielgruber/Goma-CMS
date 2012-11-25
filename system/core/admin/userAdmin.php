@@ -34,6 +34,16 @@ class userAdmin extends adminItem {
 	);
 	
 	/**
+	 * history-url
+	 *
+	 *@name historyURL
+	 *@access public
+	*/
+	public function historyURL() {
+		return "admin/history/user";
+	}
+	
+	/**
 	 * logic
 	*/
 	public function index() {

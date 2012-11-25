@@ -18,7 +18,7 @@ class Newsettings extends DataObject implements HistoryData {
 	 *@name name
 	 *@access public
 	*/
-	public static $name = '{$_lang_settings}';
+	public static $cname = '{$_lang_settings}';
 	
 	/**
 	 * fields for general tab
