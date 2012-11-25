@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 16.09.2011
-  * $Version 2.0.0 - 001
+  * last modified: 25.11.2011
+  * $Version 2.0
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -18,6 +18,7 @@ class Tabs extends Object {
      *@access public
     */
     public $name;
+    
     /**
      * array of tabs
      *
@@ -25,6 +26,7 @@ class Tabs extends Object {
      *@access public
     */
     public $tabs = array();
+    
     /**
      * container of the tabset
      *
@@ -32,6 +34,7 @@ class Tabs extends Object {
      *@access public
     */
     public $tabContainer;
+    
     /**
      * contains the tab-navigation
      *
@@ -39,6 +42,7 @@ class Tabs extends Object {
      *@access public
     */
     public $tabNavi;
+    
     /**
      *@name __construct
      *@access public
@@ -53,6 +57,7 @@ class Tabs extends Object {
             "id"		=> "tabs_container_" . $name
         ), $this->tabNavi = new HTMLNode("ul"));
     }
+    
     /**
      * adds a Tab
      *
@@ -71,6 +76,7 @@ class Tabs extends Object {
         }
         return true;
     }
+    
     /**
      * adds an ajax-Tab
      *
@@ -89,6 +95,7 @@ class Tabs extends Object {
         }
         return true;
     }
+    
     /**
      * renders the tabs
      *
