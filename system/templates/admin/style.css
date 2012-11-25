@@ -1045,7 +1045,14 @@ form h2 {
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	
-	background: #eee url(images/buttons.png) repeat-x;
+	background: -moz-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -ms-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -o-linear-gradient(#f5f5f5, #e0e0e0);
+	background: -webkit-linear-gradient(#f5f5f5 0%, #e0e0e0 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0')";
+	background: linear-gradient(#f5f5f5, #e0e0e0); 
+	
 	text-decoration: none;
 	color: #333;
 }

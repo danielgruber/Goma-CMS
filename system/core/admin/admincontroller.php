@@ -237,7 +237,7 @@ class adminController extends Controller
 				if(isset($item))
 					$filter["recordid"] = $item;
 				
-				if(Core::is_ajax() && isset($_GET["dropdownDialog"])) {
+				if(Core::is_ajax()) {
 					HTTPResponse::setBody(History::renderHistory($filter));
 					HTTPResponse::output();
 					exit;
