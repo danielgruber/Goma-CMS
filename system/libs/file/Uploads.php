@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.10.2012
-  * $Version 1.4
+  * last modified: 25.11.2012
+  * $Version 1.4.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -392,16 +392,25 @@ class Uploads extends DataObject {
 	 *@access public
 	 *@param int - size; support for 16, 32, 64 and 128
 	*/
-	public function getIcon($size = 128) {
+	public function getIcon($size = 128, $retina = false) {
 		switch($size) {
 			case 16:
-				return "images/icons/goma/16x16/file.png";
+				if($retina)
+					return "images/icons/goma16/file@2x.png";
+				else
+					return "images/icons/goma16/file.png";
 			break;
 			case 32:
-				return "images/icons/goma/32x32/file.png";
+				if($retina)
+					return "images/icons/goma32/file@2x.png";
+				else
+					return "images/icons/goma32/file.png";
 			break;
 			case 64:
-				return "images/icons/goma/64x64/file.png";
+				if($retina)
+					return "images/icons/goma64/file@2x.png";
+				else
+					return "images/icons/goma64/file.png";
 			break;
 			case 128:
 				return "images/icons/goma/128x128/file.png";
@@ -555,34 +564,55 @@ class ImageUploads extends Uploads {
 	 *@access public
 	 *@param int - size; support for 16, 32, 64 and 128
 	*/
-	public function getIcon($size = 128) {
+	public function getIcon($size = 128, $retina = false) {
 		switch($size) {
 			case 16:
 				if($this->width > 15) {
+					if($retina && $this->width > 31) {
+						return $this->path . "/setWidth/32";
+					}
 					return $this->path . "/setWidth/16";
 				} else {
-					return "images/icons/goma/16x16/image.png";
+					if($retina) {
+						return "images/icons/goma16/image@2x.png";
+					}
+					return "images/icons/goma16/image.png";
 				}
 			break;
 			case 32:
-				if($this->width > 31) {
+				if($this->width > 31) {	
+					if($retina && $this->width > 63) {
+						return $this->path . "/setWidth/64";
+					}
 					return $this->path . "/setWidth/32";
 				} else {
-					return "images/icons/goma/16x16/image.png";
+					if($retina) {
+						return "images/icons/goma32/image@2x.png";
+					}
+					return "images/icons/goma32/image.png";
 				}
 			break;
 			case 64:
 				if($this->width > 63) {
+					if($retina && $this->width > 127) {
+						return $this->path . "/setWidth/128";
+					}
 					return $this->path . "/setWidth/64";
 				} else {
-					return "images/icons/goma/16x16/image.png";
+					if($retina) {
+						return "images/icons/goma64/image@2x.png";
+					}
+					return "images/icons/goma64/image.png";
 				}
 			break;
 			case 128:
 				if($this->width > 127) {
+					if($retina && $this->width > 255) {
+						return $this->path . "/setWidth/256";
+					}
 					return $this->path . "/setWidth/128";
 				} else {
-					return "images/icons/goma/16x16/image.png";
+					return "images/icons/goma/128x128/image.png";
 				}
 			break;
 		}
