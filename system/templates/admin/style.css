@@ -296,14 +296,9 @@ a:hover {
 	color: #eee;
 	text-decoration: none;
 }
-#content > .header .userbar .user a {
-	position: relative;
-	padding-left: 29px;
-}
+
 #content > .header .userbar .user a img {
-	position: absolute;
-	top: -7px;
-	left: -5px;
+	margin-top: -9px;
 	border: 2px solid #bbb;
 	border-radius: 2px;
 	-webkit-border-radius: 2px;
