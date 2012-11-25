@@ -84,7 +84,11 @@ class History extends DataObject {
 	*/
 	public static function renderHistory($filter) {
 		if(isset($filter["dbobject"])) {
-			$filter["dbobject"] = array_intersect($filter["class_name"], self::supportHistoryView());
+			$dbObjectFilter = array();
+			foreach((array) $filter["dbobject"] as $class) {
+				$dbObjectFilter = array_merge($dbObjectFilter, array($class), ClassInfo::getChildren($class));
+			}
+			$filter["dbobject"] = array_intersect(ArrayLib::key_value($dbObjectFilter), self::supportHistoryView());
 		} else {
 			$filter["dbobject"] = self::supportHistoryView();
 		}

@@ -534,6 +534,8 @@ $lang = array(
 	
 	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>',
 	
+	"h_all"					=> "Alle Ereignisse",
+	
 	"older"					=> "Ältere Einträge",
 	"newer"					=> "Neuere Einträge"
 );

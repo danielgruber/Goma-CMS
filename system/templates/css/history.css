@@ -6,12 +6,16 @@
   * last modified: 25.11.2012
 */
 
+.dropdownDialog #tabs_container_history {
+	margin: 0 -15px;
+}
 .dropdownDialog .history {
 	width: 300px;
 	height: 400px;
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
-	margin-top: 30px;
+	margin-top: -15px;
+	margin-bottom: -23px;
 }
 .dropdownDialog .history .event {
 	position: relative;
@@ -22,9 +26,6 @@
 	position: absolute;
 	left: 33px;
 	bottom: 5px;
-}
-.history .event.first {
-	border-top: 1px solid #ddd;
 }
 .history .event {
 	display: block;

@@ -531,6 +531,8 @@ $lang = array(
 	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '$euser logged in',
 	
+	"h_all"					=> "All Events",
+	
 	"older"					=> "older entries",
 	"newer"					=> "newer entries"
 

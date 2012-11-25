@@ -240,11 +240,14 @@ class adminController extends Controller
 				if(isset($item))
 					$filter["recordid"] = $item;
 				
+				
+				// render the tabset
+				$tabs = new Tabs("history");
 				if(isset($filter["dbobject"])) {
-					$tabs = new Tabs("history");
-					$tabs->add();
+					$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), History::renderHistory($filter), $filter["dbobject"]);
 				}
-				$output = istory::renderHistory($filter);
+				$tabs->addTab(lang("h_all"), History::renderHistory(array()), "h_all");
+				$output = $tabs->render();
 				
 				if(Core::is_ajax()) {
 					HTTPResponse::setBody($output);
@@ -279,6 +282,16 @@ class adminController extends Controller
 		public function contentClass() {
 			return $this->class;
 		}
+		
+		/**
+		 * history-url
+		 *
+		 *@name historyURL
+		 *@access public
+		*/
+		public function historyURL() {
+			return "admin/history";
+		}
 }
 
 class admin extends ViewAccessableData implements PermProvider
@@ -295,6 +308,16 @@ class admin extends ViewAccessableData implements PermProvider
 			adminController::activeController()->userbar($userbar);
 			
 			return $userbar->html();
+		}
+		
+		/**
+		 * history-url
+		 *
+		 *@name historyURL
+		 *@access public
+		*/
+		public function historyURL() {
+			return adminController::activeController()->historyURL();
 		}
 		
 		/**

@@ -100,6 +100,17 @@ class contentAdmin extends LeftAndMain
 			return defined("PREVIEW_URL") ? PREVIEW_URL : BASE_URI;
 		}
 		
+		
+		/**
+		 * history-url
+		 *
+		 *@name historyURL
+		 *@access public
+		*/
+		public function historyURL() {
+			return "admin/history/pages";
+		}
+		
 		/**
 		 * redirect back
 		*/
