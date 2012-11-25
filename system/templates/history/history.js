@@ -7,32 +7,90 @@
 */
 (function($, w){
 	w.bindHistory = function() {
+		$("div.history .older").unbind("click");
+		$("div.history .event").unbind("mouseover");
+		
+		/**
+		 * loads new elements based on the older-button
+		*/
 		var load = function(o){
+			
+			// define which history is meant, maybe there are more than one on a page
 			var history = o.parent();
 			var older = o;
 			var olderText = older.html();
 			older.html('<img src="images/16x16/loading.gif" alt="loading" />');
+			
+			// load data from server
 			$.ajax({
 				url: older.attr("href"),
 				success: function(html) {
+					
+					// prase data
 					var node = $("<div></div>");
 					node.append(html);
+					
+					// remove the button
 					older.remove();
+					
+					// append all events
 					node.find(".event").each(function(){
 						$(this).removeClass("first");
 						$(this).appendTo(history);
 					});
+				
+					// append older button if existing
 					if(node.find(".older").length > 0) {
 						node.find(".older").appendTo(history);
 					}
-					$(".history .older").click(function(){
-						return load($(this));
-					});
+					
+					// rebind events
+					history.find(".event").unbind("mouseover");
+					if(history.find(".older").length > 0) {
+						
+						// bind click
+						history.find(".older").click(function(){
+							return load($(this));
+						});
+						
+						// bind mouseover
+						var evLength = history.find(".event").length - 10;
+						var timeout;
+						history.find(".event:gt("+evLength+")").mouseover(function(){
+							history.find(".event").unbind("mouseover");
+							
+							// we need the timeout to prevent from firing multiple times
+							clearTimeout(timeout);
+							timeout = setTimeout(function(){
+								history.find(".older").click();
+							}, 80);
+						});
+					}
 				}
 			});
 			return false;
 		};
-		$(".history .older").click(function(){
+		
+		// bind mouseover events
+		$("div.history").each(function(){
+			var history = $(this);
+			if(history.find(".older").length > 0) {
+				var evLength = history.find(".event").length - 10;
+				var timeout;
+				history.find(".event:gt("+evLength+")").mouseover(function(){
+					history.find(".event").unbind("mouseover");
+					
+					// we need the timeout to prevent from firing multiple times
+					clearTimeout(timeout);
+					timeout = setTimeout(function(){
+						history.find(".older").click();
+					}, 80);
+				});
+			}
+		});
+		
+		// bind click event
+		$("div.history .older").click(function(){
 			return load($(this));
 		});
 	};
