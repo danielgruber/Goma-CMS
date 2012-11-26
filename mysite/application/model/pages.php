@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 2.4.2
+  * last modified: 26.11.2012
+  * $Version 2.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -500,7 +500,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 								"root" => lang("no_parentpage", "Root Page"),
 								"subpage" => array(
 									lang("subpage","sub page"),
-									"parentid"
+									"parent"
 								)
 							)),
 							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),
