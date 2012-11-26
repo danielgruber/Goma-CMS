@@ -77,35 +77,6 @@ class History extends DataObject {
 	}
 	
 	/**
-	 * renders the history for given filter
-	 *
-	 *@name renderHistory
-	 *@access public
-	*/
-	public static function renderHistory($filter) {
-		if(isset($filter["dbobject"])) {
-			$dbObjectFilter = array();
-			foreach((array) $filter["dbobject"] as $class) {
-				$dbObjectFilter = array_merge($dbObjectFilter, array($class), ClassInfo::getChildren($class));
-			}
-			$filter["dbobject"] = array_intersect(ArrayLib::key_value($dbObjectFilter), self::supportHistoryView());
-		} else {
-			$filter["dbobject"] = self::supportHistoryView();
-		}
-		//$filter[] = "autorid != 0";
-		
-		if(!is_a($filter, "DataObjectSet")) {
-			$data = DataObject::get("History", $filter);
-		} else {
-			$data = $filter;
-		}
-		
-		$id = "history_" . md5(var_export($filter, true));
-		
-		return $data->customise(array("id" => $id))->renderWith("history/history.html");
-	}
-	
-	/**
 	 * returns a list of classes supporting HistoryView
 	 *
 	 *@name supportHistoryView

@@ -49,9 +49,9 @@ class HistoryController extends Controller {
 		// render the tabset
 		$tabs = new Tabs("history");
 		if(isset($filter["dbobject"])) {
-			$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), History::renderHistory($filter), $filter["dbobject"]);
+			$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), HistoryController::renderHistory($filter, $this->namespace), $filter["dbobject"]);
 		}
-		$tabs->addTab(lang("h_all"), History::renderHistory(array()), "h_all");
+		$tabs->addTab(lang("h_all"), HistoryController::renderHistory(array(), $this->namespace), "h_all");
 		$output = $tabs->render();
 		
 		if(Core::is_ajax()) {
@@ -61,5 +61,35 @@ class HistoryController extends Controller {
 		} else {
 			return $output;
 		}
+	}
+	
+		
+	/**
+	 * renders the history for given filter
+	 *
+	 *@name renderHistory
+	 *@access public
+	*/
+	public static function renderHistory($filter, $namespace = null) {
+		if(isset($filter["dbobject"])) {
+			$dbObjectFilter = array();
+			foreach((array) $filter["dbobject"] as $class) {
+				$dbObjectFilter = array_merge($dbObjectFilter, array($class), ClassInfo::getChildren($class));
+			}
+			$filter["dbobject"] = array_intersect(ArrayLib::key_value($dbObjectFilter), History::supportHistoryView());
+		} else {
+			$filter["dbobject"] = History::supportHistoryView();
+		}
+		//$filter[] = "autorid != 0";
+		
+		if(!is_a($filter, "DataObjectSet")) {
+			$data = DataObject::get("History", $filter);
+		} else {
+			$data = $filter;
+		}
+		
+		$id = "history_" . md5(var_export($filter, true));
+		
+		return $data->customise(array("id" => $id, "namespace" => $namespace))->renderWith("history/history.html");
 	}
 }
