@@ -14,7 +14,7 @@
 						grid: [10, 10],
 						stop: function(event, ui) {
 							$.ajax({
-								url: BASE_SCRIPT + root_path + "boxes_new/$pageid/saveBoxWidth/" + ui.element.attr("id").replace("box_new_", ""),
+								url: root_path + BASE_SCRIPT + "boxes_new/$pageid/saveBoxWidth/" + ui.element.attr("id").replace("box_new_", ""),
 								type: "post",
 								data: {width: ui.element.width()},
 								dataType: "html"
@@ -40,7 +40,7 @@
 							var data  = $(this).sortable("serialize");
 							// save order
 							$.ajax({
-								url: BASE_SCRIPT + root_path + "boxes_new/$pageid/saveBoxOrder",
+								url: root_path + BASE_SCRIPT + "boxes_new/$pageid/saveBoxOrder",
 								data: data,
 								type: "post",
 								dataType: "html"
