@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
+  * last modified: 26.11.2012
   * $Version 1.0
 */
 
@@ -18,8 +18,62 @@ class HistoryController extends Controller {
 	 *@access public
 	*/
 	public $url_handlers = array(
-		'$c/$i'	=> "index"
+		'$c/$i'								=> "index",
+		'compareVersion/$class!/$id!/$nid!'	=> "compareVersion",
+		'restoreVersion/$class!/$id!'		=> "restoreVersion"
 	);
+	
+	/**
+	 * allowed actions
+	 *
+	 *@name allowed_actions
+	*/
+	public $allowed_actions = array(
+		"compareVersion"	=> "->canCompareVersion",
+		"restoreVersion"	=> "->canRestoreVersion"
+	);
+	
+	/**
+	 * Permissions
+	*/
+	
+	/**
+	 * you can restore a version if you are author or publisher
+	 *
+	 *@name canRestoreVersion
+	*/
+	public function canRestoreVersion() {
+		if(ClassInfo::exists($this->getParam("class"))) {
+			if($data = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")))) {
+				if($data->canWrite($data) || $data->canPublish($data)) {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * you can compare a version if you are author or publisher
+	 *
+	 *@name canCompareVersion
+	*/
+	public function canCompareVersion() {
+		if(ClassInfo::exists($this->getParam("class"))) {
+			if($data = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("nid")))) {
+				if($data->canWrite($data) || $data->canPublish($data)) {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+		
+		return false;
+	}
 	
 	/**
 	 * name of this controller

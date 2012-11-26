@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 1.0
+  * last modified: 26.11.2012
+  * $Version 1.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -220,6 +220,16 @@ class History extends DataObject {
 	}
 	
 	/**
+	 * returns the id of the new version
+	 *
+	 *@name newversionid
+	 *@access public
+	*/
+	public function newversionid() {
+		return $this->fieldGet("newversion");
+	}
+	
+	/**
 	 * returns the old version
 	 * it's a object of $this->dbobject
 	 * returns false if not available, because of versions disabled
@@ -239,6 +249,16 @@ class History extends DataObject {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * returns the id of the old version
+	 *
+	 *@name oldversionid
+	 *@access public
+	*/
+	public function oldversionid() {
+		return $this->fieldGet("oldversion");
 	}
 	
 	/**
