@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.05.2012
-  * $Version 1.0.9
+  * last modified: 26.11.2012
+  * $Version 1.0.10
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -45,7 +45,8 @@ class ManyManyDropDown extends MultiSelectDropDown
 		*/
 		public function __construct($name = "", $title = null, $showfield = "title", $where = array(), $value = null, $parent = null)
 		{
-				parent::__construct($name . "ids", $title, $value, $parent);
+				parent::__construct($name , $title, $value, $parent);
+				$this->dbname = $name . "ids";
 				$this->relation = strtolower($name);
 				$this->showfield = $showfield;
 				$this->where = $where;
