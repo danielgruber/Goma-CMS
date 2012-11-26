@@ -20,6 +20,11 @@
 				<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
 				<span class="date">$this.created.date()</span>
 				<p>$this.content</p>
+				<% IF $this.versioned %>
+					<div class="version">
+						<a href="#" class="button">{$_lang_restore}</a> <a href="#" class="button">{$_lang_compare}</a>
+					</div>
+				<% END %>
 				<div class="clear"></div>
 			</div>
 		<% ENDCONTROL %>

@@ -163,6 +163,23 @@ class History extends DataObject {
 	}
 	
 	/**
+	 * gets the info if all versions are available for this history-object
+	 *
+	 *@name getVersioned
+	*/
+	public function getVersioned() {
+		$temp = new $this->dbobject();
+		if(!$temp->versioned)
+			return false;
+		
+		if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * returns the retina-icon for a history-element
 	 * makes $content in template available or $object->content
 	 *
