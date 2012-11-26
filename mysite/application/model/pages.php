@@ -620,6 +620,21 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			}	
 			
 		}
+		
+		/**
+		 * returns versioned fields
+		 *
+		 *@name getVersionedFields
+		 *@access public
+		*/
+		public function getVersionedFields() {
+			return array(
+				"title" 		=> lang("title"),
+				"mainbartitle"	=> lang("menupoint_title"),
+				"data"			=> lang("content")
+			);
+		}
+		
 		/**
 		 * cache for allowed_parents
 		 *@name cache_parent

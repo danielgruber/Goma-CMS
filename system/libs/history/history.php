@@ -151,6 +151,16 @@ class History extends DataObject {
 	}
 	
 	/**
+	 * gets the info if all versions are available for this history-object and comparing
+	 *
+	 *@name getCompared
+	*/
+	public function getCompared() {
+		$temp = new $this->dbobject();
+		return ($this->getVersioned() && $temp->getVersionedFields());
+	}
+	
+	/**
 	 * returns the retina-icon for a history-element
 	 * makes $content in template available or $object->content
 	 *

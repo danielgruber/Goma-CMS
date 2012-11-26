@@ -22,7 +22,10 @@
 				<p>$this.content</p>
 				<% IF $this.versioned AND $namespace %>
 					<div class="version">
-						<a href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_restore}</a> <a href="$namespace/compareVersion/{$this.dbobject}/{$this.oldversionid}/{$this.newversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_compare}</a>
+						<a href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_restore}</a> 
+						<% IF $this.compared %>
+							<a href="$namespace/compareVersion/{$this.dbobject}/{$this.oldversionid}/{$this.newversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_compare}</a>
+						<% END %>
 					</div>
 				<% END %>
 				<div class="clear"></div>
