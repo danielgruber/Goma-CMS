@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 11.11.2012
-  * $Version 2.1.11
+  * last modified: 27.11.2012
+  * $Version 2.1.12
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -267,9 +267,8 @@ class Controller extends RequestHandler
 		*/
 		public function handleRequest($request, $subController = false)
 		{
-				$this->subController = $subController;
 				$this->areaData = array();
-				$data = $this->__output(parent::handleRequest($request));
+				$data = $this->__output(parent::handleRequest($request, $subController));
 				
 				if(Core::is_ajax() && is_object($data) && Object::method_exists($data,"render")) {
 					HTTPResponse::setBody($data->render());
