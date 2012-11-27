@@ -339,6 +339,7 @@ self.dropdownDialogs = [];
 			
 			this.subDialogs = [];
 			this.dropdown.find(" > div > .content").css("width", ""); // unlock width
+			
 			// check if string or jquery object
 			if(typeof content == "string")
 				this.dropdown.find(" > div > .content").html('<div>' + content + '</div>');
@@ -346,6 +347,7 @@ self.dropdownDialogs = [];
 				this.dropdown.find(" > div > .content").html('');
 				$(content).wrap("<div></div>").appendTo(this.dropdown.find(" > div > .content"));
 			}
+			
 			// close-button
 			this.dropdown.find(" > div  > .content > .close").remove();
 			if(!this.elem.hasClass("hideClose") && this.closeButton)
@@ -362,6 +364,7 @@ self.dropdownDialogs = [];
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
 			
+			// register event for sub-dialogs
 			this.dropdown.find(" > div > .content a[rel*=dropdowndialog]").click(function(){	
 				var $this = $(this);
 				setTimeout(function(){
@@ -369,6 +372,7 @@ self.dropdownDialogs = [];
 				}, 100);
 			});
 			
+			// javascript-profiler
 			if(typeof profiler != "undefined") {
 				profiler.unmark("dropdownDialog.setContent");
 			}
@@ -421,10 +425,14 @@ self.dropdownDialogs = [];
 					return true;
 				}
 			}
+			
+			// unregister dropdown
 			dropdowns[this.dropdown.attr("id")] = null;
 			elems[this.elem.attr("id")] = null;
 			self.dropdownDialogs[this.id] = null;
 			var that = this;
+			
+			// animate dropdown
 			this.dropdown.fadeOut("fast", function(){
 				that.removeHelper();
 			});
@@ -455,9 +463,13 @@ self.dropdownDialogs = [];
 		*/
 		player_img: function(uri) {
 			var href = uri;
+			
+			// create an image to get dimensions of the image
 			var preloader = new Image();
 			var that = this;
 			preloader.onload = function(){
+				
+				// now calculate correct dimensions, which fit into window
 				var height = preloader.height;
 				var width = preloader.width;
 				var sv = width / height;
@@ -467,11 +479,19 @@ self.dropdownDialogs = [];
 					var height = dheight;
 					var width = height * sv;
 				}
+				
+				preloader.src = null; // IE overflow bug
+				
+				// set img-tag
 				that.setContent('<img src="'+href+'" alt="'+href+'" height="'+height+'" width="'+width+'" />');
 			}
+			
+			// if an error happens, we can't do anything :(
 			preloader.onerror = function(){
 				that.setContent('<h3>Connection error!</h3> <br /> Please try again later!');
 			}
+			
+			// now set src when events set, because of lags in some browsers
 			preloader.src = href;
 		},
 		
@@ -490,6 +510,8 @@ self.dropdownDialogs = [];
 			$.ajax({
 				url: uri,
 				type: "get",
+				
+				// if there was an error we try to find out why
 				error: function(jqXHR, textStatus, errorThrown) {
 					if(textStatus == "timeout") {
 						that.setContent('Error when fetching data from the server: <br /> The response timed out.');
@@ -499,11 +521,15 @@ self.dropdownDialogs = [];
 						that.setContent('Error when fetching data from the server: <br /> Failed to fetch data from the server.');
 					}
 				},
+				
+				// data should always be html as basic, we can interpret layteron
 				dataType: "html",
 				success: function(html, textStatus, jqXHR) {
 					
 					LoadAjaxResources(jqXHR);
 					var content_type = jqXHR.getResponseHeader("content-type");
+					
+					// if it is json-data
 					if(content_type == "text/x-json") {
 						try {
 							var data = parseJSON(html);
@@ -517,6 +543,8 @@ self.dropdownDialogs = [];
 							that.setContent(html);
 							
 							if(typeof data.exec != "undefined") {
+								
+								// execution should not break json-data before
 								try {
 									var method;
 									if (window.execScript) {
@@ -535,7 +563,11 @@ self.dropdownDialogs = [];
 							alert(e);
 							that.setContent("error parsing JSON");
 						}
+					
+					// if it is javascript
 					} else if(content_type == "text/javascript") {
+						
+						// execution for IE and all other Browsers
 						var method;
 						if (window.execScript)
 						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
@@ -544,6 +576,7 @@ self.dropdownDialogs = [];
 						method.call(this);
 						
 					} else {
+						// html just must be set to Dialog
 						that.setContent(html);
 					}
 					
