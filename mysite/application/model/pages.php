@@ -1238,10 +1238,12 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			$compared = false;
 			switch($record->action) {
 				case "update":
 					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_edit.png";
+					$compared = true;
 				break;
 				case "insert":
 					$lang = lang("h_pages_create", '$user created the page <a href="$pageUrl">$page</a>');
@@ -1250,6 +1252,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				case "publish":
 					$lang = lang("h_pages_publish", '$user published the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_get.png";
+					$compared = true;
 				break;
 				case "remove":
 					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
@@ -1259,7 +1262,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
 			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared);
 		}
 		
 }

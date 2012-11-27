@@ -51,21 +51,32 @@ class History extends DataObject {
 	 *
 	 *@name push
 	 *@access public
+	 *@param class-name of the data to insert
+	 *@param old version-id of data
+	 *@param new version-id of data
+	 *@param id of the record to which the versions belong
+	 *@param name of the action which happended, for example: "insert", "delete", "update"
 	*/
 	public static function push($class, $oldrecord, $newrecord, $recordid, $action) {
+		
+		// if it's an object, get the class-name from the object
 		if(is_object($class))
 			$class = $class->class;
 		
+		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))
 			$oldrecord = $oldrecord->versionid;
 		
+		// if we've got the version as object given, get versionid from object
 		if(is_object($newrecord))
 			$newrecord = $newrecord->versionid;
 		
+		// check if history is enabled on that dataobject
 		if(!ClassInfo::getStatic($class, "history")) {
 			return false;
 		}
 		
+		// create the history-record
 		$record = new History(array(
 			"dbobject" 		=> $class,
 			"oldversion"	=> $oldrecord,
@@ -73,6 +84,8 @@ class History extends DataObject {
 			"record"		=> $recordid,
 			"action"		=> $action
 		));
+		
+		// insert data, we force to insert and to write, so override permission-system ;)
 		return $record->write(true, true);
 	}
 	
@@ -139,15 +152,20 @@ class History extends DataObject {
 	 *@name getVersioned
 	*/
 	public function getVersioned() {
-		$temp = new $this->dbobject();
-		if(!$temp->versioned)
+		$data = $this->historyData();
+		if(isset($data["versioned"]) && $data["versioned"]) {
+			$temp = new $this->dbobject();
+			if(!$temp->versioned)
+				return false;
+			
+			if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
+				return true;
+			}
+			
 			return false;
-		
-		if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
-			return true;
+		} else {
+			return false;
 		}
-		
-		return false;
 	}
 	
 	/**
@@ -156,8 +174,13 @@ class History extends DataObject {
 	 *@name getCompared
 	*/
 	public function getCompared() {
+		$data = $this->historyData();
 		$temp = new $this->dbobject();
-		return ($this->getVersioned() && $temp->getVersionedFields());
+		if(!isset($data["compared"]) || $data["compared"]) {
+			return ($this->getVersioned() && $temp->getVersionedFields());
+		}
+		
+		return false;
 	}
 	
 	/**
