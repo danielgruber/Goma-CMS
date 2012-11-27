@@ -89,7 +89,7 @@ class HistoryController extends Controller {
 		
 		// render the tabset
 		$tabs = new Tabs("history");
-		if(isset($filter["dbobject"]) && !ClassInfo::exists($filter["dbobject"])) {
+		if(isset($filter["dbobject"]) && ClassInfo::exists($filter["dbobject"])) {
 			$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), HistoryController::renderHistory($filter, $this->namespace), $filter["dbobject"]);
 		}
 		$tabs->addTab(lang("h_all"), HistoryController::renderHistory(array(), $this->namespace), "h_all");
