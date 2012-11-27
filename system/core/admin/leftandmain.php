@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.10.2012
-  * $Version 2.2
+  * last modified: 27.11.2012
+  * $Version 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -366,7 +366,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 			$dialog = new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay", "Okay"));
 			$dialog->close(3);
 			$response->exec($dialog);
-			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
+			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
@@ -442,7 +442,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 			$dialog = new Dialog(lang("successful_published", "The data was successfully published!"), lang("okay", "Okay"));
 			$dialog->close(3);
 			$response->exec($dialog);
-			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
+			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
