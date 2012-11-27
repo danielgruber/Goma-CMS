@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.05.2012
+  * last modified: 27.11.2012
 */
 
 self.dropdownDialogs = [];
@@ -47,6 +47,8 @@ self.dropdownDialogs = [];
 	};
 	
 	dropdownDialog.prototype = {
+		subDialogs: [],
+		
 		checkEdit: function() {
 
 			if(this.dropdown.find("> div > .content > div").html() != this.html) {
@@ -54,6 +56,17 @@ self.dropdownDialogs = [];
 				this.definePosition(this.position);
 			}
 		},
+		
+		/**
+		 * inits the dropdown
+		 * creates info for dropdown on related element
+		 * creates dropdown
+		 * initates the events
+		 * registers all other things
+		 * oh, and before I forget it, it set's loading state ;)
+		 * 
+		 *@name Init
+		*/
 		Init: function() {
 			
 			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
@@ -109,13 +122,12 @@ self.dropdownDialogs = [];
 				}
 			}
 			
-			
-			
 			if(loading)
 				this.setLoading();
 				
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
 		},
+		
 		/**
 		 * defines the position of the dropdown
 		 *
@@ -179,8 +191,11 @@ self.dropdownDialogs = [];
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
 			
 		},
+		
 		/**
 		 * validates and sets the position
+		 *
+		 *@name setPosition
 		*/
 		setPosition: function(position) {
  			switch(position) {
@@ -202,8 +217,11 @@ self.dropdownDialogs = [];
  			}
 	 		
 		},
+		
 		/**
-		 * moves the dropdown to the right place cause of position
+		 * moves the dropdown to the right place cause of position (top, bottom, left, right)
+		 *
+		 *@name moveDropdown
 		*/ 
 		moveDropdown: function(position) {
 			
@@ -296,8 +314,11 @@ self.dropdownDialogs = [];
 			
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.moveDropdown");
 		},
+		
 		/**
 		 * sets the dropdown in loading state
+		 *
+		 *@name setLoading
 		*/ 
 		setLoading: function() {
 			this.dropdown.css("display", "block");
@@ -305,8 +326,10 @@ self.dropdownDialogs = [];
 			this.setContent('<img src="system/templates/css/images/loading_big.gif" alt="loading" style="display: block;margin: auto;" />');
 			this.closeButton = true;
 		},
+		
 		/**
-		 * sets the content
+		 * sets the given content
+		 * registers subDropdownEvents
 		 *
 		 *@name setContent
 		 *@access public
@@ -314,6 +337,7 @@ self.dropdownDialogs = [];
 		setContent: function(content) {
 			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.setContent");
 			
+			this.subDialogs = [];
 			this.dropdown.find(" > div > .content").css("width", ""); // unlock width
 			// check if string or jquery object
 			if(typeof content == "string")
@@ -337,14 +361,26 @@ self.dropdownDialogs = [];
 			// if is shown also now, we we'll move it to the right position
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
-				
+			
+			this.dropdown.find(" > div > .content a[rel*=dropdowndialog]").click(function(){	
+				var $this = $(this);
+				setTimeout(function(){
+					that.subDialogs.push("dropdownDialog_" + $this.attr("id"));
+				}, 100);
+			});
+			
 			if(typeof profiler != "undefined") {
 				profiler.unmark("dropdownDialog.setContent");
 			}
 
 		},
+		
 		/**
 		 * shows a specific uri in the dropdown
+		 * for example: ./system/blah, it'll get data via ajax and show the result
+		 *
+		 *@name show
+		 *@access public
 		*/
 		show: function(uri) {
 			if(this.dropdown.css("display") == "block" && this.dropdown.attr("name") == uri) {
@@ -363,10 +399,28 @@ self.dropdownDialogs = [];
 			
 			return this.player_ajax(this.uri);
 		},
+		
+		/**
+		 * removes the dropdown
+		 *
+		 *@name removeHeloper
+		*/ 
 		removeHelper: function() {
 			this.dropdown.remove();
 		},
+				
+		/**
+		 * hides the dropdown if no subdropdowns exist and removes it afterwards
+		 *
+		 *@name remove
+		*/
 		remove: function() {
+			// first check if subDropdown is open
+			for(i in this.subDialogs) {
+				if($("#" + this.subDialogs[i]).length > 0 && $("#" + this.subDialogs[i]).css("display") != "none") {
+					return true;
+				}
+			}
 			dropdowns[this.dropdown.attr("id")] = null;
 			elems[this.elem.attr("id")] = null;
 			self.dropdownDialogs[this.id] = null;
@@ -375,12 +429,30 @@ self.dropdownDialogs = [];
 				that.removeHelper();
 			});
 		},
+		
+		/**
+		 * alias for remove
+		 *
+		 *@name hide
+		*/
 		hide: function() {
 			this.remove(); // better solution
 		},
+		
+		/**
+		 * player for content-type html
+		 *
+		 *@name play_html
+		*/
 		player_html: function(uri) {
 			this.setContent($(uri));
 		},
+		
+		/**
+		 * player for images
+		 *
+		 @name player_img
+		*/
 		player_img: function(uri) {
 			var href = uri;
 			var preloader = new Image();
@@ -402,6 +474,12 @@ self.dropdownDialogs = [];
 			}
 			preloader.src = href;
 		},
+		
+		/**
+		 * player for urls reachable via ajax
+		 *
+		 *@name player_ajax
+		*/
 		player_ajax: function(uri) {
 			var that = this;
 			if(uri.indexOf("?") == -1) {
