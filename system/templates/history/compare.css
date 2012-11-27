@@ -26,10 +26,10 @@
 .compareView .content del {
 	background: #f87878 !important;
 	border: 1px solid #852222;
-	display: block;
+	display: inline-block;
 }
 .compareView .content ins {
 	background: #87f77c !important;
 	border: 1px solid #168a0b;
-	display: block;
+	display: inline-block;
 }
