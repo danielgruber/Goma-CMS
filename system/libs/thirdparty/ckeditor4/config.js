@@ -9,16 +9,18 @@ CKEDITOR.editorConfig = function( config ) {
 	// config.uiColor = '#AADC6E';
 	config.toolbar_Goma =
 	[
-		{ name: 'document', items : [ 'Source','-','Templates' ] },
+		{ name: 'document', items : [ 'Source'/*,'-','Templates'*/] },
 		{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
 		{ name: 'clipboard', items : [ 'Cut','PasteText','PasteFromWord','-','Undo','Redo' ] },
-		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
-		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent', '-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-'] },
+		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike',/*'Subscript','Superscript',*/'-','RemoveFormat' ] },
+		{ name: 'justify', items: ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
+		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] },
 		'/',
 		{ name: 'insert', items : [ 'Image','Table','SpecialChar','PageBreak'] },
 		{ name: 'styles', items : [ 'Styles','Format','Font','FontSize' ] },
 		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		{ name: 'tools', items : [ /*'Maximize',*/ 'ShowBlocks','-','About' ] },
+		{ name: 'tools', items : [ /*'Maximize',*/ 'About' ] },
 		{ name: 'editing', items : [ 'Find','Replace' ,'BidiLtr','BidiRtl' ] }
 	];
+	config.extraPlugins = "autogrow,stylesheetparser,tableresize";
 };

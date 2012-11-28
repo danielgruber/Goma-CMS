@@ -87,7 +87,6 @@ $(function(){
         		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
         		width: "'.$width.'",
         		resize_dir: "vertical",
-        		extraPlugins : "autogrow",
         		autoGrow_maxHeight: $(document).height() - 300
     		});
     		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
@@ -118,7 +117,6 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
         	width: "'.$width.'",
         	resize_dir: "vertical",
-        	extraPlugins : "autogrow",
         	autoGrow_maxHeight : $(document).height() - 300
 		});
 		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
