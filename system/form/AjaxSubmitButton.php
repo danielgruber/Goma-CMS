@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 2.1.5
+  * last modified: 26.11.2012
+  * $Version 2.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -170,8 +170,8 @@ class AjaxSubmitButton extends FormAction
 						$result = $field->result();
 						if($result !== null)
 						{
-								$form->result[$field->name] = $result;
-								$allowed_result[$field->name] = true;
+								$form->result[$field->dbname] = $result;
+								$allowed_result[$field->dbname] = true;
 						}
 				}
 				

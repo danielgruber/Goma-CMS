@@ -20,6 +20,14 @@
 				<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
 				<span class="date">$this.created.date()</span>
 				<p>$this.content</p>
+				<% IF $this.versioned AND $namespace %>
+					<div class="version">
+						<!--<a href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_restore}</a> -->
+						<% IF $this.compared %>
+							<a rel="dropdownDialog[left]" href="$namespace/compareVersion/{$this.dbobject}/{$this.oldversionid}/{$this.newversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_compare}</a>
+						<% END %>
+					</div>
+				<% END %>
 				<div class="clear"></div>
 			</div>
 		<% ENDCONTROL %>

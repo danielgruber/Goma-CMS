@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
+  * last modified: 29.11.2012
 */
 
 
@@ -181,6 +181,8 @@ var LaM_type_timeout;
 				$(this).parent().addClass("active");
 				if(typeof HistoryLib.push == "function")
 					HistoryLib.push($(this).attr("href"));
+			
+				renderSideBar();
 				
 				$.ajax({
 					url: $(this).attr("href"),

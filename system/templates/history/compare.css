@@ -1,0 +1,43 @@
+/**
+  *@package goma css framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012 Goma-Team
+  * last modified: 25.11.2012
+*/
+
+.compareView table {
+	border-spacing: 0;
+	border: 1px solid #ddd;
+}
+.compareView .grey {
+	background: #efefef;
+}
+.compareView td {
+	padding: 10px;
+}
+.compareView .title {
+	width: 25%;
+	font-weight: bold;
+	vertical-align: top;
+	border-right: 2px solid #ddd;
+	background: #eee;
+}
+.compareView .content p {
+	margin: 3px;
+}
+.compareView .content del {
+	background: #f87878 !important;
+	border: 1px solid #852222;
+	padding: 2px;
+	display: inline-block;
+}
+.compareView .content ins {
+	background: #87f77c !important;
+	border: 1px solid #168a0b;
+	padding: 2px;
+	display: inline-block;
+}
+.compareView .content del p, .compareView .content ins p, .compareView .content del div, .compareView .content ins div {
+	width: 100% !important;
+}
