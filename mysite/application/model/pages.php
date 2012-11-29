@@ -865,7 +865,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$data = DataObject::get($this, $where);
 			}
 			
-			if(Permission::check("PAGES_WRITE") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
+			if(Permission::check("ADMIN_CONTENT") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
 			
 			foreach($data as $record) {
 				
@@ -989,7 +989,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			$data = DataObject::search_Object($this, $words, $where, array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
 			$data->setVersion(false);
-			if(Permission::check("ADMIN_WRITE")) $data->setVersion("state");
+			if(Permission::check("ADMIN_CONTENT")) $data->setVersion("state");
 			
 			$parentid_cache = array();
 			
