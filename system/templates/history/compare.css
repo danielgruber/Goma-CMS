@@ -23,13 +23,21 @@
 	border-right: 2px solid #ddd;
 	background: #eee;
 }
+.compareView .content p {
+	margin: 3px;
+}
 .compareView .content del {
 	background: #f87878 !important;
 	border: 1px solid #852222;
+	padding: 2px;
 	display: inline-block;
 }
 .compareView .content ins {
 	background: #87f77c !important;
 	border: 1px solid #168a0b;
+	padding: 2px;
 	display: inline-block;
+}
+.compareView .content del p, .compareView .content ins p, .compareView .content del div, .compareView .content ins div {
+	width: 100% !important;
 }

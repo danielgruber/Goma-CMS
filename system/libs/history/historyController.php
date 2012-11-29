@@ -226,6 +226,8 @@ class HistoryController extends Controller {
 		$html = array ();
 		$i = 0;
 		for ($x = 0; $x < count($diffs); $x++) {
+			$html[$x] = "";
+			$add = "";
 			$op = $diffs[$x][0]; // Operation (insert, delete, equal)
 			$data = $diffs[$x][1]; // Text of change.
 			/*$text = preg_replace(array (
@@ -239,19 +241,34 @@ class HistoryController extends Controller {
 				'&gt;',
 				'&para;<BR>'
 			), $data);*/
-			$text = $data;
-
+			$text = trim($data);
+			
+			if(trim($text) == "") {
+				continue;
+			}
+			
+			if(preg_match('/^(\<p[^\>]*\>)(.*)\<\/p\>$/i', $text, $m)) {
+				$html[$x] = $m[1];
+				$text = $m2[2];
+				$add = "</p>";
+			}
+			
 			switch ($op) {
 				case DIFF_INSERT :
-					$html[$x] = '<INS STYLE="background:#E6FFE6;" TITLE="i=' . $i . '">' . $text . '</INS>';
+					$html[$x] .= '<INS STYLE="background:#E6FFE6;" TITLE="i=' . $i . '">' . $text . '</INS>';
 					break;
 				case DIFF_DELETE :
-					$html[$x] = '<DEL STYLE="background:#FFE6E6;" TITLE="i=' . $i . '">' . $text . '</DEL>';
+					$html[$x] .= '<DEL STYLE="background:#FFE6E6;" TITLE="i=' . $i . '">' . $text . '</DEL>';
 					break;
 				case DIFF_EQUAL :
-					$html[$x] = '<SPAN TITLE="i=' . $i . '">' . $text . '</SPAN>';
+					$html[$x] .= '<SPAN TITLE="i=' . $i . '">' . $text . '</SPAN>';
 					break;
 			}
+			
+			if(isset($add)) {
+				$html[$x] .= "</p>";
+			}
+			
 			if ($op !== DIFF_DELETE) {
 				$i += mb_strlen($data);
 			}
