@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 22.11.2012
-  * $Version: 4.6.8
+  * last modified: 26.11.2012
+  * $Version: 4.6.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -2357,6 +2357,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	{
 			$form->result = $this;
 	
+	}
+	
+	/**
+	 * returns a list of fields you want to show if we use the history-compare-view
+	 *
+	 *@name getVersionedFields
+	 *@access public
+	*/
+	public function getVersionedFields() {
+		return array();
 	}
 	
 	/**

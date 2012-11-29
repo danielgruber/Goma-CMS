@@ -44,7 +44,7 @@ class AjaxExternalForm extends FormField
 		*/
 		public function createNode()
 		{
-				$node = new HTMLNode("div", array(
+				$node = new HTMLNode("span", array(
 					"class"	=> "value"
 				));
 				
@@ -65,14 +65,14 @@ class AjaxExternalForm extends FormField
 				
 				$this->container->append($this->input);
 				$this->input->append(array(
-					new HTMLNode("div", array(
-						"style" => array("float" => "right"),
-						"class"	=> "edit"
-					), '<a href="'.$this->externalURL().'/render/?redirect='.urlencode(getredirect()).'" title="'.convert::raw2text($this->title).'" rel="dropdownDialog[left]" class="button hideClose noAutoHide">'.lang("edit").'</a>'),
 					$this->value,
-					new HTMLNode("div", array(
-						"class"	=> "clear"
-					))
+					"&nbsp;&nbsp;&nbsp;&nbsp;",
+					new HTMLNode("a", array(
+						"href" 	=> $this->externalURL() . "/render/?redirect=" . urlencode(getredirect()),
+						"title" => convert::raw2text($this->title),
+						"rel"	=> "dropdownDialog",
+						"class" => "edit hideClose noAutoHide"
+					), new HTMLNode("img", array("alt" => lang("edit"), "src" => "images/icons/fatcow16/edit.png", "data-retina" => "images/icons/fatcow16/edit@2x.png")))
 				));
 				
 				$this->callExtending("afterField");

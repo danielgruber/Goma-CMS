@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.11.2012
-  * $Version 1.4.4
+  * last modified: 26.11.2012
+  * $Version 1.4.5
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,7 +37,7 @@ class adminController extends Controller
 			"switchlang"				=> "switchlang",
 			"update"					=> "handleUpdate",
 			"flushLog"					=> "flushLog",
-			"history/\$c/\$i"			=> "history",
+			"history"					=> "history",
 			"admincontroller:\$item!"	=> "handleItem"
 		);
 		
@@ -168,13 +168,15 @@ class adminController extends Controller
 			if(!Permission::check("ADMIN") && Core::is_ajax()) {
 				Resources::addJS("location.reload();");
 			}
-			if(!_eregi('</html', $content)) {
-				if(!Permission::check("ADMIN")) {
-					$admin = new Admin();
-					return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
-				 } else {
-					$admin = new Admin();
-					return $admin->customise(array("content" => $content))->renderWith("admin/index.html");
+			if(!Core::is_ajax()) {
+				if(!_eregi('</html', $content)) {
+					if(!Permission::check("ADMIN")) {
+						$admin = new Admin();
+						return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
+					 } else {
+						$admin = new Admin();
+						return $admin->customise(array("content" => $content))->renderWith("admin/index.html");
+					}
 				}
 			}
 			return $content;
@@ -231,32 +233,8 @@ class adminController extends Controller
 		*/
 		public function history() {
 			if(Permission::check("ADMIN")) {
-				$filter = array();
-				$class = $this->getParam("c");
-				if(isset($class))
-					$filter["dbobject"] = $class;
-				
-				$item = $this->getParam("i");
-				if(isset($item))
-					$filter["recordid"] = $item;
-				
-				
-				// render the tabset
-				$tabs = new Tabs("history");
-				if(isset($filter["dbobject"])) {
-					$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), History::renderHistory($filter), $filter["dbobject"]);
-				}
-				$tabs->addTab(lang("h_all"), History::renderHistory(array()), "h_all");
-				$output = $tabs->render();
-				
-				if(Core::is_ajax()) {
-					HTTPResponse::setBody($output);
-					HTTPResponse::output();
-					exit;
-				} else {
-					Core::setTitle(lang("history"));
-					return $output;
-				}
+				$controller = new HistoryController();
+				return $controller->handleRequest($this->request, true);
 			}
 			
 			$this->template = "admin/index_not_permitted.html";

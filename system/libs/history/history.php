@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 1.0
+  * last modified: 26.11.2012
+  * $Version 1.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -51,21 +51,32 @@ class History extends DataObject {
 	 *
 	 *@name push
 	 *@access public
+	 *@param class-name of the data to insert
+	 *@param old version-id of data
+	 *@param new version-id of data
+	 *@param id of the record to which the versions belong
+	 *@param name of the action which happended, for example: "insert", "delete", "update"
 	*/
 	public static function push($class, $oldrecord, $newrecord, $recordid, $action) {
+		
+		// if it's an object, get the class-name from the object
 		if(is_object($class))
 			$class = $class->class;
 		
+		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))
 			$oldrecord = $oldrecord->versionid;
 		
+		// if we've got the version as object given, get versionid from object
 		if(is_object($newrecord))
 			$newrecord = $newrecord->versionid;
 		
+		// check if history is enabled on that dataobject
 		if(!ClassInfo::getStatic($class, "history")) {
 			return false;
 		}
 		
+		// create the history-record
 		$record = new History(array(
 			"dbobject" 		=> $class,
 			"oldversion"	=> $oldrecord,
@@ -73,36 +84,9 @@ class History extends DataObject {
 			"record"		=> $recordid,
 			"action"		=> $action
 		));
+		
+		// insert data, we force to insert and to write, so override permission-system ;)
 		return $record->write(true, true);
-	}
-	
-	/**
-	 * renders the history for given filter
-	 *
-	 *@name renderHistory
-	 *@access public
-	*/
-	public static function renderHistory($filter) {
-		if(isset($filter["dbobject"])) {
-			$dbObjectFilter = array();
-			foreach((array) $filter["dbobject"] as $class) {
-				$dbObjectFilter = array_merge($dbObjectFilter, array($class), ClassInfo::getChildren($class));
-			}
-			$filter["dbobject"] = array_intersect(ArrayLib::key_value($dbObjectFilter), self::supportHistoryView());
-		} else {
-			$filter["dbobject"] = self::supportHistoryView();
-		}
-		//$filter[] = "autorid != 0";
-		
-		if(!is_a($filter, "DataObjectSet")) {
-			$data = DataObject::get("History", $filter);
-		} else {
-			$data = $filter;
-		}
-		
-		$id = "history_" . md5(var_export($filter, true));
-		
-		return $data->customise(array("id" => $id))->renderWith("history/history.html");
 	}
 	
 	/**
@@ -157,6 +141,43 @@ class History extends DataObject {
 	public function getIcon() {
 		if($data = $this->historyData()) {
 			return $data["icon"];
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * gets the info if all versions are available for this history-object
+	 *
+	 *@name getVersioned
+	*/
+	public function getVersioned() {
+		$data = $this->historyData();
+		if(isset($data["versioned"]) && $data["versioned"]) {
+			$temp = new $this->dbobject();
+			if(!$temp->versioned)
+				return false;
+			
+			if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
+				return true;
+			}
+			
+			return false;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * gets the info if all versions are available for this history-object and comparing
+	 *
+	 *@name getCompared
+	*/
+	public function getCompared() {
+		$data = $this->historyData();
+		$temp = new $this->dbobject();
+		if(!isset($data["compared"]) || $data["compared"]) {
+			return ($this->getVersioned() && $temp->getVersionedFields());
 		}
 		
 		return false;
@@ -232,6 +253,16 @@ class History extends DataObject {
 	}
 	
 	/**
+	 * returns the id of the new version
+	 *
+	 *@name newversionid
+	 *@access public
+	*/
+	public function newversionid() {
+		return $this->fieldGet("newversion");
+	}
+	
+	/**
 	 * returns the old version
 	 * it's a object of $this->dbobject
 	 * returns false if not available, because of versions disabled
@@ -251,6 +282,16 @@ class History extends DataObject {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * returns the id of the old version
+	 *
+	 *@name oldversionid
+	 *@access public
+	*/
+	public function oldversionid() {
+		return $this->fieldGet("oldversion");
 	}
 	
 	/**

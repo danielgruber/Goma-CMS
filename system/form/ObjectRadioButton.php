@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 01.08.2012
-  * $Version 2.0.2
+  * last modified: 26.11.2012
+  * $Version 2.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -46,6 +46,9 @@ class ObjectRadioButton extends RadioButton
 			$this->javaScriptNeeded[] = $id;
 			
 			if(isset($field)) {
+				if(!is_object($field)) {
+					throwError(6, "Invalid Error", "Field for Option " . $name . " seems not to be existing.");
+				}
 				$node->append(new HTMLNode('div', array(
 					"id" 	=> "displaycontainer_" . $id,
 					"class"	=> "displaycontainer"

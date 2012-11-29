@@ -178,7 +178,8 @@ class gLoader extends Controller
 				}
 			}
 			
-			$js .= 'gloader.loaded["'.$name.'"] = true;' . "\n\n";
+			$js .= '/* file '.$data["file"].' */
+gloader.loaded["'.$name.'"] = true;' . "\n\n";
 			
 			$js .= jsmin::minify(file_get_contents($data["file"]));
 			

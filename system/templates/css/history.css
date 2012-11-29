@@ -38,6 +38,14 @@
 	padding: 15px;
 	border-bottom: 1px solid #ddd;
 }
+.history .event .version {
+	margin-left: 18px;
+}
+.history .event .version .button {
+	font-size: 9pt;
+	padding: 5px 9px;
+	border-color: #ccc;
+}
 .history .event img {
 	margin-right: 5px;
 	margin-top: 4px;

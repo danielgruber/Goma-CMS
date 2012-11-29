@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
+  * last modified: 27.11.2012
   * $Version 1.5
 */
 
@@ -19,7 +19,11 @@ if(typeof self.loader == "undefined") {
 	var html_regexp = new RegExp("<body");
 	var external_regexp = /https?\:\/\/|ftp\:\/\//;
 	
-	// the gloader
+	/**
+	 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
+	 * you must register the plugin in PHP
+	 * we stop execution of JavaScript while loading
+	*/
 	var gloader = {
 		load: function(component, fn)
 		{
@@ -74,7 +78,10 @@ if(typeof self.loader == "undefined") {
 		};
 		
 		$(function(){
-			// ajax handlers
+			
+			/**
+			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
+			*/
 			$("a[rel=ajaxfy]").live("click", function()
 			{
 				var $this = $(this);
@@ -96,6 +103,8 @@ if(typeof self.loader == "undefined") {
 				});
 				return false;
 			});
+			
+			// the orangebox is not tested, yet, please don't use it!
 			$('a[rel*=orangebox]').live('click',function(){	
 				gloader.load("orangebox");
 				$(this).orangebox();
@@ -103,6 +112,7 @@ if(typeof self.loader == "undefined") {
 				$(this).click();
 			});
 	
+			// pretty old-fasioned bluefox, if you like it create an a-tag with rel="bluebox"
 			$("a[rel*=bluebox], a[rel*=facebox]").live('click',function(){
 				gloader.load("dialog");
 				if($(this).hasClass("nodrag"))
@@ -115,6 +125,7 @@ if(typeof self.loader == "undefined") {
 				return false;
 			});
 		    
+		    // new dropdownDialog, which is very dynamic and greate
 		    $("a[rel*=dropdownDialog]").live("click", function()
 			{
 				gloader.load("dropdownDialog");
@@ -177,6 +188,13 @@ if(typeof self.loader == "undefined") {
 		
 		// language
 		var lang = [];
+		
+		/**
+		 * load language for name from PHP with default value as second argument
+		 * e.g. lang("loading", "loading..."); should return for german: "Laden..."
+		 *
+		 *@name lang
+		*/
 		w.lang = function(name, _default) {
 			if(typeof profiler != "undefined") profiler.mark("lang");
 			
@@ -207,6 +225,9 @@ if(typeof self.loader == "undefined") {
 			}
 		}
 		
+		/**
+		 * returns the root of the document
+		*/
 		w.getDocRoot = function() {
 			if($(".documentRoot").length == 1) {
 				return $(".documentRoot");
@@ -215,12 +236,19 @@ if(typeof self.loader == "undefined") {
 			}
 		}
 		
-		// preloads lang
+		/**
+		 * reloads lang that if you need it javascript does not have to make an ajax-request to get it, which can freeze the browser in very performance-exzessive-operations
+		 * do this if you know the names before
+		 *
+		 *@name preloadLang
+		 *@param array - names
+		 *@param bool - async request or not, default: true
+		*/
 		w.preloadLang = function(_names, async) {
 			if(typeof profiler != "undefined") profiler.mark("preloadLang");
 			
 			if(typeof async == "undefined")
-				async = false;
+				async = true;
 			
 			var names = [];
 			// check names
@@ -233,7 +261,7 @@ if(typeof self.loader == "undefined") {
 				return true;
 			
 			var jqXHR = $.ajax({
-				async: false,
+				async: async,
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",

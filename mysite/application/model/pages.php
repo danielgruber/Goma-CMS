@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 2.4.2
+  * last modified: 26.11.2012
+  * $Version 2.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -500,7 +500,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 								"root" => lang("no_parentpage", "Root Page"),
 								"subpage" => array(
 									lang("subpage","sub page"),
-									"parentid"
+									"parent"
 								)
 							)),
 							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),
@@ -620,6 +620,21 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			}	
 			
 		}
+		
+		/**
+		 * returns versioned fields
+		 *
+		 *@name getVersionedFields
+		 *@access public
+		*/
+		public function getVersionedFields() {
+			return array(
+				"title" 		=> lang("title"),
+				"mainbartitle"	=> lang("menupoint_title"),
+				"data"			=> lang("content")
+			);
+		}
+		
 		/**
 		 * cache for allowed_parents
 		 *@name cache_parent
@@ -1223,10 +1238,12 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			$compared = false;
 			switch($record->action) {
 				case "update":
 					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_edit.png";
+					$compared = true;
 				break;
 				case "insert":
 					$lang = lang("h_pages_create", '$user created the page <a href="$pageUrl">$page</a>');
@@ -1235,6 +1252,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				case "publish":
 					$lang = lang("h_pages_publish", '$user published the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_get.png";
+					$compared = true;
 				break;
 				case "remove":
 					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
@@ -1244,7 +1262,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
 			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared);
 		}
 		
 }

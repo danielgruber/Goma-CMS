@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
-  * $Version 1.4.2
+  * last modified: 27.11.2012
+  * $Version 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -116,6 +116,44 @@ class systemController extends Controller {
 					}
 			}
 		}
+		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
+		$mtime = $cacher->created;
+		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . $output));
+		HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
+		HTTPResponse::addHeader("pragma","Public");
+		HTTPResponse::addHeader("Etag", '"'.$etag.'"');
+		
+		// 304 by HTTP_IF_MODIFIED_SINCE
+		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
+		{					
+				if(strtolower(gmdate('D, d M Y H:i:s', $mtime).' GMT') == strtolower($_SERVER['HTTP_IF_MODIFIED_SINCE']))
+				{
+						HTTPResponse::setResHeader(304);
+						HTTPResponse::sendHeader();
+						if(PROFILE)
+							Profiler::End();
+							
+						exit;
+				}
+		}
+		
+		// 304 by ETAG
+		if(isset($_SERVER["HTTP_IF_NONE_MATCH"]))
+		{
+				if($_SERVER["HTTP_IF_NONE_MATCH"] == '"' . $etag . '"')
+				{
+						HTTPResponse::setResHeader(304);
+						HTTPResponse::sendHeader();
+						
+						if(PROFILE)
+							Profiler::End();
+						
+						exit;
+				}
+		}
+		
+		$expiresAdd = defined("DEV_MODE") ? 3 * 60 * 60 : 48 * 60 * 60;
+		HTTPResponse::setCachable(NOW + $expiresAdd, $mtime, true);
 		
 		HTTPResponse::setHeader("content-type", "text/x-json");
 		HTTPResponse::output('('.json_encode($output).')');

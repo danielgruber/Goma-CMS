@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.10.2012
-  * $Version 2.3
+  * last modified: 26.11.2012
+  * $Version 2.3.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -84,6 +84,14 @@ class FormField extends RequestHandler
 		public $name;
 		
 		/**
+		 * name of the data-relation
+		 *
+		 *@name dbname
+		 *@access public
+		*/
+		public $dbname;
+		
+		/**
 		 * overrides the post-name
 		 *
 		 *@name overridePostName
@@ -124,6 +132,7 @@ class FormField extends RequestHandler
 				$this->randomKey = randomString(3);
 				
 				$this->name = $name;
+				$this->dbname = $name;
 				$this->title = $title;
 				$this->value = $value;
 				$this->parent =& $parent;
@@ -296,10 +305,10 @@ class FormField extends RequestHandler
 			if(!isset($this->hasNoValue) || !$this->hasNoValue) {
 				if(!$this->disabled && $this->POST && isset($this->form()->post[$this->PostName()])) {
 					$this->value = $this->form()->post[$this->PostName()];
-				} else if($this->POST && $this->value == null && is_object($this->form()->result) && is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->name])) {
-					$this->value = ($this->form()->result->doObject($this->name)) ? $this->form()->result->doObject($this->name)->raw() : null;
-				} else if($this->POST && $this->value == null && is_array($this->form()->result) && isset($this->form()->result[$this->name])) {
-					$this->value = $this->form()->result[$this->name];
+				} else if($this->POST && $this->value == null && is_object($this->form()->result) && is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->dbname])) {
+					$this->value = ($this->form()->result->doObject($this->dbname)) ? $this->form()->result->doObject($this->dbname)->raw() : null;
+				} else if($this->POST && $this->value == null && is_array($this->form()->result) && isset($this->form()->result[$this->dbname])) {
+					$this->value = $this->form()->result[$this->dbname];
 				}
 			}
 		}

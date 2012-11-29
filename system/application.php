@@ -9,7 +9,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
+  * last modified: 26.11.2012
   * $Version 2.6
 */
 
@@ -116,7 +116,7 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "053");
+define("BUILD_VERSION", "054");
 define("GOMA_VERSION", "2.0");
 
 // fix for debug_backtrace
