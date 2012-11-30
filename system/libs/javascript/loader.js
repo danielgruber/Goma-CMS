@@ -406,7 +406,7 @@ if(typeof self.loader == "undefined") {
 				var i;
 				for(i in cssfiles) {
 					var file = cssfiles[i];
-					if(!external_regexp.test(file)) {
+					if(!external_regexp.test(file) && file != "") {
 						
 						if(typeof w.CSSLoadedResources[file] == "undefined") {
 							$.ajax({

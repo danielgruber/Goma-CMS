@@ -502,6 +502,7 @@ self.dropdownDialogs = [];
 		*/
 		player_ajax: function(uri) {
 			var that = this;
+			var oldURI = uri;
 			if(uri.indexOf("?") == -1) {
 				uri += "?dropdownDialog=1&dropElem=" + this.id;
 			} else {
@@ -525,62 +526,66 @@ self.dropdownDialogs = [];
 				// data should always be html as basic, we can interpret layteron
 				dataType: "html",
 				success: function(html, textStatus, jqXHR) {
-					
-					LoadAjaxResources(jqXHR);
-					var content_type = jqXHR.getResponseHeader("content-type");
-					
-					// if it is json-data
-					if(content_type == "text/x-json") {
-						try {
-							var data = parseJSON(html);
-							var html = data.content;
-							if(data.position != null) {
-								that.position = data.position;
-							}
-							if(data.closeButton != null) {
-								that.closeButton = data.closeButton;
-							}
-							that.setContent(html);
-							
-							if(typeof data.exec != "undefined") {
-								
-								// execution should not break json-data before
-								try {
-									var method;
-									if (window.execScript) {
-									  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
-									} else
-									  	method = eval('(function(){' + data.exec + '})');
-									
-									method.call(that);
-								} catch(e) {
-									alert(e);
+					try {
+						LoadAjaxResources(jqXHR);
+						var content_type = jqXHR.getResponseHeader("content-type");
+						
+						// if it is json-data
+						if(content_type == "text/x-json") {
+							try {
+								var data = parseJSON(html);
+								var html = data.content;
+								if(data.position != null) {
+									that.position = data.position;
 								}
+								if(data.closeButton != null) {
+									that.closeButton = data.closeButton;
+								}
+								that.setContent(html);
+								
+								if(typeof data.exec != "undefined") {
+									
+									// execution should not break json-data before
+									try {
+										var method;
+										if (window.execScript) {
+										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+										} else
+										  	method = eval('(function(){' + data.exec + '})');
+										
+										method.call(that);
+									} catch(e) {
+										alert(e);
+									}
+								}
+								
+								
+							} catch(e) {
+								alert(e);
+								that.setContent("error parsing JSON");
 							}
+						
+						// if it is javascript
+						} else if(content_type == "text/javascript") {
 							
+							// execution for IE and all other Browsers
+							var method;
+							if (window.execScript)
+							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+							else
+							  	method = eval('(function(){' + html + '});');
+							method.call(this);
 							
-						} catch(e) {
-							alert(e);
-							that.setContent("error parsing JSON");
+						} else {
+							// html just must be set to Dialog
+							that.setContent(html);
 						}
-					
-					// if it is javascript
-					} else if(content_type == "text/javascript") {
 						
-						// execution for IE and all other Browsers
-						var method;
-						if (window.execScript)
-						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-						else
-						  	method = eval('(function(){' + html + '});');
-						method.call(this);
-						
-					} else {
-						// html just must be set to Dialog
-						that.setContent(html);
+						RunAjaxResources(jqXHR);
+					} catch(e) {
+						alert(e);
+						location.href = oldURI;
 					}
-					
-					RunAjaxResources(jqXHR);
 				}
 			});
 		},
