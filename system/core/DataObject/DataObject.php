@@ -2049,9 +2049,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function isDeleted() {
-		if(isset($this->data["publishedid"]))
+		if(isset($this->data["publishedid"]) || DataObject::count("pages", array("id" => $this->id) > 0)) {
 			return false;
-		else
+		} else
 			return true;
 	}
 	
@@ -3913,7 +3913,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access protected
 	*/
 	protected function renderSubTreesHelper($data, $fields, $params, $activenode,  $href) {
-		
+
 		$container = array();
 		$i = 1;
 		foreach($data as $nodedata) {

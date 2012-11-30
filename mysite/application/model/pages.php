@@ -1054,8 +1054,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			foreach($data as $record) {
 				if($record["parentid"] == 0) {
 					if(!isset($arr["_" . $record["id"]])) {
-						
-						if($record->isDeleted()) {
+						if($record->first()->isDeleted()) {
 							$state = "deleted";
 						}
 						// get class-attribute
@@ -1068,7 +1067,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						$arr["_" . $record["id"]] = array(
 							"title" 		=> $record["title"],
 							"attributes"	=> array("class" => $class),
-							"data"			=> $record->ToArray(),
+							"data"			=> $record->first()->ToArray(),
 							"collapsed"		=> false,
 							"collapsable"	=> false,
 							"children"		=> array()
@@ -1082,7 +1081,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					if(isset($arr[$parentid])) { // we are on the second level of the tree
 						
 						if(!isset($arr["_" . $parentid]["children"]["_" . $record["id"]])) {
-							if($record->isDeleted()) {
+							if($record->first()->isDeleted()) {
 								$state = "deleted";
 							}
 							// get class-attribute
@@ -1095,7 +1094,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 							$arr["_" . $parentid]["children"]["_" . $record["recordid"]] = array(
 								"title" 		=> $record["title"],
 								"attributes"	=> array("class" => $class),
-								"data"			=> $record->ToArray(),
+								"data"			=> $record->first()->ToArray(),
 								"collapsed"		=> false,
 								"collapsable"	=> false,
 								"children"		=> array()
@@ -1114,13 +1113,13 @@ class Pages extends DataObject implements PermProvider, HistoryData
 							
 							$data = DataObject::get($this, array("id" => $current_parent_id),array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
 							$data->version = false;
-							if(Permission::check("ADMIN_WRITE")) $data->version = "state";
+							if(Permission::check("ADMIN_CONTENT")) $data->version = "state";
 							
 							if(isset($arr["_" . $data["parentid"]]) || $data["parentid"] == 0) { // found
 								if($data["parentid"] != 0 && isset($arr["_" . $data["parentid"]])) {
 									// if isn't set
 									if(!isset($arr["_" . $data["parentid"]]["children"]["_" . $data["id"]])) {
-										if($data->isDeleted()) {
+										if($data->first()->isDeleted()) {
 											$state = "deleted";
 										}
 										// get class-attribute
@@ -1156,7 +1155,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 								} else { // parentid is 0
 									// if isn't set
 									if(!isset($arr["_" . $data["id"]])) {
-										if($data->isDeleted()) {
+										if($data->first()->isDeleted()) {
 											$state = "deleted";
 										}
 										// get class-attribute
