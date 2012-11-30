@@ -291,6 +291,7 @@ $lang = array(
 	"viewer_groups"									=> "Betrachungsgruppen",
 	"content_edit_users"							=> "Alle Bearbeitungs-Gruppen",
 	"editors"										=> "Recht zur Bearbeitung",
+	"publisher"										=> "Recht zur Veröffentlichung",
 	"viewer_types"									=> "Betrachter-Rechte",
 	"everybody"										=> "Jeder",
 	"login_groups"									=> "Jeder, der sich anmelden kann",

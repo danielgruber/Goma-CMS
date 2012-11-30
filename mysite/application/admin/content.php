@@ -162,7 +162,7 @@ class contentAdmin extends LeftAndMain
 		if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
 			$data = DataObject::get_one($this->modelInst()->class, array("id" => $this->model_inst->id));
 			if($data) {
-				$data->write(false, false, 2);
+				$data->write(false, false, 2, true);
 				if(Core::is_ajax()) {
 					$response = new AjaxResponse();
 					$dialog = new Dialog(lang("revert_changes_success", "The last version was recovered successfully."), lang("okay", "Okay"));

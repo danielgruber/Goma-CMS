@@ -290,6 +290,7 @@ $lang = array(
 	"viewer_groups"									=> "viewer-groups",
 	"content_edit_users"							=> "every edit-group",
 	"editors"										=> "Permission to edit",
+	"publish"										=> "Permission to publish",
 	"viewer_types"									=> "Permission to view",
 	"everybody"										=> "Everyone",
 	"login_groups"									=> "Everyone, who can login",

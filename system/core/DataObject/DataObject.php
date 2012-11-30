@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 26.11.2012
-  * $Version: 4.6.9
+  * last modified: 30.11.2012
+  * $Version: 4.6.10
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1472,7 +1472,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
 	 *@return bool
 	*/
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2)
+	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false)
 	{
 		if(!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
@@ -1532,7 +1532,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			// check rights
 			if(!$forceInsert && !$forceWrite) {
 				if(!$this->canInsert($this)) {
-					return false;
+					if($snap_priority == 2 && !$this->canPublish($this))
+						return false;
 				}
 			}
 			
@@ -1548,7 +1549,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				// check rights
 				if(!$forceWrite)
 					if(!$this->canWrite($this))
-						return false;
+						if($snap_priority == 2 && !$this->canPublish($this))
+							return false;
 				
 				$command = "update";
 				$newdata = array_merge($data->ToArray(), $this->data);
@@ -1840,10 +1842,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				if($this->versioned) {
 					$this->onBeforePublish();
 					$this->callExtending("onBeforePublish");
-					if(!$forceWrite) {
-						if(!$this->canPublish($this)) {
-							if(PROFILE) Profiler::unmark("DataObject::write");
-							return false;
+					if(!$forcePublish) {
+						if(!$forceWrite) {
+							if(!$this->canPublish($this)) {
+								if(PROFILE) Profiler::unmark("DataObject::write");
+								return false;
+							}
 						}
 					}
 				}
@@ -1933,7 +1937,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 	}
 	
-
 	/**
 	 * unpublishes the record
 	 *
@@ -1941,7 +1944,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function unpublish($force = false) {
-		if((!$this->canWrite($this) || !$this->canPublish($this)) && !$force)
+		if((!$this->canPublish($this)) && !$force)
 			return false;
 		
 		$manipulation = array(
@@ -1969,6 +1972,46 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		return false;
 	}
+	
+	/**
+	 * publishes the record
+	 *
+	 *@name publish
+	 *@access public
+	*/
+	public function publish($force = false) {
+		if((!$this->canPublish($this)) && !$force)
+			return false;
+		
+		if($this->isPublished())
+			return true;
+		
+		$manipulation = array(
+			$this->baseTable . "_state" => array(
+				"table_name" 	=> $this->baseTable . "_state",
+				"command"		=> "update",
+				"id"			=> $this->recordid,
+				"fields"		=> array(
+					"publishedid"	=> $this->versionid
+				)
+			)
+		);
+		
+		$this->onBeforePublish();
+		$this->callExtending("OnBeforePublish");
+		
+		$this->onBeforeManipulate($manipulation);
+		
+		if(SQL::manipulate($manipulation)) {
+			if(ClassInfo::getStatic($this->class, "history")) {
+				History::push($this->class, 0, $this->versionid, $this->id, "publish");
+			}
+			return true;
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * returns if this version of the record is published
 	 *
@@ -1983,6 +2026,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return false;
 		}
 	}
+	
 	/** 
 	 * gives back if ever published
 	 *
@@ -1997,6 +2041,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return false;
 		}
 	}
+	
 	/**
 	 * returns if baseRecord is deleted
 	 *
@@ -2009,6 +2054,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		else
 			return true;
 	}
+	
 	/**
 	 * gets versions of this ordered by time DESC
 	 *
@@ -2021,6 +2067,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			"recordid"	=> $this->recordid
 		)),  array($this->baseTable . ".id", $ordertype));
 	}
+	
 	/**
 	 * gets versions of this ordered by time ASC
 	 *
