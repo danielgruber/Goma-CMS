@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 30.11.2012
-  * $Version: 4.6.10
+  * last modified: 01.12.2012
+  * $Version: 4.6.11
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -2091,6 +2091,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return $this->autor();
 	}
 	
+	//!TODO: Where is this necessary???
 	/**
 	 * gets field-value-pairs for a given class of the current data
 	 * so you can get an array for each class of the fields
@@ -2568,23 +2569,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $fields;
 	}
 	
-	
-	//! Todo: Check if we need Permissions here
 	/**
 	  * set many-many-connection-data
+	  *
 	  *@name set_many_many
 	  *@param stirng - name of connection
 	  *@param array - ids to connect with current id
+	  *@param bool - override permission system
 	  *@access public
 	*/
-	public function set_many_many($name,$ids)
+	public function set_many_many($name, $ids, $force = false)
 	{
-			$manipulation = $this->set_many_many_manipulation(array(),$name, $ids);
-			
-			$this->onBeforeManipulate($manipulation);
-			
-			return SQL::manipulate($manipulation);
-			
+		if($this->canWrite($this)) {
+			if(!$this->isPublished() || $this->canPublish($this)) {
+				$manipulation = $this->set_many_many_manipulation(array(), $name, $ids);
+				
+				$this->onBeforeManipulate($manipulation);
+				
+				return SQL::manipulate($manipulation);
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -2986,17 +2992,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		return $this->setField($name . "ids", $ids);
-	}
-	
-	/**
-	 * fieldget
-	 *
-	 *@name fieldGET
-	 *@access public
-	*/
-	public function fieldGet($name) {
-		
-		return parent::fieldGet($name);
 	}
 
 	/**
