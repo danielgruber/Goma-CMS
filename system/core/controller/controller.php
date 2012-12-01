@@ -88,7 +88,8 @@ class Controller extends RequestHandler
 		public $allowed_actions = array(
 			"edit",
 			"delete",
-			"record"
+			"record",
+			"version"
 		);
 		
 		/**
@@ -329,6 +330,7 @@ class Controller extends RequestHandler
 				throwError(6, "Logical Exception", "No Template for Controller ".$this->class." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
 			}
 		}
+		
 		/**
 		 * renders with areas
 		 *
@@ -348,6 +350,7 @@ class Controller extends RequestHandler
 			
 			return $model->customise($this->tplVars)->renderWith($template, $areas);
 		}
+		
 		/**
 		 * handles a request with a given record in it's controller
 		 *
@@ -369,6 +372,29 @@ class Controller extends RequestHandler
 				return $this->index();
 			}
 		}
+		
+		/**
+		 * handles a request with a given versionid in it's controller
+		 *
+		 *@name version
+		 *@access public
+		*/
+		public function version() {
+			$id = $this->getParam("id");
+			if($model = $this->model()) {
+				$data = DataObject::get_one($model, array("versionid" => $id));
+				$this->callExtending("decorateRecord", $model);
+				$this->decorateRecord($data);
+				if($data) {
+					return $data->controller()->handleRequest($this->request);
+				} else {
+					return $this->index();
+				}
+			} else {
+				return $this->index();
+			}
+		}
+		
 		/**
 		 * hook in this function to decorate a created record of record()-method
 		 *
@@ -378,6 +404,7 @@ class Controller extends RequestHandler
 		public function decorateRecord(&$record) {
 			
 		}
+		
 		/**
 		 * generates a form
 		 *
