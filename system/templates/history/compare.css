@@ -15,8 +15,9 @@
 	border: 1px solid #ddd;
 	min-width: 200px;
 }
-.compareView .grey {
-	background: #efefef;
+.compareView .grey .content {
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
 }
 .compareView td {
 	padding: 10px;

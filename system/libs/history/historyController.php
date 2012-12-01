@@ -180,7 +180,7 @@ class HistoryController extends Controller {
 				}
 			}
 			
-			return $view->customise(array("fields" => $fieldset))->renderWith("history/compare.html");
+			return $view->customise(array("fields" => $fieldset, "css" => $this->buildEditorCSS()))->renderWith("history/compare.html");
 		} else {
 			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->class.". Please create method ".$oldversion->class."::getVersionedFields with array as return-value.");
 		}
@@ -339,6 +339,68 @@ class HistoryController extends Controller {
 			$output = str_replace($matches[0], $tag, $output);
 		}
 		
+		// script-tags - we remove them
+		$output = preg_replace('/\<script(.*)\>(.*)\<\/script\>/Usi', '', $output);
+		
 		return $output;
+	}
+	
+	/**
+	 * builds editor.css
+	 *
+	 *@name buildEditorCSS
+	*/
+	public function buildEditorCSS() {
+		$cache = ROOT . CACHE_DIRECTORY . "/editor.compare." . Core::GetTheme() . ".css";
+		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
+			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			
+			// parse CSS
+			$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
+			FileSystem::write($cache, $css);
+			
+			return $cache;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * interprets the CSS
+	 *
+	 *@name interpretCSS
+	*/
+	public static function interpretCSS($matches) {
+		if(preg_match('/^(body|html)?,?\s*(html|body)?$/i', trim($matches[1]))) {
+			return "\n.compareView .content {";
+		} else {
+			$exps = explode(",", trim($matches[1]));
+			$out = "\n";
+			foreach($exps as $exp) {
+				$out .= ".compareView .content " . trim($exp) . ", ";
+			}
+			return $out . " { ";
+		}
+	}
+	
+	/**
+	 * gets a consolidated CSS-File, where imports are merged with original file
+	 *
+	 *@name importCSS
+	 *@param string - file
+	*/
+	public static function importCSS($file) {
+		if(file_exists($file)) {
+			$css = file_get_contents($file);
+			// import imports
+			preg_match_all('/\@import\s*url\(("|\')([^"\']+)("|\')\)\;/Usi', $css, $m);
+			foreach($m[2] as $key => $_file) {
+				$css = str_replace($m[0][$key], self::importCSS(dirname($file) . "/" . $_file), $css);
+			}
+			
+			return $css;
+		}
+		
+		return "";
 	}
 }
