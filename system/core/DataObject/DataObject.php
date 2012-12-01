@@ -697,14 +697,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if($limit != "") {
 				if(is_array($limit)) {
-					if(count($limit) > 1 && _ereg("^[0-9]+$", $limit[0]) && _ereg("^[0-9]+$", $limit[1]))
+					if(count($limit) > 1 && preg_match("/^[0-9]+$/", $limit[0]) && preg_match("/^[0-9]+$/", $limit[1]))
 						$limit = " LIMIT ".$limit[0].", ".$limit[1]."";
-					else if(count($limit) == 1 && _ereg("^[0-9]+$", $limit[0])) 
+					else if(count($limit) == 1 && preg_match("/^[0-9]+$/", $limit[0])) 
 						$limit = " LIMIT ".$limit[0];
 					
-				} else if(_ereg("^[0-9]+$", $limit)) {
+				} else if(preg_match("/^[0-9]+$/", $limit)) {
 					$limit = " LIMIT ".$limit;
-				} else if(_ereg('^\s*([0-9]+)\s*,\s*([0-9]+)\s*$', $limit)) {
+				} else if(preg_match('/^\s*([0-9]+)\s*,\s*([0-9]+)\s*$/', $limit)) {
 					$limit = " LIMIT ".$limit;
 				} else {
 					$limit = "";
@@ -3209,7 +3209,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				if(member::login()) {
 					$perms = $this->providePerms();
 					foreach($perms as $key => $val) {
-						if(_eregi("publish", $key) || _eregi("edit", $key) || _eregi("write", $key)) {
+						if(preg_match("/publish/i", $key) || preg_match("/edit/i", $key) || preg_match("/write/i", $key)) {
 							if(Permission::check($key)) {
 								$canVersion = true;
 								break;
@@ -3257,7 +3257,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						$query->db_fields["id"] = $baseTable . "_state";
 					
 					// if we prefer specific versions
-					} else if(_ereg('^[0-9]+$', $version)) {
+					} else if(preg_match('/^[0-9]+$/', $version)) {
 						$query->addFilter($baseTable.'.id = (
 							SELECT where_'.$baseTable.'.id FROM '.DB_PREFIX . $baseTable.' AS where_'.$baseTable.' WHERE where_'.$baseTable.'.recordid = '.$baseTable.'.recordid ORDER BY (where_'.$baseTable.'.id = '.$version.') DESC LIMIT 1
 						)');
@@ -3388,7 +3388,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if($join)
 				foreach($join as $table => $statement)
 				{
-					if(_ereg('^[0-9]+$', $table) && is_numeric($table))
+					if(preg_match('/^[0-9]+$/', $table) && is_numeric($table))
 						$query->from[] = $statement;
 					else
 						$query->from[$table] = " LEFT JOIN ".DB_PREFIX.$table." AS ".$table." ON " . $statement;
@@ -3879,7 +3879,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// now get data
-			if(!is_array($words_parentid) && _ereg("^[0-9]+$", $words_parentid)) {
+			if(!is_array($words_parentid) && preg_match("/^[0-9]+$/", $words_parentid)) {
 				$data = $this->getTree($words_parentid, $fields, $activenode, $params);
 			} else if(is_array($words_parentid) && $words_parentid[0] == "") {
 				$data = $this->getTree($words_parentid, $fields, $activenode, $params);
@@ -3955,7 +3955,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$link->addClass("first");
 			}
 			
-			if(_ereg('^[0-9]+$', $activenode)) {
+			if(preg_match('/^[0-9]+$/', $activenode)) {
 				if($activenode == $nodedata["data"]["recordid"]) {
 					$hoverspan->addClass("marked");
 				}
