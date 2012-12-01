@@ -280,6 +280,15 @@ self.dropdownDialogs = [];
 				break;
 				case "left":
 					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
+					
+					// fix if dropdown is not in document
+					if(positionTop < 0) {
+						var triangle_margin_top = 0 - 20 + positionTop;
+						positionTop = 4;
+					} else {
+						var triangle_margin_top = 0 - 20;
+					}
+					
 					var contentWidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
 					var positionRight = elemleft + 2 - contentWidth;
@@ -294,6 +303,14 @@ self.dropdownDialogs = [];
 				break;
 				case "right":
 					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
+					// fix if dropdown is not in document
+					if(positionTop < 0) {
+						var triangle_margin_top = 0 - 20 + positionTop;
+						positionTop = 4;
+					} else {
+						var triangle_margin_top = 0 - 20;
+					}
+					
 					var positionLeft = elemleft + elemwidth - 2;
 					this.dropdown.css({
 						"display": "none",
@@ -307,6 +324,9 @@ self.dropdownDialogs = [];
 			
 			// now set the triangle
 			this.dropdown.find(" > div").prepend('<div class="triangle_position_'+this.triangle_position+' triangle"><div></div></div>');
+			if(typeof triangle_margin_top != "undefined") {
+				this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
+			}
 			if(display)
 				this.dropdown.css("display", "block");
 			else
