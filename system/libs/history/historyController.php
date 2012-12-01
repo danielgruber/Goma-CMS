@@ -247,10 +247,10 @@ class HistoryController extends Controller {
 				continue;
 			}
 			
-			if(preg_match('/^(\<p[^\>]*\>)(.*)\<\/p\>$/i', $text, $m)) {
+			if(preg_match('/^(\<(p|h1|h2|h3|h4|h5|h6|div|blockquote|noscript|form|fieldset|adress|li|ul)[^\>]*\>)(.*)\<\/$2\>$/i', $text, $m)) {
 				$html[$x] = $m[1];
-				$text = $m2[2];
-				$add = "</p>";
+				$text = $m2[3];
+				$add = "</".$m[2].">";
 			}
 			
 			switch ($op) {
@@ -273,6 +273,9 @@ class HistoryController extends Controller {
 				$i += mb_strlen($data);
 			}
 		}
-		return implode('',$html);
+		$output = implode('',$html);
+		// run output fixes here
+		
+		return $output;
 	}
 }
