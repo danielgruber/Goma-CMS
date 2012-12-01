@@ -224,7 +224,8 @@ class HistoryController extends Controller {
 	*/
 	public function diffToHTML($diffs) {
 		$html = array ();
-		$i = 0;
+		$blockElements = "p|h1|h2|h3|h4|h5|h6|div|blockquote|noscript|form|fieldset|adress|li|ul";
+		$i =0;
 		for ($x = 0; $x < count($diffs); $x++) {
 			$html[$x] = "";
 			$add = "";
@@ -247,26 +248,28 @@ class HistoryController extends Controller {
 				continue;
 			}
 			
-			if(preg_match('/^(\<(p|h1|h2|h3|h4|h5|h6|div|blockquote|noscript|form|fieldset|adress|li|ul)[^\>]*\>)(.*)\<\/$2\>$/i', $text, $m)) {
+			if(preg_match('/^(\<('.$blockElements.')[^\>]*\>)(.*)\<\/\2\>$/si', $text, $m)) {
 				$html[$x] = $m[1];
-				$text = $m2[3];
+				$text = $m[3];
 				$add = "</".$m[2].">";
 			}
 			
 			switch ($op) {
 				case DIFF_INSERT :
-					$html[$x] .= '<INS STYLE="background:#E6FFE6;" TITLE="i=' . $i . '">' . $text . '</INS>';
+					$html[$x] .= '<ins>' . $text . '</ins>';
 					break;
 				case DIFF_DELETE :
-					$html[$x] .= '<DEL STYLE="background:#FFE6E6;" TITLE="i=' . $i . '">' . $text . '</DEL>';
+					$html[$x] .= '<del>' . $text . '</del>';
 					break;
 				case DIFF_EQUAL :
-					$html[$x] .= '<SPAN TITLE="i=' . $i . '">' . $text . '</SPAN>';
+					$html[$x] .= $text;
 					break;
 			}
 			
+			$html[$x] = preg_replace('/^\s*\<(ins|del)\>\s*\<\/('.$blockElements.')\>\s*\<('.$blockElements.')\>/Usi', "</$2><$3><$1>", $html[$x]);
+			
 			if(isset($add)) {
-				$html[$x] .= "</p>";
+				$html[$x] .= $add;
 			}
 			
 			if ($op !== DIFF_DELETE) {
@@ -274,7 +277,67 @@ class HistoryController extends Controller {
 			}
 		}
 		$output = implode('',$html);
+		
+		
 		// run output fixes here
+		
+		// img-fixes
+		preg_match_all('/\<img(.*)\s\/\>/Usi', $output, $matches);
+		foreach($matches[0] as $tag) {
+			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
+				$delTag = $tag;
+				$delTag = str_replace('<del>', '', $delTag);
+				$delTag = str_replace('</del>', '', $delTag);
+				$delTag = preg_replace('/\<ins>(.*)\<\/ins\>/Usi', "", $delTag);
+				
+				$insTag = $tag;
+				$insTag = str_replace('<ins>', '', $insTag);
+				$insTag = str_replace('</ins>', '', $insTag);
+				$insTag = preg_replace('/\<del>(.*)\<\/del\>/Usi', "", $insTag);
+				
+				$tag = "<del style=\"display: block;\">".$delTag."</del><ins style=\"display: block;\">".$insTag."</ins>";
+				
+			} else if(strpos($tag, "<ins>")) {
+				$tag = str_replace('<ins>', '', $tag);
+				$tag = str_replace('</ins>', '', $tag);
+				$tag = "<ins>".$tag."</ins>";
+			} else if(strpos($tag, "<del>")) {
+				$tag = str_replace('<del>', '', $tag);
+				$tag = str_replace('</del>', '', $tag);
+				$tag = "<del>".$tag."</del>";
+			}
+			
+			$output = str_replace($matches[0], $tag, $output);
+		}
+		
+		// a-fixes
+		preg_match_all('/\<(a)(.*)\>(.*)\<\/\1\>/Usi', $output, $matches);
+		foreach($matches[0] as $tag) {
+			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
+				$delTag = $tag;
+				$delTag = str_replace('<del>', '', $delTag);
+				$delTag = str_replace('</del>', '', $delTag);
+				$delTag = preg_replace('/\<ins>(.*)\<\/ins\>/Usi', "", $delTag);
+				
+				$insTag = $tag;
+				$insTag = str_replace('<ins>', '', $insTag);
+				$insTag = str_replace('</ins>', '', $insTag);
+				$insTag = preg_replace('/\<del>(.*)\<\/del\>/Usi', "", $insTag);
+				
+				$tag = "<del style=\"display: block;\">".$delTag."</del><ins style=\"display: block;\">".$insTag."</ins>";
+				
+			} else if(strpos($tag, "<ins>")) {
+				$tag = str_replace('<ins>', '', $tag);
+				$tag = str_replace('</ins>', '', $tag);
+				$tag = "<ins>".$tag."</ins>";
+			} else if(strpos($tag, "<del>")) {
+				$tag = str_replace('<del>', '', $tag);
+				$tag = str_replace('</del>', '', $tag);
+				$tag = "<del>".$tag."</del>";
+			}
+			
+			$output = str_replace($matches[0], $tag, $output);
+		}
 		
 		return $output;
 	}
