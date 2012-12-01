@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
+  * last modified: 01.12.2012
 */
 
 self.dropdownDialogs = [];
@@ -364,12 +364,15 @@ self.dropdownDialogs = [];
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
 			
+			this.dropdown.off(".subdrops");
 			// register event for sub-dialogs
-			this.dropdown.find(" > div > .content a[rel*=dropdowndialog]").click(function(){	
-				var $this = $(this);
-				setTimeout(function(){
-					that.subDialogs.push("dropdownDialog_" + $this.attr("id"));
-				}, 100);
+			this.dropdown.on("click.subdrops", "a", function(){	
+				if($(this).attr("rel").match(/dropdownDialog/)) {
+					var $this = $(this);
+					setTimeout(function(){
+						that.subDialogs.push("dropdownDialog_" + $this.attr("id"));
+					}, 100);
+				}
 			});
 			
 			// javascript-profiler

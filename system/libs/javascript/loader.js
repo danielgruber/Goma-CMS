@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 1.5
+  * last modified: 01.12.2012
+  * $Version 1.5.1
 */
 
 // prevent from being executed twice
@@ -82,7 +82,7 @@ if(typeof self.loader == "undefined") {
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
 			*/
-			$("a[rel=ajaxfy]").live("click", function()
+			$(document).on("click", "a[rel=ajaxfy]", function()
 			{
 				var $this = $(this);
 				var _html = $this.html();
@@ -105,7 +105,7 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			// the orangebox is not tested, yet, please don't use it!
-			$('a[rel*=orangebox]').live('click',function(){	
+			$(document).on('click',"a[rel*=orangebox]",function(){	
 				gloader.load("orangebox");
 				$(this).orangebox();
 				$(this).removeAttr("rel");
@@ -113,7 +113,7 @@ if(typeof self.loader == "undefined") {
 			});
 	
 			// pretty old-fasioned bluefox, if you like it create an a-tag with rel="bluebox"
-			$("a[rel*=bluebox], a[rel*=facebox]").live('click',function(){
+			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
 				gloader.load("dialog");
 				if($(this).hasClass("nodrag"))
 				{
@@ -126,7 +126,7 @@ if(typeof self.loader == "undefined") {
 			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
-		    $("a[rel*=dropdownDialog]").live("click", function()
+		    $(document).on("click", "a[rel*=dropdownDialog]", function()
 			{
 				gloader.load("dropdownDialog");
 				
@@ -151,7 +151,7 @@ if(typeof self.loader == "undefined") {
 			 * every element with class="windowzindex" is with this plugin
 			 * it makes the clicked one on top
 			*/
-			$(".windowzindex").live('click', function(){
+			$(document).on('click', ".windowzindex", function(){
 				$(".windowzindex").parent().css('z-index', 900);
 				$(this).parent().css("z-index", 901);
 			});
