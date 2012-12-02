@@ -11,7 +11,7 @@ Please follow the git_readme.txt if you want to clone the project to your server
 Otherwise just get a source package and extract it in your servers document root.
 Then point your browser to the url, you gave it.
 The first time you start Goma CMS, an installer will appear to guide you through the
-neccessary steps of installation.
+necessary steps of installation.
 If not, please check, if the webserver hast the rights to read, write and execute Goma.
 The installer will also provide information about what to install on your system to make Goma run.
 
