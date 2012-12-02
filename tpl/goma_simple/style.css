@@ -28,8 +28,8 @@ html, body {
 }
 
 #header {
-	background: #efefef;
-	border-bottom: 1px solid #ccc;
+	background: #444;
+	border-bottom: 1px solid #fff;
 }
 
 #header > .content_wrapper {
@@ -39,11 +39,11 @@ html, body {
 #header .quickLinks {
 	float: right;
 	font-size: 0.8em;
-	color: #777;
+	color: #eee;
 	position: relative;
 }
 #header .quickLinks a {
-	color: #555;
+	color: #ddd;
 }
 #header .quickLinks .user img {
 	margin-top: -3px;
@@ -76,19 +76,19 @@ html, body {
 #header #navi ul li a {
 	display: block;
 	padding: 0.5em 0.8em;
-	color: #777;
+	color: #eee;
 	font-size: 1.1em;
 	text-decoration: none;
 }
 #header #navi ul li a:hover {
 	text-decoration: none;
-	color: #0060bb;
+	color: #52abff;
 }
 #header #navi ul li a.active {
 	padding-bottom: 2.49em;
 	margin-bottom: -2.45em;
 	background: url(images/arrow_navi.png) no-repeat bottom center;
-	color: #0060bb;
+	color: #52abff;
 }
 #header #search { 
 	float: right;
@@ -99,10 +99,13 @@ html, body {
 	-webkit-appearance: none;
 	padding: 0.4em;
 	font-size: 0.9em;
-	background: #fff;
-	border: 1px solid #ccc;
+	background: #bbb;
+	border: 0;
 	border-radius: 5px;
 	padding-right: 26px;
+}
+#header #search input[type=search]:focus {
+	background: #eee;
 }
 #header #search input[type=image] {
 	position: absolute;
@@ -114,6 +117,10 @@ html, body {
 	margin-bottom: 25px;
 	margin-top: 0;
 	margin-right: 30px;
+	color: #bbb !important;
+}
+#header h3 a {
+	color: #bbb !important;
 }
 
 #content > .content_wrapper {

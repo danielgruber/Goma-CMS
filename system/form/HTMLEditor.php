@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 28.11.2011
-  * $Version 1.2.3
+  * last modified: 01.12.2011
+  * $Version 1.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -62,7 +62,7 @@ class HTMLEditor extends Textarea
 					$width = $this->width;
 				}
 				
-				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor/";');
+				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4/";');
 				Resources::add("system/libs/thirdparty/ckeditor4/ckeditor.js", "js");
 				//Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
@@ -72,10 +72,22 @@ class HTMLEditor extends Textarea
 				$_SESSION["uploadTokens"][$accessToken] = true;
 				
 				$js = '
+var bindIEClickPatch = function() {
+	if(getInternetExplorerVersion() != -1) {
+		$(document).on("click", "a.cke_dialog_ui_button", function(){
+			self.leave_check = true;
+			setTimeout(function(){
+				self.leave_check = false;
+			}, 100);
+		});
+	}
+}
+
 $(function(){
 	// apple bug with contenteditable of iOS 4 and lower
 	// firefox 3 and above are supported, otherwise dont load up
 	if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
+		bindIEClickPatch();
 		setTimeout(function(){
 			
 			if(CKEDITOR.instances.'.$this->input->id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$this->input->id.');

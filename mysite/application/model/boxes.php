@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.1.6
+  * last modified: 29.11.2012
+  * $Version 1.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -73,9 +73,9 @@ class Boxes extends DataObject {
 	public function getActions(&$form) {
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		if(Core::is_ajax()) {
-			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave"));
+			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish"));
 		} else {
-			$form->addAction(new FormAction("submit", lang("save")));
+			$form->addAction(new FormAction("submit", lang("save"), "publish"));
 		}
 	}
 	

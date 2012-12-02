@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
+  * last modified: 01.12.2012
 */
 
 self.dropdownDialogs = [];
@@ -280,6 +280,15 @@ self.dropdownDialogs = [];
 				break;
 				case "left":
 					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
+					
+					// fix if dropdown is not in document
+					if(positionTop < 0) {
+						var triangle_margin_top = 0 - 20 + positionTop;
+						positionTop = 4;
+					} else {
+						var triangle_margin_top = 0 - 20;
+					}
+					
 					var contentWidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
 					var positionRight = elemleft + 2 - contentWidth;
@@ -294,6 +303,14 @@ self.dropdownDialogs = [];
 				break;
 				case "right":
 					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
+					// fix if dropdown is not in document
+					if(positionTop < 0) {
+						var triangle_margin_top = 0 - 20 + positionTop;
+						positionTop = 4;
+					} else {
+						var triangle_margin_top = 0 - 20;
+					}
+					
 					var positionLeft = elemleft + elemwidth - 2;
 					this.dropdown.css({
 						"display": "none",
@@ -307,6 +324,9 @@ self.dropdownDialogs = [];
 			
 			// now set the triangle
 			this.dropdown.find(" > div").prepend('<div class="triangle_position_'+this.triangle_position+' triangle"><div></div></div>');
+			if(typeof triangle_margin_top != "undefined") {
+				this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
+			}
 			if(display)
 				this.dropdown.css("display", "block");
 			else
@@ -364,13 +384,19 @@ self.dropdownDialogs = [];
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
 			
+			this.dropdown.off(".subdrops");
 			// register event for sub-dialogs
-			this.dropdown.find(" > div > .content a[rel*=dropdowndialog]").click(function(){	
-				var $this = $(this);
-				setTimeout(function(){
-					that.subDialogs.push("dropdownDialog_" + $this.attr("id"));
-				}, 100);
+			this.dropdown.on("click.subdrops", "a", function(){	
+				if($(this).attr("rel").match(/dropdownDialog/)) {
+					var $this = $(this);
+					setTimeout(function(){
+						that.subDialogs.push("dropdownDialog_" + $this.attr("id"));
+					}, 100);
+				}
 			});
+			
+			// retina
+			retinaReplace();
 			
 			// javascript-profiler
 			if(typeof profiler != "undefined") {
@@ -502,6 +528,7 @@ self.dropdownDialogs = [];
 		*/
 		player_ajax: function(uri) {
 			var that = this;
+			var oldURI = uri;
 			if(uri.indexOf("?") == -1) {
 				uri += "?dropdownDialog=1&dropElem=" + this.id;
 			} else {
@@ -526,61 +553,66 @@ self.dropdownDialogs = [];
 				dataType: "html",
 				success: function(html, textStatus, jqXHR) {
 					
-					LoadAjaxResources(jqXHR);
-					var content_type = jqXHR.getResponseHeader("content-type");
-					
-					// if it is json-data
-					if(content_type == "text/x-json") {
-						try {
-							var data = parseJSON(html);
-							var html = data.content;
-							if(data.position != null) {
-								that.position = data.position;
-							}
-							if(data.closeButton != null) {
-								that.closeButton = data.closeButton;
-							}
-							that.setContent(html);
-							
-							if(typeof data.exec != "undefined") {
-								
-								// execution should not break json-data before
-								try {
-									var method;
-									if (window.execScript) {
-									  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
-									} else
-									  	method = eval('(function(){' + data.exec + '})');
-									
-									method.call(that);
-								} catch(e) {
-									alert(e);
+					try {
+						LoadAjaxResources(jqXHR);
+						var content_type = jqXHR.getResponseHeader("content-type");
+						
+						// if it is json-data
+						if(content_type == "text/x-json") {
+							try {
+								var data = parseJSON(html);
+								var html = data.content;
+								if(data.position != null) {
+									that.position = data.position;
 								}
+								if(data.closeButton != null) {
+									that.closeButton = data.closeButton;
+								}
+								that.setContent(html);
+								
+								if(typeof data.exec != "undefined") {
+									
+									// execution should not break json-data before
+									try {
+										var method;
+										if (window.execScript) {
+										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+										} else
+										  	method = eval('(function(){' + data.exec + '})');
+										
+										method.call(that);
+									} catch(e) {
+										alert(e);
+									}
+								}
+								
+								
+							} catch(e) {
+								alert(e);
+								that.setContent("error parsing JSON");
 							}
+						
+						// if it is javascript
+						} else if(content_type == "text/javascript") {
 							
+							// execution for IE and all other Browsers
+							var method;
+							if (window.execScript)
+							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+							else
+							  	method = eval('(function(){' + html + '});');
+							method.call(this);
 							
-						} catch(e) {
-							alert(e);
-							that.setContent("error parsing JSON");
+						} else {
+							// html just must be set to Dialog
+							that.setContent(html);
 						}
-					
-					// if it is javascript
-					} else if(content_type == "text/javascript") {
 						
-						// execution for IE and all other Browsers
-						var method;
-						if (window.execScript)
-						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-						else
-						  	method = eval('(function(){' + html + '});');
-						method.call(this);
-						
-					} else {
-						// html just must be set to Dialog
-						that.setContent(html);
+						RunAjaxResources(jqXHR);
+					} catch(e) {
+						alert(e);
+						location.href = oldURI;
 					}
-					
-					RunAjaxResources(jqXHR);
 				}
 			});
 		},

@@ -153,7 +153,7 @@ class History extends DataObject {
 	*/
 	public function getVersioned() {
 		$data = $this->historyData();
-		if(isset($data["versioned"]) && $data["versioned"]) {
+		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
 			$temp = new $this->dbobject();
 			if(!$temp->versioned)
 				return false;
@@ -166,6 +166,16 @@ class History extends DataObject {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * gets the edit-url
+	 *
+	 *@name getEditURL
+	*/
+	public function getEditURL() {
+		$data = $this->historyData();
+		return isset($data["editurl"]) ? $data["editurl"] : null;
 	}
 	
 	/**

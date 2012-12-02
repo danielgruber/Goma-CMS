@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.4.1
+  * last modified: 02.12.2012
+  * $Version 1.4.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -626,7 +626,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setHeight($height) {
-		return '<img src="' . $this->path . "/setHeight/" . $height . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setHeight/" . $height . '" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -636,7 +636,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setWidth($width) {
-		return '<img src="' . $this->path . "/setWidth/" . $width . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setWidth/" . $width . '" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -646,21 +646,21 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setSize($width, $height) {
-		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
-	 * sets the size on the original
+	 * sets the size on the original,  so not the thumbnail we saved
 	 *
 	 *@name orgSetSize
 	 *@access public
 	*/
 	public function orgSetSize($width, $height) {
-		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
-	 * sets the width on the original
+	 * sets the width on the original, so not the thumbnail we saved
 	 *
 	 *@name orgSetWidth
 	 *@access public
@@ -670,7 +670,7 @@ class ImageUploads extends Uploads {
 	}
 	
 	/**
-	 * sets the height on the original
+	 * sets the height on the original, so not the thumbnail we saved
 	 *
 	 *@name orgSetHeight
 	 *@access public
@@ -833,7 +833,7 @@ class ImageUploadsController extends UploadsController {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
 			$width = $this->getParam("width");
 			$image = new RootImage($this->modelInst()->realfile);
-			$image->createThumb($width, nukk, 0, 0, 100, 100)->Output();
+			$image->createThumb($width, null, 0, 0, 100, 100)->Output();
 		}
 		
 		exit;
