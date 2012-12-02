@@ -147,6 +147,27 @@ class HistoryController extends Controller {
 	}
 	
 	/**
+	 * restores a version
+	 *
+	 *@name restoreVersion
+	*/
+	public function restoreVersion() {
+		$version = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")));
+		if($version->canWrite($version) || $version->canPublish($version)) {
+			if($this->confirm(lang("restore_confirm"))) {
+				if($version->canWrite($version)) {
+					$version->write(false, true, 1);
+				} else {
+					$version->write(false, true, 2);
+				}
+				$this->redirectBack();
+			}
+		} else {
+			return lang("less_rights");
+		}
+	}
+	
+	/**
 	 * compares two versions
 	 *
 	 *@name compareVersion
@@ -180,7 +201,7 @@ class HistoryController extends Controller {
 				}
 			}
 			
-			return $view->customise(array("fields" => $fieldset))->renderWith("history/compare.html");
+			return $view->customise(array("fields" => $fieldset, "css" => $this->buildEditorCSS()))->renderWith("history/compare.html");
 		} else {
 			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->class.". Please create method ".$oldversion->class."::getVersionedFields with array as return-value.");
 		}
@@ -224,7 +245,8 @@ class HistoryController extends Controller {
 	*/
 	public function diffToHTML($diffs) {
 		$html = array ();
-		$i = 0;
+		$blockElements = "p|h1|h2|h3|h4|h5|h6|div|blockquote|noscript|form|fieldset|adress|li|ul";
+		$i =0;
 		for ($x = 0; $x < count($diffs); $x++) {
 			$html[$x] = "";
 			$add = "";
@@ -247,32 +269,159 @@ class HistoryController extends Controller {
 				continue;
 			}
 			
-			if(preg_match('/^(\<p[^\>]*\>)(.*)\<\/p\>$/i', $text, $m)) {
+			if(preg_match('/^(\<('.$blockElements.')[^\>]*\>)(.*)\<\/\2\>$/si', $text, $m)) {
 				$html[$x] = $m[1];
-				$text = $m2[2];
-				$add = "</p>";
+				$text = $m[3];
+				$add = "</".$m[2].">";
 			}
 			
 			switch ($op) {
 				case DIFF_INSERT :
-					$html[$x] .= '<INS STYLE="background:#E6FFE6;" TITLE="i=' . $i . '">' . $text . '</INS>';
+					$html[$x] .= '<ins>' . $text . '</ins>';
 					break;
 				case DIFF_DELETE :
-					$html[$x] .= '<DEL STYLE="background:#FFE6E6;" TITLE="i=' . $i . '">' . $text . '</DEL>';
+					$html[$x] .= '<del>' . $text . '</del>';
 					break;
 				case DIFF_EQUAL :
-					$html[$x] .= '<SPAN TITLE="i=' . $i . '">' . $text . '</SPAN>';
+					$html[$x] .= $text;
 					break;
 			}
 			
+			$html[$x] = preg_replace('/^\s*\<(ins|del)\>\s*\<\/('.$blockElements.')\>\s*\<('.$blockElements.')\>/Usi', "</$2><$3><$1>", $html[$x]);
+			
 			if(isset($add)) {
-				$html[$x] .= "</p>";
+				$html[$x] .= $add;
 			}
 			
 			if ($op !== DIFF_DELETE) {
 				$i += mb_strlen($data);
 			}
 		}
-		return implode('',$html);
+		$output = implode('',$html);
+		
+		
+		// run output fixes here
+		
+		// img-fixes
+		preg_match_all('/\<img(.*)\s\/\>/Usi', $output, $matches);
+		foreach($matches[0] as $tag) {
+			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
+				$delTag = $tag;
+				$delTag = str_replace('<del>', '', $delTag);
+				$delTag = str_replace('</del>', '', $delTag);
+				$delTag = preg_replace('/\<ins>(.*)\<\/ins\>/Usi', "", $delTag);
+				
+				$insTag = $tag;
+				$insTag = str_replace('<ins>', '', $insTag);
+				$insTag = str_replace('</ins>', '', $insTag);
+				$insTag = preg_replace('/\<del>(.*)\<\/del\>/Usi', "", $insTag);
+				
+				$tag = "<del style=\"display: block;\">".$delTag."</del><ins style=\"display: block;\">".$insTag."</ins>";
+				
+			} else if(strpos($tag, "<ins>")) {
+				$tag = str_replace('<ins>', '', $tag);
+				$tag = str_replace('</ins>', '', $tag);
+				$tag = "<ins>".$tag."</ins>";
+			} else if(strpos($tag, "<del>")) {
+				$tag = str_replace('<del>', '', $tag);
+				$tag = str_replace('</del>', '', $tag);
+				$tag = "<del>".$tag."</del>";
+			}
+			
+			$output = str_replace($matches[0], $tag, $output);
+		}
+		
+		// a-fixes
+		preg_match_all('/\<(a)(.*)\>(.*)\<\/\1\>/Usi', $output, $matches);
+		foreach($matches[0] as $tag) {
+			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
+				$delTag = $tag;
+				$delTag = str_replace('<del>', '', $delTag);
+				$delTag = str_replace('</del>', '', $delTag);
+				$delTag = preg_replace('/\<ins>(.*)\<\/ins\>/Usi', "", $delTag);
+				
+				$insTag = $tag;
+				$insTag = str_replace('<ins>', '', $insTag);
+				$insTag = str_replace('</ins>', '', $insTag);
+				$insTag = preg_replace('/\<del>(.*)\<\/del\>/Usi', "", $insTag);
+				
+				$tag = "<del style=\"display: block;\">".$delTag."</del><ins style=\"display: block;\">".$insTag."</ins>";
+				
+			} else if(strpos($tag, "<ins>")) {
+				$tag = str_replace('<ins>', '', $tag);
+				$tag = str_replace('</ins>', '', $tag);
+				$tag = "<ins>".$tag."</ins>";
+			} else if(strpos($tag, "<del>")) {
+				$tag = str_replace('<del>', '', $tag);
+				$tag = str_replace('</del>', '', $tag);
+				$tag = "<del>".$tag."</del>";
+			}
+			
+			$output = str_replace($matches[0], $tag, $output);
+		}
+		
+		// script-tags - we remove them
+		$output = preg_replace('/\<script(.*)\>(.*)\<\/script\>/Usi', '', $output);
+		
+		return $output;
+	}
+	
+	/**
+	 * builds editor.css
+	 *
+	 *@name buildEditorCSS
+	*/
+	public function buildEditorCSS() {
+		$cache = ROOT . CACHE_DIRECTORY . "/editor.compare." . Core::GetTheme() . ".css";
+		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
+			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			
+			// parse CSS
+			$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
+			FileSystem::write($cache, $css);
+			
+			return $cache;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * interprets the CSS
+	 *
+	 *@name interpretCSS
+	*/
+	public static function interpretCSS($matches) {
+		if(preg_match('/^(body|html)?,?\s*(html|body)?$/i', trim($matches[1]))) {
+			return "\n.compareView .content {";
+		} else {
+			$exps = explode(",", trim($matches[1]));
+			$out = "\n";
+			foreach($exps as $exp) {
+				$out .= ".compareView .content " . trim($exp) . ", ";
+			}
+			return $out . " { ";
+		}
+	}
+	
+	/**
+	 * gets a consolidated CSS-File, where imports are merged with original file
+	 *
+	 *@name importCSS
+	 *@param string - file
+	*/
+	public static function importCSS($file) {
+		if(file_exists($file)) {
+			$css = file_get_contents($file);
+			// import imports
+			preg_match_all('/\@import\s*url\(("|\')([^"\']+)("|\')\)\;/Usi', $css, $m);
+			foreach($m[2] as $key => $_file) {
+				$css = str_replace($m[0][$key], self::importCSS(dirname($file) . "/" . $_file), $css);
+			}
+			
+			return $css;
+		}
+		
+		return "";
 	}
 }

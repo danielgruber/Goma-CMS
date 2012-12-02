@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 26.11.2012
-  * $Version: 4.6.9
+  * last modified: 01.12.2012
+  * $Version: 4.6.11
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -697,14 +697,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if($limit != "") {
 				if(is_array($limit)) {
-					if(count($limit) > 1 && _ereg("^[0-9]+$", $limit[0]) && _ereg("^[0-9]+$", $limit[1]))
+					if(count($limit) > 1 && preg_match("/^[0-9]+$/", $limit[0]) && preg_match("/^[0-9]+$/", $limit[1]))
 						$limit = " LIMIT ".$limit[0].", ".$limit[1]."";
-					else if(count($limit) == 1 && _ereg("^[0-9]+$", $limit[0])) 
+					else if(count($limit) == 1 && preg_match("/^[0-9]+$/", $limit[0])) 
 						$limit = " LIMIT ".$limit[0];
 					
-				} else if(_ereg("^[0-9]+$", $limit)) {
+				} else if(preg_match("/^[0-9]+$/", $limit)) {
 					$limit = " LIMIT ".$limit;
-				} else if(_ereg('^\s*([0-9]+)\s*,\s*([0-9]+)\s*$', $limit)) {
+				} else if(preg_match('/^\s*([0-9]+)\s*,\s*([0-9]+)\s*$/', $limit)) {
 					$limit = " LIMIT ".$limit;
 				} else {
 					$limit = "";
@@ -1472,7 +1472,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
 	 *@return bool
 	*/
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2)
+	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false)
 	{
 		if(!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
@@ -1532,7 +1532,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			// check rights
 			if(!$forceInsert && !$forceWrite) {
 				if(!$this->canInsert($this)) {
-					return false;
+					if($snap_priority == 2 && !$this->canPublish($this))
+						return false;
 				}
 			}
 			
@@ -1548,7 +1549,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				// check rights
 				if(!$forceWrite)
 					if(!$this->canWrite($this))
-						return false;
+						if($snap_priority == 2 && !$this->canPublish($this))
+							return false;
 				
 				$command = "update";
 				$newdata = array_merge($data->ToArray(), $this->data);
@@ -1824,6 +1826,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		self::$query_cache = array();
 		
+		// get correct oldid for history
+		if($data = DataObject::get_one($this->class, array("id" => $this->RecordID))) {
+			$historyOldID = ($data["publishedid"] == 0) ? $data["publishedid"] : $data["stateid"];
+		} else {
+			$historyOldID = isset($oldid) ? $oldid : 0;
+		}
+		
 		// fire events!
 		$this->onBeforeWriteData();
 		$this->onBeforeManipulate($manipulation);
@@ -1840,10 +1849,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				if($this->versioned) {
 					$this->onBeforePublish();
 					$this->callExtending("onBeforePublish");
-					if(!$forceWrite) {
-						if(!$this->canPublish($this)) {
-							if(PROFILE) Profiler::unmark("DataObject::write");
-							return false;
+					if(!$forcePublish) {
+						if(!$forceWrite) {
+							if(!$this->canPublish($this)) {
+								if(PROFILE) Profiler::unmark("DataObject::write");
+								return false;
+							}
 						}
 					}
 				}
@@ -1874,7 +1885,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(SQL::manipulate($manipulation)) {
 				
 				if(ClassInfo::getStatic($this->class, "history")) {
-					History::push($this->class, isset($oldid) ? $oldid : 0, $this->versionid, $this->id, $command);
+					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command);
 				}
 				unset($manipulation);
 				// if we don't version this dataobject, we need to delete the old record
@@ -1933,7 +1944,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 	}
 	
-
 	/**
 	 * unpublishes the record
 	 *
@@ -1941,7 +1951,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function unpublish($force = false) {
-		if((!$this->canWrite($this) || !$this->canPublish($this)) && !$force)
+		if((!$this->canPublish($this)) && !$force)
 			return false;
 		
 		$manipulation = array(
@@ -1969,6 +1979,46 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		return false;
 	}
+	
+	/**
+	 * publishes the record
+	 *
+	 *@name publish
+	 *@access public
+	*/
+	public function publish($force = false) {
+		if((!$this->canPublish($this)) && !$force)
+			return false;
+		
+		if($this->isPublished())
+			return true;
+		
+		$manipulation = array(
+			$this->baseTable . "_state" => array(
+				"table_name" 	=> $this->baseTable . "_state",
+				"command"		=> "update",
+				"id"			=> $this->recordid,
+				"fields"		=> array(
+					"publishedid"	=> $this->versionid
+				)
+			)
+		);
+		
+		$this->onBeforePublish();
+		$this->callExtending("OnBeforePublish");
+		
+		$this->onBeforeManipulate($manipulation);
+		
+		if(SQL::manipulate($manipulation)) {
+			if(ClassInfo::getStatic($this->class, "history")) {
+				History::push($this->class, 0, $this->versionid, $this->id, "publish");
+			}
+			return true;
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * returns if this version of the record is published
 	 *
@@ -1983,6 +2033,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return false;
 		}
 	}
+	
 	/** 
 	 * gives back if ever published
 	 *
@@ -1997,6 +2048,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return false;
 		}
 	}
+	
 	/**
 	 * returns if baseRecord is deleted
 	 *
@@ -2004,11 +2056,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function isDeleted() {
-		if(isset($this->data["publishedid"]))
+		if(isset($this->data["publishedid"]) || DataObject::count("pages", array("id" => $this->id) > 0)) {
 			return false;
-		else
+		} else
 			return true;
 	}
+	
 	/**
 	 * gets versions of this ordered by time DESC
 	 *
@@ -2021,6 +2074,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			"recordid"	=> $this->recordid
 		)),  array($this->baseTable . ".id", $ordertype));
 	}
+	
 	/**
 	 * gets versions of this ordered by time ASC
 	 *
@@ -2044,6 +2098,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return $this->autor();
 	}
 	
+	//!TODO: Where is this necessary???
 	/**
 	 * gets field-value-pairs for a given class of the current data
 	 * so you can get an array for each class of the fields
@@ -2521,23 +2576,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $fields;
 	}
 	
-	
-	//! Todo: Check if we need Permissions here
 	/**
 	  * set many-many-connection-data
+	  *
 	  *@name set_many_many
 	  *@param stirng - name of connection
 	  *@param array - ids to connect with current id
+	  *@param bool - override permission system
 	  *@access public
 	*/
-	public function set_many_many($name,$ids)
+	public function set_many_many($name, $ids, $force = false)
 	{
-			$manipulation = $this->set_many_many_manipulation(array(),$name, $ids);
-			
-			$this->onBeforeManipulate($manipulation);
-			
-			return SQL::manipulate($manipulation);
-			
+		if($this->canWrite($this)) {
+			if(!$this->isPublished() || $this->canPublish($this)) {
+				$manipulation = $this->set_many_many_manipulation(array(), $name, $ids);
+				
+				$this->onBeforeManipulate($manipulation);
+				
+				return SQL::manipulate($manipulation);
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -2940,17 +3000,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		return $this->setField($name . "ids", $ids);
 	}
-	
-	/**
-	 * fieldget
-	 *
-	 *@name fieldGET
-	 *@access public
-	*/
-	public function fieldGet($name) {
-		
-		return parent::fieldGet($name);
-	}
 
 	/**
 	 * GETTERS AND SETTERS
@@ -3162,7 +3211,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				if(member::login()) {
 					$perms = $this->providePerms();
 					foreach($perms as $key => $val) {
-						if(_eregi("publish", $key) || _eregi("edit", $key) || _eregi("write", $key)) {
+						if(preg_match("/publish/i", $key) || preg_match("/edit/i", $key) || preg_match("/write/i", $key)) {
 							if(Permission::check($key)) {
 								$canVersion = true;
 								break;
@@ -3210,7 +3259,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						$query->db_fields["id"] = $baseTable . "_state";
 					
 					// if we prefer specific versions
-					} else if(_ereg('^[0-9]+$', $version)) {
+					} else if(preg_match('/^[0-9]+$/', $version)) {
 						$query->addFilter($baseTable.'.id = (
 							SELECT where_'.$baseTable.'.id FROM '.DB_PREFIX . $baseTable.' AS where_'.$baseTable.' WHERE where_'.$baseTable.'.recordid = '.$baseTable.'.recordid ORDER BY (where_'.$baseTable.'.id = '.$version.') DESC LIMIT 1
 						)');
@@ -3341,7 +3390,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if($join)
 				foreach($join as $table => $statement)
 				{
-					if(_ereg('^[0-9]+$', $table) && is_numeric($table))
+					if(preg_match('/^[0-9]+$/', $table) && is_numeric($table))
 						$query->from[] = $statement;
 					else
 						$query->from[$table] = " LEFT JOIN ".DB_PREFIX.$table." AS ".$table." ON " . $statement;
@@ -3832,7 +3881,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// now get data
-			if(!is_array($words_parentid) && _ereg("^[0-9]+$", $words_parentid)) {
+			if(!is_array($words_parentid) && preg_match("/^[0-9]+$/", $words_parentid)) {
 				$data = $this->getTree($words_parentid, $fields, $activenode, $params);
 			} else if(is_array($words_parentid) && $words_parentid[0] == "") {
 				$data = $this->getTree($words_parentid, $fields, $activenode, $params);
@@ -3866,7 +3915,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access protected
 	*/
 	protected function renderSubTreesHelper($data, $fields, $params, $activenode,  $href) {
-		
+
 		$container = array();
 		$i = 1;
 		foreach($data as $nodedata) {
@@ -3908,7 +3957,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$link->addClass("first");
 			}
 			
-			if(_ereg('^[0-9]+$', $activenode)) {
+			if(preg_match('/^[0-9]+$/', $activenode)) {
 				if($activenode == $nodedata["data"]["recordid"]) {
 					$hoverspan->addClass("marked");
 				}

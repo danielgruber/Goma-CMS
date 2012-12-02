@@ -364,15 +364,25 @@ class HTTPresponse extends object
 				{
 						self::setResHeader(301);
 				}
-				if(core::is_ajax())
+				if(Core::is_ajax())
 				{
-						if(_ereg('\?', $url))
-						{
-								$url .= "&ajax=1";
-						} else
-						{
-								$url .= "?ajax=1";
-						}
+					if(Request::isJSResponse() || isset($_GET["dropdownDialog"])) {
+						self::setResHeader(200);
+						$response = new AjaxResponse();
+						$response->exec("window.location.href = " . var_export($url, true)) . ";";
+						$output = $response->render();
+						self::sendHeader();
+						echo $output;
+						exit;
+					}
+					
+					if(preg_match('/\?/', $url))
+					{
+							$url .= "&ajax=1";
+					} else
+					{
+							$url .= "?ajax=1";
+					}
 				}
 				self::addHeader('Location', $url);
 				self::sendheader();

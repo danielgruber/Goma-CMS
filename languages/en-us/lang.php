@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 26.11.2012
+  * last modified: 02.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -166,7 +166,7 @@ $lang = array(
 	"js_disable_editor"                            	=> "You have to activate JavaScript to user the Editor.",
 	"overview"                                     	=> "Overview",
 	"own_css"                                      	=> "Own CSS (For Developers)",
-	"less_rights"                                  	=> "You don't have the permission to use this!",
+	"less_rights"                                  	=> "You don't have the permission to do this!",
 	"wrong_login"                                  	=> "<strong>Error</strong><br />Unknowen user or wrong password!",
 	"edit_profile"                                 	=> "edit profile",
 	"show_profile"                                 	=> "show profile",
@@ -290,6 +290,7 @@ $lang = array(
 	"viewer_groups"									=> "viewer-groups",
 	"content_edit_users"							=> "every edit-group",
 	"editors"										=> "Permission to edit",
+	"publish"										=> "Permission to publish",
 	"viewer_types"									=> "Permission to view",
 	"everybody"										=> "Everyone",
 	"login_groups"									=> "Everyone, who can login",
@@ -394,7 +395,8 @@ $lang = array(
 	"version_at"									=> "at",
 	"versions_javascript"							=> "Please enable JavaScript to use this page.",
 	"done"											=> "Done",
-	"restore"										=> "Restore",
+	"restore"										=> "Undo",
+	"restore_confirm"								=> "Do you really want to undo this change?",
 	"compare"										=> "compare",
 	"no_versions"									=> "No version found",
 	"versions_timeline"								=> "Timeline",

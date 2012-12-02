@@ -6,12 +6,18 @@
   * last modified: 25.11.2012
 */
 
+.dropdownDialog .compareView {
+	max-height: 300px;
+	overflow: auto;
+}
 .compareView table {
 	border-spacing: 0;
 	border: 1px solid #ddd;
+	min-width: 200px;
 }
-.compareView .grey {
-	background: #efefef;
+.compareView .grey .content {
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
 }
 .compareView td {
 	padding: 10px;
@@ -40,4 +46,14 @@
 }
 .compareView .content del p, .compareView .content ins p, .compareView .content del div, .compareView .content ins div {
 	width: 100% !important;
+}
+
+@media screen and (min-width:600px) {
+	.dropdownDialog .compareView {
+		max-height: 400px;
+		max-width: 600px;
+	}
+	.compareView table {
+		min-width: 350px;
+	}
 }

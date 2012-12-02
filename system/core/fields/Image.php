@@ -1,10 +1,10 @@
 <?php
 /**
-  *@package goma
+  *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 14.04.2011
+  * last modified: 02.12.2011
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -42,7 +42,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 		*/
 		public function setWidth($width) {
 			if(_ereg("^[0-9]+$",$width))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$this->value.'" alt="'.$this->value.'" />';
+					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.($width*2).'/'.$this->value.'" style="width:'.$width.'px;" alt="'.$this->value.'" />';
 			else 
 					return $this->makeImage();
 		}
@@ -54,7 +54,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 		*/
 		public function setHeight($height) {	
 			if(_ereg("^[0-9]+$",$height))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/x/'.$height.'/'.$this->value.'" alt="'.$this->value.'" />';
+					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/x/'.$height.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/x/'.($height*2).'/'.$this->value.'"  style="height:'.$height.'px;" alt="'.$this->value.'" />';
 			else 
 					return $this->makeImage();
 		}
@@ -66,7 +66,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 		*/
 		public function setSize($width, $height) {
 			if(_ereg("^[0-9]+$",$width) && _ereg("^[0-9]+$",$height))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$height.'/'.$this->value.'" alt="'.$this->value.'" />';
+					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$height.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.($width*2).'/'.($height*2).'/'.$this->value.'" style="width: '.$width.'px; height: '.$height.'px;" alt="'.$this->value.'" />';
 			else 
 					return $this->makeImage();
 		}
