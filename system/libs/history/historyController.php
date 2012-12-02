@@ -147,6 +147,27 @@ class HistoryController extends Controller {
 	}
 	
 	/**
+	 * restores a version
+	 *
+	 *@name restoreVersion
+	*/
+	public function restoreVersion() {
+		$version = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")));
+		if($version->canWrite($version) || $version->canPublish($version)) {
+			if($this->confirm(lang("restore_confirm"))) {
+				if($version->canWrite($version)) {
+					$version->write(false, true, 1);
+				} else {
+					$version->write(false, true, 2);
+				}
+				$this->redirectBack();
+			}
+		} else {
+			return lang("less_rights");
+		}
+	}
+	
+	/**
 	 * compares two versions
 	 *
 	 *@name compareVersion

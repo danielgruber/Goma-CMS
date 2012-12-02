@@ -552,6 +552,7 @@ self.dropdownDialogs = [];
 				// data should always be html as basic, we can interpret layteron
 				dataType: "html",
 				success: function(html, textStatus, jqXHR) {
+					
 					try {
 						LoadAjaxResources(jqXHR);
 						var content_type = jqXHR.getResponseHeader("content-type");

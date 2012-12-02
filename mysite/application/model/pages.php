@@ -1319,7 +1319,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
 			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared);
+			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared, "editurl" => "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND);
 		}
 		
 }

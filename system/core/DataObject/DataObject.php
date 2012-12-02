@@ -1826,6 +1826,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		self::$query_cache = array();
 		
+		// get correct oldid for history
+		if($data = DataObject::get_one($this->class, array("id" => $this->RecordID))) {
+			$historyOldID = ($data["publishedid"] == 0) ? $data["publishedid"] : $data["stateid"];
+		} else {
+			$historyOldID = isset($oldid) ? $oldid : 0;
+		}
+		
 		// fire events!
 		$this->onBeforeWriteData();
 		$this->onBeforeManipulate($manipulation);
@@ -1878,7 +1885,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(SQL::manipulate($manipulation)) {
 				
 				if(ClassInfo::getStatic($this->class, "history")) {
-					History::push($this->class, isset($oldid) ? $oldid : 0, $this->versionid, $this->id, $command);
+					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command);
 				}
 				unset($manipulation);
 				// if we don't version this dataobject, we need to delete the old record
