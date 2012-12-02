@@ -16,7 +16,8 @@ If not, please check, if the webserver hast the rights to read, write and execut
 The installer will also provide information about what to install on your system to make Goma run.
 
 Notice for RedHat-related OS:
-you need to install the package php-xml to make Goma run.
+
+Goma needs the package php-xml from the OS Repos (e.g. Fedora or Mandriva Main).
 
 
 Team
