@@ -494,16 +494,19 @@ class boxPageController extends PageController
 		public function frontedBar() {
 			$arr = parent::frontedBar();
 			
-			if(isset($_SESSION["adminAsUser"])) {
-				$arr[] = array(
-						"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
-						"title"			=> lang("switch_view_edit_on", "enable edit-mode")
-					);
-			} else {
-				$arr[] = array(
-						"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
-						"title"			=> lang("switch_view_edit_off", "disable edit-mode")
-					);
+			if($this->modelInst()->canWrite($this->modelInst())) {
+			
+				if(isset($_SESSION["adminAsUser"])) {
+					$arr[] = array(
+							"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
+							"title"			=> lang("switch_view_edit_on", "enable edit-mode")
+						);
+				} else {
+					$arr[] = array(
+							"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
+							"title"			=> lang("switch_view_edit_off", "disable edit-mode")
+						);
+				}
 			}
 			
 			return $arr;

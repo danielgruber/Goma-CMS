@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.05.2012
+  * last modified: 03.12.2012
   * $Version 2.1.5
 */
 
@@ -199,39 +199,44 @@ class Permission extends DataObject
 		 *@return Permission
 		*/
 		public function forceExisting($r) {
-			if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
-				return $data;
-			} else {
-				$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
-				if(isset($perm->inherit)) {
-					if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
-						$data->consolidate();
-						$data->inheritorid = $data->id;
-						$data->forModel = "permission";
-						$data = $data->_clone();
-						$data->name = $perm->name;
-						$data->write(true, true, 2);
-						return $data;
+			$r = strtolower(trim($r));
+			if(isset(self::$providedPermissions[$r])) { 
+				if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
+					return $data;
+				} else {
+					$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
+					if(isset($perm->inherit)) {
+						if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
+							$data->consolidate();
+							$data->inheritorid = $data->id;
+							$data->forModel = "permission";
+							$data = $data->_clone();
+							$data->name = $perm->name;
+							$data->write(true, true, 2);
+							return $data;
+						}
+					} else
+					if($perm->inheritorid) {
+						if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
+							$data->consolidate();
+							$data->inheritorid = $perm->inheritorid;
+							$data->forModel = "permission";
+							$data = $data->_clone();
+							$data->name = $perm->name;
+							$data->write(true, true, 2);
+							return $data;
+						}
 					}
-				} else
-				if($perm->inheritorid) {
-					if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
-						$data->consolidate();
-						$data->inheritorid = $perm->inheritorid;
-						$data->forModel = "permission";
-						$data = $data->_clone();
-						$data->name = $perm->name;
-						$data->write(true, true, 2);
-						return $data;
-					}
+					
+					if(isset(self::$providedPermissions[$r]["default"]["type"]))
+						$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
+					
+					$perm->write(true, true, 2);
+					
+					return $perm;
 				}
-				
-				if(isset(self::$providedPermissions[$r]["default"]["type"]))
-					$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
-				
-				$perm->write(true, true, 2);
-				
-				return $perm;
+			} else {
+				return false;
 			}
 		}
 		

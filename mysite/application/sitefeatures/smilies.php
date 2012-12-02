@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.08.2012
+  * last modified: 02.12.2012
   * $Version 1.2.1
 */
 
@@ -57,8 +57,7 @@ class smilies extends DataObject
 		public function providePerms() {
 			return array(
 				"SMILIE_ADMIN" => array(
-					"title" 		=> '{$_lang_smilies}',
-					"forceGroup"	=> true,
+					"title" 		=> '{$_lang_administration}: {$_lang_smilies}',
 					"default"		=> array(
 						"type"		=> "admins"
 					)
