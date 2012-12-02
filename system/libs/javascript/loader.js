@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 01.12.2012
+  * last modified: 02.12.2012
   * $Version 1.5.1
 */
 
@@ -773,5 +773,68 @@ if(typeof self.loader == "undefined") {
 	    // *     example 1: str_repeat('-=', 10);
 	    // *     returns 1: '-=-=-=-=-=-=-=-=-=-='
 	    return new Array(multiplier + 1).join(input);
+	}
+	
+	// Helper Functions
+    var getDevicePixelRatio = function() {
+        if (window.devicePixelRatio === undefined) { return 1; }
+        return window.devicePixelRatio;
+    }
+    
+	// retina-support
+	$(function(){
+		var timeout;
+		var replace = function() {
+			if(getDevicePixelRatio() > 1.5) {
+				var setT = true;
+				$("img").each(function(){ //.on("load", "img", function(){
+					var $this = $(this);
+					if($this.attr("data-ratined") != "complete" && $this.attr("data-retina")) {
+						if(IsImageOk($(this).get(0))) {
+							var img = new Image();
+							img.onload = function(){
+								$this.css("width", $this.width());
+								$this.css("height", $this.height());
+								$this.attr("src", $this.attr("data-retina"));
+								img.src = null;
+							}
+							img.src = $this.attr("data-retina");
+							$this.attr("data-ratined", "complete");
+						} else {
+							clearTimeout(timeout);
+							timeout = setTimeout(replace, 100);
+							setT = false;
+						}
+					}
+				});
+				
+				if(setT === true) {
+					clearTimeout(timeout);
+					timeout = setTimeout(replace, 2000);
+				}
+			}
+		}
+		replace();
+		window.retinaReplace = replace;
+	});
+	
+	function IsImageOk(img) {
+	    // During the onload event, IE correctly identifies any images that
+	    // weren’t downloaded as not complete. Others should too. Gecko-based
+	    // browsers act like NS4 in that they report this incorrectly.
+	    if (!img.complete) {
+	        return false;
+	    }
+	
+	    // However, they do have two very useful properties: naturalWidth and
+	    // naturalHeight. These give the true size of the image. If it failed
+	    // to load, either of these should be zero.
+	
+	    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
+	        return false;
+	    }
+	
+	    // No other way of checking: assume it’s ok.
+	    return true;
 	}
 }

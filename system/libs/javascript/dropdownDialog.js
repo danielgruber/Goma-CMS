@@ -395,6 +395,9 @@ self.dropdownDialogs = [];
 				}
 			});
 			
+			// retina
+			retinaReplace();
+			
 			// javascript-profiler
 			if(typeof profiler != "undefined") {
 				profiler.unmark("dropdownDialog.setContent");
