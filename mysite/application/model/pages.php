@@ -490,11 +490,10 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$form->addValidator(new FormValidator(array($this, "validatePageType")), "pagetype");
 				$form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 				
+				$form->useStateData = true;
+				
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
 					$html = "<div class=\"pageinfo versionControls\">";
-					if($this->versions()->count > 1) {
-						$html .= '<a class="version" href="'.Core::$requestController->namespace.'/versions/?redirect='.Core::$url.'">'.lang("browse_versions", "Browse all Versions").'</a>';
-					}
 					
 					if($this->isPublished()) {
 						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
@@ -550,6 +549,14 @@ class Pages extends DataObject implements PermProvider, HistoryData
 						
 					) 
 				));
+				
+				if(!$this->canWrite($this) || !Permission::check("PAGES_WRITE")) {
+					$write->disable();
+				}
+				
+				if(!$this->canPublish($this) || !Permission::check("PAGES_PUBLISH")) {
+					$publish->disable();
+				}
 				
 				// permissions
 				if($this->parent) {
@@ -647,11 +654,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$form->addAction(new button('cancel',lang("cancel"), "LoadTreeItem(0);"));
 				// we need special submit-button for adding
 				
-				if($this->canWrite($this))
-					$form->addAction(new AjaxSubmitButton('_submit',lang("save", "Save"),"AjaxSave"));
+				$form->addAction(new AjaxSubmitButton('_submit',lang("save", "Save"),"AjaxSave"));
 				
-				if($this->canPublish($this))
-					$form->addAction(new AjaxSubmitButton('_publish',lang("save_publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
+				$form->addAction(new AjaxSubmitButton('_publish',lang("save_publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
 				
 			}	
 			
@@ -799,7 +804,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		/**
 		 * can-publish-rights
 		*/
-		public function canPublish() {
+		public function canPublish($row) {
 			if(Permission::check("superadmin"))
 				return true;
 			
@@ -824,8 +829,10 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		{	
 			if(isset($row)) {
 				if($row->parentid != 0) {
-					$data = DataObject::get_by_id("pages", $row->parentid);
-					return $data->canWrite($data);
+					$data = DataObject::get_versioned("pages", "state", $row->parentid);
+					if($data->Count() > 0) {
+						return $data->first()->canWrite($data);
+					}
 				}
 			}
 			

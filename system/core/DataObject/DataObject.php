@@ -6,7 +6,7 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 01.12.2012
+  * last modified: 02.12.2012
   * $Version: 4.6.11
 */
 
@@ -2399,7 +2399,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getForm(&$form)
 	{
-			$form->result = $this;
+			$form->setResult($this);
 	
 	}
 	
@@ -2410,7 +2410,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getActions(&$form, $edit = false)
 	{
-			$form->result = $this;
+			$form->setResult($this);
 	
 	}
 	
