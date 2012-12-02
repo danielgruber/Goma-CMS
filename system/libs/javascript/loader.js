@@ -418,15 +418,17 @@ if(typeof self.loader == "undefined") {
 								success: function(css) {
 									// patch uris
 									var base = file.substring(0, file.lastIndexOf("/"));
-									css = css.replace(/url\(("|')?([^']+)("|')?\)/gi, 'url(' + root_path + base + '/$2)');
+									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+									css = css.replace(/url\(([^'"#\>\!\s]+)\)/gi, 'url(' + root_path + base + '/$1)');
 									
 									w.CSSLoadedResources[file] = css;
 								}
 							});
 						}
 						
+						
 						if(typeof w.CSSIncludedResources[file] == "undefined") {
-							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/, "_")+'">'+CSSLoadedResources[file]+'</style>');
+							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoadedResources[file]+'</style>');
 							w.CSSIncludedResources[file] = true;
 						}
 					} else {
