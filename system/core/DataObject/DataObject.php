@@ -1553,7 +1553,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							return false;
 				
 				$command = "update";
-				$newdata = array_merge($data->ToArray(), $this->data);
+				$newdata = array_merge($data->first()->ToArray(), $this->data);
+				$this->data = $data->first()->ToArray();
 				$newdata["created"] = $data["created"]; // force
 				$newdata["autorid"] = $data["autorid"];
 				$oldid = $data->versionid;
