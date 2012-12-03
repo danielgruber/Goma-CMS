@@ -3,17 +3,18 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 16.11.2012
+  * last modified: 03.12.2012
 */
 
 /* defaults */
 body, html {
 	padding: 0;
 	margin: 0;
-    background: #fff;
-    color: #000;
-    font-size: 12pt;
-    font-family: Verdana, Arial;
+	background: #fff;
+	color: #000;
+	font-size: 12pt;
+	font-family: Verdana, Arial;
+	min-height: 100%;
 }
 
 /* box-sizing */
@@ -40,7 +41,7 @@ img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
 
 ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
 dd { margin: 0 0 0 40px; }
-nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
 
 /* =============================================================================
    Typography
@@ -80,8 +81,8 @@ input[type=text], input[type=password], input[type=email] {
 	width: 150px;
 	
 	box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 
 textarea { 
@@ -91,8 +92,8 @@ textarea {
 	
 	/* improve box-model here */
 	box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 
 /* 
@@ -110,8 +111,8 @@ button, input[type="button"], input[type="reset"], input[type="submit"], .border
 	cursor: pointer; 
 	-webkit-appearance: button;
 	box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 
 /*
@@ -138,8 +139,8 @@ label
 }
 
 a.icon {
-    padding: 1px;
-    display: inline-block;
+	padding: 1px;
+	display: inline-block;
 }
 
 a.button:hover {
@@ -158,28 +159,28 @@ input[type="checkbox"], input[type="radio"] {
 
 .ui-right
 {
-    float: right;
+	float: right;
 }
 .ui-left
 {
-    float: left;
+	float: left;
 }
 
 
 .clear
 {
-    clear: both;
+	clear: both;
 }
 
 /* fields */
 .actions
 {
-    text-align: center;
+	text-align: center;
 }
 .actions .submitbutton
 {
-    display: inline;
-    margin: 4px;
+	display: inline;
+	margin: 4px;
 }
 
 .notice {
@@ -221,10 +222,10 @@ input[type="checkbox"], input[type="radio"] {
 
 /* placeholders */
 input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
-    color:    #999 !important;
+	color: #999 !important;
 }
 input:-moz-placeholder, textarea:-moz-placeholder {
-    color:    #999 !important;
+	color: #999 !important;
 }
 
 input[disabled] {
@@ -357,6 +358,7 @@ html[xmlns] .clearfix {
 	height: 1%;
 }
 
+/* retina support */
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (   min--moz-device-pixel-ratio: 2),
