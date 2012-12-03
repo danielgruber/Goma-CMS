@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.011.2012
-  * Version: 1.2.6
+  * last modified: 03.12.2012
+  * Version: 1.2.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,7 @@ ClassInfo::AddSaveVar("Resources", "scanFolders");
 */
 
 class Resources extends Object {
-	
+    
 	/**
 	 * version of this class
 	 *
@@ -28,7 +28,7 @@ class Resources extends Object {
 	 *@access public
 	 *@var CONST
 	*/
-	const VERSION = "1.2.6";
+	const VERSION = "1.2.7";
 	
 	/**
 	 * defines if gzip is enabled
@@ -450,7 +450,7 @@ class Resources extends Object {
 	 *@access public
 	*/
 	public static function generateCSSFile($combine_css, $name = "",  &$css_files) {
-		$file = self::getFileName(CACHE_DIRECTORY . "css.".$name.".".md5(implode(".", $combine_css["files"])).".".$combine_css["mtime"].".".self::VERSION.".css");
+		$file = self::getFileName(CACHE_DIRECTORY . "css_".$name."_".md5(implode("_", $combine_css["files"]))."_".$combine_css["mtime"]."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).".css");
 		if(is_file($file)) {
 			$css_files[] = $file;
 		} else {
@@ -531,7 +531,7 @@ class Resources extends Object {
 			}
 			// we have to make raw-file
 			if(count(self::$raw_js) > 0) {
-				$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw.".md5(implode("", self::$raw_js)).".".self::VERSION.".js");
+				$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw_".md5(implode("", self::$raw_js))."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).".js");
 				if(!is_file($file)) {
 						$js = "";
 						foreach(self::$raw_js as $code) {
@@ -545,7 +545,7 @@ class Resources extends Object {
 			
 			if(isset(self::$resources_css["raw"]["data"]) && count(self::$resources_css["raw"]["data"]) > 0) {
 				$css = implode("\n\n", self::$resources_css["raw"]["data"]);
-				$filename = self::getFileName(CACHE_DIRECTORY . "/raw." . md5($css) . ".css");
+				$filename = self::getFileName(CACHE_DIRECTORY . "/raw_" . md5($css) . ".css");
 				if(!is_file(ROOT . $filename)) {
 					FileSystem::Write($filename,self::getEncodedString($css));
 					$css_files[] = $filename;
@@ -576,7 +576,7 @@ class Resources extends Object {
 			if(PROFILE) Profiler::mark("Resources::get");
 			// we have to make raw-file
 			if(count(self::$raw_js) > 0) {
-				$file = self::getFilename(CACHE_DIRECTORY . "/raw.".md5(implode("", self::$raw_js)).".js");
+				$file = self::getFilename(CACHE_DIRECTORY . "/raw_".md5(implode("", self::$raw_js)).".js");
 				if(!is_file(ROOT . $file)) {
 						$js = "";
 						foreach(self::$raw_js as $code) {
@@ -660,7 +660,7 @@ class Resources extends Object {
 		} else {
 			$hash = md5(implode("", $data["files"]));
 		}
-		$file = self::getFileName(CACHE_DIRECTORY . "js.combined.".$data["name"].".".$hash.".".$data["mtime"].".".self::VERSION.".js");
+		$file = self::getFileName(CACHE_DIRECTORY . "js_combined_".$data["name"]."_".$hash."_".$data["mtime"]."_".preg_replace('/[^0-9a-zA-Z_]/', '_', self::VERSION).".js");
 		if(self::file_exists($file)) {
 			return $file;
 		} else {
