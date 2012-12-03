@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.4.3
+  * last modified: 03.12.2012
+  * $Version 2.4.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -372,7 +372,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				if($this->ID != 0) {
 					$perm->write(true, true);
 					$this->edit_permissionid = $perm->id;
-					$this->write(false, true);
+					$this->write(false, true, $this->isPublished() ? 2 : 1);
 				}
 				
 				return $perm;
@@ -404,7 +404,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				if($this->ID != 0) {
 					$perm->write(true, true);
 					$this->publish_permissionid = $perm->id;
-					$this->write(false, true);
+					$this->write(false, true, $this->isPublished() ? 2 : 1);
 				}
 				
 				return $perm;
@@ -431,7 +431,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				if($this->ID != 0) {
 					$perm->write(true, true);
 					$this->read_permissionid = $perm->id;
-					$this->write(false, true);
+					$this->write(false, true, $this->isPublished() ? 2 : 1);
 				}
 				
 				return $perm;
