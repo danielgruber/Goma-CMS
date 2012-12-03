@@ -6,7 +6,7 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 02.12.2012
+  * last modified: 03.12.2012
   * $Version: 4.6.11
 */
 
@@ -1683,6 +1683,67 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		unset($newdata["versionid"]);
 		
+		// find out if we should write data
+		if($command != "insert") {
+			$changed = array();
+			$forceChange = $forceWrite;
+			
+			// first calculate change-count
+			foreach($this->data as $key => $val) {
+				if(isset($newdata[$key]) && $newdata[$key] != $val) {
+					$changed[$key] = $newdata[$key];
+				}
+			}
+			
+			// check for relation
+			if(count($many_many_objects) > 0) {
+				$forceChange = true;
+			}
+			
+			// many-many
+			if(!$forceChange && $this->many_many)
+				foreach($this->many_many as $name => $table)
+				{
+						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+						{
+								$forceChange = true;
+								break;
+						}
+				}
+			
+			// many-many
+			if(!$forceChange && $this->belongs_many_many)
+				foreach($this->belongs_many_many as $name => $table)
+				{
+						
+						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+						{
+								$forceChange = true;
+								break;
+						}	
+				}
+			
+			// has-many
+			if(!$forceChange && $this->has_many)
+				foreach($this->has_many as $name => $class)
+				{
+						if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
+							$newdata[$name . "ids"] = $newdata[$name];
+						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+						{
+								$forceChange = true;				
+						}						
+				}
+			
+			// now check if we should write or not
+			if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
+				// should we really write this?! No!
+				return true;
+			}
+		}
+		
+		// WE CAN WRITE!
+		
 		// now set the correct data
 		$this->data = $newdata;
 		$this->viewcache = array();
@@ -1885,7 +1946,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(SQL::manipulate($manipulation)) {
 				
 				if(ClassInfo::getStatic($this->class, "history") && $history) {
-					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command);
+					if($command == "insert" || !isset($changed)) {
+						$changed = $this->data;
+					}
+					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command, $changed);
 				}
 				unset($manipulation);
 				// if we don't version this dataobject, we need to delete the old record
@@ -2200,13 +2264,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			{
 					$object = $this->many_many[$relation];
 
-					$table_name = classinfo::$class_info[$object]["table_name"];
+					$table_name = ClassInfo::$class_info[$object]["table_name"];
 					
 			} else if(isset($this->belongs_many_many[$relation]))
 			{
 					$object = $this->belongs_many_many[$relation];
 
-					$table_name = classinfo::$class_info[$object]["table_name"];
+					$table_name = ClassInfo::$class_info[$object]["table_name"];
 					
 			}
 			if(isset($this->many_many_tables[$relation]))

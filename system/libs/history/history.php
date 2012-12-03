@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
+  * last modified: 03.12.2012
   * $Version 1.0.1
 */
 
@@ -19,7 +19,9 @@ class History extends DataObject {
 		"record"		=> "int(10)",
 		"oldversion"	=> "int(10)",
 		"newversion"	=> "int(10)",
-		"action"		=> "varchar(100)"
+		"action"		=> "varchar(100)",
+		"changecount"	=> "int(10)",
+		"changed"		=> "text"
 	);
 	
 	/**
@@ -56,8 +58,9 @@ class History extends DataObject {
 	 *@param new version-id of data
 	 *@param id of the record to which the versions belong
 	 *@param name of the action which happended, for example: "insert", "delete", "update"
+	 *@param array - changed data
 	*/
-	public static function push($class, $oldrecord, $newrecord, $recordid, $action) {
+	public static function push($class, $oldrecord, $newrecord, $recordid, $action, $changed = null) {
 		
 		// if it's an object, get the class-name from the object
 		if(is_object($class))
@@ -76,13 +79,23 @@ class History extends DataObject {
 			return false;
 		}
 		
+		if(isset($changed)) {
+			$cc = count($changed);
+			$c = serialize($changed);
+		} else {
+			$c = 0;
+			$cc = null;
+		}
+		
 		// create the history-record
 		$record = new History(array(
 			"dbobject" 		=> $class,
 			"oldversion"	=> $oldrecord,
 			"newversion"	=> $newrecord,
 			"record"		=> $recordid,
-			"action"		=> $action
+			"action"		=> $action,
+			"changed"		=> $c,
+			"cc"			=> $cc
 		));
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
