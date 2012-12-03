@@ -2,13 +2,20 @@
 How to edit Goma + Goma CMS with GIT
 ************************************
 
------------------
+----------------
 * Installation *
 
-- Clone the GIT-Repository in a local Directory with Webserver
-- remove folder mysite, because this will be the installation folder
-- Commit it in your branche
-- Install Goma + Goma CMS as normal, but required in folder mysite!
-- Commit it in your branch
+- Clone the Git-Repository in a local directory on your webserver
+- Proceed like "Installation" in the Readme
 
-Now feel free to push what ever you want, we just will approve it if it is good ;)
+---------------
+* Development *
+
+- Clone the Git-Repository in a local directory
+- Edit the project
+- Commit you changes whenever you want
+- If you want to publish your commits, you have got the following options:
+  - Change your remote path via "git remote set-url origin <protocol and URL>
+  - Fork our repo on GitHub directly
+  - Make a pull request to our repo ( We have to check your patch and we will apply 
+    it, if it's good ;) )
