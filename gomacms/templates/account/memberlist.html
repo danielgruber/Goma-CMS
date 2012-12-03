@@ -6,12 +6,7 @@ $prependedContent
 	<% CONTROL member() %>
 		<div class="member">
 			<div style="float: left;" class="image">
-				<% IF $member.avatar %>
-					<a href="{URL}/{$member.id}{URLEND}">$member.avatar.setSize(128,128)</a>
-				<% ELSE %>
-					<a href="{URL}/{$member.id}{URLEND}"><img height="128" width="128" src="images/no_avatar.png" alt="no avatar" /></a>
-				<% END %>
-					
+				<a href="{URL}/{$member.id}{URLEND}">$member.image.setSize(128,128)</a>
 			</div>
 			<div class="data">
 				<a href="{URL}/{$member.id}{URLEND}">

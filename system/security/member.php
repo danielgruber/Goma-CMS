@@ -572,7 +572,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		*/
 		public function getImage() {
 			if($this->avatar) {
-				if($this->avatar->filename == "no_avatar.jpg" && $this->avatar->class != "gravatarimagehandler") {
+				if(ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->class != "gravatarimagehandler") {
 					$a = $this->avatar->getClassAs("GravatarImageHandler");
 					$a->email = $this->email;
 					$a->write(false, true, 2, false, false);

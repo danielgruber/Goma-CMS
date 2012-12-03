@@ -928,11 +928,20 @@ class GravatarImageHandler extends ImageUploads {
 	 * @source http://gravatar.com/site/implement/images/php/
 	 */
 	function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array() ) {
-		$url = 'http://www.gravatar.com/avatar/';
+		if(isset($_SERVER["HTTPS"])) {
+			$url = 'https://secure.gravatar.com/avatar/';	
+		} else {
+			$url = 'http://www.gravatar.com/avatar/';
+		}
 		$url .= md5( strtolower( trim( $email ) ) );
+		$urlRetina = $url;
+		
 		$url .= "?s=$s&d=$d&r=$r&.jpg";
+		$sR = $s * 2;
+		$urlRetina .= "?s=$sR&d=$d&r=$r&.jpg";
+		
 		if ( $img ) {
-			$url = '<img src="' . $url . '"';
+			$url = '<img src="' . $url . '" data-retina="'.$urlRetina.'"';
 			foreach ( $atts as $key => $val )
 				$url .= ' ' . $key . '="' . $val . '"';
 			$url .= ' />';
@@ -981,7 +990,7 @@ class GravatarImageHandler extends ImageUploads {
 	 *@access public
 	*/
 	public function setHeight($height) {
-		return self::get_gravatar($this->email, $height, "mm", "g", true);
+		return self::get_gravatar($this->email, $height, "mm", "g", true, array("height" => $height));
 	}
 	
 	/**
@@ -991,7 +1000,7 @@ class GravatarImageHandler extends ImageUploads {
 	 *@access public
 	*/
 	public function setWidth($width) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true);
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array("width" => $width));
 	}
 	
 	/**
@@ -1001,7 +1010,7 @@ class GravatarImageHandler extends ImageUploads {
 	 *@access public
 	*/
 	public function setSize($width, $height) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true);
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array("height" => $height, "width" => $width));
 	}
 	
 	/**
