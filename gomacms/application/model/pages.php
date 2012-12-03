@@ -370,9 +370,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
-					$perm->write(true, true);
+					$perm->write(true, true, 2, false, false);
 					$this->edit_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1);
+					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
@@ -402,9 +402,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
-					$perm->write(true, true);
+					$perm->write(true, true, 2, false, false);
 					$this->publish_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1);
+					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
@@ -429,9 +429,9 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$perm = new Permission(array("type" => "all"));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
-					$perm->write(true, true);
+					$perm->write(true, true, 2, false, false);
 					$this->read_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1);
+					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
