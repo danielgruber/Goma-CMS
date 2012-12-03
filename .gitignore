@@ -3,8 +3,6 @@ _config.php
 .htaccess
 .DS_Store
 gomacms/*
-gomacms/application/.WELCOME_RUN
-gomacms/application/WELCOME_RUN.php
 !gomacms/application/*
 !gomacms/application
 !gomacms/templates/*
@@ -14,6 +12,8 @@ gomacms/application/WELCOME_RUN.php
 !gomacms/upgrade/*
 !gomacms/upgrade
 !gomacms/.htaccess
+gomacms/application/.WELCOME_RUN
+gomacms/application/WELCOME_RUN.php
 system/installer/log_*****/*
 system/temp/*
 system/installer/log/*
