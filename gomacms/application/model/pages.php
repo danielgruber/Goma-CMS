@@ -403,7 +403,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true);
-					$this->edit_permissionid = $perm->id;
+					$this->publish_permissionid = $perm->id;
 					$this->write(false, true);
 				}
 				

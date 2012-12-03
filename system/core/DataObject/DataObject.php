@@ -1983,10 +1983,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	/**
 	 * publishes the record
 	 *
-	 *@name publishRecord
+	 *@name publish
 	 *@access public
 	*/
-	public function publishRecord($force = false) {
+	public function publish($force = false) {
 		if((!$this->canPublish($this)) && !$force)
 			return false;
 		
