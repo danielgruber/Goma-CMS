@@ -117,6 +117,20 @@ class Permission extends DataObject
 		}
 		
 		/**
+		 * preserve Defaults
+		 *
+		 *@name preserveDefaults
+		 *@åccess public
+		*/
+		public function preserveDefaults($prefix = DB_PREFIX, &$log) {
+			parent::preserveDefaults($prefix, $log);
+			
+			foreach(self::$providedPermissions as $name => $data) {
+				self::forceExisting($name);
+			}
+		}
+		
+		/**
 		 * checks if the user has the given permission 
 		 *
 		 *@name check
