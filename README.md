@@ -1,7 +1,7 @@
 Goma CMS
 ========
 
-This is a Web Content Managment System, which allows you, to create fast and easy websites.
+This is a Web Content Managment System, which allows you to create fast and easy websites.
 
 At the moment we're developing version 2.0 of Goma, so please be patient. It's done, when it's done.
 
@@ -12,8 +12,8 @@ Otherwise just get a source package and extract it in your servers document root
 Then point your browser to the url, you gave it.
 The first time you start Goma CMS, an installer will appear to guide you through the
 necessary steps of installation.
-If not, please check, if the webserver hast the rights to read, write and execute Goma.
-The installer will also provide information about what to install on your system to make Goma run.
+If not, please check if the webserver has the rights to read, write and execute Goma.
+The installer will also provide information how to install Goma on your system or inform you about problems.
 
 Notice for RedHat-related OS:
 
