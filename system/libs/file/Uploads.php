@@ -901,6 +901,156 @@ class UploadController extends Controller {
 		session_write_close();
 		
 		return $data->first()->controller()->handleRequest($this->request);
+	}	
+}
+
+class GravatarImageHandler extends ImageUploads {
+	
+	/**
+	 * add db-fields for email
+	 *
+	 *@name db_fields
+	*/
+	public $db_fields = array(
+		"email"	=> "varchar(200)"
+	);
+	
+	/**
+	 * Get either a Gravatar URL or complete image tag for a specified email address.
+	 *
+	 * @param string $email The email address
+	 * @param string $s Size in pixels, defaults to 80px [ 1 - 2048 ]
+	 * @param string $d Default imageset to use [ 404 | mm | identicon | monsterid | wavatar ]
+	 * @param string $r Maximum rating (inclusive) [ g | pg | r | x ]
+	 * @param boole $img True to return a complete IMG tag False for just the URL
+	 * @param array $atts Optional, additional key/value attributes to include in the IMG tag
+	 * @return String containing either just a URL or a complete image tag
+	 * @source http://gravatar.com/site/implement/images/php/
+	 */
+	function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array() ) {
+		$url = 'http://www.gravatar.com/avatar/';
+		$url .= md5( strtolower( trim( $email ) ) );
+		$url .= "?s=$s&d=$d&r=$r&.jpg";
+		if ( $img ) {
+			$url = '<img src="' . $url . '"';
+			foreach ( $atts as $key => $val )
+				$url .= ' ' . $key . '="' . $val . '"';
+			$url .= ' />';
+		}
+		return $url;
 	}
 	
+	/**
+	 * returns the raw-path
+	 *
+	 *@name raw
+	 *@access public
+	*/
+	public function raw() {
+		return self::get_gravatar($this->email, 500);
+	}
+	/**
+	 * to string
+	 *
+	 *@name __toString
+	 *@access public
+	*/
+	public function __toString() {
+		return '<img src="'.$this->raw().'" alt="'.$this->filename.'" />';
+	}
+	
+	/**
+	 * returns the path to the icon of the file
+	 *
+	 *@name getIcon
+	 *@access public
+	 *@param int - size; support for 16, 32, 64 and 128
+	*/
+	public function getIcon($size = 128, $retina = false) {
+		if($retina) {
+			$size = $size * 2;
+		}
+		
+		return self::get_gravatar($this->email, $size);
+	}
+	
+	/**
+	 * sets the height
+	 *
+	 *@name setHeight
+	 *@access public
+	*/
+	public function setHeight($height) {
+		return self::get_gravatar($this->email, $height, "mm", "g", true);
+	}
+	
+	/**
+	 * sets the width
+	 *
+	 *@name setWidth
+	 *@access public
+	*/
+	public function setWidth($width) {
+		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	}
+	
+	/**
+	 * sets the Size
+	 *
+	 *@name setSize
+	 *@access public
+	*/
+	public function setSize($width, $height) {
+		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	}
+	
+	/**
+	 * sets the size on the original,  so not the thumbnail we saved
+	 *
+	 *@name orgSetSize
+	 *@access public
+	*/
+	public function orgSetSize($width, $height) {
+		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	}
+	
+	/**
+	 * sets the width on the original, so not the thumbnail we saved
+	 *
+	 *@name orgSetWidth
+	 *@access public
+	*/
+	public function orgSetWidth($width) {
+		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	}
+	
+	/**
+	 * sets the height on the original, so not the thumbnail we saved
+	 *
+	 *@name orgSetHeight
+	 *@access public
+	*/
+	public function orgSetHeight($height) {
+		return self::get_gravatar($this->email, $height, "mm", "g", true);
+	}
+	
+	/**
+	 * returns width
+	 *
+	 *@name width
+	 *@access public
+	*/
+	public function width() {
+		return 500;
+	}
+	
+	/**
+	 * returns height
+	 *
+	 *@name height
+	 *@access public
+	*/
+	public function height() {
+		return 500;
+	}
 }

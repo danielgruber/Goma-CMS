@@ -574,7 +574,10 @@ class User extends DataObject implements HistoryData, PermProvider
 			if($this->avatar) {
 				return $this->avatar;
 			} else {
-				$this->avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "ImageUploads", false);
+				$avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "GravatarImageHandler", false);
+				$avatar->email = $this->email;
+				$avatar->write(false, true);
+				$this->avatar = $avatar;
 				$this->write(false, true);
 				return $this->avatar;
 			}
