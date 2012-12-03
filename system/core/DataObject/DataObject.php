@@ -2324,7 +2324,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					{							
 							foreach($classes as $class => $table)
 							{
-									if($class != $this->class)
+									if(isset(ClassInfo::$database[$table]) && $class != $this->class)
 									{
 											if(!isset($manipulation[$class])) {
 												$manipulation[$class] = array(
