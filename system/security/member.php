@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 2.4.1
+  * last modified: 03.12.2012
+  * $Version 2.4.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -572,13 +572,20 @@ class User extends DataObject implements HistoryData, PermProvider
 		*/
 		public function getImage() {
 			if($this->avatar) {
+				if($this->avatar->filename == "no_avatar.jpg" && $this->avatar->class != "gravatarimagehandler") {
+					$a = $this->avatar->getClassAs("GravatarImageHandler");
+					$a->email = $this->email;
+					$a->write(false, true, 2, false, false);
+					$this->avatar = $a;
+					$this->write(false, true, 2, false, false);
+				}
 				return $this->avatar;
 			} else {
 				$avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "GravatarImageHandler", false);
 				$avatar->email = $this->email;
-				$avatar->write(false, true);
+				$avatar->write(false, true, 2, false, false);
 				$this->avatar = $avatar;
-				$this->write(false, true);
+				$this->write(false, true, 2, false, false);
 				return $this->avatar;
 			}
 		}

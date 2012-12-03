@@ -1472,7 +1472,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
 	 *@return bool
 	*/
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false)
+	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true)
 	{
 		if(!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
@@ -1884,7 +1884,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$this->onBeforeManipulate($manipulation);
 			if(SQL::manipulate($manipulation)) {
 				
-				if(ClassInfo::getStatic($this->class, "history")) {
+				if(ClassInfo::getStatic($this->class, "history") && $history) {
 					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command);
 				}
 				unset($manipulation);
@@ -1950,7 +1950,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name unpublish
 	 *@access public
 	*/
-	public function unpublish($force = false) {
+	public function unpublish($force = false, $history = true) {
 		if((!$this->canPublish($this)) && !$force)
 			return false;
 		
@@ -1971,7 +1971,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeManipulate($manipulation);
 		
 		if(SQL::manipulate($manipulation)) {
-			if(ClassInfo::getStatic($this->class, "history")) {
+			if(ClassInfo::getStatic($this->class, "history") && $history) {
 				History::push($this->class, 0, $this->versionid, $this->id, "unpublish");
 			}
 			return true;
@@ -1986,7 +1986,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name publish
 	 *@access public
 	*/
-	public function publish($force = false) {
+	public function publish($force = false, $history = true) {
 		if((!$this->canPublish($this)) && !$force)
 			return false;
 		
@@ -2010,7 +2010,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeManipulate($manipulation);
 		
 		if(SQL::manipulate($manipulation)) {
-			if(ClassInfo::getStatic($this->class, "history")) {
+			if(ClassInfo::getStatic($this->class, "history") && $history) {
 				History::push($this->class, 0, $this->versionid, $this->id, "publish");
 			}
 			return true;
@@ -2264,7 +2264,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param bool - if cancel on error, or resume
 	 *@param bool - if force to delete versions, too
 	*/
-	public function remove($force = false, $forceAll = false)
+	public function remove($force = false, $forceAll = false, $history = true)
 	{
 		// check if table in db and if not, create it
 		if($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
@@ -2363,7 +2363,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
 		if(SQL::manipulate($manipulation)) {
-			if(ClassInfo::getStatic($this->class, "history")) {
+			if(ClassInfo::getStatic($this->class, "history") && $history) {
 				History::push($this->class, 0, $this->versionid, $this->id, "remove");
 			}
 			$this->onAfterRemove($this);
