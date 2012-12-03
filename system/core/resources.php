@@ -423,7 +423,7 @@ class Resources extends Object {
 			
 			
 			foreach($js as $file) {
-				$html .= "			<script type=\"text/javascript\" src=\"".$file."\"></script>\n";
+				$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."\"></script>\n";
 			}
 			
 			$html .= "\n\n
