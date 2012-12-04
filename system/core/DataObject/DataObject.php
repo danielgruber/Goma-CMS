@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 03.12.2012
-  * $Version: 4.6.11
+  * last modified: 04.12.2012
+  * $Version: 4.6.12
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -101,6 +101,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@var array
 	*/
 	public $many_many_tables = array();
+	
+	/**
+	 * many-many-extra-fields
+	 *@name many_many_extra_fields
+	 *@access public
+	 *@var array
+	*/
+	public $many_many_extra_fields = array();
 	
 	/**
 	 * indexes
@@ -358,11 +366,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		// many-many
 		foreach($this->generateMany_many(false) as $key => $value) {
+			// generate extra-fields
+			if(isset($this->many_many_extra_fields[$key])) {
+				$extraFields = $this->many_many_extra_fields[$key];
+			} else {
+				$extraFields = array();
+			}
+			$extendExtraFields = $this->localCallExtending("many_many_extra_fields");
+			if(isset($extendExtraFields[$key])) {
+				$extraFields = array_merge($extraFields, $extendExtraFields);
+			}
+			
 			if(class_exists($value)) {
 				$tables[$key] = array(
-					"table"		=> "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value,
-					"field"		=> strtolower(get_class($this)) . "id",
-					"extfield"	=> $value . "id"
+					"table"			=> "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value,
+					"field"			=> strtolower(get_class($this)) . "id",
+					"extfield"		=> $value . "id",
+					"extrafields"	=> $extraFields
 				);
 				unset($key, $value);
 			} else {
@@ -385,7 +405,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			if(class_exists($value)) {
 				if(is_subclass_of($value, "DataObject")) {
-					$relations = Object::instance($value)->generateMany_Many();
+					$inst = Object::instance($value);
+					$relations = $inst->generateMany_Many();
+					
 					if(is_array($relations)) {
 						if(isset($relation)) {
 							if(isset($relations[$relation]) && $relations[$relation] == $this->class) {
@@ -396,15 +418,31 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						} else {
 							$relation = array_search(strtolower(get_class($this)), $relations);
 						}
+					} else {
+						throwError(6, "Logcal Error", "Relation ".$relation." does not exist on ".$value.".");
 					}
+					
+					// generate extra-fields
+					if(isset($inst->many_many_extra_fields[$relation])) {
+						$extraFields = $inst->many_many_extra_fields[$relation];
+					} else {
+						$extraFields = array();
+					}
+					$extendExtraFields = $inst->localCallExtending("many_many_extra_fields");
+					if(isset($extendExtraFields[$relation])) {
+						$extraFields = array_merge($extraFields, $extendExtraFields);
+					}
+					
+					
 				} else {
 					throwError(6, "Logical Exception", $value . " must be subclass of DataObject to be a handler for a many-many-relation.");
 				}
 				if($relation) {
 					$tables[$key] = array(
-						"table"		=> "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this)),
-						"field"		=> strtolower(get_class($this)) . "id",
-						"extfield"	=> $value . "id"
+						"table"			=> "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this)),
+						"field"			=> strtolower(get_class($this)) . "id",
+						"extfield"		=> $value . "id",
+						"extraFields"	=> $extraFields
 					);
 					unset($key, $value);
 				}
@@ -544,18 +582,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public static function get_version() {
 		return call_user_func_array(array("DataObject", "get_Versioned"), func_get_args());
-	}
-	
-	/**
-	 * alias for _get
-	 * added in 2.0.0 - 015
-	 *
-	 *@name getObject
-	 *@access public
-	*/
-	public static function getObject($class, $filter = array(), $distinct = false, $joins = array(), $sort = array(), $groupby = false, $limits = array(), $pagination = false) 		{
-		Core::Deprecate(2.0, "DataObject::get");
-		return self::_get($class, $filter, array(), $sort, $joins, $limits, $pagination, $groupby);
 	}
 	
 	/**
@@ -726,53 +752,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					throwErrorById(3);
 			}
 	}
-	
-	/**
-	 * 	s the data
-	 *@name truncate
-	 *@param string - DataObject
-	 *@return bool
-	*/
-	public static function truncate($name, $table_name = null)
-	{
-			if(!isset($table_name)) {
-				$DataObject = Object::instance($name);
-				if(is_subclass_of($DataObject, "controller"))
-				{
-						$DataObject = $DataObject->model_inst;
-				}
-			
-				$table_name =  $DataObject->table_name;
-			}
-			
-			$sql = "TRUNCATE TABLE ". DB_PREFIX . $table_name;
-			if(sql::query($sql))
-			{
-					return true;
-			} else
-			{
-					throwErrorById(3);
-			}
-	}
-	
-	/**
-	 * adds values
-	 *@name add
-	 *@param string - DataObject
-	 *@param array - data to insert
-	 *@return bool
-	*/
-	public static function add($name, array $data = array())
-	{
-		Core::Deprecate(2.0);
-		$class = new $name();
-			
-		foreach($data as $key => $value) {						
-			$class[$key] = $value;
-		}
-			
-		return $class->write(true, true);
-	}
 
 	/**
 	 * gets one data
@@ -832,20 +811,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		return $DataSet;
 	}
-	
-	/**
-	 * alias for search
-	 * 
-	 * DEPRECATED!!
-	 *
-	 *@name _search
-	 *@access public
-	*/
-	public static function _search($name, $search = array(), $filter = array(), $sort = array(), $join = array(), $limits = array(), $pagination = false, $groupby = false) {
-		Core::Deprecate(2.0, "DataObject::search_object");
-		return self::search_object($name, $search, $filter, $sort, $limits, $join, $pagination, $groupby);
-	}
-	
+
 	
 	/**
 	 * defines the methods
