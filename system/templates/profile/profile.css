@@ -62,3 +62,10 @@
 .profile-title {
 	border: 0 !important;
 }
+
+.profile-ui-left {
+	float: left;
+}
+.profile-ui-right {
+	float: right;
+}
