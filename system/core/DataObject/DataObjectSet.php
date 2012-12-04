@@ -1946,6 +1946,9 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		
 		if(isset($extraFields) && is_array($extraFields))
 			$this->extraFields = $extraFields;
+		
+		if($this->extraFields)
+			$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
 	}
 	
 	/**
@@ -1957,7 +1960,8 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	public function join($join) {
 		if(isset($join)) {
 			$this->join = $join;
-			$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
+			if($this->extraFields)
+				$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
 			$this->purgeData();
 		}
 		return $this;

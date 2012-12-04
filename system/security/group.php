@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.1.2
+  * last modified: 04.12.2012
+  * $Version 1.1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -302,6 +302,9 @@ class Group extends DataObject implements HistoryData, PermProvider
 					$lang = lang("h_user_remove", '$user removed the group $group');
 					$icon = "images/icons/fatcow16/group_delete.png";
 				break;
+				default:
+					$lang = "Unknowen event " . $record->action;
+					$icon = "images/icons/fatcow16/group_edit.png";
 			}
 			
 			$lang = str_replace('$groupUrl', "admin/group/" . $record->record()->id . URLEND, $lang);

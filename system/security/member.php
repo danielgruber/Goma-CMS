@@ -538,6 +538,9 @@ class User extends DataObject implements HistoryData, PermProvider
 					$lang = lang("h_user_remove", '$user removed the user $euser');
 					$icon = "images/icons/fatcow16/user_delete.png";
 				break;
+				default:
+					$lang = "Unknowen event " . $record->action;
+					$icon = "images/icons/fatcow16/user_edit.png";
 			}
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
