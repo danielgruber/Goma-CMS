@@ -1947,6 +1947,21 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		if(isset($extraFields) && is_array($extraFields))
 			$this->extraFields = $extraFields;
 	}
+	
+	/**
+	 * sets the variable join
+	 *
+	 *@name join
+	 *@access public
+	*/
+	public function join($join) {
+		if(isset($join)) {
+			$this->join = $join;
+			$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
+			$this->purgeData();
+		}
+		return $this;
+	}
 
 	/**
 	 * write to DB

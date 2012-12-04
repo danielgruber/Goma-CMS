@@ -1768,7 +1768,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		// relation-data
 		
 		foreach($many_many_objects as $key => $object) {
-			$object->setRelationENV($key, $this->many_many_tables[$key]["extfield"], $this->many_many_tables[$key]["table"], $this->many_many_tables[$key]["field"], $this->data["versionid"]);
+			$object->setRelationENV($key, $this->many_many_tables[$key]["extfield"], $this->many_many_tables[$key]["table"], $this->many_many_tables[$key]["field"], $this->data["versionid"], isset($object["extraFields"]) ? $object["extraFields"] : array());
 			$object->write(false, true);
 			unset($this->data[$key . "ids"]);
 		}
@@ -2940,7 +2940,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$where["versionid"] = $this->data[$name . "ids"];
 			// this relation was modfied, so we use the data from the datacache
 			$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit);
-			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"]);
+			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], , isset($data["extraFields"]) ? $data["extraFields"] : array());
 			if($this->queryVersion == "state") {
 				$instance->setVersion("state");
 			}
@@ -2961,7 +2961,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit, array(
 			' INNER JOIN '.DB_PREFIX . $data["table"].' AS '.$data["table"].' ON '.$data["table"].'.'.$object . 'id = '.$table.'.id ' // Join other Table with many-many-table
 		));
-		$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"]);
+		$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 		if($this->queryVersion == "state") {
 			$instance->setVersion("state");
 		}
@@ -2997,7 +2997,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(is_object($value)) {
 			if(is_a($value, "DataObjectSet")) {
 				$instance = new ManyMany_DataObjectSet($object);
-				$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"]);
+				$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 				$instance->addMany($value);
 				$this->setField($name, $instance);
 				
@@ -3605,10 +3605,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(PROFILE) Profiler::unmark("DataObject::buildExtendedQuery");
 			return $query;
 	}
+	
 	/**
 	 * cache
 	*/
 	protected static $datacache = array();
+	
 	/**
 	 * gets all the records of one query as an array
 	 *@name getRecords
