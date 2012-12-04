@@ -89,6 +89,15 @@ class Permission extends DataObject
 		);
 		
 		/**
+		 * extra fields
+		*/
+		public $many_many_extra_fields = array(
+			"groups"	=> array(
+				"major"	=> "int(1)"
+			)
+		);	
+		
+		/**
 		 * indexes
 		 *
 		 *@name indexes

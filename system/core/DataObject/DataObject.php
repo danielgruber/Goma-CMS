@@ -381,9 +381,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$tables[$key] = array(
 					"table"			=> "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value,
 					"field"			=> strtolower(get_class($this)) . "id",
-					"extfield"		=> $value . "id",
-					"extrafields"	=> $extraFields
+					"extfield"		=> $value . "id"
 				);
+				if($extraFields) {
+					$tables[$key]["extraFields"] = $extraFields;
+				}
 				unset($key, $value);
 			} else {
 				throwError(6, 'PHP-Error', "Can't create Relationship on not existing class '".$value."'.");
@@ -442,8 +444,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						"table"			=> "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this)),
 						"field"			=> strtolower(get_class($this)) . "id",
 						"extfield"		=> $value . "id",
-						"extraFields"	=> $extraFields
 					);
+					if($extraFields) {
+						$tables[$key]["extraFields"] = $extraFields;
+					}
 					unset($key, $value);
 				}
 			} else {
@@ -1000,21 +1004,30 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			);
 		}
 		
+		// create many-many-tables
 		if(isset(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"])) {
 			foreach(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"] as $key => $data) {
-				if($fields = SQL::getFieldsOfTable($data["table"]))
-				{
-						ClassInfo::$database[$data["table"]] = $fields;
-				} else
-				{
-						$table = $data["table"];
-						if(SQL::_createTable($table, array('id' => 'int(10) PRIMARY KEY auto_increment', $data["field"] => 'int(10)', $data["extfield"] => 'int(10)'), DB_PREFIX))
-						{
-								SQL::addIndex($table, array($data["field"], $data["extfield"]), "INDEX", "dataindex",$prefix);
-								SQL::addIndex($table, array($data["field"], $data["extfield"]), "UNIQUE", "dataindexunique",$prefix);
-						}
-						ClassInfo::$database[$data["table"]] = array('id' => 'int(10)', $data["field"] => 'int(10)', $data["extfield"] => 'int(10)');
-				}
+				
+				// generate fields with extraFields
+				$table = $data["table"];
+				$fields = array('id' => 'int(10) PRIMARY KEY auto_increment', $data["field"] => 'int(10)', $data["extfield"] => 'int(10)');
+				if(isset($data["extraFields"]))
+					$fields = array_merge($fields, $data["extraFields"]);
+				
+				// require Table
+				$log .= SQL::requireTable($table, $fields, array(
+					"dataindex"	=> array(
+						"name" 		=> "dataindex",
+						"fields"	=> array($data["field"], $data["extfield"]),
+						"type"		=> "INDEX"
+					),
+					"dataindexunique"	=> array(
+						"name"		=> "dataindexunique",
+						"type"		=> "UNIQUE",
+						"fields"	=> array($data["field"], $data["extfield"])
+					)
+				), array(), DB_PREFIX);
+				ClassInfo::$database[$data["table"]] = $fields;
 			}	
 		}
 		
