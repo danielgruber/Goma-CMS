@@ -65,6 +65,7 @@ class adminController extends Controller
 		public function __construct()
 		{
 				defined("IS_BACKEND") OR define("IS_BACKEND", true);
+				Core::setHeader("robots", "noindex, nofollow");
 				parent::__construct();
 		}
 		

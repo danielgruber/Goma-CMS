@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified:  15.11.2012
-  * $Version 2.0.6
+  * last modified:  04.12.2012
+  * $Version 2.0.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -100,6 +100,9 @@ class FrontedController extends Controller
 				"frontedbar"=> new DataSet($this->frontedBar())
 			));
 			
+			if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN")) {
+				return $model->customise(array("content" => $content))->renderWith("page_maintenance.html");
+			}
 			
 			
 			return $this->renderWithAreas("site.html", $model);
@@ -117,9 +120,10 @@ class siteController extends Controller
                 
                 if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN"))
                 {
-                       $data = new ViewAccessAbleData();
-                       HTTPResponse::output($data->customise()->renderWith("page_maintenance.html"));
-                       exit;
+                		HTTPResponse::setResHeader(503);
+                		$data = new ViewAccessAbleData();
+                		HTTPResponse::output($data->customise()->renderWith("page_maintenance.html"));
+                		exit;
                 }
                 
                 return parent::handleRequest($request, $subController);
