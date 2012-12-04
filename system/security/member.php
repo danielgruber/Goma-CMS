@@ -573,20 +573,13 @@ class User extends DataObject implements HistoryData, PermProvider
 		public function getImage() {
 			if($this->avatar) {
 				if(ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->class != "gravatarimagehandler") {
-					$a = $this->avatar->getClassAs("GravatarImageHandler");
-					$a->email = $this->email;
-					$a->write(false, true, 2, false, false);
-					$this->avatar = $a;
+					$this->avatarid = 0;
 					$this->write(false, true, 2, false, false);
+					return new GravatarImageHandler(array("email" => $this->email));
 				}
 				return $this->avatar;
 			} else {
-				$avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "GravatarImageHandler", false);
-				$avatar->email = $this->email;
-				$avatar->write(false, true, 2, false, false);
-				$this->avatar = $avatar;
-				$this->write(false, true, 2, false, false);
-				return $this->avatar;
+				return new GravatarImageHandler(array("email" => $this->email));
 			}
 		}
 }
