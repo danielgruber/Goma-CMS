@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.12.2012
-  * $Version 1.4.2
+  * last modified: 05.12.2012
+  * $Version 1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -626,7 +626,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setHeight($height) {
-		return '<img src="' . $this->path . "/setHeight/" . $height . '" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setHeight/" . $height . '" height="'.$height.'" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -636,7 +636,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setWidth($width) {
-		return '<img src="' . $this->path . "/setWidth/" . $width . '" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setWidth/" . $width . '" width="'.$width.'" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -646,7 +646,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setSize($width, $height) {
-		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2).'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -656,7 +656,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetSize($width, $height) {
-		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2).'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -666,7 +666,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetWidth($width) {
-		return '<img src="' . $this->path . "/orgSetWidth/" . $width . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/orgSetWidth/" . $width . '" width="'.$width.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -676,7 +676,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetHeight($height) {
-		return '<img src="' . $this->path . "/orgSetHeight/" . $height . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/orgSetHeight/" . $height . '" height="'.$height.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
