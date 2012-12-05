@@ -2940,7 +2940,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$where["versionid"] = $this->data[$name . "ids"];
 			// this relation was modfied, so we use the data from the datacache
 			$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit);
-			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], , isset($data["extraFields"]) ? $data["extraFields"] : array());
+			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 			if($this->queryVersion == "state") {
 				$instance->setVersion("state");
 			}
@@ -3436,6 +3436,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				{
 					if(preg_match('/^[0-9]+$/', $table) && is_numeric($table))
 						$query->from[] = $statement;
+					else if($statement == "")
+						$query->from[$table] = "";	
 					else
 						$query->from[$table] = " LEFT JOIN ".DB_PREFIX.$table." AS ".$table." ON " . $statement;
 				}

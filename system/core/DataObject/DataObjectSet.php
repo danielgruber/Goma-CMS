@@ -1948,7 +1948,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			$this->extraFields = $extraFields;
 		
 		if($this->extraFields)
-			$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
+			$this->join[$this->relationTable] = "";
 	}
 	
 	/**
@@ -1961,7 +1961,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		if(isset($join)) {
 			$this->join = $join;
 			if($this->extraFields)
-				$this->join[$this->relationTable] = " INNER JOIN ".DB_PREFIX . $this->relationTable." AS ".$this->relationTable." ON ".$this->relationTable . "." . $this->ownField." = '".$this->ownValue."' ";
+				$this->join[$this->relationTable] = "";
 			$this->purgeData();
 		}
 		return $this;
