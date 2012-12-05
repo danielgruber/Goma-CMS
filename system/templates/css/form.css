@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.01.2012
+  * last modified: 05.12.2012
 */
 
 form { 
@@ -51,6 +51,16 @@ fieldset {
 	text-transform:capitalize;
 }
 
+.form_field .info_field {
+	padding: 5px 5px 5px 264px;
+	font-size: 9pt;
+	color: #555;
+}
+
+.form_field.fullSize > .info_field, fieldset > .form_field > .info_field {
+	padding-left: 5px;
+}
+
 .form_field_tabs {
 	padding: 0 !important;
 }
@@ -61,7 +71,6 @@ fieldset {
 }
 
 .form > .actions {
-	
 	border-top: 1px solid #ccc;
 }
 
@@ -107,4 +116,47 @@ fieldset {
 	margin-top: 12px;
 	margin-bottom: -10px;
 	text-align: right;
+}
+
+.form_field .inputHolder {
+	margin-left: 264px;
+	margin-top: -20px;
+}
+span.formaction {
+	padding: 3px;
+}
+
+fieldset, fieldset.hidden {
+	border: 0;
+	border-bottom: 1px solid #e0e0e0;
+	padding: 10px !important;
+	margin-bottom: -1px;
+}
+fieldset > legend {
+	width: 170px;
+	float: left;
+	display: block;
+	margin-top: 7px;
+	font-weight: bold;
+	color: #555;
+}
+fieldset > .form_field {
+	margin-left: 180px !important;
+	margin-bottom: 7px;
+}
+
+fieldset > .form_field > label {
+	display: block;
+	font-weight: normal;
+	padding: 4px 0;
+	color: #333;
+	cursor: pointer;
+}
+fieldset > .form_field.checkbox > label {
+	display: inline;
+	width: auto;
+}
+fieldset > .form_field > .info_field {
+	color: #999;
+	padding: 5px 0;
 }

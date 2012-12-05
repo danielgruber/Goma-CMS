@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 1.4.3
+  * last modified: 05.12.2012
+  * $Version 1.4.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -116,7 +116,9 @@ class systemController extends Controller {
 					}
 			}
 		}
-		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
+		
+		$expCount = isset(ClassInfo::$appENV["expansion"]) ? count(ClassInfo::$appENV["expansion"]) : 0;
+		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . $expCount);
 		$mtime = $cacher->created;
 		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . $output));
 		HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');

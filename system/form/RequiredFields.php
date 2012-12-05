@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 30.08.2012
-  * $Version 1.3.2
+  * last modified: 05.12.2012
+  * $Version 1.3.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -44,15 +44,16 @@ class RequiredFields extends FormValidator
 				{
 						if(isset($this->form->fields[$field]))
 						{
+								$fieldName = $this->form->fields[$field]->dbname;
 								$f = $this->form->fields[$field];
-								if(!isset($this->form->result[$field]) || empty($this->form->result[$field]) || (is_object($this->form->result[$field]) && is_a($this->form->result[$field], "ViewAccessableData") && !$this->form->result[$field]->bool()))
+								if(!isset($this->form->result[$fieldName]) || empty($this->form->result[$fieldName]) || (is_object($this->form->result[$fieldName]) && is_a($this->form->result[$fieldName], "ViewAccessableData") && !$this->form->result[$fieldName]->bool()))
 								{
 										$valid = false;
 										$missing[] = $f->title;
 								} else
 								{
 										// own validation
-										$v = $this->form->fields[$field]->validate($this->form->result[$field]);
+										$v = $this->form->fields[$field]->validate($this->form->result[$fieldName]);
 										if($v !== true)
 										{
 												$valid = false;
