@@ -22,9 +22,9 @@ function pages_pushPreviewURL(publish, state, usePublish) {
 	
 	$("#visit_webpage").click(function(){
 		if(publish !== false) {
-			publish = publish + "&preview=1";
+			publish = publish;
 		}
-		show_preview(publish, state + "&preview=1", usePublish);
+		show_preview(publish, state, usePublish);
 		return false;	
 	});
 }
@@ -53,7 +53,7 @@ function show_preview(publish, state, usePublish) {
 		zIndex: 900
 	});
 	
-	$("#preview").html('<iframe src="'+state+'" frameBorder="0" name="previewFrame" id="previewFrame" width="100%" height="100%"></iframe><div id="bottomBarWrapper"><div id="bottomBar"></div></div>');
+	$("#preview").html('<iframe src="'+state+'" frameBorder="0" name="previewFrame" id="previewFrame" width="100%"></iframe><div id="bottomBarWrapper"><div id="bottomBar"></div></div>');
 	
 	$("#bottomBarWrapper").css({
 		position: "absolute",
@@ -81,6 +81,11 @@ function show_preview(publish, state, usePublish) {
 		$("#previewFrame").attr("src", publish);
 	}
 	
+	var updateHeight = function() {
+		$("#previewFrame").height($(window).height() - $("#bottomBar").height());
+	}
+	$(window).resize(updateHeight);
+	updateHeight();
 	
 	$("#preview").animate({top: 0}, 150);
 	setTimeout(function(){
@@ -120,19 +125,29 @@ function show_preview(publish, state, usePublish) {
 	
 	var current = state;
 	var changeCount = -1;
-	interval = setInterval(function(){
-		if($("#previewFrame").length == 0) {
-			clearInterval(interval);
-		}
-		
-		if(current != $("#previewFrame").get(0).contentWindow.location.href) {
-			current = $("#previewFrame").get(0).contentWindow.location.href;
-			changeCount++;
-			if(changeCount == 1) {
-				location.href = current;
-				$("#preview .edit").click();
+	$("#previewFrame").get(0).onload = function() {
+		interval = setInterval(function(){
+			if($("#previewFrame").length == 0) {
+				clearInterval(interval);
 			}
-		}
-		
-	}, 500);
+			
+			if($("#previewFrame").get(0).contentDocument) {
+				var doc = $("#previewFrame").get(0).contentDocument;
+			} else if($("#previewFrame").get(0).contentWindow) {
+				var doc = $("#previewFrame").get(0).contentWindow;
+			} else {
+				return false;
+			}
+			
+			if(current != $("#previewFrame").get(0).contentWindow.location.href) {
+				current = $("#previewFrame").get(0).contentWindow.location.href;
+				changeCount++;
+				if(changeCount == 1) {
+					location.href = current;
+					$("#preview .edit").click();
+				}
+			}
+			
+		}, 500);
+	}
 }

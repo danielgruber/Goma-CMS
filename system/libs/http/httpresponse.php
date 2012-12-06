@@ -469,7 +469,7 @@ class htmlparser extends object
 						}
 						if(preg_match('/^#/', $href))
 						{
-								continue;
+								$href = URL . URLEND . "#" . $m[1];
 						}
 						if(preg_match('/^javascript:/i', $href))
 						{
