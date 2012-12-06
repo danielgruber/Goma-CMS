@@ -1202,6 +1202,33 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	
 	/**
+	 * returns if you can access a specific history-record
+	 *
+	 *@name canViewHistory
+	 *@access public
+	*/
+	public static function canViewHistory($record = null) {
+		if(is_object($record)) {
+			if($record->oldversion && $record->newversion) {
+				return ($record->oldversion->canWrite($record->oldversion) && $record->newversion->canWrite($record->newversion));
+			} else if($record->newversion) {
+				return $record->newversion->canWrite($record->newversion);
+			} else if($record->record) {
+				return $record->record->canWrite($record->record);
+			}
+		}
+		
+		if(is_object($record)) {
+			$c = new $record->dbobject;
+		} else if(is_string($record)) {
+			$c = new $record;
+		} else {
+			throwError("6", "Invalid Argument Error", "Invalid Argument for DataObject::canViewRecord Object or Class_name required");
+		}
+		return $c->canWrite();
+	}
+	
+	/**
 	 * returns if a given record can be written to db
 	 *
 	 *@name canWrite
@@ -1639,12 +1666,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		$many_many_objects = array();
+		$many_many_data = array();
 		
 		// here the magic for many-many happens
 		if($this->many_many) {
 			foreach($this->many_many as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
 					$many_many_objects[$key] = $newdata[$key];
+					$many_many_data[$key] = $value;
 					unset($newdata[$key]);
 				}
 				unset($key, $value);
@@ -1655,6 +1684,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			foreach($this->belongs_many_many as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
 					$many_many_objects[$key] = $newdata[$key];
+					$many_many_data[$key] = $value;
 					unset($newdata[$key]);
 				}
 				unset($newdata[$key], $key, $value);
@@ -1768,7 +1798,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		// relation-data
 		
 		foreach($many_many_objects as $key => $object) {
-			$object->setRelationENV($key, $this->many_many_tables[$key]["extfield"], $this->many_many_tables[$key]["table"], $this->many_many_tables[$key]["field"], $this->data["versionid"], isset($object["extraFields"]) ? $object["extraFields"] : array());
+			$object->setRelationENV($key, $this->many_many_tables[$key]["extfield"], $this->many_many_tables[$key]["table"], $this->many_many_tables[$key]["field"], $this->data["versionid"], isset($many_many_data[$key]["extraFields"]) ? $many_many_data[$key]["extraFields"] : array());
 			$object->write(false, true);
 			unset($this->data[$key . "ids"]);
 		}

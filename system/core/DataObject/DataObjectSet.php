@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 04.12.2012
-  * $Version: 1.4.2
+  * last modified: 06.12.2012
+  * $Version: 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -577,7 +577,24 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	public function reRenderSet() {
 		if($this->pagination) {
 			$this->dataCache = (array) $this->dataCache + (array) $this->data;
-			$this->data = array_values($this->getArrayRange($this->page * $this->perPage - $this->perPage, $this->perPage));
+			$start = $this->page * $this->perPage - $this->perPage;
+			$count = $this->perPage;
+			if($this->Count() < $start) {
+				if($this->Count() < $this->perPage) {
+					$start = 0;
+					$count = $this->perPage;
+				} else {
+					$pages = ceil($this->Count() / $this->perPage);
+					if($this->page < $pages) {
+						$this->page = $pages;
+					}
+					$start = $this->page * $this->perPage - $this->perPage;
+				}
+			}
+			if($start + $count < $this->Count()) {
+				$count = $this->Count() - $start;
+			}
+			$this->data = array_values($this->getArrayRange($start, $count));
 			reset($this->data);
 		} else {
 			$this->data =& $this->dataCache;
@@ -949,16 +966,6 @@ class DataObjectSet extends DataSet {
 	protected $version;
 	
 	/**
-	 * Object for the DataBase Connection with the following methods:
-	 *
-	 * - getRecords
-	 *
-	 *@name DataBaseObject
-	 *@access public
-	*/
-	public $DataBaseObject;
-	
-	/**
 	 * count of the data in this set
 	 *
 	 *@name count
@@ -995,7 +1002,7 @@ class DataObjectSet extends DataSet {
 	 *@name __construct
 	 *@access public
 	*/
-	public function __construct($class = null,$filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
+	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
 		parent::__construct(null);
 		
 		if(isset($class)) {
@@ -1016,6 +1023,19 @@ class DataObjectSet extends DataSet {
 			
 			$this->protected_customised = $this->customised;
 		}
+	}
+	
+	/**
+	 * sets the data and datacache of this set
+	 *
+	 *@name setData
+	 *@access public
+	*/
+	public function setData($data = array()) {
+		$this->dataCache = $data;
+		$this->data = $data;
+		$this->count = count($data);
+		$this->reRenderSet();
 	}
 	
 	/**

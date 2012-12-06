@@ -722,7 +722,7 @@ class Member extends Object {
 				if(self::$groupType == 0) {
 					self::$groupType = 1;
 					self::$groups->first()->type = 1;
-					self::$groups->first()->write(false, true);
+					self::$groups->first()->write(false, true, 2, false, false);
 				}
 				
 				self::$loggedIn = $data;

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
+  * last modified: 06.12.2012
   * $Version 1.0.1
 */
 
@@ -114,12 +114,24 @@ class History extends DataObject {
 			
 		self::$supportHistoryView = array();
 		foreach(ClassInfo::getChildren("DataObject") as $child) {
-			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData")) {
+			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData") && call_user_func_array(array($child, "canViewHistory"), array($child))) {
 				self::$supportHistoryView[] = $child;
 			}
 		}
 		
 		return self::$supportHistoryView;
+	}
+	
+	/**
+	 * if we can this history-event
+	 *
+	 *@name canSeeEvent
+	*/
+	public function canSeeEvent() {
+		if(call_user_func_array(array($this->dbobject, "canViewHistory"), array($this)) && $this->historyData()) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -241,8 +253,10 @@ class History extends DataObject {
 				$data = call_user_func_array(array($this->dbobject, "generateHistoryData"), array($this));
 				if(isset($data["text"], $data["icon"])) {
 					$this->historyData = $data;
-				} else {
+				} else if(is_array($data)) {
 					throwError(6, "Invalid Result", "Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
+				} else {
+					return false;
 				}
 				return $data;
 			} else {

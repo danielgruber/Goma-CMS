@@ -116,9 +116,9 @@ class Group extends DataObject implements HistoryData, PermProvider
 						$active = ($this->permissions(array("name" => $name))->count() > 0) ? 1 : 0;
 						$form->permissions->add(new Checkbox($name, parse_lang($data["title"]), $active));
 					}
+					
+					$form->addDataHandler(array($this, "handlePerms"));
 				}
-				
-				$form->addDataHandler(array($this, "handlePerms"));
 				
 				$form->addValidator(new RequiredFields(array("name")), "validator");
 				
@@ -134,6 +134,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 		*/
 		public function handlePerms($data) {
 			$dataset = new ManyMany_DataObjectSet("permission");
+			$dataset->setData();
 			foreach($data["permissions"] as $key => $val) {
 				if($val) {
 					// check for created
@@ -143,7 +144,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 				}
 			}
 			$data["permissions"] = $dataset;
-			
+
 			return $data;
 		}
 		
