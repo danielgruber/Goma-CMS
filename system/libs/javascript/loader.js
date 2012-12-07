@@ -19,6 +19,9 @@ if(typeof self.loader == "undefined") {
 	var html_regexp = new RegExp("<body");
 	var external_regexp = /https?\:\/\/|ftp\:\/\//;
 	
+	var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
+	var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
+	
 	/**
 	 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
 	 * you must register the plugin in PHP
@@ -418,15 +421,17 @@ if(typeof self.loader == "undefined") {
 								success: function(css) {
 									// patch uris
 									var base = file.substring(0, file.lastIndexOf("/"));
-									css = css.replace(/url\(("|')?([^']+)("|')?\)/gi, 'url(' + root_path + base + '/$2)');
+									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
 									
 									w.CSSLoadedResources[file] = css;
 								}
 							});
 						}
 						
+						
 						if(typeof w.CSSIncludedResources[file] == "undefined") {
-							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/, "_")+'">'+CSSLoadedResources[file]+'</style>');
+							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoadedResources[file]+'</style>');
 							w.CSSIncludedResources[file] = true;
 						}
 					} else {
@@ -444,9 +449,7 @@ if(typeof self.loader == "undefined") {
 				for(i in jsfiles) {
 					var file = jsfiles[i];
 					if(file != "") {
-						var regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
-						var alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
-						if((!regexp.test(file) && w.JSLoadedResources[file] !== true) || alwaysLoad.test(file)) {
+						if((!run_regexp.test(file) && w.JSLoadedResources[file] !== true) || load_alwaysLoad.test(file)) {
 							w.JSLoadedResources[file] = true;
 							$.ajax({
 								cache: true,
@@ -476,8 +479,7 @@ if(typeof self.loader == "undefined") {
 					
 					var file = jsfiles[i];
 					if(file != "") {
-						var regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
-						if(regexp.test(file)) {
+						if(run_regexp.test(file)) {
 							$.ajax({
 								cache: true,
 								url: file,

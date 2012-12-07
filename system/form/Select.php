@@ -79,7 +79,7 @@ class Select extends FormField
 				
 				$options = $this->options();
 				
-				if(isset($options[0])) // this is no associative array
+				/*if(isset($options[0])) // this is no associative array
 				{
 						foreach($options as $key => $value)
 						{
@@ -108,7 +108,7 @@ class Select extends FormField
 								}
 						}
 				} else
-				{
+				{*/
 						foreach($options as $key => $value)
 						{
 								if($key == $this->value)
@@ -121,7 +121,7 @@ class Select extends FormField
 											"value"		=> $key
 										), $value));
 						}
-				}
+				//}
 				
 				$this->container->append($node);
 				

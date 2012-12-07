@@ -4,11 +4,14 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
+  * last modified: 05.12.2012
 */
 
 /* basics */
 
+.tablefield-fieldset {
+	padding: 0 !important;
+}
 .tablefield-table {
 	width: 100%;
 	border: 1px solid #bbb;

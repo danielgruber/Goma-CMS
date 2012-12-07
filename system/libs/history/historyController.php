@@ -46,6 +46,9 @@ class HistoryController extends Controller {
 				$dbObjectFilter = array_merge($dbObjectFilter, array($class), ClassInfo::getChildren($class));
 			}
 			$filter["dbobject"] = array_intersect(ArrayLib::key_value($dbObjectFilter), History::supportHistoryView());
+			if(count($filter["dbobject"]) == 0) {
+				return false;
+			}
 		} else {
 			$filter["dbobject"] = History::supportHistoryView();
 		}
@@ -90,7 +93,10 @@ class HistoryController extends Controller {
 		// render the tabset
 		$tabs = new Tabs("history");
 		if(isset($filter["dbobject"]) && ClassInfo::exists($filter["dbobject"])) {
-			$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), HistoryController::renderHistory($filter, $this->namespace), $filter["dbobject"]);
+			$content = HistoryController::renderHistory($filter, $this->namespace);
+			if($content) {
+				$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), $content, $filter["dbobject"]);
+			}
 		}
 		$tabs->addTab(lang("h_all"), HistoryController::renderHistory(array(), $this->namespace), "h_all");
 		$output = $tabs->render();

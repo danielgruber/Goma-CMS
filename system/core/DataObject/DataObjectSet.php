@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 29.11.2012
-  * $Version: 1.4.1
+  * last modified: 06.12.2012
+  * $Version: 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -577,7 +577,24 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	public function reRenderSet() {
 		if($this->pagination) {
 			$this->dataCache = (array) $this->dataCache + (array) $this->data;
-			$this->data = array_values($this->getArrayRange($this->page * $this->perPage - $this->perPage, $this->perPage));
+			$start = $this->page * $this->perPage - $this->perPage;
+			$count = $this->perPage;
+			if($this->Count() < $start) {
+				if($this->Count() < $this->perPage) {
+					$start = 0;
+					$count = $this->perPage;
+				} else {
+					$pages = ceil($this->Count() / $this->perPage);
+					if($this->page < $pages) {
+						$this->page = $pages;
+					}
+					$start = $this->page * $this->perPage - $this->perPage;
+				}
+			}
+			if($start + $count > $this->Count()) {
+				$count = $this->Count() - $start;
+			}
+			$this->data = array_values($this->getArrayRange($start, $count));
 			reset($this->data);
 		} else {
 			$this->data =& $this->dataCache;
@@ -949,16 +966,6 @@ class DataObjectSet extends DataSet {
 	protected $version;
 	
 	/**
-	 * Object for the DataBase Connection with the following methods:
-	 *
-	 * - getRecords
-	 *
-	 *@name DataBaseObject
-	 *@access public
-	*/
-	public $DataBaseObject;
-	
-	/**
 	 * count of the data in this set
 	 *
 	 *@name count
@@ -995,7 +1002,7 @@ class DataObjectSet extends DataSet {
 	 *@name __construct
 	 *@access public
 	*/
-	public function __construct($class = null,$filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
+	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
 		parent::__construct(null);
 		
 		if(isset($class)) {
@@ -1016,6 +1023,19 @@ class DataObjectSet extends DataSet {
 			
 			$this->protected_customised = $this->customised;
 		}
+	}
+	
+	/**
+	 * sets the data and datacache of this set
+	 *
+	 *@name setData
+	 *@access public
+	*/
+	public function setData($data = array()) {
+		$this->dataCache = $data;
+		$this->data = $data;
+		$this->count = count($data);
+		$this->reRenderSet();
 	}
 	
 	/**
@@ -1915,6 +1935,14 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	protected $ownValue;
 	
 	/**
+	 * extra-fields in this many-many-table
+	 *
+	 *@name extraFields
+	 *@access protected
+	*/
+	protected $extraFields = array();
+	
+	/**
 	 * sets the relation-props
 	 *
 	 *@name setRelationENV
@@ -1925,7 +1953,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	 *@param string - own field, not the field where to set the given IDs, the field where to store the current id
 	 *@param string - the value of the own field, so the id
 	*/
-	public function setRelationENV($name = null, $field = null, $table = null, $ownField = null, &$ownValue = null) {
+	public function setRelationENV($name = null, $field = null, $table = null, $ownField = null, &$ownValue = null, $extraFields = array()) {
 		parent::setRelationENV($name, $field);
 		if(isset($table))
 			$this->relationTable = $table;
@@ -1935,6 +1963,28 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			
 		if(isset($ownValue))
 			$this->ownValue = $ownValue;
+		
+		if(isset($extraFields) && is_array($extraFields))
+			$this->extraFields = $extraFields;
+		
+		if($this->extraFields)
+			$this->join[$this->relationTable] = "";
+	}
+	
+	/**
+	 * sets the variable join
+	 *
+	 *@name join
+	 *@access public
+	*/
+	public function join($join) {
+		if(isset($join)) {
+			$this->join = $join;
+			if($this->extraFields)
+				$this->join[$this->relationTable] = "";
+			$this->purgeData();
+		}
+		return $this;
 	}
 
 	/**
@@ -1948,9 +1998,14 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	*/
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
+		$writeExtraFields = array();
 		
 		if(count($this->data) > 0) {
+			
+			// write all records
 			foreach($this as $record) {
+				
+				// check if object and writable
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
 					// check if record exists in this form
 					// if exists, don't rewrite
@@ -1960,25 +2015,49 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 						}
 					}
 					$writtenIDs[$record->versionid] = true;
+					$writeExtraFields[$record->versionid] = array();
+					
+					// add extra fields
+					foreach($this->extraFields as $field => $char) {
+						if(isset($record[$field])) {
+							$writeExtraFields[$record->versionid][$field] = $record[$field];
+						}
+					}
 				}
 			}
 		} else {
+			
+			// if we don't have records the local dataobject could be changed an have to be written then
 			if(!$this->dataobject || !$this->dataobject->wasChanged()) {
 				return true;
 			}
 			$record = $this->dataobject;
-			if($record->write($forceInsert, $forceWrite, $snap_priority))
+			if($record->write($forceInsert, $forceWrite, $snap_priority)) {
 				$writtenIDs[$record->versionid] = true;
-			else
+				
+				// add extra fields
+				foreach($this->extraFields as $field => $char) {
+					if(isset($record[$field])) {
+						$writeExtraFields[$record->versionid][$field] = $record[$field];
+					}
+				}
+			} else
 				return false;
 		}
 		
 		// check for existing entries
-		$sql = "SELECT ".$this->field." FROM ".DB_PREFIX . $this->relationTable." WHERE ".$this->ownField." = ".$this->ownValue."";
+		$sql = "SELECT * FROM ".DB_PREFIX . $this->relationTable." WHERE ".$this->ownField." = ".$this->ownValue."";
 		if($result = SQL::Query($sql)) {
 			$existing = array();
+			$existingFields = array();
 			while($row = SQL::fetch_object($result)) {
-				$existing[] = $row->{$this->field};
+				$existing[$row->id] = $row->{$this->field};
+				$existingFields[$row->{$this->field}] = array();
+				
+				// add extra fields, which exist
+				foreach($this->extraFields as $field => $char) {
+					$existingFields[$row->{$this->field}][$field] = $row->{$field};
+				}
 			}
 		} else {
 			throwErrorByID(5);
@@ -1996,11 +2075,21 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
-				$manipulation[0]["fields"][] = array(
+				$c = count($manipulation[0]["fields"]);
+				$manipulation[0]["fields"][$c] = array(
 					$this->ownField => $this->ownValue,
 					$this->field	=> $id
 				);
-				
+				$manipulation[0]["fields"] = array_merge($manipulation[0]["fields"], $writeExtraFields[$id]);
+			} else {
+				if($writeExtraFields[$id] != $existingFields[$row->{$this->field}]) {
+					$manipulation[] = array(
+						"command"	=> "update",
+						"table_name"=> $this->relationTable,
+						"id"		=> array_search($id, $existing),
+						"fields"	=> $writeExtraFields[$id]
+					);
+				}
 			}
 		}
 

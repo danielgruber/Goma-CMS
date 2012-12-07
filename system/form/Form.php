@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
+  * last modified: 02.12.2012
   * $Version - 2.4.4
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -245,6 +245,7 @@ class Form extends object
 				// if we restore form
 				if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
 					$data = session_restore("form_" . strtolower($this->name));
+					$this->useStateData = $data->useStateData;
 					$this->result = $data->result;
 					$this->post = $data->post;
 					$this->state = $data->state;

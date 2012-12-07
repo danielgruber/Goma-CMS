@@ -174,6 +174,9 @@ a:hover {
 	margin: 0;
 	text-transform: capitalize;
 }
+.header h1 a {
+	color: #444 !important;
+}
 #content > .header {
 	background: #555 url(images/content_bg.png) repeat-x;
 	background: -moz-linear-gradient(#5c5c5b, #424242);
@@ -821,26 +824,12 @@ textarea:focus, input[type=text]:focus, input[type=password]:focus
 	padding: 12px;
 	padding-bottom: 15px;
 }
-.form_field .inputHolder {
-	margin-left: 264px;
-	margin-top: -20px;
-}
 span.formaction {
 	padding: 3px;
 }
 
 .visibleField {
 	border-bottom: 1px solid #e5e5e5;
-}
-
-.form_field .info_field {
-	padding: 5px 5px 5px 264px;
-	font-size: 9pt;
-	color: #555;
-}
-
-.form_field.fullSize .info_field {
-	padding-left: 5px;
 }
 
 .form_field__rights .form_field {

@@ -19,7 +19,7 @@ class groupAdmin extends adminItem {
 	/**
 	 * permissions
 	*/
-	public $rights = "10";
+	public $rights = "canManagePermissions";
 	
 	/**
 	 * sort

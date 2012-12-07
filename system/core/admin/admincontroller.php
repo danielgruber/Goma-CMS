@@ -65,6 +65,7 @@ class adminController extends Controller
 		public function __construct()
 		{
 				defined("IS_BACKEND") OR define("IS_BACKEND", true);
+				Core::setHeader("robots", "noindex, nofollow");
 				parent::__construct();
 		}
 		
@@ -150,7 +151,7 @@ class adminController extends Controller
 		 *@name flushLog
 		*/
 		public function flushLog() {
-			if(Permission::check("ADMIN")) {
+			if(Permission::check("superadmin")) {
 				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
 				AddContent::addSuccess(lang("flush_log_success"));
 				$this->redirectBack();
@@ -351,6 +352,12 @@ class admin extends ViewAccessableData implements PermProvider
 						"title" 	=> '{$_lang_administration}',
 						'default'	=> array(
 							"type" => "admins"
+						)
+					),
+					"ADMIN_HISTORY"	=> array(
+						"title"		=> '{$_lang_history}',
+						"default"	=> array(
+							"type"	=> "admins"
 						)
 					)
 				);
