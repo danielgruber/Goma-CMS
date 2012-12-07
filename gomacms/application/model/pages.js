@@ -7,6 +7,10 @@
   * $Version 1.2.1
 */
 
+if(window.top != window) {
+	top.location.href = location.href;
+}
+
 function pages_pushPreviewURL(publish, state, usePublish) {
 	if(publish !== false) {
 		$("#visit_webpage").attr("href", publish);	
