@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * $Version 2.1.5
+  * last modified: 07.12.2012
+  * $Version 2.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -368,8 +368,12 @@ class Permission extends DataObject
 					return (member::$groupType > 0);
 				}
 				
-				if($needed < 11) {
+				if($needed < 10) {
 					return (member::$groupType > 1);
+				}
+				
+				if($needed == 10) {
+					return Permission::check("superadmin");
 				}
 		}
 		

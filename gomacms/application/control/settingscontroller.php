@@ -87,7 +87,7 @@ class Newsettings extends DataObject implements HistoryData {
 		$tabs->add($general = new Tab("general", array(), lang("settings_normal", "General")));
 		$this->getFormFromDB($general);
 		$general->add(new langselect('lang',lang("lang"),PROJECT_LANG));
-		$general->add(new select("timezone",lang("timezone"),i18n::$timezones ,Core::getCMSVar("TIMEZONE")));
+		$general->add(new select("timezone",lang("timezone"), ArrayLib::key_value(i18n::$timezones) ,Core::getCMSVar("TIMEZONE")));
 		$general->add($date_format = new Select("date_format", lang("date_format"), $this->generateDate(), DATE_FORMAT));			
 						
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => $GLOBALS['lang']['normal'], STATUS_MAINTANANCE => $GLOBALS['lang']['wartung']), SITE_MODE));
@@ -237,7 +237,7 @@ class TemplateSettings extends NewSettings {
 	 *@access public
 	*/
 	public function getFormFromDB(&$form) {
-		$form->add(new Select("stpl", lang("available_styles"), $this->getTemplates()));
+		$form->add(new Select("stpl", lang("available_styles"), ArrayLib::key_value($this->getTemplates())));
 		$form->add(new TextArea("css_standard", lang("own_css")));
 	}
 }

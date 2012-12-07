@@ -215,12 +215,9 @@ class User extends DataObject implements HistoryData, PermProvider
 				
 				$mail->info = lang("email_correct_info");
 				
-				if(Permission::check(10))
+				if(Permission::check("USERS_MANAGE"))
 				{
-					
-					$form->add(new Tab("admin", array(
-						new Manymanydropdown("groups", lang("groups", "Groups"), "name")
-					), $GLOBALS["lang"]["administration"]),0, "tabs");
+					$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"),0, "general");
 				}
 				
 				if(!member::login())
@@ -232,7 +229,7 @@ class User extends DataObject implements HistoryData, PermProvider
 								$form->addValidator(new FormValidator(array($this, 'validatecode')), "validatecode");
 						}
 				}
-				if(Permission::check(10))
+				if(Permission::check("USERS_MANAGE"))
 				{
 					$form->addValidator(new RequiredFields(array("nickname", "password", "groups", "repeat", "email")), "required_users");
 				} else {
@@ -261,6 +258,7 @@ class User extends DataObject implements HistoryData, PermProvider
 							new TextField("nickname", lang("username")),
 							new TextField("name",  lang("name", "name")),
 							new TextField("email", lang("email", "email")),
+							new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
 							$this->doObject("timezone")->formfield(lang("timezone")),
 							new LangSelect("custom_lang", lang("lang")),
 							// password management in external window
@@ -277,7 +275,7 @@ class User extends DataObject implements HistoryData, PermProvider
 				
 				
 				// group selection for admin
-				if($this["id"] != member::$id && Permission::check(10))
+				if($this["id"] != member::$id && Permission::check("USERS_MANAGE"))
 				{
 					
 					// if a user is not activated by mail, admin should have a option to activate him manually
@@ -288,13 +286,14 @@ class User extends DataObject implements HistoryData, PermProvider
 					}
 					
 					$form->add(new Tab("admin", array(
-						new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
 						$status
 					), $GLOBALS["lang"]["administration"]),0,"tabs");
+				} else {
+					$form->remove("groups");
 				}
 				
 				// generate actions
-				if(right(10) && defined("IS_BACKEND"))
+				if(right("USERS_MANAGE") && defined("IS_BACKEND"))
 				{
 						$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/model/user/'.$this->id.'/delete'.URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
 				}

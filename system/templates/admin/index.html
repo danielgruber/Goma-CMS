@@ -193,7 +193,7 @@
 													<% ENDCONTROL %>
 												</table>
 												<a href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}</a>
-												<% IF DEV_MODE %>
+												<% IF DEV_MODE AND PERMISSION("superadmin") %>
 													<a href="{BASE_SCRIPT}dev/buildDistro" class="button"><% lang("distro_build", "build a version") %></a>
 												<% END %>
 											</div>
@@ -205,10 +205,12 @@
 											<div>
 												<div class="info">{$_lang_cache_del_info}</div>
 												<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
-												<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+												<% IF permission("superadmin") %>
+													<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+												<% END %>
 											</div>
 										</div>
-										<% IF DEV_MODE %>
+										<% IF DEV_MODE AND PERMISSION("superadmin") %>
 											<div id="database" class="content_container">
 												<h2>{$_lang_database}</h2>
 												<div>

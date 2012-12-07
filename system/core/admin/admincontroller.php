@@ -151,7 +151,7 @@ class adminController extends Controller
 		 *@name flushLog
 		*/
 		public function flushLog() {
-			if(Permission::check("ADMIN")) {
+			if(Permission::check("superadmin")) {
 				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
 				AddContent::addSuccess(lang("flush_log_success"));
 				$this->redirectBack();
