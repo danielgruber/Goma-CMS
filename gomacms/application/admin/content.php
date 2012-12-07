@@ -129,7 +129,7 @@ class contentAdmin extends LeftAndMain
 		 * init JavaScript-Files
 		*/
 		public function Init() {
-			Resources::add(APPLICATION . "/application/model/pages.js");
+			Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
 			return parent::Init();
 		}
 		
