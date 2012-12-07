@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.11.2012
-  * $Version - 1.0
+  * last modified: 05.12.2012
+  * $Version - 1.0.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -132,6 +132,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 				$title = $data->name;
 			}
 			Core::setTitle($title);
+			$tableField->form()->controller->request->post_params = $_POST;
 			$content = $data->first()->controller($tableField->form()->controller)->edit();
 		} else {
 			$tableField->Form()->redirectToForm();

@@ -25,9 +25,9 @@
 				</div>
 				<div class="header">
 					<% IF $content %>
-						<h1>{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></h1>
+						<h1><a href="/">{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></a></h1>
 					<% ELSE %>
-						<h1><% lang("wartung", "maintenance") %></h1>
+						<h1><a href="/"><% lang("wartung", "maintenance") %></a></h1>
 					<% END %>
 				</div>
 				<div class="content">

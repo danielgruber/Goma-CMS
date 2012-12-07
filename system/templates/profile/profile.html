@@ -6,11 +6,7 @@
 	<% END %>
 		<div>
 		<div class="profile-photo">
-			<% IF $avatar %>
-				<a href="{$avatar.raw()}" rel="dropdownDialog">$avatar.setSize(150, 150)</a>
-			<% ELSE %>
-				<img src="images/no_avatar.png" alt="" />
-			<% END %>
+			<a href="{$image.raw()}" rel="dropdownDialog">$image.setSize(150, 150)</a>
 		</div>
 		</div>
 	<% IF NOT isMobile() %>
@@ -20,7 +16,7 @@
 	<% END %>
 	<div>
 		<% IF NOT isMobile() %> 
-			<div class="profile-actions ui-right">
+			<div class="profile-actions profile-ui-right">
 				$profile_actions
 			</div>
 		<% ELSE %>

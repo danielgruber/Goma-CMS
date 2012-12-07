@@ -1,4 +1,6 @@
 /**
+  * this file is for browser compatiblity, so that every browser has the same basic styles
+  *
   *@package goma css framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
@@ -39,9 +41,10 @@ img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
    Lists
    ========================================================================== */
 
-ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
+/*ul, ol { margin: 1em 0; padding: 0 0 0 40px; }*/
 dd { margin: 0 0 0 40px; }
-nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+/*nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }*/
+/* remove cause of annyoing sometimes, maybe readded later */
 
 /* =============================================================================
    Typography
@@ -138,18 +141,6 @@ label
 	padding: 3px;
 }
 
-a.icon {
-	padding: 1px;
-	display: inline-block;
-}
-
-a.button:hover {
-	color: inherit;
-}
-a.button {
-	color: inherit;
-}
-
 input[type="checkbox"], input[type="radio"] {
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -157,67 +148,9 @@ input[type="checkbox"], input[type="radio"] {
 	margin: 2px 1px;
 }
 
-.ui-right
-{
-	float: right;
-}
-.ui-left
-{
-	float: left;
-}
-
-
 .clear
 {
 	clear: both;
-}
-
-/* fields */
-.actions
-{
-	text-align: center;
-}
-.actions .submitbutton
-{
-	display: inline;
-	margin: 4px;
-}
-
-.notice {
-    background: #fae98c url(../../../images/icons/fatcow16/bullet_error.png) no-repeat 2px center;
-    border: 1px solid #d7c143;
-    padding: 10px;
-    padding-left: 25px;
-    margin:10px 0px;
-}
-
-.success {
-    text-align:left;
-    padding:10px;
-    border: 1px solid #8fb865;
-    background-color: #afe37b;
-    color: #222;
-    margin:10px 0px;
-    background-image: url(../../../images/icons/fatcow16/success.png);
-    background-repeat: no-repeat;
-    padding-left: 36px;
-    background-position: 5px center;
-}
-
-.error {
-   	background: #ffbdaf;
-	border: 1px solid #d53f3f;
-	padding: 10px;
-	margin: 10px 0px;
-	color: #252525;
-}
-
-.info_box {
-	padding: 10px;
-	margin: 10px 0px;
-	border: 1px solid #6cd2ff;
-	background: #bfebff;
-	color: #222;
 }
 
 /* placeholders */
@@ -242,98 +175,6 @@ iframe {
 	border:none;
 }
 
-/**
- * default-pages-style
-*/
-.pages a, .pages span.black {
-	padding: 4px;
-}
-
-#login_page .left {
-	float: left;
-	padding: 10px;
-	width: 250px;
-}
-#login_page .right {
-	margin-left: 280px;
-	border-left: 1px solid #eee;
-	padding: 0 10px;
-}
-
-.login_form > label {
-	font-weight: 8pt;
-	display: block;
-	font-weight: bold;
-}
-
-.login_form input[type=text], .login_form input[type=password] {
-	width: 90%;
-}
-
-.login_form > ._actions {
-	padding-top: 5px;
-}
-.login_form > ._actions a {
-	display: block;
-	margin: 5px 4px;
-}
-.login_form > ._actions div a {
-	float: right;
-	margin: 13px 20px;
-	color: #777;
-}
-
-#langSelect {
-	padding: 10px;
-}
-#langSelect .back {
-	float: right;
-	margin-top: 14px;
-}
-#langSelect .selectBox {
-	margin: -8px;
-}
-#langSelect ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-#langSelect ul li {
-	margin: 5px;
-	float: left;
-}
-#langSelect ul li a {
-	display: block;
-	text-decoration: none;
-	color: #555;
-	padding: 5px;
-}
-#langSelect ul li a img {
-	margin-top: -1px;
-}
-#langSelect ul li a:hover, #langSelect ul li.active a {
-	background: #eee;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-}
-
-.icon.arrow_left {
-	height: 10px;
-	width: 8px;
-	background: url(../images/arrow_left.png) no-repeat;
-	display: inline-block;
-	margin: 0 5px;
-}
-
-/* js */
-.show-on-js {
-	display: block;
-}
-.hide-on-js {
-	display: none;
-}
-
 /* clear-fix */
 
 .clearfix:after {
@@ -356,20 +197,4 @@ html[xmlns] .clearfix {
  
 * html .clearfix {
 	height: 1%;
-}
-
-/* retina support */
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1) {  
-	.success {
-		background-image: url(../../../images/icons/fatcow16/success@2x.png);
-		background-size: 16px 16px;
-	}
-	
-	.notice {
-		background-image: url(../../../images/icons/fatcow16/bullet_error@2x.png);
-		background-size: 16px 16px;
-	}
 }

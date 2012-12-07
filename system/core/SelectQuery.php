@@ -470,13 +470,34 @@ class SelectQuery extends Object
 			}
 			
 			if(is_array($fields) && count($fields) > 0) {
+				
+				if(in_array("*", $fields)) {
+					$i = 0;
+					// join all from-tables
+					foreach($this->from as $alias => $statement) {
+						if(_ereg("^[0-9]+$", $alias))
+							continue;
+						
+						if($i == 0)
+						{
+								$i++;
+						} else
+						{
+								$sql .= " , ";
+						}
+						if(!empty($alias)) {
+							$sql .= " ".$alias.".*";
+						}
+					}
+				}
+				
 				// some added caches ;)
 				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
 					$sql .= self::$new_field_cache[$from]["colidingSQL"];
 					$i = self::$new_field_cache[$from]["colidingSQLi"];
 				} else {	
 					$colidingSQL = "";
-					$i = 0;
+					$i = isset($i) ? $i : 0;
 					
 					// fix coliding fields
 					foreach($colidingFields as $field => $tables) {
@@ -516,8 +537,9 @@ class SelectQuery extends Object
 						continue;
 								
 					$field = str_replace("`", "", $field);
-						
-							
+					
+					if($field == "*")
+						continue;
 					
 					if($i == 0)
 						$i++;
@@ -528,25 +550,6 @@ class SelectQuery extends Object
 					
 					if(!_ereg('^[0-9]+$', $key)) {
 						$alias = $key;
-					} else if($field == "*") {
-						$a = 0;
-						// join all from-tables
-						foreach($this->from as $alias => $statement) {
-							if(_ereg("^[0-9]+$", $alias))
-								continue;
-							
-							if($a == 0)
-							{
-									$a++;
-							} else
-							{
-									$sql .= " , ";
-							}
-							if(!empty($alias)) {
-								$sql .= " ".$alias.".*";
-							}
-						}
-						continue;
 					} else {
 						if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
 							$alias = $field;

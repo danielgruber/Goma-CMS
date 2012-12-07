@@ -695,7 +695,7 @@ class TimeZone extends DBField {
 	*/
 	public function formfield($title = null)
 	{
-			return new Select($this->name, $title, i18n::$timezones, $this->value);
+			return new Select($this->name, $title, ArrayLib::key_value(i18n::$timezones), $this->value);
 	}
 }
 

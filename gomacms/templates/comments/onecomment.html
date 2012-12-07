@@ -1,0 +1,11 @@
+<div class="comment record" id="comment_{$this.id}">	
+	<% IF $writeaccess %>
+		<div class="menu">
+			<a href="{$page.url}/pagecomments/edit/{$id}{URLEND}?redirect={$_SERVER_REQUEST_URI.URL()}" title="{$_lang_edit}"><img src="images/icons/fatcow-icons/16x16/edit.png" alt="{$_lang_edit}" /></a>
+			<a href="{$page.url}/pagecomments/delete/{$id}{URLEND}?redirect={$_SERVER_REQUEST_URI.URL()}" rel="ajaxfy" title="{$_lang_delete}"><img src="images/icons/fatcow-icons/16x16/delete.png" alt="{$_lang_delete}" /></a>
+		</div>
+	<% END %>
+
+	<div class="from">{$_lang_co_of} $name.text() {$_lang_co_on} $timestamp.date()</div>
+	<div class="text">$text.bbcode()</div>	
+</div>

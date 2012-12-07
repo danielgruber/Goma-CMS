@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 2.4.1
+  * last modified: 03.12.2012
+  * $Version 2.4.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -215,12 +215,9 @@ class User extends DataObject implements HistoryData, PermProvider
 				
 				$mail->info = lang("email_correct_info");
 				
-				if(Permission::check(10))
+				if(Permission::check("USERS_MANAGE"))
 				{
-					
-					$form->add(new Tab("admin", array(
-						new Manymanydropdown("groups", lang("groups", "Groups"), "name")
-					), $GLOBALS["lang"]["administration"]),0, "tabs");
+					$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"),0, "general");
 				}
 				
 				if(!member::login())
@@ -232,7 +229,7 @@ class User extends DataObject implements HistoryData, PermProvider
 								$form->addValidator(new FormValidator(array($this, 'validatecode')), "validatecode");
 						}
 				}
-				if(Permission::check(10))
+				if(Permission::check("USERS_MANAGE"))
 				{
 					$form->addValidator(new RequiredFields(array("nickname", "password", "groups", "repeat", "email")), "required_users");
 				} else {
@@ -261,6 +258,7 @@ class User extends DataObject implements HistoryData, PermProvider
 							new TextField("nickname", lang("username")),
 							new TextField("name",  lang("name", "name")),
 							new TextField("email", lang("email", "email")),
+							new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
 							$this->doObject("timezone")->formfield(lang("timezone")),
 							new LangSelect("custom_lang", lang("lang")),
 							// password management in external window
@@ -277,7 +275,7 @@ class User extends DataObject implements HistoryData, PermProvider
 				
 				
 				// group selection for admin
-				if($this["id"] != member::$id && Permission::check(10))
+				if($this["id"] != member::$id && Permission::check("USERS_MANAGE"))
 				{
 					
 					// if a user is not activated by mail, admin should have a option to activate him manually
@@ -288,13 +286,14 @@ class User extends DataObject implements HistoryData, PermProvider
 					}
 					
 					$form->add(new Tab("admin", array(
-						new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
 						$status
 					), $GLOBALS["lang"]["administration"]),0,"tabs");
+				} else {
+					$form->remove("groups");
 				}
 				
 				// generate actions
-				if(right(10) && defined("IS_BACKEND"))
+				if(right("USERS_MANAGE") && defined("IS_BACKEND"))
 				{
 						$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/model/user/'.$this->id.'/delete'.URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
 				}
@@ -538,6 +537,9 @@ class User extends DataObject implements HistoryData, PermProvider
 					$lang = lang("h_user_remove", '$user removed the user $euser');
 					$icon = "images/icons/fatcow16/user_delete.png";
 				break;
+				default:
+					$lang = "Unknowen event " . $record->action;
+					$icon = "images/icons/fatcow16/user_edit.png";
 			}
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
@@ -572,11 +574,14 @@ class User extends DataObject implements HistoryData, PermProvider
 		*/
 		public function getImage() {
 			if($this->avatar) {
+				if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->class != "gravatarimagehandler") || $this->avatar->class == "gravatarimagehandler") {
+					$this->avatarid = 0;
+					$this->write(false, true, 2, false, false);
+					return new GravatarImageHandler(array("email" => $this->email));
+				}
 				return $this->avatar;
 			} else {
-				$this->avatar = Uploads::addFile("no_avatar.png", "images/no_avatar.png", "system", "ImageUploads", false);
-				$this->write(false, true);
-				return $this->avatar;
+				return new GravatarImageHandler(array("email" => $this->email));
 			}
 		}
 }
@@ -716,7 +721,7 @@ class Member extends Object {
 				if(self::$groupType == 0) {
 					self::$groupType = 1;
 					self::$groups->first()->type = 1;
-					self::$groups->first()->write(false, true);
+					self::$groups->first()->write(false, true, 2, false, false);
 				}
 				
 				self::$loggedIn = $data;

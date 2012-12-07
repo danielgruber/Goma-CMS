@@ -459,7 +459,7 @@ class tableField extends FormField {
 		
 		$this->form()->disableRestore();
 		
-		return $this->createTag('fieldset', array(), 
+		return $this->createTag('fieldset', array("class" => "tablefield-fieldset"), 
 				$content['before'] .
 				$this->createTag('table', $tableAttrs, $head."\n".$foot."\n".$body) .
 				$content['after']

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
-  * $Version 3.3.17
+  * last modified: 04.12.2012
+  * $Version 3.3.18
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -472,6 +472,7 @@ class Core extends object
 			Resources::add("box.css", "css", "main");
 			
 			Resources::add("default.css", "css", "main");
+			Resources::add("goma_default.css", "css", "main");
 			
 			if(DEV_MODE) {
 				Resources::add("system/libs/javascript/profiler.js", "js", "main");
