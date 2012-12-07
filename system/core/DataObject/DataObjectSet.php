@@ -591,7 +591,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 					$start = $this->page * $this->perPage - $this->perPage;
 				}
 			}
-			if($start + $count < $this->Count()) {
+			if($start + $count > $this->Count()) {
 				$count = $this->Count() - $start;
 			}
 			$this->data = array_values($this->getArrayRange($start, $count));
