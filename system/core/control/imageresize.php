@@ -103,7 +103,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByWidth($width)->output();
+						$img = $image->resizeByWidth($width);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -125,7 +130,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByHeight($height)->output();
+						$img = $image->resizeByHeight($height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -147,8 +157,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-					
-						$image->resize($width, $height)->output();
+						$img = $image->resize($width, $height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -175,7 +189,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByWidth($width)->output();
+						$img = $image->resizeByWidth($width);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -198,12 +217,12 @@ class imageResize extends RequestHandler
 				if(isset($image->md5))
 				{
 						
-						$gd = $image->resizeByHeight($height);
-						if(substr($file, 0, 8) == "Uploads/") {
+						$img = $image->resizeByHeight($height);
+						if(substr($file, 0, 7) == "Uploads") {
 							FileSystem::requireDir(dirname(ROOT . URL));
-							$gd->ToFile(ROOT . URL);
-							$gd->Output();
+							$img->toFile(ROOT . URL);
 						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -225,7 +244,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resize($width, $height)->output();
+						$img = $image->resize($width, $height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
