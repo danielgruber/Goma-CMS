@@ -450,6 +450,7 @@ class htmlparser extends object
 				if(PROFILE) Profiler::unmark("HTMLParser::parseHTML");
 				return $html;
 		}
+		
 		/**
 		  * processes links for non-mod-rewrite
 		  *@name process_links
@@ -467,7 +468,7 @@ class htmlparser extends object
 						{
 								continue;
 						}
-						if(preg_match('/^#/', $href))
+						if(preg_match('/^#([a-zA-Z0-9_\-]+)/', $href, $m))
 						{
 								$href = URL . URLEND . "#" . $m[1];
 						}
