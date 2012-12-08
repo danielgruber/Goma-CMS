@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.6
+  * last modified: 08.12.2012
+  * $Version 2.6.1
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -392,10 +392,13 @@ function loadApplication($directory) {
 		
 		if(file_exists(ROOT . "503." . md5(basename($directory)) . ".goma")) {
 			if(filemtime(ROOT . "503." . md5(basename($directory)) . ".goma") > NOW - 10) {
-				$allowed_ip = file_get_contents(ROOT . "503." . md5(basename($directory)) . ".goma");
+				$allowed_ip = @file_get_contents(ROOT . "503." . md5(basename($directory)) . ".goma");
 				if($_SERVER["REMOTE_ADDR"] != $allowed_ip) {
 					$content = file_get_contents(ROOT . "system/templates/framework/503.html");
 					$content = str_replace('{BASE_URI}', BASE_URI, $content);
+					header('HTTP/1.1 503 Service Temporarily Unavailable');
+					header('Status: 503 Service Temporarily Unavailable');
+					header('Retry-After: 10');
 					die($content);
 				}
 			} else {

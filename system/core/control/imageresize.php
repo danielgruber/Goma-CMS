@@ -197,7 +197,13 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByHeight($height)->output();
+						
+						$gd = $image->resizeByHeight($height);
+						if(substr($file, 0, 8) == "Uploads/") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$gd->ToFile(ROOT . URL);
+							$gd->Output();
+						}
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
