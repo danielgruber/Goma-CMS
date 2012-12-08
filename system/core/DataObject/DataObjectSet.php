@@ -1006,10 +1006,12 @@ class DataObjectSet extends DataSet {
 		parent::__construct(null);
 		
 		if(isset($class)) {
-			if(is_a($class, "DataObjectSet"))
+			if(is_a($class, "DataObjectSet")) {
 				$class = $class->dataobject;
+			}
 			
 			$this->dataobject = Object::instance($class);
+			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->class;
 			if($this->dataobject->controller != "")
 				$this->controller = $this->dataobject->controller;
