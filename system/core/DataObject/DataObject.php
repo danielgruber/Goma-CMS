@@ -489,10 +489,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		// validate
 		foreach($indexes as $name => $type) {
 			if(is_array($type)) {
-				if(isset($type["type"], $type["name"], $type["fields"])) {
+				if(isset($type["type"], $type["fields"])) {
 					// okay
 				} else {
-					throwError(6, "Invalid Index", "Index ".$name." in DataObject ".$this->class." invalid. Type, Name and Fields required!");
+					throwError(6, "Invalid Index", "Index ".$name." in DataObject ".$this->class." invalid. Type and Fields required!");
 				}
 			}
 		}

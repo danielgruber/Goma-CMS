@@ -97,6 +97,11 @@ class PermissionField extends ClusterFormField {
 				$this->type->value = "inherit";
 			}
 		}
+		
+		if($this->disabled) {
+			$this->fields["password"]->value = "*****";
+		}
+		
 		return parent::field();
 	}
 	
