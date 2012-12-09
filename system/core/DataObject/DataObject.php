@@ -485,7 +485,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($this->searchable_fields)
 				// we add an index for fast searching
 				$indexes["searchable_fields"] = array("type" => "INDEX", "fields" => implode(",", $this->searchable_fields), "name" => "searchable_fields");
-				
+		
+		// validate
+		foreach($indexes as $name => $type) {
+			if(is_array($type)) {
+				if(isset($type["type"], $type["name"], $type["fields"])) {
+					// okay
+				} else {
+					throwError(6, "Invalid Index", "Index ".$name." in DataObject ".$this->class." invalid. Type, Name and Fields required!");
+				}
+			}
+		}
+		
 		return $indexes;
 
 	}

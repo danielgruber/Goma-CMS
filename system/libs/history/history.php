@@ -25,6 +25,17 @@ class History extends DataObject {
 	);
 	
 	/**
+	 * indexes
+	*/
+	public $indexes = array(
+		"dbobject"	=> array(
+			"type"		=> "INDEX",
+			"name"		=> "dbobject",
+			"fields"	=> "dbobject,class_name"
+		)
+	);
+	
+	/**
 	 * disable history for this dataobject, because we would have an endless loop
 	 *
 	 *@name history
@@ -177,13 +188,20 @@ class History extends DataObject {
 	 *@name getVersioned
 	*/
 	public function getVersioned() {
+		if(isset($this->_versioned)) {
+			return $this->_versioned;
+		}
+		
+		$this->_versioned = false;
 		$data = $this->historyData();
 		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
 			$temp = new $this->dbobject();
-			if(!$temp->versioned)
+			if(!$temp->versioned || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
 				return false;
+			}
 			
 			if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
+				$this->_versioned = true;
 				return true;
 			}
 			
@@ -282,7 +300,7 @@ class History extends DataObject {
 			$temp = null;
 			
 			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
+				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
 		}
 		
@@ -314,7 +332,7 @@ class History extends DataObject {
 			$temp = null;
 			
 			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
+				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
 			}
 		}
 		

@@ -844,6 +844,16 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		}
 		
 		/**
+		 * can view history
+		 *
+		 *@name canViewHistory
+		 *@access public
+		*/
+		public static function canViewHistory($record = null) {
+			return (Permission::check("PAGES_WRITE") || Permission::check("PAGES_PUBLISH"));
+		}
+		
+		/**
 		 * permission-checks
 		*/
 		public function canWrite($row = null)
