@@ -139,7 +139,7 @@ class History extends DataObject {
 	 *@name canSeeEvent
 	*/
 	public function canSeeEvent() {
-		if(call_user_func_array(array($this->dbobject, "canViewHistory"), array($this)) && $this->historyData()) {
+		if(call_user_func_array(array($this->dbobject, "canViewHistory"), array($this)) && $this->historyData() !== false) {
 			return true;
 		}
 		return false;
@@ -274,6 +274,7 @@ class History extends DataObject {
 				} else if(is_array($data)) {
 					throwError(6, "Invalid Result", "Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
 				} else {
+					$this->historyData = false;
 					return false;
 				}
 				return $data;

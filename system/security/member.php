@@ -513,6 +513,9 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			if(!$record->newversion()) {
+				return false;
+			}
 			switch($record->action) {
 				case "update":
 				case "publish":
