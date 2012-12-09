@@ -20,3 +20,5 @@ system/installer/log/*
 system/installer/temp/*
 Uploads
 Uploads/*
+images/resampled
+images/resampled/*

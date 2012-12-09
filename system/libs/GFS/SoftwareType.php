@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
+  * last modified: 09.12.2012
   * $Version 1.5.6
 */
 
@@ -881,7 +881,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			$gfs->setAutoCommit(false);
 			$gfs->add(FRAMEWORK_ROOT, "/data/system/", array("temp", LOG_FOLDER, "/installer/data", "version.php"));
-			$gfs->add(ROOT . "images/", "/data/images/");
+			$gfs->add(ROOT . "images/", "/data/images/", array("resampled"));
 			$gfs->add(ROOT . "languages/", "/data/languages/");
 			$gfs->commit();
 		}	
