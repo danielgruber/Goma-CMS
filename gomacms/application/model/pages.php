@@ -516,8 +516,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					return lang("site_exists", "The page with this filename already exists.");
 			} else {
 				return true;
-			}
-				
+			}	
 		}
 		
 		/**
