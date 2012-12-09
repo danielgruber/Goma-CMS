@@ -1530,7 +1530,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$oldid = 0;
 		
-		self::$query_cache = array();
+		self::$datacache[$this->class] = array();
 		
 		// if we don't insert we merge the old record with the new one
 		if($forceInsert || $this->versionid == 0) {
@@ -1895,7 +1895,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
-		self::$query_cache = array();
+		self::$datacache[$this->class] = array();
 		
 		// get correct oldid for history
 		if($data = DataObject::get_one($this->class, array("id" => $this->RecordID))) {
@@ -2103,6 +2103,21 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		if(isset($this->data["publishedid"])) {
 			return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * returns if original version of the record is published
+	 *
+	 *@name isrOrgPublished
+	 *@access public
+	*/
+	public function isOrgPublished() {
+		
+		if(isset($this->original["publishedid"])) {
+			return ($this->original["publishedid"] != 0 && $this->original["versionid"] == $this->original["publishedid"]);
 		} else {
 			return false;
 		}
@@ -2432,7 +2447,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$this->disconnect();
 		
-		self::$query_cache = array();
+		self::$datacache[$this->class] = array();
 		
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
@@ -3221,6 +3236,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@var array
 	*/
 	protected static $query_cache = array();
+	
 	/**
 	 * builds the Query
 	 *@name buildQuery
@@ -4170,6 +4186,21 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$data->versionid = 0;
 		
 		return $data;
+	}
+	
+	/**
+	 * clears the data-cache
+	 *
+	 *@name clearDataCache
+	 *@access public
+	*/
+	public static function createDataCache($class = null) {
+		if(isset($class)) {
+			$class = strtolower($class);
+			self::$datacache[$class] = array();
+		} else {
+			self::$datacache = array();
+		}
 	}
 }
 

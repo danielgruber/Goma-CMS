@@ -367,16 +367,35 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				} else {
 					$inheritor = Permission::forceExisting("PAGES_WRITE");
 				}
+				
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->edit_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		
+		/**
+		 * sets the edit-permission
+		 *
+		 *@name setEdit_Permission
+		 *@access public
+		*/
+		public function setEdit_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = Permission::forceExisting("PAGES_WRITE")->id;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $this->parent->edit_permission->id;
+				}
+			}
+			$this->setField("Edit_Permission", $perm);
 		}
 		
 		/**
@@ -401,14 +420,33 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				}
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
+				
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->publish_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		
+		/**
+		 * sets the publish-permission
+		 *
+		 *@name setPublish_Permission
+		 *@access public
+		*/
+		public function setPublish_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $perm->inheritorid = $this->parent->publish_permission->id;
+				}
+			}
+			$this->setField("Publish_Permission", $perm);
 		}
 		
 		/**
@@ -431,11 +469,30 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->read_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		/**
+		 * sets the read-permission
+		 *
+		 *@name setRead_Permission
+		 *@access public
+		*/
+		public function setRead_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = 0;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+				}
+			} else if($this->id == 0 && $this->parentid != 0) {
+				$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+			}
+			$this->setField("Read_Permission", $perm);
 		}
 		
 		/**
@@ -636,7 +693,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					$form->addAction(new HTMLAction("deletebutton", '<a rel="ajaxfy" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
 				}
 				
-				if($this->everPublished() && !$this->isPublished() && $this->canWrite($this)) {
+				if($this->everPublished() && !$this->isOrgPublished() && $this->canWrite($this)) {
 					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="ajaxfy">'.lang("draft_delete", "delete draft").'</a>'));
 				}
 				

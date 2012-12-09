@@ -177,7 +177,7 @@ var LaM_type_timeout;
 				self.leave_check = true;
 				$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
 				$(".left-and-main .LaM_tabs > div").css("display", "none");
-				$(".left-and-main .LaM_tabs").find("." + $(this).attr("class")).css("display", "block");
+				$(".left-and-main .LaM_tabs").find("div." + $(this).attr("class")).css("display", "block");
 				$(this).parent().addClass("active");
 				if(typeof HistoryLib.push == "function")
 					HistoryLib.push($(this).attr("href"));
@@ -400,7 +400,10 @@ var LaM_type_timeout;
 		
 		// switch to tree-tab if necessary
 		if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-			$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+			$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
+			$(".left-and-main .LaM_tabs > div").css("display", "none");
+			$(".left-and-main .LaM_tabs").find("div.tree").css("display", "block");
+			$(".left-and-main .LaM_tabs").find("a.tree").parent().addClass("active");
 		}
 		
 		$this.addClass("loading");

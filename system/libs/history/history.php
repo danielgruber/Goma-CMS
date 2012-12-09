@@ -99,7 +99,7 @@ class History extends DataObject {
 		));
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
-		return $record->write(true, true);
+		return $record->write(true, true, 2, true, false);
 	}
 	
 	/**
