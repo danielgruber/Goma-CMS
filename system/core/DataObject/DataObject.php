@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 04.12.2012
-  * $Version: 4.6.12
+  * last modified: 09.12.2012
+  * $Version: 4.6.13
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1530,7 +1530,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$oldid = 0;
 		
-		self::$datacache[$this->class] = array();
+		self::$datacache[$this->baseClass] = array();
 		
 		// if we don't insert we merge the old record with the new one
 		if($forceInsert || $this->versionid == 0) {
@@ -1895,7 +1895,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
-		self::$datacache[$this->class] = array();
+		self::$datacache[$this->baseClass] = array();
 		
 		// get correct oldid for history
 		if($data = DataObject::get_one($this->class, array("id" => $this->RecordID))) {
@@ -2447,7 +2447,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$this->disconnect();
 		
-		self::$datacache[$this->class] = array();
+		self::$datacache[$this->caseClass] = array();
 		
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
@@ -3695,8 +3695,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 				unset($limithash, $joinhash, $searchhash);
 				if(PROFILE) Profiler::unmark("getRecords::hash");
-				if(isset(self::$datacache[$this->class][$hash])) {
-					return self::$datacache[$this->class][$hash];
+				if(isset(self::$datacache[$this->baseClass][$hash])) {
+					return self::$datacache[$this->baseClass][$hash];
 				}
 			}
 			
@@ -3728,13 +3728,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				
 				
 				// store id in cache
-				if(isset($basehash)) self::$datacache[$this->class][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
+				if(isset($basehash)) self::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
 				
 				// cleanup
 				unset($row);
 			}
 			
-			self::$datacache[$this->class][$hash] = $arr;
+			self::$datacache[$this->baseClass][$hash] = $arr;
 			
 			$query->free();
 			unset($hash, $basehash, $limits, $sort, $filter, $query); // free memory
