@@ -548,6 +548,26 @@ class User extends DataObject implements HistoryData, PermProvider
 		}
 		
 		/**
+		 * returns a comma-seperated list of all groups
+		 *
+		 *@name getGroupList
+		 *@access public
+		*/
+		public function getGroupList() {
+			$str = "";
+			$i = 0;
+			foreach($this->groups() as $group) {
+				if($i == 0) {
+					$i++;
+				} else {
+					$str .= ",";
+				}
+				$str .= Convert::raw2text($group->name);
+			}
+			return $str;
+		}
+		
+		/**
 		 * provides some permissions
 		 *
 		 *@name providePerms

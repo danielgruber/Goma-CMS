@@ -51,7 +51,8 @@ class userAdmin extends adminItem {
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(
 			"nickname" 	=> lang("username"),
 			"name"		=> lang("name"),
-			"email"		=> lang("email")
+			"email"		=> lang("email"),
+			"groupList"	=> lang("groups")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
 		
