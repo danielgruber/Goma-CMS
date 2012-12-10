@@ -703,28 +703,28 @@ function getStoreID($key) {
 */
 function getRedirect($parentDir = false) {
 	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
-		return $_SERVER["HTTP_X_REFERER"];
+		return convert::raw2text($_SERVER["HTTP_X_REFERER"]);
 	}
 	if($parentDir) {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return substr($uri, 0, strrpos($uri, "/")) . URLEND;
+				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
-				return substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND;
+				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
 		}
 	} else {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
-			return $_SERVER["REQUEST_URI"];
+			return convert::raw2text($_SERVER["REQUEST_URI"]);
 		}
 	}
 }
@@ -732,22 +732,22 @@ function getRedirect($parentDir = false) {
 function getRedirection($parentDir = true) {
 	if($parentDir) {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"])) {
-			return $_POST["redirect"];
+			return convert::raw2text($_POST["redirect"]);
 		} else {
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return substr($uri, 0, strrpos($uri, "/")) . URLEND;
+				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
-				return substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND;
+				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
 		}
 	} else {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"])) {
-			return $_POST["redirect"];
+			return convert::raw2text($_POST["redirect"]);
 		} else {
 			return BASE_URI . BASE_SCRIPT;
 		}

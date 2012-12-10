@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.12.2012
-  * $Version 3.3.18
+  * last modified: 09.12.2012
+  * $Version 3.3.19
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -430,6 +430,8 @@ class Core extends object
 			if(PROFILE) Profiler::mark("session");
 			session_start();
 			if(PROFILE) Profiler::unmark("session");
+			
+			member::Init();
 			
 			if(PROFILE) Profiler::mark("Core::Init");
 			
