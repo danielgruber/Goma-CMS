@@ -330,9 +330,21 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				} else
 				{
 						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
-							return lang("error_page_self");
+							return lang("error_page_self", "You can't suborder a page under itself!");
 						}
+						
 						$d = DataObject::get("pages", array("id" => $parentid));
+						if(isset($data["recordid"])) {
+							$temp = $d;
+							// validate if we subordered under subtree
+							while($temp->parent) {
+								if($temp->id == $data["recordid"]) {
+									return lang("error_page_self", "You can't suborder a page under itself!");
+								}
+								$temp = $temp->parent;
+							}
+						}
+						
 						$pclassname = strtolower($d["class_name"]);
 				}
 
