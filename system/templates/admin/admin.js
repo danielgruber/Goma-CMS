@@ -14,7 +14,7 @@ $(document).ready(function(){
 		var headerWidth = $("#content > .header").width();
 		var userbarWidth = $("#content > .header > .userbar").outerWidth();
 		var naviWidth = $("#navi").outerWidth();
-		var naviWidthMax = headerWidth - userbarWidth - 25;
+		var naviWidthMax = headerWidth - userbarWidth - 50;
 		var curNode;
 		var active = $("#navi > ul > li.active").index() + 1;
 				
