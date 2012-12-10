@@ -280,16 +280,9 @@ $lang = array(
 	"pages_add"										=> "Seiten erstellen",
 	"pages_publish"									=> "Seiten veröffentlichen",
 	// default DataObjects
-	"dataobject_all"								=> "Vollzugriff auf andere Datenobjekte",
-	"dataobject_edit"								=> "Daten von anderen Datenobjekten bearbeiten",
-	"dataobject_add"								=> "Daten zu anderen Datenobjekten hinzufügen",
-	"dataobject_delete"								=> "Daten von anderen Datenobjekten löschen",
-
+	"data_manage" 									=> "Andere Daten verwalten",
 	// right-mangement
 	"following_groups"								=> "Folgende Gruppen",
-	"editor_groups"									=> "Bearbeitungs-Gruppen",
-	"viewer_groups"									=> "Betrachungsgruppen",
-	"content_edit_users"							=> "Alle Bearbeitungs-Gruppen",
 	"editors"										=> "Recht zur Bearbeitung",
 	"publisher"										=> "Recht zur Veröffentlichung",
 	"viewer_types"									=> "Betrachter-Rechte",

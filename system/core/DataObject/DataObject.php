@@ -3928,7 +3928,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	{
 			return array(
 				"DATA_MANAGE"	=> array(
-					"title"		=> '{$_lang_dataobject_edit}',
+					"title"		=> '{$_lang_data_manage}',
 					"default"	=> array(
 						"type" => "admins"
 					)

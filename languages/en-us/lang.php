@@ -279,16 +279,10 @@ $lang = array(
 	"pages_add"										=> "create page",
 	"pages_publish"									=> "publish page",
 	// default DataObjects
-	"dataobject_all"								=> "Full access to various dataobjects.",
-	"dataobject_edit"								=> "Edit data of various dataobjects.",
-	"dataobject_add"								=> "Add data to various dataobjects.",
-	"dataobject_delete"								=> "Delete data from various dataobjects.",
+	"data_manage"									=> "manage other data",
 
 	// right-mangement
 	"following_groups"								=> "Following groups",
-	"editor_groups"									=> "edit-groups",
-	"viewer_groups"									=> "viewer-groups",
-	"content_edit_users"							=> "every edit-group",
 	"editors"										=> "Permission to edit",
 	"publish"										=> "Permission to publish",
 	"viewer_types"									=> "Permission to view",
