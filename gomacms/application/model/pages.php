@@ -516,8 +516,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					return lang("site_exists", "The page with this filename already exists.");
 			} else {
 				return true;
-			}
-				
+			}	
 		}
 		
 		/**
@@ -845,6 +844,16 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		}
 		
 		/**
+		 * can view history
+		 *
+		 *@name canViewHistory
+		 *@access public
+		*/
+		public static function canViewHistory($record = null) {
+			return (Permission::check("PAGES_WRITE") || Permission::check("PAGES_PUBLISH"));
+		}
+		
+		/**
 		 * permission-checks
 		*/
 		public function canWrite($row = null)
@@ -1152,7 +1161,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 							// get class-attribute
 							$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 							if(!isset($state))
-								$state = ($record->isPublished()) ? "published" : "edited";
+								$state = ($record->first()->isPublished()) ? "published" : "edited";
 							$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
 							unset($state);
 							
@@ -1190,7 +1199,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 										// get class-attribute
 										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 										if(!isset($state))
-											$state = ($data->isPublished()) ? "published" : "edited";
+											$state = ($data->first()->isPublished()) ? "published" : "edited";
 										$class = "".$data["class_name"]. " page ".$mainbar . " " . $state;
 										unset($state);
 										
@@ -1226,7 +1235,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 										// get class-attribute
 										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 										if(!isset($state))
-											$state = ($data->isPublished()) ? "published" : "edited";
+											$state = ($data->first()->isPublished()) ? "published" : "edited";
 										$class = "".$data["class_name"]. " page ".$mainbar;
 										unset($state);
 										
@@ -1286,20 +1295,20 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					if(!$record["id"])
 						continue;
 					
-					if($record->isDeleted()) {
+					if($record->first()->isDeleted()) {
 						$state = "deleted";
 					}				
 					// get class-attribute
 					$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 					if(!isset($state))
-						$state = ($record->isPublished()) ? "published" : "edited";
+						$state = ($record->first()->isPublished()) ? "published" : "edited";
 					$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
 					unset($state);
 					
 					$arr["_" . $record["id"]] = array(
 						"title" 		=> $record["title"],
 						"attributes"	=> array("class" => $class),
-						"data"			=> $record->ToArray(),
+						"data"			=> $record->first()->ToArray(),
 						"collapsed"		=> false,
 						"collapsable"	=> false,
 						"children"		=> $this->generateFromToInsert($record["id"], $to_insert)

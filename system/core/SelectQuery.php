@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version: 2.0.2
+  * last modified: 09.12.2012
+  * $Version: 2.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -483,7 +483,7 @@ class SelectQuery extends Object
 								$i++;
 						} else
 						{
-								$sql .= " , ";
+								$sql .= ", ";
 						}
 						if(!empty($alias)) {
 							$sql .= " ".$alias.".*";
@@ -493,19 +493,32 @@ class SelectQuery extends Object
 				
 				// some added caches ;)
 				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
+					// comma
+					if(isset($i)) {
+						if($i != 0) {
+							$sql .= ", ";
+						}
+					}
+					
 					$sql .= self::$new_field_cache[$from]["colidingSQL"];
-					$i = self::$new_field_cache[$from]["colidingSQLi"];
+					
+					// i
+					if(isset($i)) {
+						$i += self::$new_field_cache[$from]["colidingSQLi"];
+					} else {
+						$i = self::$new_field_cache[$from]["colidingSQLi"];
+					}
 				} else {	
 					$colidingSQL = "";
-					$i = isset($i) ? $i : 0;
+					$a = 0;
 					
 					// fix coliding fields
 					foreach($colidingFields as $field => $tables) {
 						
-						if($i == 0)
-							$i++;
+						if($a == 0)
+							$a++;
 						else
-							$colidingSQL .= ",";
+							$colidingSQL .= ", ";
 						
 						if(is_string($tables)) {
 							if(strpos($tables, ".")) {
@@ -525,11 +538,24 @@ class SelectQuery extends Object
 					}
 					
 					self::$new_field_cache[$from]["colidingSQL"] = $colidingSQL;
-					self::$new_field_cache[$from]["colidingSQLi"] = $i;
+					self::$new_field_cache[$from]["colidingSQLi"] = $a;
+					
+					// comma
+					if(isset($i)) {
+						if($i != 0) {
+							$sql .= ", ";
+						}
+					}
 					$sql .= $colidingSQL;
+					
+					// i
+					if(isset($i)) {
+						$i += $a;
+					} else {
+						$i = $a;
+					}
 					unset($colidingSQL);
 				}
-				
 				
 				foreach($fields as $key => $field) {
 					// some basic filter
@@ -544,7 +570,7 @@ class SelectQuery extends Object
 					if($i == 0)
 						$i++;
 					else
-						$sql .= ",";
+						$sql .= ", ";
 					
 					/* --- */
 					
