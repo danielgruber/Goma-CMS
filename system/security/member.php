@@ -560,7 +560,7 @@ class User extends DataObject implements HistoryData, PermProvider
 				if($i == 0) {
 					$i++;
 				} else {
-					$str .= ",";
+					$str .= ", ";
 				}
 				$str .= Convert::raw2text($group->name);
 			}
