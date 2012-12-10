@@ -358,7 +358,8 @@ class admin extends ViewAccessableData implements PermProvider
 						"title"		=> '{$_lang_history}',
 						"default"	=> array(
 							"type"	=> "admins"
-						)
+						),
+						"category"	=> "ADMIN"
 					)
 				);
 		}

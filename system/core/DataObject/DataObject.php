@@ -3927,24 +3927,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function providePerms()
 	{
 			return array(
-				"DATA_WRITE"	=> array(
+				"DATA_MANAGE"	=> array(
 					"title"		=> '{$_lang_dataobject_edit}',
 					"default"	=> array(
 						"type" => "admins"
 					)
-				),
-				"DATA_DELETE"	=> array(
-					"title"		=> '{$_lang_dataobject_delete}',
-					"default"	=> array(
-						"type" => "admins"
-					)
-				),
-				"DATA_INSERT"	=> array(
-					"title"		=> '{$_lang_dataobject_add}',
-					"default"	=> array(
-						"type" => "admins"
-					)
-				),
+				)
 			);
 	}
 	

@@ -277,7 +277,8 @@ class Group extends DataObject implements HistoryData, PermProvider
 					"title"		=> '{$_lang_rights_manage}',
 					"default"	=> array(
 						"type"	=> "admins"
-					)
+					),
+					"category"	=> "ADMIN"
 				)
 			);
 		}

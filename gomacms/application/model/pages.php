@@ -940,7 +940,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					"title" => '{$_lang_administration}: {$_lang_content}',
 					"default"	=> array(
 						"type"	=> "admins"
-					)
+					),
+					"category"	=> "ADMIN"
 				)
 			);
 		}

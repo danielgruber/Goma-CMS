@@ -55,6 +55,13 @@ class Permission extends DataObject
 		);
 		
 		/**
+		 * cache for reordered permissions
+		 *
+		 *@name reorderedPermissions
+		*/
+		public static $reorderedPermissions;
+		
+		/**
 		 * fields of this set
 		 *
 		 *@name db_fields
@@ -114,6 +121,62 @@ class Permission extends DataObject
 		*/
 		public static function addPermissions($perms) {
 			self::$providedPermissions = ArrayLib::map_key("strtolower", array_merge(self::$providedPermissions, $perms));
+		}
+		
+		/**
+		 * reorders all permissions as in hierarchy
+		 *
+		 *@name reOrderedPermissions
+		*/
+		public static function reorderedPermissions() {
+			if(isset(self::$reorderedPermissions)) {
+				return self::$reorderedPermissions;
+			}
+			
+			$perms = array();
+			foreach(self::$providedPermissions as $name => $data) {
+				if(!isset($data["category"]) && $name != "superadmin") {
+					$perms[$name] = $data;
+					// get children
+					if($children = self::reorderedPermissionsHelper($name)) {
+						$perms[$name]["children"] = $children;
+					}
+				}
+			}
+			
+			$perms = array(
+				"superadmin" => array_merge(self::$providedPermissions["superadmin"], array(
+					"children" 		=> array_merge($perms, self::reorderedPermissionsHelper("superadmin")),
+					"forceSubOn1" 	=> true
+				))
+			);
+			
+			self::$reorderedPermissions = $perms;
+			return $perms;
+			
+		}
+		
+		/**
+		 * helper which gets all children for given permission
+		 *
+		 *@name reorderedPermissionsHelper
+		 *@access protected
+		*/
+		protected static function reorderedPermissionsHelper($perm) {
+			$perms = array();
+			$perm = strtolower($perm);
+			foreach(self::$providedPermissions as $name => $data) {
+				// get children for given perm
+				if(isset($data["category"]) && strtolower($data["category"]) == $perm) {
+					$perms[$name] = $data;
+					
+					// get children for current subperm
+					if($children = self::reorderedPermissionsHelper($name)) {
+						$perms[$name]["children"] = $children;
+					}
+				}
+			}
+			return $perms;
 		}
 		
 		/**
