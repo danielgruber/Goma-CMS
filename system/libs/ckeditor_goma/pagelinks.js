@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 21.03.2012
+  * last modified: 12.12.2012
   * $Version 1.0.3
 */
 $(function(){
@@ -90,7 +90,7 @@ $(function(){
 										data: {search: $("#" + $edit.getInputElement().getId() ).val()},
 										dataType: "html",
 										success: function(data) {
-											var data = eval_global('(' + data + ')');
+											var data = parseJSON(data);
 											if(data.count > 0) {
 												var ul = $("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(" > .textDropDown > ul");
 												ul.html("");
