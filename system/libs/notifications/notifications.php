@@ -21,7 +21,7 @@ interface Notifier {
 	 *@name NotifySettings
 	 *@access public
 	*/
-	public function NotifySettings();
+	public static function NotifySettings();
 }
 
 class Notification extends Object {
@@ -35,14 +35,28 @@ class Notification extends Object {
 	 *@param string - text of the notification
 	 *@param string - type
 	*/
-	public static function notify($class, $title, $text, $type = null) {
+	public static function notify($class, $text = "", $type = null) {
 		if(!isset($type))
 			$type = "notification";
 		
-		Resources::add("system/libs/notifications/notifications.js");
-		Resources::add("notifications.css");
+		Resources::add("system/libs/notifications/notifications.js", "js", "script");
+		Resources::add("notifications.css", "css");
+		
+		if(ClassInfo::hasInterface($class, "Notifier")) {
+			$data = class_user_func_array($class, "NotifySettings");
+			if(isset($data["title"], $data["icon"])) {
+				$title = $data["title"];
+				$icon = ClassInfo::findFile($data["icon"], $class);
+			}
+		}
+		
+		if(!isset($title, $icon)) {
+			$title = lang("notification", "notification");
+			$icon = "images/icons/modernui/dark/48x48/appbar.notification.multiple.png";
+		}
+		
 		if($type == "notification") {
-			
+			Resources::addJS("$(function(){ Notifications.notify(".var_export($class, true).",".var_export(parse_lang($title), true).", ".var_export($icon, true).", ".var_export($text, true)."); });");
 		} else {
 			// other types are unsupported right now
 			throwError(6, "PHP-Error", "Unsupported notification type " . $type);

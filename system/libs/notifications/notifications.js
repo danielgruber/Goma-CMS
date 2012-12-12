@@ -8,11 +8,96 @@
 */
 
 var Notifications = {
+	/**
+	 * notifications, which are sent or visible
+	*/
 	notifications: [],
+	/**
+	 * inits the Notification area
+	 *
+	 *@name Init
+	 *@access public
+	*/
 	Init: function() {
-		getDocRoot().append('<div id="notifications></div>"');	
+		if($(".notificationRoot").length == 1) {
+			$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+		} else {
+			getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+		}
 	},
-	notify: function(title, icon, text, href) {
+	
+	/**
+	 * notify a user about anything
+	 * all you need is a class-name, a title, and an icon
+	 * you can give also a text and a function which is executes if you click on the notification if you want
+	 *
+	 *@name notify
+	 *@access public
+	 *@param string - class-name, notification fired from
+	 *@param string - title
+	 *@param string - icon
+	 *@param string - text
+	 *@param function
+	*/
+	notify: function(class_name, title, icon, text, Clickfn) {
+		var notificationID = "notification_" + class_name + Notifications.notifications.length;
 		
+		var notification = $("<div>").addClass("notification").attr("id", notificationID).append('<div class="icon"><img src="'+icon+'" alt="Icon" /></div>\
+		<div class="title">'+title+'</div>\
+		<div class="text">'+text+'</div>');
+		
+		if(typeof Clickfn != "undefined") {
+			notification.click(Clickfn);
+		}
+		
+		var notification = {
+			node: notification,
+			type: "notification",
+			id: notificationID,
+			fn: Clickfn,
+			visible: false,
+			class_name: class_name
+		};
+		
+		Notifications.notifications[notificationID] = notification;
+		
+		Notifications.makeVisible(notification, 7000);
+	},
+	
+	/**
+	 * makes a notification visible
+	 *
+	 *@name notification
+	 *@access public
+	*/
+	makeVisible: function(notification, durationClose) {
+		var n = notification;
+		n.node.css("display", "none");
+		n.node.prependTo($("#notifications"));
+		var nNode = n.node;
+		
+		Notifications.notifications[n.id].visible = true;
+		nNode.slideDown("fast");
+		
+		var close = function(){
+			Notifications.notifications[n.id].visible = false;
+			nNode.css("position", "absolute");
+			nNode.animate({
+				left: $(window).width() + 1000
+			}, 1000, function(){
+				nNode.remove();
+			});
+			nNode.off(".close");
+		};
+		
+		nNode.on("click.close", close);
+		
+		if(typeof durationClose != "undefined" && durationClose != -1) {
+			setTimeout(close, durationClose);
+		}
 	}
 };
+
+$(function(){
+	Notifications.Init();
+});

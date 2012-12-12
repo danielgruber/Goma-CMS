@@ -92,11 +92,13 @@ class AjaxSubmitButton extends FormAction
 								var eventb = jQuery.Event("ajaxresponded");
 								$("#'.$this->form()->id().'").trigger(eventb);
 							},
-							success: function(script) {
+							success: function(script, textStatus, jqXHR) {
+								LoadAjaxResources(jqXHR);
 								 if (window.execScript)
 								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
 								 else
 								 	method = eval("(function(){" + script + "});");
+								RunAjaxResources(jqXHR);
 								return method.call($("#'.$this->form()->id().'").get(0));
 							},
 							error: function(jqXHR, textStatus, errorThrown)

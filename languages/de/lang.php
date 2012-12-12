@@ -537,5 +537,7 @@ $lang = array(
 	"h_all"					=> "Alle Ereignisse",
 	
 	"older"					=> "Ältere Einträge",
-	"newer"					=> "Neuere Einträge"
+	"newer"					=> "Neuere Einträge",
+	
+	"notification"			=> "Mitteilung"
 );

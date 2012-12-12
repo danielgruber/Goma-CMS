@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
+  * last modified: 12.12.2012
   * $Version 2.0.5
 */
 
@@ -165,9 +165,7 @@ class contentAdmin extends LeftAndMain
 				$data->write(false, false, 2, true);
 				if(Core::is_ajax()) {
 					$response = new AjaxResponse();
-					$dialog = new Dialog(lang("revert_changes_success", "The last version was recovered successfully."), lang("okay", "Okay"));
-					$dialog->close(3);
-					$response->exec($dialog);
+					Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."));
 					$response->exec("reloadTree(function(){ LoadTreeItem('".$data["class_name"] . "_" . $data["id"]."'); });");
 					HTTPResponse::setBody($response->render());
 					HTTPResponse::output();
@@ -192,9 +190,7 @@ class contentAdmin extends LeftAndMain
 		if($this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
 				$response = new AjaxResponse();
-				$dialog = new Dialog(lang("unpublish_success", "The site was successfully unpublished."), lang("okay", "Okay"));
-				$dialog->close(3);
-				$response->exec($dialog);
+				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."));
 				$response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" .$this->modelInst()->id."'); });");
 				$this->removeResume();
 				HTTPResponse::setBody($response->render());

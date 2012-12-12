@@ -1,0 +1,64 @@
+/**
+  *@package goma framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2012  Goma-Team
+  * last modified: 12.12.2012
+  * $Version 1.0
+*/
+
+#notificationsHolder {
+	position: fixed;
+	right: 10px;
+	top: 5px;
+}
+#notifications {
+	display: block;
+	position: relative;
+}
+#notifications .notification {
+	background: -moz-linear-gradient(#fff, #eee);
+	background: -ms-linear-gradient(#fff, #eee);
+	background: -o-linear-gradient(#fff, #eee);
+	background: -webkit-linear-gradient(#fff 0%, #eee 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee'); /* IE6 & IE7 */  
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee')"; /* IE8+ */
+	background: linear-gradient(#fff, #eee); /* the standard */
+	opacity: 0.9;
+	
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	
+	-webkit-box-shadow: 0 0 8px #555;
+	box-shadow: 0 0 8px #555;
+	-moz-box-shadow: 0 0 8px #555;
+	
+	width: 200px;
+	padding-top: 5px;
+	padding-bottom: 8px;
+	padding-right: 8px;
+	border-top: 1px solid #fff;
+}
+
+#notifications .notification .icon {
+	float: left;
+	margin: 0 8px;
+	height: 24px;
+	width: 24px;
+}
+#notifications .notification .icon img {
+	height: 24px;
+	width: 24px;
+}
+#notifications .notification .title, #notifications .notification .text {
+	margin-left: 40px;
+}
+#notifications .notification .title {
+	font-weight: bold;
+	color: #000;
+	padding: 5px 0;
+}
+#notifications .notification .text {
+	font-size: 0.9em;
+	color: #333;
+}

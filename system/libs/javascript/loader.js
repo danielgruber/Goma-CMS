@@ -186,7 +186,7 @@ if(typeof self.loader == "undefined") {
 			);
 			
 			// scroll fix
-			getDocRoot().on("click", "a", function(){
+			$(document).on("click", "a", function(){
 				if($(this).attr("href").substr(0,1) == "#") {
 					scrollToHash($(this).attr("href").substr(1));
 					return false;

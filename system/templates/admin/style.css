@@ -178,7 +178,6 @@ a:hover {
 	color: #444 !important;
 }
 #content > .header {
-	background: #555 url(images/content_bg.png) repeat-x;
 	background: -moz-linear-gradient(#5c5c5b, #424242);
 	background: -ms-linear-gradient(#5c5c5b, #424242);
 	background: -o-linear-gradient(#5c5c5b, #424242);
@@ -449,6 +448,10 @@ a:hover {
 }
 #wrapper_logout .wrapper_inner_login .content {
 	width: 258px;
+}
+
+#notifications {
+	padding-top: 100px;
 }
 
 #statistics {
