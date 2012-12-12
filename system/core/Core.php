@@ -367,6 +367,7 @@ class Core extends object
 				FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
 				
 				Core::callHook("deletecache", array($all));
+				
 				global $_REGISTRY;
 				$_REGISTRY["cache"] = array();
 				

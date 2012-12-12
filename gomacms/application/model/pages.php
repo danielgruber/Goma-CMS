@@ -701,11 +701,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			} else if($this->id != 0) {
 				
 				if($this->canDelete($this)) {
-					$form->addAction(new HTMLAction("deletebutton", '<a rel="ajaxfy" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
+					$form->addAction(new HTMLAction("deletebutton", '<a rel="dropdownDialog" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
 				}
 				
 				if($this->everPublished() && !$this->isOrgPublished() && $this->canWrite($this)) {
-					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="ajaxfy">'.lang("draft_delete", "delete draft").'</a>'));
+					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="dropdownDialog">'.lang("draft_delete", "delete draft").'</a>'));
 				}
 				
 				if($this->everPublished() && $this->canPublish($this)) {

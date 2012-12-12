@@ -198,6 +198,7 @@ class adminController extends Controller
 		{
 				if(isset($_GET["flush"])) {
 					AddContent::addSuccess(lang("cache_deleted"));
+					Notification::notify("Core", lang("cache_deleted"));
 				}
 				
 				if(Permission::check("ADMIN"))
