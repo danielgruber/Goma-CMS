@@ -1706,60 +1706,83 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		// find out if we should write data
 		if($command != "insert") {
-			$changed = array();
-			$forceChange = $forceWrite;
-			
-			// first calculate change-count
-			foreach($this->data as $key => $val) {
-				if(isset($newdata[$key]) && $newdata[$key] != $val) {
-					$changed[$key] = $newdata[$key];
+			// first check if this record is important
+			if(!$this->isField("stateid") || !$this->isField("publishedid")) {
+				$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("recordid" => $this->recordid));
+				if($query->execute()) {
+					while($row = $query->fetch_object()) {
+						$this->publishedid = $row->publishedid;
+						$this->stateid = $row->stateid;
+						break;
+					}
+					if(!isset($this->data["publishedid"])) {
+						$this->publishedid = 0;
+						$this->stateid = 0;
+					}
+				} else {
+					throwErrorByID(3);
 				}
 			}
 			
-			// check for relation
-			if(count($many_many_objects) > 0) {
-				$forceChange = true;
-			}
-			
-			// many-many
-			if(!$forceChange && $this->many_many)
-				foreach($this->many_many as $name => $table)
-				{
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;
-								break;
-						}
+			// try and find out whether to write cause of state
+			if($this->publishedid != 0 && $this->stateid != 0 && ($this->stateid == $this->versionid || $snap_priority == 1) && ($this->publishedid == $this->versionid || $snap_priority == 2)) {
+				
+				
+				$changed = array();
+				$forceChange = $forceWrite;
+				
+				// first calculate change-count
+				foreach($this->data as $key => $val) {
+					if(isset($newdata[$key]) && $newdata[$key] != $val) {
+						$changed[$key] = $newdata[$key];
+					}
 				}
-			
-			// many-many
-			if(!$forceChange && $this->belongs_many_many)
-				foreach($this->belongs_many_many as $name => $table)
-				{
-						
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;
-								break;
-						}	
+				
+				// check for relation
+				if(count($many_many_objects) > 0) {
+					$forceChange = true;
 				}
-			
-			// has-many
-			if(!$forceChange && $this->has_many)
-				foreach($this->has_many as $name => $class)
-				{
-						if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
-							$newdata[$name . "ids"] = $newdata[$name];
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;				
-						}						
+				
+				// many-many
+				if(!$forceChange && $this->many_many)
+					foreach($this->many_many as $name => $table)
+					{
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;
+									break;
+							}
+					}
+				
+				// many-many
+				if(!$forceChange && $this->belongs_many_many)
+					foreach($this->belongs_many_many as $name => $table)
+					{
+							
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;
+									break;
+							}	
+					}
+				
+				// has-many
+				if(!$forceChange && $this->has_many)
+					foreach($this->has_many as $name => $class)
+					{
+							if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
+								$newdata[$name . "ids"] = $newdata[$name];
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;				
+							}						
+					}
+				
+				// now check if we should write or not
+				if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
+					// should we really write this?! No!
+					return true;
 				}
-			
-			// now check if we should write or not
-			if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
-				// should we really write this?! No!
-				return true;
 			}
 		}
 		
@@ -2115,7 +2138,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->data["publishedid"])) {
 			return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
 		} else {
-			return false;
+			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("recordid" => $this->recordid));
+			if($query->execute()) {
+				while($row = $query->fetch_object()) {
+					$this->publishedid = $row->publishedid;
+					$this->stateid = $row->stateid;
+					break;
+				}
+				if(isset($this->data["publishedid"])) {
+					return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
+				} else {
+					$this->publishedid = 0;
+					$this->stateid = 0;
+					return false;
+				}
+			} else {
+				throwErrorByID(3);
+			}
 		}
 	}
 	
