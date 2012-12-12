@@ -364,7 +364,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function ajaxSave($data, $response) {
 		if($model = $this->save($data)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_saved", "The data was successfully written!"));
+			Notification::notify($model->class, lang("successful_saved", "The data was successfully written!"), lang("saved"));
 			
 			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
 			return $response;
@@ -440,7 +440,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		if($model = $this->save($data, 2)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_published", "The data was successfully published!"));
+			Notification::notify($model->class, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
 			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
 			return $response;

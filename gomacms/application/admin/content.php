@@ -190,7 +190,7 @@ class contentAdmin extends LeftAndMain
 		if($this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
 				$response = new AjaxResponse();
-				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."));
+				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
 				$response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" .$this->modelInst()->id."'); });");
 				$this->removeResume();
 				HTTPResponse::setBody($response->render());

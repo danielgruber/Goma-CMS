@@ -35,7 +35,7 @@ class Notification extends Object {
 	 *@param string - text of the notification
 	 *@param string - type
 	*/
-	public static function notify($class, $text = "", $type = null) {
+	public static function notify($class, $text = "", $title = null, $type = null) {
 		if(!isset($type))
 			$type = "notification";
 		
@@ -45,7 +45,7 @@ class Notification extends Object {
 		if(ClassInfo::hasInterface($class, "Notifier")) {
 			$data = call_user_func_array(array($class, "NotifySettings"), array());
 			if(isset($data["title"], $data["icon"])) {
-				$title = $data["title"];
+				$title = isset($title) ? $title : $data["title"];
 				$icon = ClassInfo::findFile($data["icon"], $class);
 			}
 		}

@@ -57,8 +57,9 @@
 }
 #notifications .notification .title {
 	font-weight: bold;
-	color: #000;
+	color: #111;
 	padding-bottom: 5px;
+	text-transform: capitalize;
 }
 #notifications .notification .text {
 	font-size: 0.9em;
