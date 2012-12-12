@@ -98,7 +98,7 @@
 							<% ENDCONTROL %>
 							<td class="actions">
 								<% CONTROL Action() %>
-									<a href="{$action.url}/{$this.id}?redirect={$_SERVER_REQUEST_URI.url()}">{$action.title}</a>
+									<a href="{$action.url}/{$this.id}{URLEND}?redirect={$_SERVER_REQUEST_URI.url()}">{$action.title}</a>
 								<% ENDCONTROL %>
 							</td>
 						</tr>
