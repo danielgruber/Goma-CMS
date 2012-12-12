@@ -432,7 +432,8 @@ class Core extends object
 			session_start();
 			if(PROFILE) Profiler::unmark("session");
 			
-			member::Init();
+			if(defined("SQL_LOADUP"))
+				member::Init();
 			
 			if(PROFILE) Profiler::mark("Core::Init");
 			

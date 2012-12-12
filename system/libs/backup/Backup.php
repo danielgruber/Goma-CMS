@@ -20,7 +20,7 @@ class Backup extends Object {
 	 *@name excludeList
 	 *@access public
 	*/
-	public static $excludeList = array("statistics", "statistics_state", "history", "history_state");
+	public static $excludeList = array("statistics", "statistics_state", "history", "history_state", "permission", "permission_state", "many_many_permission_groups_group", "users", "users_state", "many_many_user_groups_group");
 	
 	/**
 	 * excludes files
