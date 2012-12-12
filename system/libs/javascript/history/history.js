@@ -55,7 +55,9 @@ var HistoryLib = {
 		if(HistoryLib.mode == "history") {
 			window.history.pushState({}, null, url);
 		} else {
-			location.hash = "!" + url;
+			var scroll = $(window).scrollTop();
+			window.location.hash = hash;
+			$(window).scrollTop(scroll);
 		}
 		
 		setTimeout(function() {

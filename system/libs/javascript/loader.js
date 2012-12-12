@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.12.2012
-  * $Version 1.5.1
+  * last modified: 12.12.2012
+  * $Version 1.5.2
 */
 
 // prevent from being executed twice
@@ -184,6 +184,24 @@ if(typeof self.loader == "undefined") {
 					}
 				}
 			);
+			
+			// scroll fix
+			getDocRoot().on("click", "a", function(){
+				if($(this).attr("href").substr(0,1) == "#") {
+					scrollToHash($(this).attr("href").substr(1));
+					return false;
+				} else if(typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
+					scrollToHash($(this).attr("data-anchor"));
+					return false;
+				}
+			});
+			
+			// scroll to right position
+			if($("#frontedbar").length == 1) {
+				if(location.hash != "") {
+					scrollToHash(location.hash.substr(1));
+				}
+			}
 			
 		});
 		
@@ -838,5 +856,29 @@ if(typeof self.loader == "undefined") {
 	
 	    // No other way of checking: assume it’s ok.
 	    return true;
+	}
+	
+	var scrollToHash = function(hash) {
+		if($("#" + hash).length > 0) {
+			var scrollPosition = $("#" + hash).offset().top;
+		} else if($("a[name="+hash+"]").length > 0) {
+			var scrollPosition = $("a[name="+hash+"]").offset().top;
+		} else {
+			var scrollPosition = 0;
+		}
+		
+		scrollPosition = Math.round(scrollPosition);
+		
+		if(scrollPosition != 0 && $("#frontedbar").length == 1) {
+			scrollPosition -= $("#frontedbar").height();
+		}
+		
+		var scroll = $(window).scrollTop();
+		window.location.hash = hash;
+		$(window).scrollTop(scroll);
+		
+		$("html, body").animate({
+			"scrollTop": scrollPosition
+		}, 200);
 	}
 }
