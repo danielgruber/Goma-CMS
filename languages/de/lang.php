@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 10.12.2012
+  * last modified: 12.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -210,7 +210,9 @@ $lang = array(
 	"captcha_reload"                                => "Neu Laden",
 	'path'                                          => "Pfad",
 	"successful_saved"                              => "Die Daten wurden erfolgreich gespeichert!",
+	"saved"											=> "Gespeichert",
 	"successful_published"							=> "Die Daten wurden erfolgreich ver&ouml;ffentlicht!",
+	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
 	'admin_smilies'									=> "Smilies verwalten",
@@ -371,7 +373,6 @@ $lang = array(
 	"preview"										=> "Vorschau",
 	"publish"										=> "Ver&ouml;ffentlichen",
 	"published_site"								=> "Veröffentlichte Seite",
-	"published"										=> "Veröffentlicht",
 	"draft"											=> "Entwurf",
 	"draft_save"									=> "Entwurf speichern",
 	"save_publish"									=> "Speichern & Veröffentlichen",
@@ -383,6 +384,7 @@ $lang = array(
 	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Veröffentlichung zurückkehren?",
 	"revert_changes_success"						=> "Die letzte Version wurde erfolgreich wiederhergestellt.",
 	"unpublish"										=> "Veröffentlichung zurücknehmen",
+	"unpublished"									=> "Zurückgenommen",
 	"unpublish_success"								=> "Die Seite ist nun nicht mehr veröffentlicht.",
 	"state_publish"									=> "Veröffentlichung",
 	"state_state"									=> "Speicherpunkt",
@@ -519,6 +521,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user nahm die Seite <a href="$pageUrl">$page</a> zurück',
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
 	

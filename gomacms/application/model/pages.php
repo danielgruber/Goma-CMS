@@ -1401,6 +1401,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_delete.png";
 				break;
+				case "unpublish":
+					$lang = lang("h_pages_unpublish", '$user unpublished the page <a href="$pageUrl">$page</a>');
+					$icon = "images/icons/fatcow16/page_white_edit.png";
+				break;
 				default:
 					$lang = "unknowen event " . $record->action;
 					$icon = "images/icons/fatcow16/page_white_edit.png";

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 02.12.2012
+  * last modified: 12.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -210,6 +210,9 @@ $lang = array(
 	"captcha_reload"                                => "reload",
 	'path'                                          => "path",
 	"successful_saved"                              => "The data was successfully saved!",
+	"saved"											=> "Saved",
+	"successful_published"							=> "The data was successfully published!",
+	"published"										=> "Published"
 	'sites_edit'									=> "edit and create sites",
 	'admin_rating'									=> "edit rating",
 	'admin_smilies'									=> "manage emotions",
@@ -368,7 +371,6 @@ $lang = array(
 	"preview"										=> "preview",
 	"publish"										=> "publish",
 	"published_site"								=> "published page",
-	"published"										=> "published",
 	"draft"											=> "draft",
 	"draft_save"									=> "save draft",
 	"save_publish"									=> "save & publish",
@@ -381,6 +383,7 @@ $lang = array(
 	"revert_changes_success"						=> "The last version was recovered successfully.",
 	"unpublish"										=> "Unpublish",
 	"unpublish_success"								=> "The site was successfully unpublished.",
+	"unpublished"									=> "unpublished",
 	"state_publish"									=> "Published version",
 	"state_state"									=> "Saved version",
 	"state_autosave"								=> "Auto-saved version",
@@ -518,6 +521,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user unpublished the page <a href="$pageUrl">$page</a>',
 	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a>',
 	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
