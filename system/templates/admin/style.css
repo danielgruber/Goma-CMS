@@ -450,8 +450,8 @@ a:hover {
 	width: 258px;
 }
 
-#notifications {
-	padding-top: 100px;
+#notificationsHolder {
+	margin-top: 100px;
 }
 
 #statistics {
