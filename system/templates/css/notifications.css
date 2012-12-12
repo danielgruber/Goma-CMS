@@ -25,7 +25,7 @@
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee'); /* IE6 & IE7 */  
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee')"; /* IE8+ */
 	background: linear-gradient(#fff, #eee); /* the standard */
-	opacity: 0.9;
+	opacity: 0.95;
 	
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
