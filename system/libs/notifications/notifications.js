@@ -62,7 +62,7 @@ var Notifications = {
 		Notifications.notifications[notificationID] = notification;
 		
 		setTimeout(function(){
-			Notifications.makeVisible(notification, 7000);
+			Notifications.makeVisible(notification, 5500);
 		}, 250);
 	},
 	
