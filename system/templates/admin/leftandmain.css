@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 16.08.2012
+  * last modified: 12.12.2012
 */
 
 .lam_noscript p {
@@ -45,6 +45,15 @@
 	ms-overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 	padding: 5px 0;
+}
+.leftandmaintable tr > .main > .inner > form > .fieldsScroll {
+	overflow: auto;
+}
+.leftandmaintable tr > .main > .inner > form > .fieldsScroll .visibleField:last-child {
+	border-bottom: 0 !important;
+}
+.leftandmaintable tr > .main > .inner > form > .actionsScroll {
+	border-top: 1px solid #ccc;
 }
 
 /* sidebar */
