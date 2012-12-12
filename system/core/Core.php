@@ -573,6 +573,8 @@ class Core extends object
 		*/
 		public static function serve($output) {
 			
+			if(isset($_GET["flush"]))
+				Notification::notify("Core", lang("cache_deleted"));
 			
 			if(PROFILE) Profiler::unmark("render");
 			

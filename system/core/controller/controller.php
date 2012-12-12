@@ -562,6 +562,7 @@ class Controller extends RequestHandler
 		*/
 		public function hideDeletedObject($response, $data) {
 			$response->exec("location.reload();");
+			Notification::notify($this->model, lang("successful_deleted", "The data was successfully deleted."), lang("deleted"));
 			return $response;
 		}
 		
@@ -594,6 +595,7 @@ class Controller extends RequestHandler
 			if($this->save($data) !== false)
 			{
 				addcontent::addSuccess(lang("successful_saved", "The data was successfully saved."));
+				Notification::notify($this->model, lang("successful_published", "The data was successfully published."), lang("saved"));
 				$this->redirectback();
 			} else
 			{
@@ -650,6 +652,7 @@ class Controller extends RequestHandler
 				if($this->save($data, 2) !== false)
 				{
 						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published.").'</div>');
+						Notification::notify($this->model, lang("successful_published", "The data was successfully published."), lang("saved"));
 						$this->redirectback();
 				} else
 				{

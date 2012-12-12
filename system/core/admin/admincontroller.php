@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 1.4.5
+  * last modified: 12.12.2012
+  * $Version 1.4.6
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -198,7 +198,6 @@ class adminController extends Controller
 		{
 				if(isset($_GET["flush"])) {
 					AddContent::addSuccess(lang("cache_deleted"));
-					Notification::notify("Core", lang("cache_deleted"));
 				}
 				
 				if(Permission::check("ADMIN"))
