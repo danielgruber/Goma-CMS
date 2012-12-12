@@ -43,7 +43,7 @@ class Notification extends Object {
 		Resources::add("notifications.css", "css");
 		
 		if(ClassInfo::hasInterface($class, "Notifier")) {
-			$data = class_user_func_array($class, "NotifySettings");
+			$data = call_user_func_array(array($class, "NotifySettings"), array());
 			if(isset($data["title"], $data["icon"])) {
 				$title = $data["title"];
 				$icon = ClassInfo::findFile($data["icon"], $class);

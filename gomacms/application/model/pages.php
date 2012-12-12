@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Pages extends DataObject implements PermProvider, HistoryData
+class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 {
 		/**
 		 * name
@@ -1411,6 +1411,20 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared, "editurl" => "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND);
 		}
+		
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("content"), "icon" => "images/icons/other/content.png");
+	}
 		
 }
 
