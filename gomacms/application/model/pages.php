@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * $Version 2.4.4
+  * last modified: 13.12.2012
+  * $Version 2.4.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -154,6 +154,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		
 		/**
 		 * makes the url
+		 *
 		 *@name geturl
 		 *@return string
 		*/
@@ -164,6 +165,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			} else {
 				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
 			}
+		}
+		
+		/**
+		 * makes the org url without nothing for homepage
+		 *
+		 *@name getorgurl
+		 *@return string
+		*/
+		public function getOrgURL()
+		{
+			return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
 		}
 		
 		/**
@@ -854,6 +866,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			return $this->fieldGet("path");
 		}
+		
+		
 		
 		/**
 		 * can view history

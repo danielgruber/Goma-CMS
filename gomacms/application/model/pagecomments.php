@@ -71,8 +71,8 @@ class PageComments extends DataObject
 				$form->add(new BBCodeEditor("text", lang("text", "text"), null, null, null, array("showAlign" => false)));
 				if(!member::login())
 					$form->add(new Captcha("captcha"));
-				$form->addAction(new AjaxSubmitButton("save", lang("co_add_comment", "add comment"),  "ajaxsave","safe"));
 				$form->addValidator(new RequiredFields(array("text", "name", "captcha")), "fields");
+				$form->addAction(new AjaxSubmitButton("save", lang("co_add_comment", "add comment"),  "ajaxsave","safe", array("green")));
 		}
 		
 		/**
@@ -86,8 +86,8 @@ class PageComments extends DataObject
 				$form->add(new HTMLField("heading", "<h3>".lang("co_edit", "edit comments")."</h3>"));
 				$form->add(new BBCodeEditor("text", lang("text", "text")));
 				
-				$form->addAction(new FormAction("save", lang("save", "save")));
 				$form->addAction(new CancelButton("cancel", lang("cancel", "cancel")));
+				$form->addAction(new FormAction("save", lang("save", "save"), null, array("green")));
 		}
 }
 

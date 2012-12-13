@@ -479,7 +479,7 @@ class Controller extends RequestHandler
 		*/
 		public function edit()
 		{
-			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
+			if($this->countModelRecords() == 1 && (!$this->getParam("id", false) || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id", false) || $this->ModelInst()->id == $this->getParam("id", false))) {
 				if(!$this->modelInst()->canWrite($this->modelInst()))
 				{
 					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
@@ -494,7 +494,7 @@ class Controller extends RequestHandler
 				return $this->form("edit_" . $this->class . $this->modelInst()->id, $this->modelInst(), array(
 					
 				), true, "safe", $disabled);
-			} else if($this->getParam("id")) {
+			} else if($this->getParam("id", false)) {
 				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
 				if($model) {
 					return $model->controller(clone $this)->edit();
