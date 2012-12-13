@@ -1708,7 +1708,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($command != "insert") {
 			// first check if this record is important
 			if(!$this->isField("stateid") || !$this->isField("publishedid")) {
-				$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("recordid" => $this->recordid));
+				$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
 				if($query->execute()) {
 					while($row = $query->fetch_object()) {
 						$this->publishedid = $row->publishedid;
@@ -2140,7 +2140,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->data["publishedid"])) {
 			return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
 		} else {
-			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("recordid" => $this->recordid));
+			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
 			if($query->execute()) {
 				while($row = $query->fetch_object()) {
 					$this->publishedid = $row->publishedid;
@@ -2182,6 +2182,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function everPublished() {
+		if($this->isPublished())
+			return true;
 		
 		if(isset($this->data["publishedid"]) && $this->data["publishedid"]) {
 			return true;
@@ -2197,7 +2199,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function isDeleted() {
-		if(isset($this->data["publishedid"]) || DataObject::count("pages", array("id" => $this->id) > 0)) {
+		if($this->isPublished() || (isset($this->data["publishedid"]) && $this->data["publishedid"] != 0 && $this->data["stateid"] != 0)) {
 			return false;
 		} else
 			return true;

@@ -143,7 +143,8 @@ class SelectQuery extends Object
 		 *@name filter
 		*/
 		public function filter($filter) {
-			$this->filter = $filter;
+			if(!is_bool($filter))
+				$this->filter = $filter;
 		}
 		
 		/**
@@ -166,11 +167,6 @@ class SelectQuery extends Object
 							$this->filter[$k] = array_merge((array) $this->filter[$k], (array) $v);
 						}
 					} else {
-						if(is_bool($this->filter)) {
-							var_dump($this->filter);
-							var_dump($k);
-							var_dump($v);
-						}
 						$this->filter[$k] = $v;
 					}
 				}
