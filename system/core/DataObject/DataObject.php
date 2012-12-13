@@ -1733,8 +1733,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				
 				// first calculate change-count
 				foreach($this->data as $key => $val) {
-					if(isset($newdata[$key]) && $newdata[$key] != $val) {
-						$changed[$key] = $newdata[$key];
+					if(isset($newdata[$key])) {
+						if(gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
+							$changed[$key] = $newdata[$key];
+						}
 					}
 				}
 				
