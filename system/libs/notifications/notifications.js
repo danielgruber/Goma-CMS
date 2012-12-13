@@ -85,7 +85,7 @@ var Notifications = {
 			Notifications.notifications[n.id].visible = false;
 			nNode.css("position", "absolute");
 			nNode.animate({
-				left: $(window).width() + 1000
+				left: $(window).width() + nNode.outerWidth() + 20
 			}, 1000, function(){
 				nNode.remove();
 			});

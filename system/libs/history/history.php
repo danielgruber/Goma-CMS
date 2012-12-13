@@ -139,7 +139,7 @@ class History extends DataObject {
 	 *@name canSeeEvent
 	*/
 	public function canSeeEvent() {
-		if(call_user_func_array(array($this->dbobject, "canViewHistory"), array($this)) && $this->historyData() !== false) {
+		if($this->historyData() !== false && call_user_func_array(array($this->dbobject, "canViewHistory"), array($this))) {
 			return true;
 		}
 		return false;
@@ -155,13 +155,17 @@ class History extends DataObject {
 	public function getContent() {
 		if($data = $this->historyData()) {
 			$text = $data["text"];
-			// generate user
-			if($this->autor) {
-				$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
+			if(preg_match('/\$user/', $text)) {
+				// generate user
+				if($this->autor) {
+					$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
+				} else {
+					$user = '<span style="font-style: italic;">System</span>';
+				}
+				return str_replace('$user', $user, $text);
 			} else {
-				$user = '<span style="font-style: italic;">System</span>';
+				return $text;
 			}
-			return str_replace('$user', $user, $text);
 		}
 		
 		return false;

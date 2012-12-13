@@ -290,6 +290,9 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			if(!$record->record())
+				return false;
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
