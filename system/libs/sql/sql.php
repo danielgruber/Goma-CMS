@@ -130,8 +130,8 @@ class SQL extends object
 		static function query($sql, $unbuffered = false, $track = true) {
 				$start = microtime(true);
 				
-				$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
-				logging($_sql);
+				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+				//logging($_sql);
 				
 				if($track)
 					self::$last_query = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql);
