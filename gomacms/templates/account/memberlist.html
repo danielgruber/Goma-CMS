@@ -5,10 +5,10 @@
 	<% CONTROL member() %>
 		<div class="member">
 			<div style="float: left;" class="image">
-				<a href="{URL}/{$member.id}{URLEND}">$member.image.setSize(128,128)</a>
+				<a href="{URL}/member/{$member.id}{URLEND}">$member.image.setSize(128,128)</a>
 			</div>
 			<div class="data">
-				<a href="{URL}/{$member.id}{URLEND}">
+				<a href="{URL}/member/{$member.id}{URLEND}">
 					<% IF $member.name %>
 						$member.name.text()
 					<% ELSE %>

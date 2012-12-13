@@ -64,7 +64,7 @@ class membersController extends PageController
 {
 		
 		public $url_handlers = array(
-			'$id!'				   	=> 'showmember',
+			'member/$id!'				   	=> 'showmember',
 			'$Action/$id/$otherid' 	=> '$Action'
 		);
 		
