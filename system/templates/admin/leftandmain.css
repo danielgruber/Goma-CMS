@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 12.12.2012
+  * last modified: 13.12.2012
 */
 
 .lam_noscript p {
@@ -54,6 +54,7 @@
 }
 .leftandmaintable tr > .main > .inner > form > .actionsScroll {
 	border-top: 1px solid #ccc;
+	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
 }
 
 /* sidebar */

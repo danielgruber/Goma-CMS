@@ -161,6 +161,7 @@ var LaM_type_timeout;
 			OuterDiff = $(".left-and-main > table td.main > .inner").outerHeight() - $(".left-and-main > table td.main > .inner").height();
 			$(".left-and-main > table td.main > .inner").css("height", tableHeight - OuterDiff);
 			
+			// render fixed actions
 			if($(".left-and-main > table td.main > .inner > form > .fields").length > 0 && $(".left-and-main > table td.main > .inner > form > .actions").length > 0) {
 				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
 				$(".left-and-main > table td.main > .inner > form > .fields").outerHeight(tableHeight - OuterDiff - $(".left-and-main > table td.main > .inner > form > .actions").outerHeight() - 10);
