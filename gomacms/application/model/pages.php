@@ -1090,14 +1090,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function provideTreeParams() {
 			return array(
-				"deleted" 	=> array(
+				/*"deleted" 	=> array(
 					"title"		=> '{$_lang_deleted_page}',
 					"default"	=> false,
 					"css"		=> array(
 						'text-decoration' 	=> 'line-through !important',
 						"color"				=> '#c60004 !important'
 					)
-				),
+				),*/
 				"published"	=> array(
 					"title"		=> '{$_lang_published_site}',
 					"default"	=> true,
