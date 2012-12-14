@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.12.2012
-  * $Version 3.3.19
+  * last modified: 13.12.2012
+  * $Version 3.3.20
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -449,7 +449,7 @@ class Core extends object
 					if(PROFILE)
 							Profiler::mark("delete_cache");
 					
-					if(Permission::check(7))
+					if(Permission::check("ADMIN"))
 					{
 						logging('Deleting FULL Cache');
 						self::deletecache(true); // delete files in cache
@@ -573,7 +573,7 @@ class Core extends object
 		*/
 		public static function serve($output) {
 			
-			if(isset($_GET["flush"]))
+			if(isset($_GET["flush"]) && Permission::check("ADMIN"))
 				Notification::notify("Core", lang("cache_deleted"));
 			
 			if(PROFILE) Profiler::unmark("render");

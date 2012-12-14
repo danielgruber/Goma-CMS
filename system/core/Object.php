@@ -153,7 +153,7 @@ abstract class Object
 					ClassManifest::load($class);
 				
 				// check native
-				if(method_exists($class, $method) && is_callable(array($this, $name))
+				if(method_exists($class, $method) && is_callable(array($class, $method)))
 				{
 					self::$method_cache[$class . "::" . $method] = true;
 					unset($class, $method);

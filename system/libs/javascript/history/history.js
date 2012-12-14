@@ -44,7 +44,7 @@ var HistoryLib = {
 		}
 		
 		if(this.mode == "hash") {
-			if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+			if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
 				fn(document.location.hash.substr(2));
 			}
 		}
@@ -56,7 +56,11 @@ var HistoryLib = {
 			window.history.pushState({}, null, url);
 		} else {
 			var scroll = $(window).scrollTop();
-			window.location.hash = hash;
+			if(url.substr(0,1) == "#")
+				url = url.substr(1);
+			
+			//alert(url);
+			location.hash = "!" + url;
 			$(window).scrollTop(scroll);
 		}
 		
