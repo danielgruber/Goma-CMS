@@ -95,7 +95,7 @@ $(function(){
         		toolbar : "Goma",
         		language: "'.Core::getCMSVar("lang").'",
         		baseHref: "'.BASE_URI.'",
-        		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/editor.css",
+        		contentsCss: "'.self::buildEditorCSS().'",
         		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
         		width: "'.$width.'",
         		resize_dir: "vertical",
@@ -125,7 +125,7 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		toolbar : "Goma",
     		language: "'.Core::getCMSVar("lang").'",
     		baseHref: "'.BASE_URI.'",
-    		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
+    		contentsCss: "'.self::buildEditorCSS().'",
     		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
         	width: "'.$width.'",
         	resize_dir: "vertical",
@@ -140,4 +140,45 @@ window.toggleEditor_'.$this->input->id.' = function() {
 						';
 				return $js;
 		}
+		
+	/**
+	 * builds editor.css
+	 *
+	 *@name buildEditorCSS
+	*/
+	public function buildEditorCSS() {
+		$cache = CACHE_DIRECTORY . "/htmleditor_compare_" . Core::GetTheme() . ".css";
+		if(/*(!file_exists($cache) || filemtime($cache) < TIME + 300) && */file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
+			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			
+			// parse CSS
+			$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
+			FileSystem::write($cache, $css);
+			
+			return $cache;
+		} else {
+			return false;
+		}
+	}	
+	
+	/**
+	 * gets a consolidated CSS-File, where imports are merged with original file
+	 *
+	 *@name importCSS
+	 *@param string - file
+	*/
+	public static function importCSS($file) {
+		if(file_exists($file)) {
+			$css = file_get_contents($file);
+			// import imports
+			preg_match_all('/\@import\s*url\(("|\')([^"\']+)("|\')\)\;/Usi', $css, $m);
+			foreach($m[2] as $key => $_file) {
+				$css = str_replace($m[0][$key], self::importCSS(dirname($file) . "/" . $_file), $css);
+			}
+			
+			return $css;
+		}
+		
+		return "";
+	}
 }
