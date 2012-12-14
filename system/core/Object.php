@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.09.2012
-  * $Version 3.1.9
+  * last modified: 13.12.2012
+  * $Version 3.1.10
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -153,7 +153,7 @@ abstract class Object
 					ClassManifest::load($class);
 				
 				// check native
-				if(method_exists($class, $method))
+				if(method_exists($class, $method) && is_callable(array($this, $name))
 				{
 					self::$method_cache[$class . "::" . $method] = true;
 					unset($class, $method);
@@ -352,7 +352,7 @@ abstract class Object
 				return $this->callExtraMethod($name, self::$cache_extra_methods[$this->class][$name], $args);
 			}
 			
-			if(method_exists($this, $name))
+			if(method_exists($this, $name) && is_callable(array($this, $name)))
 				return call_user_func_array(array($this, $name), $args);
 			
 			// check parents

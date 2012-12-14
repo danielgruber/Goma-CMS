@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 2.1.12
+  * last modified: 14.12.2012
+  * $Version 2.1.13
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -479,7 +479,7 @@ class Controller extends RequestHandler
 		*/
 		public function edit()
 		{
-			if($this->countModelRecords() == 1 && (!$this->getParam("id", false) || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id", false) || $this->ModelInst()->id == $this->getParam("id", false))) {
+			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
 				if(!$this->modelInst()->canWrite($this->modelInst()))
 				{
 					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
@@ -494,7 +494,7 @@ class Controller extends RequestHandler
 				return $this->form("edit_" . $this->class . $this->modelInst()->id, $this->modelInst(), array(
 					
 				), true, "safe", $disabled);
-			} else if($this->getParam("id", false)) {
+			} else if($this->getParam("id")) {
 				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
 				if($model) {
 					return $model->controller(clone $this)->edit();
@@ -526,7 +526,12 @@ class Controller extends RequestHandler
 				
 				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"))) {
 					$data = clone $this->modelInst();
-					$this->modelInst()->remove();
+					if(is_a($this->modelInst(), "DataObjectSet"))
+						$toDelete = $this->modelInst()->first();
+					else
+						$toDelete = $this->modelInst();
+					
+					$toDelete->remove();
 					if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 						$response = new AjaxResponse();
 						if($object !== null)
@@ -562,7 +567,6 @@ class Controller extends RequestHandler
 		*/
 		public function hideDeletedObject($response, $data) {
 			$response->exec("location.reload();");
-			Notification::notify($this->model, lang("successful_deleted", "The data was successfully deleted."), lang("deleted"));
 			return $response;
 		}
 		
@@ -595,7 +599,6 @@ class Controller extends RequestHandler
 			if($this->save($data) !== false)
 			{
 				addcontent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-				Notification::notify($this->model, lang("successful_published", "The data was successfully published."), lang("saved"));
 				$this->redirectback();
 			} else
 			{
@@ -652,7 +655,6 @@ class Controller extends RequestHandler
 				if($this->save($data, 2) !== false)
 				{
 						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published.").'</div>');
-						Notification::notify($this->model, lang("successful_published", "The data was successfully published."), lang("saved"));
 						$this->redirectback();
 				} else
 				{
