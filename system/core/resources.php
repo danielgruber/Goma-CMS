@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.12.2012
+  * last modified: 15.12.2012
   * Version: 1.3
 */
 
@@ -703,7 +703,7 @@ class Resources extends Object {
 */\n\n";
 			$i = 0;
 			foreach($data["files"] as $jsfile) {
-				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".js";
+				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".".self::VERSION.".js";
 				if(self::file_exists($cachefile) && filemtime($cachefile) > filemtime(ROOT . $jsfile)) {
 					$js .= file_get_contents($cachefile);
 				} else {
