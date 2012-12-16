@@ -360,12 +360,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						$pclassname = strtolower($d["class_name"]);
 				}
 
-				if(Object::instance($classname)->can_parent == "*" || Object::instance($classname)->can_parent == "all" || in_array(strtolower($pclassname), Object::instance($classname)->can_parent))
-				{
-						return true;
-				} else if($d->_count() > 0 && in_array(strtolower($classname), Object::instance($pclassname)->allowed_children))
-				{
-						return true;
+				if(in_array($pclassname, $this->allowed_parents())) {
+					return true;
 				}
 				
 				return lang("form_bad_pagetype");
@@ -561,7 +557,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@param object - form
 		*/
 		public function getForm(&$form)
-		{
+		{		
+				
 				parent::getForm($form);
 				
 				$allowed_parents = $this->allowed_parents();
