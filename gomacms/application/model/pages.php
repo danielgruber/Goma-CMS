@@ -663,6 +663,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$parenttype->disableOption("root");
 				}
 				
+				if(in_array("pages", $allowed_parents) && count($allowed_parents) == 1) {
+					$parenttype->disableOption("subpage");	
+				}
+				
 				// add some js
 				$form->add(new JavaScriptField("change",'$(function(){
 					$("#'.$title->ID().'").change(function(){
