@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version: 2.2.4
+  * last modified: 15.12.2012
+  * $Version: 2.2.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -350,29 +350,24 @@ class RequestHandler extends Object
 		*/
 		public function __throwError($errcode, $errname, $errdetails) {
 			
-			if(Core::is_ajax()) {
+			if(Core::is_ajax())
+				HTTPResponse::setResHeader(200);
+			
+			if(class_exists("ClassInfo", false)) {
+				$template = new template;
+				$template->assign('errcode',convert::raw2text($errcode));
+				$template->assign('errname',convert::raw2text($errname));
+				$template->assign('errdetails',$errdetails);
 				HTTPresponse::sendHeader();
-				echo "<h1>".convert::raw2text($errcode).": ".convert::raw2text($errname)."</h1>\n";
-				echo $errdetails;
-				exit;
-			} else if(Core::is_ajax() && isset($_GET["ajaxfy"])) {
-				
-			} else  {
-				if(class_exists("ClassInfo", false)) {
-					$template = new template;
-					$template->assign('errcode',convert::raw2text($errcode));
-					$template->assign('errname',convert::raw2text($errname));
-					$template->assign('errdetails',$errdetails);
-					HTTPresponse::sendHeader();
-	 				
-					echo $template->display('framework/error.html');
-				} else {
-					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-					echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails ;
-				}
-				
-				exit;
+ 				
+				echo $template->display('framework/error.html');
+			} else {
+				header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
+				echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails ;
 			}
+			
+			exit;
+			
 		}
 		
 		/**

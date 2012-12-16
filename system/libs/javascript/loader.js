@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 1.5.2
+  * last modified: 15.12.2012
+  * $Version 1.5.3
 */
 
 // prevent from being executed twice
@@ -325,17 +325,17 @@ if(typeof self.loader == "undefined") {
 					$("#"+_class+"_"+i+"").html(object["areas"][i]);
 				}
 			} else {
-				gloader.load("orangebox");
+				gloader.load("dropdownDialog");
 				var id = randomString(5);
 				if(html_regexp.test(html)) {
 					self[id + "_html"] = html;
-					$("body").append('<div id="'+id+'_div" style="display: none;width: 800px;hieght: 300px;"><iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0" id="'+id+'"></iframe></div>');
+					$("body").append('<div id="'+id+'_div" style="width: 800px;height: 500px;"><iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0" id="'+id+'"></iframe></div>');
 					
-					$("body").append('<a style="display: none;" href="#'+id+'_div" rel="orangebox" id="'+id+'_link"></a>');
+					$("body").append('<a href="#'+id+'_div" rel="dropdownDialog" id="'+id+'_link"></a>');
 					$("#" + id + "_link").click();
 				} else{
-					$("body").append('<div id="'+id+'_div" style="display: none;">'+html+'</div>');
-					$("body").append('<a style="display: none;" href="#'+id+'_div" rel="orangebox" id="'+id+'_link"></a>');
+					$("body").append('<div id="'+id+'_div">'+html+'</div>');
+					$("body").append('<a href="#'+id+'_div" rel="dropdownDialog" id="'+id+'_link"></a>');
 					$("#" + id + "_link").click();
 				}
 			}

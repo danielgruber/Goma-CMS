@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 3.3.20
+  * last modified: 15.12.2012
+  * $Version 3.3.21
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -644,6 +644,9 @@ class Core extends object
 				echo self::$requestController->__throwError($code, $name, $message);
 				exit;
 			} else {
+				if(Core::is_ajax())
+					HTTPResponse::setResHeader(200);
+				
 				if(class_exists("ClassInfo", false) && CLASS_INFO_LOADED) {
 					$template = new template;
 					$template->assign('errcode',convert::raw2text($code));

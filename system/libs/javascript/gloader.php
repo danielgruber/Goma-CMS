@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.10.2012
-  * $Version 1.1.1
+  * last modified: 15.12.2012
+  * $Version 1.1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -179,7 +179,8 @@ class gLoader extends Controller
 			}
 			
 			$js .= '/* file '.$data["file"].' */
-gloader.loaded["'.$name.'"] = true;' . "\n\n";
+gloader.loaded["'.$name.'"] = true;' . "
+if(self.JSLoadedResources == null) self.JSLoadedResources = []; self.JSLoadedResources['".$data["file"]."?".filemtime($data["file"])."'] = true;\n\n";
 			
 			$js .= jsmin::minify(file_get_contents($data["file"]));
 			
