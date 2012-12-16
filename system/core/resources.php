@@ -508,7 +508,7 @@ class Resources extends Object {
 		if(self::$combine) {
 			// css
 			
-  	 	
+			if(PROFILE) Profiler::mark("Resources::generateFiles CSS");
 			if(isset(self::$resources_css["default"])) {
 				$css_files = array_merge($css_files, self::$resources_css["default"]);
 			}
@@ -521,8 +521,9 @@ class Resources extends Object {
 	 			self::generateCSSFile(self::$resources_css["main"], "main", $css_files);
 			}
 			
+			if(PROFILE) Profiler::unmark("Resources::generateFiles CSS");
 			
-			
+			if(PROFILE) Profiler::mark("Resources::generateFiles JS");
 			
 			// javascript
 			$resources_js = self::$resources_js;
@@ -531,6 +532,7 @@ class Resources extends Object {
 					$js_files[] = self::makeCombiedJS($resources_js["main"]);
 					unset($resources_js["main"]);
 			}
+			
 			// default
 			if(isset($resources_js["default"])) {
 					foreach($resources_js["default"]["files"] as $jsfile) {
@@ -573,6 +575,8 @@ class Resources extends Object {
 				}
 			}
 			usort($js_files, array("Resources", "sortjs"));
+			
+			if(PROFILE) Profiler::unmark("Resources::generateFiles JS");
 		} else {
 			
 			$css_files = isset(self::$resources_css["default"]["files"]) ? array_values(self::$resources_css["default"]["files"]) : array();
@@ -685,6 +689,8 @@ class Resources extends Object {
 	 *@param data-array
 	*/
 	public static function makeCombiedJS($data) {
+		if(PROFILE) Profiler::mark("Resources::makeCombinedJS");
+		
 		if(isset($data["raw"])) {
 			$hash = md5(implode("", $data["files"])) . md5(implode("", $data["raw"]));
 		} else {
@@ -743,6 +749,7 @@ class Resources extends Object {
 			
 			FileSystem::Write($file,self::getEncodedString($js));
 			unset($filepointer, $js);
+			if(PROFILE) Profiler::unmark("Resources::generateFiles");
 			return $file;
 		}
 	}

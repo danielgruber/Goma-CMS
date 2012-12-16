@@ -70,6 +70,7 @@ class HTMLEditor extends Textarea
 				
 				$accessToken = randomString(20);
 				$_SESSION["uploadTokens"][$accessToken] = true;
+				Resources::addData("var CKEditor_Upload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken, true).";");
 				
 				$js = '
 var bindIEClickPatch = function() {
@@ -96,7 +97,7 @@ $(function(){
         		language: "'.Core::getCMSVar("lang").'",
         		baseHref: "'.BASE_URI.'",
         		contentsCss: "'.self::buildEditorCSS().'",
-        		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
+        		filebrowserUploadUrl: self.CKEditor_Upload_Path,
         		width: "'.$width.'",
         		resize_dir: "vertical",
         		autoGrow_maxHeight: $(document).height() - 300
@@ -126,7 +127,7 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		language: "'.Core::getCMSVar("lang").'",
     		baseHref: "'.BASE_URI.'",
     		contentsCss: "'.self::buildEditorCSS().'",
-    		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
+    		filebrowserUploadUrl: self.CKEditor_Upload_Path,
         	width: "'.$width.'",
         	resize_dir: "vertical",
         	autoGrow_maxHeight : $(document).height() - 300
