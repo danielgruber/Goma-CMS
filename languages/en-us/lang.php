@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 12.12.2012
+  * last modified: 15.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -546,6 +546,7 @@ $lang = array(
 	"older"					=> "older entries",
 	"newer"					=> "newer entries",
 	
-	"notification"			=> "Mitteilung"
+	"notification"			=> "notification",
+	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again."
 
 );

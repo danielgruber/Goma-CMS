@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
-  * $Version 1.4.4
+  * last modified: 16.12.2012
+  * $Version 1.4.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -28,10 +28,11 @@ class systemController extends Controller {
 		"setUserView/\$bool!"	=> "setUserView",
 		"switchView",
 		"getLang/\$lang"		=> "getLang",
-		"ck_uploader"			=> "ckeditor_upload"
+		"ck_uploader"			=> "ckeditor_upload",
+		"ck_imageuploader"		=> "ckeditor_imageupload"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "logJSProfile");
+	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload", "logJSProfile");
 	
 	/**
 	 * disables the mobile version
@@ -207,7 +208,13 @@ class systemController extends Controller {
 			"7z",
 			"gif",
 			"mp3",
-			"xls"
+			"xls",
+			"xlsx",
+			"docx",
+			"pptx",
+			"numbers",
+			"key",
+			"pages"
 		);
 		$allowed_size = 20 * 1024 * 1024;
 		
@@ -218,6 +225,62 @@ class systemController extends Controller {
 					if($_FILES["upload"]["size"] <= $allowed_size) {
 						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+						} else {
+							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+						}
+					} else {
+						return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filesize_failure").'");</script>';
+					}
+				} else {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filetype_failure").'");</script>';
+
+				}
+			} else {
+				return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+			}
+		} else {
+			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+		}
+	}
+	
+	/**
+	 * uploads files for the ckeditor
+	 *
+	 *@name ckeditor_upload
+	 *@access public
+	*/
+	public function ckeditor_imageupload() {
+	
+		if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
+			die(0);
+		}
+	
+		$allowed_types = array(
+			"jpg",
+			"png",
+			"bmp",
+			"jpeg",
+			"gif"
+		);
+		$allowed_size = 20 * 1024 * 1024;
+		
+		if(isset($_FILES["upload"])) {
+			if($_FILES["upload"]["error"] == 0) {
+				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
+					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
+					if($_FILES["upload"]["size"] <= $allowed_size) {
+						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
+							$info = GetImageSize($response->realfile);
+							$width = $info[0];
+							$height = $info[0];
+							if(filesize($response->realfile) > 1024 * 1024 || $width > 2000 || $height > 2000) {
+								$add = 'alert(parent.lang("alert_big_image"));';
+							} else {
+								$add = "";
+							}
+							
+							return '<script type="text/javascript">'.$add.'
+							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}

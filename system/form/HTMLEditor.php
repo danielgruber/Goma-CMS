@@ -70,7 +70,7 @@ class HTMLEditor extends Textarea
 				
 				$accessToken = randomString(20);
 				$_SESSION["uploadTokens"][$accessToken] = true;
-				Resources::addData("var CKEditor_Upload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken, true).";");
+				Resources::addData("var CKEditor_Upload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken, true)."; var CKEditor_ImageUpload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken, true).";");
 				
 				$js = '
 var bindIEClickPatch = function() {
@@ -98,6 +98,7 @@ $(function(){
         		baseHref: "'.BASE_URI.'",
         		contentsCss: "'.self::buildEditorCSS().'",
         		filebrowserUploadUrl: self.CKEditor_Upload_Path,
+        		filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
         		width: "'.$width.'",
         		resize_dir: "vertical",
         		autoGrow_maxHeight: $(document).height() - 300
@@ -128,6 +129,7 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		baseHref: "'.BASE_URI.'",
     		contentsCss: "'.self::buildEditorCSS().'",
     		filebrowserUploadUrl: self.CKEditor_Upload_Path,
+        	filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
         	width: "'.$width.'",
         	resize_dir: "vertical",
         	autoGrow_maxHeight : $(document).height() - 300
