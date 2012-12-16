@@ -1150,7 +1150,7 @@ class ClassInfo extends Object
 				defined("APPLICATION_BUILD") OR define("APPLICATION_BUILD", self::$appENV["app"]["build"]);
 				
 				if(isset(self::$appENV["app"]["requireFrameworkVersion"])) {
-					if(version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
+					if(goma_version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
 						throwError(7, 'Application-Error', "Application does not support this version of the goma-framework, please update the framework to <strong>".self::$appENV["app"]["requireFrameworkVersion"]."</strong>. <br />Framework-Version: <strong>".GOMA_VERSION."-".BUILD_VERSION."</strong>");
 					}
 				}
