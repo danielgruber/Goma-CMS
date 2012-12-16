@@ -71,12 +71,22 @@ class Page extends pages
 	{
 		parent::getForm($form);
 		// HACK HACK HACK!
-		if($this->class == "page")
+		if($this->class == "page" || $this->class == "wrapperpage")
 				$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
 	}				
 }
 
 class WrapperPage extends Page {
+	/**
+	 * name
+	*/
+	public static $cname = '{$_lang_wrapper_page}';
+	
+	/**
+	 * icon
+	*/
+	public static $icon = "images/icons/fatcow16/column_four.png";
+	
 	/**
 	 * allowed children
 	 *
@@ -101,6 +111,15 @@ class ChildPage extends Page {
 	 *@name allow_children
 	*/
 	public static $allow_children = array();
+	
+	/**
+	 * hide this type of page
+	 *
+	 *@name hidden
+	*/
+	public static function hidden() {
+		return true;
+	}
 }
 
 class pageController extends contentController
@@ -123,4 +142,18 @@ class pageController extends contentController
 			)
 		);
 	}
+}
+
+class WrapperPageController extends pageController
+{
+	/**
+	 * other template for this
+	 *
+	 *@name template
+	*/
+	public $template = "pages/wrapperPage.html";
+}
+
+class ChildPageController extends pageController {
+	
 }

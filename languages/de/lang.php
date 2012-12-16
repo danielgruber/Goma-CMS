@@ -548,5 +548,7 @@ $lang = array(
 	"newer"					=> "Neuere Einträge",
 	
 	"notification"			=> "Mitteilung",
-	"alert_big_image"		=> "Achtung:\n\nIhre hochgeladene Bilddatei ist zu groß für eine Webseite. Sie wird möglicherweise sehr lange laden.\n\nBitte reduzieren Sie die Bildgröße mit einem Bildbearbeitungsprogramm und laden Sie die Datei erneut hoch."
+	"alert_big_image"		=> "Achtung:\n\nIhre hochgeladene Bilddatei ist zu groß für eine Webseite. Sie wird möglicherweise sehr lange laden.\n\nBitte reduzieren Sie die Bildgröße mit einem Bildbearbeitungsprogramm und laden Sie die Datei erneut hoch.",
+	
+	"wrapper_page"			=> "Liste mit Unterseiten"
 );
