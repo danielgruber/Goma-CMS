@@ -318,6 +318,7 @@ class Controller extends RequestHandler
 		public function index()
 		{
 			if($this->template) {
+				$this->tplVars["namespace"] = $this->namespace;
 				if(is_a($this->modelInst(), "DataObject") && $this->modelInst()->controller != $this) {
 					$model = DataObject::Get($this->model(), $this->where);
 					$model->controller = clone $this;
