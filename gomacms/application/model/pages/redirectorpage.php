@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.0.1
+  * last modified: 15.12.2012
+  * $Version 1.0.2
 */ 
 
 defined("IN_GOMA") OR die("");
@@ -21,11 +21,6 @@ class redirector extends Page
 		 * icon
 		*/
 		public static $icon = "images/icons/fatcow16/page_link.png";
-		
-		/**
-		 * which parents are allowed
-		*/
-		public $can_parent = array('page', 'boxpage', 'mod', 'pages');
 		
 		/**
 		 * generates the form

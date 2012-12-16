@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
+  * last modified: 15.12.2012
 */ 
 class errorPage extends Page
 {
@@ -19,9 +19,11 @@ class errorPage extends Page
 		public static $cname = '{$_lang_errorpage}';
 		
 		/**
-		 * which parents are allowed
+		 * only allowed in site-root
+		 *
+		 *@name allow_parent
 		*/
-		public $can_parent = array('page', 'boxpage', 'mod', 'pages');
+		public static $allow_parent = array("pages", "!page");
 		
 		/**
 		 * we need an error-code, for example 500 or 404

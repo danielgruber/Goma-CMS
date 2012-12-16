@@ -34,8 +34,6 @@ class contact extends Page
 			"requireemailfield" => 1
 		);
 		
-		public $can_parent = "all";
-		
 		/**
 		 * generate the extended form
 		 *

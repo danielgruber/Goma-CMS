@@ -11,68 +11,96 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Page extends pages
 {
-				
-		/**
-		 * name
-		*/
-		public static $cname = '{$_lang_just_content_page}';
+	/**
+	 * allowed children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array(
+		"Page", "ChildPage", "WrapperPage"
+	);
+	
+	/**
+	 * name
+	*/
+	public static $cname = '{$_lang_just_content_page}';
+	
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	public $db_fields = array();
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	public $has_one = array();
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	public $many_many = array();
+	/**
+	 * belongs-many-many
+	*/
+	public $belongs_many_many = array();
+	/**
+	 * we need no indexes, indexes are in parent class
+	*/
+	public $indexes = array(
 		
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $db_fields = array();
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $has_one = array();
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $many_many = array();
-		/**
-		 * belongs-many-many
-		*/
-		public $belongs_many_many = array();
-		/**
-		 * we need no indexes, indexes are in parent class
-		*/
-		public $indexes = array(
-			
-		);
-		/**
-		 * searchable fields
-		*/
-		public $searchable_fields = array(
-		
-		);
-		
-		public $prefix = "Page_";
-		
-		/**
-		 * orderby
-		*/
-		public $orderby = array('field' => 'sort', 'type' => 'ASC');
-		
-		/**
-		 * which parents are allowed
-		*/
-		public $can_parent = array('page', 'boxpage','modulepage', 'pages');
-		/**
-		 * gets the FORM
-		*/
-		public function getForm(&$form)
-		{
-				parent::getForm($form);
-				// HACK HACK HACK!
-				if($this->class == "page")
-						$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
-						
-				
+	);
+	/**
+	 * searchable fields
+	*/
+	public $searchable_fields = array(
+	
+	);
+	
+	public $prefix = "Page_";
+	
+	/**
+	 * orderby
+	*/
+	public $orderby = array('field' => 'sort', 'type' => 'ASC');
+	
+	/**
+	 * gets the FORM
+	*/
+	public function getForm(&$form)
+	{
+		parent::getForm($form);
+		// HACK HACK HACK!
+		if($this->class == "page")
+				$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
+	}				
+}
 
-		}				
+class WrapperPage extends Page {
+	/**
+	 * allowed children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array(
+		"Page", "ChildPage", "WrapperPage"
+	);
+}
+
+class ChildPage extends Page {
+	/**
+	 * limit parents
+	*/
+	public static $allow_parent = array(
+		"WrapperPage"
+	);
+	
+	/**
+	 * children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array();
 }
 
 class pageController extends contentController
