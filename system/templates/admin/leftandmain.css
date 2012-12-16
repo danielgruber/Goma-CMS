@@ -44,7 +44,8 @@
 	overflow-y: auto;
 	ms-overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
-	padding: 5px 0;
+	padding: 0;
+	padding-bottom: 5px;
 }
 .leftandmaintable tr > .main > .inner > form > .fieldsScroll {
 	overflow: auto;
@@ -55,6 +56,9 @@
 .leftandmaintable tr > .main > .inner > form > .actionsScroll {
 	border-top: 1px solid #ccc;
 	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
+}
+.leftandmaintable tr > .main > .inner > form > .error {
+	margin: 0 !important;
 }
 
 /* sidebar */
