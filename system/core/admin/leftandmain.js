@@ -164,7 +164,7 @@ var LaM_type_timeout;
 			// render fixed actions
 			if($(".left-and-main > table td.main > .inner > form > .fields").length > 0 && $(".left-and-main > table td.main > .inner > form > .actions").length > 0) {
 				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
-				$(".left-and-main > table td.main > .inner > form > .fields").outerHeight(tableHeight - OuterDiff - $(".left-and-main > table td.main > .inner > form > .actions").outerHeight() - $(".left-and-main > table td.main > .inner > form > .error").outerHeight() - 10);
+				$(".left-and-main > table td.main > .inner > form > .fields").outerHeight(tableHeight - OuterDiff - $(".left-and-main > table td.main > .inner > form > .actions").outerHeight(true) - $(".left-and-main > table td.main > .inner > form > .error").outerHeight(true));
 				$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
 			}
 			
@@ -179,8 +179,8 @@ var LaM_type_timeout;
 		renderSideBar();
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-			jqXHR.always(function(){
-				renderSideBar();
+			jqXHR.done(function(){
+				setTimeout(renderSideBar, 1);
 			});
 		});
 		
