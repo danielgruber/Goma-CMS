@@ -108,10 +108,10 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function url() {
-		return BASE_SCRIPT . "admin/".substr($this->class, 0, -5)."/";
+		return $this->namespace . "/";
 	}
 	public function adminURI() {
-		return BASE_SCRIPT . "admin/".substr($this->class, 0, -5)."/";
+		return $this->namespace . "/";
 	}
 	
 	/**
