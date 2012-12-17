@@ -101,7 +101,8 @@ class RequestHandler extends Object
 						throwError(6, 'PHP-Error', 'Class '.get_class($this).' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
 				}
 				$this->request = $request;
-				$this->namespace = $request->shiftedPart;
+				if(!isset($this->namespace))
+					$this->namespace = $request->shiftedPart;
 				
 				$this->subController = $subController;
 				$this->Init();			

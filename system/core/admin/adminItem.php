@@ -110,6 +110,7 @@ class adminItem extends AdminController implements PermProvider {
 	public function url() {
 		return $this->namespace . "/";
 	}
+	
 	public function adminURI() {
 		return $this->namespace . "/";
 	}
