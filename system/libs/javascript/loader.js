@@ -803,13 +803,11 @@ if(typeof self.loader == "undefined") {
     
 	// retina-support
 	$(function(){
-		var timeout;
 		var replace = function() {
-			if(getDevicePixelRatio() > 1.5) {
-				var setT = true;
+			if(true) { //getDevicePixelRatio() > 1.5) {
 				$("img").each(function(){ //.on("load", "img", function(){
 					var $this = $(this);
-					if($this.attr("data-ratined") != "complete" && $this.attr("data-retina")) {
+					if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
 						if(IsImageOk($(this).get(0))) {
 							var img = new Image();
 							img.onload = function(){
@@ -819,23 +817,19 @@ if(typeof self.loader == "undefined") {
 								img.src = null;
 							}
 							img.src = $this.attr("data-retina");
-							$this.attr("data-ratined", "complete");
-						} else {
-							clearTimeout(timeout);
-							timeout = setTimeout(replace, 100);
-							setT = false;
+							$this.attr("data-retined", "complete");
 						}
 					}
 				});
-				
-				if(setT === true) {
-					clearTimeout(timeout);
-					timeout = setTimeout(replace, 2000);
-				}
 			}
 		}
 		replace();
 		window.retinaReplace = replace;
+		
+		document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
+	    if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+	        /loaded|complete/.test(document.readyState) && replace();
+	    }, 10);
 	});
 	
 	function IsImageOk(img) {
