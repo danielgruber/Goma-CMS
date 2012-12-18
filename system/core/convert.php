@@ -77,11 +77,7 @@ class Convert extends Object
 			foreach($val as $k => $v) $val[$k] = self::raw2xml($v);
 			return $val;	
 		} else {
-			if(defined("ENT_HTML5")) {
-				return htmlentities($val, ENT_COMPAT | ENT_HTML5, "UTF-8", false);
-			} else {
-				return htmlentities($val, ENT_COMPAT, "UTF-8", false);
-			}
+			return htmlentities($val, ENT_COMPAT, "UTF-8", false);
 		}
 	}
 	
