@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 2.2.1
+  * last modified: 18.12.2012
+  * $Version 2.2.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -56,7 +56,7 @@ class UpdateController extends adminController {
 		$storeAvailable = G_SoftwareType::isStoreAvailable();
 		$updatables = G_SoftwareType::listUpdatablePackages();
 		
-		$view->customise(array("updates" => $updates, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
+		$view->customise(array("updates" => $updates, "BASEURI" => BASE_URI, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
 		
 		return $view->renderWith("admin/update.html");
 	}
