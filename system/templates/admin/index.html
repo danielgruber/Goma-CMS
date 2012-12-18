@@ -10,6 +10,64 @@
 		<% INCLUDE_JS_MAIN "admin.js" %>
 		
 		{$header}
+		
+		<% IF NOT $content %>
+			<% gload("htmllib") %>
+			
+			<script type="text/javascript">
+				// <![CDATA[
+					$(function(){
+						var u = {$updatables_json};
+						var uCount = $updatables.count();
+						var results = [];
+						
+						var checkResult = function() {
+							if(uCount == results.length) {
+								// render it
+								var a = 0;
+								for(i in results) {
+									if(results[i] != null) {
+										a++;
+										var record = results[i].response;
+									}
+								}
+								
+								if(a == 0)
+									return null;
+								
+								if(a == 1) {
+									$("#update .count").html('1');
+								} else {
+									$("#update .count").text(a);
+								}
+								$("#update .count").css("display", "block");
+								
+								// update number
+							} else {
+								setTimeout(checkResult, 1000);
+							}
+						}
+
+						for(name in u) {
+							var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"];
+							$.ajax({
+								url: url,
+								dataType: "jsonp",
+								success: function(object) {
+									if(object.name) {
+										results.push({response: object, current_version: u[name]["version"], webversion: object.version});
+									} else {
+										results.push(null);
+									}
+								}
+							});
+						}
+						
+						setTimeout(checkResult, 1000);
+					});
+				// ]]>
+			</script>
+		<% END %>
 	</head>
 	<body id="adminPanel">
 		<!--<div id="viewport">-->
@@ -192,13 +250,17 @@
 														</tr>
 													<% ENDCONTROL %>
 												</table>
-												<a href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}</a>
+												<% IF PERMISSION("superadmin") %>
+													<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
+												<% END %>
+												
 												<% IF DEV_MODE AND PERMISSION("superadmin") %>
 													<a href="{BASE_SCRIPT}dev/buildDistro" class="button"><% lang("distro_build", "build a version") %></a>
 												<% END %>
 											</div>
 										</div>
 									</div>
+									
 									<div id="right">
 										<div id="cache" class="content_container">
 											<h2>{$_lang_del_cache}</h2>

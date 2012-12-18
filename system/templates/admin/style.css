@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.11.2012
-  * $Version 2.3.5
+  * last modified: 18.12.2012
+  * $Version 2.3.6
 */
 
 body, html {
@@ -589,6 +589,27 @@ a:hover {
 }
 #update_response {
 	font-weight: bold;
+}
+#update {
+	position: relative;
+	margin-right: 10px;
+}
+#update .count {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: #ed0808;
+	border: 2px solid #fff;
+	padding: 3px 6px;
+	font-size: 10px;
+	color: #fff;
+	text-shadow: none;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+	
+	-webkit-box-shadow: 0 0 5px #999;
+	-moz-box-shadow: 0 0 5px #999;
+	box-shadow: 0 0 5px #999;
 }
 .boxheader
 {

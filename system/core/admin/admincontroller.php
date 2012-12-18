@@ -216,7 +216,7 @@ class adminController extends Controller
 		*/
 		public function handleUpdate() {
 			
-			if(Permission::check("ADMIN")) {
+			if(Permission::check("superadmin")) {
 				$controller = new UpdateController();
 				self::$activeController = $controller;
 				return $controller->handleRequest($this->request);
@@ -437,5 +437,54 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function Software($number = 7) {
 			return G_SoftwareType::listAllSoftware();
-		}				
+		}
+		
+		/**
+		 * lists local updates
+		 *
+		 *@name getUpdates
+		*/			
+		public function getUpdates() {
+			$updates = G_SoftwareType::listUpdatePackages();
+			foreach($updates as $name => $data) {
+				$data["secret"] = randomString(20);
+				if(!isset($data["AppStore"])) {
+					$_SESSION["updates"][$data["file"]] = $data["secret"];
+				} else {
+					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+				}
+				$updates[$name] = $data;
+			}
+			
+			return new DataSet($updates);
+		}
+		
+		/**
+		 * returns if store is available
+		 *
+		 *@name isStoreAvailable
+		 *@access public
+		*/
+		public function isStoreAvailable() {
+			return G_SoftwareType::isStoreAvailable();
+		}
+		
+		/**
+		 * returns updatable packages
+		 *
+		 *@name getUpdatables
+		 *@access public
+		*/
+		public function getUpdatables() {
+			return new DataSet(G_SoftwareType::listUpdatablePackages());
+		}
+		
+		/**
+		 * returns updatables as json
+		 *
+		 *@name getUpdatables_JSON
+		*/
+		public function getUpdatables_JSON() {
+			return json_encode(G_SoftwareType::listUpdatablePackages());
+		}
 }

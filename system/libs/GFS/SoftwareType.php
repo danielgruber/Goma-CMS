@@ -418,7 +418,7 @@ abstract class g_SoftwareType {
 			
 			// app
 			$app = ClassInfo::$appENV["app"]["name"];
-			if($data = self::getAppStoreInfo($app)) {
+			if($data = self::getAppStoreInfo($app, null, ClassInfo::appVersion())) {
 				$data["installed_version"] = ClassInfo::appVersion();
 				$data["appinfo"]["autor"] = $data["autor"];
 				$data["AppStore"] = $data["download"];
@@ -434,7 +434,7 @@ abstract class g_SoftwareType {
 			
 			// framework
 			$app = ClassInfo::$appENV["framework"]["name"];
-			if($data = self::getAppStoreInfo($app)) {
+			if($data = self::getAppStoreInfo($app, null, GOMA_VERSION . "-" . BUILD_VERSION)) {
 				$data["installed_version"] = GOMA_VERSION . "-" . BUILD_VERSION;
 				$data["appinfo"]["autor"] = $data["autor"];
 				$data["AppStore"] = $data["download"];
@@ -451,7 +451,7 @@ abstract class g_SoftwareType {
 			if(isset(ClassInfo::$appENV["expansion"]) && ClassInfo::$appENV["expansion"]) {
 				// expansions
 				foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-					if($data = self::getAppStoreInfo($app)) {
+					if($data = self::getAppStoreInfo($app, null, ClassInfo::expVersion($app))) {
 						$data["installed_version"] = ClassInfo::expVersion($app);
 						$data["appinfo"]["autor"] = $data["autor"];
 						$data["AppStore"] = $data["download"];
@@ -492,12 +492,14 @@ abstract class g_SoftwareType {
 			"version"	=> ClassInfo::appVersion()
 		);
 		
-		// expansions
-		foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-			$apps[$app] = array(
-				"name" 		=> $app,
-				"version"	=> ClassInfo::expVersion($app)
-			);
+		if(isset(ClassInfo::$appENV["expansion"])) {
+			// expansions
+			foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
+				$apps[$app] = array(
+					"name" 		=> $app,
+					"version"	=> ClassInfo::expVersion($app)
+				);
+			}
 		}
 		
 		return $apps;
@@ -528,23 +530,28 @@ abstract class g_SoftwareType {
 	 *@name getAppStoreInfo
 	 *@access public
 	*/
-	public function getAppStoreInfo($name, $version = null) {
+	public function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
 		if(PROFILE) Profiler::mark("G_SoftwareType::getAppStoreInfo");
 		
 		if(!self::isStoreAvailable()) {
 			return false;
 		}
 		
-		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name . "?framework=" . GOMA_VERSION . "-" . BUILD_VERSION;
+		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name;
+		
+		if(isset($version)) {
+			$url .= "/" . $version;
+		}
+		
+		$url .= "?framework=" . urlencode(GOMA_VERSION . "-" . BUILD_VERSION);
+		$url .= "&current=".urlencode($currVersion);
 		
 		$cacher = new Cacher("AppStore_" . md5($url));
 		if($cacher->checkValid()) {
 			if(PROFILE) Profiler::unmark("G_SoftwareType::getAppStoreInfo");
 			return $cacher->getData();
 		} else {
-			if(isset($version)) {
-				$url .= "/" . $version;
-			}
+			
 			if($response = @file_get_contents($url)) {
 				if(substr($response, 0, 1) == "(")
 					$response = substr($response, 1, -1);
