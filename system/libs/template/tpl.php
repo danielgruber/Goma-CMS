@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 3.3.8
+  * last modified: 18.11.2012
+  * $Version 3.3.9
 */   
  
  
@@ -106,8 +106,13 @@ class tpl extends Object
          */
 		public static function render($name,$replacement = array(),$class = "", $required_areas = array(), $expansion = null)
 		{
-				$file = self::getFilename($name, $class, false, $expansion);
+			if($file = self::getFilename($name, $class, false, $expansion)) {
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
+			} else {
+				HTTPresponse::setResHeader(500);
+				/* an error so show an error ;-) */
+				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+			}
 		}
 		
 		/**
@@ -126,8 +131,7 @@ class tpl extends Object
 								return ROOT . $name;
 						} else
 						{
-								HTTPresponse::setResHeader(500);
-								throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+								return false;
 						}
 				} else
 				{
@@ -180,10 +184,83 @@ class tpl extends Object
 						{
 								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
 						}
-								
-						HTTPresponse::setResHeader(500);
-						/* an error so show an error ;-) */
-						throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+						
+						return sekf::getFileNameUncached();
+				}
+		}
+		
+		/**
+		 * gets the filename of a given template-name uncached!
+		 * just returns false
+		 *
+		 *@name getFilenameUncached
+		 *@access public
+		 *@param string - name
+		 *@param use include-folders
+		*/
+		public static function getFilenameUncached($name, $class = "", $inc = false, $expansion = null) {
+				if(preg_match('/^\//', $name))
+				{
+						if(is_file(ROOT . $name))
+						{
+								return ROOT . $name;
+						} else
+						{
+								return false;
+						}
+				} else
+				{
+						if(is_file(ROOT . self::$tplpath . Core::getTheme() . "/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/" . $name;
+						}
+						
+						if($inc === true && is_file(ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name;
+						}
+						
+						if(file_exists(APPLICATION_TPL_PATH . "/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(APPLICATION_TPL_PATH . "/includes/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/includes/' . $name;
+						}
+						
+						if(is_object($class) && $class->inExpansion) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(isset($expansion)) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(file_exists(SYSTEM_TPL_PATH . "/" . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(SYSTEM_TPL_PATH . '/includes/' . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
+						}
+						
+						return false;
 						
 				}
 		}
