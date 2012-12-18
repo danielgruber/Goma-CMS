@@ -117,11 +117,11 @@ class ChildPage extends Page {
 	 *
 	 *@name hidden
 	*/
-	public static function hidden() {
-		if($this->class == "childpage")
+	public static function hidden($class = null) {
+		if($class == "childpage")
 			return true;
-		else
-			return false;
+			
+		return false;
 	}
 }
 
