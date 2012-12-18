@@ -17,6 +17,18 @@
 	border: 1px solid #bbb;
 	border-spacing: 0;
 }
+.tablefield-table fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.tablefield-table fieldset legend {
+	display: none;
+}
+.tablefield-table fieldset .form_field {
+	margin: 0 !important;
+	padding: 0 !important;
+}
 
 /* headers */
 .tablefield-table thead tr td, .tablefield_pagination th {
@@ -169,6 +181,11 @@
 	background-image: url(images/tablefield/arrow_desc.png);
 	filter: none;
 	-ms-filter: none;
+}
+.tablefield-table .sortable-header td .non-sortable {
+	padding: 8px;
+	font-size: 11pt;
+	color: #333;
 }
 
 .tablefield-table .toolbar_header h2 {

@@ -55,6 +55,13 @@ class Permission extends DataObject
 		);
 		
 		/**
+		 * cache for reordered permissions
+		 *
+		 *@name reorderedPermissions
+		*/
+		public static $reorderedPermissions;
+		
+		/**
 		 * fields of this set
 		 *
 		 *@name db_fields
@@ -89,15 +96,6 @@ class Permission extends DataObject
 		);
 		
 		/**
-		 * extra fields
-		*/
-		public $many_many_extra_fields = array(
-			"groups"	=> array(
-				"major"	=> "int(1)"
-			)
-		);	
-		
-		/**
 		 * indexes
 		 *
 		 *@name indexes
@@ -123,6 +121,62 @@ class Permission extends DataObject
 		*/
 		public static function addPermissions($perms) {
 			self::$providedPermissions = ArrayLib::map_key("strtolower", array_merge(self::$providedPermissions, $perms));
+		}
+		
+		/**
+		 * reorders all permissions as in hierarchy
+		 *
+		 *@name reOrderedPermissions
+		*/
+		public static function reorderedPermissions() {
+			if(isset(self::$reorderedPermissions)) {
+				return self::$reorderedPermissions;
+			}
+			
+			$perms = array();
+			foreach(self::$providedPermissions as $name => $data) {
+				if(!isset($data["category"]) && $name != "superadmin") {
+					$perms[$name] = $data;
+					// get children
+					if($children = self::reorderedPermissionsHelper($name)) {
+						$perms[$name]["children"] = $children;
+					}
+				}
+			}
+			
+			$perms = array(
+				"superadmin" => array_merge(self::$providedPermissions["superadmin"], array(
+					"children" 		=> array_merge($perms, self::reorderedPermissionsHelper("superadmin")),
+					"forceSubOn1" 	=> true
+				))
+			);
+			
+			self::$reorderedPermissions = $perms;
+			return $perms;
+			
+		}
+		
+		/**
+		 * helper which gets all children for given permission
+		 *
+		 *@name reorderedPermissionsHelper
+		 *@access protected
+		*/
+		protected static function reorderedPermissionsHelper($perm) {
+			$perms = array();
+			$perm = strtolower($perm);
+			foreach(self::$providedPermissions as $name => $data) {
+				// get children for given perm
+				if(isset($data["category"]) && strtolower($data["category"]) == $perm) {
+					$perms[$name] = $data;
+					
+					// get children for current subperm
+					if($children = self::reorderedPermissionsHelper($name)) {
+						$perms[$name]["children"] = $children;
+					}
+				}
+			}
+			return $perms;
 		}
 		
 		/**
@@ -172,31 +226,20 @@ class Permission extends DataObject
 							return self::$perm_cache[$r];
 						} else {
 							
-							$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
-							if(isset($perm->inherit)) {
-								if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
-									$data->consolidate();
-									$data->inheritorid = $data->id;
+							if(isset(self::$providedPermissions[$r]["default"]["inherit"]) && strtolower(self::$providedPermissions[$r]["default"]["inherit"]) != $r) {
+								if($data = self::forceExisting(self::$providedPermissions[$r]["default"]["inherit"])) {
+									$perm = clone $data;
+									$perm->consolidate();
+									$perm->id = 0;
+									$perm->inheritorid = $data->id;
+									$perm->name = $r;
 									$data->forModel = "permission";
-									$data = $data->_clone();
-									$data->name = $perm->name;
-									self::$perm_cache[$r] = $data->hasPermission();
-									$data->write(true, true, 2);
-									return self::$perm_cache[$r];
-								}
-							} else
-							if($perm->inheritorid) {
-								if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
-									$data->consolidate();
-									$data->inheritorid = $perm->inheritorid;
-									$data->forModel = "permission";
-									$data = $data->_clone();
-									$data->name = $perm->name;
-									self::$perm_cache[$r] = $data->hasPermission();
-									$data->write(true, true, 2);
+									self::$perm_cache[$r] = $perm->hasPermission();
+									$perm->write(true, true, 2);
 									return self::$perm_cache[$r];
 								}
 							}
+							$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
 							
 							if(isset(self::$providedPermissions[$r]["default"]["type"]))
 								$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
@@ -227,29 +270,20 @@ class Permission extends DataObject
 				if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
 					return $data;
 				} else {
-					$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
-					if(isset($perm->inherit)) {
-						if($data = DataObject::get_one("Permission", array("name" => $perm->inherit))) {
-							$data->consolidate();
-							$data->inheritorid = $data->id;
+					if(isset(self::$providedPermissions[$r]["default"]["inherit"]) && strtolower(self::$providedPermissions[$r]["default"]["inherit"]) != $r) {
+						if($data = self::forceExisting(self::$providedPermissions[$r]["default"]["inherit"])) {
+							$perm = clone $data;
+							$perm->consolidate();
+							$perm->id = 0;
+							$perm->inheritorid = $data->id;
+							$perm->name = $r;
 							$data->forModel = "permission";
-							$data = $data->_clone();
-							$data->name = $perm->name;
-							$data->write(true, true, 2);
-							return $data;
-						}
-					} else
-					if($perm->inheritorid) {
-						if($data = DataObject::get_by_id("Permission",$perm->inheritorid)) {
-							$data->consolidate();
-							$data->inheritorid = $perm->inheritorid;
-							$data->forModel = "permission";
-							$data = $data->_clone();
-							$data->name = $perm->name;
-							$data->write(true, true, 2);
-							return $data;
+							self::$perm_cache[$r] = $perm->hasPermission();
+							$perm->write(true, true, 2);
+							return self::$perm_cache[$r];
 						}
 					}
+					$perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
 					
 					if(isset(self::$providedPermissions[$r]["default"]["type"]))
 						$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
@@ -273,6 +307,17 @@ class Permission extends DataObject
 			if($this->inheritorid == $this->id)
 				$this->inheritorid = 0;
 			
+			if($this->inheritorid != 0 && $perm = DataObject::get_by_id("Permission", $this->inheritorid)) {
+				if($this->hasChanged()) {
+					$this->type = $perm->type;
+					$this->password = $perm->password;
+					$this->invert_groups = $perm->invert_groups;
+					$this->groups = $perm->groups;
+				}
+			} else {
+				$this->inheritorid = 0;
+			}
+			
 			if($this->name) {
 				if($this->type != "groups") {
 					switch($this->type) {
@@ -295,10 +340,13 @@ class Permission extends DataObject
 				if($data->Count() > 0) {
 					foreach($data as $record) {
 						if($record->id != $record->inheritorid) {
-							$newrecord = $this->_clone();
+							$newrecord = clone $this;
+							$newrecord->consolidate();
+							$newrecord->inheritorid = $this->id;
+							$newrecord->id = $record->id;
 							$newrecord->name = $record->name;
 							$newrecord->inheritorid = $record->inheritorid;
-							$newrecord->write(true, true);
+							$newrecord->write(false, true);
 						}
 					}
 				}

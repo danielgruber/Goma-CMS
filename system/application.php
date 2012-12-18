@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.6
+  * last modified: 16.12.2012
+  * $Version 2.6.2
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -116,8 +116,8 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "056");
-define("GOMA_VERSION", "2.0");
+define("BUILD_VERSION", "060");
+define("GOMA_VERSION", "2.0b1");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -392,10 +392,13 @@ function loadApplication($directory) {
 		
 		if(file_exists(ROOT . "503." . md5(basename($directory)) . ".goma")) {
 			if(filemtime(ROOT . "503." . md5(basename($directory)) . ".goma") > NOW - 10) {
-				$allowed_ip = file_get_contents(ROOT . "503." . md5(basename($directory)) . ".goma");
+				$allowed_ip = @file_get_contents(ROOT . "503." . md5(basename($directory)) . ".goma");
 				if($_SERVER["REMOTE_ADDR"] != $allowed_ip) {
 					$content = file_get_contents(ROOT . "system/templates/framework/503.html");
 					$content = str_replace('{BASE_URI}', BASE_URI, $content);
+					header('HTTP/1.1 503 Service Temporarily Unavailable');
+					header('Status: 503 Service Temporarily Unavailable');
+					header('Retry-After: 10');
 					die($content);
 				}
 			} else {
@@ -700,28 +703,28 @@ function getStoreID($key) {
 */
 function getRedirect($parentDir = false) {
 	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
-		return $_SERVER["HTTP_X_REFERER"];
+		return convert::raw2text($_SERVER["HTTP_X_REFERER"]);
 	}
 	if($parentDir) {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return substr($uri, 0, strrpos($uri, "/")) . URLEND;
+				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
-				return substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND;
+				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
 		}
 	} else {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
-			return $_SERVER["REQUEST_URI"];
+			return convert::raw2text($_SERVER["REQUEST_URI"]);
 		}
 	}
 }
@@ -729,22 +732,22 @@ function getRedirect($parentDir = false) {
 function getRedirection($parentDir = true) {
 	if($parentDir) {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"])) {
-			return $_POST["redirect"];
+			return convert::raw2text($_POST["redirect"]);
 		} else {
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return substr($uri, 0, strrpos($uri, "/")) . URLEND;
+				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
-				return substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND;
+				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
 		}
 	} else {
 		if(isset($_GET["redirect"])) {
-			return $_GET["redirect"];
+			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"])) {
-			return $_POST["redirect"];
+			return convert::raw2text($_POST["redirect"]);
 		} else {
 			return BASE_URI . BASE_SCRIPT;
 		}

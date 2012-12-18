@@ -378,7 +378,7 @@ class HistoryController extends Controller {
 	 *@name buildEditorCSS
 	*/
 	public function buildEditorCSS() {
-		$cache = ROOT . CACHE_DIRECTORY . "/editor.compare." . Core::GetTheme() . ".css";
+		$cache = ROOT . CACHE_DIRECTORY . "/editor_compare_" . Core::GetTheme() . ".css";
 		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
 			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			

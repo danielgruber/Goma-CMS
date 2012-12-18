@@ -1,1 +1,16 @@
-a:2:{s:9:"fileindex";a:6:{i:0;s:1:".";i:1;s:2:"..";i:2;s:9:".DS_Store";i:3;s:9:".index.db";i:4;s:19:"gomacms.2.0-041.gfs";i:5;s:25:"gomacms.2.0-041.gfs.plist";}s:8:"packages";a:1:{s:6:"backup";a:1:{s:7:"gomacms";a:1:{s:7:"2.0-041";a:11:{s:4:"type";s:6:"backup";s:7:"created";i:1354567315;s:10:"backuptype";s:4:"full";s:4:"name";s:7:"gomacms";s:7:"version";s:7:"2.0-041";s:17:"framework_version";s:7:"2.0-053";s:6:"appENV";a:11:{s:4:"type";s:3:"app";s:4:"name";s:7:"gomacms";s:5:"title";s:8:"Goma CMS";s:5:"autor";s:9:"Goma Team";s:7:"version";d:2;s:5:"build";i:41;s:23:"requireFrameworkVersion";s:7:"2.0-053";s:4:"icon";s:29:"templates/images/app-icon.png";s:23:"excludeModelsFromDistro";a:1:{i:0;s:2:"pm";}s:12:"excludeFiles";a:1:{i:0;s:24:"application/.WELCOME_RUN";}s:3:"SQL";b:1;}s:13:"excludedFiles";a:1:{i:0;s:24:"application/.WELCOME_RUN";}s:14:"excludedTables";a:5:{s:5:"users";s:5:"users";s:10:"user_state";s:10:"user_state";s:27:"many_many_user_groups_group";s:27:"many_many_user_groups_group";i:0;s:10:"statistics";i:1;s:16:"statistics_state";}s:9:"DB_PREFIX";s:10:"{!#PREFIX}";s:4:"file";s:19:"gomacms.2.0-041.gfs";}}}}}
+a:2:{s:9:"fileindex";a:4:{i:0;s:1:".";i:1;s:2:"..";i:2;s:9:".DS_Store";i:3;s:21:"gomacms.2.0b1-045.gfs";}s:8:"packages";a:1:{s:6:"backup";a:1:{s:7:"gomacms";a:1:{s:9:"2.0b1-045";a:12:{s:4:"type";s:6:"backup";s:7:"created";i:1355693936;s:10:"backuptype";s:4:"full";s:4:"name";s:7:"gomacms";s:7:"version";s:9:"2.0b1-045";s:9:"changelog";s:521:"Preview improved
+LeftAndMain-Content-Bug fixed
+Upgrade-Scripts
+Boxes are versioned now
+Fixed some Bugs in boxes
+Fixed some Bugs in Welcome-Screen
+Patches in Login-Box
+Patched Box-Bugs
+Patched a Bug cause of API-Change in Dropdown
+Enabled Compare & Restore in pages
+Patched Bugs in Pages-Sitetree
+Implemented better Permissions in Pages
+Added editurl to pages for redirect after restore
+Permissions in Pages
+Notifications integrated with content edit area and Flush-Cache
+New API for Page-Children-Relations";s:17:"framework_version";s:7:"2.0-060";s:6:"appENV";a:11:{s:4:"type";s:3:"app";s:4:"name";s:7:"gomacms";s:5:"title";s:8:"Goma CMS";s:5:"autor";s:9:"Goma Team";s:7:"version";s:5:"2.0b1";s:5:"build";i:45;s:23:"requireFrameworkVersion";s:7:"2.0-060";s:4:"icon";s:29:"templates/images/app-icon.png";s:23:"excludeModelsFromDistro";a:0:{}s:12:"excludeFiles";a:1:{i:0;s:24:"application/.WELCOME_RUN";}s:3:"SQL";b:1;}s:13:"excludedFiles";a:1:{i:0;s:24:"application/.WELCOME_RUN";}s:14:"excludedTables";a:13:{s:5:"users";s:5:"users";s:10:"user_state";s:10:"user_state";s:27:"many_many_user_groups_group";s:27:"many_many_user_groups_group";i:0;s:10:"statistics";i:1;s:16:"statistics_state";i:2;s:7:"history";i:3;s:13:"history_state";i:4;s:10:"permission";i:5;s:16:"permission_state";i:6;s:33:"many_many_permission_groups_group";i:7;s:5:"users";i:8;s:11:"users_state";i:9;s:27:"many_many_user_groups_group";}s:9:"DB_PREFIX";s:10:"{!#PREFIX}";s:4:"file";s:21:"gomacms.2.0b1-045.gfs";}}}}}

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.11.2012
+  * last modified: 12.12.2012
   * $Version: 2.1.6
 */
 
@@ -450,6 +450,7 @@ class htmlparser extends object
 				if(PROFILE) Profiler::unmark("HTMLParser::parseHTML");
 				return $html;
 		}
+		
 		/**
 		  * processes links for non-mod-rewrite
 		  *@name process_links
@@ -462,14 +463,16 @@ class htmlparser extends object
 				preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $html, $links);
 				foreach($links[2] as $key => $href)
 				{
+						$attrs = "";
 						// check http
 						if(preg_match('/^(http|https|ftp)/Usi', $href))
 						{
 								continue;
 						}
-						if(preg_match('/^#/', $href))
+						if(preg_match('/^#(.+)/', $href, $m))
 						{
 								$href = URL . URLEND . "#" . $m[1];
+								$attrs = ' data-anchor="'.$m[1].'"';
 						}
 						if(preg_match('/^javascript:/i', $href))
 						{
@@ -501,7 +504,7 @@ class htmlparser extends object
 						{
 								$href = BASE_SCRIPT . $href;
 						}
-						$newlink = '<a'.$links[1][$key].'href="'.$href.'"'.$links[3][$key].'>';
+						$newlink = '<a'.$links[1][$key].'href="'.$href.'"'.$links[3][$key].' '.$attrs.'>';
 						$html = str_replace($links[0][$key], $newlink, $html);
 				}
 				

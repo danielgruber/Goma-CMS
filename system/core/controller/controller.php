@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 2.1.12
+  * last modified: 14.12.2012
+  * $Version 2.1.13
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -318,6 +318,7 @@ class Controller extends RequestHandler
 		public function index()
 		{
 			if($this->template) {
+				$this->tplVars["namespace"] = $this->namespace;
 				if(is_a($this->modelInst(), "DataObject") && $this->modelInst()->controller != $this) {
 					$model = DataObject::Get($this->model(), $this->where);
 					$model->controller = clone $this;
@@ -364,7 +365,9 @@ class Controller extends RequestHandler
 				$this->callExtending("decorateRecord", $model);
 				$this->decorateRecord($data);
 				if($data) {
-					return $data->controller()->handleRequest($this->request);
+					$controller = $data->controller();
+					$controller->namespace = $this->namespace;
+					return $controller->handleRequest($this->request);
 				} else {
 					return $this->index();
 				}
@@ -526,7 +529,12 @@ class Controller extends RequestHandler
 				
 				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"))) {
 					$data = clone $this->modelInst();
-					$this->modelInst()->remove();
+					if(is_a($this->modelInst(), "DataObjectSet"))
+						$toDelete = $this->modelInst()->first();
+					else
+						$toDelete = $this->modelInst();
+					
+					$toDelete->remove();
 					if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 						$response = new AjaxResponse();
 						if($object !== null)

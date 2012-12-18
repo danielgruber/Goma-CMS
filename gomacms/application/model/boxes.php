@@ -4,13 +4,13 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.11.2012
-  * $Version 1.1.7
+  * last modified: 12.12.2012
+  * $Version 1.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Boxes extends DataObject {
+class Boxes extends DataObject implements Notifier {
 	
 	/**
 	 * title of this dataobject
@@ -73,9 +73,9 @@ class Boxes extends DataObject {
 	public function getActions(&$form) {
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		if(Core::is_ajax()) {
-			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish"));
+			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish", array("green")));
 		} else {
-			$form->addAction(new FormAction("submit", lang("save"), "publish"));
+			$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
 		}
 	}
 	
@@ -161,6 +161,21 @@ class Boxes extends DataObject {
 		
 		return Permission::check("PAGES_INSERT");
 	}
+	
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("boxes"), "icon" => "images/icons/fatcow16/layout_content@2x.png");
+	}
+		
 	
 }
 
@@ -326,6 +341,7 @@ class BoxesController extends FrontedController {
 	public function ajaxSave($data, $response) {
 		if($this->save($data, 2) !== false)
 		{
+			Notification::notify("boxes", lang("box_successful_saved", "The data was successfully written!"), lang("saved"));
 			//$response->exec(new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay"), 3));
 			$response->exec('$("#boxes_new_'.convert::raw2js($data["seiteid"]).'").html("'.convert::raw2js(BoxesController::renderBoxes($data["seiteid"])).'");');
 			$response->exec('dropdownDialog.get(ajax_button.parents(".dropdownDialog").attr("id")).hide();');

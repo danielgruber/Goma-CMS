@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
+  * last modified: 09.12.2012
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -103,7 +103,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByWidth($width)->output();
+						$img = $image->resizeByWidth($width);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -125,7 +130,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByHeight($height)->output();
+						$img = $image->resizeByHeight($height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -147,8 +157,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-					
-						$image->resize($width, $height)->output();
+						$img = $image->resize($width, $height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -175,7 +189,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByWidth($width)->output();
+						$img = $image->resizeByWidth($width);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -197,7 +216,13 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resizeByHeight($height)->output();
+						
+						$img = $image->resizeByHeight($height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";
@@ -219,7 +244,12 @@ class imageResize extends RequestHandler
 				
 				if(isset($image->md5))
 				{
-						$image->resize($width, $height)->output();
+						$img = $image->resize($width, $height);
+						if(substr($file, 0, 7) == "Uploads") {
+							FileSystem::requireDir(dirname(ROOT . URL));
+							$img->toFile(ROOT . URL);
+						}
+						$img->Output();
 						exit;
 				}
 				return $file . "." . $extension . " does not exist.";

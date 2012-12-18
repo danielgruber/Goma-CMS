@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 04.12.2012
-  * $Version: 4.6.12
+  * last modified: 09.12.2012
+  * $Version: 4.6.13
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -485,7 +485,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($this->searchable_fields)
 				// we add an index for fast searching
 				$indexes["searchable_fields"] = array("type" => "INDEX", "fields" => implode(",", $this->searchable_fields), "name" => "searchable_fields");
-				
+		
+		// validate
+		foreach($indexes as $name => $type) {
+			if(is_array($type)) {
+				if(isset($type["type"], $type["fields"])) {
+					// okay
+				} else {
+					throwError(6, "Invalid Index", "Index ".$name." in DataObject ".$this->class." invalid. Type and Fields required!");
+				}
+			}
+		}
+		
 		return $indexes;
 
 	}
@@ -1530,7 +1541,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$oldid = 0;
 		
-		self::$query_cache = array();
+		self::$datacache[$this->baseClass] = array();
 		
 		// if we don't insert we merge the old record with the new one
 		if($forceInsert || $this->versionid == 0) {
@@ -1695,60 +1706,85 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		// find out if we should write data
 		if($command != "insert") {
-			$changed = array();
-			$forceChange = $forceWrite;
-			
-			// first calculate change-count
-			foreach($this->data as $key => $val) {
-				if(isset($newdata[$key]) && $newdata[$key] != $val) {
-					$changed[$key] = $newdata[$key];
+			// first check if this record is important
+			if(!$this->isField("stateid") || !$this->isField("publishedid")) {
+				$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
+				if($query->execute()) {
+					while($row = $query->fetch_object()) {
+						$this->publishedid = $row->publishedid;
+						$this->stateid = $row->stateid;
+						break;
+					}
+					if(!isset($this->data["publishedid"])) {
+						$this->publishedid = 0;
+						$this->stateid = 0;
+					}
+				} else {
+					throwErrorByID(3);
 				}
 			}
 			
-			// check for relation
-			if(count($many_many_objects) > 0) {
-				$forceChange = true;
-			}
-			
-			// many-many
-			if(!$forceChange && $this->many_many)
-				foreach($this->many_many as $name => $table)
-				{
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;
-								break;
+			// try and find out whether to write cause of state
+			if($this->publishedid != 0 && $this->stateid != 0 && ($this->stateid == $this->versionid || $snap_priority == 1) && ($this->publishedid == $this->versionid || $snap_priority == 2)) {
+				
+				
+				$changed = array();
+				$forceChange = $forceWrite;
+				
+				// first calculate change-count
+				foreach($this->data as $key => $val) {
+					if(isset($newdata[$key])) {
+						if(gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
+							$changed[$key] = $newdata[$key];
 						}
+					}
 				}
-			
-			// many-many
-			if(!$forceChange && $this->belongs_many_many)
-				foreach($this->belongs_many_many as $name => $table)
-				{
-						
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;
-								break;
-						}	
+				
+				// check for relation
+				if(count($many_many_objects) > 0) {
+					$forceChange = true;
 				}
-			
-			// has-many
-			if(!$forceChange && $this->has_many)
-				foreach($this->has_many as $name => $class)
-				{
-						if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
-							$newdata[$name . "ids"] = $newdata[$name];
-						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-						{
-								$forceChange = true;				
-						}						
+				
+				// many-many
+				if(!$forceChange && $this->many_many)
+					foreach($this->many_many as $name => $table)
+					{
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;
+									break;
+							}
+					}
+				
+				// many-many
+				if(!$forceChange && $this->belongs_many_many)
+					foreach($this->belongs_many_many as $name => $table)
+					{
+							
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;
+									break;
+							}	
+					}
+				
+				// has-many
+				if(!$forceChange && $this->has_many)
+					foreach($this->has_many as $name => $class)
+					{
+							if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
+								$newdata[$name . "ids"] = $newdata[$name];
+							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+							{
+									$forceChange = true;				
+							}						
+					}
+				
+				// now check if we should write or not
+				if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
+					// should we really write this?! No!
+					return true;
 				}
-			
-			// now check if we should write or not
-			if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
-				// should we really write this?! No!
-				return true;
 			}
 		}
 		
@@ -1895,7 +1931,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
-		self::$query_cache = array();
+		self::$datacache[$this->baseClass] = array();
 		
 		// get correct oldid for history
 		if($data = DataObject::get_one($this->class, array("id" => $this->RecordID))) {
@@ -2104,6 +2140,37 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->data["publishedid"])) {
 			return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
 		} else {
+			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
+			if($query->execute()) {
+				while($row = $query->fetch_object()) {
+					$this->publishedid = $row->publishedid;
+					$this->stateid = $row->stateid;
+					break;
+				}
+				if(isset($this->data["publishedid"])) {
+					return ($this->publishedid != 0 && $this->versionid == $this->publishedid);
+				} else {
+					$this->publishedid = 0;
+					$this->stateid = 0;
+					return false;
+				}
+			} else {
+				throwErrorByID(3);
+			}
+		}
+	}
+	
+	/**
+	 * returns if original version of the record is published
+	 *
+	 *@name isrOrgPublished
+	 *@access public
+	*/
+	public function isOrgPublished() {
+		
+		if(isset($this->original["publishedid"])) {
+			return ($this->original["publishedid"] != 0 && $this->original["versionid"] == $this->original["publishedid"]);
+		} else {
 			return false;
 		}
 	}
@@ -2115,6 +2182,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function everPublished() {
+		if($this->isPublished())
+			return true;
 		
 		if(isset($this->data["publishedid"]) && $this->data["publishedid"]) {
 			return true;
@@ -2130,7 +2199,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function isDeleted() {
-		if(isset($this->data["publishedid"]) || DataObject::count("pages", array("id" => $this->id) > 0)) {
+		if($this->isPublished() || (isset($this->data["publishedid"]) && $this->data["publishedid"] != 0 && $this->data["stateid"] != 0)) {
 			return false;
 		} else
 			return true;
@@ -2432,7 +2501,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$this->disconnect();
 		
-		self::$query_cache = array();
+		self::$datacache[$this->caseClass] = array();
 		
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
@@ -3221,6 +3290,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@var array
 	*/
 	protected static $query_cache = array();
+	
 	/**
 	 * builds the Query
 	 *@name buildQuery
@@ -3679,8 +3749,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 				unset($limithash, $joinhash, $searchhash);
 				if(PROFILE) Profiler::unmark("getRecords::hash");
-				if(isset(self::$datacache[$this->class][$hash])) {
-					return self::$datacache[$this->class][$hash];
+				if(isset(self::$datacache[$this->baseClass][$hash])) {
+					return self::$datacache[$this->baseClass][$hash];
 				}
 			}
 			
@@ -3712,13 +3782,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				
 				
 				// store id in cache
-				if(isset($basehash)) self::$datacache[$this->class][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
+				if(isset($basehash)) self::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
 				
 				// cleanup
 				unset($row);
 			}
 			
-			self::$datacache[$this->class][$hash] = $arr;
+			self::$datacache[$this->baseClass][$hash] = $arr;
 			
 			$query->free();
 			unset($hash, $basehash, $limits, $sort, $filter, $query); // free memory
@@ -3911,24 +3981,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function providePerms()
 	{
 			return array(
-				"DATA_WRITE"	=> array(
-					"title"		=> '{$_lang_dataobject_edit}',
+				"DATA_MANAGE"	=> array(
+					"title"		=> '{$_lang_data_manage}',
 					"default"	=> array(
 						"type" => "admins"
 					)
-				),
-				"DATA_DELETE"	=> array(
-					"title"		=> '{$_lang_dataobject_delete}',
-					"default"	=> array(
-						"type" => "admins"
-					)
-				),
-				"DATA_INSERT"	=> array(
-					"title"		=> '{$_lang_dataobject_add}',
-					"default"	=> array(
-						"type" => "admins"
-					)
-				),
+				)
 			);
 	}
 	
@@ -4170,6 +4228,21 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$data->versionid = 0;
 		
 		return $data;
+	}
+	
+	/**
+	 * clears the data-cache
+	 *
+	 *@name clearDataCache
+	 *@access public
+	*/
+	public static function createDataCache($class = null) {
+		if(isset($class)) {
+			$class = strtolower($class);
+			self::$datacache[$class] = array();
+		} else {
+			self::$datacache = array();
+		}
 	}
 }
 

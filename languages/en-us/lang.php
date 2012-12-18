@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 02.12.2012
+  * last modified: 15.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -209,7 +209,13 @@ $lang = array(
 	"captcha_wrong"                                 => "The security-code was wrong",
 	"captcha_reload"                                => "reload",
 	'path'                                          => "path",
+	"box_successful_saved"							=> "The box was successfully saved!",
 	"successful_saved"                              => "The data was successfully saved!",
+	"saved"											=> "Saved",
+	"successful_deleted"							=> "The data was successfully removed.",
+	"deleted"										=> "Removed",
+	"successful_published"							=> "The data was successfully published!",
+	"published"										=> "Published"
 	'sites_edit'									=> "edit and create sites",
 	'admin_rating'									=> "edit rating",
 	'admin_smilies'									=> "manage emotions",
@@ -241,6 +247,7 @@ $lang = array(
 	'no_parentpage'									=> "Root-Page",
 	"subpage"										=> "Child-Page",
 	'boxes_page'									=> "Page with box-system",
+	"boxes"											=> "box-system",
 	'view_site'										=> "view site",
 	'show_in_search'								=> "Show in search",
 	'redirect'										=> "Weiterleitung",
@@ -279,16 +286,10 @@ $lang = array(
 	"pages_add"										=> "create page",
 	"pages_publish"									=> "publish page",
 	// default DataObjects
-	"dataobject_all"								=> "Full access to various dataobjects.",
-	"dataobject_edit"								=> "Edit data of various dataobjects.",
-	"dataobject_add"								=> "Add data to various dataobjects.",
-	"dataobject_delete"								=> "Delete data from various dataobjects.",
+	"data_manage"									=> "manage other data",
 
 	// right-mangement
 	"following_groups"								=> "Following groups",
-	"editor_groups"									=> "edit-groups",
-	"viewer_groups"									=> "viewer-groups",
-	"content_edit_users"							=> "every edit-group",
 	"editors"										=> "Permission to edit",
 	"publish"										=> "Permission to publish",
 	"viewer_types"									=> "Permission to view",
@@ -374,7 +375,6 @@ $lang = array(
 	"preview"										=> "preview",
 	"publish"										=> "publish",
 	"published_site"								=> "published page",
-	"published"										=> "published",
 	"draft"											=> "draft",
 	"draft_save"									=> "save draft",
 	"save_publish"									=> "save & publish",
@@ -382,11 +382,13 @@ $lang = array(
 	"current_state"									=> "Current State",
 	"open_in_new_tab"								=> "Open in new window",
 	"browse_versions"								=> "Browse all Versions",
-	"revert_changes"								=> "Revert Changes",
+	"revert_changes"								=> "Revert changes",
 	"revert_changes_confirm"						=> "Do you really want to revert changes and go back to the last published version?",
+	"revert"										=> "reverted",
 	"revert_changes_success"						=> "The last version was recovered successfully.",
 	"unpublish"										=> "Unpublish",
 	"unpublish_success"								=> "The site was successfully unpublished.",
+	"unpublished"									=> "unpublished",
 	"state_publish"									=> "Published version",
 	"state_state"									=> "Saved version",
 	"state_autosave"								=> "Auto-saved version",
@@ -524,6 +526,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user unpublished the page <a href="$pageUrl">$page</a>',
 	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a>',
 	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
@@ -541,6 +544,11 @@ $lang = array(
 	"h_all"					=> "All Events",
 	
 	"older"					=> "older entries",
-	"newer"					=> "newer entries"
+	"newer"					=> "newer entries",
+	
+	"notification"			=> "notification",
+	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again.",
+	
+	"wrapper_page"			=> "list with subpages"
 
 );

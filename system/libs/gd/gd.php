@@ -5,8 +5,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   ********
-  * last modified: 03.04.2012
-  * $Version: 2.0.2
+  * last modified: 08.12.2012
+  * $Version: 2.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -418,23 +418,24 @@ class GD extends Object
 		{
 				if($this->extension == "gif")
 				{
-						$this->pic = $file;
 						imagegif($this->gd(), $file, $quality);
+						$this->pic = $file;
+						@chmod($file, 0777);
 						imagedestroy($this->gd);
 						unset($this->gd);
 						clearstatcache();
 						return $file;
 				} else if($this->extension == "jpg")
 				{
-						$this->pic = $file;
 						imagejpeg($this->gd(), $file, $quality);
+						$this->pic = $file;
+						@chmod($file, 0777);	
 						imagedestroy($this->gd);
 						unset($this->gd);
 						clearstatcache();
 						return $file;
 				} else if($this->extension == "png")
 				{
-						$this->pic = $file;
 						if($quality > 9 && $quality < 100)
 						{
 								if($quality <= 100 && $quality > 90) {
@@ -464,14 +465,17 @@ class GD extends Object
 						}
 						
 						imagepng($this->gd(), $file, $quality);
+						$this->pic = $file;
+						@chmod($file, 0777);
 						imagedestroy($this->gd);
 						unset($this->gd);
 						clearstatcache();
 						return $file;
 				} else if($this->extension == "bmp") {
-						$this->pic = $file;
 						
-						ImageJPEG($this->gd(), $file);
+						ImageJPEG($this->gd(), $file, 100);
+						$this->pic = $file;
+						@chmod($file, 0777);
 						imagedestroy($this->gd);
 						unset($this->gd);
 						clearstatcache();
