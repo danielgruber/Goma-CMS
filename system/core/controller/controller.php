@@ -366,7 +366,6 @@ class Controller extends RequestHandler
 				$this->decorateRecord($data);
 				if($data) {
 					$controller = $data->controller();
-					$controller->namespace = $this->namespace;
 					return $controller->handleRequest($this->request);
 				} else {
 					return $this->index();

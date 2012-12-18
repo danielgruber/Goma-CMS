@@ -108,11 +108,11 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function url() {
-		return $this->namespace . "/";
+		return $this->originalNamespace . "/";
 	}
 	
 	public function adminURI() {
-		return $this->namespace . "/";
+		return $this->originalNamespace . "/";
 	}
 	
 	/**
