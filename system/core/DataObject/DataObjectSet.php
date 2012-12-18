@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 06.12.2012
-  * $Version: 1.4.3
+  * last modified: 14.12.2012
+  * $Version: 1.4.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1714,6 +1714,13 @@ class DataObjectSet extends DataSet {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * public removal
+	*/
+	public function getRemove() {
+		throwError(6, "Not allowed", "Method remove is not allowed anymore and DataObjectSet, please select a single DataObject");
 	}
 	
 	/**

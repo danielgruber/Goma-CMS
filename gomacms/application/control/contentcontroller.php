@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.10.2012
-  * $Version 2.0.2
+  * last modified: 13.12.2012
+  * $Version 2.0.3
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -125,6 +125,7 @@ class contentController extends FrontedController
 			
 			// register a PAGE_PATH
 			define("PAGE_PATH", $this->modelInst()->url);
+			define("PAGE_ORG_PATH", $this->modelInst()->orgurl);
 			
 			if($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
 				defined("HOMEPAGE") OR define("HOMEPAGE", true);

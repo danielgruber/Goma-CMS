@@ -146,7 +146,7 @@ function show_preview(publish, state, usePublish) {
 			if(current != $("#previewFrame").get(0).contentWindow.location.href) {
 				current = $("#previewFrame").get(0).contentWindow.location.href;
 				changeCount++;
-				if(changeCount == 1) {
+				if(changeCount > 0) {
 					location.href = current;
 					$("#preview .edit").click();
 				}

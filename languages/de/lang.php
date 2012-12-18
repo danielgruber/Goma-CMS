@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 02.12.2012
+  * last modified: 15.12.2012
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -209,8 +209,13 @@ $lang = array(
 	"captcha_wrong"                                 => "Der Sicherheitscode war falsch.",
 	"captcha_reload"                                => "Neu Laden",
 	'path'                                          => "Pfad",
+	"box_successful_saved"							=> "Die Box wurde erfolgreich gespeichert!",
 	"successful_saved"                              => "Die Daten wurden erfolgreich gespeichert!",
+	"saved"											=> "Gespeichert",
+	"successful_deleted"							=> "Die Daten wurden erfolgreich gelöscht",
+	"deleted"										=> "Gelöscht",
 	"successful_published"							=> "Die Daten wurden erfolgreich ver&ouml;ffentlicht!",
+	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
 	'admin_smilies'									=> "Smilies verwalten",
@@ -242,6 +247,7 @@ $lang = array(
 	'no_parentpage'									=> "Übergeordnete Seite",
 	"subpage"										=> "Untergeordnete Seite",
 	'boxes_page'									=> "Seite mit Boxsystem",
+	"boxes"											=> "Boxsystem",
 	'view_site'										=> "Seite aufrufen",
 	'show_in_search'								=> "In der Suche anzeigen",
 	'redirect'										=> "Weiterleitung",
@@ -280,16 +286,9 @@ $lang = array(
 	"pages_add"										=> "Seiten erstellen",
 	"pages_publish"									=> "Seiten veröffentlichen",
 	// default DataObjects
-	"dataobject_all"								=> "Vollzugriff auf andere Datenobjekte",
-	"dataobject_edit"								=> "Daten von anderen Datenobjekten bearbeiten",
-	"dataobject_add"								=> "Daten zu anderen Datenobjekten hinzufügen",
-	"dataobject_delete"								=> "Daten von anderen Datenobjekten löschen",
-
+	"data_manage" 									=> "Andere Daten verwalten",
 	// right-mangement
 	"following_groups"								=> "Folgende Gruppen",
-	"editor_groups"									=> "Bearbeitungs-Gruppen",
-	"viewer_groups"									=> "Betrachungsgruppen",
-	"content_edit_users"							=> "Alle Bearbeitungs-Gruppen",
 	"editors"										=> "Recht zur Bearbeitung",
 	"publisher"										=> "Recht zur Veröffentlichung",
 	"viewer_types"									=> "Betrachter-Rechte",
@@ -378,7 +377,6 @@ $lang = array(
 	"preview"										=> "Vorschau",
 	"publish"										=> "Ver&ouml;ffentlichen",
 	"published_site"								=> "Veröffentlichte Seite",
-	"published"										=> "Veröffentlicht",
 	"draft"											=> "Entwurf",
 	"draft_save"									=> "Entwurf speichern",
 	"save_publish"									=> "Speichern & Veröffentlichen",
@@ -386,10 +384,12 @@ $lang = array(
 	"current_state"									=> "Aktueller Zustand",
 	"browse_versions"								=> "Versionen durchsuchen",
 	"open_in_new_tab"								=> "Auf neuer Seite öffnen",
-	"revert_changes"								=> "Änderungen zurücksetzen",
+	"revert_changes"								=> "Änderungen verwerfen",
 	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Veröffentlichung zurückkehren?",
+	"reverted"										=> "Verworfen",
 	"revert_changes_success"						=> "Die letzte Version wurde erfolgreich wiederhergestellt.",
 	"unpublish"										=> "Veröffentlichung zurücknehmen",
+	"unpublished"									=> "Zurückgenommen",
 	"unpublish_success"								=> "Die Seite ist nun nicht mehr veröffentlicht.",
 	"state_publish"									=> "Veröffentlichung",
 	"state_state"									=> "Speicherpunkt",
@@ -399,7 +399,7 @@ $lang = array(
 	"version_at"									=> "am",
 	"versions_javascript"							=> "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen.",
 	"done"											=> "Fertig",
-	"restore"										=> "Zurücksetzen",
+	"restore"										=> "Rückgängig",
 	"restore_confirm"								=> "Wollen Sie diese Änderung wirklich rückgängig machen?",
 	"compare"										=> "Vergleichen",
 	"no_versions"									=> "Keine Version vorhanden",
@@ -526,6 +526,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user nahm die Seite <a href="$pageUrl">$page</a> zurück',
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
 	
@@ -544,5 +545,10 @@ $lang = array(
 	"h_all"					=> "Alle Ereignisse",
 	
 	"older"					=> "Ältere Einträge",
-	"newer"					=> "Neuere Einträge"
+	"newer"					=> "Neuere Einträge",
+	
+	"notification"			=> "Mitteilung",
+	"alert_big_image"		=> "Achtung:\n\nIhre hochgeladene Bilddatei ist zu groß für eine Webseite. Sie wird möglicherweise sehr lange laden.\n\nBitte reduzieren Sie die Bildgröße mit einem Bildbearbeitungsprogramm und laden Sie die Datei erneut hoch.",
+	
+	"wrapper_page"			=> "Liste mit Unterseiten"
 );

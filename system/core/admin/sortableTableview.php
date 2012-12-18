@@ -114,6 +114,7 @@ class SortableTableView extends TableView {
 		if(isset($_POST["sort_item"])) {
 			$field = $this->sort_field;
 			foreach($_POST["sort_item"] as $key => $value) {
+				$key += isset($_GET["pa"]) ? ($_GET["pa"] - 1) * $this->perPage : 0;
 				DataObject::update($this->models[0], array($field => $key), array("recordid" => $value));
 			}
 		}

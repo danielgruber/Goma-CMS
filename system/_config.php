@@ -49,7 +49,6 @@ gloader::addLoadAble("tabs", "system/libs/javascript/ui/tabs.js");
 gloader::addLoadAble("gtabs", "system/libs/tabs/tabs.js");
 gloader::addLoadAble("progessbar", "system/libs/javascript/ui/progessbar.js");
 gloader::addLoadAble("tree", "system/libs/javascript/tree.js");
-gloader::addLoadAble("orangebox", "system/libs/javascript/orangebox/js/orangebox.min.js");
 gloader::addLoadAble("datepicker", "system/libs/javascript/ui/datepicker.js");
 gloader::addLoadAble("uiEffects", "system/libs/javascript/ui/effects.js");
 gloader::addLoadAble("touch", "system/libs/javascript/ui/jquery.ui.touch.js");

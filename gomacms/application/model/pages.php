@@ -4,13 +4,13 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * $Version 2.4.4
+  * last modified: 13.12.2012
+  * $Version 2.4.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Pages extends DataObject implements PermProvider, HistoryData
+class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 {
 		/**
 		 * name
@@ -79,16 +79,16 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		/**
 		 * which parents are allowed
 		 *
-		 *@name can_parent
+		 *@name allow_parent
 		*/
-		public $can_parent = array();
+		public static $allow_parent = array();
 		
 		/**
 		 * childs that are allowed
 		 *
-		 *@name allowed_children
+		 *@name allow_children
 		*/
-		public $allowed_children = array();
+		public static $allow_children = array("Page", "WrapperPage");
 		
 		/**
 		 * default sort
@@ -154,6 +154,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		
 		/**
 		 * makes the url
+		 *
 		 *@name geturl
 		 *@return string
 		*/
@@ -164,6 +165,17 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			} else {
 				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
 			}
+		}
+		
+		/**
+		 * makes the org url without nothing for homepage
+		 *
+		 *@name getorgurl
+		 *@return string
+		*/
+		public function getOrgURL()
+		{
+			return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
 		}
 		
 		/**
@@ -330,18 +342,26 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				} else
 				{
 						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
-							return lang("error_page_self");
+							return lang("error_page_self", "You can't suborder a page under itself!");
 						}
+						
 						$d = DataObject::get("pages", array("id" => $parentid));
+						if(isset($data["recordid"])) {
+							$temp = $d;
+							// validate if we subordered under subtree
+							while($temp->parent) {
+								if($temp->id == $data["recordid"]) {
+									return lang("error_page_self", "You can't suborder a page under itself!");
+								}
+								$temp = $temp->parent;
+							}
+						}
+						
 						$pclassname = strtolower($d["class_name"]);
 				}
 
-				if(Object::instance($classname)->can_parent == "*" || Object::instance($classname)->can_parent == "all" || in_array(strtolower($pclassname), Object::instance($classname)->can_parent))
-				{
-						return true;
-				} else if($d->_count() > 0 && in_array(strtolower($classname), Object::instance($pclassname)->allowed_children))
-				{
-						return true;
+				if(in_array($pclassname, $this->allowed_parents())) {
+					return true;
 				}
 				
 				return lang("form_bad_pagetype");
@@ -367,16 +387,35 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				} else {
 					$inheritor = Permission::forceExisting("PAGES_WRITE");
 				}
+				
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->edit_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		
+		/**
+		 * sets the edit-permission
+		 *
+		 *@name setEdit_Permission
+		 *@access public
+		*/
+		public function setEdit_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = Permission::forceExisting("PAGES_WRITE")->id;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $this->parent->edit_permission->id;
+				}
+			}
+			$this->setField("Edit_Permission", $perm);
 		}
 		
 		/**
@@ -401,14 +440,33 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				}
 				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
 				$perm->forModel = "pages";
+				
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->publish_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		
+		/**
+		 * sets the publish-permission
+		 *
+		 *@name setPublish_Permission
+		 *@access public
+		*/
+		public function setPublish_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $perm->inheritorid = $this->parent->publish_permission->id;
+				}
+			}
+			$this->setField("Publish_Permission", $perm);
 		}
 		
 		/**
@@ -431,11 +489,30 @@ class Pages extends DataObject implements PermProvider, HistoryData
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
 					$this->read_permissionid = $perm->id;
-					$this->write(false, true, $this->isPublished() ? 2 : 1, false, false);
+					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 				}
 				
 				return $perm;
 			}
+		}
+		/**
+		 * sets the read-permission
+		 *
+		 *@name setRead_Permission
+		 *@access public
+		*/
+		public function setRead_Permission($perm) {
+			$perm->forModel = "pages";
+			if($perm->inheritorid != 0) {
+				if($perm->inheritor->name == "" && $this->parentid == 0) {
+					$perm->inheritorid = 0;
+				} else if($this->parentid != 0) {
+					$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+				}
+			} else if($this->id == 0 && $this->parentid != 0) {
+				$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+			}
+			$this->setField("Read_Permission", $perm);
 		}
 		
 		/**
@@ -459,8 +536,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					return lang("site_exists", "The page with this filename already exists.");
 			} else {
 				return true;
-			}
-				
+			}	
 		}
 		
 		/**
@@ -481,7 +557,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		 *@param object - form
 		*/
 		public function getForm(&$form)
-		{
+		{		
+				
 				parent::getForm($form);
 				
 				$allowed_parents = $this->allowed_parents();
@@ -586,6 +663,10 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					$parenttype->disableOption("root");
 				}
 				
+				if(in_array("pages", $allowed_parents) && count($allowed_parents) == 1) {
+					$parenttype->disableOption("subpage");	
+				}
+				
 				// add some js
 				$form->add(new JavaScriptField("change",'$(function(){
 					$("#'.$title->ID().'").change(function(){
@@ -633,11 +714,11 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			} else if($this->id != 0) {
 				
 				if($this->canDelete($this)) {
-					$form->addAction(new HTMLAction("deletebutton", '<a rel="ajaxfy" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
+					$form->addAction(new HTMLAction("deletebutton", '<a rel="dropdownDialog" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
 				}
 				
-				if($this->everPublished() && !$this->isPublished() && $this->canWrite($this)) {
-					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="ajaxfy">'.lang("draft_delete", "delete draft").'</a>'));
+				if($this->everPublished() && !$this->isOrgPublished() && $this->canWrite($this)) {
+					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="dropdownDialog">'.lang("draft_delete", "delete draft").'</a>'));
 				}
 				
 				if($this->everPublished() && $this->canPublish($this)) {
@@ -692,33 +773,94 @@ class Pages extends DataObject implements PermProvider, HistoryData
 		{
 				if($this->cache_parent == array())
 				{
+						if(PROFILE) Profiler::mark("pages::allowed_parents");
+						
 						$allowed_parents = array();
-						if(Object::instance($this->class)->can_parent == "*" || Object::instance($this->class)->can_parent == "all") {
-							return array_merge(array("pages"), ClassInfo::getChildren("pages"));
-						}
-						$can_parent =  array_map("strtolower",Object::instance($this->class)->can_parent);
 						
-						$allowed_parents = $can_parent;
-						
-						foreach(ClassInfo::getChildren("pages") as $child)
-						{
-								if(in_array($this->RecordClass(), array_map("strtolower",Object::instance($child)->allowed_children)))
-								{
-										if(!in_array($child, $allowed_parents) && $child != $this->class)
-										{
-												$allowed_parents[] = $child;
+						// first check all pages
+						$allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
+						foreach($allPages as $child) {
+							
+							// get allowed children for this page
+							$allowed = ClassInfo::getStatic($child, "allow_children");
+							if(count($allowed) > 0) {
+								foreach($allowed as $allow) {
+									$allow = strtolower($allow);
+									
+									// if ! these children are absolutly prohibited
+									if(substr($allow, 0, 1) == "!") {
+										if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
+											unset($allowed_parents[$child]);
+											continue 2;
 										}
+									} else {
+										if($allow == $this->class || is_subclass_of($this->class, $allow)) {
+											$allowed_parents[$child] = $child;
+										}
+									}
 								}
+							}
 						}
 						
-						$this->cache_parent = $allowed_parents;
+						// now filter
+						$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
+						if(count($allow_parents) > 0) {
+							foreach($allowed_parents as $parent) {
+								
+								// set found to false
+								$found = false;
+								
+								// try find the parent
+								foreach($allow_parents as $allow) {
+									$allow = strtolower($allow);
+									if(substr($allow, 0, 1) == "!") {
+										if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
+											unset($allowed_parents[$parent]);
+											continue 2;
+										}
+									} else {
+										if($allow == $parent || is_subclass_of($parent, $allow)) {
+											$found = true;
+										}
+									}
+								}
+								
+								// if not found, unset
+								if(!$found) {
+									unset($allowed_parents[$parent]);
+								}
+							}
+						}
 						
+						if(PROFILE) Profiler::unmark("pages::allowed_parents");
+
 						return $allowed_parents;
 				} else
 				{
 						return $this->cache_parent;
 				}	
 		}
+		
+		/**
+		 * checks if specifc class is allowed child for given page
+		 *
+		 *@name checkCanChild
+		 *@access public
+		 *@param string - child-class
+		 *@param string - parent-class
+		*/
+		public function checkCanChild($child, $parent) {
+			$children = ClassInfo::getStatic($parent, "allow_children");
+			if(count($children) > 0) {
+				foreach($children as $allowed_child) {
+					if(is_a($child, $allowed_child))
+						return true;
+				}
+			}
+			
+			return false;
+		}
+		
 		/**
 		 * get adds for the pageselector
 		 *@name _add
@@ -785,6 +927,18 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			}
 			
 			return $this->fieldGet("path");
+		}
+		
+		
+		
+		/**
+		 * can view history
+		 *
+		 *@name canViewHistory
+		 *@access public
+		*/
+		public static function canViewHistory($record = null) {
+			return (Permission::check("PAGES_WRITE") || Permission::check("PAGES_PUBLISH"));
 		}
 		
 		/**
@@ -883,7 +1037,8 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					"title" => '{$_lang_administration}: {$_lang_content}',
 					"default"	=> array(
 						"type"	=> "admins"
-					)
+					),
+					"category"	=> "ADMIN"
 				)
 			);
 		}
@@ -1094,7 +1249,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 							// get class-attribute
 							$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 							if(!isset($state))
-								$state = ($record->isPublished()) ? "published" : "edited";
+								$state = ($record->first()->isPublished()) ? "published" : "edited";
 							$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
 							unset($state);
 							
@@ -1132,7 +1287,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 										// get class-attribute
 										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 										if(!isset($state))
-											$state = ($data->isPublished()) ? "published" : "edited";
+											$state = ($data->first()->isPublished()) ? "published" : "edited";
 										$class = "".$data["class_name"]. " page ".$mainbar . " " . $state;
 										unset($state);
 										
@@ -1168,7 +1323,7 @@ class Pages extends DataObject implements PermProvider, HistoryData
 										// get class-attribute
 										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 										if(!isset($state))
-											$state = ($data->isPublished()) ? "published" : "edited";
+											$state = ($data->first()->isPublished()) ? "published" : "edited";
 										$class = "".$data["class_name"]. " page ".$mainbar;
 										unset($state);
 										
@@ -1228,20 +1383,20 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					if(!$record["id"])
 						continue;
 					
-					if($record->isDeleted()) {
+					if($record->first()->isDeleted()) {
 						$state = "deleted";
 					}				
 					// get class-attribute
 					$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
 					if(!isset($state))
-						$state = ($record->isPublished()) ? "published" : "edited";
+						$state = ($record->first()->isPublished()) ? "published" : "edited";
 					$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
 					unset($state);
 					
 					$arr["_" . $record["id"]] = array(
 						"title" 		=> $record["title"],
 						"attributes"	=> array("class" => $class),
-						"data"			=> $record->ToArray(),
+						"data"			=> $record->first()->ToArray(),
 						"collapsed"		=> false,
 						"collapsable"	=> false,
 						"children"		=> $this->generateFromToInsert($record["id"], $to_insert)
@@ -1322,6 +1477,10 @@ class Pages extends DataObject implements PermProvider, HistoryData
 					$lang = lang("h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
 					$icon = "images/icons/fatcow16/page_white_delete.png";
 				break;
+				case "unpublish":
+					$lang = lang("h_pages_unpublish", '$user unpublished the page <a href="$pageUrl">$page</a>');
+					$icon = "images/icons/fatcow16/page_white_edit.png";
+				break;
 				default:
 					$lang = "unknowen event " . $record->action;
 					$icon = "images/icons/fatcow16/page_white_edit.png";
@@ -1332,6 +1491,20 @@ class Pages extends DataObject implements PermProvider, HistoryData
 			
 			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared, "editurl" => "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND);
 		}
+		
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("content"), "icon" => "images/icons/other/content.png");
+	}
 		
 }
 

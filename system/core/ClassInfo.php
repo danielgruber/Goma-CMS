@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.11.2012
-  * $Version 3.6.4
+  * last modified: 16.12.2012
+  * $Version 3.6.5
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -1150,7 +1150,7 @@ class ClassInfo extends Object
 				defined("APPLICATION_BUILD") OR define("APPLICATION_BUILD", self::$appENV["app"]["build"]);
 				
 				if(isset(self::$appENV["app"]["requireFrameworkVersion"])) {
-					if(version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
+					if(goma_version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
 						throwError(7, 'Application-Error', "Application does not support this version of the goma-framework, please update the framework to <strong>".self::$appENV["app"]["requireFrameworkVersion"]."</strong>. <br />Framework-Version: <strong>".GOMA_VERSION."-".BUILD_VERSION."</strong>");
 					}
 				}

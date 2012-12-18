@@ -22,11 +22,6 @@ class VirtualPage extends Page {
 	public static $icon = "images/icons/goma/16x16/clone.png";
 	
 	/**
-	 * can-parent
-	*/
-	public $can_parent = "all";
-	
-	/**
 	 * relations
 	*/
 	public $has_one = array(

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
-  * $Version 1.5
+  * last modified: 08.12.2012
+  * $Version 1.5.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -626,7 +626,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setHeight($height) {
-		return '<img src="' . $this->path . "/setHeight/" . $height . '" height="'.$height.'" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, ".")).'" height="'.$height.'" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -636,7 +636,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setWidth($width) {
-		return '<img src="' . $this->path . "/setWidth/" . $width . '" width="'.$width.'" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, ".")) . '" width="'.$width.'" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -646,7 +646,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setSize($width, $height) {
-		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height.'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2).'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, ".")) .'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -656,7 +656,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetSize($width, $height) {
-		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height.'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2).'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, ".")) .'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2).'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -666,7 +666,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetWidth($width) {
-		return '<img src="' . $this->path . "/orgSetWidth/" . $width . '" width="'.$width.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, ".")) . '" width="'.$width.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -676,7 +676,7 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetHeight($height) {
-		return '<img src="' . $this->path . "/orgSetHeight/" . $height . '" height="'.$height.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, ".")) . '" height="'.$height.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -765,9 +765,12 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function setWidth() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$width = $this->getParam("width");
+			$width = (int) $this->getParam("width");
 			$image = new RootImage($this->modelInst()->realfile);
-			$image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+			$img = $image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+			$img->toFile(ROOT . URL);
+			$img->Output();
 		}
 		
 		exit;
@@ -781,9 +784,12 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function setHeight() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$height = $this->getParam("height");
+			$height = (int) $this->getParam("height");
 			$image = new RootImage($this->modelInst()->realfile);
-			$image->createThumb(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+			$img = $image->createThumb(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+			$img->toFile(ROOT . URL);
+			$img->Output();
 		}
 		
 		exit;
@@ -797,10 +803,13 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function setSize() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$height = $this->getParam("height");
-			$width = $this->getParam("width");
+			$height = (int) $this->getParam("height");
+			$width = (int) $this->getParam("width");
 			$image = new RootImage($this->modelInst()->realfile);
-			$image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+			$img = $image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+			$img->toFile(ROOT . URL);
+			$img->Output();
 		}
 		
 		exit;
@@ -814,8 +823,8 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function orgSetSize() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$height = $this->getParam("height");
-			$width = $this->getParam("width");
+			$height = (int) $this->getParam("height");
+			$width = (int) $this->getParam("width");
 			$image = new RootImage($this->modelInst()->realfile);
 			$image->createThumb($width, $height, 0, 0, 100, 100)->Output();
 		}
@@ -831,7 +840,7 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function orgSetWidth() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$width = $this->getParam("width");
+			$width = (int) $this->getParam("width");
 			$image = new RootImage($this->modelInst()->realfile);
 			$image->createThumb($width, null, 0, 0, 100, 100)->Output();
 		}
@@ -847,7 +856,7 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function orgSetHeight() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$height = $this->getParam("height");
+			$height = (int) $this->getParam("height");
 			$image = new RootImage($this->modelInst()->realfile);
 			$image->createThumb(null, $height,0,0,100,100)->Output();
 		}

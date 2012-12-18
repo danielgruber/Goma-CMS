@@ -11,16 +11,15 @@
 	<key>autor</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0</string>
+	<string>2.0b1</string>
 	<key>build</key>
-	<string>041</string>
+	<string>045</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0-053</string>
+	<string>2.0-060</string>
 	<key>icon</key>
 	<string>templates/images/app-icon.png</string>
 	<key>excludeModelsFromDistro</key>
 	<array>
-		<string>pm</string>
 	</array>
 	<key>excludeFiles</key>
 	<array>

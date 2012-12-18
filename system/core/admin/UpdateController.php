@@ -54,11 +54,7 @@ class UpdateController extends adminController {
 		
 		$updates = new DataSet($updates);
 		$storeAvailable = G_SoftwareType::isStoreAvailable();
-		if(!$storeAvailable) {
-			$updatables = G_SoftwareType::listUpdatablePackages();
-		} else {
-			$updatables = null;
-		}
+		$updatables = G_SoftwareType::listUpdatablePackages();
 		
 		$view->customise(array("updates" => $updates, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
 		

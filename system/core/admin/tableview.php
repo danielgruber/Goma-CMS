@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.05.2012
-  * $Version 1.2
+  * last modified: 12.12.2012
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -117,6 +117,8 @@ class TableView extends AdminItem {
 	 *@param string - name of the action
 	*/
 	public function checkPermission($action) {
+		
+		$this->actions = ArrayLib::map_key("strtolower", $this->actions);
 		
 		if(isset($this->actions[$action])) {
 			return true;

@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.11.2012
+  * last modified: 16.12.2012
 */
 
 
@@ -46,6 +46,7 @@ var LaM_type_timeout;
 					success: function(html, code, request) {
 						$("#content .success, #content .error, #content .notice").hide("fast");
 						renderResponseTo(html, $(".leftandmaintable").find("td.main > .inner"), request);
+						renderSideBar();
 						$(".tree .marked").removeClass("marked");
 						$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
 						
@@ -93,6 +94,7 @@ var LaM_type_timeout;
 				url: $this.attr("action") + "?" + $this.serialize(),
 				success: function(html, code, request) {
 					renderResponseTo(html, $this.parents(".leftandmaintable").find(".main"), request);
+					renderSideBar();
 					$this.find(".loading").remove();
 					self.marked_node = $this.attr("nodeid");
 					$(".tree .marked").removeClass("marked");
@@ -159,12 +161,28 @@ var LaM_type_timeout;
 			OuterDiff = $(".left-and-main > table td.main > .inner").outerHeight() - $(".left-and-main > table td.main > .inner").height();
 			$(".left-and-main > table td.main > .inner").css("height", tableHeight - OuterDiff);
 			
+			// render fixed actions
+			if($(".left-and-main > table td.main > .inner > form > .fields").length > 0 && $(".left-and-main > table td.main > .inner > form > .actions").length > 0) {
+				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
+				$(".left-and-main > table td.main > .inner > form > .fields").outerHeight(tableHeight - OuterDiff - $(".left-and-main > table td.main > .inner > form > .actions").outerHeight(true) - $(".left-and-main > table td.main > .inner > form > .error").outerHeight(true));
+				$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
+			}
+			
 			// set height for sidebar
 			var otherSideBar = $(".leftandmaintable tr > .left > .LaM_tabs > ul").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree > .treesearch").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree .legend").outerHeight() + 15;
 			$(".leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper").css("height", tableHeight - otherSideBar - 30);
 		}
+		
+		window.renderLeftSideBar = renderSideBar;
+		
 		$(window).resize(renderSideBar);
 		renderSideBar();
+		
+		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
+			jqXHR.done(function(){
+				setTimeout(renderSideBar, 1);
+			});
+		});
 		
 		/**
 		 * tab-rendering
@@ -177,7 +195,7 @@ var LaM_type_timeout;
 				self.leave_check = true;
 				$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
 				$(".left-and-main .LaM_tabs > div").css("display", "none");
-				$(".left-and-main .LaM_tabs").find("." + $(this).attr("class")).css("display", "block");
+				$(".left-and-main .LaM_tabs").find("div." + $(this).attr("class")).css("display", "block");
 				$(this).parent().addClass("active");
 				if(typeof HistoryLib.push == "function")
 					HistoryLib.push($(this).attr("href"));
@@ -190,6 +208,7 @@ var LaM_type_timeout;
 					success: function(html, code, request) {
 						$("#content .success, #content .error, #content .notice").hide("fast");
 						renderResponseTo(html, $(".leftandmaintable").find("td.main > .inner"), request);
+						renderSideBar();
 						$("div.tree .marked").removeClass("marked");
 						$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
 													
@@ -400,7 +419,10 @@ var LaM_type_timeout;
 		
 		// switch to tree-tab if necessary
 		if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-			$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+			$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
+			$(".left-and-main .LaM_tabs > div").css("display", "none");
+			$(".left-and-main .LaM_tabs").find("div.tree").css("display", "block");
+			$(".left-and-main .LaM_tabs").find("a.tree").parent().addClass("active");
 		}
 		
 		$this.addClass("loading");
@@ -416,6 +438,7 @@ var LaM_type_timeout;
 				success: function(html, code, request) {
 					$("#content .success, #content .error, #content .notice").hide("fast");
 					renderResponseTo(html, $this.parents(".leftandmaintable").find("td.main > .inner"), request);
+					renderLeftSideBar();
 					self.marked_node = $this.attr("nodeid");
 					$(".tree .marked").removeClass("marked");
 					$this.parent().parent().addClass("marked");

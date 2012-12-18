@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.12.2012
-  * $Version 3.3.18
+  * last modified: 15.12.2012
+  * $Version 3.3.21
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -367,6 +367,7 @@ class Core extends object
 				FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
 				
 				Core::callHook("deletecache", array($all));
+				
 				global $_REGISTRY;
 				$_REGISTRY["cache"] = array();
 				
@@ -431,6 +432,9 @@ class Core extends object
 			session_start();
 			if(PROFILE) Profiler::unmark("session");
 			
+			if(defined("SQL_LOADUP"))
+				member::Init();
+			
 			if(PROFILE) Profiler::mark("Core::Init");
 			
 			// init language-support
@@ -445,7 +449,7 @@ class Core extends object
 					if(PROFILE)
 							Profiler::mark("delete_cache");
 					
-					if(Permission::check(7))
+					if(Permission::check("ADMIN"))
 					{
 						logging('Deleting FULL Cache');
 						self::deletecache(true); // delete files in cache
@@ -569,6 +573,8 @@ class Core extends object
 		*/
 		public static function serve($output) {
 			
+			if(isset($_GET["flush"]) && Permission::check("ADMIN"))
+				Notification::notify("Core", lang("cache_deleted"));
 			
 			if(PROFILE) Profiler::unmark("render");
 			
@@ -638,6 +644,9 @@ class Core extends object
 				echo self::$requestController->__throwError($code, $name, $message);
 				exit;
 			} else {
+				if(Core::is_ajax())
+					HTTPResponse::setResHeader(200);
+				
 				if(class_exists("ClassInfo", false) && CLASS_INFO_LOADED) {
 					$template = new template;
 					$template->assign('errcode',convert::raw2text($code));

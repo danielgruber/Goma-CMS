@@ -513,6 +513,9 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			if(!$record->newversion()) {
+				return false;
+			}
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -545,6 +548,26 @@ class User extends DataObject implements HistoryData, PermProvider
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 			
 			return array("icon" => $icon, "text" => $lang);
+		}
+		
+		/**
+		 * returns a comma-seperated list of all groups
+		 *
+		 *@name getGroupList
+		 *@access public
+		*/
+		public function getGroupList() {
+			$str = "";
+			$i = 0;
+			foreach($this->groups() as $group) {
+				if($i == 0) {
+					$i++;
+				} else {
+					$str .= ", ";
+				}
+				$str .= Convert::raw2text($group->name);
+			}
+			return $str;
 		}
 		
 		/**
@@ -650,14 +673,14 @@ class Member extends Object {
 			$group = new Group();
 			$group->name = lang("admins", "admins");
 			$group->type = 2;
-			$group->write(true, true);
+			$group->write(true, true, 2, false, false);
 		}
 		
 		if(DataObject::count("group", array("type" => 1)) == 0) {
 			$group = new Group();
 			$group->name = lang("user", "users");
 			$group->type = 1;
-			$group->write(true, true);
+			$group->write(true, true, 2, false, false);
 		}
 		
 		if(isset(self::$default_admin) && DataObject::count("user") == 0) {
@@ -676,7 +699,8 @@ class Member extends Object {
 	 *@name checkLogin
 	 *@access public
 	*/
-	public static function checkLogin() {
+	public static function Init() {
+		if(PROFILE) Profiler::mark("member::Init");
 		if(isset(self::$id)) {
 			return true;
 		}
@@ -690,6 +714,7 @@ class Member extends Object {
 				if($data['phpsess'] != $currsess)
 				{
 					self::doLogout();
+					if(PROFILE) Profiler::unmark("member::Init");
 					return false;
 				}
 				
@@ -708,11 +733,11 @@ class Member extends Object {
 					$group = DataObject::get_one("group", array("type" => 1));
 					if(!$group) {
 						$group = new Group(array("name" => lang("user"), "type" => 1));
-						$group->write(true, true);
+						$group->write(true, true, 2, false, false);
 					}
 					
 					self::$groups->add($group);
-					self::$groups->write(false, true);
+					self::$groups->write(false, true, 2, false, false);
 				}
 				
 				self::$groupType = self::$groups->first()->type;
@@ -725,14 +750,20 @@ class Member extends Object {
 				}
 				
 				self::$loggedIn = $data;
-				
+				if(PROFILE) Profiler::unmark("member::Init");
 				return true;
 			} else {
 				self::doLogout();
+				if(PROFILE) Profiler::unmark("member::Init");
 				return false;
 			}
 		}
 	}
+	
+	/**
+	 * old method
+	*/
+	public static function checkLogin() {}
 	
 	/**
 	 * returns the groupids of the groups of the user

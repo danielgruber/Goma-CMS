@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.08.2012
-  * $Version 1.2.6
+  * last modified: 12.12.2012
+  * $Version 1.2.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,7 @@ class Backup extends Object {
 	 *@name excludeList
 	 *@access public
 	*/
-	public static $excludeList = array("statistics", "statistics_state");
+	public static $excludeList = array("statistics", "statistics_state", "history", "history_state", "permission", "permission_state", "many_many_permission_groups_group", "users", "users_state", "many_many_user_groups_group");
 	
 	/**
 	 * excludes files
