@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.12.2012
-  * $Version 2.4.3
+  * last modified: 18.12.2012
+  * $Version 2.4.4
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -824,7 +824,7 @@ class Member extends Object {
 	{
 		self::checkDefaults();
 
-		$data = DataObject::get_one("user", array("nickname" => array("LIKE", $user), "OR", "email" => array("LIKE", $user)));
+		$data = DataObject::get_one("user", array("nickname" => array("LIKE", trim($user)), "OR", "email" => array("LIKE", $user)));
 		
 		if($data) {
 			// check password
