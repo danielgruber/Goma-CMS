@@ -78,9 +78,9 @@ class Convert extends Object
 			return $val;	
 		} else {
 			if(defined("ENT_HTML5")) {
-				return htmlentities($val, ENT_COMPAT | ENT_HTML5, "UTF-8");
+				return htmlentities($val, ENT_COMPAT | ENT_HTML5, "UTF-8", false);
 			} else {
-				return htmlentities($val, ENT_COMPAT, "UTF-8");
+				return htmlentities($val, ENT_COMPAT, "UTF-8", false);
 			}
 		}
 	}
