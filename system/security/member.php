@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * $Version 2.4.2
+  * last modified: 17.12.2012
+  * $Version 2.4.3
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -671,7 +671,7 @@ class Member extends Object {
 	public static function checkDefaults() {
 		if(DataObject::count("group", array("type" => 2)) == 0) {
 			$group = new Group();
-			$group->name = lang("admins", "admins");
+			$group->name = lang("admins", "admin");
 			$group->type = 2;
 			$group->write(true, true, 2, false, false);
 		}
