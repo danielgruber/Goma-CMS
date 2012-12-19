@@ -136,6 +136,8 @@ $lang = array(
 	"register_code"                                	=> "Registration-code",
 	"title"                                        	=> "Title",
 	"title_page"									=> "Title of the page",
+	"window_title"									=> "title of the browser-window",
+	"window_title_info"								=> "keep empty to use default title",
 	/* SETTINGS END TPL START */
 	"available_styles"                             	=> "Available designs",
 	"available_adminstyles"                        	=> "available designs for admin",

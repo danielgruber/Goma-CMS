@@ -129,7 +129,7 @@ class contentController extends FrontedController
 			
 			if($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
 				defined("HOMEPAGE") OR define("HOMEPAGE", true);
-				Core::setTitle($this->modelInst()->title);
+				Core::setTitle($this->modelInst()->windowtitle);
 			} else {
 				defined("HOMEPAGE") OR define("HOMEPAGE", false);
 			}

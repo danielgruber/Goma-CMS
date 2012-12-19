@@ -614,6 +614,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
 							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
+							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
 							new checkbox('search', lang("show_in_search", "show in search?")),		
@@ -659,6 +660,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$description->info = lang("description_info");
 				$keywords->info = lang("keywords_info");
 				$mainbartitle->info = lang("menupoint_title_info");
+				$wtitle->info = lang("window_title_info");
 				
 				if(!in_array("pages", $allowed_parents)) {
 					$parenttype->disableOption("root");
@@ -897,6 +899,19 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						return true;
 				else
 						return false;
+		}
+		
+		/**
+		 * returns the title of the browser-window
+		 *
+		 *@name getWindowTitle
+		*/
+		public function getWindowTitle() {
+			if($this->fieldGet("googleTitle")) {
+				return $this->fieldGet("googleTitle");
+			} else {
+				return $this->title;
+			}
 		}
 		
 		/**

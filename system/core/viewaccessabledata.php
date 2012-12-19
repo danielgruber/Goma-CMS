@@ -325,6 +325,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			}
 			
 			if(isset($data)) {
+				if(is_array($data) && isset($data["casting"], $data["value"])) {
+					$this->casting[$lowername] = $data["casting"];
+					$data = $data["value"];
+				}
+				
 				if(is_array($data))
 					$data = new ViewAccessableData($data);
 				
