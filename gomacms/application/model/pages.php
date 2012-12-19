@@ -1048,6 +1048,21 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
+		 * generates the tree for this DataObject
+		 *
+		 *@name generateTree
+		 *@access public
+		*/
+		public function generateTree($parent = null, $params = array()) {
+			if(PROFILE) Profiler::mark("pages::generateTree");
+			
+			$nodes = array();
+			
+			
+			if(PROFILE) Profiler::unmark("pages::generateTree");
+		}
+		
+		/**
 		 * TREE-API v2
 		 * this API renders trees more flexibel and with better performance
 		*/ 
