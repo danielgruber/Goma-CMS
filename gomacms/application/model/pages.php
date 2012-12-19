@@ -36,7 +36,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									'data' 				=> 'text',
 									'sort'				=> 'int(8)',
 									'search'			=> 'int(1)',
-									'editright'			=> 'text',
+									'editright'			=> 'HTMLtext',
 									'meta_description'	=> 'varchar(200)',
 									'meta_keywords'		=> 'varchar(200)');
 									
