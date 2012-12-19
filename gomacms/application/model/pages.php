@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 2.4.5
+  * last modified: 19.12.2012
+  * $Version 2.4.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -31,6 +31,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									'rights' 			=> 'int(2)',
 									'mainbar' 			=> 'int(1)',
 									'mainbartitle' 		=> 'varchar(200)',
+									'googletitle'		=> "varchar(200)",
 									'title' 			=> 'varchar(200)',
 									'data' 				=> 'text',
 									'sort'				=> 'int(8)',

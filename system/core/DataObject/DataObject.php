@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 09.12.2012
-  * $Version: 4.6.13
+  * last modified: 19.12.2012
+  * $Version: 4.6.14
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -2801,26 +2801,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					);
 	
 	}
-	
-	/**
-	 * new get method
-	 *
-	 *@name __get
-	 *@access public
-	*/
-	public function __get($offset) {
-		
-		if(strtolower($offset) == "basetable")
-			return $this->BaseTable();
-		
-		$data = parent::__get($offset);
-		$offset = strtolower($offset);
-		if($this->convertDefault === false || !isset($this->casting[$offset])) {
-			return $data;
-		}
-		
-		return DBField::convertByCastingIfDefault($this->casting[$offset], $offset, $data);
-	}
+
 	/**
 	 * checks if a method "set" . $offset exists
 	 *@name isSetMethod

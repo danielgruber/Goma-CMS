@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.11.2012
-  * $Version 3.3.9
+  * last modified: 19.12.2012
+  * $Version 3.4
 */   
  
  
@@ -835,15 +835,18 @@ $data = array_pop($dataStack);
 				if(strpos($name, "."))
 				{
 						$php = '$data';
+						$echo = '$data';
 						$parts = explode(".",$name);
 						foreach($parts as $part)
 						{
 								$php .= '["'.$part.'"]';
+								$echo .= '->doObject("'.$part.'")';
 						}
-						return '<?php echo '.$php.'; ?>';
+						$echo .= '->forTemplate()';
+						return '<?php echo isset('.$php.') ? '.$echo.' : ""; ?>';
 				} else
 				{
-						return '<?php echo $data["'.$name.'"]; ?>';
+						return '<?php echo isset($data["'.$name.'"]) ? $data->doObject("'.$name.'")->forTemplate() : ""; ?>';
 				}
 		}
 		
@@ -852,7 +855,7 @@ $data = array_pop($dataStack);
 		 *@name renderIF
 		 *@access public
 		*/
-		public static function renderIF($matches, $includeConvert = true)
+		public static function renderIF($matches)
 		{
 				$clause = $matches[1];
 				// first parse
@@ -893,10 +896,7 @@ $data = array_pop($dataStack);
 				
 				$newclause = str_replace('$$','$',$newclause);
 				// render clause
-				if($includeConvert)
-					return '$data->convertDefault = false; if(' . $newclause . ') { $data->convertDefault = null;';
-				else
-					return 'if(' . $newclause . ') {';
+				return 'if(' . $newclause . ') {';
 		}
 		
 		/**
@@ -906,7 +906,7 @@ $data = array_pop($dataStack);
 		*/
 		public static function renderELSEIF($matches)
 		{
-				return '$data->convertDefault = false; } else ' . self::renderIF($matches, false) . "  \$data->convertDefault = null;";
+				return '$data->convertDefault = false; } else ' . self::renderIF($matches) . "  \$data->convertDefault = null;";
 		}
 		
 		/**
