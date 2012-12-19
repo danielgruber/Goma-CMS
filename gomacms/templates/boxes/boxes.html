@@ -20,10 +20,7 @@
 								url: root_path + BASE_SCRIPT + "boxes_new/$pageid/saveBoxWidth/" + ui.element.attr("id").replace("box_new_", ""),
 								type: "post",
 								data: {width: ui.element.width()},
-								dataType: "html",
-								error: function(jqXHR, textStatus, errorThrown) {
-									Notifications.notify("error", "Error", "images/icons/fatcow16/bullet_error@2x.png", textStatus);
-								}
+								dataType: "html"
 							});
 						},
 						resize: function(event, ui){
@@ -53,10 +50,7 @@
 							});
 						},
 						distance: 10,
-						items: " > .box_new",
-						error: function(jqXHR, textStatus, errorThrown) {
-							Notifications.notify("error", lang("error"), "images/icons/fatcow16/bullet_error@2x.png", textStatus);
-						}
+						items: " > .box_new"
 					});
 					$("#boxes_new_$pageid > .box_new .adminhead").css("cursor", "move");
 				});

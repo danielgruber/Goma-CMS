@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.12.2012
+  * last modified: 19.12.2012
   * $Version 1.5.3
 */
 
@@ -38,10 +38,6 @@ if(typeof self.loader == "undefined") {
 					noRequestTrack: true,
 					url: BASE_SCRIPT + "gloader/" + component + ".js",
 					dataType: "script",
-					error: function(jqXHR, textStatus, errorThrown) {
-						alert(textStatus);
-						alert(errorThrown);
-					},
 					async: false
 				});
 				$("body").css("cursor", "auto");
@@ -94,28 +90,18 @@ if(typeof self.loader == "undefined") {
 				$.ajax({
 					url: $this.attr("href"),
 					data: {ajaxfy: true, "ajaxcontent": true, "container": $container},
-					dataType: "html",
-					success: function(html, code, ajaxreq) {
-						eval_script(html, ajaxreq);
-						$this.html(_html);
-					},
-					error: function(ajaxreq) {
-						eval_script(ajaxreq.responseText, ajaxreq);
-						$this.html(_html);
-					}
+					dataType: "html"
+				}).done(function(html, textStatus, jqXHR){
+					eval_script(html, jqXHR);
+					$this.html(_html);
+				}).fail(function(jqXHR){
+					eval_script(jqXHR.responseText, jqXHR);
+					$this.html(_html);
 				});
 				return false;
 			});
-			
-			// the orangebox is not tested, yet, please don't use it!
-			$(document).on('click',"a[rel*=orangebox]",function(){	
-				gloader.load("orangebox");
-				$(this).orangebox();
-				$(this).removeAttr("rel");
-				$(this).click();
-			});
 	
-			// pretty old-fasioned bluefox, if you like it create an a-tag with rel="bluebox"
+			// pretty old-fashioned bluefox, if you like it create an a-tag with rel="bluebox"
 			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
 				gloader.load("dialog");
 				if($(this).hasClass("nodrag"))
@@ -224,7 +210,8 @@ if(typeof self.loader == "undefined") {
 					async: false,
 					cache: true,
 					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name),
-					dataType: "json"
+					dataType: "json",
+					noRequestTrack: true
 				});
 				
 				try {
@@ -286,7 +273,8 @@ if(typeof self.loader == "undefined") {
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",
-				dataType: "json"
+				dataType: "json",
+				noRequestTrack: true
 			});
 			
 			try {
@@ -399,11 +387,9 @@ if(typeof self.loader == "undefined") {
 				url: url,
 				type: method,
 				data: data,
-				dataType: "script",
-				complete: function()
-				{
-					$form.find(".loader").remove();
-				}
+				dataType: "script"
+			}).always(function(){
+				$form.find(".loader").remove();
 			});
 			return false;
 		}
@@ -435,15 +421,14 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html",
-								success: function(css) {
-									// patch uris
-									var base = file.substring(0, file.lastIndexOf("/"));
-									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-									
-									w.CSSLoadedResources[file] = css;
-								}
+								dataType: "html"
+							}).done(function(css){
+								// patch uris
+								var base = file.substring(0, file.lastIndexOf("/"));
+								//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+								css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+								
+								w.CSSLoadedResources[file] = css;
 							});
 						}
 						
@@ -474,10 +459,9 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html",
-								success: function(js) {
-									eval_global(js);
-								}
+								dataType: "html"
+							}).done(function(js){
+								eval_global(js);
 							});
 						}
 						regexp = null;
@@ -503,10 +487,9 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html",
-								success: function(js) {
-									eval_global(js);
-								}
+								dataType: "html"
+							}).done(function(js){
+								eval_global(js);
 							});
 						}
 						regexp = null;	
@@ -638,6 +621,29 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
+				if(originalOptions.type == "post") {
+					jqXHR.fail(function(){
+						alert(originalOptions.url);
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while saving data to the server: \nThe response timed out.');
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while saving data to the server: \nThe request was aborted.');
+						} else {
+							alert('Error while saving data to the server: \nFailed to save data on the server.');
+						}
+					});
+				} else {
+					jqXHR.fail(function(){
+						alert(originalOptions.url);
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while fetching data from the server: \nThe response timed out.');
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while fetching data from the server: \nThe request was aborted.');
+						} else {
+							alert('Error while fetching data from the server: \nFailed to fetch data from the server.');
+						}
+					});
+				}
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
@@ -750,10 +756,15 @@ if(typeof self.loader == "undefined") {
 	
 	// patch for IE eval
 	function eval_global(codetoeval) {
-	    if (window.execScript)
-	        window.execScript(codetoeval); // execScript doesn’t return anything
-	    else
-	        window.eval(codetoeval);
+		try {
+		    if (window.execScript)
+		        window.execScript(codetoeval); // execScript doesn’t return anything
+		    else
+		        window.eval(codetoeval);
+		} catch(e) {
+			alert(e);
+			throw e;
+		}
 	}
 	
 	// parse JSON
