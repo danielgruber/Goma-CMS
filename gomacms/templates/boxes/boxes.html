@@ -7,6 +7,9 @@
 		// <![CDATA[
 			(function($){
 				$(function(){
+					gloader.load("notifications");
+					var img = new Image;
+					img.src = "images/icons/fatcow16/bullet_error@2x.png";
 					$("#boxes_new_$pageid .box_new").resizable({
 						autoHide: true,
 						handles: 'e',
@@ -17,7 +20,10 @@
 								url: root_path + BASE_SCRIPT + "boxes_new/$pageid/saveBoxWidth/" + ui.element.attr("id").replace("box_new_", ""),
 								type: "post",
 								data: {width: ui.element.width()},
-								dataType: "html"
+								dataType: "html",
+								error: function(jqXHR, textStatus, errorThrown) {
+									Notifications.notify("error", "Error", "images/icons/fatcow16/bullet_error@2x.png", textStatus);
+								}
 							});
 						},
 						resize: function(event, ui){
@@ -47,7 +53,10 @@
 							});
 						},
 						distance: 10,
-						items: " > .box_new"
+						items: " > .box_new",
+						error: function(jqXHR, textStatus, errorThrown) {
+							Notifications.notify("error", lang("error"), "images/icons/fatcow16/bullet_error@2x.png", textStatus);
+						}
 					});
 					$("#boxes_new_$pageid > .box_new .adminhead").css("cursor", "move");
 				});
