@@ -4050,7 +4050,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				else
 					$generated_href = str_replace("\$".$field, $nodedata["data"][$field], $generated_href);
 			}
-			$hoverspan = new HTMLNode("span", array("class"	=> "a", "title" => $nodedata["title"]), array(
+			$hoverspan = new HTMLNode("span", array("class"	=> "a", "title" => convert::raw2text($nodedata["title"])), array(
 				$linespan = new HTMLNode("span", array("class"	=> "b"))
 			));
 			
@@ -4059,7 +4059,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			} else {
 				$title = $nodedata["title"];
 			}
-			$title = " " . $title;
+			$title = " " . convert::raw2text($title);
 			
 			$link = new HTMLNode("a", array_merge($nodedata["attributes"],array("href" => $generated_href, "nodeid" => $id)), array(
 				new HTMLNode("span", array(), convert::raw2text($title))

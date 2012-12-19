@@ -203,7 +203,7 @@ class HTMLNode extends Object
 				{
 						if($this->tag == "input")
 						{
-								return $this->value = $value;
+								return $this->value = convert::raw2xml($value);
 						} else
 						{
 								return $this->html(convert::raw2xml($value));
