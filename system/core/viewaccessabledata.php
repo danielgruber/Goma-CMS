@@ -321,6 +321,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			} else 
 			
 			if($this->isServer($name, $lowername)) {
+				$this->casting[$lowername] = "varchar";
 				$data = $this->serverGet($name, $lowername);
 			}
 			
