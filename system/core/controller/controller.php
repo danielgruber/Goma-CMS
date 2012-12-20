@@ -583,7 +583,7 @@ class Controller extends RequestHandler
 		{
 				if($this->save($data) !== false)
 				{
-						addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully saved.").'</div>');
+						addcontent::add('<div class="success">'.lang("successful_saved", "The data were successfully saved.").'</div>');
 						$this->redirectback();
 				} else
 				{
@@ -657,7 +657,7 @@ class Controller extends RequestHandler
 		{	
 				if($this->save($data, 2) !== false)
 				{
-						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published.").'</div>');
+						AddContent::add('<div class="success">'.lang("successful_published", "The data were successfully published.").'</div>');
 						$this->redirectback();
 				} else
 				{
