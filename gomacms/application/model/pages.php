@@ -875,22 +875,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
-		 * get adds for the pageselector
-		 *@name _add
-		 *@access public
-		*/
-		public function _add()
-		{
-				if(in_array("pages", $this->allowed_parents()))
-				{
-						return array(0 => lang("no_parentpage"));
-				} else
-				{
-						return array();
-				}
-		}
-		
-		/**
 		 * gets the content
 		*/
 		public function getContent()
