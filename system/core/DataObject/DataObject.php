@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 09.12.2012
-  * $Version: 4.6.13
+  * last modified: 21.12.2012
+  * $Version: 4.6.15
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -867,10 +867,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 	}
-	
-	
-	
-	
 	
 	/**
 	 * this defines a right for advrights or rechte, which tests if an user is an admin
@@ -2801,26 +2797,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					);
 	
 	}
-	
-	/**
-	 * new get method
-	 *
-	 *@name __get
-	 *@access public
-	*/
-	public function __get($offset) {
-		
-		if(strtolower($offset) == "basetable")
-			return $this->BaseTable();
-		
-		$data = parent::__get($offset);
-		$offset = strtolower($offset);
-		if($this->convertDefault === false || !isset($this->casting[$offset])) {
-			return $data;
-		}
-		
-		return DBField::convertByCastingIfDefault($this->casting[$offset], $offset, $data);
-	}
+
 	/**
 	 * checks if a method "set" . $offset exists
 	 *@name isSetMethod
@@ -2974,7 +2951,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getHasOne($name, $filter = array(), $sort = array()) {
 		$name = trim(strtolower($name));
 		
-		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true);
+		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true) . $this[$name . "id"];
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
@@ -4069,7 +4046,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				else
 					$generated_href = str_replace("\$".$field, $nodedata["data"][$field], $generated_href);
 			}
-			$hoverspan = new HTMLNode("span", array("class"	=> "a", "title" => $nodedata["title"]), array(
+			$hoverspan = new HTMLNode("span", array("class"	=> "a", "title" => convert::raw2text($nodedata["title"])), array(
 				$linespan = new HTMLNode("span", array("class"	=> "b"))
 			));
 			
@@ -4078,7 +4055,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			} else {
 				$title = $nodedata["title"];
 			}
-			$title = " " . $title;
+			$title = " " . convert::raw2text($title);
 			
 			$link = new HTMLNode("a", array_merge($nodedata["attributes"],array("href" => $generated_href, "nodeid" => $id)), array(
 				new HTMLNode("span", array(), convert::raw2text($title))

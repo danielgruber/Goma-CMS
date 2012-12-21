@@ -745,8 +745,8 @@ class ClassInfo extends Object
 							@unlink($appFolder . "/write.test");
 							
 							$files = scandir($appFolder);
-							if(file_exists($appFolder . "/.index.db")) {
-								$data = unserialize(file_get_contents($appFolder . "/.index.db"));
+							if(file_exists($appFolder . "/.index.db") && $data = @unserialize(file_get_contents($appFolder . "/.index.db"))) {
+								;
 							} else {
 								$data = array("fileindex" => array(), "packages" => array());
 							}

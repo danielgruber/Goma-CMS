@@ -4,21 +4,12 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 02.12.2011
+  * last modified: 19.12.2011
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class ImageSQLField extends DBField implements DefaultConvert {	
-		
-		/**
-		 * field-type if you want to replace typed field type
-		 * for example varchar(200)
-		 *
-		 *@name field_type
-		 *@access public
-		*/ 
-		static public $field_type = "varchar(100)";
+class ImageSQLField extends DBField {	
 		/**
 		 * gets the field-type
 		 *
@@ -28,12 +19,14 @@ class ImageSQLField extends DBField implements DefaultConvert {
 		static public function getFieldType($args = array()) {
 			return "varchar(200)";
 		}
+		
 		/**
 		 * generates a image from the image-uri
 		*/
 		public function makeImage() {
 			return '<img src="'.$this->value.'" alt="'.$this->value.'" />';
 		}
+		
 		/**
 		 * sets the width of the image
 		 *
@@ -46,6 +39,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 			else 
 					return $this->makeImage();
 		}
+		
 		/**
 		 * sets the width of the image
 		 *
@@ -58,6 +52,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 			else 
 					return $this->makeImage();
 		}
+		
 		/**
 		 * sets the width of the image
 		 *
@@ -74,7 +69,7 @@ class ImageSQLField extends DBField implements DefaultConvert {
 		/**
 		 * default convert
 		*/
-		public function convertDefault() {
+		public function forTemplate() {
 			return $this->makeImage();
 		}
 }

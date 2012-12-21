@@ -11,9 +11,9 @@
 					<% CONTROL frontedbar() %>
 						<div>
 							<% IF $frontedbar.attr_title %>
-								<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="{$frontedbar.attr_title}">{$frontedbar.title}</a>
+								<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="{$frontedbar.attr_title.text()}">{$frontedbar.title}</a>
 							<% ELSE %>
-								<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="$frontedbar.title">{$frontedbar.title}</a>
+								<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="$frontedbar.title.text()">{$frontedbar.title}</a>
 							<% END %>
 						</div>
 					<% ENDCONTROL %>
