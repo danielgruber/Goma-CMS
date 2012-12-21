@@ -6,8 +6,8 @@
   *@Copyright (C) 2009 - 2012  Goma-Team
   * implementing datasets
   *********
-  * last modified: 19.12.2012
-  * $Version: 4.6.14
+  * last modified: 21.12.2012
+  * $Version: 4.6.15
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -827,7 +827,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $DataSet;
 	}
 
-	
 	/**
 	 * defines the methods
 	 *
@@ -840,6 +839,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			foreach(ClassInfo::$class_info[$class]["has_many"] as $key => $val) {
 				Object::LinkMethod($class, $key, array("this", "getHasMany"), true);
 				Object::LinkMethod($class, $key . "ids", array("this", "getRelationIDs"), true);
+				Object::LinkMethod($class, "set" . $key . "ids", array("this", "setHasManyIDs"), true);
 			}
 		}
 		
@@ -864,13 +864,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset(ClassInfo::$class_info[$class]["has_one"])) {
 			foreach(ClassInfo::$class_info[$class]["has_one"] as $key => $val) {
 				Object::LinkMethod($class, $key, array("this", "getHasOne"), true);
+				Object::LinkMethod($class, "set" . $key . "ID", array("this", "setHasOneID"), true);
 			}
 		}
 	}
-	
-	
-	
-	
 	
 	/**
 	 * this defines a right for advrights or rechte, which tests if an user is an admin
@@ -2955,7 +2952,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getHasOne($name, $filter = array(), $sort = array()) {
 		$name = trim(strtolower($name));
 		
-		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true);
+		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true) . $this[$name . "id"];
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
@@ -2979,6 +2976,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$debug = debug_backtrace();
 			throwError(6, "PHP-Error", "No Has-one-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
+	}
+	
+	/**
+	 * sets has one id and empties cache
+	 *
+	 *@name setHasOneID
+	 *@access public
+	*/
+	public function setHasOneID($name, $val) {
+		$this->setField($name, $val);
+		$this->viewcache = array();
+	}
+	
+	/**
+	 * sets has-many-ids and empties cache
+	 *
+	 *@name setHasManyIDs
+	 *@access public
+	*/
+	public function setHasManyIDs($name, $val) {
+		$this->setField($name, $val);
+		$this->viewcache = array();
 	}
 	
 	/**

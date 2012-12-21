@@ -37,6 +37,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									'sort'				=> 'int(8)',
 									'search'			=> 'int(1)',
 									'editright'			=> 'HTMLtext',
+									'editright'			=> 'text',
 									'meta_description'	=> 'varchar(200)',
 									'meta_keywords'		=> 'varchar(200)');
 									
@@ -186,7 +187,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getParentType()
 		{
-				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()))
+				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()) && (Permission::check("PAGES_WRITE") && Permission::check("PAGES_PUBLISH")))
 				{
 						return "root";
 				} else
@@ -235,7 +236,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						$this->setField("parentid", "0");
 				else
 						$this->setField("parentid", $value);
-				
+					
+				$this->viewcache = array();
+				$this->data["parent"] = null;
 		}
 		
 		/**
@@ -417,6 +420,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 			}
 			$this->setField("Edit_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -464,10 +469,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->publish_permission->id;
+					$perm->inheritorid = $this->parent->publish_permission->id;
 				}
 			}
+			
 			$this->setField("Publish_Permission", $perm);
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -508,12 +515,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = 0;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+					$perm->inheritorid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
-				$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+				$perm->inheritorid = $this->parent->read_permission->id;
 			}
 			$this->setField("Read_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -569,6 +578,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 				
 				$form->useStateData = true;
+				$this->queryVersion = "state";
 				
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
 					$html = "<div class=\"pageinfo versionControls\">";
@@ -662,7 +672,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$mainbartitle->info = lang("menupoint_title_info");
 				$wtitle->info = lang("window_title_info");
 				
-				if(!in_array("pages", $allowed_parents)) {
+				if(!in_array("pages", $allowed_parents) || (!Permission::check("PAGES_WRITE") && !Permission::check("PAGES_PUBLISH"))) {
 					$parenttype->disableOption("root");
 				}
 				
@@ -899,19 +909,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						return true;
 				else
 						return false;
-		}
-		
-		/**
-		 * returns the title of the browser-window
-		 *
-		 *@name getWindowTitle
-		*/
-		public function getWindowTitle() {
-			if($this->fieldGet("googleTitle")) {
-				return $this->fieldGet("googleTitle");
-			} else {
-				return $this->title;
-			}
 		}
 		
 		/**
