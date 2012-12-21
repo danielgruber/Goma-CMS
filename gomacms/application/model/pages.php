@@ -991,6 +991,19 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
+		 * gets the title of the window
+		 *
+		 *@name getWindowTitle
+		*/
+		public function getWindowTitle() {
+			if($this->fieldGet("googleTitle")) {
+				return $this->googleTitle;
+			} else {
+				return $this->title;
+			}
+		}
+		
+		/**
 		 * permissions
 		 *@name providePermissions
 		 *@access public
