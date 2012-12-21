@@ -10,23 +10,14 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.12.2012
-  * $Version 2.2.2
+  * last modified: 19.12.2012
+  * $Version 2.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class ViewAccessableData extends Object implements Iterator, ArrayAccess
-{
-		/**
-		 * if this is set to true or false convert in offsetGet will be edited
-		 *
-		 * it's for IF-Clauses
-		 *@name convertDefault
-		 *@access public
-		*/
-		public $convertDefault = null;
-		
+{		
 		/**
 		 * data
 		 *
@@ -50,7 +41,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		 *@var string
 		*/
-		public static $default_casting = "Varchar";
+		public static $default_casting = "HTMLText";
 		
 		/**
 		 * customised data
@@ -310,10 +301,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			$lowername = strtolower($name);
 			
-			if($lowername == "count")
-				return $this->_count();
-			
-			
 			if(isset($this->customised[$lowername])) {
 				$data = $this->customised[$lowername];
 			// methods
@@ -334,13 +321,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			} else 
 			
 			if($this->isServer($name, $lowername)) {
+				$this->casting[$lowername] = "varchar";
 				$data = $this->serverGet($name, $lowername);
 			}
 			
 			if(isset($data)) {
-				// casting-array
 				if(is_array($data) && isset($data["casting"], $data["value"])) {
-					$data = DBField::convertByCasting($data["casting"], $lowername, $data["value"]);
+					$this->casting[$lowername] = $data["casting"];
+					$data = $data["value"];
 				}
 				
 				if(is_array($data))
@@ -383,13 +371,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
 				return $data;
-			
-			// casting-array
-			} else if(is_array($data) && isset($data["casting"], $data["value"])) {
-			
-				$object = DBField::getObjectByCasting($data["casting"], $name, $data["value"]);
-				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
-				return $object;
 			
 			// if is array, get as array-object
 			} else if(is_array($data)) {

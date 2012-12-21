@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 01.12.2012
+  * last modified: 19.12.2012
 */
 
 self.dropdownDialogs = [];
@@ -538,83 +538,84 @@ self.dropdownDialogs = [];
 				url: uri,
 				type: "get",
 				
-				// if there was an error we try to find out why
-				error: function(jqXHR, textStatus, errorThrown) {
-					if(textStatus == "timeout") {
-						that.setContent('Error when fetching data from the server: <br /> The response timed out.');
-					} else if(textStatus == "abort") {
-						that.setContent('Error when fetching data from the server: <br /> The request was aborted.');
-					} else {
-						that.setContent('Error when fetching data from the server: <br /> Failed to fetch data from the server.');
-					}
-				},
-				
 				// data should always be html as basic, we can interpret layteron
-				dataType: "html",
-				success: function(html, textStatus, jqXHR) {
+				dataType: "html"
+			}).done(function(html, textStatus, jqXHR){
+				
+				// run code
+				try {
+					LoadAjaxResources(jqXHR);
+					var content_type = jqXHR.getResponseHeader("content-type");
 					
-					try {
-						LoadAjaxResources(jqXHR);
-						var content_type = jqXHR.getResponseHeader("content-type");
-						
-						// if it is json-data
-						if(content_type == "text/x-json") {
-							try {
-								var data = parseJSON(html);
-								var html = data.content;
-								if(data.position != null) {
-									that.position = data.position;
-								}
-								if(data.closeButton != null) {
-									that.closeButton = data.closeButton;
-								}
-								that.setContent(html);
-								
-								if(typeof data.exec != "undefined") {
-									
-									// execution should not break json-data before
-									try {
-										var method;
-										if (window.execScript) {
-										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
-										} else
-										  	method = eval('(function(){' + data.exec + '})');
-										
-										method.call(that);
-									} catch(e) {
-										alert(e);
-									}
-								}
-								
-								
-							} catch(e) {
-								alert(e);
-								that.setContent("error parsing JSON");
+					// if it is json-data
+					if(content_type == "text/x-json") {
+						try {
+							var data = parseJSON(html);
+							var html = data.content;
+							if(data.position != null) {
+								that.position = data.position;
 							}
-						
-						// if it is javascript
-						} else if(content_type == "text/javascript") {
-							
-							// execution for IE and all other Browsers
-							var method;
-							if (window.execScript)
-							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-							else
-							  	method = eval('(function(){' + html + '});');
-							method.call(this);
-							
-						} else {
-							// html just must be set to Dialog
+							if(data.closeButton != null) {
+								that.closeButton = data.closeButton;
+							}
 							that.setContent(html);
+							
+							if(typeof data.exec != "undefined") {
+								
+								// execution should not break json-data before
+								try {
+									var method;
+									if (window.execScript) {
+									  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+									} else
+									  	method = eval('(function(){' + data.exec + '})');
+									
+									method.call(that);
+								} catch(e) {
+									alert(e);
+								}
+							}
+							
+							
+						} catch(e) {
+							alert(e);
+							that.setContent("error parsing JSON");
 						}
+					
+					// if it is javascript
+					} else if(content_type == "text/javascript") {
 						
-						RunAjaxResources(jqXHR);
-					} catch(e) {
-						alert(e);
-						location.href = oldURI;
+						// execution for IE and all other Browsers
+						var method;
+						if (window.execScript)
+						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+						else
+						  	method = eval('(function(){' + html + '});');
+						method.call(this);
+						
+					} else {
+						// html just must be set to Dialog
+						that.setContent(html);
 					}
+					
+					RunAjaxResources(jqXHR);
+				} catch(e) {
+					alert(e);
+					location.href = oldURI;
 				}
-			});
+				
+				
+			}).fail(function(jqXHR){
+				
+				// try find out why it has failed
+				if(jqXHR.textStatus == "timeout") {
+					that.setContent('Error while fetching data from the server: <br /> The response timed out.');
+				} else if(jqXHR.textStatus == "abort") {
+					that.setContent('Error while fetching data from the server: <br /> The request was aborted.');
+				} else {
+					that.setContent('Error while fetching data from the server: <br /> Failed to fetch data from the server.');
+				}
+			});;
 		},
 		players: [
 			{

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 2.4.5
+  * last modified: 21.12.2012
+  * $Version 2.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -31,10 +31,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									'rights' 			=> 'int(2)',
 									'mainbar' 			=> 'int(1)',
 									'mainbartitle' 		=> 'varchar(200)',
+									'googletitle'		=> "varchar(200)",
 									'title' 			=> 'varchar(200)',
 									'data' 				=> 'text',
 									'sort'				=> 'int(8)',
 									'search'			=> 'int(1)',
+									'editright'			=> 'HTMLtext',
 									'editright'			=> 'text',
 									'meta_description'	=> 'varchar(200)',
 									'meta_keywords'		=> 'varchar(200)');
@@ -185,7 +187,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getParentType()
 		{
-				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()))
+				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()) && (Permission::check("PAGES_WRITE") && Permission::check("PAGES_PUBLISH")))
 				{
 						return "root";
 				} else
@@ -234,7 +236,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						$this->setField("parentid", "0");
 				else
 						$this->setField("parentid", $value);
-				
+					
+				$this->viewcache = array();
+				$this->data["parent"] = null;
 		}
 		
 		/**
@@ -415,7 +419,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$perm->inheritorid = $this->parent->edit_permission->id;
 				}
 			}
+			$perm->name = "";
 			$this->setField("Edit_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -463,10 +470,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->publish_permission->id;
+					$perm->inheritorid = $this->parent->publish_permission->id;
 				}
 			}
+			$perm->name = "";
+			
 			$this->setField("Publish_Permission", $perm);
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -507,12 +517,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = 0;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+					$perm->inheritorid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
-				$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+				$perm->inheritorid = $this->parent->read_permission->id;
 			}
+			$perm->name = "";
 			$this->setField("Read_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -568,6 +581,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 				
 				$form->useStateData = true;
+				$this->queryVersion = "state";
 				
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
 					$html = "<div class=\"pageinfo versionControls\">";
@@ -613,6 +627,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
 							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
+							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
 							new checkbox('search', lang("show_in_search", "show in search?")),		
@@ -658,8 +673,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$description->info = lang("description_info");
 				$keywords->info = lang("keywords_info");
 				$mainbartitle->info = lang("menupoint_title_info");
+				$wtitle->info = lang("window_title_info");
 				
-				if(!in_array("pages", $allowed_parents)) {
+				if(!in_array("pages", $allowed_parents) || (!Permission::check("PAGES_WRITE") && !Permission::check("PAGES_PUBLISH"))) {
 					$parenttype->disableOption("root");
 				}
 				
@@ -862,22 +878,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
-		 * get adds for the pageselector
-		 *@name _add
-		 *@access public
-		*/
-		public function _add()
-		{
-				if(in_array("pages", $this->allowed_parents()))
-				{
-						return array(0 => lang("no_parentpage"));
-				} else
-				{
-						return array();
-				}
-		}
-		
-		/**
 		 * gets the content
 		*/
 		public function getContent()
@@ -991,6 +991,19 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 			
 			return Permission::check("PAGES_INSERT");
+		}
+		
+		/**
+		 * gets the title of the window
+		 *
+		 *@name getWindowTitle
+		*/
+		public function getWindowTitle() {
+			if($this->fieldGet("googleTitle")) {
+				return $this->googleTitle;
+			} else {
+				return $this->title;
+			}
 		}
 		
 		/**

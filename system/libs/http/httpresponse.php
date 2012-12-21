@@ -408,7 +408,7 @@ class htmlparser extends object
 				if(PROFILE) Profiler::mark("HTMLParser scriptParse");
 				if(!HTTPResponse::$disabledparsing)
 				{
-						preg_match_all('/<script[^>]*>(.*)<\/script\s*>/Usi', $html, $no_tags);
+						preg_match_all('/\<script[^\>]*\>(.*)\<\/script\s*\>/Usi', $html, $no_tags);
 						foreach($no_tags[1] as $key => $js)
 						{
 								if(!empty($js))
@@ -416,8 +416,9 @@ class htmlparser extends object
 										$html = str_replace($no_tags[0][$key], $this->js($js), $html );
 								}
 						}
+
 						
-						preg_match_all('/<script[^>]*src="(.+)"[^>]*>(.*)<\/script\s*>/Usi', $html, $no_tags);
+						preg_match_all('/\<script[^\>]*src="(.+)"[^>]*\>(.*)\<\/script\s*\>/Usi', $html, $no_tags);
 						foreach($no_tags[1] as $key => $js)
 						{
 								if(!empty($js) && file_exists(ROOT . $js))

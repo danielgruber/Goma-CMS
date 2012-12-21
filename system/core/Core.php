@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.12.2012
-  * $Version 3.3.21
+  * last modified: 19.12.2012
+  * $Version 3.3.22
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -337,6 +337,10 @@ class Core extends object
 				clearstatcache();
 				
 				foreach(scandir($dir) as $file) {
+					if(substr($file, 0, 3) == "gfs")
+						continue;
+					
+					
 					// session store
 					if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi',$file)) {
 						if(file_exists($dir . $file) && filemtime($dir . $file) < NOW - 3600) {
@@ -360,7 +364,7 @@ class Core extends object
 				
 				// empty framework cache
 				foreach(scandir(ROOT . "system/temp/") as $file) {
-					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 60 < NOW && !file_exists($dir . $file . "/.dontremove"))
+					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove"))
 						FileSystem::delete (ROOT . "system/temp/" . $file);
 				}
 				
@@ -735,6 +739,7 @@ class Core extends object
 			
 			return false;
 		}
+		
 		/**
 		 * checks if iPod/iPhone is available, but not activated, because the user didn't want to see mobile version
 		 *
@@ -745,6 +750,7 @@ class Core extends object
 			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 			return (self::$isMobile && preg_match("/(iphone|ipod)/Usi",$useragent));
 		}
+		
 		/**
 		 * checks if iPad is available, but not activated, because the user didn't want to see mobile version
 		 *
@@ -755,6 +761,7 @@ class Core extends object
 			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 			return (self::$isMobile && preg_match("/(ipad/Usi", $useragent));
 		}
+		
 		/**
 		 * disables whole mobile functionallity
 		 *
@@ -764,6 +771,7 @@ class Core extends object
 		public static function disableMobile() {
 			self::$isMobile = false;
 		}
+		
 		/**
 		 * enables mobile functionallity
 		 *
@@ -773,6 +781,7 @@ class Core extends object
 		public static function enableMobile() {
 			self::$isMobile = true;
 		}
+		
 		/**
 		 * gives back if the current logged in admin want's to be see everything as a simple user
 		 *

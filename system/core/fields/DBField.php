@@ -4,38 +4,46 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.09.2012
-  * $Version 1.4.2
+  * last modified: 19.12.2012
+  * $Version 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 interface DataBaseField {
+	/**
+	 * constructor
+	*/
 	public function __construct($name, $value, $args = array());
+	
 	/**
 	 * set the value of the field
 	 *
 	 *@name setValue
 	*/
 	public function setValue($value);
+	
 	/**
 	 * gets the value of the field
 	 *
 	 *@name getValue
 	*/
 	public function getValue();
+	
 	/**
 	 * sets the name of the field
 	 *
 	 *@name setName
 	*/
 	public function setName($name);
+	
 	/**
 	 * gets the name of the field
 	 *
 	 *@name getName
 	*/
 	public function getName();
+	
 	/**
 	 * gets the raw-data of the field
 	 * should be give back the same as getValue
@@ -43,6 +51,7 @@ interface DataBaseField {
 	 *@name raw
 	*/
 	public function raw();
+	
 	/**
 	 * generates the default form-field for this field
 	 *
@@ -51,6 +60,7 @@ interface DataBaseField {
 	 *@param string - title
 	*/
 	public function formfield($title = null);
+	
 	/**
 	 * search-field for searching
 	 *
@@ -59,6 +69,7 @@ interface DataBaseField {
 	 *@param string - title
 	*/
 	public function searchfield($title = null);
+	
 	/**
 	 * this function uses more than one convert-method
 	 *
@@ -67,6 +78,7 @@ interface DataBaseField {
 	 *@param array - methods
 	*/
 	public function convertMulti($arr);
+	
 	/**
 	 * gets the field-type for the database, for example if you want to have the type varchar instead of the name of this class
 	 *
@@ -74,6 +86,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	static public function getFieldType($args = array());
+	
 	/**
 	 * toString-Method
 	 * should call default-convert
@@ -82,6 +95,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function __toString();
+	
 	/**
 	 * bool - for IF in template
 	 * should give back if the value of this field represents a false or true
@@ -90,6 +104,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function toBool();
+	
 	/**
 	 * to don't give errors for unknowen calls, should always give back raw-data
 	 *
@@ -97,22 +112,16 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function __call($name, $args);
+	
 	/**
 	 * bool, like toBool
 	*/
 	public function bool();
-}
-
-/**
- * defines a DataBase-Field as Field, which should convert each value on the fly on read
- *
- *@name DefaultConvert
-*/
-interface DefaultConvert {
+	
 	/**
-	 * this method is called when we read
+	 * returns datatype for view
 	*/
-	public function convertDefault();
+	public function forTemplate();
 }
 
 
@@ -128,12 +137,14 @@ class DBField extends Object implements DataBaseField
 	 *@var mixed
 	*/
 	protected $value;
+	
 	/**
 	 * this field contains the field-name of this object
 	 *@name name
 	 *@access protected
 	*/
 	protected $name;
+	
 	/**
 	 * args
 	 *
@@ -141,12 +152,13 @@ class DBField extends Object implements DataBaseField
 	 *@access public
 	*/
 	public $args = array();
+	
 	/**
 	 *@name __construct
 	 *@access public
 	 *@param mixed - value
 	*/
-	public function __construct($name,$value,$args = array())
+	public function __construct($name, $value, $args = array())
 	{
 			$this->name = $name;
 			$this->value = $value;
@@ -273,6 +285,7 @@ class DBField extends Object implements DataBaseField
 			
 			return $field;
 	}
+	
 	/**
 	 * search-field for searching
 	 *@name searchfield
@@ -283,6 +296,7 @@ class DBField extends Object implements DataBaseField
 	{
 			return $this->formfield($title);
 	}
+	
 	/**
 	 * this function uses more than one convert-method
 	 *@name convertMulti
@@ -301,6 +315,7 @@ class DBField extends Object implements DataBaseField
 			}
 			return $new->getValue();
 	}
+	
 	/**
 	 * gets the field-type
 	 *
@@ -310,6 +325,7 @@ class DBField extends Object implements DataBaseField
 	static public function getFieldType($args = array()) {
 		return "";
 	}
+	
 	/**
 	 * toString-Method
 	 *@name __toString
@@ -317,14 +333,18 @@ class DBField extends Object implements DataBaseField
 	*/
 	public function __toString()
 	{
-			if(ClassInfo::hasInterface($this->class, "DefaultConvert"))
-			{
-					return (string) $this->convertDefault();
-			} else
-			{
-					return (string) $this->value;
-			}
+		return $this->forTemplate();
 	}
+	
+	/**
+	 * gets Data Converted for Template
+	 *
+	 *@name forTemplate
+	*/
+	public function forTemplate() {
+		return (string) $this->value;
+	}
+	
 	/**
 	 * bool - for IF in template
 	 *
@@ -348,6 +368,7 @@ class DBField extends Object implements DataBaseField
 		}
 		return $this->__toString();
 	}
+	
 	/**
 	 * bool
 	*/
@@ -566,6 +587,15 @@ class Varchar extends DBField
 		{	
 			return goma_date($format, $this->value);
 		}
+		
+		/**
+		 * for template
+		 *
+		 *@name forTemplate
+		*/
+		public function forTemplate() {
+			return $this->text();
+		}
 }
 
 
@@ -687,6 +717,7 @@ class TimeZone extends DBField {
 	static public function getFieldType($args = array()) {
 		return 'enum("'.implode('","', i18n::$timezones).'")';
 	}
+	
 	/**
 	 * generatesa a numeric field
 	 *@name formfield
@@ -699,15 +730,7 @@ class TimeZone extends DBField {
 	}
 }
 
-class DateSQLField extends DBField implements DefaultConvert {
-	/**
-	 * field-type if you want to replace typed field type
-	 * for example int(30)
-	 *
-	 *@name field_type
-	 *@access public
-	*/ 
-	static public $field_type = "int(30)";
+class DateSQLField extends DBField {
 	
 	/**
 	 * gets the field-type
@@ -722,7 +745,7 @@ class DateSQLField extends DBField implements DefaultConvert {
 	/**
 	 * default convert
 	*/
-	public function convertDefault() {
+	public function forTemplate() {
 		if(isset($this->args[0]))
 			return $this->date($this->args[0]);
 		else
@@ -749,31 +772,64 @@ class DateSQLField extends DBField implements DefaultConvert {
 		if($this->value - NOW < 60) {
 			return printf(lang("ago.seconds", "about %d seconds ago"), round($this->value - NOW));
 		} else if($this->value - NOW < 90) {
-			return '<span title="'.$this->convertDefault().'">' . lang("ago.minute", "about one minute ago") . '</span>';
+			return '<span title="'.$this->forTemplate().'">' . lang("ago.minute", "about one minute ago") . '</span>';
 		} else {
 			$diff = $this->value - NOW;
 			$diff = $diff / 60;
 			if($diff < 60) {
-				return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
+				return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
 			} else {
 				$diff = round($diff / 60);
 				if($diff == 1) {
-					return '<span title="'.$this->convertDefault().'">' . lang("ago.hour", "about one hour ago") . '</span>';
+					return '<span title="'.$this->forTemplate().'">' . lang("ago.hour", "about one hour ago") . '</span>';
 				} else {
 					if($diff < 60) {
-						return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
+						return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
 					} else {
 						$diff = round($diff / 24);
 						if($diff == 1) {
-							return '<span title="'.$this->convertDefault().'">' . lang("ago.day", "about one day ago") . '</span>';
+							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
 						} else if($diff < 10) {
-							return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
+							return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
 						} else {
-							return $this->convertDefault();
+							return $this->forTemplate();
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+class HTMLText extends Varchar {
+	/**
+	 * gets the field-type
+	 *
+	 *@name getFieldType
+	 *@access public
+	*/
+	static public function getFieldType($args = array()) {
+		return "mediumtext";
+	}
+	
+	/**
+	 * generatesa a numeric field
+	 *
+	 *@name formfield
+	 *@access public
+	 *@param string - title
+	*/
+	public function formfield($title = null)
+	{
+			return new HTMLEditor($this->name, $title, $this->value);
+	}
+	
+	/**
+	 * for template
+	 *
+	 *@name forTemplate
+	*/
+	public function forTemplate() {
+		return $this->value;
 	}
 }
