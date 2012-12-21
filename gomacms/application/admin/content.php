@@ -158,7 +158,7 @@ class contentAdmin extends LeftAndMain
 	 *@access public
 	*/
 	public function revert_changes() {
-		if($this->modelInst()->Count() == 0) {
+		if(is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) {
 			if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
 				$data = DataObject::get_one($this->modelInst()->class, array("id" => $this->model_inst->id));
 				if($data) {
@@ -187,7 +187,7 @@ class contentAdmin extends LeftAndMain
 	 *@access public
 	*/
 	public function unpublish() {
-		if($this->modelInst()->Count() == 0 && $this->modelInst()->unpublish()) {
+		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) && $this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
 				$response = new AjaxResponse();
 				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
