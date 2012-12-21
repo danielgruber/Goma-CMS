@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 1.5.3
+  * last modified: 20.12.2012
+  * $Version 1.5.4
 */
 
 // prevent from being executed twice
@@ -625,22 +625,22 @@ if(typeof self.loader == "undefined") {
 					jqXHR.fail(function(){
 						alert(originalOptions.url);
 						if(jqXHR.textStatus == "timeout") {
-							alert('Error while saving data to the server: \nThe response timed out.');
+							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
 						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while saving data to the server: \nThe request was aborted.');
+							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
 						} else {
-							alert('Error while saving data to the server: \nFailed to save data on the server.');
+							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
 						}
 					});
 				} else {
 					jqXHR.fail(function(){
-						alert(originalOptions.url);
+						
 						if(jqXHR.textStatus == "timeout") {
-							alert('Error while fetching data from the server: \nThe response timed out.');
+							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
 						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while fetching data from the server: \nThe request was aborted.');
+							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
 						} else {
-							alert('Error while fetching data from the server: \nFailed to fetch data from the server.');
+							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
 						}
 					});
 				}

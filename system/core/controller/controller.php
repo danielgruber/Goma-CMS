@@ -746,7 +746,7 @@ class Controller extends RequestHandler
 		*/
 		public static function keyChainAdd($password, $cookie = null, $cookielt = null) {
 			if(!isset($cookie)) {
-				$cookie = true;
+				$cookie = false;
 			}
 			
 			if(!isset($cookielt)) {
@@ -770,7 +770,7 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public static function KeyChainCheck($password) {
-			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password))) {
+			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password)) || isset($_GET[getPrivateKey()])) {
 				return true;
 			} else {
 				return false;

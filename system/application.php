@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.12.2012
-  * $Version 2.6.2
+  * last modified: 20.12.2012
+  * $Version 2.6.3
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -838,7 +838,7 @@ function writeSystemConfig($data = array()) {
 	}
 	
 	if(@file_put_contents(ROOT . "_config.php", $contents)) {
-		@chmod(ROOT . "_config.php", 0600);
+		@chmod(ROOT . "_config.php", 0644);
 		return true;
 	} else
 		throwError(6, 'PHP-Error', "Could not write System-Config. Please apply Permissions 0777 to /_config.php");
@@ -887,7 +887,7 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	$config_content = str_replace('{info}', var_export($info, true), $config_content);
 	$config_content = str_replace('{folder}', $project, $config_content);
 	if(@file_put_contents($config, $config_content)) {
-		@chmod($config, 0600);
+		@chmod($config, 0644);
 		return true;
 	} else {
 		die("6: Could not write Project-Config '".$config."'. Please set Permissions to 0777!");
