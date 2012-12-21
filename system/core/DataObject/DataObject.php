@@ -827,6 +827,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $DataSet;
 	}
 
+	
 	/**
 	 * defines the methods
 	 *
@@ -839,7 +840,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			foreach(ClassInfo::$class_info[$class]["has_many"] as $key => $val) {
 				Object::LinkMethod($class, $key, array("this", "getHasMany"), true);
 				Object::LinkMethod($class, $key . "ids", array("this", "getRelationIDs"), true);
-				Object::LinkMethod($class, "set" . $key . "ids", array("this", "setHasManyIDs"), true);
 			}
 		}
 		
@@ -864,7 +864,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset(ClassInfo::$class_info[$class]["has_one"])) {
 			foreach(ClassInfo::$class_info[$class]["has_one"] as $key => $val) {
 				Object::LinkMethod($class, $key, array("this", "getHasOne"), true);
-				Object::LinkMethod($class, "set" . $key . "ID", array("this", "setHasOneID"), true);
 			}
 		}
 	}
@@ -2976,28 +2975,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$debug = debug_backtrace();
 			throwError(6, "PHP-Error", "No Has-one-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
-	}
-	
-	/**
-	 * sets has one id and empties cache
-	 *
-	 *@name setHasOneID
-	 *@access public
-	*/
-	public function setHasOneID($name, $val) {
-		$this->setField($name, $val);
-		$this->viewcache = array();
-	}
-	
-	/**
-	 * sets has-many-ids and empties cache
-	 *
-	 *@name setHasManyIDs
-	 *@access public
-	*/
-	public function setHasManyIDs($name, $val) {
-		$this->setField($name, $val);
-		$this->viewcache = array();
 	}
 	
 	/**
