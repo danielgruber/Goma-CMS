@@ -419,6 +419,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$perm->inheritorid = $this->parent->edit_permission->id;
 				}
 			}
+			$perm->name = "";
 			$this->setField("Edit_Permission", $perm);
 			
 			$this->viewcache = array();
@@ -472,6 +473,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$perm->inheritorid = $this->parent->publish_permission->id;
 				}
 			}
+			$perm->name = "";
 			
 			$this->setField("Publish_Permission", $perm);
 			$this->viewcache = array();
@@ -520,6 +522,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			} else if($this->id == 0 && $this->parentid != 0) {
 				$perm->inheritorid = $this->parent->read_permission->id;
 			}
+			$perm->name = "";
 			$this->setField("Read_Permission", $perm);
 			
 			$this->viewcache = array();
