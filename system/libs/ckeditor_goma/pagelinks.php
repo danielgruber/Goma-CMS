@@ -42,7 +42,7 @@ class PageLinksController extends RequestHandler {
 			$output["nodes"][$record["id"]] = array(
 				"id" 	=> $record["id"],
 				"title"	=> convert::raw2xml($record["title"]),
-				"url"	=> $record->path . URLEND
+				"url"	=> "./?r=" . $record->id
 			);
 		}
 		HTTPResponse::setHeader("content-type", "text/x-json");
