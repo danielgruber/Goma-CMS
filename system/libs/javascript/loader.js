@@ -421,14 +421,15 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(css){
-								// patch uris
-								var base = file.substring(0, file.lastIndexOf("/"));
-								//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-								css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-								
-								w.CSSLoadedResources[file] = css;
+								dataType: "html",
+								success: function(css){
+									// patch uris
+									var base = file.substring(0, file.lastIndexOf("/"));
+									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+									
+									w.CSSLoadedResources[file] = css;
+								}
 							});
 						}
 						
@@ -459,9 +460,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(js){
-								eval_global(js);
+								dataType: "html",
+								success: function(js){
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;
@@ -487,9 +489,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(js){
-								eval_global(js);
+								dataType: "html",
+								success: function(js){
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;	
@@ -621,7 +624,7 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
-				if(originalOptions.type == "post") {
+				if(originalOptions.type == "post" && originalOptions.async != false) {
 					jqXHR.fail(function(){
 						alert(originalOptions.url);
 						if(jqXHR.textStatus == "timeout") {
