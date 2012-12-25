@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.08.2012
+  * last modified: 25.12.2012
 */
 
 function DropDown(id, url, multiple) {
@@ -106,7 +106,7 @@ DropDown.prototype = {
 			// set correct position
 			this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 			
-			if(is_mobile || ($.browser.msie && getInternetExplorerVersion() < 9)) {
+			if(($.browser.msie && getInternetExplorerVersion() < 9)) {
 				var fieldhtml = this.widget.find(" > .field").html();
 				//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
 				this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
