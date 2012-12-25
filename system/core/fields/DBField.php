@@ -510,6 +510,15 @@ class DBField extends Object implements DataBaseField
 			return new DBField($name, $value, array());
 		}
 	}
+	
+	/**
+	 * returns false because no object can be done
+	 *
+	 *@name canDoObject
+	*/
+	public function canDoObject() {
+		return false;
+	}
 }
 
 /**

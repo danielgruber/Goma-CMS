@@ -590,8 +590,15 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				return $this->__call($offset, array());
 		}
 		
-		
-		
+		/**
+		 * if we can do a object
+		 *
+		 *@name canDoObject
+		*/
+		public function canDoObject() {
+			return true;
+		}
+				
 		/**
 		 * to cutomise this data with own data for loops
 		 *@name customise
