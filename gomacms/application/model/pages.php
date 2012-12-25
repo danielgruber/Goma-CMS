@@ -185,7 +185,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getParentType()
 		{
-				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()) && (Permission::check("PAGES_WRITE") && Permission::check("PAGES_PUBLISH")))
+				if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()))
 				{
 						return "root";
 				} else
