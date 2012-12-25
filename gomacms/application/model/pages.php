@@ -584,7 +584,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$this->queryVersion = "state";
 				
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
-					$html = "<div class=\"pageinfo versionControls\">";
+					
+					$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class)).'</span></span><div class="pageinfo versionControls">';
 					
 					if($this->isPublished()) {
 						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
@@ -599,7 +600,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
 						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
 					}
-					$html .= '</div><div style="clear:right;"></div>';
+					$html .= '</div><div style="clear:right;"></div></div>';
 					
 					$form->add($links = new HTMLField('links', $html));
 					$links->container->addClass("hidden");

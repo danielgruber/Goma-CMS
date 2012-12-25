@@ -54,7 +54,7 @@
 	border-color: #aaa;
 }
 .leftandmaintable tr > .main .leftbar_toggle.index {
-	display: none;
+	display: none !important;
 }
 
 /*.leftandmaintable tr > .main textarea {
@@ -79,6 +79,35 @@
 }
 .leftandmaintable tr > .main > .inner > form > .error {
 	margin: 0 !important;
+}
+.leftandmaintable tr > .main > .inner .headBar {
+	background: #eee;
+	border-bottom: 1px solid #ccc;
+	padding: 4px;
+}
+.leftandmaintable tr > .main > .inner .headBar span span {
+	padding: 6px;
+	margin-left: 4px;
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding-left: 20px;
+	display: block;
+	float: left;
+}
+.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
+	float: left;
+	border: 0;
+	margin-top: -6px;
+	margin-left: -6px;
+	padding-left: 4px;
+	padding-right: 2px;
+	padding-bottom: 2px;
+	margin-right: 6px;
+	border-right: 1px solid #ccc;
+}
+.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle img {
+	height: 38px;
+	width: 38px;
 }
 
 /* sidebar */
