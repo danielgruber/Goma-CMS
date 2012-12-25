@@ -441,30 +441,6 @@ function parseUrl() {
 	$root_path = substr($root_path, strlen(realpath($_SERVER["DOCUMENT_ROOT"])));
 	define('ROOT_PATH',$root_path);
 	
-	
-	// generate URL
-	$url = isset($GLOBALS["url"]) ? $GLOBALS["url"] : $_SERVER["REQUEST_URI"];
-	$url = urldecode($url); // we should do this, because the url is not correct else
-	if(preg_match('/\?/',$url))
-	{
-			$url = substr($url, 0, strpos($url,'?') );
-	} else
-	{
-			$url = $url;
-	}
-	$url = substr($url, strlen(ROOT_PATH . BASE_SCRIPT));
-	// parse URL
-	if(substr($url, 0, 1) == "/")
-			$url = substr($url, 1);
-	if(preg_match('/^(.*)'.preg_quote(URLEND, "/").'$/Usi', $url, $matches))
-	{
-			$url = $matches[1];
-	}
-	$url = str_replace('//','/', $url);
-	
-	define("URL", $url);
-	
-	
 	// generate BASE_URI
 	$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
 	$port = $_SERVER["SERVER_PORT"];
@@ -482,6 +458,52 @@ function parseUrl() {
 	}
 	
 	define("BASE_URI",$http.'://'.$_SERVER["SERVER_NAME"] . $port . ROOT_PATH);
+	
+	// generate URL
+	$url = isset($GLOBALS["url"]) ? $GLOBALS["url"] : $_SERVER["REQUEST_URI"];
+	$url = urldecode($url); // we should do this, because the url is not correct else
+	if(preg_match('/\?/',$url))
+	{
+			$url = substr($url, 0, strpos($url,'?') );
+	} else
+	{
+			$url = $url;
+	}
+	
+	$url = substr($url, strlen(ROOT_PATH . BASE_SCRIPT));
+	
+	// parse URL
+	if(substr($url, 0, 1) == "/")
+			$url = substr($url, 1);
+	
+	// URL-END
+	if(preg_match('/^(.*)'.preg_quote(URLEND, "/").'$/Usi', $url, $matches))
+	{
+		$url = $matches[1];
+	} else if($url != "") {
+		
+		// enforce URLEND
+		$get = "";
+		$i = 0;
+		foreach($_GET as $k => $v) {
+			if($i == 0)
+				$i++;
+			else
+				$get .= "&";
+			
+			$get .= urlencode($k) . "=" . urlencode($v);
+		}
+		if($get) {
+			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND . "?" . $get);
+		} else {
+			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND);
+		}
+		exit;
+	}
+	
+	$url = str_replace('//','/', $url);
+	
+	define("URL", $url);
 }
 
 /**
