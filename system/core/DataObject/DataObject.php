@@ -3292,6 +3292,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				ClassInfo::write();
 			}
 			
+			if(PROFILE) Profiler::mark("DataObject::buildQuery hairy");
+			
 			$baseClass = $this->baseClass;
 			$baseTable = $this->baseTable;
 			
@@ -3318,6 +3320,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 
 			$query = clone self::$query_cache[$this->baseClass];
+			
+			if(PROFILE) Profiler::unmark("DataObject::buildQuery hairy");
 			
 			if(is_array($filter)) {
 				if(isset($filter["versionid"])) {
