@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.09.2012
-  * $Version 1.0.1
+  * last modified: 22.12.2012
+  * $Version 1.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,7 +14,7 @@ class PageLinksController extends RequestHandler {
 	/**
 	 * limit for the list
 	*/
-	public $limit = 8;
+	public $limit = 15;
 	/**
 	 * urls
 	*/
@@ -36,13 +36,13 @@ class PageLinksController extends RequestHandler {
 		} else {
 			$search = "";
 		}
-		$data = DataObject::search_object("pages", array($search), array(), array(), $this->limit);
+		$data = DataObject::search_object("pages", array($search), array(), $this->limit);
 		$output = array("count" => $data->count, "nodes" => array());
 		foreach($data as $record) {
 			$output["nodes"][$record["id"]] = array(
 				"id" 	=> $record["id"],
 				"title"	=> convert::raw2xml($record["title"]),
-				"url"	=> $record->path . URLEND
+				"url"	=> "./?r=" . $record->id
 			);
 		}
 		HTTPResponse::setHeader("content-type", "text/x-json");

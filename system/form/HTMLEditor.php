@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 15.12.2011
-  * $Version 1.2.5
+  * last modified: 22.12.2011
+  * $Version 1.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -64,7 +64,7 @@ class HTMLEditor extends Textarea
 				
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4/";');
 				Resources::add("system/libs/thirdparty/ckeditor4/ckeditor.js", "js");
-				Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
+				if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
 				Resources::addData("var lang_page = '".lang("page")."';");
 				
