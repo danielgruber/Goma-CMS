@@ -181,7 +181,7 @@ if(file_exists(ROOT . '_config.php'))
 		
 		// END define vars
 		
-		// get temporary a root_path
+		// get a temporary root_path
 		$root_path = str_replace("\\","/",substr(__FILE__, 0, -22));
 		$root_path = substr($root_path, strlen(realpath($_SERVER["DOCUMENT_ROOT"])));
 		
