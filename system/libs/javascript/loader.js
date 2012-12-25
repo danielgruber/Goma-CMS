@@ -627,7 +627,6 @@ if(typeof self.loader == "undefined") {
 				
 				if(originalOptions.type == "post" && originalOptions.async != false) {
 					jqXHR.fail(function(){
-						alert(originalOptions.url);
 						if(jqXHR.textStatus == "timeout") {
 							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
 						} else if(jqXHR.textStatus == "abort") {
@@ -649,12 +648,19 @@ if(typeof self.loader == "undefined") {
 					});
 				}
 			}
-			
-			/*w.event_history = [];
-			w.$.orgajax = w.$.ajax;
-			w.$.ajax = function(url, options) {
-				var jqXHR = $.orgajax.call(this, url options);
 				
+	 		jqXHR.setRequestHeader("X-Referer", location.href);
+		});
+		
+		w.event_history = [];
+		$.orgajax = $.ajax;
+		$.ajax = function(url, options) {
+			
+			var w = window;
+			
+			var jqXHR = $.orgajax.apply(this, [url, options]);
+			
+			if(typeof options != "undefined" && options.noRequestTrack == null || url.noRequestTrack == null) {
 				var i = w.event_history.length;
 				w.event_history[i] = {done: [], fail: [], always: []};
 				
@@ -675,12 +681,33 @@ if(typeof self.loader == "undefined") {
 					w.event_history[i]["always"].push(fn);
 					return jqXHR._always(fn);
 				}
+			}
 				
-				return jqXHR;
-			}*/
-				
-	 		jqXHR.setRequestHeader("X-Referer", location.href);
-		});
+			return jqXHR;
+		};
+		
+		/* API to run earlier Requests with a bit different options */
+		w.runLastRequest = function(data) {
+			return w.runPreRequest(0, data);
+		}
+		w.runPreRequest = function(i, data) {
+			var a = self.request_history.length - 1 - parseInt(i);
+			var options = $.extend(self.request_history[a], data);
+			if(self.request_history[a].data != null && typeof self.request_history[a].data != "string" && typeof data.data == "object") {
+				options.data = $.extend(self.request_history[a].data, data.data);
+			}
+			var jqXHR = $.ajax(options);
+			for(i in w.event_history[a]["done"]) {
+				jqXHR.done(w.event_history[a]["done"][i]);
+			}
+			for(i in w.event_history[a]["always"]) {
+				jqXHR.always(w.event_history[a]["always"][i]);
+			}
+			for(i in w.event_history[a]["fail"]) {
+				jqXHR.fail(w.event_history[a]["fail"][i]);
+			}
+			return jqXHR;
+		}
 		
 	})(jQuery, window);
 	
@@ -708,13 +735,6 @@ if(typeof self.loader == "undefined") {
 	
 	function is_string(input) {
 	    return (typeof(input) == 'string');
-	}
-	
-	function getLastRequest() {
-		return self.request_history[self.request_history.length -1];
-	}
-	function getPreRequest(i) {
-		return self.request_history[self.request_history.length - 1 - parseInt(i)];
 	}
 	
 	

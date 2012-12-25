@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.05.2012
-  * $Version 1.4.1
+  * last modified: 24.12.2012
+  * $Version 1.4.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -203,16 +203,7 @@ class RequestForm extends Object {
 		
 		$_SESSION["requestform"][md5($this->title . $this->key)] = $arr;
 		$response->exec('var bluebox_id = $("#'.$form->ID().'").parents(".bluebox").attr("id").replace("bluebox_", ""); getblueboxbyid(bluebox_id).close();
-		var settings = getPreRequest(1);
-		if(settings.data == null || typeof settings.data == "string")
-			settings.data = [];
-		
-		
-		
-		settings.type = "POST";
-		settings.data["'.md5($this->title . $this->key).'"] = true;
-		settings.data["requestform_key"] = '.var_export($this->key, true).';
-		$.ajax(settings);');
+		runPreRequest(1, {type: "POST", data: {requestform_key: '.var_export($this->key, true).', "'.md5($this->title . $this->key).'": true}});');
 		HTTPResponse::setBody($response->render());
 		HTTPResponse::output();
 		exit;
@@ -238,15 +229,7 @@ class RequestForm extends Object {
 		
 		$_SESSION["requestform"][md5($this->title . $this->key)] = $arr;
 		$response->exec('var dropdown_id = $(this).parents(".dropdownDialog").attr("id"); dropdownDialog.get(dropdown_id).hide();
-		var settings = getPreRequest(1);
-		if(settings.data == null || typeof settings.data == "string")
-			settings.data = {};
-		
-		settings.type = "POST";
-		settings.data["'.md5($this->title . $this->key).'"] = true;
-		settings.data.requestform_key = '.var_export($this->key, true).';
-
-		$.ajax(settings);');
+		runPreRequest(1, {type: "POST", data: {requestform_key: '.var_export($this->key, true).', "'.md5($this->title . $this->key).'": true}});');
 		HTTPResponse::setBody($response->render());
 		HTTPResponse::output();
 		exit;
