@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
+  * last modified: 25.12.2012
   * $Version 2.4.8
 */
 
@@ -290,7 +290,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				$value = str_replace(" ",  "-", $value);
 				// normal chars
-				$value = preg_replace('/[^a-zA-Z0-9-_]/', '-', $value);
+				$value = preg_replace('/[^a-zA-Z0-9\-_\.]/', '-', $value);
 				$value = preg_replace('/[\-\-]/', '-', $value);
 				$this->setField("path", $value);					
 
@@ -711,8 +711,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									filename = filename.replace("ö", "oe");
 									filename = filename.replace("ü", "ue");
 									filename = filename.replace("ß", "ss");
-									while(filename.match(/[^a-zA-Z0-9-_]/))
-										filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
+									while(filename.match(/[^a-zA-Z0-9\-_\.]/))
+										filename = filename.replace(/[^a-zA-Z0-9\-_\.]/, "-");
 									
 									while(filename.match(/\-\-/))
 										filename = filename.replace("--", "-");
