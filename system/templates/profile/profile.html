@@ -1,35 +1,16 @@
 <% INCLUDE_CSS "profile.css" %>
 
-<div>
-	<% IF NOT isMobile() %>
-		<div class="profile-left">
-	<% END %>
-		<div>
-		<div class="profile-photo">
-			<a href="{$image.raw()}" rel="dropdownDialog">$image.setSize(150, 150)</a>
-		</div>
-		</div>
-	<% IF NOT isMobile() %>
-		</div>
-		
-		<div class="profile-content">
-	<% END %>
-	<div>
-		<% IF NOT isMobile() %> 
-			<div class="profile-actions profile-ui-right">
-				$profile_actions
-			</div>
-		<% ELSE %>
-			<div class="profile-actions" style="margin-top: 8px;">
-				$profile_actions
-				<div class="clear"></div>
-			</div>
-		<% END %>
-		<h1 class="profile-title">$nickname.text()</h1>
-		$tabs
+<div class="profile-left">
+	<div class="profile-photo">
+		<a href="{$image.raw()}" rel="dropdownDialog">$image.setSize(150, 150)</a>
 	</div>
-	<% IF NOT isMobile() %>
-		</div>
-	<% END %>
-	<div class="clear"></div>
 </div>
+	
+<div class="profile-content">
+	<div class="profile-actions profile-ui-right">
+		$profile_actions
+	</div>
+	<h1 class="profile-title">$nickname.text()</h1>
+	$tabs
+</div>
+<div class="clear"></div>

@@ -1493,34 +1493,7 @@ class tplCaller extends Object implements ArrayAccess
 			return Resources::file_exists($filename);
 		}
 		
-		/**
-		 * Mobility Functions
-		*/
-		
-		public function isMobile() {
-			return Core::isMobile();
-		}
-		
-		public function isiPhone() {
-			return Core::isiPhone();
-		}
-		
-		public function isiPad() {
-			return Core::isiPad();
-		}
-		
-		public function isMobileAvailable() {
-			return Core::isMobileAvailable();
-		}
-		
-		public function isiPhoneAvailable() {
-			return Core::isiPhoneAvailable();
-		}
-		
-		public function isiPadAvailable() {
-			return Core::isiPadAvailable();
-		}
-		
+				
 		/**
 		 * returns if homepage
 		*/
