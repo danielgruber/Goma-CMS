@@ -311,7 +311,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			// methods
 			if($this->isOffsetMethod($lowername)) {
-				$data = $this->callOffsetMethod($lowername, $args);
+				$data = call_user_func_array(array($this, "get" . $name), $args);
 			} else
 			
 			// data
@@ -360,11 +360,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@name makeObject
 		 *@access public
 		*/
-		public function makeObject($name, $data, $cachename = null) {
+		public function makeObject($name, $data) {
 			if(PROFILE) Profiler::mark("ViewAccessableData::makeObject");
-			
-			if(!isset($cachename))
-				$cachename = "1_" . $name;
 			
 			// if is already an object
 			if(is_object($data)) {
@@ -380,12 +377,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			// default object
 			} else {
-				if(isset($this->casting[$name])) {
-					$object = DBField::getObjectByCasting($this->casting[$name], $name, $data);
-				} else {
-					$c = ClassInfo::getStatic("viewaccessabledata", "default_casting");
-					$object = new $c($name, $data);
-				}
+				$casting = isset($this->casting[$name]) ? $this->casting[$name] : ClassInfo::getStatic($this->class, "default_casting");
+				$object = DBField::getObjectByCasting($casting, $name, $data);
 				
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
 				return $object;
@@ -426,23 +419,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		public function isOffsetMethod($name) {
 			return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->class, "get" . $name));
 		}
-		
-		/**
-		 * checks if there is a method get + $name or $name
-		 * and calls it
-		 *
-		 *@name callOffsetMethod
-		 *@access public
-		 *@param string - name
-		 *@param array - args
-		*/
-		public function callOffsetMethod($name, $args) {
-			if(!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->class, "get" . $name)) {
-				return call_user_func_array(array($this, "get" . $name), $args);
-			} 
-			
-			return false;
-		}
+
 		/**
 		 * new __cancall
 		 *
