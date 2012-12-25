@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 1.5.3
+  * last modified: 20.12.2012
+  * $Version 1.5.4
 */
 
 // prevent from being executed twice
@@ -421,14 +421,15 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(css){
-								// patch uris
-								var base = file.substring(0, file.lastIndexOf("/"));
-								//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-								css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-								
-								w.CSSLoadedResources[file] = css;
+								dataType: "html",
+								success: function(css){
+									// patch uris
+									var base = file.substring(0, file.lastIndexOf("/"));
+									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+									
+									w.CSSLoadedResources[file] = css;
+								}
 							});
 						}
 						
@@ -459,9 +460,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(js){
-								eval_global(js);
+								dataType: "html",
+								success: function(js){
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;
@@ -487,9 +489,10 @@ if(typeof self.loader == "undefined") {
 								url: file,
 								noRequestTrack: true,
 								async: false,
-								dataType: "html"
-							}).done(function(js){
-								eval_global(js);
+								dataType: "html",
+								success: function(js){
+									eval_global(js);
+								}
 							});
 						}
 						regexp = null;	
@@ -613,6 +616,7 @@ if(typeof self.loader == "undefined") {
 		
 		// save settings of last ajax request
 		w.request_history = [];
+		w.event_history = [];
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			if(originalOptions.noRequestTrack == null) {
@@ -621,30 +625,59 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
-				if(originalOptions.type == "post") {
+				if(originalOptions.type == "post" && originalOptions.async != false) {
 					jqXHR.fail(function(){
 						alert(originalOptions.url);
 						if(jqXHR.textStatus == "timeout") {
-							alert('Error while saving data to the server: \nThe response timed out.');
+							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
 						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while saving data to the server: \nThe request was aborted.');
+							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
 						} else {
-							alert('Error while saving data to the server: \nFailed to save data on the server.');
+							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
 						}
 					});
 				} else {
 					jqXHR.fail(function(){
-						alert(originalOptions.url);
+						
 						if(jqXHR.textStatus == "timeout") {
-							alert('Error while fetching data from the server: \nThe response timed out.');
+							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
 						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while fetching data from the server: \nThe request was aborted.');
+							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
 						} else {
-							alert('Error while fetching data from the server: \nFailed to fetch data from the server.');
+							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
 						}
 					});
 				}
 			}
+			
+			/*w.event_history = [];
+			w.$.orgajax = w.$.ajax;
+			w.$.ajax = function(url, options) {
+				var jqXHR = $.orgajax.call(this, url options);
+				
+				var i = w.event_history.length;
+				w.event_history[i] = {done: [], fail: [], always: []};
+				
+				jqXHR._done = jqXHR.done;
+				jqXHR.done = function(fn) {
+					w.event_history[i]["done"].push(fn);
+					return jqXHR._done(fn);
+				}
+				
+				jqXHR._fail = jqXHR.fail;
+				jqXHR.fail = function(fn) {
+					w.event_history[i]["fail"].push(fn);
+					return jqXHR._fail(fn);
+				}
+				
+				jqXHR._always = jqXHR.always;
+				jqXHR.always = function(fn) {
+					w.event_history[i]["always"].push(fn);
+					return jqXHR._always(fn);
+				}
+				
+				return jqXHR;
+			}*/
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 		});

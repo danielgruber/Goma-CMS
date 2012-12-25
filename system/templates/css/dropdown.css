@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.09.2012
+  * last modified: 24.12.2012
 */
 .dropdownContainer .info_field {
 	padding-left: 6px !important;
@@ -16,7 +16,7 @@
 	padding-left: 2px;
 }
 .dropdown_widget .field {
-	width: 400px;
+	width: 250px;
 	font-size: 13px;
 	padding: 5px;
 	-moz-border-radius: 3px;
@@ -44,7 +44,7 @@
 }
 
 .dropdown_widget .hiddenbutton {
-	width: 405px;
+	width: 250px;
 	height: 27px;
 	border: 1px solid #999;
 	border-left: 0;
@@ -61,7 +61,6 @@
 	display: none;
 	background: #fff;
 	max-height: 300px;
-	width: 408px;
 	border: 1px solid #999;
 	
 	-webkit-border-bottom-left-radius: 3px;
@@ -89,7 +88,7 @@
 	height: 30px;
 }
 .dropdown_widget .dropdown .header .search {
-	width: 270px;
+	width: 100%;
 	max-width: 60%;
 	font-size: 13px;
 	line-height: 15px;
@@ -228,3 +227,14 @@
 	font-weight: normal;
 }
 
+@media only screen and (min-width: 600px) {
+	.dropdown_widget .field {
+		width: 400px;
+	}
+	.dropdown_widget .hiddenbutton {
+		width: 405px;
+	}
+	.dropdown_widget .dropdown {
+		width: 408px;
+	}
+}

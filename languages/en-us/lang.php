@@ -212,7 +212,7 @@ $lang = array(
 	"captcha_reload"                                => "reload",
 	'path'                                          => "path",
 	"box_successful_saved"							=> "The box was successfully saved!",
-	"successful_saved"                              => "The data was successfully saved!",
+	"successful_saved"                              => "The data were successfully saved!",
 	"saved"											=> "Saved",
 	"successful_deleted"							=> "The data was successfully removed.",
 	"deleted"										=> "Removed",
@@ -551,6 +551,9 @@ $lang = array(
 	"notification"			=> "notification",
 	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again.",
 	
-	"wrapper_page"			=> "list with subpages"
+	"wrapper_page"			=> "list with subpages",
+	
+	"toggle_navigation"		=> "toggle navigation",
+	"toggle_sidebar"		=> "toggle sidebar"
 
 );
