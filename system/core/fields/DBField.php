@@ -384,6 +384,8 @@ class DBField extends Object implements DataBaseField
 	 *@param string - casting
 	*/
 	public static function parseCasting($casting) {
+		if(PROFILE) Profiler::mark("DBField::parseCasting");
+		
 		if(is_array($casting))
 			return $casting;
 
@@ -433,6 +435,8 @@ class DBField extends Object implements DataBaseField
 		if(isset($method)) {
 			$data["method"] = $method;
 		}
+		
+		if(PROFILE) Profiler::unmark("DBField::parseCasting");
 		
 		return $data;
 	}
