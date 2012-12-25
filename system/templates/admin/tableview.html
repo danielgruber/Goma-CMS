@@ -125,7 +125,7 @@
 				<% ENDCONTROL %>
 			</div>
 			<% CONTROL GlobalAction() AS $action %>
-				<a href="{$action.url}{URLEND}?redirect={$_SERVER_REQUEST_URI}" class="button">{$action.title}</a>
+				<a href="{$action.url}{URLEND}?redirect={$_SERVER_REQUEST_URI.url()}" class="button">{$action.title}</a>
 			<% ENDCONTROL %>
 			<div class="clear"></div>
 		</div>
