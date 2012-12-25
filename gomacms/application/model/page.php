@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.04.2012
+  * last modified: 18.12.2012
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -117,8 +117,11 @@ class ChildPage extends Page {
 	 *
 	 *@name hidden
 	*/
-	public static function hidden() {
-		return true;
+	public static function hidden($class = null) {
+		if($class == "childpage")
+			return true;
+			
+		return false;
 	}
 }
 

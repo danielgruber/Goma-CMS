@@ -22,3 +22,4 @@ Uploads
 Uploads/*
 images/resampled
 images/resampled/*
+*.db

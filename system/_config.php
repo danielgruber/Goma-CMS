@@ -57,6 +57,7 @@ gloader::addLoadAble("dropdownDialog", "system/libs/javascript/dropdownDialog.js
 gloader::addLoadAble("ajaxupload", "system/libs/ajax/ajaxupload.js");
 gloader::addLoadAble("htmllib", "system/libs/javascript/html.js");
 gloader::addLoadAble("history", "system/libs/javascript/history/history.js");
+gloader::addLoadAble("notifications", "system/libs/notifications/notifications.js");
 
 /**
  * here you can define the seperator for the creadcrumbs

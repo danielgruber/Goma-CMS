@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.08.2012
+  * last modified: 25.12.2012
 */
 
 function DropDown(id, url, multiple) {
@@ -106,41 +106,18 @@ DropDown.prototype = {
 			// set correct position
 			this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 			
-			if(is_mobile || ($.browser.msie && getInternetExplorerVersion() < 9)) {
-				var fieldhtml = this.widget.find(" > .field").html();
-				//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
-				this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-				var $this = this;
-				this.reloadData(function(){
-					//$this.widget.find(" > .field").css({height: ""});
-					$this.widget.find(" > .dropdown").fadeIn(200);
-					$this.widget.find(" > .field").html(fieldhtml);
-					var width = $this.widget.find(" > .field").width() +  /* padding */10;
-					$this.widget.find(" > .dropdown").css({ width: width});
-					$this.widget.find(" > .dropdown .search").focus();
-				});
-			} else {
-				var fieldhtml = this.widget.find(" > .field").html();
-				//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
-				this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-				var $this = this;
-				gloader.load("jquery.scale.rotate");
-				this.reloadData(function(){
-					//$this.widget.find(" > .field").css({height: ""});
-					$this.widget.find(" > .dropdown").css("display", "block");
-					var destheight = $this.widget.find(" > .dropdown").height();
-					$this.widget.find(" > .field").html(fieldhtml);
-					var width = $this.widget.find(" > .field").width() +  /* padding */10;
-					$this.widget.find(" > .dropdown").css({width: width, height: destheight,"opacity": 0.4});
-					$this.widget.find(" > .dropdown").scale(0.1);
-					$this.widget.find(" > .dropdown").animate({scale: 1.05, opacity: 0.9}, 150, function(){
-						$this.widget.find(" > .dropdown").animate({scale:1, "opacity": 0.95}, 100, function(){
-							$this.widget.find(" > .dropdown").css({ height: "", "-moz-transform": ""});
-							$this.widget.find(" > .dropdown .search").focus();
-						});
-					});
-				});
-			}
+			var fieldhtml = this.widget.find(" > .field").html();
+			//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
+			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+			var $this = this;
+			this.reloadData(function(){
+				//$this.widget.find(" > .field").css({height: ""});
+				$this.widget.find(" > .dropdown").fadeIn(200);
+				$this.widget.find(" > .field").html(fieldhtml);
+				var width = $this.widget.find(" > .field").width() +  /* padding */10;
+				$this.widget.find(" > .dropdown").css({ width: width});
+				$this.widget.find(" > .dropdown .search").focus();
+			});
 		}
 	},
 	/**

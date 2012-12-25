@@ -6,12 +6,13 @@
 		
 		<% INCLUDE_CSS_MAIN "style.css" %>
 		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
+		<% INCLUDE_CSS_MAIN "notifications.css" %>
 		
 		<% INCLUDE_JS_MAIN "admin.js" %>
 		
 		{$header}
 		
-		<% IF NOT $content %>
+		<% IF NOT $content AND PERMISSION("superadmin") %>
 			<% gload("htmllib") %>
 			
 			<script type="text/javascript">
@@ -49,7 +50,7 @@
 						}
 
 						for(name in u) {
-							var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"];
+							var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
 							$.ajax({
 								url: url,
 								dataType: "jsonp",

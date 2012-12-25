@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.08.2012
-  * $Version 2.1.1
+  * last modified: 24.12.2012
+  * $Version 2.1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -68,6 +68,7 @@ class FormAction extends FormField implements FormActionHandler
 				$node->type = "submit";
 				$node->addClass("button");
 				$node->addClass("formaction");
+				$node->removeClass("input");
 				return $node;
 		}
 		

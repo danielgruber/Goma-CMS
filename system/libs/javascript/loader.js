@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.12.2012
-  * $Version 1.5.3
+  * last modified: 25.12.2012
+  * $Version 1.5.5
 */
 
 // prevent from being executed twice
@@ -38,10 +38,6 @@ if(typeof self.loader == "undefined") {
 					noRequestTrack: true,
 					url: BASE_SCRIPT + "gloader/" + component + ".js",
 					dataType: "script",
-					error: function(jqXHR, textStatus, errorThrown) {
-						alert(textStatus);
-						alert(errorThrown);
-					},
 					async: false
 				});
 				$("body").css("cursor", "auto");
@@ -94,28 +90,18 @@ if(typeof self.loader == "undefined") {
 				$.ajax({
 					url: $this.attr("href"),
 					data: {ajaxfy: true, "ajaxcontent": true, "container": $container},
-					dataType: "html",
-					success: function(html, code, ajaxreq) {
-						eval_script(html, ajaxreq);
-						$this.html(_html);
-					},
-					error: function(ajaxreq) {
-						eval_script(ajaxreq.responseText, ajaxreq);
-						$this.html(_html);
-					}
+					dataType: "html"
+				}).done(function(html, textStatus, jqXHR){
+					eval_script(html, jqXHR);
+					$this.html(_html);
+				}).fail(function(jqXHR){
+					eval_script(jqXHR.responseText, jqXHR);
+					$this.html(_html);
 				});
 				return false;
 			});
-			
-			// the orangebox is not tested, yet, please don't use it!
-			$(document).on('click',"a[rel*=orangebox]",function(){	
-				gloader.load("orangebox");
-				$(this).orangebox();
-				$(this).removeAttr("rel");
-				$(this).click();
-			});
 	
-			// pretty old-fasioned bluefox, if you like it create an a-tag with rel="bluebox"
+			// pretty old-fashioned bluefox, if you like it create an a-tag with rel="bluebox"
 			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
 				gloader.load("dialog");
 				if($(this).hasClass("nodrag"))
@@ -224,7 +210,8 @@ if(typeof self.loader == "undefined") {
 					async: false,
 					cache: true,
 					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name),
-					dataType: "json"
+					dataType: "json",
+					noRequestTrack: true
 				});
 				
 				try {
@@ -286,7 +273,8 @@ if(typeof self.loader == "undefined") {
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",
-				dataType: "json"
+				dataType: "json",
+				noRequestTrack: true
 			});
 			
 			try {
@@ -399,11 +387,9 @@ if(typeof self.loader == "undefined") {
 				url: url,
 				type: method,
 				data: data,
-				dataType: "script",
-				complete: function()
-				{
-					$form.find(".loader").remove();
-				}
+				dataType: "script"
+			}).always(function(){
+				$form.find(".loader").remove();
 			});
 			return false;
 		}
@@ -436,7 +422,7 @@ if(typeof self.loader == "undefined") {
 								noRequestTrack: true,
 								async: false,
 								dataType: "html",
-								success: function(css) {
+								success: function(css){
 									// patch uris
 									var base = file.substring(0, file.lastIndexOf("/"));
 									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
@@ -475,7 +461,7 @@ if(typeof self.loader == "undefined") {
 								noRequestTrack: true,
 								async: false,
 								dataType: "html",
-								success: function(js) {
+								success: function(js){
 									eval_global(js);
 								}
 							});
@@ -504,7 +490,7 @@ if(typeof self.loader == "undefined") {
 								noRequestTrack: true,
 								async: false,
 								dataType: "html",
-								success: function(js) {
+								success: function(js){
 									eval_global(js);
 								}
 							});
@@ -630,6 +616,7 @@ if(typeof self.loader == "undefined") {
 		
 		// save settings of last ajax request
 		w.request_history = [];
+		w.event_history = [];
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			if(originalOptions.noRequestTrack == null) {
@@ -638,10 +625,89 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
+				if(originalOptions.type == "post" && originalOptions.async != false) {
+					jqXHR.fail(function(){
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
+						} else {
+							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
+						}
+					});
+				} else {
+					jqXHR.fail(function(){
+						
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
+						} else {
+							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
+						}
+					});
+				}
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 		});
+		
+		w.event_history = [];
+		$.orgajax = $.ajax;
+		$.ajax = function(url, options) {
+			
+			var w = window;
+			
+			var jqXHR = $.orgajax.apply(this, [url, options]);
+			
+			if(typeof options != "undefined" && options.noRequestTrack == null || url.noRequestTrack == null) {
+				var i = w.event_history.length;
+				w.event_history[i] = {done: [], fail: [], always: []};
+				
+				jqXHR._done = jqXHR.done;
+				jqXHR.done = function(fn) {
+					w.event_history[i]["done"].push(fn);
+					return jqXHR._done(fn);
+				}
+				
+				jqXHR._fail = jqXHR.fail;
+				jqXHR.fail = function(fn) {
+					w.event_history[i]["fail"].push(fn);
+					return jqXHR._fail(fn);
+				}
+				
+				jqXHR._always = jqXHR.always;
+				jqXHR.always = function(fn) {
+					w.event_history[i]["always"].push(fn);
+					return jqXHR._always(fn);
+				}
+			}
+				
+			return jqXHR;
+		};
+		
+		/* API to run earlier Requests with a bit different options */
+		w.runLastRequest = function(data) {
+			return w.runPreRequest(0, data);
+		}
+		w.runPreRequest = function(i, data) {
+			var a = self.request_history.length - 1 - parseInt(i);
+			var options = $.extend(self.request_history[a], data);
+			if(self.request_history[a].data != null && typeof self.request_history[a].data != "string" && typeof data.data == "object") {
+				options.data = $.extend(self.request_history[a].data, data.data);
+			}
+			var jqXHR = $.ajax(options);
+			for(i in w.event_history[a]["done"]) {
+				jqXHR.done(w.event_history[a]["done"][i]);
+			}
+			for(i in w.event_history[a]["always"]) {
+				jqXHR.always(w.event_history[a]["always"][i]);
+			}
+			for(i in w.event_history[a]["fail"]) {
+				jqXHR.fail(w.event_history[a]["fail"][i]);
+			}
+			return jqXHR;
+		}
 		
 	})(jQuery, window);
 	
@@ -669,13 +735,6 @@ if(typeof self.loader == "undefined") {
 	
 	function is_string(input) {
 	    return (typeof(input) == 'string');
-	}
-	
-	function getLastRequest() {
-		return self.request_history[self.request_history.length -1];
-	}
-	function getPreRequest(i) {
-		return self.request_history[self.request_history.length - 1 - parseInt(i)];
 	}
 	
 	
@@ -750,10 +809,15 @@ if(typeof self.loader == "undefined") {
 	
 	// patch for IE eval
 	function eval_global(codetoeval) {
-	    if (window.execScript)
-	        window.execScript(codetoeval); // execScript doesn’t return anything
-	    else
-	        window.eval(codetoeval);
+		try {
+		    if (window.execScript)
+		        window.execScript(codetoeval); // execScript doesn’t return anything
+		    else
+		        window.eval(codetoeval);
+		} catch(e) {
+			alert(e);
+			throw e;
+		}
 	}
 	
 	// parse JSON
@@ -803,40 +867,39 @@ if(typeof self.loader == "undefined") {
     
 	// retina-support
 	$(function(){
-		var timeout;
-		var replace = function() {
-			if(getDevicePixelRatio() > 1.5) {
-				var setT = true;
-				$("img").each(function(){ //.on("load", "img", function(){
-					var $this = $(this);
-					if($this.attr("data-ratined") != "complete" && $this.attr("data-retina")) {
-						if(IsImageOk($(this).get(0))) {
-							var img = new Image();
-							img.onload = function(){
-								$this.css("width", $this.width());
-								$this.css("height", $this.height());
-								$this.attr("src", $this.attr("data-retina"));
-								img.src = null;
-							}
-							img.src = $this.attr("data-retina");
-							$this.attr("data-ratined", "complete");
-						} else {
-							clearTimeout(timeout);
-							timeout = setTimeout(replace, 100);
-							setT = false;
-						}
-					}
-				});
+		if(getDevicePixelRatio() > 1.5) {
+			var replace = function() {
 				
-				if(setT === true) {
-					clearTimeout(timeout);
-					timeout = setTimeout(replace, 2000);
-				}
+					$("img").each(function(){ //.on("load", "img", function(){
+						var $this = $(this);
+						if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
+							if(IsImageOk($(this).get(0))) {
+								var img = new Image();
+								img.onload = function(){
+									$this.css("width", $this.width());
+									$this.css("height", $this.height());
+									$this.attr("src", $this.attr("data-retina"));
+									img.src = null;
+								}
+								img.src = $this.attr("data-retina");
+								$this.attr("data-retined", "complete");
+							}
+						}
+					});
+				
 			}
+			replace();
+			window.retinaReplace = replace;
+			
+			document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
+		    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+		     	   /loaded|complete/.test(document.readyState) && replace();
+		   	 }, 10);
 		}
-		replace();
-		window.retinaReplace = replace;
 	});
+	
+	if(typeof window.retinaReplace == "undefined")
+		window.retinaReplace = function(){};
 	
 	function IsImageOk(img) {
 	    // During the onload event, IE correctly identifies any images that

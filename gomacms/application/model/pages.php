@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 2.4.5
+  * last modified: 25.12.2012
+  * $Version 2.4.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -31,11 +31,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									'rights' 			=> 'int(2)',
 									'mainbar' 			=> 'int(1)',
 									'mainbartitle' 		=> 'varchar(200)',
+									'googletitle'		=> "varchar(200)",
 									'title' 			=> 'varchar(200)',
-									'data' 				=> 'text',
+									'data' 				=> 'HTMLtext',
 									'sort'				=> 'int(8)',
 									'search'			=> 'int(1)',
-									'editright'			=> 'text',
 									'meta_description'	=> 'varchar(200)',
 									'meta_keywords'		=> 'varchar(200)');
 									
@@ -234,7 +234,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						$this->setField("parentid", "0");
 				else
 						$this->setField("parentid", $value);
-				
+					
+				$this->viewcache = array();
+				$this->data["parent"] = null;
 		}
 		
 		/**
@@ -288,7 +290,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				$value = str_replace(" ",  "-", $value);
 				// normal chars
-				$value = preg_replace('/[^a-zA-Z0-9-_]/', '-', $value);
+				$value = preg_replace('/[^a-zA-Z0-9\-_\.]/', '-', $value);
 				$value = preg_replace('/[\-\-]/', '-', $value);
 				$this->setField("path", $value);					
 
@@ -415,7 +417,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$perm->inheritorid = $this->parent->edit_permission->id;
 				}
 			}
+			$perm->name = "";
 			$this->setField("Edit_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -463,10 +468,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->publish_permission->id;
+					$perm->inheritorid = $this->parent->publish_permission->id;
 				}
 			}
+			$perm->name = "";
+			
 			$this->setField("Publish_Permission", $perm);
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -507,12 +515,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($perm->inheritor->name == "" && $this->parentid == 0) {
 					$perm->inheritorid = 0;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+					$perm->inheritorid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
-				$perm->inheritorid = $perm->inheritorid = $this->parent->read_permission->id;
+				$perm->inheritorid = $this->parent->read_permission->id;
 			}
+			$perm->name = "";
 			$this->setField("Read_Permission", $perm);
+			
+			$this->viewcache = array();
 		}
 		
 		/**
@@ -568,9 +579,22 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->addValidator(new FormValidator(array($this, "validatePageFileName")), "filename");
 				
 				$form->useStateData = true;
+				$this->queryVersion = "state";
 				
+				// render head-bar
+				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class));
+				
+				// title in head-bar
+				if($this->title)
+					$html .= ': <strong>'.convert::raw2text($this->title).'</strong>';
+				
+				// end of title in head-bar
+				$html .= ' </span></span>';
+				
+				// version-state-status
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
-					$html = "<div class=\"pageinfo versionControls\">";
+					
+					$html .= '<div class="pageinfo versionControls">';
 					
 					if($this->isPublished()) {
 						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
@@ -587,9 +611,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					}
 					$html .= '</div><div style="clear:right;"></div>';
 					
-					$form->add($links = new HTMLField('links', $html));
-					$links->container->addClass("hidden");
 				}
+				
+				// end of headbar and add it to form
+				$html .= '</div>';
+				$form->add($links = new HTMLField('links', $html));
+				$links->container->addClass("hidden");
 				
 				define("EDIT_ID", $this->id);
 				
@@ -613,6 +640,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
 							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
+							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
 							new checkbox('search', lang("show_in_search", "show in search?")),		
@@ -658,8 +686,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$description->info = lang("description_info");
 				$keywords->info = lang("keywords_info");
 				$mainbartitle->info = lang("menupoint_title_info");
+				$wtitle->info = lang("window_title_info");
 				
-				if(!in_array("pages", $allowed_parents)) {
+				if(!in_array("pages", $allowed_parents) || (!Permission::check("PAGES_WRITE") && !Permission::check("PAGES_PUBLISH"))) {
 					$parenttype->disableOption("root");
 				}
 				
@@ -682,8 +711,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									filename = filename.replace("ö", "oe");
 									filename = filename.replace("ü", "ue");
 									filename = filename.replace("ß", "ss");
-									while(filename.match(/[^a-zA-Z0-9-_]/))
-										filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
+									while(filename.match(/[^a-zA-Z0-9\-_\.]/))
+										filename = filename.replace(/[^a-zA-Z0-9\-_\.]/, "-");
 									
 									while(filename.match(/\-\-/))
 										filename = filename.replace("--", "-");
@@ -862,22 +891,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
-		 * get adds for the pageselector
-		 *@name _add
-		 *@access public
-		*/
-		public function _add()
-		{
-				if(in_array("pages", $this->allowed_parents()))
-				{
-						return array(0 => lang("no_parentpage"));
-				} else
-				{
-						return array();
-				}
-		}
-		
-		/**
 		 * gets the content
 		*/
 		public function getContent()
@@ -991,6 +1004,19 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 			
 			return Permission::check("PAGES_INSERT");
+		}
+		
+		/**
+		 * gets the title of the window
+		 *
+		 *@name getWindowTitle
+		*/
+		public function getWindowTitle() {
+			if($this->fieldGet("googleTitle")) {
+				return $this->googleTitle;
+			} else {
+				return $this->title;
+			}
 		}
 		
 		/**

@@ -29,7 +29,7 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public $db_fields = array(
 		"title"		=> "varchar(100)",
-		"text"		=> "text",
+		"text"		=> "HTMLtext",
 		"border"	=> "switch",
 		"sort"		=> "int(3)",
 		"seiteid"	=> "varchar(50)",

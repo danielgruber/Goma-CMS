@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.05.2012
-  * $Version 2.1.3
+  * last modified: 24.12.2012
+  * $Version 2.1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -21,7 +21,6 @@ class livecounter extends DataObject
 		public $db_fields = array(
 				'user' 			=> 'varchar(200)', 
 				'phpsessid' 	=> 'varchar(800)', 
-				"mobile"		=> "int(1)",
 				"browser"		=> "varchar(200)",
 				"referer"		=> "varchar(400)",
 				"ip"			=> "varchar(30)"
@@ -133,7 +132,6 @@ class livecounterController extends Controller
 						$data = new LiveCounter();
 						$data->user = $userid;
 						$data->phpsessid = $user_identifier;
-						$data->mobile = Core::isMobile();
 						$data->browser = $_SERVER["HTTP_USER_AGENT"];
 						$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 						$data->ip = $_SERVER["REMOTE_ADDR"];
@@ -159,7 +157,6 @@ class livecounterController extends Controller
 				$data = new LiveCounter();
 				$data->user = $userid;
 				$data->phpsessid = $user_identifier;
-				$data->mobile = Core::isMobile();
 				$data->browser = $_SERVER["HTTP_USER_AGENT"];
 				$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 				$data->ip = $_SERVER["REMOTE_ADDR"];

@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.01.2012
-  * $Version 1.0.2
+  * last modified: 21.12.2012
+  * $Version 1.0.3
 */
 
 .pageLinkHolder {
@@ -17,6 +17,8 @@
 	position: absolute;
 	background: #fff;
 	min-height: 50px;
+	max-height: 150px;
+	overflow: auto;
 	border: 1px solid #999;
 	-webkit-border-bottom-left-radius: 5px;
 	-webkit-border-bottom-right-radius: 5px;
@@ -26,6 +28,10 @@
 	border-bottom-left-radius: 5px;
 	margin-bottom: 5px;
 	padding-bottom: 3px;
+	
+	-webkit-box-shadow: 0 2px 5px #999;
+	box-shadow: 0 2px 5px #999;
+	-moz-box-shadow: 0 2px 5px #999;
 }
 .pageLinkHolder .textDropDown ul {
 	list-style: none;
@@ -37,14 +43,17 @@
 	display: block;
 	padding: 5px;
 	margin: 0;
+	color: #666;
+	border-bottom: 1px solid #eee;
 }
 .pageLinkHolder .textDropDown ul li a:hover {
 	background: #eee;
+	text-decoration: none;
 }
 .pageLinkHolder .cancelButton {
 	position: absolute;
-	right: -3px;
-	top: 2px;
+	right: 0;
+	top: 6px;
 	height: 17px !important;
 	width: 17px !important;
 	background: url(images/cancel.png) no-repeat !important;
