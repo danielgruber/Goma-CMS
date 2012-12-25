@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
+  * last modified: 25.12.2012
   * $Version 2.0.7
 */
 
@@ -158,7 +158,7 @@ class contentAdmin extends LeftAndMain
 	 *@access public
 	*/
 	public function revert_changes() {
-		if($this->modelInst()->Count() == 0) {
+		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1)) {
 			if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
 				$data = DataObject::get_one($this->modelInst()->class, array("id" => $this->model_inst->id));
 				if($data) {
@@ -187,7 +187,7 @@ class contentAdmin extends LeftAndMain
 	 *@access public
 	*/
 	public function unpublish() {
-		if($this->modelInst()->Count() == 0 && $this->modelInst()->unpublish()) {
+		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) && $this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
 				$response = new AjaxResponse();
 				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
