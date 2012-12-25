@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.12.2012
-  * $Version 2.6.2
+  * last modified: 25.12.2012
+  * $Version 2.6.3
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -116,8 +116,8 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "060");
-define("GOMA_VERSION", "2.0b1");
+define("BUILD_VERSION", "064");
+define("GOMA_VERSION", "2.0b2");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -441,30 +441,6 @@ function parseUrl() {
 	$root_path = substr($root_path, strlen(realpath($_SERVER["DOCUMENT_ROOT"])));
 	define('ROOT_PATH',$root_path);
 	
-	
-	// generate URL
-	$url = isset($GLOBALS["url"]) ? $GLOBALS["url"] : $_SERVER["REQUEST_URI"];
-	$url = urldecode($url); // we should do this, because the url is not correct else
-	if(preg_match('/\?/',$url))
-	{
-			$url = substr($url, 0, strpos($url,'?') );
-	} else
-	{
-			$url = $url;
-	}
-	$url = substr($url, strlen(ROOT_PATH . BASE_SCRIPT));
-	// parse URL
-	if(substr($url, 0, 1) == "/")
-			$url = substr($url, 1);
-	if(preg_match('/^(.*)'.preg_quote(URLEND, "/").'$/Usi', $url, $matches))
-	{
-			$url = $matches[1];
-	}
-	$url = str_replace('//','/', $url);
-	
-	define("URL", $url);
-	
-	
 	// generate BASE_URI
 	$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
 	$port = $_SERVER["SERVER_PORT"];
@@ -482,6 +458,52 @@ function parseUrl() {
 	}
 	
 	define("BASE_URI",$http.'://'.$_SERVER["SERVER_NAME"] . $port . ROOT_PATH);
+	
+	// generate URL
+	$url = isset($GLOBALS["url"]) ? $GLOBALS["url"] : $_SERVER["REQUEST_URI"];
+	$url = urldecode($url); // we should do this, because the url is not correct else
+	if(preg_match('/\?/',$url))
+	{
+			$url = substr($url, 0, strpos($url,'?') );
+	} else
+	{
+			$url = $url;
+	}
+	
+	$url = substr($url, strlen(ROOT_PATH . BASE_SCRIPT));
+	
+	// parse URL
+	if(substr($url, 0, 1) == "/")
+			$url = substr($url, 1);
+	
+	// URL-END
+	if(preg_match('/^(.*)'.preg_quote(URLEND, "/").'$/Usi', $url, $matches))
+	{
+		$url = $matches[1];
+	} else if($url != "" && !Core::is_ajax()) {
+		
+		// enforce URLEND
+		$get = "";
+		$i = 0;
+		foreach($_GET as $k => $v) {
+			if($i == 0)
+				$i++;
+			else
+				$get .= "&";
+			
+			$get .= urlencode($k) . "=" . urlencode($v);
+		}
+		if($get) {
+			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND . "?" . $get);
+		} else {
+			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND);
+		}
+		exit;
+	}
+	
+	$url = str_replace('//','/', $url);
+	
+	define("URL", $url);
 }
 
 /**
@@ -838,7 +860,7 @@ function writeSystemConfig($data = array()) {
 	}
 	
 	if(@file_put_contents(ROOT . "_config.php", $contents)) {
-		@chmod(ROOT . "_config.php", 0600);
+		@chmod(ROOT . "_config.php", 0644);
 		return true;
 	} else
 		throwError(6, 'PHP-Error', "Could not write System-Config. Please apply Permissions 0777 to /_config.php");
@@ -887,7 +909,7 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	$config_content = str_replace('{info}', var_export($info, true), $config_content);
 	$config_content = str_replace('{folder}', $project, $config_content);
 	if(@file_put_contents($config, $config_content)) {
-		@chmod($config, 0600);
+		@chmod($config, 0644);
 		return true;
 	} else {
 		die("6: Could not write Project-Config '".$config."'. Please set Permissions to 0777!");

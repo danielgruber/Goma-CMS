@@ -351,7 +351,19 @@ class Form extends object
 					});
 					
 					$(function(){
+						var button = false;
+						$("#'.$this->ID().'").find("button[type=submit], input[type=submit]").click(function(){
+							button = true;
+						});
+						
 						$("#'.$this->ID().'").submit(function(){
+							if(button == false) {
+								button = true;
+								setTimeout(function(){
+									$("#'.$this->ID().' .default_submit").click();
+								}, 100);
+								return false;
+							}
 							var eventb = jQuery.Event("beforesubmit");
 							$("#'.$this->id().'").trigger(eventb);
 							if ( eventb.result === false ) {
@@ -363,6 +375,8 @@ class Form extends object
 							if ( event.result === false ) {
 								return false;
 							}
+							
+							button = false;
 						});
 					});
 					

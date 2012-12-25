@@ -161,6 +161,8 @@ $lang = array(
 	'site'											=> "Seite",
 	"text"                                         	=> "Text",
 	"menupoint_title"								=> "Navigations-Titel",
+	"window_title"									=> "Titel des Browser-Fensters",
+	"window_title_info"								=> "Leer lassen um Standard-Titel zu verwenden",
 	"menupoint_title_info"							=> "Titel der Seite, der in der Navigation angezeigt wird.",
 	"js_disable_editor"                            	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
 	"overview"                                     	=> "&Uuml;bersicht",
@@ -550,5 +552,8 @@ $lang = array(
 	"notification"			=> "Mitteilung",
 	"alert_big_image"		=> "Achtung:\n\nIhre hochgeladene Bilddatei ist zu groß für eine Webseite. Sie wird möglicherweise sehr lange laden.\n\nBitte reduzieren Sie die Bildgröße mit einem Bildbearbeitungsprogramm und laden Sie die Datei erneut hoch.",
 	
-	"wrapper_page"			=> "Liste mit Unterseiten"
+	"wrapper_page"			=> "Liste mit Unterseiten",
+	
+	"toggle_navigation"		=> "Navigation umschalten",
+	"toggle_sidebar"		=> "Seitenleiste umschalten"
 );

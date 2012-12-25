@@ -136,6 +136,8 @@ $lang = array(
 	"register_code"                                	=> "Registration-code",
 	"title"                                        	=> "Title",
 	"title_page"									=> "Title of the page",
+	"window_title"									=> "title of the browser-window",
+	"window_title_info"								=> "keep empty to use default title",
 	/* SETTINGS END TPL START */
 	"available_styles"                             	=> "Available designs",
 	"available_adminstyles"                        	=> "available designs for admin",
@@ -549,6 +551,9 @@ $lang = array(
 	"notification"			=> "notification",
 	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again.",
 	
-	"wrapper_page"			=> "list with subpages"
+	"wrapper_page"			=> "list with subpages",
+	
+	"toggle_navigation"		=> "toggle navigation",
+	"toggle_sidebar"		=> "toggle sidebar"
 
 );

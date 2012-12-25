@@ -142,7 +142,7 @@ class FileUpload extends FormField
 				"type"	=> "hidden",
 				"value"	=> $this->value->fieldGet("path"),
 				"class"	=> "FileUploadValue"
-			))	
+			))
 			
 		));
 		
@@ -335,18 +335,22 @@ class FileUpload extends FormField
 			
 			$this->container->append($this->leftContainer);
 			
-			$this->container->append(new HTMLNode("div", array("class" => "FileUpload_right"), array(
+			$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(
 				new HTMLNode('div', array(
 					"class" => "no-js-fallback"
 				), array(
 					new HTMLNode('h3', array(), lang("files.replace")),
 					$this->input
-				)),
-				new HTMLNode('div', array("class" => "delete"), array(
+				))
+			));
+			
+			if($this->value->realfile)
+				$nojs->append(new HTMLNode('div', array("class" => "delete"), array(
 					new HTMLNode('input', array("id" => $this->ID() ."__delete", "name" => $this->PostName() . "__deletefile", "type" => "checkbox")),
 					new HTMLNode('label', array("for" => $this->ID() ."__delete"), lang("files.delete"))
-				))
-			)));
+				)));
+			
+			$this->container->append($nojs);
 			
 			$this->container->append(new HTMLNode("div", array("class" => "clear")));
 			

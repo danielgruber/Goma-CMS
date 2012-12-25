@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
+  * last modified: 18.12.2012
   * $Version 1.4.6
 */   
 
@@ -48,6 +48,21 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate", "flushLog", "history");
+		
+		/**
+		 * this var contains the templatefile
+		 * the str {admintpl} will be replaced with the current admintpl
+		 *@name template
+		 *@var string
+		*/
+		public $template = "admin/index.html";
+		
+		/**
+		 * tpl-vars
+		*/
+		public $tplVars = array(
+			"BASEURI"	=> BASE_URI
+		);
 		
 		/**
 		 * returns current controller
@@ -176,20 +191,14 @@ class adminController extends Controller
 						return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
 					 } else {
 						$admin = new Admin();
-						return $admin->customise(array("content" => $content))->renderWith("admin/index.html");
+						return $admin->customise(array("content" => $content, ""))->renderWith("admin/index.html");
 					}
 				}
 			}
 			return $content;
 			
 		}
-		/**
-		 * this var contains the templatefile
-		 * the str {admintpl} will be replaced with the current admintpl
-		 *@name template
-		 *@var string
-		*/
-		public $template = "admin/index.html";
+		
 		/**
 		 * loads content and then loads page
 		 *@name index

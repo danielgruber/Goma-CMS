@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 3.3.8
+  * last modified: 19.12.2012
+  * $Version 3.4
 */   
  
  
@@ -106,8 +106,13 @@ class tpl extends Object
          */
 		public static function render($name,$replacement = array(),$class = "", $required_areas = array(), $expansion = null)
 		{
-				$file = self::getFilename($name, $class, false, $expansion);
+			if($file = self::getFilename($name, $class, false, $expansion)) {
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
+			} else {
+				HTTPresponse::setResHeader(500);
+				/* an error so show an error ;-) */
+				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+			}
 		}
 		
 		/**
@@ -126,8 +131,7 @@ class tpl extends Object
 								return ROOT . $name;
 						} else
 						{
-								HTTPresponse::setResHeader(500);
-								throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+								return false;
 						}
 				} else
 				{
@@ -180,10 +184,83 @@ class tpl extends Object
 						{
 								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
 						}
-								
-						HTTPresponse::setResHeader(500);
-						/* an error so show an error ;-) */
-						throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+						
+						return sekf::getFileNameUncached();
+				}
+		}
+		
+		/**
+		 * gets the filename of a given template-name uncached!
+		 * just returns false
+		 *
+		 *@name getFilenameUncached
+		 *@access public
+		 *@param string - name
+		 *@param use include-folders
+		*/
+		public static function getFilenameUncached($name, $class = "", $inc = false, $expansion = null) {
+				if(preg_match('/^\//', $name))
+				{
+						if(is_file(ROOT . $name))
+						{
+								return ROOT . $name;
+						} else
+						{
+								return false;
+						}
+				} else
+				{
+						if(is_file(ROOT . self::$tplpath . Core::getTheme() . "/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/" . $name;
+						}
+						
+						if($inc === true && is_file(ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name;
+						}
+						
+						if(file_exists(APPLICATION_TPL_PATH . "/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(APPLICATION_TPL_PATH . "/includes/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/includes/' . $name;
+						}
+						
+						if(is_object($class) && $class->inExpansion) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(isset($expansion)) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(file_exists(SYSTEM_TPL_PATH . "/" . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(SYSTEM_TPL_PATH . '/includes/' . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
+						}
+						
+						return false;
 						
 				}
 		}
@@ -369,8 +446,8 @@ class tpl extends Object
 				$tpl = preg_replace_callback('/<%\s*IF\s+(.+)\s*%>/Usi', array("tpl","PHPrenderIF"), $tpl);
 				$tpl = preg_replace_callback('/<%\s*ELSE\s*IF\s+(.+)\s*%>/Usi', array("tpl", "PHPrenderELSEIF"), $tpl);
 				$tpl = preg_replace('/<%\s*ELSE\s*%>/Usi', '<?php } else { ?>', $tpl);
-				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php }  $data->convertDefault = null;?>', $tpl);
-				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }   $data->convertDefault = null; ?>', $tpl);
+				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php } ?>', $tpl);
+				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }  ?>', $tpl);
 				// parse functions
 				$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php echo \\1\\2(\\3); ?>', $tpl);
 				
@@ -755,19 +832,7 @@ $data = array_pop($dataStack);
 						return '<?php echo Core::getCMSVar('.var_export($data[1], true).'); ?>';
 				}
 				
-				if(strpos($name, "."))
-				{
-						$php = '$data';
-						$parts = explode(".",$name);
-						foreach($parts as $part)
-						{
-								$php .= '["'.$part.'"]';
-						}
-						return '<?php echo '.$php.'; ?>';
-				} else
-				{
-						return '<?php echo $data["'.$name.'"]; ?>';
-				}
+				return '<?php echo $data->getTemplateVar('.var_export($name, true).'); ?>';
 		}
 		
 		/**
@@ -775,7 +840,7 @@ $data = array_pop($dataStack);
 		 *@name renderIF
 		 *@access public
 		*/
-		public static function renderIF($matches, $includeConvert = true)
+		public static function renderIF($matches)
 		{
 				$clause = $matches[1];
 				// first parse
@@ -816,10 +881,7 @@ $data = array_pop($dataStack);
 				
 				$newclause = str_replace('$$','$',$newclause);
 				// render clause
-				if($includeConvert)
-					return '$data->convertDefault = false; if(' . $newclause . ') { $data->convertDefault = null;';
-				else
-					return 'if(' . $newclause . ') {';
+				return 'if(' . $newclause . ') {';
 		}
 		
 		/**
@@ -829,7 +891,7 @@ $data = array_pop($dataStack);
 		*/
 		public static function renderELSEIF($matches)
 		{
-				return '$data->convertDefault = false; } else ' . self::renderIF($matches, false) . "  \$data->convertDefault = null;";
+				return '$data->convertDefault = false; } else ' . self::renderIF($matches) . "  \$data->convertDefault = null;";
 		}
 		
 		/**
@@ -1210,7 +1272,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@param string - name
 		*/
 		public function getVar($name) {
-			return isset($this->dataobject[$name]) ? $this->dataobject[$name] : null;
+			return isset($this->dataobject[$name]) ? $this->dataobject->doObject($name)->forTemplate() : null;
 		}
 		
 		/**
@@ -1416,34 +1478,7 @@ class tplCaller extends Object implements ArrayAccess
 			return Resources::file_exists($filename);
 		}
 		
-		/**
-		 * Mobility Functions
-		*/
-		
-		public function isMobile() {
-			return Core::isMobile();
-		}
-		
-		public function isiPhone() {
-			return Core::isiPhone();
-		}
-		
-		public function isiPad() {
-			return Core::isiPad();
-		}
-		
-		public function isMobileAvailable() {
-			return Core::isMobileAvailable();
-		}
-		
-		public function isiPhoneAvailable() {
-			return Core::isiPhoneAvailable();
-		}
-		
-		public function isiPadAvailable() {
-			return Core::isiPadAvailable();
-		}
-		
+				
 		/**
 		 * returns if homepage
 		*/
@@ -1565,7 +1600,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function currentLang() {
-			return array_merge(i18n::getLangInfo(), array("code" => Core::$lang));
+			return new ViewAccessableData(array_merge(i18n::getLangInfo(), array("code" => Core::$lang)));
 		}
 		
 		/**

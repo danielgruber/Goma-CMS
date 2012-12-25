@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.12.2012
+  * last modified: 18.12.2012
   * $Version 1.5.6
 */
 
@@ -545,6 +545,7 @@ abstract class g_SoftwareType {
 		
 		$url .= "?framework=" . urlencode(GOMA_VERSION . "-" . BUILD_VERSION);
 		$url .= "&current=".urlencode($currVersion);
+		$url .= "&base_uri=" . urlencode(BASE_URI);
 		
 		$cacher = new Cacher("AppStore_" . md5($url));
 		if($cacher->checkValid()) {

@@ -549,7 +549,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 				}
 			}
 		} else {
-			
+			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
 			$model = new ViewAccessableData();
 			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
 		}
@@ -561,4 +562,13 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		return $this->selectModel($model)->form();
 	}
 	
+	/**
+	 * index-method
+	 *
+	 *@name index
+	*/
+	public function index() {
+		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		return parent::index();
+	}
 }
