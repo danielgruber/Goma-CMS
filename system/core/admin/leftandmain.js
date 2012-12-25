@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.12.2012
+  * last modified: 24.12.2012
 */
 
 
@@ -24,6 +24,29 @@ var LaM_type_timeout;
 			updateWithSearch($(this).parent());
 			return false;
 		});
+		
+		$(".leftbar_toggle").on("click touchend", function(){
+			if($(this).hasClass("active")) {
+				$(this).removeClass("active");
+				$(this).addClass("not_active");
+				$(".leftandmaintable .left").addClass("not_active");
+				$(".leftandmaintable .left").removeClass("active");
+			} else {
+				$(this).addClass("active");
+				$(this).removeClass("not_active");
+				$(".leftandmaintable .left").removeClass("not_active");
+				$(".leftandmaintable .left").addClass("active");
+			}
+			renderSideBar();
+		});
+		
+		setTimeout(function(){
+			if(!$(".leftbar_toggle").hasClass("active")) {
+				$(".leftbar_toggle, .leftandmaintable .left").addClass("not_active");
+			} else {
+				$(".leftandmaintable .left").addClass("active");
+			}
+		}, 100);
 		
 		if(getInternetExplorerVersion() > 7 || getInternetExplorerVersion() == -1) {
 			gloader.load("history");
@@ -150,9 +173,13 @@ var LaM_type_timeout;
 		 * rendering of the whole page via javascript
 		*/
 		var renderSideBar = function() {
-			var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
+			if($(".leftbar_toggle").css("display") != "none")
+				var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight() - $(".leftbar_toggle").outerHeight(true);
+			else
+				var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
 			if(tableHeight < 405)
 				tableHeight = 405;
+				
 			
 			$(".left-and-main").css("min-height", tableHeight);
 			$(".left-and-main > table").css("height", tableHeight);
@@ -176,7 +203,7 @@ var LaM_type_timeout;
 		window.renderLeftSideBar = renderSideBar;
 		
 		$(window).resize(renderSideBar);
-		renderSideBar();
+		setTimeout(renderSideBar, 10)
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			jqXHR.done(function(){
@@ -436,6 +463,11 @@ var LaM_type_timeout;
 				url: $this.attr("href"),
 				data: {"ajaxfy": true},
 				success: function(html, code, request) {
+					$(".leftbar_toggle").removeClass("index");
+					if($(".leftbar_toggle").hasClass("active")) {
+						$(".leftbar_toggle").click();
+					}
+					
 					$("#content .success, #content .error, #content .notice").hide("fast");
 					renderResponseTo(html, $this.parents(".leftandmaintable").find("td.main > .inner"), request);
 					renderLeftSideBar();

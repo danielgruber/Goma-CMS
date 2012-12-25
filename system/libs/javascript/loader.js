@@ -616,6 +616,7 @@ if(typeof self.loader == "undefined") {
 		
 		// save settings of last ajax request
 		w.request_history = [];
+		w.event_history = [];
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			if(originalOptions.noRequestTrack == null) {
@@ -648,6 +649,35 @@ if(typeof self.loader == "undefined") {
 					});
 				}
 			}
+			
+			/*w.event_history = [];
+			w.$.orgajax = w.$.ajax;
+			w.$.ajax = function(url, options) {
+				var jqXHR = $.orgajax.call(this, url options);
+				
+				var i = w.event_history.length;
+				w.event_history[i] = {done: [], fail: [], always: []};
+				
+				jqXHR._done = jqXHR.done;
+				jqXHR.done = function(fn) {
+					w.event_history[i]["done"].push(fn);
+					return jqXHR._done(fn);
+				}
+				
+				jqXHR._fail = jqXHR.fail;
+				jqXHR.fail = function(fn) {
+					w.event_history[i]["fail"].push(fn);
+					return jqXHR._fail(fn);
+				}
+				
+				jqXHR._always = jqXHR.always;
+				jqXHR.always = function(fn) {
+					w.event_history[i]["always"].push(fn);
+					return jqXHR._always(fn);
+				}
+				
+				return jqXHR;
+			}*/
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 		});

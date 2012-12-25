@@ -551,6 +551,9 @@ $lang = array(
 	"notification"			=> "notification",
 	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again.",
 	
-	"wrapper_page"			=> "list with subpages"
+	"wrapper_page"			=> "list with subpages",
+	
+	"toggle_navigation"		=> "toggle navigation",
+	"toggle_sidebar"		=> "toggle sidebar"
 
 );

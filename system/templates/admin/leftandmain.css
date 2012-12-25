@@ -34,9 +34,29 @@
 /* main-part */
 
 .leftandmaintable tr > .main {
-	min-width: 600px;
 	overflow: auto;
 }
+
+.leftandmaintable tr > .main .leftbar_toggle {
+	display: block;
+	margin-bottom: 3px;
+	background: #eee;
+	border: 1px solid #ccc;
+	border-width: 0 1px 1px 0; 
+	padding: 0 !important;
+	color: #333;
+	text-decoration: none;
+	font-weight: bold;
+	line-height: 30px;
+}
+.leftandmaintable tr > .main .leftbar_toggle.active {
+	background: #d0d0d0;
+	border-color: #aaa;
+}
+.leftandmaintable tr > .main .leftbar_toggle.index {
+	display: none;
+}
+
 /*.leftandmaintable tr > .main textarea {
 	max-width: 650px !important;
 }*/
@@ -64,11 +84,16 @@
 /* sidebar */
 
 .leftandmaintable tr > .left {
+	display: none;
 	width: 280px !important;
 	background: #eee;
 	height: 100%;
 	border-right: 1px solid #ccc;
 }
+.leftandmaintable tr > .left.active {
+	display: table-cell;
+}
+
 .leftandmaintable tr > .left > .LaM_tabs {
 	height: 100%;
 	min-width: 280px;
@@ -182,6 +207,18 @@
 
 .create li a {
 	color: #555;
+}
+
+@media only screen and (min-width: 900px) {
+	.leftandmaintable tr > .main {
+		min-width: 600px;
+	}
+	.leftandmaintable tr > .left {
+		display: table-cell;
+	}
+	.leftandmaintable tr > .main .leftbar_toggle {
+		display: none;
+	}
 }
 
 /* here goes some retina-stuff */
