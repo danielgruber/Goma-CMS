@@ -446,8 +446,8 @@ class tpl extends Object
 				$tpl = preg_replace_callback('/<%\s*IF\s+(.+)\s*%>/Usi', array("tpl","PHPrenderIF"), $tpl);
 				$tpl = preg_replace_callback('/<%\s*ELSE\s*IF\s+(.+)\s*%>/Usi', array("tpl", "PHPrenderELSEIF"), $tpl);
 				$tpl = preg_replace('/<%\s*ELSE\s*%>/Usi', '<?php } else { ?>', $tpl);
-				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php }  $data->convertDefault = null;?>', $tpl);
-				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }   $data->convertDefault = null; ?>', $tpl);
+				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php } ?>', $tpl);
+				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }  ?>', $tpl);
 				// parse functions
 				$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php echo \\1\\2(\\3); ?>', $tpl);
 				
@@ -832,22 +832,7 @@ $data = array_pop($dataStack);
 						return '<?php echo Core::getCMSVar('.var_export($data[1], true).'); ?>';
 				}
 				
-				if(strpos($name, "."))
-				{
-						$php = '$data';
-						$echo = '$data';
-						$parts = explode(".",$name);
-						foreach($parts as $part)
-						{
-								$php .= '["'.$part.'"]';
-								$echo .= '->doObject("'.$part.'")';
-						}
-						$echo .= '->forTemplate()';
-						return '<?php echo isset('.$php.') ? '.$echo.' : ""; ?>';
-				} else
-				{
-						return '<?php echo isset($data["'.$name.'"]) ? $data->doObject("'.$name.'")->forTemplate() : ""; ?>';
-				}
+				return '<?php echo $data->getTemplateVar('.var_export($name, true).'); ?>';
 		}
 		
 		/**
@@ -1615,7 +1600,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function currentLang() {
-			return array_merge(i18n::getLangInfo(), array("code" => Core::$lang));
+			return new ViewAccessableData(array_merge(i18n::getLangInfo(), array("code" => Core::$lang)));
 		}
 		
 		/**

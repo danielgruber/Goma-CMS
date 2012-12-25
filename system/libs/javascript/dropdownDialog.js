@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
+  * last modified: 25.12.2012
 */
 
 self.dropdownDialogs = [];
@@ -394,9 +394,6 @@ self.dropdownDialogs = [];
 					}, 100);
 				}
 			});
-			
-			// retina
-			retinaReplace();
 			
 			// javascript-profiler
 			if(typeof profiler != "undefined") {

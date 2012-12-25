@@ -591,12 +591,46 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		}
 		
 		/**
-		 * if we can do a object
+		 * gets a var for template
 		 *
-		 *@name canDoObject
+		 *@name getTemplateVar
 		*/
-		public function canDoObject() {
-			return true;
+		public function getTemplateVar($var) {
+			if(PROFILE) Profiler::mark("ViewAccessableData::getTemplateVar");
+			
+			if(strpos($var, ".")) {
+				$currentvar = substr($var, 0, strpos($var, "."));
+				$remaining = substr($var, strpos($var, ".") + 1);
+			} else {
+				$currentvar = $var;
+				$remaining = "";
+			}
+			
+			$currentvar = trim(strtolower($currentvar));
+			$data = $this->getOffset($currentvar, array());
+			
+			if($remaining == "") {
+				if(is_object($data)) {
+					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
+					return $data->forTemplate();
+				} else if(isset($this->casting[$currentvar])) {
+					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
+					return $this->makeObject($currentvar, $data)->forTemplate();
+				} else {
+					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
+					return $data;
+				}
+			} else {
+				if(is_object($data)) {
+					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
+					return $data->getTemplateVar($remaining);
+				} else if(isset($this->casting[$currentvar])) {
+					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
+					return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
+				} else {
+					throwError(6, "Not-Recursive-Error", "Argument " . $var . " wasn't found because it's not recursive.");
+				}
+			}
 		}
 				
 		/**

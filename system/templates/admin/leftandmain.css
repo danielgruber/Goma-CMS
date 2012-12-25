@@ -84,6 +84,7 @@
 	background: #eee;
 	border-bottom: 1px solid #ccc;
 	padding: 4px;
+	min-height: 26px;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
 	padding: 6px;

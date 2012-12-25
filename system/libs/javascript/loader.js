@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
+  * last modified: 25.12.2012
   * $Version 1.5.5
 */
 
@@ -897,6 +897,9 @@ if(typeof self.loader == "undefined") {
 		   	 }, 10);
 		}
 	});
+	
+	if(typeof window.retinaReplace == "undefined")
+		window.retinaReplace = function(){};
 	
 	function IsImageOk(img) {
 	    // During the onload event, IE correctly identifies any images that

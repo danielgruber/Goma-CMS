@@ -1361,3 +1361,7 @@ form h2 {
 #updates .update .button_right {
 	float: right;
 }
+
+.page > span {
+	background: url(../../../images/icons/fatcow16/file.png);
+}

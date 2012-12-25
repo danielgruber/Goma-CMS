@@ -154,6 +154,14 @@ class DBField extends Object implements DataBaseField
 	public $args = array();
 	
 	/**
+	 * cache for casting
+	 *
+	 *@name castingCache
+	 *@access private
+	*/
+	private static $castingCache = array();
+	
+	/**
 	 *@name __construct
 	 *@access public
 	 *@param mixed - value
@@ -384,6 +392,10 @@ class DBField extends Object implements DataBaseField
 	 *@param string - casting
 	*/
 	public static function parseCasting($casting) {
+		
+		if(isset(self::$castingCache[$casting]))
+			return self::$castingCache[$casting];
+			
 		if(PROFILE) Profiler::mark("DBField::parseCasting");
 		
 		if(is_array($casting))
@@ -418,8 +430,11 @@ class DBField extends Object implements DataBaseField
 			$valid = true;
 		}
 		
-		if(!isset($valid))
+		if(!isset($valid)) {
+			self::$castingCache[$casting] = null;
+			if(PROFILE) Profiler::unmark("DBField::parseCasting");
 			return null;
+		}
 		
 		$data = array(
 			"class" => $name
@@ -436,9 +451,31 @@ class DBField extends Object implements DataBaseField
 			$data["method"] = $method;
 		}
 		
+		self::$castingCache[$casting] = $data;
 		if(PROFILE) Profiler::unmark("DBField::parseCasting");
 		
 		return $data;
+	}
+	
+	/**
+	 * gets a var for template
+	 *
+	 *@name getTemplateVar
+	*/
+	public function getTemplateVar($var) {
+		if(strpos($var, ".")) {
+			throwError(6, "Invalid Argument Error", "Argument " . $var . " is not allowed in a DB-Field, because it's recursive.");
+		}
+		
+		// check for args
+		if(strpos($var, "(") && substr($var, -1) == ")") {
+			$args = eval("return array(" . substr($var, strpos($var, "(") + 1, -1) . ");");
+			$var = substr($var, 0, strpos($var, "("));
+		} else {
+			$args = array();
+		}
+		
+		return call_user_func_array(array($this, $var), $args);
 	}
 	
 	/**
