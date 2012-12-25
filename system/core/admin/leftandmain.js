@@ -25,7 +25,7 @@ var LaM_type_timeout;
 			return false;
 		});
 		
-		$(".leftbar_toggle").on("click touchend", function(){
+		$(document).on("click touchend", ".leftbar_toggle", function(){
 			if($(this).hasClass("active")) {
 				$(this).removeClass("active");
 				$(this).addClass("not_active");
