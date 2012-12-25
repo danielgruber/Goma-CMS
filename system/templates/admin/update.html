@@ -71,6 +71,7 @@
 				$.ajax({
 					url: url,
 					dataType: "jsonp",
+					noRequestTrack: true,
 					success: function(object) {
 						$("#storeUnavailable").slideUp(0);
 						if(object.name) {
