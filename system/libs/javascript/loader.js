@@ -867,33 +867,35 @@ if(typeof self.loader == "undefined") {
     
 	// retina-support
 	$(function(){
-		var replace = function() {
-			if(true) { //getDevicePixelRatio() > 1.5) {
-				$("img").each(function(){ //.on("load", "img", function(){
-					var $this = $(this);
-					if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
-						if(IsImageOk($(this).get(0))) {
-							var img = new Image();
-							img.onload = function(){
-								$this.css("width", $this.width());
-								$this.css("height", $this.height());
-								$this.attr("src", $this.attr("data-retina"));
-								img.src = null;
+		if(getDevicePixelRatio() > 1.5) {
+			var replace = function() {
+				
+					$("img").each(function(){ //.on("load", "img", function(){
+						var $this = $(this);
+						if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
+							if(IsImageOk($(this).get(0))) {
+								var img = new Image();
+								img.onload = function(){
+									$this.css("width", $this.width());
+									$this.css("height", $this.height());
+									$this.attr("src", $this.attr("data-retina"));
+									img.src = null;
+								}
+								img.src = $this.attr("data-retina");
+								$this.attr("data-retined", "complete");
 							}
-							img.src = $this.attr("data-retina");
-							$this.attr("data-retined", "complete");
 						}
-					}
-				});
+					});
+				
 			}
+			replace();
+			window.retinaReplace = replace;
+			
+			document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
+		    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+		     	   /loaded|complete/.test(document.readyState) && replace();
+		   	 }, 10);
 		}
-		replace();
-		window.retinaReplace = replace;
-		
-		document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
-	    if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
-	        /loaded|complete/.test(document.readyState) && replace();
-	    }, 10);
 	});
 	
 	function IsImageOk(img) {
