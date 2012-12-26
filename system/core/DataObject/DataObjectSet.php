@@ -1043,7 +1043,6 @@ class DataObjectSet extends DataSet {
 	public function setData($data = array()) {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
-		$this->count = count($data);
 		$this->reRenderSet();
 	}
 	
@@ -1692,7 +1691,7 @@ class DataObjectSet extends DataSet {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
 			foreach($this->data as $record) {
-				if(is_object($record) && !isset($writtenIDs[$record->id]) && $record->id != 0) {
+				if(is_object($record) && !isset($writtenIDs[$record->id])) {
 					$writtenIDs[$record->id] = true;
 					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
 						return false;
@@ -1853,11 +1852,15 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@param string - name
 	 *@param string - field
 	*/
-	public function setRelationENV($name = null, $field = null) {
+	public function setRelationENV($name = null, $field = null, $id = null) {
 		if(isset($name)) 
 			$this->relationName = $name;
 		if(isset($field))
 			$this->field = $field;
+		
+		if(isset($id))
+			foreach($this as $record)
+				$record[$field] = $id;
 	}
 	
 	/**
@@ -1896,7 +1899,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 		if($this->class == "hasmany_dataobjectset") {
 			if(isset($this[$this->field])) {
 				$record[$this->field] = $this[$this->field];
-			} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
+			} else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
 				$record[$this->field] = $this->filter[$this->field];
 			}
 		}

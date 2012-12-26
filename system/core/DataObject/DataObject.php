@@ -1863,6 +1863,27 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($this->has_many)
 			foreach($this->has_many as $name => $class)
 			{
+				if(isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "HasMany_DataObjectSet")) {	
+					$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
+					if($key === false)
+					{
+							$c = $this->class;
+							while($c = strtolower(get_parent_class($c)))
+							{
+									if($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
+									{
+											break;
+									}
+							}
+					}
+					if($key === false)
+					{
+							return false;
+					}
+					$this->data[$name]->setRelationENV($name, $key . "id", $this->ID);
+					if(!$this->data[$name]->write($forceInsert, $forceWrite, $snap_priority))
+						return false;
+				} else {
 					if(isset($this->data[$name]) && !isset($this->data[$name . "ids"]))
 						$this->data[$name . "ids"] = $this->data[$name];
 					if(isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
@@ -1892,7 +1913,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 								$editdata->write(false, true, $snap_priority);
 								unset($editdata);
 							}				
-					}						
+					}	
+				}					
 			}
 			
 	
