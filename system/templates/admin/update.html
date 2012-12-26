@@ -20,7 +20,7 @@
 						if(results[i] != null) {
 							a++;
 							var record = results[i].response;
-							$("#updates").append('<div class="update"></div>');
+							$("#updates").append('<div class="update" id="update_'+record.name+'"></div>');
 							$("#updates .update:last-child").css("display", "none");
 							if(a == 1) {
 								$("#updates .update:last-child").addClass("first");
@@ -74,7 +74,7 @@
 					noRequestTrack: true,
 					success: function(object) {
 						$("#storeUnavailable").slideUp(0);
-						if(object.name) {
+						if(object.name && $("#update_" + object.name).length == 0) {
 							results.push({response: object, current_version: u[name]["version"], webversion: object.version});
 						} else {
 							results.push(null);
@@ -100,11 +100,11 @@
 	<% IF $updates %>
 		<% CONTROL updates() AS $update %>
 			<% IF $update.first %>
-				<div class="update first">
+				<div class="update first" id="update_{$update.name}" data-version="{$update.version}">
 			<% ELSE IF NOT $update.white %>
-				<div class="update grey">
+				<div class="update grey" id="update_{$update.name}" data-version="{$update.version}">
 			<% ELSE %>
-				<div class="update">
+				<div class="update" id="update_{$update.name}" data-version="{$update.version}">
 			<% END %>
 				<div class="icon">
 					<% IF $update.icon %>
