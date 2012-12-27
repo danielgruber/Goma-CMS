@@ -111,14 +111,12 @@ fieldset {
 	margin: 5px;
 }
 
-
-.form_field.checkbox {
-	margin-bottom: 10px;
+.form_field.checkbox label {
+	min-height: 20px;
 }
-.form_field.checkbox > .info_field {
-	margin-top: 12px;
-	margin-bottom: -10px;
-	text-align: right;
+.form_field.checkbox .iPhoneCheckContainer {
+	margin-left: 260px;
+	margin-top: -20px;
 }
 
 .form_field .inputHolder {
@@ -173,6 +171,10 @@ fieldset > .form_field > .info_field {
 	}
 	.form_field_captcha > div {
 		display: block;
+		margin-left: 0;
+		margin-top: 0;
+	}
+	.form_field.checkbox .iPhoneCheckContainer {
 		margin-left: 0;
 		margin-top: 0;
 	}

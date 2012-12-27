@@ -134,7 +134,7 @@ class UpdateController extends adminController {
 	 *@access public
 	*/
 	public function upload() {
-		if(isset($_GET["download"])) {
+		if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
 			$form = new Form($this, "update", array(
 				new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'),
 				$file = new FileUpload("file", lang("update_file_upload"), array("gfs"), null, "updates")

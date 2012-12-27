@@ -185,7 +185,7 @@ class tpl extends Object
 								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
 						}
 						
-						return sekf::getFileNameUncached();
+						return self::getFileNameUncached($name, $class, $inc, $expansion);
 				}
 		}
 		

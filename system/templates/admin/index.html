@@ -54,6 +54,7 @@
 							$.ajax({
 								url: url,
 								dataType: "jsonp",
+								noRequestTrack: true,
 								success: function(object) {
 									if(object.name) {
 										results.push({response: object, current_version: u[name]["version"], webversion: object.version});
