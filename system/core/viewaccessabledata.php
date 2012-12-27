@@ -10,8 +10,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 2.2.3
+  * last modified: 26.12.2012
+  * $Version 2.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -628,7 +628,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
 					return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
 				} else {
-					throwError(6, "Not-Recursive-Error", "Argument " . $var . " wasn't found because it's not recursive.");
+					log_error("Not-Recursive-Error: Argument ".$var." wasn't found because it's not recursive.");
+					return null;
 				}
 			}
 		}

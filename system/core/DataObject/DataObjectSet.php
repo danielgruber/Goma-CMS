@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 14.12.2012
-  * $Version: 1.4.4
+  * last modified: 25.12.2012
+  * $Version: 1.4.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -47,7 +47,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@name dataCache
 	 *@access protected
 	*/
-	protected $dataCache = null;
+	protected $dataCache = array();
 	
 	/**
 	 * defaults
@@ -381,6 +381,9 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@name rewind
 	*/
 	public function rewind() {
+		if(!is_array($this->data) && !is_object($this->data)) {
+			return;
+		}
 		reset($this->data);
 		$this->position = key($this->data);
 		
@@ -403,6 +406,10 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	*/
 	public function valid()
 	{	
+		if(!is_array($this->data) && !is_object($this->data)) {
+			return false;
+		}
+		
 		return ($this->position >= key($this->data) && $this->position < count($this->data));
 	}
 	
@@ -1035,8 +1042,7 @@ class DataObjectSet extends DataSet {
 	*/
 	public function setData($data = array()) {
 		$this->dataCache = $data;
-		$this->data = $data;
-		$this->count = count($data);
+		$this->data = (array) $data;
 		$this->reRenderSet();
 	}
 	
@@ -1685,7 +1691,7 @@ class DataObjectSet extends DataSet {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
 			foreach($this->data as $record) {
-				if(is_object($record) && !isset($writtenIDs[$record->id]) && $record->id != 0) {
+				if(is_object($record) && !isset($writtenIDs[$record->id])) {
 					$writtenIDs[$record->id] = true;
 					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
 						return false;
@@ -1846,11 +1852,15 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@param string - name
 	 *@param string - field
 	*/
-	public function setRelationENV($name = null, $field = null) {
+	public function setRelationENV($name = null, $field = null, $id = null) {
 		if(isset($name)) 
 			$this->relationName = $name;
 		if(isset($field))
 			$this->field = $field;
+		
+		if(isset($id))
+			foreach($this as $record)
+				$record[$field] = $id;
 	}
 	
 	/**
@@ -1863,6 +1873,12 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@param bool - disabled
 	*/
 	public function generateForm($name = null, $edit = false, $disabled = false) {
+		
+		if(isset($this[$this->field])) {
+			$this->dataobject[$this->field] = $this[$this->field];
+		} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
+			$this->dataobject[$this->field] = $this->filter[$this->field];
+		}
 		
 		$form = parent::generateForm($name, $edit, $disabled);
 		
@@ -1883,7 +1899,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 		if($this->class == "hasmany_dataobjectset") {
 			if(isset($this[$this->field])) {
 				$record[$this->field] = $this[$this->field];
-			} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
+			} else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
 				$record[$this->field] = $this->filter[$this->field];
 			}
 		}
