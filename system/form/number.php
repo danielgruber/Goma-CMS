@@ -42,7 +42,7 @@ class NumberField extends FormField {
 	 *@param mixed - value
 	 *@param object - form
 	*/	
-	public function __construct($name = null, $title = null, $value = null, $maxlength = null, $parent) {
+	public function __construct($name = null, $title = null, $value = null, $maxlength = null, $parent = null) {
 		$this->maxlength = $maxlength;
 		parent::__construct($name, $title, $value, $parent);
 	}
