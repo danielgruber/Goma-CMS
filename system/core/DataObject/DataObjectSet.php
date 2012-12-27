@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
   *********
-  * last modified: 25.12.2012
-  * $Version: 1.4.5
+  * last modified: 26.12.2012
+  * $Version: 1.4.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1691,7 +1691,7 @@ class DataObjectSet extends DataSet {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
 			foreach($this->data as $record) {
-				if(is_object($record) && !isset($writtenIDs[$record->id])) {
+				if(is_object($record) && (!isset($writtenIDs[$record->id]) || $record->id == 0)) {
 					$writtenIDs[$record->id] = true;
 					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
 						return false;

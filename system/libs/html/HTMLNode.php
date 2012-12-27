@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 1.3.1
+  * last modified: 26.12.2012
+  * $Version 1.3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -135,7 +135,7 @@ class HTMLNode extends Object
 				if(is_array($this->content)) {
 					foreach($this->content as $node)
 					{
-							if(is_object($node))
+							if(is_object($node) && Object::method_exists($node, "render"))
 							{
 									if($whitespace !== null)
 									{
@@ -144,6 +144,8 @@ class HTMLNode extends Object
 									{
 											$content .= $node->render();
 									}
+							} else if(is_object($node)) {
+									$content .= $node->__toString();
 							} else 
 							{
 									if($whitespace !== null)

@@ -104,6 +104,7 @@ class ProfileController extends FrontedController {
 		
 		Core::addBreadCrumb(lang("login"), "profile/login/");
 		Core::setTitle(lang("login"), "profile/login/");
+
 		
 		// if login and a user want's to login as someone else, we should log him out
 		if(member::login() && isset($_POST["pwd"]))
