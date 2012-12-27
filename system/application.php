@@ -480,7 +480,7 @@ function parseUrl() {
 	if(preg_match('/^(.*)'.preg_quote(URLEND, "/").'$/Usi', $url, $matches))
 	{
 		$url = $matches[1];
-	} else if($url != "" && !Core::is_ajax()) {
+	} else if($url != "" && !Core::is_ajax() && !preg_match('/\.([a-zA-Z]+)$/i', $url)) {
 		
 		// enforce URLEND
 		$get = "";
