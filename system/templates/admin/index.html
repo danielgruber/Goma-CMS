@@ -88,11 +88,11 @@
 										<li>
 									<% END %>
 										<% IF NOT $content %>
-											<a href="{BASE_SCRIPT}admin/" class="active">
+											<a href="{BASE_SCRIPT}admin{URLEND}" class="active">
 												<span><% lang("dashboard", "Dashboard") %></span>
 											</a>
 										<% ELSE %>
-											<a href="{BASE_SCRIPT}admin/">
+											<a href="{BASE_SCRIPT}admin{URLEND}">
 												<span><% lang("dashboard", "Dashboard") %></span>
 											</a>
 										<% END %>

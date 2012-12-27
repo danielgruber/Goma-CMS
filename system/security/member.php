@@ -822,8 +822,6 @@ class Member extends Object {
 	*/
 	public static function doLogin($user, $pwd)
 	{
-		echo 1;
-		exit;
 		self::checkDefaults();
 
 		$data = DataObject::get_one("user", array("nickname" => array("LIKE", trim($user)), "OR", "email" => array("LIKE", $user)));

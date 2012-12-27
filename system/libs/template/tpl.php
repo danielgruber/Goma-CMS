@@ -104,8 +104,31 @@ class tpl extends Object
          *@param array - required areas
          *@use: parse tpl
          */
-		public static function render($name,$replacement = array(),$class = "", $required_areas = array(), $expansion = null)
+		public static function render($name,$replacement = array(),$class = "", $expansion = null)
 		{
+			if($file = self::getFilename($name, $class, false, $expansion)) {
+				return self::parser($file,  $replacement, realpath($file),$class);
+			} else {
+				HTTPresponse::setResHeader(500);
+				/* an error so show an error ;-) */
+				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+			}
+		}
+		
+		/**
+		 * new init method
+		 *
+		 *@name render
+         *@access public
+         *@param string - filename
+         *@param array - for replacement like {$content}
+         *@param object - class
+         *@param array - required areas
+         *@use: parse tpl
+         */
+		public static function renderAreas($name,$replacement = array(),$class = "", $required_areas, $expansion = null)
+		{
+			Core::deprecated(2.0, "Don't use areas anymore, use render and vars instead");
 			if($file = self::getFilename($name, $class, false, $expansion)) {
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
 			} else {

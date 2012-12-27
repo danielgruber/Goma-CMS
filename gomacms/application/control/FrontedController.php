@@ -97,7 +97,8 @@ class FrontedController extends Controller
 				"own_css"	=> $this->own_css(),
 				"addcontent"=> $this->addcontent(),
 				"view"		=> $this->view(),
-				"frontedbar"=> new DataSet($this->frontedBar())
+				"frontedbar"=> new DataSet($this->frontedBar()),
+				"content"	=> $content
 			));
 			
 			if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN")) {

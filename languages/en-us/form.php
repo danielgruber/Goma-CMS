@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.12.2012
+  *@Copyright (C) 2009 - 2010  Goma-Team
+  * last modified: 25.11.2010
 */   
 $form_lang = array(
 	'email_not_valid'			=> 'Please enter a valid email-adresse.',
@@ -13,7 +13,6 @@ $form_lang = array(
 	'required_field'			=> "This field is a mandatory field!",
 	'too_long'					=> "Your input is too long. Please check the field  ",
 	'no_number'					=> "Your input is not numeric. Please check the field ",
-	"number_wrong_area"			=> "The number is not within the given range. Please check the field ",
 	"dropdown_nothing_select"	=> "Nothing selected",
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
