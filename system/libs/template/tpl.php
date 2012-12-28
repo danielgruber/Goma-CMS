@@ -1793,7 +1793,6 @@ defined(\'IN_GOMA\') OR die(\'<!-- restricted access -->\'); // silence is golde
 if(!isset($data))
 	return false;
 ?>
-
 ';
 				
 				/*if(function_exists("__autoload")) {
