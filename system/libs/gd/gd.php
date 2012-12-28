@@ -94,7 +94,7 @@ class GD extends Object
 						
 				} else if($this->type == 3)
 				{
-						$this->content_type = "images/png";
+						$this->content_type = "image/png";
 						$this->extension = "png";
 						
 				} else if($this->type == 6)
