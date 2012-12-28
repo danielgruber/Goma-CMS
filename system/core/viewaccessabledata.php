@@ -777,22 +777,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		}
 		
 		/**
-		 * renders a view with areas and the data of this DataObject
-		 * DEPRECATED for removal in 2.1
-		 *
-		 *@name renderWithArea
-		 *@access public
-		 *@param string - template
-		 *@param array - areas
-		 *@param expansion-name of you want to use the expansion-path too
-		*/
-		public function renderWithAreas($view, $expansion = null)
-		{
-				Core::deprecated(2.0, "Don't use areas anymore, use renderWith and vars instead");
-				return tpl::renderAreas($view,array(), $this, $expansion);
-		}
-		
-		/**
 		 * bool - for IF in template
 		 *
 		 *@name toBool

@@ -206,7 +206,7 @@ class Core extends object
 			}
 			
 			if($name == "user") {
-				self::$cms_vars["user"] = convert::raw2text(member::$loggedIn->title());
+				self::$cms_vars["user"] = (member::$loggedIn) ? convert::raw2text(member::$loggedIn->title()) : null;
 				if(PROFILE) Profiler::unmark("Core::getCMSVar");
 				return self::$cms_vars["user"];
 			}

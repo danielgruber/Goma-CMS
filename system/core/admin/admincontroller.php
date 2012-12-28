@@ -191,7 +191,7 @@ class adminController extends Controller
 						return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
 					 } else {
 						$admin = new Admin();
-						return $admin->customise(array("content" => $content, ""))->renderWith("admin/index.html");
+						return $admin->customise(array("content" => $content))->renderWith("admin/index.html");
 					}
 				}
 			}

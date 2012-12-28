@@ -4,24 +4,14 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.12.2012
-  * $Version 2.1.13
+  * last modified: 28.12.2012
+  * $Version 2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Controller extends RequestHandler
-{
-				
-		/**
-		 * if this var is set to true areas are always used
-		 *
-		 *@name useAreas
-		 *@access public
-		 *@var bool
-		*/
-		public static $useAreas;
-		
+{		
 		/**
 		 * showform if no edit right
 		 *
@@ -277,26 +267,7 @@ class Controller extends RequestHandler
 					exit;
 				}
 				
-				if(Core::is_ajax() && isset($_GET["ajaxcontent"]) && (count($this->areaData) > 0 || $this->useAreas === true)) {
-					HTTPResponse::addHeader("content-type", "text/x-json");
-					$areas = array_keys($this->areaData);
-					if(!empty($data) && !is_bool($data)) {
-						$this->areaData["content"] = $data;
-					}
-					return array("areas" => $this->areaData, "class" => $this->model_inst->class);					
-				} else {
-					if(count($this->areaData) > 0 || ClassInfo::getStatic($this->class, "useAreas") === true) {
-						if(!empty($data) && !is_bool($data)) {
-							$this->areaData["content"] = $data;
-						}
-						
-						
-						return $this->renderWithAreas($this->template);
-					} else {
-						return $data;
-					}
-				}
-				
+				return $data;
 		}
 		
 		/**
@@ -333,7 +304,7 @@ class Controller extends RequestHandler
 		}
 		
 		/**
-		 * renders with areas
+		 * renders given view with areas
 		 *
 		 *@name renderWithAreas
 		 *@access public
@@ -345,11 +316,24 @@ class Controller extends RequestHandler
 				$model = $this->modelInst();
 			
 			foreach($this->areaData as $key => $value) {
-				$this->tplVars[$model->class . "_" . $key] = $value;
+				$this->tplVars[$key] = $value;
 			}
 			// get iAreas
 			
-			return $model->customise($this->tplVars)->renderWith($template, $areas);
+			return $model->customise($this->tplVars)->renderWith($template);
+		}
+		
+		/**
+		 * renders with given view
+		 *
+		 *@name renderWith
+		 *@access public
+		*/
+		public function renderWith($template, $model = null) {			
+			if(!isset($model))
+				$model = $this->modelInst();
+			
+			return $model->customise($this->tplVars)->renderWith($template);
 		}
 		
 		/**

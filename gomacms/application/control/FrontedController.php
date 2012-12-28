@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified:  04.12.2012
-  * $Version 2.0.7
+  * last modified:  28.12.2012
+  * $Version 2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -88,8 +88,6 @@ class FrontedController extends Controller
 			if(Core::is_ajax() && isset($_GET["dropdownDialog"]))
 				return $content;
 			
-			$this->areaData["content"] = $content;
-			
 			$model = is_object($this->model_inst) ? $this->model_inst : new ViewAccessableData();
 			
 			$model->customise(array(
@@ -106,7 +104,7 @@ class FrontedController extends Controller
 			}
 			
 			
-			return $this->renderWithAreas("site.html", $model);
+			return $this->renderWith("site.html", $model);
 		}
 }
 

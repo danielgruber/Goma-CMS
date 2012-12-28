@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 3.4
+  * last modified: 28.12.2012
+  * $Version 3.5
 */   
  
  
@@ -563,11 +563,9 @@ $data = array_pop($dataStack);
 					throwError(10, 'Template-Parse-Error.','Expected <% CONTROL [method] %> '.($endControlCount - $controlCount).' more time(s) in '.self::$tpl.'.');
 				}
 				
-				// areas
-				self::$areas = array();
-				self::$iAreas = array();
+				// areas, DEPRECATED!
 				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "areas"), $tpl);
-				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s+reload=("|\')([a-zA-Z0-9_-]+)\3\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "iAreas"), $tpl);
+				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s+reload=("|\')([a-zA-Z0-9_-]+)\3\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "iareas"), $tpl);
 				
 				// check areas in includes
 				preg_match_all('/'.preg_quote('<?php echo $caller->INCLUDE(', '/') . '("|\')([a-zA-Z0-9_\.\-\/]+)\1\); \?\>/Usi', $tpl, $matches);
@@ -577,47 +575,8 @@ $data = array_pop($dataStack);
 						continue;
 					}
 					self::buildFilesForTemplate($filename, realpath($filename));
-					$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", $filename);
-					$_name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-					$areafile = ROOT . CACHE_DIRECTORY . "/tpl.areas.".$name.".php";
-					if(file_exists($areafile)) {
-						include($areafile);
-						self::$areas = array_merge(self::$areas, $areas);
-						self::$iAreas = array_merge(self::$iAreas, $iAreas);
-						foreach($areas as $area => $bool) {
-							$_areafile = ROOT . CACHE_DIRECTORY . "/tpl.area.".$area.".".$name.".php";
-							$secondareafile = ROOT . CACHE_DIRECTORY . "/tpl.area.".$area.".".$_name.".php";
-							copy($_areafile, $secondareafile);
-							unset($_areafile, $secondareafile, $area, $bool);
-						}
-					}
-					unset($iAreas, $areas, $name, $areafile, $filename, $_name);
 				}
 				unset($matches);
-				
-				if(count(self::$areas) > 0)  {
-					$tpl = '<?php if(isset($required_areas)) { 
-								$available_areas = '.var_export(self::$areas, true).'; 
-								foreach($required_areas as $area) { 
-									if(!isset($available_areas[$area])) {
-										throwError("6", "PHP-Error", "Error in Template-File ".$tpl.". Area ".$area." not found! Please add <code>&lt;garea name=\"".$area."\"&gt;...&lt;/garea&gt;");
-									}
-								}
-							} ?>' . $tpl;
-				}
-				
-				
-				
-				if(count(self::$areas) > 0) {
-					$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-					$file = ROOT . CACHE_DIRECTORY . "/tpl.areas.".$name.".php";
-					FileSystem::Write($file, '<?php defined("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-	
-	$areas = '.var_export(self::$areas,true).';
-	$iAreas = '.var_export(self::$iAreas, true).';');
-					self::$areas = array();
-				}
-				unset($file, $f, $name, $percents);
 				
 				// you can hook into it
 				Core::callHook("compileTPL", array($tpl));
@@ -670,17 +629,8 @@ $data = array_pop($dataStack);
 		 *@access public
 		*/
 		public static function areas($matches) {
-			$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-			$file = ROOT . CACHE_DIRECTORY . "/tpl.area.".$matches[2].".".$name.".php";
-			FileSystem::Write($file, '<?php define("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-// area '.$matches[2].'
-?>
-' . $matches[3]);
-			unset($f, $file, $name);
-			self::$areas[$matches[2]] = true;
-			return '<div class="area" id="<?php echo $data->class; ?>_'.$matches[2].'"><?php if(isset($data[$data->class . "_'.$matches[2].'"])) { echo $data[$data->class . "_'.$matches[2].'"]; } else { ?>
-			' . $matches[3] . '
-			<?php } ?></div>';
+			Core::deprecate(2.0, "Use of areas is Deprecated! Please use normal vars instead in " . self::$tpl);
+			return '<?php if($data->getTemplateVar('.var_export($matches[2], true).')) { echo $data->getTemplateVar('.var_export($matches[2], true).'); } else { ?>' . $matches[3] . "<?php } ?>";
 		}
 		
 		/**
@@ -689,20 +639,11 @@ $data = array_pop($dataStack);
 		 *@name areas
 		 *@access public
 		*/
-		public static function iAreas($matches) {
-			$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-			$file = ROOT . CACHE_DIRECTORY . "/tpl.area.".$matches[2].".".$name.".php";
-			FileSystem::Write($file, '<?php define("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-// area '.$matches[2].'
-?>
-' . $matches[3]);
-			unset($f, $file, $name);
-			self::$areas[$matches[2]] = true;
-			self::$iAreas[$matches[2]] = true;
-			return '<div class="area" id="<?php echo $data->class; ?>_'.$matches[2].'"><?php if(isset($data[$data->class . "_'.$matches[2].'"])) { echo $data[$data->class . "_'.$matches[2].'"]; } else { ?>
-			' . $matches[5] . '
-			<?php } ?></div>';
+		public static function iareas($matches) {
+			Core::deprecate(2.0, "Use of areas is Deprecated! Please use normal vars instead in " . self::$tpl);
+			return '<?php if($data->getTemplateVar('.var_export($matches[2], true).')) { echo $data->getTemplateVar('.var_export($matches[2], true).'); } else { ?>' . $matches[5] . "<?php } ?>";
 		}
+		
 		
 		/**
 		 * renders the IF with php-tags
