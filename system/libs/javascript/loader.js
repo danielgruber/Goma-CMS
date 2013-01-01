@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
-  * $Version 1.5.5
+  * last modified: 30.12.2012
+  * $Version 1.5.6
 */
 
 // prevent from being executed twice
@@ -563,10 +563,10 @@ if(typeof self.loader == "undefined") {
 			}
 			
 			// function if we click anywhere
-			mouseDownFunc = function(){
+			mouseDownFunc = function(e){
 				setTimeout(function(){		
 					if(mouseover === false) {
-						fn();
+						fn(e);
 					}
 				}, 10);
 			}
@@ -574,15 +574,17 @@ if(typeof self.loader == "undefined") {
 			if(exceptions) {
 				var i;
 				for(i in exceptions) {
-					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("mouseup", exceptionFunc);
-					$(exceptions[i]).on("touchstart", exceptionFunc);
+					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("touchend", exceptionFunc);
+					$(exceptions[i]).on("touchstart", exceptionFunc);
 				}
 			}
 			// init mouseover-events
-			$(document).on("mouseup", mouseDownFunc);
-			$(document).on("touchend", mouseDownFunc);
+			$(window).on("mouseup", mouseDownFunc);
+			$(window).on("mousedown", mouseDownFunc);
+			$(window).on("touchend", mouseDownFunc);
+			$(window).on("touchstart", mouseDownFunc);
 			$("iframe").each(function(){
 				var w = $(this).get(0).contentWindow;
 				if(w) {

@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.12.2012
-  * $Version 1.5.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.01.2013
+  * $Version 1.5.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -47,7 +47,7 @@ class Uploads extends DataObject {
 	public $has_one = array(
 		"collection"		=> "Uploads"
 	);
-	
+		
 	/**
 	 * extensions in this files are by default handled by this class
 	 *
@@ -468,6 +468,16 @@ class Uploads extends DataObject {
 		}
 	}
 	
+	/**
+	 * checks for the permission to show this file
+	 *
+	 *@name checkPermission
+	*/
+	public function checkPermission() {
+		$check = true;
+		$this->callExtendig("checkPermission", $check);
+		return $check;
+	}
 }
 
 
@@ -479,13 +489,24 @@ class UploadsController extends Controller {
 	 *@access public
 	*/
 	public function index() {
-		if(preg_match('/\.(pdf)$/i', $this->modelInst()->filename)) {
-			HTTPResponse::setHeader("content-type", "application/pdf");
-			HTTPResponse::sendHeader();
-			readfile($this->modelInst()->realfile);
-			exit;
+		if($this->modelInst()->checkPermission()) {
+			if(preg_match('/\.(pdf)$/i', $this->modelInst()->filename)) {
+				HTTPResponse::setHeader("content-type", "application/pdf");
+				HTTPResponse::sendHeader();
+				readfile($this->modelInst()->realfile);
+				exit;
+			}
+			FileSystem::sendFile($this->modelInst()->realfile, $this->modelInst()->filename);
 		}
-		FileSystem::sendFile($this->modelInst()->realfile, $this->modelInst()->filename);
+	}
+	
+	/**
+	 * checks for the permission to do anything
+	 *
+	 *@name checkPermission
+	*/
+	public function checkPermission($action) {
+		return (parent::checkPermission($action) && $this->modelInst()->checkPermission());
 	}
 }
 

@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 3.3.22
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.01.2013
+  * $Version 3.3.23
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -154,11 +154,11 @@ class Core extends object
 		 *@param string - name of the hook
 		 *@param array - params
 		*/
-		public static function callHook($name, $params = array()) {
+		public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
 			if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
 				foreach(self::$hooks[strtolower($name)] as $callback) {
 					if(is_callable($callback))
-						call_user_func_array($callback, $params);
+						call_user_func_array($callback, array($p1, $p2, $p3, $p4, $p5, $p6, $p7));
 				}
 			}
 		}
@@ -370,7 +370,7 @@ class Core extends object
 				
 				FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
 				
-				Core::callHook("deletecache", array($all));
+				Core::callHook("deletecache", $all);
 				
 				global $_REGISTRY;
 				$_REGISTRY["cache"] = array();
@@ -585,17 +585,20 @@ class Core extends object
 			
 			if(PROFILE) Profiler::mark("serve");
 			
-			Core::callHook("serve", array($output));
+			Core::callHook("serve", $output);
 			
 			if(isset(self::$requestController))
 				$output = self::$requestController->serve($output);
 			
 			if(PROFILE) Profiler::unmark("serve");
 			
-			Core::callHook("onBeforeShutdown");
+			Core::callHook("onBeforeDeliver", $output);
 			
 			HTTPResponse::setBody($output);
 			HTTPResponse::output();
+			
+			Core::callHook("onBeforeShutdown");
+			
 			exit;
 		}
 		
