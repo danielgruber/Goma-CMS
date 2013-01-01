@@ -182,5 +182,55 @@ class contentController extends FrontedController
 			}
 		}
 		
+		/**
+		 * output-hook
+		 *
+		 *@name outputHook
+		*/
+		public static function outputHook($content) {
+			if(is_subclass_of(Core::$requestController, "contentController")) {
+				$uploadObjects = array();
+				
+				// a-tags
+				preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $content, $links);
+				foreach($links[2] as $key => $href)
+				{
+					if(strpos($href, "Uploads/") && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9_\-\.]+)/', $href, $match)) {
+						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+							$uploadObjects[] = $data;
+						}
+					}
+				}
+				
+				// img-tags
+				preg_match_all('/<img([^>]+)src="([^">]+)"([^>]*)>/Usi', $content, $links);
+				foreach($links[2] as $key => $href)
+				{
+					if(strpos($href, "Uploads/") && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9_\-\.]+)/', $href, $match)) {
+						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+							$uploadObjects[] = $data;
+						}
+					}
+				}
+				
+				if(Core::$requestController->modelInst()->UploadTracking()->Count() != count($uploadObjects)) {
+					Core::$requestController->modelInst()->UploadTracking()->setData(array());
+					foreach($uploadObjects as $upload)
+						Core::$requestController->modelInst()->UploadTracking()->push($upload);
+					
+					Core::$requestController->modelInst()->UploadTracking()->write(false, true);
+				}
+			}
+		}
 }
 
+class UploadsPageLinkExtension extends DataObjectExtension {
+	/**
+	 * many-many
+	*/
+	public $belongs_many_many = array(
+		"pagelinks"	=> "pages"
+	);
+}
+
+Core::addToHook("onBeforeServe", array("contentController", "outputHook"));

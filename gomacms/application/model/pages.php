@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
-  * $Version 2.4.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.01.2013
+  * $Version 2.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -58,6 +58,16 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@var array
 		*/
 		public $has_many = array('children' => 'pages');
+		
+		/**
+		 * link-tracking
+		 *
+		 *@name many_many
+		 *@access public
+		*/
+		public $many_many = array(
+			"UploadTracking"	=> "Uploads"
+		);
 		
 		/**
 		 * searchable fields
