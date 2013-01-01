@@ -592,7 +592,7 @@ class Core extends object
 			
 			if(PROFILE) Profiler::unmark("serve");
 			
-			Core::callHook("onBeforeDeliver", $output);
+			Core::callHook("onBeforeServe", $output);
 			
 			HTTPResponse::setBody($output);
 			HTTPResponse::output();

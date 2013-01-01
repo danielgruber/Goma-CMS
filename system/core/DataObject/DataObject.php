@@ -1,13 +1,16 @@
 <?php
 /**
+  * this is a Basic class for all Models that need DataBase-Connection
+  * it creates tables based on db-fields, has-one-, has-many- and many-many-connections
+  * it gets data and makes it available as normal attributes
+  * it can write and remove data
+  *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * implementing datasets
-  *********
-  * last modified: 21.12.2012
-  * $Version: 4.6.15
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.01.2013
+  * $Version: 4.6.16
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -289,6 +292,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		$has_one = array_map("strtolower", $has_one);
+		$has_one = ArrayLib::map_key("strtolower", $has_one);
 		return $has_one;
 	}
 	
@@ -310,6 +314,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		$has_many = array_map("strtolower", $has_many);
+		$has_many = ArrayLib::map_key("strtolower", $has_many);
 		return $has_many;
 	}
 	
@@ -331,6 +336,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		$many_many = array_map("strtolower", $many_many);
+		$many_many = ArrayLib::map_key("strtolower", $many_many);
 		return $many_many;
 	}
 	
@@ -352,6 +358,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		$belongs_many_many = array_map("strtolower", $belongs_many_many);
+		$belongs_many_many = ArrayLib::map_key("strtolower", $belongs_many_many);
 		return $belongs_many_many;
 	}
 	
