@@ -29,7 +29,7 @@ class Uploads extends DataObject {
 	 *@name cacheLifeTime
 	 *@access public
 	*/
-	public static $cache_life_time = 31 * 24 * 60 * 60;
+	public static $cache_life_time = 2678400; // 31 days = 2678400
 
 	/**
 	 * database-table
@@ -858,8 +858,8 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			
 			// write to cache
-			FileSystem::requireDir($cacheDir);
-			$img->toFile(ROOT . URL);
+			/*FileSystem::requireDir($cacheDir);
+			$image->toFile(ROOT . URL);*/
 			
 			// output
 			$image->output();
