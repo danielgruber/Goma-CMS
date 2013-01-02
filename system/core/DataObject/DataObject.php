@@ -1535,8 +1535,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$this->data["versionid"] = 0;
 		}
 		
-		$this->onBeforeWrite();
-		
 		if(isset(ClassInfo::$class_info[$this->class]["baseclass"]))
 			$baseClass = ClassInfo::$class_info[$this->class]["baseclass"];
 		else
@@ -1557,24 +1555,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 			
+			$this->onBeforeWrite();
+			
 			$command = "insert";
 			
 			// get new data
 			$newdata = $this->data;
 		} else {
 			// get old record
-			$data = DataObject::get($baseClass, array("versionid" => $this->versionid));
+			$data = DataObject::get_one($baseClass, array("versionid" => $this->versionid));
 			
-			if($data->count() > 0) {
+			if($data) {
 				// check rights
 				if(!$forceWrite)
 					if(!$this->canWrite($this))
 						if($snap_priority == 2 && !$this->canPublish($this))
 							return false;
 				
+				$this->onBeforeWrite();
+				
 				$command = "update";
-				$newdata = array_merge($data->first()->ToArray(), $this->data);
-				$this->data = $data->first()->ToArray();
+				$newdata = array_merge($data->ToArray(), $this->data);
+				$this->data = $data->ToArray();
 				$newdata["created"] = $data["created"]; // force
 				$newdata["autorid"] = $data["autorid"];
 				$oldid = $data->versionid;
