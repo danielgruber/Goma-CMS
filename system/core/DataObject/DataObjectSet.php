@@ -2107,7 +2107,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				);
 				$manipulation[0]["fields"] = array_merge($manipulation[0]["fields"], $writeExtraFields[$id]);
 			} else {
-				if($writeExtraFields[$id] != $existingFields[$row->{$this->field}]) {
+				if($writeExtraFields[$id] != $existingFields[$id]) {
 					$manipulation[] = array(
 						"command"	=> "update",
 						"table_name"=> $this->relationTable,

@@ -581,7 +581,7 @@ class ImageUploads extends Uploads {
 	*/
 	public function __toString() {
 		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->filename))
-			return '<img src="'.$this->raw().'" height="'.$this->height.'" width="'.$this->width.'" alt="'.$this->filename.'" />';
+			return '<img src="'.$this->raw().'/index'.substr($this->filename, strrpos($this->filename, ".")).'" height="'.$this->height.'" width="'.$this->width.'" alt="'.$this->filename.'" />';
 		else
 			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
 	}
@@ -858,8 +858,10 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			
 			// write to cache
-			/*FileSystem::requireDir($cacheDir);
-			$image->toFile(ROOT . URL);*/
+			if(preg_match('/index\.(jpg|jpeg|png|bmp|gif)$/', URL)) {
+				FileSystem::requireDir($cacheDir);
+				$image->toFile(ROOT . URL);
+			}
 			
 			// output
 			$image->output();
@@ -874,14 +876,17 @@ class ImageUploadsController extends UploadsController {
 	 *@access public
 	*/
 	public function setWidth() {
+
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			
 			$width = (int) $this->getParam("width");
 			
 			$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
 			
 			// create
 			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight)->Output();
+			
+			$img = $image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
 			
 			// write to cache
 			FileSystem::requireDir($cacheDir);
@@ -902,11 +907,18 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function setHeight() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			
 			$height = (int) $this->getParam("height");
+			
+			// create image
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+			
+			// write to cache
 			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
 			$img->toFile(ROOT . URL);
+			
+			// output
 			$img->Output();
 		}
 		
@@ -921,12 +933,19 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function setSize() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
+			
 			$height = (int) $this->getParam("height");
 			$width = (int) $this->getParam("width");
+			
+			// create image
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+			
+			// write to cache
 			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
 			$img->toFile(ROOT . URL);
+			
+			// output
 			$img->Output();
 		}
 		
