@@ -4,12 +4,12 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 2.0.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 02.01.2013
+  * $Version 2.0.4
 */
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class contentController extends FrontedController
 {
@@ -197,6 +197,9 @@ class contentController extends FrontedController
 				{
 					if(strpos($href, "Uploads/") && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9_\-\.]+)/', $href, $match)) {
 						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+							if(file_exists($data->path) && filemtime(ROOT . "Uploads/" $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
+								@unlink($data->path);
+							}
 							$uploadObjects[] = $data;
 						}
 					}
