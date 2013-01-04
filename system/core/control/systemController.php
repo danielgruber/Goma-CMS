@@ -121,7 +121,7 @@ class systemController extends Controller {
 		$expCount = isset(ClassInfo::$appENV["expansion"]) ? count(ClassInfo::$appENV["expansion"]) : 0;
 		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . $expCount);
 		$mtime = $cacher->created;
-		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . $output));
+		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . var_export($output, true)));
 		HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
 		HTTPResponse::addHeader("pragma","Public");
 		HTTPResponse::addHeader("Etag", '"'.$etag.'"');
