@@ -65,7 +65,7 @@ class mysqliDriver extends object implements SQLDriver
 					self::setCharsetUTF8();
 					return true;
 				} else {
-					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/mysql_connect_error.html')));
+					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
 				}
 		}
 		/**

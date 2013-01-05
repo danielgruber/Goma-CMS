@@ -12,12 +12,12 @@
  
 
 class pgsqlDriver extends object implements SQLDriver 
-{
-	public $_db;
-	
+{	
 	public function __construct()
 	{
 		parent::__construct();
+		
+		define("pgsql_connected", false);
 				
 		/* --- */
 		if(!defined("NO_AUTO_CONNECT")) 
@@ -28,9 +28,18 @@ class pgsqlDriver extends object implements SQLDriver
 			global $dbuser;
 			global $dbpass;
 			
-			if(!isset(self::$db))
+			if(!pgsql_connected)
 			{
-				self::connect($dbuser, $dbdb, $dbpass, $dbhost);
+				if(!self::connect($dbuser, $dbdb, $dbpass, $dbhost))
+				{
+					define("pgsql_connected", true);
+					return true;
+				}
+				else
+				{
+					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+				}
+				
 			}
 		}
 	}
@@ -38,8 +47,12 @@ class pgsqlDriver extends object implements SQLDriver
 
 	public function connect($dbhost, $dbport, $dbdb, $dbuser, $dbpass)
 	{
-		$conn_string = $dbhost . ',' . $dbport . ',' . $dbuser . ',' . $dbpass;
-		if(!pg_connect($conn_string, $dbdb))
+		if(!is_int($dbport))
+			return false;
+			
+		$conn_string = "host=".$dbhost . " port=".$dbport." dbname=".$dbdb." user=".$dbuser." password=".$dbpass;
+		
+		if(!pg_connect($conn_string))
 		{
 			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/mysql_connect_error.html')));
 		}
@@ -51,7 +64,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public  function query($sql, $unbuffered = false)
 	{
-		if($result = $this->_db->query($sql))
+		if($result = pg_query($sql))
 			return $result;
 		else {
 			$trace = debug_backtrace();
@@ -214,7 +227,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function setCharsetUTF8()
 	{
-		$this->_db->set_client_encoding("utf8");
+		return pg_set_client_encoding("utf8");
 	}
 
 

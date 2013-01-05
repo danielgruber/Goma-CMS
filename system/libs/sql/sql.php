@@ -90,7 +90,7 @@ class SQL extends object
 				
 				if($driver == "mysql")
 					$driver = "mysqli";
-				elseif($driver == "postgres")
+				elseif($driver == "postgresql")
 					$driver = "pgsql";
 				
 				self::$driver = self::factory($driver);
@@ -115,6 +115,8 @@ class SQL extends object
 		{
 				if($driver == "mysql")
 					$driver = "mysqli";
+				elseif($driver == "postgresql")
+					$driver = "pgsql";
 				
 				if(file_exists(dirname(__FILE__) . '/driver/' . $driver . ".php"))
 				{
