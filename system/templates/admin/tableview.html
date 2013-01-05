@@ -120,7 +120,7 @@
 					<% IF $pages.black %>
 						<span class="black">$pages.page</span>
 					<% ELSE %>
-						<a href="<% echo addParamToURL($_SERVER_REDIRECT, "bp", $pages.page) %>">{$pages.page}</a>
+						<a href="<% echo addParamToURL($_SERVER_REQUEST_URI, "bp", $pages.page) %>">{$pages.page}</a>
 					<% END %>
 				<% ENDCONTROL %>
 			</div>
