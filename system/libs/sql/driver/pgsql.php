@@ -23,7 +23,6 @@ class pgsqlDriver extends object implements SQLDriver
 		if(!defined("NO_AUTO_CONNECT")) 
 		{
 			global $dbhost;
-			global $dbport;
 			global $dbdb;
 			global $dbuser;
 			global $dbpass;
@@ -45,12 +44,9 @@ class pgsqlDriver extends object implements SQLDriver
 	}
 
 
-	public function connect($dbhost, $dbport, $dbdb, $dbuser, $dbpass)
+	public function connect($dbuser, $dbdb, $dbpass, $dbhost)
 	{
-		if(!is_int($dbport))
-			return false;
-			
-		$conn_string = "host=".$dbhost . " port=".$dbport." dbname=".$dbdb." user=".$dbuser." password=".$dbpass;
+		$conn_string = generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass);
 		
 		if(!pg_connect($conn_string))
 		{
@@ -59,6 +55,11 @@ class pgsqlDriver extends object implements SQLDriver
 		self::setCharsetUTF8();
 		unset $conn_string;
 		return true;
+	}
+	
+	public function test($dbuser, $dbdb, $dbpass, $dbhost)
+	{
+		return pg_ping(generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass););
 	}
 	
 	
@@ -104,15 +105,18 @@ class pgsqlDriver extends object implements SQLDriver
 	}
 	
 	public  function error()
-	{				
+	{	
+		return pg_last_error();			
 	}
 		
 	public  function errno()
 	{
+		return -1; // PostgreSQL does not provide any error code
 	}
 	
 	public  function insert_id()
 	{
+		return -1; // to be done !!!
 	}
 	
 	public function free_result($result)
@@ -151,9 +155,9 @@ class pgsqlDriver extends object implements SQLDriver
 		return $queries;
 	}
 	
-	public function affected_rows() 
+	public function affected_rows($result) 
 	{
-	
+		return pg_affected_rows($result);
 	}
 	
 	public  function list_tables($database)
@@ -167,60 +171,6 @@ class pgsqlDriver extends object implements SQLDriver
 		return $list;
 	}
 	
-	public function getFieldsOfTable($table, $prefix = false, $track = true)
-	{
-		if($prefix === false)
-			$prefix = DB_PREFIX;
-				
-		
-		$sql = "SHOW COLUMNS FROM ".$prefix.$table."";
-		if($result = sql::query($sql, false, $track))
-		{
-			$fields = array();
-			while($row = $this->fetch_object($result))
-			{
-					$fields[$row->Field] = $row->Type;
-			}
-			return $fields;
-		} else
-		{
-			return false;
-		}
-	}
-	
-	public function changeField($table, $field, $type, $prefix = false)
-	{
-		if($prefix === false)
-			$prefix = DB_PREFIX;
-		
-	
-		$sql = "ALTER TABLE ".$prefix.$table." MODIFY ".$field." ".$type." ";
-		if(sql::query($sql))
-		{
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-	
-	public function addField($table, $field, $type, $prefix = false)
-	{
-		if($prefix === false)
-			$prefix = DB_PREFIX;
-		
-		
-		$sql = "ALTER TABLE ".$prefix.$table." ADD ".$field." ".$type." NOT NULL";
-		if(sql::query($sql))
-		{
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-	
-	
 	
 	
 	
@@ -228,6 +178,19 @@ class pgsqlDriver extends object implements SQLDriver
 	public function setCharsetUTF8()
 	{
 		return pg_set_client_encoding("utf8");
+	}
+	
+	public function generate_connection_string($dbhost, $dbport, $dbdb, $dbuser, $dbpass)
+	{
+		$raw = split($dbhost, ':', 2);
+		
+		if(count($raw) != 2)
+			return false;
+			
+		if(!is_int($raw[1]))
+			return false;
+			
+		return "host=".$raw[0] . " port=".$raw[1]." dbname=".$dbdb." user=".$dbuser." password=".$dbpass;
 	}
 
 
