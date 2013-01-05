@@ -90,6 +90,8 @@ class SQL extends object
 				
 				if($driver == "mysql")
 					$driver = "mysqli";
+				elseif($driver == "postgres")
+					$driver = "pgsql";
 				
 				self::$driver = self::factory($driver);
 		}
