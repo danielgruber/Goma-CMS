@@ -44,6 +44,7 @@ class pgsqlDriver extends object implements SQLDriver
 	}
 
 
+
 	public function connect($dbuser, $dbdb, $dbpass, $dbhost)
 	{
 		$conn_string = generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass);
@@ -56,11 +57,14 @@ class pgsqlDriver extends object implements SQLDriver
 		unset $conn_string;
 		return true;
 	}
+
+
 	
 	public function test($dbuser, $dbdb, $dbpass, $dbhost)
 	{
 		return pg_ping(generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass););
 	}
+
 	
 	
 	public  function query($sql, $unbuffered = false)
@@ -79,55 +83,77 @@ class pgsqlDriver extends object implements SQLDriver
 		}
 	}
 	
+	
+	
 	public function fetch_row($result)
 	{
 		return pg_fetch_row($result);
 	}
+	
+	
 	
 	public function close()
 	{
 		return pg_close();
 	}
 	
+	
+	
 	public function fetch_object($result)
 	{
 		return pg_fetch_object($result);
 	}
+	
+	
 	
 	public function fetch_array($result)
 	{
 		return pg_fetch_array($result);
 	}
 	
+	
+	
 	public function fetch_assoc($result)
 	{
 		return pg_fetch_assoc($result);
 	}
+	
+	
 	
 	public function num_rows($result)
 	{
 		return pg_num_rows($result);
 	}
 	
+	
+	
 	public  function error()
 	{	
 		return pg_last_error();			
 	}
+	
+	
 		
 	public  function errno()
 	{
 		return -1; // PostgreSQL does not provide any error code
 	}
 	
+	
+	
 	public  function insert_id()
 	{
 		return -1; // to be done
 	}
 	
+	
+	
 	public function free_result($result)
 	{
 		return pg_free_result($result);
 	}
+	
+	
 	
 	public function escape_string($str)
 	{
@@ -144,15 +170,21 @@ class pgsqlDriver extends object implements SQLDriver
 		return pg_escape_string((string)$str);
 	}
 	
+	
+	
 	public function real_escape_string($str)
 	{
 		return self::escape_string($str);
 	}
 	
+	
+	
 	public function protect($str)
 	{
 		return self::escape_string($str);
 	}
+	
+	
 	
 	public function split($sql)
 	{
@@ -160,20 +192,32 @@ class pgsqlDriver extends object implements SQLDriver
 		return $queries;
 	}
 	
+	
+	
 	public function affected_rows($result) 
 	{
 		return pg_affected_rows($result);
 	}
 	
+	
+	
 	public  function list_tables($database)
 	{
 		/**
-		 * Our PostgreSQL socket is connected to an database
-		 * so we can't read out any other db without reconnecting
-		 * this is an problem, so
+		 * The PostgreSQL socket is connected to an database
+		 * so we can't read out any other db without reconnecting.
+		 * This solution is based on reconnecting.
 		 * */
-		 
-		 // to be done !
+
+		if(!$this->close())
+			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+			
+		if(!$this->connect($dbuser, $database, $dbpass, $dbhost))
+		{
+			if(!$this->connect($dbuser, $dbdb, $dbpass, $dbhost))
+				die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+			return false;
+		}
 		
 		$list = array();
 		if($result = sql::query("SELECT DISTINCT table_catalog FROM INFORMATION_SCHEMA.TABLES")) {
@@ -181,19 +225,49 @@ class pgsqlDriver extends object implements SQLDriver
 				$list[] = $row[0];
 			}
 		}
+		
+		if(!$this->close())
+			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+		
+		if(!$this->connect($dbuser, $dbdb, $dbpass, $dbhost))
+				die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+
 		return $list;
 	}
 	
+	
+	
 	public function getFieldsOfTable($table, $prefix = false, $track = true)
 	{
-		// to be done !
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+		
+		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='".$table."'";
+		if($result = sql::query($sql, false, $track))
+		{
+			$fields = array();
+			while($row = $this->fetch_object($result))
+			{
+					$fields[$row->Field] = $row->Type;
+			}
+			return $fields;
+		} 
+		else
+		{
+			return false;
+		}
 	}
+	
+	
 	
 	public function changeField($table, $field, $type, $prefix = false)
 	{
 		// to be done
-		// possible solution: delete column and build a new one
+		// possible solution :  delete column and build a new one
+		// 						(with data dump and conversion if necessary)
 	}
+	
+	
 	
 	public function addField($table, $field, $type, $prefix = false)
 	{
@@ -210,6 +284,8 @@ class pgsqlDriver extends object implements SQLDriver
 			return true;
 	}
 	
+	
+	
 	public function dropField($table, $field, $prefix = false)
 	{
 		if($prefix === false)
@@ -221,6 +297,8 @@ class pgsqlDriver extends object implements SQLDriver
 		else
 			return true;
 	}
+	
+	
 	
 	public function createTable($table, $fields, $prefix = false)
 	{
@@ -255,10 +333,13 @@ class pgsqlDriver extends object implements SQLDriver
 	}
 	
 	
+	
 	public function _createTable($table, $fields, $prefix = false)
 	{
 		return createTable($table, $fields, $prefix);
 	}
+	
+	
 	
 	public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
 	{
@@ -284,6 +365,8 @@ class pgsqlDriver extends object implements SQLDriver
 			throwErrorByID(3);
 	}
 	
+	
+	
 	public function dropIndex($table, $name, $db_prefix = null)
 	{
 		if($db_prefix === null)
@@ -297,31 +380,54 @@ class pgsqlDriver extends object implements SQLDriver
 			throwErrorByID(3);
 	}
 	
+	
+	
 	public function getIndexes($table, $db_prefix = null)
 	{
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 		
-		// to be done
+		if(!$this->close())
+			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+			
+		if(!$this->connect($dbuser, $database, $dbpass, $dbhost))
+		{
+			if(!$this->connect($dbuser, $dbdb, $dbpass, $dbhost))
+				die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
+			return false;
+		}	
+			
+		$sql = "SELECT i.relname AS index_name FROM pg_class t, pg_class i, pg_index ix,pg_attribute a  WHERE t.oid = ix.indrelid
+				AND i.oid = ix.indexrelid AND a.attrelid = t.oid AND a.attnum = ANY(ix.indkey) AND t.relkind = 'r' AND t.relname like 'test%'
+				ORDER BY t.relname, i.relname";
+				
+		// to be done : check if this function is portable to postgresql
+		
 		
 	}
 	
+	
+	
 	public function showTableDetails($table, $track = true, $prefix = false)
 	{
+		// PostgreSQL does not provide any other feature than type ...
+		
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 		
 		if($result = getFieldsOfTable($table, $prefix, $track))
 		{
 			$fields = array();
-		
-			while($row = $this->fetch_object($result))
+			$max = pg_num_fields($result);
+			
+			for($i = 0; $i < $max, $i++)
 			{
-				/**
-				 * to be done : check what variables the object has
-				 * if not, maybe the pg_meta_data function can help
-				 * alternative: get the details via pg_field_type, ...
-				 * */
+				$fields[pg_field_name($result, $i)] = array(
+						"type" 		=> pg_field_type($result, $i),
+						"key"		=> NULL,
+						"default"	=> NULL,
+						"extra"		=> NULL
+					);
 				 
 			}
 			return $fields;
@@ -332,6 +438,8 @@ class pgsqlDriver extends object implements SQLDriver
 		}
 	}
 	
+	
+	
 	public function requireTable($table, $fields, $indexes, $defaults, $prefix = false)
 	{
 		if($prefix === false)
@@ -340,17 +448,11 @@ class pgsqlDriver extends object implements SQLDriver
 		// to be done	
 	}
 	
+	
+	
 	public function setDefaultSort($table, $field, $type = "ASC", $prefix = false)
 	{
-		if($prefix === false)
-			$prefix = DB_PREFIX;
-			
-		$sql = "";	// to be done
-		
-		if(SQL::Query($sql))
-			return true;
-		else
-			throwErrorByID(3);
+		// not possible in postgresql
 	}
 	
 	
@@ -582,8 +684,5 @@ class pgsqlDriver extends object implements SQLDriver
 			
 		return "host=".$raw[0] . " port=".$raw[1]." dbname=".$dbdb." user=".$dbuser." password=".$dbpass;
 	}
-
-
-				
 }
- ?>
+?>
