@@ -271,7 +271,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function addField($table, $field, $type, $prefix = false)
 	{
-		// note: the types in PGSQL and MySQL differ -> we maybe need to provide a type config
+		$type = $this->parse_type($type);
 		
 		if($prefix === false)
 			$prefix = DB_PREFIX;
@@ -343,6 +343,8 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
 	{
+		$type = $this->parse_type($type);
+		
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 			
@@ -683,6 +685,31 @@ class pgsqlDriver extends object implements SQLDriver
 			return false;
 			
 		return "host=".$raw[0] . " port=".$raw[1]." dbname=".$dbdb." user=".$dbuser." password=".$dbpass;
+	}
+	
+	
+	
+	public function init_types()
+	{
+		$types = array(
+						"int" 		=> "integer",
+						"float" 	=> "real",
+						"longtext"	=> "text",
+						"mediumtext"=> "text"
+						);
+	}
+	
+	
+	// parse function for mysql <-> pgsql type compatibility
+	
+	public function parse_type($type)
+	{
+		foreach($types as $regex => $rep)
+		{
+			if(lower($type) == $regex)
+				return $rep;
+		}
+		return $type;
 	}
 }
 ?>
