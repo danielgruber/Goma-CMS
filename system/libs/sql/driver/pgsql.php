@@ -176,7 +176,7 @@ class pgsqlDriver extends object implements SQLDriver
 		 // to be done !
 		
 		$list = array();
-		if($result = sql::query("SELECT c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE pg_catalog.pg_table_is_visible(c.oid) AND c.relkind = 'r' AND relname NOT LIKE 'pg_%' ORDER BY 1")) {
+		if($result = sql::query("SELECT DISTINCT table_catalog FROM INFORMATION_SCHEMA.TABLES")) {
 			while($row = $this->fetch_array($result)) {
 				$list[] = $row[0];
 			}
@@ -191,12 +191,13 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function changeField($table, $field, $type, $prefix = false)
 	{
+		// to be done
 		// possible solution: delete column and build a new one
 	}
 	
 	public function addField($table, $field, $type, $prefix = false)
 	{
-		// note: the types in PGSQL and MySQL may differ
+		// note: the types in PGSQL and MySQL differ -> we maybe need to provide a type config
 		
 		if($prefix === false)
 			$prefix = DB_PREFIX;
@@ -370,7 +371,192 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function writeManipulation($manipulation)
 	{
-		// to be done : check weather postgresql supports manipulations
+		if(PROFILE) Profiler::mark("PGSQL::writeManipulation");
+		foreach($manipulation as $class => $data)
+		{
+			switch(strtolower($data["command"]))
+			{	
+				case "update":
+					if(isset($data["id"]))
+					{
+						if(count($data["fields"]) > 0)
+						{
+							if ((isset($data["table_name"]) && $table_name = $data["table_name"]) || 
+								(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"]))
+							{
+								
+								$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+								$i = 0;
+								foreach($data["fields"] as $field => $value)
+								{
+									if($i == 0)
+									{
+											$i++;
+									} else
+									{
+											$sql .= " , ";
+									}
+									$sql .= " ".$field." = '".convert::raw2sql($value)."' ";
+										
+								}
+								unset($i);
+								
+								if(isset($data["id"])) 
+								{
+									$id = $data["id"];
+									$sql .= " WHERE id = '".convert::raw2sql($id)."'";
+								} 
+								else if(isset($data["where"])) 
+								{
+									$where = $data["where"];
+									$where = SQL::extractToWhere($where);
+									$sql .= $where;
+									unset($where);
+								} 
+								else 
+								{
+									return false;
+								}
+								
+								if(SQL::query($sql))
+								{
+									unset($id);
+									// everything is fine
+								} else
+								{
+									throwErrorById(3);
+								}	
+							}
+						}
+					}
+				break;
+					
+				case "insert":
+					if(count($data["fields"]) > 0)
+					{
+						if ((isset($data["table_name"]) && $table_name = $data["table_name"]) ||
+							(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"]))
+						{
+							$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
+							$fields = ' (';
+							$values = ' VALUES (';
+							
+							// multi data
+							if(isset($data["fields"][0]))
+							{
+								$a = 0;
+								foreach($data["fields"] as $fields_data)
+								{
+									if($a == 0) 
+									{
+										// do nothing, it will be done at the end, because we need it above
+									} 
+									else 
+									{
+										$values .= " ) , ( ";
+									}
+									
+									$i = 0;
+									
+									foreach($fields_data as $field => $value) 
+									{	
+										if($i == 0)	
+										{
+											$i++;
+										} 
+										else 
+										{
+											if($a == 0) 
+											{
+												$fields .= ",";
+											}
+												
+											$values .= ", ";
+										}
+										
+										if($a == 0) 
+										{
+											$fields .= convert::raw2sql($field);
+										}
+										$values .= "'".convert::raw2sql($value)."'";
+									}
+									
+									if($a == 0) 
+									{
+										$a++; // now we can edit it
+									}
+									
+									unset($i);
+								}
+								unset($a, $field_data);
+							}
+							else // just one record
+							{
+								$i = 0;
+								foreach($data["fields"] as $field => $value)
+								{	
+									if($i == 0)
+									{
+										$i++;
+									} else
+									{
+										$fields .= ",";
+										$values .= ",";
+									}
+									$fields .= convert::raw2sql($field);
+									$values .= "'".convert::raw2sql($value)."'";
+								}
+								unset($i);
+							}
+							
+							$fields .= ")";
+							$values .= ")";
+							$sql .= $fields . $values;
+							if(sql::query($sql))
+							{
+								unset($fields, $values);
+								// everything is fine
+							} 
+							else
+							{
+								throwErrorById(3);
+							}
+						}	
+					}
+				break;
+					
+				case "delete":
+					if(!isset($data["where"]) && isset($data["id"]))
+						$data["where"]["id"] = $data["id"];
+					
+					if(isset($data["where"])) 
+					{
+						if ((isset($data["table_name"]) && $table_name = $data["table_name"]) ||
+							(isset(ClassInfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"]))
+						{
+							$where = $data["where"];
+							$where = SQL::extractToWhere($where);
+									
+							$sql = "DELETE FROM ".DB_PREFIX . $table_name.$where;
+									
+							if(sql::query($sql)) {
+								// everything is fine
+							} else {
+								throwErrorById(3);
+							}
+						}
+					}
+				break;
+				
+				default:
+					if(PROFILE) Profiler::unmark("PGSQL::writeManipulation");
+					return false;
+				break;
+			}
+		}
+		
+		if(PROFILE) Profiler::unmark("PGSQL::writeManipulation");
+		return true;
 	}
 	
 	
