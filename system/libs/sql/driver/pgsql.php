@@ -226,25 +226,74 @@ class pgsqlDriver extends object implements SQLDriver
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 			
-		// to be done
+		$fields_ = "";
+		$i = 0;
+		foreach($fields as $key => $value)
+		{
+			if($i != 0)
+			{
+				$fields_ .= ",\n";
+					
+			} 
+			else
+			{
+				$i = 1;
+			}
+			$fields_ .= "".$key." ".$value." NOT NULL ";
+		}
+		
+		$sql = "CREATE TABLE " . $prefix . $table." 
+				(
+					".$fields_."
+				);";
+							
+		if(sql::query($sql))
+			return true;
+		else
+			return false;
 	}
+	
 	
 	public function _createTable($table, $fields, $prefix = false)
 	{
-		if($prefix === false)
-			$prefix = DB_PREFIX;
-			
-		// to be done
+		return createTable($table, $fields, $prefix);
 	}
 	
 	public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
 	{
-		// to be done
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+			
+		if(is_array($field))
+		{
+			$field = implode(',', $field);
+		} else
+		{
+			$field = $field; // ????
+		}
+		
+		$name = ($name === null) ? "" : $name;
+		
+		$sql = "CREATE ".$type." INDEX ".$name." ON ".$table." (".$field.")";
+			
+		if(sql::query($sql))
+			return true;
+		else
+			throwErrorByID(3);
 	}
 	
 	public function dropIndex($table, $name, $db_prefix = null)
 	{
-		// to be done
+		if($db_prefix === null)
+			$db_prefix = DB_PREFIX;
+	
+		$sql = "DROP INDEX ".$name;
+		
+		if(sql::query($sql))
+			return true;
+		else
+			throwErrorByID(3);
 	}
 	
 	public function getIndexes($table, $db_prefix = null)
@@ -261,7 +310,25 @@ class pgsqlDriver extends object implements SQLDriver
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 		
-		// to be done	
+		if($result = getFieldsOfTable($table, $prefix, $track))
+		{
+			$fields = array();
+		
+			while($row = $this->fetch_object($result))
+			{
+				/**
+				 * to be done : check what variables the object has
+				 * if not, maybe the pg_meta_data function can help
+				 * alternative: get the details via pg_field_type, ...
+				 * */
+				 
+			}
+			return $fields;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public function requireTable($table, $fields, $indexes, $defaults, $prefix = false)
@@ -303,7 +370,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function writeManipulation($manipulation)
 	{
-		// to be done 
+		// to be done : check weather postgresql supports manipulations
 	}
 	
 	
