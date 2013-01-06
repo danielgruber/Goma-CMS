@@ -47,6 +47,7 @@ $lang = array(
 	"smilie_title"									=> "Name of emotion",
 	"register"                                     	=> "Sign Up",
 	"administration"                               	=> "administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "manage website",
 	'default_admin'									=> "normal administration",
 	"my_account"                                   	=> "my account" ,
@@ -476,6 +477,7 @@ $lang = array(
 	"hierarchy"										=> "hierarchy",
 	
 	"full_admin_permissions"						=> "Full admin permissions",
+	"full_admin_permissions_info"					=> "Everything is allowed, also if some rights are disabled.",
 	"signed"										=> "signature",
 	"signed_true"									=> "This package was validated by the Goma-Team and is safe to install!",
 	"signed_false"									=> "This package wasn't validated by the Goma-Team! Installing is at own risk!",

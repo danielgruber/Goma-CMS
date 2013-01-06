@@ -46,11 +46,12 @@ class Permission extends DataObject
 		 *@access public
 		*/
 		public static $providedPermissions = array(
-			"superadmin"	=> array(
-				"title"		=> '{$_lang_full_admin_permissions}',
-				"default"	=> array(
-					"type"	=> "admins"
-				)
+			"superadmin"		=> array(
+				"title"			=> '{$_lang_full_admin_permissions}',
+				"default"		=> array(
+					"type"		=> "admins"
+				),
+				"description"	=> '{$_lang_full_admin_permissions_info}'
 			)
 		);
 		
