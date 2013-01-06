@@ -65,6 +65,11 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public  function query($sql, $unbuffered = false)
 	{
+		// some parse rules for postgresql
+		
+		str_replace($sql, "\"", "\'");
+		str_replace($sql, "`", "");
+		
 		if($result = pg_query($sql))
 			return $result;
 		else {
@@ -116,7 +121,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public  function insert_id()
 	{
-		return -1; // to be done !!!
+		return -1; // to be done
 	}
 	
 	public function free_result($result)
@@ -162,8 +167,16 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public  function list_tables($database)
 	{
+		/**
+		 * Our PostgreSQL socket is connected to an database
+		 * so we can't read out any other db without reconnecting
+		 * this is an problem, so
+		 * */
+		 
+		 // to be done !
+		
 		$list = array();
-		if($result = sql::query("SHOW TABLES FROM ".$database."")) {
+		if($result = sql::query("SELECT c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE pg_catalog.pg_table_is_visible(c.oid) AND c.relkind = 'r' AND relname NOT LIKE 'pg_%' ORDER BY 1")) {
 			while($row = $this->fetch_array($result)) {
 				$list[] = $row[0];
 			}
@@ -171,14 +184,138 @@ class pgsqlDriver extends object implements SQLDriver
 		return $list;
 	}
 	
+	public function getFieldsOfTable($table, $prefix = false, $track = true)
+	{
+		// to be done !
+	}
+	
+	public function changeField($table, $field, $type, $prefix = false)
+	{
+		// possible solution: delete column and build a new one
+	}
+	
+	public function addField($table, $field, $type, $prefix = false)
+	{
+		// note: the types in PGSQL and MySQL may differ
+		
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		$sql = "ALTER TABLE ".$prefix.$table." ADD COLUMN".$field." ".$type." NOT NULL";
+		
+		if(!sql::query($sql))
+			return false;
+		else
+			return true;
+	}
+	
+	public function dropField($table, $field, $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		$sql = "ALTER TABLE " .$prefix . $table . " DROP COLUMN ".$field."";
+		if(!sql::query($sql))
+			return false;
+		else
+			return true;
+	}
+	
+	public function createTable($table, $fields, $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		// to be done
+	}
+	
+	public function _createTable($table, $fields, $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		// to be done
+	}
+	
+	public function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
+	{
+		// to be done
+	}
+	
+	public function dropIndex($table, $name, $db_prefix = null)
+	{
+		// to be done
+	}
+	
+	public function getIndexes($table, $db_prefix = null)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+		
+		// to be done
+		
+	}
+	
+	public function showTableDetails($table, $track = true, $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+		
+		// to be done	
+	}
+	
+	public function requireTable($table, $fields, $indexes, $defaults, $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+		
+		// to be done	
+	}
+	
+	public function setDefaultSort($table, $field, $type = "ASC", $prefix = false)
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		$sql = "";	// to be done
+		
+		if(SQL::Query($sql))
+			return true;
+		else
+			throwErrorByID(3);
+	}
+	
+	
+	// deletes a table
+	
+	public function dontRequireTable($table, $prefix = false) 
+	{
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		if($data = $this->showTableDetails($table, true, $prefix)) {
+			return sql::query('DROP TABLE '.$prefix . $table.'');
+		}
+		return true;
+	}
 	
 	
 	
+	public function writeManipulation($manipulation)
+	{
+		// to be done 
+	}
+	
+	
+	// sets the client charset encoding to UTF8
 	
 	public function setCharsetUTF8()
 	{
 		return pg_set_client_encoding("utf8");
 	}
+	
+	
+	// generates a connection string used by the pg_connect function
 	
 	public function generate_connection_string($dbhost, $dbport, $dbdb, $dbuser, $dbpass)
 	{
