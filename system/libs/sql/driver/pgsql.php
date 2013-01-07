@@ -4,6 +4,9 @@
  * 	PostreSQL database driver
  * 	5.1.13	v0.1 Beta
  * 
+ *  This driver should provide the same functions like the MySQL-Driver. 
+ *  All function names and many parts are brazenly stolen from it.
+ * 
  * @package goma framework
  * @link http://goma-cms.org
  * @license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
@@ -261,10 +264,29 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	
 	public function changeField($table, $field, $type, $prefix = false)
-	{
-		// to be done
-		// possible solution :  delete column and build a new one
-		// 						(with data dump and conversion if necessary)
+	{	
+		if($prefix === false)
+			$prefix = DB_PREFIX;
+			
+		$sql = "SELECT ".$field." FROM ".$prefix.$table;
+		$result = sql::query($sql);
+		if(!$result)
+			return false;
+			
+		$sql = "ALTER TABLE ".$prefix.$table." DROP COLUMN ".$field;
+		if(!sql::query($sql))
+			return false;
+			
+		sql::addField($table, $field, $type, $prefix);
+		
+		// to be done : check if we need to convert types
+		
+		$data = sql::fetch_array($result);
+		$sql = "INSERT INTO ".$prefix.$table." ".$field. "some sql ".$data[$field];
+		if(!sql::query($sql))
+			return false;
+			
+		return true;
 	}
 	
 	
@@ -350,12 +372,13 @@ class pgsqlDriver extends object implements SQLDriver
 			
 			
 		if(is_array($field))
-		{
 			$field = implode(',', $field);
-		} else
-		{
-			$field = $field; // ????
-		}
+	 /* *
+		* else
+		* {
+		* 	$field = $field; // ????
+		* }
+		* */
 		
 		$name = ($name === null) ? "" : $name;
 		
@@ -412,7 +435,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function showTableDetails($table, $track = true, $prefix = false)
 	{
-		// PostgreSQL does not provide any other feature than type ...
+		// note : PostgreSQL does not provide any other feature than type ...
 		
 		if($prefix === false)
 			$prefix = DB_PREFIX;
@@ -447,7 +470,243 @@ class pgsqlDriver extends object implements SQLDriver
 		if($prefix === false)
 			$prefix = DB_PREFIX;
 		
-		// to be done	
+		$log = "";
+		
+		if($data = $this->showTableDetails($table, true, $prefix)) 
+		{
+			$editsql = 'ALTER TABLE '.$prefix . $table .' ';
+			foreach($fields as $name => $type)
+			{
+				if($name == "id")
+					continue;
+				
+				if(!isset($data[$name])) 
+				{
+					$editsql .= ' ADD COLUMN '.$name.' '.$type.' ';
+					if(isset($defaults[$name])) 
+						$editsql .= ' DEFAULT "'.addslashes($defaults[$name]).'"';
+						
+					$editsql .= " NOT NULL,";
+					$log .= "ADD Field ".$name." ".$type."\n";
+				}
+				else
+				{
+					// correct fields with edited type or default-value
+					if(str_replace('"', "'", $data[$name]["type"]) != $type && str_replace("'", '"', $data[$name]["type"]) != $type) 
+					{
+						$editsql .= " MODIFY ".$name." ".$type.",";
+						$log .= "Modify Field ".$name." to ".$type."\n";
+					}
+					
+					if(!_eregi('enum', $fields[$name])) 
+					{
+						if(!isset($defaults[$name]) && $data[$name]["default"] != "") 
+						{
+							$editsql .= " ALTER COLUMN ".$name." DROP DEFAULT,";
+						}
+						
+						if(isset($defaults[$name]) && $data[$name]["default"] != $defaults[$name]) 
+						{
+							$editsql .= " ALTER COLUMN ".$name." SET DEFAULT \"".addslashes($defaults[$name])."\",";
+						}
+					}	
+				}
+			}
+			
+			// get fields too much
+			foreach($data as $name => $_data) 
+			{
+				if($name != "id" && !isset($fields[$name])) 
+				{
+					// patch
+					if($name == "default") $name = '`default`';
+					if($name == "read") $name = '`read`';
+					$editsql .= ' DROP COLUMN '.$name.',';
+					$log .= "Drop Field ".$name."\n";
+				}
+			}
+			
+			// @todo indexes
+			
+			$currentindexes = $this->getIndexes($table, $prefix);
+			$allowed_indexes = array(); // for later delete
+			
+			// sort sql, so first drop and then add
+			$removeindexsql = "";
+			$addindexsql = "";
+				
+			// check indexes
+			foreach($indexes as $key => $data) 
+			{
+				if(!$data)
+					continue;
+				
+				if(is_array($data)) 
+				{
+					$name = $data["name"];
+					$ifields = $data["fields"];
+					$type = $data["type"];
+				}
+				else if(_ereg("\(", $data)) 
+				{
+					$name = $key;
+					$allowed_indexes[$name] = true;
+					if(isset($currentindexes[$key])) 
+					{
+						$removeindexsql .= " DROP INDEX ".$key.",";
+					}
+					$addindexsql .= " ADD ".$data . ",";
+					continue;
+				} 
+				else 
+				{
+					$name = $key;
+					$ifields = array($key);
+					$type = $data;
+				}
+				
+				$allowed_indexes[$name] = true;
+				switch(strtolower($type)) 
+				{
+					case "unique":
+						$type = "UNIQUE";
+					break;
+					case "fulltext":
+						$type = "FULLTEXT";
+					break;
+					case "index":
+						$type = "INDEX";
+					break;
+				}	
+				
+				if(!isset($currentindexes[$name])) 
+				{ // we have to create the index
+					$addindexsql .= " ADD ".$type." ".$name . " (".implode(",", $ifields)."),";
+					$log .= "Add Index ".$name."\n";
+				} 
+				else 
+				{
+					// create matchable fields
+					$mfields = array();
+					foreach($ifields as $key => $value) {
+					$mfields[$key] = preg_replace('/\((.*)\)/', "", $value);
+				}
+										
+				if($currentindexes[$name]["type"] != $type || $currentindexes[$name]["fields"] != $mfields) 
+				{
+					$removeindexsql .= " DROP INDEX ".$name.",";
+					$addindexsql .= " ADD ".$type." ".$name . "  (".implode(",", $ifields)."),";
+					$log .= "Change Index ".$name."\n";
+				}
+				
+				unset($mfields, $ifields);
+				}
+			}
+			
+			// check not longer needed indexes
+			foreach($currentindexes as $name => $data) 
+			{
+				if($data["type"] != "PRIMARY" && !isset($allowed_indexes[$name])) 
+				{
+					// sry, it's a hack for older versions
+					if($name == "show") $name = '`'.$name.'`';
+					$removeindexsql .= " DROP INDEX ".$name.", ";
+					$log .= "Drop Index ".$name."\n";
+				}
+			}
+			
+			// add sql
+			$editsql .= $removeindexsql;
+			$editsql .= $addindexsql;
+			unset($removeindexsql, $addindexsql);
+			
+			// run query
+			$editsql = trim($editsql);
+			
+			if(substr($editsql, -1) == ",") 
+				$editsql = substr($editsql, 0, -1);
+			
+			if(sql::query($editsql)) 
+			{
+				ClassInfo::$database[$table] = $fields;
+				return $log;
+			} 
+			else
+				throwError(3,'SQL-Error', "SQL-Query ".$editsql." failed");	
+				
+				
+		} 
+		else 
+		{
+			$sql = "CREATE TABLE ".$prefix . $table ." ( ";
+			$i = 0;
+			foreach($fields as $name => $value) 
+			{
+				if($i == 0) 
+					$i++;
+				else
+					$sql .= ",";
+
+				$sql .= ' '.$name.' '.$value.' ';
+				if(isset($defaults[$name])) 
+					$sql .= " DEFAULT '".addslashes($defaults[$name])."'";
+			}
+			
+			foreach($indexes as $key => $data) 
+			{
+				if($i == 0) 
+					$i++;
+				else
+					$sql .= ",";
+
+				if(is_array($data)) 
+				{
+					$name = $data["name"];
+					$type = $data["type"];
+					$ifields = $data["fields"];
+				}
+				else if(_ereg("\(", $data)) 
+				{
+					$sql .= $data;
+					continue;
+				} 
+				else 
+				{
+					$name = $field = $key;
+					$ifields = array($field);
+					$type = $data;
+				}
+				
+				switch(strtolower($type)) 
+				{
+					case "fulltext":
+						$type = "FULLTEXT";
+						break;
+					case "unique":
+						$type = "UNIQUE";
+						break;
+					case "index":
+					default:
+						$type = "INDEX";
+					break;
+				}
+				
+				$sql .= ''.$type.' '.$name.' ('.implode(',', $ifields).')';
+			}
+			
+			// to be done : check wather this is working 
+			
+			$sql .= ") DEFAULT CHARACTER SET 'utf8'";
+			$log .= $sql . "\n";
+			
+			if(sql::query($sql)) {
+				ClassInfo::$database[$table] = $fields;
+				return $log;
+			} else {
+				throwErrorByID(3);
+			}
+		}
+			
 	}
 	
 	
