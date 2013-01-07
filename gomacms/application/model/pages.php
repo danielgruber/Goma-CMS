@@ -300,8 +300,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				$value = str_replace(" ",  "-", $value);
 				// normal chars
-				$value = preg_replace('/[^a-zA-Z0-9-_]/', '-', $value);
-				$value = preg_replace('/[\-\-]/', '-', $value);
+				$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+				$value = str_replace('--', '-', $value);
 				$this->setField("path", $value);					
 
 		}

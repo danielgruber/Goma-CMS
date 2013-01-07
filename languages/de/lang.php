@@ -47,6 +47,7 @@ $lang = array(
 	"smilie_title"									=> "Name des Smilies",
 	"register"                                     	=> "Registrieren",
 	"administration"                               	=> "Administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "Webseite verwalten",
 	'default_admin'									=> "Normale Administration",
 	"my_account"                                   	=> "Mein Account" ,
@@ -476,6 +477,7 @@ $lang = array(
 	"hierarchy"										=> "Hierarchie",
 	
 	"full_admin_permissions"						=> "Volle Admin-Rechte",
+	"full_admin_permissions_info"					=> "Alle Rechte werden automatisch gewährt, auch wenn eines deaktiviert wird.",
 	"signed"										=> "Signatur",
 	"signed_true"									=> "Dieses Paket wurde vom Goma-Team geprüft und ist freigegeben!",
 	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
