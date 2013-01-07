@@ -9,13 +9,11 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.01.2013
-  * $Version: 4.6.16
+  * last modified: 06.01.2013
+  * $Version: 4.6.17
 */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-classinfo::addSaveVar("DataObject", "extensions");
+defined('IN_GOMA') OR die();
 
 abstract class DataObject extends ViewAccessableData implements PermProvider, SaveVarSetter
 {
