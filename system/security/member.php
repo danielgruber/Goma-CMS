@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
-  * $Version 2.4.4
+  * last modified: 08.01.2012
+  * $Version 2.4.5
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -68,20 +68,40 @@ class User extends DataObject implements HistoryData, PermProvider
 		/**
 		 * the database fields of a user
 		 *
-		 *@name db_fields
+		 *@name db
 		 *@access public
 		*/
-		public $db_fields = array(		'nickname'		=> 'varchar(200)',
-										'name'			=> 'varchar(200)',
-										'email'			=> 'varchar(200)',
-										'password'		=> 'varchar(200)',
-										'signatur'		=> 'text',
-										'status'		=> 'int(2)',
-										'phpsess'		=> 'varchar(200)',
-										"code"			=> "varchar(200)",
-										"timezone"		=> "timezone",
-										"custom_lang"	=> "varchar(10)");
+		static $db = array(	'nickname'		=> 'varchar(200)',
+							'name'			=> 'varchar(200)',
+							'email'			=> 'varchar(200)',
+							'password'		=> 'varchar(200)',
+							'signatur'		=> 'text',
+							'status'		=> 'int(2)',
+							'phpsess'		=> 'varchar(200)',
+							"code"			=> "varchar(200)",
+							"timezone"		=> "timezone",
+							"custom_lang"	=> "varchar(10)");
 		
+		
+		/**
+		 * we add an index to username and password, because of logins
+		 *
+		 *@name index
+		 *@access public
+		*/
+		static $index = array(
+			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
+		);
+		
+		/**
+		 * fields which are searchable
+		 *
+		 *@name search_fields
+		 *@access public
+		*/
+		static $search_fields = array(
+			"nickname", "name", "email", "signatur"
+		);
 		
 		/**
 		 * the table_name is users not user
@@ -115,26 +135,6 @@ class User extends DataObject implements HistoryData, PermProvider
 		*/
 		public $defaults = array(
 				'status'	=> '1'
-		);
-		
-		/**
-		 * we add an index to username and password, because of logins
-		 *
-		 *@name indexes
-		 *@access public
-		*/
-		public $indexes = array(
-			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
-		);
-		
-		/**
-		 * fields which are searchable
-		 *
-		 *@name searchable_fields
-		 *@access public
-		*/
-		public $searchable_fields = array(
-			"nickname", "name", "email", "signatur"
 		);
 		
 		public $insertRights = 1;

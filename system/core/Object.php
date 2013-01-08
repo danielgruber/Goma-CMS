@@ -8,9 +8,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.12.2012
-  * $Version 3.1.10
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 08.01.2013
+  * $Version 3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -68,9 +68,119 @@ abstract class Object
 		public $inExpansion;
 		
 		/**
+		 * get a static param for a class
+		 *@name getStatic
+		 *@access public
+		 *@param string - class_name
+		 *@param string - var_name
+		*/
+		public static function getStatic($class_name, $var)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval("return ".$class_name."::\$".$var.";");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * checks if a static var isset
+		 *@name hasStatic
+		 *@access public 
+		 *@param string - class_name
+		 *@param string - var_name
+		*/
+		public static function hasStatic($class_name, $var)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval("return isset(".$class_name."::\$".$var.");");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * checks if a static var isset
+		 *@name setStatic
+		 *@access public 
+		 *@param string - class_name
+		 *@param string - var_name
+		 *@param mixed - value
+		*/
+		public static function setStatic($class_name, $var, $value)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval($class_name."::\$".$var." = ".var_export($value, true).";");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * calls a static function
+		 *@name callStatic
+		 *@access public
+		 *@param string - class_name
+		 *@param string - func-name
+		 *@return mixed
+		*/
+		public static function callStatic($class, $func)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class))
+				{
+						if(!empty($func))
+						{
+								return call_user_func_array(array($class, $func), array($class));
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of function in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
 		 * creates a method on the class
 		 *
-		 *@name creatMethod
+		 *@name createMethod
 		 *@param string - class for the method
 		 *@param string - method-name
 		 *@param string - code

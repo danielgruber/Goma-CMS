@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.10.2012
-  * $Version 4.0.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 08.01.2013
+  * $Version 4.1
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -38,7 +38,10 @@ class DataObjectClassInfo extends Extension
 						$db_fields = $c->generateDBFields();
 						$belongs_many_many = $c->GenerateBelongs_Many_Many();
 						
-						$searchable_fields = $c->searchable_fields;
+						$searchable_fields = Object::hasStatic($class, "search_fields") ? Object::getStatic($class, "search_fields") : array();
+						if(isset($class->searchable_fields))
+							$searchable_fields = array_merge($searchable_fields, $class->searchable_fields);
+						
 						$indexes = $c->generateIndexes();
 						
 						$many_many_tables = array();
@@ -142,13 +145,13 @@ class DataObjectClassInfo extends Extension
 						
 						if(count($has_one) > 0) ClassInfo::$class_info[$class]["has_one"] = $has_one;
 						if(count($has_many) > 0) ClassInfo::$class_info[$class]["has_many"] = $has_many;
-						if(count($db_fields) > 0) ClassInfo::$class_info[$class]["db_fields"] = $db_fields;
+						if(count($db_fields) > 0) ClassInfo::$class_info[$class]["db"] = $db_fields;
 						if(count($many_many) > 0) ClassInfo::$class_info[$class]["many_many"] = $many_many;
 						if(count($belongs_many_many) > 0) ClassInfo::$class_info[$class]["belongs_many_many"] = $belongs_many_many;
 						if(count($defaults) > 0) ClassInfo::$class_info[$class]["defaults"] = $defaults;
 						//ClassInfo::$class_info[$class]["prefix"] = $c->prefix;
-						if(count($searchable_fields) > 0) ClassInfo::$class_info[$class]["searchable_fields"] = $searchable_fields;
-						if(count($indexes) > 0) ClassInfo::$class_info[$class]["indexes"] = $indexes;
+						if(count($searchable_fields) > 0) ClassInfo::$class_info[$class]["search"] = $searchable_fields;
+						if(count($indexes) > 0) ClassInfo::$class_info[$class]["index"] = $indexes;
 						//Classinfo::$class_info[$class]["iDBFields"] = arraylib::map_key($c->generateiDBFields(), "strtolower");
 						
 						

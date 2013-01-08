@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 06.01.2013
-  * $Version 1.2
+  * last modified: 08.01.2013
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -28,6 +28,26 @@ class Group extends DataObject implements HistoryData, PermProvider
 		*/
 		static public $icon = "images/icons/fatcow16/group.png";
 		
+		/**
+		 * database-fields
+		 *
+		 *@name db
+		 *@access public
+		 *@var array
+		*/
+		static $db = array(	"name"	 	=> 'varchar(100)',
+							"type"		=> 'enum("0", "1", "2")');
+		
+		
+		/**
+		 * fields, whch are searchable
+		 *
+		 *@name search_fields
+		 *@access public
+		*/
+		static $search_fields = array(
+			"name"
+		);
 		
 		/**
 		 * belongs many-many
@@ -47,26 +67,6 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public $table_name = "groups";
-		
-		/**
-		 * database-fields
-		 *
-		 *@name db_fields
-		 *@access public
-		 *@var array
-		*/
-		public $db_fields = array(	"name"	 	=> 'varchar(100)',
-									"type"		=> 'enum("0", "1", "2")');
-		
-		/**
-		 * fields, whch are searchable
-		 *
-		 *@name searchable_fields
-		 *@access public
-		*/
-		public $searchable_fields = array(
-			"name"
-		);
 		
 		/**
 		 * generates the form to create a new group
