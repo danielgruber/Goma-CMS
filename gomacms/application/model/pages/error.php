@@ -3,27 +3,27 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
 */ 
 class errorPage extends Page
 {
 		/**
 		 * the icon for this page
 		*/
-		static public $icon = "images/icons/fatcow16/page_error.png";
+		static $icon = "images/icons/fatcow16/page_error.png";
 		
 		/**
 		 * the title of this page shown in the select
 		*/ 
-		public static $cname = '{$_lang_errorpage}';
+		static $cname = '{$_lang_errorpage}';
 		
 		/**
 		 * only allowed in site-root
 		 *
 		 *@name allow_parent
 		*/
-		public static $allow_parent = array("pages", "!page");
+		static $allow_parent = array("pages", "!page");
 		
 		/**
 		 * we need an error-code, for example 500 or 404

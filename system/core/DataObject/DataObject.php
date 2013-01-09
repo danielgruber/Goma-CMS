@@ -3936,8 +3936,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$fields = self::getStatic($this->class, "db");
 		}
 		
-		if(isset($this->db_fields))
+		if(isset($this->db_fields)) {
 			$fields = $this->db_fields;
+			Core::deprecate("2.0", "Class ".$this->class." uses old db_fields-Attribute, use static \$db instead.");
+		}
 		
 		// has-one-fields
 		foreach($this->generateHas_one(false) as $key => $value) {
@@ -4177,8 +4179,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(self::hasStatic($this->class, "index"))
 			$indexes = self::getStatic($this->class, "index");
 		
-		if(isset($this->indexes))
+		if(isset($this->indexes)) {
 			$indexes = $this->indexes;
+			Core::deprecate("2.0", "Class ".$this->class." uses old indexes-Attribute, use static \$index instead.");
+		}
 		
 		foreach($this->generateHas_one(false) as $key => $value) {
 			if(!isset($indexes[$key . "id"])) {
@@ -4300,7 +4304,7 @@ abstract class DataObjectExtension extends Extension
 		 * gets DBFields
 		*/
 		public function DBFields() {
-				return isset($this->db_fields) ? $this->db_fields : array();
+				return (self::hasStatic($this->class, "db")) ? self::getStatic($this->class, "db") : (isset($this->db_fields) ? $this->db_fields : array());
 		}
 		/**
 		 * gets has_one

@@ -5,9 +5,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.2.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 1.2.5
 */
 
 
@@ -25,7 +25,7 @@ class Newsettings extends DataObject implements HistoryData {
 	 *
 	 *@name db_fields
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"titel"				=> "varchar(50)",
 		"register"			=> "varchar(100)",
 		"register_enabled"	=> "Switch",
@@ -185,15 +185,18 @@ class SettingsController extends Controller {
 }
 
 class metaSettings extends Newsettings {
-	public $db_fields = array(
+	/**
+	 * Database-Fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
 		"meta_keywords"		=> "varchar(100)",
 		"meta_description"	=> "varchar(100)"
 	);
+	
 	public $tab = "{\$_lang_meta}";
-	public $fieldTitles = array(
-		//"meta_keywords"		=> lang("keywords"),
-		//"meta_descriotion"	=> lang("web_description", "Description of the Site")
-	);
+	
 	public $fieldInfo = array(
 		"meta_keywords"		=> "{\$_lang_keywords_info}",
 		"meta_description"	=> "{\$_lang_description_info}"
@@ -207,7 +210,12 @@ class metaSettings extends Newsettings {
 }
 
 class TemplateSettings extends NewSettings {
-	public $db_fields = array(
+	/**
+	 * database-fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
 		"stpl"			=> "varchar(64)",
 		"css_standard"	=> "text"
 	);

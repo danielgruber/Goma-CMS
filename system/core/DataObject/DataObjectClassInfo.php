@@ -34,10 +34,14 @@ class DataObjectClassInfo extends Extension
 						$has_many = $c->GenerateHas_Many();
 						
 						// generate table_name
-						if(ClassInfo::hasStatic($c->class, "table"))
+						if(ClassInfo::hasStatic($c->class, "table")) {
 							$table_name = ClassInfo::getStatic($c->class, "table");
-						else
-							$table_name = ($c->table_name == "") ? $c->prefix . $class : $c->table_name;
+						} else if(isset($c->table_name)) {
+							Core::deprecate("2.0", "Class ".$this->class." uses old table_name-Attribute, use static \$table instead.");
+							$table_name = $c->table_name;
+						} else {
+							$table_name = $c->prefix . $class;
+						}
 						
 						
 						$defaults = $c->GenerateDefaults();
@@ -46,8 +50,10 @@ class DataObjectClassInfo extends Extension
 						$belongs_many_many = $c->GenerateBelongs_Many_Many();
 						
 						$searchable_fields = Object::hasStatic($class, "search_fields") ? Object::getStatic($class, "search_fields") : array();
-						if(isset($class->searchable_fields))
+						if(isset($class->searchable_fields)) {
+							Core::deprecate("2.0", "Class ".$this->class." uses old searchable_fields-Attribute, use static \$search_fields instead.");
 							$searchable_fields = array_merge($searchable_fields, $class->searchable_fields);
+						}
 						
 						$indexes = $c->generateIndexes();
 						

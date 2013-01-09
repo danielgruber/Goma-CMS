@@ -5,9 +5,9 @@
   *@package rating plugin
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 13.03.2012
-  * $Version 1.0
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 1.0.1
 */   
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -17,11 +17,11 @@ gloader::addLoadAble("rating", ClassInfo::getExpansionFolder("gomacms_rating") .
 class Rating extends DataObject
 {
 		/**
-		 * db fields
+		 * db-fields
 		 *
-		 *@name db_fields
+		 *@name db
 		*/
-		public $db_fields = array(
+		static $db = array(
 			"name" 		=> "varchar(200)",
 			"rates"		=> "int(10)",
 			"rating"	=> "int(11)",
@@ -29,9 +29,9 @@ class Rating extends DataObject
 		);
 		
 		/**
-		 * indexes
+		 * index
 		*/
-		public $indexes = array(
+		static $index = array(
 			"name" => "INDEX"
 		);
 		
@@ -327,7 +327,7 @@ class RatingDataObjectExtension extends DataObjectExtension {
 	/**
 	 * add db-field for switching
 	*/
-	public $db_fields = array(
+	static $db = array(
 		'rating' 			=> 'int(1)'
 	);
 	/**
