@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.03.2012
-  * $Version 1.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,6 +14,25 @@ loadlang('bbcode');
 
 class BBcode extends TextTransformer
 {
+		/**
+		 * smilies
+		 *
+		 *@name smilies
+		*/
+		public static $smilies = array(
+			":evil:"		=> "system/templates/images/emoticons/emotion_evilgrin.png",
+			":D"			=> "system/templates/images/emoticons/emotion_grin.png",
+			"=D"			=> "system/templates/images/emoticons/emotion_grin.png",
+			":))"			=> "system/templates/images/emoticons/emotion_happy.png",
+			":)"			=> "system/templates/images/emoticons/emotion_smile.png",
+			"=)"			=> "system/templates/images/emoticons/emotion_smile.png",
+			":O"			=> "system/templates/images/emoticons/emotion_suprised.png",
+			":P"			=> "system/templates/images/emoticons/emotion_tongue.png",
+			"=P"			=> "system/templates/images/emoticons/emotion_tongue.png",
+			":("			=> "system/templates/images/emoticons/emotion_unhappy.png",
+			";)"			=> "system/templates/images/emoticons/emotion_wink.png",
+		);
+		
 		/**
 		 * transforms to BBcode
 		 *@name transform
@@ -133,6 +152,10 @@ class BBcode extends TextTransformer
 				foreach($noparses as $key => $value)
 				{
 						$text = str_replace('[noparse]'.$key.'[/noparse]', $value, $text);
+				}
+				
+				foreach(self::getStatic($this->class, "smilies") as $code => $file) {
+					$text = str_replace($code,'<img src="'.$file.'" alt="'.$code.'" />',$text);
 				}
 				
 				return $text;
