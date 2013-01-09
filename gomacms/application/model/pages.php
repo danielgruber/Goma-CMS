@@ -15,29 +15,57 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		/**
 		 * name
 		*/
-		public static $cname = '{$_lang_content}';
+		static $cname = '{$_lang_content}';
+		
+		/**
+		 * activate versions
+		 * 
+		 *@name versions
+		*/
+		static $versions = true;
+		
+		/**
+		 * the db-fields
+		 *
+		 *@name db
+		 *@var array
+		*/
+		static $db = array(	'path' 				=> 'varchar(500)',
+							'rights' 			=> 'int(2)',
+							'mainbar' 			=> 'int(1)',
+							'mainbartitle' 		=> 'varchar(200)',
+							'googletitle'		=> "varchar(200)",
+							'title' 			=> 'varchar(200)',
+							'data' 				=> 'HTMLtext',
+							'sort'				=> 'int(8)',
+							'search'			=> 'int(1)',
+							'meta_description'	=> 'varchar(200)',
+							'meta_keywords'		=> 'varchar(200)');
+		
+		/**
+		 * searchable fields
+		 *
+		 *@name search_fields
+		*/
+		static $search_fields = array("data", "title", "mainbartitle", "meta_keywords");
+		
+		
+		/**
+		 * indexes to improve performance
+		 *
+		 *@name index
+		 *@access public
+		*/
+		static $index = array(
+			array("type" => "INDEX", "fields" => "path,sort,class_name", "name" => "path"),
+			array("type" => "INDEX", "fields" => "parentid,mainbar,class_name", "name"	=> "mainbar"),
+			array("type" => "INDEX", "fields" => "class_name,data,title,mainbartitle,meta_keywords,id","name" => "sitesearch")
+		);
 		
 		/**
 		 * show read-only edit if not enough rights
 		*/
 		public $showWithoutRight = true;
-		
-		/**
-		 * the db-fields
-		 *@name db_fields
-		 *@var array
-		*/
-		public $db_fields = array(	'path' 				=> 'varchar(500)',
-									'rights' 			=> 'int(2)',
-									'mainbar' 			=> 'int(1)',
-									'mainbartitle' 		=> 'varchar(200)',
-									'googletitle'		=> "varchar(200)",
-									'title' 			=> 'varchar(200)',
-									'data' 				=> 'HTMLtext',
-									'sort'				=> 'int(8)',
-									'search'			=> 'int(1)',
-									'meta_description'	=> 'varchar(200)',
-									'meta_keywords'		=> 'varchar(200)');
 									
 		/**
 		 * a page has a parent page
@@ -70,23 +98,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		);
 		
 		/**
-		 * searchable fields
-		*/
-		public $searchable_fields = array("data", "title", "mainbartitle", "meta_keywords");
-		
-		/**
-		 * indexes to improve performance
-		 *
-		 *@name indexes
-		 *@access public
-		*/
-		public $indexes = array(
-			array("type" => "INDEX", "fields" => "path,sort,class_name", "name" => "path"),
-			array("type" => "INDEX", "fields" => "parentid,mainbar,class_name", "name"	=> "mainbar"),
-			array("type" => "INDEX", "fields" => "class_name,data,title,mainbartitle,meta_keywords,id","name" => "sitesearch")
-		);
-		
-		/**
 		 * which parents are allowed
 		 *
 		 *@name allow_parent
@@ -112,13 +123,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									"search" 		=> 1,
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
-		
-		/**
-		 * activate versions
-		 * 
-		 *@name versioned
-		*/
-		public $versioned = true;
 		
 		/**
 		  * we remove child-pages after removing parent page
@@ -1522,6 +1526,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$icon = "images/icons/fatcow16/page_white_edit.png";
 				break;
 			}
+			
 			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
 			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			

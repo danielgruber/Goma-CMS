@@ -104,12 +104,19 @@ class User extends DataObject implements HistoryData, PermProvider
 		);
 		
 		/**
-		 * the table_name is users not user
+		 * the table is users not user
 		 *
-		 *@name table_name
+		 *@name table
 		 *@access public
 		*/
-		public $table_name = "users";
+		static $table = "users";
+		
+		/**
+		 * use versions here
+		 *
+		 *@name versions
+		*/
+		static $versions = true;
 		
 		/**
 		 * every user has one group and an avatar-picture, which is reflected in this relation
@@ -138,13 +145,6 @@ class User extends DataObject implements HistoryData, PermProvider
 		);
 		
 		public $insertRights = 1;
-		
-		/**
-		 * use versions here
-		 *
-		 *@name versioned
-		*/
-		public $versioned = true;
 		
 		/**
 		 * gets all groups if a object

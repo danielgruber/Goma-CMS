@@ -39,13 +39,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public $showWithoutRight = false;
 	
 	/**
-	 * table-name
-	 *@name table_name
-	 *@var string
-	*/
-	public $table_name;
-	
-	/**
 	 * casting
 	 *
 	 *@name casting
@@ -351,7 +344,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 					
 			
-			$table_name =  $DataObject->table_name;
+			$table_name = $DataObject->Table();
 			//deleteTableCache($table_name);
 			$updates = "";
 			$i = 0;
@@ -499,7 +492,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							$this->belongs_many_many = isset($myinfo['belongs_many_many']) ? $myinfo['belongs_many_many'] : array();
 							$this->many_many_tables = isset($myinfo['many_many_tables']) ? $myinfo['many_many_tables'] : array();
 							$this->defaults = array_merge(ArrayLib::map_key("strtolower", $this->defaults), isset($myinfo['defaults']) ? $myinfo['defaults'] : array());
-							$this->table_name = isset($myinfo['table_name']) ? $myinfo['table_name'] : array();
 							$this->casting = isset($myinfo['casting']) ? $myinfo['casting'] : array();
 					}
 			}
@@ -875,7 +867,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			!$forceInsert &&  
 			$this->original == $this->data && 
 				(
-				$this->versioned == false || 
+				!self::Versioned($this->class) || 
 				$snap_priority < 2 || 
 					(
 					$this->isPublished() &&
@@ -1184,7 +1176,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				{
 						$manipulation[$class . "_clean"] = array(
 							"command"	=> "delete",
-							"table_name"=> ClassInfo::$class_info[$class]["table_name"],
+							"table_name"=> ClassInfo::$class_info[$class]["table"],
 							"id"		=> $this->versionid
 						);
 						$manipulation[$class] = array(
@@ -1340,8 +1332,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			
 			// update state-table
-			if(!$this->versioned || $snap_priority == 2) {
-				if($this->versioned) {
+			if(!self::Versioned($this->class) || $snap_priority == 2) {
+				if(self::Versioned($this->class)) {
 					$this->onBeforePublish();
 					$this->callExtending("onBeforePublish");
 					if(!$forcePublish) {
@@ -1387,7 +1379,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 				unset($manipulation);
 				// if we don't version this dataobject, we need to delete the old record
-				if(!$this->versioned && isset($oldid) && $command != "insert") {
+				if(!self::Versioned($this->class) && isset($oldid) && $command != "insert") {
 					$manipulation = array(
 						$baseClass => array(
 							"command"	=> "delete",
@@ -1457,8 +1449,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$arr = array();
 			if(isset(ClassInfo::$class_info[$class]["db_fields"]))
 			{
-				if(isset(ClassInfo::$database[ClassInfo::$class_info[$class]["table_name"]])) {
-					foreach(ClassInfo::$database[ClassInfo::$class_info[$class]["table_name"]] as $field => $type)
+				if(isset(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]])) {
+					foreach(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]] as $field => $type)
 					{
 						if($field != "id") {
 							if(isset($this->data[$field])) {
@@ -1544,13 +1536,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			{
 					$object = $this->many_many[$relation];
 
-					$table_name = ClassInfo::$class_info[$object]["table_name"];
+					$table_name = ClassInfo::$class_info[$object]["table"];
 					
 			} else if(isset($this->belongs_many_many[$relation]))
 			{
 					$object = $this->belongs_many_many[$relation];
 
-					$table_name = ClassInfo::$class_info[$object]["table_name"];
+					$table_name = ClassInfo::$class_info[$object]["table"];
 					
 			}
 			if(isset($this->many_many_tables[$relation]))
@@ -1723,7 +1715,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$manipulation[$baseClass . "_state"]["where"]["id"][] = $this->id;
 				
 				// if not versioning, delete data, too
-				if(!$this->versioned || $forceAll || !isset($this->data["stateid"])) {
+				if(!self::Versioned($this->class) || $forceAll || !isset($this->data["stateid"])) {
 					// clean up data-tables
 					
 					if(!isset($manipulation[$baseClass])) {
@@ -2098,13 +2090,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			{
 					$_table = $this->many_many[$name];
 
-					$__table = classinfo::$class_info[$_table]["table_name"];
+					$__table = classinfo::$class_info[$_table]["table"];
 					
 			} else if(isset($this->belongs_many_many[$name]))
 			{
 					$_table = $this->belongs_many_many[$name];
 
-					$__table = classinfo::$class_info[$_table]["table_name"];
+					$__table = classinfo::$class_info[$_table]["table"];
 					
 			}
 			
@@ -2133,10 +2125,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return (
 						DataObject::count(	$_table, 
 											array(	$__table.'.id' 				=> $id, 
-													$this->table_name . '.id' 	=> $this["versionid"]), 
+													$this->Table() . '.id' 	=> $this["versionid"]), 
 											array(
 												' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.'.$_table . 'id = '.$__table.'.id ', // Join other table with many-many-table
-												' INNER JOIN '.DB_PREFIX . $this->table_name.' AS '.$this->table_name.' ON '.$table.'.'. $data["field"] . ' = '.$this->table_name.'.id ' // join this table with many-many-table
+												' INNER JOIN '.DB_PREFIX . $this->Table().' AS '.$this->Table().' ON '.$table.'.'. $data["field"] . ' = '.$this->Table().'.id ' // join this table with many-many-table
 											)
 										) > 0
 					);
@@ -2319,11 +2311,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->many_many[$name]))
 		{
 			$object = $this->many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else if(isset($this->belongs_many_many[$name]))
 		{
 			$object = $this->belongs_many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else {
 			throwError(6, 'PHP-Error', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
@@ -2349,9 +2341,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		// else we use INNER-JOINS to connect the tables
 		
-		// sometimes there is an bug with $this->table_name, so get from registry
+		// sometimes there is an bug with $this->Table(), so get from registry
 		$baseClass = ClassInfo::$class_info[$this->class]["baseclass"];
-		$baseTable = ClassInfo::$class_info[$baseClass]["table_name"];
+		$baseTable = ClassInfo::$class_info[$baseClass]["table"];
 		
 		$where[$data["field"]] = $this["versionid"];
 		
@@ -2380,11 +2372,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->many_many[$name]))
 		{
 			$object = $this->many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else if(isset($this->belongs_many_many[$name]))
 		{
 			$object = $this->belongs_many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else {
 			throwError(6, 'Logical Exception', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
@@ -2426,11 +2418,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(isset($this->many_many[$name]))
 		{
 			$object = $this->many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else if(isset($this->belongs_many_many[$name]))
 		{
 			$object = $this->belongs_many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table_name"]; // table
+			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else {
 			throwError(6, 'Logical Exception', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
@@ -2527,7 +2519,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function BaseTable() {
-		return (ClassInfo::$class_info[ClassInfo::$class_info[$this->class]["baseclass"]]["table_name"]);
+		return (ClassInfo::$class_info[ClassInfo::$class_info[$this->class]["baseclass"]]["table"]);
 	}
 	/**
 	 * gets the versionid
@@ -2622,7 +2614,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					
 					if($classes = ClassInfo::dataclasses($this->baseClass)) 
 					{
-						
 							foreach($classes as $class => $table) 
 							{
 									if($class != $baseClass && isset(ClassInfo::$database[$table]) && ClassInfo::$database[$table])
@@ -2649,7 +2640,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 			
-			if($this->versioned) {
+			if(self::Versioned($this->class)) {
 				$canVersion = false;
 				if(member::login()) {
 					$perms = $this->providePerms();
@@ -2743,7 +2734,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 											$_table = isset(ClassInfo::$class_info[$this->class]["many_many"][$key]) ? ClassInfo::$class_info[$this->class]["many_many"][$key] : ClassInfo::$class_info[$this->class]["belongs_many_many"][$key];
 											if($_table)
 											{
-													$__table = ClassInfo::$class_info[$_table]["table_name"];
+													$__table = ClassInfo::$class_info[$_table]["table"];
 													if(isset(ClassInfo::$class_info[$class]["many_many_tables"][$key]))
 													{
 															$table = ClassInfo::$class_info[$this->class]["many_many_tables"][$key]["table"];
@@ -2778,7 +2769,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 											$_table = ClassInfo::$class_info[$this->class]["many_many"][$key];
 											if($_table)
 											{
-													$__table = ClassInfo::$class_info[$_table]["table_name"];
+													$__table = ClassInfo::$class_info[$_table]["table"];
 													if(isset($this->many_many_tables[$key]))
 													{
 															$table = ClassInfo::$class_info[$this->class]["many_many_tables"][$key]["table"];
@@ -2806,8 +2797,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 									if(is_array($value))
 									{
 											$c = $this->has_one[$key];
-											$table = ClassInfo::$class_info[$c]["table_name"];
-											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->table_name.'.'.$key.'id ';
+											$table = ClassInfo::$class_info[$c]["table"];
+											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
 											unset($filter[$key]);
 									}
 									
@@ -2914,7 +2905,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$filter = array();
 			foreach($searchQuery as $word) {
 				$i = 0;
-				$table_name = ClassInfo::$class_info[$this->baseClass]["table_name"];
+				$table_name = ClassInfo::$class_info[$this->baseClass]["table"];
 				if($table_name != "")
 				{
 					if($this->searchFields())
@@ -2936,7 +2927,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				
 				if($classes = ClassInfo::DataClasses($this->baseClass)) {
 					foreach($classes as $class => $table) {
-						$table_name = ClassInfo::$class_info[$class]["table_name"];
+						$table_name = ClassInfo::$class_info[$class]["table"];
 						if($table_name != "") {
 							if($this->searchFields())
 								foreach($this->searchFields() as $field) {
@@ -3025,7 +3016,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getRecords($version, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array())
 	{
-			if(!isset(ClassInfo::$class_info[$this->baseClass]["table_name"]) || !ClassInfo::$class_info[$this->baseClass]["table_name"] || !defined("SQL_LOADUP"))
+			if(!isset(ClassInfo::$class_info[$this->baseClass]["table"]) || !ClassInfo::$class_info[$this->baseClass]["table"] || !defined("SQL_LOADUP"))
 				return array();
 			
 			if(PROFILE) Profiler::mark("DataObject::getRecords");
@@ -3110,7 +3101,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param array - search
 	*/
 	public function getGroupedRecords($version, $groupField, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array()) {
-		if(!isset(ClassInfo::$class_info[$this->baseClass]["table_name"]) || !ClassInfo::$class_info[$this->baseClass]["table_name"] || !defined("SQL_LOADUP"))
+		if(!isset(ClassInfo::$class_info[$this->baseClass]["table"]) || !ClassInfo::$class_info[$this->baseClass]["table"] || !defined("SQL_LOADUP"))
 			return array();
 			
 		if(PROFILE) Profiler::mark("DataObject::getGroupedRecords");
@@ -3164,7 +3155,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param array - groupby
 	*/
 	public function getAggregate($version, $aggregate, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array(), $groupby = array()) {
-		if(!isset(ClassInfo::$class_info[$this->baseClass]["table_name"]) || !ClassInfo::$class_info[$this->baseClass]["table_name"] || !defined("SQL_LOADUP"))
+		if(!isset(ClassInfo::$class_info[$this->baseClass]["table"]) || !ClassInfo::$class_info[$this->baseClass]["table"] || !defined("SQL_LOADUP"))
 			return array();
 		
 		if(PROFILE) Profiler::mark("DataObject::getAggregate");
@@ -3561,7 +3552,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 	}
 	
-	//!API for fields
+	//!API for Config
 	
 	/**
 	 * returns DataBase-Fields of this record
@@ -3590,6 +3581,39 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return isset(ClassInfo::$class_info[$this->class]["search"]) ? ClassInfo::$class_info[$this->class]["search"] : array();
 	}
 	
+	/**
+	 * table
+	 *
+	 *@name Table
+	*/
+	public function Table() {
+		return isset(ClassInfo::$class_info[$this->class]["table"]) ? ClassInfo::$class_info[$this->class]["table"] : false;
+	}
+	
+	/**
+	 * table
+	 *
+	 *@name hasTable
+	*/
+	public function hasTable() {
+		return ((isset(ClassInfo::$class_info[$this->class]["table_exists"]) ? ClassInfo::$class_info[$this->class]["table_exists"] : false) && $this->Table());
+	}
+	
+	/**
+	 * returns if a DataObject is versioned
+	 *
+	 *@name Versioned
+	*/
+	public static function Versioned($class) {
+		if(self::hasStatic($class, "versions") && self::getStatic($class, "versions") == true)
+			return true;
+		
+		if(Object::instance($class)->versioned == true)
+			return true;
+			
+		return false;
+	}
+	
 	//!Dev-Area: Generation of DataBase
 	
 	/**
@@ -3607,11 +3631,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$indexes = $this->indexes();
 	
 		// add some fields for versioning
-		if($this->table_name != "" && $this->table_name == $this->baseTable) {
+		if($this->hasTable() && $this->Table() == $this->baseTable) {
 			if(!isset($db_fields["recordid"]))
 				$db_fields["recordid"] = "int(10)";
 			
-			if($this->versioned) {
+			if(self::Versioned($this->class)) {
 				$db_fields["snap_priority"] = "int(10)";
 				$this->defaults["snap_priority"] = 2;
 			}
@@ -3620,7 +3644,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$indexes["recordid"] = "INDEX";
 		}
 		
-		if($this->table_name) {
+		if($this->hasTable()) {
 			
 			foreach($db_fields as $field => $type) {
 				if(isset($this->casting[strtolower($field)])) {
@@ -3633,11 +3657,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// now require table
-			$log .= SQL::requireTable($this->table_name, $db_fields, $indexes , $this->defaults, $prefix);
+			$log .= SQL::requireTable($this->table(), $db_fields, $indexes , $this->defaults, $prefix);
 		}
 		
 		// versioned
-		if($this->table_name != "" && $this->table_name == $this->baseTable) {
+		if($this->hasTable() && $this->table() == $this->baseTable) {
 			if(!SQL::getFieldsOfTable($this->baseTable . "_state")) {
 				$exists = false;
 			} else {
@@ -3665,7 +3689,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(!$exists) {
 				// now copy records from old table to new
 				$sql = "INSERT INTO ".$prefix . $this->baseTable."_state (id, stateid, publishedid) SELECT id AS id, id AS stateid, id AS publishedid FROM ".$prefix . $this->baseTable."";
-				if($this->versioned) {
+				if(self::Versioned($this->class)) {
 					$sql2 = "UPDATE ".$prefix.$this->baseTable." SET snap_priority = 2, recordid = id, editorid = autorid";
 				} else {
 					$sql2 = "UPDATE ".$prefix.$this->baseTable." SET recordid = id, editorid = autorid";
@@ -3724,8 +3748,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$field = $sort;
 			$type = "ASC";
 		}
-		if(isset(ClassInfo::$database[$this->table_name][$field])) {
-			SQL::setDefaultSort($this->table_name, $field, $type);
+		if(isset(ClassInfo::$database[$this->Table()][$field])) {
+			SQL::setDefaultSort($this->Table(), $field, $type);
 		}
 		
 		$this->callExtending("buildDB", $prefix, $log);
@@ -3767,12 +3791,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function preserveDefaults($prefix = DB_PREFIX, &$log) {
 		$this->callExtending("preserveDefaults", $prefix);
 		
-		if($this->table_name) {			
+		if($this->hasTable()) {			
 			//@todo bugfix
 			if(count($this->defaults) > 0) {
 				foreach($this->defaults as $field => $value) {
-					if(isset(ClassInfo::$database[$this->table_name][$field])) {
-						$sql = "UPDATE ".DB_PREFIX . $this->table_name." SET ".$field." = '".$value."' WHERE ".$field." = '' AND ".$field." != '0'";
+					if(isset(ClassInfo::$database[$this->Table()][$field])) {
+						$sql = "UPDATE ".DB_PREFIX . $this->Table()." SET ".$field." = '".$value."' WHERE ".$field." = '' AND ".$field." != '0'";
 						if(!sql::query($sql, false, $prefix)) {
 							return false;
 						}
@@ -3782,23 +3806,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if($this->baseClass == $this->class) {
 				// set record ids
-				$sql = "UPDATE ".DB_PREFIX . $this->table_name." SET recordid = id WHERE recordid = 0";
+				$sql = "UPDATE ".DB_PREFIX . $this->Table()." SET recordid = id WHERE recordid = 0";
 				SQL::query($sql);
 			
-				$sql = "UPDATE ".DB_PREFIX . $this->table_name." SET editorid = autorid WHERE editorid = 0";
+				$sql = "UPDATE ".DB_PREFIX . $this->Table()." SET editorid = autorid WHERE editorid = 0";
 				SQL::query($sql);
 			}
 		}
 		
-		if($this->table_name == $this->baseTable) {
+		if($this->Table() == $this->baseTable) {
 			// clean-up recordid-0s
-			$sql = "SELECT * FROM ".DB_PREFIX . $this->table_name." WHERE recordid = '0'";
+			$sql = "SELECT * FROM ".DB_PREFIX . $this->Table()." WHERE recordid = '0'";
 			if($result = SQL::Query($sql)) {
 				while($row = SQL::fetch_object($result)) {
-					$_sql = "SELECT * FROM ".DB_PREFIX . $this->baseTable." WHERE publishedid = '".$row->id."' OR stateid = '".$row->id."'";
+					$_sql = "SELECT * FROM ".DB_PREFIX . $this->baseTable."_state WHERE publishedid = '".$row->id."' OR stateid = '".$row->id."'";
 					if($_result = SQL::Query($_sql)) {
 						if($_row = SQL::fetch_object($_result)) {
-							$update = "UPDATE ".DB_PREFIX . $this->table_name." SET recordid = '".$_row->id."' WHERE id = '".$row->id."'";
+							$update = "UPDATE ".DB_PREFIX . $this->Table()." SET recordid = '".$_row->id."' WHERE id = '".$row->id."'";
 							SQL::Query($update);
 						}
 					}
@@ -3818,7 +3842,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
 		$this->callExtending("cleanUpDB", $prefix);
 		
-		if($this->versioned && $this->baseClass == $this->class) {
+		if(self::Versioned($this->class) && $this->baseClass == $this->class) {
 			$recordids = array();
 			$ids = array();
 			// first recordids
@@ -3913,7 +3937,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		if(isset($this->db_fields))
-			$fields = array_merge($fields, $this->db_fields);
+			$fields = $this->db_fields;
 		
 		// has-one-fields
 		foreach($this->generateHas_one(false) as $key => $value) {
@@ -4154,7 +4178,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$indexes = self::getStatic($this->class, "index");
 		
 		if(isset($this->indexes))
-			$indexes = array_merge($indexes, $this->indexes);
+			$indexes = $this->indexes;
 		
 		foreach($this->generateHas_one(false) as $key => $value) {
 			if(!isset($indexes[$key . "id"])) {

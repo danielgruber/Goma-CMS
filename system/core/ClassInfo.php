@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
-  * $Version 3.6.6
+  * last modified: 09.01.2013
+  * $Version 3.6.7
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -201,7 +201,7 @@ class ClassInfo extends Object
 		*/
 		public static function classTable($class)
 		{
-				return isset(classinfo::$class_info[$class]["table_name"]) ? classinfo::$class_info[$class]["table_name"] : false;
+				return isset(classinfo::$class_info[$class]["table"]) ? classinfo::$class_info[$class]["table"] : false;
 		}
 		
 		/**
@@ -344,10 +344,10 @@ class ClassInfo extends Object
 			
 			if(self::$class_info[$class]["baseclass"] == $class) {
 				$tables = array();
-				if(!isset(self::$class_info[$class]["table_name"]) || empty(self::$class_info[$class]["table_name"]))
+				if(!isset(self::$class_info[$class]["table"]) || empty(self::$class_info[$class]["table"]))
 					return array();
 				
-				$tables[self::$class_info[$class]["table_name"]] = self::$class_info[$class]["table_name"];
+				$tables[self::$class_info[$class]["table"]] = self::$class_info[$class]["table"];
 				$tables[$class . "_state"] = $class . "_state";
 				
 				if(isset(self::$class_info[$class]["many_many_tables"]) && self::$class_info[$class]["many_many_tables"]) {
@@ -357,8 +357,8 @@ class ClassInfo extends Object
 				}
 				
 				foreach(self::getChildren($class) as $_class) {
-					if(isset(self::$class_info[$_class]["table_name"]) && self::$class_info[$_class]["table_name"])
-						$tables[self::$class_info[$_class]["table_name"]] = self::$class_info[$_class]["table_name"];
+					if(isset(self::$class_info[$_class]["table"]) && self::$class_info[$_class]["table"])
+						$tables[self::$class_info[$_class]["table"]] = self::$class_info[$_class]["table"];
 					
 					if(isset(self::$class_info[$_class]["many_many_tables"]) && self::$class_info[$_class]["many_many_tables"]) {
 						foreach(self::$class_info[$_class]["many_many_tables"] as $data) {
@@ -1151,9 +1151,9 @@ class ClassInfo extends Object
 						$dataclasses = array();
 						foreach(self::$class_info[$class]["dataclasses"] as $c)
 						{
-								if(isset(self::$class_info[$c]["table_name"]) && self::$class_info[$c]["table_name"] !== false)
+								if(isset(self::$class_info[$c]["table"]) && self::$class_info[$c]["table"] !== false)
 								{
-										$dataclasses[$c] = self::$class_info[$c]["table_name"];
+										$dataclasses[$c] = self::$class_info[$c]["table"];
 								}
 						}
 						

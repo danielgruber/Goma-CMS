@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
-  * $Version 2.1.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 2.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,11 +14,17 @@ define("SESSION_TIMEOUT", 16*3600);
 
 class livecounter extends DataObject
 {
-		public static $history = false;
 		/**
-		 * database
+		 * disable history for this DataObject, because it would be a big lag of performance
 		*/
-		public $db_fields = array(
+		static $history = false;
+		
+		/**
+		 * database-fields
+		 *
+		 *@name db
+		*/
+		static $db = array(
 				'user' 			=> 'varchar(200)', 
 				'phpsessid' 	=> 'varchar(800)', 
 				"browser"		=> "varchar(200)",
@@ -28,13 +34,17 @@ class livecounter extends DataObject
 			
 		/**
 		 * the name of the table isn't livecounter, it's statistics
+		 *
+		 *@name table
 		*/
-		public $table_name = "statistics";
+		static $table = "statistics";
 		
 		/**
 		 * indexes
+		 *
+		 *@name index
 		*/
-		public $indexes = array(
+		static $index = array(
 			"recordid" => false
 		);
 		

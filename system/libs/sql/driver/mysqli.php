@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
+  * last modified: 09.01.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -720,7 +720,7 @@ class mysqliDriver extends object implements SQLDriver
 											{
 													if (
 														(isset($data["table_name"]) && $table_name = $data["table_name"]) || 
-														(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+														(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 													)
 													{	
 															$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
@@ -769,7 +769,7 @@ class mysqliDriver extends object implements SQLDriver
 									{
 											if (
 												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
 													$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
@@ -855,7 +855,7 @@ class mysqliDriver extends object implements SQLDriver
 									if(isset($data["where"])) {
 											if (
 												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-												(isset(ClassInfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
 													$where = $data["where"];

@@ -25,7 +25,7 @@ class contact extends Page
 		/**
 		 * we need an e-mail-adress
 		*/
-		public $db_fields = array('email'	=> 'varchar(200)'/*, "requireemailfield" => "Checkbox"*/);
+		static $db = array('email'	=> 'varchar(200)'/*, "requireemailfield" => "Checkbox"*/);
 		
 		/**
 		 * defaults

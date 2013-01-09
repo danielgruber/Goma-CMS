@@ -28,7 +28,7 @@ class errorPage extends Page
 		/**
 		 * we need an error-code, for example 500 or 404
 		*/
-		public $db_fields = array('code' => 'varchar(50)');
+		static $db = array('code' => 'varchar(50)');
 		
 		/**
 		 * generates the extended form for this page

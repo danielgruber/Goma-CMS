@@ -142,7 +142,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"getoffset",
 			"getversion",
 			"_get",
-			"getobject"
+			"getobject",
+			"versioned"
 		);
 		/**
 		 * defaults

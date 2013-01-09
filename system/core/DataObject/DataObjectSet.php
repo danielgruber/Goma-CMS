@@ -5,10 +5,10 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@Copyright (C) 2009 - 2013  Goma-Team
   *********
-  * last modified: 26.12.2012
-  * $Version: 1.4.6
+  * last modified: 09.01.2013
+  * $Version: 1.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1084,7 +1084,7 @@ class DataObjectSet extends DataSet {
 	public function getTable_Name() {
 		if(!isset($this->dataobject))
 			return null;
-		return $this->dataobject->table_name;
+		return $this->dataobject->Table();
 	}
 	
 	/**

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
-  * $Version 4.1
+  * last modified: 09.01.2013
+  * $Version 4.1.1
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -32,7 +32,14 @@ class DataObjectClassInfo extends Extension
 							
 						$has_one = $c->GenerateHas_One();
 						$has_many = $c->GenerateHas_Many();
-						$table_name = ($c->table_name == "") ? $c->prefix . $class : $c->table_name;
+						
+						// generate table_name
+						if(ClassInfo::hasStatic($c->class, "table"))
+							$table_name = ClassInfo::getStatic($c->class, "table");
+						else
+							$table_name = ($c->table_name == "") ? $c->prefix . $class : $c->table_name;
+						
+						
 						$defaults = $c->GenerateDefaults();
 						$many_many = $c->GenerateMany_Many();
 						$db_fields = $c->generateDBFields();
@@ -195,11 +202,11 @@ class DataObjectClassInfo extends Extension
 						
 						if(count($db_fields) == 0)
 						{
-								ClassInfo::$class_info[$class]["table_name"] = false;
+								ClassInfo::$class_info[$class]["table"] = false;
 								ClassInfo::$class_info[$class]["table_exists"] = false;
 						} else
 						{
-								ClassInfo::$class_info[$class]["table_name"] = $table_name;
+								ClassInfo::$class_info[$class]["table"] = $table_name;
 								ClassInfo::addTable($table_name, $class);
 								if(defined("SQL_LOADUP") && $fields = SQL::getFieldsOfTable($table_name))
 								{
@@ -230,7 +237,7 @@ class DataObjectClassInfo extends Extension
 						$_c = $parent;
 						while($_c != "dataobject" && $_c != "array_dataobject")
 						{
-								if(ClassInfo::$class_info[$class]["table_name"] !== false)
+								if(ClassInfo::$class_info[$class]["table"] !== false)
 								{
 										ClassInfo::$class_info[$_c]["dataclasses"][] = $class;
 								}

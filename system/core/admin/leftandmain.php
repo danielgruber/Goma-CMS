@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 2.2.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 2.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -500,7 +500,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	 *@access public 
 	*/
 	public function versions() {
-		if($this->ModelInst() && $this->ModelInst()->versioned) {
+		if($this->ModelInst() && DataObject::Versioned($this->ModelInst()->dataClass)) {
 			$controller = new VersionsViewController($this->ModelInst());
 			$controller->subController = true;
 			return $controller->handleRequest($this->request);
@@ -555,7 +555,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
 		}
 		
-		if($model->versioned && $model->canWrite($model)) {
+		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
 			$model->queryVersion = "state";
 		}
 		
