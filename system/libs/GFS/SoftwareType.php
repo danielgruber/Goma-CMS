@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
-  * $Version 1.5.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 1.5.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -348,17 +348,17 @@ abstract class g_SoftwareType {
 	}
 	
 	/**
-	 * forces that installer/data/apps/.index.db is Live
+	 * forces that installer/data/apps/.index-db is Live
 	 *
 	 *@name forceLiveDB
 	 *@access public
 	*/
 	public static function forceLiveDB() {
-		if(!file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(!file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			ClassInfo::delete();
 			ClassInfo::loadFile();
 		} else {
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			if($data["fileindex"] != scandir(FRAMEWORK_ROOT . "installer/data/apps/")) {
 				ClassInfo::delete();
 				ClassInfo::loadFile();
@@ -373,9 +373,9 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listUpdatePackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			
 			$updates = array();
 			
@@ -595,9 +595,9 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listInstallPackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			
 			$updates = array();
 			
