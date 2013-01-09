@@ -16,7 +16,7 @@ gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
 system/installer/log_*****/*
 system/temp/*
-system/installer/data/apps/.index.db
+system/installer/data/apps/.index-db
 system/installer/log/*
 system/installer/temp/*
 Uploads
