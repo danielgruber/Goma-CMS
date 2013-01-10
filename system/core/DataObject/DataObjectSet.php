@@ -724,7 +724,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 							"black"	=> ($i == $currentpage)
 						);
 						$lastDots = false;
-					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
+					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
 						$data[$i] = array(
 							"page" 	=> "...",
 							"black" => true
