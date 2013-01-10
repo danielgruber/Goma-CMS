@@ -24,12 +24,12 @@ Team
 ----
 
 ### Development
-* @Daniel_Gruber - Daniel Gruber
-* @MatorKaleen - Fabian Parzefall
-* hansau22 - Julian Frielinghaus
+* @[DanielGruber](https://github.com/danielgruber) - Daniel Gruber
+* @[MatorKaleen](https://github.com/MatorKaleen) - Fabian Parzefall
+* @[hansau22](https://github.com/hansau22) - Julian Frielinghaus
 
 #### Quality & User-Experience
-* @PatrickLemke - Patrick Lemke
+* PatrickLemke - Patrick Lemke
 
 #### Server-Management
 * Nick - Dominik Hardtke
