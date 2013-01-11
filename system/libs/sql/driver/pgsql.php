@@ -51,7 +51,7 @@ class pgsqlDriver extends object implements SQLDriver
 		
 		if(!pg_connect($conn_string))
 		{
-			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/mysql_connect_error.html')));
+			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
 		}
 		self::setCharsetUTF8();
 		unset $conn_string;
