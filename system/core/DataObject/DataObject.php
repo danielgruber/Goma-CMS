@@ -973,8 +973,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$newdata["snap_priority"] = $snap_priority;
 		$newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->class;
 		
-		//print_r($newdata);
-		
 		// second step: if insert, add new record in state-table and get the auto-increment-id
 		if($command == "insert") {
 			$manipulation = array(

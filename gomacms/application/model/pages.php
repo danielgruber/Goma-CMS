@@ -593,7 +593,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name onBeforeWrite
 		*/
 		public function onBeforeWrite() {
-			$this->data["uploadstrackingids"] = array();
+			$this->data["uploadtrackingids"] = array();
 		}
 		
 		/**
@@ -618,7 +618,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$this->queryVersion = "state";
 				
 				// render head-bar
-				$html .= '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class));
+				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class));
 				
 				// title in head-bar
 				if($this->title)
