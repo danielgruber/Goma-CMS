@@ -1558,7 +1558,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@name controller
 	 *@access public
 	*/
-	public function controller($controller = null {
+	public function controller($controller = null) {
 		if(parent::controller($controller)) {
 			return parent::controller($controller);
 		} else {
@@ -1801,7 +1801,7 @@ class UploadsPageBacktraceController extends ControllerExtension {
 	 *
 	 *@name onBeforeHandleAction
 	*/
-	public function onBeforeHandleAction($action, $content, $handleWithMethod) {
+	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
 		$data = $this->getOwner()->modelInst()->linkingPages();
 		$data->setVersion(false);
 		if($data->Count() > 0) {
@@ -1812,8 +1812,7 @@ class UploadsPageBacktraceController extends ControllerExtension {
 			}
 			
 			$handleWithMethod = false;
-			HTTPResponse::redirect(BASE_URI);
-			exit;
+			$content = false;
 		}
 	}
 }

@@ -112,6 +112,87 @@ class Core extends object
 		public static $phpInputFile;
 		
 		/**
+		 * inits the core
+		 *
+		 *@name init
+		 *@access public
+		*/
+		public static function Init() {
+			
+			ob_start();
+			
+			if(isset($_POST) && $handle = @fopen("php://input", "r")) {
+				if(PROFILE) Profiler::mark("php://input read");
+				$random = randomString(20);
+				$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
+				file_put_contents($file, $handle);
+				fclose($handle);
+				self::$phpInputFile = $file;
+				
+				register_shutdown_function(array("Core", "cleanUpInput"));
+				
+				if(PROFILE) Profiler::unmark("php://input read");
+			}
+			
+			// now init session
+			if(PROFILE) Profiler::mark("session");
+			session_start();
+			if(PROFILE) Profiler::unmark("session");
+			
+			if(defined("SQL_LOADUP"))
+				member::Init();
+			
+			if(PROFILE) Profiler::mark("Core::Init");
+			
+			// init language-support
+			require_once(FRAMEWORK_ROOT . "core/i18n.php");
+ 	 	 	ClassManifest::$loaded["i18n"] = true;
+			i18n::Init();
+			
+			
+			// delete-cache-support
+			if(isset($_GET['flush']))
+			{
+					if(PROFILE)
+							Profiler::mark("delete_cache");
+					
+					if(Permission::check("ADMIN"))
+					{
+						logging('Deleting FULL Cache');
+						self::deletecache(true); // delete files in cache
+					} else {
+						logging("Deleting Cache");
+						 self::deletecache(); // delete some files in cache
+					}
+					
+					if(PROFILE)
+ 	 	 				Profiler::unmark("delete_cache");
+			}
+			
+			// some vars for javascript
+			Resources::addData("var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."';");
+			
+			Object::instance("Core")->callExtending("construct");
+			self::callHook("init");
+			
+			Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
+			Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
+			Resources::add("system/libs/javascript/loader.js", "js", "main");
+			Resources::add("box.css", "css", "main");
+			
+			Resources::add("default.css", "css", "main");
+			Resources::add("goma_default.css", "css", "main");
+			
+			if(DEV_MODE) {
+				Resources::add("system/libs/javascript/profiler.js", "js", "main");
+			}
+			
+			if(PROFILE) Profiler::unmark("Core::Init");
+		}
+		
+		/**
 		 *@access public
 		 *@param string - title of the link
 		 *@param string - href attribute of the link
@@ -376,6 +457,7 @@ class Core extends object
 				$_REGISTRY["cache"] = array();
 				
 		}
+		
 		/**
 		 * adds some rules to controller
 		 *@name addRules
@@ -394,6 +476,7 @@ class Core extends object
 				}	 
 						
 		}
+		
 		/**
 		 * checks if ajax
 		 *@name is_ajax
@@ -409,87 +492,6 @@ class Core extends object
 		}
 		
 		/**
-		 * inits the core
-		 *
-		 *@name init
-		 *@access public
-		*/
-		public static function Init() {
-			
-			ob_start();
-			
-			if(isset($_POST) && $handle = @fopen("php://input", "r")) {
-				if(PROFILE) Profiler::mark("php://input read");
-				$random = randomString(20);
-				$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
-				file_put_contents($file, $handle);
-				fclose($handle);
-				self::$phpInputFile = $file;
-				
-				register_shutdown_function(array("Core", "cleanUpInput"));
-				
-				if(PROFILE) Profiler::unmark("php://input read");
-			}
-			
-			// now init session
-			if(PROFILE) Profiler::mark("session");
-			session_start();
-			if(PROFILE) Profiler::unmark("session");
-			
-			if(defined("SQL_LOADUP"))
-				member::Init();
-			
-			if(PROFILE) Profiler::mark("Core::Init");
-			
-			// init language-support
-			require_once(FRAMEWORK_ROOT . "core/i18n.php");
- 	 	 	ClassManifest::$loaded["i18n"] = true;
-			i18n::Init();
-			
-			
-			// delete-cache-support
-			if(isset($_GET['flush']))
-			{
-					if(PROFILE)
-							Profiler::mark("delete_cache");
-					
-					if(Permission::check("ADMIN"))
-					{
-						logging('Deleting FULL Cache');
-						self::deletecache(true); // delete files in cache
-					} else {
-						logging("Deleting Cache");
-						 self::deletecache(); // delete some files in cache
-					}
-					
-					if(PROFILE)
- 	 	 				Profiler::unmark("delete_cache");
-			}
-			
-			// some vars for javascript
-			Resources::addData("var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."';");
-			
-			Object::instance("Core")->callExtending("construct");
-			self::callHook("init");
-			
-			Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
-			Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
-			Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
-			Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
-			Resources::add("system/libs/javascript/loader.js", "js", "main");
-			Resources::add("box.css", "css", "main");
-			
-			Resources::add("default.css", "css", "main");
-			Resources::add("goma_default.css", "css", "main");
-			
-			if(DEV_MODE) {
-				Resources::add("system/libs/javascript/profiler.js", "js", "main");
-			}
-			
-			if(PROFILE) Profiler::unmark("Core::Init");
-		}
-		
-		/**
 		 * clean-up for saved file-data
 		 *
 		 *@name cleanUpInput
@@ -498,108 +500,6 @@ class Core extends object
 		public static function cleanUpInput() {
 			if(isset(self::$phpInputFile) && file_exists(self::$phpInputFile))
 				@unlink(self::$phpInputFile);
-		}
-		
-		/**
-		 * END STATIC METHODS
-		*/
-		
-		
-		/**
-		 * renders the page
-		 *@name render
-		 *@access public
-		*/
-		public function render($url)
-		{
-				self::$url = $url;
-				if(PROFILE) Profiler::mark("render");
-				
-				// we will merge $_POST with $_FILES, but before we validate $_FILES
-				foreach($_FILES as $name => $arr)
-				{
-						if(is_array($arr["tmp_name"]))
-						{
-								foreach($arr["tmp_name"] as $tmp_file)
-								{
-										if($tmp_file && !is_uploaded_file($tmp_file))
-										{
-												throwError(6, 'PHP-Error', "".$tmp_file." is no valid upload! Please try again uploading the file.");
-										}
-								}
-						} else
-						{
-								if($arr["tmp_name"] && !is_uploaded_file($arr["tmp_name"]))
-								{
-										throwError(6, 'PHP-Error', "".$arr["tmp_name"]." is no valid upload! Please try again uploading the file.");
-								}
-						}
-				}
-				
-				$request = new Request(
-					(isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'],
-					$url,
-					$_GET,
-					array_merge((array)$_POST, (array)$_FILES)
-				);
-				
-				krsort(Core::$rules);
-				
-				// get  current controller
-				foreach(self::$rules as $priority => $rules)
-				{
-						foreach($rules as $rule => $controller)
-						{
-								if($args = $request->match($rule, true))
-								{
-										if($request->getParam("controller"))
-										{
-												$controller = $request->getParam("controller");
-										}
-										$inst = new $controller;
-										self::$requestController = $inst;
-										self::$controller[] = $inst;
-										
-										self::serve($inst->handleRequest($request));
-										break 2;
-								}
-						}
-				}
-				
-		}
- 	  
-		/**
-		 * serves the output given
-		 *
-		 *@name serve
-		 *@access public
-		 *@param string - content
-		*/
-		public static function serve($output) {
-			
-			if(isset($_GET["flush"]) && Permission::check("ADMIN"))
-				Notification::notify("Core", lang("cache_deleted"));
-			
-			if(PROFILE) Profiler::unmark("render");
-			
-			
-			if(PROFILE) Profiler::mark("serve");
-			
-			Core::callHook("serve", $output);
-			
-			if(isset(self::$requestController))
-				$output = self::$requestController->serve($output);
-			
-			if(PROFILE) Profiler::unmark("serve");
-			
-			Core::callHook("onBeforeServe", $output);
-			
-			HTTPResponse::setBody($output);
-			HTTPResponse::output();
-			
-			Core::callHook("onBeforeShutdown");
-			
-			exit;
 		}
 		
 		/**
@@ -693,6 +593,113 @@ class Core extends object
 		*/
 		public static function adminAsUser() {
 			return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
+		}
+		
+		//!Rendering-Methods
+		/**
+		 * Rendering-Methods
+		*/
+		
+		/**
+		 * serves the output given
+		 *
+		 *@name serve
+		 *@access public
+		 *@param string - content
+		*/
+		public static function serve($output) {
+			
+			if(isset($_GET["flush"]) && Permission::check("ADMIN"))
+				Notification::notify("Core", lang("cache_deleted"));
+			
+			if(PROFILE) Profiler::unmark("render");
+			
+			
+			if(PROFILE) Profiler::mark("serve");
+			
+			Core::callHook("serve", $output);
+			
+			if(isset(self::$requestController))
+				$output = self::$requestController->serve($output);
+			
+			if(PROFILE) Profiler::unmark("serve");
+			
+			Core::callHook("onBeforeServe", $output);
+			
+			HTTPResponse::setBody($output);
+			HTTPResponse::output();
+			
+			Core::callHook("onBeforeShutdown");
+			
+			exit;
+		}
+		
+		/**
+		 * renders the page
+		 *@name render
+		 *@access public
+		*/
+		public function render($url)
+		{
+				self::$url = $url;
+				if(PROFILE) Profiler::mark("render");
+				
+				// we will merge $_POST with $_FILES, but before we validate $_FILES
+				foreach($_FILES as $name => $arr)
+				{
+						if(is_array($arr["tmp_name"]))
+						{
+								foreach($arr["tmp_name"] as $tmp_file)
+								{
+										if($tmp_file && !is_uploaded_file($tmp_file))
+										{
+												throwError(6, 'PHP-Error', "".$tmp_file." is no valid upload! Please try again uploading the file.");
+										}
+								}
+						} else
+						{
+								if($arr["tmp_name"] && !is_uploaded_file($arr["tmp_name"]))
+								{
+										throwError(6, 'PHP-Error', "".$arr["tmp_name"]." is no valid upload! Please try again uploading the file.");
+								}
+						}
+				}
+				
+				$orgrequest = new Request(
+					(isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'],
+					$url,
+					$_GET,
+					array_merge((array)$_POST, (array)$_FILES)
+				);
+				
+				krsort(Core::$rules);
+				
+				// get  current controller
+				foreach(self::$rules as $priority => $rules)
+				{
+						foreach($rules as $rule => $controller)
+						{
+								$request = clone $orgrequest;
+								if($args = $request->match($rule, true))
+								{
+										if($request->getParam("controller"))
+										{
+												$controller = $request->getParam("controller");
+										}
+										$inst = new $controller;
+										self::$requestController = $inst;
+										self::$controller = array($inst);
+										
+										$data = $inst->handleRequest($request);
+										if($data === false) {
+											continue;
+										}
+										self::serve($data);
+										break 2;
+								}
+						}
+				}
+				
 		}
 }
 

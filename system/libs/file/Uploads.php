@@ -1027,7 +1027,7 @@ class UploadController extends Controller {
 	 * index
 	*/
 	public function index() {
-		exit;
+		return false;
 	}
 	
 	/**
@@ -1039,9 +1039,13 @@ class UploadController extends Controller {
 	public function handleFile() {
 		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
 		
+		if($data->count() == 0) {
+			return false;
+		}
+		
 		if(!file_exists($data->first()->realfile)) {
 			$data->first()->remove(true);
-			exit;
+			return false;
 		}
 		
 		session_write_close();
