@@ -8,9 +8,9 @@
   *@subpackage framework loader
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
-  * $Version 2.6.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 13.01.2013
+  * $Version 2.6.4
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -238,32 +238,35 @@ if(PROFILE) Profiler::unmark("init");
 if(!MOD_REWRITE && !preg_match('/nginx/i', $_SERVER["SERVER_SOFTWARE"]) && !file_exists(ROOT . ".htaccess")) {
 	$template = 'RewriteEngine on
 
-	RewriteBase '.ROOT_PATH.'
+RewriteBase '.ROOT_PATH.'
 	
-	RewriteCond %{REQUEST_FILENAME} !-f
-	RewriteCond %{REQUEST_URI} !^/system/application.php
-	RewriteRule (.*) system/application.php [QSA]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} !^/system/application.php
+RewriteRule (.*) system/application.php [QSA]
 	
 	
-	<IfModule mod_headers.c>
-		<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
-			Header set Cache-Control "max-age=86400, public"
-		</FilesMatch>
-	</IfModule>
+<IfModule mod_headers.c>
+	<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
+		Header set Cache-Control "max-age=86400, public"
+	</FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(gdf|ggz)\.(css|js)$">
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+</IfModule>
+
+AddEncoding x-gzip .ggz
+AddEncoding deflate .gdf
+
+<files *.plist>
+	order allow,deny
+	deny from all
+</files>
 	
-	<IfModule mod_headers.c>
-	  <FilesMatch "\.(gdf|ggz)\.(css|js)$">
-	    Header append Vary Accept-Encoding
-	  </FilesMatch>
-	</IfModule>
-	
-	AddEncoding x-gzip .ggz
-	AddEncoding deflate .gdf
-	
-	<files *.plist>
-		order allow,deny
-		deny from all
-	</files>
+ErrorDocument 404 system/application.php
+ErrorDocument 500 system/templates/framework/500.html
 	';
 	
 	if(!file_put_contents(ROOT . ".htaccess", $template)) {
@@ -271,6 +274,17 @@ if(!MOD_REWRITE && !preg_match('/nginx/i', $_SERVER["SERVER_SOFTWARE"]) && !file
 	}
 }
 
+if(file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 404")) {
+	if(!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 system/application.php", FILE_APPEND)) {
+		die("Could not write .htaccess");
+	}
+}
+
+if(file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 500")) {
+	if(!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 system/templates/framework/500.html", FILE_APPEND)) {
+		die("Could not write .htaccess");
+	}
+}
 
 loadApplication($application);
 
