@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
-  * $Version: 2.2.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 12.01.2013
+  * $Version: 2.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -148,7 +148,7 @@ class RequestHandler extends Object
 												}
 										}
 										
-										$action = strtolower($action);
+										$action = str_replace('-', '_', strtolower($action));
 										
 										if(!$this->hasAction($action))
 										{
