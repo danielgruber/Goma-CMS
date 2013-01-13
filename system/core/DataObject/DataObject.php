@@ -9,7 +9,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
+  * last modified: 12.01.2013
   * $Version: 4.6.17
 */
 
@@ -17,7 +17,11 @@ defined('IN_GOMA') OR die();
 
 abstract class DataObject extends ViewAccessableData implements PermProvider, SaveVarSetter
 {
-	public static $donothing = false;
+	/**
+	 * temporary while generating
+	*/
+	static $donothing = false;
+	
 	/**
 	 * OPTIONS PROVIDED TO CONFIGURE THIS CLASS
 	*/
@@ -27,6 +31,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name default_sort
 	*/
 	static $default_sort = "id";
+	
+	/**
+	 * enables or disabled history
+	 *
+	 *@name history
+	 *@access public
+	*/
+	static $history = true;
 	
 	 /**
 	 * show read-only edit if not enough rights
@@ -38,13 +50,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public $showWithoutRight = false;
 	
-	/**
-	 * casting
-	 *
-	 *@name casting
-	 *@access public
-	*/
-	public $casting;
 	/**
 	 * relations
 	*/
@@ -147,22 +152,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@var array
 	*/
 	public $fieldInfo = array();
-	
-	/**
-	 * this var specifies if this dataclass will be versioned
-	 *
-	 *@name versioned
-	 *@access public
-	*/
-	public $versioned = false;
-	
-	/**
-	 * enables or disabled history
-	 *
-	 *@name history
-	 *@access public
-	*/
-	public static $history = true;
+
 	
 	/**
 	 * this var identifies with which version a DataObjectSet got the data
@@ -180,6 +170,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access protected
 	*/
 	protected $viewcache = array();
+	
+	/**
+	 * DEPRECATED API
+	*/
+	public $versioned;
 	
 	//!Global Static Methods
 	/**
@@ -492,7 +487,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							$this->belongs_many_many = isset($myinfo['belongs_many_many']) ? $myinfo['belongs_many_many'] : array();
 							$this->many_many_tables = isset($myinfo['many_many_tables']) ? $myinfo['many_many_tables'] : array();
 							$this->defaults = array_merge(ArrayLib::map_key("strtolower", $this->defaults), isset($myinfo['defaults']) ? $myinfo['defaults'] : array());
-							$this->casting = isset($myinfo['casting']) ? $myinfo['casting'] : array();
 					}
 			}
 			
@@ -2639,7 +2633,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 			
-			if(self::Versioned($this->class)) {
+			if(self::versioned($this->class)) {
 				$canVersion = false;
 				if(member::login()) {
 					$perms = $this->providePerms();
@@ -3628,6 +3622,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		// first get all fields with translated types
 		$db_fields = $this->DataBaseFields();
 		$indexes = $this->indexes();
+		$casting = $this->casting();
 	
 		// add some fields for versioning
 		if($this->hasTable() && $this->Table() == $this->baseTable) {
@@ -3646,9 +3641,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($this->hasTable()) {
 			
 			foreach($db_fields as $field => $type) {
-				if(isset($this->casting[strtolower($field)])) {
-					if($this->casting[strtolower($field)] = DBField::parseCasting($this->casting[strtolower($field)])) {
-						$type = call_user_func_array(array($this->casting[strtolower($field)]["class"], "getFieldType"), (isset($this->casting[strtolower($field)]["args"])) ? $this->casting[strtolower($field)]["args"] : array());
+				if(isset($casting[strtolower($field)])) {
+					if($casting[strtolower($field)] = DBField::parseCasting($casting[strtolower($field)])) {
+						$type = call_user_func_array(array($casting[strtolower($field)]["class"], "getFieldType"), (isset($casting[strtolower($field)]["args"])) ? $casting[strtolower($field)]["args"] : array());
 						if($type != "")
 							$db_fields[$field] = $type;
 					}
@@ -4245,7 +4240,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function generateCasting() {
-		$casting = array_merge((array) $this->casting, (array) $this->generateDBFields());
+		$casting = array_merge((array) self::getStatic($this->class, "casting"), (array) $this->generateDBFields());
 		foreach($this->LocalcallExtending("casting") as $_casting) {
 			$casting = array_merge($casting, $_casting);
 			unset($_casting);

@@ -2059,6 +2059,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			$record = $this->dataobject;
 			if($record->write($forceInsert, $forceWrite, $snap_priority)) {
 				$writtenIDs[$record->versionid] = true;
+				$writeExtraFields[$record->versionid] = array();
 				
 				// add extra fields
 				foreach($this->extraFields as $field => $char) {
@@ -2097,7 +2098,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				)
 			)
 		);
-		
+
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
 				$c = count($manipulation[0]["fields"]);

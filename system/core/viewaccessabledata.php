@@ -10,14 +10,29 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.01.2013
-  * $Version 2.2.5
+  * last modified: 12.01.2013
+  * $Version 2.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class ViewAccessableData extends Object implements Iterator, ArrayAccess
 {		
+		/**
+		 * default castings
+		 *@name defaultCasting
+		 *@access public
+		 *@var string
+		*/
+		static $default_casting = "HTMLText";
+		
+		/**
+		 * casting
+		 *
+		 *@name casting
+		*/
+		static $casting = array();
+		
 		/**
 		 * data
 		 *
@@ -36,14 +51,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		public $original = array();
 		
 		/**
-		 * default castings
-		 *@name defaultCasting
-		 *@access public
-		 *@var string
-		*/
-		public static $default_casting = "HTMLText";
-		
-		/**
 		 * customised data
 		 *@name customised
 		 *@access protected
@@ -58,13 +65,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public $dataSetPosition = 0;
-		
-		/**
-		 * casting
-		 *
-		 *@name casting
-		*/
-		public $casting = array();
 		
 		/**
 		 * indicates whether the data was changes or not
@@ -96,7 +96,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function generateCasting() {
-			$casting = (array) $this->casting;
+			$casting = self::getStatic($this->class, "casting");
 			foreach($this->LocalcallExtending("casting") as $_casting) {
 				$casting = array_merge($casting, $_casting);
 				unset($_casting);
@@ -145,10 +145,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"getobject",
 			"versioned"
 		);
+		
 		/**
 		 * defaults
 		*/
 		public $defaults = array();
+		
 		/**
 		 * construct
 		 *@name __construct
@@ -167,10 +169,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					$this->data = ArrayLib::map_key("strtolower", (array)$data);
 					$this->original = $this->data;
 				}
-				
-				if(isset(ClassInfo::$class_info[$this->class]["casting"]))
-					$this->casting = ClassInfo::$class_info[$this->class]["casting"];
 		}
+		
 		/**
 		 * this function returns the current record as an array
 		 *@name ToArray
@@ -322,14 +322,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			} else 
 			
 			if($this->isServer($name, $lowername)) {
-				$this->casting[$lowername] = "varchar";
-				$data = $this->serverGet($name, $lowername);
+				$data = DBField::getObjectByCasting($this->serverGet($name, $lowername), $lowername, "varchar");
 			}
 			
 			if(isset($data)) {
 				if(is_array($data) && isset($data["casting"], $data["value"])) {
-					$this->casting[$lowername] = $data["casting"];
-					$data = $data["value"];
+					$data = DBField::getObjectByCasting($data["casting"], $lowername, $data["value"]);
 				}
 				
 				if(is_array($data))
@@ -921,6 +919,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		*/
 		public function _clone() {
 			return clone $this;
+		}
+		
+		/**
+		 * returns casting-values
+		 *
+		 *@name casting
+		 *@access public
+		*/
+		public function casting() {
+			return isset(ClassInfo::$class_info[$this->class]["casting"]) ? ClassInfo::$class_info[$this->class]["casting"] : self::getStatic($this->class, "casting");
 		}
 		
 }
