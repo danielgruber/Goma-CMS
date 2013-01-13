@@ -973,6 +973,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$newdata["snap_priority"] = $snap_priority;
 		$newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->class;
 		
+		//print_r($newdata);
+		
 		// second step: if insert, add new record in state-table and get the auto-increment-id
 		if($command == "insert") {
 			$manipulation = array(
@@ -1447,8 +1449,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	protected function getFieldValues($class, $command)
 	{
 			$arr = array();
-			if(isset(ClassInfo::$class_info[$class]["db_fields"]))
-			{
+			if($fields = $this->DataBaseFields()) {
 				if(isset(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]])) {
 					foreach(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]] as $field => $type)
 					{
@@ -1481,7 +1482,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						}
 					}
 					
-					if(isset(classinfo::$class_info[$class]["db_fields"]["last_modfied"]))
+					if(isset($fields["last_modfied"]))
 						$arr["last_modfied"] = NOW;
 				}
 			} else if(isset(ClassInfo::$database[$class])) {
@@ -1514,7 +1515,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 				}
 				
-				if(isset(ClassInfo::$class_info[$class]["db_fields"]["last_modfied"]))
+				if(isset(ClassInfo::$database[$class]["last_modfied"]))
 					$arr["last_modfied"] = NOW;
 			}
 			

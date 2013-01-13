@@ -29,15 +29,15 @@ class Uploads extends DataObject {
 	 *@name cacheLifeTime
 	 *@access public
 	*/
-	public static $cache_life_time = 2678400; // 31 days = 2678400
+	static $cache_life_time = 2678400; // 31 days = 2678400
 
 	/**
 	 * database-table
 	 *
-	 *@name db_fields
+	 *@name db
 	 *@access public
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"filename"	=> "varchar(100)",
 		"realfile"	=> "varchar(300)",
 		"path"		=> "varchar(200)",
@@ -45,6 +45,14 @@ class Uploads extends DataObject {
 		"deletable"	=> "enum('0', '1')",
 		"md5"		=> "text"
 	);
+	
+	/**
+	 * extensions in this files are by default handled by this class
+	 *
+	 *@name file_extensions
+	 *@access public
+	*/
+	static $file_extensions = array();
 	
 	/**
 	 * relations
@@ -55,14 +63,6 @@ class Uploads extends DataObject {
 	public $has_one = array(
 		"collection"		=> "Uploads"
 	);
-		
-	/**
-	 * extensions in this files are by default handled by this class
-	 *
-	 *@name file_extensions
-	 *@access public
-	*/
-	public static $file_extensions = array();
 	
 	/**
 	 * adds a file to the upload-folder
@@ -524,10 +524,10 @@ class ImageUploads extends Uploads {
 	 * add some db-fields
 	 * inherits fields from Uploads
 	 *
-	 *@name db_fields
+	 *@name db
 	 *@access public
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"width"				=> "int(5)",
 		"height"			=> "int(5)",
 		"thumbLeft"			=> "int(3)",
@@ -542,7 +542,7 @@ class ImageUploads extends Uploads {
 	 *@name file_extensions
 	 *@access public
 	*/
-	public static $file_extensions = array(
+	static $file_extensions = array(
 		"png",
 		"jpeg",
 		"jpg",
@@ -1055,9 +1055,9 @@ class GravatarImageHandler extends ImageUploads {
 	/**
 	 * add db-fields for email
 	 *
-	 *@name db_fields
+	 *@name db
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"email"	=> "varchar(200)"
 	);
 	

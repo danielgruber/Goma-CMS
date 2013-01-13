@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 2.5.1
+  * last modified: 13.01.2013
+  * $Version 2.5.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -384,6 +384,19 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
+		 * gets the title of the window
+		 *
+		 *@name getWindowTitle
+		*/
+		public function getWindowTitle() {
+			if($this->fieldGet("googleTitle")) {
+				return $this->googleTitle;
+			} else {
+				return $this->title;
+			}
+		}
+		
+		/**
 		 * gets edit_permission
 		 *
 		 *@name getEdit_Permission
@@ -572,6 +585,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getLinkClass() {
 			return ($this->active) ? "active" : ""; 
+		}
+		
+		/**
+		 * on before writing
+		 *
+		 *@name onBeforeWrite
+		*/
+		public function onBeforeWrite() {
+			$this->data["uploadstrackingids"] = array();
 		}
 		
 		/**
@@ -1018,19 +1040,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 			
 			return Permission::check("PAGES_INSERT");
-		}
-		
-		/**
-		 * gets the title of the window
-		 *
-		 *@name getWindowTitle
-		*/
-		public function getWindowTitle() {
-			if($this->fieldGet("googleTitle")) {
-				return $this->googleTitle;
-			} else {
-				return $this->title;
-			}
 		}
 		
 		/**
@@ -1763,4 +1772,40 @@ class ContentTPLExtension extends Extension {
 	} 
 }
 
-Object::Extend("tplCaller", "ContentTPLExtension");
+class UploadsPageBacktrace extends DataObjectExtension {
+	/**
+	 * relation to pages
+	 *
+	 *@name belongs_many_many
+	*/
+	public $belongs_many_many = array(
+		"linkingPages"	=> "pages"
+	);
+}
+
+class UploadsPageBacktraceController extends ControllerExtension {
+	/**
+	 * on before handle an action we redirect if needed
+	 *
+	 *@name onBeforeHandleAction
+	*/
+	public function onBeforeHandleAction($action, $content, $handleWithMethod) {
+		$data = $this->getOwner()->modelInst()->linkingPages();
+		$data->setVersion(false);
+		if($data->Count() > 0) {
+			foreach($data as $page) {
+				if($page->isPublished() || $page->canWrite($page) || $page->canPublish($page)) {
+					return true;
+				}
+			}
+			
+			$handleWithMethod = false;
+			HTTPResponse::redirect(BASE_URI);
+			exit;
+		}
+	}
+}
+
+Object::extend("UploadsController", "UploadsPageBacktraceController");
+Object::extend("Uploads", "UploadsPageBacktrace");
+Object::extend("tplCaller", "ContentTPLExtension");
