@@ -63,6 +63,25 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		);
 		
 		/**
+		 * which parents are allowed
+		 *
+		 *@name allow_parent
+		*/
+		static $allow_parent = array();
+		
+		/**
+		 * childs that are allowed
+		 *
+		 *@name allow_children
+		*/
+		static $allow_children = array("Page", "WrapperPage");
+		
+		/**
+		 * default sort
+		*/
+		static $default_sort = "sort ASC";
+		
+		/**
 		 * show read-only edit if not enough rights
 		*/
 		public $showWithoutRight = true;
@@ -98,25 +117,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		);
 		
 		/**
-		 * which parents are allowed
-		 *
-		 *@name allow_parent
-		*/
-		public static $allow_parent = array();
-		
-		/**
-		 * childs that are allowed
-		 *
-		 *@name allow_children
-		*/
-		public static $allow_children = array("Page", "WrapperPage");
-		
-		/**
-		 * default sort
-		*/
-		public static $default_sort = "sort ASC";
-		
-		/**
 		 * defaults
 		*/
 		public $defaults = array(	"parenttype" 	=> "root", 
@@ -124,47 +124,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
 		
-		/**
-		  * we remove child-pages after removing parent page
-		  *
-		 *@name onAfterRemove
-		 *@return bool
-		*/
-		public function onAfterRemove()
-		{
-			foreach($this->children() as $record) {
-				$record->remove(true);
-			}
-		}
-		
-		/**
-		 * local argument sql
-		 *
-		 *@name argumentSQL
-		 *@access public
-		*/
-		public function argumentSQL(&$query) {
-			$rank = Permission::getRank() - 1;
-			
-			// rights
-			if(Permission::check(10) && (!isset($_SESSION['sites_ansicht']) || $_SESSION['sites_ansicht'] != lang("user"))) {
-				// just add nothing ;)
-			} else if(member::login()) {
-				if(isset($this->many_many_tables["viewer_groups"]))
-				{
-						$table = $this->many_many_tables["viewer_groups"]["table"];
-						$data = $this->many_many_tables["viewer_groups"];
-				} else
-				{
-						return false;
-				}
-				$query->addFilter('viewer_type IN ("all", "password", "login", "") OR (viewer_type = "rights" AND `rights` <= '. Permission::getRank() .') OR (viewer_type = "groups" AND (SELECT count(*) FROM '.DB_PREFIX . $table.' AS '.$table.' WHERE '.$table.'.'.$data["field"].' = pages.id AND groupid IN ("'.implode('","', member::groupids()).'")))');
-			} else {
-				$query->addFilter(array("viewer_type" => array("", "all", "password")));
-			}
-			
-			
-		}
+		//!Getters and Setters
 		
 		/**
 		 * makes the url
@@ -311,79 +271,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		/**
-		 * validates the path
-		 *
-		 *@name validatePath
-		 *@access public
-		*/
-		public function validatePath($data)
-		{
-				$fullpath = "";
-				$path = $data["path"];
-				$parentid = $data["parentid"];
-				
-				if($data["parenttype"] == "root")
-				{
-						$parentid = 0;
-				}
-				
-				if(isset($data["id"]))
-				{
-						$add = " AND pages.id != '".convert::raw2text($data["id"])."'";
-				} else
-				{
-						$add = "";
-				}
-				
-				return true;
-		}
-
-		/**
-		 * validates the field parentid
-		 *@name validateParentId
-		 *@access public
-		*/
-		public function validatePageType($obj)
-		{
-				$data = $obj->form->result;
-				$classname = strtolower($data["class_name"]);
-				$parentid = $data["parentid"];
-				
-				if($data["parenttype"] == "subpage" && $data["parentid"] == null)
-						return lang("form_required_fields", "Please fill out the oligatory fields") . ' \'' . lang("parentpage", "Parent Page"). '\'';;
-				
-				if($data["parenttype"] == "root")
-				{
-						$pclassname = "pages";
-				} else
-				{
-						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
-							return lang("error_page_self", "You can't suborder a page under itself!");
-						}
-						
-						$d = DataObject::get("pages", array("id" => $parentid));
-						if(isset($data["recordid"])) {
-							$temp = $d;
-							// validate if we subordered under subtree
-							while($temp->parent) {
-								if($temp->id == $data["recordid"]) {
-									return lang("error_page_self", "You can't suborder a page under itself!");
-								}
-								$temp = $temp->parent;
-							}
-						}
-						
-						$pclassname = strtolower($d["class_name"]);
-				}
-
-				if(in_array($pclassname, $this->allowed_parents())) {
-					return true;
-				}
-				
-				return lang("form_bad_pagetype");
-		}
-		
-		/**
 		 * gets the title of the window
 		 *
 		 *@name getWindowTitle
@@ -395,6 +282,54 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				return $this->title;
 			}
 		}
+		
+		/**
+		 * gets class of a link
+		 *
+		 *@name getLinkClass
+		 *@access public
+		*/
+		public function getLinkClass() {
+			return ($this->active) ? "active" : ""; 
+		}
+		
+		/**
+		 * gets the content
+		*/
+		public function getContent()
+		{
+				return $this->fieldGet("data");
+		}
+		
+		/**
+		 * checks if this site is active in mainbar
+		 *@name getActive
+		 *@access public
+		*/
+		public function getActive()
+		{
+				if(in_array($this->fieldGet("id"), contentController::$activeids))
+						return true;
+				else
+						return false;
+		}
+		
+		/**
+		 * the path
+		 *
+		 *@name getPath
+		 *@access public
+		*/
+		public function getPath()
+		{
+			if($this->parent) {
+				return $this->parent()->getPath() . "/" . $this->fieldGet("path");
+			}
+			
+			return $this->fieldGet("path");
+		}
+		
+		//!Permission-Getters and Setters
 		
 		/**
 		 * gets edit_permission
@@ -553,6 +488,134 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$this->viewcache = array();
 		}
 		
+		//!Events
+		
+		/**
+		  * we remove child-pages after removing parent page
+		  *
+		 *@name onAfterRemove
+		 *@return bool
+		*/
+		public function onAfterRemove()
+		{
+			foreach($this->children() as $record) {
+				$record->remove(true);
+			}
+		}
+		
+		/**
+		 * on before writing
+		 *
+		 *@name onBeforeWrite
+		*/
+		public function onBeforeWrite() {
+			$this->data["uploadtrackingids"] = array();
+		}
+		
+		//!Validators
+		
+		/**
+		 * local argument sql
+		 *
+		 *@name argumentSQL
+		 *@access public
+		*/
+		public function argumentSQL(&$query) {
+			$rank = Permission::getRank() - 1;
+			
+			// rights
+			if(Permission::check(10) && (!isset($_SESSION['sites_ansicht']) || $_SESSION['sites_ansicht'] != lang("user"))) {
+				// just add nothing ;)
+			} else if(member::login()) {
+				if(isset($this->many_many_tables["viewer_groups"]))
+				{
+						$table = $this->many_many_tables["viewer_groups"]["table"];
+						$data = $this->many_many_tables["viewer_groups"];
+				} else
+				{
+						return false;
+				}
+				$query->addFilter('viewer_type IN ("all", "password", "login", "") OR (viewer_type = "rights" AND `rights` <= '. Permission::getRank() .') OR (viewer_type = "groups" AND (SELECT count(*) FROM '.DB_PREFIX . $table.' AS '.$table.' WHERE '.$table.'.'.$data["field"].' = pages.id AND groupid IN ("'.implode('","', member::groupids()).'")))');
+			} else {
+				$query->addFilter(array("viewer_type" => array("", "all", "password")));
+			}
+			
+			
+		}
+		
+		/**
+		 * validates the path
+		 *
+		 *@name validatePath
+		 *@access public
+		*/
+		public function validatePath($data)
+		{
+				$fullpath = "";
+				$path = $data["path"];
+				$parentid = $data["parentid"];
+				
+				if($data["parenttype"] == "root")
+				{
+						$parentid = 0;
+				}
+				
+				if(isset($data["id"]))
+				{
+						$add = " AND pages.id != '".convert::raw2text($data["id"])."'";
+				} else
+				{
+						$add = "";
+				}
+				
+				return true;
+		}
+
+		/**
+		 * validates the field parentid
+		 *@name validateParentId
+		 *@access public
+		*/
+		public function validatePageType($obj)
+		{
+				$data = $obj->form->result;
+				$classname = strtolower($data["class_name"]);
+				$parentid = $data["parentid"];
+				
+				if($data["parenttype"] == "subpage" && $data["parentid"] == null)
+						return lang("form_required_fields", "Please fill out the oligatory fields") . ' \'' . lang("parentpage", "Parent Page"). '\'';;
+				
+				if($data["parenttype"] == "root")
+				{
+						$pclassname = "pages";
+				} else
+				{
+						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
+							return lang("error_page_self", "You can't suborder a page under itself!");
+						}
+						
+						$d = DataObject::get("pages", array("id" => $parentid));
+						if(isset($data["recordid"])) {
+							$temp = $d;
+							// validate if we subordered under subtree
+							while($temp->parent) {
+								if($temp->id == $data["recordid"]) {
+									return lang("error_page_self", "You can't suborder a page under itself!");
+								}
+								$temp = $temp->parent;
+							}
+						}
+						
+						$pclassname = strtolower($d["class_name"]);
+				}
+
+				if(in_array($pclassname, $this->allowed_parents())) {
+					return true;
+				}
+				
+				return lang("form_bad_pagetype");
+		}
+				
 		/**
 		 * validates page-filename
 		 *
@@ -577,24 +640,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}	
 		}
 		
-		/**
-		 * gets class of a link
-		 *
-		 *@name getLinkClass
-		 *@access public
-		*/
-		public function getLinkClass() {
-			return ($this->active) ? "active" : ""; 
-		}
-		
-		/**
-		 * on before writing
-		 *
-		 *@name onBeforeWrite
-		*/
-		public function onBeforeWrite() {
-			$this->data["uploadtrackingids"] = array();
-		}
+		//!Form
 		
 		/**
 		 * writes the form
@@ -822,163 +868,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			);
 		}
 		
-		/**
-		 * cache for allowed_parents
-		 *@name cache_parent
-		 *@access public
-		*/
-		private $cache_parent = array();
-		
-		/**
-		 * gets allowed parents
-		 *@name allowed_parents
-		 *@access public
-		*/		
-		public function allowed_parents()
-		{
-				if($this->cache_parent == array())
-				{
-						if(PROFILE) Profiler::mark("pages::allowed_parents");
-						
-						$allowed_parents = array();
-						
-						// first check all pages
-						$allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
-						foreach($allPages as $child) {
-							
-							// get allowed children for this page
-							$allowed = ClassInfo::getStatic($child, "allow_children");
-							if(count($allowed) > 0) {
-								foreach($allowed as $allow) {
-									$allow = strtolower($allow);
-									
-									// if ! these children are absolutly prohibited
-									if(substr($allow, 0, 1) == "!") {
-										if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
-											unset($allowed_parents[$child]);
-											continue 2;
-										}
-									} else {
-										if($allow == $this->class || is_subclass_of($this->class, $allow)) {
-											$allowed_parents[$child] = $child;
-										}
-									}
-								}
-							}
-						}
-						
-						// now filter
-						$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
-						if(count($allow_parents) > 0) {
-							foreach($allowed_parents as $parent) {
-								
-								// set found to false
-								$found = false;
-								
-								// try find the parent
-								foreach($allow_parents as $allow) {
-									$allow = strtolower($allow);
-									if(substr($allow, 0, 1) == "!") {
-										if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
-											unset($allowed_parents[$parent]);
-											continue 2;
-										}
-									} else {
-										if($allow == $parent || is_subclass_of($parent, $allow)) {
-											$found = true;
-										}
-									}
-								}
-								
-								// if not found, unset
-								if(!$found) {
-									unset($allowed_parents[$parent]);
-								}
-							}
-						}
-						
-						if(PROFILE) Profiler::unmark("pages::allowed_parents");
-
-						return $allowed_parents;
-				} else
-				{
-						return $this->cache_parent;
-				}	
-		}
-		
-		/**
-		 * checks if specifc class is allowed child for given page
-		 *
-		 *@name checkCanChild
-		 *@access public
-		 *@param string - child-class
-		 *@param string - parent-class
-		*/
-		public function checkCanChild($child, $parent) {
-			$children = ClassInfo::getStatic($parent, "allow_children");
-			if(count($children) > 0) {
-				foreach($children as $allowed_child) {
-					if(is_a($child, $allowed_child))
-						return true;
-				}
-			}
-			
-			return false;
-		}
-		
-		/**
-		 * gets the content
-		*/
-		public function getContent()
-		{
-				return $this->fieldGet("data");
-		}
-		
-		/**
-		 * checks if this site is active in mainbar
-		 *@name getActive
-		 *@access public
-		*/
-		public function getActive()
-		{
-				if(in_array($this->fieldGet("id"), contentController::$activeids))
-						return true;
-				else
-						return false;
-		}
-		
-		/**
-		 * gets controller
-		 *@name controller
-		 *@access public
-		*/
-		public function controller($controller = null)
-		{
-				if(parent::controller($controller)) {
-						return parent::controller($controller);
-				} else {
-						$this->controller = Object::instance("contentController");
-						$this->controller->model_inst = $this;
-						return $this->controller;
-				}				
-		}
-		
-		/**
-		 * the path
-		 *
-		 *@name getPath
-		 *@access public
-		*/
-		public function getPath()
-		{
-			if($this->parent) {
-				return $this->parent()->getPath() . "/" . $this->fieldGet("path");
-			}
-			
-			return $this->fieldGet("path");
-		}
-		
-		
+		//!Permissions
 		
 		/**
 		 * can view history
@@ -1091,6 +981,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				)
 			);
 		}
+		
+		//!SiteTree
 		
 		public function getSiteTree($search = "") {
 			return $this->renderTree("admin/content/record/\$id/edit", 0, array($search), true, false);
@@ -1461,6 +1353,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 		}
 		
+		
+		//!APIs
 		/**
 		 * gets the data object of a site of a given url
 		 *
@@ -1554,6 +1448,124 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	*/
 	public static function NotifySettings() {
 		return array("title" => lang("content"), "icon" => "images/icons/other/content.png");
+	}
+	
+	/**
+	 * cache for allowed_parents
+	 *@name cache_parent
+	 *@access public
+	*/
+	private $cache_parent = array();
+	
+	/**
+	 * gets allowed parents
+	 *@name allowed_parents
+	 *@access public
+	*/		
+	public function allowed_parents() {
+		
+		// for performance reason we cache this part
+		if($this->cache_parent == array()) {
+				if(PROFILE) Profiler::mark("pages::allowed_parents");
+				
+				$allowed_parents = array();
+				
+				// first check all pages
+				$allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
+				foreach($allPages as $child) {
+					
+					// get allowed children for this page
+					$allowed = ClassInfo::getStatic($child, "allow_children");
+					if(count($allowed) > 0) {
+						foreach($allowed as $allow) {
+							$allow = strtolower($allow);
+							
+							// if ! these children are absolutly prohibited
+							if(substr($allow, 0, 1) == "!") {
+								if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
+									unset($allowed_parents[$child]);
+									continue 2;
+								}
+							} else {
+								if($allow == $this->class || is_subclass_of($this->class, $allow)) {
+									$allowed_parents[$child] = $child;
+								}
+							}
+						}
+					}
+				}
+				
+				// now filter
+				$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
+				if(count($allow_parents) > 0) {
+					foreach($allowed_parents as $parent) {
+						
+						// set found to false
+						$found = false;
+						
+						// try find the parent
+						foreach($allow_parents as $allow) {
+							$allow = strtolower($allow);
+							if(substr($allow, 0, 1) == "!") {
+								if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
+									unset($allowed_parents[$parent]);
+									continue 2;
+								}
+							} else {
+								if($allow == $parent || is_subclass_of($parent, $allow)) {
+									$found = true;
+								}
+							}
+						}
+						
+						// if not found, unset
+						if(!$found) {
+							unset($allowed_parents[$parent]);
+						}
+					}
+				}
+				
+				if(PROFILE) Profiler::unmark("pages::allowed_parents");
+
+				return $allowed_parents;
+		} else {
+				return $this->cache_parent;
+		}	
+	}
+	
+	/**
+	 * checks if specifc class is allowed child for given page
+	 *
+	 *@name checkCanChild
+	 *@access public
+	 *@param string - child-class
+	 *@param string - parent-class
+	*/
+	public function checkCanChild($child, $parent) {
+		$children = ClassInfo::getStatic($parent, "allow_children");
+		if(count($children) > 0) {
+			foreach($children as $allowed_child) {
+				if(is_a($child, $allowed_child))
+					return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * gets controller
+	 *@name controller
+	 *@access public
+	*/
+	public function controller($controller = null {
+		if(parent::controller($controller)) {
+			return parent::controller($controller);
+		} else {
+			$this->controller = Object::instance("contentController");
+			$this->controller->model_inst = $this;
+			return $this->controller;
+		}				
 	}
 		
 }
