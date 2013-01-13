@@ -1441,7 +1441,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	protected function getFieldValues($class, $command)
 	{
 			$arr = array();
-			if($fields = $this->DataBaseFields()) {
+			if(isset(ClassInfo::$class_info[$class]["db"])) {
+				$fields = ClassInfo::$class_info[$class]["db"];
 				if(isset(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]])) {
 					foreach(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]] as $field => $type)
 					{
@@ -1474,8 +1475,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						}
 					}
 					
-					if(isset($fields["last_modfied"]))
-						$arr["last_modfied"] = NOW;
+					if(isset($fields["last_modified"]))
+						$arr["last_modified"] = NOW;
 				}
 			} else if(isset(ClassInfo::$database[$class])) {
 				foreach(ClassInfo::$database[$class] as $field => $type)
@@ -1507,8 +1508,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 				}
 				
-				if(isset(ClassInfo::$database[$class]["last_modfied"]))
-					$arr["last_modfied"] = NOW;
+				if(isset(ClassInfo::$database[$class]["last_modified"]))
+					$arr["last_modified"] = NOW;
 			}
 			
 			return $arr;

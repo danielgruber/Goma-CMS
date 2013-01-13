@@ -481,7 +481,6 @@ function parseUrl() {
 	{
 		$url = $matches[1];
 	} else if($url != "" && !Core::is_ajax() && !preg_match('/\.([a-zA-Z]+)$/i', $url) && count($_POST) == 0) {
-		
 		// enforce URLEND
 		$get = "";
 		$i = 0;
