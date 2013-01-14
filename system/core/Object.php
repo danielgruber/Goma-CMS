@@ -685,11 +685,13 @@ abstract class Object
 		  *@name getResourceFolder
 		  *@access public
 		 */
-		 public function getResourceFolder($forceAbsolute = false) {
-		 	if(isset(ClassInfo::$class_info[$this->class]["inExpansion"]) && isset(ClassInfo::$appENV["expansion"][ClassInfo::$class_info[$this->class]["inExpansion"]])) {
-		 		$ext = ClassInfo::$class_info[$this->class]["inExpansion"];
-		 		$extFolder = ClassInfo::getExpansionFolder($ext, false, $forceAbsolute);
-		 		return isset(ClassInfo::$appENV["expansion"][$ext]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$ext]["resourceFolder"] : $extFolder . "resources";
+		 public function getResourceFolder($forceAbsolute = false, $exp = null) {
+		 	if(!isset($exp)) {
+		 		$exp = isset(ClassInfo::$class_info[$this->class]["inExpansion"]) ? ClassInfo::$class_info[$this->class]["inExpansion"] : null;
+		 	}
+		 	if(isset(ClassInfo::$appENV["expansion"][$exp])) {
+		 		$extFolder = ClassInfo::getExpansionFolder($exp, false, $forceAbsolute);
+		 		return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
 		 	}
 		 	
 		 	return null;
