@@ -169,9 +169,9 @@
 								<div id="buttonLeft">
 									<% IF $_GET_stat_page %>
 										<% IF $_GET_month %>
-											<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
+											<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
 										<% ELSE %>
-											<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
+											<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
 										<% END %>
 									<% ELSE %>
 										<% IF $_GET_month %>
@@ -182,11 +182,11 @@
 									<% END %>
 								</div>
 								<div id="buttonRight">
-									<% IF $_GET_stat_page AND $_GET_stat_page > 1 %>
+									<% IF $_GET_stat_page AND _GET_stat_page.forTemplate() > 1 %>
 										<% IF $_GET_month %>
-											<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
+											<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
 										<% ELSE %>
-											<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
+											<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
 										<% END %>
 									<% END %>
 								</div>

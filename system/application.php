@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 13.01.2013
-  * $Version 2.6.4
+  * last modified: 14.01.2013
+  * $Version 2.6.5
 */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -140,6 +140,9 @@ require_once(FRAMEWORK_ROOT . 'core/Core.php');
 require_once(FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
 if(PROFILE) Profiler::unmark("core_requires");
+
+// set error-handler
+set_error_handler("Goma_ErrorHandler");
 
 if(file_exists(ROOT . '_config.php'))
 {
@@ -1228,4 +1231,161 @@ function goma_version_compare($v1, $v2, $operator = null) {
 	}
 	
 	return false;
+}
+
+/**
+ * PHP-Error-Handdling
+*/
+//!PHP-Error-Handling
+
+function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
+	switch ($errno) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_PARSE:
+	    case E_USER_ERROR:
+	    case E_RECOVERABLE_ERROR:
+	    	log_error("PHP-USER-Error: ".$errno." ".$errstr." in ".$errfile." on line ".$errline.".");
+	       	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+	       	$content = str_replace('{BASE_URI}', BASE_URI, $content);
+	       	$content = str_replace('{$errcode}', 6, $content);
+	       	$content = str_replace('{$errname}', "PHP-Error $errno", $content);
+	       	$content = str_replace('{$errdetails}', $errstr . " on line $errline in file $errfile", $content);
+	       	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+	       	echo $content;
+	       	exit;
+	    break;
+	
+	    case E_WARNING:
+	    case E_CORE_WARNING:
+	    case E_COMPILE_WARNING:
+	    case E_USER_WARNING:
+	    	log_error("PHP-USER-Warning: ".$errno." ".$errstr." in ".$errfile." on line ".$errline.".");
+	       
+	    	break;
+	    case E_USER_NOTICE:
+	    case E_NOTICE:
+	    case E_USER_NOTICE:
+	    	logging("Notice: [$errno] $errstr");
+	        if(DEV_MODE)
+	       	 	echo "<b>NOTICE:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
+	        break;
+	    case E_STRICT:
+	    	// nothing
+	    break;
+	    default:
+	    	log_error("PHP-Error: ".$errno." ".$errstr." in ".$errfile." on line ".$errline.".");
+	       	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+	       	$content = str_replace('{BASE_URI}', BASE_URI, $content);
+	       	$content = str_replace('{$errcode}', 6, $content);
+	       	$content = str_replace('{$errname}', "PHP-Error: " . $errno, $content);
+	       	$content = str_replace('{$errdetails}', $errstr . " on line $errline in file $errfile", $content);
+	       	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+	       	echo $content;
+	       	exit;
+    }
+    
+    // block PHP's internal Error-Handler
+    return true;
+}
+
+
+//!Logging
+
+/**
+ * logging
+ *
+ * log an error
+ *
+ *@name log_error
+ *@access public
+ *@param string - error-string
+*/
+function log_error($string)
+{
+	if(PROFILE) Profiler::mark("log_error");
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/");
+	if(isset($GLOBALS["error_logfile"])) {
+		$file = $GLOBALS["error_logfile"];	
+	} else {
+		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y"));
+		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y")."/";
+		$file = $folder . "1.log";
+		$i = 1;
+		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
+			$i++;
+			$file = $folder.$i.".log";
+		}
+		$GLOBALS["error_logfile"] = $file;
+	}
+	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
+	if(!file_exists($file))
+	{
+			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
+	} else
+	{
+			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
+	}
+	
+	 if(PROFILE) Profiler::unmark("log_error");
+}
+
+/**
+ * log things
+ *
+ *@name logging
+ *@access public
+ *@param string - log-string
+*/
+function logging($string)
+{
+	if(PROFILE) Profiler::mark("logging");
+	
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/");
+	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
+	if(isset($GLOBALS["log_logfile"])) {
+		$file = $GLOBALS["log_logfile"];	
+	} else {
+		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y"));
+		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y")."/";
+		$file = $folder . "1.log";
+		$i = 1;
+		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
+			$i++;
+			$file = $folder.$i.".log";
+		}
+		$GLOBALS["log_logfile"] = $file;
+	}
+	if(!file_exists($file)) {
+		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
+	} else {
+		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
+	}
+	
+	if(PROFILE) Profiler::unmark("logging");
+}
+
+/**
+ * logs debug-information
+ *
+ * this information may uploaded to the goma-server for debug-use
+ *
+ *@name debug_log
+ *@access public
+ *@param string - debug-string
+*/
+function debug_log($data) {
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/");
+	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
+	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y"));
+	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y")."/" . date("H_i_s");
+	$file = $folder . "-1.log";
+	$i = 1;
+	while(file_exists($folder. "-" . $i.".log")) {
+		$i++;
+		$file = $folder. "-" . $i.".log";
+	}
+
+	FileSystem::write($file,$data, null, 0777);
 }

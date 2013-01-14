@@ -669,7 +669,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			} else 
 			
 			if($this->isServer($name, $lowername)) {
-				$data = DBField::getObjectByCasting($this->serverGet($name, $lowername), $lowername, "varchar");
+				$data = DBField::getObjectByCasting("varchar", $lowername, $this->serverGet($name, $lowername));
 			}
 			
 			if(isset($data)) {

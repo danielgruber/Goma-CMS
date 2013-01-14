@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 3.3.24
+  * last modified: 14.01.2013
+  * $Version 3.3.25
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -544,7 +544,7 @@ class Core extends object
 			log_error("Code: " . $code . ", Name: " . $name . ", Details: ".$message.", URL: " . $_SERVER["REQUEST_URI"]);
 			
 			if(($code != 1 && $code != 2 && $code != 5) || !$callDebug) {
-	 	 		  debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV["app"], true) . "\n\n\nBacktrace:\n" . print_r(debug_backtrace(), true));
+	 	 		  debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace:\n" . print_r(debug_backtrace(), true));
 	 	 	}
 			
 			if(is_object(self::$requestController)) {
@@ -554,7 +554,7 @@ class Core extends object
 				if(Core::is_ajax())
 					HTTPResponse::setResHeader(200);
 				
-				if(class_exists("ClassInfo", false) && CLASS_INFO_LOADED) {
+				if(class_exists("ClassInfo", false) && defined("CLASS_INFO_LOADED")) {
 					$template = new template;
 					$template->assign('errcode',convert::raw2text($code));
 					$template->assign('errname',convert::raw2text($name));
@@ -566,7 +566,14 @@ class Core extends object
 					echo $template->display('framework/error.html');
 				} else {
 					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-					echo "Code: " . $code . "<br /> Name: " . $name . "<br /> Details: " . $message ;
+					$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+					$content = str_replace('{BASE_URI}', BASE_URI, $content);
+					$content = str_replace('{$errcode}', $code, $content);
+					$content = str_replace('{$errname}', $name, $content);
+					$content = str_replace('{$errdetails}', $message, $content);
+					$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+					echo $content;
+					exit;
 				}
 
 				exit;
@@ -1113,101 +1120,4 @@ function throwErrorById($code)
 		{
 				Core::throwerror(6, $codes[6]['name'], $codes[6]['details'], 500);
 		}
-}
-
-/**
- * logging
- *
- * log an error
- *
- *@name log_error
- *@access public
- *@param string - error-string
-*/
-function log_error($string)
-{
-	if(PROFILE) Profiler::mark("log_error");
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/");
-	if(isset($GLOBALS["error_logfile"])) {
-		$file = $GLOBALS["error_logfile"];	
-	} else {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y"));
-		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y")."/";
-		$file = $folder . "1.log";
-		$i = 1;
-		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
-			$i++;
-			$file = $folder.$i.".log";
-		}
-		$GLOBALS["error_logfile"] = $file;
-	}
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if(!file_exists($file))
-	{
-			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
-	} else
-	{
-			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
-	}
-	
-	 if(PROFILE) Profiler::unmark("log_error");
-}
-
-/**
- * log things
- *
- *@name logging
- *@access public
- *@param string - log-string
-*/
-function logging($string)
-{
-	if(PROFILE) Profiler::mark("logging");
-	
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/");
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if(isset($GLOBALS["log_logfile"])) {
-		$file = $GLOBALS["log_logfile"];	
-	} else {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y"));
-		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y")."/";
-		$file = $folder . "1.log";
-		$i = 1;
-		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
-			$i++;
-			$file = $folder.$i.".log";
-		}
-		$GLOBALS["log_logfile"] = $file;
-	}
-	if(!file_exists($file)) {
-		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
-	} else {
-		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
-	}
-	
-	if(PROFILE) Profiler::unmark("logging");
-}
-
-/**
- * logs debug-information
- *
- * this information may uploaded to the goma-server for debug-use
- *
- *@name debug_log
- *@access public
- *@param string - debug-string
-*/
-function debug_log($data) {
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/");
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y"));
-	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y")."/" . date("H_i_s");
-	$file = $folder . "-1.log";
-	$i = 1;
-	while(file_exists($folder. "-" . $i.".log")) {
-		$i++;
-		$file = $folder. "-" . $i.".log";
-	}
-
-	FileSystem::write($file,$data, null, 0777);
 }

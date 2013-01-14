@@ -3641,6 +3641,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		if($this->hasTable()) {
 			
+			// get correct SQL-Types for Goma-Field-Types
 			foreach($db_fields as $field => $type) {
 				if(isset($casting[strtolower($field)])) {
 					if($casting[strtolower($field)] = DBField::parseCasting($casting[strtolower($field)])) {

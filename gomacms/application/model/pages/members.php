@@ -39,7 +39,7 @@ class members extends Page
 								$time_online = 300;
 						}
 						$last = TIME - $time_online;
-						return DataObject::get("user"," `statistics`.`last_update` > ".dbescape($last)."", array(), array(), array('statistics' => '`statistics`.`user` = `users`.`id`'));
+						return DataObject::get("user"," statistics.last_update > ".convert::raw2sql($last)."", array(), array(), array('statistics' => 'statistics.user = `users`.`id`'));
 				}
 				else
 						return DataObject::get("user", array(), array(), array(), array(), null, true);
