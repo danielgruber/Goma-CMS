@@ -9,7 +9,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 12.01.2013
+  * last modified: 15.01.2013
   * $Version: 4.6.17
 */
 
@@ -2202,7 +2202,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name getHasMany
 	 *@access public
 	*/
-	public function getHasMany($name) {
+	public function getHasMany($name, $filter = null, $sort = null) {
 		
 		$name = trim(strtolower($name));
 		
@@ -2212,7 +2212,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			throwError(6, "PHP-Error", "No Has-many-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
 		
-		$cache = "has_many_{$name}";
+		$cache = "has_many_{$name}_".var_export($filter, true)."_".var_export($sort, true);
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
@@ -2236,8 +2236,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				return false;
 		}
 
-		$where[$key . "id"] = $this["id"];
-		$set = new HasMany_DataObjectSet(Object::instance($class), $where);
+		$filter[$key . "id"] = $this["id"];
+		$set = new HasMany_DataObjectSet($class, $filter, $sort);
 		$set->setRelationENV($name, $key . "id");
 		
 		if($this->queryVersion == "state") {
@@ -2255,7 +2255,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name getHasOne
 	 *@access public
 	*/
-	public function getHasOne($name, $filter = array(), $sort = array()) {
+	public function getHasOne($name, $filter = null) {
 		$name = trim(strtolower($name));
 		
 		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true) . $this[$name . "id"];
@@ -2264,13 +2264,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		if(isset($this->has_one[$name])) {
-			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $this->has_one[$name])) {
+			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $this->has_one[$name]) && !$filter) {
 				return $this->fieldGet($name);
 			}
+			
 			if($this[$name . "id"] == 0)
 				return false;
 			
-			$response = DataObject::get($this->has_one[$name], array("id" => $this[$name . "id"]));
+			$filter["id"] = $this[$name . "id"];
+			$response = DataObject::get($this->has_one[$name], $filter);
 			
 			if($this->queryVersion == "state") {
 				$response->setVersion("state");

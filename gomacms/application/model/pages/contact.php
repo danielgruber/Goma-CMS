@@ -68,7 +68,7 @@ class contact extends Page
 					new captcha("captcha")
 				),
 				array(
-					new FormAction("submit", lang("save"))
+					new FormAction("submit", lang("lp_submit"))
 				));
 				
 				
