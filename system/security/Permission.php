@@ -35,7 +35,7 @@ class Permission extends DataObject
 		 *@name defaults
 		 *@access public
 		*/
-		public $defaults = array(
+		static $default = array(
 			"type"	=> "admins"
 		);
 		
@@ -68,7 +68,7 @@ class Permission extends DataObject
 		 *@name db_fields
 		 *@access public 
 		*/
-		public $db_fields = array(
+		static $db = array(
 			"name"			=> "varchar(100)",
 			"type"			=> "enum('all', 'users', 'admins', 'password', 'groups')",
 			"password"		=> "varchar(100)",
@@ -82,7 +82,7 @@ class Permission extends DataObject
 		 *@name has_one
 		 *@access public
 		*/
-		public $has_one = array(
+		static $has_one = array(
 			"inheritor"	=> "Permission"
 		);
 		
@@ -92,7 +92,7 @@ class Permission extends DataObject
 		 *@name many_many
 		 *@access public
 		*/
-		public $many_many = array(
+		static $many_many = array(
 			"groups"	=> "group"
 		);
 		
@@ -102,7 +102,7 @@ class Permission extends DataObject
 		 *@name indexes
 		 *@access public
 		*/
-		public $indexes = array(
+		static $index = array(
 			"name" => "INDEX"
 		);
 		

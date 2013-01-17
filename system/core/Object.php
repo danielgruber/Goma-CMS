@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
-  * $Version 3.2
+  * last modified: 17.01.2013
+  * $Version 3.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -83,7 +83,7 @@ abstract class Object
 				{
 						if(!empty($var))
 						{
-								return eval("return ".$class_name."::\$".$var.";");
+								return eval("return isset(".$class_name."::\$".$var.") ? ".$class_name."::\$".$var." : null;");
 						} else
 						{
 								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");

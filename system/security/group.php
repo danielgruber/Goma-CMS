@@ -55,7 +55,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@name belongs_many_many
 		 *@access public
 		*/
-		public $belongs_many_many = array(
+		static $belongs_many_many = array(
 			"users"			=> "user",
 			"permissions"	=> "Permission"
 		);

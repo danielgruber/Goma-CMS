@@ -20,7 +20,6 @@ class DataObjectClassInfo extends Extension
 		public function generate($class)
 		{
 				if(PROFILE) Profiler::mark("DataObjectClassInfo::generate");
-				DataObject::$donothing = true;
 				if(class_exists($class) && class_exists("DataObject") && is_subclass_of($class, "DataObject"))
 				{
 						
@@ -44,7 +43,6 @@ class DataObjectClassInfo extends Extension
 						}
 						
 						
-						$defaults = $c->GenerateDefaults();
 						$many_many = $c->GenerateMany_Many();
 						$db_fields = $c->generateDBFields();
 						$belongs_many_many = $c->GenerateBelongs_Many_Many();
@@ -161,7 +159,6 @@ class DataObjectClassInfo extends Extension
 						if(count($db_fields) > 0) ClassInfo::$class_info[$class]["db"] = $db_fields;
 						if(count($many_many) > 0) ClassInfo::$class_info[$class]["many_many"] = $many_many;
 						if(count($belongs_many_many) > 0) ClassInfo::$class_info[$class]["belongs_many_many"] = $belongs_many_many;
-						if(count($defaults) > 0) ClassInfo::$class_info[$class]["defaults"] = $defaults;
 						//ClassInfo::$class_info[$class]["prefix"] = $c->prefix;
 						if(count($searchable_fields) > 0) ClassInfo::$class_info[$class]["search"] = $searchable_fields;
 						if(count($indexes) > 0) ClassInfo::$class_info[$class]["index"] = $indexes;
@@ -264,8 +261,11 @@ class DataObjectClassInfo extends Extension
 					if($casting = Object::instance($class)->generateCasting())
 						if(count($casting) > 0)
 							ClassInfo::$class_info[$class]["casting"] = $casting;
+					
+					if($defaults = Object::instance($class)->generateDefaults())
+						if(count($defaults) > 0)
+							ClassInfo::$class_info[$class]["defaults"] = $defaults;
 				}
-				DataObject::$donothing = false;
 				
 				if(PROFILE) Profiler::unmark("DataObjectClassInfo::generate");
 		}

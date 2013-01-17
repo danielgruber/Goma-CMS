@@ -38,7 +38,7 @@ class Newsettings extends DataObject implements HistoryData {
 	 *
 	 *@name defaults
 	*/
-	public $defaults = array(
+	static $default = array(
 		"titel"				=> "Goma - Open Source CMS / Framework",
 		"gzip"				=> "0",
 		"register_email"	=> "1",

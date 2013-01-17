@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 14.01.2013
+  * last modified: 17.01.2013
   * $Version 3.3.25
 */
 
@@ -543,12 +543,14 @@ class Core extends object
 			
 			log_error("Code: " . $code . ", Name: " . $name . ", Details: ".$message.", URL: " . $_SERVER["REQUEST_URI"]);
 			
-			if(($code != 1 && $code != 2 && $code != 5) || !$callDebug) {
+			if(($code != 1 && $code != 2 && $code != 5) && $callDebug) {
 	 	 		  debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace:\n" . print_r(debug_backtrace(), true));
+	 	 	} else {
+		 	 	debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace unavailable due to call");
 	 	 	}
 			
 			if(is_object(self::$requestController)) {
-				echo self::$requestController->__throwError($code, $name, $message);
+				echo self::$requestController->__throwError($code, $name, $message, $callDebug);
 				exit;
 			} else {
 				if(Core::is_ajax())
@@ -559,6 +561,7 @@ class Core extends object
 					$template->assign('errcode',convert::raw2text($code));
 					$template->assign('errname',convert::raw2text($name));
 					$template->assign('errdetails',$message);
+					$template->assign("throwdebug", $callDebug);
 					HTTPresponse::sendHeader();
 			 		
 					
@@ -1088,10 +1091,10 @@ function dbescape($str)
 *@param string - errordetails
 *@return  null
 */ 
-function throwerror($errcode, $errname, $errdetails, $http_status = 500)
+function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwDebug = true)
 {
 		HTTPResponse::setResHeader($http_status);
-		return Core::throwError($errcode, $errname, $errdetails);
+		return Core::throwError($errcode, $errname, $errdetails, $throwDebug);
 }
 /**
 * shows an page with error details and nothing else

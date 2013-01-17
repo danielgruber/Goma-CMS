@@ -124,7 +124,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name has_one
 		 *@access public
 		*/
-		public $has_one = array("avatar" => "Uploads"); 
+		static $has_one = array("avatar" => "Uploads"); 
 		
 		/**
 		 * every user has additional groups
@@ -132,7 +132,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name many_many
 		 *@access public
 		*/
-		public $many_many = array("groups" => "group");
+		static $many_many = array("groups" => "group");
 		
 		/**
 		 * users are activated by default
@@ -140,7 +140,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name defaults
 		 *@access public
 		*/
-		public $defaults = array(
+		static $default = array(
 				'status'	=> '1'
 		);
 		

@@ -60,7 +60,7 @@ class Uploads extends DataObject {
 	 *@name has_one
 	 *@access public
 	*/
-	public $has_one = array(
+	static $has_one = array(
 		"collection"		=> "Uploads"
 	);
 	
@@ -553,7 +553,7 @@ class ImageUploads extends Uploads {
 	/**
 	 * some defaults
 	*/
-	public $defaults = array(
+	static $default = array(
 		"thumbLeft"		=> 0,
 		"thumbTop"		=> 0,
 		"thumbWidth"	=> 100,

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 17.01.2013
   * $Version 1.2
 */
 
@@ -375,13 +375,13 @@ class Box extends Boxes
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $has_one = array();
+		static $has_one = array();
 		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $many_many = array();
+		static $many_many = array();
 		
 		/**
 		 * prefix of table

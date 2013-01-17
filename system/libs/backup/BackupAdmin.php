@@ -280,7 +280,7 @@ if(class_exists("NewSettings")) {
 		 *@name db_fields
 		 *@access public
 		*/ 
-		public $db_fields = array(
+		static $db = array(
 			"excludeFolders" => "text"
 		);
 		

@@ -3,8 +3,8 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.01.2013
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -29,25 +29,25 @@ class Page extends pages
 	 * don't use from parent-class
 	 * there would be much tables, which we don't need
 	*/
-	public $db_fields = array();
+	static $db = array();
 	/**
 	 * don't use from parent-class
 	 * there would be much tables, which we don't need
 	*/
-	public $has_one = array();
+	static $has_one = array();
 	/**
 	 * don't use from parent-class
 	 * there would be much tables, which we don't need
 	*/
-	public $many_many = array();
+	static $many_many = array();
 	/**
 	 * belongs-many-many
 	*/
-	public $belongs_many_many = array();
+	static $belongs_many_many = array();
 	/**
 	 * we need no indexes, indexes are in parent class
 	*/
-	public $indexes = array(
+	static $index = array(
 		
 	);
 	/**

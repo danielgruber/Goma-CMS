@@ -361,7 +361,7 @@ class RequestHandler extends Object
 		 *@name __throwError
 		 *@access public
 		*/
-		public function __throwError($errcode, $errname, $errdetails) {
+		public function __throwError($errcode, $errname, $errdetails, $debug = true) {
 			
 			if(Core::is_ajax())
 				HTTPResponse::setResHeader(200);
@@ -371,6 +371,7 @@ class RequestHandler extends Object
 				$template->assign('errcode',convert::raw2text($errcode));
 				$template->assign('errname',convert::raw2text($errname));
 				$template->assign('errdetails',$errdetails);
+				$template->assign("throwdebug", $debug);
 				HTTPresponse::sendHeader();
  				
 				echo $template->display('framework/error.html');

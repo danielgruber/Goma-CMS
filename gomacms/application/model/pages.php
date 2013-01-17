@@ -93,7 +93,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name has_one
 		 *@var array
 		*/
-		public $has_one = array(	'parent' 				=> 'pages', 
+		static $has_one = array(	'parent' 				=> 'pages', 
 									"read_permission" 		=> "Permission",
 									"edit_permission"		=> "Permission",
 									"publish_permission" 	=> "Permission");
@@ -104,7 +104,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name has_many
 		 *@var array
 		*/
-		public $has_many = array('children' => 'pages');
+		static $has_many = array('children' => 'pages');
 		
 		/**
 		 * link-tracking
@@ -112,14 +112,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name many_many
 		 *@access public
 		*/
-		public $many_many = array(
+		static $many_many = array(
 			"UploadTracking"	=> "Uploads"
 		);
 		
 		/**
 		 * defaults
 		*/
-		public $defaults = array(	"parenttype" 	=> "root", 
+		static $default = array(	"parenttype" 	=> "root", 
 									"search" 		=> 1,
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
@@ -514,34 +514,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		
 		//!Validators
 		
-		/**
-		 * local argument sql
-		 *
-		 *@name argumentSQL
-		 *@access public
-		*/
-		public function argumentSQL(&$query) {
-			$rank = Permission::getRank() - 1;
-			
-			// rights
-			if(Permission::check(10) && (!isset($_SESSION['sites_ansicht']) || $_SESSION['sites_ansicht'] != lang("user"))) {
-				// just add nothing ;)
-			} else if(member::login()) {
-				if(isset($this->many_many_tables["viewer_groups"]))
-				{
-						$table = $this->many_many_tables["viewer_groups"]["table"];
-						$data = $this->many_many_tables["viewer_groups"];
-				} else
-				{
-						return false;
-				}
-				$query->addFilter('viewer_type IN ("all", "password", "login", "") OR (viewer_type = "rights" AND `rights` <= '. Permission::getRank() .') OR (viewer_type = "groups" AND (SELECT count(*) FROM '.DB_PREFIX . $table.' AS '.$table.' WHERE '.$table.'.'.$data["field"].' = pages.id AND groupid IN ("'.implode('","', member::groupids()).'")))');
-			} else {
-				$query->addFilter(array("viewer_type" => array("", "all", "password")));
-			}
-			
-			
-		}
 		
 		/**
 		 * validates the path
@@ -1790,7 +1762,7 @@ class UploadsPageBacktrace extends DataObjectExtension {
 	 *
 	 *@name belongs_many_many
 	*/
-	public $belongs_many_many = array(
+	static $belongs_many_many = array(
 		"linkingPages"	=> "pages"
 	);
 }

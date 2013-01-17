@@ -24,7 +24,7 @@ class VirtualPage extends Page {
 	/**
 	 * relations
 	*/
-	public $has_one = array(
+	static $has_one = array(
 		"regardingPage" => "pages"
 	);
 	

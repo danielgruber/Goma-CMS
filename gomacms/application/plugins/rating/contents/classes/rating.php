@@ -333,7 +333,7 @@ class RatingDataObjectExtension extends DataObjectExtension {
 	/**
 	 * set defaults
 	*/
-	public $defaults = array(
+	static $default = array(
 		"rating" => 0
 	);
 	/**

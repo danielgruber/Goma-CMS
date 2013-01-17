@@ -917,7 +917,6 @@ class ClassInfo extends Object
 						
 						define("CLASS_INFO_GENERATED", true);
 						
-						DataObject::$donothing = false; // dataobject reset
 						Object::$cache_singleton_classes = array(); // object reset
 						self::$set_save_vars = array(); // class_info reset
 						

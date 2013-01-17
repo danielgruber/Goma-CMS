@@ -9,22 +9,15 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 15.01.2013
-  * $Version: 4.6.17
+  * last modified: 17.01.2013
+  * $Version: 4.7
 */
 
 defined('IN_GOMA') OR die();
 
 abstract class DataObject extends ViewAccessableData implements PermProvider, SaveVarSetter
 {
-	/**
-	 * temporary while generating
-	*/
-	static $donothing = false;
-	
-	/**
-	 * OPTIONS PROVIDED TO CONFIGURE THIS CLASS
-	*/
+
 	/**
 	 * default sorting 
 	 *
@@ -49,57 +42,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@default false
 	*/
 	public $showWithoutRight = false;
-	
-	/**
-	 * relations
-	*/
-	
-	/**
-	 * has one
-	 *@name has_one
-	 *@var array
-	*/
-	public $has_one = array();
-	
-	/**
-	 * has many
-	 * a row has many childs
-	 *@name has_many
-	 *@var array
-	*/
-	public $has_many = array();
-	
-	/**
-	 * many many
-	 * many has many
-	 *@name many_many
-	 *@var array
-	*/
-	public $many_many = array();
-	
-	/**
-	 * many many
-	 * many has many
-	 *@name belongs_many_many
-	 *@var array
-	*/
-	public $belongs_many_many = array();
-	
-	/**
-	 * many-many-tables
-	 *@name many_many_tables
-	 *@access public
-	 *@var array
-	*/
-	public $many_many_tables = array();
-	
-	/**
-	 * many-many-extra-fields
-	 *@name many_many_extra_fields
-	 *@access public
-	 *@var array
-	*/
-	public $many_many_extra_fields = array();
 	
 	/**
 	 * prefix for table_name
@@ -466,29 +408,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param string|object
 	 *@param array|string - fields
 	*/
-	public function __construct($record = null)
-	{		
-				
-				
+	public function __construct($record = null) {			
 			parent::__construct();
-			
-			if(self::$donothing)
-				return ;
-			
-			if(PROFILE) Profiler::mark("DataObject::__construct");
-			
-			if($myinfo = ClassInfo::getInfo($this->class))
-			{
-					if(isset($myinfo['has_one']))
-					{
-							$this->has_one = isset($myinfo['has_one']) ? $myinfo['has_one'] : array();
-							$this->has_many = isset($myinfo['has_many']) ? $myinfo['has_many'] : array();
-							$this->many_many = isset($myinfo['many_many']) ? $myinfo['many_many'] : array();
-							$this->belongs_many_many = isset($myinfo['belongs_many_many']) ? $myinfo['belongs_many_many'] : array();
-							$this->many_many_tables = isset($myinfo['many_many_tables']) ? $myinfo['many_many_tables'] : array();
-							$this->defaults = array_merge(ArrayLib::map_key("strtolower", $this->defaults), isset($myinfo['defaults']) ? $myinfo['defaults'] : array());
-					}
-			}
 			
 			$this->data = array_merge(array(
 				"class_name"	=> $this->class,
@@ -496,10 +417,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				"created"		=> NOW,
 				"autorid"		=> member::$id
 			), $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
-		
-			if(PROFILE) Profiler::unmark("DataObject::__construct");
-			
-			
 	}
 	
 	/**
@@ -929,13 +846,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$oldid = $data->versionid;
 				
 				// copy many-many-relations
-				foreach($this->many_many as $name => $class) {
+				foreach($this->ManyMany() as $name => $class) {
 					if(!isset($newdata[$name . "ids"]) && !isset($newdata[$name]))
 						$newdata[$name . "ids"] = $this->getRelationIDs($name);
 					else if(!isset($newdata[$name . "ids"]) && is_array($newdata[$name]))
 						$newdata[$name . "ids"] = $newdata[$name];
 				}
-				foreach($this->belongs_many_many as $name => $class) {
+				foreach($this->BelongsManyMany() as $name => $class) {
 					if(!isset($newdata[$name . "ids"]) && !isset($newdata[$name]))
 						$newdata[$name . "ids"] = $this->getRelationIDs($name);
 					else if(!isset($newdata[$name . "ids"]) && is_array($newdata[$name]))
@@ -1011,8 +928,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 				
-		if($this->has_one) {
-			foreach($this->has_one as $key => $value) {
+		if($has_one = $this->hasOne()) {
+			foreach($has_one as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "DataObject")) {
 					// we just write this if we have really new data
 					// first check if there is data
@@ -1030,10 +947,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$many_many_objects = array();
 		$many_many_data = array();
+		$many_many_tables = $this->ManyManyTables();
 		
 		// here the magic for many-many happens
-		if($this->many_many) {
-			foreach($this->many_many as $key => $value) {
+		if($many_many = $this->ManyMany()) {
+			foreach($many_many as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
 					$many_many_objects[$key] = $newdata[$key];
 					$many_many_data[$key] = $value;
@@ -1043,8 +961,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
-		if($this->belongs_many_many) {
-			foreach($this->belongs_many_many as $key => $value) {
+		if($belongs_many_many = $this->BelongsManyMany()) {
+			foreach($belongs_many_many as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
 					$many_many_objects[$key] = $newdata[$key];
 					$many_many_data[$key] = $value;
@@ -1098,8 +1016,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 				
 				// many-many
-				if(!$forceChange && $this->many_many)
-					foreach($this->many_many as $name => $table)
+				if(!$forceChange && $this->ManyMany())
+					foreach($this->ManyMany() as $name => $table)
 					{
 							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
 							{
@@ -1109,10 +1027,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 				
 				// many-many
-				if(!$forceChange && $this->belongs_many_many)
-					foreach($this->belongs_many_many as $name => $table)
+				if(!$forceChange && $this->BelongsManyMany())
+					foreach($this->BelongsManyMany() as $name => $table)
 					{
-							
 							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
 							{
 									$forceChange = true;
@@ -1121,8 +1038,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 				
 				// has-many
-				if(!$forceChange && $this->has_many)
-					foreach($this->has_many as $name => $class)
+				if(!$forceChange && $this->hasMany())
+					foreach($this->hasMany() as $name => $class)
 					{
 							if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
 								$newdata[$name . "ids"] = $newdata[$name];
@@ -1186,14 +1103,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		// relation-data
 		
 		foreach($many_many_objects as $key => $object) {
-			$object->setRelationENV($key, $this->many_many_tables[$key]["extfield"], $this->many_many_tables[$key]["table"], $this->many_many_tables[$key]["field"], $this->data["versionid"], isset($many_many_data[$key]["extraFields"]) ? $many_many_data[$key]["extraFields"] : array());
+			$object->setRelationENV($key, $many_many_tables[$key]["extfield"], $many_many_tables[$key]["table"], $many_many_tables[$key]["field"], $this->data["versionid"], isset($many_many_data[$key]["extraFields"]) ? $many_many_data[$key]["extraFields"] : array());
 			$object->write(false, true);
 			unset($this->data[$key . "ids"]);
 		}
 		
 		// many-many
-		if($this->many_many)
-			foreach($this->many_many as $name => $table)
+		if($this->ManyMany())
+			foreach($this->ManyMany() as $name => $table)
 			{
 					if(isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
 					{
@@ -1203,8 +1120,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					
 			}
 		
-		if($this->belongs_many_many)
-			foreach($this->belongs_many_many as $name => $table)
+		if($this->BelongsManyMany())
+			foreach($this->BelongsManyMany() as $name => $table)
 			{
 					
 					if(isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
@@ -1216,8 +1133,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		
 		// has-many
-		if($this->has_many)
-			foreach($this->has_many as $name => $class)
+		if($this->hasMany())
+			foreach($this->hasMany() as $name => $class)
 			{
 				if(isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "HasMany_DataObjectSet")) {	
 					$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
@@ -1397,7 +1314,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 					
 					// clean-up-many-many
-					foreach($this->generateManyManyTables() as $data) {
+					foreach($this->ManyManyTables() as $data) {
 						$manipulation[$data["table"]] = array(
 							"table" 	=> $data["table"],
 							"command"	=> "delete",
@@ -1526,23 +1443,26 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	protected function set_many_many_manipulation($manipulation, $relation, $ids)
 	{
-			if(isset($this->many_many[$relation]))
-			{
-					$object = $this->many_many[$relation];
+			$many_many = $this->ManyMany();
+			$belongs_many_many = $this->BelongsManyMany();
+			$many_many_tables = $this->ManyManyTables();
+			
+			if(isset($many_many[$relation])) {
+					$object = $many_many[$relation];
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
 					
-			} else if(isset($this->belongs_many_many[$relation]))
+			} else if(isset($belongs_many_many[$relation]))
 			{
-					$object = $this->belongs_many_many[$relation];
+					$object = $belongs_many_many[$relation];
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
 					
 			}
-			if(isset($this->many_many_tables[$relation]))
+			if(isset($many_many_tables[$relation]))
 			{
-					$table = $this->many_many_tables[$relation]["table"];
-					$data = $this->many_many_tables[$relation];
+					$table = $many_many_tables[$relation]["table"];
+					$data = $many_many_tables[$relation];
 			} else
 			{
 					return false;
@@ -2079,18 +1999,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function is_many_many($name, $id)
 	{
+			$many_many = $this->ManyMany();
+			$belongs_many_many = $this->belongsManyMany();
+			$many_many_tables = $this->ManyManyTables();
 			// there are two ways defining a many-many-relation: with belongs_many_many and many_many
-			if(isset($this->many_many[$name]))
+			if(isset($many_many[$name]))
 			{
-					$_table = $this->many_many[$name];
-
-					$__table = classinfo::$class_info[$_table]["table"];
+					$relationObject = $many_many[$name]; // object refering to
+					$relationObjectTable = ClassInfo::$class_info[ClassInfo::$class_info[$relationObject]["baseclass"]]["table"];; // table of object refering to
 					
-			} else if(isset($this->belongs_many_many[$name]))
+			} else if(isset($belongs_many_many[$name]))
 			{
-					$_table = $this->belongs_many_many[$name];
-
-					$__table = classinfo::$class_info[$_table]["table"];
+					$relationObject = $belongs_many_many[$name]; // object refering to
+					$relationObjectTable = ClassInfo::$class_info[ClassInfo::$class_info[$relationObject]["baseclass"]]["table"]; // table of Object refering to
 					
 			}
 			
@@ -2102,10 +2023,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			 * )
 			*/
 			
-			if(isset($this->many_many_tables[$name]))
+			if(isset($many_many_tables[$name]))
 			{
-					$table = $this->many_many_tables[$name]["table"];
-					$data = $this->many_many_tables[$name];
+					$relationTable = $many_many_tables[$name]["table"];
+					$data = $many_many_tables[$name];
 			} else
 			{
 					return false;
@@ -2117,12 +2038,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			// - third argument: Joins - connects the tables through the relation-table
 			// - fourth: groupby - not used here
 			return (
-						DataObject::count(	$_table, 
-											array(	$__table.'.id' 				=> $id, 
-													$this->Table() . '.id' 	=> $this["versionid"]), 
+						DataObject::count(	$relationObject, 
+											array(	$relationObjectTable.'.id' 				=> $id, 
+													$this->BaseTable() . '.id' 	=> $this["versionid"]), 
 											array(
-												' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.'.$_table . 'id = '.$__table.'.id ', // Join other table with many-many-table
-												' INNER JOIN '.DB_PREFIX . $this->Table().' AS '.$this->Table().' ON '.$table.'.'. $data["field"] . ' = '.$this->Table().'.id ' // join this table with many-many-table
+												' INNER JOIN '.DB_PREFIX . $relationTable.' AS '.$relationTable.' ON '.$relationTable.'.'.$relationObject . 'id = '.$relationObjectTable.'.id ', // Join other table with many-many-table
+												' INNER JOIN '.DB_PREFIX . $this->BaseTable().' AS '.$this->Table().' ON '.$relationTable.'.'. $data["field"] . ' = '.$this->Table().'.id ' // join this table with many-many-table
 											)
 										) > 0
 					);
@@ -2138,7 +2059,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getRelationIDs($relname) {
 		$relname = trim(strtolower($relname));
 		
-		if(isset($this->has_many[$relname])) {
+		// get all config
+		$has_many = $this->hasMany();
+		$many_many = $this->ManyMany();
+		$belongs_many_many = $this->BelongsManyMany();
+		$many_many_tables = $this->ManyManyTables();
+		
+		if(isset($has_many[$relname])) {
 				// has-many
 				/**
 				 * getMany returns a DataObject
@@ -2160,7 +2087,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				} else {
 					return array();
 				}
-		} else if(isset($this->many_many[$relname]) || isset($this->belongs_many_many[$relname])) {
+		} else if(isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
 			if(isset($this->data[$relname . "ids"]))
 				return $this->data[$relname . "ids"];
 			
@@ -2172,10 +2099,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			 * )
 			*/
 			
-			if(isset($this->many_many_tables[$relname]))
+			if(isset($many_many_tables[$relname]))
 			{
-					$table = $this->many_many_tables[$relname]["table"]; // relation-table
-					$data = $this->many_many_tables[$relname];
+					$table = $many_many_tables[$relname]["table"]; // relation-table
+					$data = $many_many_tables[$relname];
 			} else
 			{
 					return false;
@@ -2206,7 +2133,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$name = trim(strtolower($name));
 		
-		if(!isset($this->has_many[$name]))
+		$has_many = $this->hasMany();
+		if(!isset($has_many[$name]))
 		{
 			$debug = debug_backtrace();
 			throwError(6, "PHP-Error", "No Has-many-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
@@ -2217,7 +2145,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return $this->viewcache[$cache];
 		}
 		
-		$class = $this->has_many[$name];
+		$class = $has_many[$name];
 		$key = array_search($this->class, ClassInfo::$class_info[$class]["has_one"]);
 		if($key === false)
 		{
@@ -2258,13 +2186,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getHasOne($name, $filter = null) {
 		$name = trim(strtolower($name));
 		
-		$cache = "has_one_{$name}_".var_export($filter, true)."_".var_export($sort, true) . $this[$name . "id"];
+		$cache = "has_one_{$name}_".var_export($filter, true) . $this[$name . "id"];
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
 		
-		if(isset($this->has_one[$name])) {
-			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $this->has_one[$name]) && !$filter) {
+		$has_one = $this->hasOne();
+		if(isset($has_one[$name])) {
+			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $has_one[$name]) && !$filter) {
 				return $this->fieldGet($name);
 			}
 			
@@ -2272,7 +2201,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				return false;
 			
 			$filter["id"] = $this[$name . "id"];
-			$response = DataObject::get($this->has_one[$name], $filter);
+			$response = DataObject::get($has_one[$name], $filter);
 			
 			if($this->queryVersion == "state") {
 				$response->setVersion("state");
@@ -2302,21 +2231,25 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return $this->viewcache[$cache];
 		}
 		
+		// get config
+		$many_many = $this->ManyMany();
+		$belongs_many_many = $this->BelongsManyMany();
+		$many_many_tables = $this->ManyManyTables();
 		
 		// first we get the object for this connection
-		if(isset($this->many_many[$name]))
+		if(isset($many_many[$name]))
 		{
-			$object = $this->many_many[$name]; // object
+			$object = $many_many[$name]; // object
 			$table = ClassInfo::$class_info[$object]["table"]; // table
-		} else if(isset($this->belongs_many_many[$name]))
+		} else if(isset($belongs_many_many[$name]))
 		{
-			$object = $this->belongs_many_many[$name]; // object
+			$object = $belongs_many_many[$name]; // object
 			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else {
 			throwError(6, 'PHP-Error', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
 		
-		$data = $this->many_many_tables[$name]; // this contains the field for this object and the other
+		$data = $many_many_tables[$name]; // this contains the field for this object and the other
 		
 		$where = (array) $filter;
 		// if we know the ids
@@ -2364,20 +2297,26 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function setManyMany($name, $value) {
 		$name = substr($name, 3);
+		
+		// get config
+		$many_many = $this->ManyMany();
+		$belongs_many_many = $this->BelongsManyMany();
+		$many_many_tables = $this->ManyManyTables();
+		
 		// first we get the object for this connection
-		if(isset($this->many_many[$name]))
+		if(isset($many_many[$name]))
 		{
-			$object = $this->many_many[$name]; // object
+			$object = $many_many[$name]; // object
 			$table = ClassInfo::$class_info[$object]["table"]; // table
-		} else if(isset($this->belongs_many_many[$name]))
+		} else if(isset($belongs_many_many[$name]))
 		{
-			$object = $this->belongs_many_many[$name]; // object
+			$object = $belongs_many_many[$name]; // object
 			$table = ClassInfo::$class_info[$object]["table"]; // table
 		} else {
 			throwError(6, 'Logical Exception', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
 		
-		$data = $this->many_many_tables[$name];
+		$data = $many_many_tables[$name];
 		
 		if(is_object($value)) {
 			if(is_a($value, "DataObjectSet")) {
@@ -2410,16 +2349,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$name = trim(strtolower($name));
 		
+		// get config
+		$many_many = $this->ManyMany();
+		$belongs_many_many = $this->BelongsManyMany();
+		$many_many_tables = $this->ManyManyTables();
+		
 		// first we get the object for this connection
-		if(isset($this->many_many[$name]))
-		{
-			$object = $this->many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table"]; // table
-		} else if(isset($this->belongs_many_many[$name]))
-		{
-			$object = $this->belongs_many_many[$name]; // object
-			$table = ClassInfo::$class_info[$object]["table"]; // table
-		} else {
+		if(!isset($many_many[$name]) && !isset($belongs_many_many[$name])) {
 			throwError(6, 'Logical Exception', "Many-Many-Relation ".convert::raw2text($name)." does not exist!");
 		}
 		
@@ -2466,7 +2402,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function editor() {
 		if($this->fieldGet("editorid") != 0) {
-			return DataObject::get($this->has_one["editor"],array('id' => $this['autorid']));
+			return DataObject::get("user",array('id' => $this['autorid']));
 		} else
 			return $this->autor();
 	}
@@ -2499,24 +2435,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function ID() {
 		return ($this->isField("recordid")) ? $this->fieldGet("recordid") : $this->fieldGet("id");
 	}
-	/**
-	 * gets the baseclass of the current record
-	 *@name getBaseClass
-	 *@access public
-	*/
-	public function BaseClass()
-	{
-			return isset(ClassInfo::$class_info[$this->class]["baseclass"]) ? ClassInfo::$class_info[$this->class]["baseclass"] : $this->class;	
-	}
-	/**
-	 * gets the base-table
-	 *
-	 *@name getBaseTable
-	 *@access public
-	*/
-	public function BaseTable() {
-		return (ClassInfo::$class_info[ClassInfo::$class_info[$this->class]["baseclass"]]["table"]);
-	}
+	
 	/**
 	 * gets the versionid
 	 *@name getVersionId
@@ -2715,8 +2634,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 			
-			
-			
 			// some specific addons for relations
 			if(is_array($filter))
 			{
@@ -2727,11 +2644,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							{										
 									if(is_array($value))
 									{
-											$_table = isset(ClassInfo::$class_info[$this->class]["many_many"][$key]) ? ClassInfo::$class_info[$this->class]["many_many"][$key] : ClassInfo::$class_info[$this->class]["belongs_many_many"][$key];
-											if($_table)
+											$object = isset(ClassInfo::$class_info[$this->class]["many_many"][$key]) ? ClassInfo::$class_info[$this->class]["many_many"][$key] : ClassInfo::$class_info[$this->class]["belongs_many_many"][$key];
+											if($object)
 											{
-													$__table = ClassInfo::$class_info[$_table]["table"];
-													if(isset(ClassInfo::$class_info[$class]["many_many_tables"][$key]))
+													$objectTable = ClassInfo::$class_info[ClassInfo::$class_info[$object]["baseclass"]]["table"];
+													if(isset(ClassInfo::$class_info[$this->class]["many_many_tables"][$key]))
 													{
 															$table = ClassInfo::$class_info[$this->class]["many_many_tables"][$key]["table"];
 															$data = ClassInfo::$class_info[$this->class]["many_many_tables"][$key];
@@ -2747,26 +2664,24 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 																			'.$table.'.'.$data["field"]. ' = '.$baseTable.'.id
 																		'; // join many-many-table with BaseTable table
 													$query->from[] = ' INNER JOIN 
-																			'.DB_PREFIX . $__table.' 
+																			'.DB_PREFIX . $objectTable.' 
 																		AS 
-																			'.$__table.' 
+																			'.$objectTable.' 
 																		ON 
-																			'.$table.'.'.$__table . 'id = '.$__table.'.id 
+																			'.$table.'.'.$objectTable . 'id = '.$objectTable.'.id 
 																		 '; // join other table with many-many-table
 											}
 											foreach($value as $field => $val)
 											{
-													$filter[$__table . '.' . $field] = $val;
+													$filter[$objectTable . '.' . $field] = $val;
 											}
 											
 											$query->removeFilter($key);
 									} else
 									{
-											$_table = ClassInfo::$class_info[$this->class]["many_many"][$key];
-											if($_table)
+											if(ClassInfo::$class_info[$this->class]["many_many"][$key])
 											{
-													$__table = ClassInfo::$class_info[$_table]["table"];
-													if(isset($this->many_many_tables[$key]))
+													if(isset(ClassInfo::$class_info[$this->class]["many_many_tables"][$key]))
 													{
 															$table = ClassInfo::$class_info[$this->class]["many_many_tables"][$key]["table"];
 															$data = ClassInfo::$class_info[$this->class]["many_many_tables"][$key];
@@ -2788,11 +2703,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							
 							/*// has-one
 							
-							if(isset($this->has_one[$key]))
+							$has_one = $this->hasOne();
+							if(isset($has_one[$key]))
 							{
 									if(is_array($value))
 									{
-											$c = $this->has_one[$key];
+											$c = $has_one[$key];
 											$table = ClassInfo::$class_info[$c]["table"];
 											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
 											unset($filter[$key]);
@@ -3499,7 +3415,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function consolidate() {
-		foreach($this->many_many_tables as $name => $data) {
+		foreach($this->manyManyTables() as $name => $data) {
 			$this->getRelationIDs($name);
 		}
 		return $this;
@@ -3596,6 +3512,52 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
+	 * has-one-relations
+	 *
+	 *@name hasOne
+	*/
+	public function hasOne() {
+		return (isset(ClassInfo::$class_info[$this->class]["has_one"]) ? ClassInfo::$class_info[$this->class]["has_one"] : false);
+	}
+	
+	/**
+	 * has-many-relations
+	 *
+	 *@name hasMany
+	*/
+	public function hasMany() {
+		return (isset(ClassInfo::$class_info[$this->class]["has_many"]) ? ClassInfo::$class_info[$this->class]["has_many"] : false);
+	}
+	
+	/**
+	 * many-many-relations
+	 *
+	 *@name ManyMany
+	*/
+	public function ManyMany() {
+		return (isset(ClassInfo::$class_info[$this->class]["many_many"]) ? ClassInfo::$class_info[$this->class]["many_many"] : false);
+	}
+	
+	/**
+	 * many-many-relations belonging to this
+	 *
+	 *@name BelongsManyMany
+	*/
+	public function BelongsManyMany() {
+		return (isset(ClassInfo::$class_info[$this->class]["belongs_many_many"]) ? ClassInfo::$class_info[$this->class]["belongs_many_many"] : false);
+	}
+	
+	/**
+	 * many-many-tables belonging to this
+	 *
+	 *@name ManyManyTables
+	*/
+	public function ManyManyTables() {
+		return (isset(ClassInfo::$class_info[$this->class]["many_many_tables"]) ? ClassInfo::$class_info[$this->class]["many_many_tables"] : false);
+	}
+	
+	
+	/**
 	 * returns if a DataObject is versioned
 	 *
 	 *@name Versioned
@@ -3608,6 +3570,26 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return true;
 			
 		return false;
+	}
+	
+	/**
+	 * gets the baseclass of the current record
+	 *@name getBaseClass
+	 *@access public
+	*/
+	public function BaseClass()
+	{
+			return isset(ClassInfo::$class_info[$this->class]["baseclass"]) ? ClassInfo::$class_info[$this->class]["baseclass"] : $this->class;	
+	}
+	
+	/**
+	 * gets the base-table
+	 *
+	 *@name getBaseTable
+	 *@access public
+	*/
+	public function BaseTable() {
+		return (ClassInfo::$class_info[ClassInfo::$class_info[$this->class]["baseclass"]]["table"]);
 	}
 	
 	//!Dev-Area: Generation of DataBase
@@ -3634,7 +3616,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if(self::Versioned($this->class)) {
 				$db_fields["snap_priority"] = "int(10)";
-				$this->defaults["snap_priority"] = 2;
 			}
 			
 			if(!isset($indexes["recordid"]))
@@ -3887,7 +3868,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// clean up many-many-tables
-			foreach($this->many_many_tables as $name => $data) {
+			foreach($this->manyManyTables() as $name => $data) {
 				$sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." = 0 OR ". $data["extfield"] ." = 0";
 				if(SQL::Query($sql)) {
 					if(SQL::affected_rows() > 0)
@@ -3911,7 +3892,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return array(	
 					'id'			=> 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
 					'last_modified' => 'date()',
-					'class_name' 	=> 'enum("'.implode('","', array_merge(classinfo::getChildren($class), array($class))).'")',
+					'class_name' 	=> 'enum("'.implode('","', array_merge(Classinfo::getChildren($class), array($class))).'")',
 					"created"		=> "date()"
 				);
 		} else {
@@ -3972,7 +3953,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function generateHas_one($parents = true) {
 		
-		$has_one = $this->has_one;
+		$has_one = self::getStatic($this->class, "has_one");
 		foreach($this->LocalcallExtending("Has_One") as $has_ones) {
 			$has_one = array_merge($has_one, $has_ones);
 			unset($has_ones);
@@ -3994,7 +3975,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function generateHas_many() {
 		
-		$has_many = $this->has_many;
+		$has_many = self::getStatic($this->class, "has_many");
 		foreach($this->LocalcallExtending("Has_Many") as $has_manys) {
 			$has_many = array_merge($has_many, $has_manys);
 			unset($has_manys);
@@ -4016,7 +3997,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function generateMany_many($parents = true) {
-		$many_many = $this->many_many;
+		$many_many = self::getStatic($this->class, "many_many");
 		foreach($this->LocalcallExtending("many_many") as $many_manys) {
 			$many_many = array_merge($many_many, $many_manys);
 			unset($many_manys);
@@ -4038,7 +4019,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function generateBelongs_many_many($parents = true) {
-		$belongs_many_many = $this->belongs_many_many;
+		$belongs_many_many = self::getStatic($this->class, "belongs_many_many");
 		foreach($this->LocalcallExtending("belongs_many_many") as $belongs_many_manys) {
 			$belongs_many_many = array_merge($belongs_many_many, $belongs_many_manys);
 			unset($belongs_many_manys);
@@ -4067,6 +4048,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			// generate extra-fields
 			if(isset($this->many_many_extra_fields[$key])) {
 				$extraFields = $this->many_many_extra_fields[$key];
+			} else if(self::isStatic($this->class, "many_many_extra_fields")) {
+				$extraFields = self::getStatic($this->class, "many_many_extra_fields");
 			} else {
 				$extraFields = array();
 			}
@@ -4212,30 +4195,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		return $indexes;
 
 	}
-	/**
-	 * defaults
-	 *
-	 *@name defaults
-	 *@access public
-	*/
-	public function generateDefaults() {
-		$defaults = array();
-		// get parents
-		$parent = get_parent_class($this);
-		if($parent != "DataObject") {
-			$defaults = array_merge(Object::instance($parent)->generateDefaults(), $defaults);
-		}
-		
-		foreach($this->LocalcallExtending("defaults") as $defaultsext) {
-			$defaults = array_merge($defaults, $defaultsext);
-			unset($defaultsext);
-		}
-		
-		// free memory
-		unset($parent);
-		$defaults = arraylib::map_key($defaults, "strtolower");
-		return $defaults;
-	}
 	
 	/**
 	 * generates casting
@@ -4271,59 +4230,31 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 abstract class DataObjectExtension extends Extension
 {
 		/**
-		 * has_one
-		*/
-		public $has_one = array();
-		/**
-		 * important db-fields are for example fields you need to validate something in canRead or sth else you need to get specific data, which is very important
-		 *
-		 *@name important_db_fields
-		 *@access public
-		 *@var array
-		*/
-		public $important_db_fields = array();
-		/**
-		 * has-many
-		 *
-		 *@name has_many
-		 *@access public
-		*/
-		public $has_many = array();
-		/**
-		 * many-many
-		*/
-		public $many_many = array();
-		public $belongs_many_many = array();
-		/**
-		 * defaults
-		*/
-		public $defaults = array();
-		/**
 		 * gets DBFields
 		*/
 		public function DBFields() {
-				return (self::hasStatic($this->class, "db")) ? self::getStatic($this->class, "db") : (isset($this->db_fields) ? $this->db_fields : array());
+			return (self::hasStatic($this->class, "db")) ? self::getStatic($this->class, "db") : (isset($this->db_fields) ? $this->db_fields : array());
 		}
 		/**
 		 * gets has_one
 		*/ 
 		public function has_one() {
-			return $this->has_one;
+			return (self::hasStatic($this->class, "has_one")) ? self::getStatic($this->class, "has_one") : (isset($this->has_one) ? $this->has_one : array());
 		}
 		/**
 		 * gets has_many
 		*/ 
 		public function has_many() {
-			return $this->has_many;
+			return (self::hasStatic($this->class, "has_many")) ? self::getStatic($this->class, "has_many") : (isset($this->has_many) ? $this->has_many : array());
 		}
 		/**
 		 * many-many
 		*/
 		public function many_many() {
-			return $this->many_many;
+			return (self::hasStatic($this->class, "many_many")) ? self::getStatic($this->class, "many_many") : (isset($this->many_many) ? $this->many_many : array());
 		}
 		public function belongs_many_many() {
-			return $this->belongs_many_many;
+			return (self::hasStatic($this->class, "belongs_many_many")) ? self::getStatic($this->class, "belongs_many_many") : (isset($this->belongs_many_many) ? $this->belongs_many_many : array());
 		}
 		/**
 		 * defaults
@@ -4332,7 +4263,7 @@ abstract class DataObjectExtension extends Extension
 		 *@access public
 		*/
 		public function defaults() {
-			return $this->defaults;
+			return (self::hasStatic($this->class, "defaults")) ? self::getStatic($this->class, "defaults") : (isset($this->defaults) ? $this->defaults : array());
 		}
 		
 		/**
@@ -4349,5 +4280,15 @@ abstract class DataObjectExtension extends Extension
 				}
 				parent::setOwner($object);
 				return $this;
+		}
+		
+		/**
+		 * defaults
+		 *
+		 *@name defaults
+		 *@access public
+		*/
+		public function generateDefaults() {		
+			return array();
 		}
 }

@@ -30,7 +30,7 @@ class contact extends Page
 		/**
 		 * defaults
 		*/
-		public $defaults = array(
+		static $default = array(
 			"requireemailfield" => 1
 		);
 		

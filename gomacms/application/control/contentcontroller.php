@@ -231,7 +231,7 @@ class UploadsPageLinkExtension extends DataObjectExtension {
 	/**
 	 * many-many
 	*/
-	public $belongs_many_many = array(
+	static $belongs_many_many = array(
 		"pagelinks"	=> "pages"
 	);
 }

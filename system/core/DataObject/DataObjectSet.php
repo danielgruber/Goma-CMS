@@ -50,14 +50,6 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	protected $dataCache = array();
 	
 	/**
-	 * defaults
-	 *
-	 *@name defaults
-	 *@access public
-	*/
-	public $defaults = array();
-	
-	/**
 	 * protected customised data
 	 *
 	 *@name protected_customised

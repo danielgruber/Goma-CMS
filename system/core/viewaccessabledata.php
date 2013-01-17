@@ -10,7 +10,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 12.01.2013
+  * last modified: 17.01.2013
   * $Version 2.2.6
 */
 
@@ -90,6 +90,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		public $dataClass;
 		
 		/**
+		 * defaults
+		 *
+		 *@name defaults
+		 *@access public
+		*/
+		static $default = array();
+		
+		/**
 		 * a list of not allowed methods
 		 *@name notViewableMethods
 		 *@access public
@@ -124,11 +132,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"versioned"
 		);
 		
-		/**
-		 * defaults
-		*/
-		public $defaults = array();
-		
 		//!Init
 		/**
 		 * construct
@@ -147,6 +150,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(isset($data)) { 
 					$this->data = ArrayLib::map_key("strtolower", (array)$data);
 					$this->original = $this->data;
+				}
+				
+				if(isset(ClassInfo::$class_info[$this->class]["defaults"])) {
+					$this->defaults = array_merge($this->defaults, ClassInfo::$class_info[$this->class]["defaults"]);
 				}
 		}
 		
@@ -669,7 +676,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			} else 
 			
 			if($this->isServer($name, $lowername)) {
-				$data = DBField::getObjectByCasting("varchar", $lowername, $this->serverGet($name, $lowername));
+				$data = $this->serverGet($name, $lowername);
 			}
 			
 			if(isset($data)) {
@@ -809,6 +816,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				return $object;
 			
 			// default object
+			} else if($this->isServer($name, strtolower($name))) {
+				$object = DBField::getObjectByCasting("varchar", $name, $data);
+				
+				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
+				return $object;
 			} else {
 				$casting = isset($this->casting[$name]) ? $this->casting[$name] : ClassInfo::getStatic($this->class, "default_casting");
 				$object = DBField::getObjectByCasting($casting, $name, $data);
@@ -927,6 +939,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		}
 		
 		/**
+		 * returns casting-values
+		 *
+		 *@name casting
+		 *@access public
+		*/
+		public function defaults() {
+			return isset(ClassInfo::$class_info[$this->class]["defaults"]) ? ClassInfo::$class_info[$this->class]["defaults"] : self::getStatic($this->class, "casting");
+		}
+		
+		/**
 		 * generates casting
 		 *
 		 *@name generateCasting
@@ -940,12 +962,42 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			}
 			
 			$parent = get_parent_class($this);
-			if($parent != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
+			if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
 				$casting = array_merge(Object::instance($parent)->generateCasting(), $casting);
 			}
 			
 			$casting = ArrayLib::map_key("strtolower", $casting);
 			return $casting;
+		}
+		
+		/**
+		 * defaults
+		 *
+		 *@name defaults
+		 *@access public
+		*/
+		public function generateDefaults() {		
+			if(self::hasStatic($this->class, "default")) {
+				$defaults = self::getStatic($this->class, "default");
+			} else {
+				$defaults = array();
+			}
+			
+			// get parents
+			$parent = get_parent_class($this);
+			if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
+				$defaults = array_merge(Object::instance($parent)->generateDefaults(), $defaults);
+			}
+			
+			foreach($this->LocalcallExtending("defaults") as $defaultsext) {
+				$defaults = array_merge($defaults, $defaultsext);
+				unset($defaultsext);
+			}
+			
+			// free memory
+			unset($parent);
+			$defaults = ArrayLib::map_key($defaults, "strtolower");
+			return $defaults;
 		}
 		
 		/**
