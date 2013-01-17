@@ -95,7 +95,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@name defaults
 		 *@access public
 		*/
-		static $default = array();
+		public $defaults;
 		
 		/**
 		 * a list of not allowed methods
