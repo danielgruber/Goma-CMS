@@ -117,7 +117,7 @@ define('STATUS_DISABLED', 0);
 
 // version
 define("BUILD_VERSION", "066");
-define("GOMA_VERSION", "2.0b2");
+define("GOMA_VERSION", "2.0b3");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
