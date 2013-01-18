@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 1.2.7
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.01.2013
+  * $Version 1.2.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,7 @@ class Backup extends Object {
 	 *@name excludeList
 	 *@access public
 	*/
-	public static $excludeList = array("statistics", "statistics_state", "history", "history_state", "permission", "permission_state", "many_many_permission_groups_group", "users", "users_state", "many_many_user_groups_group");
+	public static $excludeList = array("statistics", "statistics_state");
 	
 	/**
 	 * excludes files
@@ -37,7 +37,7 @@ class Backup extends Object {
 	 *@access public
 	*/
 	public static function generateDBBackup($file, $prefix = DB_PREFIX, $excludeList = array()) {
-		$excludeList = array_merge(self::$excludeList, $excludeList);
+		$excludeList = array_merge(self::getStatic("Backup", "excludeList"), $excludeList);
 		// force GFS
 		if(!preg_match('/\.sgfs$/i', $file))
 			$file .= ".sgfs";
@@ -140,7 +140,7 @@ class Backup extends Object {
 					$data .= ");\n";
 					$data .= "\n";
 			}
-			
+
 			if(!in_array($table, $excludeList)) {
 				
 				// values
@@ -249,10 +249,11 @@ class Backup extends Object {
 			}
 		}
 		
-		if(defined("LOG_FOLDER"))
+		if(defined("LOG_FOLDER")) {
 			self::$fileExcludeList[] = "/" . LOG_FOLDER;
+		}
 		
-		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::$fileExcludeList, $excludeList));
+		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::getStatic("Backup", "fileExcludeList"), $excludeList));
 		$backup->commit();
 		
 		$backup->close();
@@ -306,7 +307,7 @@ class Backup extends Object {
 		$dict->add("excludedFiles", $excludeListPlist);
 		
 		$td = new CFTypeDetector();  
-		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, self::$excludeList));
+		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, self::getStatic("Backup", "excludeList")));
 		$dict->add("excludedTables", $excludeSQLListPlist);
 		
 		$dict->add("DB_PREFIX", new CFString($SQLprefix));

@@ -137,7 +137,7 @@ class TableView extends AdminItem {
 			$data = $_POST["data"];
 			unset($data["all"]);
 			foreach($data as $key => $value) {
-				DataObject::get($this->modelInst(), array("id" => $key))->remove();
+				DataObject::get_one($this->modelInst(), array("id" => $key))->remove();
 			}
 			$this->redirectBack();
 		}

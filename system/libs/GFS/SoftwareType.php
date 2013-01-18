@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.5.7
+  * last modified: 17.01.2013
+  * $Version 1.5.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1648,6 +1648,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 	public static function backup($file, $name, $changelog = null) {
 		
 		$tables = ClassInfo::Tables("user");
+		$tables = array_merge($tables, ClassInfo::Tables("history"));
+		$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
 				$tables = array_merge($tables, ClassInfo::Tables($model));
