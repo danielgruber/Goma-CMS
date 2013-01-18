@@ -135,6 +135,7 @@ class SQL extends object
 				$start = microtime(true);
 				
 				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+				//echo $sql . "\n";
 				//logging($_sql);
 				
 				if($track)

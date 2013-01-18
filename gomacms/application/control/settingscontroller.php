@@ -10,6 +10,35 @@
   * $Version 1.2.5
 */
 
+class SettingsController extends Controller {
+	/**
+	 * this is a cache of the dataobject of settings
+	 *
+	 *@name settingsCache
+	 *@access public
+	*/
+	public static $settingsCache;
+	/**
+	 * gets the cache
+	 *
+	 *@name preInit
+	 *@access public
+	*/
+	public static function PreInit() {
+		self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
+	}
+	/**
+	 * gets one static
+	 *@name get
+	 *@access public
+	 *@param string - name
+	*/
+	public static function get($name)
+	{	
+			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
+	}
+
+}
 
 class Newsettings extends DataObject implements HistoryData {
 	/**
@@ -152,36 +181,6 @@ class Newsettings extends DataObject implements HistoryData {
 		return array("icon" => $icon, "text" => $lang);
 		
 	}
-}
-
-class SettingsController extends Controller {
-	/**
-	 * this is a cache of the dataobject of settings
-	 *
-	 *@name settingsCache
-	 *@access public
-	*/
-	public static $settingsCache;
-	/**
-	 * gets the cache
-	 *
-	 *@name preInit
-	 *@access public
-	*/
-	public static function PreInit() {
-		self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
-	}
-	/**
-	 * gets one static
-	 *@name get
-	 *@access public
-	 *@param string - name
-	*/
-	public static function get($name)
-	{	
-			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
-	}
-
 }
 
 class metaSettings extends Newsettings {

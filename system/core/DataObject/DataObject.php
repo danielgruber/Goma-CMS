@@ -410,13 +410,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function __construct($record = null) {			
 			parent::__construct();
-			
+
 			$this->data = array_merge(array(
 				"class_name"	=> $this->class,
 				"last_modified"	=> NOW,
 				"created"		=> NOW,
 				"autorid"		=> member::$id
-			), $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
+			), (array) $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
 	}
 	
 	/**

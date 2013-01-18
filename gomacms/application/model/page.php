@@ -53,7 +53,7 @@ class Page extends pages
 	/**
 	 * searchable fields
 	*/
-	public $searchable_fields = array(
+	static $search_fields = array(
 	
 	);
 	
