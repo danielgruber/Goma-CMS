@@ -217,7 +217,7 @@ class ClassManifest {
 					// check for old APIs
 					//!Deprecation for 2.1
 					if(!preg_match('/class (DataObject|SelectQuery|Viewaccessabledata)/i', $contents)) {
-						preg_match_all('/(static\s+)?public\s+\$(has_one|has_many|many_many|belongs_many_many|db_fields|defaults|casting|indexes)\s/i', $contents, $matches);
+						preg_match_all('/(static\s+)?public\s+\$(has_one|has_many|many_many|belongs_many_many|db_fields|defaults|casting|indexes|searchable_fields)\s/i', $contents, $matches);
 						if(count($matches[2]) > 0) {
 							foreach($matches[2] as $k => $name) {
 								if($matches[1][$k] != "static") {
@@ -230,6 +230,9 @@ class ClassManifest {
 									
 									if($name == "indexes")
 										$name = "index";
+									
+									if($name == "searchable_fields")
+										$name = "search_fields";
 									
 									// switch to static
 									$contents = str_replace($matches[0][$k], 'static $' . $name . " ", $contents);

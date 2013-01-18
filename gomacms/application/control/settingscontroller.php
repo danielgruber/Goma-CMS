@@ -178,7 +178,7 @@ class SettingsController extends Controller {
 	 *@param string - name
 	*/
 	public static function get($name)
-	{
+	{	
 			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
 	}
 

@@ -66,7 +66,7 @@ class VirtualPageController extends PageController {
 		if(is_object($model->controller())) {
 			return $model->controller()->index();
 		} else {
-			throwError(6, "Unknowen Error", "VirtualPage must have an regarding Page, but regarding page seems missing or imcompabible.");
+			throwError(6, "Unknown Error", "VirtualPage must have an regarding Page, but regarding page seems missing or imcompabible.");
 		}
 	}
 }

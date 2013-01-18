@@ -516,7 +516,7 @@ class SQL extends object
 					}
 					$sql .= "";
 				}
-			} else if(is_string($this->where)) {
+			} else if(is_string($where)) {
 				if($includeWhere)
 					$sql .= " WHERE ";
 				
