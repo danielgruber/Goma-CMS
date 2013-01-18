@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 1.2.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.01.2013
+  * $Version 1.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -136,8 +136,9 @@ class TableView extends AdminItem {
 		if(isset($_SESSION["deletekey"][$this->class]) && $_SESSION["deletekey"][$this->class] == $_POST["deletekey"]) {
 			$data = $_POST["data"];
 			unset($data["all"]);
-			foreach($data as $key => $value) {
-				DataObject::get_one($this->modelInst(), array("id" => $key))->remove();
+			foreach($data as $key => $value) {	
+				if($record = DataObject::get_one($this->modelInst(), array("id" => $key))
+					$record->remove();
 			}
 			$this->redirectBack();
 		}
