@@ -54,7 +54,7 @@ class pgsqlDriver extends object implements SQLDriver
 			die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
 		}
 		self::setCharsetUTF8();
-		unset $conn_string;
+		unset($conn_string);
 		return true;
 	}
 
@@ -62,7 +62,7 @@ class pgsqlDriver extends object implements SQLDriver
 	
 	public function test($dbuser, $dbdb, $dbpass, $dbhost)
 	{
-		return pg_ping(generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass););
+		return pg_ping(generate_connection_string($dbhost, $dbdb, $dbuser, $dbpass));
 	}
 
 	
@@ -422,7 +422,7 @@ class pgsqlDriver extends object implements SQLDriver
 			$fields = array();
 			$max = pg_num_fields($result);
 			
-			for($i = 0; $i < $max, $i++)
+			for($i = 0; $i < $max; $i++)
 			{
 				$fields[pg_field_name($result, $i)] = array(
 						"type" 		=> pg_field_type($result, $i),
