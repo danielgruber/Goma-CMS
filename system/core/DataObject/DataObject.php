@@ -3912,7 +3912,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$fields = array();
 		if(self::hasStatic($this->class, "db")) {
-			$fields = self::getStatic($this->class, "db");
+			$fields = (array) self::getStatic($this->class, "db");
 		}
 		
 		if(isset($this->db_fields)) {
@@ -3953,7 +3953,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function generateHas_one($parents = true) {
 		
-		$has_one = self::getStatic($this->class, "has_one");
+		$has_one = (array) self::getStatic($this->class, "has_one");
 		foreach($this->LocalcallExtending("Has_One") as $has_ones) {
 			$has_one = array_merge($has_one, $has_ones);
 			unset($has_ones);
@@ -3975,7 +3975,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function generateHas_many() {
 		
-		$has_many = self::getStatic($this->class, "has_many");
+		$has_many = (array) self::getStatic($this->class, "has_many");
 		foreach($this->LocalcallExtending("Has_Many") as $has_manys) {
 			$has_many = array_merge($has_many, $has_manys);
 			unset($has_manys);
@@ -3997,7 +3997,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function generateMany_many($parents = true) {
-		$many_many = self::getStatic($this->class, "many_many");
+		$many_many = (array) self::getStatic($this->class, "many_many");
 		foreach($this->LocalcallExtending("many_many") as $many_manys) {
 			$many_many = array_merge($many_many, $many_manys);
 			unset($many_manys);
@@ -4019,7 +4019,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function generateBelongs_many_many($parents = true) {
-		$belongs_many_many = self::getStatic($this->class, "belongs_many_many");
+		$belongs_many_many = (array) self::getStatic($this->class, "belongs_many_many");
 		foreach($this->LocalcallExtending("belongs_many_many") as $belongs_many_manys) {
 			$belongs_many_many = array_merge($belongs_many_many, $belongs_many_manys);
 			unset($belongs_many_manys);
@@ -4158,7 +4158,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$indexes = array();
 		
 		if(self::hasStatic($this->class, "index"))
-			$indexes = self::getStatic($this->class, "index");
+			$indexes = (array) self::getStatic($this->class, "index");
 		
 		if(isset($this->indexes)) {
 			$indexes = $this->indexes;
