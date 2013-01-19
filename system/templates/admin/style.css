@@ -170,14 +170,14 @@ a:hover {
 #content > .addcontent > .success, #content > .addcontent > .error, #content > .addcontent > .notice, #content > .addcontent > .info {
 	margin-top: 0;
 }
-#content > .header h1 {
+#header h1 {
 	margin: 0;
 	text-transform: capitalize;
 }
 .header h1 a {
 	color: #444 !important;
 }
-#content > .header {
+#header {
 	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #5c5c5b), color-stop(1, #424242));
 	background: -webkit-linear-gradient(#5c5c5b, #424242);
 	background: -moz-linear-gradient(#5c5c5b, #424242);
@@ -191,12 +191,12 @@ a:hover {
 	color: #ccc;
 }
 
-#content > .header .userbar {
+#userbar {
 	float: right;
 	padding: 10px;
 	padding-bottom: 0;
 }
-#content > .header .userbar-js {
+.userbar-js {
 	position: absolute;
 	top: 0px;
 	right: 0px;
@@ -209,58 +209,58 @@ a:hover {
 	background: linear-gradient(#5c5c5b, #424242);
 	z-index: 10;
 }
-#content > .header .userbar > div {
+#userbar > div {
 	float: left;
 	padding: 5px 10px;
 	color: #ddd;
 	position: relative;
 }
-#content > .header .userbar > div.history {
+#userbar > div.history {
 	margin: -10px 0;
 	padding: 0;
 }
-#content > .header .userbar > div.history a {
+#userbar > div.history a {
 	padding: 5px 8px;
 }
 
-#content > .header .userbar .langSelect {
+#userbar .langSelect {
 	padding: 0;
 	margin: -10px 0;
 }
-#content > .header .userbar .langSelect > a {
+#userbar .langSelect > a {
 	margin: -3px 0px;
 	padding: 20px 15px;
 	display: block;
 }
-#content > .header .userbar .langSelect > a.active {
+#userbar .langSelect > a.active {
 	background: url(images/header_bg_hover.png) repeat-x;
 }
-#content > .header .userbar .langSelect .langSelection {
+#userbar .langSelect .langSelection {
 	top: 51px;
 }
-#content > .header .userbar .langSelection ul {
+#userbar .langSelection ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 }
-#content > .header .userbar .langSelection ul li {
+#userbar .langSelection ul li {
 	margin: 1px 0px;
 }
-#content > .header .userbar .langSelection ul li a {
+#userbar .langSelection ul li a {
 	display: block;
 	padding: 5px 10px;
 	margin: 0 -10px;
 }
-#content > .header .userbar .langSelection ul li.active a {
+#userbar .langSelection ul li.active a {
 	background: #eee;
 }
-#content > .header .userbar .langSelection ul li a:hover {
+#userbar .langSelection ul li a:hover {
 	background: #eee;
 }
-#content > .header .userbar .langSelection ul li a img {
+#userbar .langSelection ul li a img {
 	margin-top: -1px;
 }
-#content > .header .userbar > div .dropdowncontainer {
+#userbar > div .dropdowncontainer {
 	display: none;
 	position: absolute;
 	z-index: 950;
@@ -276,15 +276,15 @@ a:hover {
 	box-shadow: #999 0 2px 5px;
 	border-bottom: 1px solid #999;
 }
-#content > .header .userbar > div .dropdowncontainer a {
+#userbar > div .dropdowncontainer a {
 	color: #444;
 	text-shadow: none;
 }
-#content > .header .userbar > div .dropdowncontainer a:hover {
+#userbar > div .dropdowncontainer a:hover {
 	color: #000;
 }
 
-#content > .header .userbar > .spacer {
+#userbar > .spacer {
 	padding: 0 !important;
 	width: 1px;
 	height: 51px;
@@ -293,32 +293,32 @@ a:hover {
 	background: #333 !important;
 	margin-top: -10px
 }
-#content > .header .userbar div a, #content > .header .userbar div > span {
+#userbar div a, #userbar div > span {
 	color: #aaa;
 	display: block;
 	margin-top: 3px;
 	text-shadow: 1px 1px 0px #333;
 }
-#content > .header .userbar div a:hover {
+#userbar div a:hover {
 	color: #eee;
 	text-decoration: none;
 }
 
-#content > .header .userbar .user a img {
+#userbar .user a img {
 	margin-top: -9px;
 	border: 2px solid #bbb;
 	border-radius: 2px;
 	-webkit-border-radius: 2px;
 }
-#content > .header .userbar .user a:hover img {
+#userbar .user a:hover img {
 	border-color: #fff;
 }
 
-#content > .header .userbar .logout {
+#userbar .logout {
 	padding-right: 0;
 }
 
-#content > .header .userbar .logout .logoutButton {
+#userbar .logout .logoutButton {
 	margin-top: -2px;
 }
 #content .content_inner {
