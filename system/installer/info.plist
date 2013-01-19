@@ -11,7 +11,7 @@
 	<key>version</key>
 	<string>2.0</string>
 	<key>build</key>
-	<string>008</string>
+	<string>009</string>
 	<key>requireFrameworkVersion</key>
 	<string>2.0-040</string>
 	<key>langPath</key>

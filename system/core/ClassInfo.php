@@ -735,9 +735,7 @@ class ClassInfo extends Object
 						
 						if(file_exists($file) && (filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist"))) {
 							if(!preg_match("/^dev/i", URL)) {
-								$_SESSION["dev_without_perms"] = true;
-								header("Location:" . BASE_URI . BASE_SCRIPT . "dev?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
-								exit;	
+								Dev::redirectToDev();
 							}
 						}
 						
