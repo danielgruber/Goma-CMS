@@ -2,6 +2,8 @@ _config.php
 .DS_Store
 .htaccess
 .DS_Store
+.project
+.index-db
 gomacms/*
 !gomacms/application/*
 !gomacms/application
@@ -16,7 +18,6 @@ gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
 system/installer/log_*****/*
 system/temp/*
-system/installer/data/apps/.index-db
 system/installer/log/*
 system/installer/temp/*
 Uploads
