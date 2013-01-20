@@ -2026,7 +2026,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
 					// check if record exists in this form
 					// if exists, don't rewrite
-					if($record->id == 0 || $record->wasChanged()) {
+					if($record->id == 0) {
 						if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
 							return false;
 						}
