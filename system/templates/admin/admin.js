@@ -7,21 +7,12 @@
  */
 
 function update() {
-	if ( typeof update.lastUpdate == 'undefined') {
-		update.lastUpdate = 0;
-	}
-
 	var headerWidth = $("#header").width();
 	var userbarWidth = $("#userbar").outerWidth();
 	var naviWidth = $("#navi").outerWidth();
 	var naviWidthMax = headerWidth - userbarWidth - 50;
 	var curNode;
 	var active = $("#navi > ul > li.active").index() + 1;
-
-	// Performance :)
-	if (Math.abs(headerWidth - update.lastUpdate) < 25) {
-		return;
-	}
 
 	update.lastUpdate = headerWidth;
 
