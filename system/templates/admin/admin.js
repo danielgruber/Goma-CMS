@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
  *@Copyright (C) 2009 - 2012  Goma-Team
- * last modified: 19.01.2013
+ * last modified: 21.01.2013
  */
 
 function update() {
@@ -23,9 +23,8 @@ function update() {
 				$("#navMore-sub li").first().remove();
 				curNode.removeClass("nav-inactive");
 			}
-		} else {
-			$("#navMore").css("display", "none");
 		}
+		$("#navMore").css("display", "none");
 	} else {
 		while ($("#navi").outerWidth() > naviWidthMax) {
 			curNode = $("#navi").find(" > ul > li").not($("#navMore")).not($("#navi li.active")).not($("#navi li.nav-inactive")).last();
@@ -39,7 +38,15 @@ function update() {
 
 $(document).ready(function() {
 	$("#userbar").addClass("userbar-js");
-	$(window).resize(update);
+
+	// Timeout for more smoothness
+	var timeoutEnd;
+	$(window).resize(function() {
+		clearTimeout(timeoutEnd);
+		doit = setTimeout(function() {
+			update();
+		}, 200);
+	});
 
 	update();
 
