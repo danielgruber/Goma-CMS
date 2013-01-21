@@ -838,10 +838,10 @@ class Member extends Object {
 					
 					return true;
 				} else if($data->status == 0) {
-					addcontent::addError(login("login_not_unlocked"));
+					addcontent::addError(lang("login_not_unlocked"));
 					return false;
 				} else {
-					addcontent::addError(login("login_locked"));
+					addcontent::addError(lang("login_locked"));
 					return false;
 				}
 			} else {

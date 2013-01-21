@@ -177,6 +177,7 @@ class Core extends object
 			
 			Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
 			Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
 			Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
 			Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
 			Resources::add("system/libs/javascript/loader.js", "js", "main");
