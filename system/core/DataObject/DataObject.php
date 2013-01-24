@@ -3768,8 +3768,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$sort = self::getStatic($this->class, "default_sort");
 		
 		if(is_array($sort)) {
-			$field = $sort["field"];
-			$type = $sort["type"];
+			if(isset($sort["field"], $sort["type"])) {
+				$field = $sort["field"];
+				$type = $sort["type"];
+			} else {
+				$sort = array_values($sort);
+				$field = $sort[0];
+				$type = isset($sort[1]) ? $sort[1] : "ASC";
+			}
 		} else if(preg_match('/^([a-zA-Z0-9_\-]+)\s(DESC|ASC)$/Usi', $sort, $matches)) {
 			$field = $sort[1];
 			$type = $sort[2];

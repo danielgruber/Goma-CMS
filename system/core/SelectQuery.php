@@ -202,9 +202,9 @@ class SelectQuery extends Object
 		 *@name sort
 		 *@access public
 		 *@param string - field
-		 *@param string - type, default: DESC
+		 *@param string - type, default: ASC
 		*/
-		public function sort($field, $type = "DESC", $order = 0)
+		public function sort($field, $type = "ASC", $order = 0)
 		{		
 			if(is_array($field)) {
 				if(isset($field["field"], $field["type"])) {

@@ -116,7 +116,7 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "066");
+define("BUILD_VERSION", "067");
 define("GOMA_VERSION", "2.0b3");
 
 // fix for debug_backtrace
@@ -741,28 +741,28 @@ function getStoreID($key) {
 */
 function getRedirect($parentDir = false) {
 	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
-		return convert::raw2text($_SERVER["HTTP_X_REFERER"]);
+		return htmlentities($_SERVER["HTTP_X_REFERER"], ENT_COMPAT, "UTF-8", false);
 	}
 	if($parentDir) {
 		if(isset($_GET["redirect"])) {
-			return convert::raw2text($_GET["redirect"]);
+			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
+				return htmlentities(substr($uri, 0, strrpos($uri, "/")) . URLEND,  ENT_COMPAT, "UTF-8", false);
 			} else {
-				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
+				return htmlentities(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			}
 		}
 	} else {
 		if(isset($_GET["redirect"])) {
-			return convert::raw2text($_GET["redirect"]);
+			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		/*} else if(isset($_POST["redirect"])) {
 			return $_POST["redirect"];
 		*/} else {
-			return convert::raw2text($_SERVER["REQUEST_URI"]);
+			return htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, "UTF-8", false);
 		}
 	}
 }
