@@ -495,7 +495,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		if(!is_array($permissions)) {
-			$permissions = array($permission);
+			$permissions = array($permissions);
 		}
 		
 		foreach($permissions as $perm) {
@@ -508,8 +508,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if(Object::method_exists($this->class, "can" . $perm)) {
 				$c = call_user_func_array(array($this, "can" . $perm), $record);
-				if(is_bool($d))
-					$can = $d;
+				if(is_bool($c))
+					$can = $c;
 			}
 			
 			$this->callExtending("can" . $perm, $can);
@@ -2606,8 +2606,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			if(self::versioned($this->class)) {
-				$canVersion = false;
-				if(member::login()) {
+				$canVersion = ($version === true) ? true : $this->can("version");
+				if(!$canVersion && member::login()) {
 					$perms = $this->providePerms();
 					foreach($perms as $key => $val) {
 						if(preg_match("/publish/i", $key) || preg_match("/edit/i", $key) || preg_match("/write/i", $key)) {
