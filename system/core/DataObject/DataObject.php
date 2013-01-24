@@ -487,14 +487,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				return true;
 		}
 		
-		if(isset($record)) {
-			$record = $this;
-		}
-		
 		if(!is_array($permissions)) {
 			$permissions = array($permissions);
 		}
 		
+		$r = isset($record) ? $record : $this;
 		foreach($permissions as $perm) {
 			$perm = strtolower($perm);
 			$can = false;
@@ -504,18 +501,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			if(Object::method_exists($this->class, "can" . $perm)) {
-				$c = call_user_func_array(array($this, "can" . $perm), array($record));
-				echo "c: "; var_dump($c);
+				$c = call_user_func_array(array($this, "can" . $perm), array($r));
 				if(is_bool($c)) {
 					$can = $c;
 				}
 			}
 			
-			$this->callExtending("can" . $perm, $can);
-			
-			var_dump($perm);
-			var_dump($can);
-			
+			$this->callExtending("can" . $perm, $can, $r);
+
 			if($can === true)
 				return true;
 		}

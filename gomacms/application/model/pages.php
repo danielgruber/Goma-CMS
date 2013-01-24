@@ -884,7 +884,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if(isset($row) && is_object($row->publish_permissions) && $row->publish_permissions->type != "admins")
 				return $row->publish_permission->hasPermission();
 			
-			return Permission::check("PAGES_WRITE");
+			return Permission::check("PAGES_PUBLISH");
 		}
 		
 		/**
