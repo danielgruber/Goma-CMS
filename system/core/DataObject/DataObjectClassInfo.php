@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 4.1.1
+  * last modified: 24.01.2013
+  * $Version 4.1.2
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -57,20 +57,7 @@ class DataObjectClassInfo extends Extension
 						
 						$many_many_tables = array();
 						
-						$has_one["autor"] = "user";
-						if(isset($db_fields["class_name"])) {
-							//$indexes["class_name"] = "INDEX";
-							$indexes["last_modified"] = "INDEX";
-						}
-						
-						if(count($db_fields) > 0)
-						{
-							$db_fields["autorid"] = "int(10)";
-							$db_fields["editorid"] = "int(10)";
-						}
-						
 						/* --- */
-						
 						
 						foreach($indexes as $key => $value)
 						{
@@ -145,15 +132,7 @@ class DataObjectClassInfo extends Extension
 						if($casting = $c->generateCasting())
 							if(count($casting) > 0)
 								ClassInfo::$class_info[$class]["casting"] = $casting;
-						
-						$has_one = arraylib::map_key($has_one, "strtolower");
-						$has_many = arraylib::map_key($has_many, "strtolower");
-						$many_many = arraylib::map_key($many_many, "strtolower");
-						$belongs_many_many = arraylib::map_key($belongs_many_many, "strtolower");
-						
-						$has_one["editor"] = "user";
-						$has_one["autor"] = "user";
-						
+					
 						if(count($has_one) > 0) ClassInfo::$class_info[$class]["has_one"] = $has_one;
 						if(count($has_many) > 0) ClassInfo::$class_info[$class]["has_many"] = $has_many;
 						if(count($db_fields) > 0) ClassInfo::$class_info[$class]["db"] = $db_fields;
@@ -244,7 +223,7 @@ class DataObjectClassInfo extends Extension
 								{
 										ClassInfo::$class_info[$_c]["dataclasses"][] = $class;
 								}
-								if(strtolower(get_parent_class($_c)) == "dataobject" || strtolower(get_parent_class($_c)) == "array_dataobject")
+								if(strtolower(get_parent_class($_c)) == "dataobject")
 								{
 										ClassInfo::$class_info[$class]["baseclass"] = $_c;
 								} else

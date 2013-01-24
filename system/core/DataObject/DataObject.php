@@ -234,7 +234,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	{
 			$dataobject = Object::instance($name);
 			
-			$table_name = $dataobject->table_name;
+			$table_name = $dataobject->Table();
 			
 			$where = SQL::ExtractToWhere($filter);
 			
@@ -268,10 +268,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			$DataObject = Object::instance($name);
 			
-			if(is_subclass_of($DataObject, "controller"))
-			{
-					$DataObject = $DataObject->model_inst;
-			}
 			if(is_array($where))
 			{
 					$d = array_merge($where,$data);
@@ -486,9 +482,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function can($permissions, $record = null) {	
 		
-		// super-admin
-		if(Permission::check("superadmin"))
-			return true;
 		
 		if(isset($record)) {
 			$record = $this;
@@ -2606,7 +2599,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			if(self::versioned($this->class)) {
-				$canVersion = ($version === true) ? true : $this->can("version");
+				$canVersion = ($version === true) ? true : $this->can("viewVersions");
 				if(!$canVersion && member::login()) {
 					$perms = $this->providePerms();
 					foreach($perms as $key => $val) {
@@ -3998,7 +3991,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($fields)
 			$fields = array_merge($this->DefaultSQLFields(strtolower(get_class($this))), $fields);
 		
-		
 		return $fields;
 	}
 	
@@ -4014,9 +4006,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$has_one = array_merge($has_one, $has_ones);
 			unset($has_ones);
 		}
+		
 		$parent = get_parent_class($this);
 		if($parents === true && $parent != "DataObject") {
 			$has_one = array_merge(Object::instance($parent)->generateHas_one(), $has_one);
+		}
+		
+		if($parent == "DataObject" || $parents === true) {
+			$has_one["autor"] = "user";
+			$has_one["editor"] = "user";
 		}
 		
 		$has_one = array_map("strtolower", $has_one);
@@ -4234,8 +4232,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		
 		if($searchable_fields)
-				// we add an index for fast searching
-				$indexes["searchable_fields"] = array("type" => "INDEX", "fields" => implode(",", $searchable_fields), "name" => "searchable_fields");
+			// we add an index for fast searching
+			$indexes["searchable_fields"] = array("type" => "INDEX", "fields" => implode(",", $searchable_fields), "name" => "searchable_fields");
 		
 		// validate
 		foreach($indexes as $name => $type) {
@@ -4247,6 +4245,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 		}
+		
+		$db = $this->generateDBFields(false);
+		if(isset($db["last_modified"]))
+			$indexes["last_modified"] = "INDEX";
 		
 		return $indexes;
 

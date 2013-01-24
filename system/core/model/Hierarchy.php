@@ -25,7 +25,7 @@ class Hierarchy extends DataObjectExtension {
 	 * has-one-extension
 	*/
 	public function has_one() {
-		if($this->getOwner()->class != $this->getOwner()->baseClass)
+		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
 			return array();
 		
 		return array(
@@ -37,7 +37,7 @@ class Hierarchy extends DataObjectExtension {
 	 * has-many-extension
 	*/
 	public function has_many() {
-		if($this->getOwner()->class != $this->getOwner()->baseClass)
+		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
 			return array();
 			
 		return array(
