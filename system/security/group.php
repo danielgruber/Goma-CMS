@@ -61,6 +61,11 @@ class Group extends DataObject implements HistoryData, PermProvider
 		);
 		
 		/**
+		 * sort by name
+		*/
+		static $default_sort = array("name", "ASC");
+		
+		/**
 		 * the table_name
 		 *
 		 *@name table_name

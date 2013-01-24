@@ -135,6 +135,11 @@ class User extends DataObject implements HistoryData, PermProvider
 		static $many_many = array("groups" => "group");
 		
 		/**
+		 * sort by name
+		*/
+		static $default_sort = array("name", "ASC");
+		
+		/**
 		 * users are activated by default
 		 *
 		 *@name defaults
