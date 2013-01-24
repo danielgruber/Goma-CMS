@@ -480,7 +480,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param name(s) of permission
 	 *@param optional - record
 	*/
-	public function can($permissions, $record = null) {	
+	public function can($permissions, $record = null) {
 		
 		if($this->class != "permission") {
 			if(Permission::check("superadmin"))
@@ -505,6 +505,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			if(Object::method_exists($this->class, "can" . $perm)) {
 				$c = call_user_func_array(array($this, "can" . $perm), array($record));
+				echo "c: "; var_dump($c);
 				if(is_bool($c)) {
 					$can = $c;
 				}
@@ -3587,7 +3588,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name hasMany
 	*/
 	public function hasMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["has_many"]) ? ClassInfo::$class_info[$this->class]["has_many"] : false);
+		return (isset(ClassInfo::$class_info[$this->class]["has_many"]) ? ClassInfo::$class_info[$this->class]["has_many"] : array());
 	}
 	
 	/**
@@ -3596,7 +3597,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name ManyMany
 	*/
 	public function ManyMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["many_many"]) ? ClassInfo::$class_info[$this->class]["many_many"] : false);
+		return (isset(ClassInfo::$class_info[$this->class]["many_many"]) ? ClassInfo::$class_info[$this->class]["many_many"] : array());
 	}
 	
 	/**
@@ -3605,7 +3606,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name BelongsManyMany
 	*/
 	public function BelongsManyMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["belongs_many_many"]) ? ClassInfo::$class_info[$this->class]["belongs_many_many"] : false);
+		return (isset(ClassInfo::$class_info[$this->class]["belongs_many_many"]) ? ClassInfo::$class_info[$this->class]["belongs_many_many"] : array());
 	}
 	
 	/**
@@ -3614,7 +3615,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name ManyManyTables
 	*/
 	public function ManyManyTables() {
-		return (isset(ClassInfo::$class_info[$this->class]["many_many_tables"]) ? ClassInfo::$class_info[$this->class]["many_many_tables"] : false);
+		return (isset(ClassInfo::$class_info[$this->class]["many_many_tables"]) ? ClassInfo::$class_info[$this->class]["many_many_tables"] : array());
 	}
 	
 	

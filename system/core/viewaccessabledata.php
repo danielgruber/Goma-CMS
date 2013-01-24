@@ -153,7 +153,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				}
 				
 				if(isset(ClassInfo::$class_info[$this->class]["defaults"])) {
-					$this->defaults = array_merge($this->defaults, ClassInfo::$class_info[$this->class]["defaults"]);
+					$this->defaults = array_merge((array) $this->defaults, (array) ClassInfo::$class_info[$this->class]["defaults"]);
 				}
 		}
 		

@@ -741,7 +741,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$mainbartitle->info = lang("menupoint_title_info");
 				$wtitle->info = lang("window_title_info");
 				
-				if(!in_array("pages", $allowed_parents) || (!Permission::check("PAGES_WRITE") && !Permission::check("PAGES_PUBLISH"))) {
+				if(!in_array("pages", $allowed_parents) || ($this->id == 0 && !Permission::check("PAGES_WRITE") && !Permission::check("PAGES_PUBLISH"))) {
 					$parenttype->disableOption("root");
 				}
 				

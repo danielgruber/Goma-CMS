@@ -1507,7 +1507,7 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function push(DataObject $record, $write = false) {
-		foreach($this->defaults as $key => $value) {
+		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record[$key]))
 				$record[$key] = $value;
 		}
@@ -2024,17 +2024,6 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				
 				// check if object and writable
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
-					
-					// check the belonging many-many-relation
-					foreach($record->ManyManyTables() as $name => $data) {
-						if($data["table"] == $this->relationTable) {
-							$beloning_name = $name;
-							break;
-						}
-					}
-					
-					$record[$beloning_name] = null;
-					
 					// write
 					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
 						return false;
