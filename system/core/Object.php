@@ -528,7 +528,7 @@ abstract class Object
 		 	if($this->class == "") {
 		 		$this->class = strtolower(get_class($this));
 		 	}
-
+		 	
 	 		if($recursive === true) {
 	 			if(defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->class])) {
 	 				$this->buildExtCache();

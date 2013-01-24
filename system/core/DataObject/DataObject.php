@@ -482,6 +482,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function can($permissions, $record = null) {	
 		
+		if($this->class != "permission") {
+			if(Permission::check("superadmin"))
+				return true;
+		}
 		
 		if(isset($record)) {
 			$record = $this;
@@ -2599,27 +2603,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			if(self::versioned($this->class)) {
-				$canVersion = ($version === true) ? true : $this->can("viewVersions");
-				if(!$canVersion && member::login()) {
-					$perms = $this->providePerms();
-					foreach($perms as $key => $val) {
-						if(preg_match("/publish/i", $key) || preg_match("/edit/i", $key) || preg_match("/write/i", $key)) {
-							if(Permission::check($key)) {
-								$canVersion = true;
-								break;
-							}
-						}
-					}
+				if(isset($_GET[$baseClass . "_version"]) && $this->_canVersion($version)) {
+					$version = $_GET[$baseClass . "_version"];
 				}
 				
-				if($canVersion) {
-					if(isset($_GET[$baseClass . "_version"])) {
-						$version = $_GET[$baseClass . "_version"];
-					}
-					
-					if(isset($_GET[$baseClass . "_state"])) {
-						$version = "state";
-					}
+				if(isset($_GET[$baseClass . "_state"]) && $this->_canVersion($version)) {
+					$version = "state";
 				}
 			}
 			
@@ -2802,6 +2791,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			return $query;
 	}
+	
 	/**
 	 * builds a SearchQuery and adds Search-Filter
 	 * after that decorates the query with argumentQuery and argumentSelectQuery on Extensions and local
@@ -2847,6 +2837,30 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		return $query;
 	}
+	
+	/**
+	 * returns whether canVersion or not
+	 *
+	 *@name _canVersion
+	 *@access public
+	*/
+	public function _canVersion($version) {
+		$canVersion = ($version === true) ? true : $this->can("viewVersions");
+		if(!$canVersion && member::login()) {
+			$perms = $this->providePerms();
+			foreach($perms as $key => $val) {
+				if(preg_match("/publish/i", $key) || preg_match("/edit/i", $key) || preg_match("/write/i", $key)) {
+					if(Permission::check($key)) {
+						$canVersion = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		return $canVersion;
+	}
+	
 	/**
 	 * decorates a query with search
 	 *
@@ -4012,13 +4026,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			$has_one = array_merge(Object::instance($parent)->generateHas_one(), $has_one);
 		}
 		
-		if($parent == "DataObject" || $parents === true) {
+		if($parent == "DataObject") {
 			$has_one["autor"] = "user";
 			$has_one["editor"] = "user";
 		}
 		
 		$has_one = array_map("strtolower", $has_one);
 		$has_one = ArrayLib::map_key("strtolower", $has_one);
+
 		return $has_one;
 	}
 	

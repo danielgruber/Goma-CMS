@@ -825,6 +825,13 @@ class ClassInfo extends Object
 							if(Object::method_exists($class, "buildClassInfo")) {
 								call_user_func_array(array($class, "buildClassInfo"), array($class));
 							}
+						}
+						
+						foreach(self::$class_info as $class => $data)
+						{
+							if(Object::method_exists($class, "buildClassInfo")) {
+								call_user_func_array(array($class, "buildClassInfo"), array($class));
+							}
 							
 							Object::instance("ClassInfo")->callExtending("generate", $class);
 								

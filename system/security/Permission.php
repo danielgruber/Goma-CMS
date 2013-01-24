@@ -470,5 +470,15 @@ class Permission extends DataObject
 			
 			return (member::$groupType > 0);
 		}
+		
+		// DEPRECATED API!
+		public function inheritor() {
+			Core::deprecate("2.0.1", "inheritor is deprecated, use parent instead");
+			return $this->parent;
+		}
+		public function inheritorid() {
+			Core::deprecate("2.0.1", "inheritorid is deprecated, use parentid instead");
+			return $this->parentid;
+		}
 
 }

@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 22.01.2013
+  * last modified: 24.01.2013
   * $Version 1.0
 */
 
@@ -21,6 +21,9 @@ class Hierarchy extends DataObjectExtension {
 	static $extra_methods = array(
 		"AllChildren", "searchChildren", "searchAllChildren"
 	);
+	
+	static $c = 0;
+	
 	/**
 	 * has-one-extension
 	*/

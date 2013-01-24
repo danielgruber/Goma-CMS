@@ -346,12 +346,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				return $this->parent()->edit_permission;
 			*/} else {
 				if($this->parentid) {
-					$inheritor = $this->parent->edit_permission();
+					$parent = $this->parent->edit_permission();
 				} else {
-					$inheritor = Permission::forceExisting("PAGES_WRITE");
+					$parent = Permission::forceExisting("PAGES_WRITE");
 				}
 				
-				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
+				$perm = new Permission(array("type" => "admins", "parentid" => $parent->id));
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
@@ -371,11 +371,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function setEdit_Permission($perm) {
 			$perm->forModel = "pages";
-			if($perm->inheritorid != 0) {
-				if($perm->inheritor->name == "" && $this->parentid == 0) {
-					$perm->inheritorid = Permission::forceExisting("PAGES_WRITE")->id;
+			if($perm->parentid != 0) {
+				if($perm->parent->name == "" && $this->parentid == 0) {
+					$perm->parentid = Permission::forceExisting("PAGES_WRITE")->id;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $this->parent->edit_permission->id;
+					$perm->parentid = $this->parent->edit_permission->id;
 				}
 			}
 			$perm->name = "";
@@ -400,11 +400,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				return $this->parent()->edit_permission;
 			*/} else {
 				if($this->parentid) {
-					$inheritor = $this->parent->publish_permission();
+					$parent = $this->parent->publish_permission();
 				} else {
-					$inheritor = Permission::forceExisting("PAGES_PUBLISH");
+					$parent = Permission::forceExisting("PAGES_PUBLISH");
 				}
-				$perm = new Permission(array("type" => "admins", "inheritorid" => $inheritor->id));
+				$perm = new Permission(array("type" => "admins", "parentid" => $parent->id));
 				$perm->forModel = "pages";
 				
 				if($this->ID != 0) {
@@ -425,11 +425,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function setPublish_Permission($perm) {
 			$perm->forModel = "pages";
-			if($perm->inheritorid != 0) {
-				if($perm->inheritor->name == "" && $this->parentid == 0) {
-					$perm->inheritorid = Permission::forceExisting("PAGES_PUBLISH")->id;
+			if($perm->parentid != 0) {
+				if($perm->parent->name == "" && $this->parentid == 0) {
+					$perm->parentid = Permission::forceExisting("PAGES_PUBLISH")->id;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $this->parent->publish_permission->id;
+					$perm->parentid = $this->parent->publish_permission->id;
 				}
 			}
 			$perm->name = "";
@@ -472,14 +472,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function setRead_Permission($perm) {
 			$perm->forModel = "pages";
-			if($perm->inheritorid != 0) {
-				if($perm->inheritor->name == "" && $this->parentid == 0) {
-					$perm->inheritorid = 0;
+			if($perm->parentid != 0) {
+				if($perm->parent->name == "" && $this->parentid == 0) {
+					$perm->parentid = 0;
 				} else if($this->parentid != 0) {
-					$perm->inheritorid = $this->parent->read_permission->id;
+					$perm->parentid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
-				$perm->inheritorid = $this->parent->read_permission->id;
+				$perm->parentid = $this->parent->read_permission->id;
 			}
 			$perm->name = "";
 			$this->setField("Read_Permission", $perm);
@@ -849,6 +849,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public static function canViewHistory($record = null) {
 			return (Permission::check("PAGES_WRITE") || Permission::check("PAGES_PUBLISH"));
+		}
+		
+		/**
+		 * returns that everyone who has the permission to view the content-page in admin-panel can view drafts and versions
+		 *
+		 *@name canViewVersions
+		*/
+		public function canViewVersions() {
+			return Permission::check("ADMIN_CONTENT");
 		}
 		
 		/**
