@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 1.1
+  * last modified: 24.01.2013
+  * $Version 1.1.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -159,7 +159,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$arr[$record["versionid"]] = convert::raw2text($record[$this->showfield]);
+				$arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
 			}			
 			$left = ($p > 1);
 			
@@ -183,7 +183,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$arr[$record["versionid"]] = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]));
+				$arr[] = array("key" => $record["versionid"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);

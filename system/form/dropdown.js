@@ -102,14 +102,20 @@ DropDown.prototype = {
 	*/
 	showDropDown: function() {
 		if(this.widget.find(" > .dropdown").css("display") == "none") {
+			
+			
 			this.widget.find(" > .field").addClass("active");
 			// set correct position
 			this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 			
 			var fieldhtml = this.widget.find(" > .field").html();
 			//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
+			
+			// show loading
 			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			var $this = this;
+			
+			// load data
 			this.reloadData(function(){
 				//$this.widget.find(" > .field").css({height: ""});
 				$this.widget.find(" > .dropdown").fadeIn(200);
@@ -203,25 +209,19 @@ DropDown.prototype = {
 						i = -1;
 						for(i in data.data) {
 							var val = data.data[i];
-							if(typeof val == "object") {
-								smallText = val[1];
-								val = val[0];
-							}
 							
 							content += "<li>";
 							
-							if(this.value[i] || this.value[i] === 0)
-								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+i+"\">"+val+"</a>";
+							if(this.value[val.key] || this.value[val.key] === 0)
+								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
 							else
-								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+i+"\">"+val+"</a>";
+								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
 								
-							if(typeof smallText == "string") {
-								content += "<span class=\"record_info\">"+smallText+"</span>";
+							if(typeof val.smallText == "string") {
+								content += "<span class=\"record_info\">"+val.smallText+"</span>";
 							}
 							
 							content += "</li>";
-							
-							smallText = null;
 						}
 						
 						content += "</ul>";

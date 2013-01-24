@@ -854,15 +854,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		/**
 		 * permission-checks
 		*/
-		public function canWrite($row = null)
-		{		
-				if(Permission::check("superadmin"))
-					return true;
-				
-				if(isset($row) && is_object($row->edit_permission) && $row->edit_permission->type != "admins")
-					return $row->edit_permission->hasPermission();
-				
-				return Permission::check("PAGES_WRITE");
+		public function canWrite($row = null) {		
+			if(Permission::check("superadmin"))
+				return true;
+			
+			if(isset($row) && is_object($row->edit_permission) && $row->edit_permission->type != "admins")
+				return $row->edit_permission->hasPermission();
+			
+			return Permission::check("PAGES_WRITE");
 		}
 		
 		/**
@@ -883,7 +882,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function canDelete($row = null)
 		{
-				return Permission::check("PAGES_DELETE");
+			return Permission::check("PAGES_DELETE");
 		}
 		
 		/**

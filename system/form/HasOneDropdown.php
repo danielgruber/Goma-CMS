@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 1.2
+  * last modified: 24.01.2013
+  * $Version 1.2.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -158,17 +158,16 @@ class HasOneDropdown extends SingleSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$val = convert::raw2text($record[$this->showfield]);
 				
+				
+				$arr[] = array("key" => $record["id"], "value" => convert::raw2text($record[$this->showfield]));
+				
+				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$val = array($val, convert::raw2text($record[$this->info_field]));
+						$arr[count($arr) - 1] = convert::raw2text($record[$this->info_field]);
 					}
 				}
-				
-				$arr[$record["id"]] = $val;
-				
-				unset($record, $val);
 			}			
 			$left = ($p > 1);
 			
@@ -195,16 +194,15 @@ class HasOneDropdown extends SingleSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$val = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]));
+				
+				$arr[] = array("key" => $record["id"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
+				
+				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$val = array($val, convert::raw2text($record[$this->info_field]));
+						$arr[count($arr) - 1] = convert::raw2text($record[$this->info_field]);
 					}
 				}
-				
-				$arr[$record["id"]] = $val;
-				
-				unset($record, $val);
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);
