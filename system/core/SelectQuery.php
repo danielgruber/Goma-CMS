@@ -494,21 +494,24 @@ class SelectQuery extends Object
 				
 				// some added caches ;)
 				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
-					// comma
-					if(isset($i)) {
-						if($i != 0) {
-							$sql .= ", ";
+					if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
+						// comma
+						if(isset($i)) {
+							if($i != 0) {
+								$sql .= ", ";
+							}
 						}
+						
+						$sql .= self::$new_field_cache[$from]["colidingSQL"];
 					}
-					
-					$sql .= self::$new_field_cache[$from]["colidingSQL"];
-					
+						
 					// i
 					if(isset($i)) {
 						$i += self::$new_field_cache[$from]["colidingSQLi"];
 					} else {
 						$i = self::$new_field_cache[$from]["colidingSQLi"];
 					}
+					
 				} else {	
 					$colidingSQL = "";
 					$a = 0;

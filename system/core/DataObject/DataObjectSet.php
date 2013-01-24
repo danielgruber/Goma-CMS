@@ -2024,13 +2024,22 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				
 				// check if object and writable
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
-					// check if record exists in this form
-					// if exists, don't rewrite
-					if($record->id == 0) {
-						if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
-							return false;
+					
+					// check the belonging many-many-relation
+					foreach($record->ManyManyTables() as $name => $data) {
+						if($data["table"] == $this->relationTable) {
+							$beloning_name = $name;
+							break;
 						}
 					}
+					
+					$record[$beloning_name] = null;
+					
+					// write
+					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
+						return false;
+					}
+					
 					$writtenIDs[$record->versionid] = true;
 					$writeExtraFields[$record->versionid] = array();
 					
@@ -2064,11 +2073,11 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		// check for existing entries
-		$sql = "SELECT * FROM ".DB_PREFIX . $this->relationTable." WHERE ".$this->ownField." = ".$this->ownValue."";
-		if($result = SQL::Query($sql)) {
+		$query = new SelectQuery($this->relationTable, array("*"), array($this->ownField => $this->ownValue));
+		if($query->execute()) {
 			$existing = array();
 			$existingFields = array();
-			while($row = SQL::fetch_object($result)) {
+			while($row = $query->fetch_object()) {
 				$existing[$row->id] = $row->{$this->field};
 				$existingFields[$row->{$this->field}] = array();
 				

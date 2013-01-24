@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 3.2.1
+  * last modified: 22.01.2013
+  * $Version 3.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -334,7 +334,7 @@ abstract class Object
 						$obj = strtolower($obj);
 						$ext = strtolower($ext);
 						$arguments = "";
-						if(_ereg('^([a-zA-Z0-9_-]+)\((.*)\)$', $ext, $exts)) {
+						if(preg_match('/^([a-zA-Z0-9_\-]+)\((.*)\)$/', $ext, $exts)) {
 								$ext = $exts[0];
 								$arguments = $exts[1];
 						}
@@ -351,11 +351,11 @@ abstract class Object
 										self::$extensions[$obj][$ext] = $arguments;
 								} else
 								{
-										throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' isn\'t a Extension.');
+										throwError(6, 'PHP-Error', 'Extension '.convert::raw2text($ext).' isn\'t a Extension.');
 								}
 						} else
 						{
-								throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' does not exist.');
+								throwError(6, 'PHP-Error', 'Extension '.convert::raw2text($ext).' does not exist.');
 						}
 				}
 		}
@@ -695,6 +695,18 @@ abstract class Object
 		 	}
 		 	
 		 	return null;
+		 }
+		 
+		 /**
+		  * generates class-info
+		  *
+		  *@name buildClassInfo
+		  *@access public
+		 */
+		 static function buildClassInfo($class) {
+			 foreach(self::getStatic($class, "extend") as $ext) {
+				 Object::extend($class, $ext);
+			 }
 		 }
 		 
 }

@@ -60,7 +60,7 @@ class Permission extends DataObject
 		 *
 		 *@name reorderedPermissions
 		*/
-		public static $reorderedPermissions;
+		static $reorderedPermissions;
 		
 		/**
 		 * fields of this set
@@ -74,16 +74,6 @@ class Permission extends DataObject
 			"password"		=> "varchar(100)",
 			"invert_groups"	=> "int(1)",
 			"forModel"		=> "varchar(100)"
-		);
-		
-		/**
-		 * every permission can be inherited by a parent permission, here we define this relation-ship
-		 *
-		 *@name has_one
-		 *@access public
-		*/
-		static $has_one = array(
-			"inheritor"	=> "Permission"
 		);
 		
 		/**
@@ -104,6 +94,13 @@ class Permission extends DataObject
 		*/
 		static $index = array(
 			"name" => "INDEX"
+		);
+		
+		/**
+		 * extensions for this class
+		*/
+		static $extend = array(
+			"Hierarchy"
 		);
 		
 		/**
@@ -232,7 +229,7 @@ class Permission extends DataObject
 									$perm = clone $data;
 									$perm->consolidate();
 									$perm->id = 0;
-									$perm->inheritorid = $data->id;
+									$perm->parentid = $data->id;
 									$perm->name = $r;
 									$data->forModel = "permission";
 									self::$perm_cache[$r] = $perm->hasPermission();
@@ -276,7 +273,7 @@ class Permission extends DataObject
 							$perm = clone $data;
 							$perm->consolidate();
 							$perm->id = 0;
-							$perm->inheritorid = $data->id;
+							$perm->parentid = $data->id;
 							$perm->name = $r;
 							$data->forModel = "permission";
 							self::$perm_cache[$r] = $perm->hasPermission();
@@ -305,10 +302,10 @@ class Permission extends DataObject
 		 *@access public
 		*/
 		public function onBeforeWrite() {
-			if($this->inheritorid == $this->id)
-				$this->inheritorid = 0;
+			if($this->parentid == $this->id)
+				$this->parentid = 0;
 			
-			if($this->inheritorid != 0 && $perm = DataObject::get_by_id("Permission", $this->inheritorid)) {
+			if($this->parentid != 0 && $perm = DataObject::get_by_id("Permission", $this->parentid)) {
 				if($this->hasChanged()) {
 					$this->type = $perm->type;
 					$this->password = $perm->password;
@@ -316,7 +313,7 @@ class Permission extends DataObject
 					$this->groups = $perm->groups;
 				}
 			} else {
-				$this->inheritorid = 0;
+				$this->parentid = 0;
 			}
 			
 			if($this->name) {
@@ -337,16 +334,17 @@ class Permission extends DataObject
 			
 			if($this->id != 0) {
 				// inherit permissions to subordinated perms
-				$data = DataObject::Get("Permission", array("inheritorid" => $this->id));
+				$data = DataObject::Get("Permission", array("parentid" => $this->id));
 				if($data->Count() > 0) {
 					foreach($data as $record) {
-						if($record->id != $record->inheritorid) {
+						if($record->id != $record->parentid) {
 							$newrecord = clone $this;
 							$newrecord->consolidate();
-							$newrecord->inheritorid = $this->id;
+							$newrecord->parentid = $this->id;
 							$newrecord->id = $record->id;
 							$newrecord->name = $record->name;
-							$newrecord->inheritorid = $record->inheritorid;
+							$newrecord->parentid = $record->parentid;
+							
 							$newrecord->write(false, true);
 						}
 					}

@@ -93,18 +93,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name has_one
 		 *@var array
 		*/
-		static $has_one = array(	'parent' 				=> 'pages', 
-									"read_permission" 		=> "Permission",
+		static $has_one = array(	"read_permission" 		=> "Permission",
 									"edit_permission"		=> "Permission",
 									"publish_permission" 	=> "Permission");
 									
-		/**
-		 * a page has many children
-		 *
-		 *@name has_many
-		 *@var array
-		*/
-		static $has_many = array('children' => 'pages');
 		
 		/**
 		 * link-tracking
@@ -114,6 +106,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		static $many_many = array(
 			"UploadTracking"	=> "Uploads"
+		);
+		
+		/**
+		 * extensions of pages
+		*/
+		static $extend = array(
+			"Hierarchy"
 		);
 		
 		/**
@@ -860,7 +859,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if(Permission::check("superadmin"))
 					return true;
 				
-				if(isset($row))
+				if(isset($row) && is_object($row->edit_permission) && $row->edit_permission->type != "admins")
 					return $row->edit_permission->hasPermission();
 				
 				return Permission::check("PAGES_WRITE");
@@ -873,7 +872,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if(Permission::check("superadmin"))
 				return true;
 			
-			if(isset($row))
+			if(isset($row) && is_object($row->publish_permissions) && $row->publish_permissions->type != "admins")
 				return $row->publish_permission->hasPermission();
 			
 			return Permission::check("PAGES_WRITE");

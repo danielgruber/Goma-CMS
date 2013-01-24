@@ -822,6 +822,10 @@ class ClassInfo extends Object
 						
 						foreach(self::$class_info as $class => $data)
 						{
+							if(Object::method_exists($class, "buildClassInfo")) {
+								call_user_func_array(array($class, "buildClassInfo"), array($class));
+							}
+							
 							Object::instance("ClassInfo")->callExtending("generate", $class);
 								
 							// generates save-vars
@@ -854,6 +858,7 @@ class ClassInfo extends Object
 									if(!isset($c)) $c = new $class;
 									$c->generateClassInfo();
 								}
+								
 								unset($c);
 							}
 							

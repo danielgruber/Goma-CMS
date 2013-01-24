@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version: 4.7
+  * last modified: 22.01.2013
+  * $Version: 4.7.1
 */
 
 defined('IN_GOMA') OR die();
@@ -477,6 +477,51 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
+	 * public function to make permission-calls
+	 *
+	 *@name can
+	 *@access public
+	 *@param name(s) of permission
+	 *@param optional - record
+	*/
+	public function can($permissions, $record = null) {	
+		
+		// super-admin
+		if(Permission::check("superadmin"))
+			return true;
+		
+		if(isset($record)) {
+			$record = $this;
+		}
+		
+		if(!is_array($permissions)) {
+			$permissions = array($permission);
+		}
+		
+		foreach($permissions as $perm) {
+			$perm = strtolower($perm);
+			$can = false;
+			
+			if(isset(Permission::$providedPermissions[$this->baseClass . "::" . $perm])) {
+				$can = Permission::check($this->baseClass . "::" . $perm);
+			}
+			
+			if(Object::method_exists($this->class, "can" . $perm)) {
+				$c = call_user_func_array(array($this, "can" . $perm), $record);
+				if(is_bool($d))
+					$can = $d;
+			}
+			
+			$this->callExtending("can" . $perm, $can);
+			
+			if($can === true)
+				return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * returns if you can access a specific history-record
 	 *
 	 *@name canViewHistory
@@ -485,11 +530,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public static function canViewHistory($record = null) {
 		if(is_object($record)) {
 			if($record->oldversion && $record->newversion) {
-				return ($record->oldversion->canWrite($record->oldversion) && $record->newversion->canWrite($record->newversion));
+				return ($record->oldversion->can("Write", $record->oldversion) && $record->newversion->can("Write", $record->newversion));
 			} else if($record->newversion) {
-				return $record->newversion->canWrite($record->newversion);
+				return $record->newversion->can("Write", $record->newversion);
 			} else if($record->record) {
-				return $record->record->canWrite($record->record);
+				return $record->record->can("Write", $record->record);
 			}
 		}
 		
@@ -500,7 +545,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else {
 			throwError("6", "Invalid Argument Error", "Invalid Argument for DataObject::canViewRecord Object or Class_name required");
 		}
-		return $c->canWrite();
+		return $c->can("Write");
 	}
 	
 	/**
@@ -643,10 +688,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getWriteAccess()
 	{
-			if($this->canWrite($this))
+			if(!self::Versioned($this->class) && $this->can("Write"))
 			{
 					return true;
-			} else if($this->canDelete($this))
+			} else if ($this->can("Publish")) {
+				return true;
+			} else if($this->can("Delete"))
 			{
 					return true;
 			}
@@ -813,8 +860,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			// check rights
 			if(!$forceInsert && !$forceWrite) {
-				if(!$this->canInsert($this)) {
-					if($snap_priority == 2 && !$this->canPublish($this))
+				if(!$this->can("Insert", $this)) {
+					if($snap_priority == 2 && !$this->can("Publish", $this))
 						return false;
 				}
 			}
@@ -832,8 +879,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if($data) {
 				// check rights
 				if(!$forceWrite)
-					if(!$this->canWrite($this))
-						if($snap_priority == 2 && !$this->canPublish($this))
+					if(!$this->can("Write", $this))
+						if($snap_priority == 2 && !$this->can("Publish", $this))
 							return false;
 				
 				$this->onBeforeWrite();
@@ -863,8 +910,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 
 				// check rights
 				if(!$forceInsert)
-					if(!$this->canInsert($this->data))
+					if(!$this->can("Insert", $this->data))
 						return false;
+				
+				$this->onBeforeWrite();
+				
 				// old record doesn't exist, so we create a new record
 				$command = "insert";
 				$newdata = $this->data;
@@ -1249,7 +1299,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					$this->callExtending("onBeforePublish");
 					if(!$forcePublish) {
 						if(!$forceWrite) {
-							if(!$this->canPublish($this)) {
+							if(!$this->can("Publish")) {
 								if(PROFILE) Profiler::unmark("DataObject::write");
 								return false;
 							}
@@ -1511,7 +1561,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function unpublish($force = false, $history = true) {
-		if((!$this->canPublish($this)) && !$force)
+		if((!$this->can("Publish")) && !$force)
 			return false;
 		
 		$manipulation = array(
@@ -1547,7 +1597,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function publish($force = false, $history = true) {
-		if((!$this->canPublish($this)) && !$force)
+		if((!$this->can("Publish")) && !$force)
 			return false;
 		
 		if($this->isPublished())
@@ -1604,7 +1654,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if(!isset($this->data))
 			return true;
 		
-		if($force || $this->canDelete($this))
+		if($force || $this->can("Delete"))
 		{
 				// get the ids which are needed
 				$ids = array();
@@ -1976,8 +2026,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function set_many_many($name, $ids, $force = false)
 	{
-		if($this->canWrite($this)) {
-			if(!$this->isPublished() || $this->canPublish($this)) {
+		if($this->can("Write", $this)) {
+			if(!$this->isPublished() || $this->can("Publish", $this)) {
 				$manipulation = $this->set_many_many_manipulation(array(), $name, $ids);
 				
 				$this->onBeforeManipulate($manipulation);
@@ -2129,7 +2179,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name getHasMany
 	 *@access public
 	*/
-	public function getHasMany($name, $filter = null, $sort = null) {
+	public function getHasMany($name, $filter = null, $sort = null, $limit = null) {
 		
 		$name = trim(strtolower($name));
 		
@@ -2140,7 +2190,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			throwError(6, "PHP-Error", "No Has-many-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
 		
-		$cache = "has_many_{$name}_".var_export($filter, true)."_".var_export($sort, true);
+		$cache = "has_many_{$name}_".var_export($filter, true)."_".var_export($sort, true) . "_" . var_export($limit, true);
 		if(isset($this->viewcache[$cache])) {
 			return $this->viewcache[$cache];
 		}
@@ -2165,7 +2215,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 
 		$filter[$key . "id"] = $this["id"];
-		$set = new HasMany_DataObjectSet($class, $filter, $sort);
+		$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
 		$set->setRelationENV($name, $key . "id");
 		
 		if($this->queryVersion == "state") {
@@ -3709,7 +3759,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						"type"		=> "UNIQUE",
 						"fields"	=> array($data["field"], $data["extfield"])
 					)
-				), array(), DB_PREFIX);
+				), array(), $prefix);
 				ClassInfo::$database[$data["table"]] = $fields;
 			}	
 		}

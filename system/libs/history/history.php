@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.0.2
+  * last modified: 22.01.2013
+  * $Version 1.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -90,7 +90,7 @@ class History extends DataObject {
 			return false;
 		}
 		
-		if(isset($changed)) {
+		if(isset($changed) && !DataObject::versioned($class)) {
 			$cc = count($changed);
 			$c = serialize($changed);
 		} else {
