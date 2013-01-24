@@ -165,7 +165,7 @@ class HasOneDropdown extends SingleSelectDropDown
 				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$arr[count($arr) - 1] = convert::raw2text($record[$this->info_field]);
+						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
 					}
 				}
 			}			

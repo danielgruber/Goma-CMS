@@ -1262,7 +1262,9 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	    case E_COMPILE_WARNING:
 	    case E_USER_WARNING:
 	    	log_error("PHP-USER-Warning: ".$errno." ".$errstr." in ".$errfile." on line ".$errline.".");
-	       
+	    	if(DEV_MODE) {
+		    	echo "<b>WARNING:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
+	    	}
 	    	break;
 	    case E_USER_NOTICE:
 	    case E_NOTICE:

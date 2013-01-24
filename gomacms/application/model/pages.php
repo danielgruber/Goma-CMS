@@ -708,11 +708,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					) 
 				));
 				
-				if(!$this->canWrite($this) || !Permission::check("PAGES_WRITE")) {
+				if(!$this->can("Write") || !Permission::check("PAGES_WRITE")) {
 					$write->disable();
 				}
 				
-				if(!$this->canPublish($this) || !Permission::check("PAGES_PUBLISH")) {
+				if(!$this->can("Publish") || !Permission::check("PAGES_PUBLISH")) {
 					$publish->disable();
 				}
 				
@@ -795,22 +795,22 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->addAction(new AjaxSubmitButton('_submit',lang("restore", "Restore"),"AjaxSave"));
 			} else if($this->id != 0) {
 				
-				if($this->canDelete($this)) {
+				if($this->can("Delete")) {
 					$form->addAction(new HTMLAction("deletebutton", '<a rel="dropdownDialog" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
 				}
 				
-				if($this->everPublished() && !$this->isOrgPublished() && $this->canWrite($this)) {
+				if($this->everPublished() && !$this->isOrgPublished() && $this->can("Write")) {
 					$form->addAction(new HTMLAction("revert_changes", '<a class="draft_delete red button" href="'.Core::$requestController->namespace.'/revert_changes" rel="dropdownDialog">'.lang("draft_delete", "delete draft").'</a>'));
 				}
 				
-				if($this->everPublished() && $this->canPublish($this)) {
+				if($this->everPublished() && $this->can("Publish")) {
 					$form->addAction(new HTMLAction("unpublish", '<a class="button" href="'.Core::$requestController->namespace.'/unpublish" rel="ajaxfy">'.lang("unpublish", "Unpublish").'</a>'));
 				}
 				
-				if($this->canWrite($this))
+				if($this->can("Write"))
 					$form->addAction(new AjaxSubmitButton("save_draft",lang("draft_save", "Save draft"),"AjaxSave"));
 				
-				if($this->canPublish($this))
+				if($this->can("Publish"))
 					$form->addAction(new AjaxSubmitButton('publish',lang("publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));	
 					
 			} else {
@@ -867,8 +867,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if(Permission::check("superadmin"))
 				return true;
 			
-			if(isset($row) && is_object($row->edit_permission) && $row->edit_permission->type != "admins")
+			if(isset($row) && is_object($row->edit_permission) && $row->edit_permission->type != "admins") {
 				return $row->edit_permission->hasPermission();
+			}
 			
 			return Permission::check("PAGES_WRITE");
 		}
@@ -903,7 +904,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				if($row->parentid != 0) {
 					$data = DataObject::get_versioned("pages", "state", $row->parentid);
 					if($data->Count() > 0) {
-						return $data->first()->canWrite($data);
+						return $data->first()->can("Write", $data);
 					}
 				}
 			}
@@ -1785,7 +1786,7 @@ class UploadsPageBacktraceController extends ControllerExtension {
 		$data->setVersion(false);
 		if($data->Count() > 0) {
 			foreach($data as $page) {
-				if($page->isPublished() || $page->canWrite($page) || $page->canPublish($page)) {
+				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
 					return true;
 				}
 			}
