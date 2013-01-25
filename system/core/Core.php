@@ -186,10 +186,6 @@ class Core extends object
 			Resources::add("default.css", "css", "main");
 			Resources::add("goma_default.css", "css", "main");
 			
-			if(DEV_MODE) {
-				Resources::add("system/libs/javascript/profiler.js", "js", "main");
-			}
-			
 			if(PROFILE) Profiler::unmark("Core::Init");
 		}
 		

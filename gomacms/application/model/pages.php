@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
+  * last modified: 25.01.2013
   * $Version 2.5.3
 */
 
@@ -881,8 +881,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if(Permission::check("superadmin"))
 				return true;
 			
-			if(isset($row) && is_object($row->publish_permissions) && $row->publish_permissions->type != "admins")
+			if(isset($row) && is_object($row->publish_permission) && $row->publish_permission->type != "admins")
 				return $row->publish_permission->hasPermission();
+			
 			
 			return Permission::check("PAGES_PUBLISH");
 		}

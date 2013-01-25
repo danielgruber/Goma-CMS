@@ -704,7 +704,7 @@ abstract class Object
 		  *@access public
 		 */
 		 static function buildClassInfo($class) {
-			 foreach(self::getStatic($class, "extend") as $ext) {
+			 foreach((array) self::getStatic($class, "extend") as $ext) {
 				 Object::extend($class, $ext);
 			 }
 		 }

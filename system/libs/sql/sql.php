@@ -134,7 +134,7 @@ class SQL extends object
 		static function query($sql, $unbuffered = false, $track = true) {
 				$start = microtime(true);
 				
-				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+				$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
 				//echo $sql . "\n";
 				//logging($_sql);
 				

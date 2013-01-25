@@ -5,9 +5,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.12.2012
-  * $Version 2.1.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.01.2013
+  * $Version 2.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -281,6 +281,26 @@ class Permission extends DataObject
 			}
 		}
 		
+		/**
+		 * setting the parent-id
+		 *
+		 *@name setParentID
+		*/
+		public function setParentID($parentid) {
+			$this->setField("parentid", $parentid);
+			if($this->parentid != 0 && $perm = DataObject::get_by_id("Permission", $this->parentid)) {
+				if($this->hasChanged()) {
+					$this->type = $perm->type;
+					$this->password = $perm->password;
+					$this->invert_groups = $perm->invert_groups;
+					if($this->type == "groups")
+						$this->groupsids = $perm->groupsids;
+				}
+			} else {
+				$this->parentid = 0;
+			}
+		}
+		
 		/** 
 		 * writing
 		 *
@@ -290,17 +310,6 @@ class Permission extends DataObject
 		public function onBeforeWrite() {
 			if($this->parentid == $this->id)
 				$this->parentid = 0;
-			
-			if($this->parentid != 0 && $perm = DataObject::get_by_id("Permission", $this->parentid)) {
-				if($this->hasChanged()) {
-					$this->type = $perm->type;
-					$this->password = $perm->password;
-					$this->invert_groups = $perm->invert_groups;
-					$this->groups = $perm->groups;
-				}
-			} else {
-				$this->parentid = 0;
-			}
 			
 			if($this->name) {
 				if($this->type != "groups") {
@@ -479,6 +488,14 @@ class Permission extends DataObject
 		public function inheritorid() {
 			Core::deprecate("2.0.1", "inheritorid is deprecated, use parentid instead");
 			return $this->parentid;
+		}
+		public function setinheritor($parent) {
+			Core::deprecate("2.0.1", "inheritor is deprecated, use parent instead");
+			$this->setField("parent", $parent);
+		}
+		public function setinheritorid($parentid) {
+			Core::deprecate("2.0.1", "inheritorid is deprecated, use parentid instead");
+			$this->setField("parentid", $parentid);
 		}
 
 }

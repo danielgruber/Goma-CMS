@@ -850,6 +850,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		self::$datacache[$this->baseClass] = array();
 		
+		// Generate Data
 		// if we don't insert we merge the old record with the new one
 		if($forceInsert || $this->versionid == 0) {
 			
@@ -913,9 +914,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				// old record doesn't exist, so we create a new record
 				$command = "insert";
 				$newdata = $this->data;
-			}
-			
-			
+			}	
 		}
 		
 		// first step: decorate the important fields
@@ -928,6 +927,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$newdata["editorid"] = member::$id;
 		$newdata["snap_priority"] = $snap_priority;
 		$newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->class;
+		
+		// find out if we should write data
+		if($command != "insert" && !$forceWrite) {
+			if(!$this->checkForChange($snap_priority, $newdata, $changed)) {
+				return true;
+			}
+		}
+		
+		// WE CAN WRITE!
 		
 		// second step: if insert, add new record in state-table and get the auto-increment-id
 		if($command == "insert") {
@@ -973,6 +981,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 				
+		
+		// generate has-one-data
 		if($has_one = $this->hasOne()) {
 			foreach($has_one as $key => $value) {
 				if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "DataObject")) {
@@ -1019,98 +1029,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		unset($newdata["versionid"]);
 		
-		// find out if we should write data
-		if($command != "insert") {
-			// first check if this record is important
-			if(!$this->isField("stateid") || !$this->isField("publishedid")) {
-				$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
-				if($query->execute()) {
-					while($row = $query->fetch_object()) {
-						$this->publishedid = $row->publishedid;
-						$this->stateid = $row->stateid;
-						break;
-					}
-					if(!isset($this->data["publishedid"])) {
-						$this->publishedid = 0;
-						$this->stateid = 0;
-					}
-				} else {
-					throwErrorByID(3);
-				}
-			}
-			
-			// try and find out whether to write cause of state
-			if($this->publishedid != 0 && $this->stateid != 0 && ($this->stateid == $this->versionid || $snap_priority == 1) && ($this->publishedid == $this->versionid || $snap_priority == 2)) {
-				
-				
-				$changed = array();
-				$forceChange = $forceWrite;
-				
-				// first calculate change-count
-				foreach($this->data as $key => $val) {
-					if(isset($newdata[$key])) {
-						if(gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
-							$changed[$key] = $newdata[$key];
-						}
-					}
-				}
-				
-				// check for relation
-				if(count($many_many_objects) > 0) {
-					$forceChange = true;
-				}
-				
-				// many-many
-				if(!$forceChange && $this->ManyMany())
-					foreach($this->ManyMany() as $name => $table)
-					{
-							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-							{
-									$forceChange = true;
-									break;
-							}
-					}
-				
-				// many-many
-				if(!$forceChange && $this->BelongsManyMany())
-					foreach($this->BelongsManyMany() as $name => $table)
-					{
-							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-							{
-									$forceChange = true;
-									break;
-							}	
-					}
-				
-				// has-many
-				if(!$forceChange && $this->hasMany())
-					foreach($this->hasMany() as $name => $class)
-					{
-							if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
-								$newdata[$name . "ids"] = $newdata[$name];
-							if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-							{
-									$forceChange = true;				
-							}						
-					}
-				
-				// now check if we should write or not
-				if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
-					// should we really write this?! No!
-					return true;
-				}
-			}
-		}
-		
-		// WE CAN WRITE!
-		
 		// now set the correct data
 		$this->data = $newdata;
 		$this->viewcache = array();
 		
 		// write data
 		
-		
+		// generate the write-manipulation
 		$manipulation = array(
 			$baseClass => array(
 				"command"	=> "insert",
@@ -1334,6 +1259,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command, $changed);
 				}
 				unset($manipulation);
+				
+				// HERE CLEAN-UP for non-versioned-tables happens
 				// if we don't version this dataobject, we need to delete the old record
 				if(!self::Versioned($this->class) && isset($oldid) && $command != "insert") {
 					$manipulation = array(
@@ -1388,6 +1315,94 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			return false;
 		}
 			
+	}
+	
+	/**
+	 * checks for writing
+	 *
+	 *@name checkForChange
+	 *@access public
+	 *@param snap-priority
+	 *@param newdata
+	 *@param param to write changed into
+	*/
+	public function checkForChange($snap_priority, $newdata, &$changed = array()) {
+
+		// first check if this record is important
+		if(!$this->isField("stateid") || !$this->isField("publishedid")) {
+			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
+			if($query->execute()) {
+				while($row = $query->fetch_object()) {
+					$this->publishedid = $row->publishedid;
+					$this->stateid = $row->stateid;
+					break;
+				}
+				if(!isset($this->data["publishedid"])) {
+					$this->publishedid = 0;
+					$this->stateid = 0;
+				}
+			} else {
+				throwErrorByID(3);
+			}
+		}
+		
+		// try and find out whether to write cause of state
+		if($this->publishedid != 0 && $this->stateid != 0 && ($this->stateid == $this->versionid || $snap_priority == 1) && ($this->publishedid == $this->versionid || $snap_priority == 2)) {
+			
+			$forceChange = false;
+			
+			// first calculate change-count
+			foreach($this->data as $key => $val) {
+				if(isset($newdata[$key])) {
+					if(gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
+						$changed[$key] = $newdata[$key];
+					}
+				}
+			}
+			
+			// many-many
+			if(!$forceChange && $this->ManyMany())
+				foreach($this->ManyMany() as $name => $table)
+				{
+						if((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
+						{
+								$forceChange = true;
+								break;
+						}
+				}
+			
+			// many-many
+			if(!$forceChange && $this->BelongsManyMany())
+				foreach($this->BelongsManyMany() as $name => $table)
+				{
+						if((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
+						{
+								$forceChange = true;
+								break;
+						}	
+				}
+			
+			// has-many
+			if(!$forceChange && $this->hasMany())
+				foreach($this->hasMany() as $name => $class)
+				{
+						if(isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
+							$newdata[$name . "ids"] = $newdata[$name];
+						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
+						{
+								$forceChange = true;				
+						}						
+				}
+			
+			// now check if we should write or not
+			if(!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
+				// should we really write this?! No!
+				return false;
+			} else {
+				return true;
+			}
+		}
+		
 	}
 	
 	/**
@@ -2600,7 +2615,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				}
 			}
 			
-			if(self::versioned($this->class)) {
+			if($version !== false && self::versioned($this->class)) {
 				if(isset($_GET[$baseClass . "_version"]) && $this->_canVersion($version)) {
 					$version = $_GET[$baseClass . "_version"];
 				}

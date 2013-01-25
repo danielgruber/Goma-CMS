@@ -4,9 +4,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 30.12.2012
-  * $Version 1.5.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.01.2013
+  * $Version 1.5.7
 */
 
 // prevent from being executed twice
@@ -203,7 +203,6 @@ if(typeof self.loader == "undefined") {
 		 *@name lang
 		*/
 		w.lang = function(name, _default) {
-			if(typeof profiler != "undefined") profiler.mark("lang");
 			
 			if(typeof lang[name] == "undefined") {
 				var jqXHR = $.ajax({
@@ -223,8 +222,6 @@ if(typeof self.loader == "undefined") {
 					lang[name] = null;
 				}
 			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("lang");
 			
 			if(lang[name] == null) {
 				return _default;
@@ -253,7 +250,6 @@ if(typeof self.loader == "undefined") {
 		 *@param bool - async request or not, default: true
 		*/
 		w.preloadLang = function(_names, async) {
-			if(typeof profiler != "undefined") profiler.mark("preloadLang");
 			
 			if(typeof async == "undefined")
 				async = true;
@@ -283,15 +279,11 @@ if(typeof self.loader == "undefined") {
 					lang[i] = data[i];
 				}
 			} catch(e) { }
-			
-			if(typeof profiler != "undefined") profiler.unmark("preloadLang");
 		}
 			
 		// some response handlers
 		w.eval_script = function(html, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("eval_script");
 			
 			var content_type = ajaxreq.getResponseHeader("content-type");
 			if(content_type == "text/javascript") {
@@ -328,15 +320,11 @@ if(typeof self.loader == "undefined") {
 				}
 			}
 			
-			if(typeof profiler != "undefined") profiler.unmark("eval_script");
-			
 			RunAjaxResources(ajaxreq);
 		}
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("renderResponseTo");
 			
 			if(ajaxreq != null) {
 				var content_type = ajaxreq.getResponseHeader("content-type");
@@ -369,8 +357,6 @@ if(typeof self.loader == "undefined") {
 			} else {
 				node.html(html);
 			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("renderResponseTo");
 			
 			RunAjaxResources(ajaxreq);
 		}
