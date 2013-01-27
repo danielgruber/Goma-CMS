@@ -51,6 +51,6 @@ $(document).ready(function() {
 
 	$("#navMore").click(function() {
 		$(this).toggleClass("open");
-		$("#navMore-sub").slideToggle("fast");
+		$("#navMore-sub").stop().slideToggle("fast");
 	});
 })
