@@ -2,29 +2,32 @@
  *@package goma framework
  *@link http://goma-cms.org
  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
- *@Copyright (C) 2009 - 2012  Goma-Team
- * last modified: 21.01.2013
+ *@Copyright (C) 2009 - 2013  Goma-Team
+ * last modified: 27.01.2013
  */
 
-function update() {
+function updateNav() {
+	// Width of the entire page
 	var headerWidth = $("#header").width();
+	// Width of the userbar right
 	var userbarWidth = $("#userbar").outerWidth();
+	// Width of all navigation nodes
 	var naviWidth = $("#navi").outerWidth();
-	var naviWidthMax = headerWidth - userbarWidth - 50;
+	// Maximum available space for the navigation
+	var naviWidthMax = headerWidth - userbarWidth - 15;
 	var curNode;
-	var active = $("#navi > ul > li.active").index() + 1;
 
-	update.lastUpdate = headerWidth;
-
-	if (naviWidth <= naviWidthMax) {
-		if ($("#navMore-sub li").length > 0) {
+	if (naviWidth < naviWidthMax) {
+		if ($("#navMore-sub li").length != 0) {
 			curNode = $("#navi li.nav-inactive").first();
-			if (naviWidthMax - naviWidth > curNode.outerWidth(true)) {
+			while (naviWidthMax - naviWidth > curNode.outerWidth(true) && curNode.length != 0) {
 				$("#navMore-sub li").first().remove();
 				curNode.removeClass("nav-inactive");
+				curNode = $("#navi li.nav-inactive").first();
 			}
+			if ($("#navMore-sub li").length == 0)
+				$("#navMore").css("display", "none");
 		}
-		$("#navMore").css("display", "none");
 	} else {
 		while ($("#navi").outerWidth() > naviWidthMax) {
 			curNode = $("#navi").find(" > ul > li").not($("#navMore")).not($("#navi li.active")).not($("#navi li.nav-inactive")).last();
@@ -38,17 +41,13 @@ function update() {
 
 $(document).ready(function() {
 	$("#userbar").addClass("userbar-js");
+	$("#userbar").removeClass("userbar-no-js");
 
-	// Timeout for more smoothness
-	var timeoutEnd;
 	$(window).resize(function() {
-		clearTimeout(timeoutEnd);
-		doit = setTimeout(function() {
-			update();
-		}, 200);
+		updateNav();
 	});
 
-	update();
+	updateNav();
 
 	$("#navMore").click(function() {
 		$(this).toggleClass("open");
