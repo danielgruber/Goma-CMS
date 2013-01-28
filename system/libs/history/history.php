@@ -199,8 +199,7 @@ class History extends DataObject {
 		$this->_versioned = false;
 		$data = $this->historyData();
 		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
-			$temp = new $this->dbobject();
-			if(!$temp->versioned || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
+			if(!DataObject::versioned($this->dbobject) || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
 				return false;
 			}
 			
