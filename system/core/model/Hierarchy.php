@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
+  * last modified: 29.01.2013
   * $Version 1.0
 */
 
@@ -85,6 +85,59 @@ class Hierarchy extends DataObjectExtension {
 	 *@name buidlDB
 	*/
 	public function buildDB($prefix, &$log) {
+		return true;
+		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
+			return true;
 		
+		if(!SQL::getFieldsOfTable($this->baseTable . "_tree")) {
+			// create and migrate
+			$migrate = true;
+		}
+		
+		$log .= SQL::requireTable(	$this->getOwner()->baseTable . "_tree", 
+										array(	"id" 		=> "int(10)", 
+												"parentid" 	=> "int(10)"
+											), 
+										array(), 
+										array(), 
+										$prefix
+									);
+		if(isset($migrate)) {
+			$sql = "SELECT recordid, parentid FROM " . $prefix . $this->getOwner()->baseTable;
+			$directParents = array();
+			
+			if($result = SQL::query($sql)) {
+				while($row = SQL::fetch_object($result)) {
+					$directParents[$row->recordid] = $row->parentid;
+				}
+			} else {
+				throwErrorbyID(3);
+			}
+			
+			if(count($directParents) > 0) {
+				$insert = "INSERT INTO " . $prefix . $this->getOwner()->baseTable . "_tree (id, parentid) VALUES ";
+				
+				$a = 0;
+				foreach($directParents as $id => $parent) {
+					if($a == 0)
+						$a++;
+					else
+						$insert .= ", ";
+					
+					$insert .= "(".$id.", ".(int) $tid.")";
+					$tid = $parent;
+					while(isset($directParents[$tid])) {
+						$tid = $directParents[$tid];
+						$insert .= ",(".$id.", ".(int) $tid.")";
+					}
+				}
+				
+				if(SQL::Query($insert)) {
+					return true;
+				} else {
+					throwErrorByID(3);
+				}
+			}
+		}
 	}
 }

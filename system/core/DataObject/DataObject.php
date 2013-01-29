@@ -4034,12 +4034,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			unset($has_ones);
 		}
 		
-		$parent = get_parent_class($this);
-		if($parents === true && $parent != "DataObject") {
+		$parent = strtolower(get_parent_class($this));
+		if($parents === true && $parent != "dataobject") {
 			$has_one = array_merge(Object::instance($parent)->generateHas_one(), $has_one);
 		}
 		
-		if($parent == "DataObject") {
+		if($parent == "dataobject") {
 			$has_one["autor"] = "user";
 			$has_one["editor"] = "user";
 		}

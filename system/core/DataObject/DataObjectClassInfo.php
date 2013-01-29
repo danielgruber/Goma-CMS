@@ -234,12 +234,13 @@ class DataObjectClassInfo extends Extension
 								$_c = strtolower(get_parent_class($_c));												
 						}
 						unset($_c, $parent, $c);
-				} else
+				}
 		
 				if(class_exists($class) && class_exists("viewaccessabledata") && is_subclass_of($class, "viewaccessabledata") && !ClassInfo::isAbstract($class)) {
-					if($casting = Object::instance($class)->generateCasting())
-						if(count($casting) > 0)
-							ClassInfo::$class_info[$class]["casting"] = $casting;
+					if(!class_exists("DataObject") || !is_subclass_of($class, "DataObject"))
+						if($casting = Object::instance($class)->generateCasting())
+							if(count($casting) > 0)
+								ClassInfo::$class_info[$class]["casting"] = $casting;
 					
 					if($defaults = Object::instance($class)->generateDefaults())
 						if(count($defaults) > 0)
