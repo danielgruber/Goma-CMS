@@ -1194,12 +1194,12 @@ class ClassInfo extends Object
 		*/
 		public static function checkForUpgradeScripts($folder, $current_version) {
 			if(file_exists($folder . "/version.php")) {
-				include($folder . "/version.php");
-			} else {
-				$version = 0;
-			}
+				require($folder . "/version.php");
+			} 
 			
-			if(goma_version_compare($current_version, $version, ">")) {
+			if (!defined('GOMA_VERSION')) define('GOME_VERSION', 0);
+			
+			if(goma_version_compare($current_version, GOMA_VERSION, ">")) {
 				// run upgrade-scripts
 				if(is_dir($folder. "/upgrade")) {
 					$files = scandir($folder . "/upgrade");
