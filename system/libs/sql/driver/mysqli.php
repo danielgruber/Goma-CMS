@@ -675,7 +675,7 @@ class mysqliDriver extends object implements SQLDriver
 			if(SQL::Query($sql))
 				return true;
 			else
-				throwErrorByID(3);
+				return false;
 		}
 		
 		/**

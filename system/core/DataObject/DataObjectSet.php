@@ -1016,7 +1016,7 @@ class DataObjectSet extends DataSet {
 				$this->controller = $this->dataobject->controller;
 			
 			$this->filter($filter);
-			$this->sort = $sort;
+			$this->sort = ClassInfo::getStatic($class, "default_sort");
 			$this->limit($limit);
 			$this->join($join);
 			$this->search($search);
