@@ -75,7 +75,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		static $db = array(	'nickname'		=> 'varchar(200)',
 							'name'			=> 'varchar(200)',
 							'email'			=> 'varchar(200)',
-							'password'		=> 'varchar(200)',
+							'password'		=> 'varchar(1000)',
 							'signatur'		=> 'text',
 							'status'		=> 'int(2)',
 							'phpsess'		=> 'varchar(200)',
