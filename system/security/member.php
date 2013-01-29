@@ -49,13 +49,14 @@ class userController extends Controller
 		} else if(isset($_GET["dropElem"])) {
 			$response->exec("dropdownDialog.get(".var_export($_GET["dropElem"], true).").hide();");
 		}
+		Notification::notify("user", lang("edit_password_ok"));
 		return $response->render();
 	}
 		
 }
 
 
-class User extends DataObject implements HistoryData, PermProvider
+class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
 		/**
 		 * the name of this dataobject
@@ -612,6 +613,20 @@ class User extends DataObject implements HistoryData, PermProvider
 				return new GravatarImageHandler(array("email" => $this->email));
 			}
 		}
+		
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
+	}
 }
 
 /**

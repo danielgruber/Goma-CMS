@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 15.12.2012
+  * last modified: 28.01.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,7 @@ $lang = array(
 	"installed_version"								=> "Installierte Version",
 	"password"                                    	=> "Passwort",
 	'smilies'										=> "Smileys",
+	"edit_password"									=> "Passwort ändern",
 	"edit_password_ok"                             	=> "Das Passwort wurde ge&auml;ndert!",
 	"homepage"                                     	=> "Startseite",
 	"page"											=> "Seite",

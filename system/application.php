@@ -1262,7 +1262,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	    case E_COMPILE_WARNING:
 	    case E_USER_WARNING:
 	    	log_error("PHP-USER-Warning: ".$errno." ".$errstr." in ".$errfile." on line ".$errline.".");
-	    	if(DEV_MODE) {
+	    	if(DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest") && !strpos($errstr, "chmod")) {
 		    	echo "<b>WARNING:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
 	    	}
 	    	break;
@@ -1270,7 +1270,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	    case E_NOTICE:
 	    case E_USER_NOTICE:
 	    	logging("Notice: [$errno] $errstr");
-	        if(DEV_MODE)
+	        if(DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"))
 	       	 	echo "<b>NOTICE:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
 	        break;
 	    case E_STRICT:
