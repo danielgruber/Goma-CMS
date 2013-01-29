@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 21.06.2011
+  * last modified: 29.01.2013
   * $Version 2.0.0 - 002
 */
 
@@ -16,11 +16,31 @@ class Hash extends Object {
 	 * generates a hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		
+	} 
+	
+	/**
+	 * generates a random salt
+	 */
+	public static function generateSalt() {
+		//chars
+	        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ÃŸ!Â§%&[]}{";
+	
+	        //lenght 
+	        $lenght = rand(236, 255); 
+	
+	        $salt = ""; 
+	
+	        for ($i = 1; $i < $lenght; ++$i) {
+	            $salt .= $chars[rand(0, (strlen($chars) - 1))];
+	        }
+	       
+	        return $salt; 
 	}
+	
 	/**
 	 * gets the hash from the current default function
 	 *
@@ -29,7 +49,6 @@ class Hash extends Object {
 	*/
 	public static function getHashFromDefaultFunction($string) {
 		return GomaHash::makeHash($string);
-		
 	}
 	/**
 	 * checks if a hash matches any of the hash-functions
@@ -48,15 +67,15 @@ class Hash extends Object {
 	}
 }
 
-class md5Hash extends Hash {
+class sha512Hash extends Hash {
 	/**
 	 * generates a md5-hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
-		return md5($string);
+		return hash('sha512', $string);
 	}
 }
 
@@ -65,10 +84,10 @@ class GomaHash extends Hash {
 	 * generates a Goma-hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		
-		return md5("GOMA_PASSWORD_PREFIX" . md5($string));
+		return sha512::makeHash("GOMA_PASSWORD_PREFIX" . sha512Hash::makeHash($string));
 	}
 }
