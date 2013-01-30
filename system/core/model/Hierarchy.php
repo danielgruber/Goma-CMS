@@ -22,8 +22,6 @@ class Hierarchy extends DataObjectExtension {
 		"AllChildren", "searchChildren", "searchAllChildren"
 	);
 	
-	static $c = 0;
-	
 	/**
 	 * has-one-extension
 	*/
