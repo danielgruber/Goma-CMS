@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 22.01.2013
-  * $Version: 4.7.1
+  * last modified: 30.01.2013
+  * $Version: 4.7.2
 */
 
 defined('IN_GOMA') OR die();
@@ -753,14 +753,25 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
+	 * will be called after write
+	 *@name onAfterWrite
+	 *@access public
+	*/
+	public function onAfterWrite()
+	{
+		
+	}
+	
+	
+	/**
 	 * before manipulating the data
 	 *@name onbeforeManipulate
 	 *@access public
 	 *@param manipulation
 	*/
-	public function onbeforeManipulate(&$manipulation)
+	public function onbeforeManipulate(&$manipulation, $job)
 	{
-		$this->callExtending("onBeforeManipulate", $manipulation);
+		
 	}
 	
 	/**
@@ -770,7 +781,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function onBeforeWriteData() {
-		$this->callExtending("onBeforeWriteData");
+		
 	}
 	
 	/**
@@ -1203,7 +1214,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		// fire events!
 		$this->onBeforeWriteData();
-		$this->onBeforeManipulate($manipulation);
+		$this->callExtending("onBeforeWriteData");
+		$this->onBeforeManipulate($manipulation, $b = "write");
+		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
 		
 		// fire manipulation to DataBase
 		if(SQL::manipulate($manipulation)) {
@@ -1249,7 +1262,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				));
 			}
 			
-			$this->onBeforeManipulate($manipulation);
+			$this->onBeforeManipulate($manipulation, $b = "write_state");
+			$this->callExtending("onBeforeManipulate", $manipulation, $b = "write_state");
 			if(SQL::manipulate($manipulation)) {
 				
 				if(self::getStatic($this->class, "history") && $history) {
@@ -1259,6 +1273,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					History::push($this->class, $historyOldID, $this->versionid, $this->id, $command, $changed);
 				}
 				unset($manipulation);
+				
+				$this->onAfterWrite();
+				$this->callExtending("onAfterWrite");
 				
 				// HERE CLEAN-UP for non-versioned-tables happens
 				// if we don't version this dataobject, we need to delete the old record
@@ -1588,7 +1605,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeUnPublish();
 		$this->callExtending("OnBeforeUnPublish");
 		
-		$this->onBeforeManipulate($manipulation);
+		$this->onBeforeManipulate($manipulation, $b = "unpublish");
+		$this->callExtending("onBeforeManipulate", $manipulation, $b = "unpublish");
 		
 		if(SQL::manipulate($manipulation)) {
 			if(self::getStatic($this->class, "history") && $history) {
@@ -1627,7 +1645,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforePublish();
 		$this->callExtending("OnBeforePublish");
 		
-		$this->onBeforeManipulate($manipulation);
+		$this->onBeforeManipulate($manipulation, $b = "publish");
+		$this->callExtending("onBeforeManipulate", $manipulation, $b = "publish");
 		
 		if(SQL::manipulate($manipulation)) {
 			if(self::getStatic($this->class, "history") && $history) {
@@ -2040,7 +2059,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			if(!$this->isPublished() || $this->can("Publish", $this)) {
 				$manipulation = $this->set_many_many_manipulation(array(), $name, $ids);
 				
-				$this->onBeforeManipulate($manipulation);
+				$this->onBeforeManipulate($manipulation, $b = "set_many_many");
+				$this->callExtending("onBeforeManipulate", $manipulation, $b = "set_many_many");
 				
 				return SQL::manipulate($manipulation);
 			}

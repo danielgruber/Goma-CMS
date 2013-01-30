@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 29.01.2013
+  * last modified: 30.01.2013
   * $Version 1.0
 */
 
@@ -80,16 +80,57 @@ class Hierarchy extends DataObjectExtension {
 	*/
 	
 	/**
+	 * before inserting data
+	 *
+	 *@name onBeforeManipulate
+	*/
+	public function onBeforeManipulate(&$manipulation, $job) {
+		if($job == "write" && isset(ClassInfo::$database[$this->getOwner()->baseTable . "_tree"])) {
+			$parentid = $this->getOwner()->parentid;
+		
+			$manipulation["tree_table"] = array(
+				"command" 		=> "insert",
+				"table_name"	=> $this->getOwner()->baseTable . "_tree",
+				"fields" 		=> array(array("id" => $this->getOwner()->versionid, "parentid" => 0))
+			);
+			
+			$p = $this->getOwner();
+			while($p->parent) {
+				$p = $p->parent();
+				
+				$manipulation["tree_table"]["fields"][] = array("id" => $this->getOwner()->versionid, "parentid" => $p->id);
+			}
+		}
+	}
+	
+	/**
+	 * before removing data
+	 *
+	 *@name onBeforeRemove
+	*/
+	public function onBeforeRemove(&$manipulation) {
+		if(!DataObject::versioned($this->getOwner()->class) && isset(ClassInfo::$database[$this->getOwner()->baseTable . "_tree"])) {
+			$manipulation["delete_tree"] = array(
+				"table" 	=> $this->getOwner()->baseTable . "_tree",
+				"command"	=> "delete",
+				"where"		=> array(
+					"id" => $this->getOwner()->versionid
+				)
+			);
+		}
+	}
+	
+	/**
 	 * build a seperate tree-table
 	 *
 	 *@name buidlDB
 	*/
 	public function buildDB($prefix, &$log) {
-		return true;
+		
 		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
 			return true;
 		
-		if(!SQL::getFieldsOfTable($this->baseTable . "_tree")) {
+		if(!SQL::getFieldsOfTable($this->getOwner()->baseTable . "_tree")) {
 			// create and migrate
 			$migrate = true;
 		}
@@ -102,13 +143,27 @@ class Hierarchy extends DataObjectExtension {
 										array(), 
 										$prefix
 									);
+		
+		// set Database-Record
+		ClassInfo::$database[$this->getOwner()->baseTable . "_tree"] = array(
+			"id" => "int(10)", 
+			"parentid" => "int(10)"
+		);
+		
 		if(isset($migrate)) {
-			$sql = "SELECT recordid, parentid FROM " . $prefix . $this->getOwner()->baseTable;
+			$sql = "SELECT recordid, parentid, id FROM " . $prefix . $this->getOwner()->baseTable . " ORDER BY id DESC";
 			$directParents = array();
+			$versions = array();
 			
+			$i = 0;
 			if($result = SQL::query($sql)) {
 				while($row = SQL::fetch_object($result)) {
-					$directParents[$row->recordid] = $row->parentid;
+					if(!isset($directParents[$row->recordid]))
+						$directParents[$row->recordid] = $row->parentid;
+					
+					$versions[$row->id] = $row->parentid;
+					
+					$i++;
 				}
 			} else {
 				throwErrorbyID(3);
@@ -118,13 +173,13 @@ class Hierarchy extends DataObjectExtension {
 				$insert = "INSERT INTO " . $prefix . $this->getOwner()->baseTable . "_tree (id, parentid) VALUES ";
 				
 				$a = 0;
-				foreach($directParents as $id => $parent) {
+				foreach($versions as $id => $parent) {
 					if($a == 0)
 						$a++;
 					else
 						$insert .= ", ";
 					
-					$insert .= "(".$id.", ".(int) $tid.")";
+					$insert .= "(".$id.", ".(int) $parent.")";
 					$tid = $parent;
 					while(isset($directParents[$tid])) {
 						$tid = $directParents[$tid];
