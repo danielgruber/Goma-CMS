@@ -52,7 +52,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name AllChildren
 	*/
 	public function AllChildren($filter = null, $sort = null, $limit = null) {
-		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id), $sort, $limit, array(
+		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
@@ -72,7 +72,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name SearchAllChildren
 	*/
 	public function SearchAllChildren($search, $filter = null, $sort = null, $limit = null) {
-		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id), $sort, $limit, array(
+		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
