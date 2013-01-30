@@ -19,7 +19,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name extra_methods
 	*/
 	static $extra_methods = array(
-		"AllChildren", "searchChildren", "searchAllChildren"
+		"AllChildren", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
 	);
 	
 	/**
@@ -78,6 +78,37 @@ class Hierarchy extends DataObjectExtension {
 	}
 	
 	/**
+	 * returns a list of all parentids to the top
+	 *
+	 *@name getAllParentIDs
+	*/ 
+	public function getAllParentIDs() {
+		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id" => $this->getOwner()->versionid));
+		if($query->execute()) {
+			$ids = array();
+			while($row = $query->fetch_object()) {
+				if($row->parentid != 0)
+					$ids[] = $row->parentid;
+			}
+		}
+		return $ids;
+	}
+	
+	/**
+	 * returns a dataset of all parents
+	 *
+	 *@name getAllParents
+	*/ 
+	public function getAllParents($filter = null, $sort = null, $limit = null) {
+		if(!isset($sort)) {
+			$sort = array("field" => $this->getOwner()->baseClass . "_tree.height", "type" => "DESC");
+		}
+		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
+			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
+		));
+	}
+	
+	/**
 	 * //!extend APIs
 	*/
 	
@@ -93,14 +124,22 @@ class Hierarchy extends DataObjectExtension {
 			$manipulation["tree_table"] = array(
 				"command" 		=> "insert",
 				"table_name"	=> $this->getOwner()->baseTable . "_tree",
-				"fields" 		=> array(array("id" => $this->getOwner()->versionid, "parentid" => 0))
+				"fields" 		=> array()
 			);
 			
+			$height = 0;
 			$p = $this->getOwner();
 			while($p->parent) {
 				$p = $p->parent();
 				
 				$manipulation["tree_table"]["fields"][] = array("id" => $this->getOwner()->versionid, "parentid" => $p->id);
+				$height++;
+			}
+			
+			$manipulation["tree_table"]["fields"][] = array("id" => $this->getOwner()->versionid, "parentid" => 0, "height" => 0);
+			foreach($manipulation["tree_table"]["fields"] as $key => $data) {
+				$manipulation["tree_table"]["fields"][$key]["height"] = $height;
+				$height--;
 			}
 		}
 	}
@@ -139,7 +178,8 @@ class Hierarchy extends DataObjectExtension {
 		
 		$log .= SQL::requireTable(	$this->getOwner()->baseTable . "_tree", 
 										array(	"id" 		=> "int(10)", 
-												"parentid" 	=> "int(10)"
+												"parentid" 	=> "int(10)",
+												"height"	=> "int(10)"
 											), 
 										array(), 
 										array(), 
@@ -148,8 +188,9 @@ class Hierarchy extends DataObjectExtension {
 		
 		// set Database-Record
 		ClassInfo::$database[$this->getOwner()->baseTable . "_tree"] = array(
-			"id" => "int(10)", 
-			"parentid" => "int(10)"
+			"id" 		=> "int(10)", 
+			"parentid" 	=> "int(10)",
+			"height"	=> "int(10)"
 		);
 		
 		if(isset($migrate)) {
@@ -172,7 +213,7 @@ class Hierarchy extends DataObjectExtension {
 			}
 			
 			if(count($directParents) > 0) {
-				$insert = "INSERT INTO " . $prefix . $this->getOwner()->baseTable . "_tree (id, parentid) VALUES ";
+				$insert = "INSERT INTO " . $prefix . $this->getOwner()->baseTable . "_tree (id, parentid, height) VALUES ";
 				
 				$a = 0;
 				foreach($versions as $id => $parent) {
@@ -181,11 +222,20 @@ class Hierarchy extends DataObjectExtension {
 					else
 						$insert .= ", ";
 					
-					$insert .= "(".$id.", ".(int) $parent.")";
+					// calc height
+					$height = 0;
 					$tid = $parent;
 					while(isset($directParents[$tid])) {
 						$tid = $directParents[$tid];
-						$insert .= ",(".$id.", ".(int) $tid.")";
+						$height++;
+					}
+					
+					$insert .= "(".$id.", ".(int) $parent.", $height)";
+					$tid = $parent;
+					while(isset($directParents[$tid])) {
+						$tid = $directParents[$tid];
+						$height--;
+						$insert .= ",(".$id.", ".(int) $tid.", $height)";
 					}
 				}
 				
