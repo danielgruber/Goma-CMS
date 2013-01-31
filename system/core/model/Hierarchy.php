@@ -121,6 +121,7 @@ class Hierarchy extends DataObjectExtension {
 			while($row = $query->fetch_object()) {
 				$ids[] = $row->id;
 			}
+			return $ids;
 		} else {
 			throwErrorByID(3);
 		}
@@ -134,11 +135,13 @@ class Hierarchy extends DataObjectExtension {
 	*/
 	public function getAllChildIDs() {
 		$ids = array();
-		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
+		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("recordid"), array("parentid" => $this->getOwner()->id));
+		$query->innerJOIN($this->getOwner()->baseTable, $this->getOwner()->baseTable . ".id = " . $this->getOwner()->baseClass . "_tree.id");
 		if($query->execute()) {
 			while($row = $query->fetch_object()) {
-				$ids[] = $row->id;
+				$ids[] = $row->recordid;
 			}
+			return $ids;
 		} else {
 			throwErrorByID(3);
 		}
