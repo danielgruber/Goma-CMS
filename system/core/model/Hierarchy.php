@@ -19,7 +19,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name extra_methods
 	*/
 	static $extra_methods = array(
-		"AllChildren", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
+		"AllChildren", "allChildVersionIDs", "getAllChildIDs", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
 	);
 	
 	/**
@@ -83,7 +83,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name getAllParentIDs
 	*/ 
 	public function getAllParentIDs() {
-		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id" => $this->getOwner()->versionid));
+		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("parentid"), array("id" => $this->getOwner()->versionid));
 		if($query->execute()) {
 			$ids = array();
 			while($row = $query->fetch_object()) {
@@ -106,6 +106,42 @@ class Hierarchy extends DataObjectExtension {
 		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
 		));
+	}
+	
+	/**
+	 * gets all versionids of the children
+	 *
+	 *@name getAllChildVersionIDs
+	 *@access public
+	*/
+	public function getAllChildVersionIDs() {
+		$ids = array();
+		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
+		if($query->execute()) {
+			while($row = $query->fetch_object()) {
+				$ids[] = $row->id;
+			}
+		} else {
+			throwErrorByID(3);
+		}
+	}
+	
+	/**
+	 * gets all ids of the children
+	 *
+	 *@name getAllChildVersionIDs
+	 *@access public
+	*/
+	public function getAllChildIDs() {
+		$ids = array();
+		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
+		if($query->execute()) {
+			while($row = $query->fetch_object()) {
+				$ids[] = $row->id;
+			}
+		} else {
+			throwErrorByID(3);
+		}
 	}
 	
 	/**
