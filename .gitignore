@@ -1,7 +1,24 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Aptana
+.settings/*
+.project
+
+# Goma files
 _config.php
-.DS_Store
+.index.db
 .htaccess
-.DS_Store
+
+# Goma Core
+system/installer/log_*****/*
+system/temp/*
+system/installer/data/apps/.index.db
+system/installer/log/*
+system/installer/temp/*
+
+# Goma Application
 gomacms/*
 !gomacms/application/*
 !gomacms/application
@@ -14,13 +31,9 @@ gomacms/*
 !gomacms/.htaccess
 gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
-system/installer/log_*****/*
-system/temp/*
-system/installer/data/apps/.index.db
-system/installer/log/*
-system/installer/temp/*
+
+# User files
 Uploads
 Uploads/*
 images/resampled
 images/resampled/*
-*.db
