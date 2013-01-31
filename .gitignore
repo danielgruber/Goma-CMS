@@ -27,7 +27,6 @@ gomacms/*
 !gomacms/version.php
 !gomacms/upgrade/*
 !gomacms/upgrade
-!gomacms/.htaccess
 gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
 
