@@ -481,11 +481,16 @@ class Controller extends RequestHandler
 					
 				), true, "safe", $disabled);
 			} else if($this->getParam("id")) {
-				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
-				if($model) {
-					return $model->controller(clone $this)->edit();
+				if(preg_match('/^[0-9]+$/', $this->getParam("id")) {
+					$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+					if($model) {
+						return $model->controller(clone $this)->edit();
+					} else {
+						throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
+					}
 				} else {
-					throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
+					log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
+					$this->redirectBack();
 				}
 			} else {
 				throwError(6, "Invalid Argument", "Controller::Edit should be called if you just have one Record or a given ID in URL.");
@@ -536,11 +541,16 @@ class Controller extends RequestHandler
 					}
 				}
 			} else {
-				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
-				if($model) {
-					return $model->controller(clone $this)->delete();
+				if(preg_match('/^[0-9]+$/', $this->getParam("id")) {
+					$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+					if($model) {
+						return $model->controller(clone $this)->delete();
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					log_error("Warning: Param ID for Action delete is not an integer: " . print_r($this->request, true));
+					$this->redirectBack();	
 				}
 			}
 		}
