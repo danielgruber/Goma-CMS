@@ -372,7 +372,8 @@ class DBField extends Object implements DataBaseField
 		if(DEV_MODE) {
 			$trace = debug_backtrace();
 			log_error('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
-			addcontent::add('<div class="notice"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
+			if(DEV_MODE)
+		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
 		}
 		return $this->__toString();
 	}
