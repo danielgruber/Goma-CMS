@@ -460,7 +460,7 @@ function parseUrl() {
 	define('ROOT_PATH', $root_path);
 
 	// generate BASE_URI
-	$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
+	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
 	$port = $_SERVER["SERVER_PORT"];
 	if ($http == "http" && $port == 80) {
 		$port = "";
@@ -1245,7 +1245,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 		case E_CORE_WARNING :
 		case E_COMPILE_WARNING :
 		case E_USER_WARNING :
-			if(strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
+			if (strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
 				log_error("PHP-USER-Warning: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
 				if (DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest")) {
 					echo "<b>WARNING:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
@@ -1255,7 +1255,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 		case E_USER_NOTICE :
 		case E_NOTICE :
 		case E_USER_NOTICE :
-			if(strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
+			if (strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
 				logging("Notice: [$errno] $errstr");
 				if (DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"))
 					echo "<b>NOTICE:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
