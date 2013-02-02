@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 02.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -63,6 +63,7 @@ class mysqliDriver extends object implements SQLDriver
 				$this->_db = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
 				if(!mysqli_connect_errno()) {
 					self::setCharsetUTF8();
+					$this->query("SET sql_mode = '';");
 					return true;
 				} else {
 					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
