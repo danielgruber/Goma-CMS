@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 1.2.8
+  * last modified: 02.02.2013
+  * $Version 1.2.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -78,7 +78,7 @@ class Backup extends Object {
 					// get all fields
 					while($array = sql::fetch_array($result))
 					{
-							$tab_name = '`'.$array["Field"].'`';
+							$tab_name = $array["Field"];
 							$tab_type = $array["Type"];
 							$tab_null = " NOT NULL";
 							$tab_default = (empty($array["Default"])) ? "" : " DEFAULT '" . $array["Default"] . "'";
@@ -101,11 +101,11 @@ class Backup extends Object {
 							$sub_part = (isset($info["Sub_part"])) ? $info["Sub_part"] : "";
 							if($keyname != "PRIMARY" && $info["Non_unique"] == 0) 
 							{
-									$keyname = "UNIQUE `".$keyname."`";
+									$keyname = "UNIQUE ".$keyname;
 							}
 							if($comment == "FULLTEXT") 
 							{
-									$keyname="FULLTEXT `".$keyname."`";
+									$keyname="FULLTEXT ".$keyname;
 							}
 							if(!isset($keyarray[$keyname])) 
 							{
@@ -130,7 +130,7 @@ class Backup extends Object {
 											$data .= "FULLTEXT " . substr($keyname, 9) . " (";
 									} else 
 									{
-											$data .= "KEY `" . $keyname . "` (";
+											$data .= "KEY " . $keyname . " (";
 									}
 									$data .= implode($columns, ", ") . ")";
 
@@ -144,7 +144,7 @@ class Backup extends Object {
 			if(!in_array($table, $excludeList)) {
 				
 				// values
-				$sql = "SELECT * FROM `".DB_PREFIX."".$table."`";
+				$sql = "SELECT * FROM ".DB_PREFIX."".$table."";
 				if($result = sql::query($sql))
 				{
 						if(sql::num_rows($result) > 0)
@@ -154,7 +154,7 @@ class Backup extends Object {
 								while($row = sql::fetch_assoc($result))
 								{
 										if($i == 0) {
-											$data .= "-- INSERT \n INSERT INTO ".$prefix."".$table." (`".implode("` , `", array_keys($row))."`) VALUES ";
+											$data .= "-- INSERT \n INSERT INTO ".$prefix."".$table." (".implode(", ", array_keys($row)).") VALUES ";
 										}
 										foreach($row as $key => $value)
 										{
