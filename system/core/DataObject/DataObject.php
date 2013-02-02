@@ -2139,6 +2139,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function getRelationIDs($relname) {
 		$relname = trim(strtolower($relname));
 		
+		if(substr($relname, -3) == "ids") {
+			$relname = substr($relname, 0, -3);
+		}
+		
 		// get all config
 		$has_many = $this->hasMany();
 		$many_many = $this->ManyMany();
@@ -3855,6 +3859,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				"publishedid" => "int(10)"
 			);
 		}
+		
+		$this->callExtending("generateClassInfo");
 	}
 	
 	/**

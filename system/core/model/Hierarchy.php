@@ -6,7 +6,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.01.2013
+  * last modified: 02.02.2013
   * $Version 1.0
 */
 
@@ -19,7 +19,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name extra_methods
 	*/
 	static $extra_methods = array(
-		"AllChildren", "allChildVersionIDs", "getAllChildIDs", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
+		"AllChildren", "getallChildVersionIDs", "getAllChildIDs", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
 	);
 	
 	/**
@@ -52,8 +52,8 @@ class Hierarchy extends DataObjectExtension {
 	 *@name AllChildren
 	*/
 	public function AllChildren($filter = null, $sort = null, $limit = null) {
-		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.id = " . $this->getOwner()->baseTable . ".id"
+		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
+			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
 	
@@ -72,8 +72,8 @@ class Hierarchy extends DataObjectExtension {
 	 *@name SearchAllChildren
 	*/
 	public function SearchAllChildren($search, $filter = null, $sort = null, $limit = null) {
-		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.id = " . $this->getOwner()->baseTable . ".id"
+		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
+			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
 	
@@ -83,7 +83,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name getAllParentIDs
 	*/ 
 	public function getAllParentIDs() {
-		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("parentid"), array("id" => $this->getOwner()->versionid));
+		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("parentid"), array("id" => $this->getOwner()->versionid));
 		if($query->execute()) {
 			$ids = array();
 			while($row = $query->fetch_object()) {
@@ -101,10 +101,10 @@ class Hierarchy extends DataObjectExtension {
 	*/ 
 	public function getAllParents($filter = null, $sort = null, $limit = null) {
 		if(!isset($sort)) {
-			$sort = array("field" => $this->getOwner()->baseClass . "_tree.height", "type" => "DESC");
+			$sort = array("field" => $this->getOwner()->baseTable . "_tree.height", "type" => "DESC");
 		}
-		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseClass . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
-			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseClass . "_tree AS " . $this->getOwner()->baseClass . "_tree ON " . $this->getOwner()->baseClass . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
+		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
+			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
 	
@@ -115,8 +115,9 @@ class Hierarchy extends DataObjectExtension {
 	 *@access public
 	*/
 	public function getAllChildVersionIDs() {
+		
 		$ids = array();
-		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
+		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
 		if($query->execute()) {
 			while($row = $query->fetch_object()) {
 				$ids[] = $row->id;
@@ -135,8 +136,8 @@ class Hierarchy extends DataObjectExtension {
 	*/
 	public function getAllChildIDs() {
 		$ids = array();
-		$query = new SelectQuery($this->getOwner()->baseClass . "_tree", array("recordid"), array("parentid" => $this->getOwner()->id));
-		$query->innerJOIN($this->getOwner()->baseTable, $this->getOwner()->baseTable . ".id = " . $this->getOwner()->baseClass . "_tree.id");
+		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("recordid"), array("parentid" => $this->getOwner()->id));
+		$query->innerJOIN($this->getOwner()->baseTable, $this->getOwner()->baseTable . ".id = " . $this->getOwner()->baseTable . "_tree.id");
 		if($query->execute()) {
 			while($row = $query->fetch_object()) {
 				$ids[] = $row->recordid;
@@ -196,6 +197,23 @@ class Hierarchy extends DataObjectExtension {
 				"where"		=> array(
 					"id" => $this->getOwner()->versionid
 				)
+			);
+		}
+	}
+	
+	/**
+	 * generates some ClassInfo
+	 *
+	 *@name generateClassInfo
+	 *@access public
+	*/
+	public function generateClassInfo() {
+		if(defined("SQL_LOADUP") && SQL::getFieldsOfTable($this->baseTable . "_tree")) {
+			// set Database-Record
+			ClassInfo::$database[$this->getOwner()->baseTable . "_tree"] = array(
+				"id" 		=> "int(10)", 
+				"parentid" 	=> "int(10)",
+				"height"	=> "int(10)"
 			);
 		}
 	}

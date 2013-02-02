@@ -465,6 +465,11 @@ abstract class Object
 			if(method_exists($this, $name) && is_callable(array($this, $name)))
 				return call_user_func_array(array($this, $name), $args);
 			
+			// check last
+			if(isset(self::$temp_extra_methods[$this->class][$name])) {
+				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
+			}
+			
 			// check parents
 			$c = $this->class;
 			while($c = ClassInfo::GetParentClass($c))
@@ -482,11 +487,6 @@ abstract class Object
 					}
 			}
 			
-			
-			// check last
-			if(isset(self::$temp_extra_methods[$this->class][$name])) {
-				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
-			}
 			
 			$trace = debug_backtrace();
 			throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line'].'');
@@ -510,6 +510,7 @@ abstract class Object
 					array_unshift($args, $method_name);
 					$extra_method[0] = $this;
 				}
+				
 				return call_user_func_array($extra_method, $args);
 			}
 			

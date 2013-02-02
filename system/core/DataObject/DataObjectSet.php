@@ -1856,6 +1856,18 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	}
 	
 	/**
+	 * get the relation-props
+	 *
+	 *@name getRelationENV
+	 *@access public
+	 *@return array
+	*/
+	public function getRelationENV() {
+		return array("name" => $this->name, "field" => $this->field);
+	}
+	
+	
+	/**
 	 * generates a form
 	 *
 	 *@name form
@@ -1989,6 +2001,17 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	}
 	
 	/**
+	 * get the relation-props
+	 *
+	 *@name getRelationENV
+	 *@access public
+	 *@return array
+	*/
+	public function getRelationENV() {
+		return array("name" => $this->name, "field" => $this->field, "relationTable" => $this->relationTable, "ownField" => $this->ownField, "ownValue" => $this->ownValue, "extraFields" => $this->extraFields);
+	}
+	
+	/**
 	 * sets the variable join
 	 *
 	 *@name join
@@ -2080,7 +2103,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		$manipulation = array(
-			array(
+			"insert" => array(
 				"command"	=> "insert",
 				"table_name"=> $this->relationTable,
 				"fields"	=> array(
@@ -2091,12 +2114,11 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
-				$c = count($manipulation[0]["fields"]);
-				$manipulation[0]["fields"][$c] = array(
+				$manipulation["insert"]["fields"][$id] = array(
 					$this->ownField => $this->ownValue,
 					$this->field	=> $id
 				);
-				$manipulation[0]["fields"] = array_merge($manipulation[0]["fields"], $writeExtraFields[$id]);
+				$manipulation["insert"]["fields"] = array_merge($manipulation["insert"]["fields"], $writeExtraFields[$id]);
 			} else {
 				if($writeExtraFields[$id] != $existingFields[$id]) {
 					$manipulation[] = array(
@@ -2108,7 +2130,8 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				}
 			}
 		}
-
+		
+		$this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writtenIDs, $writeExtraFields);
 		if(SQL::manipulate($manipulation)) {
 			return true;
 		}

@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.01.2013
-  * $Version 2.1.7
+  * last modified: 31.01.2013
+  * $Version 2.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -327,26 +327,84 @@ class Permission extends DataObject
 				}
 			}
 			
-			if($this->id != 0) {
-				// inherit permissions to subordinated perms
-				$data = DataObject::Get("Permission", array("parentid" => $this->id));
-				if($data->Count() > 0) {
-					foreach($data as $record) {
-						if($record->id != $record->parentid) {
-							$newrecord = clone $this;
-							$newrecord->consolidate();
-							$newrecord->parentid = $this->id;
-							$newrecord->id = $record->id;
-							$newrecord->name = $record->name;
-							$newrecord->parentid = $record->parentid;
-							
-							$newrecord->write(false, true);
+			parent::onBeforeWrite();
+		}
+		
+		/**
+		 * on before manipulate
+		 *
+		 *@name onBeforeManipulate
+		 *@access public
+		*/
+		public function onBeforeManipulate(&$manipulation, $job) {
+			if($this->id != 0 && $job == "write") {	
+				$subversions = $this->getAllChildVersionIDs;
+				
+				if(count($subversions) > 0) {
+					
+					if($this->type == "groups") {
+						$many_many_tables = $this->ManyManyTables();
+						$table = $many_many_tables["groups"]["table"];
+						$manipulation["perm_groups_delete"] = array(
+							"table_name" 	=> $table,
+							"command"		=> "delete",
+							"where"			=> array(
+								$many_many_tables["groups"]["field"] => $subversions
+							)
+						);
+						
+						$manipulation["perm_groups_insert"] = array(
+							"table_name"	=> $table,
+							"command"		=> "insert",
+							"fields"		=> array()
+						);
+						
+						if($this->groupsids && count($this->groupsids) > 0) {
+							foreach($subversions as $version) {
+								foreach($this->groupsids as $groupid) {
+									$manipulation["perm_groups_insert"]["fields"][] = array(
+										$many_many_tables["groups"]["field"] 	=> $version,
+										$many_many_tables["groups"]["extfield"]	=> $groupid
+									);
+								}
+							}
 						}
 					}
+					
+					$manipulation["perm_update"] = array(
+						"command"		=> "update",
+						"table_name"	=> $this->baseTable,
+						"fields"		=> array(
+							"type"			=> $this->type,
+							"password"		=> $this->password,
+							"invert_groups"	=> $this->invert_groups
+						),
+						"where"	=> array(
+							"id" => $subversions
+						)
+					);
 				}
 			}
-			
-			parent::onBeforeWrite();
+		}
+		
+		/**
+		 * on before manipulate many-many-relation
+		 *
+		 *@name onBeforeManipulateManyMany
+		 *@access public
+		*/
+		public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writtenIDs, $writeExtraFields) {
+			$env = $dataset->getRelationENV();
+			foreach($writtenIDs as $id) {
+				if($data = DataObject::get_one("Permission", array("versionid" => $id))) {
+					foreach($data->getAllChildVersionIDs() as $vid) {
+						$manipulation["insert"]["field"][$vid] = array(
+							$env["ownField"] 	=> $env["ownValue"],
+							$env["field"]		=> $vid
+						);
+					} 
+				}
+			}
 		}
 		
 		/**
