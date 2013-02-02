@@ -208,7 +208,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@access public
 	*/
 	public function generateClassInfo() {
-		if(defined("SQL_LOADUP") && SQL::getFieldsOfTable($this->baseTable . "_tree")) {
+		if(defined("SQL_LOADUP") && SQL::getFieldsOfTable($this->getOwner()->baseTable . "_tree")) {
 			// set Database-Record
 			ClassInfo::$database[$this->getOwner()->baseTable . "_tree"] = array(
 				"id" 		=> "int(10)", 
