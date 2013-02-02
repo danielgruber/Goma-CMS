@@ -1110,14 +1110,13 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function printDebug() {
-			if(count(debug_backtrace()) > 30) {
-				debug_print_backtrace();
-			} else {
-				$data = debug_backtrace();
-				unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
-				echo convert::raw2text(print_r(array_values($data), true));
+			$data = debug_backtrace();
+			unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
+			$data = array_values($data);
+			if(count($data) > 6) {
+				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
 			}
-			
+			echo convert::raw2text(print_r($data, true));
 		}
 		
 		/**
