@@ -398,7 +398,7 @@ class Permission extends DataObject
 			foreach($writtenIDs as $id) {
 				if($data = DataObject::get_one("Permission", array("versionid" => $id))) {
 					foreach($data->getAllChildVersionIDs() as $vid) {
-						$manipulation["insert"]["field"][$vid] = array(
+						$manipulation["insert"]["fields"][$vid] = array(
 							$env["ownField"] 	=> $env["ownValue"],
 							$env["field"]		=> $vid
 						);

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.01.2013
-  * $Version 2.5.3
+  * last modified: 02.02.2013
+  * $Version 2.5.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -351,7 +351,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$parent = Permission::forceExisting("PAGES_WRITE");
 				}
 				
-				$perm = new Permission(array("type" => "admins", "parentid" => $parent->id));
+				$perm = new Permission(array("type" => "admins"));
+				$perm->parentid = $parent->id;
 				$perm->forModel = "pages";
 				if($this->ID != 0) {
 					$perm->write(true, true, 2, false, false);
@@ -404,7 +405,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				} else {
 					$parent = Permission::forceExisting("PAGES_PUBLISH");
 				}
-				$perm = new Permission(array("type" => "admins", "parentid" => $parent->id));
+				$perm = new Permission(array("type" => "admins"));
+				$perm->parentid = $parent->id;
 				$perm->forModel = "pages";
 				
 				if($this->ID != 0) {
