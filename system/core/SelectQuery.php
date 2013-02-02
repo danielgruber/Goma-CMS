@@ -492,6 +492,7 @@ class SelectQuery extends Object
 					}
 				}
 				
+				
 				// some added caches ;)
 				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
 					if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
@@ -545,7 +546,7 @@ class SelectQuery extends Object
 					self::$new_field_cache[$from]["colidingSQLi"] = $a;
 					
 					// comma
-					if(isset($i)) {
+					if(isset($i) && $a != 0) {
 						if($i != 0) {
 							$sql .= ", ";
 						}

@@ -524,7 +524,7 @@ class Core extends object
 		 *@name thorwError
 		 *@access public
 		*/		
-		public static function throwError($code, $name, $message, $callDebug = true) {
+		public static function throwError($code, $name, $message) {
  	 	 	
 			if(defined("ERROR_CODE")) {
 				echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
@@ -563,7 +563,6 @@ class Core extends object
 					$template->assign('errcode',convert::raw2text($code));
 					$template->assign('errname',convert::raw2text($name));
 					$template->assign('errdetails',$message);
-					$template->assign("throwdebug", $callDebug);
 					HTTPresponse::sendHeader();
 			 		
 					
@@ -1119,10 +1118,11 @@ function throwErrorById($code)
 		);
 		if(isset($codes[$code]))
 		{
-				
-				Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details'], HTTPresponse::setResHeader($codes[$code]["status_code"]));
+				HTTPresponse::setResHeader($codes[$code]["status_code"]);
+				Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details']);
 		} else
 		{
-				Core::throwerror(6, $codes[6]['name'], $codes[6]['details'], 500);
+				HTTPresponse::setResHeader(500);
+				Core::throwerror(6, $codes[6]['name'], $codes[6]['details']);
 		}
 }
