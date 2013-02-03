@@ -54,11 +54,11 @@
 	text-decoration: none;
 }
 .historyoptions ul li a:hover {
-	color: #555;
+	color: #222;
 }
 .historyoptions ul li a.active {
-	border-bottom: 1px solid #aaa;
-	color: #222;
+	border-bottom: 1px solid #da097a;
+	color: #da097a;
 }
 
 

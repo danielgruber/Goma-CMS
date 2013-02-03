@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.01.2013
-  * $Version: 4.7.2
+  * last modified: 03.02.2013
+  * $Version: 4.7.3
 */
 
 defined('IN_GOMA') OR die();
@@ -1250,7 +1250,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					)
 				));
 				
-				$command = "publish";
+				if($command != "insert")
+					$command = "publish";
 			} else {
 				$manipulation = array($baseClass . "_state" => array(
 					"command"		=> "update",
