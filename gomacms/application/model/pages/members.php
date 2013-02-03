@@ -79,7 +79,7 @@ class membersController extends PageController
 		 * shows a specific member
 		 *
 		 *@name showmember
-		 *@Œccess public
+		 *@access public
 		*/
 		public function showmember()
 		{
