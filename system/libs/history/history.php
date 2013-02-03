@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 22.01.2013
-  * $Version 1.0.3
+  * last modified: 03.02.2013
+  * $Version 1.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -50,6 +50,13 @@ class History extends DataObject {
 	 *@access private
 	*/
 	static $supportHistoryView;
+	
+	/**
+	 * sort-direction of the history
+	 *
+	 *@name default_sort
+	*/ 
+	static $default_sort = "created DESC";
 	
 	/**
 	 * cache for history-data
@@ -360,6 +367,16 @@ class History extends DataObject {
 		
 		return false;
 	}
+	
+	/**
+	 * class-name of a event
+	 *
+	 *@name EventClass
+	*/
+	public function EventClass() {
+		$data = $this->HistoryData();
+		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
+	}
 }
 
 interface HistoryData {
@@ -372,5 +389,3 @@ interface HistoryData {
 	*/
 	public static function generateHistoryData($record);
 }
-
-interface HistoryView {}

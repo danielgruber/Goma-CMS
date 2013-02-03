@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 02.02.2013
+  * last modified: 03.02.2013
   * $Version 2.5.4
 */
 
@@ -1384,6 +1384,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public static function generateHistoryData($record) {
 			$compared = false;
+			$relevant = true;
+			
 			switch($record->action) {
 				case "update":
 					$lang = lang("h_pages_update", '$user updated the page <a href="$pageUrl">$page</a>');
@@ -1416,7 +1418,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$lang = str_replace('$pageUrl', "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, $lang);
 			$lang = str_replace('$page', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared, "editurl" => "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND);
+			return array("icon" => $icon, "text" => $lang, "versioned" => true, "compared" => $compared, "editurl" => "admin/content/record/" . $record->newversion()->id . "/edit" . URLEND, "relevant" => $relevant);
 		}
 		
 	/**

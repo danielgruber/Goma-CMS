@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 28.01.2013
+  * last modified: 03.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -546,7 +546,9 @@ $lang = array(
 	"h_group_remove"		=> '$user removed the group $group',
 	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "All Events",
+	"h_all"					=> "all",
+	"h_all_events"			=> "all events",
+	"h_relevant"			=> "important",
 	
 	"older"					=> "older entries",
 	"newer"					=> "newer entries",

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
+  * last modified: 03.02.2013
   * $Version 1.2.1
 */
 
@@ -177,6 +177,12 @@ class Group extends DataObject implements HistoryData, PermProvider
 			if(!$record->record())
 				return false;
 			
+			$relevant = true;
+			
+			if(!$record->autor || $record->record()->name == "") {
+				$relevant = false;
+			}
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -199,7 +205,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 			$lang = str_replace('$groupUrl', "admin/group/" . $record->record()->id . URLEND, $lang);
 			$lang = str_replace('$group', convert::Raw2text($record->record()->name), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
 		}
 		
 }

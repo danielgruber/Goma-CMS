@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.01.2012
-  * $Version 2.4.5
+  * last modified: 03.03.2012
+  * $Version 2.4.6
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -522,6 +522,11 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			if(!$record->newversion()) {
 				return false;
 			}
+			
+			$relevant = true;
+			if(!$record->autor)
+				$relevant = false;
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -529,6 +534,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						$icon = "images/icons/fatcow16/user_go.png";
 						$lang = lang("h_user_login");
 						$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
+						$relevant = false;
 					} else {
 						if($record->autorid == $record->newversion()->id) {
 							$lang = lang("h_profile_update", '$user updated the own profile');
@@ -553,7 +559,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
 		}
 		
 		/**
