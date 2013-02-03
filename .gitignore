@@ -10,6 +10,7 @@ Thumbs.db
 _config.php
 .index-db
 .htaccess
+web.config
 
 # Goma Core
 system/installer/log_*****/*
