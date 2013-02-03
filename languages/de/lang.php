@@ -548,7 +548,7 @@ $lang = array(
 	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
 	
 	"h_all_events"			=> "Alle Ereignisse",
-	"h_relevant"			=> "Relevante",
+	"h_relevant"			=> "Wichtige",
 	"h_all"					=> "Alle",
 	
 	"older"					=> "Ältere Einträge",
