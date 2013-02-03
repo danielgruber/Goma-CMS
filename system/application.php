@@ -238,43 +238,8 @@ parseUrl();
 if (PROFILE)
 	Profiler::unmark("init");
 
-if (!MOD_REWRITE && !preg_match('/nginx/i', $_SERVER["SERVER_SOFTWARE"]) && !file_exists(ROOT . ".htaccess")) {
-	$template = 'RewriteEngine on
-
-RewriteBase ' . ROOT_PATH . '
-	
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} !^/system/application.php
-RewriteRule (.*) system/application.php [QSA]
-	
-	
-<IfModule mod_headers.c>
-	<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
-		Header set Cache-Control "max-age=86400, public"
-	</FilesMatch>
-</IfModule>
-
-<IfModule mod_headers.c>
-  <FilesMatch "\.(gdf|ggz)\.(css|js)$">
-    Header append Vary Accept-Encoding
-  </FilesMatch>
-</IfModule>
-
-AddEncoding x-gzip .ggz
-AddEncoding deflate .gdf
-
-<files *.plist>
-	order allow,deny
-	deny from all
-</files>
-	
-ErrorDocument 404 system/application.php
-ErrorDocument 500 system/templates/framework/500.html
-	';
-
-	if (!file_put_contents(ROOT . ".htaccess", $template)) {
-		die("Could not write .htaccess");
-	}
+if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
+	writeServerConfig();
 }
 
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 404")) {
@@ -1377,4 +1342,25 @@ function debug_log($data) {
 	}
 
 	FileSystem::write($file, $data, null, 0777);
+}
+
+/**
+ * Writes the server configuration file
+ *@name writeServerConfig
+ *@access public
+ */
+function writeServerConfig() {
+	if (strpos($_SERVER["SERVER_SOFTWARE"], "Apache") !== false) {
+		$file = ".htaccess";
+	} else if (strpos($_SERVER["SERVER_SOFTWARE"], "IIS") !== false) {
+		$file = "web.config";
+	} else {
+		return;
+	}
+
+	include (ROOT . "system\\ressources\\" . $file . ".php");
+
+	if (!file_put_contents(ROOT . $file, $serverconfig, FILE_APPEND)) {
+		die("Could not write " . $file);
+	}
 }
