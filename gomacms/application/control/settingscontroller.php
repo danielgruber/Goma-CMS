@@ -178,7 +178,7 @@ class Newsettings extends DataObject implements HistoryData {
 		$icon = "images/icons/fatcow16/setting_tools.png";
 		$lang = str_replace('$url', "admin/settings" . URLEND, $lang);
 		
-		return array("icon" => $icon, "text" => $lang);
+		return array("icon" => $icon, "text" => $lang, "relevant" => true);
 		
 	}
 }

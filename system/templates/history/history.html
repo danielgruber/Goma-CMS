@@ -17,7 +17,7 @@
 				
 				// switch
 				history.removeClass("relevant").removeClass("all").addClass($(this).attr("name"));
-				$(".historyoptions li a").removeClass("active");
+				$(this).parent().parent().find("a").removeClass("active");
 				$(this).addClass("active");
 				
 				// set scroll
