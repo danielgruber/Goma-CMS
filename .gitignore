@@ -9,8 +9,8 @@ Thumbs.db
 # Goma files
 _config.php
 .index-db
-.htaccess
-web.config
+/.htaccess
+/web.config
 
 # Goma Core
 system/installer/log_*****/*
@@ -20,6 +20,8 @@ system/installer/temp/*
 
 # Goma Application
 gomacms/*
+!gomacms/.htaccess
+!gomacms/web.config
 !gomacms/application/*
 !gomacms/application
 !gomacms/templates/*
