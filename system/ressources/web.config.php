@@ -23,5 +23,18 @@ $serverconfig = '<?xml version="1.0" encoding="UTF-8"?>
                 </rule>
             </rules>
         </rewrite>
+        <httpErrors errorMode="Custom">
+            <remove statusCode="500" subStatusCode="-1" />
+            <remove statusCode="404" subStatusCode="-1" />
+            <error statusCode="404" prefixLanguageFilePath="" path="/system/application.php" responseMode="ExecuteURL" />
+            <error statusCode="500" prefixLanguageFilePath="" path="/system/templates/framework/500.html" responseMode="ExecuteURL" />
+        </httpErrors>
+        <security>
+            <requestFiltering>
+                <fileExtensions>
+                    <add fileExtension=".plist" allowed="false" />
+                </fileExtensions>
+            </requestFiltering>
+        </security>
     </system.webServer>
 </configuration>';
