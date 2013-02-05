@@ -3717,7 +3717,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				$indexes["recordid"] = "INDEX";
 		}
 		
-		if($this->hasTable()) {
+		if($this->Table()) {
 			
 			// get correct SQL-Types for Goma-Field-Types
 			foreach($db_fields as $field => $type) {
