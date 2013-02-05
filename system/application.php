@@ -1358,7 +1358,7 @@ function writeServerConfig() {
 		return;
 	}
 
-	include (ROOT . "system\\ressources\\" . $file . ".php");
+	require (ROOT . "system/resources/" . $file . ".php");
 
 	if (!file_put_contents(ROOT . $file, $serverconfig, FILE_APPEND)) {
 		die("Could not write " . $file);
