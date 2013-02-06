@@ -880,6 +880,75 @@ class HTMLText extends Varchar {
 	 *@name forTemplate
 	*/
 	public function forTemplate() {
-		return $this->value;
+		// parse a bit
+		$value = $this->value;
+		
+		preg_match_all('/\<img[^\>]+src\="([^"]+)"[^\>]*>/Usi', $value, $matches);
+		
+		foreach($matches[1] as $k => $m) {
+			
+			// match if may be upload
+			if(preg_match('/^\.?\/?uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
+				
+				// match for size
+				if(preg_match('/style\="[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+					// sizes
+					$$sizes[1] = $sizes[2];
+					$$sizes[4] = $sizes[5];
+					
+				} else if(preg_match('/style\="[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+				
+					$$sizes[1] = $sizes[2];
+					
+				} else {
+					continue;
+				}
+				
+				$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+		
+				if($data->count() == 0) {
+					return false;
+				}
+				
+				if(isset($width, $height) && $data->width && $data->height) {
+					
+					if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+												
+						$url = "./" . $data->path . '/orgSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($width * 2 < $data->width && $height * 2 < $data->height) {
+							$retinaURL = "./" . $data->path . '/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						} else {
+							$value = str_replace($m, $url, $value);
+						}
+					}
+				} else if(isset($width)) {
+					if($data->width > $width && $data->width < 4000) {
+						$url =  "./" . $data->path . '/orgSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($width * 2 < $data->width) {
+							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						} else {
+							$value = str_replace($m, $url, $value);
+						}
+					}
+				} else {
+					if($data->height > $height && $data->height < 4000) {
+						$url = "./" . $data->path . '/orgSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($height * 2 < $data->height) {
+							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						} else {
+							$value = str_replace($m, $url, $value);
+						}
+					}
+				}
+			}
+		}
+		
+		return $value;
 	}
 }

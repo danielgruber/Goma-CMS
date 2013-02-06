@@ -297,7 +297,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getContent()
 		{
-				return $this->fieldGet("data");
+				return $this->data()->forTemplate();
 		}
 		
 		/**

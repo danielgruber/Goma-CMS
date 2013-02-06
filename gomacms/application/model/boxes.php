@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
+  * last modified: 06.02.2013
   * $Version 1.2
 */
 
@@ -407,13 +407,9 @@ class Box extends Boxes
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		
-		public function getText()
-		{
-				return $this->data['text'];
-		}
 		public function getContent()
 		{
-				return $this->data['text'];
+				return $this->text()->forTemplate();
 		}
 }
 /**
