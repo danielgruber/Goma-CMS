@@ -345,7 +345,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			/*} else if($this->parent) {
 				return $this->parent()->edit_permission;
 			*/} else {
-				if($this->parentid) {
+				if($this->parent) {
 					$parent = $this->parent->edit_permission();
 				} else {
 					$parent = Permission::forceExisting("PAGES_WRITE");
@@ -400,7 +400,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			/*} else if($this->parent) {
 				return $this->parent()->edit_permission;
 			*/} else {
-				if($this->parentid) {
+				if($this->parent) {
 					$parent = $this->parent->publish_permission();
 				} else {
 					$parent = Permission::forceExisting("PAGES_PUBLISH");
