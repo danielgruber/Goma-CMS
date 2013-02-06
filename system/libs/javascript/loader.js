@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.01.2013
+  * last modified: 06.02.2013
   * $Version 1.5.7
 */
 
@@ -81,7 +81,7 @@ if(typeof self.loader == "undefined") {
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
 			*/
-			$(document).on("click", "a[rel=ajaxfy]", function()
+			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function()
 			{
 				var $this = $(this);
 				var _html = $this.html();
@@ -100,35 +100,22 @@ if(typeof self.loader == "undefined") {
 				});
 				return false;
 			});
-	
-			// pretty old-fashioned bluefox, if you like it create an a-tag with rel="bluebox"
-			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
-				gloader.load("dialog");
-				if($(this).hasClass("nodrag"))
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'), false);
-				} else
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'));
-				}
-				return false;
-			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
-		    $(document).on("click", "a[rel*=dropdownDialog]", function()
+		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
 			{
 				gloader.load("dropdownDialog");
 				
 				var options = {
 					uri: $(this).attr("href")
 				};
-				if($(this).attr("rel") == "dropdownDialog[left]")
+				if($(this).attr("rel") == "dropdownDialog[left]" || $(this).hasClass("dropdownDialog-left"))
 					options.position = "left";
-				else if($(this).attr("rel") == "dropdownDialog[center]")
+				else if($(this).attr("rel") == "dropdownDialog[center]" || $(this).hasClass("dropdownDialog-center"))
 					options.position = "center";
-				else if($(this).attr("rel") == "dropdownDialog[right]")
+				else if($(this).attr("rel") == "dropdownDialog[right]" || $(this).hasClass("dropdownDialog-right"))
 					options.position = "right";
-				else if($(this).attr("rel") == "dropdownDialog[bottom]")
+				else if($(this).attr("rel") == "dropdownDialog[bottom]" || $(this).hasClass("dropdownDialog-bottom"))
 					options.position = "bottom";
 				
 				$(this).dropdownDialog(options);
