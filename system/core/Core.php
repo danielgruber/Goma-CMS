@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 02.02.2013
-  * $Version 3.3.26
+  * last modified: 07.02.2013
+  * $Version 3.3.27
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -833,18 +833,19 @@ class Dev extends RequestHandler
 			
 			// check if dev-without-perms, so redirect directly
 			if(isset($_SESSION["dev_without_perms"])) {
-				$redirect = getRedirect(true);
-				header("Location: " . ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches?redirect=" . urlencode($redirect));
+				$url = ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches".URLEND."?redirect=" . urlencode(getredirect(true));
+				header("Location: " . $url);
+				echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='".$url."'>'.$url.'</a>";
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}
  	 	 return '<h3>Creating new Database</h3>
 			<script type="text/javascript">
-				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches"; }, 500);
+				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches/"; }, 500);
 			</script>
 			
 			<img src="images/16x16/loading.gif" alt="Loading..." /> Rebuilding Caches... <br /><br />If it doesn\'t reload within 15 seconds, please click <a href="'.ROOT_PATH.'dev/rebuildcaches">here</a>.
-			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches">here</a>.</noscript>';
+			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches/">here</a>.</noscript>';
 		}
 		
 		/**
@@ -864,17 +865,19 @@ class Dev extends RequestHandler
 			
 			// redirect if needed
 			if(isset($_SESSION["dev_without_perms"])) {
-				header("Location: " . ROOT_PATH . BASE_SCRIPT . "dev/builddev?redirect=" . urlencode(getredirect(true)));
+				$url = ROOT_PATH . BASE_SCRIPT . "dev/builddev".URLEND."?redirect=" . urlencode(getredirect(true));
+				header("Location: " . $url);
+				echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='".$url."'>'.$url.'</a>";
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}
 			
 			return '<h3>Creating new Database</h3>
 			<script type="text/javascript">
-				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/builddev"; }, 500);
+				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/builddev/"; }, 500);
 			</script>
 			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
-			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev">here</a>.<br /></noscript>
+			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev/">here</a>.<br /></noscript>
 			<img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...<br /><br /> If it doesn\'t reload within 15 seconds, please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev">here</a>.';
 		}
 		
@@ -930,7 +933,7 @@ class Dev extends RequestHandler
 			// redirect if needed
 			if(isset($_SESSION["dev_without_perms"])) {
 				unset($_SESSION["dev_without_perms"]);
-				header("Location: " . ROOT_PATH . "");
+				header("Location: " . ROOT_PATH);
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}

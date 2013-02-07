@@ -13,9 +13,9 @@
 	<key>version</key>
 	<string>2.0b3</string>
 	<key>build</key>
-	<string>051</string>
+	<string>052</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0-066</string>
+	<string>2.0-067</string>
 	<key>icon</key>
 	<string>templates/images/app-icon.png</string>
 	<key>excludeModelsFromDistro</key>
