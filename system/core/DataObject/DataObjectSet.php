@@ -2128,6 +2128,23 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 						"fields"	=> $writeExtraFields[$id]
 					);
 				}
+				unset($existing[array_search($id, $existing)]);
+			}
+		}
+		
+		if(count($existing) > 0) {
+			$manipulation = array(
+				"delete" => array(
+					"command"	=> "delete",
+					"table_name"=> $this->relationTable,
+					"where"	=> array(
+						$this->field => array()
+					)
+				)
+			);
+				
+			foreach($existing as $remove) {
+				$manipulation["delete"]["where"][] = $remove;
 			}
 		}
 		
