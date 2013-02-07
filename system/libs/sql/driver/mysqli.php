@@ -94,6 +94,10 @@ class mysqliDriver extends object implements SQLDriver
 		**/
 		public  function query($sql, $unbuffered = false)
 		{
+				if($this->_db->ping()) {
+					$this->__construct();
+				}
+				
 				if($result = $this->_db->query($sql))
 					return $result;
 				else {
