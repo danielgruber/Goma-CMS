@@ -292,23 +292,26 @@ AjaxUpload.prototype = {
 	_progress: function(event, upload) {
 		if (event.lengthComputable) {
 			var percentage = Math.round((event.loaded * 100) / event.total);
+			
+			// update for percentage only every percent
 			if (upload.currentProgress != percentage) {
 
 				// log(this.fileIndex + " --> " + percentage + "%");
 
 				upload.currentProgress = percentage;
 				this.progressUpdate(upload.fileIndex, upload.fileObj, upload.currentProgress);
+			}
+			
+			// update speed
+			var elapsed = new Date().getTime();
+			var diffTime = elapsed - upload.currentStart;
+			if (diffTime >= this.uploadRateRefreshTime) {
+				var diffData = event.loaded - upload.startData;
+				var speed = diffData / diffTime; // in KB/sec
 				
-				var elapsed = new Date().getTime();
-				var diffTime = elapsed - upload.currentStart;
-				if (diffTime >= this.uploadRateRefreshTime) {
-					var diffData = event.loaded - upload.startData;
-					var speed = diffData / diffTime; // in KB/sec
-					
-					this.speedUpdate(upload.fileIndex, upload.fileObj, speed);
+				this.speedUpdate(upload.fileIndex, upload.fileObj, speed);
 
-					return elapsed;
-				}
+				return elapsed;
 			}
 		}
 	},
