@@ -357,6 +357,18 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						return lang("passwords_not_match");
 				}
 		}
+		
+		/**
+		 * nickname is always lowercase
+		 *
+		 *@name onbeforewrite
+		*/
+		public function onBeforeWrite() {
+			parent::onBeforeWrite();
+			
+			$this->nickname = strtolower($this->nickname);
+		}
+		
 		/**
 		 * sets the password with md5
 		 *
@@ -850,7 +862,7 @@ class Member extends Object {
 	{
 		self::checkDefaults();
 
-		$data = DataObject::get_one("user", array("nickname" => array("LIKE", trim($user)), "OR", "email" => array("LIKE", $user)));
+		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
 		
 		if($data) {
 			// check password
