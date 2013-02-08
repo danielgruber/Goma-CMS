@@ -918,10 +918,10 @@ class HTMLText extends Varchar {
 						// retina
 						if($width * 2 < $data->width && $height * 2 < $data->height) {
 							$retinaURL = "./" . $data->path . '/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 						} else {
-							$value = str_replace($m, $url, $value);
+							$retinaURL = "./" . $data->path;
 						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				} else if(isset($width)) {
 					if($data->width > $width && $data->width < 4000) {
@@ -929,10 +929,10 @@ class HTMLText extends Varchar {
 						// retina
 						if($width * 2 < $data->width) {
 							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 						} else {
-							$value = str_replace($m, $url, $value);
+							$retinaURL = "./" . $data->path;
 						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				} else {
 					if($data->height > $height && $data->height < 4000) {
@@ -940,10 +940,10 @@ class HTMLText extends Varchar {
 						// retina
 						if($height * 2 < $data->height) {
 							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 						} else {
-							$value = str_replace($m, $url, $value);
+							$retinaURL = "./" . $data->path;
 						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				}
 			}
