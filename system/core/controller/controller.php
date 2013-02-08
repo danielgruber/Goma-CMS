@@ -497,7 +497,7 @@ class Controller extends RequestHandler
 					
 				), true, "safe", $disabled);
 			} else if($this->getParam("id")) {
-				if(preg_match('/^[0-9]+$/', $this->getParam("id")) {
+				if(preg_match('/^[0-9]+$/', $this->getParam("id"))) {
 					$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
 					if($model) {
 						return $model->controller(clone $this)->edit();
