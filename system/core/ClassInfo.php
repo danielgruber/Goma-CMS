@@ -7,7 +7,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 10.02.2013
   * $Version 3.6.7
 */
 
@@ -465,6 +465,11 @@ class ClassInfo extends Object
 				if(file_exists(dirname(self::$files[$class]) . "/" . $file)) {
 					return dirname(self::$files[$class]) . "/" . $file;
 				}
+			}
+			
+			
+			if(file_exists(APPLICATION . "/" . $file)) {
+				return APPLICATION . "/" . $file;
 			}
 			
 			if(file_exists($file))
