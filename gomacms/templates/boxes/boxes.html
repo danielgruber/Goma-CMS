@@ -74,15 +74,15 @@
 				<% IF permission("BOXES") AND NOT adminAsUser() %>
 					<div class="adminhead">
 						<div class="actions">
-							<a href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter={$box.sort}&redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_new_box}" rel="dropdownDialog">
+							<a href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter={$box.sort}&redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_new_box}" class="dropdownDialog">
 								<img src="images/16x16/add.png" alt="{$_lang_new_box}" />
 							</a>
 							
-							<a class="noAutoHide" href="{BASE_SCRIPT}boxes_new/$pageid/edit/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_edit_box}" rel="dropdownDialog">
+							<a href="{BASE_SCRIPT}boxes_new/$pageid/edit/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_edit_box}" class="dropdownDialog noAutoHide">
 								<img src="images/16x16/edit.png" alt="{$_lang_edit_box}" />
 							</a>
 							
-							<a class="" href="{BASE_SCRIPT}boxes_new/$pageid/delete/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_del_box}" rel="dropdownDialog">
+							<a class="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/delete/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_del_box}">
 								<img src="images/16x16/del.png" alt="{$_lang_del_box}" />
 							</a>
 						</div>

@@ -29,15 +29,15 @@ class Uploads extends DataObject {
 	 *@name cacheLifeTime
 	 *@access public
 	*/
-	public static $cache_life_time = 2678400; // 31 days = 2678400
+	static $cache_life_time = 2678400; // 31 days = 2678400
 
 	/**
 	 * database-table
 	 *
-	 *@name db_fields
+	 *@name db
 	 *@access public
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"filename"	=> "varchar(100)",
 		"realfile"	=> "varchar(300)",
 		"path"		=> "varchar(200)",
@@ -47,22 +47,22 @@ class Uploads extends DataObject {
 	);
 	
 	/**
-	 * relations
-	 *
-	 *@name has_one
-	 *@access public
-	*/
-	public $has_one = array(
-		"collection"		=> "Uploads"
-	);
-		
-	/**
 	 * extensions in this files are by default handled by this class
 	 *
 	 *@name file_extensions
 	 *@access public
 	*/
-	public static $file_extensions = array();
+	static $file_extensions = array();
+	
+	/**
+	 * relations
+	 *
+	 *@name has_one
+	 *@access public
+	*/
+	static $has_one = array(
+		"collection"		=> "Uploads"
+	);
 	
 	/**
 	 * adds a file to the upload-folder
@@ -524,10 +524,10 @@ class ImageUploads extends Uploads {
 	 * add some db-fields
 	 * inherits fields from Uploads
 	 *
-	 *@name db_fields
+	 *@name db
 	 *@access public
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"width"				=> "int(5)",
 		"height"			=> "int(5)",
 		"thumbLeft"			=> "int(3)",
@@ -542,7 +542,7 @@ class ImageUploads extends Uploads {
 	 *@name file_extensions
 	 *@access public
 	*/
-	public static $file_extensions = array(
+	static $file_extensions = array(
 		"png",
 		"jpeg",
 		"jpg",
@@ -553,7 +553,7 @@ class ImageUploads extends Uploads {
 	/**
 	 * some defaults
 	*/
-	public $defaults = array(
+	static $default = array(
 		"thumbLeft"		=> 0,
 		"thumbTop"		=> 0,
 		"thumbWidth"	=> 100,
@@ -1027,7 +1027,7 @@ class UploadController extends Controller {
 	 * index
 	*/
 	public function index() {
-		exit;
+		return false;
 	}
 	
 	/**
@@ -1039,9 +1039,13 @@ class UploadController extends Controller {
 	public function handleFile() {
 		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
 		
+		if($data->count() == 0) {
+			return false;
+		}
+		
 		if(!file_exists($data->first()->realfile)) {
 			$data->first()->remove(true);
-			exit;
+			return false;
 		}
 		
 		session_write_close();
@@ -1055,9 +1059,9 @@ class GravatarImageHandler extends ImageUploads {
 	/**
 	 * add db-fields for email
 	 *
-	 *@name db_fields
+	 *@name db
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"email"	=> "varchar(200)"
 	);
 	

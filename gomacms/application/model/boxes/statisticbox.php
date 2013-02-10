@@ -3,8 +3,8 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 25.11.2011
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -21,9 +21,9 @@ class statistics extends box
 		/**
 		 * additional database-fields needed for this box
 		 *
-		 *@name db_fields
+		 *@name db
 		*/
-		public $db_fields = array
+		static $db = array
 		(
 			"today" 		=> "int(1)",
 			"last2" 		=> "int(1)",

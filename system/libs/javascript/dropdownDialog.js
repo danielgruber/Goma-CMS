@@ -2,8 +2,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 03.02.2013
 */
 
 self.dropdownDialogs = [];
@@ -239,6 +239,16 @@ self.dropdownDialogs = [];
 			
 			this.dropdown.find(" > div > .triangle").remove();
 			
+			// preserve scroll
+			var scrollElements = [];
+			this.dropdown.find('.scrollable').each(function(){
+				scrollElements.push({
+					element: $(this),
+					top: $(this).scrollTop(),
+					left: $(this).scrollLeft()
+				});
+			});;
+			
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
 			this.dropdown.css({"display": "block", top: "-1000px"});
@@ -331,6 +341,12 @@ self.dropdownDialogs = [];
 				this.dropdown.css("display", "block");
 			else
 				this.dropdown.fadeIn("fast");
+			
+			for(i in scrollElements) {
+				var data = scrollElements[i];
+				data.element.scrollTop(data.top);
+				data.element.scrollLeft(data.left);
+			}
 			
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.moveDropdown");
 		},

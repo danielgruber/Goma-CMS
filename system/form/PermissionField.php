@@ -93,7 +93,7 @@ class PermissionField extends ClusterFormField {
 		if(is_object($this->inheritFrom) && is_a($this->inheritFrom, "Permission") && $this->inheritFrom->id != $this->value->id) {
 			$title = isset($this->inheritTitle) ? ' (' . $this->inheritTitle . ')' : null;
 			$this->type->addOption("inherit", lang("inherit_from_parent") . $title, true);
-			if(is_object($this->inheritFrom) && $this->inheritFrom->id == $this->value->inheritorid) {
+			if(is_object($this->inheritFrom) && $this->inheritFrom->id == $this->value->parentid) {
 				$this->type->value = "inherit";
 			}
 		}
@@ -123,18 +123,21 @@ class PermissionField extends ClusterFormField {
 	 *@access public
 	*/
 	public function getValue() {
-
-		if(is_object($this->orgForm()->result) && isset($this->orgForm()->result->has_one[$this->name])) {
-			if(strtolower($this->orgForm()->result->has_one[$this->name]) == "permission" || is_subclass_of($this->form()->result->has_one[$this->name], "permission")) {
-				$this->byRelation = true;
-				if(isset($this->orgForm()->result[$this->name]) && $this->orgForm()->result[$this->name]) {
-					$this->value = $this->orgForm()->result->doObject($this->name);
+		
+		if(is_object($this->orgForm()->result)) {
+			$has_one = $this->orgForm()->result->hasOne();
+			if(isset($has_one[$this->name])) {
+				if(strtolower($has_one[$this->name]) == "permission" || is_subclass_of($has_one[$this->name], "permission")) {
+					$this->byRelation = true;
+					if(isset($this->orgForm()->result[$this->name]) && $this->orgForm()->result[$this->name]) {
+						$this->value = $this->orgForm()->result->doObject($this->name);
+					}
+				} else {
+					$this->byRelation = false;
 				}
 			} else {
 				$this->byRelation = false;
 			}
-		} else {
-			$this->byRelation = false;
 		}
 		
 		if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name]) && is_object($this->orgForm()->result)) {
@@ -165,14 +168,14 @@ class PermissionField extends ClusterFormField {
 		if($this->fields["type"]->result() == "inherit" && $this->inheritFrom && is_a($this->inheritFrom, "Permission")) {
 			$val = clone $this->inheritFrom;
 			$val->consolidate();
-			$val->inheritorid = $this->inheritFrom->id;
+			$val->parentid = $this->inheritFrom->id;
 			$val->id = $this->value->id;
 			$val->name = $this->value->name;
 			//$val->versionid = $this->value->versionid;
 			$this->value = $val;
 		} else {
-			$this->value->inheritorid = 0;
-			$this->value->inheritor = null;
+			$this->value->parentid = 0;
+			$this->value->parent = null;
 			// now remodify it by the given fields
 			foreach($this->fields as $key => $val) {
 				if($result = $val->result()) {

@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.12.2012
-  * $Version 1.0.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 1.0.3
 */ 
 
 defined("IN_GOMA") OR die("");
@@ -15,12 +15,12 @@ class redirector extends Page
 		/**
 		 * title of the page
 		*/
-		public static $cname = '{$_lang_redirect}';
+		static $cname = '{$_lang_redirect}';
 		
 		/**
 		 * icon
 		*/
-		public static $icon = "images/icons/fatcow16/page_link.png";
+		static $icon = "images/icons/fatcow16/page_link.png";
 		
 		/**
 		 * generates the form

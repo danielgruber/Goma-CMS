@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.01.2013
-  * $Version 3.5.1
+  * last modified: 14.01.2013
+  * $Version 3.5.2
 */   
  
  
@@ -1011,6 +1011,7 @@ class tplCaller extends Object implements ArrayAccess
 				
 				$this->setTplPath($tpl);
 				$this->dataobject = $dataobject;
+				$this->inExpansion = $this->dataobject->inExpansion;
 				
 		}
 		/**
@@ -1109,14 +1110,13 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function printDebug() {
-			if(count(debug_backtrace()) > 30) {
-				debug_print_backtrace();
-			} else {
-				$data = debug_backtrace();
-				unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
-				echo convert::raw2text(print_r(array_values($data), true));
+			$data = debug_backtrace();
+			unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
+			$data = array_values($data);
+			if(count($data) > 6) {
+				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
 			}
-			
+			echo convert::raw2text(print_r($data, true));
 		}
 		
 		/**

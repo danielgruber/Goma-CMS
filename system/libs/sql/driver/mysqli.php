@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 20.05.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 02.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -63,6 +63,7 @@ class mysqliDriver extends object implements SQLDriver
 				$this->_db = new MySQLi($dbhost, $dbuser, $dbpass, $dbdb);
 				if(!mysqli_connect_errno()) {
 					self::setCharsetUTF8();
+					$this->query("SET sql_mode = '';");
 					return true;
 				} else {
 					die(str_replace('{BASE_URI}', BASE_URI, file_get_contents(ROOT . 'system/templates/framework/database_connect_error.html')));
@@ -93,6 +94,10 @@ class mysqliDriver extends object implements SQLDriver
 		**/
 		public  function query($sql, $unbuffered = false)
 		{
+				if(!$this->_db->ping()) {
+					$this->__construct();
+				}
+				
 				if($result = $this->_db->query($sql))
 					return $result;
 				else {
@@ -284,151 +289,8 @@ class mysqliDriver extends object implements SQLDriver
 						return false;
 				}
 		}
-		/**
-		 * this function changes an field
-		 *@name changeField
-		 *@param string - table
-		 *@param string - field
-		 *@param string - new type
-		*/
-		public function changeField($table, $field, $type, $prefix = false)
-		{
-				if($prefix === false)
-								$prefix = DB_PREFIX;
-				
-			
-				$sql = "ALTER TABLE ".$prefix.$table." MODIFY ".$field." ".$type." ";
-				if(sql::query($sql))
-				{
-						return true;
-				} else
-				{
-						return false;
-				}
-		}
-		/**
-		 * this function adds an field
-		 *@name addField
-		 *@param string - table
-		 *@param string - field
-		 *@param string - type
-		*/
-		public function addField($table, $field, $type, $prefix = false)
-		{
-				if($prefix === false)
-								$prefix = DB_PREFIX;
-				
-				
-				$sql = "ALTER TABLE ".$prefix.$table." ADD ".$field." ".$type." NOT NULL";
-				if(sql::query($sql))
-				{
-						return true;
-				} else
-				{
-						return false;
-				}
-		}
-		/**
-		 * this function deletes an field
-		 *@name dropField
-		 *@param string - table
-		 *@param string - field
-		*/
-		public function dropField($table, $field, $prefix = false)
-		{
-				if($prefix === false)
-								$prefix = DB_PREFIX;
-				
-				
-				$sql = "ALTER TABLE " .$prefix . $table . " DROP ".$field."";
-				if(sql::query($sql))
-				{
-						return true;
-				} else
-				{
-						return false;
-				}
-		}
-		/**
-		 * creates an table
-		 *@name creatTable
-		 *@param string - tablename
-		 *@param array - fields
-		*/
-		public function createTable($table, $fields, $prefix = false)
-		{
-				if($prefix === false)
-								$prefix = DB_PREFIX;
-				
-				
-				$fields_ = "";
-				$i = 0;
-				foreach($fields as $key => $value)
-				{
-						if($i != 0)
-						{
-								$fields_ .= ",\n";
-								
-						} else
-						{
-								$i = 1;
-						}
-						$fields_ .= "".$key." ".$value." NOT NULL ";
-				}
-				$sql = "CREATE TABLE 
-							" . $prefix . $table." 
-							(
-								".$fields_."
-							);";
-				if(sql::query($sql))
-				{
-						return true;
-				} else
-				{
-						return false;
-						
-				}
-		}
-		/**
-		 * creates an table
-		 *@name creatTable
-		 *@param string - tablename
-		 *@param array - fields
-		*/
-		public function _createTable($table, $fields, $prefix = false)
-		{
-				if($prefix === false)
-								$prefix = DB_PREFIX;
-				
-				
-				$fields_ = "";
-				$i = 0;
-				foreach($fields as $key => $value)
-				{
-						if($i != 0)
-						{
-								$fields_ .= ",\n";
-								
-						} else
-						{
-								$i = 1;
-						}
-						$fields_ .= $key." ".$value." NOT NULL";
-				}
-				$sql = "CREATE TABLE 
-							".$prefix . $table." 
-							(
-								".$fields_."
-							);";
-				if(sql::query($sql))
-				{
-						return true;
-				} else
-				{
-						return false;
-						
-				}
-		}
+		
+		//!Index-Methods
 		/**
 		 * INDEX FUNCTIONS
 		*/
@@ -544,6 +406,7 @@ class mysqliDriver extends object implements SQLDriver
 		/**
 		 * table-functions V2
 		*/
+		//!Table-API
 		
 		/**
 		 * gets much information about a table, e.g. field-names, default-values, field-types
@@ -600,6 +463,7 @@ class mysqliDriver extends object implements SQLDriver
 			
 			if($data = $this->showTableDetails($table, true, $prefix)) {
 				$editsql = 'ALTER TABLE '.$prefix . $table .' ';
+				
 				// get fields missing
 				
 				foreach($fields as $name => $type) {
@@ -616,10 +480,11 @@ class mysqliDriver extends object implements SQLDriver
 					} else {
 						
 						// correct fields with edited type or default-value
-						if(str_replace('"', "'", $data[$name]["type"]) != $type && str_replace("'", '"', $data[$name]["type"]) != $type) {
+						$type = str_replace(", ", ",", $type);
+						if(str_replace('"', "'", $data[$name]["type"]) != $type && str_replace("'", '"', $data[$name]["type"]) != $type && $data[$name]["type"] != $type) {
 							$editsql .= " MODIFY ".$name." ".$type.",";
-							$log .= "Modify Field ".$name." to ".$type."\n";
-						}
+							$log .= "Modify Field ".$name." from ".$data[$name]["type"]." to ".$type."\n";
+						} else
 						
 						if(!_eregi('enum', $fields[$name])) {
 							if(!isset($defaults[$name]) && $data[$name]["default"] != "") {
@@ -698,9 +563,7 @@ class mysqliDriver extends object implements SQLDriver
 							$mfields[$key] = preg_replace('/\((.*)\)/', "", $value);
 						}
 						
-						
-						
-						if($currentindexes[$name]["type"] != $type || $currentindexes[$name]["fields"] != $mfields) {
+						if($currentindexes[$name]["type"] != $type || count(array_diff($currentindexes[$name]["fields"], $mfields)) > 0) {
 							$removeindexsql .= " DROP INDEX ".$name.",";
 							$addindexsql .= " ADD ".$type." ".$name . "  (".implode(",", $ifields)."),";
 							$log .= "Change Index ".$name."\n";
@@ -817,7 +680,7 @@ class mysqliDriver extends object implements SQLDriver
 			if(SQL::Query($sql))
 				return true;
 			else
-				throwErrorByID(3);
+				return false;
 		}
 		
 		/**
@@ -862,7 +725,7 @@ class mysqliDriver extends object implements SQLDriver
 											{
 													if (
 														(isset($data["table_name"]) && $table_name = $data["table_name"]) || 
-														(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+														(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 													)
 													{	
 															$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
@@ -911,7 +774,7 @@ class mysqliDriver extends object implements SQLDriver
 									{
 											if (
 												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-												(isset(classinfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
 													$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
@@ -997,7 +860,7 @@ class mysqliDriver extends object implements SQLDriver
 									if(isset($data["where"])) {
 											if (
 												(isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-												(isset(ClassInfo::$class_info[$class]["table_name"]) && $table_name = classinfo::$class_info[$class]["table_name"])
+												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
 													$where = $data["where"];

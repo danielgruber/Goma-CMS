@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 1.4.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.01.2013
+  * $Version 1.4.3
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -326,7 +326,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$value] = $value;
+						$arr[] = array("key" => $value, "val" => $value);
 						$i++;
 					}
 				} else {
@@ -340,7 +340,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$key] = $value;
+						$arr[] = array("key" => $key, "val" => $value);
 						$i++;
 					}
 				}
@@ -389,7 +389,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$value] = $value;
+						$arr[] = array("key" => $value, "value" => $value);
 						$i++;
 					}
 				} else {
@@ -403,7 +403,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$key] = $value;
+						$arr[] = array("key" => $key, "value" => $value);
 						$i++;
 					}
 				}

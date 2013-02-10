@@ -6,8 +6,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.11.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.02.2013
   * $Version - 1.0
  */
  
@@ -212,20 +212,102 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	 * @param string $value
 	 * @return string 
 	 */
-	protected function formatValue($tableField, $item, $fieldName, $value) {
+	protected function formatValue($tableField, $data, $fieldName, $value) {
 		if(!array_key_exists($fieldName, $this->fieldFormatting)) {
 			return $value;
 		}
 
 		$spec = $this->fieldFormatting[$fieldName];
 		if(is_callable($spec)) {
-			return $spec($value, $item);
+			return $spec($value, $data);
 		} else {
+				
 			$format = str_replace('$value', "__VAL__", $spec);
-			$format = preg_replace('/\$([A-Za-z0-9-_]+)/', '$item->$1', $format);
+			$format = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $format);
+			$format = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $format);
 			$format = str_replace('__VAL__', '$value', $format);
 			eval('$value = "' . $format . '";');
 			return $value;
 		}
 	}
+	
+	/**
+	 * vars with convertion
+	 *@name convert_vars
+	 *@access public
+	*/
+	public static function convert_vars($matches)
+	{
+			
+			$php = '$data';
+			$var = $matches[1];
+			$function = $matches[2];
+			$params = $matches[3];
+			
+			// isset-part
+			$isset = 'isset($data';
+			// parse params
+			$params = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("tpl", "percent_vars"), $params);
+			// parse functions in params
+			$params = preg_replace_callback('/([a-zA-Z0-9_\.]+)\((.*)\)/si', array("tpl", "functions"),$params);
+			
+			if(strpos($var, "."))
+			{
+					$varparts = explode(".", $var);
+					$i = 0;
+					$count = count($varparts);
+					$count--;
+					foreach($varparts as $part)
+					{
+							if($count == $i)
+							{
+									// last
+									$php .= '->doObject("'.$part.'")';
+									$isset .= '["'.$part.'"]';
+							} else
+							{
+									$php .= '["'.$part.'"]';
+									$isset .= '["'.$part.'"]';
+							}
+							$i++;
+					}
+			} else
+			{
+					$php .= '->doObject("'.$var.'")';
+					$isset .= '["'.$var.'"]';
+			}
+			$isset .= ')';
+			$php .= "->" . $function . "(".$params.")";
+			$php = '" . ('.$isset.' ? '.$php.' : "") . "';
+			
+			return $php;
+	}
+	
+	/**
+	 * callback for vars in format
+	 *@name vars
+	*/
+	public static function vars($matches)
+	{
+			$name = $matches[1];
+			
+			if($name == "caller")
+				return '$caller';
+			
+			if($name == "data")
+				return '$data';
+			
+			if(preg_match('/^_lang_([a-zA-Z0-9\._-]+)/i', $name, $data))
+			{
+					return '" . lang("'.$data[1].'", "'.$data[1].'") . "';
+			}
+			
+			if(preg_match('/^_cms_([a-zA-Z0-9_-]+)/i', $name, $data))
+			{
+					return '" . Core::getCMSVar('.var_export($data[1], true).') . "';
+			}
+			
+			return '" . $data->getTemplateVar('.var_export($name, true).') . "';
+	}
+	
 }

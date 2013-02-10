@@ -5,10 +5,10 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@Copyright (C) 2009 - 2013  Goma-Team
   *********
-  * last modified: 26.12.2012
-  * $Version: 1.4.6
+  * last modified: 09.01.2013
+  * $Version: 1.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -48,14 +48,6 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	 *@access protected
 	*/
 	protected $dataCache = array();
-	
-	/**
-	 * defaults
-	 *
-	 *@name defaults
-	 *@access public
-	*/
-	public $defaults = array();
 	
 	/**
 	 * protected customised data
@@ -724,7 +716,7 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 							"black"	=> ($i == $currentpage)
 						);
 						$lastDots = false;
-					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
+					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
 						$data[$i] = array(
 							"page" 	=> "...",
 							"black" => true
@@ -1024,7 +1016,7 @@ class DataObjectSet extends DataSet {
 				$this->controller = $this->dataobject->controller;
 			
 			$this->filter($filter);
-			$this->sort = $sort;
+			$this->sort = ClassInfo::getStatic($class, "default_sort");
 			$this->limit($limit);
 			$this->join($join);
 			$this->search($search);
@@ -1084,7 +1076,7 @@ class DataObjectSet extends DataSet {
 	public function getTable_Name() {
 		if(!isset($this->dataobject))
 			return null;
-		return $this->dataobject->table_name;
+		return $this->dataobject->Table();
 	}
 	
 	/**
@@ -1515,7 +1507,7 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function push(DataObject $record, $write = false) {
-		foreach($this->defaults as $key => $value) {
+		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record[$key]))
 				$record[$key] = $value;
 		}
@@ -1864,6 +1856,18 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	}
 	
 	/**
+	 * get the relation-props
+	 *
+	 *@name getRelationENV
+	 *@access public
+	 *@return array
+	*/
+	public function getRelationENV() {
+		return array("name" => $this->name, "field" => $this->field);
+	}
+	
+	
+	/**
 	 * generates a form
 	 *
 	 *@name form
@@ -1997,6 +2001,17 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	}
 	
 	/**
+	 * get the relation-props
+	 *
+	 *@name getRelationENV
+	 *@access public
+	 *@return array
+	*/
+	public function getRelationENV() {
+		return array("name" => $this->name, "field" => $this->field, "relationTable" => $this->relationTable, "ownField" => $this->ownField, "ownValue" => $this->ownValue, "extraFields" => $this->extraFields);
+	}
+	
+	/**
 	 * sets the variable join
 	 *
 	 *@name join
@@ -2032,13 +2047,11 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				
 				// check if object and writable
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
-					// check if record exists in this form
-					// if exists, don't rewrite
-					if($record->id == 0 || $record->wasChanged()) {
-						if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
-							return false;
-						}
+					// write
+					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
+						return false;
 					}
+					
 					$writtenIDs[$record->versionid] = true;
 					$writeExtraFields[$record->versionid] = array();
 					
@@ -2059,6 +2072,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			$record = $this->dataobject;
 			if($record->write($forceInsert, $forceWrite, $snap_priority)) {
 				$writtenIDs[$record->versionid] = true;
+				$writeExtraFields[$record->versionid] = array();
 				
 				// add extra fields
 				foreach($this->extraFields as $field => $char) {
@@ -2071,11 +2085,11 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		// check for existing entries
-		$sql = "SELECT * FROM ".DB_PREFIX . $this->relationTable." WHERE ".$this->ownField." = ".$this->ownValue."";
-		if($result = SQL::Query($sql)) {
+		$query = new SelectQuery($this->relationTable, array("*"), array($this->ownField => $this->ownValue));
+		if($query->execute()) {
 			$existing = array();
 			$existingFields = array();
-			while($row = SQL::fetch_object($result)) {
+			while($row = $query->fetch_object()) {
 				$existing[$row->id] = $row->{$this->field};
 				$existingFields[$row->{$this->field}] = array();
 				
@@ -2089,7 +2103,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		$manipulation = array(
-			array(
+			"insert" => array(
 				"command"	=> "insert",
 				"table_name"=> $this->relationTable,
 				"fields"	=> array(
@@ -2097,15 +2111,14 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				)
 			)
 		);
-		
+
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
-				$c = count($manipulation[0]["fields"]);
-				$manipulation[0]["fields"][$c] = array(
+				$manipulation["insert"]["fields"][$id] = array(
 					$this->ownField => $this->ownValue,
 					$this->field	=> $id
 				);
-				$manipulation[0]["fields"] = array_merge($manipulation[0]["fields"], $writeExtraFields[$id]);
+				$manipulation["insert"]["fields"] = array_merge($manipulation["insert"]["fields"], $writeExtraFields[$id]);
 			} else {
 				if($writeExtraFields[$id] != $existingFields[$id]) {
 					$manipulation[] = array(
@@ -2115,9 +2128,27 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 						"fields"	=> $writeExtraFields[$id]
 					);
 				}
+				unset($existing[array_search($id, $existing)]);
 			}
 		}
-
+		
+		if(count($existing) > 0) {
+			$manipulation = array(
+				"delete" => array(
+					"command"	=> "delete",
+					"table_name"=> $this->relationTable,
+					"where"	=> array(
+						$this->field => array()
+					)
+				)
+			);
+				
+			foreach($existing as $remove) {
+				$manipulation["delete"]["where"][] = $remove;
+			}
+		}
+		
+		$this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writtenIDs, $writeExtraFields);
 		if(SQL::manipulate($manipulation)) {
 			return true;
 		}

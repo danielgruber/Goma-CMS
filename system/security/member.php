@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
-  * $Version 2.4.4
+  * last modified: 03.03.2012
+  * $Version 2.4.6
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -49,13 +49,14 @@ class userController extends Controller
 		} else if(isset($_GET["dropElem"])) {
 			$response->exec("dropdownDialog.get(".var_export($_GET["dropElem"], true).").hide();");
 		}
+		Notification::notify("user", lang("edit_password_ok"));
 		return $response->render();
 	}
 		
 }
 
 
-class User extends DataObject implements HistoryData, PermProvider
+class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
 		/**
 		 * the name of this dataobject
@@ -68,28 +69,55 @@ class User extends DataObject implements HistoryData, PermProvider
 		/**
 		 * the database fields of a user
 		 *
-		 *@name db_fields
+		 *@name db
 		 *@access public
 		*/
-		public $db_fields = array(		'nickname'		=> 'varchar(200)',
-										'name'			=> 'varchar(200)',
-										'email'			=> 'varchar(200)',
-										'password'		=> 'varchar(200)',
-										'signatur'		=> 'text',
-										'status'		=> 'int(2)',
-										'phpsess'		=> 'varchar(200)',
-										"code"			=> "varchar(200)",
-										"timezone"		=> "timezone",
-										"custom_lang"	=> "varchar(10)");
+		static $db = array(	'nickname'		=> 'varchar(200)',
+							'name'			=> 'varchar(200)',
+							'email'			=> 'varchar(200)',
+							'password'		=> 'varchar(1000)',
+							'signatur'		=> 'text',
+							'status'		=> 'int(2)',
+							'phpsess'		=> 'varchar(200)',
+							"code"			=> "varchar(200)",
+							"timezone"		=> "timezone",
+							"custom_lang"	=> "varchar(10)");
 		
 		
 		/**
-		 * the table_name is users not user
+		 * we add an index to username and password, because of logins
 		 *
-		 *@name table_name
+		 *@name index
 		 *@access public
 		*/
-		public $table_name = "users";
+		static $index = array(
+			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
+		);
+		
+		/**
+		 * fields which are searchable
+		 *
+		 *@name search_fields
+		 *@access public
+		*/
+		static $search_fields = array(
+			"nickname", "name", "email", "signatur"
+		);
+		
+		/**
+		 * the table is users not user
+		 *
+		 *@name table
+		 *@access public
+		*/
+		static $table = "users";
+		
+		/**
+		 * use versions here
+		 *
+		 *@name versions
+		*/
+		static $versions = true;
 		
 		/**
 		 * every user has one group and an avatar-picture, which is reflected in this relation
@@ -97,7 +125,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name has_one
 		 *@access public
 		*/
-		public $has_one = array("avatar" => "Uploads"); 
+		static $has_one = array("avatar" => "Uploads"); 
 		
 		/**
 		 * every user has additional groups
@@ -105,7 +133,12 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name many_many
 		 *@access public
 		*/
-		public $many_many = array("groups" => "group");
+		static $many_many = array("groups" => "group");
+		
+		/**
+		 * sort by name
+		*/
+		static $default_sort = array("name", "ASC");
 		
 		/**
 		 * users are activated by default
@@ -113,38 +146,11 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name defaults
 		 *@access public
 		*/
-		public $defaults = array(
+		static $default = array(
 				'status'	=> '1'
 		);
 		
-		/**
-		 * we add an index to username and password, because of logins
-		 *
-		 *@name indexes
-		 *@access public
-		*/
-		public $indexes = array(
-			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
-		);
-		
-		/**
-		 * fields which are searchable
-		 *
-		 *@name searchable_fields
-		 *@access public
-		*/
-		public $searchable_fields = array(
-			"nickname", "name", "email", "signatur"
-		);
-		
 		public $insertRights = 1;
-		
-		/**
-		 * use versions here
-		 *
-		 *@name versioned
-		*/
-		public $versioned = true;
 		
 		/**
 		 * gets all groups if a object
@@ -351,6 +357,18 @@ class User extends DataObject implements HistoryData, PermProvider
 						return lang("passwords_not_match");
 				}
 		}
+		
+		/**
+		 * nickname is always lowercase
+		 *
+		 *@name onbeforewrite
+		*/
+		public function onBeforeWrite() {
+			parent::onBeforeWrite();
+			
+			$this->nickname = strtolower($this->nickname);
+		}
+		
 		/**
 		 * sets the password with md5
 		 *
@@ -516,6 +534,11 @@ class User extends DataObject implements HistoryData, PermProvider
 			if(!$record->newversion()) {
 				return false;
 			}
+			
+			$relevant = true;
+			if(!$record->autor)
+				$relevant = false;
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -523,6 +546,7 @@ class User extends DataObject implements HistoryData, PermProvider
 						$icon = "images/icons/fatcow16/user_go.png";
 						$lang = lang("h_user_login");
 						$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
+						$relevant = false;
 					} else {
 						if($record->autorid == $record->newversion()->id) {
 							$lang = lang("h_profile_update", '$user updated the own profile');
@@ -547,7 +571,7 @@ class User extends DataObject implements HistoryData, PermProvider
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
 		}
 		
 		/**
@@ -607,6 +631,20 @@ class User extends DataObject implements HistoryData, PermProvider
 				return new GravatarImageHandler(array("email" => $this->email));
 			}
 		}
+		
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
+	}
 }
 
 /**
@@ -824,7 +862,7 @@ class Member extends Object {
 	{
 		self::checkDefaults();
 
-		$data = DataObject::get_one("user", array("nickname" => array("LIKE", trim($user)), "OR", "email" => array("LIKE", $user)));
+		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
 		
 		if($data) {
 			// check password
@@ -838,10 +876,10 @@ class Member extends Object {
 					
 					return true;
 				} else if($data->status == 0) {
-					addcontent::addError(login("login_not_unlocked"));
+					addcontent::addError(lang("login_not_unlocked"));
 					return false;
 				} else {
-					addcontent::addError(login("login_locked"));
+					addcontent::addError(lang("login_locked"));
 					return false;
 				}
 			} else {

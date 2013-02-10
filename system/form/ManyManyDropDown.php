@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.12.2012
-  * $Version 1.0.11
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.01.2013
+  * $Version 1.1.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -63,31 +63,54 @@ class ManyManyDropDown extends MultiSelectDropDown
 			parent::getValue();
 			
 			if(!$this->dataset) {
-				if(is_object($this->form()->result) && (isset($this->form()->result->many_many[$this->relation]) || isset($this->form()->result->belongs_many_many[$this->relation]))) {
-					$this->_object = (isset($this->form()->result->many_many[$this->relation])) ? $this->form()->result->many_many[$this->relation] : $this->form()->result->belongs_many_many[$this->relation];
+				
+				if(is_object($this->form()->result)) {
+					// get relations from result
+					$many_many = $this->form()->result->ManyMany();
+					$belongs_many_many = $this->form()->result->BelongsManyMany();
+				}
+				
+				if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
+					
+					$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 					$this->dataset = call_user_func_array(array($this->form()->result, $this->relation), array())->FieldToArray("versionid");
 				} else if(is_object($this->form()->controller)) {
-					if(isset($this->form()->controller->modelInst()->many_many[$this->relation]) || isset($this->form()->controller->modelInst()->belongs_many_many[$this->relation])) {
-						$this->_object = (isset($this->form()->controller->modelInst()->many_many[$this->relation])) ? $this->form()->controller->modelInst()->many_many[$this->relation] : $this->form()->controller->modelInst()->belongs_many_many[$this->relation];
+					// get relations from model of form-controller
+					$many_many = $this->form()->controller->modelInst()->ManyMany();
+					$belongs_many_many = $this->form()->controller->modelInst()->BelongsManyMany();
+					
+					if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
+						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 						$this->dataset = call_user_func_array(array($this->form()->controller->modelInst(), $this->relation), array())->FieldToArray("versionid");
 					} else {
-						throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__."");
+						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
 					}
 				} else {
-					throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__."");
+					throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
 				}
 			} else {
-				if(is_object($this->form()->result) && (isset($this->form()->result->many_many[$this->relation]) || isset($this->form()->result->belongs_many_many[$this->relation]))) {
-					$this->_object = (isset($this->form()->result->many_many[$this->relation])) ? $this->form()->result->many_many[$this->relation] : $this->form()->result->belongs_many_many[$this->relation];
+				if(is_object($this->form()->result)) {
+					// get relations from result
+					$many_many = $this->form()->result->ManyMany();
+					$belongs_many_many = $this->form()->result->BelongsManyMany();
+				}
+				
+				if((isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation]))) {
+					$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 				} else if(is_object($this->form()->controller)) {
-					if(isset($this->form()->controller->modelInst()->many_many[$this->relation]) || isset($this->form()->controller->modelInst()->belongs_many_many[$this->relation])) {
-						$this->_object = (isset($this->form()->controller->modelInst()->many_many[$this->relation])) ? $this->form()->controller->modelInst()->many_many[$this->relation] : $this->form()->controller->modelInst()->belongs_many_many[$this->relation];
+					
+					// get relations from model of form-controller
+					$many_many = $this->form()->controller->modelInst()->ManyMany();
+					$belongs_many_many = $this->form()->controller->modelInst()->BelongsManyMany();
+					
+					if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
+						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 						
 					} else {
-						throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__."");
+						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
 					}
 				} else {
-					throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__."");
+					throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
 				}
 			}
 		}
@@ -136,7 +159,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$arr[$record["versionid"]] = convert::raw2text($record[$this->showfield]);
+				$arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
 			}			
 			$left = ($p > 1);
 			
@@ -160,7 +183,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$arr[$record["versionid"]] = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]));
+				$arr[] = array("key" => $record["versionid"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);

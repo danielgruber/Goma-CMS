@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.12.2012
-  * $Version 1.0.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 03.02.2013
+  * $Version 1.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,7 +14,7 @@ class History extends DataObject {
 	/**
 	 * db-fields
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"dbobject"		=> "varchar(100)",
 		"record"		=> "int(10)",
 		"oldversion"	=> "int(10)",
@@ -27,7 +27,7 @@ class History extends DataObject {
 	/**
 	 * indexes
 	*/
-	public $indexes = array(
+	static $index = array(
 		"dbobject"	=> array(
 			"type"		=> "INDEX",
 			"name"		=> "dbobject",
@@ -41,7 +41,7 @@ class History extends DataObject {
 	 *@name history
 	 *@access public
 	*/
-	public static $history = false;
+	static $history = false;
 	
 	/**
 	 * small cache for classes supporting HistoryView
@@ -49,7 +49,14 @@ class History extends DataObject {
 	 *@name supportHistoryView
 	 *@access private
 	*/
-	private static $supportHistoryView;
+	static $supportHistoryView;
+	
+	/**
+	 * sort-direction of the history
+	 *
+	 *@name default_sort
+	*/ 
+	static $default_sort = "created DESC";
 	
 	/**
 	 * cache for history-data
@@ -90,7 +97,7 @@ class History extends DataObject {
 			return false;
 		}
 		
-		if(isset($changed)) {
+		if(isset($changed) && !DataObject::versioned($class)) {
 			$cc = count($changed);
 			$c = serialize($changed);
 		} else {
@@ -189,9 +196,9 @@ class History extends DataObject {
 	/**
 	 * gets the info if all versions are available for this history-object
 	 *
-	 *@name getVersioned
+	 *@name getIsVersioned
 	*/
-	public function getVersioned() {
+	public function getIsVersioned() {
 		if(isset($this->_versioned)) {
 			return $this->_versioned;
 		}
@@ -199,8 +206,7 @@ class History extends DataObject {
 		$this->_versioned = false;
 		$data = $this->historyData();
 		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
-			$temp = new $this->dbobject();
-			if(!$temp->versioned || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
+			if(!DataObject::versioned($this->dbobject) || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
 				return false;
 			}
 			
@@ -234,7 +240,7 @@ class History extends DataObject {
 		$data = $this->historyData();
 		$temp = new $this->dbobject();
 		if(!isset($data["compared"]) || $data["compared"]) {
-			return ($this->getVersioned() && $temp->getVersionedFields());
+			return ($this->getIsVersioned() && $temp->getVersionedFields());
 		}
 		
 		return false;
@@ -300,11 +306,8 @@ class History extends DataObject {
 	*/
 	public function newversion() {
 		if($this->fieldGet("newversion") && ClassInfo::exists($this->dbobject)) {
-			$temp = new $this->dbobject();
-			$versioned = $temp->versioned;
-			$temp = null;
 			
-			if($versioned) {
+			if(DataObject::versioned($this->dbobject)) {
 				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
 		}
@@ -332,11 +335,8 @@ class History extends DataObject {
 	*/
 	public function oldversion() {
 		if($this->fieldGet("oldversion") && ClassInfo::exists($this->dbobject)) {
-			$temp = new $this->dbobject();
-			$versioned = $temp->versioned;
-			$temp = null;
 			
-			if($versioned) {
+			if(DataObject::versioned($this->dbobject)) {
 				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
 			}
 		}
@@ -367,6 +367,16 @@ class History extends DataObject {
 		
 		return false;
 	}
+	
+	/**
+	 * class-name of a event
+	 *
+	 *@name EventClass
+	*/
+	public function EventClass() {
+		$data = $this->HistoryData();
+		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
+	}
 }
 
 interface HistoryData {
@@ -379,5 +389,3 @@ interface HistoryData {
 	*/
 	public static function generateHistoryData($record);
 }
-
-interface HistoryView {}

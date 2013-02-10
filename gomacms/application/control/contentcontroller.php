@@ -216,7 +216,7 @@ class contentController extends FrontedController
 					}
 				}
 				
-				if(Core::$requestController->modelInst()->UploadTracking()->Count() != count($uploadObjects)) {
+				if(Core::$requestController->modelInst()->UploadTracking()->Count() < count($uploadObjects)) {
 					Core::$requestController->modelInst()->UploadTracking()->setData(array());
 					foreach($uploadObjects as $upload)
 						Core::$requestController->modelInst()->UploadTracking()->push($upload);
@@ -231,7 +231,7 @@ class UploadsPageLinkExtension extends DataObjectExtension {
 	/**
 	 * many-many
 	*/
-	public $belongs_many_many = array(
+	static $belongs_many_many = array(
 		"pagelinks"	=> "pages"
 	);
 }

@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.02.2013
 */   
 $form_lang = array(
 	'email_not_valid'			=> 'Bitte geben Sie eine g&uuml;ltige Email-Adresse in das Feld ein',
@@ -20,7 +20,7 @@ $form_lang = array(
 	"not_saved_yet"				=> "Die Aktion konnte leider aus Sicherheitsgründen nicht ausgeführt werden. Bitte versuchen Sie es noch einmal!",
 	
 	"tablefield.reset"			=> "Zurücksetzen",
-	"tablefield.filterBy"		=> "Sortieren nach "
+	"tablefield.filterBy"		=> "Suche nach "
 );
 foreach($form_lang as $key => $value)
 {

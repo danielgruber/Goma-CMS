@@ -24,7 +24,7 @@
 						<strong>{$_lang_url}:</strong> $_SERVER_REQUEST_URI.text()<br />
 						{$errdetails}
 					</div>
-					<% IF $errcode != 1 AND $errcode != 2 AND $errcode != 5 %>
+					<% IF $errcode != 1 AND $errcode != 2 AND $errcode != 5 AND $throwDebug %>
 						<strong>Debug:</strong>
 						<textarea style="width: 99%; height: 200px;"><% printDebug() %></textarea>
 					<% END %>

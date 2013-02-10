@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.02.2012
-  * $Version 1.4.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.01.2013
+  * $Version 1.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,7 +32,7 @@ class systemController extends Controller {
 		"ck_imageuploader"		=> "ckeditor_imageupload"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload", "logJSProfile");
+	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload");
 	
 	/**
 	 * disables the mobile version
@@ -161,24 +161,6 @@ class systemController extends Controller {
 		HTTPResponse::setHeader("content-type", "text/x-json");
 		HTTPResponse::output('('.json_encode($output).')');
 		exit;
-	}
-	
-	/**
-	 * saves a debug-log for javascript
-	 *
-	 *@name logJSProfile
-	 *@access public
-	*/
-	public function logJSProfile() {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/");
-		if(Core::is_ajax() && isset($_POST["JSProfile"]) && (strlen($_POST["JSProfile"]) / 1024) <= self::JS_DEBUG_LIMIT && DEV_MODE) {
-			$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/".date("m-d-y");
-			FileSystem::requireFolder($folder);
-			foreach($_POST["JSProfile"]["profiles"] as $data) {
-				file_put_contents($folder . "/" . $data["name"] . ".log", "\n\nCount: ".$data["count"]."   Time: ".$data["time"] * 1000 ."ms   User-Agent: ".$_POST["JSProfile"]["user-agent"]."   URL: ".$_POST["JSProfile"]["url"]."", FILE_APPEND);
-			}
-			return 1;
-		}
 	}
 	
 	/**

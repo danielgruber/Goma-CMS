@@ -202,9 +202,9 @@ class SelectQuery extends Object
 		 *@name sort
 		 *@access public
 		 *@param string - field
-		 *@param string - type, default: DESC
+		 *@param string - type, default: ASC
 		*/
-		public function sort($field, $type = "DESC", $order = 0)
+		public function sort($field, $type = "ASC", $order = 0)
 		{		
 			if(is_array($field)) {
 				if(isset($field["field"], $field["type"])) {
@@ -492,23 +492,27 @@ class SelectQuery extends Object
 					}
 				}
 				
+				
 				// some added caches ;)
 				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
-					// comma
-					if(isset($i)) {
-						if($i != 0) {
-							$sql .= ", ";
+					if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
+						// comma
+						if(isset($i)) {
+							if($i != 0) {
+								$sql .= ", ";
+							}
 						}
+						
+						$sql .= self::$new_field_cache[$from]["colidingSQL"];
 					}
-					
-					$sql .= self::$new_field_cache[$from]["colidingSQL"];
-					
+						
 					// i
 					if(isset($i)) {
 						$i += self::$new_field_cache[$from]["colidingSQLi"];
 					} else {
 						$i = self::$new_field_cache[$from]["colidingSQLi"];
 					}
+					
 				} else {	
 					$colidingSQL = "";
 					$a = 0;
@@ -542,7 +546,7 @@ class SelectQuery extends Object
 					self::$new_field_cache[$from]["colidingSQLi"] = $a;
 					
 					// comma
-					if(isset($i)) {
+					if(isset($i) && $a != 0) {
 						if($i != 0) {
 							$sql .= ", ";
 						}
