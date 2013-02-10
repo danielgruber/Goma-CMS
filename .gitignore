@@ -8,14 +8,13 @@ Thumbs.db
 
 # Goma files
 _config.php
-.index.db
-.htaccess
 .index-db
-/.htaccess
+.htaccess
+web.config
+
 # Goma Core
 system/installer/log_*****/*
 system/temp/*
-system/installer/data/apps/.index.db
 system/installer/log/*
 system/installer/temp/*
 
@@ -39,3 +38,8 @@ Uploads
 Uploads/*
 images/resampled
 images/resampled/*
+
+# Developer
+tpl/
+!tpl/goma_simple/
+!tpl/smoothOrange/
