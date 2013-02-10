@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 28.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.02.2013
   * $Version 2.2
 */
 
@@ -466,7 +466,7 @@ class Controller extends RequestHandler
 		public function edit()
 		{
 			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
-				if(!$this->modelInst()->canWrite($this->modelInst()))
+				if(!$this->modelInst()->can("Write"))
 				{
 					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
@@ -503,7 +503,7 @@ class Controller extends RequestHandler
 		public function delete($object = null)
 		{
 			if($this->countModelRecords() == 1) {
-				if(!$this->modelInst()->canDelete($this->modelInst()))
+				if(!$this->modelInst()->can("Delete"))
 				{
 					return lang("less_rights", "You don't have permissions to access this page.");
 				} else {
