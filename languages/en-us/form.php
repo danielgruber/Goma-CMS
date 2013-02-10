@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.02.2013
 */   
 $form_lang = array(
 	'email_not_valid'			=> 'Please enter a valid email-adresse.',
@@ -17,7 +17,10 @@ $form_lang = array(
 	"dropdown_nothing_select"	=> "Nothing selected",
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
-	"not_saved_yet"				=> "The action could not be completed for security reason, yet. Please repeat it!"
+	"not_saved_yet"				=> "The action could not be completed for security reason, yet. Please repeat it!",
+	
+	"tablefield.reset"			=> "Reset",
+	"tablefield.filterBy"		=> "filter by "
 );
 foreach($form_lang as $key => $value)
 {
