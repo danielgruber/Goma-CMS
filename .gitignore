@@ -8,18 +8,20 @@ Thumbs.db
 
 # Goma files
 _config.php
-.index.db
+.index-db
 .htaccess
+web.config
 
 # Goma Core
 system/installer/log_*****/*
 system/temp/*
-system/installer/data/apps/.index.db
 system/installer/log/*
 system/installer/temp/*
 
 # Goma Application
 gomacms/*
+!gomacms/.htaccess
+!gomacms/web.config
 !gomacms/application/*
 !gomacms/application
 !gomacms/templates/*
@@ -28,7 +30,6 @@ gomacms/*
 !gomacms/version.php
 !gomacms/upgrade/*
 !gomacms/upgrade
-!gomacms/.htaccess
 gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
 
