@@ -12,6 +12,9 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableView extends AdminItem {
 	
+	/**
+	 * entries per page
+	*/
 	public $perPage = 20;
 	
 	/**

@@ -523,8 +523,14 @@ function randomString($len, $numeric = true) {
  *@param string - name
  *@param string - default
  */
-function lang($name, $default = "") {
-	return nl2br(isset($GLOBALS["lang"][$name]) ? $GLOBALS["lang"][$name] : $default);
+function lang($name, $default = "")
+{
+	$lang = isset($GLOBALS["lang"][$name]) ? $GLOBALS["lang"][$name] : $default;
+    if(!strpos($lang, ">\n") && !strpos($lang, "</")) {
+        return nl2br($lang);
+    } else {
+        return $lang;
+    }
 }
 
 /**
