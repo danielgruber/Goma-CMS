@@ -3,14 +3,14 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.02.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 11.02.2013
   * $Version 1.0
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class SortableTableView extends TableView {
+class SortableTableView extends adminItem {
 	public $pages = true;
 	public $perPage = 20;
 	
@@ -65,6 +65,16 @@ class SortableTableView extends TableView {
 		"deletemany",
 		"saveSort"
 	);	
+	
+	/**
+	 * defines if search is enabled
+	 * you need at least one field with table-relation
+	 *
+	 *@name search
+	 *@access public
+	*/
+	public $search = true;
+	
 	/**
 	 * this action will be called if no other action was found
 	 *
@@ -131,6 +141,8 @@ class SortableTableView extends TableView {
 	*/
 	public function checkPermission($action) {
 		
+		$this->actions = ArrayLib::map_key("strtolower", $this->actions);
+		
 		if(isset($this->actions[$action])) {
 			return true;
 		}
@@ -152,5 +164,15 @@ class SortableTableView extends TableView {
 			}
 			$this->redirectBack();
 		}
+	}
+	
+	/**
+	 * adds content-class table-view to content-div
+	 *
+	 *@name contentClass
+	 *@access public
+	*/
+	public function contentClass() {
+		return parent::contentclass() . " table-view";
 	}
 }

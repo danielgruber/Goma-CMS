@@ -1547,7 +1547,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// check for existing entries
-			$sql = "SELECT ".$object . "id"." FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"]."";
+			$sql = "SELECT ".$object . "id"." FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"];
 			if($result = SQL::Query($sql)) {
 				$existing = array();
 				while($row = SQL::fetch_object($result)) {
