@@ -23,4 +23,5 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'editing', items : [ 'Find','Replace' ,'BidiLtr','BidiRtl' ] }
 	];
 	config.extraPlugins = "autogrow,stylesheetparser,tableresize";
+	config.autoGrow_onStartup = true;
 };

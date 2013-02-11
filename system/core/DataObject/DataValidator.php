@@ -4,8 +4,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.03.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 23.01.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,7 @@ class DataValidator extends FormValidator
 		public function __construct(object $data)
 		{
 				
-				if(!is_subclass_of($data, "dataobject"))
+				if(!is_subclass_of($data, "dataobject") || $data === null)
 				{
 						throwError(6, 'PHP-Error', '$data is no child of dataobject in '.__FILE__.' on line '.(__LINE__ - 3).'');
 				}

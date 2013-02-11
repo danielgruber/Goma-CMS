@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 2.2.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 08.01.2013
+  * $Version 2.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -90,6 +90,8 @@ class SQL extends object
 				
 				if($driver == "mysql")
 					$driver = "mysqli";
+				elseif($driver == "postgresql")
+					$driver = "pgsql";
 				
 				self::$driver = self::factory($driver);
 		}
@@ -113,6 +115,8 @@ class SQL extends object
 		{
 				if($driver == "mysql")
 					$driver = "mysqli";
+				elseif($driver == "postgresql")
+					$driver = "pgsql";
 				
 				if(file_exists(dirname(__FILE__) . '/driver/' . $driver . ".php"))
 				{
@@ -130,7 +134,8 @@ class SQL extends object
 		static function query($sql, $unbuffered = false, $track = true) {
 				$start = microtime(true);
 				
-				//$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+				$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+				//echo $sql . "\n";
 				//logging($_sql);
 				
 				if($track)
@@ -320,37 +325,11 @@ class SQL extends object
 				return self::$driver->tablename($res, $i);
 		}
 		
-		/**
-		 * table-functions
-		*/
-		static function getFieldsOfTable($table, $prefix = false, $track = true)
-		{
-				return self::$driver->getFieldsOfTable($table, $prefix, $track);
-		}
-		static function changeField($table, $field, $type, $prefix = false)
-		{
-				return self::$driver->changeField($table, $field, $type, $prefix);
-		}
-		static function addField($table, $field, $type, $prefix = false)
-		{
-				return self::$driver->addField($table, $field, $type, $prefix);
-		}
-		static function dropField($table, $field, $prefix = false)
-		{
-				return self::$driver->dropField($table, $field, $prefix );
-		}
-		static function createTable($table, $fields, $prefix = false)
-		{
-				return self::$driver->createTable($table, $fields, $prefix);
-		}
-		static function _createTable($table, $fields, $prefix = false)
-		{
-				return self::$driver->_createTable($table, $fields, $prefix);
-		}
-		
+
 		/**
 		 * INDEX-functions
 		*/
+		//!Index
 		static function addIndex($table, $field, $type,$name = null ,$db_prefix = null)
 		{
 				return self::$driver->addIndex($table, $field, $type,$name ,$db_prefix);
@@ -397,6 +376,15 @@ class SQL extends object
 		/**
 		 * table-functions V2
 		*/
+		//!Table
+		
+		/**
+		 * lists all fields of the table
+		*/
+		static function getFieldsOfTable($table, $prefix = false, $track = true)
+		{
+				return self::$driver->getFieldsOfTable($table, $prefix, $track);
+		}
 		
 		/**
 		 * gets much information about a table, e.g. field-names, default-values, field-types
@@ -529,7 +517,7 @@ class SQL extends object
 					}
 					$sql .= "";
 				}
-			} else if(is_string($this->where)) {
+			} else if(is_string($where)) {
 				if($includeWhere)
 					$sql .= " WHERE ";
 				
@@ -597,17 +585,6 @@ interface SQLDriver
 		 * table-functions
 		*/
 		public function getFieldsOfTable($table, $prefix = false, $track = true);
-		
-		// DEPRECATED!!
-		public function changeField($table, $field, $type, $prefix = false);
-		// DEPRECATED!!
-		public function addField($table, $field, $type, $prefix = false);
-		// DEPRECATED!!
-		public function dropField($table, $field, $prefix = false);
-		// DEPRECATED!!
-		function createTable($table, $fields, $prefix = false);
-		// DEPRECATED!!
-		function _createTable($table, $fields, $prefix = false);
 		
 		/**
 		 * table-functions V2

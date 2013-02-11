@@ -174,9 +174,9 @@ var LaM_type_timeout;
 		*/
 		var renderSideBar = function() {
 			if($(".leftbar_toggle").css("display") != "none")
-				var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight() - $(".leftbar_toggle").outerHeight(true);
+				var tableHeight = $(window).height() - $("#header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight() - $(".leftbar_toggle").outerHeight(true);
 			else
-				var tableHeight = $(window).height() - $("#content > .header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
+				var tableHeight = $(window).height() - $("#header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
 			if(tableHeight < 405)
 				tableHeight = 405;
 				

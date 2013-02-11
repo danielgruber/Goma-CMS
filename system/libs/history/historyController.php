@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 1.0
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 03.02.2013
+  * $Version 1.0.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -98,7 +98,7 @@ class HistoryController extends Controller {
 				$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), $content, $filter["dbobject"]);
 			}
 		}
-		$tabs->addTab(lang("h_all"), HistoryController::renderHistory(array(), $this->namespace), "h_all");
+		$tabs->addTab(lang("h_all_events"), HistoryController::renderHistory(array(), $this->namespace), "h_all_events");
 		$output = $tabs->render();
 		
 		if(Core::is_ajax()) {

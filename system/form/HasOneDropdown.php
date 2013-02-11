@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.12.2012
-  * $Version 1.1.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.01.2013
+  * $Version 1.2.1
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -71,27 +71,50 @@ class HasOneDropdown extends SingleSelectDropDown
 			parent::getValue();
 			
 			if(!$this->value) {
-				if(is_object($this->form()->result) && isset($this->form()->result->has_one[$this->relation])) {
-					$this->_object = $this->form()->result->has_one[$this->relation];
+				
+				// get has-one from result
+				if(is_object($this->form()->result))
+					$has_one = $this->form()->result->hasOne();
+				
+				if(isset($has_one[$this->relation]) && is_object($has_one[$this->relation])) {
+					$this->_object = $has_one[$this->relation];
 					$this->value = isset(call_user_func_array(array($this->form()->result, $this->relation), array())->id) ? call_user_func_array(array($this->form()->result, $this->relation), array())->id : null;
 					$this->input->value = $this->value;
 				} else {
-					if(isset($this->form()->controller->model_inst->has_one[$this->relation])) {
-						$this->_object = $this->form()->controller->model_inst->has_one[$this->relation];
+					
+					// get has-one from controller
+					if(is_object($this->form()->controller))
+						$has_one = $this->form()->controller->model_inst->hasOne();
+					else
+						$has_one = null;
+						
+					if(isset($has_one[$this->relation])) {
+						$this->_object = $has_one[$this->relation];
 						$this->value = isset(call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id) ? call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id : null;
 						$this->input->value = $this->value;
 					} else {
-						throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__."");
+						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__, 500, false);
 					}
 				}
 			} else {
-				if(is_object($this->form()->result) && isset($this->form()->result->has_one[$this->relation])) {
-					$this->_object = $this->form()->result->has_one[$this->relation];
+				// get has-one from result
+				if(is_object($this->form()->result))
+					$has_one = $this->form()->result->hasOne();
+					
+				if(is_object($this->form()->result) && isset($has_one[$this->relation])) {
+					$this->_object = $has_one[$this->relation];
 				} else {
-					if(isset($this->form()->controller->model_inst->has_one[$this->relation])) {
-						$this->_object = $this->form()->controller->model_inst->has_one[$this->relation];
+				
+					// get has-one from controller
+					if(is_object($this->form()->controller))
+						$has_one = $this->form()->controller->model_inst->hasOne();
+					else
+						$has_one = null;
+						
+					if(isset($has_one[$this->relation])) {
+						$this->_object = $has_one[$this->relation];
 					} else {
-						throwError(5, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__."");
+						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__, 500, false);
 					}
 				}
 			}
@@ -135,17 +158,16 @@ class HasOneDropdown extends SingleSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$val = convert::raw2text($record[$this->showfield]);
 				
+				
+				$arr[] = array("key" => $record["id"], "value" => convert::raw2text($record[$this->showfield]));
+				
+				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$val = array($val, convert::raw2text($record[$this->info_field]));
+						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
 					}
 				}
-				
-				$arr[$record["id"]] = $val;
-				
-				unset($record, $val);
 			}			
 			$left = ($p > 1);
 			
@@ -172,16 +194,15 @@ class HasOneDropdown extends SingleSelectDropDown
 			
 			$arr = array();
 			foreach($data as $record) {
-				$val = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]));
+				
+				$arr[] = array("key" => $record["id"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
+				
+				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$val = array($val, convert::raw2text($record[$this->info_field]));
+						$arr[count($arr) - 1] = convert::raw2text($record[$this->info_field]);
 					}
 				}
-				
-				$arr[$record["id"]] = $val;
-				
-				unset($record, $val);
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);

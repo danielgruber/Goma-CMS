@@ -3,10 +3,10 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@Copyright (C) 2009 - 2013  Goma-Team
   ********
-  * last modified: 08.12.2012
-  * $Version: 2.0.3
+  * last modified: 02.01.2013
+  * $Version: 2.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -94,7 +94,7 @@ class GD extends Object
 						
 				} else if($this->type == 3)
 				{
-						$this->content_type = "images/png";
+						$this->content_type = "image/png";
 						$this->extension = "png";
 						
 				} else if($this->type == 6)
@@ -438,33 +438,16 @@ class GD extends Object
 				{
 						if($quality > 9 && $quality < 100)
 						{
-								if($quality <= 100 && $quality > 90) {
-									$quality = 0;
-								} else if($quality <= 90 && $quality > 80) {
-									$quality = 1;
-								} else if($quality <= 80 && $quality > 70) {
-									$quality = 2;
-								} else if($quality <= 70 && $quality > 60) {
-									$quality = 3;
-								} else if($quality <= 60 && $quality > 50) {
-									$quality = 4;
-								} else if($quality <= 50 && $quality > 40) {
-									$quality = 5;
-								} else if($quality <= 40 && $quality > 30) {
-									$quality = 6;
-								} else if($quality <= 30 && $quality > 20) {
-									$quality = 7;
-								} else if($quality <= 20 && $quality > 10) {
-									$quality = 8;
-								} else {
-									$quality = 9;
-								}
+								$quality = $quality / 10;
 						} else
 						{
-								$quality = 4;
+								$quality = 7;
 						}
 						
+						imagealphablending($this->gd(), false);
+						imagesavealpha($this->gd(), true);
 						imagepng($this->gd(), $file, $quality);
+						
 						$this->pic = $file;
 						@chmod($file, 0777);
 						imagedestroy($this->gd);
@@ -579,6 +562,8 @@ class GD extends Object
 								{
 										$quality = 7;
 								}
+								imagealphablending($this->gd(), false);
+								imagesavealpha($this->gd(), true);
 								imagepng($this->gd(),null, $quality);
 						}
 						if(PROFILE)

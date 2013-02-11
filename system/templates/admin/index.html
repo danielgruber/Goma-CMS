@@ -3,300 +3,304 @@
 	<head>
 		<base href="{BASE_URI}" />
 		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - {$_lang_administration} <% END %></title>
-		
+
 		<% INCLUDE_CSS_MAIN "style.css" %>
 		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
 		<% INCLUDE_CSS_MAIN "notifications.css" %>
-		
+
 		<% INCLUDE_JS_MAIN "admin.js" %>
-		
+
 		{$header}
-		
+
 		<% IF NOT $content AND PERMISSION("superadmin") %>
 			<% gload("htmllib") %>
-			
+	
 			<script type="text/javascript">
-				// <![CDATA[
-					$(function(){
-						var u = {$updatables_json};
-						var uCount = $updatables.count();
-						var results = [];
-						
-						var checkResult = function() {
-							if(uCount == results.length) {
-								// render it
-								var a = 0;
-								for(i in results) {
-									if(results[i] != null) {
-										a++;
-										var record = results[i].response;
-									}
-								}
-								
-								if(a == 0)
-									return null;
-								
-								if(a == 1) {
-									$("#update .count").html('1');
-								} else {
-									$("#update .count").text(a);
-								}
-								$("#update .count").css("display", "block");
-								
-								// update number
-							} else {
-								setTimeout(checkResult, 1000);
+			// <![CDATA[
+			$(function(){
+				var u = {$updatables_json};
+				var uCount = $updatables.count();
+				var results = [];
+				
+				var checkResult = function() {
+					if(uCount == results.length) {
+						// render it
+						var a = 0;
+						for(i in results) {
+							if(results[i] != null) {
+								a++;
+								var record = results[i].response;
 							}
 						}
-
-						for(name in u) {
-							var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
-							$.ajax({
-								url: url,
-								dataType: "jsonp",
-								noRequestTrack: true,
-								success: function(object) {
-									if(object.name) {
-										results.push({response: object, current_version: u[name]["version"], webversion: object.version});
-									} else {
-										results.push(null);
-									}
-								}
-							});
+							
+						if(a == 0)
+							return null;
+							
+						if(a == 1) {
+							$("#update .count").html('1');
+						} else {
+							$("#update .count").text(a);
 						}
-						
+						$("#update .count").css("display", "block");
+							
+							// update number
+					} else {
 						setTimeout(checkResult, 1000);
+					}
+				}
+					
+				for(name in u) {
+					var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
+					$.ajax({
+						url: url,
+						dataType: "jsonp",
+						noRequestTrack: true,
+						success: function(object) {
+							if(object.name) {
+								results.push({response: object, current_version: u[name]["version"], webversion: object.version});
+							} else {
+								results.push(null);
+							}
+						}
 					});
-				// ]]>
+				}
+				
+				setTimeout(checkResult, 1000);
+			});
+			// ]]>
 			</script>
 		<% END %>
 	</head>
 	<body id="adminPanel">
 		<!--<div id="viewport">-->
-			<div id="wrapper">
-			
-				<garea name="content" reload="1">
-					<div id="content">
-						<!-- top header bar in black -->
-						<div class="header">
-							<% INCLUDE "admin/header_userbar.html" %>
-							<div id="navi" class="clearfix">
-								<ul>
-									<% IF NOT $content %>
-										<li class="active">
-									<% ELSE %>
-										<li>
-									<% END %>
-										<% IF NOT $content %>
-											<a href="{BASE_SCRIPT}admin/" class="active">
-												<span><% lang("dashboard", "Dashboard") %></span>
-											</a>
-										<% ELSE %>
-											<a href="{BASE_SCRIPT}admin/">
-												<span><% lang("dashboard", "Dashboard") %></span>
-											</a>
-										<% END %>
-										
+		<div id="wrapper">
+
+			<div id="content">
+				<!-- top header bar in black -->
+				<div id="header" class="header">
+					<% INCLUDE "admin/header_userbar.html" %>
+					<div id="navi" class="clearfix">
+						<ul>
+							<% IF NOT $content %>
+								<li class="active">
+								<% ELSE %>
+								<li>
+							<% END %>
+							
+							<% IF NOT $content %>
+								<a href="{BASE_SCRIPT}admin{URLEND}" class="active"> <span><% lang("dashboard", "Dashboard") %></span> </a>
+							<% ELSE %>
+								<a href="{BASE_SCRIPT}admin{URLEND}"> <span><% lang("dashboard", "Dashboard") %></span> </a>
+							<% END %>
+
+							</li>
+							
+							<% CONTROL this() %>
+								<% IF $this.active %>
+									<li class="active">
+										<a class="active"  title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}"> <span>$this.text</span> </a>
 									</li>
-									<% CONTROL this() %>
-										<% IF $this.active %>
-											<li class="active">
-												<a class="active"  title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
-													<span>$this.text</span>
-												</a>
-											</li>
-										<% ELSE %>
-											<li>
-												<a title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}">
-													<span>$this.text</span>
-												</a>
-											</li>
-										<% END %>
-									<% ENDCONTROL %>
-									<li id="navMore" style="display: none">
-										<a href="javascript:;">
-											<span>&raquo;</span>
-										</a>
-										<ul id="navMore-sub" style="display: none"></ul>
+								<% ELSE %>
+									<li>
+										<a title="{$this.text}" href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}"> <span>$this.text</span> </a>
 									</li>
-								</ul>
+								<% END %>
+							<% ENDCONTROL %>
+							<li id="navMore" style="display: none">
+								<a href="javascript:;"> <span>&raquo;</span> </a>
+								<ul id="navMore-sub" style="display: none"></ul>
+							</li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+				</div>
+
+				<!-- header subbar in grey -->
+				<div id="head">
+					<div id="head_inner">
+						<a href="http://goma-cms.org" target="_blank"> <img src="system/templates/admin/images/logo.png" id="logo" alt="logo" /> </a>
+						<span class="weblink"> <strong>{$_cms_ptitle}</strong> <a class="button" id="visit_webpage" href="{$previewURL}"><% lang("view_website", "Browse Website") %> &raquo;</a></span>
+						<p>
+							<% IF $title %>
+								<span class="title">$Title</span>
+							<% ELSE %>
+								<span class="title">{$_lang_overview}</span>
+							<% END %>
+						</p>
+
+						<div class="clear"></div>
+					</div>
+				</div>
+
+				<!-- content -->
+				<% IF $content %>
+					<div class="addcontent">
+						$addcontent
+					</div>
+					<div class="notificationRoot content_inner $content_class">
+						$content
+					</div>
+				<% ELSE %>
+					
+					<!-- root of content-area -->
+					<div class="notificationRoot content_inner overview">
+						<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
+							$addcontent
+						</div>
+								
+						<!-- Statistics -->
+						
+						<% IF isMobile() %>
+							<div id="statistics" class="mobile">
+						<% ELSE %>
+							<div id="statistics">
+						<% END %>
+								
+							<div class="title">
+								<% lang("visitors", "Visitors") %>
 							</div>
+								
+							<div class="controls">
+								<span style="color: #24acb8;">&middot;</span><a style="color: #24acb8;" href="{BASE_SCRIPT}{URL}{URLEND}"><% lang("visitors_by_day", "By Day") %></a><span style="color: #da097a;">&middot; </span><a style="color: #da097a;" href="{BASE_SCRIPT}{URL}{URLEND}?month=1"><% lang("visitors_by_month", "By Month") %></a>
+							</div>
+								
+							<div id="buttonLeft">
+								<% IF $_GET_stat_page %>
+									<% IF $_GET_month %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
+									<% ELSE %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
+									<% END %>
+								<% ELSE %>
+									<% IF $_GET_month %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=2" class="left"></a>
+									<% ELSE %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=2" class="left"></a>
+									<% END %>
+								<% END %>
+							</div>
+							<div id="buttonRight">
+								<% IF $_GET_stat_page AND _GET_stat_page.forTemplate() > 1 %>
+									<% IF $_GET_month %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
+									<% ELSE %>
+										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
+									<% END %>
+								<% END %>
+							</div>
+							
+							<% IF $_GET_month %>
+								<% CONTROL statistics(true, $_GET_stat_page) %>
+									<div class="stat month">
+										<div class="data">
+											<div style="height:<% echo $statistics.percent*2 %>px"></div>
+										</div>
+										<div>
+											$statistics.count
+										</div>
+										<% IF $statistics.timestamp.date("F Y") = date("F Y") %>
+											<div class="date today">
+												$statistics.timestamp.date("F")
+											</div>
+										<% ELSE %>
+											<div class="date">
+												$statistics.timestamp.date("F")
+											</div>
+										<% END %>
+									</div>
+								<% ENDCONTROL %>
+							<% ELSE %>
+							
+								<% CONTROL statistics(false, $_GET_stat_page) %>
+									<div class="stat">
+										<div class="data">
+											<div style="height:<% echo $statistics.percent*2 %>px"></div>
+										</div>
+										<div>
+											$statistics.count
+										</div>
+										<% IF $statistics.timestamp.date("j M Y") = date("j M Y") %>
+											<div class="today date">
+												$statistics.timestamp.date("D j M")
+											</div>
+										<% ELSE %>
+											<div class="date">
+												$statistics.timestamp.date("D j M")
+											</div>
+										<% END %>
+									</div>
+								<% ENDCONTROL %>
+							<% END %>
 							<div class="clear"></div>
 						</div>
+
+						<!-- end of statistics -->
 						
-						<!-- header subbar in grey -->
-						<div id="head">
-							<div id="head_inner">
-								<a href="http://goma-cms.org" target="_blank">
-									<img src="system/templates/admin/images/logo.png" id="logo" alt="logo" />
-								</a>
-								<span class="weblink"> <strong>{$_cms_ptitle}</strong> <a class="button" id="visit_webpage" href="{$previewURL}"><% lang("view_website", "Browse Website") %> &raquo;</a></span>
-								<p>
-									<% IF $title %>
-										<span class="title">$Title</span>
-									<% ELSE %>
-										<span class="title">{$_lang_overview}</span>
-									<% END %>
-								</p>
-									
-								<div class="clear"></div>
-							</div>
-						</div>
-						
-						<!-- content -->
-						<% IF $content %>
-							<div class="addcontent">
-								$addcontent
-							</div>
-							<div class="notificationRoot content_inner $content_class">
-								$content
-							</div>
-						<% ELSE %>
-							<div class="notificationRoot content_inner overview">
-								<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
-									$addcontent
-								</div>
-								<% IF isMobile() %>
-									<div id="statistics" class="mobile">
-								<% ELSE %>
-									<div id="statistics">
-								<% END %>
-									<div class="title">
-										<% lang("visitors", "Visitors") %>
-									</div>
-									<div class="controls">
-										<span style="color: #24acb8;">&middot;</span> <a style="color: #24acb8;" href="{BASE_SCRIPT}{URL}{URLEND}"><% lang("visitors_by_day", "By Day") %></a> <span style="color: #da097a;">&middot; </span> <a style="color: #da097a;" href="{BASE_SCRIPT}{URL}{URLEND}?month=1"><% lang("visitors_by_month", "By Month") %></a>
-									</div>
-									<div id="buttonLeft">
-										<% IF $_GET_stat_page %>
-											<% IF $_GET_month %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
-											<% ELSE %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page + 1 %>" class="left"></a>
-											<% END %>
-										<% ELSE %>
-											<% IF $_GET_month %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=2" class="left"></a>
-											<% ELSE %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=2" class="left"></a>
-											<% END %>
-										<% END %>
-									</div>
-									<div id="buttonRight">
-										<% IF $_GET_stat_page AND $_GET_stat_page > 1 %>
-											<% IF $_GET_month %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
-											<% ELSE %>
-												<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo $_GET_stat_page - 1 %>" class="left"></a>
-											<% END %>
-										<% END %>
-									</div>
-									<% IF $_GET_month %>
-										<% CONTROL statistics(true, $_GET_stat_page) %>
-											<div class="stat month">
-												<div class="data">
-													<div style="height:<% echo $statistics.percent*2 %>px">
-													</div>
-												</div>
-												<div>$statistics.count</div>
-												<% IF $statistics.timestamp.date("F Y") = date("F Y") %>
-													<div class="date today">$statistics.timestamp.date("F")</div>
+						<div id="home-container">
+
+							<div id="left">
+								<div id="version" class="content_container">
+									<h2>Goma {$_lang_version}</h2>
+									<div>
+										<table class="versionTable" width="100%">
+											<% CONTROL Software() %>
+											<% IF NOT $software.white %>
+											<tr class="grey">
 												<% ELSE %>
-													<div class="date">$statistics.timestamp.date("F")</div>
+											<tr class="white">
 												<% END %>
-											</div>
-										<% ENDCONTROL %>
-									<% ELSE %>
-										<% CONTROL statistics(false, $_GET_stat_page) %>
-											<div class="stat">
-												<div class="data">
-													<div style="height:<% echo $statistics.percent*2 %>px">
-													</div>
-												</div>
-												<div>$statistics.count</div>
-												<% IF $statistics.timestamp.date("j M Y") = date("j M Y") %>
-													<div class="today date">$statistics.timestamp.date("D j M")</div>
-												<% ELSE %>
-													<div class="date">$statistics.timestamp.date("D j M")</div>
-												<% END %>
-											</div>
-										<% ENDCONTROL %>
-									<% END %>
-									<div class="clear"></div>
-								</div>
-								
-								<div id="home-container">
-									
-									<div id="left">
-										<div id="version" class="content_container">
-											<h2>Goma {$_lang_version}</h2>
-											<div>
-												<table class="versionTable" width="100%">
-													<% CONTROL Software() %>
-														<% IF NOT $software.white %>
-															<tr class="grey">
-														<% ELSE %>
-															<tr class="white">
-														<% END %>
-															<td class="icon">
-																<% IF $software.icon %>
-																	<img src="$software.icon" alt="" />
-																<% END %>
-															</td>
-															<td class="name">
-																$software.title
-															</td>
-															<td class="version">
-																$software.version
-															</td>
-														</tr>
-													<% ENDCONTROL %>
-												</table>
-												<% IF PERMISSION("superadmin") %>
-													<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
-												<% END %>
-												
-												<% IF DEV_MODE AND PERMISSION("superadmin") %>
-													<a href="{BASE_SCRIPT}dev/buildDistro" class="button"><% lang("distro_build", "build a version") %></a>
-												<% END %>
-											</div>
-										</div>
-									</div>
-									
-									<div id="right">
-										<div id="cache" class="content_container">
-											<h2>{$_lang_del_cache}</h2>
-											<div>
-												<div class="info">{$_lang_cache_del_info}</div>
-												<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
-												<% IF permission("superadmin") %>
-													<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
-												<% END %>
-											</div>
-										</div>
+												<td class="icon"> <% IF $software.icon %> <img src="$software.icon" alt="" /> <% END %> </td>
+												<td class="name"> $software.title </td>
+												<td class="version"> $software.version </td>
+											</tr>
+											<% ENDCONTROL %>
+										</table>
+										<% IF PERMISSION("superadmin") %>
+										<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update/" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
+										<% END %>
+
 										<% IF DEV_MODE AND PERMISSION("superadmin") %>
-											<div id="database" class="content_container">
-												<h2>{$_lang_database}</h2>
-												<div>
-													<p class="info">{$_lang_db_update_info}</p>
-													<a class="button" href="dev">{$_lang_db_update}</a>
-												</div>
-											</div>
+										<a href="{BASE_SCRIPT}dev/buildDistro" class="button"><% lang("distro_build", "build a version") %></a>
 										<% END %>
 									</div>
-									
-									<div class="clear"></div>
-									
-									
 								</div>
 							</div>
-						<% END %>
-					
-				
+	
+							<div id="right">
+								<div id="cache" class="content_container">
+									<h2>{$_lang_del_cache}</h2>
+									<div>
+										<div class="info">
+											{$_lang_cache_del_info}
+										</div>
+										<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
+										<% IF permission("superadmin") %>
+										<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+										<% END %>
+									</div>
+								</div>
+								<% IF DEV_MODE AND PERMISSION("superadmin") %>
+								<div id="database" class="content_container">
+									<h2>{$_lang_database}</h2>
+									<div>
+										<p class="info">
+											{$_lang_db_update_info}
+										</p>
+										<a class="button" href="dev">{$_lang_db_update}</a>
+									</div>
+								</div>
+								<% END %>
+							</div>
+	
+							<div class="clear"></div>
+	
+						</div>
 					</div>
-				</garea>
-			
+				<% END %>
+
 			</div>
-		<!--</div>-->
+
+		</div>
+			<!--</div>-->
 	</body>
 </html>

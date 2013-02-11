@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 15.12.2012
+  * last modified: 03.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,7 @@ $lang = array(
 	"installed_version"								=> "Installierte Version",
 	"password"                                    	=> "Passwort",
 	'smilies'										=> "Smileys",
+	"edit_password"									=> "Passwort ändern",
 	"edit_password_ok"                             	=> "Das Passwort wurde ge&auml;ndert!",
 	"homepage"                                     	=> "Startseite",
 	"page"											=> "Seite",
@@ -47,6 +48,7 @@ $lang = array(
 	"smilie_title"									=> "Name des Smilies",
 	"register"                                     	=> "Registrieren",
 	"administration"                               	=> "Administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "Webseite verwalten",
 	'default_admin'									=> "Normale Administration",
 	"my_account"                                   	=> "Mein Account" ,
@@ -476,6 +478,7 @@ $lang = array(
 	"hierarchy"										=> "Hierarchie",
 	
 	"full_admin_permissions"						=> "Volle Admin-Rechte",
+	"full_admin_permissions_info"					=> "Alle Rechte werden automatisch gewährt, auch wenn eines deaktiviert wird.",
 	"signed"										=> "Signatur",
 	"signed_true"									=> "Dieses Paket wurde vom Goma-Team geprüft und ist freigegeben!",
 	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
@@ -544,7 +547,9 @@ $lang = array(
 	"h_group_remove"		=> '$user löschte die Gruppe $group',
 	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "Alle Ereignisse",
+	"h_all_events"			=> "Alle Ereignisse",
+	"h_relevant"			=> "Wichtige",
+	"h_all"					=> "Alle",
 	
 	"older"					=> "Ältere Einträge",
 	"newer"					=> "Neuere Einträge",

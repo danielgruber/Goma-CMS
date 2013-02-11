@@ -191,7 +191,7 @@ class adminController extends Controller
 						return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
 					 } else {
 						$admin = new Admin();
-						return $admin->customise(array("content" => $content, ""))->renderWith("admin/index.html");
+						return $admin->customise(array("content" => $content))->renderWith("admin/index.html");
 					}
 				}
 			}
@@ -358,10 +358,11 @@ class admin extends ViewAccessableData implements PermProvider
 		{
 				return array(
 					"ADMIN"	=> array(
-						"title" 	=> '{$_lang_administration}',
-						'default'	=> array(
-							"type" => "admins"
-						)
+						"title" 		=> '{$_lang_administration}',
+						'default'		=> array(
+							"type" 		=> "admins"
+						),
+						"description"	=> '{$_lang_permission_administration}'
 					),
 					"ADMIN_HISTORY"	=> array(
 						"title"		=> '{$_lang_history}',

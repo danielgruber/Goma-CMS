@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 15.12.2012
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 03.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,7 @@ $lang = array(
 	"installed_version"								=> "Installed version",
 	"password"                                     	=> "password",
 	'smilies'										=> "emoticons",
+	"edit_password"									=> "change password",
 	"edit_password_ok"                             	=> "The password was successfully changed!",
 	"homepage"                                     	=> "home",
 	"page"											=> "page",
@@ -47,6 +48,7 @@ $lang = array(
 	"smilie_title"									=> "Name of emotion",
 	"register"                                     	=> "Sign Up",
 	"administration"                               	=> "administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "manage website",
 	'default_admin'									=> "normal administration",
 	"my_account"                                   	=> "my account" ,
@@ -217,7 +219,7 @@ $lang = array(
 	"successful_deleted"							=> "The data was successfully removed.",
 	"deleted"										=> "Removed",
 	"successful_published"							=> "The data was successfully published!",
-	"published"										=> "Published"
+	"published"										=> "Published",
 	'sites_edit'									=> "edit and create sites",
 	'admin_rating'									=> "edit rating",
 	'admin_smilies'									=> "manage emotions",
@@ -476,6 +478,7 @@ $lang = array(
 	"hierarchy"										=> "hierarchy",
 	
 	"full_admin_permissions"						=> "Full admin permissions",
+	"full_admin_permissions_info"					=> "Everything is allowed, also if some rights are disabled.",
 	"signed"										=> "signature",
 	"signed_true"									=> "This package was validated by the Goma-Team and is safe to install!",
 	"signed_false"									=> "This package wasn't validated by the Goma-Team! Installing is at own risk!",
@@ -543,7 +546,9 @@ $lang = array(
 	"h_group_remove"		=> '$user removed the group $group',
 	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "All Events",
+	"h_all"					=> "all",
+	"h_all_events"			=> "all events",
+	"h_relevant"			=> "important",
 	
 	"older"					=> "older entries",
 	"newer"					=> "newer entries",

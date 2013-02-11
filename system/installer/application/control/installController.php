@@ -59,7 +59,7 @@ class InstallController extends RequestHandler {
 	public function install() {
 		G_SoftwareType::forceLiveDB();
 		
-		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 		if(!$data)
 			Dev::RedirectToDev();
 		
@@ -84,7 +84,7 @@ class InstallController extends RequestHandler {
 	public function installApp() {
 		G_SoftwareType::forceLiveDB();
 		
-		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+		$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 		if(!$data)
 			Dev::RedirectToDev();
 		

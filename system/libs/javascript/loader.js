@@ -4,9 +4,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
-  * $Version 1.5.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 06.02.2013
+  * $Version 1.5.7
 */
 
 // prevent from being executed twice
@@ -81,7 +81,7 @@ if(typeof self.loader == "undefined") {
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
 			*/
-			$(document).on("click", "a[rel=ajaxfy]", function()
+			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function()
 			{
 				var $this = $(this);
 				var _html = $this.html();
@@ -100,35 +100,22 @@ if(typeof self.loader == "undefined") {
 				});
 				return false;
 			});
-	
-			// pretty old-fashioned bluefox, if you like it create an a-tag with rel="bluebox"
-			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
-				gloader.load("dialog");
-				if($(this).hasClass("nodrag"))
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'), false);
-				} else
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'));
-				}
-				return false;
-			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
-		    $(document).on("click", "a[rel*=dropdownDialog]", function()
+		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
 			{
 				gloader.load("dropdownDialog");
 				
 				var options = {
 					uri: $(this).attr("href")
 				};
-				if($(this).attr("rel") == "dropdownDialog[left]")
+				if($(this).attr("rel") == "dropdownDialog[left]" || $(this).hasClass("dropdownDialog-left"))
 					options.position = "left";
-				else if($(this).attr("rel") == "dropdownDialog[center]")
+				else if($(this).attr("rel") == "dropdownDialog[center]" || $(this).hasClass("dropdownDialog-center"))
 					options.position = "center";
-				else if($(this).attr("rel") == "dropdownDialog[right]")
+				else if($(this).attr("rel") == "dropdownDialog[right]" || $(this).hasClass("dropdownDialog-right"))
 					options.position = "right";
-				else if($(this).attr("rel") == "dropdownDialog[bottom]")
+				else if($(this).attr("rel") == "dropdownDialog[bottom]" || $(this).hasClass("dropdownDialog-bottom"))
 					options.position = "bottom";
 				
 				$(this).dropdownDialog(options);
@@ -203,7 +190,6 @@ if(typeof self.loader == "undefined") {
 		 *@name lang
 		*/
 		w.lang = function(name, _default) {
-			if(typeof profiler != "undefined") profiler.mark("lang");
 			
 			if(typeof lang[name] == "undefined") {
 				var jqXHR = $.ajax({
@@ -223,8 +209,6 @@ if(typeof self.loader == "undefined") {
 					lang[name] = null;
 				}
 			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("lang");
 			
 			if(lang[name] == null) {
 				return _default;
@@ -253,7 +237,6 @@ if(typeof self.loader == "undefined") {
 		 *@param bool - async request or not, default: true
 		*/
 		w.preloadLang = function(_names, async) {
-			if(typeof profiler != "undefined") profiler.mark("preloadLang");
 			
 			if(typeof async == "undefined")
 				async = true;
@@ -283,15 +266,11 @@ if(typeof self.loader == "undefined") {
 					lang[i] = data[i];
 				}
 			} catch(e) { }
-			
-			if(typeof profiler != "undefined") profiler.unmark("preloadLang");
 		}
 			
 		// some response handlers
 		w.eval_script = function(html, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("eval_script");
 			
 			var content_type = ajaxreq.getResponseHeader("content-type");
 			if(content_type == "text/javascript") {
@@ -328,15 +307,11 @@ if(typeof self.loader == "undefined") {
 				}
 			}
 			
-			if(typeof profiler != "undefined") profiler.unmark("eval_script");
-			
 			RunAjaxResources(ajaxreq);
 		}
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
 			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("renderResponseTo");
 			
 			if(ajaxreq != null) {
 				var content_type = ajaxreq.getResponseHeader("content-type");
@@ -369,8 +344,6 @@ if(typeof self.loader == "undefined") {
 			} else {
 				node.html(html);
 			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("renderResponseTo");
 			
 			RunAjaxResources(ajaxreq);
 		}
@@ -563,10 +536,10 @@ if(typeof self.loader == "undefined") {
 			}
 			
 			// function if we click anywhere
-			mouseDownFunc = function(){
+			mouseDownFunc = function(e){
 				setTimeout(function(){		
 					if(mouseover === false) {
-						fn();
+						fn(e);
 					}
 				}, 10);
 			}
@@ -574,15 +547,17 @@ if(typeof self.loader == "undefined") {
 			if(exceptions) {
 				var i;
 				for(i in exceptions) {
-					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("mouseup", exceptionFunc);
-					$(exceptions[i]).on("touchstart", exceptionFunc);
+					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("touchend", exceptionFunc);
+					$(exceptions[i]).on("touchstart", exceptionFunc);
 				}
 			}
 			// init mouseover-events
-			$(document).on("mouseup", mouseDownFunc);
-			$(document).on("touchend", mouseDownFunc);
+			$(window).on("mouseup", mouseDownFunc);
+			$(window).on("mousedown", mouseDownFunc);
+			$(window).on("touchend", mouseDownFunc);
+			$(window).on("touchstart", mouseDownFunc);
 			$("iframe").each(function(){
 				var w = $(this).get(0).contentWindow;
 				if(w) {

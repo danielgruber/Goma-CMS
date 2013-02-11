@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 1.1.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 06.02.2013
+  * $Version 1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -22,12 +22,12 @@ class Boxes extends DataObject implements Notifier {
 	 *
 	 *@name versioned
 	*/
-	public $versioned = true;
+	static $versions = true;
 	
 	/**
 	 * some database fields
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"title"		=> "varchar(100)",
 		"text"		=> "HTMLtext",
 		"border"	=> "switch",
@@ -39,7 +39,7 @@ class Boxes extends DataObject implements Notifier {
 	/**
 	 * some searchable fields
 	*/
-	public $searchable_fields = array(
+	static $search_fields = array(
 		"text",
 		"title"
 	);
@@ -47,14 +47,14 @@ class Boxes extends DataObject implements Notifier {
 	/**
 	 * for performance, some indexes
 	*/
-	public $indexes = array(
+	static $index = array(
 		"view"	=> array("type"	=> "INDEX", "fields" => "seiteid,sort", "name"	=> "_show")
 	);
 	
 	/**
 	 * sort
 	*/
-	public static $default_sort = "sort ASC";
+	static $default_sort = "sort ASC";
 	
 	/**
 	 * generates the form to add boxes
@@ -369,19 +369,19 @@ class Box extends Boxes
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $db_fields = array();
+		static $db = array();
 		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $has_one = array();
+		static $has_one = array();
 		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $many_many = array();
+		static $many_many = array();
 		
 		/**
 		 * prefix of table
@@ -407,13 +407,9 @@ class Box extends Boxes
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		
-		public function getText()
-		{
-				return $this->data['text'];
-		}
 		public function getContent()
 		{
-				return $this->data['text'];
+				return $this->text()->forTemplate();
 		}
 }
 /**

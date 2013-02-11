@@ -10,7 +10,8 @@ Thumbs.db
 _config.php
 .index.db
 .htaccess
-
+.index-db
+/.htaccess
 # Goma Core
 system/installer/log_*****/*
 system/temp/*
@@ -20,6 +21,8 @@ system/installer/temp/*
 
 # Goma Application
 gomacms/*
+!gomacms/.htaccess
+!gomacms/web.config
 !gomacms/application/*
 !gomacms/application
 !gomacms/templates/*
@@ -28,7 +31,6 @@ gomacms/*
 !gomacms/version.php
 !gomacms/upgrade/*
 !gomacms/upgrade
-!gomacms/.htaccess
 gomacms/application/.WELCOME_RUN
 gomacms/application/WELCOME_RUN.php
 
