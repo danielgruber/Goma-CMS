@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
  *@Copyright (C) 2009 - 2012  Goma-Team
- * last modified: 05.02.2013
+ * last modified: 12.02.2013
  */
 
 * {
@@ -38,79 +38,59 @@ input {
 a:hover {
 	text-decoration: underline;
 }
-
 #wrapper {
 	min-height: 100%;
 	min-width: 100%;
 	position: absolute;
 }
-#head {
-	position: relative;
-	background: #eee;
-	border-bottom: 1px solid #fff;
-}
-#head_inner {
-	border-bottom: 1px solid #aaa;
-	padding: 1px;
-}
-#head #logo {
-	position: absolute;
-	right: 5px;
-	top: 5px;
-	height: 30px;
-}
-#head .weblink {
-	float: right;
-	margin-right: 120px;
-}
-#head .weblink strong {
-	display: block;
-	float: left;
-	font-size: 16px;
-	padding: 12px;
-}
-#head .title {
-	font-size: 16pt;
-	padding: 8px;
-	display: block;
-	color: #444;
+#header h1 {
+	margin: 0;
 	text-transform: capitalize;
 }
-
+.header h1 a {
+	color: #444 !important;
+}
+#header {
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #5c5c5b), color-stop(1, #424242));
+	background: -webkit-linear-gradient(#5c5c5b, #424242);
+	background: -moz-linear-gradient(#5c5c5b, #424242);
+	background: -ms-linear-gradient(#5c5c5b, #424242);
+	background: -o-linear-gradient(#5c5c5b, #424242);
+	background: linear-gradient(#5c5c5b, #424242);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242'); /* IE6 & IE7 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
+	color: #ccc;
+	width: 100%;
+	height: 51px;
+}
 #navi {
-	padding: 0;
-	margin: 0;
 	height: 51px;
 	padding-left: 7px;
 	float: left;
 }
 #navi ul {
-	list-style: none;
-	padding: 0;
-	margin: 0;
+	list-style-type: none;
 }
-#navi ul li {
-	margin: 0;
+#navi li {
 	float: left;
-	border-right: 1px solid #222;
+	border-right: 1px solid #333;
 }
-#navi ul li a {
+#navi a {
+	border-left: 1px solid #666;
+	border-right: 1px solid #666;
 	text-decoration: none;
 	display: block;
 }
-#navi ul li a:hover span {
-	color: #fff;
-}
-#navi ul li a span {
+#navi span {
 	display: block;
 	padding: 18px 15px;
 	color: #ddd;
 	font-weight: bold;
-	border-left: 1px solid #666;
-	border-right: 1px solid #666;
-	text-transform: capitalize;
 }
-#navi ul li a.active span {
+#navi span:hover {
+	color: #fff;
+}
+#navi a.active span {
 	background: #eee;
 	margin-right: -1px;
 	color: #444;
@@ -152,39 +132,6 @@ a:hover {
 }
 #navMore.open {
 	background: url(images/header_bg_hover.png) repeat-x;
-}
-.nav-inactive {
-	display: none;
-}
-#content {
-	z-index: 1;
-	min-width: 100%;
-	min-height: 100%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-}
-#content > .addcontent > .success, #content > .addcontent > .error, #content > .addcontent > .notice, #content > .addcontent > .info {
-	margin-top: 0;
-}
-#header h1 {
-	margin: 0;
-	text-transform: capitalize;
-}
-.header h1 a {
-	color: #444 !important;
-}
-#header {
-	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #5c5c5b), color-stop(1, #424242));
-	background: -webkit-linear-gradient(#5c5c5b, #424242);
-	background: -moz-linear-gradient(#5c5c5b, #424242);
-	background: -ms-linear-gradient(#5c5c5b, #424242);
-	background: -o-linear-gradient(#5c5c5b, #424242);
-	background: linear-gradient(#5c5c5b, #424242);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242'); /* IE6 & IE7 */
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
-	color: #ccc;
 }
 .userbar-no-js {
 	float: right;
@@ -230,11 +177,62 @@ a:hover {
 #userbar-langSelect .active {
 	background: #EEEEEE
 }
+#userbar-user img {
+	border: 2px solid #cfcfcf;
+	border-radius: 2px;
+}
 #userbar-logout form {
 	padding: 2px
 }
 #userbar .logout .logoutButton {
 	margin-top: -2px;
+}
+.nav-inactive {
+	display: none;
+}
+#head {
+	position: relative;
+	background: #eee;
+	border-bottom: 1px solid #fff;
+}
+#head_inner {
+	border-bottom: 1px solid #aaa;
+	padding: 1px;
+}
+#head #logo {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	height: 30px;
+}
+#head .weblink {
+	float: right;
+	margin-right: 120px;
+}
+#head .weblink strong {
+	display: block;
+	float: left;
+	font-size: 16px;
+	padding: 12px;
+}
+#head .title {
+	font-size: 16pt;
+	padding: 8px;
+	display: block;
+	color: #444;
+	text-transform: capitalize;
+}
+#content {
+	z-index: 1;
+	min-width: 100%;
+	min-height: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+}
+#content > .addcontent > .success, #content > .addcontent > .error, #content > .addcontent > .notice, #content > .addcontent > .info {
+	margin-top: 0;
 }
 #content .content_inner {
 	padding: 15px 0;
