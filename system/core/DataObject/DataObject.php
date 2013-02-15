@@ -4376,7 +4376,7 @@ abstract class DataObjectExtension extends Extension
 		 *@access public
 		*/
 		public function defaults() {
-			return (self::hasStatic($this->class, "defaults")) ? self::getStatic($this->class, "defaults") : (isset($this->defaults) ? $this->defaults : array());
+			return (self::hasStatic($this->class, "default")) ? self::getStatic($this->class, "default") : (isset($this->defaults) ? $this->defaults : array());
 		}
 		
 		/**

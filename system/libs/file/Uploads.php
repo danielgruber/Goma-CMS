@@ -654,7 +654,7 @@ class ImageUploads extends Uploads {
 	 *@name setHeight
 	 *@access public
 	*/
-	public function setHeight($height) {
+	public function setHeight($height, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -662,12 +662,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
 		
-		return '<img src="' . $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, ".")).'" height="'.$height.'" data-retina="' . $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, ".")) . '" alt="'.$this->filename.'" />';
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
+		
+		return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -676,7 +690,7 @@ class ImageUploads extends Uploads {
 	 *@name setWidth
 	 *@access public
 	*/
-	public function setWidth($width) {
+	public function setWidth($width, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -684,12 +698,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
+		
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
 				
-		return '<img src="' . $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, ".")) . '" width="'.$width.'" data-retina="' . $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, ".")) . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -698,7 +726,7 @@ class ImageUploads extends Uploads {
 	 *@name setSize
 	 *@access public
 	*/
-	public function setSize($width, $height) {
+	public function setSize($width, $height, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -706,12 +734,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
 		
-		return '<img src="' . $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, ".")) .'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, ".")).'" alt="'.$this->filename.'" />';
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
+		
+		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -720,7 +762,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetSize
 	 *@access public
 	*/
-	public function orgSetSize($width, $height) {
+	public function orgSetSize($width, $height, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -728,12 +770,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path .'/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path .'/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
 		
-		return '<img src="' . $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, ".")) .'" height="'.$height.'" width="'.$width.'" data-retina="' . $this->path .'/orgSetSize/'.($width*2).'/'.($height*2) . substr($this->filename, strrpos($this->filename, ".")).'" alt="'.$this->filename.'" />';
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
+		
+		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -742,7 +798,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetWidth
 	 *@access public
 	*/
-	public function orgSetWidth($width) {
+	public function orgSetWidth($width, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -750,12 +806,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
 		
-		return '<img src="' . $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, ".")) . '" data-retina="' . $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, ".")) . '" width="'.$width.'" alt="'.$this->filename.'" />';
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
+		
+		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -764,7 +834,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetHeight
 	 *@access public
 	*/
-	public function orgSetHeight($height) {
+	public function orgSetHeight($height, $absolute = false) {
 		// normal URL Cache
 		$file = $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
@@ -772,12 +842,26 @@ class ImageUploads extends Uploads {
 		}
 		
 		// retina
-		$file = $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		if(file_exists($file) && filemtime($file) < NOW - self::$cache_life_time) {
+		$fileRetina = $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
+		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - self::$cache_life_time) {
 			@unlink($file);
 		}
 		
-		return '<img src="' . $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, ".")) . '" data-retina="' . $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, ".")) . '" height="'.$height.'" alt="'.$this->filename.'" />';
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
+		
+		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" />';
 	}
 	
 	/**
@@ -869,6 +953,7 @@ class ImageUploadsController extends UploadsController {
 		
 		exit;
 	}
+	
 	/**
 	 * sets the width
 	 *
