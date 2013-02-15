@@ -826,23 +826,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($this->data === null)
 			return true;
 		
-		if(
-			!$forceWrite &&
-			!$forceInsert &&  
-			$this->original == $this->data && 
-				(
-				!self::Versioned($this->class) || 
-				$snap_priority < 2 || 
-					(
-					$this->isPublished() &&
-					$this->stateid == $this->versionid
-					)
-				)
-			) 
-		{
-			return true;
-		}
-		
 		if(PROFILE) Profiler::mark("DataObject::write");
 		
 		// if we insert, we don't have an ID
@@ -1419,8 +1402,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			} else {
 				return true;
 			}
+		} else {
+			return true;
 		}
-		
 	}
 	
 	/**
