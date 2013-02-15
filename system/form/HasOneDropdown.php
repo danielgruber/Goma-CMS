@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
-  * $Version 1.2.1
+  * last modified: 15.02.2013
+  * $Version 1.2.2
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -200,7 +200,7 @@ class HasOneDropdown extends SingleSelectDropDown
 				// check for info-field
 				if(isset($this->info_field)) {
 					if(isset($record[$this->info_field])) {
-						$arr[count($arr) - 1] = convert::raw2text($record[$this->info_field]);
+						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
 					}
 				}
 			}			
