@@ -52,7 +52,10 @@ class templateInfo extends object
 		{
 			$plist = new CFPropertyList();
 			$plist->parse($this->getFileContents($file));
-			return $plist->ToArray();
+			$content = $plist->ToArray();
+			
+			if(isset($content["screenshot"]))
+				$content["screenshot"] = ROOT . "tpl/" . $template . "/" . $content["screenshot"];
 		}
 		
 		return array();
@@ -68,7 +71,7 @@ class templateInfo extends object
 	
 	public function get_key($template, $key)
 	{
-		$content = get_plist_contents($template);
+		$content = $this->get_plist_contents($template);
 		
 		if(!isset($content[$key]))
 			return "";
@@ -93,7 +96,7 @@ class templateInfo extends object
 		
 		foreach($tpl as $curTpl)
 		{
-			if(get_key($curTpl, "requireApp") == $version || version_compare(get_key($curTpl, "requireApp"), $version, ">"))
+			if($this->get_key($curTpl, "requireAppVersion") == $version || version_compare(get_key($curTpl, "requireAppVersion"), $version, "<"))
 				array_push($availTpl, $curTpl);
 		}
 		
