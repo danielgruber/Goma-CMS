@@ -10,8 +10,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 2.2.6
+  * last modified: 16.02.2013
+  * $Version 2.2.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -403,11 +403,22 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		
 		/**
 		 * gets a cloned object
+		 * does the same as duplicate
 		 *
 		 *@name _clone
 		 *@access public
 		*/
 		public function _clone() {
+			return $this->duplicate();
+		}
+		
+		/**
+		 * gets a duplicated object
+		 *
+		 *@name duplicate
+		 *@access public
+		*/
+		public function duplicate() {
 			return clone $this;
 		}
 		
