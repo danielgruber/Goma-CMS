@@ -1,14 +1,35 @@
 <?php
+/* *
+  *@package goma framework
+  *@subpackage templateInfo
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 16.02.2013
+* */  
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class templateInfo extends object
 {
 
+	/* *
+	 * construction
+	 *@name __construct
+	 *@access public
+	 * */
+
 	public function __construct()
 	{
 		parent::__construct();
 	}
+	
+	/* *
+	 * get contents of an plist-file
+	 * @access public
+	 * @param string - name of the template
+	 * @return plist object
+	 * */
 	
 	public function get_plist_contents($template)
 	{
@@ -18,6 +39,12 @@ class templateInfo extends object
 		return parse_plist($path . $plist_path);
 	}
 	
+	/* *
+	 * get array of an plist content
+	 * @access public
+	 * @param string - path to plist file
+	 * @return array - [key] = string
+	 * */
 	
 	public function parse_plist($file)
 	{
@@ -31,6 +58,14 @@ class templateInfo extends object
 		return array();
 	}
 	
+	/* *
+	 * get the value for an specific key
+	 * @access public
+	 * @param string - name of the template
+	 * @param string - name of the key
+	 * @return string - value of the key (empty string if not available)
+	 * */
+	
 	public function get_key($template, $key)
 	{
 		$content = get_plist_contents($template);
@@ -43,8 +78,28 @@ class templateInfo extends object
 			
 		return $content[$key];
 	}
+	
+	/* *
+	 * get all available templates for the given version
+	 * @access public
+	 * @param string - version to check
+	 * @return array - numbered array with all available templates
+	 * */
 			
-			
+	public function get_available_templates($version)
+	{
+		$tpl = getTemplates();
+		$availTpl = array();
+		
+		foreach($tpl as $curTpl)
+		{
+			if(get_key($curTpl, "requireApp") == $version || version_compare(get_key($curTpl, "requireApp"), $version, ">"))
+				array_push($availTpl, $curTpl);
+		}
+		
+		return $availTpl;
+	}
+					
 		
 
 }
