@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 03.02.2013
-  * $Version: 4.7.3
+  * last modified: 16.02.2013
+  * $Version: 4.7.4
 */
 
 defined('IN_GOMA') OR die();
@@ -3503,10 +3503,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	/**
 	 * gets a object of this record with id and versionid set to 0
 	 *
-	 *@name _clone
+	 *@name duplicate
 	 *@access public
 	*/
-	public function _clone() {
+	public function duplicate() {
 		$this->consolidate();
 		$data = clone $this;
 		
