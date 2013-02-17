@@ -89,8 +89,11 @@ class templateInfo extends object
 		{
 			if(self::get_key($curTpl, "requireApp") == $app)
 			{
-				if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $versionCMS, "<=") && goma_version_compare(self::get_key($curTpl, "requireFrameworkVersion"), $versionFramework, "<="))
-					array_push($availTpl, $curTpl);
+				if(strtolower(self::get_key($curTpl, "type")) != "template")
+				{
+					if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $versionCMS, "<=") && goma_version_compare(self::get_key($curTpl, "requireFrameworkVersion"), $versionFramework, "<="))
+						array_push($availTpl, $curTpl);
+				}
 			}
 		}
 		
