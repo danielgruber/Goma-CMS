@@ -51,7 +51,11 @@ class TemplateSwitcher extends FormField {
 	public function renderAfterSetForm() {
 		$templates = new DataSet();
 		foreach(TemplateInfo::get_available_templates($this->appname, $this->appversion, $this->frameworkVersion) as $template) {
-			$templates->push(array_merge(TemplateInfo::parse_plist($template), array("name" => $template)));
+			if($this->value == $template) {
+				$templates->push(array_merge(TemplateInfo::get_plist_contents($template), array("name" => $template, "selected" => true)));
+			} else {
+				$templates->push(array_merge(TemplateInfo::get_plist_contents($template), array("name" => $template)));
+			}
 		}
 		
 		$this->content = $templates->customise(array("id" => $this->ID(), "containerid" => $this->divID()))->renderWith("form/templateSwitcher/templateSwitcher.html");

@@ -44,7 +44,7 @@ class templateInfo extends object
 			$content = $plist->ToArray();
 			
 			if(isset($content["screenshot"]))
-				$content["screenshot"] = "tpl/" . $template . "/" . $content["screenshot"];
+				$content["screenshot"] = substr(dirname($file), strlen(ROOT)) . "/" . $content["screenshot"];
 				
 			return $content;
 		}
@@ -89,7 +89,7 @@ class templateInfo extends object
 		{
 			if(self::get_key($curTpl, "requireApp") == $app)
 			{
-				if(strtolower(self::get_key($curTpl, "type")) != "template")
+				if(strtolower(self::get_key($curTpl, "type")) == "template")
 				{
 					if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $versionCMS, "<=") && goma_version_compare(self::get_key($curTpl, "requireFrameworkVersion"), $versionFramework, "<="))
 						array_push($availTpl, $curTpl);
