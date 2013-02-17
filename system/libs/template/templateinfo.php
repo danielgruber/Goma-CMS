@@ -5,24 +5,13 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 16.02.2013
+  * last modified: 17.02.2013
 * */  
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class templateInfo extends object
 {
-
-	/* *
-	 * construction
-	 *@name __construct
-	 *@access public
-	 * */
-
-	public function __construct()
-	{
-		parent::__construct();
-	}
 	
 	/* *
 	 * get contents of an plist-file
@@ -55,7 +44,9 @@ class templateInfo extends object
 			$content = $plist->ToArray();
 			
 			if(isset($content["screenshot"]))
-				$content["screenshot"] = ROOT . "tpl/" . $template . "/" . $content["screenshot"];
+				$content["screenshot"] = "tpl/" . $template . "/" . $content["screenshot"];
+				
+			return $content;
 		}
 		
 		return array();
@@ -71,13 +62,13 @@ class templateInfo extends object
 	
 	public function get_key($template, $key)
 	{
-		$content = $this->get_plist_contents($template);
+		$content = self::get_plist_contents($template);
 		
 		if(!isset($content[$key]))
 			return "";
 			
 		if($key == "screenshot")
-			$content[$key] = ROOT . "tpl/" . $template . "/" . $content[$key];
+			$content[$key] = "tpl/" . $template . "/" . $content[$key];
 			
 		return $content[$key];
 	}
@@ -89,21 +80,20 @@ class templateInfo extends object
 	 * @return array - numbered array with all available templates
 	 * */
 			
-	public function get_available_templates($version)
+	public function get_available_templates($app, $version)
 	{
 		$tpl = getTemplates();
 		$availTpl = array();
 		
 		foreach($tpl as $curTpl)
 		{
-			if($this->get_key($curTpl, "requireAppVersion") == $version || version_compare(get_key($curTpl, "requireAppVersion"), $version, "<"))
-				array_push($availTpl, $curTpl);
+			if(self::get_key($curTpl, "requireApp") == $app)
+			{
+				if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $version, "<=")
+					array_push($availTpl, $curTpl);
+			}
 		}
 		
 		return $availTpl;
 	}
-					
-		
-
 }
-?>
