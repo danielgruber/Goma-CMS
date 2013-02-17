@@ -11,13 +11,25 @@
 }
 .templateSwitcher .template {
 	float: left;
-	padding: 5px;
+	padding: 10px;
 	margin: 5px;
+	border: 1px solid #ccc;
+	cursor: pointer;
 }
-.templateSwitcher .template .screenshot img {
-	 width: 280px;
-	 height: auto !important;
-	 margin: 5px;
+.templateSwitcher .template h3 {
+	color: #555;
+	text-align: center;
+}
+.templateSwitcher .template.selected {
+	background: #eee;
+}
+
+.templateSwitcher .template .screenshot {
+	 width: 220px;
+	 height: 200px;
+	 margin: 10px -10px;
+	 border-top: 1px solid #ccc;
+	 border-bottom: 1px solid #ccc;
 }
 .templateSwitcher .template .description table {
 	border: 0;

@@ -2,14 +2,21 @@
 <% INCLUDE_JS "templateSwitcher.js" %>
 <div class="templateSwitcher" id="{$id}_switcher">
 	<% CONTROL this() %>
-		<div class="template" name="$this.name.text()">
+		<% IF $this.selected %>
+			<div class="template selected" name="$this.name.text()">
+		<% ELSE %>
+			<div class="template" name="$this.name.text()">
+		<% END %>
+		
 			<% IF $this.title %>
 				<h3>$this.title.text()</h3>
 			<% ELSE %>
 				<h3>$this.name.text()</h3>
 			<% END %>
 			<div class="screenshot">
-				<img src="$this.screenshot" alt="" />
+				<% IF $this.screenshot %>
+					<img src="images/resampled/220/200/$this.screenshot" alt="" />
+				<% END %>
 			</div>
 			<div class="description">
 				<table class="datatable" width="100%">

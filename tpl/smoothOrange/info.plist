@@ -12,5 +12,9 @@
 	<string>gomacms</string>
 	<key>requireAppVersion</key>
 	<string>2.0.0-026</string>
+	<key>requireFrameworkVersion</key>
+	<string>2.0-066</string>
+	<key>screenshot</key>
+	<string>images/screenshot.png</string>
 </dict>
 </plist>
