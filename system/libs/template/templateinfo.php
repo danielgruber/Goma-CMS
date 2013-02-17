@@ -40,7 +40,7 @@ class templateInfo extends object
 		if(file_exists($file))
 		{
 			$plist = new CFPropertyList();
-			$plist->parse($this->getFileContents($file));
+			$plist->parse(file_get_contents($file));
 			$content = $plist->ToArray();
 			
 			if(isset($content["screenshot"]))
