@@ -17,7 +17,7 @@
 	cursor: pointer;
 }
 .templateSwitcher .template h3 {
-	color: #555;
+	color: #333;
 	text-align: center;
 }
 .templateSwitcher .template.selected {
