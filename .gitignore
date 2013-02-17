@@ -38,3 +38,8 @@ Uploads
 Uploads/*
 images/resampled
 images/resampled/*
+
+# Developer
+tpl/
+!tpl/goma_simple/
+!tpl/smoothOrange/
