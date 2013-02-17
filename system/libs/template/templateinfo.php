@@ -25,7 +25,7 @@ class templateInfo extends object
 		$path = ROOT . "tpl/";
 		$plist_path = $template . "/info.plist";
 		
-		return parse_plist($path . $plist_path);
+		return self::parse_plist($path . $plist_path);
 	}
 	
 	/* *
