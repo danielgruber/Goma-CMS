@@ -82,7 +82,7 @@ class templateInfo extends object
 			
 	public function get_available_templates($app, $version)
 	{
-		$tpl = getTemplates();
+		$tpl = self::getTemplates();
 		$availTpl = array();
 		
 		foreach($tpl as $curTpl)
@@ -95,5 +95,24 @@ class templateInfo extends object
 		}
 		
 		return $availTpl;
+	}
+	
+	/**
+	 * gets all templates as an array
+	 *
+	 *@name getTemplates
+	 *@access public
+	*/
+	public function getTemplates() 
+	{
+		$path = "tpl/";
+		$tpl = array();
+		$files = scandir(ROOT . $path);
+		foreach($files as $file) {
+			if(is_dir(ROOT . $path . $file) && is_file(ROOT . $path . $file . "/info.plist")) {
+				$tpl[] = $file;
+			}
+		}
+		return $tpl;
 	}
 }
