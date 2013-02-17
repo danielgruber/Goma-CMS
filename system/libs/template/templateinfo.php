@@ -80,7 +80,7 @@ class templateInfo extends object
 	 * @return array - numbered array with all available templates
 	 * */
 			
-	public function get_available_templates($app, $version)
+	public function get_available_templates($app, $versionCMS, $versionFramework)
 	{
 		$tpl = self::getTemplates();
 		$availTpl = array();
@@ -89,7 +89,7 @@ class templateInfo extends object
 		{
 			if(self::get_key($curTpl, "requireApp") == $app)
 			{
-				if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $version, "<=")
+				if(goma_version_compare(self::get_key($curTpl, "requireAppVersion"), $versionCMS, "<=") && goma_version_compare(self::get_key($curTpl, "requireFrameworkVersion"), $versionFramework, "<="))
 					array_push($availTpl, $curTpl);
 			}
 		}
