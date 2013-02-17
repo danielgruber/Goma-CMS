@@ -244,7 +244,7 @@ class TemplateSettings extends NewSettings {
 	 *@access public
 	*/
 	public function getFormFromDB(&$form) {
-		$form->add(new Select("stpl", lang("available_styles"), ArrayLib::key_value($this->getTemplates())));
+		$form->add(new TemplateSwitcher("stpl", lang("available_styles"), ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), GOMA_VERSION . "-" . BUILD_VERSION));
 		$form->add(new TextArea("css_standard", lang("own_css")));
 	}
 }
