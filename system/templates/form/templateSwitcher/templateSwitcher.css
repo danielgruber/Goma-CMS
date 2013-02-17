@@ -15,6 +15,7 @@
 	margin: 5px;
 	border: 1px solid #ccc;
 	cursor: pointer;
+	width: 200px;
 }
 .templateSwitcher .template h3 {
 	color: #333;
