@@ -3522,7 +3522,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name duplicateWrite
 	 *@access public
 	*/
-	public function duplicateWrite($num = 1, $fieldToRise = null, $forceWrite = false) {
+	public function duplicateWrite($num = 1, $fieldToRise = null, $forceWrite = false, $snap_priority = 2) {
 		$fieldValue = array();
 		for($i = 0; $i < $num; $i++) {
 			$data = $this->duplicate();
@@ -3532,6 +3532,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						$val = isset($fieldValue[$field]) ? $fieldValue[$field] : $data[$field];
 						if(preg_match('/^(.*)([0-9]+)$/Us', $val, $m)) {
 							$data[$field] = $m[1] . ($m[2] + $i + 1);
+						} else {
+							$data[$field] = $val . " " . ($i + 1);
 						}
 					}
 				} else {
@@ -3539,11 +3541,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					$val = isset($fieldValue[$field]) ? $fieldValue[$field] : $data[$field];
 					if(preg_match('/^(.*)([0-9]+)$/Us', $val, $m)) {
 						$data[$field] = $m[1] . ($m[2] + $i + 1);
+					} else {
+						$data[$field] = $val . " " . ($i + 1);
 					}
+
 				}
 			}
-			$data->write(false, $forceWrite);
+			
+			if(!$data->write(false, $forceWrite, $snap_priority)) {
+				return false;
+			}
 		}
+		return true;
 	}
 	
 	/**
