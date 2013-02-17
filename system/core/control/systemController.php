@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.01.2013
+  * last modified: 17.02.2013
   * $Version 1.4.7
 */
 
@@ -97,6 +97,7 @@ class systemController extends Controller {
 	public function getLang() {
 		$lang = $this->getParam("lang");
 		$output = array();
+		$outputNull = false;
 		if(empty($lang) || $lang == "*") {
 			$output = $GLOBALS["lang"];
 		} else {
@@ -107,6 +108,7 @@ class systemController extends Controller {
 						$output[$value] = $GLOBALS["lang"][$value];
 					} else {
 						$output[$value] = null;
+						$outputNull = true;
 					}
 				}
 			} else if(is_string($lang)) {
@@ -114,6 +116,7 @@ class systemController extends Controller {
 						$output[$lang] = $GLOBALS["lang"][$lang];
 					} else {
 						$output[$lang] = null;
+						$outputNull = true;
 					}
 			}
 		}
@@ -122,8 +125,11 @@ class systemController extends Controller {
 		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . $expCount);
 		$mtime = $cacher->created;
 		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . var_export($output, true)));
-		HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
-		HTTPResponse::addHeader("pragma","Public");
+		if($outputNull === false) {
+			HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
+			HTTPResponse::addHeader("pragma","Public");
+		}
+		
 		HTTPResponse::addHeader("Etag", '"'.$etag.'"');
 		
 		// 304 by HTTP_IF_MODIFIED_SINCE
@@ -156,7 +162,9 @@ class systemController extends Controller {
 		}
 		
 		$expiresAdd = defined("DEV_MODE") ? 3 * 60 * 60 : 48 * 60 * 60;
-		HTTPResponse::setCachable(NOW + $expiresAdd, $mtime, true);
+		if($outputNull === false) {
+			HTTPResponse::setCachable(NOW + $expiresAdd, $mtime, true);
+		}
 		
 		HTTPResponse::setHeader("content-type", "text/x-json");
 		HTTPResponse::output('('.json_encode($output).')');
