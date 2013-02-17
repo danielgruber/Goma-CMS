@@ -3517,6 +3517,45 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
+	 * duplicates given number of this model and writes them to the database
+	 *
+	 *@name duplicateWrite
+	 *@access public
+	*/
+	public function duplicateWrite($num = 1, $fieldToRise = null, $forceWrite = false, $snap_priority = 2) {
+		$fieldValue = array();
+		for($i = 0; $i < $num; $i++) {
+			$data = $this->duplicate();
+			if(isset($fieldToRise)) {
+				if(is_array($fieldToRise)) {
+					foreach($fieldToRise as $field) {
+						$val = isset($fieldValue[$field]) ? $fieldValue[$field] : $data[$field];
+						if(preg_match('/^(.*)([0-9]+)$/Us', $val, $m)) {
+							$data[$field] = $m[1] . ($m[2] + $i + 1);
+						} else {
+							$data[$field] = $val . " " . ($i + 1);
+						}
+					}
+				} else {
+					$field = $fieldToRise;
+					$val = isset($fieldValue[$field]) ? $fieldValue[$field] : $data[$field];
+					if(preg_match('/^(.*)([0-9]+)$/Us', $val, $m)) {
+						$data[$field] = $m[1] . ($m[2] + $i + 1);
+					} else {
+						$data[$field] = $val . " " . ($i + 1);
+					}
+
+				}
+			}
+			
+			if(!$data->write(false, $forceWrite, $snap_priority)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
 	 * bool
 	*/
 	public function bool() {
