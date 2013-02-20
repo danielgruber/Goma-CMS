@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
-  * $Version 1.0.2
+  * last modified: 20.02.2013
+  * $Version 1.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -54,6 +54,7 @@ class groupAdmin extends adminItem {
 			"name"		=> lang("name")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
+		$config->getComponentByType("TableFieldPaginator")->perPage = 20;
 		
 		$form = new Form($this, "form", array(
 			new TableField("groupTable", lang("groups"), $this->modelInst(), $config)
