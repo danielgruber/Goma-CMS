@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 03.02.2013
+  * last modified: 22.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -559,6 +559,9 @@ $lang = array(
 	"wrapper_page"			=> "list with subpages",
 	
 	"toggle_navigation"		=> "toggle navigation",
-	"toggle_sidebar"		=> "toggle sidebar"
+	"toggle_sidebar"		=> "toggle sidebar",
+	
+	"time_not_in_range"		=> "The time must be between \$start and \$end.",
+	"no_valid_time"			=> "The given time is not valid."
 
 );

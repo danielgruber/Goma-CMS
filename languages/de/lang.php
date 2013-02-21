@@ -560,5 +560,7 @@ $lang = array(
 	"wrapper_page"			=> "Liste mit Unterseiten",
 	
 	"toggle_navigation"		=> "Navigation umschalten",
-	"toggle_sidebar"		=> "Seitenleiste umschalten"
+	"toggle_sidebar"		=> "Seitenleiste umschalten",
+	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
+	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit."
 );
