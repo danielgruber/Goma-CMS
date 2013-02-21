@@ -278,7 +278,7 @@ class i18n extends Object
 			
 			$data = array();
 			foreach(scandir(ROOT . LANGUAGE_DIRECTORY) as $lang) {
-				if($lang != "." && $lang != ".." && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist") && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/lang.php")) {
+				if($lang != "." && $lang != ".." && is_dir(ROOT . LANGUAGE_DIRECTORY . "/" . $lang) && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist") && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/lang.php")) {
 					$plist = new CFPropertyList();
 					$plist->parse(file_get_contents(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist"));
 					$contents = $plist->ToArray();
