@@ -310,51 +310,43 @@ class DropDown extends FormField
 		 *@param numeric - page
 		*/
 		public function getDataFromModel($p = 1) {
-			if(count($this->options) > 10) {
-				$start = ($p * 10) - 10;
-				$end = $start + 9;
-				$i = 0;
-				$left = ($p == 1) ? false : true;
-				if(isset($this->options[0])) {
-					$arr = array();
-					foreach($this->options as $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[] = array("key" => $value, "val" => $value);
+			$start = ($p * 10) - 10;
+			$end = $start + 9;
+			$i = 0;
+			$left = ($p == 1) ? false : true;
+			if(isset($this->options[0])) {
+				$arr = array();
+				foreach($this->options as $value) {
+					if($i < $start) {
 						$i++;
+						continue;
 					}
-				} else {
-					$arr = array();
-					foreach($this->options as $key => $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[] = array("key" => $key, "val" => $value);
-						$i++;
+					if($i >= $end) {
+						$right = true;
+						break;
 					}
+					$arr[] = array("key" => $value, "value" => $value);
+					$i++;
 				}
-				// clean up
-				unset($i, $start, $end);
-				$arr = array_map(array("text", "protect"), $arr);
-				return array("data"	=> $arr, "right" => $right, "left" => $left);
 			} else {
-				if(isset($this->options[0])) {
-					return array("data" => array_map(array("convert", "raw2text"), ArrayLib::key_value($this->options)));
-				} else {
-					return array("data" => array_map(array("convert", "raw2text"), $this->options));
+				$arr = array();
+				foreach($this->options as $key => $value) {
+					if($i < $start) {
+						$i++;
+						continue;
+					}
+					if($i >= $end) {
+						$right = true;
+						break;
+					}
+					$arr[] = array("key" => $key, "value" => $value);
+					$i++;
 				}
 			}
+			// clean up
+			unset($i, $start, $end);
+			$arr = array_map(array("text", "protect"), $arr);
+			return array("data"	=> $arr, "right" => $right, "left" => $left);
 		}
 		
 		/**
