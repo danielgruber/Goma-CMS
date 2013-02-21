@@ -1234,7 +1234,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@param string - name
 		*/
 		public function getVar($name) {
-			return isset($this->dataobject[$name]) ? $this->dataobject->doObject($name)->forTemplate() : null;
+			return $this->getTemplateVar($name);
 		}
 		
 		/**
