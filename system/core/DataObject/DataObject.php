@@ -4191,8 +4191,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			if(class_exists($value)) {
+				
+				$table = "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value;
+				if(!SQL::getFieldsOfTable($table)) {
+					$table = "many_".strtolower(get_class($this))."_".  $key;
+				}
+			
 				$tables[$key] = array(
-					"table"			=> "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value,
+					"table"			=> $table,
 					"field"			=> strtolower(get_class($this)) . "id",
 					"extfield"		=> $value . "id"
 				);
@@ -4203,8 +4209,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			} else {
 				throwError(6, 'PHP-Error', "Can't create Relationship on not existing class '".$value."'.");
 			}
-		}
-		
+		}                                                                                                                                              
 		
 		// belongs-many-many
 		foreach($this->generateBelongs_Many_many(false) as $key => $value) {
@@ -4253,8 +4258,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					throwError(6, "Logical Exception", $value . " must be subclass of DataObject to be a handler for a many-many-relation.");
 				}
 				if($relation) {
+					$table = "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this));
+					if(!SQL::getFieldsOfTable($table))
+						$table = "many_" . $value . "_" . $relation;
+					
+					
 					$tables[$key] = array(
-						"table"			=> "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this)),
+						"table"			=> $table,
 						"field"			=> strtolower(get_class($this)) . "id",
 						"extfield"		=> $value . "id",
 					);
@@ -4268,18 +4278,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 		}
 		
-		
-		
 		$parent = get_parent_class($this);
 		if($parent != "DataObject") {
 			$tables = array_merge(Object::instance($parent)->generateManyManyTables(), $tables);
 		}
 		
-		
 		return $tables;
-		
-		
 	}
+
 	/**
 	 * indexes
 	 *
