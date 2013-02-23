@@ -4,7 +4,11 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
+<<<<<<< HEAD
   * last modified: 22.02.2013
+=======
+  * last modified: 17.02.2013
+>>>>>>> some updates for timeField and Language
   * $Version
 */
 
@@ -40,6 +44,7 @@ class TimeField extends FormField
 		}
 		
 		/**
+<<<<<<< HEAD
 		 * validate
 		 *
 		 *@name validate
@@ -72,6 +77,13 @@ class TimeField extends FormField
 		public function JS() {
 			Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.js");
 			Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.css");
+=======
+		 * render JavaScript
+		*/
+		public function JS() {
+			Resources::add("system/libs/thirdparty/u-timepicker/jquery.ui.timepicker.js");
+			Resources::add("system/libs/thirdparty/u-timepicker/jquery.ui.timepicker.css");
+>>>>>>> some updates for timeField and Language
 			$regional = "";
 			foreach(i18n::getLangCodes(Core::$lang) as $code) {
 				if(file_exists("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-".$code.".js")) {

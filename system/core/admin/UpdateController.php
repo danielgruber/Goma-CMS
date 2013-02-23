@@ -135,6 +135,14 @@ class UpdateController extends adminController {
 	*/
 	public function upload() {
 		if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
+			$filename = ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs";
+			if(file_put_contents(ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs", @file_get_contents($_GET["download"]))) {
+				if($model = Uploads::addFile(basename($_GET["download"]), $filename, "updates")) {
+					HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
+					exit;
+				}
+			}
+			
 			$form = new Form($this, "update", array(
 				new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'),
 				$file = new FileUpload("file", lang("update_file_upload"), array("gfs"), null, "updates")
