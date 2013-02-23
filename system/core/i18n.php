@@ -292,28 +292,6 @@ class i18n extends Object
 			return $code;
 		}
 		
-<<<<<<< HEAD
-		/**
-		 * lists all languages
-		 *
-		 *@name listLangs
-		 *@access public
-		*/
-		public static function listLangs() {
-			if(PROFILE) Profiler::mark("i18n::listLangs");
-			
-			$data = array();
-			foreach(scandir(ROOT . LANGUAGE_DIRECTORY) as $lang) {
-				if($lang != "." && $lang != ".." && is_dir(ROOT . LANGUAGE_DIRECTORY . "/" . $lang) && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist") && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/lang.php")) {
-					$plist = new CFPropertyList();
-					$plist->parse(file_get_contents(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist"));
-					$contents = $plist->ToArray();
-					if(isset($contents["title"], $contents["type"], $contents["icon"]) && $contents["type"] == "language") {
-						$contents["icon"] = LANGUAGE_DIRECTORY . "/" . $lang . "/" . $contents["icon"];
-						$data[$lang] = $contents;
-					}
-				}
-=======
 		// if a user want to have another language
 		if(isset($_GET['setlang']) && !empty($_GET["setlang"]))
 		{
@@ -359,7 +337,6 @@ class i18n extends Object
 			$db = self::getLangDB();
 			if(isset($db[$code])) {
 				return $db[$code];
->>>>>>> some updates for timeField and Language
 			}
 			
 			if(defined("PROJECT_LANG") && self::LangExists("PROJECT_LANG")) {
