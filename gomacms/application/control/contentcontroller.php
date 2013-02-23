@@ -180,6 +180,99 @@ class contentController extends FrontedController
 				ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);
 				ContentTPLExtension::PrependContent($this->modelInst()->prependedContent);
 			}
+			
+			if($content !== null) {
+				if($this->modelInst()->meta_keywords == "") {
+					$index = array();
+					foreach(HTMLParser::list_words($content) as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)]++;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h1") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 7;
+						} else {
+							$index[strtolower($word)] = 7;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h2") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 6;
+						} else {
+							$index[strtolower($word)] = 6;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h3") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 5;
+						} else {
+							$index[strtolower($word)] = 5;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h4") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 4;
+						} else {
+							$index[strtolower($word)] = 4;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h5") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 3;
+						} else {
+							$index[strtolower($word)] = 3;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h6") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 2;
+						} else {
+							$index[strtolower($word)] = 2;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "b") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 1;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "strong") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 1;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					arsort($index);
+					$str = "";
+					$i = 0;
+					foreach($index as $word => $prio) {
+						if($i == 0) {
+							$i++;
+						} else if($i == 5) {
+							break;
+						} else {
+							$i++;
+							$str .= ", ";
+						}
+						$str .= $word;
+					}
+					Core::setHeader("keywords", $str);
+				}
+			}
 		}
 		
 		/**
