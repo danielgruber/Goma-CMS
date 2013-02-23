@@ -11,7 +11,8 @@
 Core::addRules(array(
 	"rate/\$name/\$rate"			=> "ratingController",
 	"search"						=> "searchController",
-	"boxes_new"						=> "boxesController"
+	"boxes_new"						=> "boxesController",
+	"sitemap.xml"					=> "SitemapController"
 ), 11);
 
 
