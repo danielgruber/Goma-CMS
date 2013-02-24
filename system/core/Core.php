@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 07.02.2013
-  * $Version 3.3.27
+  * last modified: 24.02.2013
+  * $Version 3.3.28
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -540,7 +540,7 @@ class Core extends object
 			
 			log_error("Code: " . $code . ", Name: " . $name . ", Details: ".$message.", URL: " . $_SERVER["REQUEST_URI"]);
 			
-			if(($code != 1 && $code != 2 && $code != 5) && $callDebug) {
+			if(($code != 1 && $code != 2 && $code != 5)) {
 				$data = debug_backtrace();
 				if(count($data) > 6) {
 					$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
@@ -552,7 +552,7 @@ class Core extends object
 	 	 	}
 			
 			if(is_object(self::$requestController)) {
-				echo self::$requestController->__throwError($code, $name, $message, $callDebug);
+				echo self::$requestController->__throwError($code, $name, $message);
 				exit;
 			} else {
 				if(Core::is_ajax())
