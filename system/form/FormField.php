@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.3.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.02.2013
+  * $Version 2.3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -187,7 +187,7 @@ class FormField extends RequestHandler
 		*/
 		public function setValue()
 		{
-			if(($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->class, "__toString"))))
+			if($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->class, "__toString"))))
 				$this->input->val($this->value);
 		}
 		
@@ -436,7 +436,7 @@ class FormField extends RequestHandler
 			} else if(isset($this->$name)) {
 				return $this->$name;
 			} else {
-				throwError(6, "Unknowen Attribute", "\$" . $name . " is not defined in ".$this->class." with name ".$this->name.".");
+				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->class." with name ".$this->name.".");
 			}
 		}
 		

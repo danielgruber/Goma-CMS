@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
-  * $Version 1.4.3
+  * last modified: 24.02.2013
+  * $Version 1.4.4
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -125,12 +125,17 @@ class DropDown extends FormField
 					$this->key = randomString(5);
 				} else if($this->POST && isset($this->form()->result[$this->dbname]) && $this->value == null) {
 					$this->dataset = $this->form()->result[$this->dbname];
+					
 					$this->key = randomString(5);
 				} else {
 					$this->dataset = array();
 					$this->key = randomString(5);
 				}
 				$this->input->value = $this->key;
+				
+				if(is_object($this->dataset) && Object::method_exists($this->dataset->class, "toArray")) {
+					$this->dataset = $this->dataset->ToArray();
+				}
 				
 			 } else {
 			 	parent::getValue();
