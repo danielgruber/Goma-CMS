@@ -1996,8 +1996,16 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		if(isset($extraFields) && is_array($extraFields))
 			$this->extraFields = $extraFields;
 		
-		if($this->extraFields)
-			$this->join[$this->relationTable] = "";
+		if($this->extraFields) {
+			// search second join
+			foreach($this->join as $table => $data) {
+				if(strpos($data, $this->relationTable)) {
+					unset($this->join[$table]);
+				}
+			}
+			
+			$this->join[$this->relationTable] = $this->relationTable . "." . $this->ownField . " = '".convert::raw2text($this->ownValue)."'";
+		}
 	}
 	
 	/**
