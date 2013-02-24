@@ -2004,7 +2004,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				}
 			}
 			
-			$this->join[$this->relationTable] = $this->relationTable . "." . $this->ownField . " = '".convert::raw2text($this->ownValue)."'";
+			$this->join[$this->relationTable] = " INNER JOIN " . DB_PREFIX . $this->relationTable . " AS " . $this->relationTable . " ON " . $this->relationTable . "." . $this->ownField . " = '".convert::raw2text($this->ownValue)."'";
 		}
 	}
 	
