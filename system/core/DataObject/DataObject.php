@@ -2794,6 +2794,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						$query->from[] = $statement;
 					else if($statement == "")
 						$query->from[$table] = "";	
+					else if(strpos(strtolower($statement), "join")) 
+						$query->from[$table] = $statement;
 					else
 						$query->from[$table] = " LEFT JOIN ".DB_PREFIX.$table." AS ".$table." ON " . $statement;
 				}
