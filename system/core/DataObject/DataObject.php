@@ -885,13 +885,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				// copy many-many-relations
 				foreach($this->ManyMany() as $name => $class) {
 					if(!isset($newdata[$name . "ids"]) && !isset($newdata[$name]))
-						$newdata[$name . "ids"] = $this->getRelationIDs($name);
+						$newdata[$name . "ids"] = $this->getRelationData($name);
 					else if(!isset($newdata[$name . "ids"]) && is_array($newdata[$name]))
 						$newdata[$name . "ids"] = $newdata[$name];
 				}
 				foreach($this->BelongsManyMany() as $name => $class) {
 					if(!isset($newdata[$name . "ids"]) && !isset($newdata[$name]))
-						$newdata[$name . "ids"] = $this->getRelationIDs($name);
+						$newdata[$name . "ids"] = $this->getRelationData($name);
 					else if(!isset($newdata[$name . "ids"]) && is_array($newdata[$name]))
 						$newdata[$name . "ids"] = $newdata[$name];
 				}
@@ -1531,11 +1531,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			// check for existing entries
-			$sql = "SELECT ".$object . "id"." FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"];
+			$sql = "SELECT ". $data["extfield"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"];
 			if($result = SQL::Query($sql)) {
 				$existing = array();
 				while($row = SQL::fetch_object($result)) {
-					$existing[] = $row->{$object . "id"};
+					$existing[] = $row->{$data["extfield"]};
 				}
 			} else {
 				throwErrorByID(5);
@@ -1552,16 +1552,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			foreach($ids as $id)
 			{
+				if(is_array($id)) {
+					$extraData = $id;
+					$id = $extraData["id"];
+					unset($extraData["id"], $extraData["versionid"]);
+				} else {
+					$extraData = array();
+				}
+				
 				if(!in_array($id, $existing)) {
-					$mani_insert["fields"][] = array(
+					$mani_insert["fields"][] = array_merge($extraData, array(
 						$data["field"] 	=> $this["versionid"],
 						$object . "id" 	=> $id
-					);
+					));
 				}
 			}
 			
 			$manipulation[$table . "_insert"] = $mani_insert;
-			
 			
 			return $manipulation;
 	}
@@ -2038,11 +2045,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	  *@param bool - override permission system
 	  *@access public
 	*/
-	public function set_many_many($name, $ids, $force = false)
+	public function set_many_many($name, $data, $force = false)
 	{
 		if($this->can("Write", $this)) {
 			if(!$this->isPublished() || $this->can("Publish", $this)) {
-				$manipulation = $this->set_many_many_manipulation(array(), $name, $ids);
+				$manipulation = $this->set_many_many_manipulation(array(), $name, $data);
 				
 				$this->onBeforeManipulate($manipulation, $b = "set_many_many");
 				$this->callExtending("onBeforeManipulate", $manipulation, $b = "set_many_many");
@@ -2186,6 +2193,89 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					$arr[] = $row[$data["extfield"]];
 			}
 			$this->data[$relname . "ids"] = $arr;
+			return $arr;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * gets relation-data
+	 *
+	 *@name getRelationData
+	 *@access public
+	*/
+	public function getRelationData($relname) {
+		$relname = trim(strtolower($relname));
+		
+		if(substr($relname, -3) == "ids") {
+			$relname = substr($relname, 0, -3);
+		}
+		
+		// get all config
+		$has_many = $this->hasMany();
+		$many_many = $this->ManyMany();
+		$belongs_many_many = $this->BelongsManyMany();
+		$many_many_tables = $this->ManyManyTables();
+		
+		if(isset($has_many[$relname])) {
+				// has-many
+				/**
+				 * getMany returns a DataObject
+				 * parameters:
+				 * name of relation
+				 * where
+				 * fields
+				 */
+				if($data = $this->getHasMany($relname)) {
+					
+					// then get all data in one array with key - id pairs
+					
+					$arr = array();
+					foreach($data->ToArray() as $key => $value)
+					{
+							$arr[] = $value["id"];
+					}
+					return $arr;
+				} else {
+					return array();
+				}
+		} else if(isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
+			if(isset($this->data[$relname . "_data"]))
+				return $this->data[$relname . "_data"];
+			
+			/**
+			 * there is the var many_many_tables, which contains data for the table, which stores the relation
+			 * for exmaple: array(
+			 * "table"	=> "my_many_many_table_generated_by_system",
+			 * "field"	=> "myclassid"
+			 * )
+			*/
+			
+			if(isset($many_many_tables[$relname]))
+			{
+					$table = $many_many_tables[$relname]["table"]; // relation-table
+					$data = $many_many_tables[$relname];
+			} else
+			{
+					return false;
+			}
+
+			$query = new SelectQuery($table, array("*"), array($data["field"] => $this["versionid"]));	
+			
+			$query->execute();			
+			$arr = array();
+			$i = 0;
+			while($row = $query->fetch_assoc()) {
+					$arr[$i] = array("versionid" => $row[$data["extfield"]], "id" => $row[$data["extfield"]]);
+					if(isset($data["extraFields"]))
+						foreach($data["extraFields"] as $field => $pattern) {
+							$arr[$i][$field] = $row[$field];
+						}
+					
+					$i++;
+			}
+			$this->data[$relname . "_data"] = $arr;
 			return $arr;
 		} else {
 			return false;
