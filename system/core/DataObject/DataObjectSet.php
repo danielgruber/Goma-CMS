@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   *********
-  * last modified: 24.02.2013
-  * $Version: 1.4.8
+  * last modified: 09.01.2013
+  * $Version: 1.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1998,11 +1998,12 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		
 		if($this->extraFields) {
 			// search second join
-			foreach($this->join as $table => $data) {
+			foreach((array) $this->join as $table => $data) {
 				if(strpos($data, $this->relationTable)) {
 					unset($this->join[$table]);
 				}
 			}
+			
 			$this->join[$this->relationTable] = " INNER JOIN " . DB_PREFIX . $this->relationTable . " AS " . $this->relationTable . " ON " . $this->relationTable . "." . $this->field . " = " . $this->dataobject->table() . ".id";
 		}
 	}
@@ -2046,7 +2047,6 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		$writeExtraFields = array();
-		
 		if(count($this->data) > 0) {
 			
 			// write all records
@@ -2118,7 +2118,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				)
 			)
 		);
-
+		
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
 				$manipulation["insert"]["fields"][$id] = array(

@@ -46,9 +46,9 @@ img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
    Lists
    ========================================================================== */
 
-/*ul, ol { margin: 1em 0; padding: 0 0 0 40px; }*/
-dd { margin: 0 0 0 40px; }
-/*nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }*/
+ul, ol { margin: 0.5em 0; padding: 0 0 0 30px; }
+dd { margin: 0 0 0 30px; }
+nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol, #navi ul, #navi ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
 /* remove cause of annyoing sometimes, maybe readded later */
 
 /* =============================================================================
