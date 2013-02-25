@@ -2047,6 +2047,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		$writeExtraFields = array();
+		
 		if(count($this->data) > 0) {
 			
 			// write all records
@@ -2119,13 +2120,15 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			)
 		);
 		
+		$i = 0;
 		foreach(array_keys($writtenIDs) as $id) {
 			if(!in_array($id, $existing)) {
-				$manipulation["insert"]["fields"][$id] = array(
+				$manipulation["insert"]["fields"][$i] = array(
 					$this->ownField => $this->ownValue,
 					$this->field	=> $id
 				);
-				$manipulation["insert"]["fields"] = array_merge($manipulation["insert"]["fields"][$id], $writeExtraFields[$id]);
+				$manipulation["insert"]["fields"][$i] = array_merge($manipulation["insert"]["fields"][$i], $writeExtraFields[$id]);
+				$i++;
 			} else {
 				if($writeExtraFields[$id] != $existingFields[$id]) {
 					$manipulation[] = array(
@@ -2137,6 +2140,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				}
 				unset($existing[array_search($id, $existing)]);
 			}
+			
 		}
 		
 		if(count($existing) > 0) {
