@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 27.02.2013
   * $Version - 2.4.4
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -657,13 +657,6 @@ class Form extends object
 						}
 				}
 				
-				if($valid !== true)
-				{
-						$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
-						$this->form->append($errors);
-						return $this->renderForm();
-				}
-				
 				$result = $this->result;
 				if(is_object($result) && is_subclass_of($result, "dataobject")) {
 					$result = $result->to_array();
@@ -712,6 +705,12 @@ class Form extends object
 					}
 				}
 				
+				if($valid !== true)
+				{
+						$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
+						$this->form->append($errors);
+						return $this->renderForm();
+				}
 				
 				// no registered action has submitted the form
 				if($i == 0) {

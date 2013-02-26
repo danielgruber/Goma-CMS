@@ -10,8 +10,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 16.02.2013
-  * $Version 2.2.7
+  * last modified: 126.02.2013
+  * $Version 2.2.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -130,6 +130,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"_get",
 			"getobject",
 			"versioned"
+		);
+		
+		private static $notCallableGetters = array(
+			"valid", "current", "rewind", "next", "key", "duplicate", "reset", "__construct"
 		);
 		
 		//!Init
@@ -672,7 +676,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			if(isset($this->customised[$lowername])) {
 				$data = $this->customised[$lowername];
 			// methods
-			} else if(Object::method_exists($this->class, $name)) {
+			} else if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->class, $name)) {
 				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset");
 				return parent::__call($name, $args);
 			} else
