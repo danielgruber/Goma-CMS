@@ -1534,6 +1534,7 @@ class GFS_Package_installer extends GFS {
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
 		
 		// copy some files
+		copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
 		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
 		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
 		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
@@ -1548,6 +1549,7 @@ class GFS_Package_installer extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
 		// includes
+		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
 		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
 		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';
@@ -1794,6 +1796,7 @@ class GFS_Package_Creator extends GFS {
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
 		
   	 	// copy some files
+  	 	copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
 		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
 		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
 		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
@@ -1808,6 +1811,7 @@ class GFS_Package_Creator extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
 		// includes
+		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
 		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
 		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';
