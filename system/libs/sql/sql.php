@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.01.2013
-  * $Version 2.2.2
+  * last modified: 27.02.2013
+  * $Version 2.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -383,7 +383,10 @@ class SQL extends object
 		*/
 		static function getFieldsOfTable($table, $prefix = false, $track = true)
 		{
+			if(self::$driver)
 				return self::$driver->getFieldsOfTable($table, $prefix, $track);
+			else
+				return array();
 		}
 		
 		/**

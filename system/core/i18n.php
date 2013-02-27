@@ -151,6 +151,7 @@ class i18n extends Object
 
 		// check lang selection	
 		Core::$lang = self::AutoSelectLang($language);
+		$_SESSION["lang"] = Core::$lang;
 		
 		global $lang;
 		$lang = array();
