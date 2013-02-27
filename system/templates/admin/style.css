@@ -167,6 +167,7 @@ a:hover {
 #userbar-langSelect ul {
 	list-style-type: none;
 	padding: 10px 0;
+	margin: 0;
 	z-index: 100;
 	box-shadow: 0 2px 5px #999999;
 	background-color: #FFFFFF;
@@ -182,8 +183,15 @@ a:hover {
 	padding: 0 10px;
 	margin: 2px 0;
 }
+#userbar-langSelect li:hover {
+	background: #eee;
+}
+#userbar-langSelect li a {
+	text-decoration: none;
+	color: #444;
+}
 #userbar-langSelect .active {
-	background: #EEEEEE;
+	background: #eee;
 }
 #userbar-user img {
 	border: 2px solid #cfcfcf;
