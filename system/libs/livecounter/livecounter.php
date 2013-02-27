@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 2.1.5
+  * last modified: 27.02.2013
+  * $Version 2.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -96,8 +96,12 @@ class livecounterController extends Controller
 			// first get userid
 			$userid = member::$id;
 			
+			if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"])) {
+				return false;
+			}
+			
 			// user identifier
-			if(!isset($_COOKIE['goma_sessid']) && !_eregi(self::$cookie_support, $_SERVER['HTTP_USER_AGENT'])) {
+			if((!isset($_COOKIE['goma_sessid']) && !preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT'])) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
 				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);
 			} else if(isset($_COOKIE['goma_sessid'])) {
 				$user_identifier = $_COOKIE['goma_sessid'];
