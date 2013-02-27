@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.02.2013
-  * $Version 1.0.5
+  * last modified: 27.02.2013
+  * $Version 1.0.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -255,7 +255,7 @@ class History extends DataObject {
 	*/
 	public function getRetinaIcon() {
 		if($data = $this->historyData()) {
-			$icon = ClassInfo::findFile($data["icon"]);
+			$icon = ClassInfo::findFile($data["icon"], $this->dbobject);
 			$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
 			if(file_exists($retinaPath))
 				return $retinaPath;

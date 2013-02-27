@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
  *@Copyright (C) 2009 - 2013  Goma-Team
- * last modified: 27.01.2013
+ * last modified: 27.02.2013
  */
 
 function updateNav() {
@@ -52,5 +52,6 @@ $(document).ready(function() {
 	$("#navMore").click(function() {
 		$(this).toggleClass("open");
 		$("#navMore-sub").stop().slideToggle("fast");
+		return false;
 	});
 })

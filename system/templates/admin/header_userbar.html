@@ -11,9 +11,9 @@
 			$("#userbar-langSelect").removeClass("active");
 		}
 		
-		$("#userbar-langSelect").click(function() {
-			$(this).toggleClass("active");
-			$(this).find("ul").clearQueue().stop().slideToggle(100);
+		$("#userbar-langSelect > a").click(function() {
+			$(this).parent().toggleClass("active");
+			$(this).parent().find("ul").clearQueue().stop().slideToggle(100);
 			return false;
 		});
 

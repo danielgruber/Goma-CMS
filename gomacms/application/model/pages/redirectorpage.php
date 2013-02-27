@@ -48,7 +48,7 @@ class redirector extends Page
 class redirectorController extends PageController
 {
 	public function index() {
-		HTTPResponse::redirect($this->modelInst()->data["data"]);
+		HTTPResponse::redirect($this->modelInst()->data["data"], true);
 	}
 }
 
