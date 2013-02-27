@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.02.2013
-  * $Version 1.4.2
+  * last modified: 27.02.2013
+  * $Version 1.4.3
 */   
 
 
@@ -244,7 +244,7 @@ class i18n extends Object
 		
 		$data = array();
 		foreach(scandir(ROOT . LANGUAGE_DIRECTORY) as $lang) {
-			if($lang != "." && $lang != ".." && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist") && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/lang.php")) {
+			if($lang != "." && $lang != ".." && is_dir(ROOT . LANGUAGE_DIRECTORY . "/" . $lang) && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist") && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/lang.php")) {
 				$plist = new CFPropertyList();
 				$plist->parse(file_get_contents(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist"));
 				$contents = $plist->ToArray();
