@@ -92,7 +92,7 @@ class mysqliDriver extends object implements SQLDriver
 		 *@access public
 		 *@use: run a query
 		**/
-		public  function query($sql, $unbuffered = false)
+		public function query($sql, $unbuffered = false)
 		{
 				if(!$this->_db->ping()) {
 					$this->__construct();
@@ -103,9 +103,32 @@ class mysqliDriver extends object implements SQLDriver
 				else {
 					$trace = debug_backtrace();
 					log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
+					$this->runDebug($sql);
 					return false;
 				}
 		}
+		
+		/**
+		 * some debug-operations
+		*/
+		public function runDebug($sql) {
+			if($this->errno() == 1054) {
+				// match out table
+				if(preg_match('/from\s+([a-zA-Z0-9_\-]+)/i', $sql, $matches)) {
+					$table = $matches[1];
+					if(substr($table, 0, strlen(DB_PREFIX))) {
+						$table = substr($table, strlen(DB_PREFIX));
+					}
+					
+					if(isset(ClassInfo::$tables[$table])) {
+						$class = ClassInfo::$tables[$table];
+						$c = new $class();
+						$c->buildDB(DB_PREFIX);
+					}
+				}
+			}
+		}
+		
 		/**
 		 *@access public
 		 *@use: fetch_row

@@ -1109,7 +1109,7 @@ function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwD
 */ 
 function throwErrorById($code)
 {
-		$sqlerr = sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>".sql::$last_query."</code>\n";
+		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>".sql::$last_query."</code>\n";
 		$codes = array(
 			1 => array('name' => 'Security Error',		 						'details' => ''	,											"status_code"		=> 500),
 			2 => array('name' => 'Security Error',		 						'details' => 'Ip banned! Please wait 60 seconds!',			"status_code"		=> 403),

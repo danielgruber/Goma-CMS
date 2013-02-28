@@ -188,7 +188,7 @@ $lang = array(
 	"login"                                        	=> "Anmeldung" ,
 	/* infos */
 	"usergroups_info"								=> "<h3>Willkommen</h3>Hier k&ouml;nnen Sie Benutzer und Gruppen verwalten. W&auml;hlen Sie im Baum, was Sie bearbeiten möchten.",
-	"email_info"									=> "Sie k&ouml;nenn mehrere E-Mail-Adressen mit Komma trennen.",
+	"email_info"									=> "Sie k&ouml;nnen mehrere E-Mail-Adressen mit Komma trennen.",
 	"email_correct_info"							=> "Diese E-Mail-Adresse sollte richtig sein und Ihnen gehören.",
 	'dragndrop_info'								=> "Ziehen Sie die Elemente, um sie zu sortieren.",
 	"noscript"                                      => "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen!",
@@ -562,5 +562,6 @@ $lang = array(
 	"toggle_navigation"		=> "Navigation umschalten",
 	"toggle_sidebar"		=> "Seitenleiste umschalten",
 	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
-	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit."
+	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit.",
+	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet."
 );

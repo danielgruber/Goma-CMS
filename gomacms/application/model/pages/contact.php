@@ -136,7 +136,7 @@ class contactController extends PageController
 							Goma Auto-Messenger");
 							
 				if($mail->sendHTML($this->model_inst->email, lang("contact"),$message))
-					AddContent::addSuccess(lang("successful_saved"));
+					AddContent::addSuccess(lang("mail_successful_sent"));
 				else
 					AddContent::addError(lang("mail_not_sent", "There was an error transmitting the data."));
 				$this->redirectback();

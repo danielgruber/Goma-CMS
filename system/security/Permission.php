@@ -362,6 +362,9 @@ class Permission extends DataObject
 						if($this->groupsids && count($this->groupsids) > 0) {
 							foreach($subversions as $version) {
 								foreach($this->groupsids as $groupid) {
+									if(is_array($groupid)) {
+										$groupid = $groupid["versionid"];
+									}
 									$manipulation["perm_groups_insert"]["fields"][] = array(
 										$many_many_tables["groups"]["field"] 	=> $version,
 										$many_many_tables["groups"]["extfield"]	=> $groupid

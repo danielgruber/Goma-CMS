@@ -1201,6 +1201,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeManipulate($manipulation, $b = "write");
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
 		
+		
 		// fire manipulation to DataBase
 		if(SQL::manipulate($manipulation)) {
 			
@@ -3820,7 +3821,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$casting = $this->casting();
 	
 		// add some fields for versioning
-		if($this->hasTable() && $this->Table() == $this->baseTable) {
+		if($this->Table() && $this->Table() == $this->baseTable) {
 			if(!isset($db_fields["recordid"]))
 				$db_fields["recordid"] = "int(10)";
 			

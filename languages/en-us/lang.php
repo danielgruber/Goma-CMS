@@ -562,6 +562,8 @@ $lang = array(
 	"toggle_sidebar"		=> "toggle sidebar",
 	
 	"time_not_in_range"		=> "The time must be between \$start and \$end.",
-	"no_valid_time"			=> "The given time is not valid."
+	"no_valid_time"			=> "The given time is not valid.",
+	
+	"mail_successful_sent"	=> "The mail was sent successfully."
 
 );
