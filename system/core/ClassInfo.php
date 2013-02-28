@@ -462,17 +462,17 @@ class ClassInfo extends Object
 			}
 			
 			if(isset(self::$files[$class])) {
-				if(file_exists(dirname(self::$files[$class]) . "/" . $file)) {
+				if(file_exists(dirname(self::$files[$class]) . "/" . $file) && !is_dir(dirname(self::$files[$class]) . "/" . $file)) {
 					return dirname(self::$files[$class]) . "/" . $file;
 				}
 			}
 			
 			
-			if(file_exists(APPLICATION . "/" . $file)) {
+			if(file_exists(APPLICATION . "/" . $file) && !is_dir(APPLICATION . "/" . $file)) {
 				return APPLICATION . "/" . $file;
 			}
 			
-			if(file_exists($file))
+			if(file_exists($file) && !is_dir($file))
 				return $file;
 			else
 				return false;

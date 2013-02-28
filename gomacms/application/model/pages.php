@@ -328,6 +328,26 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			return $this->fieldGet("path");
 		}
 		
+		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			$title = $this->title;
+			
+			if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
+				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
+			}
+			
+			if($link)
+				$title = '<a href="'.BASE_URI.'?r='.$this->id.'&pages_version='.$this->versionid.'" target="_blank">' . $title . '</a>';
+			
+			return $title;
+		}
+	
+		
 		//!Permission-Getters and Setters
 		
 		/**
@@ -1036,7 +1056,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					else
 						$state = "edited";
 				}
-				$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
+				$class = "".$record["class_name"]. " " . $mainbar . " " . $state;
 				
 				$where["parentid"] = $record->recordid;
 				// children

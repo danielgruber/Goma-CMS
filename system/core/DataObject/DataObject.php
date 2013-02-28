@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 16.02.2013
-  * $Version: 4.7.4
+  * last modified: 28.02.2013
+  * $Version: 4.7.5
 */
 
 defined('IN_GOMA') OR die();
@@ -2562,7 +2562,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function editor() {
 		if($this->fieldGet("editorid") != 0) {
-			return DataObject::get("user",array('id' => $this['autorid']));
+			return DataObject::get_one("user",array('id' => $this['editorid']));
 		} else
 			return $this->autor();
 	}
@@ -2637,6 +2637,33 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			
 			$this->setField("versionid", $vID);
 		}
+	}
+	
+	/**
+	 * returns the representation of this record
+	 *
+	 *@name generateResprensentation
+	 *@access public
+	*/
+	public function generateRepresentation($link = false) {
+		if($this->title)
+			$title = $this->title;
+		
+		else if($this->name)
+			$title = $this->name;
+		else {
+			$fields = array_values($this->DataBaseFields());
+			if(isset($fields[0]))
+				$title = $this[$fields[0]];
+			else
+				return null;
+		}
+		
+		if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
+			$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
+		}
+		
+		return $title;
 	}
 	
 	//!Queries
@@ -2757,6 +2784,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						$query->addFilter($baseTable.'.id = (
 							SELECT where_'.$baseTable.'.id FROM '.DB_PREFIX . $baseTable.' AS where_'.$baseTable.' WHERE where_'.$baseTable.'.recordid = '.$baseTable.'.recordid ORDER BY (where_'.$baseTable.'.id = '.$version.') DESC LIMIT 1
 						)');
+						
+						if(isset($query->filter["id"])) {
+							$query->filter["recordid"] = $query->filter["id"];
+						}
+						
+						unset($query->filter["id"]);
 						
 						
 						// unmerge deleted records

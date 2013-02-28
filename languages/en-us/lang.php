@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 22.02.2013
+  * last modified: 28.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -402,7 +402,7 @@ $lang = array(
 	"versions_javascript"							=> "Please enable JavaScript to use this page.",
 	"done"											=> "Done",
 	"restore"										=> "Undo",
-	"restore_confirm"								=> "Do you really want to undo this change?",
+	"restore_confirm"								=> "Do you really want to revert back to this version?",
 	"compare"										=> "compare",
 	"no_versions"									=> "No version found",
 	"versions_timeline"								=> "Timeline",

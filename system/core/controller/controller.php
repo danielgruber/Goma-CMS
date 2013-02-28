@@ -515,13 +515,19 @@ class Controller extends RequestHandler
 					$disabled = false;
 				}
 				
-				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"))) {
-					$data = clone $this->modelInst();
-					if(is_a($this->modelInst(), "DataObjectSet"))
-						$toDelete = $this->modelInst()->first();
-					else
-						$toDelete = $this->modelInst();
+				if(is_a($this->modelInst(), "DataObjectSet"))
+					$toDelete = $this->modelInst()->first();
+				else
+					$toDelete = $this->modelInst();
+				
+				// generate description for data to delete
+				$description = $toDelete->generateRepresentation(false);
+				if(isset($description))
+					$description = '<a href="'.$this->namespace.'/edit/'.$toDelete->id . URLEND .'" target="_blank">'.$description.'</a>';
+				
+				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"), null, null, $description)) {
 					
+					$data = clone $this->modelInst();
 					$toDelete->remove();
 					if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 						$response = new AjaxResponse();
@@ -695,11 +701,14 @@ class Controller extends RequestHandler
 		 *@param string - title of the okay-button, if you want to set it, default: "yes"
 		 *@param string|null - redirect on cancel button
 		*/
-		public function confirm($title, $btnokay = null, $redirectOnCancel = null) {
+		public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null) {
 			
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
 			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->class), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
+			if(isset($description)) {
+				$form->add(new HTMLField("description", '<div class="confirmDescription">'.$description.'</div>'));
+			}
 			$form->get();
 			return true;
 			

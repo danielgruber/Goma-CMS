@@ -160,7 +160,19 @@ class HistoryController extends Controller {
 	public function restoreVersion() {
 		$version = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")));
 		if($version->canWrite($version) || $version->canPublish($version)) {
-			if($this->confirm(lang("restore_confirm"))) {
+			
+			$description = $version->generateRepresentation(true);
+			if(isset($description)) {
+				$description .= " " . lang("version_by") . " ";
+				if($version->editor) {
+					$description .= '<a href="member/'.$version->editor->ID . URLEND.'" class="user">' . convert::Raw2xml($version->editor->title) . '</a>';
+				} else {
+					$description .= '<span style="font-style: italic;">System</span>';
+				}
+				$description .= " " . $version->last_modified()->ago();
+			}
+			
+			if($this->confirm(lang("restore_confirm"), null, null, $description)) {
 				if($version->canWrite($version)) {
 					$version->write(false, true, 1);
 				} else {

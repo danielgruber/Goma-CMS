@@ -820,30 +820,30 @@ class DateSQLField extends DBField {
 	 *@access public
 	*/
 	public function ago() {
-		if($this->value - NOW < 60) {
-			return printf(lang("ago.seconds", "about %d seconds ago"), round($this->value - NOW));
-		} else if($this->value - NOW < 90) {
-			return '<span title="'.$this->forTemplate().'">' . lang("ago.minute", "about one minute ago") . '</span>';
+		if(NOW - $this->value < 60) {
+			return '<span title="'.$this->forTemplate().'" class="ago-date">' . sprintf(lang("ago.seconds", "about %d seconds ago"), round(NOW - $this->value)) . '</span>';
+		} else if(NOW - $this->value < 90) {
+			return '<span title="'.$this->forTemplate().'" class="ago-date">' . lang("ago.minute", "about one minute ago") . '</span>';
 		} else {
-			$diff = $this->value - NOW;
+			$diff = NOW - $this->value;
 			$diff = $diff / 60;
 			if($diff < 60) {
-				return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
+				return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
 			} else {
 				$diff = round($diff / 60);
 				if($diff == 1) {
 					return '<span title="'.$this->forTemplate().'">' . lang("ago.hour", "about one hour ago") . '</span>';
 				} else {
 					if($diff < 60) {
-						return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
+						return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
 					} else {
 						$diff = round($diff / 24);
 						if($diff == 1) {
 							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff < 10) {
-							return '<span title="'.$this->forTemplate().'">' . printf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
+						} else if($diff < 20) {
+							return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
 						} else {
-							return $this->forTemplate();
+							return lang("version_at") . " " . $this->forTemplate();
 						}
 					}
 				}
