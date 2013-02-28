@@ -886,16 +886,18 @@ function debug_log($data) {
  */
 function writeServerConfig() {
 	if (strpos($_SERVER["SERVER_SOFTWARE"], "Apache") !== false) {
-		$file = ".htaccess";
+		$file = "htaccess";
+		$toFile = ".htaccess";
 	} else if (strpos($_SERVER["SERVER_SOFTWARE"], "IIS") !== false) {
 		$file = "web.config";
+		$toFile = "web.config";
 	} else {
 		return;
 	}
 
 	require (ROOT . "system/resources/" . $file . ".php");
 
-	if (!file_put_contents(ROOT . $file, $serverconfig, FILE_APPEND)) {
+	if (!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
 		die("Could not write " . $file);
 	}
 }
