@@ -54,7 +54,7 @@
 	<div id="userbar-logout">
 		<form method="post" id="loginFormGlobe" action="{BASE_SCRIPT}profile/logout">
 			<input type="hidden" name="logout" value="1" />
-			<input type="hidden" name="redirect" value="{$_SERVER_REQUEST_URI.text()}" />
+			<input type="hidden" name="redirect" value="{BASE_URI}" />
 			<input title="{$_lang_logout}" alt="{$_lang_logout}" type="image" src="system/templates/admin/images/power_off.png" />
 		</form>
 	</div>
