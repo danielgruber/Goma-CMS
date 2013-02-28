@@ -834,13 +834,13 @@ class DateSQLField extends DBField {
 				if($diff == 1) {
 					return '<span title="'.$this->forTemplate().'">' . lang("ago.hour", "about one hour ago") . '</span>';
 				} else {
-					if($diff < 60) {
+					if($diff < 24) {
 						return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
 					} else {
 						$diff = round($diff / 24);
 						if($diff == 1) {
 							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff < 20) {
+						} else if($diff < 4) {
 							return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
 						} else {
 							return lang("version_at") . " " . $this->forTemplate();
