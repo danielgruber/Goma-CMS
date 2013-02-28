@@ -235,4 +235,14 @@ class RequestForm extends Object {
 		exit;
 	}
 	
+	/**
+	 * adds a field
+	 *
+	 *@name add
+	 *@access public
+	*/
+	public function add($field) {
+		array_push($this->fields, $field);
+	}
+	
 }

@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 03.02.2013
+  * last modified: 28.02.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -404,7 +404,7 @@ $lang = array(
 	"versions_javascript"							=> "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen.",
 	"done"											=> "Fertig",
 	"restore"										=> "Rückgängig",
-	"restore_confirm"								=> "Wollen Sie diese Änderung wirklich rückgängig machen?",
+	"restore_confirm"								=> "Wollen Sie wirklich zu dieser Version zurückkehren?",
 	"compare"										=> "Vergleichen",
 	"no_versions"									=> "Keine Version vorhanden",
 	"versions_timeline"								=> "Zeitleiste",
@@ -499,13 +499,13 @@ $lang = array(
 	
 	/* date for ago */
 	
-	"ago.seconds"			=> "Vor %d Sekunden",
-	"ago.minute"			=> "Vor etwa einer Minute",
-	"ago.minutes"			=> "Vor %d Minuten",
-	"ago.hour"				=> "Vor etwa einer Stunde",
-	"ago.hours"				=> "Vor %d Stunden",
-	"ago.day"				=> "Vor etwa einem Tag",
-	"ago.days"				=> "Vor %d Tagen",
+	"ago.seconds"			=> "vor %d Sekunden",
+	"ago.minute"			=> "vor etwa einer Minute",
+	"ago.minutes"			=> "vor %d Minuten",
+	"ago.hour"				=> "vor etwa einer Stunde",
+	"ago.hours"				=> "vor %d Stunden",
+	"ago.day"				=> "vor etwa einem Tag",
+	"ago.days"				=> "vor %d Tagen",
 	
 	"domain"				=> "Domain",
 	"restoreType"			=> "Wiederherstellungsmethode",
