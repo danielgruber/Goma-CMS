@@ -492,6 +492,23 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		}
 		
 		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			$title = $this->title;
+			
+			$title = $this->image()->setSize(20, 20) . " " . $title;
+			
+			if($link)
+				$title = '<a href="member/'.$this->id.'" target="_blank">' . $title . '</a>';
+			
+			return $title;
+		}
+		
+		/**
 		 * performs a login
 		 *
 		 *@name performLogin
