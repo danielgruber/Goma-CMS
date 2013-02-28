@@ -49,9 +49,16 @@ $(document).ready(function() {
 
 	updateNav();
 
-	$("#navMore").click(function() {
-		$(this).toggleClass("open");
+	$("#navMore > a").click(function() {
+		$(this).parent().toggleClass("open");
 		$("#navMore-sub").stop().slideToggle("fast");
 		return false;
 	});
+	
+	var hideNavMore = function() {
+		$("#navMore").removeClass("open");
+		$("#navMore-sub").stop().slideUp("fast");
+	}
+	
+	CallonDocumentClick(hideNavMore, [$("#navMore"), $("#navMore-sub")]);
 })
