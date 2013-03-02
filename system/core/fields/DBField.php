@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 19.12.2012
-  * $Version 1.4.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 02.03.2013
+  * $Version 1.4.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -819,7 +819,7 @@ class DateSQLField extends DBField {
 	 *@name ago
 	 *@access public
 	*/
-	public function ago() {
+	public function ago($fullSentence = true) {
 		if(NOW - $this->value < 60) {
 			return '<span title="'.$this->forTemplate().'" class="ago-date">' . sprintf(lang("ago.seconds", "about %d seconds ago"), round(NOW - $this->value)) . '</span>';
 		} else if(NOW - $this->value < 90) {
@@ -837,13 +837,18 @@ class DateSQLField extends DBField {
 					if($diff < 24) {
 						return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
 					} else {
-						$diff = round($diff / 24);
-						if($diff == 1) {
+						$diff = $diff / 24;
+						$diffRound = round($diff, 1);
+						if($diff <= 1.1) {
 							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff < 4) {
-							return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
+						} else if($diff <= 7) {
+							$pre = ($fullSentence) ? lang("version_at") . " " : "";
+							return '<span title="'.$this->forTemplate().'">' . $pre . sprintf(lang("ago.weekday", "%s at %s"), $this->date("l"), $this->date("H:i")) . '</span>';
 						} else {
-							return lang("version_at") . " " . $this->forTemplate();
+							if($fullSentence)
+								return lang("version_at") . " " . $this->forTemplate();
+							else
+								return $this->forTemplate();
 						}
 					}
 				}
