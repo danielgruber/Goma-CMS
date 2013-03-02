@@ -505,7 +505,7 @@ $lang = array(
 	"ago.hour"				=> "vor etwa einer Stunde",
 	"ago.hours"				=> "vor %d Stunden",
 	"ago.day"				=> "vor etwa einem Tag",
-	"ago.days"				=> "vor %d Tagen",
+	"ago.weekday"			=> "%s um %s",
 	
 	"domain"				=> "Domain",
 	"restoreType"			=> "Wiederherstellungsmethode",
