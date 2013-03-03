@@ -267,4 +267,53 @@ class HTMLParser extends Object
 			}
 			return $words;
 		}
+		
+		/**
+		 * Rates a word in the given context
+		 * Returnvalues can be between 0 and 3
+		 * @access public
+		 * @return int - result
+		*/
+		
+		public function rate_word($word, $context)
+		{
+			if(empty($word) || empty($context))
+				return 0;
+			
+			$value = count_word($word, $context);
+			$div = $value;
+			
+			$value += count_title_words($word, $context);
+			$value += count_question_words($word, $context);
+			$value += count_exclamation_words($word, $context);
+			
+			return $value / $div;
+		}
+		
+		
+		public function count_word($word, $context)
+		{
+			$count = preg_split($word, $context, -1);
+			$count = sizeof($count);
+			
+			if(!($count <= 0))
+				$count --;
+			
+			return $count;	
+		}
+		
+		public function count_title_words($word, $context)
+		{
+			
+		}
+		
+		public function count_question_words($word, $context)
+		{
+			
+		}
+		
+		public function count_exclamation_words($word, $context)
+		{
+			
+		}
 }
