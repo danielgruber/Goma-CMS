@@ -9,9 +9,13 @@
 		<% INCLUDE_CSS_MAIN "notifications.css" %>
 
 		<% INCLUDE_JS_MAIN "admin.js" %>
-
+		
 		{$header}
 
+		<!--[if lte IE 8]>
+		<link rel="stylesheet" media="print" href="system/templates/admin/print.css" type="text/css" />
+		<![endif]-->
+		
 		<% IF NOT $content AND PERMISSION("superadmin") %>
 			<% gload("htmllib") %>
 	
