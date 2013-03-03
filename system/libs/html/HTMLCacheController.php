@@ -24,6 +24,8 @@ class HTMLCacheController extends Object
 	
 	public function build_cache($content)
 	{
+		self::load_word_filter("de-de");
+		
 		$cache = "";
 		$words = get_wordlist($content);
 		foreach($words as $word)
@@ -42,7 +44,7 @@ class HTMLCacheController extends Object
 			
 			// $word is a noun
 			
-			if(strlen($word) < 3)
+			if(strlen($word) < 4)
 				continue;
 			
 			// $word is ! (in german) a help word (nothing to be found)
@@ -105,6 +107,7 @@ class HTMLCacheController extends Object
 	
 	public function load_word_filter($lang)
 	{
+		$lang = "./".$lang.".filter.php";
 		include $lang;
 	}
 		
