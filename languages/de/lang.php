@@ -482,6 +482,7 @@ $lang = array(
 	"signed"										=> "Signatur",
 	"signed_true"									=> "Dieses Paket wurde vom Goma-Team geprüft und ist freigegeben!",
 	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
+	"signed_false_ssl"								=> "Das Paket konnte nicht vom Goma-Team geprüft werden. Open-SSL ist nicht auf Ihrem Server installiert. Bitte kontaktieren Sie den Server-Administrator oder holen Sie sich Support auf der <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Seite</a>.",
 	
 	/* install */
 	"install.folder"		=> "Installationsverzeichnis",

@@ -711,7 +711,7 @@ class ClassInfo extends Object
 								unset($data);
 							} else {
 								$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
-								$error = str_replace('{$error}', 'You need to have a installed GD-Library 2.', $error);
+								$error = str_replace('{$error}', /*'You need to have GD-Library 2 installed.'*/ 'Sie benötigen GD-Library 2, um Goma auszuführen.', $error);
 								$error = str_replace('{BASE_URI}', BASE_URI, $error);
 								header("HTTP/1.1 500 Server Error");
 								echo $error;

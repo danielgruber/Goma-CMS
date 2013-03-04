@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
-  * $Version 1.5.8
+  * last modified: 05.03.2013
+  * $Version 1.5.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -206,6 +206,8 @@ abstract class g_SoftwareType {
 					
 					if($gfs->isSigned(self::getAppStorePublic())) {
 						$data["signed"] = true;
+					} else if(GFS::$openssl_problems) {
+						$data["signed_ssl_not_installed"] = true;
 					}
 					
 					return $data;

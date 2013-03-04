@@ -256,10 +256,3 @@ html[xmlns] .clearfix {
 * html .clearfix {
 	height: 1%;
 }
-
-#page_wrapperpage li h4 {
-	margin: 0;
-}
-.confirmDescription {
-	padding: 10px;
-}

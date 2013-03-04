@@ -351,21 +351,6 @@ function writeSystemConfig($data = array()) {
 			$$key = $val;
 	}
 
-	if (!isset($SSLprivateKey) || !isset($SSLpublicKey) || !$SSLprivateKey || !$SSLpublicKey) {
-		// generate new key-pair
-		// Create the keypair
-		$res = openssl_pkey_new();
-		if ($res === false)
-			die("Please check your OpenSSL configuration. If you're server administrator, please have a look at <a href='http://www.goma-cms.org'>Goma</a>");
-
-		// Get private key
-		openssl_pkey_export($res, $SSLprivateKey);
-
-		// Get public key
-		$SSLpublicKey = openssl_pkey_get_details($res);
-		$SSLpublicKey = $SSLpublicKey["key"];
-	}
-
 	$contents = file_get_contents(FRAMEWORK_ROOT . "core/samples/config_main.sample.php");
 	preg_match_all('/\{([a-zA-Z0-9_]+)\}/Usi', $contents, $matches);
 	foreach ($matches[1] as $name) {
@@ -439,38 +424,6 @@ function getPrivateKey() {
 	include (ROOT . "_config.php");
 
 	return $privateKey;
-}
-
-/**
- * gets the SSL-public Key
- *
- *@name getPublicKey
- *@access public
- */
-function getSSLPublicKey() {
-	if (!file_exists(ROOT . "_config.php")) {
-		writeSystemConfig();
-	}
-
-	include (ROOT . "_config.php");
-
-	return $SSLpublicKey;
-}
-
-/**
- * gets the SSL-private Key
- *
- *@name getPublicKey
- *@access public
- */
-function getSSLPrivateKey() {
-	if (!file_exists(ROOT . "_config.php")) {
-		writeSystemConfig();
-	}
-
-	include (ROOT . "_config.php");
-
-	return $SSLprivateKey;
 }
 
 /**
