@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 22.02.2013
+  * last modified: 05.03.2013
   * $Version 2.6.6
 */
 
@@ -157,6 +157,13 @@ class GFS extends Object {
 	 *@access private
 	*/
 	private $certValidCache;
+	
+	/**
+	 * contains whether problem is with openssl
+	 *
+	 *@name openssl_problems
+	*/
+	static $openssl_problems = false;
 	
 	/**
 	 *@name __construct
@@ -1183,26 +1190,34 @@ class GFS extends Object {
 			return $this->certValidCache;
 		}
 		
+		self::$openssl_problems = true;
+		return false;
+		
 		
 		
 		if(isset($this->certificate)) {
-			// generate data to encrypt
-			$data = "";
-			foreach($this->db as $path => $entry) {
-				$data .= $path;
-				if(isset($entry["checksum"])) {
-					$data .= $entry["checksum"];
-				} else if(isset($entry["contents"])) {
-					$data .= md5($entry["contents"]);
+			if(function_exists("openssl_public_decrypt")) {
+				// generate data to encrypt
+				$data = "";
+				foreach($this->db as $path => $entry) {
+					$data .= $path;
+					if(isset($entry["checksum"])) {
+						$data .= $entry["checksum"];
+					} else if(isset($entry["contents"])) {
+						$data .= md5($entry["contents"]);
+					}
 				}
-			}
-			
-			$data = md5($data);
-			if(openssl_public_decrypt($this->certificate, $decrypted, $publicKey)) {
-				if($decrypted == $data) {
-					$this->certValidCache = true;
-					return true;
+				
+				$data = md5($data);
+				if(openssl_public_decrypt($this->certificate, $decrypted, $publicKey)) {
+					if($decrypted == $data) {
+						$this->certValidCache = true;
+						return true;
+					}
 				}
+			} else {
+				self::$openssl_problems = true;
+				return false;
 			}
 		}
 		
@@ -1242,7 +1257,7 @@ class GFS extends Object {
 			$this->updateDB();
 		}
 		
-		if($this->private && !$this->readonly) {
+		if($this->private && !$this->readonly && function_exists("openssl_private_encrypt")) {
 			$enc = "";
 		
 			// generate data to encrypt
@@ -1267,6 +1282,8 @@ class GFS extends Object {
 			if(@fread($this->pointer, 5) != "!SIGN") {
 				@fwrite($this->pointer, "\n\n" . $this->certificate . "\n" . strlen($this->certificate) . "!SIGN");
 			}
+		} else if(!function_exists("openssl_private_encrypt")) {
+			self::$openssl_problems = true;
 		}
 		
 		if(isset($this->pointer)) {

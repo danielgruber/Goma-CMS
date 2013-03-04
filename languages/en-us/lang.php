@@ -482,7 +482,7 @@ $lang = array(
 	"signed"										=> "signature",
 	"signed_true"									=> "This package was validated by the Goma-Team and is safe to install!",
 	"signed_false"									=> "This package wasn't validated by the Goma-Team! Installing is at own risk!",
-
+	"signed_false_ssl"								=> "The package could not be validated, because Open-SSL is not installed on this server. Please contact your Server-administrator or get help at the <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Page</a>.",
 	
 	/* install */
 	"install.folder"			=> "Install-Folder",
