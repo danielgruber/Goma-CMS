@@ -133,10 +133,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getURL()
 		{
-			if($this->path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
+			$path = $this->path;
+			if($path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
 				return ROOT_PATH . BASE_SCRIPT;
 			} else {
-				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
+				return  ROOT_PATH . BASE_SCRIPT . $path . URLEND;
 			}
 		}
 		
@@ -1460,7 +1461,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@name cache_parent
 	 *@access public
 	*/
-	private $cache_parent = array();
+	private static $cache_parent = array();
 	
 	/**
 	 * gets allowed parents
@@ -1468,10 +1469,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@access public
 	*/		
 	public function allowed_parents() {
-		
+        
+	        if(PROFILE) Profiler::mark("pages::allowed_parents");
+	        
+	        $cacher = new Cacher("cache_parents");
+	        if($cacher->checkValid()) {
+	            self::$cache_parent = $cacher->getData();
+	        }
+        
 		// for performance reason we cache this part
-		if($this->cache_parent == array()) {
-				if(PROFILE) Profiler::mark("pages::allowed_parents");
+		if(self::$cache_parent[$this->class] == array()) {
+				
 				
 				$allowed_parents = array();
 				
@@ -1529,12 +1537,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						}
 					}
 				}
+	        
+	        self::$cache_parent[$this->class] = $allowed_parents;
 				
 				if(PROFILE) Profiler::unmark("pages::allowed_parents");
-
+	        
+	        $cacher->write(self::$cache_parent, 3600);
+	        
 				return $allowed_parents;
 		} else {
-				return $this->cache_parent;
+            		if(PROFILE) Profiler::unmark("pages::allowed_parents");
+			return self::$cache_parent[$this->class];
 		}	
 	}
 	
