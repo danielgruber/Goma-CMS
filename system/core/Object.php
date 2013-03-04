@@ -360,7 +360,7 @@ abstract class Object
 				}
 		}
 		
-		/**
+			/**
 		  * gets singletom of the given class
 		  *@name instance
 		  *@access public
@@ -379,23 +379,27 @@ abstract class Object
 				
 				/* --- */
 				
+               			// caching
 				if(isset(self::$cache_singleton_classes[$class]))
 				{
 						$class = clone self::$cache_singleton_classes[$class];
 				} else
 				{
+                        
+                        			// error catching
 						if($class == "")
 						{
-							
 							$trace = debug_backtrace();
-							throwError(6, 'PHP-Error', 'Cannot initiate empty Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
+							throwError(6, 'Class-Initiate-Error', 'Cannot initiate empty Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
-						if(classinfo::isAbstract($class)) {
+                        
+						if(ClassInfo::isAbstract($class)) {
 							$trace = debug_backtrace();
-							throwError(6, 'PHP-Error', 'Cannot initiate abstract Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
+							throwError(6, 'Class-Initiate-Error', 'Cannot initiate abstract Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
 						
-						if((defined("INSTALL") && class_exists($class)) || classinfo::exists($class)) {
+                        			// generate Class
+						if((defined("INSTALL") && class_exists($class)) || ClassInfo::exists($class)) {
 								self::$cache_singleton_classes[$class] = new $class;
 								$class = clone self::$cache_singleton_classes[$class];
 						} else {
