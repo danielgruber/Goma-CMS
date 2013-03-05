@@ -10,8 +10,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 126.02.2013
-  * $Version 2.2.8
+  * last modified: 05.04.2013
+  * $Version 2.2.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -673,11 +673,16 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			
 			$lowername = strtolower($name);
 			
+			if($lowername == "baseclass") {
+				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset", "ViewAccessableData::getOffset baseclass ");
+				return $this->baseClass();
+			}
+			
 			if(isset($this->customised[$lowername])) {
 				$data = $this->customised[$lowername];
 			// methods
 			} else if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->class, $name)) {
-				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset");
+				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset", "ViewAccessableData::getOffset call " . $name);
 				return parent::__call($name, $args);
 			} else
 			
@@ -785,11 +790,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			$currentvar = trim(strtolower($currentvar));
 			$data = $this->getOffset($currentvar, array());
 			
+			$casting = $this->casting();
+			
 			if($remaining == "") {
 				if(is_object($data)) {
 					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
 					return $data->forTemplate();
-				} else if(isset($this->casting[$currentvar])) {
+				} else if(isset($casting[$currentvar])) {
 					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
 					return $this->makeObject($currentvar, $data)->forTemplate();
 				} else {
@@ -800,7 +807,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(is_object($data)) {
 					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
 					return $data->getTemplateVar($remaining);
-				} else if(isset($this->casting[$currentvar])) {
+				} else if(isset($casting[$currentvar])) {
 					if(PROFILE) Profiler::unmark("ViewAccessableData::getTemplateVar");
 					return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
 				} else {
@@ -839,8 +846,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
 				return $object;
 			} else {
-				$casting = isset($this->casting[$name]) ? $this->casting[$name] : ClassInfo::getStatic($this->class, "default_casting");
-				$object = DBField::getObjectByCasting($casting, $name, $data);
+				$casting = $this->casting();
+				$caste = isset($casting[$name]) ? $casting[$name] : ClassInfo::getStatic($this->class, "default_casting");
+				unset($casting);
+				$object = DBField::getObjectByCasting($caste, $name, $data);
 				
 				if(PROFILE) Profiler::unmark("ViewAccessableData::makeObject");
 				return $object;
