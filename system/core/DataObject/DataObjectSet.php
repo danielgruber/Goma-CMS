@@ -1002,6 +1002,9 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
+		
+		if(PROFILE) Profiler::mark("DataObjectSet::__construct");
+		
 		parent::__construct(null);
 		
 		if(isset($class)) {
@@ -1024,6 +1027,8 @@ class DataObjectSet extends DataSet {
 			
 			$this->protected_customised = $this->customised;
 		}
+		
+		if(PROFILE) Profiler::mark("DataObjectSet::__construct");
 	}
 	
 	/**

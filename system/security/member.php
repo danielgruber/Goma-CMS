@@ -724,28 +724,37 @@ class Member extends Object {
 	 *@access public
 	*/
 	public static function checkDefaults() {
-		if(DataObject::count("group", array("type" => 2)) == 0) {
-			$group = new Group();
-			$group->name = lang("admins", "admin");
-			$group->type = 2;
-			$group->write(true, true, 2, false, false);
+		
+		$cacher = new Cacher("groups-checkDefaults");
+		if($cacher->checkValid()) {
+			
+		} else {
+			if(DataObject::count("group", array("type" => 2)) == 0) {
+				$group = new Group();
+				$group->name = lang("admins", "admin");
+				$group->type = 2;
+				$group->write(true, true, 2, false, false);
+			}
+			
+			if(DataObject::count("group", array("type" => 1)) == 0) {
+				$group = new Group();
+				$group->name = lang("user", "users");
+				$group->type = 1;
+				$group->write(true, true, 2, false, false);
+			}
+			
+			if(isset(self::$default_admin) && DataObject::count("user") == 0) {
+				$user = new User();
+				$user->nickname = self::$default_admin["nickname"];
+				$user->password = self::$default_admin["password"];
+				$user->write(true, true);
+				$user->groups()->add(DataObject::get_one("group", array("type" => 2)));
+				$user->groups()->write(false, true);
+			}
+			
+			$cacher->write(true, 3600);
 		}
 		
-		if(DataObject::count("group", array("type" => 1)) == 0) {
-			$group = new Group();
-			$group->name = lang("user", "users");
-			$group->type = 1;
-			$group->write(true, true, 2, false, false);
-		}
-		
-		if(isset(self::$default_admin) && DataObject::count("user") == 0) {
-			$user = new User();
-			$user->nickname = self::$default_admin["nickname"];
-			$user->password = self::$default_admin["password"];
-			$user->write(true, true);
-			$user->groups()->add(DataObject::get_one("group", array("type" => 2)));
-			$user->groups()->write(false, true);
-		}
 	}
 	
 	/**

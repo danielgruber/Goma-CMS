@@ -186,14 +186,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public static function get($class, $filter = null, $sort = null, $limits = null, $joins = null, $version = null, $pagination = null) {
 		
+        if(PROFILE) Profiler::mark("DataObject::get");
+        
 		$DataSet = new DataObjectSet($class, $filter, $sort, $limits, $joins, array(), $version);
 		
 		if(isset($pagination) && $pagination !== false) {
+			
 			if(is_int($pagination))
 				$DataSet->activatePagination($pagination);
 			else
 				$DataSet->activePagination();
 		}
+        
+        if(PROFILE) Profiler::unmark("DataObject::get");
 		
 		return $DataSet;
 	}
@@ -2344,21 +2349,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@access public
 	*/
 	public function getHasOne($name, $filter = null) {
+		
 		$name = trim(strtolower($name));
+		
+		if(PROFILE) Profiler::mark("getHasOne " . $name);
 		
 		$cache = "has_one_{$name}_".var_export($filter, true) . $this[$name . "id"];
 		if(isset($this->viewcache[$cache])) {
+			if(PROFILE) Profiler::unmark("getHasOne " . $name);
 			return $this->viewcache[$cache];
 		}
 		
 		$has_one = $this->hasOne();
 		if(isset($has_one[$name])) {
 			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $has_one[$name]) && !$filter) {
+				if(PROFILE) Profiler::unmark("getHasOne " . $name);
 				return $this->fieldGet($name);
 			}
 			
-			if($this[$name . "id"] == 0)
+			if($this[$name . "id"] == 0) {
+				if(PROFILE) Profiler::unmark("getHasOne " . $name);
 				return false;
+			}
 			
 			$filter["id"] = $this[$name . "id"];
 			$response = DataObject::get($has_one[$name], $filter);
@@ -2368,6 +2380,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			}
 			
 			$this->viewcache[$cache] = $response->first(false);
+			if(PROFILE) Profiler::unmark("getHasOne " . $name);
 			return $this->viewcache[$cache];
 		} else {
 			$debug = debug_backtrace();
