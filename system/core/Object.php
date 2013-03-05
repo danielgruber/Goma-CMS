@@ -360,7 +360,7 @@ abstract class Object
 				}
 		}
 		
-			/**
+		/**
 		  * gets singletom of the given class
 		  *@name instance
 		  *@access public
@@ -368,7 +368,6 @@ abstract class Object
 		*/
 		public static function instance($class)
 		{
-				if(PROFILE) Profiler::mark("Object::instance");
 				
 				if(is_object($class))
 				{
@@ -377,18 +376,20 @@ abstract class Object
 				
 				$class = strtolower($class);
 				
+				if(PROFILE) Profiler::mark("Object::instance");
+				
 				/* --- */
 				
-               			// caching
+                // caching
 				if(isset(self::$cache_singleton_classes[$class]))
 				{
+						if(PROFILE) Profiler::unmark("Object::instance");
 						$class = clone self::$cache_singleton_classes[$class];
 				} else
 				{
                         
-                        			// error catching
-						if($class == "")
-						{
+                        // error catching
+						if($class == "") {
 							$trace = debug_backtrace();
 							throwError(6, 'Class-Initiate-Error', 'Cannot initiate empty Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
@@ -398,7 +399,7 @@ abstract class Object
 							throwError(6, 'Class-Initiate-Error', 'Cannot initiate abstract Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
 						
-                        			// generate Class
+                        // generate Class
 						if((defined("INSTALL") && class_exists($class)) || ClassInfo::exists($class)) {
 								self::$cache_singleton_classes[$class] = new $class;
 								$class = clone self::$cache_singleton_classes[$class];
