@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 28.02.2013
-  * $Version: 4.7.5
+  * last modified: 05.03.2013
+  * $Version: 4.7.6
 */
 
 defined('IN_GOMA') OR die();
@@ -353,7 +353,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public static function get_one($name, $filter = array(), $sort = array(), $joins = array())
 	{
-		return self::get($name, $filter, $sort, array(1))->first(false);
+		if(PROFILE) Profiler::mark("DataObject::get_one");
+		
+		$name = strtolower($name);
+
+		$output = self::get($name, $filter, $sort, array(1))->first(false);
+		
+		if(PROFILE) Profiler::unmark("DataObject::get_one");
+
+		return $output;
+		
 	}
 	
 	/**
@@ -2352,36 +2361,48 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		
 		$name = trim(strtolower($name));
 		
-		if(PROFILE) Profiler::mark("getHasOne " . $name);
+		if(PROFILE) Profiler::mark("getHasOne");
 		
 		$cache = "has_one_{$name}_".var_export($filter, true) . $this[$name . "id"];
 		if(isset($this->viewcache[$cache])) {
-			if(PROFILE) Profiler::unmark("getHasOne " . $name);
+			if(PROFILE) Profiler::unmark("getHasOne", "getHasOne viewcache");
 			return $this->viewcache[$cache];
 		}
 		
 		$has_one = $this->hasOne();
 		if(isset($has_one[$name])) {
 			if($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $has_one[$name]) && !$filter) {
-				if(PROFILE) Profiler::unmark("getHasOne " . $name);
+				if(PROFILE) Profiler::unmark("getHasOne");
 				return $this->fieldGet($name);
 			}
 			
 			if($this[$name . "id"] == 0) {
-				if(PROFILE) Profiler::unmark("getHasOne " . $name);
+				if(PROFILE) Profiler::unmark("getHasOne");
 				return false;
 			}
 			
 			$filter["id"] = $this[$name . "id"];
+		
+			if(isset(self::$datacache[$this->baseClass][$cache])) {
+				if(PROFILE) Profiler::unmark("getHasOne", "getHasOne datacache");
+				$this->viewcache[$cache] = clone self::$datacache[$this->baseClass][$cache];
+				return $this->viewcache[$cache];
+			}
+			
 			$response = DataObject::get($has_one[$name], $filter);
 			
 			if($this->queryVersion == "state") {
 				$response->setVersion("state");
 			}
 			
-			$this->viewcache[$cache] = $response->first(false);
-			if(PROFILE) Profiler::unmark("getHasOne " . $name);
-			return $this->viewcache[$cache];
+			if(($this->viewcache[$cache] = $response->first(false))) {
+				self::$datacache[$this->baseClass][$cache] = clone $this->viewcache[$cache];
+				if(PROFILE) Profiler::unmark("getHasOne");
+				return $this->viewcache[$cache];
+			} else {
+				if(PROFILE) Profiler::unmark("getHasOne");
+				return null;
+			}
 		} else {
 			$debug = debug_backtrace();
 			throwError(6, "PHP-Error", "No Has-one-relation '".$name."' on ".$this->class." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
