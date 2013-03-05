@@ -28,21 +28,26 @@ class members extends Page
 		*/
 		public function member()
 		{
+				if(isset($this->viewcache["members"]))
+					return $this->viewcache["members"];
+					
 				// online - not yet fully supported
 				if(isset($_GET["online"]))
 				{
-						if($GLOBALS['cms_ajaxbar'] == 1)
-						{
-								$time_online = $GLOBALS['cms_ajaxbar_timeout'] / 1000 + 2;
-						} else
-						{
-								$time_online = 300;
-						}
-						$last = TIME - $time_online;
-						return DataObject::get("user"," statistics.last_update > ".convert::raw2sql($last)."", array(), array(), array('statistics' => 'statistics.user = `users`.`id`'));
+					if($GLOBALS['cms_ajaxbar'] == 1)
+					{
+							$time_online = $GLOBALS['cms_ajaxbar_timeout'] / 1000 + 2;
+					} else
+					{
+							$time_online = 300;
+					}
+					$last = TIME - $time_online;
+					$this->viewcache["members"] = DataObject::get("user"," statistics.last_update > ".convert::raw2sql($last)."", array(), array(), array('statistics' => 'statistics.user = `users`.`id`'));
+					return $this->viewcache["members"];
+				} else {
+					$this->viewcache["members"] = DataObject::get("user", array(), array(), array(), array(), null, true);
+					return $this->viewcache["members"];
 				}
-				else
-						return DataObject::get("user", array(), array(), array(), array(), null, true);
 		}
 		
 		/**
