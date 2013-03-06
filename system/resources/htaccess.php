@@ -38,5 +38,5 @@ AddEncoding deflate .gdf
 	deny from all
 </files>
 	
-ErrorDocument 404 system/application.php
-ErrorDocument 500 system/templates/framework/500.html';
+ErrorDocument 404 '.ROOT_PATH .'system/application.php
+ErrorDocument 500 '.ROOT_PATH .'system/templates/framework/500.html';

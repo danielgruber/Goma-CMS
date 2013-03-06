@@ -9,8 +9,8 @@
  *@link http://goma-cms.org
  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
  *@Copyright (C) 2009 - 2013  Goma-Team
- * last modified: 27.02.2013
- * $Version 2.6.7
+ * last modified: 06.03.2013
+ * $Version 2.6.8
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -243,16 +243,26 @@ if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
 	writeServerConfig();
 }
 
+// some hacks for changes in .htaccess
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 404")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 system/application.php", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 ".ROOT_PATH."system/application.php", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
 }
 
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 500")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 system/templates/framework/500.html", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 ".ROOT_PATH."system/templates/framework/500.html", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
+}
+
+if (file_exists(ROOT . ".htaccess") && (strpos(file_get_contents(".htaccess"), " system"))) {
+	$contents = file_get_contents(ROOT . ".htaccess");
+	$contents = str_replace(' system', ' ' . ROOT_PATH . "system", $contents);
+	if (!file_put_contents(ROOT . ".htaccess", $contents)) {
+		die("Could not write .htaccess");
+	}
+	unset($contents);
 }
 
 loadApplication($application);
