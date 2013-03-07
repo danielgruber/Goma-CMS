@@ -1190,10 +1190,6 @@ class GFS extends Object {
 			return $this->certValidCache;
 		}
 		
-		self::$openssl_problems = true;
-		return false;
-		
-		
 		
 		if(isset($this->certificate)) {
 			if(function_exists("openssl_public_decrypt")) {
