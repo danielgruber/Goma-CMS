@@ -342,7 +342,9 @@ function writeSystemConfig($data = array()) {
 	$browsercache = true;
 	$defaultLang = defined("DEFAULT_LANG") ? DEFAULT_LANG : "de";
 	$slowQuery = 50;
-
+	$SSLpublicKey = null;
+	$SSLprivateKey = null;
+	
 	if (file_exists(ROOT . "_config.php"))
 		include (ROOT . "_config.php");
 
@@ -365,6 +367,38 @@ function writeSystemConfig($data = array()) {
 		return true;
 	} else
 		throwError(6, 'PHP-Error', "Could not write System-Config. Please apply Permissions 0777 to /_config.php");
+}
+
+/**
+ * gets the SSL-public Key
+ *
+ *@name getPublicKey
+ *@access public
+ */
+function getSSLPublicKey() {
+	if (!file_exists(ROOT . "_config.php")) {
+		writeSystemConfig();
+	}
+
+	include (ROOT . "_config.php");
+
+	return $SSLpublicKey;
+}
+
+/**
+ * gets the SSL-private Key
+ *
+ *@name getPublicKey
+ *@access public
+ */
+function getSSLPrivateKey() {
+	if (!file_exists(ROOT . "_config.php")) {
+		writeSystemConfig();
+	}
+
+	include (ROOT . "_config.php");
+
+	return $SSLprivateKey;
 }
 
 /**
