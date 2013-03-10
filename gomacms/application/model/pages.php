@@ -1457,7 +1457,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@name cache_parent
 	 *@access public
 	*/
-	private $cache_parent = array();
+	private static $cache_parent = array();
 	
 	/**
 	 * gets allowed parents
@@ -1465,84 +1465,73 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@access public
 	*/		
 	public function allowed_parents() {
-
-        if(PROFILE) Profiler::mark("pages::allowed_parents");
-        
-        $cacher = new Cacher("cache_parents");
-        if($cacher->checkValid()) {
-            self::$cache_parent = $cacher->getData();
-        }
-        
+		
 		// for performance reason we cache this part
-		if(!isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
+		if($this->cache_parent == array()) {
+				if(PROFILE) Profiler::mark("pages::allowed_parents");
 				
-			$allowed_parents = array();
-			
-			// first check all pages
-			$allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
-			foreach($allPages as $child) {
+				$allowed_parents = array();
 				
-				// get allowed children for this page
-				$allowed = ClassInfo::getStatic($child, "allow_children");
-				if(count($allowed) > 0) {
-					foreach($allowed as $allow) {
-						$allow = strtolower($allow);
+				// first check all pages
+				$allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
+				foreach($allPages as $child) {
+					
+					// get allowed children for this page
+					$allowed = ClassInfo::getStatic($child, "allow_children");
+					if(count($allowed) > 0) {
+						foreach($allowed as $allow) {
+							$allow = strtolower($allow);
+							
+							// if ! these children are absolutly prohibited
+							if(substr($allow, 0, 1) == "!") {
+								if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
+									unset($allowed_parents[$child]);
+									continue 2;
+								}
+							} else {
+								if($allow == $this->class || is_subclass_of($this->class, $allow)) {
+									$allowed_parents[$child] = $child;
+								}
+							}
+						}
+					}
+				}
+				
+				// now filter
+				$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
+				if(count($allow_parents) > 0) {
+					foreach($allowed_parents as $parent) {
 						
-						// if ! these children are absolutly prohibited
-						if(substr($allow, 0, 1) == "!") {
-							if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
-								unset($allowed_parents[$child]);
-								continue 2;
+						// set found to false
+						$found = false;
+						
+						// try find the parent
+						foreach($allow_parents as $allow) {
+							$allow = strtolower($allow);
+							if(substr($allow, 0, 1) == "!") {
+								if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
+									unset($allowed_parents[$parent]);
+									continue 2;
+								}
+							} else {
+								if($allow == $parent || is_subclass_of($parent, $allow)) {
+									$found = true;
+								}
 							}
-						} else {
-							if($allow == $this->class || is_subclass_of($this->class, $allow)) {
-								$allowed_parents[$child] = $child;
-							}
+						}
+						
+						// if not found, unset
+						if(!$found) {
+							unset($allowed_parents[$parent]);
 						}
 					}
 				}
-			}
-			
-			// now filter
-			$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
-			if(count($allow_parents) > 0) {
-				foreach($allowed_parents as $parent) {
-					
-					// set found to false
-					$found = false;
-					
-					// try find the parent
-					foreach($allow_parents as $allow) {
-						$allow = strtolower($allow);
-						if(substr($allow, 0, 1) == "!") {
-							if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
-								unset($allowed_parents[$parent]);
-								continue 2;
-							}
-						} else {
-							if($allow == $parent || is_subclass_of($parent, $allow)) {
-								$found = true;
-							}
-						}
-					}
-					
-					// if not found, unset
-					if(!$found) {
-						unset($allowed_parents[$parent]);
-					}
-				}
-			}
-        
-			self::$cache_parent[$this->class] = $allowed_parents;
-			
-			if(PROFILE) Profiler::unmark("pages::allowed_parents");
-        
-			$cacher->write(self::$cache_parent, 3600);
-        
-			return $allowed_parents;
+				
+				if(PROFILE) Profiler::unmark("pages::allowed_parents");
+
+				return $allowed_parents;
 		} else {
-            if(PROFILE) Profiler::unmark("pages::allowed_parents");
-			return self::$cache_parent[$this->class];
+				return $this->cache_parent;
 		}	
 	}
 	
