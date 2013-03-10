@@ -35,12 +35,15 @@
 .tree li { 
 	margin: 0;
 	padding: 0;
-	padding-left: 25px;
+	padding-left: 15px;
 }
 
 .tree li .a > .b > a {
 	color: #222;
 	display: block;
+}
+.tree li .a > .b > a span {
+	line-height: 18px;
 }
 .tree li .a > .b > a :hover {
 	text-decoration: none;
