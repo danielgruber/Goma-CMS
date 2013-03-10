@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.02.2013
-  * $Version 1.4.7
+  * last modified: 08.03.2013
+  * $Version 1.4.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -206,7 +206,7 @@ class systemController extends Controller {
 			"key",
 			"pages"
 		);
-		$allowed_size = 20 * 1024 * 1024;
+		$allowed_size = 100 * 1024 * 1024;
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 06.03.2013
-  * $Version 2.5.
+  * last modified: 10.03.2013
+  * $Version 2.5.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -133,14 +133,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getURL()
 		{
-			$path = $this->path;
-			if($path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
+			if($this->path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
 				return ROOT_PATH . BASE_SCRIPT;
 			} else {
-				return  ROOT_PATH . BASE_SCRIPT . $path . URLEND;
+				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
 			}
 		}
-		
 		
 		/**
 		 * makes the org url without nothing for homepage
@@ -329,26 +327,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			return $this->fieldGet("path");
 		}
-		
-		/**
-		 * returns the representation of this record
-		 *
-		 *@name generateResprensentation
-		 *@access public
-		*/
-		public function generateRepresentation($link = false) {
-			$title = $this->title;
-			
-			if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
-				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
-			}
-			
-			if($link)
-				$title = '<a href="'.BASE_URI.'?r='.$this->id.'&pages_version='.$this->versionid.'" target="_blank">' . $title . '</a>';
-			
-			return $title;
-		}
-	
 		
 		//!Permission-Getters and Setters
 		
@@ -1058,7 +1036,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					else
 						$state = "edited";
 				}
-				$class = "".$record["class_name"]. " " . $mainbar . " " . $state;
+				$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
 				
 				$where["parentid"] = $record->recordid;
 				// children
@@ -1462,7 +1440,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@name cache_parent
 	 *@access public
 	*/
-	private static $cache_parent = array();
+	private $cache_parent = array();
 	
 	/**
 	 * gets allowed parents
@@ -1470,7 +1448,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@access public
 	*/		
 	public function allowed_parents() {
-        
+
         if(PROFILE) Profiler::mark("pages::allowed_parents");
         
         $cacher = new Cacher("cache_parents");
@@ -1480,7 +1458,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         
 		// for performance reason we cache this part
 		if(!isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
-				
 				
 			$allowed_parents = array();
 			
@@ -1814,28 +1791,5 @@ class UploadsPageBacktrace extends DataObjectExtension {
 	);
 }
 
-class UploadsPageBacktraceController extends ControllerExtension {
-	/**
-	 * on before handle an action we redirect if needed
-	 *
-	 *@name onBeforeHandleAction
-	*/
-	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-		$data = $this->getOwner()->modelInst()->linkingPages();
-		$data->setVersion(false);
-		if($data->Count() > 0) {
-			foreach($data as $page) {
-				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
-					return true;
-				}
-			}
-			
-			$handleWithMethod = false;
-			$content = false;
-		}
-	}
-}
-
-Object::extend("UploadsController", "UploadsPageBacktraceController");
 Object::extend("Uploads", "UploadsPageBacktrace");
 Object::extend("tplCaller", "ContentTPLExtension");
