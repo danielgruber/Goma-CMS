@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 02.01.2013
-  * $Version 2.0.4
+  * last modified: 10.03.2013
+  * $Version 2.0.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -281,19 +281,22 @@ class contentController extends FrontedController
 		 *@name outputHook
 		*/
 		public static function outputHook($content) {
-			if(is_subclass_of(Core::$requestController, "contentController")) {
+			if(is_a(Core::$requestController, "contentController")) {
 				$uploadObjects = array();
+				$uploadHash = "";
 				
 				// a-tags
 				preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $content, $links);
 				foreach($links[2] as $key => $href)
 				{
-					if(strpos($href, "Uploads/") && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9_\-\.]+)/', $href, $match)) {
+					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
 						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
 							if(file_exists($data->path) && filemtime(ROOT . "Uploads/" . $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
 								@unlink($data->path);
 							}
+							
 							$uploadObjects[] = $data;
+							$uploadHash .= $data->realfile;
 						}
 					}
 				}
@@ -302,20 +305,31 @@ class contentController extends FrontedController
 				preg_match_all('/<img([^>]+)src="([^">]+)"([^>]*)>/Usi', $content, $links);
 				foreach($links[2] as $key => $href)
 				{
-					if(strpos($href, "Uploads/") && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([a-zA-Z0-9_\-\.]+)/', $href, $match)) {
+					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
 						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
 							$uploadObjects[] = $data;
+							$uploadHash .= $data->realfile;
 						}
 					}
 				}
 				
-				if(Core::$requestController->modelInst()->UploadTracking()->Count() < count($uploadObjects)) {
-					Core::$requestController->modelInst()->UploadTracking()->setData(array());
-					foreach($uploadObjects as $upload)
-						Core::$requestController->modelInst()->UploadTracking()->push($upload);
-					
-					Core::$requestController->modelInst()->UploadTracking()->write(false, true);
+				if(count($uploadObjects) > 0) {
+
+					$hash = md5($uploadHash);
+					$cacher = new Cacher("track_" . Core::$requestController->modelInst()->id . "_" . $hash);
+					if($cacher->checkValid())
+						return true;
+					else {
+						echo 1;
+						Core::$requestController->modelInst()->UploadTracking()->setData(array());
+						foreach($uploadObjects as $upload)
+							Core::$requestController->modelInst()->UploadTracking()->push($upload);
+						
+						Core::$requestController->modelInst()->UploadTracking()->write(false, true);
+						$cacher->write(1, 86400);
+					}
 				}
+				
 			}
 		}
 }
@@ -329,4 +343,27 @@ class UploadsPageLinkExtension extends DataObjectExtension {
 	);
 }
 
+class UploadsPageBacktraceController extends ControllerExtension {
+	/**
+	 * on before handle an action we redirect if needed
+	 *
+	 *@name onBeforeHandleAction
+	*/
+	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
+		$data = $this->getOwner()->modelInst()->linkingPages();
+		$data->setVersion(false);
+		if($data->Count() > 0) {
+			foreach($data as $page) {
+				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
+					return true;
+				}
+			}
+			
+			$handleWithMethod = false;
+			$content = false;
+		}
+	}
+}
+
+Object::extend("UploadsController", "UploadsPageBacktraceController");
 Core::addToHook("onBeforeServe", array("contentController", "outputHook"));
