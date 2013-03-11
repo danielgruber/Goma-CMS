@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   *********
-  * last modified: 09.01.2013
-  * $Version: 1.4.7
+  * last modified: 11.01.2013
+  * $Version: 1.4.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1002,9 +1002,6 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
-		
-		if(PROFILE) Profiler::mark("DataObjectSet::__construct");
-		
 		parent::__construct(null);
 		
 		if(isset($class)) {
@@ -1027,8 +1024,6 @@ class DataObjectSet extends DataSet {
 			
 			$this->protected_customised = $this->customised;
 		}
-		
-		if(PROFILE) Profiler::mark("DataObjectSet::__construct");
 	}
 	
 	/**
@@ -2149,18 +2144,16 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		
 		if(count($existing) > 0) {
-			$manipulation = array(
-				"delete" => array(
-					"command"	=> "delete",
-					"table_name"=> $this->relationTable,
-					"where"	=> array(
-						$this->field => array()
-					)
+			$manipulation["delete"] = array(
+				"command"	=> "delete",
+				"table_name"=> $this->relationTable,
+				"where"	=> array(
+					$this->field => array()
 				)
 			);
 				
 			foreach($existing as $remove) {
-				$manipulation["delete"]["where"][] = $remove;
+				$manipulation["delete"]["where"][$this->field][] = $remove;
 			}
 		}
 		
