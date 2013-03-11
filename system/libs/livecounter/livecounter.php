@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.02.2013
-  * $Version 2.1.6
+  * last modified: 11.03.2013
+  * $Version 2.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -29,7 +29,8 @@ class livecounter extends DataObject
 				'phpsessid' 	=> 'varchar(800)', 
 				"browser"		=> "varchar(200)",
 				"referer"		=> "varchar(400)",
-				"ip"			=> "varchar(30)"
+				"ip"			=> "varchar(30)",
+				"isbot"			=> "int(1)"
 			);
 			
 		/**
@@ -74,10 +75,25 @@ class livecounterController extends Controller
 		 *@access public
 		*/
 		public static $cookie_support = "(firefox|msie|AppleWebKit|opera|khtml|icab|irdier|teleca|webfront|iemobile|playstation)";
+		
+		/**
+		 * a regexp to use to intentify browsers, which support cookies
+		 *
+		 *@name no_cookie_support
+		 *@access public
+		*/
+		public static $no_cookie_support = "(hotbar)";
+		
+		/**
+		 * bot-list
+		*/
+		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector)";
+		
 		/**
 		 * counts how much users are online
 		*/
 		static private $useronline = 0;
+		
 		/**
 		 * just run once per request
 		*/
@@ -101,7 +117,7 @@ class livecounterController extends Controller
 			}
 			
 			// user identifier
-			if((!isset($_COOKIE['goma_sessid']) && !preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT'])) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
+			if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']) || preg_match("/" . self::$no_cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']))) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
 				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);
 			} else if(isset($_COOKIE['goma_sessid'])) {
 				$user_identifier = $_COOKIE['goma_sessid'];
@@ -149,6 +165,7 @@ class livecounterController extends Controller
 						$data->browser = $_SERVER["HTTP_USER_AGENT"];
 						$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 						$data->ip = $_SERVER["REMOTE_ADDR"];
+						$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
 						$data->write(true, true);
 					}
 					unset($data);
@@ -174,6 +191,7 @@ class livecounterController extends Controller
 				$data->browser = $_SERVER["HTTP_USER_AGENT"];
 				$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 				$data->ip = $_SERVER["REMOTE_ADDR"];
+				$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
 				$data->write(true, true);
 			}
 			
@@ -219,7 +237,7 @@ class livecounterController extends Controller
 						return self::$useronline;
 				}
 				$last = time() - 60;
-				$c = DataObject::count("livecounter",array("last_modified" => array(">", $last)));
+				$c = DataObject::count("livecounter",array("last_modified" => array(">", $last), "isbot" => 0));
 				self::$useronline = $c;
 				return $c;
 		}
@@ -232,7 +250,7 @@ class livecounterController extends Controller
 		public function countUsersByLast($last)
 		{
 
-				return DataObject::count("livecounter", array("last_modified" => array(">", $last)));
+				return DataObject::count("livecounter", array("last_modified" => array(">", $last), "isbot" => 0));
 		}
 		/**
 		 * counts user since and before..
@@ -240,7 +258,7 @@ class livecounterController extends Controller
 		public function countUsersByLastFirst($last, $first)
 		{
 
-				return DataObject::count("livecounter", ' last_modified > "'.convert::raw2sql($last).'" AND `last_modified` < "'.convert::raw2sql($first).'"');
+				return DataObject::count("livecounter", ' last_modified > "'.convert::raw2sql($last).'" AND last_modified < "'.convert::raw2sql($first).'" AND isbot = 0');
 		}
 		
 		/**
@@ -268,7 +286,7 @@ class livecounterController extends Controller
 				
 				// gets last day
 				$last =$day + $interval;
-				$data[$day] = DataObject::count("livecounter", "last_modified > ".$day." AND last_modified < ". $last);
+				$data[$day] = DataObject::count("livecounter", "last_modified > ".$day." AND last_modified < ". $last . " AND isbot = 0");
 				if($max < $data[$day]) {
 					$max = $data[$day];
 				}
@@ -341,7 +359,7 @@ class livecounterController extends Controller
 			for($i = 0; $i < $showcount; $i++) {
 				
 				
-				$data[$start] = DataObject::count("livecounter", "last_modified > ".$start." AND last_modified < ". $end);
+				$data[$start] = DataObject::count("livecounter", "last_modified > ".$start." AND last_modified < ". $end . " AND isbot = 0");
 				if($max < $data[$start]) {
 					$max = $data[$start];
 				}
