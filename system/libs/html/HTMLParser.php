@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 23.02.2013
-  * $Version: 2.2
+  * last modified: 11.03.2013
+  * $Version: 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -106,7 +106,7 @@ class HTMLParser extends Object
 								$href = substr($href, strlen(ROOT_PATH));
 						}
 						
-						if(!_eregi('\.php/(.*)', $href))
+						if(!_eregi('\.php/(.*)', $href) && !strpos($href, "?"))
 						{
 								if(file_exists(ROOT . $href))
 								{
@@ -142,7 +142,7 @@ class HTMLParser extends Object
 						{
 								$href = substr($href, strlen(ROOT_PATH));
 						}
-						if(!_eregi('\.php/(.+)', $href))
+						if(!_eregi('\.php/(.+)', $href) && !strpos($href, "?"))
 						{
 								if(file_exists(ROOT . $href))
 								{
