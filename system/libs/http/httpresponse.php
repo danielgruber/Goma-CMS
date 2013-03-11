@@ -490,7 +490,7 @@ class htmlparser extends object
 								$href = substr($href, strlen(ROOT_PATH));
 						}
 						
-						if(!_eregi('\.php/(.*)', $href))
+						if(!_eregi('\.php/(.*)', $href) && !strpos($href, "?"))
 						{
 								if(file_exists(ROOT . $href))
 								{
