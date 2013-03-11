@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 02.02.2013
+  * last modified: 11.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -482,7 +482,7 @@ class mysqliDriver extends object implements SQLDriver
 				
 			$log = "";
 			
-			
+			$updates = "";
 			
 			if($data = $this->showTableDetails($table, true, $prefix)) {
 				$editsql = 'ALTER TABLE '.$prefix . $table .' ';
@@ -497,8 +497,10 @@ class mysqliDriver extends object implements SQLDriver
 						$editsql .= ' ADD '.$name.' '.$type.' ';
 						if(isset($defaults[$name])) {
 							$editsql .= ' DEFAULT "'.addslashes($defaults[$name]).'"';
+							$updates .= ' ' . $name . ' = "'.addslashes($defaults[$name]).'",';
 						}
 						$editsql .= " NOT NULL,";
+						
 						$log .= "ADD Field ".$name." ".$type."\n";
 					} else {
 						
@@ -618,6 +620,16 @@ class mysqliDriver extends object implements SQLDriver
 				}
 				
 				if(sql::query($editsql)) {
+					if($updates) {
+						$updates = "UPDATE " . $prefix . $table . " SET " . $updates;
+						if(substr($updates, -1) == ",") {
+							$updates = substr($updates, 0, -1);
+						}
+						if(!SQL::Query($updates)) {
+							throwError(3,'SQL-Error', "SQL-Query ".$updates." failed");
+						}
+					}
+					
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else
