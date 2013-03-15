@@ -345,58 +345,10 @@ class Form extends object
 				
 				$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
 				// add that this is a submit-function
-				$this->add(new JavaScriptField("leave_check", '$(function(){
-					$("#'.$this->ID().'").bind("formsubmit",function(){
-						self.leave_check = true;
-					});
-					
-					$(function(){
-						var button = false;
-						$("#'.$this->ID().'").find("button[type=submit], input[type=submit]").click(function(){
-							button = true;
-						});
-						
-						$("#'.$this->ID().'").submit(function(){
-							if(button == false) {
-								button = true;
-								setTimeout(function(){
-									$("#'.$this->ID().' .default_submit").click();
-								}, 100);
-								return false;
-							}
-							var eventb = jQuery.Event("beforesubmit");
-							$("#'.$this->id().'").trigger(eventb);
-							if ( eventb.result === false ) {
-								return false;
-							}
-							
-							var event = jQuery.Event("formsubmit");
-							$("#'.$this->id().'").trigger(event);
-							if ( event.result === false ) {
-								return false;
-							}
-							
-							button = false;
-						});
-					});
-					
-					$("#'.$this->ID().'").find("select, input[type=text], input[type=hidden], input[type=radio], input[type=checkbox], input[type=password], textarea").change(function(){
-						self.leave_check = false;
-					});
-					
-					$("#'.$this->ID().' > .default_submit").click(function(){
-						$("#'.$this->ID().' > .actions  input[type=submit]").each(function(){
-							if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
-								$(this).click();
-								return false;
-							}
-						});
-						return false;
-					});
-				});'));
+				$this->add(new JavaScriptField("leave_check", '$(function(){ new goma.form('.var_export($this->ID(), true).'); });'));
 								
-				
-				
+				Resources::add("system/form/form.js", "js", "tpl");				
+								
 				if(!isset($this->fields["redirect"]))
 					$this->add(new HiddenField("redirect", getredirect()));
 		}

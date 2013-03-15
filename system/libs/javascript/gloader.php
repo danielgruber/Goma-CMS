@@ -14,7 +14,7 @@ ClassInfo::addSaveVar("gLoader", "resources");
 
 class gLoader extends Controller
 {
-		const VERSION = "1.1";
+		const VERSION = "1.1.1";
 		/**
 		 * url-handlers
 		 *
@@ -178,9 +178,8 @@ class gLoader extends Controller
 				}
 			}
 			
-			$js .= '/* file '.$data["file"].' */
-gloader.loaded["'.$name.'"] = true;' . "
-if(self.JSLoadedResources == null) self.JSLoadedResources = []; self.JSLoadedResources['".$data["file"]."?".filemtime($data["file"])."'] = true;\n\n";
+			$js .= '/* file '.$data["file"]." */
+goma.ui.setLoaded('".$name."'); goma.ui.registerResource('js', '".$data["file"]."?".filemtime($data["file"])."');\n\n";
 			
 			$js .= jsmin::minify(file_get_contents($data["file"]));
 			

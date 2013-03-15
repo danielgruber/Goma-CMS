@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version: 2.1.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 13.03.2013
+  * $Version: 2.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -139,7 +139,7 @@ class HTTPresponse extends object
 				
 				// gloader
 				foreach(gloader::$preloaded as $file => $true) {
-					Resources::addData("gloader.loaded['".$file."'] = true;");
+					Resources::addData("goma.ui.setLoaded('".$file."');");
 				}
 				
 				

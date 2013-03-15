@@ -39,7 +39,7 @@ class Notification extends Object {
 		if(!isset($type))
 			$type = "notification";
 		
-		Resources::add("system/libs/notifications/notifications.js", "js", "script");
+		Resources::add("system/libs/notifications/notifications.js", "js", "tpl");
 		Resources::add("notifications.css", "css");
 		
 		if(ClassInfo::hasInterface($class, "Notifier")) {
