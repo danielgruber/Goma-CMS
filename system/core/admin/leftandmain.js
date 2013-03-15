@@ -52,10 +52,9 @@ var LaM_type_timeout;
 			gloader.load("history");
 			HistoryLib.bind(function(url){
 				
-				if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
+				if(typeof goma.ui.fireUnloadEvents() == "string" && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 					return false;
 				}
-				self.leave_check = true;
 				
 				if($(".treewrapper a[href='"+url+"']").length > 0) {
 					var $this = $(".treewrapper a[href='"+url+"']");
@@ -433,11 +432,9 @@ var LaM_type_timeout;
 	w.LoadTreeItem = function (id) {
 		
 		// check if we are on a current unsaved page
-		if(self.leave_check ===  false && !confirm(lang("unload_lang").replace('\n', "\n"))) {
+		if(typeof goma.ui.fireUnloadEvents() == "string" && !confirm(lang("unload_lang").replace('\n', "\n"))) {
 			return false;
 		}
-		self.leave_check = true;
-		
 		
 		var $this = $("a[nodeid="+id+"]");
 		if($this.length == 0) {
@@ -499,12 +496,3 @@ var LaM_type_timeout;
 		return false;
 	}
 })(jQuery, window);
-
-
-window.onbeforeunload = function(){
-
-	if(self.leave_check ===  false) {
-		return lang("unload_not_saved").replace('\n', "\n");
-	}
-	return;
-}

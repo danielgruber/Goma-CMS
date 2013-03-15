@@ -87,7 +87,7 @@ class livecounterController extends Controller
 		/**
 		 * bot-list
 		*/
-		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector)";
+		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider)";
 		
 		/**
 		 * counts how much users are online

@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 18.03.2013
-  * $Version 2.0
+  * last modified: 27.03.2013
+  * $Version 2.0.1
 */
 
 // goma-framework
@@ -32,14 +32,14 @@ if(typeof goma.ui == "undefined") {
 		 * we stop execution of JavaScript while loading
 		*/
 		var gloaded = [];
-		var _loadScript = function(comp, fn) {
+		var loadScript = function(comp, fn) {
 			if(gloaded[comp] == null)
 			{
 				$("body").css("cursor", "wait");
 				$.ajax({
 					cache: true,
 					noRequestTrack: true,
-					url: BASE_SCRIPT + "gloader/v2/" + comp + ".js",
+					url: BASE_SCRIPT + "gloader/" + comp + ".js",
 					dataType: "script",
 					async: false
 				});
@@ -104,6 +104,11 @@ if(typeof goma.ui == "undefined") {
 		
 		// build module
 		return {
+			
+			/**
+			 * defines if we are in backend
+			*/
+			is_backend: false,
 			
 			/**
 			 * sets the main-content where to put by default content from ajax-requests
@@ -220,7 +225,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param string - mod
 			 *@param function - fn
 			*/
-			load: _loadScript,
+			load: loadScript,
 			
 			/**
 			 * some base-roots in DOM
@@ -458,9 +463,15 @@ if(typeof goma.ui == "undefined") {
 		};
 	})(jQuery);
 	
-	var gloader = {load: function(a) {
-        return goma.ui.load(a);   
-	}};
+	var gloader = {load: goma.ui.load};
+}
+
+if(typeof goma.ENV == "undefined") {
+	goma.ENV = (function(){
+		return {
+			"jsversion": "2.0"
+		};
+	})();
 }
 
 // prevent from being executed twice
@@ -664,21 +675,24 @@ if(typeof self.loader == "undefined") {
 			if(names.length == 0)
 				return true;
 			
-			var jqXHR = $.ajax({
+			$.ajax({
 				async: async,
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",
-				dataType: "json",
-				noRequestTrack: true
-			});
-			
-			try {
-				var data = parseJSON(jqXHR.responseText);
-				for(i in data) {
-					lang[i] = data[i];
+				dataType: "html",
+				noRequestTrack: true,
+				success: function(html) {
+					try {
+						var data = parseJSON(html);
+						for(i in data) {
+							lang[i] = data[i];
+						}
+					} catch(e) { 
+						alert(e);
+					}
 				}
-			} catch(e) { }
+			});
 		}
 			
 		// some response handlers
@@ -707,6 +721,7 @@ if(typeof self.loader == "undefined") {
 		 *@param node
 		*/
 		w.unbindFromFormSubmit = function(node) {
+			
 			// first make sure it works!
 			var active = false;
 			$(node).focus(function(){
@@ -718,13 +733,15 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			$(node).parents("form").bind("formsubmit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			$(node).parents("form").bind("submit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			// second use a better method, just if the browser support it
@@ -849,6 +866,9 @@ if(typeof self.loader == "undefined") {
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
+	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	 		if(goma.ENV.is_backend)
+	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
 		
 		w.event_history = [];
