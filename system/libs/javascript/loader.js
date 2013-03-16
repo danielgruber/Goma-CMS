@@ -117,8 +117,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param jQuery-Object | string (CSS-Path)
 			*/
 			setMainContent: function(node) {
-				if($(node).length > 0)
-					goma.ui.mainContent = $(node);
+				goma.ui.mainContent = $(node);
 			},
 			
 			/**
@@ -152,6 +151,16 @@ if(typeof goma.ui == "undefined") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
 					}
 				});
+			},
+			
+			/**
+			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
+			 *
+			 *@name updateRetina
+			*/
+			updateRetina: function() {
+				if(goma.ui.getDevicePixelRatio() > 1.5)
+					RetinaReplace();	
 			},
 			
 			/**
