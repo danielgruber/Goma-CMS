@@ -150,6 +150,13 @@ class Resources extends Object {
 	private static $default_directory_contents = false;
 	
 	/**
+	 * registered resources
+	 *
+	 *@name registeredResources
+	*/
+	protected static $registeredResources = array("js" => array(), "css" => array());
+	
+	/**
 	 * add-functionality
 	 *
 	 *@name add
@@ -229,9 +236,9 @@ class Resources extends Object {
 					
 					// register in autoloader
 					if(file_exists($content))
-						self::addData("goma.ui.registerResource('css', '".$content."?".filemtime($content)."');");
+						self::$registeredResources["css"][] = $content."?".filemtime($content);
  	 				else
- 	 					self::addData("goma.ui.registerResource('css', '".$content."');");
+ 	 					self::$registeredResources["css"][] = $content;
 					
 				} else {
 					if(!$path && self::file_exists(SYSTEM_TPL_PATH . "/css/" . $content)) {
@@ -239,9 +246,9 @@ class Resources extends Object {
 					} else if(!$path) {
 						// register in autoloader
 						if(file_exists($content))
-							self::addData("goma.ui.registerResource('css', '".$content."?".filemtime($content)."');");
+							self::$registeredResources["css"][] = $content."?".filemtime($content);
 	 	 				else
-	 	 					self::addData("goma.ui.registerResource('css', '".$content."');");
+	 	 					self::$registeredResources["css"][] = $content;
 	 	 				
 	 	 				// register
 						self::$resources_css["default"]["files"][$content] = $content;
@@ -276,16 +283,16 @@ class Resources extends Object {
 						
 						// register in autoloader
 						if(file_exists($content))
-							self::addData("goma.ui.registerResource('css', '".$content."?".filemtime($content)."');");
+							self::$registeredResources["css"][] = $content."?".filemtime($content);
 	 	 				else
-	 	 					self::addData("goma.ui.registerResource('css', '".$content."');");
+	 	 					self::$registeredResources["css"][] = $content;
 						break;
 					} else {
 						// register in autoloader
 						if(file_exists($content))
-							self::addData("goma.ui.registerResource('css', '".$content."?".filemtime($content)."');");
+							self::$registeredResources["css"][] = $content."?".filemtime($content);
 	 	 				else
-	 	 					self::addData("goma.ui.registerResource('css', '".$content."');");
+	 	 					self::$registeredResources["css"][] = $content;
 	 	 				
 						self::$resources_css["default"]["files"][$content] = $content;
 					}
@@ -415,6 +422,11 @@ class Resources extends Object {
 		$js = $files[1];
 		$css = $files[0];
 		
+		if(self::$registeredResources["js"])
+			self::$resources_data[] = "goma.ui.registerResources('js', ".json_encode(self::$registeredResources["js"]).");";
+		
+		if(self::$registeredResources["css"])
+			self::$resources_data[] = "goma.ui.registerResources('css', ".json_encode(self::$registeredResources["css"]).");";
 		
 		if(Core::is_ajax()) {
 			// write data to file
@@ -542,7 +554,7 @@ class Resources extends Object {
 						} else {
 							$js_files[] = $jsfile;
 						}
-						Resources::addData("goma.ui.registerResource('js', \"".$jsfile."\");");
+						self::$registeredResources["js"][] = $jsfile;
 					}
 					unset($resources_js["default"], $jsfile);
 			}
@@ -627,7 +639,7 @@ class Resources extends Object {
 			
 			if(!Core::is_ajax()) {
 				foreach($js_files as $file) {
-					Resources::addData("goma.ui.registerResource('js', \"".$file."\");\n");
+					self::$registeredResources["js"][] = $file;
 				}
 			}
 			
