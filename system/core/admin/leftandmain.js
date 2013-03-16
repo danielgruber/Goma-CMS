@@ -12,6 +12,8 @@ var LaM_type_timeout;
 
 (function($, w){
 	$(function(){
+		goma.ui.setMainContent($("#contnet > content_inner table td.main"));
+		
 		$(".leftandmaintable").css("display", "");
 		
 		// searchfield bindings
