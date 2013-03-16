@@ -243,7 +243,7 @@ class Resources extends Object {
 						self::registerLoaded("css", $content);
 	 	 				
 	 	 				// register
-					self::$resources_css["default"]["files"][$content] = $content;
+	 	 				self::$resources_css["default"]["files"][$content] = $content;
 						break;
 					}
 					
@@ -282,6 +282,7 @@ class Resources extends Object {
 	 	 				
 						break;
 					} else {
+						self::$resources_css["default"]["files"][$content] = $content;
 						self::registerLoaded("css", $content);
 					}
 				

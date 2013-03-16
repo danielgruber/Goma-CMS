@@ -1,5 +1,5 @@
 /**
-  * some basic functionality for goma, e.g. loaders for javascript and some global functions
+  * goma javascript framework
   *
   *@package goma framework
   *@link http://goma-cms.org
@@ -56,6 +56,27 @@ if(typeof goma.ui == "undefined") {
 		var CSSIncluded = [];
 		var JSLoaded = [];
 		
+		// retina support
+		var RetinaReplace = function() {
+			$("img").each(function(){ //.on("load", "img", function(){
+				var $this = $(this);
+				if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
+					if(goma.ui.IsImageOk($(this).get(0))) {
+						var img = new Image();
+						img.onload = function(){
+							$this.css("width", $this.width());
+							$this.css("height", $this.height());
+							$this.attr("src", $this.attr("data-retina"));
+							img.src = null;
+						}
+						img.src = $this.attr("data-retina");
+						$this.attr("data-retined", "complete");
+					}
+				}
+			});
+			
+		}
+		
 		$(function() {	
 			$.extend(goma.ui, {
 				/**
@@ -68,6 +89,15 @@ if(typeof goma.ui == "undefined") {
 				*/
 				DocRoot: ($(".documentRoot").length == 1) ? $(".documentRoot") : $("body")
 			});
+			
+			if(goma.ui.getDevicePixelRatio() > 1.5) {
+				RetinaReplace();
+				// add retina-updae-event
+				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, !1);
+			    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+			     	   /loaded|complete/.test(document.readyState) && RetinaReplace();
+			   	}, 10);
+			}
 			
 			window.onbeforeunload = goma.ui.fireUnloadEvents;
 		});
@@ -82,8 +112,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param jQuery-Object | string (CSS-Path)
 			*/
 			setMainContent: function(node) {
-				if($(node).length > 0)
-					goma.ui.mainContent = $(node);
+				goma.ui.mainContent = $(node);
 			},
 			
 			/**
@@ -95,6 +124,16 @@ if(typeof goma.ui == "undefined") {
 			
 			ajax: function(destination, options) {
 				
+			},
+			
+			/**
+			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
+			 *
+			 *@name updateRetina
+			*/
+			updateRetina: function() {
+				if(goma.ui.getDevicePixelRatio() > 1.5)
+					RetinaReplace();	
 			},
 			
 			/**
@@ -360,6 +399,37 @@ if(typeof goma.ui == "undefined") {
 						}
 					}
 				}
+			},
+			
+			// Helper Functions
+			getDevicePixelRatio: function() {
+		        if (window.devicePixelRatio === undefined) { return 1; }
+		        return window.devicePixelRatio;
+		    },
+		    
+		    /**
+		     * checks if a img were loaded correctly
+		     *
+		     *@name isImageOK
+		    */
+			IsImageOk: function(img) {
+			    // During the onload event, IE correctly identifies any images that
+			    // weren’t downloaded as not complete. Others should too. Gecko-based
+			    // browsers act like NS4 in that they report this incorrectly.
+			    if (!img.complete) {
+			        return false;
+			    }
+			
+			    // However, they do have two very useful properties: naturalWidth and
+			    // naturalHeight. These give the true size of the image. If it failed
+			    // to load, either of these should be zero.
+			
+			    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
+			        return false;
+			    }
+			
+			    // No other way of checking: assume it’s ok.
+			    return true;
 			}
 	
 		};
@@ -593,25 +663,6 @@ if(typeof self.loader == "undefined") {
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
 			return goma.ui.renderResponse(html, ajaxreq, node, object);
-		}
-		
-		w.ajax_submit = function(obj)
-		{
-			var $this = $(obj);
-			$form = $this.parents("form");
-			var data = $form.serialize();
-			var url = $form.attr("action");
-			var method = $form.attr("method");
-			$this.before('<img src="images/16x16/loading.gif" class="loader" alt="loading..." />');
-			$.ajax({
-				url: url,
-				type: method,
-				data: data,
-				dataType: "script"
-			}).always(function(){
-				$form.find(".loader").remove();
-			});
-			return false;
 		}
 		
 		w.LoadAjaxResources = function(request) {
@@ -980,68 +1031,6 @@ if(typeof self.loader == "undefined") {
 	    // *     example 1: str_repeat('-=', 10);
 	    // *     returns 1: '-=-=-=-=-=-=-=-=-=-='
 	    return new Array(multiplier + 1).join(input);
-	}
-	
-	// Helper Functions
-    var getDevicePixelRatio = function() {
-        if (window.devicePixelRatio === undefined) { return 1; }
-        return window.devicePixelRatio;
-    }
-    
-	// retina-support
-	$(function(){
-		if(getDevicePixelRatio() > 1.5) {
-			var replace = function() {
-				
-					$("img").each(function(){ //.on("load", "img", function(){
-						var $this = $(this);
-						if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
-							if(IsImageOk($(this).get(0))) {
-								var img = new Image();
-								img.onload = function(){
-									$this.css("width", $this.width());
-									$this.css("height", $this.height());
-									$this.attr("src", $this.attr("data-retina"));
-									img.src = null;
-								}
-								img.src = $this.attr("data-retina");
-								$this.attr("data-retined", "complete");
-							}
-						}
-					});
-				
-			}
-			replace();
-			window.retinaReplace = replace;
-			
-			document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
-		    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
-		     	   /loaded|complete/.test(document.readyState) && replace();
-		   	 }, 10);
-		}
-	});
-	
-	if(typeof window.retinaReplace == "undefined")
-		window.retinaReplace = function(){};
-	
-	function IsImageOk(img) {
-	    // During the onload event, IE correctly identifies any images that
-	    // weren’t downloaded as not complete. Others should too. Gecko-based
-	    // browsers act like NS4 in that they report this incorrectly.
-	    if (!img.complete) {
-	        return false;
-	    }
-	
-	    // However, they do have two very useful properties: naturalWidth and
-	    // naturalHeight. These give the true size of the image. If it failed
-	    // to load, either of these should be zero.
-	
-	    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
-	        return false;
-	    }
-	
-	    // No other way of checking: assume it’s ok.
-	    return true;
 	}
 	
 	var scrollToHash = function(hash) {
