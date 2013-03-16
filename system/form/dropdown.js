@@ -6,7 +6,7 @@
   * last modified: 25.12.2012
 */
 
-function DropDown(id, url, multiple) {
+var DropDown = function(id, url, multiple) {
 	this.url = url;
 	this.multiple = multiple;
 	this.widget = $("#" + id + "_widget");
@@ -17,7 +17,7 @@ function DropDown(id, url, multiple) {
 	this.init();
 	this.id = id;
 	return this;
-}
+};
 
 DropDown.prototype = {
 	/**
