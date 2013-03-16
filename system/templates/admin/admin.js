@@ -61,4 +61,6 @@ $(document).ready(function() {
 	}
 	
 	CallonDocumentClick(hideNavMore, [$("#navMore"), $("#navMore-sub")]);
+	
+	goma.ui.setMainContent($("#contnet > content_inner"));
 })
