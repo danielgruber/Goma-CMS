@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 05.03.2013
-  * $Version 2.6.6
+  * last modified: 17.03.2013
+  * $Version 2.6.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1546,6 +1546,8 @@ class GFS_Package_installer extends GFS {
 		
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
 		
+		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
+		
 		// copy some files
 		copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
 		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
@@ -1807,6 +1809,8 @@ class GFS_Package_Creator extends GFS {
 		$code = '<?php define("TIME", time()); define("NOW", TIME); define("IN_GOMA", true); define("PROFILE", false); define("CACHE_DIRECTORY", '.var_export(CACHE_DIRECTORY, true).'); define("ROOT", '.var_export(ROOT, true).'); define("ROOT_PATH", '.var_export(ROOT_PATH, true).');  define("BASE_URI", '.var_export(BASE_URI, true).'); define("FRAMEWORK_ROOT", ROOT . "system/"); define("IN_GFS_EXTERNAL", true); chdir(ROOT); error_reporting(E_ALL); defined("INSTALL") OR define("INSTALL", true); define("DEV_MODE", '.var_export(DEV_MODE, true).'); define("EXEC_START_TIME", microtime(true)); define("LOG_FOLDER", '.var_export(LOG_FOLDER, true).'); ';
 		
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
+		
+		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
 		
   	 	// copy some files
   	 	copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
