@@ -85,6 +85,10 @@ class mysqliDriver extends object implements SQLDriver
 					$test->close();
 					return true;
 				} else {
+					if($test = new MySQLi($dbhost, $dbuser, $dbpass)) {
+						if($test->query("CREATE DATABASE " . $dbdb))
+							return true;
+					}
 					return false;
 				}
 		}
