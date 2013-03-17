@@ -112,7 +112,8 @@ if(typeof goma.ui == "undefined") {
 			 *@param jQuery-Object | string (CSS-Path)
 			*/
 			setMainContent: function(node) {
-				goma.ui.mainContent = $(node);
+				if($(node).length > 0)
+					goma.ui.mainContent = $(node);
 			},
 			
 			/**
@@ -122,8 +123,30 @@ if(typeof goma.ui == "undefined") {
 				return goma.ui.mainContent;
 			},
 			
-			ajax: function(destination, options) {
+			ajax: function(destination, options, unload) {
+				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
 				
+				
+				if(unload !== false) {
+					var data = goma.ui.fireUnloadEvents(node);
+					if(typeof data == "string") {
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
+							return false;
+					}
+				}
+				
+				return $.ajax(options).done(function(r, c, a){	
+					goma.ui.renderResponse(r, a, node, undefined, false);
+				}).fail(function(a){
+					// try find out why it has failed
+					if(jqXHR.textStatus == "timeout") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
+					} else if(jqXHR.textStatus == "abort") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The request was aborted.</div>');
+					} else {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
+					}
+				});
 			},
 			
 			/**

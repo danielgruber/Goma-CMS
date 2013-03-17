@@ -550,7 +550,6 @@ self.dropdownDialogs = [];
 			$.ajax({
 				url: uri,
 				type: "get",
-				
 				// data should always be html as basic, we can interpret layteron
 				dataType: "html"
 			}).done(function(html, textStatus, jqXHR){
@@ -619,7 +618,6 @@ self.dropdownDialogs = [];
 				
 				
 			}).fail(function(jqXHR){
-				
 				// try find out why it has failed
 				if(jqXHR.textStatus == "timeout") {
 					that.setContent('Error while fetching data from the server: <br /> The response timed out.');

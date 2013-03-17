@@ -71,4 +71,4 @@ goma.form = function(id) {
 	});
 }
 
-goma.form.prototype ={}; 
+goma.form.prototype = {}; 
