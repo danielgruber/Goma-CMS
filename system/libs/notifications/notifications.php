@@ -39,7 +39,7 @@ class Notification extends Object {
 		if(!isset($type))
 			$type = "notification";
 		
-		Resources::add("system/libs/notifications/notifications.js", "js", "tpl");
+		gloader::load("notifications");
 		Resources::add("notifications.css", "css");
 		
 		if(ClassInfo::hasInterface($class, "Notifier")) {
@@ -56,7 +56,7 @@ class Notification extends Object {
 		}
 		
 		if($type == "notification") {
-			Resources::addJS("$(function(){ Notifications.notify(".var_export($class, true).",".var_export(parse_lang($title), true).", ".var_export($icon, true).", ".var_export($text, true)."); });");
+			Resources::addJS("$(function(){ goma.ui.Notifications.notify(".var_export($class, true).",".var_export(parse_lang($title), true).", ".var_export($icon, true).", ".var_export($text, true)."); });");
 		} else {
 			// other types are unsupported right now
 			throwError(6, "PHP-Error", "Unsupported notification type " . $type);

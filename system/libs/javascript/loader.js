@@ -117,7 +117,8 @@ if(typeof goma.ui == "undefined") {
 			 *@param jQuery-Object | string (CSS-Path)
 			*/
 			setMainContent: function(node) {
-				goma.ui.mainContent = $(node);
+				if($(node).length > 0)
+					goma.ui.mainContent = $(node);
 			},
 			
 			/**

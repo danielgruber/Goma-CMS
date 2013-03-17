@@ -2,12 +2,12 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.03.2013
   * $Version 1.0
 */
 
-var Notifications = {
+goma.ui.Notifications = {
 	/**
 	 * notifications, which are sent or visible
 	*/
@@ -22,7 +22,7 @@ var Notifications = {
 		if($(".notificationRoot").length == 1) {
 			$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
 		} else {
-			getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+			goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
 		}
 	},
 	
@@ -40,7 +40,7 @@ var Notifications = {
 	 *@param function
 	*/
 	notify: function(class_name, title, icon, text, Clickfn) {
-		var notificationID = "notification_" + class_name + Notifications.notifications.length;
+		var notificationID = "notification_" + class_name + goma.ui.Notifications.notifications.length;
 		
 		var notification = $("<div>").addClass("notification").attr("id", notificationID).append('<div class="icon"><img src="'+icon+'" alt="Icon" /></div>\
 		<div class="title">'+title+'</div>\
@@ -59,10 +59,10 @@ var Notifications = {
 			class_name: class_name
 		};
 		
-		Notifications.notifications[notificationID] = notification;
+		goma.ui.Notifications.notifications[notificationID] = notification;
 		
 		setTimeout(function(){
-			Notifications.makeVisible(notification, 5500);
+			goma.ui.Notifications.makeVisible(notification, 5500);
 		}, 250);
 	},
 	
@@ -78,11 +78,11 @@ var Notifications = {
 		n.node.prependTo($("#notifications"));
 		var nNode = n.node;
 		
-		Notifications.notifications[n.id].visible = true;
+		goma.ui.Notifications.notifications[n.id].visible = true;
 		nNode.slideDown("fast");
 		
 		var close = function(){
-			Notifications.notifications[n.id].visible = false;
+			goma.ui.Notifications.notifications[n.id].visible = false;
 			nNode.css("position", "absolute");
 			nNode.animate({
 				left: $(window).width() + nNode.outerWidth() + 20
@@ -101,5 +101,5 @@ var Notifications = {
 };
 
 $(function(){
-	Notifications.Init();
+	goma.ui.Notifications.Init();
 });
