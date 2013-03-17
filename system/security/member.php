@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.03.2012
-  * $Version 2.4.6
+  * last modified: 17.03.2012
+  * $Version 2.4.7
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -30,27 +30,9 @@ class userController extends Controller
 	*/
 	public function pwdsave($result)
 	{
-		AddContent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
+		AddContent::add('<div class="success">'.lang("edit_password_ok", "The password were successfully changed!").'</div>');
 		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
 		$this->redirectback();
-	}
-	/**
-	 * saves the user-pwd
-	 *@access public
-	 *@name savepwd
-	*/
-	public function ajaxpwdsave($result, $response)
-	{
-		$user = DataObject::get("user", array("id" => $result["id"]));
-		$user->password = $result["password"];
-		$user->write(false, true);			
-		if(isset($_GET["boxid"])) {
-			$response->exec(dialog::closeById($_GET["boxid"]));
-		} else if(isset($_GET["dropElem"])) {
-			$response->exec("dropdownDialog.get(".var_export($_GET["dropElem"], true).").hide();");
-		}
-		Notification::notify("user", lang("edit_password_ok"));
-		return $response->render();
 	}
 		
 }
@@ -268,7 +250,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 							$this->doObject("timezone")->formfield(lang("timezone")),
 							new LangSelect("custom_lang", lang("lang")),
 							// password management in external window
-							new ajaxexternalform("passwort", lang("password", "password"), '**********', $this->pwdform($this->id)),
+							new ExternalForm("passwort", lang("password", "password"), lang("edit_password", "change password"), '**********', array($this, "pwdform")),
 							new ImageUpload("avatar", lang("pic", "image")),
 							new TextArea("signatur", lang("signatur", "signature"), null, "100px")
 							
@@ -313,8 +295,11 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		 *
 		 *@name pwdform
 		*/
-		public function pwdform($id)
+		public function pwdform($id = null)
 		{
+				if(!isset($id))
+					$id = $this->id;
+				
 				if(Permission::check("USERS_MANAGE") && $id != member::$id) {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
@@ -322,7 +307,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+					$pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
 				} else {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
@@ -331,7 +316,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+					$pwdform->addAction(new FormAction("submit", lang("save", "save"),"pwdsave"));
 				}
 				return $pwdform;
 		}

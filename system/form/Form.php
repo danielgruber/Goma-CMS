@@ -193,6 +193,13 @@ class Form extends object
 		public $state;
 		
 		/**
+		 * request
+		 *
+		 *@name request
+		*/
+		public $request;
+		
+		/**
 		 *@name __construct
 		 *@access public
 		 *@param object - controller
@@ -222,6 +229,7 @@ class Form extends object
 				$this->name = $name;
 				$this->secretKey = randomString(30);
 				$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
+				$this->request = $request;
 				
 				if(isset($request)) {
 					$this->post = $request->post_params;
@@ -281,7 +289,6 @@ class Form extends object
 				$this->form = $this->createFormTag();
 				
 				if(PROFILE) Profiler::unmark("form::__construct");
-				
 		}
 		
 		/**
@@ -1034,7 +1041,7 @@ class Form extends object
  *@name ExternalForm
  *@parent RequestHandler
 */
-class ExternalForm extends RequestHandler
+class ExternalFormController extends RequestHandler
 {
 		/**
 		 * handles the request
@@ -1054,6 +1061,7 @@ class ExternalForm extends RequestHandler
 				$field = $request->getParam("field");
 				return $this->FieldExtAction($form, $field);
 		}
+		
 		/**
 		 * a external resource for a form
 		 *@name FieldExtAction
@@ -1114,5 +1122,5 @@ class FormState extends Object {
 }
 
 Core::addRules(array(
-	'system/forms/$form!/$field!' => "ExternalForm"
+	'system/forms/$form!/$field!' => "ExternalFormController"
 ), 50);
