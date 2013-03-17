@@ -3,14 +3,14 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 08.05.2012
-  * $Version 1.1.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.03.2013
+  * $Version 1.0
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class AjaxExternalForm extends FormField
+class ExternalForm extends FormField
 {
 
 		public $allowed_actions = array(
@@ -25,6 +25,14 @@ class AjaxExternalForm extends FormField
 		public $external_form;
 		
 		/**
+		 * title of the external form
+		 *
+		 *@name extTitle
+		 *@access public
+		*/
+		public $extTitle;
+		
+		/**
 		 *@name __construct
 		 *@param string - name
 		 *@param string - title
@@ -32,11 +40,14 @@ class AjaxExternalForm extends FormField
 		 *@param form - external form
 		 *@param form - form for this field
 		*/
-		public function __construct($name = "", $title = null, $value = null, $external = "", &$form = null, $code = "")
+		public function __construct($name = "", $title = null, $extTitle = null, $value = null, $externalCallback = null, &$form = null, $code = "")
 		{
-				if(is_object($external))
-					$this->external_form = $external;
+				$this->external_form = $externalCallback;
 				
+				if(!isset($extTitle))
+					$this->extTitle = $title;
+				else
+					$this->extTitle = $extTitle;
 				
 				parent::__construct($name, $title, $value, $form);
 		}
@@ -72,10 +83,8 @@ class AjaxExternalForm extends FormField
 					"&nbsp;&nbsp;&nbsp;&nbsp;",
 					new HTMLNode("a", array(
 						"href" 	=> $this->externalURL() . "/render/?redirect=" . urlencode(getredirect()),
-						"title" => convert::raw2text($this->title),
-						"rel"	=> "dropdownDialog",
-						"class" => "edit hideClose noAutoHide"
-					), new HTMLNode("img", array("alt" => lang("edit"), "src" => "images/icons/fatcow16/edit.png", "data-retina" => "images/icons/fatcow16/edit@2x.png")))
+						"title" => convert::raw2text($this->extTitle)
+					), ($this->title != $this->extTitle) ? $this->extTitle : lang("edit"))
 				));
 				
 				$this->callExtending("afterField");
@@ -88,18 +97,18 @@ class AjaxExternalForm extends FormField
 		 *@access public
 		*/
 		public function render()
-		{
+		{		
+				Core::setTitle($this->extTitle);
 				// create a deep copy
-				$form = unserialize(serialize($this->external_form)); 
-				if(Core::is_ajax()) {
-					$form->addAction(new Button("cancel", lang("cancel", "Cancel"), "var id = $(this).parents('.bluebox').attr('id').replace('bluebox_','');getblueboxbyid(id).close();"));
-					return $form->render();
+				if(is_callable($this->external_form)) {
+					$form = call_user_func_array($this->external_form, array());
 				} else {
-					$form->add(new HTMLField("head","<h1>".convert::raw2text($this->title)."</h1>"), 1);
-					$form->addAction(new LinkAction("cancel", lang("cancel"), $this->form()->url));
-					$fronted = new FrontedController();
-					return $fronted->serve($form->render());
+					throwError(6, "No callback set", "No valid callback were set to ExternalForm::__construct");
 				}
+				$form->add(new HTMLField("head","<h1>".convert::raw2text($this->extTitle)."</h1>"), 1);
+				$form->addAction(new LinkAction("cancel", lang("cancel"), $this->form()->url));
+				$fronted = new FrontedController();
+				return $fronted->serve($form->render());
 		}
 		/**
 		 * we never have a result
