@@ -63,7 +63,7 @@
 				<td class="value">
 					<% IF $signed %>
 						<div class="success">{$_lang_signed_true}</div>
-					<% ELSE IF $signed_ssl_not_installed %>
+					<% ELSE IF $signed_ssl_not_installed == 1 %>
 						<div class="error">{$_lang_signed_false_ssl}</div>
 					<% ELSE %>
 						<div class="notice">{$_lang_signed_false}</div>
