@@ -320,13 +320,12 @@ class contentController extends FrontedController
 					if($cacher->checkValid())
 						return true;
 					else {
-						echo 1;
 						Core::$requestController->modelInst()->UploadTracking()->setData(array());
 						foreach($uploadObjects as $upload)
 							Core::$requestController->modelInst()->UploadTracking()->push($upload);
 						
 						Core::$requestController->modelInst()->UploadTracking()->write(false, true);
-						$cacher->write(1, 86400);
+						$cacher->write(1, 14 * 86400);
 					}
 				}
 				
