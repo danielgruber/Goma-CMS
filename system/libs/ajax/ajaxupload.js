@@ -62,7 +62,7 @@ var AjaxUpload = function(DropZone, options) {
 	if(typeof this.browse != "undefined") {
 		this.browse = $(this.browse);
 		// bind events to browse-button
-		this.browse.hover(function(){
+		this.browse.on("mouseover touchstart", function(){
 			if(!$this.loading) {
 				$this.browse.removeAttr("disabled");
 				$this.placeBrowseHandler();
@@ -72,7 +72,9 @@ var AjaxUpload = function(DropZone, options) {
 			}
 		});
 		
-		this.placeBrowseHandler();
+		setTimeout(function(){
+			$this.placeBrowseHandler();
+		}, 100);
 	}
 	
 	return this;

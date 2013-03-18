@@ -39,6 +39,8 @@ class BackupModel extends DataObject {
 		"type"			=> "varchar(40)"
 	);
 	
+	static $default_sort = "create_date DESC";
+	
 	/**
 	 * syncs the path with the model
 	 *
