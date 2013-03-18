@@ -1,55 +1,472 @@
 /**
-  * some basic functionality for goma, e.g. loaders for javascript and some global functions
+  * goma javascript framework
   *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 06.02.2013
-  * $Version 1.5.7
+  * last modified: 18.03.2013
+  * $Version 2.0
 */
 
-// prevent from being executed twice
-if(typeof self.loader == "undefined") {
+// goma-framework
+if(typeof goma == "undefined")
+	var goma = {};
+
+
+// some regular expressions
+var json_regexp = /^\(?\{/;
+var html_regexp = new RegExp("<body");
+
+if(typeof goma.ui == "undefined") {
+	goma.ui = (function($){
+		
+		var external_regexp = /https?\:\/\/|ftp\:\/\//;
 	
-	self.loader = true;
-	
-	// some regular expressions
-	var json_regexp = /^\(?\{/;
-	var html_regexp = new RegExp("<body");
-	var external_regexp = /https?\:\/\/|ftp\:\/\//;
-	
-	var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
-	var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
-	
-	/**
-	 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
-	 * you must register the plugin in PHP
-	 * we stop execution of JavaScript while loading
-	*/
-	var gloader = {
-		load: function(component, fn)
-		{
-			if(gloader.loaded[component] == null)
+		var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
+		var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
+		
+		/**
+		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
+		 * you must register the plugin in PHP
+		 * we stop execution of JavaScript while loading
+		*/
+		var gloaded = [];
+		var _loadScript = function(comp, fn) {
+			if(gloaded[comp] == null)
 			{
 				$("body").css("cursor", "wait");
 				$.ajax({
 					cache: true,
 					noRequestTrack: true,
-					url: BASE_SCRIPT + "gloader/" + component + ".js",
+					url: BASE_SCRIPT + "gloader/v2/" + comp + ".js",
 					dataType: "script",
 					async: false
 				});
 				$("body").css("cursor", "auto");
 				
-				gloader.loaded[component] = true;
+				gloaded[comp] = true;
 				
 				if(fn != null)
 					fn();
 			}
-		},
-		loaded: []
-	};
+		};
+		
+		var CSSLoaded = [];
+		var CSSIncluded = [];
+		var JSLoaded = [];
+		
+		// retina support
+		var RetinaReplace = function() {
+			$("img").each(function(){ //.on("load", "img", function(){
+				var $this = $(this);
+				if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
+					if(goma.ui.IsImageOk($(this).get(0))) {
+						var img = new Image();
+						img.onload = function(){
+							$this.css("width", $this.width());
+							$this.css("height", $this.height());
+							$this.attr("src", $this.attr("data-retina"));
+							img.src = null;
+						}
+						img.src = $this.attr("data-retina");
+						$this.attr("data-retined", "complete");
+					}
+				}
+			});
+			
+		}
+		
+		$(function() {	
+			$.extend(goma.ui, {
+				/**
+				 * this area is by default used to place content loaded via Ajax
+				*/
+				mainContent: $("#content").length ? $("#content") : $("body"),
+				
+				/**
+				 * this area is by default used to place containers from javascript
+				*/
+				DocRoot: ($(".documentRoot").length == 1) ? $(".documentRoot") : $("body")
+			});
+			
+			if(goma.ui.getDevicePixelRatio() > 1.5) {
+				RetinaReplace();
+				// add retina-updae-event
+				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, !1);
+			    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+			     	   /loaded|complete/.test(document.readyState) && RetinaReplace();
+			   	}, 10);
+			}
+			
+			window.onbeforeunload = goma.ui.fireUnloadEvents;
+		});
+		
+		// build module
+		return {
+			
+			/**
+			 * sets the main-content where to put by default content from ajax-requests
+			 *
+			 *@name setMainContent
+			 *@param jQuery-Object | string (CSS-Path)
+			*/
+			setMainContent: function(node) {
+				if($(node).length > 0)
+					goma.ui.mainContent = $(node);
+			},
+			
+			/**
+			 * returns the main-content as jQuery-Object
+			*/
+			getMainContent: function() {
+				return goma.ui.mainContent;
+			},
+			
+			ajax: function(destination, options, unload) {
+				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
+				
+				
+				if(unload !== false) {
+					var data = goma.ui.fireUnloadEvents(node);
+					if(typeof data == "string") {
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
+							return false;
+					}
+				}
+				
+				return $.ajax(options).done(function(r, c, a){	
+					goma.ui.renderResponse(r, a, node, undefined, false);
+				}).fail(function(a){
+					// try find out why it has failed
+					if(jqXHR.textStatus == "timeout") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
+					} else if(jqXHR.textStatus == "abort") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The request was aborted.</div>');
+					} else {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
+					}
+				});
+			},
+			
+			/**
+			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
+			 *
+			 *@name updateRetina
+			*/
+			updateRetina: function() {
+				if(goma.ui.getDevicePixelRatio() > 1.5)
+					RetinaReplace();	
+			},
+			
+			/**
+			 * fires unload events and returns perfect result for onbeforeunload event
+			 *
+			 *@name fireUnloadEvents
+			*/
+			fireUnloadEvents: function(node) {
+				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
+				var event = jQuery.Event("onbeforeunload");
+				var r = true;
+				
+				$(".g-unload-handler").each(function(){
+					if($(this).parents(node)) {
+						$(this).trigger(event);
+						if(typeof event.result == "string")
+							r = event.result;
+					}
+				});
+				
+				if(r !== true)
+					return r;
+			},
+			
+			/**
+			 * binds unload-event on specfic html-node
+			 *
+			 *@name bindUnloadEvent
+			 *@param string - selector for event-binding
+			 *@param object - data //optional
+			 *@param function - handler
+			*/
+			bindUnloadEvent: function(select, data, handler) {
+				$(select).addClass("g-unload-handler");
+				$(select).on("onbeforeunload", data, handler);
+			},
+			
+			/**
+			 * removes unbind-handler from specific object
+			 *
+			 *@name removeUnloadHandler
+			 *@param string - selector
+			 *@param function - handler to remove - optional
+			*/
+			unbindUnloadEvent: function(select, handler) {
+				$(select).off("onbeforeunload", handler);
+			},
+			
+			/**
+			 * for loading data
+			 * sets data loaded
+			*/
+			setLoaded: function(mod) {
+				gloaded[mod] = true;
+			},
+			
+			/**
+			 * loading-script
+			 *
+			 *@name load
+			 *@param string - mod
+			 *@param function - fn
+			*/
+			load: _loadScript,
+			
+			/**
+			 * some base-roots in DOM
+			*/
+			getContentRoot: function() {
+				return goma.ui.mainContent;
+			},
+			getDocRoot: function() {
+				return goma.ui.DocRoot;
+			},
+			
+			/**
+			 * global ajax renderer
+			 *
+			 *@name renderResponse
+			 *@access public
+			*/
+			renderResponse: function(html, xhr, node, object, checkUnload) {
+				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
+				
+				if(checkUnload !== false) {
+					var data = goma.ui.fireUnloadEvents(node);
+					if(typeof data == "string") {
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
+							return false;
+					}
+				}
+				
+				LoadAjaxResources(xhr);
+			
+				if(xhr != null) {
+					var content_type = xhr.getResponseHeader("content-type");
+					if(content_type == "text/javascript") {
+						if(typeof object != "undefined") {
+							var method;
+							if (window.execScript)
+							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+							else
+						  		method = eval('(function(){' + html + '});');
+						  	
+							method.call(object);
+						} else {
+							eval_global(html);
+						}
+						RunAjaxResources(xhr);
+						return true;
+					} else if(content_type == "text/x-json" && json_regexp.test(html)) {
+						
+						RunAjaxResources(xhr);
+						return false;
+					}
+				}
+				
+				var regexp = new RegExp("<body");
+				if(regexp.test(html)) {
+					var id = randomString(5);
+					top[id + "_html"] = html;
+					node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
+				} else {
+					node.html(html);
+				}
+				
+				RunAjaxResources(xhr);
+			},
+			
+			/**
+			 * css and javascript-management
+			*/
+			
+			/**
+			 * register a resource loaded
+			 *
+			 *@name registerResource
+			 *@access public
+			*/
+			registerResource: function(type, file) {
+				goma.ui.registerResources(type, [file]);
+			},
+			
+			/**
+			 * register resources loaded
+			 *
+			 *@name registerResources
+			 *@access public
+			*/
+			registerResources: function(type, files) {
+				switch(type) {
+					case "css":
+						
+						var i;
+						for(i in files) {
+							CSSLoaded[files[i]] = "";
+							CSSIncluded[files[i]] = true;
+						}
+					break;
+					case "js":
+						
+						var i;
+						for(i in files) {
+							JSLoaded[files[i]] = true;
+						}
+					break;
+				}
+			},
+			
+			loadResources: function(request) {
+				var css = request.getResponseHeader("X-CSS-Load");
+				var js = request.getResponseHeader("X-JavaScript-Load");
+				
+				if(css != null) {
+					var cssfiles = css.split(";");
+					var i;
+					
+					for(i in cssfiles) {
+						var file = cssfiles[i];
+						if(!external_regexp.test(file) && file != "") {
+							
+							if(typeof CSSLoaded[file] == "undefined") {
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(css){
+										// patch uris
+										var base = file.substring(0, file.lastIndexOf("/"));
+										//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+										css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+										
+										CSSLoaded[file] = css;
+									}
+								});
+							}
+							
+							if(typeof CSSIncluded[file] == "undefined") {
+								$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
+								CSSIncluded[file] = true;
+							}
+						} else {
+							CSSLoaded[file] = css;
+							if($("head").html().indexOf(file) != -1) {
+								$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
+							}
+						}
+					}
+				}
+				
+				if(js != null) {
+					var jsfiles = js.split(";");
+					var i;
+					
+					for(i in jsfiles) {
+						var file = jsfiles[i];
+						if(file != "") {
+							if((!run_regexp.test(file) && JSLoaded[file] !== true) || load_alwaysLoad.test(file)) {
+								JSLoaded[file] = true;
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(js){
+										eval_global(js);
+									}
+								});
+							}
+							regexp = null;
+							
+						}
+					}
+				}
+				
+			},
+			
+			runResources: function(request) {
+				var js = request.getResponseHeader("X-JavaScript-Load");
+				if(js != null) {
+					var jsfiles = js.split(";");
+					var i;
+					for(i in jsfiles) {
+						
+						var file = jsfiles[i];
+						if(file != "") {
+							if(run_regexp.test(file)) {
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(js){
+										eval_global(js);
+									}
+								});
+							}
+							regexp = null;	
+						}
+					}
+				}
+			},
+			
+			// Helper Functions
+			getDevicePixelRatio: function() {
+		        if (window.devicePixelRatio === undefined) { return 1; }
+		        return window.devicePixelRatio;
+		    },
+		    
+		    /**
+		     * checks if a img were loaded correctly
+		     *
+		     *@name isImageOK
+		    */
+			IsImageOk: function(img) {
+			    // During the onload event, IE correctly identifies any images that
+			    // weren’t downloaded as not complete. Others should too. Gecko-based
+			    // browsers act like NS4 in that they report this incorrectly.
+			    if (!img.complete) {
+			        return false;
+			    }
+			
+			    // However, they do have two very useful properties: naturalWidth and
+			    // naturalHeight. These give the true size of the image. If it failed
+			    // to load, either of these should be zero.
+			
+			    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
+			        return false;
+			    }
+			
+			    // No other way of checking: assume it’s ok.
+			    return true;
+			}
+	
+		};
+	})(jQuery);
+	
+	var gloader = {load: function(a) {
+        return goma.ui.load(a);   
+	}};
+}
+
+// prevent from being executed twice
+if(typeof self.loader == "undefined") {
+	
+	self.loader = true;
 	
 	// shuffle
 	array_shuffle = function(array){
@@ -221,11 +638,7 @@ if(typeof self.loader == "undefined") {
 		 * returns the root of the document
 		*/
 		w.getDocRoot = function() {
-			if($(".documentRoot").length == 1) {
-				return $(".documentRoot");
-			} else {
-				return $("body");
-			}
+			return goma.ui.getDocRoot();
 		}
 		
 		/**
@@ -270,208 +683,19 @@ if(typeof self.loader == "undefined") {
 			
 		// some response handlers
 		w.eval_script = function(html, ajaxreq, object) {
-			LoadAjaxResources(ajaxreq);
-			
-			var content_type = ajaxreq.getResponseHeader("content-type");
-			if(content_type == "text/javascript") {
-				if(typeof object != "undefined") {
-					var method;
-					if (window.execScript)
-					  	window.execScript('method = function(' + html + ')',''); // execScript doesn’t return anything
-					else
-					  	var method = eval('(function(){' + html + '});');
-					method.call(object);
-				} else {
-					 eval_global(html);
-				}
-			} else if(content_type == "text/x-json") {
-				var object = parseJSON(html);
-				var _class = object["class"];
-				var i;
-				for(i in object["areas"]) {
-					$("#"+_class+"_"+i+"").html(object["areas"][i]);
-				}
-			} else {
-				gloader.load("dropdownDialog");
-				var id = randomString(5);
-				if(html_regexp.test(html)) {
-					self[id + "_html"] = html;
-					$("body").append('<div id="'+id+'_div" style="width: 800px;height: 500px;"><iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0" id="'+id+'"></iframe></div>');
-					
-					$("body").append('<a href="#'+id+'_div" rel="dropdownDialog" id="'+id+'_link"></a>');
-					$("#" + id + "_link").click();
-				} else{
-					$("body").append('<div id="'+id+'_div">'+html+'</div>');
-					$("body").append('<a href="#'+id+'_div" rel="dropdownDialog" id="'+id+'_link"></a>');
-					$("#" + id + "_link").click();
-				}
-			}
-			
-			RunAjaxResources(ajaxreq);
+			return goma.ui.renderResponse(html, ajaxreq, undefined, object);
 		}
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
-			LoadAjaxResources(ajaxreq);
-			
-			if(ajaxreq != null) {
-				var content_type = ajaxreq.getResponseHeader("content-type");
-				if(content_type == "text/javascript") {
-					if(typeof object != "undefined") {
-						var method = eval('(function(){' + html + '});');
-						method.call(object);
-					} else {
-						eval_global(html);
-					}
-					RunAjaxResources(ajaxreq);
-					return true;
-				} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-					var object = parseJSON(html);
-					var _class = object["class"];
-					var i;
-					for(i in object["areas"]) {
-						$("#"+_class+"_"+i+"").html(object["areas"][i]);
-					}
-					RunAjaxResources(ajaxreq);
-					return true;
-				}
-			}
-			
-			var regexp = new RegExp("<body");
-			if(regexp.test(html)) {
-				var id = randomString(5);
-				top[id + "_html"] = html;
-				node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
-			} else {
-				node.html(html);
-			}
-			
-			RunAjaxResources(ajaxreq);
+			return goma.ui.renderResponse(html, ajaxreq, node, object);
 		}
-		
-		w.ajax_submit = function(obj)
-		{
-			var $this = $(obj);
-			$form = $this.parents("form");
-			var data = $form.serialize();
-			var url = $form.attr("action");
-			var method = $form.attr("method");
-			$this.before('<img src="images/16x16/loading.gif" class="loader" alt="loading..." />');
-			$.ajax({
-				url: url,
-				type: method,
-				data: data,
-				dataType: "script"
-			}).always(function(){
-				$form.find(".loader").remove();
-			});
-			return false;
-		}
-		
-		if(typeof w.JSLoadedResources == "undefined")
-			w.JSLoadedResources = [];
-		
-		if(typeof w.CSSLoadedResources == "undefined")
-			w.CSSLoadedResources = [];
-		
-		if(typeof w.CSSIncludedResources == "undefined")
-			w.CSSIncludedResources = [];
-		
-		
 		
 		w.LoadAjaxResources = function(request) {
-			var css = request.getResponseHeader("X-CSS-Load");
-			var js = request.getResponseHeader("X-JavaScript-Load");
-			if(css != null) {
-				var cssfiles = css.split(";");
-				var i;
-				for(i in cssfiles) {
-					var file = cssfiles[i];
-					if(!external_regexp.test(file) && file != "") {
-						
-						if(typeof w.CSSLoadedResources[file] == "undefined") {
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(css){
-									// patch uris
-									var base = file.substring(0, file.lastIndexOf("/"));
-									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-									
-									w.CSSLoadedResources[file] = css;
-								}
-							});
-						}
-						
-						
-						if(typeof w.CSSIncludedResources[file] == "undefined") {
-							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoadedResources[file]+'</style>');
-							w.CSSIncludedResources[file] = true;
-						}
-					} else {
-						w.CSSLoadedResources[file] = css;
-						if($("head").html().indexOf(file) != -1) {
-							$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
-						}
-					}
-				}
-			}
-			if(js != null) {
-				var jsfiles = js.split(";");
-				var i;
-				
-				for(i in jsfiles) {
-					var file = jsfiles[i];
-					if(file != "") {
-						if((!run_regexp.test(file) && w.JSLoadedResources[file] !== true) || load_alwaysLoad.test(file)) {
-							w.JSLoadedResources[file] = true;
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(js){
-									eval_global(js);
-								}
-							});
-						}
-						regexp = null;
-						
-					}
-				}
-			}
-			
+			return goma.ui.loadResources(request);
 		}
 		
 		w.RunAjaxResources = function(request) {
-			var js = request.getResponseHeader("X-JavaScript-Load");
-			if(js != null) {
-				var jsfiles = js.split(";");
-				var i;
-				for(i in jsfiles) {
-					
-					var file = jsfiles[i];
-					if(file != "") {
-						if(run_regexp.test(file)) {
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(js){
-									eval_global(js);
-								}
-							});
-						}
-						regexp = null;	
-					}
-				}
-			}
+			return goma.ui.runResources(request);
 		}
 	
 	
@@ -832,68 +1056,6 @@ if(typeof self.loader == "undefined") {
 	    // *     example 1: str_repeat('-=', 10);
 	    // *     returns 1: '-=-=-=-=-=-=-=-=-=-='
 	    return new Array(multiplier + 1).join(input);
-	}
-	
-	// Helper Functions
-    var getDevicePixelRatio = function() {
-        if (window.devicePixelRatio === undefined) { return 1; }
-        return window.devicePixelRatio;
-    }
-    
-	// retina-support
-	$(function(){
-		if(getDevicePixelRatio() > 1.5) {
-			var replace = function() {
-				
-					$("img").each(function(){ //.on("load", "img", function(){
-						var $this = $(this);
-						if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
-							if(IsImageOk($(this).get(0))) {
-								var img = new Image();
-								img.onload = function(){
-									$this.css("width", $this.width());
-									$this.css("height", $this.height());
-									$this.attr("src", $this.attr("data-retina"));
-									img.src = null;
-								}
-								img.src = $this.attr("data-retina");
-								$this.attr("data-retined", "complete");
-							}
-						}
-					});
-				
-			}
-			replace();
-			window.retinaReplace = replace;
-			
-			document.addEventListener && document.addEventListener("DOMContentLoaded", replace, !1);
-		    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
-		     	   /loaded|complete/.test(document.readyState) && replace();
-		   	 }, 10);
-		}
-	});
-	
-	if(typeof window.retinaReplace == "undefined")
-		window.retinaReplace = function(){};
-	
-	function IsImageOk(img) {
-	    // During the onload event, IE correctly identifies any images that
-	    // weren’t downloaded as not complete. Others should too. Gecko-based
-	    // browsers act like NS4 in that they report this incorrectly.
-	    if (!img.complete) {
-	        return false;
-	    }
-	
-	    // However, they do have two very useful properties: naturalWidth and
-	    // naturalHeight. These give the true size of the image. If it failed
-	    // to load, either of these should be zero.
-	
-	    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
-	        return false;
-	    }
-	
-	    // No other way of checking: assume it’s ok.
-	    return true;
 	}
 	
 	var scrollToHash = function(hash) {
