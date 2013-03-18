@@ -1496,7 +1496,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	        }
         
 		// for performance reason we cache this part
-		if(self::$cache_parent[$this->class] == array()) {
+		if(isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
 				
 				
 				$allowed_parents = array();
