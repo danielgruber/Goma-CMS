@@ -122,6 +122,14 @@ defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJ
 
 chdir(ROOT);
 
+// check for disk-quote
+$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+define("GOMA_FREE_SPACE", $free);
+if($free / 1024 / 1024 < 10) {
+	header("HTTP/1.1 500 Server Error");
+	die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+}
+
 // require data
 
 if (PROFILE)
