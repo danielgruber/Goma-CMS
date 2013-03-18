@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 03.02.2013
-  * $Version 2.5.4
+  * last modified: 18.03.2013
+  * $Version 2.5.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -133,12 +133,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getURL()
 		{
-			if($this->path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
+			$path = $this->path;
+			if($path == "" || ($this->fieldGet("parentid") == 0 && $this->fieldGet("sort") == 0)) {
 				return ROOT_PATH . BASE_SCRIPT;
 			} else {
-				return  ROOT_PATH . BASE_SCRIPT . $this->path . URLEND;
+				return  ROOT_PATH . BASE_SCRIPT . $path . URLEND;
 			}
 		}
+		
 		
 		/**
 		 * makes the org url without nothing for homepage
@@ -328,6 +330,26 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			return $this->fieldGet("path");
 		}
 		
+		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			$title = $this->title;
+			
+			if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
+				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
+			}
+			
+			if($link)
+				$title = '<a href="'.BASE_URI.'?r='.$this->id.'&pages_version='.$this->versionid.'" target="_blank">' . $title . '</a>';
+			
+			return $title;
+		}
+	
+		
 		//!Permission-Getters and Setters
 		
 		/**
@@ -342,26 +364,33 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
 				return $data;
-			/*} else if($this->parent) {
-				return $this->parent()->edit_permission;
-			*/} else {
-				if($this->parent) {
-					$parent = $this->parent->edit_permission();
-				} else {
-					$parent = Permission::forceExisting("PAGES_WRITE");
+			} else if(!$this->isPublished() && $this->wasPublished()) {
+				if($data = DataObject::Get_one("Permission", array(), array(), array(
+					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.edit_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
+				))) {
+					return $data;
 				}
-				
-				$perm = new Permission(array("type" => "admins"));
-				$perm->parentid = $parent->id;
-				$perm->forModel = "pages";
-				if($this->ID != 0) {
-					$perm->write(true, true, 2, false, false);
-					$this->edit_permissionid = $perm->id;
-					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
-				}
-				
-				return $perm;
 			}
+			
+			logging("edit:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
+			
+			if($this->parent) {
+				$parent = $this->parent->edit_permission();
+			} else {
+				$parent = Permission::forceExisting("PAGES_WRITE");
+			}
+			
+			$perm = new Permission(array("type" => "admins"));
+			$perm->parentid = $parent->id;
+			$perm->forModel = "pages";
+			if($this->ID != 0) {
+				$perm->write(true, true, 2, false, false);
+				$this->edit_permissionid = $perm->id;
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+			}
+			
+			return $perm;
+			
 		}
 		
 		/**
@@ -397,26 +426,32 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
 				return $data;
-			/*} else if($this->parent) {
-				return $this->parent()->edit_permission;
-			*/} else {
-				if($this->parent) {
-					$parent = $this->parent->publish_permission();
-				} else {
-					$parent = Permission::forceExisting("PAGES_PUBLISH");
+			} else if(!$this->isPublished() && $this->wasPublished()) {
+				if($data = DataObject::Get_one("Permission", array(), array(), array(
+					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.publish_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
+				))) {
+					return $data;
 				}
-				$perm = new Permission(array("type" => "admins"));
-				$perm->parentid = $parent->id;
-				$perm->forModel = "pages";
-				
-				if($this->ID != 0) {
-					$perm->write(true, true, 2, false, false);
-					$this->publish_permissionid = $perm->id;
-					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
-				}
-				
-				return $perm;
 			}
+			
+			logging("publish:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
+			
+			if($this->parent) {
+				$parent = $this->parent->publish_permission();
+			} else {
+				$parent = Permission::forceExisting("PAGES_PUBLISH");
+			}
+			$perm = new Permission(array("type" => "admins"));
+			$perm->parentid = $parent->id;
+			$perm->forModel = "pages";
+			
+			if($this->ID != 0) {
+				$perm->write(true, true, 2, false, false);
+				$this->publish_permissionid = $perm->id;
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+			}
+			
+			return $perm;
 		}
 		
 		/**
@@ -452,19 +487,23 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
 				return $data;
-			/*} else if($this->parent) {
-				return $this->parent()->read_permission;
-			*/} else {
-				$perm = new Permission(array("type" => "all"));
-				$perm->forModel = "pages";
-				if($this->ID != 0) {
-					$perm->write(true, true, 2, false, false);
-					$this->read_permissionid = $perm->id;
-					$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
+			} else if(!$this->isPublished() && $this->wasPublished()) {
+				if($data = DataObject::Get_one("Permission", array(), array(), array(
+					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.read_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
+				))) {
+					return $data;
 				}
-				
-				return $perm;
 			}
+			
+			$perm = new Permission(array("type" => "all"));
+			$perm->forModel = "pages";
+			if($this->ID != 0) {
+				$perm->write(true, true, 2, false, false);
+				$this->read_permissionid = $perm->id;
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
+			}
+			
+			return $perm;		
 		}
 		/**
 		 * sets the read-permission
@@ -1036,7 +1075,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					else
 						$state = "edited";
 				}
-				$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
+				$class = "".$record["class_name"]. " " . $mainbar . " " . $state;
 				
 				$where["parentid"] = $record->recordid;
 				// children
@@ -1440,7 +1479,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@name cache_parent
 	 *@access public
 	*/
-	private $cache_parent = array();
+	private static $cache_parent = array();
 	
 	/**
 	 * gets allowed parents
@@ -1448,10 +1487,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	 *@access public
 	*/		
 	public function allowed_parents() {
-		
+        
+	        if(PROFILE) Profiler::mark("pages::allowed_parents");
+	        
+	        $cacher = new Cacher("cache_parents");
+	        if($cacher->checkValid()) {
+	            self::$cache_parent = $cacher->getData();
+	        }
+        
 		// for performance reason we cache this part
-		if($this->cache_parent == array()) {
-				if(PROFILE) Profiler::mark("pages::allowed_parents");
+		if(!isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
+				
 				
 				$allowed_parents = array();
 				
@@ -1509,12 +1555,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						}
 					}
 				}
+	        
+	        self::$cache_parent[$this->class] = $allowed_parents;
 				
 				if(PROFILE) Profiler::unmark("pages::allowed_parents");
-
+	        
+	        $cacher->write(self::$cache_parent, 3600);
+	        
 				return $allowed_parents;
 		} else {
-				return $this->cache_parent;
+            		if(PROFILE) Profiler::unmark("pages::allowed_parents");
+			return self::$cache_parent[$this->class];
 		}	
 	}
 	
@@ -1780,28 +1831,5 @@ class UploadsPageBacktrace extends DataObjectExtension {
 	);
 }
 
-class UploadsPageBacktraceController extends ControllerExtension {
-	/**
-	 * on before handle an action we redirect if needed
-	 *
-	 *@name onBeforeHandleAction
-	*/
-	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-		$data = $this->getOwner()->modelInst()->linkingPages();
-		$data->setVersion(false);
-		if($data->Count() > 0) {
-			foreach($data as $page) {
-				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
-					return true;
-				}
-			}
-			
-			$handleWithMethod = false;
-			$content = false;
-		}
-	}
-}
-
-Object::extend("UploadsController", "UploadsPageBacktraceController");
 Object::extend("Uploads", "UploadsPageBacktrace");
 Object::extend("tplCaller", "ContentTPLExtension");
