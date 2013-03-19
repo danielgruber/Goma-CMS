@@ -372,7 +372,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 			}
 			
-			logging("edit:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
+			//logging("edit:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
 			
 			if($this->parent) {
 				$parent = $this->parent->edit_permission();
@@ -434,7 +434,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 			}
 			
-			logging("publish:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
+			//logging("publish:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
 			
 			if($this->parent) {
 				$parent = $this->parent->publish_permission();
