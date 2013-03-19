@@ -1344,6 +1344,17 @@ class GFS_Package_installer extends GFS {
 		// first we write everything to a temporary folder
 		$tempfolder = ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
 		
+		
+		// check for disk-quote
+		$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+		define("GOMA_FREE_SPACE", $free);
+		if($free / 1024 / 1024 < 5) {
+			// free space
+			FileSystem::delete($tempfolder);
+			header("HTTP/1.1 500 Server Error");
+			die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+		}
+		
 		// write files
 		$this->status = "Writing files...";
 		$this->current = "";
@@ -1687,6 +1698,16 @@ class GFS_Package_Creator extends GFS {
 	public function commit($inFile = null, $index = null) {
 		if(isset($index)) {
 			$this->fileIndex = $index;
+		}
+		
+		// check for disk-quote
+		$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+		define("GOMA_FREE_SPACE", $free);
+		if($free / 1024 / 1024 < 20) {
+			// free space
+			@unlink($this->file);
+			header("HTTP/1.1 500 Server Error");
+			die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
 		}
 		
 		// Adding files...

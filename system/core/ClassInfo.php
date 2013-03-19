@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.02.2013
-  * $Version 3.6.7
+  * last modified: 19.03.2013
+  * $Version 3.6.8
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -783,6 +783,14 @@ class ClassInfo extends Object
 						makeProjectUnavailable();
 						
 						Core::deletecache(true);
+						
+						// check for disk-quote
+						$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+						define("GOMA_FREE_SPACE", $free);
+						if($free / 1024 / 1024 < 20) {
+							header("HTTP/1.1 500 Server Error");
+							die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+						}
 						
 						// register shutdown hook
 						register_shutdown_function(array("ClassInfo", "finalizeClassInfo"));
