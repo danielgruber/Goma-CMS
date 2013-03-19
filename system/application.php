@@ -133,6 +133,7 @@ if($f !== null && $f !== "" && $f !== false) {
 	}
 } else {
 	define("GOMA_FREE_SPACE", 100000000000);
+
 }
 
 // require data
