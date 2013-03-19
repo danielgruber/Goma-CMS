@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 1.1.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 19.03.2013
+  * $Version 1.1.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -345,6 +345,10 @@ class FileUploadSet extends FormField {
 	public function handleUpload($upload) {
 		if(!isset($upload["name"])) {
 			return "No Upload defined.";
+		}
+		
+		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
+			return lang("error_disk_space");
 		}
 		
 		// if are more than one file are given ;)

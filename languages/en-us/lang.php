@@ -566,6 +566,8 @@ $lang = array(
 	"time_not_in_range"		=> "The time must be between \$start and \$end.",
 	"no_valid_time"			=> "The given time is not valid.",
 	
-	"mail_successful_sent"	=> "The mail was sent successfully."
+	"mail_successful_sent"	=> "The mail was sent successfully.",
+	
+	"error_disk_space"		=> "There's not enough disk space on the webserver available."
 
 );

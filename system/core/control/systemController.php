@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.03.2013
-  * $Version 1.4.8
+  * last modified: 19.03.2013
+  * $Version 1.4.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -210,6 +210,11 @@ class systemController extends Controller {
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
+				if(GOMA_FREE_SPACE -$_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
+				}
+		
+		
 				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {
@@ -256,6 +261,10 @@ class systemController extends Controller {
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
+				if(GOMA_FREE_SPACE -$_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
+				}
+				
 				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {

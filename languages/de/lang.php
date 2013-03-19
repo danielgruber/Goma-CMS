@@ -566,5 +566,7 @@ $lang = array(
 	"toggle_sidebar"		=> "Seitenleiste umschalten",
 	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
 	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit.",
-	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet."
+	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",
+	
+	"error_disk_space"		=> "Es ist nicht genügend freier Speicherplatz auf dem Webserver verfügbar.",
 );
