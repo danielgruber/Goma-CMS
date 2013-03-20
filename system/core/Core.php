@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.02.2013
-  * $Version 3.3.28
+  * last modified: 20.03.2013
+  * $Version 3.3.29
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -120,6 +120,10 @@ class Core extends object
 		public static function Init() {
 			
 			ob_start();
+			
+			if(isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
+				define("IS_BACKEND", true);
+			}
 			
 			if(isset($_POST) && $handle = @fopen("php://input", "r")) {
 				if(PROFILE) Profiler::mark("php://input read");
