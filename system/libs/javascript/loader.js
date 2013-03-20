@@ -106,6 +106,11 @@ if(typeof goma.ui == "undefined") {
 		return {
 			
 			/**
+			 * defines if we are in backend
+			*/
+			is_backend: false,
+			
+			/**
 			 * sets the main-content where to put by default content from ajax-requests
 			 *
 			 *@name setMainContent
@@ -850,6 +855,9 @@ if(typeof self.loader == "undefined") {
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
+	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	 		if(goma.ui.is_backend)
+	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
 		
 		w.event_history = [];
