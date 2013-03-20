@@ -785,9 +785,7 @@ class ClassInfo extends Object
 						Core::deletecache(true);
 						
 						// check for disk-quote
-						$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-						define("GOMA_FREE_SPACE", $free);
-						if($free / 1024 / 1024 < 20) {
+						if(GOMA_FREE_SPACE / 1024 / 1024 < 20) {
 							header("HTTP/1.1 500 Server Error");
 							die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
 						}
