@@ -210,7 +210,7 @@ class systemController extends Controller {
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
-				if(GOMA_FREE_SPACE -$_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
 					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
 				}
 		
@@ -261,7 +261,7 @@ class systemController extends Controller {
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
-				if(GOMA_FREE_SPACE -$_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
 					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
 				}
 				

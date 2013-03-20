@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 19.03.2013
+  * last modified: 20.03.2013
   * $Version 1.1.9
 */
 
@@ -347,16 +347,17 @@ class FileUploadSet extends FormField {
 			return "No Upload defined.";
 		}
 		
-		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
-			return lang("error_disk_space");
-		}
-		
 		// if are more than one file are given ;)
 		if(is_array($upload["name"])) {
 			// we make a error-stack
 			$errStack = array();
 			$fileStack = array();
 			foreach($upload["name"]  as $key => $name) {
+				
+				if(GOMA_FREE_SPACE - $upload["size"][$key] < 10 * 1024 * 1024) {
+					$errStack[] = lang("error_disk_space");
+				}
+				
 				if($this->max_filesize == -1 || $upload["size"][$key] <= $this->max_filesize) {
 					$ext = strtolower(substr($name, strrpos($name, ".") + 1));
 					if($this->allowed_file_types == "*" || in_array($ext, $this->allowed_file_types)) {
@@ -388,6 +389,10 @@ class FileUploadSet extends FormField {
 		
 		// just one file
 		} else {
+			if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
+				return lang("error_disk_space");
+			}
+		
 			if($this->max_filesize == -1 || $upload["size"] <= $this->max_filesize) {
 				$name = $upload["name"];
 				$ext = strtolower(substr($name, strrpos($name, ".") + 1));

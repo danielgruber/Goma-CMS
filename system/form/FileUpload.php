@@ -372,7 +372,7 @@ class FileUpload extends FormField
 			return "No Upload defined.";
 		}
 		
-		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
+		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
 			return lang("error_disk_space");
 		}
 		
