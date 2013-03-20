@@ -254,7 +254,6 @@ DropDown.prototype = {
 		var that = this;
 		this.widget.find(" > .dropdown > .content ul li a").click(function(){
 			if(that.multiple) {
-				
 				if($(this).hasClass("checked")) {
 					that.uncheck($(this).attr("id"));
 				} else {
@@ -263,6 +262,7 @@ DropDown.prototype = {
 			} else {
 				that.check($(this).attr("id"));
 			}
+			return false;
 		});
 	},
 	
