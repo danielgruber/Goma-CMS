@@ -196,6 +196,9 @@ a:hover {
 	border: 2px solid #cfcfcf;
 	border-radius: 2px;
 }
+#userbar-user img:hover {
+	border-color: #eee;
+}
 #userbar .logout .logoutButton {
 	margin-top: -2px;
 }
