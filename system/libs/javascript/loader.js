@@ -705,6 +705,7 @@ if(typeof self.loader == "undefined") {
 		 *@param node
 		*/
 		w.unbindFromFormSubmit = function(node) {
+			
 			// first make sure it works!
 			var active = false;
 			$(node).focus(function(){
@@ -716,13 +717,15 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			$(node).parents("form").bind("formsubmit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			$(node).parents("form").bind("submit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			// second use a better method, just if the browser support it
