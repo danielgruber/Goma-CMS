@@ -1346,7 +1346,7 @@ class GFS_Package_installer extends GFS {
 		
 		
 		$f = @disk_free_space("/");
-		if($f !== null && $f !== "") {
+		if($f !== null && $f !== "" && $f !== false) {
 			// check for disk-quote
 			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
 			define("GOMA_FREE_SPACE", $free);
@@ -1704,7 +1704,7 @@ class GFS_Package_Creator extends GFS {
 		}
 		
 		$f = @disk_free_space("/");
-		if($f !== null && $f !== "") {
+		if($f !== null && $f !== "" && $f !== false) {
 			// check for disk-quote
 			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
 			define("GOMA_FREE_SPACE", $free);
