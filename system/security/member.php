@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 17.03.2012
-  * $Version 2.4.7
+  * last modified: 21.03.2012
+  * $Version 2.4.8
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -927,7 +927,7 @@ class Member extends Object {
 	*/
 	public function require_login() {
 		if(!self::login()) {
-			AddContent::addError(lang("require_login"));
+			AddContent::addNotice(lang("require_login"));
 			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
 		}
 		return true;
