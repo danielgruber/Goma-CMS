@@ -712,7 +712,7 @@ class Member extends Object {
 		
 		$cacher = new Cacher("groups-checkDefaults");
 		if($cacher->checkValid()) {
-			
+		
 		} else {
 			if(DataObject::count("group", array("type" => 2)) == 0) {
 				$group = new Group();
@@ -759,7 +759,7 @@ class Member extends Object {
 		if(isset($_SESSION["g_userlogin"])) {
 			if($data = DataObject::get_one("user", array("id" => $_SESSION["g_userlogin"]))) {
 				$currsess = session_id();
-								
+				
 				if($data['phpsess'] != $currsess)
 				{
 					self::doLogout();
