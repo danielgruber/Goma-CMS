@@ -427,7 +427,7 @@ class Controller extends RequestHandler
 			$controller = clone $this;
 			$model->controller($controller);
 			
-			$form = $model->generateForm($name, $edit, $disabled, @$this->request);
+			$form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null);
 			$form->setSubmission($submission);
 			
 			// we add where to the form
