@@ -2,8 +2,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 21.03.2013
 */
 
 var DropDown = function(id, url, multiple) {
@@ -276,7 +276,10 @@ DropDown.prototype = {
 		var that = this;
 		if(this.multiple) {
 			
-			$("#" + id).addClass("checked");
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).addClass("checked");
+			
+			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
 			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
@@ -293,7 +296,11 @@ DropDown.prototype = {
 			});
 		} else {
 			this.widget.find(" > .dropdown > .content ul li a.checked").removeClass("checked");
-			$("#" + id).addClass("checked");
+			
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).addClass("checked");
+			
+			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
 			this.input.val(value);
 			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
@@ -326,7 +333,8 @@ DropDown.prototype = {
 		var that = this;
 		// this is just for dropdowns with multiple values
 		if(this.multiple) {
-			$("#" + id).removeClass("checked");
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).removeClass("checked");
 			var value = id.substring(10 + this.id.length);
 			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({

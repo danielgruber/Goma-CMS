@@ -466,6 +466,14 @@ if(typeof goma.ui == "undefined") {
 	var gloader = {load: goma.ui.load};
 }
 
+if(typeof goma.ENV == "undefined") {
+	goma.ENV = (function(){
+		return {
+			"jsversion": "2.0"
+		};
+	})();
+}
+
 // prevent from being executed twice
 if(typeof self.loader == "undefined") {
 	
@@ -856,7 +864,7 @@ if(typeof self.loader == "undefined") {
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-	 		if(goma.ui.is_backend)
+	 		if(goma.ENV.is_backend)
 	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
 		
