@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.02.2013
-  * $Version 1.4.4
+  * last modified: 21.03.2013
+  * $Version 1.4.5
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -128,7 +128,7 @@ class DropDown extends FormField
 					
 					$this->key = randomString(5);
 				} else {
-					$this->dataset = array();
+					$this->dataset = null;
 					$this->key = randomString(5);
 				}
 				$this->input->value = $this->key;
@@ -485,6 +485,7 @@ class DropDown extends FormField
 				unset($this->dataset[$key]);
 				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			}
+			
 			if(Core::is_ajax()) {
 				return $this->renderInput();
 			} else {
