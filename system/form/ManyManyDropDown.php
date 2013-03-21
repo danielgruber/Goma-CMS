@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
-  * $Version 1.1.1
+  * last modified: 21.03.2013
+  * $Version 1.1.2
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -62,7 +62,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			
 			parent::getValue();
 			
-			if(!$this->dataset) {
+			if(!isset($this->dataset)) {
 				
 				if(is_object($this->form()->result)) {
 					// get relations from result
@@ -188,5 +188,11 @@ class ManyManyDropDown extends MultiSelectDropDown
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);
 			return array("data" => $arr, "left" => $left, "right" => $right);
+		}
+		
+		public function result() {
+			$result = parent::result();
+			
+			return $result;
 		}
 }
