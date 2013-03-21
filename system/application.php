@@ -123,7 +123,7 @@ defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJ
 chdir(ROOT);
 
 $f = @disk_free_space("/");
-if($f !== null && $f !== "" && $f !== false) {
+if($f !== null && $f !== "") {
 	// check for disk-quote
 	$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
 	define("GOMA_FREE_SPACE", $free);
