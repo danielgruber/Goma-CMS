@@ -877,7 +877,6 @@ if(typeof self.loader == "undefined") {
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-
 	 		if(goma.ENV.is_backend)
 	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
