@@ -123,7 +123,7 @@ defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJ
 chdir(ROOT);
 
 $f = @disk_free_space("/");
-if($f !== null && $f !== "") {
+if($f !== null && $f !== "" && $f !== false) {
 	// check for disk-quote
 	$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
 	define("GOMA_FREE_SPACE", $free);
@@ -131,6 +131,8 @@ if($f !== null && $f !== "") {
 		header("HTTP/1.1 500 Server Error");
 		die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
 	}
+} else {
+	define("GOMA_FREE_SPACE", 100000000000);
 }
 
 // require data
