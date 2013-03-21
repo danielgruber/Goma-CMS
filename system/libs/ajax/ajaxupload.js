@@ -5,9 +5,9 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.10.2012
-  * $Version 2.0.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 21.03.2013
+  * $Version 2.0.4
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -62,7 +62,7 @@ var AjaxUpload = function(DropZone, options) {
 	if(typeof this.browse != "undefined") {
 		this.browse = $(this.browse);
 		// bind events to browse-button
-		this.browse.on("mouseover touchstart", function(){
+		this.browse.hover(function(){
 			if(!$this.loading) {
 				$this.browse.removeAttr("disabled");
 				$this.placeBrowseHandler();
@@ -72,9 +72,7 @@ var AjaxUpload = function(DropZone, options) {
 			}
 		});
 		
-		setTimeout(function(){
-			$this.placeBrowseHandler();
-		}, 100);
+		this.placeBrowseHandler();
 	}
 	
 	return this;
@@ -474,9 +472,11 @@ AjaxUpload.prototype = {
 			
 			// first create the iframe, we want to send the file through
 			
+            
 			this.loading = true;
 			
 			var iframe = randomString(10);
+            
 			this.frameID = iframe;
 			
 			var upload = {};
@@ -495,7 +495,7 @@ AjaxUpload.prototype = {
 			var form = $(field).parents("form");
 			
 			form.attr("id", "");
-			
+            
 			this.queue[upload.fileIndex] = {
 				send: function() {
 					form.submit();
@@ -508,8 +508,7 @@ AjaxUpload.prototype = {
 			};
 			
 			var i = document.getElementById("frame_" + iframe);
-			
-			
+            
 			var testing = function(){
 				if (i.contentDocument) {
 					var d = i.contentDocument;
@@ -524,7 +523,11 @@ AjaxUpload.prototype = {
 				$this.loading = false;
 				
 			};
-			i.onload = testing;
+            
+            if(getInternetExplorerVersion() == -1)
+			    i.onload = testing;
+            else
+                i.attachEvent("onload", testing);
 			
 			this.processQueue();
 		}
