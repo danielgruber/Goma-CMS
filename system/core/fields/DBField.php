@@ -897,12 +897,12 @@ class HTMLText extends Varchar {
 			if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
 				
 				// match for size
-				if(preg_match('/style\="[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+				if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
 					// sizes
 					$$sizes[1] = $sizes[2];
 					$$sizes[4] = $sizes[5];
 					
-				} else if(preg_match('/style\="[^"]*(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+				} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
 				
 					$$sizes[1] = $sizes[2];
 					
