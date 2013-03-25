@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 16.03.2013
-  * Version: 1.3.5
+  * last modified: 25.03.2013
+  * Version: 1.3.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -752,7 +752,7 @@ class Resources extends Object {
 							$js .= $jsdata;
 							FileSystem::Write($cachefile,$jsdata);
 						}
-						unset($cfile, $data, $cachefile);
+						unset($cfile, $jsdata, $cachefile);
 					} else {
 						$js .= "/* RAW */\n\n";
 						$js .= jsmin::minify($code) . ";\n\n";
@@ -761,12 +761,14 @@ class Resources extends Object {
 			}
 			
 			$files = array();
-			foreach((array) $data["files"] as $jsfile) {
-				if(file_exists($jsfile))
-					$files[] = $jsfile . "?" . filemtime($jsfile);
-				else
-					$files[] = $jsfile;
-			}
+			if(isset($data["files"]))
+				foreach((array) $data["files"] as $jsfile) {
+					if(file_exists($jsfile))
+						$files[] = $jsfile . "?" . filemtime($jsfile);
+					else
+						$files[] = $jsfile;
+				}
+			
 			if(count($files) > 0) {
 				$js .= "goma.ui.registerResources('js', ".json_encode($files).");";
 			}

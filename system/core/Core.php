@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 20.03.2013
+  * last modified: 25.03.2013
   * $Version 3.3.29
 */
 
@@ -12,6 +12,7 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::AddSaveVar("Core", "rules");
 ClassInfo::AddSaveVar("Core", "hooks");
+ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
 
 class Core extends object
 {
@@ -110,6 +111,13 @@ class Core extends object
 		 *@accesss public
 		*/
 		public static $phpInputFile;
+		
+		/**
+		 * callbacks for $_cms_blah
+		 *
+		 *@name cmsVarCallbacks
+		*/
+		private static $cmsVarCallbacks = array();
 		
 		/**
 		 * inits the core
@@ -246,7 +254,18 @@ class Core extends object
 			}
 		}
 		
-		
+		/**
+		 * registers an CMS-Var-Callback
+		 *
+		 *@name addCMSVarCallback
+		 *@access public
+		 *@param callback
+		 *@param int - priority
+		*/
+		public function addCMSVarCallback($callback, $prio = 10) {
+			if(is_callable($callback))
+				self::$cmsVarCallbacks[$prio][] = $callback;
+		}
 		
 		/**
 		 * sets a cms-var
@@ -257,6 +276,15 @@ class Core extends object
 		public static function setCMSVar($name, $value) {
 			self::$cms_vars[$name] = $value;
 		}
+		
+		/**
+		 * sets a CMS-Var-Handler
+		 *
+		 *@name setCMSVarHandler
+		 *@access public
+		 *@param callback
+		*/
+		
 		/**
 		 * gets a CMS-Var
 		 *
@@ -294,6 +322,15 @@ class Core extends object
 				return self::$cms_vars["user"];
 			}
 			
+			krsort(self::$cmsVarCallbacks);
+			foreach(self::$cmsVarCallbacks as $callbacks) {
+				foreach($callbacks as $callback) {
+					if(($data = call_user_func_array($callback, array($name))) !== null) {
+						if(PROFILE) Profiler::unmark("Core::getCMSVar");
+						return $data;
+					}
+				}
+			}
 			
 			if(PROFILE) Profiler::unmark("Core::getCMSVar");
 			return isset($GLOBALS["cms_" . $name]) ? $GLOBALS["cms_" . $name] : null;
