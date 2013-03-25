@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 18.12.2012
-  * $Version 1.4.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
+  * $Version 1.4.7
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -166,9 +166,26 @@ class adminController extends Controller
 		 *
 		 *@name flushLog
 		*/
-		public function flushLog() {
+		public function flushLog($count = 30) {
 			if(Permission::check("superadmin")) {
-				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
+				
+				// we delete all logs that are older than 30 days
+				$logDir = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER;
+				foreach(scandir($logDir) as $type) {
+					if($type != "." && $type != ".." && is_dir($logDir . "/" . $type))
+						foreach(scandir($logDir . "/" . $type . "/") as $date) {
+							if($date != "." && $date != "..") {
+								
+								if(preg_match('/^(\d{2})\-(\d{2})\-(\d{2})$/', $date, $matches)) {
+									$time = mktime(0, 0, 0, $matches[1], $matches[2], $matches[3]);
+									if($time < NOW - 60 * 60 * 24 * $count || isset($_GET["forceAll"])) {
+										FileSystem::delete($logDir . "/" . $type . "/" . $date);
+									}
+								}
+							}
+						}
+				}
+				
 				AddContent::addSuccess(lang("flush_log_success"));
 				$this->redirectBack();
 			}
@@ -317,6 +334,19 @@ class admin extends ViewAccessableData implements PermProvider
 		public function header()
 		{
 				return Core::GetHeaderHTML();
+		}
+		
+		public function TooManyLogs() {
+			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
+				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
+				if($count > 100) {
+					$this->controller()->flushLog(50);
+				}
+				
+				return ($count > 30);
+			}
+			
+			return false;
 		}
 		
 		/**

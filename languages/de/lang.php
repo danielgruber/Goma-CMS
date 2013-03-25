@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 28.02.2013
+  * last modified: 25.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -524,8 +524,9 @@ $lang = array(
 	
 	"author"				=> "Autor",
 	
-	"flush_log"				=> "Log-Dateien löschen",
-	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht.",
+	"flush_log"				=> "Alte Log-Dateien löschen",
+	"flush_log_success"		=> "Alte Log-Dateien wurde erfolgreich gelöscht.",
+	"flush_log_recommended"	=> "Es sind zu viele Log-Dateien auf dem Server. Es wird Ihnen empfohlen alte Log-Dateien zu löschen.",
 
 	"tablefield_out_of"		=> "von",
 
