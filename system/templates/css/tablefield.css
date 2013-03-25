@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.02.2013
+  * last modified: 25.03.2013
 */
 
 /* basics */
@@ -121,6 +121,9 @@
 
 .tablefield-table .sortable-header {
 	
+}
+.tablefield-table .sortable-header .form_field {
+	border: 0 !important;
 }
 .tablefield-table .sortable-header .tablefield-button-filter input {
 	font-size: 0;

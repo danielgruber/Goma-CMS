@@ -248,3 +248,5 @@ class TemplateSettings extends NewSettings {
 		$form->add(new TextArea("css_standard", lang("own_css")));
 	}
 }
+
+Core::addCMSVarCallback(array("settingsController", "get"));

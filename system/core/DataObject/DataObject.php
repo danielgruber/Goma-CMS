@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 05.03.2013
-  * $Version: 4.7.6
+  * last modified: 25.03.2013
+  * $Version: 4.7.7
 */
 
 defined('IN_GOMA') OR die();
@@ -1342,7 +1342,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param newdata
 	 *@param param to write changed into
 	*/
-	public function checkForChange($snap_priority, $newdata, &$changed = array()) {
+	public function checkForChange($snap_priority, $newdata, &$changed = array(), $includeAll = false) {
 
 		// first check if this record is important
 		if(!$this->isField("stateid") || !$this->isField("publishedid")) {
@@ -1382,6 +1382,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				{
 						if((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
 						{
+								if($includeAll) $changed[$name] = (isset($newdata[$name . "ids"])) ? $newdata[$name . "ids"] : $newdata[$name];
 								$forceChange = true;
 								break;
 						}
@@ -1393,6 +1394,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 				{
 						if((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
 						{
+								if($includeAll) $changed[$name] = (isset($newdata[$name . "ids"])) ? $newdata[$name . "ids"] : $newdata[$name];
 								$forceChange = true;
 								break;
 						}	
@@ -1406,6 +1408,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 							$newdata[$name . "ids"] = $newdata[$name];
 						if(isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
 						{
+								if($includeAll) $changed[$name] = $newdata[$name . "ids"];
 								$forceChange = true;				
 						}						
 				}
