@@ -148,6 +148,11 @@
 					<!-- root of content-area -->
 					<div class="notificationRoot content_inner overview">
 						<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
+							<% IF $TooManyLogs AND permission("superadmin") %>
+								<div class="notice">
+									{$_lang_flush_log_recommended} <a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+								</div>
+							<% END %>
 							$addcontent
 						</div>
 								
@@ -278,7 +283,7 @@
 										</div>
 										<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
 										<% IF permission("superadmin") %>
-										<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+											<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
 										<% END %>
 									</div>
 								</div>
