@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 19.03.2013
-  * $Version 3.6.8
+  * last modified: 25.03.2013
+  * $Version 3.6.9
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -749,6 +749,15 @@ class ClassInfo extends Object
 						
 						// end filesystem checks
 						
+						// check for clean-up
+						if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
+							$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
+							if($count > 60) {
+								register_shutdown_function(array("ClassInfo", "autoCleanUpLog"));
+							}
+						}
+						
+						return false;
 						
 						require_once(ROOT . "system/libs/thirdparty/plist/CFPropertyList.php");
 						// get some data about app-env
@@ -1082,6 +1091,16 @@ class ClassInfo extends Object
 				
 				ClassInfo::write();
 			}
+		}
+		
+		/**
+		 * callback for auto-clean-up for log-files
+		 *
+		 *@name autoCleanUpLog
+		 *@access public
+		*/
+		public static function autoCleanUpLog() {
+			Core::cleanUpLog(60);
 		}
 		
 		/**

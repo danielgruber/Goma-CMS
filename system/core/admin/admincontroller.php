@@ -170,21 +170,7 @@ class adminController extends Controller
 			if(Permission::check("superadmin")) {
 				
 				// we delete all logs that are older than 30 days
-				$logDir = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER;
-				foreach(scandir($logDir) as $type) {
-					if($type != "." && $type != ".." && is_dir($logDir . "/" . $type))
-						foreach(scandir($logDir . "/" . $type . "/") as $date) {
-							if($date != "." && $date != "..") {
-								
-								if(preg_match('/^(\d{2})\-(\d{2})\-(\d{2})$/', $date, $matches)) {
-									$time = mktime(0, 0, 0, $matches[1], $matches[2], $matches[3]);
-									if($time < NOW - 60 * 60 * 24 * $count || isset($_GET["forceAll"])) {
-										FileSystem::delete($logDir . "/" . $type . "/" . $date);
-									}
-								}
-							}
-						}
-				}
+				Core::CleanUpLog($count);
 				
 				AddContent::addSuccess(lang("flush_log_success"));
 				$this->redirectBack();
@@ -339,8 +325,8 @@ class admin extends ViewAccessableData implements PermProvider
 		public function TooManyLogs() {
 			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
 				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
-				if($count > 100) {
-					$this->controller()->flushLog(50);
+				if($count > 60) {
+					$this->controller()->flushLog(60);
 				}
 				
 				return ($count > 30);
