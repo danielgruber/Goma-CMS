@@ -390,5 +390,5 @@ class HTTPresponse extends object
 				
 				Core::callHook("onBeforeShutdown");
 				exit;
-		}	
+		}
 }
