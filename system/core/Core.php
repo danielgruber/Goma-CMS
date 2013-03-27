@@ -5,11 +5,7 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   * last modified: 25.03.2013
-<<<<<<< HEAD
-  * $Version 3.3.29
-=======
   * $Version 3.3.30
->>>>>>> Better Cleanup of Logfiles
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
