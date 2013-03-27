@@ -755,10 +755,7 @@ class ClassInfo extends Object
 							if($count > 60) {
 								register_shutdown_function(array("ClassInfo", "autoCleanUpLog"));
 							}
-						}
-						
-						return false;
-						
+						}						
 						require_once(ROOT . "system/libs/thirdparty/plist/CFPropertyList.php");
 						// get some data about app-env
 						$frameworkplist = new CFPropertyList(FRAMEWORK_ROOT . "info.plist");
