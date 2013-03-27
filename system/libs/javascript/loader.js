@@ -675,21 +675,24 @@ if(typeof self.loader == "undefined") {
 			if(names.length == 0)
 				return true;
 			
-			var jqXHR = $.ajax({
+			$.ajax({
 				async: async,
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",
-				dataType: "json",
-				noRequestTrack: true
-			});
-			
-			try {
-				var data = parseJSON(jqXHR.responseText);
-				for(i in data) {
-					lang[i] = data[i];
+				dataType: "html",
+				noRequestTrack: true,
+				success: function(html) {
+					try {
+						var data = parseJSON(html);
+						for(i in data) {
+							lang[i] = data[i];
+						}
+					} catch(e) { 
+						alert(e);
+					}
 				}
-			} catch(e) { }
+			});
 		}
 			
 		// some response handlers
