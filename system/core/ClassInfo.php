@@ -635,12 +635,15 @@ class ClassInfo extends Object
 							} else {
 								$data = array("fileindex" => array(), "packages" => array());
 							}
-							if($data["fileindex"] != $files) {
+							if(true) {//$data["fileindex"] != $files) {
+								$data = array("fileindex" => array(), "packages" => array());
 								$data["fileindex"] = $files;
 								foreach($files as $file) {
 									if(preg_match('/\.gfs$/i', $file)) {
+										
 										require_once(FRAMEWORK_ROOT . "/libs/GFS/gfs.php");
 										require_once(FRAMEWORK_ROOT . "/libs/thirdparty/plist/CFPropertyList.php");
+
 										if(file_exists($appFolder . "/" . $file . ".plist") && filemtime($appFolder . "/" . $file . ".plist") >= filemtime($appFolder . "/" . $file)) {
 											$plist = new CFPropertyList();
 											$plist->parse(file_get_contents($appFolder . "/" . $file . ".plist"));
@@ -649,21 +652,42 @@ class ClassInfo extends Object
 											$info["file"] = $file;
 											if(isset($info["type"], $info["version"])) {
 												if(isset($info["name"])) {
-													$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
-												} else {
-													$data["packages"][$info["type"]][$info["version"]] = $info;
+													if(isset($data["packages"][$info["type"]][$info["name"]])) {
+														foreach($data["packages"][$info["type"]][$info["name"]] as $v => $d) {
+															if(goma_version_compare($v, $info["version"], "<")) {
+																@unlink($appFolder . "/" . $d["file"]);
+																@unlink($appFolder . "/" . $d["file"] . ".plist");
+																unset($data["packages"][$info["type"]][$info["name"]][$v]);
+																$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
+															} else {
+																@unlink($appFolder . "/" . $file);
+																@unlink($appFolder . "/" . $file . ".plist");
+															}
+														}
+													} else {
+														$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
+													}
 												}
 											}
 										} else {
 											$gfs = new GFS($appFolder . "/" . $file);
 											if($gfs->valid) {
 												$info = $gfs->parsePlist("info.plist");
+												
 												$info["file"] = $file;
 												if(isset($info["type"], $info["version"])) {
-													if(isset($info["name"])) {
-														$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
+													if(isset($data["packages"][$info["type"]][$info["name"]])) {
+														foreach($data["packages"][$info["type"]][$info["name"]] as $v => $d) {
+															if(goma_version_compare($v, $info["version"], "<")) {
+																@unlink($appFolder . "/" . $d["file"]);
+																unset($data["packages"][$info["type"]][$info["name"]][$v]);
+																$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
+															} else {
+																@unlink($appFolder . "/" . $file);
+															}
+														}
 													} else {
-														$data["packages"][$info["type"]][$info["version"]] = $info;
+														$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
 													}
 												}
 												
@@ -677,6 +701,9 @@ class ClassInfo extends Object
 										}
 									}
 								}
+								
+								print_r($data);
+								exit;
 
 								if($permissionsValid) {
 									FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
@@ -756,8 +783,6 @@ class ClassInfo extends Object
 								register_shutdown_function(array("ClassInfo", "autoCleanUpLog"));
 							}
 						}
-						
-						return false;
 						
 						require_once(ROOT . "system/libs/thirdparty/plist/CFPropertyList.php");
 						// get some data about app-env
