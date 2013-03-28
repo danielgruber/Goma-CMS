@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.03.2013
-  * $Version 2.0.5
+  * last modified: 28.03.2013
+  * $Version 2.0.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -316,7 +316,7 @@ class contentController extends FrontedController
 				if(count($uploadObjects) > 0) {
 
 					$hash = md5($uploadHash);
-					$cacher = new Cacher("track_" . Core::$requestController->modelInst()->id . "_" . $hash);
+					$cacher = new Cacher("track_" . Core::$requestController->modelInst()->versionid . "_" . $hash);
 					if($cacher->checkValid())
 						return true;
 					else {
