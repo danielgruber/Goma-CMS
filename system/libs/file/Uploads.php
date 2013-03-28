@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.03.2013
-  * $Version 1.5.4
+  * last modified: 28.03.2013
+  * $Version 1.5.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -660,7 +660,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
@@ -696,7 +696,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
@@ -733,7 +733,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
@@ -769,7 +769,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path .'/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
@@ -805,7 +805,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
@@ -841,7 +841,7 @@ class ImageUploads extends Uploads {
 		// retina
 		$fileRetina = $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($fileRetina) && filemtime($fileRetina) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
+			@unlink($fileRetina);
 		}
 		
 		if($absolute) {
