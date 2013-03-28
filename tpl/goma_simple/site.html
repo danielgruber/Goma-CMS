@@ -65,12 +65,10 @@
 					
 					
 					<div id="breadcrumb">
-						<div>
-							{$_lang_you_are_here}: <a href="./">{$_lang_homepage} </a>
-							<% CONTROL breadcrumbs() AS $breadcrumb %>
-								{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
-							<% ENDCONTROL %>
-						</div>
+						<a href="./">{$_lang_homepage} </a>
+						<% CONTROL breadcrumbs() AS $breadcrumb %>
+							{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
+						<% ENDCONTROL %>
 					</div>
 					
 					
