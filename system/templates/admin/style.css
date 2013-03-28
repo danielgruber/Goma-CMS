@@ -1255,6 +1255,9 @@ form h2 {
 .page > span {
 	background: url(../../../images/icons/fatcow16/file.png);
 }
+#visit_webpage .page {
+	font-style: italic;
+}
 
 @media print {
 	#header {

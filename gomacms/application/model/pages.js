@@ -11,7 +11,9 @@ if(window.top != window) {
 	top.location.href = location.href;
 }
 
-function pages_pushPreviewURL(publish, state, usePublish) {
+//preloadLang(["view_site", "view_page"]);
+
+function pages_pushPreviewURL(publish, state, usePublish, title) {
 	if(publish !== false) {
 		$("#visit_webpage").attr("href", publish);	
 	} else {
@@ -31,12 +33,19 @@ function pages_pushPreviewURL(publish, state, usePublish) {
 		show_preview(publish, state, usePublish);
 		return false;	
 	});
+	
+	if(typeof title != "undefined") {
+		$("#visit_webpage").html(lang("view_page").replace("%s", '<span class="page">' + title + "</span>") + " &raquo;");
+	} else {
+		$("#visit_webpage").html(lang("view_site") + " &raquo;");
+	}
 }
 
 function pages_unbindPreviewURL() {
 	$("#visit_webpage").unbind("click");
 	$("#visit_webpage").attr("href", ROOT_PATH);
 	$("#visit_webpage").removeClass("preview");
+	$("#visit_webpage").html(lang("view_site") + " &raquo;");
 }
 
 function show_preview(publish, state, usePublish) {

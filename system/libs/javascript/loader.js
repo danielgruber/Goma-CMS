@@ -618,6 +618,8 @@ if(typeof self.loader == "undefined") {
 		 *@name lang
 		*/
 		w.lang = function(name, _default) {
+			if(typeof BASE_SCRIPT == "undefined")
+				return false;
 			
 			if(typeof lang[name] == "undefined") {
 				var jqXHR = $.ajax({
@@ -639,7 +641,7 @@ if(typeof self.loader == "undefined") {
 			}
 			
 			if(lang[name] == null) {
-				return _default;
+				return (typeof _default == "undefined") ? _default : name;
 			} else {
 				return lang[name];
 			}
@@ -675,23 +677,25 @@ if(typeof self.loader == "undefined") {
 			if(names.length == 0)
 				return true;
 			
-			$.ajax({
-				async: async,
-				cache: true,
-				data: {"lang": names},
-				url: ROOT_PATH + "system/getLang/",
-				dataType: "html",
-				noRequestTrack: true,
-				success: function(html) {
-					try {
-						var data = parseJSON(html);
-						for(i in data) {
-							lang[i] = data[i];
+			$(function(){
+				$.ajax({
+					async: async,
+					cache: true,
+					data: {"lang": names},
+					url: BASE_SCRIPT + "system/getLang/",
+					dataType: "html",
+					noRequestTrack: true,
+					success: function(html) {
+						try {
+							var data = parseJSON(html);
+							for(i in data) {
+								lang[i] = data[i];
+							}
+						} catch(e) { 
+							alert(e);
 						}
-					} catch(e) { 
-						alert(e);
 					}
-				}
+				});
 			});
 		}
 			

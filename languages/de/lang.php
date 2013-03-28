@@ -253,6 +253,7 @@ $lang = array(
 	'boxes_page'									=> "Seite mit Boxsystem",
 	"boxes"											=> "Boxsystem",
 	'view_site'										=> "Seite aufrufen",
+	"view_page"										=> "%s aufrufen",
 	'show_in_search'								=> "In der Suche anzeigen",
 	'redirect'										=> "Weiterleitung",
 	'legend'										=> "Legende",
