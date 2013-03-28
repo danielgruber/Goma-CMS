@@ -132,6 +132,7 @@ class contentController extends FrontedController
 				Core::setTitle($this->modelInst()->windowtitle);
 			} else {
 				defined("HOMEPAGE") OR define("HOMEPAGE", false);
+				Core::setTitle($this->modelInst()->windowtitle);
 			}
 		}
 		
