@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 06.02.2013
-  * $Version 1.2
+  * last modified: 28.03.2013
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -125,7 +125,7 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function canWrite($row) {
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canWrite($data)) {
+		if($data && $data->can("Write")) {
 			return true;
 		}
 		
@@ -140,7 +140,7 @@ class Boxes extends DataObject implements Notifier {
 	public function canDelete($row = null)
 	{
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canDelete($data)) {
+		if($data && $data->can("Delete")) {
 			return true;
 		}
 		
@@ -155,7 +155,7 @@ class Boxes extends DataObject implements Notifier {
 	public function canInsert($row = null)
 	{	
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canInsert($data)) {
+		if($data && $data->can("Insert")) {
 			return true;
 		}
 		
@@ -216,7 +216,7 @@ class BoxesController extends FrontedController {
 	public function canEdit() {
 
 		$data = DataObject::get_by_id("pages", $this->getParam("pid"));
-		if($data && $data->canWrite($data)) {
+		if($data && $data->can("Write")) {
 			return true;
 		}
 		
@@ -506,7 +506,7 @@ class boxPageController extends PageController
 		public function frontedBar() {
 			$arr = parent::frontedBar();
 			
-			if($this->modelInst()->canWrite($this->modelInst())) {
+			if($this->modelInst()->can("Write")) {
 			
 				if(isset($_SESSION["adminAsUser"])) {
 					$arr[] = array(

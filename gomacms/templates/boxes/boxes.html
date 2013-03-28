@@ -1,5 +1,5 @@
 <% INCLUDE_CSS "boxes.css" %>
-<% IF permission("BOXES") AND NOT adminAsUser() %>
+<% IF can("write") AND NOT adminAsUser() %>
 	<% GLOAD("sortable") %>
 	<% GLOAD("resizable") %>
 	<% GLOAD("dropdownDialog") %>
@@ -62,16 +62,16 @@
 <div class="boxes_new" id="boxes_new_$pageid">
 	<% IF $this %>
 		<% CONTROL this() AS $box %>
-			<% IF permission("BOXES") AND NOT adminAsUser() AND $box.title %>
+			<% IF $box.can("write") AND NOT adminAsUser() AND $box.title %>
 				<div class="box_new adminview {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
-			<% ELSE IF permission("BOXES") AND NOT adminAsUser() %>
+			<% ELSE IF $box.can("write") AND NOT adminAsUser() %>
 				<div class="box_new adminview {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
 			<% ELSE IF $box.title %>
 				<div class="box_new {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
 			<% ELSE %>
 				<div class="box_new {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
 			<% END %>
-				<% IF permission("BOXES") AND NOT adminAsUser() %>
+				<% IF $box.can("write") AND NOT adminAsUser() %>
 					<div class="adminhead">
 						<div class="actions">
 							<a href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter={$box.sort}&redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_new_box}" class="dropdownDialog">
@@ -101,7 +101,7 @@
 			</div>
 		<% ENDCONTROL %>
 	<% ELSE %>
-		<% IF permission("BOXES") AND NOT adminAsUser()  %>
+		<% IF can("write") AND NOT adminAsUser()  %>
 			<div class="no_box">
 				<a rel="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter=1">{$_lang_new_box}</a>
 			</div>
