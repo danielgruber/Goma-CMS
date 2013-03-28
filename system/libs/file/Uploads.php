@@ -5,7 +5,7 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   * last modified: 28.03.2013
-  * $Version 1.5.5
+  * $Version 1.5.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -650,7 +650,7 @@ class ImageUploads extends Uploads {
 	 *@name setHeight
 	 *@access public
 	*/
-	public function setHeight($height, $absolute = false) {
+	public function setHeight($height, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
@@ -677,7 +677,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 		
-		return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -686,7 +686,7 @@ class ImageUploads extends Uploads {
 	 *@name setWidth
 	 *@access public
 	*/
-	public function setWidth($width, $absolute = false) {
+	public function setWidth($width, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
@@ -713,7 +713,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 				
-		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" />';
+		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -722,7 +722,7 @@ class ImageUploads extends Uploads {
 	 *@name setSize
 	 *@access public
 	*/
-	public function setSize($width, $height, $absolute = false) {
+	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		
@@ -750,7 +750,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 		
-		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" />';
+		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -759,7 +759,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetSize
 	 *@access public
 	*/
-	public function orgSetSize($width, $height, $absolute = false) {
+	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
@@ -786,7 +786,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 		
-		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" />';
+		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -795,7 +795,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetWidth
 	 *@access public
 	*/
-	public function orgSetWidth($width, $absolute = false) {
+	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
@@ -822,7 +822,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -831,7 +831,7 @@ class ImageUploads extends Uploads {
 	 *@name orgSetHeight
 	 *@access public
 	*/
-	public function orgSetHeight($height, $absolute = false) {
+	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
 		// normal URL Cache
 		$file = $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
@@ -858,7 +858,7 @@ class ImageUploads extends Uploads {
 			}
 		}
 		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" />';
+		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
 	
 	/**
@@ -1189,7 +1189,7 @@ class GravatarImageHandler extends ImageUploads {
 	 * @return String containing either just a URL or a complete image tag
 	 * @source http://gravatar.com/site/implement/images/php/
 	 */
-	function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array() ) {
+	function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array(), $html = "", $style = "" ) {
 		if(isset($_SERVER["HTTPS"])) {
 			$url = 'https://secure.gravatar.com/avatar/';	
 		} else {
@@ -1206,7 +1206,7 @@ class GravatarImageHandler extends ImageUploads {
 			$url = '<img src="' . $url . '" data-retina="'.$urlRetina.'"';
 			foreach ( $atts as $key => $val )
 				$url .= ' ' . $key . '="' . $val . '"';
-			$url .= ' />';
+			$url .= ' style="'.$style.'" '.$html.' />';
 		}
 		return $url;
 	}
@@ -1251,8 +1251,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name setHeight
 	 *@access public
 	*/
-	public function setHeight($height) {
-		return self::get_gravatar($this->email, $height, "mm", "g", true, array("height" => $height));
+	public function setHeight($height, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $height, "mm", "g", true, array("height" => $height), $html, $style);
 	}
 	
 	/**
@@ -1261,8 +1261,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name setWidth
 	 *@access public
 	*/
-	public function setWidth($width) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array("width" => $width));
+	public function setWidth($width, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array("width" => $width), $html, $style);
 	}
 	
 	/**
@@ -1271,8 +1271,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name setSize
 	 *@access public
 	*/
-	public function setSize($width, $height) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array("height" => $height, "width" => $width));
+	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array("height" => $height, "width" => $width), $html, $style);
 	}
 	
 	/**
@@ -1281,8 +1281,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name orgSetSize
 	 *@access public
 	*/
-	public function orgSetSize($width, $height) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
 	}
 	
 	/**
@@ -1291,8 +1291,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name orgSetWidth
 	 *@access public
 	*/
-	public function orgSetWidth($width) {
-		return self::get_gravatar($this->email, $width, "mm", "g", true);
+	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
 	}
 	
 	/**
@@ -1301,8 +1301,8 @@ class GravatarImageHandler extends ImageUploads {
 	 *@name orgSetHeight
 	 *@access public
 	*/
-	public function orgSetHeight($height) {
-		return self::get_gravatar($this->email, $height, "mm", "g", true);
+	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
+		return self::get_gravatar($this->email, $height, "mm", "g", true, array(), $html, $style);
 	}
 	
 	/**
