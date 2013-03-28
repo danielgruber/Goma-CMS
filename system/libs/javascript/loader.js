@@ -182,6 +182,12 @@ if(typeof goma.ui == "undefined") {
 					}
 				});
 				
+				if(node.hasClass("g-unload-handler")) {
+					node.trigger(event);
+					if(typeof event.result == "string")
+						r = event.result;
+				}
+				
 				if(r !== true)
 					return r;
 			},

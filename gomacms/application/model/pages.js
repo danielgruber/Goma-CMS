@@ -48,6 +48,10 @@ function pages_unbindPreviewURL() {
 	$("#visit_webpage").html(lang("view_site") + " &raquo;");
 }
 
+$(function(){
+	goma.ui.bindUnloadEvent(goma.ui.getMainContent(), pages_unbindPreviewURL);
+})
+
 function show_preview(publish, state, usePublish) {
 	$("body").append('<div id="preview"></div>');
 	$('html,body').animate({scrollTop: 0, scrollLeft: 0}, 300);
