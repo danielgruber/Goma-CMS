@@ -14,7 +14,8 @@
 		</style>
 	</head>
 	<body>
-		<div id="document">
+		<div id="document" itemscope itemtype="http://schema.org/WebPage">
+			<meta itemprop="name" content="<% title() %>" />
 			<% INCLUDE "frontedbar.html" %>
 			<!--<div id="topline"><div></div></div>-->
 			
@@ -45,7 +46,7 @@
 						<input type="image" src="tpl/{$_cms_tpl}/images/loope.png" value="{$_lang_search.search}" />
 					</form>
 					<h3><a href="./">{$_cms_title}</a></h3>
-					<div id="navi">
+					<div id="navi" itemscope itemtype="http://schema.org/SiteNavigationElemente">
 						<ul>
 							<% CONTROL mainbar(1) %>
 								<li>
@@ -61,15 +62,16 @@
 			
 			
 			<div id="content">
-				<div class="content_wrapper">
+				<div class="content_wrapper" itemprop="mainContentOfPage">
 					
-					
-					<div id="breadcrumb">
-						<a href="./">{$_lang_homepage} </a>
-						<% CONTROL breadcrumbs() AS $breadcrumb %>
-							{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
-						<% ENDCONTROL %>
-					</div>
+					<% IF NOT is_homepage() %>
+						<div id="breadcrumb" itemprop="breadcrumb">
+							<a href="./">{$_lang_homepage} </a>
+							<% CONTROL breadcrumbs() AS $breadcrumb %>
+								{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
+							<% ENDCONTROL %>
+						</div>
+					<% END %>
 					
 					
 					$addcontent
@@ -89,7 +91,7 @@
 				</div>
 			</div>
 			
-			<div id="footer">
+			<div id="footer" itemscope itemtype="http://schema.org/WPFooter">
 				<div class="content_wrapper">
 					<div class="branding">
 						Powered by <a target="_blank" href="http://goma-cms.org">Goma</a>

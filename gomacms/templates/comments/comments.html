@@ -5,7 +5,7 @@
 <div class="comments">
 	<% CONTROL this() %>
 		
-		<div class="comment record" id="comment_{$this.id}">		
+		<div class="comment record" id="comment_{$this.id}" itemscope itemtype="http://schema.org/Comment">		
 				<% IF $this.writeaccess %>
 				
 					<div class="menu">
@@ -14,8 +14,17 @@
 					</div>
 					
 				<% END %>
-				<div class="from"><a href="{URL}{URLEND}#comment_{$this.id}">{$_lang_co_of} $this.name.text() {$_lang_co_on} $this.timestamp.date()</a></div>
-				<div class="text">$this.text.bbcode()</div>	
+				
+				<div class="from">
+					<a href="{URL}{URLEND}#comment_{$this.id}">
+						{$_lang_co_of} 
+						<span itemprop="author" rel="author">$this.name.text()</span> 
+						{$_lang_co_on} 
+						<span itemprop="dateCreated">$this.timestamp.date()</span>
+					</a>
+				</div>
+				
+				<div class="text" itemprop="text">$this.text.bbcode()</div>	
 				<% IF $this.writeaccess %>
 					<div class="clear"></div>
 				<% END %>

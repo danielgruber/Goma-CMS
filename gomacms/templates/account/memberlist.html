@@ -3,12 +3,13 @@
 <div class="memberlist">
 	<% member.activatePagination($_GET_pa); %>
 	<% CONTROL member() %>
-		<div class="member">
+		<div class="member" itemscope itemtype="http://schema.org/Person">
 			<div style="float: left;" class="image">
-				<a href="{URL}/member/{$member.id}{URLEND}">$member.image.setSize(128,128)</a>
+				
+				<a href="{URL}/member/{$member.id}{URLEND}">$member.image.setSize(128,128, false, 'data-prop="image"')</a>
 			</div>
 			<div class="data">
-				<a href="{URL}/member/{$member.id}{URLEND}">
+				<a href="{URL}/member/{$member.id}{URLEND}" itemprop="name">
 					<% IF $member.name %>
 						$member.name.text()
 					<% ELSE %>
