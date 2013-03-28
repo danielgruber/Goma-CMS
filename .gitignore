@@ -41,5 +41,7 @@ images/resampled/*
 
 # Developer
 tpl/
+!tpl/goma_simple/*
 !tpl/goma_simple/
+!tpl/smoothOrange/*
 !tpl/smoothOrange/

@@ -44,7 +44,7 @@ Core::setTheme(settingsController::Get("stpl"));
 Core::setHeader("keywords", settingsController::Get("meta_keywords"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
-Core::setHeader("copyright", date("Y", NOW) . " - " . settingsController::get("titel"));
+//Core::setHeader("copyright", date("Y", NOW) . " - " . settingsController::get("titel"));
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
 
