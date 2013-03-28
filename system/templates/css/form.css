@@ -40,7 +40,6 @@ fieldset {
 	padding: 0 !important;
 }
 .form_field > .fieldinfo {
-	padding-left: 265px;
 	color: #444;
 }
 .form_field > .err {
@@ -51,9 +50,9 @@ fieldset {
 }
 
 .form_field .info_field {
-	padding: 5px 5px 5px 264px;
+	padding: 5px 3px;
 	font-size: 9pt;
-	color: #555;
+	color: #666;
 }
 
 .form_field.fullSize > .info_field, fieldset > .form_field > .info_field {
@@ -112,7 +111,8 @@ fieldset {
 }
 .form_field.checkbox .iPhoneCheckContainer {
 	margin-left: 260px;
-	margin-top: -20px;
+	margin-top: -28px;
+	margin-bottom: 2px;
 }
 
 .form_field .inputHolder {

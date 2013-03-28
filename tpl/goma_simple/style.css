@@ -252,8 +252,11 @@ select {
 	font-size: 10pt;
 }
 
+.form_field {
+	padding: 10px 0;
+}
 .form_field > .info_field {
-	margin-left: 260px;
+	margin-left: 0;
 	color: #666;
 	font-size: 10pt;
 	padding: 2px;
