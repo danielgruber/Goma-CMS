@@ -635,7 +635,7 @@ class ClassInfo extends Object
 							} else {
 								$data = array("fileindex" => array(), "packages" => array());
 							}
-							if(true) {//$data["fileindex"] != $files) {
+							if($data["fileindex"] != $files) {
 								$data = array("fileindex" => array(), "packages" => array());
 								$data["fileindex"] = $files;
 								foreach($files as $file) {
@@ -701,9 +701,6 @@ class ClassInfo extends Object
 										}
 									}
 								}
-								
-								print_r($data);
-								exit;
 
 								if($permissionsValid) {
 									FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
