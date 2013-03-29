@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.03.2013
-  * $Version: 4.7.7
+  * last modified: 29.03.2013
+  * $Version: 4.7.8
 */
 
 defined('IN_GOMA') OR die();
@@ -1215,6 +1215,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		$this->onBeforeManipulate($manipulation, $b = "write");
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
 		
+		self::$datacache[$this->baseClass] = array();
 		
 		// fire manipulation to DataBase
 		if(SQL::manipulate($manipulation)) {
