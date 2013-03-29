@@ -271,7 +271,7 @@ class i18n extends Object
 		if(!isset($lang))
 			$lang = Core::$lang;
 		
-		if(file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist")) {
+		if(is_dir(ROOT . LANGUAGE_DIRECTORY . "/" . $lang) && file_exists(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist")) {
 			$plist = new CFPropertyList();
 			$plist->parse(file_get_contents(ROOT . LANGUAGE_DIRECTORY . "/" . $lang . "/info.plist"));
 			$contents = $plist->ToArray();
