@@ -53,6 +53,7 @@ fieldset {
 	padding: 5px 3px;
 	font-size: 9pt;
 	color: #666;
+	width: 600px;
 }
 
 .form_field.fullSize > .info_field, fieldset > .form_field > .info_field {
