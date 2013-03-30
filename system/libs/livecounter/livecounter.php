@@ -82,12 +82,12 @@ class livecounterController extends Controller
 		 *@name no_cookie_support
 		 *@access public
 		*/
-		public static $no_cookie_support = "(hotbar)";
+		public static $no_cookie_support = "(hotbar|Mozilla\/1.22)";
 		
 		/**
 		 * bot-list
 		*/
-		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider)";
+		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit)";
 		
 		/**
 		 * counts how much users are online
@@ -123,6 +123,13 @@ class livecounterController extends Controller
 				$user_identifier = $_COOKIE['goma_sessid'];
 			} else {
 				$user_identifier = session_id();
+			}
+			
+			if(DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "created" => array(">", NOW - 60 * 60 * 1))) > 20) {
+				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
+				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
+				$user_identifier = $ip;
+				AddContent::addNotice("Please activate the Cookies in your Browser.");
 			}
 			
 			/**
