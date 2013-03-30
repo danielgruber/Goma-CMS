@@ -61,7 +61,7 @@
 					
 					<div class="version">
 						<% IF $this.isversioned AND $namespace %>
-								<a rel="dropdownDialog[left]" href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$this.editurl.url()}" class="button">{$_lang_restore}</a>
+								<a rel="dropdownDialog[left]" href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$this.editurl.url()}" class="button">{$_lang_undo}</a>
 						<% END %>
 						
 						<% IF $this.compared AND $namespace AND DEV_MODE %>
