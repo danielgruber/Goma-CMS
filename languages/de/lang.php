@@ -572,4 +572,8 @@ $lang = array(
 	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",
 	
 	"error_disk_space"		=> "Es ist nicht genügend freier Speicherplatz auf dem Webserver verfügbar.",
+	
+	"help"					=> "Hilfe",
+	"video"					=> "Video",
+	"help_article"			=> "Hilfe-Artikel"
 );

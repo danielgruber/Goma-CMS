@@ -12,7 +12,7 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 loadlang('backup');
 
-class InstallController extends RequestHandler {
+class InstallController extends Controller {
 	/**
 	 * url_handlers
 	*/
@@ -342,5 +342,25 @@ class InstallController extends RequestHandler {
 		} else {
 			return "file not found";
 		}
+	}
+	
+	/**
+	 * returns an array of the wiki-article and youtube-video for this controller
+	 *
+	 *@name helpArticle
+	 *@access public
+	*/
+	public function helpArticle() {
+		
+		if($this->getParam("action") == "installapp")
+			if(isset($_SESSION["install"]))
+				return array("yt" => "QcIBX3Rh0RA#t=03m40s");
+			else
+				return array("yt" => "QcIBX3Rh0RA#t=03m18s");
+		
+		if($this->getParam("action") == "install")
+			return array("yt" => "QcIBX3Rh0RA#t=03m12s");
+		
+		return array("yt" => "QcIBX3Rh0RA#t=03m08s");
 	}
 }

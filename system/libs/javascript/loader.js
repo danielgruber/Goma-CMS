@@ -472,6 +472,49 @@ if(typeof goma.ui == "undefined") {
 	var gloader = {load: goma.ui.load};
 }
 
+if(typeof goma.help == "undefined") {
+	goma.help = (function($){
+		
+		$(function(){
+			if(goma.help.link == null) {
+				goma.help.setHelpLink($("a.help"));
+			}
+		});
+		
+		return {
+			link: null,
+			setHelpLink: function(node) {
+				if($(node).length > 0) {
+					goma.help.link = $(node);
+					$(node).css("display", "none")
+				} else {
+					goma.help.link = null;
+				}
+			},
+			
+			initWithParams: function(params) {
+				$(function(){
+					var url = root_path + "system/help?";
+				
+					if(typeof params["yt"] != "undefined") {
+						url += "yt=" + escape(params["yt"]);
+					}
+					
+					if(typeof params["wiki"] != "undefined") {
+						url += "&wiki=" + escape(params["wiki"]);
+					}
+					
+					if($(goma.help.link).length > 0) {
+						goma.help.link.attr("href", url);
+						goma.help.link.attr("rel", "dropdownDialog");
+						$(goma.help.link).css("display", "");
+					}
+				});
+			}
+		};
+	})(jQuery);
+}
+
 if(typeof goma.ENV == "undefined") {
 	goma.ENV = (function(){
 		return {

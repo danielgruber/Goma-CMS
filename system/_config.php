@@ -22,7 +22,8 @@ Core::addRules(array(
 	'profile//$Action'								=> "ProfileController",
 	'member/$id!'				 					=> "ProfileController",
 	"uploads"										=> "UploadController",
-	"gloader"										=> "Gloader"
+	"gloader"										=> "Gloader",
+	"system/help"									=> "HelpController"
 ), 10);
 
 Core::addRules(array(

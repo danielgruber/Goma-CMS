@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.02.2013
-  * $Version 2.2
+  * last modified: 30.03.2013
+  * $Version 2.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -149,11 +149,6 @@ class Controller extends RequestHandler
 						$_SESSION["user_counted"] = TIME; 
 					}
 				}
-				
-				if($title = $this->PageTitle()) {
-					Core::setTitle($title);
-					Core::addBreadCrumb($title, $this->namespace . URLEND);
-				}
 		}
 		
 		/**
@@ -164,6 +159,16 @@ class Controller extends RequestHandler
 		*/
 		public function PageTitle() {
 			return null;
+		}
+		
+		/**
+		 * returns an array of the wiki-article and youtube-video for this controller
+		 *
+		 *@name helpArticle
+		 *@access public
+		*/
+		public function helpArticle() {
+			return array();
 		}
 		
 		/**
@@ -261,6 +266,15 @@ class Controller extends RequestHandler
 				$this->areaData = array();
 				$data = $this->__output(parent::handleRequest($request, $subController));
 				
+				if($this->helpArticle()) {
+					Resources::addData("goma.help.initWithParams(".json_encode($this->helpArticle()).");");
+				}
+				
+				if($title = $this->PageTitle()) {
+					Core::setTitle($title);
+					Core::addBreadCrumb($title, $this->namespace . URLEND);
+				}
+				
 				if(Core::is_ajax() && is_object($data) && Object::method_exists($data,"render")) {
 					HTTPResponse::setBody($data->render());
 					HTTPResponse::output();
@@ -277,6 +291,7 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public function __output($content) {
+				
 			return $content;
 		}
 		

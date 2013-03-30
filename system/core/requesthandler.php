@@ -156,6 +156,8 @@ class RequestHandler extends Object
 												$action = "index";
 										}
 										
+										$this->request->params["action"] = $action;
+										
 										$data = $this->handleAction($action);
 										array_pop(Core::$controller);
 										return $data;

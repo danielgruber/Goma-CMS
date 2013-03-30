@@ -32,4 +32,14 @@ class HomePageController extends RequestHandler {
 		$data = new ViewAccessAbleData();
 		return $data->customise(array("firstrun" => 1,"content" => tpl::Render("install/langselect.html")))->renderWith("install/install.html");
 	}
+	
+	/**
+	 * returns an array of the wiki-article and youtube-video for this controller
+	 *
+	 *@name helpArticle
+	 *@access public
+	*/
+	public function helpArticle() {
+		return array("yt" => "QcIBX3Rh0RA#t=03m08s");
+	}
 }

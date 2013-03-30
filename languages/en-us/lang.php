@@ -571,6 +571,10 @@ $lang = array(
 	
 	"mail_successful_sent"	=> "The mail was sent successfully.",
 	
-	"error_disk_space"		=> "There's not enough disk space on the webserver available."
+	"error_disk_space"		=> "There's not enough disk space on the webserver available.",
+	
+	"help"					=> "help",
+	"video"					=> "video",
+	"help_article"			=> "help-article"
 
 );
