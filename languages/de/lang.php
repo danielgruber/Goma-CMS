@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 25.03.2013
+  * last modified: 31.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -217,8 +217,8 @@ $lang = array(
 	"saved"											=> "Gespeichert",
 	"successful_deleted"							=> "Die Daten wurden erfolgreich gelöscht",
 	"deleted"										=> "Gelöscht",
-	"successful_published"							=> "Die Daten wurden erfolgreich gespeichert und freigegeben!",
-	"published"										=> "Freigegeben",
+	"successful_published"							=> "Die Daten wurden erfolgreich gespeichert und veröffentlicht!",
+	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
 	'admin_smilies'									=> "Smilies verwalten",
@@ -379,23 +379,23 @@ $lang = array(
 	 * versions
 	*/
 	"preview"										=> "Vorschau",
-	"publish"										=> "Freigeben",
-	"published_site"								=> "Freigegebene Seite",
+	"publish"										=> "Veröffentlichen",
+	"published_site"								=> "Veröffentlichte Seite",
 	"draft"											=> "Entwurf",
 	"draft_save"									=> "Entwurf speichern",
-	"save_publish"									=> "Speichern & Freigeben",
+	"save_publish"									=> "Speichern & Veröffentlichen",
 	"draft_delete"									=> "Entwurf verwerfen",
 	"current_state"									=> "Aktueller Zustand",
 	"browse_versions"								=> "Versionen durchsuchen",
 	"open_in_new_tab"								=> "Auf neuer Seite öffnen",
 	"revert_changes"								=> "Änderungen verwerfen",
-	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Freigabe zurückkehren?",
+	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Veröffentlichung zurückkehren?",
 	"reverted"										=> "Verworfen",
 	"revert_changes_success"						=> "Die letzte Version wurde erfolgreich wiederhergestellt.",
-	"unpublish"										=> "Freigabe zurücknehmen",
+	"unpublish"										=> "Veröffentlichung zurücknehmen",
 	"unpublished"									=> "Zurückgenommen",
 	"unpublish_success"								=> "Die Seite ist nun nicht mehr veröffentlicht.",
-	"state_publish"									=> "Freigabe",
+	"state_publish"									=> "Veröffentlicht",
 	"state_state"									=> "Speicherpunkt",
 	"state_autosave"								=> "Auto-Speicher-Punkt",
 	"state_current"									=> "Diese Version",
@@ -533,7 +533,7 @@ $lang = array(
 	
 	// history
 	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
-	"h_pages_publish"		=> '$user gab Änderungen der Seite <a href="$pageUrl">$page</a> frei',
+	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_unpublish"		=> '$user nahm die Seite <a href="$pageUrl">$page</a> zurück',
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
