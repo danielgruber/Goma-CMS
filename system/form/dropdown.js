@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
+  * last modified: 31.03.2013
 */
 
 var DropDown = function(id, url, multiple) {
@@ -74,6 +74,10 @@ DropDown.prototype = {
 		this.widget.parent().parent().find(" > label").click(function(){
 			that.showDropDown();
 			return false;
+		});
+		
+		goma.ui.bindESCAction($("body"), function() {
+			that.hideDropDown();
 		});
 	},
 	/**

@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.03.2013
-  * $Version 2.0.1
+  * last modified: 31.03.2013
+  * $Version 2.0.2
 */
 
 // goma-framework
@@ -464,6 +464,23 @@ if(typeof goma.ui == "undefined") {
 			
 			    // No other way of checking: assume it’s ok.
 			    return true;
+			},
+			
+			/**
+			 * binds an action to ESC-Button when pressed while specific element
+			 *
+			 *@name bindESCAction
+			 *@param node
+			 *@param function
+			*/
+			bindESCAction: function(node, fn) {
+				var f = fn;
+				$(node).keydown(function(e){
+					var code = e.keyCode ? e.keyCode : e.which;
+					if (code == 27) {
+		       	 		f();
+		       	 	}
+				});
 			}
 	
 		};
@@ -494,7 +511,7 @@ if(typeof goma.help == "undefined") {
 			
 			initWithParams: function(params) {
 				$(function(){
-					var url = root_path + "system/help?";
+					var url = root_path + BASE_SCRIPT + "system/help?";
 				
 					if(typeof params["yt"] != "undefined") {
 						url += "yt=" + escape(params["yt"]);
@@ -799,7 +816,8 @@ if(typeof self.loader == "undefined") {
 			
 			// second use a better method, just if the browser support it
 			$(node).keydown(function(e){
-				if (e.keyCode == 13) {
+				var code = e.keyCode ? e.keyCode : e.which;
+				if (code == 13) {
 		       	 	return false;
 		    	}
 			});

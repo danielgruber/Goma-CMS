@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 03.02.2013
+  * last modified: 31.03.2013
 */
 
 self.dropdownDialogs = [];
@@ -114,6 +114,10 @@ self.dropdownDialogs = [];
 				CallonDocumentClick(function(){
 					that.hide();
 				}, [this.dropdown, this.elem]);
+				
+				goma.ui.bindESCAction($("body"), function(){
+					that.hide();
+				});
 			}
 			
 			if(this.elem.hasClass("noIEAjax")) {
@@ -460,7 +464,7 @@ self.dropdownDialogs = [];
 		remove: function() {
 			// first check if subDropdown is open
 			for(i in this.subDialogs) {
-				if($("#" + this.subDialogs[i]).length > 0 && $("#" + this.subDialogs[i]).css("display") != "none") {
+				if($("#" + this.subDialogs[i]).length > 0 && $("#" + this.subDialogs[i]).css("display") != "none" && !$("#" + this.subDialogs[i]).hasClass("hiding")) {
 					return true;
 				}
 			}
@@ -470,6 +474,10 @@ self.dropdownDialogs = [];
 			elems[this.elem.attr("id")] = null;
 			self.dropdownDialogs[this.id] = null;
 			var that = this;
+			
+			setTimeout(function(){
+				that.dropdown.addClass("hiding");
+			}, 20);
 			
 			// animate dropdown
 			this.dropdown.fadeOut("fast", function(){
