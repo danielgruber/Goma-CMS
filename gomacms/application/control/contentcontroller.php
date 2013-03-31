@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 28.03.2013
-  * $Version 2.0.6
+  * last modified: 31.03.2013
+  * $Version 2.0.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -49,11 +49,12 @@ class contentController extends FrontedController
 			// mark this id as active in mainbar
 			self::$activeids[] = $this->modelInst()->id;
 			
-			if(!empty($this->modelInst()->meta_keywords)) {
+
+			if($this->modelInst()->meta_keywords) {
 				Core::setHeader("keywords", $this->modelInst()->meta_keywords);
 			}
 			
-			if(!empty($this->modelInst()->meta_description)) {
+			if($this->modelInst()->meta_description) {
 				Core::setHeader("description", $this->modelInst()->meta_description);
 			}
 			
@@ -181,9 +182,10 @@ class contentController extends FrontedController
 				ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);
 				ContentTPLExtension::PrependContent($this->modelInst()->prependedContent);
 			}
-			
+
 			if($content !== null) {
 				if($this->modelInst()->meta_keywords == "") {
+					
 					$index = array();
 					foreach(HTMLParser::list_words($content) as $word) {
 						if(isset($index[strtolower($word)])) {
@@ -292,9 +294,9 @@ class contentController extends FrontedController
 				{
 					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
 						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
-							/*if(file_exists($data->path) && filemtime(ROOT . "Uploads/" . $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
+							if(file_exists($data->path) && filemtime(ROOT . "Uploads/" . $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
 								@unlink($data->path);
-							}*/
+							}
 							
 							$uploadObjects[] = $data;
 							$uploadHash .= $data->realfile;
