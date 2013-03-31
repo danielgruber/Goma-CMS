@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 05.03.2013
-  * $Version 1.5.9
+  * last modified: 31.03.2013
+  * $Version 1.5.10
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1026,7 +1026,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 	public function saveFormData($data) {
 		$_data = $data["installData"];
 		
-		
 		if(!is_array($_data["postflightCode"])) {
 			$_data["postflightCode"] = array($_data["postflightCode"]);
 		}
@@ -1035,15 +1034,23 @@ class G_AppSoftwareType extends G_SoftwareType {
 			$_data["postflightCode"][] = "<?php removeProject(".var_export(PROJECT_LOAD_DIRECTORY, true).");";
 		}
 		
+		if(isset($data["type"]) && $data["type"] == "copyconfig") {
+			$data["folder"] = APPLICATION;
+		}
+		
 		$_data["installFolders"]["destination"] = ROOT . $data["folder"];
 		
-		$info["db"] = array(
-			"user"	=> $data["dbuser"],
-			"db"	=> $data["dbname"],
-			"pass"	=> $data["dbpwd"],
-			"host"	=> $data["dbhost"],
-			"prefix"=> $data["tableprefix"]
-		);
+		$info = array();
+		
+		if(!isset($data["type"]) || $data["type"] != "copyconfig") {
+			$info["db"] = array(
+				"user"	=> $data["dbuser"],
+				"db"	=> $data["dbname"],
+				"pass"	=> $data["dbpwd"],
+				"host"	=> $data["dbhost"],
+				"prefix"=> $data["tableprefix"]
+			);
+		}
 		
 		$domain = isset($data["domain"]) ? $data["domain"] : null;
 		
@@ -1455,6 +1462,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 		if(!isset($info["version"]))
 			return false;
 		
+		$data["version"] = $info["version"];
+		
 		// check if we have a full backup
 		if($info["backuptype"] != "full") {
 			$data["installable"] = false;
@@ -1473,6 +1482,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
 		
 		FileSystem::requireDir($dir);
+		
+		
 		
 		// check if we use install-method
 		if($forceCompleteRestore || $appInfo["name"] != ClassInfo::$appENV["app"]["name"] || !file_exists(ROOT . APPLICATION . "/config.php")) {
@@ -1507,17 +1518,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 				$default = "myproject";
 			} else {
 				$default = null;
-			}
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				if(file_exists(ROOT . DOMAIN_LOAD_DIRECTORY)) {
-					@rename(ROOT . DOMAIN_LOAD_DIRECTORY, ROOT . DOMAIN_LOAD_DIRECTORY . time());
-				}
-				
-				if(DOMAIN_LOAD_DIRECTORY != "mysite") {
-					$default = DOMAIN_LOAD_DIRECTORY;
-					$disableDir = true;
-				}
 			}
 			
 			// get information for config.php
@@ -1558,7 +1558,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 			$data["installType"] = "install";
 			
 			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database");'
+				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database"); copy('.var_export(ROOT . APPLICATION . "/config.php", true).', '.var_export($dir . "/backup/config.php", true).');'
 			);
 			
 			$data["postflightCode"] = array(
@@ -1585,17 +1585,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 				$default = "myproject";
 			} else {
 				$default = null;
-			}
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				if(file_exists(ROOT . DOMAIN_LOAD_DIRECTORY)) {
-					@rename(ROOT . DOMAIN_LOAD_DIRECTORY, ROOT . DOMAIN_LOAD_DIRECTORY . time());
-				}
-				
-				if(DOMAIN_LOAD_DIRECTORY != "mysite") {
-					$default = DOMAIN_LOAD_DIRECTORY;
-					$disableDir = true;
-				}
 			}
 			
 			// get information for config.php

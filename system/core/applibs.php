@@ -486,7 +486,7 @@ function setProject($project, $domain = null) {
 	// first check existing
 	foreach ($apps as $key => $data) {
 		if ($data["directory"] == $app["directory"]) {
-			if (!isset($app["domain"]) ||  (isset($data["domain"]) && $data["domain"] == $app["domain"])) {
+			if (!isset($app["domain"]) || (isset($data["domain"]) && $data["domain"] == $app["domain"])) {
 				return true;
 			} else {
 				$apps[$key]["domain"] = $app["domain"];

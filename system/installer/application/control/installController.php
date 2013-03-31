@@ -172,7 +172,7 @@ class InstallController extends Controller {
 		$files = scandir(APP_FOLDER . "data/restores/");
 		foreach($files as $file) {
 			if(preg_match('/\.gfs$/i', $file)) {
-				$backups[] = $file;
+				$backups[$file] = $file;
 			}
 		}
 		
@@ -182,7 +182,7 @@ class InstallController extends Controller {
 		$form = new Form($this, "selectRestore", array(
 			new Select("backup", lang("install.backup"), $backups)
 		), array(
-			new FormAction("submit", lang("install.restore"))
+			new FormAction("submit", lang("install.restore"), "submitSelectRestore")
 		));
 		
 		$form->setSubmission("submitSelectRestore");

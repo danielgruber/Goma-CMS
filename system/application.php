@@ -215,7 +215,7 @@ if (file_exists(ROOT . '_config.php')) {
 			if (isset($data['domain'])) {
 				if (_eregi($data['domain'] . '$', $_SERVER['SERVER_NAME'])) {
 					$application = $data["directory"];
-					define("DOMAIN_LOAD_DIRECTORY", $data["domain"]);
+					define("DOMAIN_LOAD_DIRECTORY", $data["directory"]);
 					break;
 				}
 			}
