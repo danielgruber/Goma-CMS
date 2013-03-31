@@ -1005,7 +1005,7 @@ class Form extends object
 		*/
 		public function __isset($offset)
 		{
-				return (isset($this->fields[$offset]));
+				return (isset($this->fields[strtolower($offset)]));
 		}
 		/**
 		 * unset
@@ -1055,6 +1055,7 @@ class ExternalFormController extends RequestHandler
 				$this->request = $request;
 				$this->subController = $subController;
 				
+				
 				$this->init();
 				
 				$form = $request->getParam("form");
@@ -1071,11 +1072,13 @@ class ExternalFormController extends RequestHandler
 		*/
 		public function FieldExtAction($form, $field)
 		{
+				
 				if(session_store_exists("form_" . strtolower($form)))
 				{
 						$f = session_restore("form_" . strtolower($form));
 						if(isset($f->$field))
 						{
+								
 								$data = $f->$field->handleRequest($this->request);
 								
 								session_store("form_" . strtolower($form), $f);
