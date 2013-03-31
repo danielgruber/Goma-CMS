@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.02.2013
-  * $Version - 2.4.4
+  * last modified: 31.03.2013
+  * $Version - 2.4.5
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -930,7 +930,7 @@ class Form extends object
 		 *@param object - field
 		*/
 		public function registerField($name, $field) {
-			$this->fields[$name] = $field;
+			$this->fields[strtolower($name)] = $field;
 		}
 		
 		/**
@@ -940,7 +940,7 @@ class Form extends object
 		 *@access public
 		*/
 		public function unRegister($name) {
-			unset($this->fields[$name]);
+			unset($this->fields[strtolower($name)]);
 		}
 		
 		/**
@@ -951,7 +951,7 @@ class Form extends object
 		 *@param string - name
 		*/
 		public function getField($offset) {
-			return (isset($this->fields[$offset])) ? $this->fields[$offset] : false;
+			return (isset($this->fields[strtolower($offset)])) ? $this->fields[strtolower($offset)] : false;
 		}
 		
 		/**

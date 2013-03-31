@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 29.03.2013
-  * $Version: 4.7.8
+  * last modified: 31.03.2013
+  * $Version: 4.7.9
 */
 
 defined('IN_GOMA') OR die();
@@ -1345,6 +1345,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function checkForChange($snap_priority, $newdata, &$changed = array(), $includeAll = false) {
 
+		$newdata = ArrayLib::map_key("strtolower", $newdata);
+		
 		// first check if this record is important
 		if(!$this->isField("stateid") || !$this->isField("publishedid")) {
 			$query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
