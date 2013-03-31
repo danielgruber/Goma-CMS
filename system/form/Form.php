@@ -434,7 +434,7 @@ class Form extends object
 				
 				foreach($this->showFields as $field)
 				{
-						$name = $field->name;
+						$name = strtolower($field->name);
 						if(isset($this->fields[$name]) && !isset($this->renderedFields[$name]))
 						{
 								$this->renderedFields[$name] = true;

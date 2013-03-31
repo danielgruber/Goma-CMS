@@ -118,7 +118,7 @@ class FieldSet extends FormField
 						}
 						
 						
-						$name = $item->name;
+						$name = strtolower($item->name);
 						// if a field is deleted the field does not exist in that array
 						if(isset($this->form()->fields[$name]) && !isset($this->form()->renderedFields[$name]))
 						{

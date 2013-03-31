@@ -52,7 +52,7 @@ class TabSet extends FieldSet
 							$item->disable();
 						}
 						
-						$name = $item->name;
+						$name = strtolower($item->name);
 						// if a field is deleted the field does not exist in that array
 						if(isset($this->form()->fields[$name]))
 						{
