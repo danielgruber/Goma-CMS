@@ -91,7 +91,7 @@ class GFS extends Object {
 	 *@name endOfContentPos
 	 *@access public
 	*/
-	 protected $endOfContentPos = 0;
+	protected $endOfContentPos = 0;
 	 
 	/**
 	 * files
@@ -458,7 +458,7 @@ class GFS extends Object {
 		$path = $this->parsePath($path);
 				
 		if(basename($file) == basename($this->file) || in_array($path,$not_add_if_dir)) 
-				return true;
+			return true;
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
