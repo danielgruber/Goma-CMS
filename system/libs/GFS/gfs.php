@@ -377,7 +377,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							$this->addDir($currpath);
 						}
@@ -565,7 +565,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							return -4;
 						}
@@ -614,7 +614,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							$this->addDir($currpath);
 						}
