@@ -503,7 +503,10 @@ if(typeof goma.help == "undefined") {
 			setHelpLink: function(node) {
 				if($(node).length > 0) {
 					goma.help.link = $(node);
-					$(node).css("display", "none")
+					$(node).css("display", "none");
+					if($(node).parent().hasClass("help-wrapper")) {
+						$(node).parent().css("display", "none");
+					}
 				} else {
 					goma.help.link = null;
 				}
@@ -525,6 +528,9 @@ if(typeof goma.help == "undefined") {
 						goma.help.link.attr("href", url);
 						goma.help.link.attr("rel", "dropdownDialog");
 						$(goma.help.link).css("display", "");
+						if($(goma.help.link).parent().hasClass("help-wrapper")) {
+							$(goma.help.link).parent().css("display", "");
+						}
 					}
 				});
 			}
