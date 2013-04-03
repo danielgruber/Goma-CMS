@@ -11,16 +11,16 @@
  *@Copyright (C) 2009 - 2013  Goma-Team
  * last modified: 17.03.2013
  * $Version 1.0.1
-*/
- 
+ */
+
 defined("IN_GOMA") OR die("");
 
 /**
  * this loads a lang file in the languages-directory
+ *
  *@name loadlang
- *@param string - name of the file
- *@param string - subdirectory
- *@return null
+ *@param name string filename
+ *@param dir string subdirectory
  */
 function loadlang($name = "lang", $dir = "") {
 	i18n::addLang($dir . '/' . $name);
@@ -28,9 +28,10 @@ function loadlang($name = "lang", $dir = "") {
 
 /**
  * generates a random string
+ *
  *@name randomString
- *@param numeric - length of the string
- *@param bool - if numbers are allowed
+ *@param len numeric length of the string
+ *@param numeric bool if numbers are allowed
  *@return string
  */
 function randomString($len, $numeric = true) {
@@ -46,20 +47,25 @@ function randomString($len, $numeric = true) {
 }
 
 /**
- * language
- *@name l
- *@access public
- *@param string - name
- *@param string - default
+ * returns either the localized string for $name (if available) or a $default
+ *
+ *@name lang
+ *@param name string
+ *@param default string
+ *@return string
  */
-function lang($name, $default = "")
-{
-	$lang = isset($GLOBALS["lang"][$name]) ? $GLOBALS["lang"][$name] : $default;
-    if(!strpos($lang, ">\n") && !strpos($lang, "</")) {
-        return nl2br($lang);
-    } else {
-        return $lang;
-    }
+function lang($name, $default = "") {
+	if (isset($GLOBALS["lang"][$name])) {
+		$lang = $GLOBALS["lang"][$name];
+	} else {
+		$lang = $default;
+	}
+
+	if (!strpos($lang, ">\n") && !strpos($lang, "</")) {
+		return nl2br($lang);
+	} else {
+		return $lang;
+	}
 }
 
 /**
@@ -68,9 +74,10 @@ function lang($name, $default = "")
 
 /**
  * checks if a group have the rights
+ *
  *@name advrights
- *@param string - name of the rights
- *@param string - name of group
+ *@param name string right name
+ *@param rang string group name
  *@return bool
  */
 function advrights($name, $rang) {
@@ -79,8 +86,10 @@ function advrights($name, $rang) {
 
 /**
  * checks rights
+ *
  *@name right
- *@param string - right
+ *@param r string right
+ *@return bool
  */
 function right($r) {
 	return Permission::check($r);
@@ -127,11 +136,12 @@ function array_merge_recursive_distinct() {
 }
 
 /**
- * if you want to store very much data in the session, session will slow down page dramatically, so we store just a key and then store it external in a file
+ * instead of storing many data in a session (slow), it will be stored into a file and can be accessed with a key
+ *
  *@name session_store
- *@access public
- *@param string - key
- *@param data
+ *@param key string access key
+ *@param data mixed data to store
+ *@return bool
  */
 function session_store($key, $data) {
 	if (isset($_SESSION["store"][$key]))
@@ -146,11 +156,11 @@ function session_store($key, $data) {
 }
 
 /**
- * gets data from session-store
+ * gets data, that has been stored with session_store
  *
  *@name session_restore
- *@access public
- *@param string - key
+ *@param key string access key
+ *@return mixed data on success, otherwise false
  */
 function session_restore($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -163,11 +173,11 @@ function session_restore($key) {
 }
 
 /**
- * checks if a store exists
+ * checks, if a key is linked with session_stored data in the actual session
  *
  *@name session_store_exists
- *@access public
- *@param string - key
+ *@param key string
+ *@return bool
  */
 function session_store_exists($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -180,9 +190,11 @@ function session_store_exists($key) {
 }
 
 /**
- * checks session-store by storeid
+ * checks, if there exists session data for an id
  *
- *@name session_restore_byID
+ *@name session_store_exists_byID
+ *@param id string
+ *@return bool
  */
 function session_store_exists_byID($id) {
 	$id = basename($id);
@@ -190,9 +202,11 @@ function session_store_exists_byID($id) {
 }
 
 /**
- * gets session-store by storeid
+ * gets the session data by an id
  *
  *@name session_store_exists_byID
+ *@param id string
+ *@return mixed data on success, otherwise false
  */
 function session_restore_byID($id) {
 	$id = basename($id);
@@ -204,9 +218,12 @@ function session_restore_byID($id) {
 }
 
 /**
- * bind's a session key to the id
+ * binds a session key to an id
  *
  *@name bindSessionKeyToID
+ *@param id string
+ *@param key string
+ *@return bool
  */
 function bindSessionKeyToID($id, $key) {
 	if (session_store_exists_byID($id)) {
@@ -218,9 +235,11 @@ function bindSessionKeyToID($id, $key) {
 }
 
 /**
- * gets the id for the session-store
+ * gets the id for a session_store key
  *
  *@name getStoreID
+ *@param key string
+ *@return mixed id on success, otherwise false
  */
 function getStoreID($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -233,7 +252,6 @@ function getStoreID($key) {
  * returns a redirect-uri for inserting into and uri or elsewhere
  *
  *@name getRedirect
- *@access public
  */
 function getRedirect($parentDir = false) {
 	if (Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
@@ -344,7 +362,7 @@ function writeSystemConfig($data = array()) {
 	$slowQuery = 50;
 	$SSLpublicKey = null;
 	$SSLprivateKey = null;
-	
+
 	if (file_exists(ROOT . "_config.php"))
 		include (ROOT . "_config.php");
 

@@ -181,7 +181,9 @@ class Permission extends DataObject
 		 * checks if the user has the given permission 
 		 *
 		 *@name check
-		 *@param string - permission
+		 *@access public
+		 *@param r string - permission
+		 *@return bool
 		*/
 		public static function check($r)
 		{

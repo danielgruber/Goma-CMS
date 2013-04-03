@@ -107,15 +107,15 @@ define('TIME', DATE);
 define("NOW", DATE);
 
 /**
- * status-constans for config.php
+ * status-constants for config.php
  */
 define('STATUS_ACTIVE', 1);
 define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "074");
 define("GOMA_VERSION", "2.0b6");
+define("BUILD_VERSION", "074");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -386,11 +386,11 @@ function loadApplication($directory) {
 			Core::$site_mode = SITE_MODE;
 
 			if (isset($domaininfo["sql_driver"])) {
-				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver"]);
-			}
+				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver" ]);
+				}
 
-		} else {
-			define("DATE_FORMAT", "d.m.Y - H:i");
+				} else {			define(
+			"DATE_FORMAT", "d.m.Y - H:i");
 			Core::setCMSVar("TIMEZONE", DEFAULT_TIMEZONE);
 		}
 
