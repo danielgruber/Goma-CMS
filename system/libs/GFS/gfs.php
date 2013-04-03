@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.03.2013
-  * $Version 2.6.7
+  * last modified: 04.04.2013
+  * $Version 2.6.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1535,9 +1535,9 @@ class GFS_Package_installer extends GFS {
 	*/
 	public static function wasUnpacked($file = null) {
 		if(isset($file)) {
-			$file = realpath($file);
+			$file = str_replace('\\', '/', realpath($file));
 			if(isset($_GET["unpack"]))
-				return in_array($file, $_GET["unpack"]);
+				return in_array($file, str_replace('\\', '/', $_GET["unpack"]));
 			else
 				return false;
 		} else {
@@ -1812,8 +1812,8 @@ class GFS_Package_Creator extends GFS {
 	public static function wasPacked($file = null) {
 		if(isset($file)) {
 			if(isset($_GET["pack"])) {
-				$file = realpath($file);
-				return in_array($file, $_GET["pack"]);
+				$file = str_replace('\\', '/', realpath($file));
+				return in_array($file, str_replace('\\', '/', $_GET["pack"]));
 			} else {
 				return false;
 			}
