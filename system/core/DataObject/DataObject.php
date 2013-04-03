@@ -9,8 +9,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
-  * $Version: 4.7.9
+  * last modified: 03.04.2013
+  * $Version: 4.7.10
 */
 
 defined('IN_GOMA') OR die();
@@ -1945,6 +1945,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	*/
 	public function getFormFromDB(&$form) {
 		$this->fieldTitles = array_merge($this->fieldTitles, $this->getFieldTitles());
+		$this->fieldInfo = array_merge($this->fieldInfo, $this->getFieldInfo());
+		
 		foreach($this->DataBaseFields() as $field => $type) {
 			if(isset($this->fieldTitles[$field])) {
 				$form->add($formfield = $this->doObject($field)->formField($this->fieldTitles[$field]));
@@ -1960,6 +1962,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 * gets on the fly generated field titles
 	*/
 	public function getFieldTitles() {
+		return array();
+	}
+	
+	/**
+	 * gets on the fly generated field-info
+	*/
+	public function getFieldInfo() {
 		return array();
 	}
 	

@@ -575,6 +575,10 @@ $lang = array(
 	
 	"help"					=> "help",
 	"video"					=> "video",
-	"help_article"			=> "help-article"
+	"help_article"			=> "help-article",
+	
+	"useSSL"				=> "use SSL",
+	"useSSL_info"			=> "You should only use SSL if the Server supports SSL and you've got a SSL-certificate.",
+	"useSSL_unsupported"	=> "To activate SSL visit this page via SSL: <a href='\$link'>Settings via SSL</a>"
 
 );

@@ -59,7 +59,8 @@ class Newsettings extends DataObject implements HistoryData {
 		"register"			=> "varchar(100)",
 		"register_enabled"	=> "Switch",
 		"register_email"	=> "Switch",
-		"gzip"				=> "Switch"
+		"gzip"				=> "Switch",
+		"useSSL"			=> "Switch"
 	);
 	
 	/**
@@ -73,7 +74,8 @@ class Newsettings extends DataObject implements HistoryData {
 		"register_email"	=> "1",
 		"register_enabled"	=> "0",
 		"status"			=> "1",
-		"stpl"				=> "default"
+		"stpl"				=> "default",
+		"useSSL"			=> "0"
 	);
 	
 	/**
@@ -101,8 +103,37 @@ class Newsettings extends DataObject implements HistoryData {
 			"register_enabled"	=> lang("register_enabled", "Enable Registration"),
 			"register_email"	=> lang("register_require_email", "Send Registration Mail"),
 			"titel"				=> lang("title"),
-			"gzip"				=> lang("gzip", "G-Zip")
+			"gzip"				=> lang("gzip", "G-Zip"),
+			"useSSL"			=> lang("useSSL")
 		);
+	}
+	
+	/**
+	 * returns the titles for the fields for automatic form generation
+	 *
+	 *@name getFieldTitles
+	*/
+	public function getFieldInfo() {
+		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+		if($http == "https")
+			return  array(
+				"useSSL"			=> lang("useSSL_info")
+			);
+		else {
+			$port = $_SERVER["SERVER_PORT"];
+			if ($http == "http" && $port == 80) {
+				$port = "";
+			} else if ($http == "https" && $port == 443) {
+				$port = "";
+			} else {
+				$port = ":" . $port;
+			}
+
+			$url = 'https://' . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"];
+			return  array(
+				"useSSL"			=> str_replace('$link', $url, lang("useSSL_unsupported"))
+			);
+		}
 	}
 	
 	/**
@@ -130,6 +161,11 @@ class Newsettings extends DataObject implements HistoryData {
 			$inst = new $child($this->data);
 			// sync data
 			$inst->getFormFromDB($currenttab);
+		}
+		
+		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+		if($http == "http") {
+			$form->useSSL->disable();
 		}
 		
 		$form->addAction(new CancelButton('cancel',lang("cancel")));

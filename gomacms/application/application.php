@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.12.2012
-  * $Version 1.1.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 03.04.2013
+  * $Version 1.1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -33,6 +33,24 @@ if(PROFILE) Profiler::mark("settings");
 settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
+
+if(settingsController::get("useSSL") == 1) {
+	// generate BASE_URI
+	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+	$port = $_SERVER["SERVER_PORT"];
+	if ($http == "http" && $port == 80) {
+		$port = "";
+	} else if ($http == "https" && $port == 443) {
+		$port = "";
+	} else {
+		$port = ":" . $port;
+	}
+
+	if($http == "http" && !isset($_GET["forceNoSSL"])) {
+		header("Location: https://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
+		exit;
+	} 
+}
 
 Resources::$gzip = settingsController::get("gzip");
 RegisterExtension::$enabled = settingsController::get("register_enabled");
