@@ -206,6 +206,7 @@ class HTTPresponse extends object
 						self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
 				}
 				
+				HTTPResponse::setHeader("vary", "Accept-Encoding");
 				self::addHeader('X-Powered-By', self::$XPoweredBy);
 				if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
 					self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));

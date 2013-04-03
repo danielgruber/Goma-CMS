@@ -145,7 +145,8 @@ class gLoader extends Controller
 					if(!file_exists($temp) || filemtime($temp) < $mtime) {
 						FileSystem::write($temp, $this->buildFile($name, $data));
 					}
-
+					
+					
 					HTTPResponse::sendHeader();
 					readfile($temp);
 					exit;

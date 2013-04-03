@@ -62,8 +62,8 @@ class HTMLEditor extends Textarea
 					$width = $this->width;
 				}
 				
-				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4/";');
-				Resources::add("system/libs/thirdparty/ckeditor4/ckeditor.js", "js");
+				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_1/";');
+				Resources::add("system/libs/thirdparty/ckeditor4_1/ckeditor.js", "js");
 				if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
 				Resources::addData("var lang_page = '".lang("page")."';");

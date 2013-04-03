@@ -80,6 +80,7 @@ class welcomeController extends Controller {
 	public function user_create($result) {
 		$data = new User();
 		$data->nickname = $result["username"];
+		$data->name = $result["username"];
 		$data->password = $result["password"]; // we don't need to hash, it's implemented in the user-model
 		$data->email = $result["email"];
 		$data->write(true, true);
