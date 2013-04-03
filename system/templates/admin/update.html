@@ -67,7 +67,7 @@
 			}
 			
 			for(name in u) {
-				var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
+				var url = "https://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
 				$.ajax({
 					url: url,
 					dataType: "jsonp",

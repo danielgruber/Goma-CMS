@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
-  * $Version 1.5.10
+  * last modified: 03.04.2013
+  * $Version 1.5.11
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -517,7 +517,7 @@ abstract class g_SoftwareType {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
 		
-		if(strpos(@file_get_contents("http://goma-cms.org"), "<html")) {
+		if(strpos(@file_get_contents("https://goma-cms.org"), "<html")) {
 			self::$gomaAvailable = true;
 			return true;
 		} else {
@@ -539,7 +539,7 @@ abstract class g_SoftwareType {
 			return false;
 		}
 		
-		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name;
+		$url = "https://goma-cms.org/apps/api/v1/json/app/" . $name;
 		
 		if(isset($version)) {
 			$url .= "/" . $version;
