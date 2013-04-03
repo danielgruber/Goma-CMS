@@ -2,8 +2,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 25.11.2012
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 02.04.2013
 */
 (function($, w){
 	w.bindHistory = function(div) {
@@ -64,6 +64,7 @@
 						}
 						history.find(".event:gt("+evLength+")").on("mouseover.history", func);
 						history.find(".event:gt("+evLength+")").on("touchmove.history", func);
+						
 						history.on("scoll.history", func);
 					}
 				}
@@ -89,6 +90,10 @@
 				history.find(".event:gt("+evLength+")").on("mouseover.history", func);
 				history.find(".event:gt("+evLength+")").on("touchmove.history", func);
 				history.on("scoll.history", func);
+				
+				if(history.find(".older").is(":visible")) {
+					func();
+				}
 			}
 		});
 		
