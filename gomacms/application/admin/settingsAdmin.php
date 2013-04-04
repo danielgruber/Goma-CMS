@@ -59,4 +59,14 @@ class settingsAdmin extends adminItem
 			}
 			parent::safe($data, $form, $model);
 		}
+		
+		/**
+		 * returns an array of the wiki-article and youtube-video for this controller
+		 *
+		 *@name helpArticle
+		 *@access public
+		*/
+		public function helpArticle() {
+			return array("wiki" => "Einstellungen");
+		}
 }

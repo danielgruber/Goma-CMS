@@ -30,7 +30,7 @@ class HelpController extends FrontedController {
 			}
 			
 			if($this->getParam("wiki")) {
-				$tabs->addTab(lang("help_article"), '<iframe width="780" height="700" src="http://wiki.goma-cms.org/wiki/'.$this->getParam("wiki").'#without-navi" frameborder="0" allowfullscreen></iframe><a href="http://wiki.goma-cms.org/wiki/'.$this->getParam("wiki").'" target="_blank">'.lang("help_article").'</a>', "article");
+				$tabs->addTab(lang("help_article"), '<iframe width="780" height="500" src="http://wiki.goma-cms.org/wiki/'.$this->getParam("wiki").'#without-navi" frameborder="0" allowfullscreen></iframe><a href="http://wiki.goma-cms.org/wiki/'.$this->getParam("wiki").'" target="_blank">'.lang("help_article").'</a>', "article");
 			}
 			
 			return $tabs->render();
