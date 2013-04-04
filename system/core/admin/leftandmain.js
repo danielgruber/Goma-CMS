@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.03.2013
+  * last modified: 04.04.2013
 */
 
 
@@ -393,12 +393,7 @@ var LaM_type_timeout;
 	
 	// function to load content of a tree-item
 	w.LoadTreeItem = function (id) {
-		
-		// check if we are on a current unsaved page
-		if(typeof goma.ui.fireUnloadEvents() == "string" && !confirm(lang("unload_lang").replace('\n', "\n"))) {
-			return false;
-		}
-		
+
 		var $this = $("a[nodeid="+id+"]");
 		if($this.length == 0) {
 			return false;
@@ -410,23 +405,24 @@ var LaM_type_timeout;
 			return true;
 		}
 		
-		// switch to tree-tab if necessary
-		if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-			$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
-			$(".left-and-main .LaM_tabs > div").css("display", "none");
-			$(".left-and-main .LaM_tabs").find("div.tree").css("display", "block");
-			$(".left-and-main .LaM_tabs").find("a.tree").parent().addClass("active");
-		}
-		
-		$this.addClass("loading");
-		$this.parent().parent().addClass("marked");
-		if(typeof HistoryLib.push == "function")
-			HistoryLib.push($this.attr("href"));
-		
 		// delay a bit to have enough resources for UI to draw
 		setTimeout(function(){
 			
 			goma.ui.ajax(undefined, {
+				beforeSend: function() {
+					$this.addClass("loading");
+					$this.parent().parent().addClass("marked");
+					if(typeof HistoryLib.push == "function")
+						HistoryLib.push($this.attr("href"));
+					
+					// switch to tree-tab if necessary
+					if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
+						$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
+						$(".left-and-main .LaM_tabs > div").css("display", "none");
+						$(".left-and-main .LaM_tabs").find("div.tree").css("display", "block");
+						$(".left-and-main .LaM_tabs").find("a.tree").parent().addClass("active");
+					}
+				},
 				url: $this.attr("href"),
 				data: {"ajaxfy": true}
 			}).done(function(){

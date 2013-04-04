@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 04.04.2013
 */ 
 class errorPage extends Page
 {
@@ -41,8 +41,8 @@ class errorPage extends Page
 				$form->remove("rating");
 				
 				
-				$form->add(new select('code',$GLOBALS['lang']['errorcode'],array('404' => '404 - Not Found')),0, "content");
-				$form->add(new HTMLEditor('data', $GLOBALS['lang']['url']),0, "content");
+				$form->add(new select('code', lang("errorcode"), array('404' => '404 - Not Found')), null, "content");
+				$form->add(new HTMLEditor('data', lang("content")), null, "content");
 		}
 		/**
 		 * set the correct response

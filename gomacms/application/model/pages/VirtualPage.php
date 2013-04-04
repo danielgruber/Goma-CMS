@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.0.2
+  * last modified: 04.04.2013
+  * $Version 1.0.3
 */ 
 
 defined("IN_GOMA") OR die("");

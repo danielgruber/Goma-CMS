@@ -435,9 +435,9 @@ class Form extends object
 				foreach($this->showFields as $field)
 				{
 						$name = strtolower($field->name);
-						if(isset($this->fields[$name]) && !isset($this->renderedFields[$name]))
+						if($this->isFieldToRender($field->name))
 						{
-								$this->renderedFields[$name] = true;
+								$this->registerRendered($field->name);
 								$div = $field->field();
 								if(is_object($div) && !$div->hasClass("hidden")) {
 									if($i == 0) {
@@ -687,6 +687,7 @@ class Form extends object
 				return $this->controller->$submission($result, $data);
 		}
 		
+		//! Manipulate the form
 		/**
 		 * you can use data-handlers, to edit data before it is given to the submission-method
 		 * you give a callback and you get a result
@@ -700,21 +701,6 @@ class Form extends object
 				$this->dataHandlers[] = $callback;
 			else
 				throwError(6, "Invalid Argument", "Argument 1 for Form::addDataHandler should be a valid callback.");
-		}
-		
-		/**
-		 * sorts the items
-		 *@name sort
-		 *@access public
-		*/
-		public function sort($a, $b)
-		{
-				if($this->fieldSort[$a->name] == $this->fieldSort[$b->name])
-				{
-						return 0;
-				}
-				
-				return ($this->fieldSort[$a->name] > $this->fieldSort[$b->name]) ? 1 : -1;
 		}
 		
 		/**
@@ -773,17 +759,21 @@ class Form extends object
 		}
 		
 		/**
-		 * adds an field
+		 * adds a field
 		 *@name add
 		 *@access public
+		 *@param FormField $field
+		 *@param sort, 0 is on top, and count means after which field the field is rendered, null means default
+		 *@param to where the field is added, for example as a subfield to a tab
 		*/
-		public function add($field,$sort = 0, $to = "this")
+		public function add($field, $sort = null, $to = null)
 		{
-				if($to == "this")
+				if($to == "this" || !isset($to))
 				{
-						if($sort == 0) {
+						if(!isset($sort)) {
 							$sort = 1 + count($this->showFields);
 						}
+						
 						$this->showFields[$field->name] = $field;
 						$this->fieldSort[$field->name] = $sort;
 						$field->setForm($this);
@@ -795,6 +785,18 @@ class Form extends object
 						}
 							
 				}
+		}
+		
+		/**
+		 * adds a field
+		 *@name add
+		 *@access public
+		 *@param FormField $field
+		 *@param sort, 0 is on top, and count means after which field the field is rendered, null means default
+		 *@param to where the field is added, for example as a subfield to a tab
+		*/
+		public function addField($field, $sort = null, $to = null) {
+			return $this->add($field, $sort, $to);
 		}
 		
 		/**
@@ -872,23 +874,186 @@ class Form extends object
 		}
 		
 		/**
-		 * adds the secret key
-		 *@name addSecret
+		 * activates the secret key
+		 *
+		 *@name activateSecret
 		 *@acess public
 		*/
-		public function addSecret()
+		public function activateSecret()
 		{
 				$this->secret = true;
 		}
 		
 		/**
 		 * gets the secret
-		 *@name getsecret
+		 *
+		 *@name getSecret
 		 *@access public
 		*/
 		public function getSecret()
 		{
 				return $this->secret;
+		}
+		
+		/**
+		 * gets the field by the given name
+		 *
+		 *@name getField
+		 *@access public
+		 *@param string - name
+		*/
+		public function getField($name) {
+			return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : false;
+		}
+		
+		/**
+		 * returns if a field exists in this form
+		 *
+		 *@name isField
+		 *@access public
+		*/
+		public function isField($name)
+		{
+				return (isset($this->fields[strtolower($name)]));
+		}
+		
+		/**
+		 * returns if a field exists and wasn't rendered in this form
+		 *
+		 *@name isField
+		 *@access public
+		*/
+		public function isFieldToRender($name)
+		{
+				return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
+		}
+		
+		/**
+		 * registers a field in this form
+		 *
+		 *@name registerField
+		 *@access public
+		 *@param string - name
+		 *@param object - field
+		*/
+		public function registerField($name, $field) {
+			$this->fields[strtolower($name)] = $field;
+		}
+		
+		/**
+		 * unregisters the field from this form
+		 * this means that the field will not be rendered
+		 *
+		 *@name unRegister
+		 *@access public
+		*/
+		public function unRegister($name) {
+			unset($this->fields[strtolower($name)]);
+		}
+		
+		/**
+		 * registers the field as rendered
+		 *
+		 *@name registerRendered
+		 *@access public
+		 *@param string - name
+		*/
+		public function registerRendered($name) {
+			$this->renderedFields[strtolower($name)] = true;
+		}
+		
+		/**
+		 * removes the registration as rendered
+		 *
+		 *@name unregisterRendered
+		 *@access public
+		 *@param string - name
+		*/
+		public function unregisterRendered($name) {
+			unset($this->renderedFields[strtolower($name)]);
+		}
+		
+		//!Overloading
+		/**
+		 * Overloading
+		*/
+		
+		/**
+		 * returns a field in this form by name
+		 * it's not relevant how deep the field is in this form if the field is *not* within a ClusterFormField
+		 *
+		 *@name __get
+		 *@access public
+		*/
+		public function __get($offset)
+		{
+			return $this->getField($offset);
+		}
+		
+		/**
+		 * currently set doesn't do anything
+		 *
+		 *@name __set
+		 *@access public
+		*/
+		public function __set($offset, $value)
+		{
+				// currently there is no option to overload a form with fields
+		}
+		
+		/**
+		 * returns if a field exists in this form
+		 *
+		 *@name __isset
+		 *@access public
+		*/
+		public function __isset($offset)
+		{
+				return $this->isField($offset);
+		}
+		
+		/**
+		 * removes a field from this form
+		 *
+		 *@name __unset
+		 *@access public
+		*/
+		public function __unset($offset)
+		{
+				unset($this->fields[$offset]);
+		}
+		
+		//!Mostly internal APIs
+		/**
+		 * saves current form to session
+		*/
+		public function saveToSession() {
+			session_store("form_" . strtolower($this->name), $this);
+		}
+		
+		/**
+		 * external url of this form
+		 *
+		 *@name externalURL
+		 *@access public
+		*/
+		public function externalURL() {
+			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
+		}
+		
+		/**
+		 * sorts the items
+		 *@name sort
+		 *@access public
+		*/
+		public function sort($a, $b)
+		{
+				if($this->fieldSort[$a->name] == $this->fieldSort[$b->name])
+				{
+						return 0;
+				}
+				
+				return ($this->fieldSort[$a->name] > $this->fieldSort[$b->name]) ? 1 : -1;
 		}
 		
 		/**
@@ -919,118 +1084,6 @@ class Form extends object
 		public function name()
 		{
 				return $this->name;
-		}
-		
-		/**
-		 * registers a field in this form
-		 *
-		 *@name registerField
-		 *@access public
-		 *@param string - name
-		 *@param object - field
-		*/
-		public function registerField($name, $field) {
-			$this->fields[strtolower($name)] = $field;
-		}
-		
-		/**
-		 * just unregisters the field in this form
-		 *
-		 *@name unRegister
-		 *@access public
-		*/
-		public function unRegister($name) {
-			unset($this->fields[strtolower($name)]);
-		}
-		
-		/**
-		 * gets the field by the given name
-		 *
-		 *@name getField
-		 *@access public
-		 *@param string - name
-		*/
-		public function getField($offset) {
-			return (isset($this->fields[strtolower($offset)])) ? $this->fields[strtolower($offset)] : false;
-		}
-		
-		/**
-		 * registers the field as rendered
-		 *
-		 *@name registerRendered
-		 *@access public
-		 *@param string - name
-		*/
-		public function registerRendered($name) {
-			$this->renderedFields[$name] = true;
-		}
-		
-		/**
-		 * removes the registration as rendered
-		 *
-		 *@name unregisterRendered
-		 *@access public
-		 *@param string - name
-		*/
-		public function unregisterRendered($name) {
-			unset($this->renderedFields[$name]);
-		}
-		
-		/**
-		 * Overloading
-		*/
-		
-		/**
-		 * get
-		 *@name __get
-		 *@access public
-		*/
-		public function __get($offset)
-		{
-			return $this->getField($offset);
-		}
-		/**
-		 * set
-		 *@name __set
-		 *@access public
-		*/
-		public function __set($offset, $value)
-		{
-				// currently there is no option to overload a form with fields
-		}
-		/**
-		 * isset
-		 *@name __isset
-		 *@access public
-		*/
-		public function __isset($offset)
-		{
-				return (isset($this->fields[strtolower($offset)]));
-		}
-		/**
-		 * unset
-		 *@name __unset
-		 *@access public
-		*/
-		public function __unset($offset)
-		{
-				unset($this->fields[$offset]);
-		}
-		/**
-		 * saves current form to session
-		*/
-		public function saveToSession() {
-			session_store("form_" . strtolower($this->name), $this);
-		}
-		
-		/**
-		 * external url of this form
-		 *
-		 *@name externalURL
-		 *@access public
-		*/
-		public function externalURL() {
-			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
 		}
 		
 }

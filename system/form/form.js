@@ -48,7 +48,7 @@ goma.form = function(id) {
 		button = false;
 	});
 	
-	$("#" + id).find("select, input[type=text], input[type=hidden], input[type=radio], input[type=checkbox], input[type=password], textarea").change(function(){
+	$("#" + id).find("select, input, textarea").change(function(){
 		that.leave_check = true;
 	});
 	

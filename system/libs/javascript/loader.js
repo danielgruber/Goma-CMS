@@ -140,7 +140,7 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
-				return $.ajax(options).done(function(r, c, a){	
+				return $.ajax(options).done(function(r, c, a){
 					goma.ui.renderResponse(r, a, node, undefined, false);
 				}).fail(function(a){
 					// try find out why it has failed

@@ -4,8 +4,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.03.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 04.04.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -22,7 +22,7 @@ class lost_passwordExtension extends ControllerExtension
 		/**
 		 * register method
 		*/
-		public static $extra_methods = array("lost_password");
+		static $extra_methods = array("lost_password");
 		
 		/**
 		 * renders the action
@@ -68,6 +68,7 @@ class lost_passwordExtension extends ControllerExtension
 				$form->addValidator(new FormValidator(array($this,"validate"), array($this, "Validate")), "validate");
 				return $form->render();
 		}
+		
 		/**
 		 * validates the password
 		 *@name validatepwd
@@ -134,16 +135,16 @@ class lost_passwordExtension extends ControllerExtension
 				$email = $data["email"];
 				
 				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
-				$text = lang("hello", "Hello")." ".convert::raw2text($data["nickname"]).",
-				<br /><br />
-				".lang("lp_text")."<br />
-				<a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."</a> 
-				<br />
-				".lang("lp_deny") . "<br />
-				<a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&amp;deny=1\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&deny=1</a> 
+				$text = "<p>" . lang("hello", "Hello")." ".convert::raw2xml($data["title"])."!</p>
+				
+				<p>".lang("lp_text")."</p>
+				<p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."</a></p>
+				<p>
+				".lang("lp_deny") . "</p>
+				<p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&amp;deny=1\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&deny=1</a> </p>
 
-				<br /><br />
-				".lang("lp_mfg", "Kind Regards")."";
+				<br />
+				<p>".lang("lp_mfg", "Kind Regards")."</p>";
 				
 				if($mail->sendHTML($email, lang("lost_password"), $text))
 				{

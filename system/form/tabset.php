@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 21.11.2012
-  * $Version 2.0.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 04.04.2013
+  * $Version 2.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -54,9 +54,9 @@ class TabSet extends FieldSet
 						
 						$name = strtolower($item->name);
 						// if a field is deleted the field does not exist in that array
-						if(isset($this->form()->fields[$name]))
+						if($this->form()->isFieldToRender($name))
 						{
-							
+							$this->form()->registerRendered($name);
 							if((isset($_POST["tabs_" . $item->name])) && $i == 0 /*make sure just one tab is active*/) {
 								$i++;
 								setcookie("tabs_" . $this->name, $item->name, 0, "/");

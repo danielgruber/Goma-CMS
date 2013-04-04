@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 21.03.2012
-  * $Version 2.4.8
+  * last modified: 04.04.2012
+  * $Version 2.4.9
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -205,7 +205,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				
 				if(Permission::check("USERS_MANAGE"))
 				{
-					$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"),0, "general");
+					$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"), null, "general");
 				}
 				
 				if(!member::login())
@@ -275,7 +275,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 					
 					$form->add(new Tab("admin", array(
 						$status
-					), $GLOBALS["lang"]["administration"]),0,"tabs");
+					), lang("administration")), null,"tabs");
 				} else {
 					$form->remove("groups");
 				}

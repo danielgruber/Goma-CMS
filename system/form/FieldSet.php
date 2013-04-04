@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 21.11.2012
-  * $Version: 2.1.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 04.04.2013
+  * $Version: 2.1.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -120,9 +120,9 @@ class FieldSet extends FormField
 						
 						$name = strtolower($item->name);
 						// if a field is deleted the field does not exist in that array
-						if(isset($this->form()->fields[$name]) && !isset($this->form()->renderedFields[$name]))
+						if($this->form()->isFieldToRender($name))
 						{
-								$this->form()->renderedFields[$name] = true;
+								$this->form()->registerRendered($name);
 								$div = $item->field();
 								if(is_object($div) && !$div->hasClass("hidden")) {
 									if($i == 0) {
@@ -151,17 +151,18 @@ class FieldSet extends FormField
 		 *@name add
 		 *@access public
 		*/
-		public function add($field, $sort = 0)
+		public function add($field, $sort = null)
 		{
 			if($this->parent) {
-				if($sort == 0) {
+				if(!isset($sort)) {
 					$sort = 1 + count($this->items);
  				}
+ 				
 				$this->sort[$field->name] = $sort;
 				$this->items[$field->name] = $field;
 				$field->setForm($this);
 			} else {
-				if($sort == 0) {
+				if(!isset($sort)) {
 					$sort = 1 + count($this->fields);
 					while(isset($this->fields[$sort]))
 						$sort++;

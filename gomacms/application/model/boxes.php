@@ -476,7 +476,7 @@ class boxpage extends Page
 				{
 						$boxes = "";
 				}
-				$form->add(new HTMLField("boxes", $boxes . '<div style="clear: both;"></div>'),0, "content");
+				$form->add(new HTMLField("boxes", $boxes . '<div style="clear: both;"></div>'), null, "content");
 		}
 		
 		/**

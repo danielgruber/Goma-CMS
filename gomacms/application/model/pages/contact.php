@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 04.04.2013
   * $Version 1.1.2
 */
 
@@ -45,9 +45,9 @@ class contact extends Page
 		{
 				parent::getForm($form);
 				
-				$form->add($email = new TextField('email',  lang("email")),0, "content");
+				$form->add($email = new TextField('email',  lang("email")), null, "content");
 				//$form->add(new AutoFormField("requireemailfield", lang("requireEmailField", "email is required")), 0, "content");
-				$form->add(new HTMLEditor('data', lang("text")),0, "content");
+				$form->add(new HTMLEditor('data', lang("text")), null, "content");
 				
 				$email->info = lang("email_info", "e-mail-info");
 		}
