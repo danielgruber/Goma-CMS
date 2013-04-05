@@ -7,8 +7,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   *********
-  * last modified: 11.01.2013
-  * $Version: 1.4.8
+  * last modified: 04.04.2013
+  * $Version: 1.4.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -568,37 +568,23 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 	}
 	
 	/**
-	 * remakes the variable currentSet for pagination
+	 * returns starting item-count, ending item-count and page
 	 *
-	 *@name reRenderSet
+	 *@name getPageInfo
 	 *@access public
-	*/	
-	public function reRenderSet() {
+	*/
+	public function getPageInfo() {
 		if($this->pagination) {
-			$this->dataCache = (array) $this->dataCache + (array) $this->data;
-			$start = $this->page * $this->perPage - $this->perPage;
-			$count = $this->perPage;
-			if($this->Count() < $start) {
-				if($this->Count() < $this->perPage) {
-					$start = 0;
-					$count = $this->perPage;
-				} else {
-					$pages = ceil($this->Count() / $this->perPage);
-					if($this->page < $pages) {
-						$this->page = $pages;
-					}
-					$start = $this->page * $this->perPage - $this->perPage;
-				}
+			$end = $this->page * $this->perPage;
+			if($this->count() < $end) {
+				$end = $this->count();
 			}
-			if($start + $count > $this->Count()) {
-				$count = $this->Count() - $start;
-			}
-			$this->data = array_values($this->getArrayRange($start, $count));
-			reset($this->data);
-		} else {
-			$this->data =& $this->dataCache;
+			return array("start" => $this->page * $this->perPage - $this->perPage, "end" => $end, "whole" => $this->count());
 		}
+		
+		return false;
 	}
+	
 	/**
 	 * sets the Page
 	 *
@@ -729,6 +715,38 @@ class DataSet extends ViewAccessAbleData implements CountAble {
 		}
 	}
 	
+	/**
+	 * remakes the variable currentSet for pagination
+	 *
+	 *@name reRenderSet
+	 *@access public
+	*/	
+	public function reRenderSet() {
+		if($this->pagination) {
+			$this->dataCache = (array) $this->dataCache + (array) $this->data;
+			$start = $this->page * $this->perPage - $this->perPage;
+			$count = $this->perPage;
+			if($this->Count() < $start) {
+				if($this->Count() < $this->perPage) {
+					$start = 0;
+					$count = $this->perPage;
+				} else {
+					$pages = ceil($this->Count() / $this->perPage);
+					if($this->page < $pages) {
+						$this->page = $pages;
+					}
+					$start = $this->page * $this->perPage - $this->perPage;
+				}
+			}
+			if($start + $count > $this->Count()) {
+				$count = $this->Count() - $start;
+			}
+			$this->data = array_values($this->getArrayRange($start, $count));
+			reset($this->data);
+		} else {
+			$this->data =& $this->dataCache;
+		}
+	}
 	
 	/**
 	 * returns the offset of the first record or the current model

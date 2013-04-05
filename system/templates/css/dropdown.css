@@ -60,8 +60,8 @@
 .dropdown_widget .dropdown {
 	display: none;
 	background: #fff;
-	max-height: 300px;
-	border: 1px solid #999;
+	max-height: 302px;
+	border: 1px solid #aaa;
 	
 	-webkit-border-bottom-left-radius: 3px;
 	-webkit-border-bottom-right-radius: 3px;
@@ -72,48 +72,45 @@
 	
 	position: absolute;
 	top: 24px;
-	left: 2px;
-	-webkit-box-shadow: 0 4px 10px #444;
-	-moz-box-shadow: 0 4px 10px #444;
-	box-shadow: 0 4px 10px #444;
+	left: 3px;
+	-webkit-box-shadow: 0 2px 10px #aaa;
+	-moz-box-shadow: 0 2px 10px #aaa;
+	box-shadow: 0 2px 10px #aaa;
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	z-index: 999;
 }
 .dropdown_widget .dropdown .header {
-	background: #ddd;
-	border-bottom: 1px solid #777;
+	background: #fff;
+	border-bottom: 1px solid #ccc;
 	margin: 0;
 	padding: 0;
 	height: 30px;
 }
-.dropdown_widget .dropdown .header .search {
+.dropdown_widget .dropdown .header .search, .dropdown_widget .dropdown .header .search:focus {
 	width: 100%;
-	max-width: 60%;
 	font-size: 13px;
 	line-height: 15px;
-	margin-left: 4px;
-	margin-top: 2px;
-	border: 1px solid #bbb;
-	background: #fff;
+	border: 0 !important;
+	background: transparent;
 	color: #222;
-	padding: 4px;
+	padding: 5px;
+	margin-left: -120px;
+	padding-left: 125px;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	-moz-box-shadow: none !important;
 }
-.dropdown_widget .dropdown .header .search:focus {
-	-webkit-box-shadow: 0 0 7px #999;
-	-moz-box-shadow: 0 0 7px #999;
-	box-shadow: 0 0 7px #999;
-	border: 1px solid #999 !important;
-}
+
 .dropdown_widget .dropdown .header .cancel {
 	position: absolute;
 	top: 6px;
-	right: 155px;
+	right: 100px;
 	height: 17px;
 	width: 17px;
 	display: none;
 	background: url(images/cancel.png);
-	cursor: text;
+	cursor: pointer;
 }
 
 .dropdown_widget .dropdown .header .pagination {
@@ -160,6 +157,9 @@
 .dropdown_widget .dropdown .content {
 	background: #eee;
 }
+.dropdown_widget .dropdown .content .loading {
+	padding: 10px;
+}
 .dropdown_widget .dropdown .content ul {
 	padding: 0;
 	margin: 0;
@@ -177,7 +177,7 @@
 	padding: 6px 0;
 	padding-top: 3px;
 	padding-left: 25px;
-	color: #222;
+	color: #444;
 	text-decoration: none;
 	font-size: 13px;
 	line-height: 1.7em;

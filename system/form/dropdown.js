@@ -55,9 +55,41 @@ DropDown.prototype = {
 			}
 		});
 		
-		this.widget.find(" > .dropdown > .header > .search").keyup(function(){
-			that.page = 1;
-			that.reloadData();
+		this.widget.find(" > .dropdown").click(function(){
+			that.widget.find(" > .dropdown > .header > .search").focus();
+		});
+		
+		this.widget.find(" > .dropdown > .header > .search").keyup(function(e){
+			var code = e.keyCode ? e.keyCode : e.which;
+			if ((code < 37 || code > 40) && code != 13) {
+				that.page = 1;
+				that.reloadData();
+			} else {
+				if (code == 37) {
+	       	 		that.widget.find(" > .dropdown > .header > .pagination > span > a.left").click();
+	       	 		return false;
+	       	 	} else if(code == 39) {
+		       	 	that.widget.find(" > .dropdown > .header > .pagination > span > a.right").click();
+		       	 	return false;
+	       	 	} else if(code == 38) {
+		       	 	// check for marked
+		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
+			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").length > 0) {
+				       	 	that.check(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").find("a").attr("id"), false);
+			       	 	}
+		       	 	} else {
+			       	 	that.check(that.widget.find(" > .dropdown > .content a:last-child").attr("id"), false);
+		       	 	}
+	       	 	} else if(code == 40) {
+		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
+			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").length > 0) {
+				       	 	that.check(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id"), false);
+			       	 	}
+		       	 	} else {
+			       	 	that.check(that.widget.find(" > .dropdown > .content a:first-child").attr("id"), false);
+		       	 	}
+	       	 	}
+			}
 		});
 		
 		// preload some lang to improve performance
@@ -164,7 +196,7 @@ DropDown.prototype = {
 		var search = this.widget.find(" > .dropdown > .header > .search").val();
 		
 		
-		this.setContent("<div style=\"text-align: center;\"><img src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading...")+"</div>");
+		this.setContent("<div class=\"loading\" style=\"text-align: center;\"><img src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading...")+"</div>");
 		clearTimeout(this.timeout);
 		var that = this;
 		// we limit the request, so just send if in the last 200 milliseconds no edit in search was done
@@ -276,8 +308,9 @@ DropDown.prototype = {
 	 *@name check
 	 *@param id
 	*/
-	check: function(id) {
+	check: function(id, hide) {
 		var that = this;
+		var h = hide;
 		if(this.multiple) {
 			
 			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
@@ -318,7 +351,8 @@ DropDown.prototype = {
 				success: function(html) {
 					// everything is fine
 					that.widget.find(" > .field").html(html);
-					that.hideDropDown();
+					if(typeof h == "undefined" || h == true)
+						that.hideDropDown();
 					
 					that.input.val(value);
 				}

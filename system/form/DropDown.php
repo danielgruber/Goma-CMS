@@ -221,6 +221,9 @@ class DropDown extends FormField
 					)),
 					new HTMLNode("div", array(
 						"class"	=> "content"
+					)),
+					new HTMLNode("div", array(
+						"class" => "footer"
 					))
 				))
 			));
@@ -348,10 +351,9 @@ class DropDown extends FormField
 					$i++;
 				}
 			}
-			// clean up
-			unset($i, $start, $end);
+			
 			$arr = array_map(array("text", "protect"), $arr);
-			return array("data"	=> $arr, "right" => $right, "left" => $left);
+			return array("data"	=> $arr, "right" => $right, "left" => $left, "showStart" => $start, "showEnd" => $end, "whole" => count($this->options));
 		}
 		
 		/**
@@ -407,7 +409,7 @@ class DropDown extends FormField
 				// clean up
 				unset($i, $start, $end);
 				
-				return array("data"	=> $arr, "right" => $right, "left" => $left);
+				return array("data"	=> $arr, "right" => $right, "left" => $left, "showStart" => $start, "showEnd" => $end, "whole" => count($result));
 			} else {
 				if(isset($result[0])) {
 					return array("data" => ArrayLib::key_value($result));
@@ -444,8 +446,19 @@ class DropDown extends FormField
 				$value = array_flip($value);
 			}
 			
+			$return = array("data" => $arr, "left" => (isset($data["left"])) ? $data["left"] : false, "right" => (isset($data["right"])) ? $data["right"] : false, "value" => $value, "page" => $page);
+			
+			if(isset($data["showStart"], $data["showEnd"])) {
+				$return["showStart"] = $data["showStart"];
+				$return["showEnd"] = $data["showEnd"];
+			}
+			
+			if(isset($data["whole"])) {
+				$return["whole"] = $data["whole"];
+			}
+			
 			// left and right is pagination (left arrow and right)
-			return json_encode(array("data" => $arr, "left" => (isset($data["left"])) ? $data["left"] : false, "right" => (isset($data["right"])) ? $data["right"] : false, "value" => $value));
+			return json_encode($return);
 		}
 		
 		/**

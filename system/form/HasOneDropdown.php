@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 1.2.2
+  * last modified: 05.04.2013
+  * $Version 1.2.3
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -172,10 +172,11 @@ class HasOneDropdown extends SingleSelectDropDown
 			$left = ($p > 1);
 			
 			$right = (ceil($data->count() / 10) > $p);
-			
+			$pageInfo = $data->getPageInfo();
 			unset($data);
 			
-			return array("data" => $arr, "left" => $left, "right" => $right);
+			
+			return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
 		}
 		
 		/**
@@ -206,8 +207,11 @@ class HasOneDropdown extends SingleSelectDropDown
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);
+			
+			$pageInfo = $data->getPageInfo();
 			unset($data);
-			return array("data" => $arr, "left" => $left, "right" => $right);
+			
+			return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
 		}
 	
 		/**
