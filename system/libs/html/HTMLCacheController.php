@@ -11,35 +11,45 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class HTMLCacheController extends Object
 {
+	/**
+	 * unnecessary words caused of filter
+	 *
+	 *@name unnecessary_words
+	 *@access public
+	*/
+	static $unnecessary_words;
 	
-	public $unnecessaryWords;
+	/**
+	 * lang of currently loaded filter
+	 *
+	 *@name current_filter
+	*/
+	static $current_filter;
 	
 	/**
 	 * Builds a cache based on sentences with important words which can be
 	 * indexed
 	 * @param - string content
-	 * @return - string cache
-	 * */
-	
-	
-	public function build_cache($content)
+	 * @return - array cache
+	*/
+	static function build_cache($content)
 	{
 		self::load_word_filter("de-de");
 		
-		$cache = "";
-		$words = get_wordlist($content);
+		$cache = array();
+		$words = self::get_wordlist($content);
 		foreach($words as $word)
 		{
 			
 			if(!ctype_alpha($word))
 			{
-				$cache .= $word . " ";
+				$cache[] = $word;
 				continue;
 			}
 			
 			// $word is a letter
 			
-			if(!is_uppercase($word))
+			if(!self::is_uppercase($word))
 				continue;
 			
 			// $word is a noun
@@ -51,13 +61,13 @@ class HTMLCacheController extends Object
 				
 			if(strlen($word) < 7)
 			{
-				if(is_unnecessary($word))
+				if(self::is_unnecessary($word))
 					continue;
 			}
 			
 			// $word is ! a longer help word
 			
-			$cache .= $word . " ";
+			$cache [] = $word;
 		}
 		
 		return $cache;
@@ -67,9 +77,8 @@ class HTMLCacheController extends Object
 	 * checks if first char is upper-case
 	 * @param - string word
 	 * @return - boolean
-	 * */
-	
-	public function is_uppercase($str)
+	*/
+	static function is_uppercase($str)
 	{
 		$char = substr($str, 0, 1);
 		return strtolower($char) != $char;
@@ -79,25 +88,18 @@ class HTMLCacheController extends Object
 	 * checks if word is in the "list of unnecessary words"
 	 * @param - string word
 	 * @return - boolean
-	 * */
-	
-	public function is_unnecessary($word)
+	*/
+	static function is_unnecessary($word)
 	{
-		foreach($unnecessaryWords as $exp)
-		{
-			if(strtolower($word) == $exp)
-				return true;
-		}
-		
-		return false;
+		return in_array(strtolower($word), self::$$unnecessary_words);
 	}
 	
-	public function get_wordlist($content)
+	static function get_wordlist($content)
 	{
 		if(strlen($content) == 0)
 			return false;
 		
-		$words = preg_split(" ", $content, -1, PREG_SPLIT_NO_EMPTY);
+		return preg_split(" ", $content, -1, PREG_SPLIT_NO_EMPTY);
 	}
 	
 	/**
@@ -105,10 +107,14 @@ class HTMLCacheController extends Object
 	 * @param - string language
 	 **/
 	
-	public function load_word_filter($lang)
+	static function load_word_filter($lang)
 	{
-		$lang = "./".$lang.".filter.php";
-		include $lang;
+		if(self::$current_filter != $lang) {
+			self::$current_filter = $lang;
+			$lang = ROOT . LANGUAGE_DIRECTORY . "/".$lang."/word-filter.php";
+			include $lang;
+			self::$unnecessary_words = $unnecessaryWords;
+		}
 	}
 		
 }

@@ -280,12 +280,12 @@ class HTMLParser extends Object
 			if(empty($word) || empty($context))
 				return 0;
 			
-			$value = count_word($word, $context);
+			$value = self::count_word($word, $context);
 			$div = $value;
 			
-			$value += count_title_words($word, $context);
-			$value += count_question_words($word, $context);
-			$value += count_exclamation_words($word, $context);
+			$value += self::count_title_words($word, $context);
+			$value += self::count_question_words($word, $context);
+			$value += self::count_exclamation_words($word, $context);
 			
 			return $value / $div;
 		}

@@ -75,6 +75,11 @@ class ClusterFormField extends FormField {
 	public $post;
 	
 	/**
+	 * state
+	*/
+	public $state;
+	
+	/**
 	 * constructing
 	 *
 	 *@name __construct
@@ -90,7 +95,6 @@ class ClusterFormField extends FormField {
 			$field->overridePostName = $this->name . "_" . $field->name;
 			$this->sort = 1 + count($this->items);
 			$this->items[] = $field;
-			$field->setForm($this);
 		}
 		
 		$this->result =& $this->value;
