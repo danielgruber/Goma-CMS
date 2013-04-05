@@ -43,7 +43,7 @@ class HTMLCacheController extends Object
 			
 			if(!ctype_alpha($word))
 			{
-				$cache[] = $word;
+				array_push($cache, $word);
 				continue;
 			}
 			
