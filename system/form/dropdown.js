@@ -71,7 +71,7 @@ DropDown.prototype = {
 	       	 	} else if(code == 39) {
 		       	 	that.widget.find(" > .dropdown > .header > .pagination > span > a.right").click();
 		       	 	return false;
-	       	 	} else if(code == 38) {
+	       	 	} else if(code == 38 && !that.multiple) {
 		       	 	// check for marked
 		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
 			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").length > 0) {
@@ -80,7 +80,7 @@ DropDown.prototype = {
 		       	 	} else {
 			       	 	that.check(that.widget.find(" > .dropdown > .content a:last-child").attr("id"), false);
 		       	 	}
-	       	 	} else if(code == 40) {
+	       	 	} else if(code == 40 && !that.multiple) {
 		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
 			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").length > 0) {
 				       	 	that.check(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id"), false);
