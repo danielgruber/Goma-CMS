@@ -20,9 +20,9 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'insert', items : [ 'Image','Table','Symbol','PageBreak'] },
 		{ name: 'styles', items : [ 'Styles','Format','Font','FontSize' ] },
 		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		{ name: 'tools', items : [ /*'Maximize',*/ 'About' ] },
+		{ name: 'tools', items : [ 'Maximize', 'About' ] },
 		{ name: 'editing', items : [ 'Find','Replace' ,'BidiLtr','BidiRtl' ] },
-		{ name: "Scayt", items: ["Scayt"]},
+		{ name: "Scayt", items: ["Scayt"]}
 	];
 	
 	CKEDITOR.config.floatingtools = 'Basic';

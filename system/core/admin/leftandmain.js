@@ -40,6 +40,7 @@ var LaM_type_timeout;
 				$(".leftandmaintable .left").addClass("active");
 			}
 			renderSideBar();
+			return false;
 		});
 		
 		setTimeout(function(){

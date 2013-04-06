@@ -406,6 +406,9 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
+				if(!respond.mediaQueriesSupported)
+					respond.update();
+				
 			},
 			
 			runResources: function(request) {
