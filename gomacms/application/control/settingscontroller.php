@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.2.5
+  * last modified: 07.04.2013
+  * $Version 1.2.6
 */
 
 class SettingsController extends Controller {
@@ -164,7 +164,7 @@ class Newsettings extends DataObject implements HistoryData {
 		}
 		
 		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
-		if($http == "http") {
+		if($http == "http" && $this->useSSL != 1) {
 			$form->useSSL->disable();
 		}
 		
@@ -282,6 +282,32 @@ class TemplateSettings extends NewSettings {
 	public function getFormFromDB(&$form) {
 		$form->add(new TemplateSwitcher("stpl", lang("available_styles"), ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), GOMA_VERSION . "-" . BUILD_VERSION));
 		$form->add(new TextArea("css_standard", lang("own_css")));
+	}
+}
+
+class PushSettings extends NewSettings {
+	/**
+	 * database-fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
+		"p_app_key"		=> "varchar(64)",
+		"p_app_secret"	=> "varchar(64)",
+		"p_app_id"		=> "varchar(64)"
+	);
+	
+	public $tab = "{\$_lang_push}";
+	
+	public $fieldInfo = array(
+		"p_app_id"			=> "{\$_lang_push_info}"
+	);
+	public function getFieldTitles() {
+		return array(
+			"p_app_secret"		=> lang("p_app_secret", "App-Secret"),
+			"p_app_key"			=> lang("p_app_key", "App-Key"),
+			"p_app_id"			=> lang("p_app_id", "App-ID")
+		);
 	}
 }
 

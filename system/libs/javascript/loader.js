@@ -549,6 +549,56 @@ if(typeof goma.ENV == "undefined") {
 	})();
 }
 
+if(typeof goma.Pusher == "undefined") {
+	goma.Pusher = (function(){
+		var js = "http://js.pusher.com/2.0/pusher.min.js";
+		return {
+			
+			init: function(pub_key, options) {
+				goma.Pusher.key = pub_key;
+				goma.Pusher.options = options;
+			},
+			subscribe: function(id, fn) {
+				var _id = id;
+				if(typeof id == "undefined") {
+					return false;
+				}
+				
+				if(typeof fn == "undefined") {
+					fn = function(){}
+				}
+				
+				if(typeof goma.Pusher.key != "undefined") {
+					if(typeof goma.Pusher.pusher != "undefined") {
+						fn(goma.Pusher.pusher.subscribe(id));
+					} else {
+						$.getScript(js, function(data, textStatus, jqxhr) {
+							goma.Pusher.pusher = new Pusher(goma.Pusher.key, goma.Pusher.options);
+							Pusher.channel_auth_endpoint = root_path + 'pusher/auth';
+							fn(goma.Pusher.pusher.subscribe(_id));
+						});
+						return true;
+					}
+				} else {
+					return false;
+				}
+			},
+			unsubscribe: function(id) {
+				if(typeof goma.Pusher.pusher != "undefined") {
+					goma.Pusher.pusher.unsubscribe(id);
+				}
+			},
+			channel: function(id) {
+				if(typeof goma.Pusher.pusher != "undefined") {
+					return goma.Pusher.pusher.channel(id);
+				}
+				
+				return false;
+			}
+		};
+	})(jQuery);
+}
+
 // prevent from being executed twice
 if(typeof self.loader == "undefined") {
 	
