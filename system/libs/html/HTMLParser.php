@@ -283,12 +283,19 @@ class HTMLParser extends Object
 			$value = self::count_word($word, $context);
 			$div = $value;
 			
-			$value += self::count_title_words($word, $context);
-			$value += self::count_question_words($word, $context);
-			$value += self::count_exclamation_words($word, $context);
+			$count = self::count_words_in_important_sentences($word, $context);
+                        $value += $count[0];
+                        $value += $count[1];
+                        $value += self::count_title_word($word, $context);
 			
 			return $value / $div;
 		}
+                
+                /**
+                 * Count words in context
+                 * @access public
+                 * @return int
+                 * */
 		
 		
 		public function count_word($word, $context)
@@ -301,19 +308,52 @@ class HTMLParser extends Object
 			
 			return $count;	
 		}
+                
+                /**
+                 * Count words in titles
+                 * @access public
+                 * @return int
+                 * */
 		
-		public function count_title_words($word, $context)
+		public function count_title_word($word, $context)
 		{
 			
 		}
+                
+                /**
+                 * Count words in questions and exclamations
+                 * @access public
+                 * @return int
+                 * */
 		
-		public function count_question_words($word, $context)
+		public function count_words_in_important_sentences($word, $context)
 		{
-			
-		}
-		
-		public function count_exclamation_words($word, $context)
-		{
-			
+                        $questions = preg_split('?', $context, -1);
+                        $count_excl = 0;
+                        $count_quest = 0;
+                        
+                        foreach($questions as $element)
+                        {
+                                if(strpos($element, '.') !== false)
+                                {
+                                        $split = preg_split('.', $element, -1);
+                                        $element = $split[sizeof($split) - 1];
+                                        
+                                        if(strpos($element, '!') !== false)
+                                        {
+                                                $split = preg_split('!', $element, -1);
+                                                $count_excl += sizeof($split) - 1;
+                                                $element = $split[sizeof($split) - 1];
+                                        }
+                                }
+                                
+                                $tmp = preg_split($word, $context, -1);
+                                $count_quest += sizeof($tmp);
+                        }
+                        
+                        $count = array();
+                        $count[] = $count_quest;
+                        $count[] = $count_excl;
+			return $count;
 		}
 }
