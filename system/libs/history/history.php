@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.03.2013
+  * last modified: 07.04.2013
   * $Version 1.0.7
 */
 
@@ -117,7 +117,11 @@ class History extends DataObject {
 		));
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
-		return $record->write(true, true, 2, true, false);
+		$return = $record->write(true, true, 2, true, false);
+		if(PushController::$pusher && in_array($record->dbobject, History::supportHistoryView())) {
+			PushController::trigger("history-update", array("rendering" => $record->renderWith("history/event.html")));
+		}
+		return $return;
 	}
 	
 	/**

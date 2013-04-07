@@ -62,7 +62,8 @@ class HistoryController extends Controller {
 		
 		$id = "history_" . md5(var_export($filter, true));
 		
-		return $data->customise(array("id" => $id, "namespace" => $namespace))->renderWith("history/history.html");
+		$dbfilter = is_array($filter["dbobject"]) ? $filter["dbobject"] : array();
+		return $data->customise(array("id" => $id, "namespace" => $namespace, "filter" => json_encode($dbfilter)))->renderWith("history/history.html");
 	}
 	
 	/**

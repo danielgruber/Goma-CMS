@@ -3,10 +3,11 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 02.04.2013
+  * last modified: 07.04.2013
 */
 (function($, w){
-	w.bindHistory = function(div) {
+	w.bindHistory = function(div, filter) {
+		var f = filter;
 		/**
 		 * loads new elements based on the older-button
 		*/
@@ -101,5 +102,24 @@
 		div.find(".older").click(function(){
 			return load($(this));
 		});
+		
+		if(goma.Pusher.channel("presence-goma") && div.find("a.newer").length == 0) {
+			var c = goma.Pusher.channel("presence-goma");
+			c.bind("history-update", function(data) {
+				if(data.rendering && (!f || !data.class_name || in_array(data.class_name, f))) {
+					div.prepend(data.rendering);
+					div.find(".event.first").removeClass("first");
+					div.find(".event:first-child").addClass("first").css("display", "none").slideDown("fast");
+				}
+			});
+		}
+		
+		function in_array(item,arr) {
+			for(p=0;p<arr.length;p++)
+				if (item == arr[p]) 
+					return true;
+					
+			return false;
+		}
 	};
 })(jQuery, window);

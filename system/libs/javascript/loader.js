@@ -559,28 +559,34 @@ if(typeof goma.Pusher == "undefined") {
 				goma.Pusher.options = options;
 			},
 			subscribe: function(id, fn) {
-				var _id = id;
-				if(typeof id == "undefined") {
-					return false;
-				}
-				
-				if(typeof fn == "undefined") {
-					fn = function(){}
-				}
-				
-				if(typeof goma.Pusher.key != "undefined") {
-					if(typeof goma.Pusher.pusher != "undefined") {
-						fn(goma.Pusher.pusher.subscribe(id));
+				if(!goma.Pusher.channel(id)) {
+					var _id = id;
+					if(typeof id == "undefined") {
+						return false;
+					}
+					
+					if(typeof fn == "undefined") {
+						fn = function(){}
+					}
+					
+					if(typeof goma.Pusher.key != "undefined") {
+						if(typeof goma.Pusher.pusher != "undefined") {
+							fn(goma.Pusher.pusher.subscribe(id));
+						} else {
+							$.getScript(js, function(data, textStatus, jqxhr) {
+								goma.Pusher.pusher = new Pusher(goma.Pusher.key, goma.Pusher.options);
+								Pusher.channel_auth_endpoint = root_path + 'pusher/auth';
+								fn(goma.Pusher.pusher.subscribe(_id));
+							});
+							return true;
+						}
 					} else {
-						$.getScript(js, function(data, textStatus, jqxhr) {
-							goma.Pusher.pusher = new Pusher(goma.Pusher.key, goma.Pusher.options);
-							Pusher.channel_auth_endpoint = root_path + 'pusher/auth';
-							fn(goma.Pusher.pusher.subscribe(_id));
-						});
-						return true;
+						return false;
 					}
 				} else {
-					return false;
+					if(typeof fn != "undefined")
+						fn(goma.Pusher.channel(id));
+					return true;
 				}
 			},
 			unsubscribe: function(id) {
@@ -589,6 +595,9 @@ if(typeof goma.Pusher == "undefined") {
 				}
 			},
 			channel: function(id) {
+				if(typeof id == "undefined") {
+					id = "presence-goma";
+				}
 				if(typeof goma.Pusher.pusher != "undefined") {
 					return goma.Pusher.pusher.channel(id);
 				}
@@ -1231,4 +1240,51 @@ if(typeof self.loader == "undefined") {
 			"scrollTop": scrollPosition
 		}, 200);
 	}
+	
+	var now = function() {
+		return Math.round(+new Date()/1000);
+	}
+	
+	/**
+	 * returns a string like 2 seconds ago
+	 *
+	 *@name ago
+	 *@param int - unix timestamp
+	*/
+	var ago = function(time) {
+		var diff = now() - time;
+		if(diff < 60) {
+			return lang("ago.seconds", "about %d seconds ago").replace("%d", Math.round(diff));
+		} else if(diff < 90) {
+			return lang("ago.minute", "about one minute ago");
+		} else {
+			diff = diff / 60;
+			if(diff < 60) {
+				return lang("ago.minutes", "about %d minutes ago").replace("%d", Math.round(diff));
+			} else {
+				diff = diff / 60;
+				if(Math.round(diff) == 1) {
+					return lang("ago.hour", "about one hour ago");
+				} else if(diff < 24) {
+					return lang("ago.hours", "%d hours ago").replace("%d", Math.round(diff));
+				} else {
+					diff = diff / 24;
+					if(Math.round(diff * 10) <= 11) {
+						return lang("ago.day", "about one day ago");
+					} else {
+						// unsupported right now
+						return false;
+					}
+				}
+			}
+		}
+	}
+	
+	setInterval(function(){
+		$(".ago-date").each(function(){
+			if($(this).attr("data-date")) {
+				$(this).html(ago($(this).attr("data-date")));
+			}
+		});
+	}, 1000);
 }

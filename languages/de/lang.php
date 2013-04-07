@@ -582,5 +582,5 @@ $lang = array(
 	"p_app_key"				=> "App-Key",
 	"p_app_secret"			=> "App-Secret",
 	"p_app_id"				=> "App-ID",
-	"push_info"				=> "Push-data of <a href='http://pusher.com'>pusher.com</a>."
+	"push_info"				=> 'API-Informationen von <a target="_blank" href="http://pusher.com?utm_source=badge"><img src="http://pusher.com/images/badges/pusher_badge_light_1.png"></a>.'
 );
