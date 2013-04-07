@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 14.01.2013
-  * $Version 3.5.2
+  * last modified: 07.04.2013
+  * $Version 3.5.3
 */   
  
  
@@ -104,14 +104,14 @@ class tpl extends Object
          *@param array - required areas
          *@use: parse tpl
          */
-		public static function render($name,$replacement = array(),$class = "", $expansion = null)
+		public static function render($name, $replacement = array(), $class = "", $expansion = null)
 		{
 			if($file = self::getFilename($name, $class, false, $expansion)) {
 				return self::parser($file,  $replacement, realpath($file),$class);
 			} else {
 				HTTPresponse::setResHeader(500);
 				/* an error so show an error ;-) */
-				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+				throwerror(7, "Missing Template-File", "Could not open Template-File '".$name."'");
 			}
 		}
 		
@@ -134,7 +134,7 @@ class tpl extends Object
 			} else {
 				HTTPresponse::setResHeader(500);
 				/* an error so show an error ;-) */
-				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+				throwerror(7, "Missing Template-File", "Could not open Template-File '".$name."'");
 			}
 		}
 		
@@ -965,6 +965,7 @@ class tplCaller extends Object implements ArrayAccess
 		public $callers = array(
 			
 		);
+		
 		/**
 		 * current template-file
 		 *
@@ -972,6 +973,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public $tpl;
+		
 		/**
 		 * current template-base
 		 *
@@ -979,26 +981,23 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public $tplBase;
+		
 		/**
-		 * special base: admin-template-direcory or default-template-directory
+		 * sub-path, for example admin/ or history/
+		 * so this is not connected with template-root
 		 *
-		 *@name specialBase
+		 *@name subPath
 		 *@access public
 		*/
-		public $specialBase;
-		/**
-		 * sub-path, for example admin/
-		 *
-		 *@name subpath
-		 *@access public
-		*/
-		public $subpath;
+		public $subPath;
+		
 		/**
 		 * this var contains the dataobject for this caller
 		 *@name dataobject
 		 *@access private
 		*/
 		private $dataobject;
+		
 		/**
 		 *@name __construct
 		 *@param object - dataobject
@@ -1014,19 +1013,7 @@ class tplCaller extends Object implements ArrayAccess
 				$this->inExpansion = $this->dataobject->inExpansion;
 				
 		}
-		/**
-		 * on clone
-		 *
-		 *@name __clone
-		 *@accessp public
-		*/
-		public function __clone() {
-			$this->dataobject = clone $this->dataobject;
-			if($this->callers)
-				foreach($this->callers as $key => $caller) {
-					$this->callers[$key] = clone $caller;
-				}
-		}
+		
 		/**
 		 * sets tpl-paths
 		 *
@@ -1034,73 +1021,35 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function setTplPath($tpl) {
-			
+
 			$this->tplBase = substr($tpl, 0, strrpos($tpl, "/"));
 			if(substr($this->tplBase, 0, strlen(ROOT)) == ROOT)
 				$this->tplBase = substr($this->tplBase, strlen(ROOT));
 			
+			if(substr(SYSTEM_TPL_PATH, -1) == "/") {
+				$systemL = strlen(SYSTEM_TPL_PATH) + 1;
+			} else {
+				$systemL = strlen(SYSTEM_TPL_PATH);
+			}
+			
+			if(substr(APPLICATION_TPL_PATH, -1) == "/") {
+				$appL = strlen(APPLICATION_TPL_PATH) + 1;
+			} else {
+				$appL = strlen(APPLICATION_TPL_PATH);
+			}
+			
 			if(substr($this->tplBase,0, strlen("tpl/" . Core::getTheme())) == "tpl/" . Core::getTheme()) {
 				$this->subPath = substr($this->tplBase, strlen("tpl/" . Core::getTheme()));
 			} else if(substr($this->tplBase,0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH) {
-				$this->subPath = substr($this->tplBase, strlen(SYSTEM_TPL_PATH));
+				$this->subPath = substr($this->tplBase, $systemL + 1);
 			}  else if(substr($this->tplBase,0, strlen(APPLICATION_TPL_PATH)) == APPLICATION_TPL_PATH) {
-				$this->subPath = substr($this->tplBase, strlen(APPLICATION_TPL_PATH));
+				$this->subPath = substr($this->tplBase, $appL + 1);
 			}
 			
 			if(isset($this->subPath) && !$this->subPath)
 				$this->subPath = "";
 			
 			$this->tpl = $tpl;
-		}
-		
-		/**
-		 * ArrayAccess Layer
-		*/
-		
-		public function offsetGet($offset)
-		{
-				if(Object::method_exists($this->dataobject, $offset))
-				{
-						$data = call_user_func_array(array($this->dataobject, $offset), array());
-						if(is_object($data))
-						{
-								return new tplCaller($data);
-						} else
-						{
-								return $data;
-						}
-				} else if(Object::method_exists($this, $offset)) {
-					return call_user_func_array(array($this, $offset), array());
-				} else
-				{
-					return false;
-				}
-		}
-		public function offsetExists($offset)
-		{
-				if(Object::method_exists($this->dataobject, $offset) || Object::method_exists($this, $offset))
-				{
-						return true;
-				} else
-				{
-						return false;
-				}
-		}
-		public function offsetSet($offset, $value)
-		{
-				$this->dataobject[$offset] = $value;
-		}
-		public function offsetUnset($offset)
-		{
-				unset($this->dataobject[$offset]);
-		}
-		
-		
-		/**
-		 * returns addcontent
-		*/
-		public function addcontent() {
-			return addcontent::get();
 		}
 		
 		/**
@@ -1117,38 +1066,6 @@ class tplCaller extends Object implements ArrayAccess
 				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
 			}
 			echo convert::raw2text(print_r($data, true));
-		}
-		
-		/**
-		 * __call-access-layer
-		 *@name __call
-		 *@access public
-		 *@param name
-		 *@param args
-		*/
-		public function __call($name,$args)
-		{
-				if(Object::method_exists($this->class, $name))
-				{
-					if(method_exists($this->class, $name))
-						return call_user_func_array(array("parent", $name), $args);
-					else
-						return call_user_func_array(array("parent", "__call"), array($name, $args));
-				} else if(Object::method_exists($this->class, "_" . $name))
-				{
-					return call_user_func_array(array($this, "_" . $name), $args);
-				} else if(isset($this->callers[strtolower($name)])) {
-					$this->callers[strtolower($name)]->dataobject->convertDefault = null;
-					return $this->callers[strtolower($name)];
-				} else {
-						if(Object::method_exists($this->dataobject, $name))
-						{
-								return call_user_func_array(array($this->dataobject, $name), $args);
-						} else
-						{
-								return false;
-						}
-				}
 		}
 		
 		/**
@@ -1172,58 +1089,40 @@ class tplCaller extends Object implements ArrayAccess
 		}
 		
 		/**
-		 * gets current object
+		 * gets resource-path of given expansion or class-expansion
 		 *
-		 *@name doObject
+		 *@name resource_path
 		 *@access public
 		*/
-		public function doObject() {
-			return $this;
+		public function ResourcePath($exp = null) {
+			return $this->resource_path($exp);
 		}
-		
-		/**
-		 * checks if method can call
-		 *@name __cancall
-		 *@param string - name
-		*/
-		public function __cancall($name)
-		{
-				if(parent::method_exists($this->class, $name))
-				{
-						return true;
-				} else if(parent::method_exists($this->class, "_" . $name))
-				{
-						return true;
-				} else
-				{
-						if(Object::method_exists($this->dataobject, $name))
-						{
-								return true;
-						} else
-						{
-								return false;
-						}
-				}
-		}
-		/**
-		 * predefined functions
-		 * for some template-functions
-		*/
 		
 		/**
 		 * to include another template
 		 *@name include
 		 *@access public
 		*/ 
-		public function _include($name)
+		public function _include($name, $data = null)
 		{
+			if(tpl::getFilename($name, $this->dataobject, true)) {
 				$tpl = tpl::getIncludeName($name, $this->dataobject);
-				$caller = clone $this;
-				$caller->setTplPath($tpl[1]);
+			} else if(tpl::getFilename($this->subPath . "/" . $name, $this->dataobject, true)) {
+				$tpl = tpl::getIncludeName($this->subPath . "/" . $name, $this->dataobject);
+			} else {
+				throwError(7, "Template-file missing", "Could not include Template-File '".$name."'");
+			}
+			
+			$caller = clone $this;
+			$caller->setTplPath($tpl[1]);
+			if(!isset($data))
 				$data = $this->dataobject;
-				$callerStack = array();
-				$dataStack = array();
-				include($tpl[0]);
+			
+			$caller->dataobject = $data;
+			
+			$callerStack = array();
+			$dataStack = array();
+			include($tpl[0]);
 		}
 		
 		/**
@@ -1389,16 +1288,6 @@ class tplCaller extends Object implements ArrayAccess
 		}
 		
 		/**
-		 * returns the directory of the current template
-		 *
-		 *@name FileDirectory
-		 *@access public
-		*/
-		public function FileDirectory() {
-			return $this->specialBase;
-		}
-		
-		/**
 		 * includes JS as "main"
 		 *@name INCLUDE_JS_MAIN
 		 *@access public
@@ -1429,22 +1318,18 @@ class tplCaller extends Object implements ArrayAccess
 				}
 				Resources::add($name, "js", "main");
 		}
-		
-		/**
-		 * checks if a file exists
-		 *
-		 *@name file_exists
-		 *@access protected
-		*/
-		protected static function file_exists($filename) {
-			return Resources::file_exists($filename);
-		}
-		
 				
 		/**
 		 * returns if homepage
 		*/
 		public function is_homepage() {
+			return (defined("HOMEPAGE") && HOMEPAGE);
+		}
+		
+		/**
+		 * returns if homepage
+		*/
+		public function isHomepage() {
 			return (defined("HOMEPAGE") && HOMEPAGE);
 		}
 		
@@ -1694,6 +1579,150 @@ class tplCaller extends Object implements ArrayAccess
         public function title() {
         	return Core::$title;
         }
+        
+        
+		/**
+		 * returns addcontent
+		*/
+		public function addcontent() {
+			return addcontent::get();
+		}
+        
+        //! APIs
+        
+		/**
+		 * ArrayAccess Layer
+		*/
+		
+		public function offsetGet($offset)
+		{
+				if(Object::method_exists($this->dataobject, $offset))
+				{
+						$data = call_user_func_array(array($this->dataobject, $offset), array());
+						if(is_object($data))
+						{
+								return new tplCaller($data);
+						} else
+						{
+								return $data;
+						}
+				} else if(Object::method_exists($this, $offset)) {
+					return call_user_func_array(array($this, $offset), array());
+				} else
+				{
+					return false;
+				}
+		}
+		public function offsetExists($offset)
+		{
+				if(Object::method_exists($this->dataobject, $offset) || Object::method_exists($this, $offset))
+				{
+						return true;
+				} else
+				{
+						return false;
+				}
+		}
+		public function offsetSet($offset, $value)
+		{
+				$this->dataobject[$offset] = $value;
+		}
+		public function offsetUnset($offset)
+		{
+				unset($this->dataobject[$offset]);
+		}
+		
+		/**
+		 * on clone
+		 *
+		 *@name __clone
+		 *@accessp public
+		*/
+		public function __clone() {
+			$this->dataobject = clone $this->dataobject;
+			if($this->callers)
+				foreach($this->callers as $key => $caller) {
+					$this->callers[$key] = clone $caller;
+				}
+		}
+		
+		/**
+		 * checks if a file exists
+		 *
+		 *@name file_exists
+		 *@access protected
+		*/
+		protected static function file_exists($filename) {
+			return Resources::file_exists($filename);
+		}
+		
+		/**
+		 * gets current object
+		 *
+		 *@name doObject
+		 *@access public
+		*/
+		public function doObject() {
+			return $this;
+		}
+		
+		/**
+		 * checks if method can call
+		 *@name __cancall
+		 *@param string - name
+		*/
+		public function __cancall($name)
+		{
+				if(parent::method_exists($this->class, $name))
+				{
+						return true;
+				} else if(parent::method_exists($this->class, "_" . $name))
+				{
+						return true;
+				} else
+				{
+						if(Object::method_exists($this->dataobject, $name))
+						{
+								return true;
+						} else
+						{
+								return false;
+						}
+				}
+		}
+			
+		/**
+		 * __call-access-layer
+		 *@name __call
+		 *@access public
+		 *@param name
+		 *@param args
+		*/
+		public function __call($name,$args)
+		{
+				if(Object::method_exists($this->class, $name))
+				{
+					if(method_exists($this->class, $name))
+						return call_user_func_array(array("parent", $name), $args);
+					else
+						return call_user_func_array(array("parent", "__call"), array($name, $args));
+				} else if(Object::method_exists($this->class, "_" . $name))
+				{
+					return call_user_func_array(array($this, "_" . $name), $args);
+				} else if(isset($this->callers[strtolower($name)])) {
+					$this->callers[strtolower($name)]->dataobject->convertDefault = null;
+					return $this->callers[strtolower($name)];
+				} else {
+						if(Object::method_exists($this->dataobject, $name))
+						{
+								return call_user_func_array(array($this->dataobject, $name), $args);
+						} else
+						{
+								return false;
+						}
+				}
+		}
+		
 }
 /**
  * tpl-cacher
