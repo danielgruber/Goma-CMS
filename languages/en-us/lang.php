@@ -579,6 +579,11 @@ $lang = array(
 	
 	"useSSL"				=> "use SSL",
 	"useSSL_info"			=> "You should only use SSL if the Server supports SSL and you've got a SSL-certificate.",
-	"useSSL_unsupported"	=> "To activate SSL visit this page via SSL: <a href='\$link'>Settings via SSL</a>"
-
+	"useSSL_unsupported"	=> "To activate SSL visit this page via SSL: <a href='\$link'>Settings via SSL</a>",
+	
+	"push"					=> "Push",
+	"p_app_key"				=> "App-Key",
+	"p_app_secret"			=> "App-Secret",
+	"p_app_id"				=> "App-ID",
+	"push_info"				=> "Push-Daten von <a href='http://pusher.com'>pusher.com</a>."
 );

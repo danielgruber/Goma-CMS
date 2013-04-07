@@ -46,10 +46,12 @@ if(settingsController::get("useSSL") == 1) {
 		$port = ":" . $port;
 	}
 
-	if($http == "http" && !isset($_GET["forceNoSSL"])) {
+	if($http == "http" && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
 		header("Location: https://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 		exit;
-	} 
+	} else if(isset($_GET["forceNoSSL"])) {
+		$_SESSION["forceNoSSL"] = true;
+	}
 }
 
 Resources::$gzip = settingsController::get("gzip");
@@ -62,7 +64,10 @@ Core::setTheme(settingsController::Get("stpl"));
 Core::setHeader("keywords", settingsController::Get("meta_keywords"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
-//Core::setHeader("copyright", date("Y", NOW) . " - " . settingsController::get("titel"));
+
+if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
+	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
+}
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
 

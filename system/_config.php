@@ -23,7 +23,8 @@ Core::addRules(array(
 	'member/$id!'				 					=> "ProfileController",
 	"uploads"										=> "UploadController",
 	"gloader"										=> "Gloader",
-	"system/help"									=> "HelpController"
+	"system/help"									=> "HelpController",
+	"pusher"										=> "PushController"
 ), 10);
 
 Core::addRules(array(
