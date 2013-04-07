@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
-  * $Version 2.0.7
+  * last modified: 07.04.2013
+  * $Version 2.0.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -47,7 +47,7 @@ class contentController extends FrontedController
 		*/
 		public function pagetitle() {
 			// mark this id as active in mainbar
-			self::$activeids[] = $this->modelInst()->id;
+			array_unshift(self::$activeids, $this->modelInst()->id);
 			
 
 			if($this->modelInst()->meta_keywords) {
