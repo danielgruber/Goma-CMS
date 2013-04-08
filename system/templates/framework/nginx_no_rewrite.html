@@ -21,7 +21,7 @@
 					<p>Please define the following configuration:</p>
 					<pre style="background: #eee; padding: 10px;border: 1px solid #ccc;">
 if (!-f $request_filename) {
-        rewrite ^/(.*?)(\?|$)(.*)$ /system/application.php?$3 last;
+        rewrite (.*) /system/application.php last;
 }
 
 # we need this for file-uploads
