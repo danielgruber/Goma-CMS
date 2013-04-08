@@ -47,7 +47,7 @@ class contentController extends FrontedController
 		*/
 		public function pagetitle() {
 			// mark this id as active in mainbar
-			array_unshift(self::$activeids, $this->modelInst()->id);
+			array_push(self::$activeids, $this->modelInst()->id);
 			
 
 			if($this->modelInst()->meta_keywords) {
