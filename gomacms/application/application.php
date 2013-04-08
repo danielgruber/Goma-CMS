@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 03.04.2013
-  * $Version 1.1.5
+  * last modified: 08.04.2013
+  * $Version 1.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -34,7 +34,6 @@ settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
 
-// check for HTTPS
 if(settingsController::get("useSSL") == 1) {
 	// generate BASE_URI
 	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
@@ -55,7 +54,6 @@ if(settingsController::get("useSSL") == 1) {
 	}
 }
 
-// init Runtime-Vars
 Resources::$gzip = settingsController::get("gzip");
 RegisterExtension::$enabled = settingsController::get("register_enabled");
 RegisterExtension::$validateMail = settingsController::get("register_email");
@@ -71,8 +69,8 @@ if(settingsController::get("p_app_id") && settingsController::get("p_app_key") &
 	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
 }
 
-if(settingsController::get("google-site-verfication")) {
-    Core::setHeader("google-site-verification", settingsController::get("google-site-verfication"));
+if(settingsController::get("google_site_verfication")) {
+    Core::setHeader("google-site-verification", settingsController::get("google_site_verfication"));
 }
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
