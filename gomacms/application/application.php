@@ -34,6 +34,7 @@ settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
 
+// check for HTTPS
 if(settingsController::get("useSSL") == 1) {
 	// generate BASE_URI
 	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
@@ -54,6 +55,7 @@ if(settingsController::get("useSSL") == 1) {
 	}
 }
 
+// init Runtime-Vars
 Resources::$gzip = settingsController::get("gzip");
 RegisterExtension::$enabled = settingsController::get("register_enabled");
 RegisterExtension::$validateMail = settingsController::get("register_email");
@@ -67,6 +69,10 @@ Core::setHeader("robots", "index,follow");
 
 if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
 	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
+}
+
+if(settingsController::get("google-site-verfication")) {
+    Core::setHeader("google-site-verification", settingsController::get("google-site-verfication"));
 }
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
