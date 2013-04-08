@@ -7,7 +7,7 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   * last modified: 07.04.2013
-  * $Version 1.2.7
+  * $Version 1.2.6
 */
 
 class SettingsController extends Controller {
