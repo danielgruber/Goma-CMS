@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 11.03.2013
-  * $Version 2.1.7
+  * last modified: 08.04.2013
+  * $Version 2.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -46,7 +46,12 @@ class livecounter extends DataObject
 		 *@name index
 		*/
 		static $index = array(
-			"recordid" => false
+			"recordid" 	    => false,
+			"security"	    => array(
+                "name"      => "Security",
+                "fields"    => "ip, browser, last_modified",
+                "type"      => "INDEX"
+            )
 		);
 		
 		/**
@@ -125,7 +130,7 @@ class livecounterController extends Controller
 				$user_identifier = session_id();
 			}
 			
-			if(DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "created" => array(">", NOW - 60 * 60 * 1))) > 20) {
+			if(DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 20) {
 				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
 				$user_identifier = $ip;
