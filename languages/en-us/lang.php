@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 25.03.2013
+  * last modified: 08.04.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -581,9 +581,10 @@ $lang = array(
 	"useSSL_info"			=> "You should only use SSL if the Server supports SSL and you've got a SSL-certificate.",
 	"useSSL_unsupported"	=> "To activate SSL visit this page via SSL: <a href='\$link'>Settings via SSL</a>",
 	
-	"push"					=> "Push",
-	"p_app_key"				=> "App-Key",
-	"p_app_secret"			=> "App-Secret",
-	"p_app_id"				=> "App-ID",
-	"push_info"				=> 'API-information of <a target="_blank" href="http://pusher.com?utm_source=badge"><img src="http://pusher.com/images/badges/pusher_badge_light_1.png"></a>.'
+	"push"					    => "Push",
+	"p_app_key"				    => "App-Key",
+	"p_app_secret"			    => "App-Secret",
+	"p_app_id"				    => "App-ID",
+	"push_info"				    => 'API-information of <a target="_blank" href="http://pusher.com?utm_source=badge"><img src="http://pusher.com/images/badges/pusher_badge_light_1.png"></a>.',
+    "google-site-verification"  => "Google-Webmaster-Key"
 );
