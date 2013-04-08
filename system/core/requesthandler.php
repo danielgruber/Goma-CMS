@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.02.2013
-  * $Version: 2.2.6
+  * last modified: 08.04.2013
+  * $Version: 2.2.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -88,8 +88,11 @@ class RequestHandler extends Object
 		 *@name init
 		 *@access public
 		*/
-		public function Init()
+		public function Init($request = null)
 		{
+			if(isset($request))
+				$this->request = $request;
+			
 			if(!isset($this->namespace)) {
 				$this->namespace = $this->request->shiftedPart;
 				$this->originalNamespace = $this->namespace;
@@ -115,10 +118,9 @@ class RequestHandler extends Object
 				{
 						throwError(6, 'PHP-Error', 'Class '.get_class($this).' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
 				}
-				$this->request = $request;
 				
 				$this->subController = $subController;
-				$this->Init();			
+				$this->Init($request);			
 				
 				$class = $this->class;
 				

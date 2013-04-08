@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.03.2013
-  * $Version 2.2.1
+  * last modified: 08.04.2013
+  * $Version 2.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -130,9 +130,9 @@ class Controller extends RequestHandler
 		 *@name init
 		 *@access public
 		*/
-		public function Init()
+		public function Init($request = null)
 		{
-				parent::Init();
+				parent::Init($request);
 				
 				if($this->template == "")
 				{
@@ -148,6 +148,11 @@ class Controller extends RequestHandler
 						if(PROFILE) Profiler::unmark("livecounter");
 						$_SESSION["user_counted"] = TIME; 
 					}
+				}
+				
+				if($title = $this->PageTitle()) {
+					Core::setTitle($title);
+					Core::addBreadCrumb($title, $this->namespace . URLEND);
 				}
 		}
 		
@@ -264,15 +269,11 @@ class Controller extends RequestHandler
 		public function handleRequest($request, $subController = false)
 		{
 				$this->areaData = array();
+				
 				$data = $this->__output(parent::handleRequest($request, $subController));
 				
 				if($this->helpArticle()) {
 					Resources::addData("goma.help.initWithParams(".json_encode($this->helpArticle()).");");
-				}
-				
-				if($title = $this->PageTitle()) {
-					Core::setTitle($title);
-					Core::addBreadCrumb($title, $this->namespace . URLEND);
 				}
 				
 				if(Core::is_ajax() && is_object($data) && Object::method_exists($data,"render")) {
