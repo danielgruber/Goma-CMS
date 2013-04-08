@@ -69,8 +69,8 @@ if(settingsController::get("p_app_id") && settingsController::get("p_app_key") &
 	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
 }
 
-if(settingsController::get("google_site_verfication")) {
-    Core::setHeader("google-site-verification", settingsController::get("google_site_verfication"));
+if(settingsController::get("google_site_verification")) {
+    Core::setHeader("google-site-verification", settingsController::get("google_site_verification"));
 }
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));

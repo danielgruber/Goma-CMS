@@ -136,5 +136,5 @@
 	background-image: none;
 }
 .tree a.page span { background-image: url(../../../images/icons/fatcow-icons/16x16/file.png); }
-.tree a span { text-transform: capitalize;  background-repeat: no-repeat; background-position: 0 0; }
+.tree a span {  background-repeat: no-repeat; background-position: 0 0; }
 .tree .b, .tree .b a span { padding-left: 18px; display: block; } 
