@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
-  * $Version 2.0.7
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 08.04.2013
+  * $Version 2.0.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -128,9 +128,9 @@ class contentAdmin extends LeftAndMain
 	/**
 	 * init JavaScript-Files
 	*/
-	public function Init() {
+	public function Init($request = null) {
 		Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
-		return parent::Init();
+		return parent::Init($request);
 	}
 	
 	/**

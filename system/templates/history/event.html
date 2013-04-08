@@ -13,7 +13,7 @@
 					<a rel="dropdownDialog[left]" href="$namespace/restoreVersion/{$dbobject}/{$oldversionid}{URLEND}?redirect={$editurl.url()}" class="button">{$_lang_undo}</a>
 			<% END %>
 			
-			<% IF $compared AND $namespace AND DEV_MODE %>
+			<% IF $compared AND $namespace %>
 				<a rel="dropdownDialog[left]" href="$namespace/compareVersion/{$dbobject}/{$oldversionid}/{$newversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_compare}</a>
 			<% END %>
 		</div>
