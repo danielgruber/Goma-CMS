@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 07.04.2013
-  * $Version 1.2.6
+  * last modified: 08.04.2013
+  * $Version 1.2.7
 */
 
 class SettingsController extends Controller {
@@ -228,7 +228,7 @@ class metaSettings extends Newsettings {
 	static $db = array(
 		"meta_keywords"		        => "varchar(100)",
 		"meta_description"	        => "varchar(100)",
-        "google-site-verification"  => "varchar(100)"
+        "google_site_verification"  => "varchar(100)"
 	);
 	
 	public $tab = "{\$_lang_meta}";
@@ -241,7 +241,7 @@ class metaSettings extends Newsettings {
 		return array(
 			"meta_keywords"		        => lang("keywords"),
 			"meta_description"	        => lang("web_description", "Description of the Site"),
-            "google-site-verification"  => lang("google-site-verification", "Google-Webmaster-Key")
+            "google_site_verification"  => lang("google-site-verification", "Google-Webmaster-Key")
 		);
 	}
 }
