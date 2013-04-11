@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 08.04.2013
-  * $Version 1.1.6
+  * last modified: 11.04.2013
+  * $Version 1.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -70,7 +70,11 @@ if(settingsController::get("p_app_id") && settingsController::get("p_app_key") &
 }
 
 if(settingsController::get("google_site_verification")) {
-    Core::setHeader("google-site-verification", settingsController::get("google_site_verification"));
+	$code = settingsController::get("google_site_verification");
+	if(preg_match('/\<meta[^\>]+content\=\"([a-zA-Z0-9_\-]+)\"\s+\/\>/', $code, $matches)) {
+		$code = $matches[1];
+	}
+    Core::setHeader("google-site-verification", convert::raw2xml($code));
 }
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
