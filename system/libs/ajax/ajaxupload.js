@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 2.0.4
+  * last modified: 11.04.2013
+  * $Version 2.0.5
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -16,8 +16,10 @@ var AjaxUpload = function(DropZone, options) {
 	this.ajaxurl = location.href;
 	this["multiple"] = false;
 	this.id = randomString(10);
+	this.max_size = -1;
 	for(i in options) {
-		this[i] = options[i];
+		if(typeof options[i] != "undefined")
+			this[i] = options[i];
 	}
 	this.loading = false;
 	
@@ -172,6 +174,14 @@ AjaxUpload.prototype = {
 		
 	},
 	
+	failSize: function(index) {
+		
+	},
+	
+	failExt: function(index) {
+		
+	},
+	
 	/**
 	 * called on cancel
 	*/
@@ -274,6 +284,7 @@ AjaxUpload.prototype = {
 		var timeDiff = now - upload.downloadStartTime;
 		
 		this.browse.removeAttr("disabled");
+		this.placeBrowseHandler();
 		
 		this.queue[fileIndex].loading = false;
 		this.queue[fileIndex].loaded = true;
@@ -402,6 +413,7 @@ AjaxUpload.prototype = {
 		upload.currentProgress = 0;
 		upload.startData = 0;
 		upload.fileName = file.fileName;
+		upload.fileSize = file.fileSize;
 		
 		// add listeners
 		upload.addEventListener("progress", function(event){
@@ -439,10 +451,16 @@ AjaxUpload.prototype = {
 	processQueue: function() {
 		for(i in this.queue) {
 			if(!this.queue[i].loading && !this.queue[i].loaded) {
-				this.queue[i].loading = true;
-				this.queue[i].send();
-				this.uploadStarted(i, this.queue[i].upload);
+				if(this.max_size == -1 || typeof this.queue[i].upload.fileSize == "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
+					this.queue[i].loading = true;
+					this.queue[i].send();
+					this.uploadStarted(i, this.queue[i].upload);
+				} else {
+					this.abort(i);
+					this.failSize(i);
+				}
 			}
+			this.placeBrowseHandler();
 		}
 	},
 	
@@ -590,6 +608,7 @@ AjaxUpload.prototype = {
 		
 		var $form = $("#" + this.id + "_uploadForm");
 		$form.css({top: - 400, left: this.browse.offset().left});
+		this.browse.attr("disabled", "disabled");
 	},
 	
 	/**
@@ -616,6 +635,9 @@ AjaxUpload.prototype = {
 			if(typeof this.queue[fileIndex] != "undefined") {
 				this.queue[fileIndex].abort();
 				this.cancel(fileIndex);
+				this._complete(this, this.queue[fileIndex].upload, fileIndex);
+				this.queue[fileIndex].loading = false;
+				this.queue[fileIndex].loaded = true;
 			}
 		} 
 		

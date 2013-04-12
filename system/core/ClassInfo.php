@@ -573,6 +573,10 @@ class ClassInfo extends Object
 							}
 						}
 						
+						if(!file_exists(ROOT . "system/temp/autoloader_exclude")) {
+							@file_put_contents(ROOT . "system/temp/autoloader_exclude", 1);
+						}
+						
 						@chmod(APP_FOLDER . "temp/", 0777);
 						if(!is_dir(APP_FOLDER . "temp/")) {
 							mkdir(APP_FOLDER . "temp/", 0777, true);
@@ -584,6 +588,10 @@ class ClassInfo extends Object
 								$permissionsValid = false;
 								$permissionsFalse .= '<li>./'.APPLICATION.'/temp/</li>';
 							}
+						}
+						
+						if(!file_exists(APP_FOLDER . "temp/autoloader_exclude")) {
+							@file_put_contents(APP_FOLDER . "temp/autoloader_exclude", 1);
 						}
 						
 						if(!is_dir(APP_FOLDER . LOG_FOLDER)) {

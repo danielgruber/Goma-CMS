@@ -6,12 +6,15 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.03.2012
-  * $Version 1.1
+  * last modified: 11.04.2012
+  * $Version 1.1.1
 */
 
 
-function FileUpload(formelement, url) {
+function FileUpload(formelement, url, size) {
+	
+	preloadLang(["files.filesize_failure"]);
+	
 	var $this = this;
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);
@@ -29,6 +32,8 @@ function FileUpload(formelement, url) {
 		url: url + "/frameUpload/",
 		ajaxurl: url + "/ajaxUpload/",
 		browse: this.browse,
+		
+		max_size: size,
 		
 		// events
 		uploadStarted: function() {
@@ -112,6 +117,10 @@ function FileUpload(formelement, url) {
 				}
 			}
 		},
+		
+		failSize: function(i) {
+			$this.infoZone.html('<div class="error">'+lang("files.filesize_failure")+'</div>');
+		}
 		
 	});
 	

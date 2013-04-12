@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 03.04.2013
-  * $Version 1.5.11
+  * last modified: 13.04.2013
+  * $Version 1.5.12
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -545,6 +545,7 @@ abstract class g_SoftwareType {
 			$url .= "/" . $version;
 		}
 		
+		$url .= "/";
 		$url .= "?framework=" . urlencode(GOMA_VERSION . "-" . BUILD_VERSION);
 		$url .= "&current=".urlencode($currVersion);
 		$url .= "&base_uri=" . urlencode(BASE_URI);

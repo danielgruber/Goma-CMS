@@ -319,7 +319,7 @@ class FileUpload extends FormField
 			gloader::load("ajaxupload");
 			Resources::add("system/form/FileUpload.js", "js", "tpl");
 			Resources::add("FileUpload.css", "css");
-			Resources::addJS("$(function(){new FileUpload($('#".$this->divID()."'), '".$this->externalURL()."');});");
+			Resources::addJS("$(function(){new FileUpload($('#".$this->divID()."'), '".$this->externalURL()."', ".var_export($this->max_filesize, true).");});");
 			// modify form for right datatype
 			$this->form()->form->enctype = "multipart/form-data";
 			

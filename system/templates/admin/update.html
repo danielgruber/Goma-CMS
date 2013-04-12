@@ -1,8 +1,6 @@
-<% IF NOT $storeAvailable %>
-	<div id="storeUnavailable" class="notice">
-		<% lang("update_connection_failed") %>
-	</div>
-<% END %>
+<div id="storeUnavailable" class="notice">
+	<% lang("update_connection_failed") %>
+</div>
 
 <% gload("htmllib") %>
 <script type="text/javascript">
@@ -67,7 +65,7 @@
 			}
 			
 			for(name in u) {
-				var url = "https://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
+				var url = "https://goma-cms.org/apps/api/v1/json/app/" + name + "/?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
 				$.ajax({
 					url: url,
 					dataType: "jsonp",
@@ -80,7 +78,7 @@
 							results.push(null);
 						}
 					},
-					error: function() {
+					error: function(jqXHR, textStatus, errorThrown) {
 						$("#storeUnavailable").slideDown(0);
 					}
 				});

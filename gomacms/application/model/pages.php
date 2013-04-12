@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 10.03.2013
-  * $Version 2.5.5
+  * last modified: 11.04.2013
+  * $Version 2.5.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -553,35 +553,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		}
 		
 		//!Validators
-		
-		
-		/**
-		 * validates the path
-		 *
-		 *@name validatePath
-		 *@access public
-		*/
-		public function validatePath($data)
-		{
-				$fullpath = "";
-				$path = $data["path"];
-				$parentid = $data["parentid"];
-				
-				if($data["parenttype"] == "root")
-				{
-						$parentid = 0;
-				}
-				
-				if(isset($data["id"]))
-				{
-						$add = " AND pages.id != '".convert::raw2text($data["id"])."'";
-				} else
-				{
-						$add = "";
-				}
-				
-				return true;
-		}
 
 		/**
 		 * validates the field parentid
@@ -640,7 +611,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$filename = $data["filename"];
 			$parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
 			if(isset($obj->form->result["recordid"]))
-				if(DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."' AND pages.recordid != '".$obj->form->result["recordid"]."'") > 0) {
+				if($filename == "index" || DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."' AND pages.recordid != '".$obj->form->result["recordid"]."'") > 0) {
 					return lang("site_exists", "The page with this filename already exists.");
 				} else {
 					return true;

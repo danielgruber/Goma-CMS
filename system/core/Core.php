@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.03.2013
-  * $Version 3.3.30
+  * last modified: 12.04.2013
+  * $Version 3.3.31
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -457,7 +457,7 @@ class Core extends object
 				clearstatcache();
 				
 				foreach(scandir($dir) as $file) {
-					if(substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200)
+					if((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude")
 						continue;
 					
 					
@@ -484,7 +484,7 @@ class Core extends object
 				
 				// empty framework cache
 				foreach(scandir(ROOT . "system/temp/") as $file) {
-					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove"))
+					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove") && $file != "autoloader_exclude")
 						FileSystem::delete (ROOT . "system/temp/" . $file);
 				}
 				

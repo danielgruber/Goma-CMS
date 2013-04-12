@@ -40,16 +40,20 @@ class UpdateController extends adminController {
 	*/
 	public function index() {
 		$view = new ViewAccessableData();
-		G_SoftwareType::forceLiveDB();
-		$updates = G_SoftwareType::listUpdatePackages();
-		foreach($updates as $name => $data) {
-			$data["secret"] = randomString(20);
-			if(!isset($data["AppStore"])) {
-				$_SESSION["updates"][$data["file"]] = $data["secret"];
-			} else {
-				$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+		if(isset($_GET["noJS"])) {
+			G_SoftwareType::forceLiveDB();
+			$updates = G_SoftwareType::listUpdatePackages();
+			foreach($updates as $name => $data) {
+				$data["secret"] = randomString(20);
+				if(!isset($data["AppStore"])) {
+					$_SESSION["updates"][$data["file"]] = $data["secret"];
+				} else {
+					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+				}
+				$updates[$name] = $data;
 			}
-			$updates[$name] = $data;
+		} else {
+			$updates = array();
 		}
 		
 		$updates = new DataSet($updates);
