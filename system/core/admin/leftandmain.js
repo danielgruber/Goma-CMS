@@ -275,7 +275,7 @@ var LaM_type_timeout;
 			});
 			
 			$.ajax({
-				url: adminURI + "/updateTree/"+marked_node+"/?" + params,
+				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/?" + params,
 				success: function(html, code, jqXHR) {
 					
 					renderResponseTo(html, treewrapper, jqXHR);
@@ -300,7 +300,7 @@ var LaM_type_timeout;
 			
 			// if search
 			$.ajax({
-				url: adminURI + "/updateTree/"+marked_node+"/" + escape(value),
+				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/" + escape(value),
 				success: function(html, code, jqXHR) {
 					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR);
 					tree_bind($this.parents(".classtree").find(".treewrapper").find(".tree"));
@@ -363,7 +363,7 @@ var LaM_type_timeout;
 						$(s).find(" > li.last").removeClass("last");
 						$(s).find(" > li:last").addClass("last");
 						$.ajax({
-							url: adminURI + "/savesort/" + marked_node + "/",
+							url: BASE_SCRIPT + adminURI + "/savesort/" + marked_node + "/",
 							data: $(s).sortable('serialize', {key: "treenode[]"}),
 							type: 'post',
 							error: function(e)

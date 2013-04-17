@@ -117,6 +117,25 @@ if(typeof goma.AddOnStore == "undefined") {
 			
 			return {
 				"version": "1.0",
+				appStoreMainContent: null,
+				appStoreInstallUrl: null,
+				
+				/**
+				 * sets the ENV of the app-store
+				 *
+				 *@name setENV
+				*/
+				setENV: function(content, url) {
+					if($(content).length > 0)
+						goma.AddOnStore.appStoreMainContent = $(content);
+					
+					if(url)
+						goma.AddOnStore.appStoreInstallUrl = url;
+				}
+				
+				/**
+				 * gets data via ajax from the goma-app-server
+				*/
 				ajax: function(url, options) {
 					if(typeof options != "undefined") {
 						options.url = url;
@@ -129,7 +148,12 @@ if(typeof goma.AddOnStore == "undefined") {
 					
 					return $.ajax(options);
 				},
+				
+				/**
+				 * gets data via ajax and writes it to a given destination
+				*/
 				uiAjax: function(destination, options, unload) {
+					destination = ($(destination).length > 0) ? $(destination) : $(goma.AddOnStore.appStoreMainContent);
 					if(typeof options != "undefined") {
 						options.url = url;
 					} else {
@@ -139,13 +163,37 @@ if(typeof goma.AddOnStore == "undefined") {
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
 					options.url = "https://goma-cms.org/apps/" + options.url;
 					
-					return goma.ui.ajax(options);
+					return goma.ui.ajax(destination, options, unload);
 				},
+				
+				/**
+				 * registers a handler if app-store is ready
+				*/
 				onReady: function(fn) {
 					if(goma.AddOnStore.active == true) {
 						fn();
 					} else {
 						readyQueue.push(fn);
+					}
+				}
+				
+				/**
+				 * parses appstore-dom
+				 *
+				 *@name parse
+				*/
+				parse: function(dom) {
+					if($(dom).length > 0) {
+						var r = $(dom);
+						if(goma.AddOnStore.appStoreInstallUrl)
+							r.find("a").each(function(){
+								if($(this).attr("href").match(/\.gfs$/)) {
+									if(goma.AddOnStore.appStoreInstallUrl.indexOf("?"))
+										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "&download=" + escape($(this).attr("href")));
+									else
+										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "?download=" + escape($(this).attr("href")));
+								}
+							});
 					}
 				}
 			};
