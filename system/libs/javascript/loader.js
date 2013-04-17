@@ -408,7 +408,7 @@ if(typeof goma.ui == "undefined") {
 											// patch uris
 											var base = file.substring(0, file.lastIndexOf("/"));
 											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + root_path + base + '/$1)');
+											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + base + '/$1)');
 											
 											goma.ui.CSSFiles[file] = css;
 											goma.ui.CSSIncluded[file] = true;
