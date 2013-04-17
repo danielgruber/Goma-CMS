@@ -325,13 +325,13 @@ class admin extends ViewAccessableData implements PermProvider
 		public function TooManyLogs() {
 			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
 				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
-				if($count > 60) {
-					Core::CleanUpLog(30);
+				if($count > 45) {
+					Core::CleanUpLog(45);
 				
 					AddContent::addSuccess(lang("flush_log_success"));
 				}
 				
-				return ($count > 45);
+				return false;
 			}
 			
 			return false;

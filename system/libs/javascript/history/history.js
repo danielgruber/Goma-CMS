@@ -69,8 +69,8 @@ var HistoryLib = {
 		}, HistoryLib.interval + 50);
 	},
 	
-	Init: function() {
-		if(typeof window.history.pushState == "function") {
+	Init: function(mode) {
+		if(typeof window.history.pushState == "function" && mode != "hash") {
 			window.onpopstate = function(event) {
 				if(HistoryLib.lastPush) {
 					HistoryLib.lastPush = false;

@@ -408,7 +408,7 @@ if(typeof goma.ui == "undefined") {
 											// patch uris
 											var base = file.substring(0, file.lastIndexOf("/"));
 											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + root_path + base + '/$1)');
 											
 											goma.ui.CSSFiles[file] = css;
 											goma.ui.CSSIncluded[file] = true;
@@ -453,7 +453,8 @@ if(typeof goma.ui == "undefined") {
 						if(file != "") {
 							
 							// check for internal cache
-							if(typeof goma.ui.JSFiles[file] == "undefined") {
+							// we don't load modenizr, because it causes trouble sometimes if you load it via AJAX
+							if(typeof goma.ui.JSFiles[file] == "undefined" && !file.match(/modernizr\.js/)) {
 								
 								// we create a new scope for this to don't have problems with overwriting vars and then callbacking with false ones
 								return (function(file){
@@ -486,7 +487,7 @@ if(typeof goma.ui == "undefined") {
 				deferred.progress(function(data){
 					for(var i in jsfiles) {
 						var file = jsfiles[i];
-						if((!run_regexp.test(file) && goma.ui.JSIncluded[file] !== true) || load_alwaysLoad.test(file)) {
+						if(((!run_regexp.test(file) && goma.ui.JSIncluded[file] !== true) || load_alwaysLoad.test(file)) && typeof goma.ui.JSFiles[file] != "undefined") {
 							goma.ui.JSIncluded[file] = true;
 							eval_global(goma.ui.JSFiles[file]);
 						}

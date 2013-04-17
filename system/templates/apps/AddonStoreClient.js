@@ -13,6 +13,9 @@ if(typeof goma.AddOnStore == "undefined") {
 			throw "Could not connect to goma-server. PostMessage not supported";
 		} else {
 			
+			var ext_regexp = /https?\:\/\//;
+			var appstore_prefix = "https://goma-cms.org/apps/";
+			
 			var ajaxRequest = [];
 			
 			/**
@@ -80,15 +83,6 @@ if(typeof goma.AddOnStore == "undefined") {
 	            window.addEventListener('message', ReactToMessage, true);
 			});
 			
-			function sleep(milliseconds) {
-				  var start = new Date().getTime();
-				  	for (var i = 0; i < 1e7; i++) {
-				    	if ((new Date().getTime() - start) > milliseconds){
-					    	break;
-					    }
-				  }
-			}
-			
 			
 			$.ajaxTransport('+*', function(options, originalOptions, jqXHR) {
 				if(goma.AddOnStore.active && (options.url.match(/^https\:\/\/goma\-cms\.org\/apps/i) || (options.url.match(/^https\:\/\/goma\-cms\.org\//) && options.url.match(/\.(css|js|gfs)/i)))) {
@@ -126,12 +120,13 @@ if(typeof goma.AddOnStore == "undefined") {
 				 *@name setENV
 				*/
 				setENV: function(content, url) {
-					if($(content).length > 0)
+					if($(content).length > 0) {
 						goma.AddOnStore.appStoreMainContent = $(content);
+					}
 					
 					if(url)
 						goma.AddOnStore.appStoreInstallUrl = url;
-				}
+				},
 				
 				/**
 				 * gets data via ajax from the goma-app-server
@@ -154,16 +149,13 @@ if(typeof goma.AddOnStore == "undefined") {
 				*/
 				uiAjax: function(destination, options, unload) {
 					destination = ($(destination).length > 0) ? $(destination) : $(goma.AddOnStore.appStoreMainContent);
-					if(typeof options != "undefined") {
-						options.url = url;
-					} else {
-						options = url;
-					}
 					
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
-					options.url = "https://goma-cms.org/apps/" + options.url;
+					options.url = appstore_prefix + options.url;
 					
-					return goma.ui.ajax(destination, options, unload);
+					return goma.ui.ajax(destination, options, unload).done(function(){
+						goma.AddOnStore.parse($(destination));
+					});
 				},
 				
 				/**
@@ -175,7 +167,7 @@ if(typeof goma.AddOnStore == "undefined") {
 					} else {
 						readyQueue.push(fn);
 					}
-				}
+				},
 				
 				/**
 				 * parses appstore-dom
@@ -192,8 +184,49 @@ if(typeof goma.AddOnStore == "undefined") {
 										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "&download=" + escape($(this).attr("href")));
 									else
 										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "?download=" + escape($(this).attr("href")));
+								} else if(!ext_regexp.test($(this).attr("href")) || $(this).attr("href").substring(0, appstore_prefix.length) == appstore_prefix) {
+									$(this).click(function(){
+										var url = $(this).attr("href");
+										if(url.substring(0, 5) == "apps/")
+											url = url.substring(5);
+										goma.AddOnStore.uiAjax(null, {
+											url: url
+										});
+										
+										return false;
+									});
 								}
 							});
+						
+						r.find("img").each(function(){
+							if(!ext_regexp.test($(this).attr("src"))) {
+								$(this).attr("src", "https://goma-cms.org/" + $(this).attr("src"));
+							}
+						});
+						
+						r.find("form").each(function(){
+							$(this).find("input[type=submit], input[type=image]").click(function(){
+								if(!$(this).hasClass("default_submit")) {
+									var data = $(this).parents("form").serializeArray();
+									data[$(this).attr("name")] = $(this).attr("value");
+									
+									var action = $(this).parents("form").attr("action");
+									if(!ext_regexp.test(action) || action.substring(0, appstore_prefix.length) == appstore_prefix) {
+										if(action.substring(0, 5) == "apps/")
+											action = action.substring(5);
+										
+										goma.AddOnStore.uiAjax(null, {
+											url: action,
+											type: $(this).parents("form").attr("method"),
+											data: data
+										});
+									} else {
+										return true;
+									}
+								}
+								return false;
+							});
+						});
 					}
 				}
 			};

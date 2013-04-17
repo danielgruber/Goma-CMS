@@ -4,15 +4,13 @@
 
 <script type="text/javascript">
 	goma.AddOnStore.onReady(function(){
-		goma.AddOnStore.ajax({
+		goma.AddOnStore.setENV($("#appStoreArea"), "admin/update/upload{URLEND}");
+		goma.AddOnStore.uiAjax(null, {
 			type: "post",
 			url: "updates",
 			data: {"updates": $updatables_json }
 		}).done(function(html, textStatus, jqXHR){
 			$("#updates > h1 > .num").text(jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0);
-			goma.ui.renderResponse(html, jqXHR, $("#appStoreArea")).done(function(){
-				$("#appStoreArea").html(html);
-			});
 		});
 	});
 </script>
