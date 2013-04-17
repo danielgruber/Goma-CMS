@@ -955,6 +955,6 @@ class HTMLText extends Varchar {
 			}
 		}
 		
-		return $value;
+		return (string) $value;
 	}
 }

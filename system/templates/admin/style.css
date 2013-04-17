@@ -1205,51 +1205,21 @@ form h2 {
 	padding-bottom: 4px;
 	padding-left: 8px;
 }
-#updates > .no_updates {
-	margin: 0 auto;
-	padding: 150px 0;
-	border-top: 1px solid #ddd;
-	text-align: center;
-	font-size: 12pt;
-	color: #999;
-}
 #updates .upload {
 	float: right;
 	margin-top: -10px;
 }
-#updates .update {
-	border-bottom: 1px solid #ddd;
-	padding: 10px;
-}
-#updates .update.grey {
-	background: #eee;
-}
-#updates .update.first {
+#appStoreArea {
+	margin: 5px 0;
 	border-top: 1px solid #ddd;
 }
-#updates .update .icon, #updates .update .description, #updates .update .info {
-	float: left;
-}
-#updates .update .info {
-	margin-left: 15px;
-}
-#updates .update .description {
-	margin-left: 50px;
-	padding-top: 30px;
-}
-#updates .update .info {
-	color: #555;
-	font-size: 10pt;
-}
-#updates .update .info p {
-	margin: 7px 0;
-}
-#updates .update .info > h1 {
-	font-size: 12pt;
-	color: #555;
-}
-#updates .update .button_right {
-	float: right;
+#appStoreArea .loading {
+	display: block;
+	padding: 150px 0;
+	margin: 0 auto;
+	color: #999;
+	font-weight: bold;
+	text-align: center;
 }
 
 .page > span {
@@ -1257,6 +1227,9 @@ form h2 {
 }
 #visit_webpage .page {
 	font-style: italic;
+}
+.weblink .pageTitle {
+	color: #555;
 }
 
 @media print {

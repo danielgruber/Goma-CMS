@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
+  * last modified: 17.04.2013
 */
 
 self.dropdownDialogs = [];
@@ -560,65 +560,70 @@ self.dropdownDialogs = [];
 				type: "get",
 				// data should always be html as basic, we can interpret layteron
 				dataType: "html"
-			}).done(function(html, textStatus, jqXHR){
-				
+			}).done(function(h, s, j){
 				// run code
 				try {
-					LoadAjaxResources(jqXHR);
-					var content_type = jqXHR.getResponseHeader("content-type");
-					
-					// if it is json-data
-					if(content_type == "text/x-json") {
-						try {
-							var data = parseJSON(html);
-							var html = data.content;
-							if(data.position != null) {
-								that.position = data.position;
-							}
-							if(data.closeButton != null) {
-								that.closeButton = data.closeButton;
-							}
-							that.setContent(html);
-							
-							if(typeof data.exec != "undefined") {
-								
-								// execution should not break json-data before
-								try {
-									var method;
-									if (window.execScript) {
-									  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
-									} else
-									  	method = eval('(function(){' + data.exec + '})');
-									
-									method.call(that);
-								} catch(e) {
-									alert(e);
+					goma.ui.loadResources(j).done(function(){
+						var t = j.getResponseHeader("content-type");
+						
+						// we have to set it new, because of scoping issues
+						var h = j.responseText;
+						
+						// if it is json-data
+						if(t == "text/x-json") {
+							try {
+								var data = parseJSON(h);
+								var h = data.content;
+								if(data.position != null) {
+									that.position = data.position;
 								}
+								if(data.closeButton != null) {
+									that.closeButton = data.closeButton;
+								}
+								that.setContent(h);
+								
+								if(typeof data.exec != "undefined") {
+									
+									// execution should not break json-data before
+									try {
+										var method;
+										if (window.execScript) {
+										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+										} else
+										  	method = eval('(function(){' + data.exec + '})');
+										
+										method.call(that);
+									} catch(e) {
+										alert(e);
+									}
+								}
+								
+								
+							} catch(e) {
+								alert(e);
+								that.setContent("error parsing JSON");
 							}
+						
+						// if it is javascript
+						} else if(t == "text/javascript") {
 							
+							// execution for IE and all other Browsers
+							var method;
+							if (window.execScript)
+							  	window.execScript('method = ' + 'function(' + h + ')',''); // execScript doesn’t return anything
+							else
+							  	method = eval('(function(){' + h + '});');
+							method.call(this);
 							
-						} catch(e) {
-							alert(e);
-							that.setContent("error parsing JSON");
+						} else {
+							// html just must be set to Dialog
+							that.setContent(h);
 						}
-					
-					// if it is javascript
-					} else if(content_type == "text/javascript") {
 						
-						// execution for IE and all other Browsers
-						var method;
-						if (window.execScript)
-						  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-						else
-						  	method = eval('(function(){' + html + '});');
-						method.call(this);
-						
-					} else {
-						// html just must be set to Dialog
-						that.setContent(html);
-					}
-					
-					RunAjaxResources(jqXHR);
+						RunAjaxResources(j);
+					}).fail(function(){
+						that.setContent('Error while fetching data from the server: <br /> Failed to fetch data from the server.');
+					});
 				} catch(e) {
 					alert(e);
 					location.href = oldURI;

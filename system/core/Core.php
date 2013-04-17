@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 12.04.2013
-  * $Version 3.3.31
+  * last modified: 15.04.2013
+  * $Version 3.3.32
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -198,6 +198,9 @@ class Core extends object
 			
 			Resources::add("default.css", "css", "main");
 			Resources::add("goma_default.css", "css", "main");
+			
+			HTTPResponse::setHeader("x-base-uri", BASE_URI);
+			HTTPResponse::setHeader("x-root-path", ROOT_PATH);
 			
 			if(PROFILE) Profiler::unmark("Core::Init");
 		}

@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.03.2013
-  * Version: 1.3.6
+  * last modified: 15.04.2013
+  * Version: 1.3.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -438,7 +438,7 @@ class Resources extends Object {
 			// write data to file
 			$datajs = implode("\n", self::$resources_data);
 			FileSystem::Write(ROOT . CACHE_DIRECTORY . "/data.".md5($datajs).".js",$datajs);
-			$js = array_merge(array(ROOT_PATH . CACHE_DIRECTORY . "/data.".md5($datajs).".js"), $js);
+			$js = array_merge(array(CACHE_DIRECTORY . "/data.".md5($datajs).".js"), $js);
 			return array("css"	=> $css, "js"	=> $js);
 		} else {
 			// generate data

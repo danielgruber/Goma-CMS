@@ -1,131 +1,32 @@
-<div id="storeUnavailable" class="notice">
+<div id="storeUnavailable" style="display: none;" class="notice">
 	<% lang("update_connection_failed") %>
 </div>
 
-<% gload("htmllib") %>
 <script type="text/javascript">
-	// <![CDATA[
-		$(function(){
-			var u = {$updatables_json};
-			var uCount = $updatables.count();
-			var results = [];
-			
-			var checkResult = function() {
-				if(uCount == results.length) {
-					// render it
-					var a = $updates.count ;
-					for(i in results) {
-						if(results[i] != null) {
-							a++;
-							var record = results[i].response;
-							$("#updates").append('<div class="update" id="update_'+record.name+'"></div>');
-							$("#updates .update:last-child").css("display", "none");
-							if(a == 1) {
-								$("#updates .update:last-child").addClass("first");
-							}
-							
-							if(a % 2 == 0) {
-								$("#updates .update:last-child").addClass("grey");
-							}
-							
-							$("#updates .update:last-child").html('<div class="icon"><img src="'+record.icon+'" alt="" width="64" /></div><div class="button_right"><a href="{BASE_SCRIPT}admin/update/upload/?download='+escape(record.download)+'" class="button">{$_lang_update_install}</a></div><div class="info"><h1></h1><p>'+record.autor+'</p><p>{$_lang_version} '+record.version+'</p></div><div class="description"></div><div class="clear"></div>');
-							
-							$("#updates .update:last-child .info h1").text(record.title);
-							$("#updates .update:last-child .description").html(nl2br(htmlentities(record.changelog)));
-							
-							$("#updates .update:last-child").slideDown("fast");
-						}
-					}
-					
-					// no new updates
-					if(a == 0) {
-						$("#updates .no_updates").html('<% lang("update_no_available") %>');
-					} else {
-						loading.remove();
-					}
-					
-					if(a == 1) {
-						$("#updates > h1").html('<span class="num">1</span> {$_lang_update}');
-					} else {
-						$("#updates > h1 > .num").text(a);
-					}
-					
-					// update number
-				} else {
-					setTimeout(checkResult, 1000);
-				}
-			}
-			
-			if($("#updates .no_updates").length > 0) {
-				$("#updates .no_updates").html('<img src="images/16x16/loading.gif" height="14" width="14" alt="" /> <% lang("update_checking") %>');
-				var loading = $("#updates .no_updates");
-			} else {
-				$("#updates > h1").prepend('<img src="images/16x16/loading.gif" height="14" width="14" alt="" />');
-				var loading = $("#updates > h1 > img");
-			}
-			
-			for(name in u) {
-				var url = "https://goma-cms.org/apps/api/v1/json/app/" + name + "/?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
-				$.ajax({
-					url: url,
-					dataType: "jsonp",
-					noRequestTrack: true,
-					success: function(object) {
-						$("#storeUnavailable").slideUp(0);
-						if(object.name && $("#update_" + object.name).length == 0) {
-							results.push({response: object, current_version: u[name]["version"], webversion: object.version});
-						} else {
-							results.push(null);
-						}
-					},
-					error: function(jqXHR, textStatus, errorThrown) {
-						$("#storeUnavailable").slideDown(0);
-					}
-				});
-			}
-			
-			$("#storeUnavailable").slideUp(0);
-			
-			setTimeout(checkResult, 1000);
+	goma.AddOnStore.onReady(function(){
+		goma.AddOnStore.ajax({
+			type: "post",
+			url: "updates",
+			data: {"updates": $updatables_json }
+		}).done(function(html, textStatus, jqXHR){
+			$("#updates > h1 > .num").text(jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0);
+			goma.ui.renderResponse(html, jqXHR, $("#appStoreArea")).done(function(){
+				$("#appStoreArea").html(html);
+			});
 		});
-	// ]]>
+	});
 </script>
+
+<% INCLUDE_JS_MAIN "apps/AddonStoreClient.js" %>
+
+<% gload("htmllib") %>
+
 <div id="updates">
 	<div class="upload">
 		<a class="button" href="{BASE_SCRIPT}admin/update/upload/"><% lang("update_upload", "Upload update-file") %></a>
 	</div>
 	<h1><% IF $updates.count() = 1 %> <span class="num">1</span> {$_lang_update} <% ELSE %> <span class="num">$updates.count</span> {$_lang_updates} <% END %></h1>
-	<% IF $updates %>
-		<% CONTROL updates() AS $update %>
-			<% IF $update.first %>
-				<div class="update first" id="update_{$update.name}" data-version="{$update.version}">
-			<% ELSE IF NOT $update.white %>
-				<div class="update grey" id="update_{$update.name}" data-version="{$update.version}">
-			<% ELSE %>
-				<div class="update" id="update_{$update.name}" data-version="{$update.version}">
-			<% END %>
-				<div class="icon">
-					<% IF $update.icon %>
-						<img src="{$update.icon}" alt="" width="64" />
-					<% END %>
-				</div>
-				<div class="button_right">
-					<a href="{BASE_SCRIPT}admin/update/showPackageInfo/{$update.secret}" class="button">{$_lang_update_install}</a>
-				</div>
-				<div class="info">
-					<h1>$update.title</h1>
-					<p>$update.appinfo.autor</p>
-					<p>{$_lang_version} $update.version</p>
-				</div>
-				<div class="description">
-					{$update.changelog.textLines()}
-				</div>
-				<div class="clear"></div>
-			</div>
-		<% ENDCONTROL %>
-	<% ELSE %>
-		<div class="no_updates">
-			<% lang("update_no_available") %>
-		</div>
-	<% END %>
+	<div id="appStoreArea">
+		<span class="loading"><img src="images/16x16/loading.gif" alt="" /> {$_lang_loading}</span>
+	</div>
 </div>

@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
-  * $Version 2.0.2
+  * last modified: 17.04.2013
+  * $Version 2.1
 */
 
 // goma-framework
@@ -25,6 +25,7 @@ if(typeof goma.ui == "undefined") {
 	
 		var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
 		var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
+		var http_regexp = /https?\:\/\//;
 		
 		/**
 		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
@@ -51,10 +52,6 @@ if(typeof goma.ui == "undefined") {
 					fn();
 			}
 		};
-		
-		var CSSLoaded = [];
-		var CSSIncluded = [];
-		var JSLoaded = [];
 		
 		// retina support
 		var RetinaReplace = function() {
@@ -105,6 +102,11 @@ if(typeof goma.ui == "undefined") {
 		// build module
 		return {
 			
+			JSFiles: [],
+			JSIncluded: [],
+			CSSFiles: [],
+			CSSIncluded: [],
+			
 			/**
 			 * defines if we are in backend
 			*/
@@ -131,27 +133,36 @@ if(typeof goma.ui == "undefined") {
 			ajax: function(destination, options, unload) {
 				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
 				
+				var deferred = $.Deferred();
 				
 				if(unload !== false) {
 					var data = goma.ui.fireUnloadEvents(node);
 					if(typeof data == "string") {
-						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
-							return false;
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
+							setTimeout(function(){
+								deferred.reject("unload");
+							}, 1);
+							return deferred.promise();
+						}
 					}
 				}
 				
-				return $.ajax(options).done(function(r, c, a){
-					goma.ui.renderResponse(r, a, node, undefined, false);
+				$.ajax(options).done(function(r, c, a){
+					goma.ui.renderResponse(r, a, node, undefined, false).done(deferred.resolve).fail(deferred.reject);
 				}).fail(function(a){
 					// try find out why it has failed
-					if(jqXHR.textStatus == "timeout") {
+					if(a.textStatus == "timeout") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
-					} else if(jqXHR.textStatus == "abort") {
+					} else if(a.textStatus == "abort") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The request was aborted.</div>');
 					} else {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
 					}
+					
+					deferred.reject(a);
 				});
+				
+				return deferred.promise();
 			},
 			
 			/**
@@ -250,51 +261,64 @@ if(typeof goma.ui == "undefined") {
 			 *@access public
 			*/
 			renderResponse: function(html, xhr, node, object, checkUnload) {
+				var deferred = $.Deferred();
+				
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
 				
 				if(checkUnload !== false) {
 					var data = goma.ui.fireUnloadEvents(node);
 					if(typeof data == "string") {
-						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
-							return false;
-					}
-				}
-				
-				LoadAjaxResources(xhr);
-			
-				if(xhr != null) {
-					var content_type = xhr.getResponseHeader("content-type");
-					if(content_type == "text/javascript") {
-						if(typeof object != "undefined") {
-							var method;
-							if (window.execScript)
-							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-							else
-						  		method = eval('(function(){' + html + '});');
-						  	
-							method.call(object);
-						} else {
-							eval_global(html);
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
+							setTimeout(function(){
+								deferred.reject("unload");
+							}, 1);
+							return deferred.promise();
 						}
-						RunAjaxResources(xhr);
-						return true;
-					} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-						
-						RunAjaxResources(xhr);
-						return false;
 					}
 				}
 				
-				var regexp = new RegExp("<body");
-				if(regexp.test(html)) {
-					var id = randomString(5);
-					top[id + "_html"] = html;
-					node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
-				} else {
-					node.html(html);
-				}
+				LoadAjaxResources(xhr).done(function(){
+					
+					if(xhr != null) {
+						var content_type = xhr.getResponseHeader("content-type");
+						if(content_type == "text/javascript") {
+							if(typeof object != "undefined") {
+								var method;
+								if (window.execScript)
+								  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+								else
+							  		method = eval('(function(){' + html + '});');
+							  	
+								method.call(object);
+							} else {
+								eval_global(html);
+							}
+							RunAjaxResources(xhr);
+							return true;
+						} else if(content_type == "text/x-json" && json_regexp.test(html)) {
+							
+							RunAjaxResources(xhr);
+							return false;
+						}
+					}
+					
+					var regexp = new RegExp("<body");
+					if(regexp.test(html)) {
+						var id = randomString(5);
+						top[id + "_html"] = html;
+						node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
+					} else {
+						node.html(html);
+					}
+					
+					RunAjaxResources(xhr);
+					
+					deferred.resolve();
+				}).fail(function(err){
+					deferred.reject(err);
+				});
 				
-				RunAjaxResources(xhr);
+				return deferred.promise();
 			},
 			
 			/**
@@ -323,116 +347,179 @@ if(typeof goma.ui == "undefined") {
 						
 						var i;
 						for(i in files) {
-							CSSLoaded[files[i]] = "";
-							CSSIncluded[files[i]] = true;
+							goma.ui.CSSFiles[files[i]] = "";
+							goma.ui.CSSIncluded[files[i]] = true;
 						}
 					break;
 					case "js":
 						
 						var i;
 						for(i in files) {
-							JSLoaded[files[i]] = true;
+							goma.ui.JSIncluded[files[i]] = true;
 						}
 					break;
 				}
 			},
 			
 			loadResources: function(request) {
+				var deferred = $.Deferred();
+				
 				var css = request.getResponseHeader("X-CSS-Load");
 				var js = request.getResponseHeader("X-JavaScript-Load");
+				var base_uri = request.getResponseHeader("x-base-uri");
+				var root_path = request.getResponseHeader("x-root-path");
+				var cssfiles = (css != null) ? css.split(";") : [];
+				var jsfiles = (js != null) ? js.split(";") : [];
 				
-				if(css != null) {
-					var cssfiles = css.split(";");
-					var i;
-					
-					for(i in cssfiles) {
-						var file = cssfiles[i];
-						if(!external_regexp.test(file) && file != "") {
+			
+				var i = 0;
+				// we create a function which we call for each of the files and it iterates through the files
+				// if it finishes it notifies the deferred object about the finish
+				var loadFile = function() {
+
+					// i is for both js and css files
+					// first we load js files and then css, cause when js files fail we can't show the page anymore, so no need of loading css is needed
+					if(i >= jsfiles.length) {
+						
+						// get correct index for css-files
+						var a = i - jsfiles.length;
+						if(a < cssfiles.length) {
 							
-							if(typeof CSSLoaded[file] == "undefined") {
-								$.ajax({
-									cache: true,
-									url: file,
-									noRequestTrack: true,
-									async: false,
-									dataType: "html",
-									success: function(css){
-										// patch uris
-										var base = file.substring(0, file.lastIndexOf("/"));
-										//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-										css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-										
-										CSSLoaded[file] = css;
+							var file = cssfiles[a];
+							
+							// append base-uri if no external link
+							if(!http_regexp.test(file)) {
+								var loadfile = base_uri + file;
+							} else {
+								var loadfile = file;
+							}
+							
+							// scope to don't have problems with data
+							(function(f){
+								var file = f;
+								if(!external_regexp.test(file) && file != "") {
+									if(typeof goma.ui.CSSFiles[file] == "undefined") {
+										return $.ajax({
+											cache: true,
+											url: loadfile,
+											noRequestTrack: true,
+											dataType: "html"
+										}).done(function(css) {
+											// patch uris
+											var base = file.substring(0, file.lastIndexOf("/"));
+											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+											
+											goma.ui.CSSFiles[file] = css;
+											goma.ui.CSSIncluded[file] = true;
+											
+											$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+css+'</style>');
+											
+											i++;
+											loadFile();
+										}).fail(function(){
+											deferred.reject();
+										});
+									} else if(typeof goma.ui.CSSIncluded[file] == "undefined") {
+										$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
+										goma.ui.CSSIncluded[file] = true;
 									}
-								});
-							}
-							
-							if(typeof CSSIncluded[file] == "undefined") {
-								$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
-								CSSIncluded[file] = true;
-							}
+								} else {
+									goma.ui.CSSFiles[file] = css;
+									goma.ui.CSSIncluded[file] = true;
+									if($("head").html().indexOf(file) != -1) {
+										$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
+									}
+								}
+								
+								i++;
+								loadFile();
+							})(file);
 						} else {
-							CSSLoaded[file] = css;
-							if($("head").html().indexOf(file) != -1) {
-								$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
-							}
+							setTimeout(function(){
+								deferred.notify("loaded");
+							}, 10);
 						}
-					}
-				}
-				
-				if(js != null) {
-					var jsfiles = js.split(";");
-					var i;
-					
-					for(i in jsfiles) {
+					} else {
 						var file = jsfiles[i];
-						if(file != "") {
-							if((!run_regexp.test(file) && JSLoaded[file] !== true) || load_alwaysLoad.test(file)) {
-								JSLoaded[file] = true;
-								$.ajax({
-									cache: true,
-									url: file,
-									noRequestTrack: true,
-									async: false,
-									dataType: "html",
-									success: function(js){
-										eval_global(js);
-									}
-								});
-							}
-							regexp = null;
-							
+						
+						// append base-uri if no external link
+						if(!http_regexp.test(file)) {
+							var loadfile = base_uri + file;
+						} else {
+							var loadfile = file;
 						}
+						
+						if(file != "") {
+							
+							// check for internal cache
+							if(typeof goma.ui.JSFiles[file] == "undefined") {
+								
+								// we create a new scope for this to don't have problems with overwriting vars and then callbacking with false ones
+								return (function(file){
+									$.ajax({
+										cache: true,
+										url: loadfile,
+										noRequestTrack: true,
+										dataType: "html"
+									}).done(function(js){
+										// build into internal cache
+										goma.ui.JSFiles[file] = js;
+										i++;
+										loadFile();
+									}).fail(function(){
+										deferred.reject();
+									});
+								})(file);
+							}
+						}
+						
+						i++;
+						loadFile();
 					}
 				}
 				
-				if(!respond.mediaQueriesSupported)
-					respond.update();
+				// init loading
+				loadFile();
 				
+				
+				deferred.progress(function(data){
+					for(var i in jsfiles) {
+						var file = jsfiles[i];
+						if((!run_regexp.test(file) && goma.ui.JSIncluded[file] !== true) || load_alwaysLoad.test(file)) {
+							goma.ui.JSIncluded[file] = true;
+							eval_global(goma.ui.JSFiles[file]);
+						}
+					}
+					
+					setTimeout(function(){
+						deferred.resolve();
+					}, 10);
+					
+					if(!respond.mediaQueriesSupported)
+						respond.update();
+				});
+				
+				return deferred.promise();
 			},
 			
+			/**
+			 * this method can only be called after loadResources
+			 *
+			 *@name runResources
+			*/
 			runResources: function(request) {
 				var js = request.getResponseHeader("X-JavaScript-Load");
+				var base_uri = request.getResponseHeader("x-base-uri");
+				
 				if(js != null) {
 					var jsfiles = js.split(";");
-					var i;
-					for(i in jsfiles) {
+					for(var i in jsfiles) {
 						
 						var file = jsfiles[i];
-						if(file != "") {
-							if(run_regexp.test(file)) {
-								$.ajax({
-									cache: true,
-									url: file,
-									noRequestTrack: true,
-									async: false,
-									dataType: "html",
-									success: function(js){
-										eval_global(js);
-									}
-								});
-							}
-							regexp = null;	
+						
+						if(run_regexp.test(file) && typeof goma.ui.JSFiles[file] != "undefined" && goma.ui.JSIncluded[file] !== true) {
+							eval_global(goma.ui.JSFiles[file]);
 						}
 					}
 				}
