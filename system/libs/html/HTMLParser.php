@@ -284,9 +284,9 @@ class HTMLParser extends Object
 			$div = $value;
 			
 			$count = self::count_words_in_important_sentences($word, $context);
-                        $value += $count[0];
-                        $value += $count[1];
-                        $value += self::count_title_word($word, $context);
+            $value += $count[0];
+            $value += $count[1];
+            $value += self::count_title_word($word, $context);
 			
 			return $value / $div;
 		}
@@ -317,7 +317,17 @@ class HTMLParser extends Object
 		
 		public function count_title_word($word, $context)
 		{
+			$title = preq_split("\<h(1|2|3|4|5|6)\>", $context, -1);
+			if(sizeof($title < 2))
+				return 0;
+			$count_title = 0;
+				
+			foreach($title as $element)
+			{
+				$count_title += count(preg_split($word, $element, -1));
+			}
 			
+			return $count_title - 1;
 		}
                 
                 /**
@@ -328,32 +338,32 @@ class HTMLParser extends Object
 		
 		public function count_words_in_important_sentences($word, $context)
 		{
-                        $questions = preg_split('?', $context, -1);
-                        $count_excl = 0;
-                        $count_quest = 0;
-                        
-                        foreach($questions as $element)
-                        {
-                                if(strpos($element, '.') !== false)
-                                {
-                                        $split = preg_split('.', $element, -1);
-                                        $element = $split[sizeof($split) - 1];
-                                        
-                                        if(strpos($element, '!') !== false)
-                                        {
-                                                $split = preg_split('!', $element, -1);
-                                                $count_excl += sizeof($split) - 1;
-                                                $element = $split[sizeof($split) - 1];
-                                        }
-                                }
-                                
-                                $tmp = preg_split($word, $context, -1);
-                                $count_quest += sizeof($tmp);
-                        }
-                        
-                        $count = array();
-                        $count[] = $count_quest;
-                        $count[] = $count_excl;
+			$questions = preg_split('?', $context, -1);
+			$count_excl = 0;
+			$count_quest = 0;
+			
+			foreach($questions as $element)
+			{
+				if(strpos($element, '.') !== false)
+				{
+					$split = preg_split('.', $element, -1);
+					$element = $split[sizeof($split) - 1];
+					
+					if(strpos($element, '!') !== false)
+					{
+							$split = preg_split('!', $element, -1);
+							$count_excl += sizeof($split) - 1;
+							$element = $split[sizeof($split) - 1];
+					}
+				}
+				
+				$tmp = preg_split($word, $context, -1);
+				$count_quest += sizeof($tmp) - 1;
+			}
+			
+			$count = array();
+			$count[] = $count_quest;
+			$count[] = $count_excl;
 			return $count;
 		}
 }
