@@ -169,7 +169,7 @@ if(typeof goma.AddOnStore == "undefined") {
 					var newOptions;
 					for(i in uiAjaxBind) {
 						newOptions = uiAjaxBind[i](options);
-						if(typeof newOptions == "object") {
+						if(typeof newOptions == "object") {
 							options = newOptions;
 						}
 					}
