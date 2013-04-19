@@ -152,7 +152,7 @@ if(typeof goma.AddOnStore == "undefined") {
 					}
 					
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
-					options.url = "https://goma-cms.org/" + options.url;
+					options.url = appstore_prefix + options.url;
 					
 					return $.ajax(options);
 				},

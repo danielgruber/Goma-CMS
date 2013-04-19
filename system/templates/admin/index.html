@@ -10,6 +10,8 @@
 
 		<% INCLUDE_JS_MAIN "admin.js" %>
 		
+		<% INCLUDE_JS "apps/AddonStoreClient.js" %>
+		
 		{$header}
 
 		<!--[if lte IE 8]>
@@ -21,57 +23,25 @@
 	
 			<script type="text/javascript">
 			// <![CDATA[
-			$(function(){
-				var u = {$updatables_json};
-				var uCount = $updatables.count();
-				var results = [];
-				
-				var checkResult = function() {
-					if(uCount == results.length) {
-						// render it
-						var a = 0;
-						for(i in results) {
-							if(results[i] != null) {
-								a++;
-								var record = results[i].response;
-							}
-						}
-							
-						if(a == 0)
-							return null;
-							
-						if(a == 1) {
-							$("#update .count").html('1');
-						} else {
-							$("#update .count").text(a);
-						}
-						$("#update .count").css("display", "block");
-							
-							// update number
-					} else {
-						setTimeout(checkResult, 1000);
-					}
-				}
+			
+			goma.AddOnStore.onReady(function(){
+				goma.AddOnStore.ajax({
+					type: "post",
+					url: "updates",
+					data: {"updates": $updatables_json }
+				}).done(function(html, textStatus, jqXHR){
+					var a = jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0;
 					
-				for(name in u) {
-					var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
-					$.ajax({
-						url: url,
-						dataType: "jsonp",
-						noRequestTrack: true,
-						success: function(object) {
-							if(object.name) {
-								results.push({response: object, current_version: u[name]["version"], webversion: object.version});
-							} else {
-								results.push(null);
-							}
-						}
-					});
-				}
-				
-				setTimeout(checkResult, 1000);
-				
-				$("#update").attr("href", $("#update").attr("data-href"));
+					if(a == 0)
+						return null;
+					
+					if(a == 1) {
+						$("#update .count").html('1');
+					} else {
+						$("#update .count").text(a);
+					}
+					$("#update .count").css("display", "block");
+				});
 			});
 			// ]]>
 			</script>
