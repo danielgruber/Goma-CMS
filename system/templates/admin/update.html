@@ -3,8 +3,8 @@
 </div>
 
 <script type="text/javascript">
-	goma.AddOnStore.onReady(function(){
-		goma.AddOnStore.setENV($("#appStoreArea"), "admin/update/upload{URLEND}");
+	
+	function loadUpdates() {
 		goma.AddOnStore.uiAjax(null, {
 			type: "post",
 			url: "updates",
@@ -12,6 +12,22 @@
 		}).done(function(html, textStatus, jqXHR){
 			$("#updates > h1 > .num").text(jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0);
 		});
+	}
+	
+	goma.AddOnStore.onReady(function(){
+		
+		goma.AddOnStore.bindUIAjax(function(o){
+			if(o.url.match(/updates$/)) {
+				o.type = "post";
+				o.data = {"updates": $updatables_json };
+			}
+			
+			return o;
+		});
+		
+		goma.AddOnStore.setENV($("#appStoreArea"), "admin/update/upload{URLEND}");
+		loadUpdates();
+		goma.AddOnStore.history.push("updates");
 	});
 </script>
 

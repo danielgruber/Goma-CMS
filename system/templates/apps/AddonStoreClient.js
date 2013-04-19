@@ -18,6 +18,12 @@ if(typeof goma.AddOnStore == "undefined") {
 			
 			var ajaxRequest = [];
 			
+			var historyStack = [];
+			var historyForwardStack = [];
+			var historyBind = [];
+			
+			var uiAjaxBind = [];
+			
 			/**
 			 * event for reacting to store-requests
 			*/
@@ -122,6 +128,13 @@ if(typeof goma.AddOnStore == "undefined") {
 				setENV: function(content, url) {
 					if($(content).length > 0) {
 						goma.AddOnStore.appStoreMainContent = $(content);
+						goma.AddOnStore.history.Init();
+						
+						goma.AddOnStore.history.bind(function(url){
+							goma.AddOnStore.uiAjax(null, {
+								url: url
+							});
+						});
 					}
 					
 					if(url)
@@ -139,7 +152,7 @@ if(typeof goma.AddOnStore == "undefined") {
 					}
 					
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
-					options.url = "https://goma-cms.org/apps/" + options.url;
+					options.url = "https://goma-cms.org/" + options.url;
 					
 					return $.ajax(options);
 				},
@@ -153,9 +166,30 @@ if(typeof goma.AddOnStore == "undefined") {
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
 					options.url = appstore_prefix + options.url;
 					
+					var newOptions;
+					for(i in uiAjaxBind) {
+						newOptions = uiAjaxBind[i](options);
+						if(typeof newOptions == "object") {
+							options = newOptions;
+						}
+					}
+					
 					return goma.ui.ajax(destination, options, unload).done(function(){
 						goma.AddOnStore.parse($(destination));
+						if(options.type != "post")
+							goma.AddOnStore.history.push(options.url);
 					});
+				},
+				
+				/**
+				 * hooks into UI-Ajax
+				 *
+				 *@name bindUIAjax
+				*/
+				bindUIAjax: function(fn) {
+					if(typeof fn != "undefined") {
+						uiAjaxBind.push(fn);
+					}
 				},
 				
 				/**
@@ -180,11 +214,11 @@ if(typeof goma.AddOnStore == "undefined") {
 						if(goma.AddOnStore.appStoreInstallUrl)
 							r.find("a").each(function(){
 								if($(this).attr("href").match(/\.gfs$/)) {
-									if(goma.AddOnStore.appStoreInstallUrl.indexOf("?"))
+									if(goma.AddOnStore.appStoreInstallUrl.indexOf("?") != -1)
 										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "&download=" + escape($(this).attr("href")));
 									else
 										$(this).attr("href", goma.AddOnStore.appStoreInstallUrl + "?download=" + escape($(this).attr("href")));
-								} else if(!ext_regexp.test($(this).attr("href")) || $(this).attr("href").substring(0, appstore_prefix.length) == appstore_prefix) {
+								} else if((!ext_regexp.test($(this).attr("href")) || $(this).attr("href").substring(0, appstore_prefix.length) == appstore_prefix) && !$(this).attr("href").match(/^(#|javascript\:)/)) {
 									$(this).click(function(){
 										var url = $(this).attr("href");
 										if(url.substring(0, 5) == "apps/")
@@ -227,9 +261,128 @@ if(typeof goma.AddOnStore == "undefined") {
 								return false;
 							});
 						});
+						
+						if(goma.AddOnStore.history.isBack()) {
+							r.find(".history_back").removeClass("disabled");
+						} else {
+							r.find(".history_back").addClass("disabled");
+						}
+						
+						if(goma.AddOnStore.history.isForward()) {
+							r.find(".history_forward").removeClass("disabled");
+						} else {
+							r.find(".history_forward").addClass("disabled");
+						}
+					}
+				},
+				
+				/**
+				 * History-Plugin
+				*/
+				history: {
+					interval: 250,
+					
+					/**
+					 * pushes a url to the history
+					 *
+					 *@name push
+					*/
+					push: function(url) {
+						goma.AddOnStore.history.lastPush = true;
+						
+						if(url.substring(0, appstore_prefix.length) == appstore_prefix)
+							url = url.substring(appstore_prefix.length);
+						
+						window.location.hash = "!" + url;
+						historyStack.push(url);
+						historyForwardStack = [];
+						
+						setTimeout(function() {
+							goma.AddOnStore.history.lastPush = false;
+						}, goma.AddOnStore.history.interval + 50);
+					},
+					
+					/**
+					 * inits the history
+					 *
+					 *@name Init
+					*/
+					Init: function() {
+						if(typeof window.onhashchange == "object") {
+							window.onhashchange = function() {
+								if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+									
+									if(goma.AddOnStore.history.lastPush) {
+										goma.AddOnStore.history.lastPush = false;
+									} else {
+										var hash = document.location.hash.substr(2);
+									
+										// check for history event
+										if(historyStack[historyStack.length - 1] == hash) {
+											historyForwardStack.push(historyStack.pop());
+										} else {
+											historyStack.push(hash);
+											historyForwardStack = [];
+										}
+									
+										for(i in historyBind) {
+											if(!historyBind[i](hash))
+												break;
+										}
+									}
+								}
+							};
+						} else {
+							setInterval(function(){
+								if(window.___oldHash != location.hash) {
+									window.___oldHash = location.hash;
+									if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+										
+										if(goma.AddOnStore.history.lastPush) {
+											goma.AddOnStore.history.lastPush = false;
+										} else {
+											var hash = document.location.hash.substr(2);
+										
+											// check for history event
+											if(historyStack[historyStack.length - 1] == hash) {
+												historyForwardStack.push(historyStack.pop());
+											} else {
+												historyStack.push(hash);
+												historyForwardStack = [];
+											}
+											
+											for(i in historyBind) {
+												if(!historyBind[i](hash))
+													break;
+											}
+										}
+									}
+								}
+							}, goma.AddOnStore.history.interval)
+						}
+					},
+					
+					bind: function(fn) {
+						historyBind.push(fn);
+					},
+					
+					isBack: function() {
+						return (historyStack.length > 1);
+					},
+					
+					isForward: function() {
+						return (historyForwardStack.length > 0);
 					}
 				}
 			};
 		}
 	})(jQuery, window);
 }
+
+window.onload = function() {
+	setTimeout(function() {
+		goma.AddOnStore.history.lastPush = false;
+	}, goma.AddOnStore.history.interval + 50);
+	
+	goma.AddOnStore.history.Init();
+};

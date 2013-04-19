@@ -183,7 +183,8 @@ class Core extends object
 			}
 			
 			// some vars for javascript
-			Resources::addData("var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."';");
+			Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."'; }");
+
 			
 			Object::instance("Core")->callExtending("construct");
 			self::callHook("init");
