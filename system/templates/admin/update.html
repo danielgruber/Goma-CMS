@@ -39,6 +39,10 @@
 	</div>
 	<h1><% IF $updates.count() = 1 %> <span class="num">1</span> {$_lang_update} <% ELSE %> <span class="num">$updates.count</span> {$_lang_updates} <% END %></h1>
 	<div id="appStoreArea">
-		<span class="loading"><img src="images/16x16/loading.gif" alt="" /> {$_lang_loading}</span>
+		<% IF NOT $_GET_nojs %>
+			<span class="loading"><img src="images/16x16/loading.gif" alt="" /> {$_lang_loading}</span>
+		<% ELSE %>
+			<div class="error">{$_lang_noscript}</div>
+		<% END %>
 	</div>
 </div>

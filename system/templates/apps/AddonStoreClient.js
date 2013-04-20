@@ -175,6 +175,8 @@ if(typeof goma.AddOnStore == "undefined") {
 						}
 					}
 					
+					destination.html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
+					
 					return goma.ui.ajax(destination, options, unload).done(function(){
 						goma.AddOnStore.parse($(destination));
 						if(options.type != "post")

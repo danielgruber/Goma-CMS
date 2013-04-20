@@ -42,6 +42,8 @@
 					}
 					$("#update .count").css("display", "block");
 				});
+				
+				$("#update").attr("href", $("#update").attr("data-href"));
 			});
 			// ]]>
 			</script>
@@ -236,7 +238,7 @@
 											<% ENDCONTROL %>
 										</table>
 										<% IF PERMISSION("superadmin") %>
-											<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
+											<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS=1"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
 										<% END %>
 
 										<% IF DEV_MODE AND PERMISSION("superadmin") %>
