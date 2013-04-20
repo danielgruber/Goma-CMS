@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 31.03.2013
+  * last modified: 20.04.2013
 */
 
 var DropDown = function(id, url, multiple) {
@@ -98,7 +98,8 @@ DropDown.prototype = {
 		unbindFromFormSubmit(this.widget.find(" > .dropdown > .header > .search"));
 		this.widget.find(" > .dropdown > .header > .cancel").click(function(){
 			that.widget.find(" > .dropdown > .header > .search").val("");
-			that.widget.find(" > .dropdown > .header > .search").keyup();
+			that.page = 1;
+			that.reloadData();
 			that.widget.find(" > .dropdown > .header > .search").focus();
 		});
 		

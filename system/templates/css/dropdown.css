@@ -239,3 +239,7 @@
 		width: 408px;
 	}
 }
+
+.pos-relative {
+	position: static !important;
+}

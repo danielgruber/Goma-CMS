@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 1.4.5
+  * last modified: 20.04.2013
+  * $Version 1.4.6
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -255,7 +255,10 @@ class DropDown extends FormField
 				
 				return $str;
 			} else {
-				return ($this->value == "") ? lang("form_dropdown_nothing_select", "Nothing Selected") : isset($this->options[$this->value]) ? convert::raw2text($this->options[$this->value]) : convert::raw2text($this->value);
+				if($this->value == "") 
+					return lang("form_dropdown_nothing_select", "Nothing Selected");
+				else
+					return isset($this->options[$this->value]) ? convert::raw2text($this->options[$this->value]) : convert::raw2text($this->value);
 			}
 		}
 		
@@ -371,53 +374,46 @@ class DropDown extends FormField
 					$result[$key] = preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
 				}
 			}
-			// second order result
-			if(count($result) > 10) {
-				$start = ($p * 10) - 10;
-				$end = $start + 9;
-				$i = 0;
-				$left = ($p == 1) ? false : true;
-				if(isset($result[0])) {
-					$arr = array();
-					foreach($result as $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[] = array("key" => $value, "value" => $value);
+			
+			$start = ($p * 10) - 10;
+			$end = $start + 9;
+			$i = 0;
+			$left = ($p == 1) ? false : true;
+			if(isset($result[0])) {
+				$arr = array();
+				foreach($result as $value) {
+					if($i < $start) {
 						$i++;
+						continue;
 					}
-				} else {
-					$arr = array();
-					foreach($result as $key => $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[] = array("key" => $key, "value" => $value);
-						$i++;
+					if($i >= $end) {
+						$right = true;
+						break;
 					}
+					$arr[] = array("key" => $value, "value" => $value);
+					$i++;
 				}
-				// clean up
-				unset($i, $start, $end);
-				
-				return array("data"	=> $arr, "right" => $right, "left" => $left, "showStart" => $start, "showEnd" => $end, "whole" => count($result));
 			} else {
-				if(isset($result[0])) {
-					return array("data" => ArrayLib::key_value($result));
-				} else {
-					return array("data" =>  $result);
+				$arr = array();
+				foreach($result as $key => $value) {
+					if($i < $start) {
+						$i++;
+						continue;
+					}
+					if($i >= $end) {
+						$right = true;
+						break;
+					}
+					$arr[] = array("key" => $key, "value" => $value);
+					$i++;
 				}
 			}
+			// clean up
+			unset($i, $start, $end);
+			
+			return array("data"	=> $arr, "right" => $right, "left" => $left, "showStart" => $start, "showEnd" => $end, "whole" => count($result));
 		}
+		
 		/**
 		 * gets data
 		 *

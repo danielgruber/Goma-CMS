@@ -157,6 +157,19 @@ class Resources extends Object {
 	protected static $registeredResources = array("js" => array(), "css" => array());
 	
 	/**
+	 * resets the resources
+	 *
+	 *@name reset
+	*/
+	public static function reset() {
+		self::$registeredResources = array("js" => array(), "css" => array());
+		self::$raw_js = array();
+		self::$resources_data = array();
+		self::$resources_css = array();
+		self::$resources_js = array();
+	}
+	
+	/**
 	 * add-functionality
 	 *
 	 *@name add

@@ -91,8 +91,9 @@ if(typeof goma.AddOnStore == "undefined") {
 			
 			
 			$.ajaxTransport('+*', function(options, originalOptions, jqXHR) {
+				
 				if(goma.AddOnStore.active && (options.url.match(/^https\:\/\/goma\-cms\.org\/apps/i) || (options.url.match(/^https\:\/\/goma\-cms\.org\//) && options.url.match(/\.(css|js|gfs)/i)))) {
-
+					
 					var reqID = randomString(10);
 					return {
 						
