@@ -1027,11 +1027,13 @@ if(typeof self.loader == "undefined") {
 			$(window).on("touchend", mouseDownFunc);
 			$(window).on("touchstart", mouseDownFunc);
 			$("iframe").each(function(){
-				var w = $(this).get(0).contentWindow;
-				if(w) {
-					$(w).on("mouseup", mouseDownFunc);
-					$(w).on("touchend", mouseDownFunc);
-				}
+				try {
+					var w = $(this).get(0).contentWindow;
+					if(w) {
+						$(w).on("mouseup", mouseDownFunc);
+						$(w).on("touchend", mouseDownFunc);
+					}
+				} catch(e) {}
 			});
 		}
 		w.callOnDocumentClick = w.CallonDocumentClick;
