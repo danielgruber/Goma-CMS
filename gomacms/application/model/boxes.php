@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 28.03.2013
-  * $Version 1.2.1
+  * last modified: 23.04.2013
+  * $Version 1.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -230,10 +230,10 @@ class BoxesController extends FrontedController {
 	 *@access public
 	 *@param string - id
 	*/
-	public static function renderBoxes($id)
+	public static function renderBoxes($id, $count = null)
 	{
 			$data = DataObject::get("boxes", array("seiteid" => $id));
-			return $data->controller()->render($id);
+			return $data->controller()->render($id, $count);
 	}
 	
 	/**
@@ -257,6 +257,7 @@ class BoxesController extends FrontedController {
 		$boxes = new Boxes(array(
 			"seiteid" => $this->getParam("pid")
 		));
+		
 		return $this->form("add", $boxes);
 	}
 	
@@ -274,6 +275,7 @@ class BoxesController extends FrontedController {
 				return true;
 			}
 		}
+		
 		HTTPResponse::sendHeader();
 		exit;
 	}
@@ -291,6 +293,7 @@ class BoxesController extends FrontedController {
 				$data->write();
 			}
 		}
+		
 		HTTPResponse::sendHeader();
 		exit;
 	}
@@ -301,12 +304,13 @@ class BoxesController extends FrontedController {
 	 *@name render
 	 *@access public
 	*/
-	final public function render($pid = null) {
+	final public function render($pid = null, $count = null) {
 		if(isset($pid)) {
 			$data = DataObject::get("boxes", array("seiteid" => $pid));
 			$this->model_inst = $data;
 		}
-		return $this->modelInst()->customise(array("pageid" => $pid))->renderWith("boxes/boxes.html");
+		
+		return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
 	}
 	
 	/**
@@ -443,8 +447,8 @@ class BoxesTplExtension extends Extension {
 		"boxes"
 	);
 	
-	public function boxes($name) {
-		return BoxesController::renderBoxes($name);
+	public function boxes($name, $count = null) {
+		return BoxesController::renderBoxes($name, $count);
 	}
 }
 
@@ -471,7 +475,7 @@ class boxpage extends Page
 				
 				if($this->path != "")
 				{
-						$boxes = boxesController::renderBoxes($this->id, false, true);
+						$boxes = boxesController::renderBoxes($this->id);
 				} else
 				{
 						$boxes = "";
