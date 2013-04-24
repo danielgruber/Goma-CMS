@@ -59,6 +59,13 @@ class RequestHandler extends Object
 		public $originalNamespace;
 		
 		/**
+		 * the current request
+		 *
+		 *@name request
+		*/
+		public $request;
+		
+		/**
 		 * sets vars
 		 *
 		 *@name __construct
@@ -93,14 +100,18 @@ class RequestHandler extends Object
 			if(isset($request))
 				$this->request = $request;
 			
-			if(!isset($this->namespace)) {
-				$this->namespace = $this->request->shiftedPart;
-				$this->originalNamespace = $this->namespace;
+			if(isset($this->request)) {
+				if(!isset($this->namespace)) {
+					$this->namespace = $this->request->shiftedPart;
+					$this->originalNamespace = $this->namespace;
+				} else {
+					$this->originalNamespace = $this->namespace;
+					$this->namespace = $this->request->shiftedPart;
+				}
 			} else {
-				$this->originalNamespace = $this->namespace;
-				$this->namespace = $this->request->shiftedPart;
+				throwError(6, "No-Request-Error", "Object of type " . $this->class . " has no request");
 			}
-				
+			
 			if(!isset($this->subController) || !$this->subController) {
 				Core::$requestController = $this;
 				Core::$controller[] = $this;

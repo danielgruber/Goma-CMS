@@ -985,17 +985,22 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		public function argumentQuery(&$query) {
 			parent::argumentQuery($query);
 			
-			/*if(!member::login()) {
-				$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
-				$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid AND view_permission.type IN ('all', 'password')", "view_permission");
-			} else if(Permission::check("ADMIN_CONTENT")) {
-				$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
-				$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
-				$query->innerJOIN(ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"], "view_groups.permissionid = view_permission.id", "view_groups");
-				
-				$query->addFilter("view_permission.type IN ('all', 'password', 'users', 'admin') OR view_groups.groupid IN ('".implode("','", member::groupids())."')");
-				
-			}*/
+			if(!Permission::check("superadmin")) {
+				if(!member::login()) {
+					$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
+					$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid AND view_permission.type IN ('all', 'password')", "view_permission");
+				} else if(Permission::check("ADMIN_CONTENT")) {
+					$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
+					$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
+					
+					$query->addFilter("view_permission.type IN ('all', 'password', 'users', 'admin') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+				} else {
+					$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
+					$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
+					
+					$query->addFilter("view_permission.type IN ('all', 'password', 'users') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+				}
+			}
 		}
 		
 		//!SiteTree
