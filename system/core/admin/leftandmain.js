@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 04.04.2013
+  * last modified: 24.04.2013
 */
 
 
@@ -278,20 +278,21 @@ var LaM_type_timeout;
 				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/?" + params,
 				success: function(html, code, jqXHR) {
 					
-					renderResponseTo(html, treewrapper, jqXHR);
-					tree_bind(treewrapper.find(".tree"));
-					tree_bind_ajax(true, $(".left div.tree ul"));
-					
-					
-					if(fn != null) {
-						fn();
-					}
-					// find optimal scroll by position of active element
-					if(treewrapper.find(".marked").length > 0) {
-						var pos = treewrapper.find(".marked").position().top - treewrapper.position().top - treewrapper.height() / 2 + 20;
-						if(pos > 0)
-							treewrapper.scrollTop(pos);
-					}
+					renderResponseTo(html, treewrapper, jqXHR).done(function(){
+						tree_bind(treewrapper.find(".tree"));
+						tree_bind_ajax(true, $(".left div.tree ul"));
+						
+						
+						if(fn != null) {
+							fn();
+						}
+						// find optimal scroll by position of active element
+						if(treewrapper.find(".marked").length > 0) {
+							var pos = treewrapper.find(".marked").position().top - treewrapper.position().top - treewrapper.height() / 2 + 20;
+							if(pos > 0)
+								treewrapper.scrollTop(pos);
+						}
+					});
 				}
 			});
 			
@@ -302,13 +303,14 @@ var LaM_type_timeout;
 			$.ajax({
 				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/" + escape(value),
 				success: function(html, code, jqXHR) {
-					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR);
-					tree_bind($this.parents(".classtree").find(".treewrapper").find(".tree"));
-					tree_bind_ajax(false, $(".left div.tree ul"));
-					
-					if(fn != null) {
-						fn();
-					}
+					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR).done(function(){
+						tree_bind($this.parents(".classtree").find(".treewrapper").find(".tree"));
+						tree_bind_ajax(false, $(".left div.tree ul"));
+						
+						if(fn != null) {
+							fn();
+						}
+					});
 				}
 			});
 		}

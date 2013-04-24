@@ -13,7 +13,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class DataSet extends ViewAccessAbleData implements CountAble {
+class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
 	 * pagination-attributes
 	*/

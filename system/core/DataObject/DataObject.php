@@ -2932,23 +2932,25 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 											}
 											$query->removeFilter($key);
 									}
-							} else
+							} else {
 							
-							/*// has-one
+								/*// has-one
+								
+								$has_one = $this->hasOne();
+								if(isset($has_one[$key]))
+								{
+										if(is_array($value))
+										{
+												$c = $has_one[$key];
+												$table = ClassInfo::$class_info[$c]["table"];
+												$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
+												unset($filter[$key]);
+										}
+										
+										
+								}*/
 							
-							$has_one = $this->hasOne();
-							if(isset($has_one[$key]))
-							{
-									if(is_array($value))
-									{
-											$c = $has_one[$key];
-											$table = ClassInfo::$class_info[$c]["table"];
-											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
-											unset($filter[$key]);
-									}
-									
-									
-							}*/
+							}
 							
 							unset($key, $value, $table, $data, $__table, $_table);
 					}
@@ -3126,6 +3128,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		return $query;
 	}
+	
 	/**
 	 * local argument sql
 	 *
@@ -3136,6 +3139,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function argumentQuery(&$query) {
 		
 	}
+	
 	/**
 	 * builds an SQL-Query and arguments it through extensions
 	 *

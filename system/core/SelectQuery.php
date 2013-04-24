@@ -342,7 +342,7 @@ class SelectQuery extends Object
 		public function outerJoin($table, $statement, $alias = "")
 		{
 				$alias = ($alias == "") ? $table : $alias;
-				$this->from[$alias] = " OUTER JOIN ".DB_PREFIX.$table." AS ".$alias." ON ".$statement." ";
+				$this->from[$alias] = array("table" => $table, "statement" => " OUTER JOIN ".DB_PREFIX.$table." AS ".$alias." ON ".$statement." ");
 				return $this;
 		}
 		
@@ -357,7 +357,7 @@ class SelectQuery extends Object
 		public function innerJoin($table, $statement, $alias = "")
 		{
 				$alias = ($alias == "") ? $table : $alias;
-				$this->from[$alias] = " INNER JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
+				$this->from[$alias] = array("table" => $table, "statement" => " INNER JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ");
 				return $this;
 		}
 		
@@ -372,7 +372,7 @@ class SelectQuery extends Object
 		public function leftJoin($table, $statement, $alias = "")
 		{
 				$alias = ($alias == "") ? $table : $alias;
-				$this->from[$alias] = " LEFT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
+				$this->from[$alias] = array("table" => $table, "statement" => " LEFT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ");
 				return $this;
 		}
 		
@@ -387,7 +387,7 @@ class SelectQuery extends Object
 		public function rightJoin($table, $statement, $alias = "")
 		{
 				$alias = ($alias == "") ? $table : $alias;
-				$this->from[$alias] = " RIGHT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ";
+				$this->from[$alias] = array("table" => $table, "statement" => " RIGHT JOIN ".DB_PREFIX . $table." AS ".$alias." ON ".$statement." ");
 				return $this;
 		}
 		
@@ -425,7 +425,7 @@ class SelectQuery extends Object
 			
 			// first make a index of all fields and check for coliding fields
 			// we cache this part, because we need this just one time foreach from-array
-			$from = implode("", $this->from) . implode($this->db_fields);
+			$from = md5(var_export($this->from, true) . implode($this->db_fields));
 			if(isset(self::$new_field_cache[$from])) {
 				$colidingFields = self::$new_field_cache[$from]["coliding"];
 				$DBFields = self::$new_field_cache[$from]["dbfields"];
@@ -435,7 +435,14 @@ class SelectQuery extends Object
 				$colidingFields = $this->db_fields;
 				
 				foreach($this->from as $alias => $statement) {
-					$tablefields = array_keys(ClassInfo::getTableFields($alias));
+					if(is_array($statement)) {
+						$table = $statement["table"];
+						$statement = $statement["statement"];
+					} else {
+						$table = $alias;
+					}
+					
+					$tablefields = array_keys(ClassInfo::getTableFields($table));
 					foreach($tablefields as $field) {
 						if(!isset($DBFields[$field])) {
 							$DBFields[$field] = $alias;
@@ -474,6 +481,7 @@ class SelectQuery extends Object
 				
 				if(in_array("*", $fields)) {
 					$i = 0;
+					
 					// join all from-tables
 					foreach($this->from as $alias => $statement) {
 						if(_ereg("^[0-9]+$", $alias))
@@ -608,8 +616,18 @@ class SelectQuery extends Object
 				
 			$sql .= " FROM ";
 			
+			$from = $this->from;
+			
 			// validate from
-			foreach($this->from as $table => $data) {
+			foreach($from as $alias => $data) {
+				if(is_array($data)) {
+					$table = $data["table"];
+					$data = $data["statement"];
+					$from[$alias] = $data;
+				} else {
+					$table = $alias;
+				}
+					
 				if(is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
 					if(!isset(ClassInfo::$database[$table])) {
 						throwError(6, "SQL-Missing-Error", "Table ".$table." doesn't exist!");
@@ -617,7 +635,7 @@ class SelectQuery extends Object
 				}
 			}
 			
-			$sql .= implode(" ", $this->from);
+			$sql .= implode(" ", $from);
 			
 			// WHERE
 			
@@ -708,6 +726,7 @@ class SelectQuery extends Object
 		*/
 		public function execute($fields = null)
 		{
+		
 				if($result = sql::query($this->build($fields)))
 				{
 						$this->result = $result;

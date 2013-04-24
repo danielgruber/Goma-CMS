@@ -975,6 +975,29 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			);
 		}
 		
+		/**
+		 * local argument sql to inherit view-permissions
+		 *
+		 *@name argumentQuery
+		 *@access public
+		*/
+		
+		public function argumentQuery(&$query) {
+			parent::argumentQuery($query);
+			
+			/*if(!member::login()) {
+				$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
+				$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid AND view_permission.type IN ('all', 'password')", "view_permission");
+			} else if(Permission::check("ADMIN_CONTENT")) {
+				$query->innerJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
+				$query->innerJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
+				$query->innerJOIN(ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"], "view_groups.permissionid = view_permission.id", "view_groups");
+				
+				$query->addFilter("view_permission.type IN ('all', 'password', 'users', 'admin') OR view_groups.groupid IN ('".implode("','", member::groupids())."')");
+				
+			}*/
+		}
+		
 		//!SiteTree
 		
 		public function getSiteTree($search = "") {
