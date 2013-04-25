@@ -13,6 +13,9 @@
 if(typeof goma == "undefined")
 	var goma = {};
 
+if(typeof window.console == "undefined") {
+   window.console = {log: function(){}};
+}
 
 // some regular expressions
 var json_regexp = /^\(?\{/;
@@ -277,7 +280,7 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
-				LoadAjaxResources(xhr).done(function(){
+				goma.ui.loadResources(xhr).done(function(){
 					
 					if(xhr != null) {
 						var content_type = xhr.getResponseHeader("content-type");
