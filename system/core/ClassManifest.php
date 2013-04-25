@@ -8,8 +8,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified 17.01.2013
-  * $Version 3.3
+  * last modified 25.04.2013
+  * $Version 3.3.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -63,7 +63,9 @@ class ClassManifest {
 		"showsitecontroller"	=> "frontedcontroller",
 		"_array"				=> "arraylib",
 		"dataobjectholder"		=> "viewaccessabledata",
-		"autoloader"			=> "ClassManifest"
+		"autoloader"			=> "ClassManifest",
+		"unittestcase"			=> "Object",
+		"testsuite"				=> "Object"
 	);
 	
 	/**
@@ -141,6 +143,9 @@ class ClassManifest {
 		}
 		
 		if(file_exists($dir . "/autoloader_exclude"))
+			return false;
+			
+		if(!DEV_MODE && file_exists($dir . "/autoloader_non_dev_exclude"))
 			return false;
 		
 		$dir = realpath($dir);

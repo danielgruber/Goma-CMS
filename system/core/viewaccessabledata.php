@@ -359,7 +359,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		*/
 		public function reset()
 		{
-				$this->data = false;
+				$this->data = array();
 				$this->position = 0;
 				$this->customised = array();
 		}

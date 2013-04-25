@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 15.04.2013
-  * $Version 3.3.32
+  * last modified: 26.04.2013
+  * $Version 3.3.33
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -807,7 +807,8 @@ class Dev extends RequestHandler
 			"buildDistro/\$name!/\$subname"	=> "buildAppDistro",
 			"buildDistro"					=> "buildDistro",
 			"cleanUpVersions"				=> "cleanUpVersions",
-			"setChmod777"					=> "setChmod777"
+			"setChmod777"					=> "setChmod777",
+			"test"							=> "test"
 		);
 		
 		public $allowed_actions = array("builddev", 
@@ -817,7 +818,8 @@ class Dev extends RequestHandler
 										"buildAppDistro"		=> "->isDev",
 										"buildExpDistro"		=> "->isDev",
 										"cleanUpVersions"		=> "->isDev",
-										"setChmod777");
+										"setChmod777",
+										"test");
 										
 		/**
 		 * runs dev and redirects back to REDIRECT
@@ -1140,6 +1142,18 @@ class Dev extends RequestHandler
 				}
 			}
 		}
+		
+		/**
+		 * test-implementation
+		*/
+		public function test() {
+			if(DEV_MODE) {
+				$c = new GomaTestController();
+				return $c->handleRequest($this->request);
+			} else {
+				return false;
+			}
+		}
 }
 
 /**
@@ -1201,3 +1215,5 @@ function throwErrorById($code)
 				Core::throwerror(6, $codes[6]['name'], $codes[6]['details']);
 		}
 }
+
+interface TestAble {}
