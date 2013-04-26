@@ -133,7 +133,11 @@ if(typeof goma.ui == "undefined") {
 				return goma.ui.mainContent;
 			},
 			
-			ajax: function(destination, options, unload) {
+			ajax: function(destination, options, unload, hideLoading) {
+				if(typeof hideLoading == "undefined") {
+					hideLoading = false;
+				}
+					
 				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
 				
 				var deferred = $.Deferred();
@@ -150,8 +154,20 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
+				if(!hideLoading) {
+					goma.ui.setProgress(5);
+				}
+				
 				$.ajax(options).done(function(r, c, a){
-					goma.ui.renderResponse(r, a, node, undefined, false).done(deferred.resolve).fail(deferred.reject);
+					if(typeof goma.ui.progress != "undefined") {
+						goma.ui.setProgress(50);
+					}
+					
+					goma.ui.renderResponse(r, a, node, undefined, false).done(function(){
+						if(typeof goma.ui.progress != "undefined") {
+							goma.ui.setProgress(100);
+						}
+					}).done(deferred.resolve).fail(deferred.reject);
 				}).fail(function(a){
 					// try find out why it has failed
 					if(a.textStatus == "timeout") {
@@ -255,6 +271,39 @@ if(typeof goma.ui == "undefined") {
 			},
 			getDocRoot: function() {
 				return goma.ui.DocRoot;
+			},
+			
+			/**
+			 * sets a progress of a async action as loading bar
+			 *
+			 *@name setProgress
+			*/
+			setProgress: function(percent) {
+				if($("#loadingBar").length == 0) {
+					$("body").append('<div id="loadingBar"></div>');
+					$("#loadingBar").css("width", 0);
+				}
+				
+				goma.ui.progress = percent;
+				$("#loadingBar").stop().css({opacity: 1}).animate({
+					width: percent + "%"
+				}, {
+					duration: 500,
+					queue: false
+				});
+				
+				if(percent == 100) {
+					$("#loadingBar").animate({
+						opacity: 0
+					}, {
+						duration: 1000,
+						queue: false,
+						done: function(){
+							$("#loadingBar").css({width: 0, opacity: 1})
+						}
+					});
+					goma.ui.progress = undefined;
+				}
 			},
 			
 			/**
@@ -374,6 +423,7 @@ if(typeof goma.ui == "undefined") {
 				var cssfiles = (css != null) ? css.split(";") : [];
 				var jsfiles = (js != null) ? js.split(";") : [];
 				
+				var perProgress = Math.round((50 / (jsfiles.length + cssfiles.length)));
 			
 				var i = 0;
 				// we create a function which we call for each of the files and it iterates through the files
@@ -408,6 +458,10 @@ if(typeof goma.ui == "undefined") {
 											noRequestTrack: true,
 											dataType: "html"
 										}).done(function(css) {
+											if(typeof goma.ui.progress != "undefined") {
+												goma.ui.setProgress(goma.ui.progress + perProgress);
+											}
+											
 											// patch uris
 											var base = file.substring(0, file.lastIndexOf("/"));
 											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
@@ -467,6 +521,9 @@ if(typeof goma.ui == "undefined") {
 										noRequestTrack: true,
 										dataType: "html"
 									}).done(function(js){
+										if(typeof goma.ui.progress != "undefined") {
+											goma.ui.setProgress(goma.ui.progress + perProgress);
+										}
 										// build into internal cache
 										goma.ui.JSFiles[file] = js;
 										i++;

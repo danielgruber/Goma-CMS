@@ -45,7 +45,7 @@ function pages_unbindPreviewURL() {
 	$("#visit_webpage").unbind("click");
 	$("#visit_webpage").attr("href", ROOT_PATH);
 	$("#visit_webpage").removeClass("preview");
-	$("#visit_webpage").html(lang("view_site") + " &raquo;");
+	$("#visit_webpage").html(lang("view_website") + " &raquo;");
 }
 
 $(function(){

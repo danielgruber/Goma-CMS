@@ -161,7 +161,11 @@ if(typeof goma.AddOnStore == "undefined") {
 				/**
 				 * gets data via ajax and writes it to a given destination
 				*/
-				uiAjax: function(destination, options, unload) {
+				uiAjax: function(destination, options, unload, hideLoading) {
+					if(typeof hideLoading == "undefined") {
+						hideLoading = false;
+					}
+					
 					destination = ($(destination).length > 0) ? $(destination) : $(goma.AddOnStore.appStoreMainContent);
 					
 					options.url = (typeof options.url == "undefined") ? "" : options.url;
@@ -177,7 +181,15 @@ if(typeof goma.AddOnStore == "undefined") {
 					
 					destination.html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
 					
+					if(!hideLoading) {
+						goma.ui.setProgress(5);
+					}
+					
 					return goma.ui.ajax(destination, options, unload).done(function(){
+						if(typeof goma.ui.progress != "undefined") {
+							goma.ui.setProgress(100);
+						}
+						
 						goma.AddOnStore.parse($(destination));
 						if(options.type != "post")
 							goma.AddOnStore.history.push(options.url);
