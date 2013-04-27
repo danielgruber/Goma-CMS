@@ -768,6 +768,12 @@ class Core extends object
 										{
 												$controller = $request->getParam("controller");
 										}
+										
+										if(!ClassInfo::exists($controller)) {
+											ClassInfo::delete();
+											throwError(6, "Controller not found", "Controller $controller does not exist.");
+										}
+										
 										$inst = new $controller;
 										self::$requestController = $inst;
 										self::$controller = array($inst);

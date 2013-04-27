@@ -3943,7 +3943,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		// versioned
-		if($this->hasTable() && $this->table() == $this->baseTable) {
+		if($this->Table() && $this->table() == $this->baseTable) {
 			if(!SQL::getFieldsOfTable($this->baseTable . "_state")) {
 				$exists = false;
 			} else {

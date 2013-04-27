@@ -81,7 +81,7 @@
 	-webkit-overflow-scrolling: touch;
 	z-index: 999;
 }
-.dropdown_widget .dropdown .header {
+.widgetwrapper .dropdown_widget .dropdown .header {
 	background: #fff;
 	border-bottom: 1px solid #ccc;
 	margin: 0;
