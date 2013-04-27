@@ -43,6 +43,7 @@ if (ini_get('safe_mode')) {
 	define("IN_SAFE_MODE", false);
 }
 
+
 /* --- */
 
 // some loading
