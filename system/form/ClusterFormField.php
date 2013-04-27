@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version - 1.0.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 27.04.2013
+  * $Version - 1.0.5
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -402,6 +402,9 @@ class ClusterFormField extends FormField {
 	 *@param object - field
 	*/
 	public function registerField($name, $field) {
+		if($name == $this->name) {
+			return false;
+		}
 		$this->fields[strtolower($name)] = $field;
 		$field->overridePostName = $this->name . "_" . $name;
 	}
