@@ -167,7 +167,8 @@ class ClusterFormField extends FormField {
 		// get content
 		usort($this->items, array($this, "sort"));
 		foreach($this->items as $item) {
-			if(isset($this->fields[$item->name]) && !isset($this->renderedFields[$item->name])) {
+			if($this->isFieldToRender($item->name)) {
+				$this->registerRendered($item->name);
 				$subContainer->append($item->field());
 			}
 		}

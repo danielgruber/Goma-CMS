@@ -5,8 +5,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.04.2013
-  * $Version 2.1
+  * last modified: 27.04.2013
+  * $Version 2.1.1
 */
 
 // goma-framework
@@ -155,7 +155,10 @@ if(typeof goma.ui == "undefined") {
 				}
 				
 				if(!hideLoading) {
-					goma.ui.setProgress(5);
+					goma.ui.setProgress(5).done(function(){	
+						goma.ui.setProgress(15, true)
+					});
+					
 				}
 				
 				$.ajax(options).done(function(r, c, a){
@@ -278,18 +281,34 @@ if(typeof goma.ui == "undefined") {
 			 *
 			 *@name setProgress
 			*/
-			setProgress: function(percent) {
+			setProgress: function(percent, slow) {
+				var deferred = $.Deferred();
+				
 				if($("#loadingBar").length == 0) {
 					$("body").append('<div id="loadingBar"></div>');
 					$("#loadingBar").css("width", 0);
 				}
 				
+				var slow = (typeof slow == "undefined") ? false : slow;
+				
+				var duration = (slow && percent != 100) ? 5000 : 500
+				
 				goma.ui.progress = percent;
 				$("#loadingBar").stop().css({opacity: 1}).animate({
 					width: percent + "%"
 				}, {
-					duration: 500,
-					queue: false
+					duration: duration,
+					queue: false,
+					complete: function() {
+						if(percent != 100) {
+							deferred.resolve();
+						}
+					},
+					fail: function() {
+						if(percent != 100) {
+							deferred.reject();
+						}
+					}
 				});
 				
 				if(percent == 100) {
@@ -298,12 +317,18 @@ if(typeof goma.ui == "undefined") {
 					}, {
 						duration: 1000,
 						queue: false,
-						done: function(){
-							$("#loadingBar").css({width: 0, opacity: 1})
+						complete: function(){
+							$("#loadingBar").css({width: 0, opacity: 1});
+							deferred.resolve();
+						},
+						fail: function() {
+							deferred.reject();
 						}
 					});
 					goma.ui.progress = undefined;
 				}
+				
+				return deferred.promise();
 			},
 			
 			/**
