@@ -226,7 +226,6 @@ class metaSettings extends Newsettings {
 	 *@name db
 	*/
 	static $db = array(
-		"meta_keywords"		        => "varchar(100)",
 		"meta_description"	        => "varchar(100)",
         "google_site_verification"  => "varchar(100)"
 	);
@@ -234,12 +233,10 @@ class metaSettings extends Newsettings {
 	public $tab = "{\$_lang_meta}";
 	
 	public $fieldInfo = array(
-		"meta_keywords"		=> "{\$_lang_keywords_info}",
 		"meta_description"	=> "{\$_lang_description_info}"
 	);
 	public function getFieldTitles() {
 		return array(
-			"meta_keywords"		        => lang("keywords"),
 			"meta_description"	        => lang("web_description", "Description of the Site"),
             "google_site_verification"  => lang("google-site-verification", "Google-Webmaster-Key")
 		);

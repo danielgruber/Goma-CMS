@@ -39,8 +39,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							'data' 				=> 'HTMLtext',
 							'sort'				=> 'int(8)',
 							'search'			=> 'int(1)',
-							'meta_description'	=> 'varchar(200)',
-							'meta_keywords'		=> 'varchar(200)');
+							'meta_description'	=> 'varchar(200)');
 		
 		/**
 		 * searchable fields
@@ -704,7 +703,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						new Tab('meta', array(
 							
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
-							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
 							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
