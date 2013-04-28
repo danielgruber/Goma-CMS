@@ -374,9 +374,10 @@ var LaM_type_timeout;
 							},
 							success: function(html, code, jqXHR)
 							{
-								renderResponseTo(html, $(".left .treewrapper"), jqXHR);
-								tree_bind($(".left .treewrapper").find(".tree"));
-								tree_bind_ajax(true, $(".left div.tree ul"));
+								renderResponseTo(html, $(".left .treewrapper"), jqXHR).done(function(){;
+									tree_bind($(".left .treewrapper").find(".tree"));
+									tree_bind_ajax(true, $(".left div.tree ul"));
+								});
 							}
 						});
 					},

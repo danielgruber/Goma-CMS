@@ -540,7 +540,7 @@ class ClassInfo extends Object
 				self::$database = array();
 				$file = ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE;
 				
-				if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW) && (!function_exists("apc_exists") || !apc_exists(CLASS_INFO_DATAFILE))) || isset($_GET["flush"]))
+				if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW) && (!function_exists("apc_exists") || !apc_exists(CLASS_INFO_DATAFILE))))
 				{
 						if(PROFILE) Profiler::mark("generate_class_info");
 						defined("GENERATE_CLASS_INFO") OR define('GENERATE_CLASS_INFO', true);

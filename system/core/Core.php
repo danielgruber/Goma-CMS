@@ -175,7 +175,7 @@ class Core extends object
 						self::deletecache(true); // delete files in cache
 					} else {
 						logging("Deleting Cache");
-						 self::deletecache(); // delete some files in cache
+						self::deletecache(); // delete some files in cache
 					}
 					
 					if(PROFILE)
@@ -458,10 +458,13 @@ class Core extends object
 		{
 				$dir = ROOT . CACHE_DIRECTORY;
 				
+				if(!$all && file_exists($dir . "/deletecache") && filemtime($dir . "/deletecache") > NOW - 60 * 5)
+					return true;
+				
 				clearstatcache();
 				
 				foreach(scandir($dir) as $file) {
-					if((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude")
+					if((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude" || $file == "deletecache")
 						continue;
 					
 					
@@ -480,7 +483,7 @@ class Core extends object
 							}
 						}
 					} else {
-						if(preg_match('/\.php$/i', $file) && is_file($dir . $file) && substr($file, 0 - strlen(CLASS_INFO_DATAFILE)) != CLASS_INFO_DATAFILE) {
+						if(preg_match('/\.php$/i', $file) && is_file($dir . $file)) {
 							unlink($dir . $file);
 						}
 					}
@@ -496,8 +499,9 @@ class Core extends object
 				
 				Core::callHook("deletecache", $all);
 				
-				global $_REGISTRY;
-				$_REGISTRY["cache"] = array();
+				clearstatcache();
+				
+				FileSystem::Write($dir . "/deletecache", 1);
 				
 		}
 		
