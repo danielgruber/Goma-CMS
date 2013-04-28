@@ -61,7 +61,6 @@ RegisterExtension::$registerCode = settingsController::get("register");
 Core::setCMSVar("ptitle", settingsController::get("titel"));
 Core::setCMSVar("title", settingsController::get("titel"));
 Core::setTheme(settingsController::Get("stpl"));
-Core::setHeader("keywords", settingsController::Get("meta_keywords"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
 
