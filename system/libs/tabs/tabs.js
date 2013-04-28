@@ -25,7 +25,7 @@
 				tabs.find(" > ul .active").removeClass("active");
 				$(this).addClass("active");
 				newtab.addClass("active");
-				setCookie(o.cookiename, $("#" + newtab.attr("id") + "_tab").attr("name").substr(5));
+				//setCookie(o.cookiename, $("#" + newtab.attr("id") + "_tab").attr("name").substr(5));
 				var newheight = newtab.height();
 				
 				if($(this).hasClass("ajax")) {
