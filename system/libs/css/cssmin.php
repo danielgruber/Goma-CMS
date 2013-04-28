@@ -131,6 +131,7 @@ class CSSMin extends Object
 				
 				$this->output = str_replace(";}", "}", $this->output);
 				$this->output = str_replace(" 0px", " 0", $this->output);
+				
 				return $this->output;
 		}
 }
