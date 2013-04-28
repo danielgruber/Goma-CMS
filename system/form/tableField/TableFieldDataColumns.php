@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.02.2013
-  * $Version - 1.0
+  * last modified: 28.04.2013
+  * $Version - 1.0.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -245,7 +245,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 			$params = $matches[3];
 			
 			// isset-part
-			$isset = 'isset($data';
+			$isset = '$data';
 			// parse params
 			$params = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("tpl", "percent_vars"), $params);
 			// parse functions in params
@@ -276,9 +276,8 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 					$php .= '->doObject("'.$var.'")';
 					$isset .= '["'.$var.'"]';
 			}
-			$isset .= ')';
 			$php .= "->" . $function . "(".$params.")";
-			$php = '" . ('.$isset.' ? '.$php.' : "") . "';
+			$php = '" . ((isset('.$isset.') && '.$isset.') ? '.$php.' : "") . "';
 			
 			return $php;
 	}
