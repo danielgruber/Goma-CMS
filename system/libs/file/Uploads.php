@@ -662,6 +662,7 @@ class ImageUploads extends Uploads {
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
 			@unlink($file);
 		}
+		return $file;
 	}
 	
 	/**
