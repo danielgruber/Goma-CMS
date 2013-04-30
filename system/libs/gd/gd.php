@@ -5,7 +5,7 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
   ********
-  * last modified: 03.04.2013
+  * last modified: 30.04.2013
   * $Version: 2.1
 */
 
@@ -148,8 +148,9 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new width
 		 *@param numeric - height
+		 *@param bool - automatic crop or skew
 		*/
-		public function resize($width, $height)
+		public function resize($width, $height, $crop = true)
 		{
 				if($this->extension)
 				{
@@ -165,34 +166,36 @@ class GD extends Object
 						$img_width = $width;
 						$img_height = $height;
 						
-						$relation = $this->width / $this->height;
-						
-						if($dest_height > $this->height)
-						{
-								$dest_height = $this->height;
-								$img_height = $dest_height;
-						}
-						
-						$_width = round($dest_height * $relation);
-						
-						if($_width > $width)
-						{
-								$diff = round($_width - $width);
-								$rel_width = $src_width / $_width;
-								$src_x = round($diff / 2 * $rel_width);
-								$src_width = round($width * $rel_width);
-								
-						} else if($_width < $width)
-						{
-								$diff = round($width - $_width);
-								$dest_width = $_width;
-								$dest_x = round($diff / 2);
-						}
-						
-						if($dest_width > $this->width)
-						{
-								$dest_width = $this->width;
-								$img_width = $dest_width;
+						if($crop) {
+							$relation = $this->width / $this->height;
+							
+							if($dest_height > $this->height)
+							{
+									$dest_height = $this->height;
+									$img_height = $dest_height;
+							}
+							
+							$_width = round($dest_height * $relation);
+							
+							if($_width > $width)
+							{
+									$diff = round($_width - $width);
+									$rel_width = $src_width / $_width;
+									$src_x = round($diff / 2 * $rel_width);
+									$src_width = round($width * $rel_width);
+									
+							} else if($_width < $width)
+							{
+									$diff = round($width - $_width);
+									$dest_width = $_width;
+									$dest_x = round($diff / 2);
+							}
+							
+							if($dest_width > $this->width)
+							{
+									$dest_width = $this->width;
+									$img_width = $dest_width;
+							}
 						}
 					
 						$old = $this->gd();
@@ -221,7 +224,7 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new width
 		*/
-		public function resizeByWidth($width)
+		public function resizeByWidth($width, $crop = true)
 		{
 				$new_width = 0;
 				$new_height = 0;
@@ -229,7 +232,7 @@ class GD extends Object
 				$relation = $this->height / $this->width;
 				$new_width = $width;
 				$new_height = $new_width * $relation;
-				return $this->resize($new_width, $new_height);			
+				return $this->resize($new_width, $new_height, $crop);			
 		}
 		/**
 		 * resizes an image by its height
@@ -237,7 +240,7 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new height
 		*/
-		public function resizeByHeight($height)
+		public function resizeByHeight($height, $crop = true)
 		{
 				$new_width = 0;
 				$new_height = 0;
@@ -245,7 +248,7 @@ class GD extends Object
 				$relation = $this->width / $this->height;
 				$new_height = $height;
 				$new_width = round($new_height * $relation);
-				return $this->resize($new_width, $new_height);			
+				return $this->resize($new_width, $new_height, $crop);			
 		}
 		
 		

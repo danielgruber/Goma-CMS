@@ -6,8 +6,8 @@
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 07.04.2013
-  * $Version 3.5.3
+  * last modified: 28.04.2013
+  * $Version 3.5.4
 */   
  
  
@@ -1587,6 +1587,61 @@ class tplCaller extends Object implements ArrayAccess
 		public function addcontent() {
 			return addcontent::get();
 		}
+        
+        /**
+         * API for resizing images
+         *
+         *@name imageSetSize
+         *@param string - file
+         *@param int - width
+         *@param int - height
+        */
+        public function imageSetSize($file, $width, $height) {
+        	
+	        $url = "images/resampled/" . $width . "/" . $height . "/" . $file;
+	        if(!file_exists($url)) {
+		        FileSystem::requireDir(dirname($url));
+		        FileSystem::Write($url . ".permit");
+	        }
+	        
+	        return $url;
+        }
+        
+         /**
+         * API for resizing images by width
+         *
+         *@name imageSetWidth
+         *@param string - file
+         *@param int - width
+        */
+        public function imageSetWidth($file, $width) {
+	        $url = "images/resampled/" . $width . "/" . $file;
+	        
+	        if(!file_exists($url)) {
+		        FileSystem::requireDir(dirname($url));
+		        FileSystem::Write($url . ".permit");
+	        }
+	        
+	        return $url;
+        }
+        
+        /**
+         * API for resizing images by height
+         *
+         *@name imageSetHeight
+         *@param string - file
+         *@param int - height
+        */
+        public function imageSetHeight($file, $height) {
+	        $url = "images/resampled/x/" . $height . "/" . $file;
+	        
+	        if(!file_exists($url)) {
+		        FileSystem::requireDir(dirname($url));
+		        FileSystem::Write($url . ".permit");
+	        }
+	        
+	        return $url;
+        }
         
         //! APIs
         

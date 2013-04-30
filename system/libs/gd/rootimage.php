@@ -4,8 +4,8 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 05.07.2011
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 30.04.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -58,14 +58,14 @@ class ROOTImage extends GD
 		 *@param numeric - new width
 		 *@param numeric - height
 		*/
-		public function resize($width, $height)
+		public function resize($width, $height, $crop = true)
 		{
-				$file = ROOT . CACHE_DIRECTORY . '/image_cache.tn_w_'.$width.'_h_'.$height.'_'.$this->md5.'.'.$this->extension.'';
+				$file = ROOT . CACHE_DIRECTORY . '/image_cache.tn_w_'.$width.'_h_'.$height.'_'.$crop.'_'.$this->md5.'.'.$this->extension.'';
 				if(file_exists($file))
 				{
 						return new GD($file);
 				}
-				$gd = parent::resize($width, $height);
+				$gd = parent::resize($width, $height, $crop);
 				$gd->toFile($file);
 				return $gd;
 		}
@@ -109,6 +109,7 @@ class ROOTImage extends GD
 			$gd->toFile($file);
 			return $gd;
 		}
+		
 		/**
 		 * generates a url
 		 *@name generate_url

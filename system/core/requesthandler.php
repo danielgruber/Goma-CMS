@@ -150,6 +150,7 @@ class RequestHandler extends Object
 						
 						foreach(Object::instance($class)->url_handlers as $pattern => $action)
 						{
+								
 								if($argument = $request->match($pattern, $this->shiftOnSuccess, $this->class))
 								{
 										$this->request = $request;

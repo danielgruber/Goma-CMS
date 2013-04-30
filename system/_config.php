@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 2.0.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 30.04.2013
+  * $Version 2.0.4
 */
 
 Core::addRules(array(
@@ -15,10 +15,7 @@ Core::addRules(array(
 	'system/ajax//popup/$id'						=> 'ajaxlink',
 	"api/v1//\$ClassName!"							=> "RestfulServer",
 	"treeserver"									=> "TreeServer",
-	'uploaded/images/resampled/$width!/$height!' 	=> "imageResize",
-	'uploaded/images/resampled/$width!' 			=> "imageResize",
-	'images/resampled/$width!/$height!'				=> "imageResize",
-	'images/resampled/$width!'						=> "imageResize",
+	'images/resampled'								=> "imageResize",
 	'profile//$Action'								=> "ProfileController",
 	'member/$id!'				 					=> "ProfileController",
 	"uploads"										=> "UploadController",
