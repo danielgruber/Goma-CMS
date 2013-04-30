@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 07.04.2013
+  * last modified: 30.04.2013
   * $Version 1.4.6
 */
 
@@ -920,35 +920,47 @@ class HTMLText extends Varchar {
 					
 					if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
 												
-						$url = "./" . $data->path . '/orgSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+						$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
 						// retina
 						if($width * 2 < $data->width && $height * 2 < $data->height) {
-							$retinaURL = "./" . $data->path . '/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
 						} else {
 							$retinaURL = "./" . $data->path;
 						}
+						
+						$data->manageURL($url);
+						$data->manageURL($retinaURL);
+						
 						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				} else if(isset($width)) {
 					if($data->width > $width && $data->width < 4000) {
-						$url =  "./" . $data->path . '/orgSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+						$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
 						// retina
 						if($width * 2 < $data->width) {
-							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
 						} else {
 							$retinaURL = "./" . $data->path;
 						}
+						
+						$data->manageURL($url);
+						$data->manageURL($retinaURL);
+						
 						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				} else {
 					if($data->height > $height && $data->height < 4000) {
-						$url = "./" . $data->path . '/orgSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+						$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
 						// retina
 						if($height * 2 < $data->height) {
-							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
 						} else {
 							$retinaURL = "./" . $data->path;
 						}
+						
+						$data->manageURL($url);
+						$data->manageURL($retinaURL);
+						
 						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 					}
 				}
