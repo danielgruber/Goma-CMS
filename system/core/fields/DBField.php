@@ -888,17 +888,16 @@ class HTMLText extends Varchar {
 	*/
 	public function matchSizes($style) {
 		$data = array();
-		if(preg_match('/style\="[^"]*(\s*?|;?)(width|height)\s*:\s*([0-9]+)(px)[^"]*(\s*?|;?)(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $style, $sizes)) {
-			// sizes
-			$data[$sizes[2]] = $sizes[3];
-			$data[$sizes[6]] = $sizes[7];
-			
-		} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $style, $sizes)) {
+		if(preg_match('/(;|\s+|\")width\s*:\s*([0-9]+)(px)/i', $style, $sizes)) {
+			$data["width"] = $sizes[2];
+		} else if(preg_match('/(\s+|")width\="([0-9]+)"/i', $style, $sizes)) {
+			$data["width"] = $sizes[2];
+		}
 		
-			$data[$sizes[1]] = $sizes[2];
-			
-		} else {
-			return false;
+		if(preg_match('/(;|\s+|\")height\s*:\s*([0-9]+)(px)/i', $style, $sizes)) {
+			$data["height"] = $sizes[2];
+		} else if(preg_match('/(\s+|")height\="([0-9]+)"/i', $style, $sizes)) {
+			$data["height"] = $sizes[2];
 		}
 		
 		return $data;
