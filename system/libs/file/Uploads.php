@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.04.2013
-  * $Version 1.5.7
+  * last modified: 01.05.2013
+  * $Version 1.5.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -1003,9 +1003,9 @@ class ImageUploadsController extends UploadsController {
 		"orgSetWidth/\$width" 				=> "orgSetWidth",
 		"orgSetHeight/\$height"				=> "orgSetHeight",
 		"orgSetSize/\$width/\$height"		=> "orgSetSize",
-		"noCropSetWidth/\$width" 			=> "orgSetWidth",
-		"noCropSetHeight/\$height"			=> "orgSetHeight",
-		"noCropSetSize/\$width/\$height"	=> "orgSetSize"
+		"noCropSetWidth/\$width" 			=> "noCropSetWidth",
+		"noCropSetHeight/\$height"			=> "noCropSetHeight",
+		"noCropSetSize/\$width/\$height"	=> "noCropSetSize"
 	);
 	
 	/**
@@ -1275,7 +1275,7 @@ class ImageUploadsController extends UploadsController {
 			
 			// create image
 			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->resize($width, null, true);
+			$img = $image->createThumb($width, null, 0, 0, 100, 100);
 			
 			// write to cache
 			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
@@ -1304,7 +1304,7 @@ class ImageUploadsController extends UploadsController {
 			
 			// create image
 			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->resize(null, $height, true);
+			$img = $image->createThumb(null, $height, 0, 0, 100, 100);
 			
 			// write to cache
 			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));

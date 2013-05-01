@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 30.04.2013
-  * $Version 1.4.6
+  * last modified: 01.05.2013
+  * $Version 1.4.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -881,6 +881,30 @@ class HTMLText extends Varchar {
 	}
 	
 	/**
+	 * returns width and height for given style property
+	 *
+	 *@name matchSizes
+	 *@access public
+	*/
+	public function matchSizes($style) {
+		$data = array();
+		if(preg_match('/style\="[^"]*(\s*?|;?)(width|height)\s*:\s*([0-9]+)(px)[^"]*(\s*?|;?)(width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $style, $sizes)) {
+			// sizes
+			$data[$sizes[2]] = $sizes[3];
+			$data[$sizes[6]] = $sizes[7];
+			
+		} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $style, $sizes)) {
+		
+			$data[$sizes[1]] = $sizes[2];
+			
+		} else {
+			return false;
+		}
+		
+		return $data;
+	}
+	
+	/**
 	 * for template
 	 *
 	 *@name forTemplate
@@ -896,72 +920,69 @@ class HTMLText extends Varchar {
 			// match if may be upload
 			if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
 				
-				// match for size
-				if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
-					// sizes
-					$$sizes[1] = $sizes[2];
-					$$sizes[4] = $sizes[5];
+				if($sizes = $this->matchSizes($matches[0][$k])) {
 					
-				} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
-				
-					$$sizes[1] = $sizes[2];
-					
-				} else {
-					continue;
-				}
-				
-				$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
-		
-				if($data->count() == 0) {
-					return false;
-				}
-				
-				if(isset($width, $height) && $data->width && $data->height) {
-					
-					if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
-												
-						$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($width * 2 < $data->width && $height * 2 < $data->height) {
-							$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
-						}
-						
-						$data->manageURL($url);
-						$data->manageURL($retinaURL);
-						
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					if(isset($sizes["width"])) {
+						$width = $sizes["width"];
 					}
-				} else if(isset($width)) {
-					if($data->width > $width && $data->width < 4000) {
-						$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($width * 2 < $data->width) {
-							$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
-						}
-						
-						$data->manageURL($url);
-						$data->manageURL($retinaURL);
-						
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					
+					if(isset($sizes["height"])) {
+						$height = $sizes["height"];
 					}
-				} else {
-					if($data->height > $height && $data->height < 4000) {
-						$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($height * 2 < $data->height) {
-							$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
+					
+					$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+			
+					if($data->count() == 0) {
+						return false;
+					}
+					
+					if(isset($width, $height) && $data->width && $data->height) {
+						
+						if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+													
+							$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($width * 2 < $data->width && $height * 2 < $data->height) {
+								$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 						}
-						
-						$data->manageURL($url);
-						$data->manageURL($retinaURL);
-						
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					} else if(isset($width)) {
+						if($data->width > $width && $data->width < 4000) {
+							$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($width * 2 < $data->width) {
+								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						}
+					} else {
+						if($data->height > $height && $data->height < 4000) {
+							$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($height * 2 < $data->height) {
+								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						}
 					}
 				}
 			}

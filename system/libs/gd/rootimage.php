@@ -142,3 +142,8 @@ class ROOTImage extends GD
 				}				
 		}
 }
+
+class Image extends RootImage
+{
+		
+}
