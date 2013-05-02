@@ -2,8 +2,8 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 15.06.2011
   * $Version: 2.0.0 - 004
 */

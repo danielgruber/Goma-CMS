@@ -3,7 +3,7 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@author Goma-Team
   * last modified: 31.08.2012
   * $Version 2.0.1
 */

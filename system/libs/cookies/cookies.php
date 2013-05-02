@@ -4,8 +4,8 @@
   * you can get childs or other things
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 08.05.2010
 */
 

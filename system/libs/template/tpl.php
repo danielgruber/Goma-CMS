@@ -3,9 +3,9 @@
   *@package goma framework
   *@subpackage template framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@author Goma-Team
   * last modified: 28.04.2013
   * $Version 3.5.4
 */   

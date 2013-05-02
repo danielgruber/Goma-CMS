@@ -3,7 +3,7 @@
   *@package goma framework
   *@subpackage templateInfo
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
   * last modified: 17.02.2013
 * */  

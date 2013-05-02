@@ -7,8 +7,8 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 03.04.2013
   * $Version: 4.7.10
 */

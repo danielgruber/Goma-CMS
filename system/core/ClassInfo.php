@@ -6,7 +6,7 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@author Goma-Team
   * last modified: 25.03.2013
   * $Version 3.6.9
 */

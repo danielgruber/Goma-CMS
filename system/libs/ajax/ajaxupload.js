@@ -4,8 +4,8 @@
   * thanks to https://github.com/pangratz/dnd-file-upload/blob/master/jquery.dnd-file-upload.js
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 11.04.2013
   * $Version 2.0.5
 */
