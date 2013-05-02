@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 04.04.2013
+  * last modified: 02.05.2013
   * $Version 1.1.2
 */
 
@@ -103,7 +103,7 @@ class contactController extends PageController
 										".lang("name")."
 									</td>
 									<td>
-										".convert::raw2text($data["name"])."
+										".convert::raw2xml($data["name"])."
 									</td>
 								</tr>
 								<tr>
@@ -111,7 +111,7 @@ class contactController extends PageController
 										".lang("subject")."
 									</td>
 									<td>
-										".convert::raw2text($data["subject"])."
+										".convert::raw2xml($data["subject"])."
 									</td>
 								</tr>
 								<tr>
@@ -119,7 +119,7 @@ class contactController extends PageController
 										".lang("email")."
 									</td>
 									<td>
-										".convert::raw2text($data["email"])."
+										".convert::raw2xml($data["email"])."
 									</td>
 								</tr>
 								<tr>
@@ -127,7 +127,7 @@ class contactController extends PageController
 										".lang("text")."
 									</td>
 									<td>
-										".convert::raw2text($data["text"])."
+										".convert::raw2xmlLines($data["text"])."
 									</td>
 								</tr>
 							</table>
