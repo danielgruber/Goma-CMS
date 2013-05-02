@@ -1,21 +1,73 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="de" xml:lang="de">
+<html lang="de">
 	<head>
-		<title>Mail: {$subject}</title>
+		<title>{$subject}</title>
 		<base href="{BASE_URI}" />
-		<link rel="stylesheet" href="{BASE_URI}system/templates/admin/style.css" />
+		<style type="text/css">
+	    	    body, html {
+	                font-family: Arial;
+	                font-size: 12pt;
+	                line-height: 16pt;
+	                padding: 0;
+	                margin: 0;
+	                background: #ddd;
+	                color: #222;
+	    	    }
+	            
+	            a {
+	                color: #4180f5;
+	            	text-decoration: none;
+	            }
+	            a:hover {
+	            	text-decoration: underline;
+	            }
+	            
+	            #mail_wrapper {
+	                max-width: 800px;
+	                margin: auto;
+	                padding: 50px 0;
+	            }
+	            
+	            #mail_wrapper .header a {
+	                font-size: 20pt;
+	                color: #555;
+	                text-decoration: none;
+	            }
+	            #mail_wrapper .content {
+	                background: #fff;
+	                padding: 15px;
+	                margin: 10px 0;
+	                -webkit-border-radius: 5px;
+	                border-radius: 5px;
+	                -moz-border-radius: 5px;
+	            }
+	            #mail_wrapper .footer {
+	                font-size: 10pt;
+	                color: #777;
+	                text-align: right;
+	            }
+	            #mail_wrapper .footer a img {
+	                height: 20px;
+	                width: 64px;
+	                margin-top: -5px;
+	            }
+		</style>
 	</head>
 	<body>
-		<div id="wrapper_logout">
-			
+		<div id="mail_wrapper">
 			<div class="wrapper_inner">
-				<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
 				<div class="header">
-					<a href="{BASE_URI}"><h1>$_cms_ptitle</h1></a>
+					<a href="{BASE_URI}">$_cms_ptitle</a>
 				</div>
 				<div class="content">
 					{$message}
 				</div>
+                <div class="footer">
+                    Powered by 
+                    <a target="_blank" href="http://goma-cms.org" target="_blank">
+                        <img id="logo" src="https://goma-cms.org/system/templates/admin/images/logo.png" alt="Goma" />
+                    </a>
+                </div>
 			</div>
 		</div>
 	</body>
