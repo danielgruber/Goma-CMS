@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 01.05.2013
+  * last modified: 03.05.2013
   * $Version 1.5.8
 */
 
@@ -597,13 +597,15 @@ class ImageUploads extends Uploads {
 	 *@param int - size; support for 16, 32, 64 and 128
 	*/
 	public function getIcon($size = 128, $retina = false) {
+		$ext = substr($this->filename, strrpos($this->filename, "."));
 		switch($size) {
 			case 16:
 				if($this->width > 15) {
 					if($retina && $this->width > 31) {
-						return $this->path . "/setWidth/32";
+						$icon = $this->path . "/setWidth/32" . $ext;
+					} else {
+						$icon = $this->path . "/setWidth/16" . $ext;
 					}
-					return $this->path . "/setWidth/16";
 				} else {
 					if($retina) {
 						return "images/icons/goma16/image@2x.png";
@@ -614,9 +616,10 @@ class ImageUploads extends Uploads {
 			case 32:
 				if($this->width > 31) {	
 					if($retina && $this->width > 63) {
-						return $this->path . "/setWidth/64";
+						$icon = $this->path . "/setWidth/64" . $ext;
+					} else {
+						$icon = $this->path . "/setWidth/32" . $ext;
 					}
-					return $this->path . "/setWidth/32";
 				} else {
 					if($retina) {
 						return "images/icons/goma32/image@2x.png";
@@ -627,9 +630,10 @@ class ImageUploads extends Uploads {
 			case 64:
 				if($this->width > 63) {
 					if($retina && $this->width > 127) {
-						return $this->path . "/setWidth/128";
+						$icon = $this->path . "/setWidth/128" . $ext;
+					} else {
+						$icon = $this->path . "/setWidth/64" . $ext;
 					}
-					return $this->path . "/setWidth/64";
 				} else {
 					if($retina) {
 						return "images/icons/goma64/image@2x.png";
@@ -640,14 +644,21 @@ class ImageUploads extends Uploads {
 			case 128:
 				if($this->width > 127) {
 					if($retina && $this->width > 255) {
-						return $this->path . "/setWidth/256";
+						$icon = $this->path . "/setWidth/256" . $ext;
+					} else {
+						$icon = $this->path . "/setWidth/128" . $ext;
 					}
-					return $this->path . "/setWidth/128";
 				} else {
 					return "images/icons/goma/128x128/image.png";
 				}
 			break;
 		}
+		
+		if(isset($icon)) {
+			$this->manageURL($icon);
+			return $icon;
+		}
+		
 		return "images/icons/goma/128x128/image.png";
 	}
 	
