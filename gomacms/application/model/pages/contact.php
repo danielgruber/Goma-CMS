@@ -95,7 +95,7 @@ class contactController extends PageController
 		*/
 		public function send($data)
 		{
-				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
+				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, $data["email"]);
 				$message = lang("contact_introduction", "Dear Site Owner,<br /><br />\nThe following data was submitted with the contact form:<br /><br />\n\n");
 				$message .= "<table width=\"100%\">
 								<tr>

@@ -53,7 +53,7 @@ class Mail extends Object
 		 *@access public
 		 *@return bool
 		**/
-		public function __construct($from = null, $html = true, $reply = true, $sendername = null)
+		public function __construct($from = null, $html = true, $reply = null, $sendername = null)
 		{
 				parent::__construct();
 				
