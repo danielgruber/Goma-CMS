@@ -932,7 +932,7 @@ class HTMLText extends Varchar {
 					$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
 			
 					if($data->count() == 0) {
-						return false;
+						continue;
 					}
 					
 					if(isset($width, $height) && $data->width && $data->height) {
