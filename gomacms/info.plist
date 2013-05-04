@@ -23,8 +23,8 @@
 	</array>
 	<key>excludeFiles</key>
 	<array>
-		<string>application/.WELCOME_RUN</string>
-		<string>application/WELCOME_RUN.php</string>
+		<string>/application/.WELCOME_RUN</string>
+		<string>/application/WELCOME_RUN.php</string>
 	</array>
 </dict>
 </plist>
