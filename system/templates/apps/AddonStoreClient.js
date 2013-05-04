@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.04.2013
+  * last modified: 04.05.2013
 */
 
 if(typeof goma.AddOnStore == "undefined") {
@@ -35,13 +35,15 @@ if(typeof goma.AddOnStore == "undefined") {
 					var data = JSON.parse(e.data);
 					switch(data.action) {
 						case "init":
-							// it works
-							goma.AddOnStore.active = true;
-							if(console.log)
-								console.log("store available");
-							
-							for(var i in readyQueue) {
-								readyQueue[i]();
+							if(data.message == "Hello") {
+								// it works
+								goma.AddOnStore.active = true;
+								if(console.log)
+									console.log("store available");
+								
+								for(var i in readyQueue) {
+									readyQueue[i]();
+								}
 							}
 						break;
 						case "error":
@@ -63,7 +65,7 @@ if(typeof goma.AddOnStore == "undefined") {
 			 * this code is for initiating the connection to the store and checking if it works
 			*/
 			var helloToStore = function() {
-				goma.AddOnStore.frame.contentWindow.postMessage('{"action":"init", "version": "'+goma.AddOnStore.version+'"}', "https://goma-cms.org");
+				goma.AddOnStore.frame.contentWindow.postMessage('{"action":"init", "version": "'+goma.AddOnStore.version+'", "framework": "'+goma.ENV.framework_version+'"}', "https://goma-cms.org");
 				
 			};
 			

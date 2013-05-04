@@ -7,8 +7,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@author Goma-Team
-  * last modified: 25.03.2013
-  * $Version 3.6.9
+  * last modified: 04.05.2013
+  * $Version 3.7
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -806,6 +806,24 @@ class ClassInfo extends Object
 						self::$class_info = array();
 						self::$childData = array();
 						
+						// now check for upgrade-scripts
+						if(PROFILE) Profiler::mark("checkVersion");
+	
+						// first framework!
+						self::checkForUpgradeScripts(ROOT . "system", GOMA_VERSION . "-" . BUILD_VERSION);
+						
+						// second application!
+						self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
+						
+						if(isset(self::$appENV["expansion"])) {
+							// expansions
+							foreach(self::$appENV["expansion"] as $expansion => $data) {
+								self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+							}
+						}
+						
+						if(PROFILE) Profiler::unmark("checkVersion");
+						
 						if(PROFILE) Profiler::mark("ClassManifest::indexFiles");
 						
 						ClassManifest::generate_all_class_manifest(self::$files, self::$class_info, self::$appENV);
@@ -988,24 +1006,6 @@ class ClassInfo extends Object
 						}
 					
 						if(PROFILE) Profiler::unmark("generate_class_info");
-						
-						// now check for upgrade-scripts
-						if(PROFILE) Profiler::mark("checkVersion");
-	
-						// first framework!
-						self::checkForUpgradeScripts(ROOT . "system", GOMA_VERSION . "-" . BUILD_VERSION);
-						
-						// second application!
-						self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
-						
-						if(isset(self::$appENV["expansion"])) {
-							// expansions
-							foreach(self::$appENV["expansion"] as $expansion => $data) {
-								self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
-							}
-						}
-						
-						if(PROFILE) Profiler::unmark("checkVersion");
 				} else
 				{
 						defined("CLASS_INFO_LOADED") OR define("CLASS_INFO_LOADED", true);

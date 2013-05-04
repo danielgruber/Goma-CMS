@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 25.03.2013
-  * $Version 1.4.7
+  * last modified: 04.05.2013
+  * $Version 1.4.8
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -326,7 +326,7 @@ class admin extends ViewAccessableData implements PermProvider
 			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
 				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
 				if($count > 45) {
-					Core::CleanUpLog(45);
+					Core::CleanUpLog(44);
 				
 					AddContent::addSuccess(lang("flush_log_success"));
 				}
