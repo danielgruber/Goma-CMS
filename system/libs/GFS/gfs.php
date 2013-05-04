@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 13.04.2013
-  * $Version 2.6.9
+  * last modified: 04.05.2013
+  * $Version 2.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -657,7 +657,10 @@ class GFS extends Object {
 	 *@param string - file
 	*/
 	public function getFileType($file) {
-		return substr($file, strrpos($file, ".") + 1);
+		if(strpos($file, ".") !== false)
+			return substr($file, strrpos($file, ".") + 1);
+		
+		return null;
 	}
 	
 	/**
@@ -1041,15 +1044,13 @@ class GFS extends Object {
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path])) {
-			if($this->db[$path]["size"] == 0) {
-				return "";
-			}
+			
 			// get position of file
 			if(isset($this->db[$path]["startChunk"])) {
 				$offset = $this->db[$path]["startChunk"];
 			} else if(isset($this->db[$path]["contents"]) || $this->db[$path]["contents"] === null) {
 				if($pointer = @fopen($aim, "w")) {
-					fwrite($pointer, $this->db[$path]["contents"]);
+					fwrite($pointer, (string) $this->db[$path]["contents"]);
 					fclose($pointer);
 					chmod($aim, 0777);
 					unset($pointer);
