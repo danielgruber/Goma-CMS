@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 09.01.2013
-  * $Version 2.2.3
+  * last modified: 11.05.2013
+  * $Version 2.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -385,7 +385,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function savesort() {
 		$field = $this->sort_field;
 		foreach($_POST["treenode"] as $key => $value) {
-			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value));
+			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value), "", true);
 		}
 		$this->marked = $this->getParam("id");
 		HTTPResponse::setBody($this->createTree());

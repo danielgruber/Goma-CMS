@@ -7,10 +7,10 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 03.04.2013
-  * $Version: 4.7.10
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 11.04.2013
+  * $Version: 4.7.11
 */
 
 defined('IN_GOMA') OR die();
@@ -267,7 +267,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param string - optional table
 	 *@return bool
 	*/
-	public static function update($name, $data, $where, $limit = "")
+	public static function update($name, $data, $where, $limit = "", $silent = false)
 	{
 			Core::Deprecate(2.0);
 			
@@ -286,9 +286,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 			//deleteTableCache($table_name);
 			$updates = "";
 			$i = 0;
-			if(!isset($data["last_modfied"]))
+			if(!isset($data["last_modfied"]) && !$silent)
 			{
-					$data["last_modified"] = TIME;
+					$data["last_modified"] = NOW;
 			}
 			
 			foreach($data as $field => $value)
@@ -815,15 +815,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	//!Data-Manipulation
 	
 	/**
-	 * write data
+	 * writes changed data
+	 *
 	 *@name write
 	 *@access public
-	 *@param bool - to force insert
-	 *@param bool - to force write
+	 *@param bool - to force insert (default: false)
+	 *@param bool - to force write (default: false)
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	 *@param bool - if to force publishing also when not permitted (default: false)
+	 *@param bool - whether to track in history (default: true)
+	 *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
 	 *@return bool
 	*/
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true)
+	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
 	{
 		if(!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
@@ -929,10 +933,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		if($command == "insert") {
 			$newdata["created"] = NOW;
 			$newdata["autorid"] = member::$id;
+			$newdata["last_modified"] = NOW;
+			$newdata["editorid"] = member::$id;
+		} else
+		
+		if(!$silent) {
+			$newdata["last_modified"] = NOW;
+			$newdata["editorid"] = member::$id;
 		}
 		
-		$newdata["last_modified"] = NOW;
-		$newdata["editorid"] = member::$id;
 		$newdata["snap_priority"] = $snap_priority;
 		$newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->class;
 		
@@ -1435,6 +1444,24 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
+	 * writes changed data silently, so without chaning last-modified and other stuff than manually changed
+	 *
+	 *@name writeSilent
+	 *@access public
+	 *@param bool - to force insert (default: false)
+	 *@param bool - to force write (default: false)
+	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	 *@param bool - if to force publishing also when not permitted (default: false)
+	 *@param bool - whether to track in history (default: true)
+	 *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
+	 *@return bool
+	*/
+	public function writeSilent($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true)
+	{
+		return $this->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, true);
+	}
+	
+	/**
 	 * gets field-value-pairs for a given class-table of the current data
 	 * it returns the data for the table of the given class
 	 * this is used for seperating data in write to correct tables
@@ -1444,7 +1471,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@param string - class or table-name
 	 *@param string - command
 	*/
-	protected function getFieldValues($class, $command)
+	protected function getFieldValues($class, $command, $silent = false)
 	{
 			$arr = array();
 			if(isset(ClassInfo::$class_info[$class]["db"])) {
@@ -1481,7 +1508,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						}
 					}
 					
-					if(isset($fields["last_modified"]))
+					if(isset($fields["last_modified"]) && !$silent)
 						$arr["last_modified"] = NOW;
 				}
 			} else if(isset(ClassInfo::$database[$class])) {
@@ -1514,7 +1541,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 					}
 				}
 				
-				if(isset(ClassInfo::$database[$class]["last_modified"]))
+				if(isset(ClassInfo::$database[$class]["last_modified"]) && !$silent)
 					$arr["last_modified"] = NOW;
 			}
 			
@@ -2932,25 +2959,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 											}
 											$query->removeFilter($key);
 									}
-							} else {
+							} else
 							
-								/*// has-one
-								
-								$has_one = $this->hasOne();
-								if(isset($has_one[$key]))
-								{
-										if(is_array($value))
-										{
-												$c = $has_one[$key];
-												$table = ClassInfo::$class_info[$c]["table"];
-												$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
-												unset($filter[$key]);
-										}
-										
-										
-								}*/
+							/*// has-one
 							
-							}
+							$has_one = $this->hasOne();
+							if(isset($has_one[$key]))
+							{
+									if(is_array($value))
+									{
+											$c = $has_one[$key];
+											$table = ClassInfo::$class_info[$c]["table"];
+											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
+											unset($filter[$key]);
+									}
+									
+									
+							}*/
 							
 							unset($key, $value, $table, $data, $__table, $_table);
 					}
@@ -3128,7 +3153,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		return $query;
 	}
-	
 	/**
 	 * local argument sql
 	 *
@@ -3139,7 +3163,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	public function argumentQuery(&$query) {
 		
 	}
-	
 	/**
 	 * builds an SQL-Query and arguments it through extensions
 	 *
@@ -3943,7 +3966,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		}
 		
 		// versioned
-		if($this->Table() && $this->table() == $this->baseTable) {
+		if($this->hasTable() && $this->table() == $this->baseTable) {
 			if(!SQL::getFieldsOfTable($this->baseTable . "_state")) {
 				$exists = false;
 			} else {
