@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 30.04.2013
-  * $Version 2.0.4
+  * last modified: 11.05.2013
+  * $Version 2.0.5
 */
 
 Core::addRules(array(
@@ -58,6 +58,7 @@ gloader::addLoadAble("htmllib", "system/libs/javascript/html.js");
 gloader::addLoadAble("history", "system/libs/javascript/history/history.js");
 gloader::addLoadAble("notifications", "system/libs/notifications/notifications.js");
 gloader::addLoadAble("json", "system/libs/javascript/json.js");
+gloader::addLoadAble("jquery-color", "system/libs/thirdparty/jquery-color/jquery.color.min.js");
 
 /**
  * here you can define the seperator for the creadcrumbs

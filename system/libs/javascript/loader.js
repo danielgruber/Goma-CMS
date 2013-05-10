@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 27.04.2013
+  * last modified: 11.05.2013
   * $Version 2.1.1
 */
 
@@ -39,21 +39,40 @@ if(typeof goma.ui == "undefined") {
 		var loadScript = function(comp, fn) {
 			if(gloaded[comp] == null)
 			{
-				$("body").css("cursor", "wait");
 				$.ajax({
 					cache: true,
 					noRequestTrack: true,
-					url: BASE_SCRIPT + "gloader/" + comp + ".js",
+					url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
 					dataType: "script",
 					async: false
 				});
-				$("body").css("cursor", "auto");
 				
 				gloaded[comp] = true;
 				
 				if(fn != null)
 					fn();
 			}
+			
+		};
+		
+		var loadScriptAsync = function(comp) {
+			var deferred = $.Deferred();
+			if(gloaded[comp] == null)
+			{
+				$.ajax({
+					cache: true,
+					noRequestTrack: true,
+					url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
+					dataType: "script"
+				}).done(function(){
+					gloaded[comp] = true;
+					deferred.resolve();
+				}).fail(deferred.reject);
+			} else {
+				setTimeout(deferred.resolve, 1);
+			}
+			
+			return deferred.promise();
 		};
 		
 		// retina support
@@ -265,6 +284,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param function - fn
 			*/
 			load: loadScript,
+			loadAsync: loadScriptAsync,
 			
 			/**
 			 * some base-roots in DOM
@@ -839,21 +859,24 @@ if(typeof self.loader == "undefined") {
 		    // new dropdownDialog, which is very dynamic and greate
 		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
 			{
-				gloader.load("dropdownDialog");
+				var $this = $(this);
+				goma.ui.loadAsync("dropdownDialog").done(function(){
+					
+					var options = {
+						uri: $this.attr("href")
+					};
+					if($this.attr("rel") == "dropdownDialog[left]" || $this.hasClass("dropdownDialog-left"))
+						options.position = "left";
+					else if($this.attr("rel") == "dropdownDialog[center]" || $this.hasClass("dropdownDialog-center"))
+						options.position = "center";
+					else if($this.attr("rel") == "dropdownDialog[right]" || $this.hasClass("dropdownDialog-right"))
+						options.position = "right";
+					else if($this.attr("rel") == "dropdownDialog[bottom]" || $this.hasClass("dropdownDialog-bottom"))
+						options.position = "bottom";
+					
+					$this.dropdownDialog(options);
+				});
 				
-				var options = {
-					uri: $(this).attr("href")
-				};
-				if($(this).attr("rel") == "dropdownDialog[left]" || $(this).hasClass("dropdownDialog-left"))
-					options.position = "left";
-				else if($(this).attr("rel") == "dropdownDialog[center]" || $(this).hasClass("dropdownDialog-center"))
-					options.position = "center";
-				else if($(this).attr("rel") == "dropdownDialog[right]" || $(this).hasClass("dropdownDialog-right"))
-					options.position = "right";
-				else if($(this).attr("rel") == "dropdownDialog[bottom]" || $(this).hasClass("dropdownDialog-bottom"))
-					options.position = "bottom";
-				
-				$(this).dropdownDialog(options);
 				return false;
 			});
 		    

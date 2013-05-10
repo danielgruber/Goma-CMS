@@ -164,6 +164,10 @@
 			} else {
 				this.elem.prop('checked', !this.elem.prop('checked'));
 			}
+			
+			// fire events correctly
+			this.elem.change();
+			
 			iOSCheckbox.currentlyClicking = null;
 			iOSCheckbox.dragging = null;
 			return this.didChange();
