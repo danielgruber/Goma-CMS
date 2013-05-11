@@ -174,44 +174,44 @@
 							
 							<% IF $_GET_month %>
 								<% CONTROL statistics(true, $_GET_stat_page) %>
-									<div class="stat month">
-										<div class="data">
-											<div style="height:<% echo $statistics.percent*2 %>px"></div>
-										</div>
-										<div>
+									<a class="stat month">
+										<span class="data">
+											<span style="height:<% echo $statistics.percent*2 %>px"></span>
+										</span>
+										<span class="count">
 											$statistics.count
-										</div>
+										</span>
 										<% IF $statistics.timestamp.date("F Y") = date("F Y") %>
-											<div class="date today">
+											<span class="date today">
 												$statistics.timestamp.date("F")
-											</div>
+											</span>
 										<% ELSE %>
-											<div class="date">
+											<span class="date">
 												$statistics.timestamp.date("F")
-											</div>
+											</span>
 										<% END %>
-									</div>
+									</a>
 								<% ENDCONTROL %>
 							<% ELSE %>
 							
 								<% CONTROL statistics(false, $_GET_stat_page) %>
-									<div class="stat">
-										<div class="data">
-											<div style="height:<% echo $statistics.percent*2 %>px"></div>
-										</div>
-										<div>
+									<a class="stat">
+										<span class="data">
+											<span style="height:<% echo $statistics.percent*2 %>px"></span>
+										</span>
+										<span class="count">
 											$statistics.count
-										</div>
+										</span>
 										<% IF $statistics.timestamp.date("j M Y") = date("j M Y") %>
-											<div class="today date">
+											<span class="today date">
 												$statistics.timestamp.date("D j M")
-											</div>
+											</span>
 										<% ELSE %>
-											<div class="date">
+											<span class="date">
 												$statistics.timestamp.date("D j M")
-											</div>
+											</span>
 										<% END %>
-									</div>
+									</a>
 								<% ENDCONTROL %>
 							<% END %>
 							<div class="clear"></div>

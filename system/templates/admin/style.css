@@ -466,6 +466,12 @@ a:hover {
 	padding: 10px 1%;
 	padding-top: 35px;
 	text-align: center;
+	display: block;
+	text-decoration: none;
+	color: #444;
+}
+#statistics .stat span {
+	display: block;
 }
 
 #statistics .stat .data {
@@ -474,7 +480,7 @@ a:hover {
 	height: 200px;
 	position: relative;
 }
-#statistics .stat .data div {
+#statistics .stat .data span {
 	width: 50%;
 	margin: auto;
 	background: #24acb8;
@@ -482,6 +488,9 @@ a:hover {
 	position: absolute;
 	bottom: 3px;
 	left: 25%;
+}
+#statistics .stat:hover .data span {
+	box-shadow: 0px 0px 4px #555;
 }
 
 #statistics .stat .date.today {
@@ -778,33 +787,6 @@ span.formaction {
 
 form h2 {
 	padding: 5px;
-}
-
-.bluebox .two {
-	background: none !important;
-}
-.bluebox .form_field {
-	padding: 4px;
-}
-
-#dragndrop_info {
-	float: right;
-	position: relative;
-	width: 800px;
-	height: 307px;
-}
-#dragndrop_info img {
-	position: absolute;
-	left: 0;
-	top: 0;
-}
-
-#dragndrop_info p {
-	position: absolute;
-	left: 300px;
-	top: 25px;
-	font-weight: bold;
-	font-size: 15pt;
 }
 
 .tableview_wrapper {
