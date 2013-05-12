@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 15.12.2012
-  * $Version 1.1.2
+  * last modified: 12.05.2013
+  * $Version 1.1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -76,9 +76,9 @@ class gLoader extends Controller
 				{					
 						if(isset(self::$resources[$name]))
 						{
-								foreach(self::$resources[$name]["required"] as $name)
+								foreach(self::$resources[$name]["required"] as $_name)
 								{
-										self::load($name);
+										self::load($_name);
 								}
 								Resources::add(self::$resources[$name]["file"], "js", "preload");
 						}
