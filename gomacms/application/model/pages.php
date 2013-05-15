@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.04.2013
-  * $Version 2.5.6
+  * last modified: 15.05.2013
+  * $Version 2.5.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -610,7 +610,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$filename = $data["filename"];
 			$parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
 			if(isset($obj->form->result["recordid"]))
-				if($filename == "index" || DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."' AND pages.recordid != '".$obj->form->result["recordid"]."'") > 0) {
+				if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->form->result["recordid"]))) > 0) {
 					return lang("site_exists", "The page with this filename already exists.");
 				} else {
 					return true;

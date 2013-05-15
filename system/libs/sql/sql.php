@@ -461,8 +461,11 @@ class SQL extends object
 		 *@param array - where
 		 *@param bool - if to include the WHERE
 		 *@param array - to set field tables if you have various multi-table-fields
+		 *@param array - coliding fields
 		*/
-		static function extractToWhere($where, $includeWhere = true, $DBFields = array()) {
+		static function extractToWhere($where, $includeWhere = true, $DBFields = array(), $colidingFields = array()) {
+			logging(print_r($colidingFields, true));
+			logging(print_r($where, true));
 			// WHERE
 			$sql = "";
 			if(is_array($where) && count($where) > 0) {
@@ -487,38 +490,44 @@ class SQL extends object
 						}
 					}
 					
+					// patch for sub-queries
 					$a = 0;
 					$field = trim($field);
 					if(_ereg('^[0-9]+$', $field)) {
 						if(is_array($value)) {
-							$sql .= " ( ".self::extractToWhere($value, false, $DBFields)." ) ";
+							$sql .= " ( ".self::extractToWhere($value, false, $DBFields, $colidingFields)." ) ";
 						} else if(is_string($value)) {
 							$sql .= " ( " . $value . " ) ";
 						}
 						continue;
 					}
 					
-					
-					
+					// patch for coliding fields
+					if(!isset($DBFields[$field]) && isset($colidingFields[$field]) && count($colidingFields[$field]) > 0) {
+						$sql .= " ( ";
+						
+						$b = 0;
+						
+						foreach($DBFields[$field] as $alias) {
+							if($b == 0)
+								$b++;
+							else
+								$sql .= " OR ";
+							$sql .= "(".$alias.".".$field." IS NOT NULL AND ";
+							$sql .= self::parseValue($alias . "." . $field, $value);
+							$sql .= ")";
+						}
+						$sql .= " ) ";
+						continue;
+					}
 						
 					
 					if(isset($DBFields[$field])) {
 						$field = $DBFields[$field] . "." . $field;
 					}
 					
-					if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<")) {
-						if($value[0] == "LIKE") {
-							$sql .= ' '.convert::raw2sql($field).' '.(defined("SQL_LIKE") ? SQL_LIKE : "LIKE").' "'.convert::raw2sql($value[1]).'"';
-						} else {
-							$sql .= ' '.convert::raw2sql($field).' '.$value[0].' "'.convert::raw2sql($value[1]).'"';
-						}
-						
-					} else if(is_array($value)) {
-						$sql .= ' '.convert::raw2sql($field).' IN ("'.implode('","', array_map(array("convert", "raw2sql"), $value)).'")';
-					} else {
-						$sql .= ' '.convert::raw2sql($field).' = "'.convert::raw2sql($value).'"';
-					}
-					$sql .= "";
+					
+					$sql .= self::parseValue($field, $value);
 				}
 			} else if(is_string($where)) {
 				if($includeWhere)
@@ -527,6 +536,26 @@ class SQL extends object
 				$sql .= $this->where;
 			}
 			return $sql;
+		}
+		
+		/**
+		 * returns the part of parsing value attribute
+		 *
+		 *@name parseValue
+		*/
+		static function parseValue($field, $value) {
+			if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<")) {
+				if($value[0] == "LIKE") {
+					return ' '.convert::raw2sql($field).' '.(defined("SQL_LIKE") ? SQL_LIKE : "LIKE").' "'.convert::raw2sql($value[1]).'"';
+				} else {
+					return ' '.convert::raw2sql($field).' '.$value[0].' "'.convert::raw2sql($value[1]).'"';
+				}
+				
+			} else if(is_array($value)) {
+				return ' '.convert::raw2sql($field).' IN ("'.implode('","', array_map(array("convert", "raw2sql"), $value)).'")';
+			} else {
+				return ' '.convert::raw2sql($field).' = "'.convert::raw2sql($value).'"';
+			}
 		}
 }
 

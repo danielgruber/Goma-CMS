@@ -573,7 +573,7 @@ class SelectQuery extends Object
 			
 			// WHERE
 			
-			$sql .= SQL::extractToWhere($this->filter, true, $DBFields);
+			$sql .= SQL::extractToWhere($this->filter, true, $DBFields/*, $colidingFields*/);
 			
 			
 			//$sql .= $this->addWhere;
@@ -608,7 +608,7 @@ class SelectQuery extends Object
 			if(count($this->having) > 0)
 			{
 					$sql .= " HAVING ";
-					$sql .= SQL::ExtractToWhere($this->having, false, $DBFields);
+					$sql .= SQL::ExtractToWhere($this->having, false, $DBFields, $colidingFields);
 			}
 			
 			
@@ -691,7 +691,6 @@ class SelectQuery extends Object
 					
 					$colidingSQL .= " CASE ";
 					foreach($tables as $table) {
-						
 						$colidingSQL .= " WHEN ".$table.".".$field." IS NOT NULL THEN ".$table.".".$field." ";
 					}
 					$colidingSQL .= " ELSE NULL END AS ".$field."";
