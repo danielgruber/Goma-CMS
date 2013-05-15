@@ -464,8 +464,6 @@ class SQL extends object
 		 *@param array - coliding fields
 		*/
 		static function extractToWhere($where, $includeWhere = true, $DBFields = array(), $colidingFields = array()) {
-			logging(print_r($colidingFields, true));
-			logging(print_r($where, true));
 			// WHERE
 			$sql = "";
 			if(is_array($where) && count($where) > 0) {

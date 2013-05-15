@@ -549,6 +549,27 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function onBeforeWrite() {
 			$this->data["uploadtrackingids"] = array();
+			
+			if($this->sort == 10000) {
+				if($this->id == 0)
+					$this->data["sort"] = DataObject::count("pages", array("parentid" => $this->data["parentid"]));
+				else {
+					$i = 0;
+					$sort = 0;
+					foreach(DataObject::get("pages", array("parentid" => $this->data["parentid"])) as $record) {
+						if($record->id != $this->id) {
+							$record->sort = $i;
+							$record->writeSilent(false, true, $this->isOrgPublished() ? 2 : 1, false);
+							logging("Write Record " . $record->id . " to sort " . $i);
+						} else {
+							$sort = $i;
+						}
+						$i++;
+					}
+					
+					$this->data["sort"] = $sort;
+				}
+			}
 		}
 		
 		//!Validators
