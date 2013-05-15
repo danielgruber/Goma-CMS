@@ -307,16 +307,16 @@ class i18n extends Object
 		// if a user want to have another language
 		if(isset($_GET['locale']) && !empty($_GET["locale"]))
 		{
-			if(self::LangExists(LANGUAGE_DIRECTORY . $_GET["locale"]))
+			if(self::LangExists($_GET["locale"]))
 				return $_GET['locale'];
 		} else if(isset($_POST['locale']) && !empty($_POST["locale"]))
 		{
-			if(self::LangExists(LANGUAGE_DIRECTORY . $_POST["locale"]))
+			if(self::LangExists($_POST["locale"]))
 				return $_POST['locale'];
 		}
 
 		// define current language
-		if(isset($_SESSION['lang']) && !empty($_SESSION["lang"]) && self::LangExists(LANGUAGE_DIRECTORY . $_SESSION["lang"])) {
+		if(isset($_SESSION['lang']) && !empty($_SESSION["lang"]) && self::LangExists($_SESSION["lang"])) {
 			return $_SESSION["lang"];
 		} else if(defined("PROJECT_LANG")) {
 			return PROJECT_LANG;
