@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 09.12.2012
-  * $Version: 2.0.3
+  * last modified: 12.05.2013
+  * $Version: 2.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -500,75 +500,7 @@ class SelectQuery extends Object
 					}
 				}
 				
-				
-				// some added caches ;)
-				if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
-					if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
-						// comma
-						if(isset($i)) {
-							if($i != 0) {
-								$sql .= ", ";
-							}
-						}
-						
-						$sql .= self::$new_field_cache[$from]["colidingSQL"];
-					}
-						
-					// i
-					if(isset($i)) {
-						$i += self::$new_field_cache[$from]["colidingSQLi"];
-					} else {
-						$i = self::$new_field_cache[$from]["colidingSQLi"];
-					}
-					
-				} else {	
-					$colidingSQL = "";
-					$a = 0;
-					
-					// fix coliding fields
-					foreach($colidingFields as $field => $tables) {
-						
-						if($a == 0)
-							$a++;
-						else
-							$colidingSQL .= ", ";
-						
-						if(is_string($tables)) {
-							if(strpos($tables, ".")) {
-								$colidingSQL .= $tables;
-							} else {
-								$colidingSQL .= $tables . "." . $field . " AS " . $field . " ";
-							}
-							continue;
-						}
-						
-						$colidingSQL .= " CASE ";
-						foreach($tables as $table) {
-							
-							$colidingSQL .= " WHEN ".$table.".".$field." IS NOT NULL THEN ".$table.".".$field." ";
-						}
-						$colidingSQL .= " ELSE NULL END AS ".$field."";
-					}
-					
-					self::$new_field_cache[$from]["colidingSQL"] = $colidingSQL;
-					self::$new_field_cache[$from]["colidingSQLi"] = $a;
-					
-					// comma
-					if(isset($i) && $a != 0) {
-						if($i != 0) {
-							$sql .= ", ";
-						}
-					}
-					$sql .= $colidingSQL;
-					
-					// i
-					if(isset($i)) {
-						$i += $a;
-					} else {
-						$i = $a;
-					}
-					unset($colidingSQL);
-				}
+				$sql .= $this->generateColidingSQL($from, $colidingFields, $i);
 				
 				foreach($fields as $key => $field) {
 					// some basic filter
@@ -608,6 +540,8 @@ class SelectQuery extends Object
 				
 			} else if(is_string($fields)) {
 				$sql .= " ".$fields." ";
+				/*$i = 1;
+				$sql .= $this->generateColidingSQL($from, $colidingFields, $i);*/
 			}
 			
 			
@@ -700,11 +634,89 @@ class SelectQuery extends Object
 			} else if(!empty($this->limit))
 				$sql .= " LIMIT " . $this->limit;
 			
+
 			
 			unset($DBFields, $colidingFields);
 			if(PROFILE) Profiler::unmark("SelectQuery::build");
 				
 			return $sql;
+		}
+		
+		/**
+		 * generates the coliding SQL
+		 *
+		 *@name generateColidingSQL
+		*/
+		public function generateColidingSQL($from, $colidingFields, &$i) {
+			// some added caches ;)
+			if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
+				$colidingSQL = "";
+				if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
+					// comma
+					if(isset($i)) {
+						if($i != 0) {
+							$colidingSQL = ", ";
+						}
+					}
+				}
+					
+				// i
+				if(isset($i)) {
+					$i += self::$new_field_cache[$from]["colidingSQLi"];
+				} else {
+					$i = self::$new_field_cache[$from]["colidingSQLi"];
+				}
+				
+				return $colidingSQL . self::$new_field_cache[$from]["colidingSQL"];
+			} else {	
+				$colidingSQL = "";
+				$a = 0;
+				
+				// fix coliding fields
+				foreach($colidingFields as $field => $tables) {
+					
+					if($a == 0)
+						$a++;
+					else
+						$colidingSQL .= ", ";
+					
+					if(is_string($tables)) {
+						if(strpos($tables, ".")) {
+							$colidingSQL .= $tables;
+						} else {
+							$colidingSQL .= $tables . "." . $field . " AS " . $field . " ";
+						}
+						continue;
+					}
+					
+					$colidingSQL .= " CASE ";
+					foreach($tables as $table) {
+						
+						$colidingSQL .= " WHEN ".$table.".".$field." IS NOT NULL THEN ".$table.".".$field." ";
+					}
+					$colidingSQL .= " ELSE NULL END AS ".$field."";
+				}
+				
+				self::$new_field_cache[$from]["colidingSQL"] = $colidingSQL;
+				self::$new_field_cache[$from]["colidingSQLi"] = $a;
+				
+				// comma
+				if(isset($i) && $a != 0) {
+					if($i != 0) {
+						$colidingSQL = ", " . $colidingSQL;
+					}
+				}
+				
+				
+				// i
+				if(isset($i)) {
+					$i += $a;
+				} else {
+					$i = $a;
+				}
+				
+				return $colidingSQL;
+			}
 		}
 		
 		/**
