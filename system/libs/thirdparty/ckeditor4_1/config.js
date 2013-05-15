@@ -13,25 +13,27 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'document', items : [ 'Source'/*,'-','Templates'*/] },
 		{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
 		{ name: 'clipboard', items : [ 'Cut','PasteText','PasteFromWord','-','Undo','Redo' ] },
-		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
+		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','-','RemoveFormat' ] },
 		{ name: 'justify', items: ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
-		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] },
+		{ name: 'tools', items : [ 'Maximize' ] },
 		'/',
 		{ name: 'insert', items : [ 'Image','Table','Symbol','PageBreak'] },
-		{ name: 'styles', items : [ 'Styles','Format','Font','FontSize' ] },
+		{ name: 'styles', items : [ 'Styles','Format' ] },
 		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		{ name: 'tools', items : [ 'Maximize', 'About' ] },
 		{ name: 'editing', items : [ 'Find','Replace' ,'BidiLtr','BidiRtl' ] },
-		{ name: "Scayt", items: ["Scayt"]}
+		{ name: "Scayt", items: ["Scayt"]},
+		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] }
 	];
 	
 	CKEDITOR.config.floatingtools = 'Basic';
 	CKEDITOR.config.floatingtools_Basic =
 	[
-		['Font','FontSize', '-', 'Bold', 'Italic', 'underline', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
+		['Bold', 'Italic', 'Underline','-','RemoveFormat', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
 	];
 	
 	config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
 	config.autoGrow_onStartup = true;
-	config.allowedContent = true
+	config.allowedContent = true;
+	
+	config.fillEmptyBlocks = false; // Prevent filler nodes in all empty blocks.
 };
