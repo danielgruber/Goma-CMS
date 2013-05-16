@@ -30,22 +30,22 @@ class AutoCompleterField extends ControllerExtension {
 	 * adds the info to the field
 	*/
 	public function beforeField() {
-		if(isset($this->owner->autocomplete) && $this->owner->autocomplete) {
+		if(isset($this->owner->autocomplete) && ($this->owner->autocomplete === true || is_object($this->owner->autocomplete))) {
 			if(is_a($this->owner->autocomplete, "DataSet")) {
 				$this->data = $this->owner->autocomplete;
 			} else if(is_a($this->owner->Form()->result, "ViewAccessableData")) {
 				//echo $this->owner->Form()->result->dataClass;
 				$this->data = DataObject::get($this->owner->Form()->result->dataClass);
 			}
+			
+			gloader::load("autocomplete");
+			Resources::addJS('$(function(){
+				$("#'.$this->owner->ID().'").autocomplete({
+					minLength: 1,
+					source: "'.$this->owner->externalURL().'/autocomplete_search"
+				});
+			});');
 		}
-		
-		gloader::load("autocomplete");
-		Resources::addJS('$(function(){
-			$("#'.$this->owner->ID().'").autocomplete({
-				minLength: 1,
-				source: "'.$this->owner->externalURL().'/autocomplete_search"
-			});
-		});');
 	}
 	
 	/**
