@@ -5,10 +5,10 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 15.11.2012
-  * $Version - 1.0
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.05.2013
+  * $Version - 1.0.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -199,7 +199,7 @@ class tableField extends FormField {
 		if(Object::method_exists($record, $fieldName)) {
 			return $record->$fieldName();
 		} else {
-			return $record->$fieldName;
+			return $record->getTemplateVar($fieldName);
 		}
 	}
 	
