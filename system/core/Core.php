@@ -1097,12 +1097,13 @@ class Dev extends RequestHandler
 		 *@access public
 		*/
 		public function cleanUpVersions() {
+			$log = "";
 			foreach(ClassInfo::getChildren("DataObject") as $child) {
 				if(ClassInfo::getParentClass($child) == "dataobject") {
 					$c = new $child;
-					if($c->versioned) {
-						$log = "";
-						$baseTable = ClassInfo::$class_info[$child]["table_name"];
+					if(DataObject::versioned($child)) {
+						
+						$baseTable = ClassInfo::$class_info[$child]["table"];
 						if(isset(ClassInfo::$database[$child . "_state"])) {
 							// first get ids NOT to delete
 							
@@ -1130,7 +1131,7 @@ class Dev extends RequestHandler
 							// now delete
 							
 							// first generate tables
-							$tables = array(ClassInfo::$class_info[$child]["table_name"]);
+							$tables = array(ClassInfo::$class_info[$child]["table"]);
 							foreach(ClassInfo::dataClasses($child) as $class => $table) {
 								if($baseTable != $table && isset(ClassInfo::$database[$table])) {
 									$tables[] = $table;
@@ -1144,13 +1145,13 @@ class Dev extends RequestHandler
 								else
 									$log .= '<div><img src="images/16x16/del.png" height="16" alt="Loading..." /> Failed to delete versions of '.$table.'</div>';
 							}			
-							
-	 	 					return '<h3>DB-Cleanup</h3>' . $log;
 						}
 						
 					}
 				}
 			}
+			
+			return '<h3>DB-Cleanup</h3>' . $log;
 		}
 		
 		/**

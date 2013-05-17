@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 04.05.2013
+  * last modified: 17.05.2013
 */
 
 if(typeof goma.AddOnStore == "undefined") {
@@ -87,8 +87,11 @@ if(typeof goma.AddOnStore == "undefined") {
 				    goma.AddOnStore.frame.onload = helloToStore;
 	            else
 	                goma.AddOnStore.frame.attachEvent("onload", helloToStore);
-	               
-	            window.addEventListener('message', ReactToMessage, true);
+	            
+	            if(window.addEventListener)   
+	            	window.addEventListener('message', ReactToMessage, true);
+	            else
+	            	window.onmessage = ReactToMessage;
 			});
 			
 			

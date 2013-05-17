@@ -767,7 +767,11 @@ class mysqliDriver extends object implements SQLDriver
 														(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 													)
 													{	
-															$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+															if(isset($data["ignore"]) && $data["ignore"])
+																$sql = "UPDATE IGNORE ".DB_PREFIX.$table_name." SET ";
+															else
+																$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+																
 															$i = 0;
 															foreach($data["fields"] as $field => $value)
 															{
@@ -816,7 +820,11 @@ class mysqliDriver extends object implements SQLDriver
 												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
-													$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
+													if(isset($data["ignore"]) && $data["ignore"])
+														$sql = 'INSERT IGNORE INTO '.DB_PREFIX.$table_name.' ';
+													else
+														$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
+													
 													$fields = ' (';
 													$values = ' VALUES (';
 													

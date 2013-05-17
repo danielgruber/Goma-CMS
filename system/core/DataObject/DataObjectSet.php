@@ -2134,7 +2134,8 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 				"table_name"=> $this->relationTable,
 				"fields"	=> array(
 					
-				)
+				),
+				"ignore"	=> true
 			)
 		);
 		
@@ -2175,6 +2176,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			}
 		}
 		
+		$this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writtenIDs, $writeExtraFields);
 		$this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writtenIDs, $writeExtraFields);
 		if(SQL::manipulate($manipulation)) {
 			return true;

@@ -779,12 +779,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	
 	/**
 	 * before manipulating the data
+	 *
 	 *@name onbeforeManipulate
 	 *@access public
 	 *@param manipulation
 	*/
 	public function onbeforeManipulate(&$manipulation, $job)
 	{
+		
+	}
+	
+	/**
+	 * before manipulating many-many data over @link ManyMany_DataObjectSet::write
+	 *
+	 *@name onBeforeManipulateManyMany
+	*/
+	public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writtenIDs, $writeExtraFields) {
 		
 	}
 	
@@ -2229,6 +2239,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 		} else if(isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
 			if(isset($this->data[$relname . "ids"]))
 				return $this->data[$relname . "ids"];
+			
+			if(isset($this->data[$relname]) && is_a($this->data[$relname], "ManyMany_DataObjectSet")) {
+				
+			}
 			
 			/**
 			 * there is the var many_many_tables, which contains data for the table, which stores the relation

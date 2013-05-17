@@ -1641,7 +1641,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		$tables = ClassInfo::Tables("user");
 		$tables = array_merge($tables, ClassInfo::Tables("history"));
-		$tables = array_merge($tables, ClassInfo::Tables("permission"));
+		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
 				$tables = array_merge($tables, ClassInfo::Tables($model));
