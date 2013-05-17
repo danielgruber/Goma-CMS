@@ -5,9 +5,9 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 28.04.2013
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.05.2013
   * $Version - 1.0.1
  */
  
@@ -220,6 +220,11 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 		$spec = $this->fieldFormatting[$fieldName];
 		if(is_callable($spec)) {
 			return $spec($value, $data);
+		} else if(is_array($spec)) {
+			if(isset($spec[$value]))
+				return $spec[$value];
+			
+			return $value;
 		} else {
 				
 			$format = str_replace('$value', "__VAL__", $spec);
