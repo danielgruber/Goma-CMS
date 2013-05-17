@@ -17,10 +17,10 @@
 	border: 1px solid #bbb;
 	border-spacing: 0;
 }
-.tablefield-table fieldset {
-	margin: 0;
-	padding: 0;
-	border: 0;
+.tablefield-table fieldset, .tablefield-fieldset .tablefield-table fieldset {
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
 }
 .tablefield-table fieldset legend {
 	display: none;
