@@ -371,7 +371,11 @@ class DBField extends Object implements DataBaseField
 	public function __call($name, $args) {
 		if(DEV_MODE) {
 			$trace = debug_backtrace();
-			log_error('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+			if(isset($trace[0]['file']))
+				log_error('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+			else
+				log_error('Warning: Call to undefined method ' . $this->class . '::' . $name);
+			
 			if(DEV_MODE)
 		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
 		}
@@ -476,7 +480,10 @@ class DBField extends Object implements DataBaseField
 			$args = array();
 		}
 		
-		return call_user_func_array(array($this, $var), $args);
+		if(Object::method_exists($this, $var))
+			return call_user_func_array(array($this, $var), $args);
+		
+		return null;
 	}
 	
 	/**
