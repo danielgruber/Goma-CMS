@@ -17,10 +17,10 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'justify', items: ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
 		{ name: 'tools', items : [ 'Maximize' ] },
 		'/',
-		{ name: 'insert', items : [ 'Image','Table','Symbol','PageBreak'] },
+		{ name: 'insert', items : [ 'Image','Table','PageBreak'] },
 		{ name: 'styles', items : [ 'Styles','Format' ] },
 		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		{ name: 'editing', items : [ 'Find','Replace' ,'BidiLtr','BidiRtl' ] },
+		{ name: 'editing', items : [ 'BidiLtr','BidiRtl' ] },
 		{ name: "Scayt", items: ["Scayt"]},
 		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] }
 	];
@@ -28,12 +28,20 @@ CKEDITOR.editorConfig = function( config ) {
 	CKEDITOR.config.floatingtools = 'Basic';
 	CKEDITOR.config.floatingtools_Basic =
 	[
-		['Bold', 'Italic', 'Underline','-','RemoveFormat', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
+		['Format', 'Bold', 'Italic', 'Underline','-','RemoveFormat', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
 	];
 	
 	config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
 	config.autoGrow_onStartup = true;
 	config.allowedContent = true;
 	
-	config.fillEmptyBlocks = false; // Prevent filler nodes in all empty blocks.
+	config.fillEmptyBlocks = function( element )
+	{
+		if ( element.attributes[ 'class' ].indexOf ( 'clear' ) != -1 )
+			return false;
+		
+		if ( element.is("span") || element.is("strong") || element.is("em") || element.is("u") || element.is("b") )
+			return false;
+	}
+	//config.fillEmptyBlocks = false; // Prevent filler nodes in all empty blocks.
 };

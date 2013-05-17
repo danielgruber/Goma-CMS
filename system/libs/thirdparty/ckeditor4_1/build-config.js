@@ -26,6 +26,8 @@ var CKBUILDER_CONFIG = {
 	plugins : {
 		'about' : 1,
 		'a11yhelp' : 1,
+		'basicstyles' : 1,
+		'blockquote' : 1,
 		'clipboard' : 1,
 		'contextmenu' : 1,
 		'resize' : 1,
@@ -73,12 +75,15 @@ var CKBUILDER_CONFIG = {
 		'tableresize' : 1,
 		'sharedspace' : 1,
 		'floating-tools' : 1,
-		'basicstyles' : 1,
-		'blockquote' : 1,
 		'dialogadvtab' : 1,
 		'panelbutton' : 1,
 		'colorbutton' : 1,
 		'colordialog' : 1,
+		'justify' : 1,
+		'symbol' : 1,
+		'showborders' : 1,
+		'liststyle' : 1,
+		'font' : 1,
 		'find' : 1
 	},
 	languages : {
