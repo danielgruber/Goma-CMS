@@ -1,19 +1,16 @@
 <?php
-/** >
- /*****************************************************************
- * Goma - Open Source Content Management System
- * if you see this text, please install PHP 5.3 or higher        *
- *****************************************************************
- *@package goma framework
- *@subpackage framework loader
- *@link http://goma-cms.org
- *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- *@author Goma-Team
- * last modified: 17.03.2013
- * $Version 1.0.1
+/**
+ * This file provides necessary functions for Goma.
+ *
+ * @package		Goma\Framework
+ *
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author		Goma-Team
+ *
+ * @version		1.0.1
  */
 
-defined("IN_GOMA") OR die("");
+defined("IN_GOMA") OR die();
 
 /**
  * this loads a lang file in the languages-directory
