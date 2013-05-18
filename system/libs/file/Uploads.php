@@ -668,6 +668,10 @@ class ImageUploads extends Uploads {
 	 *@name manageURL
 	*/
 	public function manageURL($file) {
+		if(substr($file, 0, strlen("index.php")) == "index.php") {
+			$file = substr($file, strlen("index.php/"));
+		}
+		
 		FileSystem::requireDir(dirname($file));
 		FileSystem::write($file . ".permit", 1);
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
