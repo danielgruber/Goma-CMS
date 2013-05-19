@@ -1,28 +1,36 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 16.05.2013
-  * $Version: 1.0
-*/
+ * Table-Field plugin to create a link in the action-column with custom HTML between the a-tags.
+ *
+ * @package     Goma\Form-Framework\TableField
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.0
+ */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldActionLink implements TableField_ColumnProvider {
 	/**
-	 * constructor
-	*/
+	 * Constructor.
+	 *
+	 * @param   string $destination link-URL with params replaced by data of record
+	 * @param   string $inner HTML between a-tags
+	 * @param	boolean|string|callback $requirePerm how to check if permissions is required
+	 */
 	public function __construct($destination, $inner, $requirePerm) {
 		$this->destination = $destination;
 		$this->inner = $inner;
 		$this->requirePerm = $requirePerm;
 	}
+	
+	
 	/**
-	 * Add a column 'Actions'
+	 * Add a column 'Actions'.
 	 * 
-	 * @param type $tableField
+	 * @param TableField $tableField
 	 * @param array $columns 
 	 */
 	public function augmentColumns($tableField, &$columns) {
@@ -31,11 +39,12 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	}
 	
 	/**
-	 * Return any special attributes that will be used for the column
+	 * Return any special attributes that will be used for the column.
 	 *
 	 * @param GridField $tableField
 	 * @param DataObject $record
 	 * @param string $columnName
+	 *
 	 * @return array
 	 */
 	public function getColumnAttributes($tableField, $record, $columnName) {
@@ -43,10 +52,11 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	}
 	
 	/**
-	 * Add the title 
+	 * Add the title.
 	 * 
 	 * @param TableField $tableField
 	 * @param string $columnName
+	 *
 	 * @return array
 	 */
 	public function getColumnMetadata($tableField, $columnName) {
@@ -56,9 +66,10 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	}
 	
 	/**
-	 * Which columns are handled by this component
+	 * Which columns are handled by this component.
 	 * 
 	 * @param type $tableField
+	 *
 	 * @return type 
 	 */
 	public function getColumnsHandled($tableField) {
@@ -66,10 +77,12 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	}
 	
 	/**
+	 * generates the content of the column "Actions".
 	 *
 	 * @param TableField $tableField
 	 * @param DataObject $record
 	 * @param string $columnName
+	 *
 	 * @return string - the HTML for the column 
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {

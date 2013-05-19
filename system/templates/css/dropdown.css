@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 24.12.2012
+  * last modified: 18.05.2013
 */
 .dropdownContainer .info_field {
 	padding-left: 6px !important;
@@ -81,7 +81,7 @@
 	-webkit-overflow-scrolling: touch;
 	z-index: 999;
 }
-.widgetwrapper .dropdown_widget .dropdown .header {
+.dropdown_widget .dropdown .header {
 	background: #fff;
 	border-bottom: 1px solid #ccc;
 	margin: 0;
@@ -220,6 +220,10 @@
 	
 }
 
+.dropdown_widget .dropdown .footer {
+	display: none;
+}
+
 .dropdown_widget .dropdown .no_data {
 	padding: 5px;
 	text-align: center;
@@ -238,8 +242,4 @@
 	.dropdown_widget .dropdown {
 		width: 408px;
 	}
-}
-
-.pos-relative {
-	position: static !important;
 }

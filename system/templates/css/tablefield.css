@@ -261,6 +261,11 @@
 	margin: -8px;
 }
 
+.tablefield-table .actionLink {
+	margin: 5px;
+}
+
+
 /* here goes some retina-stuff */
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),

@@ -1,14 +1,16 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 08.04.2013
-  * $Version: 2.2.7
-*/
+ * This class is the basic class for each controller of goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
+ *
+ * @package     Goma\Framework\Controller
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.2.7
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined("IN_GOMA") OR die();
 
 class RequestHandler extends Object
 {
@@ -91,10 +93,12 @@ class RequestHandler extends Object
 		}
 		
 		/**
-		 * init-function
-		 *@name init
-		 *@access public
-		*/
+		 * Inits the RequestHandler with a request-object.
+		 * 
+		 * It generates the current URL-namespace ($this->namespace) and registers the Controller as an activeController in Core as Core::$activeController
+		 *
+		 * @param   Request $request The Request Object
+		 */
 		public function Init($request = null)
 		{
 			if(isset($request))
@@ -345,7 +349,7 @@ class RequestHandler extends Object
 		*/
 		public function getParam($param, $useall = true)
 		{
-				if(isset($this->request)) {
+				if(isset($this->request) && is_a($this->request, "request")) {
 					return $this->request->getParam($param, $useall);
 				}
 				
