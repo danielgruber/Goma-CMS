@@ -2,10 +2,10 @@
 /**
  * This file provides necessary functions for Goma.
  *
- * @package		Goma\Framework
+ * @package		Goma\System\Core
  *
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
  * @version		1.0.1
  */
@@ -13,43 +13,44 @@
 defined("IN_GOMA") OR die();
 
 /**
- * this loads a lang file in the languages-directory
+ * Load a language file from /languages.
  *
- *@name loadlang
- *@param name string filename
- *@param dir string subdirectory
+ * @param	string $name Filename
+ * @param	string $directory Subdirectory
+ *
+ * @return	void
  */
-function loadlang($name = "lang", $dir = "") {
-	i18n::addLang($dir . '/' . $name);
+function loadlang($name = "lang", $directory = "") {
+	i18n::addLang($directory . '/' . $name);
 }
 
 /**
- * generates a random string
+ * Generates a random string.
  *
- *@name randomString
- *@param len numeric length of the string
- *@param numeric bool if numbers are allowed
- *@return string
+ * @param	int $length Length of the string.
+ * @param	boolean $numeric Are numbers allowed?
+ *
+ * @return	string
  */
-function randomString($len, $numeric = true) {
+function randomString($length, $numeric = true) {
 	$possible = "ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 	if ($numeric === true) {
 		$possible .= "123456789";
 	}
 	$s = "";
-	for ($i = 0; $i < $len; $i++) {
+	for ($i = 0; $i < $length; $i++) {
 		$s .= $possible{mt_rand(0, strlen($possible) - 1)};
 	}
 	return $s;
 }
 
 /**
- * returns either the localized string for $name (if available) or a $default
+ * Looks up for a localized version of a string.
  *
- *@name lang
- *@param name string
- *@param default string
- *@return string
+ * @param	string $name Name identifier for the string.
+ * @param	string $default Default value for non existent localized strings.
+ *
+ * @return	string Localized string or $default
  */
 function lang($name, $default = "") {
 	if (isset($GLOBALS["lang"][$name])) {
@@ -66,45 +67,42 @@ function lang($name, $default = "") {
 }
 
 /**
- * right management
- */
-
-/**
- * checks if a group have the rights
+ * Checks a specific right for a group.
  *
- *@name advrights
- *@param name string right name
- *@param rang string group name
- *@return bool
+ * @param	string $name Name identifier of the right.
+ * @param	string $group Name identifier of the group.
+ *
+ * @return	boolean
  */
-function advrights($name, $rang) {
-	return Permission::advrights($name, $rang);
+function advrights($right, $group) {
+	return Permission::advrights($right, $group);
 }
 
 /**
- * checks rights
+ * Checks a specific right for the current user.
  *
- *@name right
- *@param r string right
- *@return bool
+ * @param string r Name identifier of the right.
+ *
+ * @return boolean
  */
-function right($r) {
-	return Permission::check($r);
+function right($right) {
+	return Permission::check($right);
 }
 
 /**
+ * Merges arrays recursive.
+ *
  * Merges any number of arrays / parameters recursively, replacing
  * entries with string keys with values from latter arrays.
  * If the entry or the next value to be assigned is an array, then it
  * automagically treats both arguments as an array.
  * Numeric entries are appended, not replaced, but only if they are
- * unique
+ * unique.
  *
- * calling: result = array_merge_recursive_distinct(a1, a2, ... aN)
+ * @author	mark dot roduner at gmail dot com
+ * @link	http://php.net/manual/de/function.array-merge-recursive.php
  *
- * thanks to mark dot roduner at gmail dot com
- *
- *@link http://php.net/manual/de/function.array-merge-recursive.php
+ * @return	array
  **/
 function array_merge_recursive_distinct() {
 	$arrays = func_get_args();
@@ -133,12 +131,15 @@ function array_merge_recursive_distinct() {
 }
 
 /**
- * instead of storing many data in a session (slow), it will be stored into a file and can be accessed with a key
+ * Stores session data in a file.
  *
- *@name session_store
- *@param key string access key
- *@param data mixed data to store
- *@return bool
+ * Because storing many data in a session is slow, the data is stored in a file.
+ * This data can be accessed with an ID, that is stored in the session instead.
+ *
+ * @param	string $key Data identification key
+ * @param	mixed $data The data, that has to be stored.
+ *
+ * @return	bool Success
  */
 function session_store($key, $data) {
 	if (isset($_SESSION["store"][$key]))
@@ -153,11 +154,11 @@ function session_store($key, $data) {
 }
 
 /**
- * gets data, that has been stored with session_store
+ * Accesses session data.
  *
- *@name session_restore
- *@param key string access key
- *@return mixed data on success, otherwise false
+ * @param	string $key Data identification key
+ *
+ * @return	mixed Data on success, otherwise false.
  */
 function session_restore($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -170,11 +171,11 @@ function session_restore($key) {
 }
 
 /**
- * checks, if a key is linked with session_stored data in the actual session
+ * Checks for a key, if he is linked with session data.
  *
- *@name session_store_exists
- *@param key string
- *@return bool
+ * @param	string $key Data identification key
+ *
+ * @return	boolean
  */
 function session_store_exists($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -187,11 +188,11 @@ function session_store_exists($key) {
 }
 
 /**
- * checks, if there exists session data for an id
+ * Checks for an ID, if it is linked with session data.
  *
- *@name session_store_exists_byID
- *@param id string
- *@return bool
+ * @param	string $id Data identification ID
+ *
+ * @return	boolean
  */
 function session_store_exists_byID($id) {
 	$id = basename($id);
@@ -199,11 +200,11 @@ function session_store_exists_byID($id) {
 }
 
 /**
- * gets the session data by an id
+ * Accesses session data by ID.
  *
- *@name session_store_exists_byID
- *@param id string
- *@return mixed data on success, otherwise false
+ * @param	string $id Data identification ID
+ *
+ * @return	mixed Data on success, otherwise false.
  */
 function session_restore_byID($id) {
 	$id = basename($id);
@@ -215,12 +216,12 @@ function session_restore_byID($id) {
 }
 
 /**
- * binds a session key to an id
+ * Binds a session data key to an ID.
  *
- *@name bindSessionKeyToID
- *@param id string
- *@param key string
- *@return bool
+ * @param	string $id Data identification ID
+ * @param	string $key Data identification key
+ *
+ * @return	boolean
  */
 function bindSessionKeyToID($id, $key) {
 	if (session_store_exists_byID($id)) {
@@ -232,11 +233,11 @@ function bindSessionKeyToID($id, $key) {
 }
 
 /**
- * gets the id for a session_store key
+ * Gets the linked ID from a session data key.
  *
- *@name getStoreID
- *@param key string
- *@return mixed id on success, otherwise false
+ * @param	string $key Data identification key
+ *
+ * @return	mixed ID on success, otherwise false.
  */
 function getStoreID($key) {
 	if (isset($_SESSION["store"][$key]))
@@ -245,56 +246,58 @@ function getStoreID($key) {
 		return false;
 }
 
-/**
- * returns a redirect-uri for inserting into and uri or elsewhere
- *
- *@name getRedirect
- */
 function getRedirect($parentDir = false) {
+	// AJAX Request
 	if (Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
 		return htmlentities($_SERVER["HTTP_X_REFERER"], ENT_COMPAT, "UTF-8", false);
 	}
+
 	if ($parentDir) {
+
 		if (isset($_GET["redirect"])) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
-			/*} else if(isset($_POST["redirect"])) {
-			 return $_POST["redirect"];
-			 */
 		} else {
+			// TODO What is with redirect from other sites with other URLEND?
 			if (URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
 				return htmlentities(substr($uri, 0, strrpos($uri, "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			} else {
 				return htmlentities(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			}
+
 		}
+
 	} else {
+
 		if (isset($_GET["redirect"])) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
-			/*} else if(isset($_POST["redirect"])) {
-			 return $_POST["redirect"];
-			 */
 		} else {
 			return htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, "UTF-8", false);
 		}
+
 	}
 }
 
 function getRedirection($parentDir = true) {
 	if ($parentDir) {
+
 		if (isset($_GET["redirect"])) {
 			return convert::raw2text($_GET["redirect"]);
 		} else if (isset($_POST["redirect"])) {
 			return convert::raw2text($_POST["redirect"]);
 		} else {
+
 			if (URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
 				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
 				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
+
 		}
+
 	} else {
+
 		if (isset($_GET["redirect"])) {
 			return convert::raw2text($_GET["redirect"]);
 		} else if (isset($_POST["redirect"])) {
@@ -302,6 +305,7 @@ function getRedirection($parentDir = true) {
 		} else {
 			return BASE_URI . BASE_SCRIPT;
 		}
+
 	}
 }
 

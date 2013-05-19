@@ -1,16 +1,13 @@
 <?php
-/** >
- /*****************************************************************
- * Goma - Open Source Content Management System
- * if you see this text, please install PHP 5.3 or higher        *
- *****************************************************************
- *@package goma framework
- *@subpackage framework loader
- *@link http://goma-cms.org
- *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- *@author Goma-Team
- * last modified: 06.03.2013
- * $Version 2.6.8
+/**
+ * Main file of Goma-CMS.
+ * 
+ * @package		Goma\System
+ * 
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * 
+ * @version		2.6.8
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -42,7 +39,6 @@ if (ini_get('safe_mode')) {
 } else {
 	define("IN_SAFE_MODE", false);
 }
-
 
 /* --- */
 
@@ -124,16 +120,16 @@ defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJ
 chdir(ROOT);
 
 /*$f = @disk_free_space("/");
-if($f !== null && $f !== "" && $f !== false) {
-	// check for disk-quote
-	$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-	define("GOMA_FREE_SPACE", $free);
-	if($free / 1024 / 1024 < 10) {
-		header("HTTP/1.1 500 Server Error");
-		die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-	}
-} else {*/
-	define("GOMA_FREE_SPACE", 100000000000);
+ if($f !== null && $f !== "" && $f !== false) {
+ // check for disk-quote
+ $free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+ define("GOMA_FREE_SPACE", $free);
+ if($free / 1024 / 1024 < 10) {
+ header("HTTP/1.1 500 Server Error");
+ die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+ }
+ } else {*/
+define("GOMA_FREE_SPACE", 100000000000);
 //}
 
 // require data
@@ -259,13 +255,13 @@ if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
 
 // some hacks for changes in .htaccess
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 404")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 ".ROOT_PATH."system/application.php", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 " . ROOT_PATH . "system/application.php", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
 }
 
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 500")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 ".ROOT_PATH."system/templates/framework/500.html", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 " . ROOT_PATH . "system/templates/framework/500.html", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
 }
@@ -387,11 +383,10 @@ function loadApplication($directory) {
 			Core::$site_mode = SITE_MODE;
 
 			if (isset($domaininfo["sql_driver"])) {
-				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver" ]);
-				}
+				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver"]);
+			}
 
-				} else {			define(
-			"DATE_FORMAT", "d.m.Y - H:i");
+		} else {			define("DATE_FORMAT", "d.m.Y - H:i");
 			Core::setCMSVar("TIMEZONE", DEFAULT_TIMEZONE);
 		}
 
