@@ -1,64 +1,47 @@
 <?php
-/**
- * @package		Goma\System\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
 
 defined("IN_GOMA") OR die();
 
 /**
  * This class generates the class manifest.
  *
- * @package		Goma\System\Core
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package		Goma\Framework
  * @version		3.3.1
  */
 class ClassManifest {
 	/**
-	 * files, which should be loaded in each request
-	 *
-	 *@name reload
+	 * Files, that are loaded at each request.
 	 */
 	public static $preload = array();
 
 	/**
-	 * class-cache
-	 *
-	 *@name classes
-	 *@access private
+	 * Class cache.
 	 */
 	public static $classes = array();
 
 	/**
-	 * this var contains all directories, which will scanned recursivly
-	 *
-	 *@name directories
-	 *@access public
+	 * Array of all directories, that will be scanned recursively.
 	 */
 	static public $directories = array('system');
 
 	/**
-	 * which classes are already loaded?
-	 *
-	 *@name loaded
-	 *@access public
+	 * List of classes, that are already loaded.
 	 */
 	public static $loaded = array("classinfo" => true, "core" => true, "object" => true, "sql" => true, "requesthandler" => true, "dev" => true, "tplcaller" => true, "tplcacher" => true);
+
 	/**
-	 * class aliases
-	 *
-	 *@name class_alias
-	 *@access private
-	 *@var array
+	 * List of class aliases.
 	 */
 	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "unittestcase" => "Object", "testsuite" => "Object");
 
 	/**
-	 * loads a class
+	 * Loads a class.
 	 *
-	 *@name load
-	 *@access public
+	 * @param	string $class Classname
+	 *
+	 * @return	void
 	 */
 	public static function load($class) {
 
@@ -91,10 +74,11 @@ class ClassManifest {
 	}
 
 	/**
-	 * registers a file as loaded
-	 *
-	 *@name registerLoaded
-	 *@access public
+	 * Registers a loaded file.
+	 * 
+	 * @param	string $file Filename
+	 * 
+	 * @return	boolean
 	 */
 	public static function registerLoaded($file) {
 		if (count($keys = array_keys(ClassInfo::$files, $file)) > 0) {
@@ -108,10 +92,13 @@ class ClassManifest {
 	}
 
 	/**
-	 * generates the class manifest for all folders in this class
-	 *
-	 *@name generate_all_class_manifest
-	 *@access public
+	 * Generates class manifest for all in $directories defined folders.
+	 * 
+	 * @param	string &$classes
+	 * @param	string &class_info
+	 * @param	array[] &$env
+	 * 
+	 * @return	void
 	 */
 	public static function generate_all_class_manifest(&$classes, &$class_info, &$env) {
 		foreach (self::$directories as $dir) {
@@ -120,10 +107,13 @@ class ClassManifest {
 	}
 
 	/**
-	 * generates the class-manifest for a given directory
-	 *
-	 *@name generate_class_manifest
-	 *@access public
+	 * Generates the class-manifest for a given directory.
+	 * 
+	 * @param	string &$classes
+	 * @param	string &class_info
+	 * @param	array[] &$env
+	 * 
+	 * @return	boolean
 	 */
 	public static function generate_class_manifest($dir, &$classes, &$class_info, &$env) {
 		if (file_exists($dir . "/_exclude.php")) {
@@ -352,20 +342,20 @@ class ClassManifest {
 	}
 
 	/**
-	 * adds preloading
-	 *@name addPreload
-	 *@access public
-	 *@param string - file
+	 * Add file for preload array.
+	 *
+	 * @param string $file Filename
+	 * 
+	 * @return void
 	 */
 	public static function addPreload($file) {
 		self::$preload[$file] = $file;
 	}
 
 	/**
-	 * includes all files
-	 *
-	 *@name include_all
-	 *@access public
+	 * Include all files.
+	 * 
+	 * @return void
 	 */
 	public static function include_all() {
 		foreach (ClassInfo::$files as $class => $file) {
