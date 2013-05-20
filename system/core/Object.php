@@ -1,11 +1,4 @@
 <?php
-/**
- * @package		Goma\System\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
-
 defined("IN_GOMA") OR die();
 
 interface ExtensionModel {
@@ -16,7 +9,9 @@ interface ExtensionModel {
 /**
  * Base class for _every_ Goma class.
  *
- * @package		Goma\System\Core
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package		Goma\Framework
  * @version		3.2.2
  */
 abstract class Object {
@@ -43,26 +38,21 @@ abstract class Object {
 
 	/**
 	 * the current class-name in lowercase-letters
-	 *
-	 *@name class
-	 *@access public
 	 */
 	public $class;
 
 	/**
 	 * this variable has a value if the class belongs to an extension, else it is null
-	 *
-	 *@name inExtension
-	 *@access public
 	 */
 	public $inExpansion;
 
 	/**
-	 * get a static param for a class
-	 *@name getStatic
-	 *@access public
-	 *@param string - class_name
-	 *@param string - var_name
+	 * Gets the value of $class_name::$$var.
+	 *
+	 * @param	string $class_name Name of the class.
+	 * @param	string $var Name of the variable.
+	 *
+	 * @return	mixed Value of $var.
 	 */
 	public static function getStatic($class_name, $var) {
 		if (is_object($class_name))
@@ -80,11 +70,12 @@ abstract class Object {
 	}
 
 	/**
-	 * checks if a static var isset
-	 *@name hasStatic
-	 *@access public
-	 *@param string - class_name
-	 *@param string - var_name
+	 * Checks, if $class_name::$$var is set.
+	 * 
+	 * @param	string $class_name Name of the class.
+	 * @param	string $var Name of the variable.
+	 * 
+	 * @return	boolean
 	 */
 	public static function hasStatic($class_name, $var) {
 		if (is_object($class_name))
@@ -102,12 +93,13 @@ abstract class Object {
 	}
 
 	/**
-	 * checks if a static var isset
-	 *@name setStatic
-	 *@access public
-	 *@param string - class_name
-	 *@param string - var_name
-	 *@param mixed - value
+	 * Sets $value for $class_name::$$var.
+	 *
+	 * @param	string $class_name Name of the class.
+	 * @param	string $var Name of the variable.
+	 * @param	mixed $value
+	 * 
+	 * @return	void
 	 */
 	public static function setStatic($class_name, $var, $value) {
 		if (is_object($class_name))
@@ -126,8 +118,7 @@ abstract class Object {
 
 	/**
 	 * calls a static function
-	 *@name callStatic
-	 *@access public
+	 * 
 	 *@param string - class_name
 	 *@param string - func-name
 	 *@return mixed
