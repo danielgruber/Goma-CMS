@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 25.03.2013
+  * last modified: 20.05.2013
 */
 
 /* basics */
@@ -265,6 +265,14 @@
 	margin: 5px;
 }
 
+@media print {
+	.tablefield-table .col-buttons {
+		display: none;
+	}
+	.tablefield-table .sortable-header td .tablefield-sortable input {
+		background: none;
+	}
+};
 
 /* here goes some retina-stuff */
 @media
