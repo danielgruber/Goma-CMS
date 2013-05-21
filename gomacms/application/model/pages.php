@@ -1,14 +1,18 @@
-<?php
-/**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 15.05.2013
-  * $Version 2.5.7
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+/**
+ * Base-Class for each GomaCMS-Page.
+ *
+ * It defines basic fields like Title, Meta-Tags, Hierarchy and Permissions. It also implements Tree-Generation and History. 
+ * If you want to create a new page-type, you have to extend (@link Page).
+ *
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.6
+ */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 {
@@ -1053,7 +1057,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			// get ids that are NOT collapsed cause of current edit-node
 			$ids = array();
+			
+			// generate version
 			if(defined("EDIT_ID") && EDIT_ID != 0 && $d = DataObject::get_by_id("pages", EDIT_ID)) {
+				while($d->parent) {
+					$ids[] = $d->parent->id;
+					$d = $d->parent;
+				}
+			}
+			
+			// ajax-version
+			if(isset($_GET["edit_id"]) && $_GET["edit_id"] != 0 && $d = DataObject::get_by_id("pages", $_GET["edit_id"])) {
 				while($d->parent) {
 					$ids[] = $d->parent->id;
 					$d = $d->parent;
@@ -1626,11 +1640,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 }
 
 /**
- * extension for the template to use mainbar-methods
+ * Extends the TemplateCaller with some new methods to get content of pages.
  *
- *@name ContentTPLExtension
- *@access public
-*/
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0
+ */
 class ContentTPLExtension extends Extension {
 	/**
 	 * prepended content

@@ -1,11 +1,13 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 24.04.2013
-*/
-
+ * JavaScript for the simple two column admin-panel.
+ *
+ * @package     Goma\Admin\LeftAndMain
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.2.5
+ */
 
 var LaM_current_text = "";
 var LaM_type_timeout;
@@ -227,13 +229,13 @@ var LaM_type_timeout;
 		});
 	});
 	
-	w.reloadTree = function(fn) {
+	w.reloadTree = function(fn, openid) {
 		$(".treesearch form input[type=text]").val("");
-		updateWithSearch($(".treesearch form"), fn, true);
+		updateWithSearch($(".treesearch form"), fn, true, undefined, openid);
 	}
 	
 	var active_val = "";
-	function updateWithSearch($this, callback, force, notblur) {
+	function updateWithSearch($this, callback, force, notblur, openid) {
 		
 		var fn = callback;
 		var value = $this.find("input[type=text]").val();
@@ -273,6 +275,9 @@ var LaM_type_timeout;
 					}
 				}
 			});
+			
+			if(typeof openid != "undefined")
+				params += "&edit_id=" + escape(openid);
 			
 			$.ajax({
 				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/?" + params,
