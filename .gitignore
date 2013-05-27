@@ -3,8 +3,11 @@
 Thumbs.db
 
 # Aptana
-.settings/*
+.settings/
 .project
+
+# Netbeans
+nbproject/private/
 
 # Goma files
 _config.php
