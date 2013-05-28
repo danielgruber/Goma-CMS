@@ -19,6 +19,8 @@ Notice for RedHat-related OS:
 
 Goma needs the package php-xml from the OS Repos (e.g. Fedora or Mandriva Main).
 
+For IIS, you need the module [URL Rewrite](http://www.iis.net/downloads/microsoft/url-rewrite), otherwise Goma won't work.
+
 
 Team
 ----
