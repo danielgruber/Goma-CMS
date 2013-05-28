@@ -7,7 +7,7 @@ Thumbs.db
 .project
 
 # Netbeans
-nbproject/private/
+nbproject/
 
 # Goma files
 _config.php
