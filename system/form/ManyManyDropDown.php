@@ -1,15 +1,17 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@author Goma-Team
-  * last modified: 21.03.2013
-  * $Version 1.1.2
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
+ * This is a simple searchable dropdown, which can be used to select many-many-connections.
+ *
+ * It supports many-many-relations of DataObjects and MultiSelecting.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.2
+ */
 class ManyManyDropDown extends MultiSelectDropDown
 {		
 		/**
@@ -116,9 +118,12 @@ class ManyManyDropDown extends MultiSelectDropDown
 		}
 		
 		/**
-		 * renders the data in the input
+		 * generates the values displayed in the field, if not dropped down.
+		 *
+		 * @access protected
+		 * @return array values
 		*/
-		public function renderInput() {
+		protected function getInput() {
 			$data = DataObject::get($this->_object, array("versionid" => $this->dataset));
 			
 			if($this->form()->useStateData) {
@@ -126,23 +131,16 @@ class ManyManyDropDown extends MultiSelectDropDown
 			}
 			
 			if($data && $data->count() > 0) {
-				$str = "";
-				$i = 0;
+				$return = array();
 				foreach($data as $record) {
-					if($i == 0) {
-						$i++;
-					} else {
-						$str .= ", ";
-					}
-					$str .= $record[$this->showfield];
+					$return[$record->id] = convert::raw2text($record[$this->showfield]);
 				}
-				unset($data, $record, $i);
-				return $str;
+				return $return;
 			} else {
-				return lang("form_dropdown_nothing_select", "Nothing Selected");
+				return array();
 			}
 		}
-		
+				
 		/**
 		 * getDataFromModel
 		 *

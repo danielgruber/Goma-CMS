@@ -1,15 +1,16 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 04.04.2013
-  * $Version 2.0.3
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * This is a fieldset which is used as a tabsetb, which holds several tabs.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class TabSet extends FieldSet
 {
 		/**
@@ -54,7 +55,7 @@ class TabSet extends FieldSet
 						
 						$name = strtolower($item->name);
 						// if a field is deleted the field does not exist in that array
-						if($this->form()->isFieldToRender($name))
+						if($this->form()->isFieldToRender($name) && !$item->hidden())
 						{
 							$this->form()->registerRendered($name);
 							if((isset($_POST["tabs_" . $item->name])) && $i == 0 /*make sure just one tab is active*/) {

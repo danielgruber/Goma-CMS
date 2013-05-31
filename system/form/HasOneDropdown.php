@@ -1,15 +1,17 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@author Goma-Team
-  * last modified: 05.04.2013
-  * $Version 1.2.3
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
+ * This is a simple searchable dropdown, which can be used to select has-one-relations.
+ *
+ * It supports has-one-realtions of DataObjects and just supports single-select.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.3
+ */
 class HasOneDropdown extends SingleSelectDropDown
 {
 		/**
@@ -121,12 +123,12 @@ class HasOneDropdown extends SingleSelectDropDown
 		}
 		
 		/**
-		 * renders the data in the input
+		 * generates the values displayed in the field, if not dropped down.
 		 *
-		 *@name renderInput
-		 *@access public
+		 * @access protected
+		 * @return array values
 		*/
-		public function renderInput() {
+		protected function getInput() {
 			$data = DataObject::get($this->_object, array("id" => $this->value));
 			
 			if($this->form()->useStateData) {
@@ -134,9 +136,9 @@ class HasOneDropdown extends SingleSelectDropDown
 			}
 			
 			if($data && $data->count() > 0) {
-				return $data[$this->showfield];
+				return array($data->id => $data[$this->showfield]);
 			} else {
-				return lang("form_dropdown_nothing_select", "Nothing Selected");
+				return array();
 			}
 		}
 		

@@ -1,15 +1,18 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@author Goma-Team
-  * last modified: 21.12.2011
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
-
+ * This is a simple searchable multiselect-dropdown.
+ *
+ * It supports the same as Select, but also Search, Pagination and multi-select for big data.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1
+ */
 class MultiSelectDropDown extends DropDown
 {
 		/**

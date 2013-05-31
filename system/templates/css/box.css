@@ -5,67 +5,6 @@
   *@author Goma-Team
   * last modified: 22.05.2012
 */
-
-
-.bluebox_wrapper
-{
-    z-index: 900;
-}
-.bluebox_container
-{
-    display: none;
-}
-.bluebox_border
-{
-    background-image: url(images/border.png);
-}
-.bluebox_title
-{
-    border: 1px solid #3a5899;
-    background-color: #6c82B4;
-    color: #ffffff;
-    font-weight: bold;
-    padding:5px;
-    cursor: move;
-	min-height: 16px
-}
-.bluebox_inner {
-    background-color: #ffffff;
-    position: relative;
-}
-.bluebox_loading
-{
-    padding: 10px;
-    display: none;
-}
-.bluebox_content
-{
-    padding:5px;
-}
-.bluebox_close
-{
-    position: absolute;
-    right: 0px;
-    top:0px;
-    color: #afafaf;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 6px;
-}
-.bluebox_data {
-    position: relative;
-}
-.bluebox_content .actions {
-    background: #f5f5f5;
-    margin: -5px;
-    padding: 5px;
-    margin-top: 5px;
-}
-
-body > .bluebox_wrapper {
-        position: absolute; 
-}
-
 /* dropdownDialog */
 .dropdownDialog {
 	
@@ -149,7 +88,7 @@ body > .bluebox_wrapper {
 .dropdownDialog > div.position_top > .content {
 	z-index: 799;
 	margin-top: 14px;
-	border: 1px solid #999;
+	border: 1px solid #bbb;
 	background: #fff;
 }
 

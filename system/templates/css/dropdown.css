@@ -18,6 +18,8 @@
 .dropdown_widget .field {
 	width: 250px;
 	font-size: 13px;
+	line-height: 23px;
+	vertical-align: center;
 	padding: 5px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
@@ -36,11 +38,39 @@
 }
 
 .dropdown_widget .field.active {
-	-moz-box-shadow:0 0 10px #ccc;
+	/*-moz-box-shadow:0 0 10px #ccc;
 	-webkit-box-shadow:0 0 10px #ccc;
-	box-shadow:0 0 10px #ccc;
-	border-color: #999 !important;
+	box-shadow:0 0 10px #ccc;*/
+	border-color: #aaa !important;
 	outline-width:0;
+}
+
+.dropdown_widget .field .value-holder .value {
+	display: block;
+	float: left;
+	padding: 3px;
+	background: #a9dbe0;
+	border: 1px solid #23acb8;
+	color: #333;
+	margin: 1px 3px;
+	font-size: 13px;
+	line-height: 14px;
+	
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+}
+.dropdown_widget .field .value-holder .value .value-title {
+	padding-right: 4px;
+}
+.dropdown_widget .field .value-holder .value .value-remove { 
+	display: none;
+	padding: 1px 3px;
+}
+.dropdown_widget .field .value-holder .value .value-remove:hover {
+	text-decoration: none;
+	color: #fff;
+	background: #23acb8;
 }
 
 .dropdown_widget .hiddenbutton {
@@ -74,9 +104,9 @@
 	position: absolute;
 	top: 24px;
 	left: 3px;
-	-webkit-box-shadow: 0 4px 10px #aaa;
-	-moz-box-shadow: 0 4px 10px #aaa;
-	box-shadow: 0 4px 10px #aaa;
+	/*-webkit-box-shadow: 0 2px 7px #aaa;
+	-moz-box-shadow: 0 2px 7px #aaa;
+	box-shadow: 0 2px 7px #aaa;*/
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	z-index: 999;

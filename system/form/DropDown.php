@@ -1,22 +1,24 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@author Goma-Team
-  * last modified: 20.04.2013
-  * $Version 1.4.6
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
+ * This is a simple searchable dropdown.
+ *
+ * It supports the same as Select, but also Search and Pagination for big data.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class DropDown extends FormField 
 {
 		/**
-		 * request stuff
+		 * url-handlers for controller-part.
 		 *
-		 *@name url_handlers
-		 *@access public
+		 * @access public
 		*/
 		public $url_handlers = array(
 			"nojs/\$page"				=> "nojs",
@@ -26,69 +28,69 @@ class DropDown extends FormField
 		);
 		
 		/**
-		 * allowed actions
+		 * allowed actions for Controller-part.
 		 *
-		 *@name allowed_actions
-		 *@access public
-		*/
+		 * @access public
+		*/ 
 		public $allowed_actions = array("getData", "checkValue", "uncheckValue", "nojs");
 		
 		/**
-		 * dataset of this dropdown
+		 * dataset of this dropdown.
 		 *
-		 *@name dataset
-		 *@access public
+		 * it holds the data for a multiselect-dropdown. Maybe this is also a object working as an array.
+		 *
+		 * @access public
+		 * @var mixed
 		*/
 		public $dataset;
 		
 		/**
-		 * whether multiple values are selectable
+		 * options of this dropdown.
 		 *
-		 *@name multiselect
-		 *@access protected
-		*/
-		protected $multiselect = false;
-		
-		/**
-		 * options of this dropdown
-		 *
-		 *@name options
-		 *@access public
+		 * @access public
 		*/
 		public $options;
 		
 		/**
-		 * unique key for this field
+		 * value.
 		 *
-		 *@name key
-		 *@access protected
-		*/
-		protected $key;
-		
-		/**
-		 * value
-		 *
-		 *@name value
-		 *@access public
+		 * @access public
 		*/
 		public $value = "";
 		
 		/**
-		 * this field needs to have the full width
+		 * this field needs to have the full width.
 		 *
-		 *@name fullSizedField
+		 * @access protected
 		*/
 		protected $fullSizedField = true;
 		
+		/**
+		 * unique key for this field.
+		 *
+		 * @access protected
+		*/
+		protected $key;
+		
+		/**
+		 * whether multiple values are selectable. This is for subclasses only (@link MultiSelectDropDown).
+		 *
+		 * @access protected
+		*/
+		protected $multiselect = false;
 		
 		
 		/**
-		 *@param string - name
-		 *@param string - title
-		 *@param array - options
-		 *@param array|int - selected items
-		 *@param object - parent
-		*/
+		 * Constructor.
+		 *
+		 * @param   string $name unique name in the form
+		 * @param   string $title label for the field
+		 * @param 	array $options array of key-value for the data selectable
+		 * @param 	int|string $value a integer or string for the selected item
+		 * @param 	object $parent a Form object if you want to give the form it will be applied to
+		 *
+		 * @access public
+		 */
 		public function __construct($name = "", $title = null, $options = array(), $value = null, &$parent = null)
 		{
 				
@@ -97,11 +99,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * generates the key and array of selected data
+		 * gets the selected value from the current Form-Model or given data.
 		 *
-		 *@name getValue
-		 *@access public
-		*/
+		 * @access public
+		 */
 		public function getValue() {
 			// if mutliselect, we have to store an array
 			if($this->multiselect) {
@@ -144,11 +145,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		  * creates the hidden input-field
-		  *
-		  *@name createNode
-		  *@access public
-		*/
+		 * generates a hidden field for storing the data submitted via the form for this field.
+		 *
+		 * @access public
+		 */
 		public function createNode() {
 			$node = parent::createNode();
 			$node->type = "hidden";
@@ -162,11 +162,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * renders after setForm the whole field
+		 * generates the whole field with dropdown.
 		 *
-		 *@name renderAfterSetForm
-		 *@access public
-		*/
+		 * @access public
+		 */
 		public function renderAfterSetForm() {
 			parent::renderAfterSetForm();
 			
@@ -186,7 +185,7 @@ class DropDown extends FormField
 				$this->field = new HTMLNode("div", array(
 					"class"		=> "field",
 					"id"		=> $this->ID() . "_field"
-				), $this->renderInput()),
+				), $this->renderInputWidget()),
 				$this->dropdown = new HTMLNode("div", array(
 					"class"	=> "dropdown"
 				), array(
@@ -232,41 +231,59 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * renders the data in the input
+		 * It renders the data displayed in the field, if not dropped down.
 		 *
-		 *@name renderInput
-		 *@access public
+		 * @name renderInputWidget
+		 * @return HTMLNode Object of HTMLNode, which can be rendered with @link HTMLNode::render
 		*/
-		public function renderInput() {
-			if($this->multiselect) {
-				$str = "";
-				$i = 0;
-				foreach($this->dataset as $id) {
-					if($i == 0) {
-						$i++;
-					} else {
-						$str .= ", ";
-					}
-					$str .= isset($this->options[$id]) ? convert::raw2text($this->options[$id]) : convert::raw2text($id);
+		public function renderInputWidget() {
+			$data = $this->getInput();
+			
+			if($data) {
+				$node = new HTMLNode("span", array("class" => "value-holder"));
+				foreach($data as $id => $value) {
+					$node->append(new HTMLNode("span", array("class" => "value"), array(
+						new HTMLNode("span", array("class" => "value-title"), convert::raw2text($value)),
+						new HTMLNode("a", array("class" => "value-remove", "data-id" => $id), "x")
+					)));
 				}
-				if($str == "")
-					return lang("form_dropdown_nothing_select", "Nothing Selected");
-					
 				
-				return $str;
+				$node->append(new HTMLNode("div", array("class" => "clear")));
+				
+				return $node;
 			} else {
-				if($this->value == "") 
-					return lang("form_dropdown_nothing_select", "Nothing Selected");
-				else
-					return isset($this->options[$this->value]) ? convert::raw2text($this->options[$this->value]) : convert::raw2text($this->value);
+				return new HTMLNode("span", array("class" => "no-value"), lang("form_dropdown_nothing_select", "Nothing Selected"));
+			}
+			
+			
+		}
+		
+		/**
+		 * generates the values displayed in the field, if not dropped down.
+		 *
+		 * @access protected
+		 * @return array values
+		*/
+		protected function getInput() {
+			if($this->multiselect) {
+				$data = array();
+				foreach($this->dataset as $id) {
+					$data[$id] = isset($this->options[$id]) ? $this->options[$id] : $id;
+				}
+				return $data;
+				
+			} else if($this->value == "") {
+				return array();
+			} else {
+				return isset($this->options[$this->value]) ? array($this->options[$this->value]) : array($this->value);
 			}
 		}
 		
 		/**
-		 * returns the result
+		 * generates the result of this form-field.
 		 *
-		 *@name result
-		 *@access public
+		 * @access public
+		 * @return mixed it is an array in case of multiselect-field or string in single-select-mode.
 		*/
 		public function result() {
 			if(!$this->disabled)
@@ -279,9 +296,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * renders the field
-		 *@name field
-		 *@access public
+		 * renders the field for the Form-renderer.
+		 *
+		 * @access public
+		 * @return HTMLNode Object of HTMLNode, which can be rendered with @link HTMLNode::render
 		*/
 		public function field()
 		{
@@ -316,15 +334,20 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * getDataFromModel
+		 * generates the data, which should be shown in the dropdown.
 		 *
-		 *@param numeric - page
+		 * @param int $p number of page the user wants to see
+		 *
+		 * @access public
+		 * @return array this is an array which contains the data as data and some information about paginating.
 		*/
 		public function getDataFromModel($p = 1) {
 			$start = ($p * 10) - 10;
 			$end = $start + 9;
 			$i = 0;
 			$left = ($p == 1) ? false : true;
+			
+			// check if this is an array with numeric indexes or not
 			if(isset($this->options[0])) {
 				$arr = array();
 				foreach($this->options as $value) {
@@ -336,7 +359,7 @@ class DropDown extends FormField
 						$right = true;
 						break;
 					}
-					$arr[] = array("key" => $value, "value" => $value);
+					$arr[] = array("key" => $value, "value" => convert::raw2text($value));
 					$i++;
 				}
 			} else {
@@ -350,20 +373,23 @@ class DropDown extends FormField
 						$right = true;
 						break;
 					}
-					$arr[] = array("key" => $key, "value" => $value);
+					$arr[] = array("key" => $key, "value" => convert::raw2text($value));
 					$i++;
 				}
 			}
 			
-			$arr = array_map(array("text", "protect"), $arr);
+
 			return array("data"	=> $arr, "right" => $right, "left" => $left, "showStart" => $start, "showEnd" => $end, "whole" => count($this->options));
 		}
 		
 		/**
-		 * searches data from the optinos
+		 * generates the data, which should be shown in the dropdown if the user searches.
 		 *
-		 *@name searchDataFromModel
-		 *@param numeric - page
+		 * @param int $p number of page the user wants to see
+		 * @param string $search the phrase to search for
+		 *
+		 * @access public
+		 * @return array this is an array which contains the data as data and some information about paginating.
 		*/
 		public function searchDataFromModel($p = 1, $search = "") {
 			// first get result
@@ -375,10 +401,13 @@ class DropDown extends FormField
 				}
 			}
 			
+			// generate paging-data
 			$start = ($p * 10) - 10;
 			$end = $start + 9;
 			$i = 0;
 			$left = ($p == 1) ? false : true;
+			
+			// check if this is an array with numeric indexes or not
 			if(isset($result[0])) {
 				$arr = array();
 				foreach($result as $value) {
@@ -390,7 +419,7 @@ class DropDown extends FormField
 						$right = true;
 						break;
 					}
-					$arr[] = array("key" => $value, "value" => $value);
+					$arr[] = array("key" => $value, "value" => convert::raw2text($value));
 					$i++;
 				}
 			} else {
@@ -404,7 +433,7 @@ class DropDown extends FormField
 						$right = true;
 						break;
 					}
-					$arr[] = array("key" => $key, "value" => $value);
+					$arr[] = array("key" => $key, "value" => convert::raw2text($value));
 					$i++;
 				}
 			}
@@ -415,10 +444,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * gets data
+		 * responds to a user-request and generates the data, which should be shown in the dropdown.
 		 *
-		 *@name getData
-		 *@access public
+		 * @access public
+		 * @return string json-data to send to the client.
 		*/
 		public function getData() {
 			$page = $this->getParam("page");
@@ -458,10 +487,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * checks a value
+		 * responds to a user-request and marks a value as checked.
 		 *
-		 *@name checkValue
-		 *@access public
+		 * @access public
+		 * @return string rendered dropdown-input
 		*/
 		public function checkValue() {
 			
@@ -472,7 +501,7 @@ class DropDown extends FormField
 				$this->value = $this->getParam("value");
 			}
 			if(Core::is_ajax()) {
-				return $this->renderInput();
+				return $this->renderInputWidget();
 			} else {
 				if($this->multiselect)
 					$this->form()->post[$this->PostName()] = $this->key;
@@ -483,20 +512,23 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * unchecks a value
+		 * responds to a user-request and marks a value as unchecked.
 		 *
-		 *@name checkValue
-		 *@access public
+		 * @access public
+		 * @return string rendered dropdown-input
 		*/
 		public function uncheckValue() {
 			if($this->multiselect) {
 				$key = array_search($this->getParam("value"), $this->dataset);
 				unset($this->dataset[$key]);
 				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			} else {
+				if($this->value == $this->getParam("value"))
+					$this->value = null;
 			}
 			
 			if(Core::is_ajax()) {
-				return $this->renderInput();
+				return $this->renderInputWidget();
 			} else {
 				if($this->multiselect)
 					$this->form()->post[$this->PostName()] = $this->key;
@@ -505,11 +537,12 @@ class DropDown extends FormField
 				$this->form()->redirectToForm();
 			}
 		}
+		
 		/**
-		 * returns data for no js
+		 * responds to a user-request and generates the whole field as no-javascript for NO-JS-Users.
 		 *
-		 *@name nojs
-		 *@åccess public
+		 * @access public
+		 * @return string HTML Response
 		*/
 		public function nojs() {
 			$page = $this->getParam("page", "get");
@@ -523,7 +556,7 @@ class DropDown extends FormField
 					"class"		=> "field",
 					"id"		=> $this->ID() . "_field",
 					"style"		=> "margin: 0;"
-				), $this->renderInput()),
+				), $this->renderInputWidget()),
 				$dropdown = new HTMLNode("div", array(
 					"class"	=> "dropdown",
 					"style" => array(
@@ -615,9 +648,10 @@ class DropDown extends FormField
 		}
 		
 		/**
-		 * validation for security reason
+		 * validation for security reason, that the user can't check values aren't existing.
 		 *
-		 *@name validate
+		 * @param mixed value
+		 * @access public
 		*/
 		public function validate($value) {
 			if(!$this->multiselect && $this->options) {
