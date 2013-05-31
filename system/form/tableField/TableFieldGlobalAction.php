@@ -1,17 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * Global Action, which will be visible in the footer of the tablefield.
  *
- * @package     Goma\Form-Framework\TableField
+ * @package     Goma\Form\TableField
  *
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
  * @version     1.0
  */
-
-defined("IN_GOMA") OR die();
-
 class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_ActionProvider {
 	/**
 	 * Constructor.

@@ -352,7 +352,7 @@ class Form extends object
 				
 				$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
 				// add that this is a submit-function
-				$this->add(new JavaScriptField("leave_check", '$(function(){ new goma.form('.var_export($this->ID(), true).'); });'));
+				$this->add(new JavaScriptField("leave_check", '$(function(){new goma.form('.var_export($this->ID(), true).'); });'));
 								
 				Resources::add("system/form/form.js", "js", "tpl");				
 								

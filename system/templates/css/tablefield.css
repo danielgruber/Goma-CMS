@@ -264,6 +264,9 @@
 .tablefield-table .actionLink {
 	margin: 5px;
 }
+.tablefield-table .form_field {
+	border-bottom: 0;
+}
 
 @media print {
 	.tablefield-table .col-buttons {

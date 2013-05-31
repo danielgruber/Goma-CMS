@@ -1,6 +1,6 @@
 <?php
 /**
- * @package		Goma\System\Core
+ * @package		Goma\Core
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
@@ -15,7 +15,7 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
 /**
  * Goma Core.
  *
- * @package		Goma\System\Core
+ * @package		Goma\Core
  * @version		3.3.33
  */
 class Core extends object {
@@ -784,9 +784,10 @@ class Core extends object {
 }
 
 /**
- * represents the dev-mode of goma
+ * Controller for Dev-Mode of Goma-Framework. Handles stuff like rebuilding DB or building versions
  *
- *@name dev
+ * @package		Goma\Core
+ * @version		2.0
  */
 class Dev extends RequestHandler {
 	/**

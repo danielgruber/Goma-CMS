@@ -1,6 +1,6 @@
 <?php
 /**
- * @package		Goma\System\Core
+ * @package		Goma\Core
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"

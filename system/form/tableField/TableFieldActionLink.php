@@ -18,7 +18,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	 *
 	 * @param   string $destination link-URL with params replaced by data of record
 	 * @param   string $inner HTML between a-tags
-	 * @param	boolean|string|callback $requirePerm how to check if permissions is required
+	 * @param	mixed $requirePerm how to check if permissions is required (callback, string, boolean)
 	 */
 	public function __construct($destination, $inner, $requirePerm) {
 		$this->destination = $destination;
