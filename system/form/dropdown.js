@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 20.04.2013
+  * last modified: 01.06.2013
 */
 
 var DropDown = function(id, url, multiple) {
@@ -76,18 +76,22 @@ DropDown.prototype = {
 		       	 	// check for marked
 		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
 			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").length > 0) {
-				       	 	that.check(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").find("a").attr("id"), false);
+			       	 		var id = that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").find("a").attr("id").substring(10 + that.id.length);
+				       	 	that.check(id, false);
 			       	 	}
 		       	 	} else {
-			       	 	that.check(that.widget.find(" > .dropdown > .content a:last-child").attr("id"), false);
+		       	 		var id = that.widget.find(" > .dropdown > .content a:last-child").attr("id").substring(10 + that.id.length);
+			       	 	that.check(id, false);
 		       	 	}
 	       	 	} else if(code == 40 && !that.multiple) {
 		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
 			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").length > 0) {
-				       	 	that.check(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id"), false);
+			       	 		var id = that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id").substring(10 + that.id.length);
+				       	 	that.check(id, false);
 			       	 	}
 		       	 	} else {
-			       	 	that.check(that.widget.find(" > .dropdown > .content a:first-child").attr("id"), false);
+		       	 		var id = that.widget.find(" > .dropdown > .content a:first-child").attr("id").substring(10 + that.id.length);
+			       	 	that.check(id, false);
 		       	 	}
 	       	 	}
 			}
