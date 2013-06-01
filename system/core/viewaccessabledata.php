@@ -1,107 +1,128 @@
 <?php
 /**
-  * this class allows the view (template) access to the class, which extends this
-  * it provides methods to do e.g. $object["test"] = 1;
-  * the following features are implemented
-  * iterator - foreach
-  * array-access 
-  * overloading properties
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 05.03.2013
-  * $Version 2.2.9
-*/
+ * @package		Goma\Core
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined("IN_GOMA") OR die();
 
+
+/**
+ * Goma-Core to access data in a class from the template.
+ *
+ * This class allows the view (template) access to the class, which extends this
+ * it provides methods to do e.g. $object["test"] = 1;
+ * the following features are implemented
+ * iterator - foreach
+ * array-access 
+ * overloading properties.
+ *
+ * @package		Goma\Core
+ * @version		2.2.9
+ */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess
 {		
 		/**
-		 * default castings
-		 *@name defaultCasting
-		 *@access public
-		 *@var string
+		 * default datatype for casting.
+		 *
+		 * @access public
+		 * @var string
 		*/
 		static $default_casting = "HTMLText";
 		
 		/**
-		 * casting
+		 * set of fields with cast-type as value.
 		 *
-		 *@name casting
+		 * @access public
 		*/
 		static $casting = array();
 		
 		/**
-		 * data
+		 * data is stored in this var.
 		 *
-		 *@name data
-		 *@acccess protected
-		 *@var array
+		 * @acccess public
+		 * @var array
 		*/
 		public $data = array();
 		
 		/**
-		 * contains the original data
+		 * contains the original data at object-generation.
 		 *
-		 *@name original
-		 *@access public
+		 * @access public
 		*/
 		public $original = array();
 		
 		/**
-		 * customised data
-		 *@name customised
-		 *@access protected
-		 *@var array
+		 * customised data for template via ViewAccessableData::customise.
+		 *
+		 * @access protected
+		 * @var array
 		*/
 		public $customised = array();
 		
 		/**
-		 * dataset-position
+		 * dataset-position when this object is in a specific dataset.
 		 *
-		 *@name dataSetPosition
-		 *@access public
+		 * @access public
 		*/
 		public $dataSetPosition = 0;
 		
 		/**
-		 * indicates whether the data was changes or not
+		 * indicates whether the data was changes or not.
 		 *
-		 *@name changed
-		 *@access public
+		 * @access public
 		*/
 		public $changed = false;
 		
 		/**
-		 * dataset in which this DataObject is
+		 * dataset in which this Object is.
 		 *
-		 *@name dataset
-		 *@access public
+		 * @access public
 		*/
 		public $dataset;
 		
 		/**
-		 * dataClass
+		 * dataClass contains the class for which this data is, if it's not the same as the class, which it contains.
 		 *
-		 *@name dataClass
+		 * @access public
 		*/
 		public $dataClass;
 		
 		/**
-		 * defaults
+		 * default values for specfic fields.
 		 *
-		 *@name defaults
-		 *@access public
+		 * @access public
 		*/
 		public $defaults;
 		
 		/**
-		 * a list of not allowed methods
-		 *@name notViewableMethods
-		 *@access public
-		 *@var array
+		 * server-vars. This is for internal usage.
+		 *
+		 * @access private
+		*/
+		private static $server;
+		
+		/**
+		 * get-vars. This is for internal usage.
+		 *
+		 * @access public
+		*/
+		private static $_get;
+		
+		/**
+		 * post-vars. This is for internal usage.
+		 *
+		 * @access public
+		*/
+		private static $_post;
+		
+		/**
+		 * a list of not allowed methods. This is for internal usage.
+		 *
+		 * @access public
+		 * @var array
 		*/
 		public static $notViewableMethods = array
 		(
@@ -132,16 +153,21 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			"versioned"
 		);
 		
-		private static $notCallableGetters = array(
+		/**
+		 * a list of methods can't be called as getters. this is for internal usage.
+		 *
+		 * @access public
+		*/
+		public static $notCallableGetters = array(
 			"valid", "current", "rewind", "next", "key", "duplicate", "reset", "__construct"
 		);
 		
 		//!Init
 		/**
-		 * construct
-		 *@name __construct
-		 *@param array - wholedata
-		 *@param numeric position
+		 * Constructor.
+		 *
+		 * @access public
+		 * @param array $data data to start with
 		*/
 		public function __construct($data = null)
 		{
@@ -160,6 +186,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					$this->defaults = array_merge((array) $this->defaults, (array) ClassInfo::$class_info[$this->class]["defaults"]);
 				} else {
 					$this->defaults = array();
+				}
+				
+				if(!isset(self::$server)) {
+					self::$server = ArrayLib::map_key($_SERVER, "strtolower");
+					self::$_get = ArrayLib::map_key($_GET, "strtolower");
+					self::$_post = ArrayLib::map_key($_POST, "strtolower");
 				}
 		}
 		
@@ -513,7 +545,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			$name = trim($name);
 			$lowername = strtolower($name);
 			
-			
 			//  methods
 			if($this->isOffsetMethod($lowername)) {
 				return true;
@@ -592,17 +623,20 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				
 				if(substr($lowerOffset, 0, 8) == "_server_")
 				{
-					$key = substr($offset, 8);
-					if(strtolower($key) == "redirect" || strtolower($key) == "redirect_parent" || strtolower($key) == "real_request_uri") {
+					$key = substr($lowerOffset, 8);
+					if($key == "redirect" || $key == "redirect_parent" || $key == "real_request_uri") {
 						return true;
 					}
-					return isset($_SERVER[$key]);
+					
+					
+					
+					return isset(self::$server[$key]);
 				} else if(substr($lowerOffset, 0, 6) == "_post_") {
-					$key = substr($offset, 6);
-					return isset($_POST[$key]);
+					$key = substr($lowerOffset, 6);
+					return isset(self::$_post[$key]);
 				} else if (substr($lowerOffset, 0, 5) == "_get_") {
-					$key = substr($offset, 5);
-					return isset($_GET[$key]);
+					$key = substr($lowerOffset, 5);
+					return isset(self::$_get[$key]);
 				} else {
 					return false;
 				}
@@ -667,7 +701,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@param array - args
 		*/
 		public function getOffset($name, $args = array()) {
-			
 			
 			if(PROFILE) Profiler::mark("ViewAccessableData::getOffset");
 			
@@ -742,30 +775,30 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				if(substr($loweroffset, 0, 8) == "_server_")
 				{
 					
-					$key = substr($offset, 8);
-					if(strtolower($key) == "redirect") {
+					$key = substr($loweroffset, 8);
+					if($key == "redirect") {
 						return getredirect();
-					} else if(strtolower($key) == "redirect_parent") {
+					} else if($key == "redirect_parent") {
 						return getredirect(true);
 					}
 					
-					if(strtolower($key) == "request_uri") {
-						if(Core::is_ajax() && (isset($_SERVER["HTTP_X_REFERER"]))) {
+					if($key == "request_uri") {
+						if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"]) && $_SERVER["HTTP_X_REFERER"]) {
 							return $_SERVER["HTTP_X_REFERER"];
 						}
 					}
 					
-					if(strtolower($key) == "real_request_uri") {
+					if($key == "real_request_uri") {
 						return $_SERVER["REQUEST_URI"];
 					}
 					
-					return $_SERVER[$key];
+					return self::$server[$key];
 				} else if(substr($loweroffset, 0, 6) == "_post_") {
-					$key = substr($offset, 6);
-					return $_POST[$key];
+					$key = substr($loweroffset, 6);
+					return self::$_post[$key];
 				} else if (substr($loweroffset, 0, 5) == "_get_") {
-					$key = substr($offset, 5);
-					return $_GET[$key];
+					$key = substr($loweroffset, 5);
+					return self::$_get[$key];
 				} else {
 					return false;
 				}

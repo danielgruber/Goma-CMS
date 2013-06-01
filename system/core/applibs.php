@@ -254,7 +254,7 @@ function getRedirect($parentDir = false) {
 
 	if ($parentDir) {
 
-		if (isset($_GET["redirect"])) {
+		if (isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else {
 			// TODO What is with redirect from other sites with other URLEND?
@@ -269,7 +269,7 @@ function getRedirect($parentDir = false) {
 
 	} else {
 
-		if (isset($_GET["redirect"])) {
+		if (isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else {
 			return htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, "UTF-8", false);
@@ -281,9 +281,9 @@ function getRedirect($parentDir = false) {
 function getRedirection($parentDir = true) {
 	if ($parentDir) {
 
-		if (isset($_GET["redirect"])) {
+		if (isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return convert::raw2text($_GET["redirect"]);
-		} else if (isset($_POST["redirect"])) {
+		} else if (isset($_POST["redirect"]) && $_POST["redirect"]) {
 			return convert::raw2text($_POST["redirect"]);
 		} else {
 
@@ -298,9 +298,9 @@ function getRedirection($parentDir = true) {
 
 	} else {
 
-		if (isset($_GET["redirect"])) {
+		if (isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return convert::raw2text($_GET["redirect"]);
-		} else if (isset($_POST["redirect"])) {
+		} else if (isset($_POST["redirect"]) && $_POST["redirect"]) {
 			return convert::raw2text($_POST["redirect"]);
 		} else {
 			return BASE_URI . BASE_SCRIPT;

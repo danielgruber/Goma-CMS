@@ -497,7 +497,7 @@ a:hover {
 	font-weight: bold;
 }
 
-#statistics .month .data div {
+#statistics .month .data span {
 	background: #da097a;
 	border-color: #da097a;
 }
