@@ -132,6 +132,7 @@ DropDown.prototype = {
 	setContent: function(content) {
 		this.widget.find(" > .dropdown > .content").html('<div class="animationwrapper">' + content + '</div>');
 	},
+	
 	/**
 	 * shows the dropdown
 	 *
@@ -163,6 +164,7 @@ DropDown.prototype = {
 			});
 		}
 	},
+	
 	/**
 	 * hides the dropdown
 	 *
@@ -173,6 +175,7 @@ DropDown.prototype = {
 		this.widget.find(" > .dropdown").fadeOut(200);
 		this.widget.find(" > .field").removeClass("active");
 	},
+	
 	/**
 	 * toggles the dropdown
 	 *
@@ -185,6 +188,7 @@ DropDown.prototype = {
 			this.hideDropDown();
 		}
 	},
+	
 	/**
 	 * gets data from the server to set the content of the dropdown
 	 * it uses current pid and search-query
