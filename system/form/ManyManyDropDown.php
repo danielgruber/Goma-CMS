@@ -133,7 +133,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			if($data && $data->count() > 0) {
 				$return = array();
 				foreach($data as $record) {
-					$return[$record->id] = convert::raw2text($record[$this->showfield]);
+					$return[$record->versionid] = convert::raw2text($record[$this->showfield]);
 				}
 				return $return;
 			} else {

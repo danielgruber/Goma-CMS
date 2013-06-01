@@ -64,7 +64,6 @@
 	padding-right: 4px;
 }
 .dropdown_widget .field .value-holder .value .value-remove { 
-	display: none;
 	padding: 1px 3px;
 }
 .dropdown_widget .field .value-holder .value .value-remove:hover {

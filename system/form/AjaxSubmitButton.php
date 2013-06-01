@@ -234,7 +234,6 @@ class AjaxSubmitButton extends FormAction
 					$result = call_user_func_array($callback, array($result));
 				}
 				
-
 				return call_user_func_array(array($form->controller, $submission), array($result, $response, $form));
 		}
 		

@@ -34,6 +34,7 @@ DropDown.prototype = {
 			that.toggleDropDown();
 			return false;
 		});
+		
 		this.widget.find(" > input").css("display", "none");
 		this.widget.find(" > .field").css("margin-top", 0);
 		// make document-click to close the dropdown
@@ -112,6 +113,8 @@ DropDown.prototype = {
 		goma.ui.bindESCAction($("body"), function() {
 			that.hideDropDown();
 		});
+		
+		this.bindFieldEvents();
 	},
 	/**
 	 * sets the content of the field, which is clickable and is showing current selection
@@ -121,6 +124,7 @@ DropDown.prototype = {
 	*/
 	setField: function(content) {
 		this.widget.find(" > .field").html(content);
+		this.bindFieldEvents();
 	},
 	
 	/**
@@ -157,8 +161,8 @@ DropDown.prototype = {
 			this.reloadData(function(){
 				//$this.widget.find(" > .field").css({height: ""});
 				$this.widget.find(" > .dropdown").fadeIn(200);
-				$this.widget.find(" > .field").html(fieldhtml);
-				var width = $this.widget.find(" > .field").width() +  /* padding */10;
+				$this.setField(fieldhtml);
+				var width = $this.widget.find(" > .field").outerWidth(false);
 				$this.widget.find(" > .dropdown").css({ width: width});
 				$this.widget.find(" > .dropdown .search").focus();
 			});
@@ -285,12 +289,12 @@ DropDown.prototype = {
 		else
 			this.timeout = setTimeout(makeAjax, timeout);
 	},
-	/**
-	 * binds the clicks on values to set/unset a value
-	 *
-	 *@name bindContentEvents
-	*/
 	
+	/**
+	 * binds the clicks on values to set/unset a value.
+	 *
+	 * @access public
+	*/
 	bindContentEvents: function() {
 		var that = this;
 		this.widget.find(" > .dropdown > .content ul li a").click(function(){
@@ -303,6 +307,19 @@ DropDown.prototype = {
 			} else {
 				that.check($(this).attr("id"));
 			}
+			return false;
+		});
+	},
+	
+	/**
+	 * binds the events to the displayed values in the field-area.
+	 *
+	 * @access public
+	*/
+	bindFieldEvents: function() {
+		var $this = this;
+		this.widget.find(" > .field").find(".value-holder .value .value-remove").click(function(){
+			$this.uncheck($(this).attr("data-id"));
 			return false;
 		});
 	},
@@ -323,7 +340,7 @@ DropDown.prototype = {
 			
 			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
-			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+			this.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
 				url: this.url + "/checkValue/",
 				type: "post",
@@ -333,7 +350,7 @@ DropDown.prototype = {
 				}, 
 				success: function(html) {
 					// everything is fine
-					that.widget.find(" > .field").html(html);
+					that.setField(html);
 				}
 			});
 		} else {
@@ -345,7 +362,7 @@ DropDown.prototype = {
 			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
 			this.input.val(value);
-			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+			that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
 				url: this.url + "/checkValue/",
 				type: "post",
@@ -355,7 +372,7 @@ DropDown.prototype = {
 				}, 
 				success: function(html) {
 					// everything is fine
-					that.widget.find(" > .field").html(html);
+					that.setField(html);
 					if(typeof h == "undefined" || h == true)
 						that.hideDropDown();
 					
@@ -374,24 +391,39 @@ DropDown.prototype = {
 	*/
 	uncheck: function(id) {
 		var that = this;
+		
 		// this is just for dropdowns with multiple values
-		if(this.multiple) {
-			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-			$(document.getElementById(id)).removeClass("checked");
+		
+		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+		$(document.getElementById(id)).removeClass("checked");
+		
+		if(!id.match(/^[0-9]+$/))
 			var value = id.substring(10 + this.id.length);
-			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-			$.ajax({
-				url: this.url + "/uncheckValue/",
-				type: "post",
-				data: {"value": value},
-				error: function() {
-					alert("Failed to uncheck Node. Please check your Internet-Connection");
-				}, 
-				success: function(html) {
-					// everything is fine
-					that.widget.find(" > .field").html(html);
+		else
+			var value = id;
+		
+		that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+		$.ajax({
+			url: this.url + "/uncheckValue/",
+			type: "post",
+			data: {"value": value},
+			error: function() {
+				alert("Failed to uncheck Node. Please check your Internet-Connection");
+			}, 
+			success: function(html) {
+				// everything is fine
+				that.setField(html);
+				
+				if(that.widget.find(".dropdown").css("display") == "block") {
+					that.reloadData();
 				}
-			});
+			}
+		});
+		
+		if(!this.multiple) {
+			if(that.input.val() == value) {
+				that.input.val(0);
+			}
 		}
 	}
 
