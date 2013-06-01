@@ -298,14 +298,15 @@ DropDown.prototype = {
 	bindContentEvents: function() {
 		var that = this;
 		this.widget.find(" > .dropdown > .content ul li a").click(function(){
+			var id = $(this).attr("id").substring(10 + that.id.length);
 			if(that.multiple) {
 				if($(this).hasClass("checked")) {
-					that.uncheck($(this).attr("id"));
+					that.uncheck(id);
 				} else {
-					that.check($(this).attr("id"));
+					that.check(id);
 				}
 			} else {
-				that.check($(this).attr("id"));
+				that.check(id);
 			}
 			return false;
 		});
@@ -336,15 +337,14 @@ DropDown.prototype = {
 		if(this.multiple) {
 			
 			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-			$(document.getElementById(id)).addClass("checked");
+			$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
 			
 			// id contains id of form-field and value
-			var value = id.substring(10 + this.id.length);
 			this.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
 				url: this.url + "/checkValue/",
 				type: "post",
-				data: {"value": value},
+				data: {"value": id},
 				error: function() {
 					alert("Failed to check Node. Please check your Internet-Connection");
 				}, 
@@ -357,16 +357,15 @@ DropDown.prototype = {
 			this.widget.find(" > .dropdown > .content ul li a.checked").removeClass("checked");
 			
 			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-			$(document.getElementById(id)).addClass("checked");
+			$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
 			
 			// id contains id of form-field and value
-			var value = id.substring(10 + this.id.length);
-			this.input.val(value);
+			this.input.val(id);
 			that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
 				url: this.url + "/checkValue/",
 				type: "post",
-				data: {"value": value},
+				data: {"value": id},
 				error: function() {
 					alert("Failed to check Node. Please check your Internet-Connection");
 				}, 
@@ -376,7 +375,7 @@ DropDown.prototype = {
 					if(typeof h == "undefined" || h == true)
 						that.hideDropDown();
 					
-					that.input.val(value);
+					that.input.val(id);
 				}
 			});	
 			
@@ -395,33 +394,24 @@ DropDown.prototype = {
 		// this is just for dropdowns with multiple values
 		
 		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-		$(document.getElementById(id)).removeClass("checked");
-		
-		if(!id.match(/^[0-9]+$/))
-			var value = id.substring(10 + this.id.length);
-		else
-			var value = id;
+		$(document.getElementById("dropdown_" + this.id + "_" + id)).removeClass("checked");
 		
 		that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 		$.ajax({
 			url: this.url + "/uncheckValue/",
 			type: "post",
-			data: {"value": value},
+			data: {"value": id},
 			error: function() {
 				alert("Failed to uncheck Node. Please check your Internet-Connection");
 			}, 
 			success: function(html) {
 				// everything is fine
 				that.setField(html);
-				
-				if(that.widget.find(".dropdown").css("display") == "block") {
-					that.reloadData();
-				}
 			}
 		});
 		
 		if(!this.multiple) {
-			if(that.input.val() == value) {
+			if(that.input.val() == id) {
 				that.input.val(0);
 			}
 		}
