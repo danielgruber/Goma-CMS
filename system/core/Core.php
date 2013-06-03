@@ -16,7 +16,7 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
  * Goma Core.
  *
  * @package		Goma\Core
- * @version		3.3.33
+ * @version		3.3.34
  */
 class Core extends object {
 	/**
@@ -119,6 +119,14 @@ class Core extends object {
 	 *@name cmsVarCallbacks
 	 */
 	private static $cmsVarCallbacks = array();
+	
+	/**
+	 * contains the path to the favicon.
+	 *
+	 * @access public
+	 * @var string
+	*/
+	public static $favicon;
 
 	/**
 	 * inits the core
@@ -441,6 +449,11 @@ class Core extends object {
 				$html .= "<meta name=\"" . $data["name"] . "\" content=\"" . $data["value"] . "\" />\n";
 			}
 		}
+		
+		if(self::$favicon) {
+			$html .= '		<link rel="icon" href="'.self::$favicon.'" type="image/x-icon" />';
+		}
+		
 		return $html;
 	}
 

@@ -12,7 +12,8 @@ Core::addRules(array(
 	"rate/\$name/\$rate"			=> "ratingController",
 	"search"						=> "searchController",
 	"boxes_new"						=> "boxesController",
-	"sitemap.xml"					=> "SitemapController"
+	"sitemap.xml"					=> "SitemapController",
+	"favicon.ico"					=> "FaviconController"
 ), 11);
 
 

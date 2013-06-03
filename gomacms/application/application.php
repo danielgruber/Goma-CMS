@@ -64,6 +64,10 @@ Core::setTheme(settingsController::Get("stpl"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
 
+if(settingsController::get("favicon")) {
+	Core::$favicon = "./favicon.ico";
+}
+
 if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
 	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
 }

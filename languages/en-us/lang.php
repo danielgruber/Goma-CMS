@@ -588,5 +588,6 @@ $lang = array(
 	"push_info"				    => 'API-information <a target="_blank" href="http://pusher.com?utm_source=badge"><img src="http://pusher.com/images/badges/pusher_badge_light_1.png"></a>.',
     "google-site-verification"  => "Google-Webmaster-Key",
     
-    "no_value"					=> "no value"
+    "no_value"					=> "no value",
+    "favicon"					=> "Bookmark-icon"
 );

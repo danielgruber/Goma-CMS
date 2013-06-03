@@ -254,6 +254,13 @@ class TemplateSettings extends NewSettings {
 		"css_standard"	=> "text"
 	);
 	
+	/**
+	 * has-one
+	*/
+	static $has_one = array(
+		"favicon"	=> "ImageUploads"
+	);
+	
 	public $tab = "{\$_lang_style}";
 	/**
 	 * gets all templates as an array
@@ -280,6 +287,10 @@ class TemplateSettings extends NewSettings {
 	*/
 	public function getFormFromDB(&$form) {
 		$form->add(new TemplateSwitcher("stpl", lang("available_styles"), ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), GOMA_VERSION . "-" . BUILD_VERSION));
+		$form->add($img = new ImageUpload("favicon", lang("favicon")));
+		
+		$img->allowed_file_types = array("jpg", "png", "bmp", "gif", "jpeg", "ico");
+		
 		$form->add(new TextArea("css_standard", lang("own_css")));
 	}
 }

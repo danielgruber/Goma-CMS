@@ -49,6 +49,13 @@ abstract class Object {
 	 * this variable has a value if the class belongs to an extension, else it is null
 	 */
 	public $inExpansion;
+	
+	/**
+	 * indicates whether a class ran the constructor.
+	 *
+	 * @access private
+	*/
+	private static $loaded;
 
 	/**
 	 * Gets the value of $class::$$var.
@@ -385,9 +392,12 @@ abstract class Object {
 	public static function singleton($class) {
 		return self::instance($class);
 	}
-
+	
+	//! Non-Static Part
 	/**
 	 * Sets class name and save vars.
+	 *
+	 * @access public
 	 */
 	public function __construct() {
 		$this -> class = strtolower(get_class($this));
@@ -395,8 +405,24 @@ abstract class Object {
 		if (isset(ClassInfo::$class_info[$this -> class]["inExpansion"]))
 			$this -> inExpansion = ClassInfo::$class_info[$this -> class]["inExpansion"];
 
-		if (!isset(ClassInfo::$set_save_vars[$this -> class]))
+		if (!isset(ClassInfo::$set_save_vars[$this -> class])) {
 			ClassInfo::setSaveVars($this -> class);
+			$this->defineStatics();
+		} else
+		
+		if(!isset(self::$loaded[$this->class])) {
+			$this->defineStatics();
+			self::$loaded[$this->class] = true;
+		}
+	}
+	
+	/**
+	 * defines some basic stuff, but it has already an object loaded. You can hook in here for subclasses.
+	 *
+	 * @access protected
+	*/
+	protected function defineStatics() {
+		
 	}
 
 	/**

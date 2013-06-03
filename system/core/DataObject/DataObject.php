@@ -1,21 +1,22 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+
 /**
-  * this is a Basic class for all Models that need DataBase-Connection
-  * it creates tables based on db-fields, has-one-, has-many- and many-many-connections
-  * it gets data and makes it available as normal attributes
-  * it can write and remove data
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 11.04.2013
-  * $Version: 4.7.11
-*/
-
-defined('IN_GOMA') OR die();
-
-abstract class DataObject extends ViewAccessableData implements PermProvider, SaveVarSetter
+ * Basic class for all models with DB-Connection of Goma.
+ *
+ * this is a Basic class for all Models that need DataBase-Connection
+ * it creates tables based on db-fields, has-one-, has-many- and many-many-connections
+ * it gets data and makes it available as normal attributes
+ * it can write and remove data
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     4.7.13
+ */
+abstract class DataObject extends ViewAccessableData implements PermProvider
 {
 
 	/**
@@ -430,41 +431,40 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	}
 	
 	/**
-	 * defines the methods
+	 * defines the methods.
 	 *
-	 *@name __setSaveVars
-	 *@access public
+	 * @access protected
 	*/
-	public static function __setSaveVars($class) {
+	protected function defineStatics() {
 		
-		if(isset(ClassInfo::$class_info[$class]["has_many"])) {
-			foreach(ClassInfo::$class_info[$class]["has_many"] as $key => $val) {
-				Object::LinkMethod($class, $key, array("this", "getHasMany"), true);
-				Object::LinkMethod($class, $key . "ids", array("this", "getRelationIDs"), true);
+		if($has_many = $this->hasMany())
+			foreach($has_many as $key => $val) {
+				Object::LinkMethod($this->class, $key, array("this", "getHasMany"), true);
+				Object::LinkMethod($this->class, $key . "ids", array("this", "getRelationIDs"), true);
+			}
+		
+		
+		if($many_many = $this->ManyMany())
+			foreach($many_many as $key => $val) {
+				Object::LinkMethod($this->class, $key, array("this", "getManyMany"), true);
+				Object::LinkMethod($this->class, $key . "ids", array("this", "getRelationIDs"), true);
+				Object::LinkMethod($this->class, "set" . $key, array("this", "setManyMany"), true);
+				Object::LinkMethod($this->class, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
+			}
+		
+		
+		if($belongs_many_many = $this->BelongsManyMany()) {
+			foreach($belongs_many_many as $key => $val) {
+				Object::LinkMethod($this->class, $key, array("this", "getManyMany"), true);
+				Object::LinkMethod($this->class, $key . "ids", array("this", "getRelationIDs"), true);
+				Object::LinkMethod($this->class, "set" . $key, array("this", "setManyMany"), true);
+				Object::LinkMethod($this->class, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
 			}
 		}
 		
-		if(isset(ClassInfo::$class_info[$class]["many_many"])) {
-			foreach(ClassInfo::$class_info[$class]["many_many"] as $key => $val) {
-				Object::LinkMethod($class, $key, array("this", "getManyMany"), true);
-				Object::LinkMethod($class, $key . "ids", array("this", "getRelationIDs"), true);
-				Object::LinkMethod($class, "set" . $key, array("this", "setManyMany"), true);
-				Object::LinkMethod($class, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-			}
-		}
-		
-		if(isset(ClassInfo::$class_info[$class]["belongs_many_many"])) {
-			foreach(ClassInfo::$class_info[$class]["belongs_many_many"] as $key => $val) {
-				Object::LinkMethod($class, $key, array("this", "getManyMany"), true);
-				Object::LinkMethod($class, $key . "ids", array("this", "getRelationIDs"), true);
-				Object::LinkMethod($class, "set" . $key, array("this", "setManyMany"), true);
-				Object::LinkMethod($class, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-			}
-		}
-		
-		if(isset(ClassInfo::$class_info[$class]["has_one"])) {
-			foreach(ClassInfo::$class_info[$class]["has_one"] as $key => $val) {
-				Object::LinkMethod($class, $key, array("this", "getHasOne"), true);
+		if($has_one = $this->HasOne()) {
+			foreach($has_one as $key => $val) {
+				Object::LinkMethod($this->class, $key, array("this", "getHasOne"), true);
 			}
 		}
 	}
@@ -1400,6 +1400,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 						}
 					} else if(gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
 						$changed[$key] = $newdata[$key];
+					}
+				}
+			}
+			
+			// has-one
+			if(!$forceChange && $has_one = $this->hasOne()) {
+				foreach($has_one as $key => $value) {
+					if(isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "DataObject")) {
+						$forceChange = true;
+						break;
 					}
 				}
 			}
@@ -3856,8 +3866,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *
 	 *@name hasOne
 	*/
-	public function hasOne() {
-		return (isset(ClassInfo::$class_info[$this->class]["has_one"]) ? ClassInfo::$class_info[$this->class]["has_one"] : false);
+	public function hasOne($component = null) {
+		if($component === null) {
+			$has_one = (isset(ClassInfo::$class_info[$this->class]["has_one"]) ? ClassInfo::$class_info[$this->class]["has_one"] : array());
+			
+			if($classes = ClassInfo::dataclasses($this->class)) {
+				foreach($classes as $class) {
+					if(isset(ClassInfo::$class_info[$class]["has_one"]))
+						$has_one = array_merge(ClassInfo::$class_info[$class]["has_one"], $has_one);
+				}
+			}
+			
+			return $has_one;
+		} else {
+			if(isset(ClassInfo::$class_info[$this->class]["has_one"][$component])) {
+				return ClassInfo::$class_info[$this->class]["has_one"][$component];
+			}
+		}
 	}
 	
 	/**
@@ -3866,7 +3891,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name hasMany
 	*/
 	public function hasMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["has_many"]) ? ClassInfo::$class_info[$this->class]["has_many"] : array());
+		$has_many = (isset(ClassInfo::$class_info[$this->class]["has_many"]) ? ClassInfo::$class_info[$this->class]["has_many"] : array());
+		
+		if($classes = ClassInfo::dataclasses($this->class)) {
+			foreach($classes as $class) {
+				if(isset(ClassInfo::$class_info[$class]["has_many"]))
+					$has_many = array_merge(ClassInfo::$class_info[$class]["has_many"], $has_many);
+			}
+		}
+		
+		return $has_many;
 	}
 	
 	/**
@@ -3875,7 +3909,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name ManyMany
 	*/
 	public function ManyMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["many_many"]) ? ClassInfo::$class_info[$this->class]["many_many"] : array());
+		$many_many = (isset(ClassInfo::$class_info[$this->class]["many_many"]) ? ClassInfo::$class_info[$this->class]["many_many"] : array());
+		
+		if($classes = ClassInfo::dataclasses($this->class)) {
+			foreach($classes as $class) {
+				if(isset(ClassInfo::$class_info[$class]["many_many"]))
+					$many_many = array_merge(ClassInfo::$class_info[$class]["many_many"], $many_many);
+			}
+		}
+		
+		return $many_many;
 	}
 	
 	/**
@@ -3884,7 +3927,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, Sa
 	 *@name BelongsManyMany
 	*/
 	public function BelongsManyMany() {
-		return (isset(ClassInfo::$class_info[$this->class]["belongs_many_many"]) ? ClassInfo::$class_info[$this->class]["belongs_many_many"] : array());
+		$belongs_many_many = (isset(ClassInfo::$class_info[$this->class]["belongs_many_many"]) ? ClassInfo::$class_info[$this->class]["belongs_many_many"] : array());
+		
+		if($classes = ClassInfo::dataclasses($this->class)) {
+			foreach($classes as $class) {
+				if(isset(ClassInfo::$class_info[$class]["many_many"]))
+					$belongs_many_many = array_merge(ClassInfo::$class_info[$class]["belongs_many_many"], $belongs_many_many);
+			}
+		}
+		
+		return $belongs_many_many;
 	}
 	
 	/**
