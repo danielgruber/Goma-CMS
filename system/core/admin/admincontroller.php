@@ -272,7 +272,7 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public function contentClass() {
-			return $this->class;
+			return $this->classname;
 		}
 		
 		/**
@@ -422,12 +422,12 @@ class admin extends ViewAccessableData implements PermProvider
 						if($class->text) {
 								if(right($class->rights) && $class->visible())
 								{
-										if(adminController::activeController()->class == $child)
+										if(adminController::activeController()->classname == $child)
 											$active = true;
 										else
 											$active = false;
 										$data->push(array(	'text' 	=> parse_lang($class->text), 
-															'uname' => substr($class->class, 0, -5),
+															'uname' => substr($class->classname, 0, -5),
 															'sort'	=> $class->sort,
 															"active"=> $active));
 								}

@@ -107,9 +107,9 @@ class TableView extends AdminItem {
 			if($this->search === false)
 				$search = $this->search;
 			
-			$_SESSION["deletekey"][$this->class] = randomString(10);
+			$_SESSION["deletekey"][$this->classname] = randomString(10);
 
-			return $this->modelInst()->customise(array("search" => $search, "perPage" => $this->perPage, "datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->class], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
+			return $this->modelInst()->customise(array("search" => $search, "perPage" => $this->perPage, "datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->classname], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
 	}
 	
 	/**
@@ -136,7 +136,7 @@ class TableView extends AdminItem {
 	 *@access public
 	*/
 	public function deleteMany() {
-		if(isset($_SESSION["deletekey"][$this->class]) && $_SESSION["deletekey"][$this->class] == $_POST["deletekey"]) {
+		if(isset($_SESSION["deletekey"][$this->classname]) && $_SESSION["deletekey"][$this->classname] == $_POST["deletekey"]) {
 			$data = $_POST["data"];
 			unset($data["all"]);
 			foreach($data as $key => $value) {	

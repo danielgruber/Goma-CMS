@@ -223,7 +223,7 @@ class HasOneDropdown extends SingleSelectDropDown
 		 *@param value
 		*/
 		public function validate($id) {
-			if($this->class == "hasonedropdown") {
+			if($this->classname == "hasonedropdown") {
 				if(DataObject::count($this->_object, array("id" => $id)) > 0) {
 					return true;
 				} else {

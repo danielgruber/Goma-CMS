@@ -73,7 +73,7 @@ class Page extends pages
 	{
 		parent::getForm($form);
 		// HACK HACK HACK!
-		if($this->class == "page" || $this->class == "wrapperpage")
+		if($this->classname == "page" || $this->classname == "wrapperpage")
 				$form->add(new HTMLeditor('data','', null, "400px"), null, "content");
 	}				
 }

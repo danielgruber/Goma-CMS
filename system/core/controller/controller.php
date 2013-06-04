@@ -139,7 +139,7 @@ class Controller extends RequestHandler
 						$this->template = $this->model() . ".html";
 				}
 				
-				if(ClassInfo::getStatic($this->class, "live_counter")) {
+				if(ClassInfo::getStatic($this->classname, "live_counter")) {
 					// run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
 					if(settingsController::get("livecounter") == 1 || !isset($_SESSION["user_counted"])  || member::login()) {
 					// livecounter
@@ -195,10 +195,10 @@ class Controller extends RequestHandler
 				if(isset($this->model)) {
 					$this->model_inst = Object::instance($this->model);
 				} else {
-					if(ClassInfo::exists($model = substr($this->class, 0, -10))) {
+					if(ClassInfo::exists($model = substr($this->classname, 0, -10))) {
 						$this->model = $model;
 						$this->model_inst = Object::instance($this->model);
-					} else if(ClassInfo::exists($model = substr($this->class, 0, -11))) {
+					} else if(ClassInfo::exists($model = substr($this->classname, 0, -11))) {
 						$this->model = $model;
 						$this->model_inst = Object::instance($this->model);
 					}
@@ -232,9 +232,9 @@ class Controller extends RequestHandler
 			
 			if(!isset($this->model)) {
 				if(!is_object($this->model_inst)) {
-					if(ClassInfo::exists($model = substr($this->class, 0, -10))) {
+					if(ClassInfo::exists($model = substr($this->classname, 0, -10))) {
 						$this->model = $model;
-					} else if(ClassInfo::exists($model = substr($this->class, 0, -11))) {
+					} else if(ClassInfo::exists($model = substr($this->classname, 0, -11))) {
 						$this->model = $model;
 					}
 				} else {
@@ -315,7 +315,7 @@ class Controller extends RequestHandler
 				}
 			} else {
 				$trace = @debug_backtrace();
-				throwError(6, "Logical Exception", "No Template for Controller ".$this->class." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
+				throwError(6, "Logical Exception", "No Template for Controller ".$this->classname." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
 			}
 		}
 		
@@ -484,7 +484,7 @@ class Controller extends RequestHandler
 			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
 				if(!$this->modelInst()->can("Write"))
 				{
-					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
+					if(ClassInfo::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
 					} else {
 						return lang("less_rights");
@@ -493,7 +493,7 @@ class Controller extends RequestHandler
 					$disabled = false;
 				}
 				
-				return $this->form("edit_" . $this->class . $this->modelInst()->id, $this->modelInst(), array(
+				return $this->form("edit_" . $this->classname . $this->modelInst()->id, $this->modelInst(), array(
 					
 				), true, "safe", $disabled);
 			} else if($this->getParam("id")) {
@@ -721,7 +721,7 @@ class Controller extends RequestHandler
 			
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
-			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->class), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
+			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->classname), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
 			if(isset($description)) {
 				$form->add(new HTMLField("description", '<div class="confirmDescription">'.$description.'</div>'));
 			}
@@ -744,7 +744,7 @@ class Controller extends RequestHandler
 			$field = ($usePwdField) ? new PasswordField("prompt_text", $title, $value) : new TextField("prompt_text", $title, $value);
 			$form = new RequestForm(array(
 				$field
-			), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->class), $validators, null, $redirectOnCancel);
+			), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->classname), $validators, null, $redirectOnCancel);
 			$data = $form->get();
 			return $data["prompt_text"];	
 			

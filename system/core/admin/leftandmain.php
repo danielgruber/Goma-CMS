@@ -144,7 +144,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function removeResume() {
-		unset($_SESSION["goma_resume_".$this->class.""]);
+		unset($_SESSION["goma_resume_".$this->classname.""]);
 	}
 	
 	/**
@@ -199,7 +199,7 @@ class LeftAndMain extends AdminItem {
 		
 		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree(), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
 		
-		$_SESSION[$this->class . "_LaM_marked"] = $this->marked;
+		$_SESSION[$this->classname . "_LaM_marked"] = $this->marked;
 		
 		// parent-serve
 		return parent::serve($output);
@@ -212,7 +212,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function getCSS() {
-		$filename = "left_and_main_on_the_fly_".$this->class.".css";
+		$filename = "left_and_main_on_the_fly_".$this->classname.".css";
 		if(!file_exists(ROOT . CACHE_DIRECTORY . "/" . $filename)) {
 			$css = "";
 			$retinaCSS = "";
@@ -262,7 +262,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function createTree($search = "", $marked = null) {
 		$tree_class = $this->tree_class;
 		if($tree_class == "") {
-			throwError(6, 'PHP-Error', "Failed to load \$tree_class! Please define \$tree_class in ".$this->class."");
+			throwError(6, 'PHP-Error', "Failed to load \$tree_class! Please define \$tree_class in ".$this->classname."");
 		}
 		
 		if(isset($_GET["searchtree"])) {
@@ -280,12 +280,12 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		}
 		
 		if(isset($_GET["tree_params"]) && is_array($_GET["tree_params"])) {
-			if(!isset($_SESSION[$this->class . "_tree_params"])) $_SESSION[$this->class . "_tree_params"] = array();
-			$params = array_merge($_SESSION[$this->class . "_tree_params"], $_GET["tree_params"]);
-			$_SESSION[$this->class . "_tree_params"] = $params;
+			if(!isset($_SESSION[$this->classname . "_tree_params"])) $_SESSION[$this->classname . "_tree_params"] = array();
+			$params = array_merge($_SESSION[$this->classname . "_tree_params"], $_GET["tree_params"]);
+			$_SESSION[$this->classname . "_tree_params"] = $params;
 			
-		} else if(isset($_SESSION[$this->class . "_tree_params"]) && is_array($_SESSION[$this->class . "_tree_params"])) {
-			$params = $_SESSION[$this->class . "_tree_params"];
+		} else if(isset($_SESSION[$this->classname . "_tree_params"]) && is_array($_SESSION[$this->classname . "_tree_params"])) {
+			$params = $_SESSION[$this->classname . "_tree_params"];
 		} else {
 			$params = array();
 		}
@@ -307,7 +307,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		if(!empty($search)) {
 			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->class.'">
+							<li class="expanded last" id="tree_'.$this->classname.'">
 								<span class="a  '.$marked.'">
 									<span class="b">
 										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("result", "result").'</span></a>
@@ -321,7 +321,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 						</ul>';
 		} else {
 			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->class.'">
+							<li class="expanded last" id="tree_'.$this->classname.'">
 								<span class="a '.$marked.'">
 									<span class="b">
 										<a nodeid="0" class="treelink root" href="'.$this->adminURI() .'"><span>'.$this->getRootNode().'</span></a>
@@ -345,7 +345,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		$this->marked = $this->getParam("marked");
 		$search = $this->getParam("search");
-		HTTPResponse::setBody($this->createTree($search), isset($_SESSION[$this->class . "_LaM_marked"]) ? $_SESSION[$this->class . "_LaM_marked"] : 0);
+		HTTPResponse::setBody($this->createTree($search), isset($_SESSION[$this->classname . "_LaM_marked"]) ? $_SESSION[$this->classname . "_LaM_marked"] : 0);
 		HTTPResponse::output();
 		exit;
 	}
@@ -365,7 +365,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function ajaxSave($data, $response) {
 		if($model = $this->save($data)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_saved", "The data was successfully written!"), lang("saved"));
+			Notification::notify($model->classname, lang("successful_saved", "The data was successfully written!"), lang("saved"));
 			
 			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }, ".var_export($model["id"], true)."); }");
 			return $response;
@@ -420,8 +420,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		if(Object::method_exists($this->tree_class, "provideTreeParams")) {
 				$params = Object::instance($this->tree_class)->provideTreeParams();
 				foreach($params as $class => $data) {
-					if(isset($_SESSION[$this->class . "_tree_params"][$class])) 
-						$data["default"] = $_SESSION[$this->class . "_tree_params"][$class];
+					if(isset($_SESSION[$this->classname . "_tree_params"][$class])) 
+						$data["default"] = $_SESSION[$this->classname . "_tree_params"][$class];
 					
 					$arr[] = array("class" => $class, "title" => parse_lang($data["title"]), "checkbox" => true, "checked" => $data["default"]);
 				}
@@ -441,7 +441,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		if($model = $this->save($data, 2)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_published", "The data was successfully published!"), lang("published"));
+			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
 			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }, ".var_export($model["id"], true).");}");
 			return $response;

@@ -155,7 +155,7 @@ class FormField extends RequestHandler
 				$this->input = $this->createNode();
 				
 				$this->container = new HTMLNode("div",array(
-					"class"	=> "form_field ". $this->class ." form_field_".$name.""
+					"class"	=> "form_field ". $this->classname ." form_field_".$name.""
 				));
 				
 				if($this->fullSizedField)
@@ -187,7 +187,7 @@ class FormField extends RequestHandler
 		*/
 		public function setValue()
 		{
-			if($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->class, "__toString"))))
+			if($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->classname, "__toString"))))
 				$this->input->val($this->value);
 		}
 		
@@ -341,7 +341,7 @@ class FormField extends RequestHandler
 		*/
 		public function ID()
 		{
-			return "form_field_" .  $this->class . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
+			return "form_field_" .  $this->classname . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
 		}
 		
 		/**
@@ -387,7 +387,7 @@ class FormField extends RequestHandler
 						return $data;
 				} else {
 						$debug = debug_backtrace(false);
-						throwError(6,'PHP-Error', 'No Form for Field '.$this->class.' in '.$debug[0]["file"].' on line '.$debug[0]["line"].'');
+						throwError(6,'PHP-Error', 'No Form for Field '.$this->classname.' in '.$debug[0]["file"].' on line '.$debug[0]["line"].'');
 				}
 		}
 		
@@ -432,11 +432,11 @@ class FormField extends RequestHandler
 		*/
 		public function __get($name) {
 			if(strtolower($name) == "state") {
-				return $this->form()->state->{$this->class . $this->name};
+				return $this->form()->state->{$this->classname . $this->name};
 			} else if(isset($this->$name)) {
 				return $this->$name;
 			} else {
-				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->class." with name ".$this->name.".");
+				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->classname." with name ".$this->name.".");
 			}
 		}
 		

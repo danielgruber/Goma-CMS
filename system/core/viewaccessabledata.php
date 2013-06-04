@@ -173,7 +173,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		{
 				parent::__construct();
 				
-				$this->dataClass = $this->class;
+				$this->dataClass = $this->classname;
 				
 				/* --- */
 				
@@ -182,8 +182,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 					$this->original = $this->data;
 				}
 				
-				if(isset(ClassInfo::$class_info[$this->class]["defaults"])) {
-					$this->defaults = array_merge((array) $this->defaults, (array) ClassInfo::$class_info[$this->class]["defaults"]);
+				if(isset(ClassInfo::$class_info[$this->classname]["defaults"])) {
+					$this->defaults = array_merge((array) $this->defaults, (array) ClassInfo::$class_info[$this->classname]["defaults"]);
 				} else {
 					$this->defaults = array();
 				}
@@ -608,7 +608,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@param string - name
 		*/
 		public function isOffsetMethod($name) {
-			return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->class, "get" . $name));
+			return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->classname, "get" . $name));
 		}
 		
 		/**
@@ -714,7 +714,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 			if(isset($this->customised[$lowername])) {
 				$data = $this->customised[$lowername];
 			// methods
-			} else if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->class, $name)) {
+			} else if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 				if(PROFILE) Profiler::unmark("ViewAccessableData::getOffset", "ViewAccessableData::getOffset call " . $name);
 				return parent::__call($name, $args);
 			} else
@@ -880,7 +880,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 				return $object;
 			} else {
 				$casting = $this->casting();
-				$caste = isset($casting[$name]) ? $casting[$name] : ClassInfo::getStatic($this->class, "default_casting");
+				$caste = isset($casting[$name]) ? $casting[$name] : ClassInfo::getStatic($this->classname, "default_casting");
 				unset($casting);
 				$object = DBField::getObjectByCasting($caste, $name, $data);
 				
@@ -994,7 +994,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function casting() {
-			return isset(ClassInfo::$class_info[$this->class]["casting"]) ? ClassInfo::$class_info[$this->class]["casting"] : self::getStatic($this->class, "casting");
+			return isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : self::getStatic($this->classname, "casting");
 		}
 		
 		/**
@@ -1004,7 +1004,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function defaults() {
-			return isset(ClassInfo::$class_info[$this->class]["defaults"]) ? ClassInfo::$class_info[$this->class]["defaults"] : self::getStatic($this->class, "casting");
+			return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : self::getStatic($this->classname, "casting");
 		}
 		
 		/**
@@ -1014,7 +1014,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function generateCasting() {
-			$casting = self::getStatic($this->class, "casting");
+			$casting = self::getStatic($this->classname, "casting");
 			foreach($this->LocalcallExtending("casting") as $_casting) {
 				$casting = array_merge($casting, $_casting);
 				unset($_casting);
@@ -1036,8 +1036,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess
 		 *@access public
 		*/
 		public function generateDefaults() {		
-			if(self::hasStatic($this->class, "default")) {
-				$defaults = self::getStatic($this->class, "default");
+			if(self::hasStatic($this->classname, "default")) {
+				$defaults = self::getStatic($this->classname, "default");
 			} else {
 				$defaults = array();
 			}

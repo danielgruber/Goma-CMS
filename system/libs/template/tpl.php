@@ -1728,10 +1728,10 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function __cancall($name)
 		{
-				if(parent::method_exists($this->class, $name))
+				if(parent::method_exists($this->classname, $name))
 				{
 						return true;
-				} else if(parent::method_exists($this->class, "_" . $name))
+				} else if(parent::method_exists($this->classname, "_" . $name))
 				{
 						return true;
 				} else
@@ -1755,13 +1755,13 @@ class tplCaller extends Object implements ArrayAccess
 		*/
 		public function __call($name,$args)
 		{
-				if(Object::method_exists($this->class, $name))
+				if(Object::method_exists($this->classname, $name))
 				{
-					if(method_exists($this->class, $name))
+					if(method_exists($this->classname, $name))
 						return call_user_func_array(array("parent", $name), $args);
 					else
 						return call_user_func_array(array("parent", "__call"), array($name, $args));
-				} else if(Object::method_exists($this->class, "_" . $name))
+				} else if(Object::method_exists($this->classname, "_" . $name))
 				{
 					return call_user_func_array(array($this, "_" . $name), $args);
 				} else if(isset($this->callers[strtolower($name)])) {

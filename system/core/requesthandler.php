@@ -83,11 +83,11 @@ class RequestHandler extends Object {
 		$this -> allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions));
 		$this -> url_handlers = array_map("strtolower", $this -> url_handlers);
 
-		if (isset(ClassInfo::$class_info[$this -> class]["allowed_actions"]))
-			$this -> allowed_actions = array_merge($this -> allowed_actions, ClassInfo::$class_info[$this -> class]["allowed_actions"]);
+		if (isset(ClassInfo::$class_info[$this -> classname]["allowed_actions"]))
+			$this -> allowed_actions = array_merge($this -> allowed_actions, ClassInfo::$class_info[$this -> classname]["allowed_actions"]);
 
-		if (isset(ClassInfo::$class_info[$this -> class]["url_handlers"]))
-			$this -> url_handlers = array_merge($this -> url_handlers, ClassInfo::$class_info[$this -> class]["url_handlers"]);
+		if (isset(ClassInfo::$class_info[$this -> classname]["url_handlers"]))
+			$this -> url_handlers = array_merge($this -> url_handlers, ClassInfo::$class_info[$this -> classname]["url_handlers"]);
 
 		if (PROFILE)
 			Profiler::unmark("RequestHandler::__construct");
@@ -113,7 +113,7 @@ class RequestHandler extends Object {
 				$this -> namespace = $this -> request -> shiftedPart;
 			}
 		} else {
-			throwError(6, "No-Request-Error", "Object of type " . $this -> class . " has no request");
+			throwError(6, "No-Request-Error", "Object of type " . $this -> classname . " has no request");
 		}
 
 		if (!isset($this -> subController) || !$this -> subController) {
@@ -128,14 +128,14 @@ class RequestHandler extends Object {
 	 *@name handleRequest
 	 */
 	public function handleRequest($request, $subController = false) {
-		if ($this -> class == "") {
+		if ($this -> classname == "") {
 			throwError(6, 'PHP-Error', 'Class ' . get_class($this) . ' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
 		}
 
 		$this -> subController = $subController;
 		$this -> Init($request);
 
-		$class = $this -> class;
+		$class = $this -> classname;
 
 		while ($class != "object") {
 			if (empty($class)) {
@@ -149,7 +149,7 @@ class RequestHandler extends Object {
 
 			foreach (Object::instance($class)->url_handlers as $pattern => $action) {
 
-				if ($argument = $request -> match($pattern, $this -> shiftOnSuccess, $this -> class)) {
+				if ($argument = $request -> match($pattern, $this -> shiftOnSuccess, $this -> classname)) {
 					$this -> request = $request;
 
 					if ($action{0} == "$") {
@@ -270,7 +270,7 @@ class RequestHandler extends Object {
 			Profiler::mark("RequestHandler::checkPermission");
 
 		$class = $this;
-		while ($class -> class != "object") {
+		while ($class -> classname != "object") {
 			if (in_array($action, $class -> allowed_actions)) {
 				if (PROFILE)
 					Profiler::unmark("RequestHandler::checkPermission");

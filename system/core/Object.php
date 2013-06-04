@@ -43,7 +43,7 @@ abstract class Object {
 	/**
 	 * the current class-name in lowercase-letters
 	 */
-	public $class;
+	public $classname;
 
 	/**
 	 * this variable has a value if the class belongs to an extension, else it is null
@@ -67,7 +67,7 @@ abstract class Object {
 	 */
 	public static function getStatic($class, $var) {
 		if (is_object($class))
-			$class = $class -> class;
+			$class = $class -> classname;
 
 		if (!empty($class)) {
 			if (!empty($var)) {
@@ -90,7 +90,7 @@ abstract class Object {
 	 */
 	public static function hasStatic($class, $var) {
 		if (is_object($class))
-			$class = $class -> class;
+			$class = $class -> classname;
 
 		if (!empty($class)) {
 			if (!empty($var)) {
@@ -114,7 +114,7 @@ abstract class Object {
 	 */
 	public static function setStatic($class, $var, $value) {
 		if (is_object($class))
-			$class = $class -> class;
+			$class = $class -> classname;
 
 		if (!empty($class)) {
 			if (!empty($var)) {
@@ -137,7 +137,7 @@ abstract class Object {
 	 */
 	public static function callStatic($class, $func) {
 		if (is_object($class))
-			$class = $class -> class;
+			$class = $class -> classname;
 
 		if (!empty($class)) {
 			if (!empty($func)) {
@@ -400,19 +400,19 @@ abstract class Object {
 	 * @access public
 	 */
 	public function __construct() {
-		$this -> class = strtolower(get_class($this));
+		$this -> classname = strtolower(get_class($this));
 
-		if (isset(ClassInfo::$class_info[$this -> class]["inExpansion"]))
-			$this -> inExpansion = ClassInfo::$class_info[$this -> class]["inExpansion"];
+		if (isset(ClassInfo::$class_info[$this -> classname]["inExpansion"]))
+			$this -> inExpansion = ClassInfo::$class_info[$this -> classname]["inExpansion"];
 
-		if (!isset(ClassInfo::$set_save_vars[$this -> class])) {
-			ClassInfo::setSaveVars($this -> class);
+		if (!isset(ClassInfo::$set_save_vars[$this -> classname])) {
+			ClassInfo::setSaveVars($this -> classname);
 			$this->defineStatics();
 		} else
 		
-		if(!isset(self::$loaded[$this->class])) {
+		if(!isset(self::$loaded[$this->classname])) {
 			$this->defineStatics();
-			self::$loaded[$this->class] = true;
+			self::$loaded[$this->classname] = true;
 		}
 	}
 	
@@ -441,30 +441,30 @@ abstract class Object {
 
 		$name = trim(strtolower($name));
 
-		if (isset(self::$extra_methods[$this -> class][$name])) {
-			return $this -> callExtraMethod($name, self::$extra_methods[$this -> class][$name], $args);
+		if (isset(self::$extra_methods[$this -> classname][$name])) {
+			return $this -> callExtraMethod($name, self::$extra_methods[$this -> classname][$name], $args);
 		}
 
-		if (isset(self::$cache_extra_methods[$this -> class][$name])) {
-			return $this -> callExtraMethod($name, self::$cache_extra_methods[$this -> class][$name], $args);
+		if (isset(self::$cache_extra_methods[$this -> classname][$name])) {
+			return $this -> callExtraMethod($name, self::$cache_extra_methods[$this -> classname][$name], $args);
 		}
 
 		if (method_exists($this, $name) && is_callable(array($this, $name)))
 			return call_user_func_array(array($this, $name), $args);
 
 		// check last
-		if (isset(self::$temp_extra_methods[$this -> class][$name])) {
-			return $this -> callExtraMethod($name, self::$temp_extra_methods[$this -> class][$name], $args);
+		if (isset(self::$temp_extra_methods[$this -> classname][$name])) {
+			return $this -> callExtraMethod($name, self::$temp_extra_methods[$this -> classname][$name], $args);
 		}
 
 		// check parents
-		$c = $this -> class;
+		$c = $this -> classname;
 		while ($c = ClassInfo::GetParentClass($c)) {
 			if (isset(self::$extra_methods[$c][$name])) {
 				$extra_method = self::$extra_methods[$c][$name];
 
 				// cache result
-				self::$cache_extra_methods[$this -> class][$name] = self::$extra_methods[$c][$name];
+				self::$cache_extra_methods[$this -> classname][$name] = self::$extra_methods[$c][$name];
 
 				unset($c);
 
@@ -473,7 +473,7 @@ abstract class Object {
 		}
 
 		$trace = debug_backtrace();
-		throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this -> class . '::' . $name . ' in ' . $trace[0]['file'] . ' on line ' . $trace[0]['line'] . '');
+		throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this -> classname . '::' . $name . ' in ' . $trace[0]['file'] . ' on line ' . $trace[0]['line'] . '');
 	}
 
 	/**
@@ -510,17 +510,17 @@ abstract class Object {
 	 * @return	array[] Array with all extensions.
 	 */
 	public function getExtensions($recursive = true) {
-		if ($this -> class == "") {
-			$this -> class = strtolower(get_class($this));
+		if ($this -> classname == "") {
+			$this -> classname = strtolower(get_class($this));
 		}
 
 		if ($recursive === true) {
-			if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> class])) {
+			if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> classname])) {
 				$this -> buildExtCache();
 			}
-			return array_keys(self::$cache_extensions[$this -> class]);
+			return array_keys(self::$cache_extensions[$this -> classname]);
 		} else
-			return (isset(self::$extensions[$this -> class])) ? array_keys(self::$extensions[$this -> class]) : array();
+			return (isset(self::$extensions[$this -> classname])) ? array_keys(self::$extensions[$this -> classname]) : array();
 	}
 
 	/**
@@ -530,7 +530,7 @@ abstract class Object {
 	 * @access private
 	 */
 	private function buildExtCache() {
-		$parent = $this -> class;
+		$parent = $this -> classname;
 		$extensions = array();
 		while ($parent !== false) {
 			if (isset(self::$extensions[$parent])) {
@@ -539,7 +539,7 @@ abstract class Object {
 			$parent = ClassInfo::getParentClass($parent);
 		}
 
-		self::$cache_extensions[$this -> class] = $extensions;
+		self::$cache_extensions[$this -> classname] = $extensions;
 		return $extensions;
 	}
 
@@ -555,19 +555,19 @@ abstract class Object {
 		if (isset($this -> ext_instances[$name]))
 			return $this -> ext_instances[$name];
 
-		if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> class])) {
+		if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> classname])) {
 			$this -> buildExtCache();
 		}
 
-		if (!isset(self::$extension_instances[$this -> class][$name]) || !is_object(self::$extension_instances[$this -> class][$name])) {
-			if (isset(self::$cache_extensions[$this -> class][$name])) {
-				self::$extension_instances[$this -> class][$name] = clone eval("return new " . $name . "(" . self::$cache_extensions[$this -> class][$name] . ");");
+		if (!isset(self::$extension_instances[$this -> classname][$name]) || !is_object(self::$extension_instances[$this -> classname][$name])) {
+			if (isset(self::$cache_extensions[$this -> classname][$name])) {
+				self::$extension_instances[$this -> classname][$name] = clone eval("return new " . $name . "(" . self::$cache_extensions[$this -> classname][$name] . ");");
 			} else {
 				return false;
 			}
 		}
 
-		$this -> ext_instances[$name] = clone self::$extension_instances[$this -> class][$name];
+		$this -> ext_instances[$name] = clone self::$extension_instances[$this -> classname][$name];
 		$this -> ext_instances[$name] -> setOwner($this);
 		return $this -> ext_instances[$name];
 	}
@@ -580,10 +580,10 @@ abstract class Object {
 	 * @param string - extension
 	 */
 	public function getExtArguments($extension) {
-		if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> class])) {
+		if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this -> classname])) {
 			$this -> buildExtCache();
 		}
-		return isset(self::$cache_extensions[$this -> class][$extension]) ? self::$cache_extensions[$this -> class][$extension] : "";
+		return isset(self::$cache_extensions[$this -> classname][$extension]) ? self::$cache_extensions[$this -> classname][$extension] : "";
 	}
 
 	/**
@@ -614,7 +614,7 @@ abstract class Object {
 
 					unset($return);
 				} else {
-					log_error("Could not create instance of " . $extension . " for class " . $this -> class . "");
+					log_error("Could not create instance of " . $extension . " for class " . $this -> classname . "");
 				}
 			}
 		}
@@ -664,7 +664,7 @@ abstract class Object {
 	 */
 	public function getResourceFolder($forceAbsolute = false, $exp = null) {
 		if (!isset($exp)) {
-			$exp = isset(ClassInfo::$class_info[$this -> class]["inExpansion"]) ? ClassInfo::$class_info[$this -> class]["inExpansion"] : null;
+			$exp = isset(ClassInfo::$class_info[$this -> classname]["inExpansion"]) ? ClassInfo::$class_info[$this -> classname]["inExpansion"] : null;
 		}
 		if (isset(ClassInfo::$appENV["expansion"][$exp])) {
 			$extFolder = ClassInfo::getExpansionFolder($exp, false, $forceAbsolute);

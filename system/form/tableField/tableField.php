@@ -254,7 +254,7 @@ class tableField extends FormField {
 				if(is_array($_attr)) {
 					$attr = array_merge($attr, $_attr);
 				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->class . "::getColumnAttributes");
+					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnAttributes");
 				}
 			}
 			return $attr;
@@ -282,7 +282,7 @@ class tableField extends FormField {
 				if(is_array($_metadata)) {
 					$metadata = array_merge($metadata, $_metadata);
 				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->class . "::getColumnMetaData");
+					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnMetaData");
 				}
 			}
 			return $metadata;

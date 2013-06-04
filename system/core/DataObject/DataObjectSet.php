@@ -119,7 +119,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	 *@access public
 	*/
 	public function _count() {
-		Core::Deprecate(2.0, "".$this->class."::Count");
+		Core::Deprecate(2.0, "".$this->classname."::Count");
 		return $this->Count();
 	}
 	
@@ -761,7 +761,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 		if(strtolower($offset) == "count") {
 			return $this->Count();
 		} else 
-		if(Object::method_exists($this->class, $offset) || parent::__canCall($offset, $args)) {
+		if(Object::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
 			return parent::getOffset($offset, $args);
 		} else {
 			if(is_object($this->first())) {
@@ -784,7 +784,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 		if(strtolower($offset) == "count")
 			return true;
 		
-		return ((Object::method_exists($this->class, $offset) || parent::__cancall($offset)) || (is_object($this->first()) && Object::method_exists($this->first(), $offset)));
+		return ((Object::method_exists($this->classname, $offset) || parent::__cancall($offset)) || (is_object($this->first()) && Object::method_exists($this->first(), $offset)));
 	}
 	
 	/**
@@ -798,7 +798,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	public function __set($key, $value) {
 		$name = strtolower(trim($key));
 			
-		if(Object::method_exists($this->class, "set" . $key)) {
+		if(Object::method_exists($this->classname, "set" . $key)) {
 			return call_user_func_array(array($this, "set" . $key), array($value));
 		}
 		
@@ -1029,7 +1029,7 @@ class DataObjectSet extends DataSet {
 			
 			$this->dataobject = Object::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
-			$this->dataClass = $this->dataobject->class;
+			$this->dataClass = $this->dataobject->classname;
 			if($this->dataobject->controller != "")
 				$this->controller = $this->dataobject->controller;
 			
@@ -1602,7 +1602,7 @@ class DataObjectSet extends DataSet {
 		if(isset($controller)) {
 			$this->controller = clone $controller;
 			$this->controller->model_inst = $this;
-			$this->controller->model = $this->dataobject->class;
+			$this->controller->model = $this->dataobject->classname;
 			return $this->controller;
 		}
 		
@@ -1621,16 +1621,16 @@ class DataObjectSet extends DataSet {
 				return $this->controller;
 		} else {
 			
-			if(ClassInfo::exists($this->dataobject->class . "controller"))
+			if(ClassInfo::exists($this->dataobject->classname . "controller"))
 			{
-					$c = $this->dataobject->class . "controller";
+					$c = $this->dataobject->classname . "controller";
 					$this->controller = new $c;
 					$this->controller->model_inst = $this;
 					$this->controller->model = null;
 					return $this->controller;
 			} else {
-				if(ClassInfo::getParentClass($this->dataobject->class) != "dataobject") {
-					$parent = $this->dataobject->class;
+				if(ClassInfo::getParentClass($this->dataobject->classname) != "dataobject") {
+					$parent = $this->dataobject->classname;
 					while(($parent = ClassInfo::getParentClass($parent)) != "dataobject") {
 						if(!$parent)
 							return false;
@@ -1752,7 +1752,7 @@ class DataObjectSet extends DataSet {
 		
 		// if name is not set, we generate a name from this model
 		if(!isset($name)) {
-			$name = $this->dataobject->class . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
+			$name = $this->dataobject->classname . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
 		}
 		
 		$form = new Form($this->controller(), $name);
@@ -1766,7 +1766,7 @@ class DataObjectSet extends DataSet {
 		
 		$form->setResult(clone $this->dataobject);
 		
-		$form->add(new HiddenField("class_name", $this->dataobject->class));
+		$form->add(new HiddenField("class_name", $this->dataobject->classname));
 		
 		foreach($this->defaults as $key => $value) {
 			$form->add(new HiddenField($key, $value));
@@ -1918,7 +1918,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 	 *@name push
 	*/
 	public function push(DataObject $record, $write = false) {
-		if($this->class == "hasmany_dataobjectset") {
+		if($this->classname == "hasmany_dataobjectset") {
 			if(isset($this[$this->field])) {
 				$record[$this->field] = $this[$this->field];
 			} else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
@@ -1943,7 +1943,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 		if($write) {
 			$record[$this->field] = 0;
 			if(!$record->write()) {
-				throwError(6, "Permission-Error", "Could not remove Relation from Record ".$record->class.": ".$record->ID."");
+				throwError(6, "Permission-Error", "Could not remove Relation from Record ".$record->classname.": ".$record->ID."");
 			}
 		}
 		return $record;

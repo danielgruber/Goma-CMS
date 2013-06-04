@@ -49,7 +49,7 @@ class DataValidator extends FormValidator
 				
 				foreach($this->form->result as $field => $data)
 				{
-						if(Object::method_exists($this->data->class, "validate" . $field))
+						if(Object::method_exists($this->data->classname, "validate" . $field))
 						{
 								$method = "validate" . $field;
 								$str = $this->data->$method($_data);

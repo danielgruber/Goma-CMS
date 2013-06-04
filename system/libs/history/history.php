@@ -82,7 +82,7 @@ class History extends DataObject {
 		
 		// if it's an object, get the class-name from the object
 		if(is_object($class))
-			$class = $class->class;
+			$class = $class->classname;
 		
 		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))

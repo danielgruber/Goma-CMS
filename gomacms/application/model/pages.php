@@ -342,8 +342,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		public function generateRepresentation($link = false) {
 			$title = $this->title;
 			
-			if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
-				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
+			if(ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname)) {
+				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
 			}
 			
 			if($link)
@@ -671,7 +671,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$this->queryVersion = "state";
 				
 				// render head-bar
-				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class));
+				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->classname.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->classname));
 				
 				// title in head-bar
 				if($this->title)
@@ -1542,7 +1542,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         	}
         
 		// for performance reason we cache this part
-		if(!isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
+		if(!isset(self::$cache_parent[$this->classname]) || self::$cache_parent[$this->classname] == array()) {
 				
 			
 			$allowed_parents = array();
@@ -1559,12 +1559,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						
 						// if ! these children are absolutly prohibited
 						if(substr($allow, 0, 1) == "!") {
-							if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
+							if(substr($allow, 1) == $this->classname || is_subclass_of($this->classname, substr($allow, 1))) {
 								unset($allowed_parents[$child]);
 								continue 2;
 							}
 						} else {
-							if($allow == $this->class || is_subclass_of($this->class, $allow)) {
+							if($allow == $this->classname || is_subclass_of($this->classname, $allow)) {
 								$allowed_parents[$child] = $child;
 							}
 						}
@@ -1573,7 +1573,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 			
 			// now filter
-			$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
+			$allow_parents = ClassInfo::getStatic($this->classname, "allow_parent");
 			if(count($allow_parents) > 0) {
 				foreach($allowed_parents as $parent) {
 					
@@ -1602,7 +1602,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 			}
 	        
-	        	self::$cache_parent[$this->class] = $allowed_parents;
+	        	self::$cache_parent[$this->classname] = $allowed_parents;
 				
 			if(PROFILE) Profiler::unmark("pages::allowed_parents", "pages::allowed_parents generate");
 	        
@@ -1611,7 +1611,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			return $allowed_parents;
 		} else {
             		if(PROFILE) Profiler::unmark("pages::allowed_parents");
-			return self::$cache_parent[$this->class];
+			return self::$cache_parent[$this->classname];
 		}		
 	}
 	

@@ -260,7 +260,7 @@ class ClusterFormField extends FormField {
 		$this->url =& $form->url;
 		$this->controller =& $form->controller;
 		$this->post =& $form->post;
-		$this->state = $this->orgForm()->state->{$this->class . $this->name};
+		$this->state = $this->orgForm()->state->{$this->classname . $this->name};
 		
 		foreach($this->items as $field)
 			$field->setForm($this);
@@ -347,9 +347,9 @@ class ClusterFormField extends FormField {
 	public function ID()
 	{
 		if(Core::is_ajax()) {
-			return "form_field_" .  $this->class . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name . "_ajax";
+			return "form_field_" .  $this->classname . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name . "_ajax";
 		} else {
-			return "form_field_" .  $this->class . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name;
+			return "form_field_" .  $this->classname . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name;
 		}
 	}
 	

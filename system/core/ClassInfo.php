@@ -175,7 +175,7 @@ class ClassInfo extends Object {
 	 */
 	public static function hasInterface($class, $interface) {
 		if (is_object($class)) {
-			$class = $class -> class;
+			$class = $class -> classname;
 		} else {
 			$class = strtolower($class);
 		}
@@ -377,7 +377,7 @@ class ClassInfo extends Object {
 			if (!$forceClass && isset($name -> inExpansion) && isset(self::$appENV["expansion"][strtolower($name -> inExpansion)])) {
 				$name = $name -> inExpansion;
 			} else {
-				$name = $name -> class;
+				$name = $name -> classname;
 			}
 		}
 
@@ -446,7 +446,7 @@ class ClassInfo extends Object {
 		}
 
 		if (is_object($class)) {
-			$class = $class -> class;
+			$class = $class -> classname;
 		}
 
 		if (isset(self::$files[$class])) {

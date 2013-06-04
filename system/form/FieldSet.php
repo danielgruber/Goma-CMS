@@ -67,7 +67,7 @@ class FieldSet extends FormField
 				if(is_object($form))
 				{
 						$this->parent =& $form;
-						$this->state = $this->form()->state->{$this->class . $this->name};
+						$this->state = $this->form()->state->{$this->classname . $this->name};
 						$this->form()->fields[$this->name] = $this;
 						$this->renderAfterSetForm();
 				}

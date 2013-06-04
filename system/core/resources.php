@@ -916,7 +916,7 @@ class Resources extends Object {
 		if(PROFILE) Profiler::mark("Resources::GenerateClassInfo");
 		
 		// scan directories
-		ClassInfo::$class_info[$this->class]["files"] = array();
+		ClassInfo::$class_info[$this->classname]["files"] = array();
 		foreach(self::$scanFolders as $folder) {
 			$this->scanToClassInfo($folder);
 		}
@@ -952,7 +952,7 @@ class Resources extends Object {
 					$this->scanToClassInfo($dir . "/" . $file);
 				} else { 
 					if(preg_match('/\.(js|css|html)$/i', $file)) {
-						ClassInfo::$class_info[$this->class]["files"][$dir . "/" . $file] = true;
+						ClassInfo::$class_info[$this->classname]["files"][$dir . "/" . $file] = true;
 					}
 				}
 				

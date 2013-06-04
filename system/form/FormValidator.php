@@ -37,7 +37,7 @@ class FormValidator extends Object
 		{
 				parent::__construct();
 				
-				if($this->class == "formvalidator" && !is_callable($data)) {
+				if($this->classname == "formvalidator" && !is_callable($data)) {
 					throwError(6, "Invalid Argument", "FormValidator requires a valid callback to be given.");
 				}
 				

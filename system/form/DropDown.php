@@ -134,7 +134,7 @@ class DropDown extends FormField
 				}
 				$this->input->value = $this->key;
 				
-				if(is_object($this->dataset) && Object::method_exists($this->dataset->class, "toArray")) {
+				if(is_object($this->dataset) && Object::method_exists($this->dataset->classname, "toArray")) {
 					$this->dataset = $this->dataset->ToArray();
 				}
 				
@@ -152,7 +152,7 @@ class DropDown extends FormField
 		public function createNode() {
 			$node = parent::createNode();
 			$node->type = "hidden";
-			$node->class = "value";
+			$node->classname = "value";
 			if($this->multiselect)
 				$node->value = $this->key;
 			else

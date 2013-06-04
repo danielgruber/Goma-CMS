@@ -222,7 +222,7 @@ class HistoryController extends Controller {
 			
 			return $view->customise(array("fields" => $fieldset, "css" => $this->buildEditorCSS()))->renderWith("history/compare.html");
 		} else {
-			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->class.". Please create method ".$oldversion->class."::getVersionedFields with array as return-value.");
+			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->classname.". Please create method ".$oldversion->classname."::getVersionedFields with array as return-value.");
 		}
 	}
 	
@@ -254,7 +254,7 @@ class HistoryController extends Controller {
 			return $version[$field];
 		}
 		
-		throwError(6, "Invalid-Data-Error", "$field doesn't exist on version of type ".$version->class." with id ".$version->versionid."");
+		throwError(6, "Invalid-Data-Error", "$field doesn't exist on version of type ".$version->classname." with id ".$version->versionid."");
 	}
 	
 	/**
