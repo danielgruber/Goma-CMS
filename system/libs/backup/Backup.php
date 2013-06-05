@@ -57,8 +57,14 @@ class Backup extends Object {
 		
 		$dict->add("includedTables", $tables = new CFArray());
 		
+		$time = microtime(true);
+		$i = 0;
+		
 		foreach(ClassInfo::$database as $table => $fields)
 		{
+			
+			if($gfs->exists("database/" . $table . ".sql"))
+				continue;
 			
 			$tables->add(new CFString($table));
 			$data = "-- Table ".$table . "\n\n";
@@ -182,6 +188,26 @@ class Backup extends Object {
 			
 			$gfs->addFile("database/" . $table . ".sql", $data);
 			unset($data);
+			
+			$i++;
+			
+			$diff = microtime(true) - $time;
+			if($diff > 1) {
+				if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)
+		
+				$template = new Template;
+				$template->assign("destination", $_SERVER["REQUEST_URI"]);
+				$template->assign("reload", true);
+				$template->assign("archive", "SQL-Backup");
+				$template->assign("progress", ($i / count(ClassInfo::$database)) * 100);
+				$template->assign("status", "");
+				$template->assign("current", $table);
+				$template->assign("remaining", "");
+				echo $template->display("/system/templates/GFSUnpacker.html");
+				exit;
+			}
+			
+			
 		
 		}
 		

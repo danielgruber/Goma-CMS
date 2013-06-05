@@ -165,7 +165,10 @@ class BackupAdmin extends TableView
 		 *@name add_db
 		*/
 		public function add_db() {
-			Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/sql." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".sgfs");
+			$_SESSION["dbfile"] = $file = isset($_SESSION["dbfile"]) ? $_SESSION["dbfile"] : "sql." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".sgfs";
+			Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $file);
+			unset($_SESSION["dbfile"]);
+			BackupModel::forceSyncFolder();
 			$this->redirectBack();
 		}
 		
@@ -185,7 +188,10 @@ class BackupAdmin extends TableView
 				$exclude[$key] = "/" . $val;
 			}
 			
-			Backup::generateBackup(BackupModel::BACKUP_PATH . "/full." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".gfs", $exclude);
+			$_SESSION["backupfile"] = $file = isset($_SESSION["backupfile"]) ? $_SESSION["backupfile"] : "full." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".gfs";
+			Backup::generateBackup(BackupModel::BACKUP_PATH . "/" . $file, $exclude);
+			unset($_SESSION["backupfile"]);
+			BackupModel::forceSyncFolder();
 			$this->redirectBack();
 		}
 		
