@@ -401,6 +401,10 @@ abstract class Object {
 	 */
 	public function __construct() {
 		$this -> classname = strtolower(get_class($this));
+		
+		// temporary until release
+		//@TODO: remove this
+		$this->class = $this->classname;
 
 		if (isset(ClassInfo::$class_info[$this -> classname]["inExpansion"]))
 			$this -> inExpansion = ClassInfo::$class_info[$this -> classname]["inExpansion"];

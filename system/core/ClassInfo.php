@@ -269,7 +269,7 @@ class ClassInfo extends Object {
 				}
 			}
 
-			if (ClassInfo::hasInterface($class, "saveVarSetter")) {
+			if (ClassInfo::hasInterface($class, "saveVarSetter") && Object::method_exists($class, "__setSaveVars")) {
 				call_user_func_array(array($class, "__setSaveVars"), array($class));
 			}
 
