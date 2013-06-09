@@ -1,15 +1,22 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 04.04.2012
-  * $Version 2.4.9
-*/   
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined('IN_GOMA') OR die();
 
+/**
+ * handles some user-specific actions.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.2.2
+ */
 class userController extends Controller
 {
 	/**
@@ -34,10 +41,36 @@ class userController extends Controller
 		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
 		$this->redirectback();
 	}
+	
+	/**
+	 * this is the method, which is called when a action was completed successfully or not.
+	 *
+	 * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
+	 *
+	 * @param 	string $action the action called
+	 * @param	object $record optional: record if available
+	 * @access 	public
+	*/
+	public function actionComplete($action, $record = null) {
+		if($action == "publish_success") {
+			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
+			$this->redirectback();
+			return true;
+		}
 		
+		return parent::actionComplete($action, $record);
+	}
 }
 
-
+/**
+ * Base-Model of every User.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.3
+ */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
 		/**
@@ -623,7 +656,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		*/
 		public function getImage() {
 			if($this->avatar) {
-				if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classname != "gravatarimagehandler") || $this->avatar->classname == "gravatarimagehandler") {
+				if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classnamename != "gravatarimagehandler") || $this->avatar->classnamename == "gravatarimagehandler") {
 					$this->avatarid = 0;
 					$this->write(false, true, 2, false, false);
 					return new GravatarImageHandler(array("email" => $this->email));
@@ -650,8 +683,15 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 }
 
 /**
- * this class reflects some data of the current logged in user
-*/
+ * Wrapper-Class to reflect some data of the logged-in user.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ *
+ * @version		1.3
+ */
 class Member extends Object {
 	/**
 	 * id of the current logged in user
@@ -659,7 +699,7 @@ class Member extends Object {
 	 *@name id
 	 *@access public
 	*/
-	public static $id;
+	static $id;
 	
 	/**
 	 * nickname of the user logged in
@@ -667,7 +707,7 @@ class Member extends Object {
 	 *@name nickname
 	 *@access public
 	*/
-	public static $nickname;
+	static $nickname;
 	
 	/**
 	 * this var reflects the status of the highest group in which the user is
@@ -676,7 +716,7 @@ class Member extends Object {
 	 *@access public
 	 *@var enum(0,1,2)
 	*/
-	public static $groupType = 0;
+	static $groupType = 0;
 	
 	/**
 	 * set of groups of this user
@@ -684,7 +724,7 @@ class Member extends Object {
 	 *@name groups
 	 *@access public
 	*/
-	public static $groups = array();
+	static $groups = array();
 	
 	/**
 	 * default-admin
@@ -692,7 +732,7 @@ class Member extends Object {
 	 *@name default_admin
 	 *@access public
 	*/
-	public static $default_admin;
+	static $default_admin;
 	
 	/**
 	 * object of logged in user
@@ -700,7 +740,7 @@ class Member extends Object {
 	 *@name loggedIn
 	 *@access public
 	*/
-	public static $loggedIn;
+	static $loggedIn;
 	
 	/**
 	 * checks for default admin and basic groups
@@ -708,7 +748,7 @@ class Member extends Object {
 	 *@name checkDefaults
 	 *@access public
 	*/
-	public static function checkDefaults() {
+	static function checkDefaults() {
 		
 		$cacher = new Cacher("groups-checkDefaults");
 		if($cacher->checkValid()) {
@@ -748,7 +788,7 @@ class Member extends Object {
 	 *@name checkLogin
 	 *@access public
 	*/
-	public static function Init() {
+	static function Init() {
 		if(PROFILE) Profiler::mark("member::Init");
 		if(isset(self::$id)) {
 			return true;
@@ -779,10 +819,29 @@ class Member extends Object {
 				
 				// if no group is set, set default group user
 				if(self::$groups->forceData()->Count() == 0) {
-					$group = DataObject::get_one("group", array("type" => 1));
+					$group = DataObject::get_one("group", array("usergroup" => 1));
 					if(!$group) {
-						$group = new Group(array("name" => lang("user"), "type" => 1));
-						$group->write(true, true, 2, false, false);
+					
+						$groupCount = DataObject::count("group", array("type" => 1));
+						
+						if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
+							$group = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
+							$group->write(true, true, 2, false, false);
+						} else {
+							foreach(DataObject::get("group", array("type" => 1)) as $_group) {
+								if($_group->permissions()->count() == 0) {
+									$_group->usergroup = 1;
+									$_group->write(false, true, 2, true, false);
+									$group = $_group;
+									break;
+								}
+							}
+							
+							if(!isset($group)) {
+								$group = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
+								$group->write(true, true, 2, false, false);
+							}
+						}
 					}
 					
 					self::$groups->add($group);
@@ -812,7 +871,7 @@ class Member extends Object {
 	/**
 	 * old method
 	*/
-	public static function checkLogin() {}
+	static function checkLogin() {}
 	
 	/**
 	 * returns the groupids of the groups of the user
@@ -820,7 +879,7 @@ class Member extends Object {
 	 *@name groupids
 	 *@access public
 	*/
-	public static function groupIDs() {
+	static function groupIDs() {
 		if(is_array(self::$groups)) {
 			return self::$groups;
 		}
@@ -833,7 +892,7 @@ class Member extends Object {
 	 *@name login
 	 *@access public
 	*/
-	public static function login() {
+	static function login() {
 		return (self::$groupType > 0);
 	}
 	
@@ -854,7 +913,7 @@ class Member extends Object {
 	 *@param string|numeric - if numeric: the rights from 1 - 10, if string: the advanced rights
 	 *@return bool
 	*/
-	public static function right($name)
+	static function right($name)
 	{
 			return right($name);
 	}
@@ -869,7 +928,7 @@ class Member extends Object {
 	 *@param string - password
 	 *@return bool
 	*/
-	public static function doLogin($user, $pwd)
+	static function doLogin($user, $pwd)
 	{
 		self::checkDefaults();
 

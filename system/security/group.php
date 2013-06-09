@@ -1,15 +1,22 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 03.02.2013
-  * $Version 1.2.1
-*/
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined('IN_GOMA') OR die();
 
+/**
+ * defines the basic group.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.2.2
+ */
 class Group extends DataObject implements HistoryData, PermProvider
 {
 		/**
@@ -36,7 +43,8 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@var array
 		*/
 		static $db = array(	"name"	 	=> 'varchar(100)',
-							"type"		=> 'enum("0", "1", "2")');
+							"type"		=> 'enum("0", "1", "2")',
+							"usergroup"	=> "int(1)");
 		
 		
 		/**
@@ -84,7 +92,8 @@ class Group extends DataObject implements HistoryData, PermProvider
 				$form->add(new TabSet("tabs", array(
 					new Tab("general",array(
 						new TextField("name", lang("name", "Name")),
-						new Select("type", lang("grouptype"), array(1 => lang("users"), 2 => lang("admins")))
+						new Select("type", lang("grouptype"), array(1 => lang("users"), 2 => lang("admins"))),
+						new CheckBox("usergroup", lang("user_defaultgroup"))
 					), lang("general", "general information"))
 				)));
 
@@ -106,6 +115,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 				$form->add($tabs = new TabSet("tabs", array(
 					new Tab("general",array(
 						new TextField("name",  lang("name", "Name")),
+						new CheckBox("usergroup", lang("user_defaultgroup"))
 					), lang("general", "general information"))
 				)));
 				
@@ -150,6 +160,19 @@ class Group extends DataObject implements HistoryData, PermProvider
 			$data["permissions"] = $dataset;
 
 			return $data;
+		}
+		
+		/**
+		 * unsets the default group if this is now default.
+		 *
+		 * @access public
+		*/
+		public function onAfterWrite() {
+			if($this->usergroup == 1) {
+				DataObject::update("group", array("usergroup" => 0), "recordid != ".$this->RecordID."");
+			}
+			
+			parent::onAfterWrite();
 		}
 		
 		/**

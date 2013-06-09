@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 08.04.2013
-*/
+ * @package		Goma\Lang\en-us
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	09.06.2013
+ */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -214,11 +214,11 @@ $lang = array(
 	"captcha_reload"                                => "reload",
 	'path'                                          => "path",
 	"box_successful_saved"							=> "The box was successfully saved!",
-	"successful_saved"                              => "The data were successfully saved!",
+	"successful_saved"                              => "The information was successfully saved!",
 	"saved"											=> "Saved",
-	"successful_deleted"							=> "The data was successfully removed.",
+	"successful_deleted"							=> "The record was successfully removed.",
 	"deleted"										=> "Removed",
-	"successful_published"							=> "The data was successfully published!",
+	"successful_published"							=> "The record was successfully published!",
 	"published"										=> "Published",
 	'sites_edit'									=> "edit and create sites",
 	'admin_rating'									=> "edit rating",
@@ -231,7 +231,7 @@ $lang = array(
 	'lp_edit_pass'									=> "edit password",
 	'lp_email_or_user'								=> "username or email",
 	'lp_submit'										=> "send",
-	'lp_update_ok'									=> "the password was successfully changed",
+	'lp_update_ok'									=> "The password was successfully changed,",
 	'lp_not_found'									=> "There was nobody found with your data.",
 	'lp_sent'										=> "you submitted a request for resetting your password.",
 	'hello'											=> "Hello",
@@ -308,7 +308,7 @@ $lang = array(
 	"version_current"								=> "Your version is the newest!",
 	"Create"										=> "Create",
 	"no_result"										=> "No result",
-	"delete_okay"									=> "The data was successfully deleted!",
+	"delete_okay"									=> "The record was successfully deleted!",
 	
 	/*mobile*/
 	"classic_version"								=> "standard view",
@@ -589,5 +589,7 @@ $lang = array(
     "google-site-verification"  => "Google-Webmaster-Key",
     
     "no_value"					=> "no value",
-    "favicon"					=> "Bookmark-icon"
+    "favicon"					=> "Bookmark-icon",
+    
+    "user_defaultgroup"			=> "default group of new users"
 );

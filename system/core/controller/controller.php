@@ -487,7 +487,7 @@ class Controller extends RequestHandler
 					if(ClassInfo::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
 					} else {
-						return lang("less_rights");
+						return $this->actionComplete("less_rights");
 					}
 				} else {
 					$disabled = false;
@@ -526,7 +526,7 @@ class Controller extends RequestHandler
 			if($this->countModelRecords() == 1) {
 				if(!$this->modelInst()->can("Delete"))
 				{
-					return lang("less_rights", "You don't have permissions to access this page.");
+					return $this->actionComplete("less_rights");
 				} else {
 					$disabled = false;
 				}
@@ -589,35 +589,29 @@ class Controller extends RequestHandler
 		}
 		
 		/**
-		 * default save-function for forms
+		 * Alias for Controller::submit_form.
 		 *
-		 *@name safe
-		 *@access public
-		*/ 
+		 * @access 	public
+		 * @param 	array $data
+		*/
 		public function safe($data)
 		{
-				if($this->save($data) !== false)
-				{
-						addcontent::add('<div class="success">'.lang("successful_saved", "The data were successfully saved.").'</div>');
-						$this->redirectback();
-				} else
-				{
-						throwError(6, 'Server-Error', 'Could not save data.');
-				}
+			return $this->submit_form($data);
 		}
 		
 		/**
-		 * default save-method for forms
-		 * it's the new one, the old one was @safe
+		 * saves data to database and marks the record as draft if versions are enabled.
 		 *
-		 *@name submit_form
-		 *@access public
+		 * Saves data to the database. It decides if to create a new record or not whether an id is set or not.
+		 * It marks the record as draft if versions are enabled on this model.
+		 *
+		 * @access 	public
+		 * @param 	array $data
 		*/
 		public function submit_form($data) {
-			if($this->save($data) !== false)
+			if($model = $this->save($data) !== false)
 			{
-				addcontent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-				$this->redirectback();
+				return $this->actionComplete("save_success", $model);
 			} else
 			{
 				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
@@ -626,11 +620,15 @@ class Controller extends RequestHandler
 		}
 		
 		/**
-		 * saves data to database, it does not matter if edit or add
+		 * global save method for the database.
 		 *
-		 *@name save
-		 *@access public
-		 *@param array - data
+		 * it saves data to the database. you can define which priority should be selected and if permissions are relevant.
+		 *
+		 * @access	public
+		 * @param 	array $data data
+		 * @param 	integer $priority Defines what type of save it is: 0 = autosave, 1 = save, 2 = publish
+		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
+		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
 		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false)
 		{
@@ -661,30 +659,61 @@ class Controller extends RequestHandler
 		}
 		
 		/**
-		 * saves data to database, it does not matter if edit or add
-		 * it publishes the data
+		 * saves data to database and marks the record published.
 		 *
-		 *@name publish
-		 *@access public
-		 *@param array - data
+		 * Saves data to the database. It decides if to create a new record or not whether an id is set or not.
+		 * It marks the record as published.
+		 *
+		 * @access 	public
+		 * @param 	array $data
 		*/
 		public function publish($data)
 		{	
-				if($this->save($data, 2) !== false)
-				{
-						AddContent::add('<div class="success">'.lang("successful_published", "The data were successfully published.").'</div>');
-						$this->redirectback();
-				} else
-				{
-						$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-						throwError(6, 'Server-Error', 'Could not publish data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
-				}
+			if($model = $this->save($data, 2) !== false)
+			{
+				return $this->actionComplete("publish_success", $model);
+			} else
+			{
+				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+				throwError(6, 'Server-Error', 'Could not publish data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			}
 		}
 		
 		/**
-		 * redirects back
-		 *@name redirectback
-		 *@access public
+		 * this is the method, which is called when a action was completed successfully or not.
+		 *
+		 * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
+		 *
+		 * @param 	string $action the action called
+		 * @param	object $record optional: record if available
+		 * @access 	public
+		*/
+		public function actionComplete($action, $record = null) {
+			switch($action) {
+				case "publish_success": 
+					AddContent::addSuccess(lang("successful_published", "The entry was successfully published."));
+					$this->redirectback();
+				break;
+				case "save_success":
+					AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
+					$this->redirectback();
+				break;
+				case "less_rights":
+					
+					return lang("less_rights", "You are not allowed to visit this page or perform this action.");
+				break;
+			}
+		}
+		
+		/**
+		 * redirects back to the page before based on some information by the user.
+		 *
+		 * it detects redirect-params with GET and POST-Vars. It uses the Referer and as a last instance it redirects to homepage.
+		 * you can define params to add to the redirect if you want.
+		 *
+		 * @access	public
+		 * @param 	string $param get-parameter
+		 * @param 	string $value value of the get-parameter
 		*/
 		public function redirectback($param = null, $value = null)
 		{

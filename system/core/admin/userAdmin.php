@@ -66,4 +66,23 @@ class userAdmin extends adminItem {
 		
 		return $form->render();
 	}
+	
+	/**
+	 * this is the method, which is called when a action was completed successfully or not.
+	 *
+	 * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
+	 *
+	 * @param 	string $action the action called
+	 * @param	object $record optional: record if available
+	 * @access 	public
+	*/
+	public function actionComplete($action, $record = null) {
+		if($action == "publish_success") {
+			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
+			$this->redirectback();
+			return true;
+		}
+		
+		return parent::actionComplete($action, $record);
+	}
 }

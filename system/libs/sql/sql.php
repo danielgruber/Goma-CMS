@@ -531,7 +531,7 @@ class SQL extends object
 				if($includeWhere)
 					$sql .= " WHERE ";
 				
-				$sql .= $this->where;
+				$sql .= $where;
 			}
 			return $sql;
 		}

@@ -1,11 +1,11 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 08.04.2013
-*/
+ * @package		Goma\Lang\de
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	09.06.2013
+ */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -213,11 +213,11 @@ $lang = array(
 	"captcha_reload"                                => "Neu Laden",
 	'path'                                          => "Pfad",
 	"box_successful_saved"							=> "Die Box wurde erfolgreich gespeichert!",
-	"successful_saved"                              => "Die Daten wurden erfolgreich gespeichert!",
+	"successful_saved"                              => "Die Informationen wurden erfolgreich gespeichert!",
 	"saved"											=> "Gespeichert",
-	"successful_deleted"							=> "Die Daten wurden erfolgreich gelöscht",
+	"successful_deleted"							=> "Der Eintrag wurden erfolgreich gelöscht",
 	"deleted"										=> "Gelöscht",
-	"successful_published"							=> "Die Daten wurden erfolgreich gespeichert und veröffentlicht!",
+	"successful_published"							=> "Der Eintrag wurden erfolgreich gespeichert und veröffentlicht!",
 	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
@@ -305,7 +305,7 @@ $lang = array(
 	"version_current"								=> "Sie haben die aktuellste Version!",
 	"Create"										=> "Erstellen",
 	"no_result"										=> "Keine Elemente",
-	"delete_okay"									=> "Die Daten wurden erfolgreich gelöscht!",
+	"delete_okay"									=> "Der Eintrag wurden erfolgreich entfernt!",
 	
 	/*mobile*/
 	"classic_version"								=> "Klassische Ansicht",
@@ -586,5 +586,7 @@ $lang = array(
     "google-site-verification"  => "Google-Webmaster-Key",
     
     "no_value"					=> "Kein Wert",
-    "favicon"					=> "Lesezeichen-Symbol"
+    "favicon"					=> "Lesezeichen-Symbol",
+    
+    "user_defaultgroup"			=> "Standard-Gruppe neuer Nutzer"
 );

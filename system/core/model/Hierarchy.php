@@ -26,11 +26,11 @@ class Hierarchy extends DataObjectExtension {
 	 * has-one-extension
 	*/
 	public function has_one() {
-		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
+		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
 			return array();
 		
 		return array(
-			"parent" => $this->getOwner()->class
+			"parent" => $this->getOwner()->classname
 		);
 	}
 	
@@ -38,11 +38,11 @@ class Hierarchy extends DataObjectExtension {
 	 * has-many-extension
 	*/
 	public function has_many() {
-		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
+		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
 			return array();
 			
 		return array(
-			"Children" => $this->getOwner()->class
+			"Children" => $this->getOwner()->classname
 		);
 	}
 	
@@ -52,7 +52,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name AllChildren
 	*/
 	public function AllChildren($filter = null, $sort = null, $limit = null) {
-		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
+		return DataObject::get($this->getOwner()->classname, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
@@ -63,7 +63,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name SearchChildren
 	*/
 	public function SearchChildren($search, $filter = null, $sort = null, $limit = null) {
-		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array("parentid" => $this->getOwner()->id)));
+		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array("parentid" => $this->getOwner()->id)));
 	}
 	
 	/**
@@ -72,7 +72,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name SearchAllChildren
 	*/
 	public function SearchAllChildren($search, $filter = null, $sort = null, $limit = null) {
-		return DataObject::search_object($this->getOwner()->class, $search, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
+		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
@@ -103,7 +103,7 @@ class Hierarchy extends DataObjectExtension {
 		if(!isset($sort)) {
 			$sort = array("field" => $this->getOwner()->baseTable . "_tree.height", "type" => "DESC");
 		}
-		return DataObject::get($this->getOwner()->class, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
+		return DataObject::get($this->getOwner()->classname, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.id" => $this->getOwner()->versionid)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
@@ -203,7 +203,7 @@ class Hierarchy extends DataObjectExtension {
 	 *@name onBeforeRemove
 	*/
 	public function onBeforeRemove(&$manipulation) {
-		if(!DataObject::versioned($this->getOwner()->class) && isset(ClassInfo::$database[$this->getOwner()->baseTable . "_tree"])) {
+		if(!DataObject::versioned($this->getOwner()->classname) && isset(ClassInfo::$database[$this->getOwner()->baseTable . "_tree"])) {
 			$manipulation["delete_tree"] = array(
 				"table" 	=> $this->getOwner()->baseTable . "_tree",
 				"command"	=> "delete",
@@ -238,7 +238,7 @@ class Hierarchy extends DataObjectExtension {
 	*/
 	public function buildDB($prefix, &$log) {
 		
-		if(strtolower(get_parent_class($this->getOwner()->class)) != "dataobject")
+		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
 			return true;
 		
 		if(!SQL::getFieldsOfTable($this->getOwner()->baseTable . "_tree")) {

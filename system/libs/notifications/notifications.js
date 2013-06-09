@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 17.03.2013
-  * $Version 1.0
+  * last modified: 09.06.2013
+  * $Version 1.0.1
 */
 
 goma.ui.Notifications = {
@@ -19,11 +19,12 @@ goma.ui.Notifications = {
 	 *@access public
 	*/
 	Init: function() {
-		if($(".notificationRoot").length == 1) {
-			$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
-		} else {
-			goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
-		}
+		if($("#notificationsHolder").length == 0)
+			if($(".notificationRoot").length == 1) {
+				$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+			} else {
+				goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+			}
 	},
 	
 	/**
@@ -73,6 +74,9 @@ goma.ui.Notifications = {
 	 *@access public
 	*/
 	makeVisible: function(notification, durationClose) {
+		if($("#notifications").length == 0)
+			goma.ui.Notifications.Init();
+		
 		var n = notification;
 		n.node.css("display", "none");
 		n.node.prependTo($("#notifications"));

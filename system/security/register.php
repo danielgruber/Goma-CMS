@@ -1,15 +1,22 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 16.08.2012
-  * $Version 1.2.1
-*/
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined('IN_GOMA') OR die();
 
+/**
+ * extends the user-class with a registration-form.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		2.0
+ */
 class RegisterExtension extends ControllerExtension
 {
 		
@@ -79,7 +86,7 @@ class RegisterExtension extends ControllerExtension
 				} else if(isset($_GET["activate"])) {
 					$data = DataObject::get("user", array("code" => $_GET["activate"]));
 					
-					if($data->_count() > 0 && $data->status != 2) {
+					if($data->count() > 0 && $data->status != 2) {
 						$data->status = 1; // activation
 						$data->code = randomString(10); // new code
 						if($data->write(false, true)) {
@@ -98,10 +105,11 @@ class RegisterExtension extends ControllerExtension
 					
 				// great, let's show a form
 				} else {
-					$this->model_inst = new user();
-					return $this->form(false, false, array(), false, "doregister");
+					$user = new user();
+					return $user->controller()->form(false, false, array(), false, "doregister");
 				}
 		}
+		
 		/**
 		 * registers the user
 		 * we don't use register, because of constructor
