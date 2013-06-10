@@ -1,15 +1,21 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.1.6
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * A simple FormAction, which submits data via Ajax and calls the ajax-response-handler given.
+ * 
+ * you should return the given AjaxResponse-Object or Plain JavaScript in Ajax-Response-Handler.
+ * a handler could look like this:
+ * public function ajaxSave($data, $response) {
+ *      $response->exec("alert('Nice!')");
+ *      return $response;
+ * }
+ *
+ * @author    	Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package		Goma\Form
+ * @version		2.1.7
+ */
 class AjaxSubmitButton extends FormAction
 {
 		/**
@@ -93,13 +99,14 @@ class AjaxSubmitButton extends FormAction
 								$("#'.$this->form()->id().'").trigger(eventb);
 							},
 							success: function(script, textStatus, jqXHR) {
-								LoadAjaxResources(jqXHR);
-								 if (window.execScript)
-								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
-								 else
-								 	method = eval("(function(){" + script + "});");
-								RunAjaxResources(jqXHR);
-								return method.call($("#'.$this->form()->id().'").get(0));
+								goma.ui.loadResources(jqXHR).done(function(){;
+    								if (window.execScript)
+    								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
+    								else
+    								 	method = eval("(function(){" + script + "});");
+    								RunAjaxResources(jqXHR);
+    								return method.call($("#'.$this->form()->id().'").get(0));
+								});
 							},
 							error: function(jqXHR, textStatus, errorThrown)
 							{
@@ -234,6 +241,7 @@ class AjaxSubmitButton extends FormAction
 					$result = call_user_func_array($callback, array($result));
 				}
 				
+
 				return call_user_func_array(array($form->controller, $submission), array($result, $response, $form));
 		}
 		
