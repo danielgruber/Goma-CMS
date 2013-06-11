@@ -1799,7 +1799,7 @@ class ContentTPLExtension extends Extension {
 	 *@access public
 	*/
 	public function pageByPath($path) {
-		return DataObject::get_one("pages", array("path" => $path));
+		return DataObject::get_one("pages", array("path" => array("LIKE" => $path)));
 	}
 	
 	/**
@@ -1808,7 +1808,7 @@ class ContentTPLExtension extends Extension {
 	*/
 	public function active_mainbar_title($level = 2)
 	{
-		return ($this->active_mainbar()) ? $this->active_mainbar()->mainbartitle : "";
+		return ($this->active_mainbar($level)) ? $this->active_mainbar($level)->mainbartitle : "";
 	}
 	
 	/**
@@ -1817,7 +1817,7 @@ class ContentTPLExtension extends Extension {
 	*/
 	public function active_mainbar_url($level = 2)
 	{
-		return ($this->active_mainbar()) ? $this->active_mainbar()->url : null;
+		return ($this->active_mainbar($level)) ? $this->active_mainbar($level)->url : null;
 	}
 	
 	/**
