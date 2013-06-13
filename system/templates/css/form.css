@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 26.02.2013
+  * last modified: 14.06.2013
 */
 
 form { 
@@ -110,11 +110,6 @@ fieldset {
 .form_field.checkbox label {
 	min-height: 20px;
 }
-.form_field.checkbox .iPhoneCheckContainer {
-	margin-left: 260px;
-	margin-top: -28px;
-	margin-bottom: 2px;
-}
 
 .form_field .inputHolder {
 	margin-left: 264px;
@@ -179,7 +174,7 @@ fieldset > .form_field > .info_field {
 		margin-left: 0;
 		margin-top: 0;
 	}
-	.form_field.checkbox .iPhoneCheckContainer {
+	.form_field.checkbox .g-checkbox {
 		margin-left: 0;
 		margin-top: 0;
 	}
@@ -192,4 +187,71 @@ fieldset > .form_field > .info_field {
 	.form_field .info_field {
 		padding: 5px;
 	}
+}
+
+.g-checkbox {
+	border: 2px solid #ddd;
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	background: #fff;
+	display: inline-block;
+	padding: 3px 5px;
+	position: relative;
+	height: 19px;
+	margin: 0 5px;
+	
+	cursor: pointer;
+}
+.g-checkbox.value-active {
+	background: #24ACB8;
+	border-color: #24ACB8;
+}
+.g-checkbox label {
+	vertical-align: top;
+	line-height: 10pt;
+	font-size: 10pt;
+	font-family: Helvetica;
+	color: #555;
+	min-height: 0 !important;
+	padding: 3px;
+	margin: 0;
+	height: 13px;
+	cursor: pointer;
+}
+.g-checkbox .g-check-label-on {
+	margin-right: 4px;
+}
+.g-checkbox.value-active label {
+	color: #eee;
+}
+.g-checkbox.value-active .g-check-label-off {
+	color: #24ACB8;
+}
+.g-checkbox .g-check-label-on {
+	color: #fff;
+}
+.g-checkbox.value-active .g-check-handle {
+	right: 0px;
+	left: auto;
+}
+.g-checkbox .g-check-handle {
+	background: #fff;
+	height: 25px;
+	width: 25px;
+	
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	
+	position: absolute;
+	top: -1px;
+	left: 0px;
+	
+	border: 1px solid #ccc;
+	-webkit-box-shadow: 0 0 5px #999;
+	box-shadow: 0 0 5px #999;
+}
+.g-checkbox input[type=checkbox] {
+	display: none;
 }

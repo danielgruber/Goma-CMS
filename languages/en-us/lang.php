@@ -591,5 +591,8 @@ $lang = array(
     "no_value"					=> "no value",
     "favicon"					=> "Bookmark-icon",
     
-    "user_defaultgroup"			=> "default group of new users"
+    "user_defaultgroup"			=> "default group of new users",
+    
+    "on"						=> "on",
+    "off"						=> "off"
 );

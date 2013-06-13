@@ -588,5 +588,8 @@ $lang = array(
     "no_value"					=> "Kein Wert",
     "favicon"					=> "Lesezeichen-Symbol",
     
-    "user_defaultgroup"			=> "Standard-Gruppe neuer Nutzer"
+    "user_defaultgroup"			=> "Standard-Gruppe neuer Nutzer",
+    
+    "on"						=> "An",
+    "off"						=> "Aus"
 );

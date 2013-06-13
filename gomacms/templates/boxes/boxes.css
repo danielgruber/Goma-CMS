@@ -14,6 +14,7 @@
 	padding: 0;
 	float: left;
 	max-width: 100% !important;
+	position: relative;
 }
 .box_new > .content {
 	padding: 5px;
@@ -23,12 +24,14 @@
 	background: url(../images/boxes_drag_area.png) repeat-x;
 	line-height: 100% !important;
 }
-.box_new > .adminhead > .actions {
-	float: right;
+.box_new > .actions {
+	position: absolute;
+	right: 0;
+	top: 0;
 	margin: 1px;
 	line-height: 100% !important;
 }
-.boxes_new > .box_new > .adminhead > .actions > a {
+.boxes_new > .box_new > .actions > a {
 	display: block;
 	float: left;
 	margin: 1px;

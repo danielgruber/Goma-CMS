@@ -1,13 +1,11 @@
 /**
-  * goma javascript framework
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 11.05.2013
-  * $Version 2.1.1
-*/
+ * The base goma-javascript-library to load other JS-Modules from the server and get some base functionallity in JavaScript.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\JS-Framework
+ * @version	2.1.1
+ */
 
 // goma-framework
 if(typeof goma == "undefined")

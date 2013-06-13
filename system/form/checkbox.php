@@ -84,20 +84,10 @@ class CheckBox extends FormField
 		*/
 		public function js() {
 			
-			Resources::add("system/libs/thirdparty/iphone-checkbox/jquery/iphone-style-checkboxes.js", "js", "tpl");
-			Resources::add("system/libs/thirdparty/iphone-checkbox/style.css", "css", "combine");
+			Resources::add("system/libs/javascript/checkbox/gCheckBox.js", "js", "tpl");
 			
 			return '$(function(){
-				var obj = $("#'.$this->ID().'").iphoneStyle();
-				interval = setInterval(function(){
-					if($("#'.$this->ID().'").length > 0) {
-						$("#'.$this->ID().'").iphoneStyle("initialPosition");
-					} else {
-						clearInterval(interval);
-					}
-				}, 500);
-				//$("#'.$this->divID().'").addClass("clearfix");
-				//$("#'.$this->divID().' .iPhoneCheckContainer").css("float", "right");
+				var obj = $("#'.$this->ID().'").gCheckBox();
 			});';
 		}
 		
