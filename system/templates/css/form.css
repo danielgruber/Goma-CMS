@@ -255,3 +255,17 @@ fieldset > .form_field > .info_field {
 .g-checkbox input[type=checkbox] {
 	display: none;
 }
+
+.g-checkbox.disabled {
+	background: #e0e0e0;
+	border-color: #d0d0d0;
+}
+.g-checkbox.disabled label {
+	color: #888 !important;
+}
+.g-checkbox.disabled.value-active .g-check-label-off, .g-checkbox.disabled .g-check-label-on {
+	color: #e0e0e0 !important;
+}
+.g-checkbox.disabled .g-check-handle {
+	background: #e0e0e0;
+}

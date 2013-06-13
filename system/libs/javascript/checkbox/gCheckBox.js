@@ -54,6 +54,14 @@
 				$wrapper.addClass(settings.activeClass);
 			}
 		    
+		    if(!elem.prop("disabled")) {
+			    $wrapper.click(switchValue);
+					
+				InitDrag($wrapper);
+			} else {
+				$wrapper.addClass("disabled");
+			}
+		    
 		    return $wrapper;
 		};
 		
@@ -173,10 +181,6 @@
 				var $wrapper = Init($this);
 	        
 				$wrapper.disableSelection();
-				
-				$wrapper.click(switchValue);
-				
-				InitDrag($wrapper);
 			}
 	        
         });
