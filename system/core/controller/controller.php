@@ -596,7 +596,14 @@ class Controller extends RequestHandler
 		*/
 		public function safe($data)
 		{
-			return $this->submit_form($data);
+			if($model = $this->save($data) !== false)
+			{
+				return $this->actionComplete("save_success", $model);
+			} else
+			{
+				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
+				throwError(6, 'Server-Error', 'Could not save data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			}
 		}
 		
 		/**
