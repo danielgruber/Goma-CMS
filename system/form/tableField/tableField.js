@@ -17,7 +17,7 @@
 		});
 		
 		$(".tablefield-item td").each(function(){
-			if(!$(this).hasClass(".col-checkboxes") && !$(this).hasClass("col-buttons")) {
+			if(!$(this).hasClass("col-checkboxes") && !$(this).hasClass("col-buttons")) {
 				$(this).on("click touchend", function(){
 					if($(this).parent().find(".col-checkboxes").length == 1) {
 						if($(this).parent().find(".col-checkboxes input").prop("checked")) {
