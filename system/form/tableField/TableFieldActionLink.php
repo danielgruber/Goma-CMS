@@ -7,7 +7,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0
+ * @version     1.0.1
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,7 +20,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	 * @param   string $inner HTML between a-tags
 	 * @param	mixed $requirePerm how to check if permissions is required (callback, string, boolean)
 	 */
-	public function __construct($destination, $inner, $requirePerm) {
+	public function __construct($destination, $inner, $requirePerm = false) {
 		$this->destination = $destination;
 		$this->inner = $inner;
 		$this->requirePerm = $requirePerm;
@@ -99,6 +99,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		
 		$format = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $this->inner);
 		$format = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $format);
+		$format = str_replace('"', '\\"', $format);
 		eval('$value = "' . $format . '";');
 
 		$data = new ViewAccessableData();
