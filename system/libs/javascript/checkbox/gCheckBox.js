@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version 1.0
+ * @version 1.0.1
 */
  
 (function( $ ) {
@@ -14,6 +14,14 @@
     	
     	
         var settings = $.extend( true, {}, $.fn.gCheckBox.defaults, options );
+        
+        var currentlyClicking = false;
+        var acurrentlyClicking = function() {
+	        currentlyClicking = true;
+	        setTimeout(function() {
+	        	currentlyClicking = false;
+	        }, 20);
+        };
         
         var Init = function(elem) {
         	
@@ -97,6 +105,10 @@
 		
 		// called when switch is clicked.
 		var switchValue = function() {
+			if(currentlyClicking)
+				return ;
+			
+			acurrentlyClicking();
 			var $wrapper = $(this);
 			// if checked.
 			if($wrapper.find("input").prop("checked")) {
@@ -181,6 +193,20 @@
 				var $wrapper = Init($this);
 	        
 				$wrapper.disableSelection();
+				
+				$this.click(function(){
+					if(currentlyClicking)
+						return ;
+					
+					acurrentlyClicking();
+					if($this.prop("checked")) {
+						switchValueToOn($wrapper);
+					} else {
+						switchValueToOff($wrapper);
+					}
+					
+					
+				});
 			}
 	        
         });

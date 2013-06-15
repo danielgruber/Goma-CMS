@@ -43,7 +43,7 @@ abstract class Object {
 	/**
 	 * the current class-name in lowercase-letters
 	 */
-	public $classname;
+	public $classname, $class;
 
 	/**
 	 * this variable has a value if the class belongs to an extension, else it is null
@@ -404,7 +404,7 @@ abstract class Object {
 		
 		// temporary until release
 		//@TODO: remove this
-		$this->class = $this->classname;
+		$this->class = strtolower(get_class($this));
 
 		if (isset(ClassInfo::$class_info[$this -> classname]["inExpansion"]))
 			$this -> inExpansion = ClassInfo::$class_info[$this -> classname]["inExpansion"];
