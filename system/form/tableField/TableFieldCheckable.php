@@ -7,7 +7,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0
+ * @version     1.0.1
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -30,7 +30,7 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	 */
 	public function augmentColumns($tableField, &$columns) {
 		if(!in_array('Check', $columns))
-			$columns[] = 'Check';
+			array_unshift($columns, 'Check');
 	}
 	
 	/**

@@ -108,6 +108,13 @@ class FormField extends RequestHandler
 		public $disabled = false;
 		
 		/**
+		 * title of the field.
+		 *
+		 *@name title
+		*/
+		public $title;
+		
+		/**
 		 * defines if this field should use the full width or not
 		 * this is good, for example for textarea or something else to get correct position of info and label-area
 		 *
