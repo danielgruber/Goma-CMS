@@ -260,44 +260,46 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	}
 	
 	/**
-	 * updates data
-	 *@name update
-	 *@param string - controller-object
-	 *@param array - data
-	 *@param array - where
-	 *@param string - optional table
-	 *@return bool
+	 * updates data raw in the table and has not version-managment or multi-table-managment.
+	 *
+	 * You have to be familiar with the structure of goma when you use this method. It is much faster than all the other methods of writing, but also more complex.
+	 *
+	 * @param String $name Model or Table
+	 * @param array $data data to update
+	 * @param array $where where-clause
+	 * @param string $limit optional limit
+	 * @param boolean $silent if to change last-modified-date
+	 *
+	 * @return boolean
 	*/
 	public static function update($name, $data, $where, $limit = "", $silent = false)
 	{
-			Core::Deprecate(2.0);
+			if(PROFILE) Profiler::mark("DataObject::update");
+			//Core::Deprecate(2.0);
 			
-			$DataObject = Object::instance($name);
-			
-			if(is_array($where))
-			{
-					$d = array_merge($where,$data);
-			} else
-			{
-					$d = $data;
+			if(ClassInfo::exists($name) && is_subclass_of($name, "DataObject")) {
+				$DataObject = Object::instance($name);
+				$table_name = $DataObject->Table();
+			} else if(isset(ClassInfo::$database[$name])) {
+				$table_name = $name;
+			} else {
+				throwError(6, "Table not found", "Table or model '" . $name . "' does not exist.");
 			}
-					
 			
-			$table_name = $DataObject->Table();
-			//deleteTableCache($table_name);
-			$updates = "";
-			$i = 0;
 			if(!isset($data["last_modfied"]) && !$silent)
 			{
 					$data["last_modified"] = NOW;
 			}
 			
+			$updates = "";
+			$i = 0;
 			foreach($data as $field => $value)
 			{
 					if(!isset(ClassInfo::$database[$table_name][$field]))
 					{
 							continue;
 					}
+					
 					if($i == 0)
 					{
 							$i = 1;
@@ -308,7 +310,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$updates .= "".convert::raw2sql($field)." = '".convert::raw2sql($value)."'";
 			}
 			$where = SQL::ExtractToWhere($where);
-			
 			
 			if($limit != "") {
 				if(is_array($limit)) {
@@ -333,8 +334,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					".$where."
 					".$limit."";
 			
-			if(sql::query($sql))
+			if(SQL::query($sql))
 			{
+					if(PROFILE) Profiler::unmark("DataObject::update");
 					return true;
 			} else
 			{

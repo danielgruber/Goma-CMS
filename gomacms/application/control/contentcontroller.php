@@ -1,16 +1,18 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+
 /**
-  * starts parsing urls for normal content-pages
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 07.04.2013
-  * $Version 2.0.8
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * the base controller for every page.
+ *
+ * It provides Hiearchy-Options and generates some content around.
+ *
+ * @package     Goma-CMS\Content
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.1
+ */
 class contentController extends FrontedController
 {
 		/**
@@ -169,9 +171,8 @@ class contentController extends FrontedController
 			
 			// livecounter
 			if(PROFILE) Profiler::mark("livecounter");			
-			livecounterController::run();				
+			livecounter::run();				
 			if(PROFILE) Profiler::unmark("livecounter");
-			$_SESSION["user_counted"] = TIME;
 			
 			if($action == "index") {
 				ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);

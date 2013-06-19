@@ -1,15 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 04.05.2013
-  * $Version 1.4.8
-*/   
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * The base controller for the admin-panel.
+ *
+ * @package     Goma\Core\Admin
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class adminController extends Controller
 {
 		/**
@@ -17,7 +17,7 @@ class adminController extends Controller
 		 *
 		 *@name title
 		*/
-		public static $title;
+		static $title;
 		
 		/**
 		 * object of current admin-view
@@ -70,7 +70,7 @@ class adminController extends Controller
 		 *@name activeController
 		 *@access public
 		*/
-		public static function activeController() {
+		static function activeController() {
 			return (self::$activeController) ? self::$activeController : new adminController;
 		}
 		
@@ -286,6 +286,16 @@ class adminController extends Controller
 		}
 }
 
+/**
+ * The base model for the admin-panel.
+ *
+ * @package     Goma\Core\Admin
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class admin extends ViewAccessableData implements PermProvider
 {
 		/**
@@ -401,9 +411,9 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function statistics($month = true, $page = 1) {
 			if($month) {
-				return livecounterController::statisticsByMonth(10, $page);
+				return liveCounter::statisticsByMonth(10, $page);
 			} else {
-				return livecounterController::statisticsByDay(10, 1, $page);
+				return liveCounter::statisticsByDay(10, 1, $page);
 			}
 		}
 		

@@ -1,17 +1,23 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
+// load language for stats
+loadlang('st');
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 08.04.2013
-  * $Version 2.1.8
+ * session-timeout for goma-cookie. this also lives after browser has closed.
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 define("SESSION_TIMEOUT", 16*3600);
 
+/**
+ * This class handles everything about statistics.
+ *
+ * @package     Goma\Statistics
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.2
+ */
 class livecounter extends DataObject
 {
 		/**
@@ -30,7 +36,9 @@ class livecounter extends DataObject
 				"browser"		=> "varchar(200)",
 				"referer"		=> "varchar(400)",
 				"ip"			=> "varchar(30)",
-				"isbot"			=> "int(1)"
+				"isbot"			=> "int(1)",
+				"hitcount"		=> "int(10)",
+				"recurring"		=> "int(1)"
 			);
 			
 		/**
@@ -54,25 +62,7 @@ class livecounter extends DataObject
             )
 		);
 		
-		/**
-		 * allow writing
-		*/
-		public function canWrite($data = null) {
-			return true;
-		}
-		/**
-		 * allow insert
-		*/
-		public function canInsert($data = null) {
-			return true;
-		}
-}
-
-// load language for stats
-loadlang('st');
-
-class livecounterController extends Controller
-{
+		
 		/**
 		 * a regexp to use to intentify browsers, which support cookies
 		 *
@@ -105,9 +95,22 @@ class livecounterController extends Controller
 		static public $alreadyRun = false;
 		
 		/**
+		 * allow writing
+		*/
+		public function canWrite($data = null) {
+			return true;
+		}
+		/**
+		 * allow insert
+		*/
+		public function canInsert($data = null) {
+			return true;
+		}
+		
+		/**
 		 * this function updates the database and user-status for us, that we count all visitors
 		*/
-		public static function run($forceLive = false) {
+		public static function run() {
 			if(self::$alreadyRun) {
 				return true;
 			}
@@ -130,46 +133,45 @@ class livecounterController extends Controller
 				$user_identifier = session_id();
 			}
 			
-			if(DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 20) {
+			
+			/**
+			 * for users without enabled cookies, this works!
+			*/
+			if(!isset($_SESSION["user_counted"]) && DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
 				$user_identifier = $ip;
-				AddContent::addNotice("Please activate the Cookies in your Browser.");
+				AddContent::addNotice("Please activate Cookies in your Browser.");
 			}
 			
 			/**
-			 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index
+			 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index.
 			*/
 			if(isset($_SESSION["user_counted"])) {
-				if($_SESSION["user_counted"] < (NOW - 20) || $forceLive) {
-					$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
-					if(count($data) == 1) {
-						$data->first()->user = $userid;
-						$data->first()->write();
-						// we set last update to next know the last update and better use database-index
-						$_SESSION["user_counted"] = TIME;
-						return true;
-					}
-				} else {
+				$data = DataObject::get_one("livecounter", array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
+				if($data) {
+					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
+					// we set last update to next know the last update and better use database-index
+					$_SESSION["user_counted"] = TIME;
 					return true;
 				}
 			}
 			
 			$timeout = TIME - SESSION_TIMEOUT;
 			
-			
-			// check if a cookie exists, that means that the user was here in the last 16 hours
+			// check if a cookie exists, that means that the user was here in the last 16 hours.
 			if(isset($_COOKIE['goma_sessid']))
 			{
 				$sessid = $_COOKIE['goma_sessid'];
 				// if sessid is not the same the user has begun a new php-session, so we update our cookie
 				if($user_identifier != $sessid)
 				{
-					$data = DataObject::get("livecounter", "phpsessid = '".dbescape($sessid)."' AND last_modified > ".dbescape($timeout)."");
-					if(count($data) > 0) {
-						$data->first()->user = $userid;
-						$data->first()->phpsessid = $user_identifier;
-						$data->first()->write(false, true);
+					$data = DataObject::get_one("livecounter", "phpsessid = '".convert::raw2sql($sessid)."' AND last_modified > ".convert::raw2sql($timeout)."");
+					if($data) {
+						$data->user = $userid;
+						$data->phpsessid = $user_identifier;
+						$data->hitcount++;
+						$data->write(false, true);
 					} else {
 						$data = new LiveCounter();
 						$data->user = $userid;
@@ -178,24 +180,32 @@ class livecounterController extends Controller
 						$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 						$data->ip = $_SERVER["REMOTE_ADDR"];
 						$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
+						$data->hitcount = 1;
+						$data->recurring = 1;
 						$data->write(true, true);
 					}
 					unset($data);
 					// set cookie
 					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 					$_SESSION["user_counted"] = TIME;
 					return true;
 				} else {
-					// just rewirte cookie
+					
+					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("versionid" => $data->versionid));
+					
+					// just rewrite cookie
 					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 				}
 			}
 			
-			
+			/**
+			 * check for current sessid
+			*/
 			$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
 			if(count($data) > 0) {
-				$data->first()->user = $userid;
-				$data->first()->write(false, true);
+				DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("versionid" => $data->versionid));
 			} else {
 				$data = new LiveCounter();
 				$data->user = $userid;
@@ -204,16 +214,20 @@ class livecounterController extends Controller
 				$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
 				$data->ip = $_SERVER["REMOTE_ADDR"];
 				$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
+				$data->hitcount = 1;
+				$data->recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $user_identifier)) > 0);
 				$data->write(true, true);
 			}
 			
 			// just rewirte cookie
 			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
 			// we set last update to next know the last update and better use database-index
 			$_SESSION["user_counted"] = TIME;
 			
 			return true;
 		}
+		
 		/**
 		 * checks if a user is online by id
 		 *@name checkUserOnline
@@ -227,6 +241,7 @@ class livecounterController extends Controller
 				$c = DataObject::count("livecounter", array("last_modified" => array(">", $last), "user" => $userid));
 				return ($c > 0) ? true : false;
 		}
+		
 		/**
 		 * counts how much users are online
 		 *@name countMembersOnline
@@ -237,6 +252,7 @@ class livecounterController extends Controller
 				$last = TIME - 300;
 				return DataObject::count("livecounter", array('last_modified > '.$last.' AND user != ""'));
 		}
+		
 		/**
 		 * counts how much users AND guests online
 		 *@name countUsersOnline
@@ -253,6 +269,7 @@ class livecounterController extends Controller
 				self::$useronline = $c;
 				return $c;
 		}
+		
 		/**
 		 * counts how much users where online since...
 		 *@name countUsersByLast
@@ -264,6 +281,7 @@ class livecounterController extends Controller
 
 				return DataObject::count("livecounter", array("last_modified" => array(">", $last), "isbot" => 0));
 		}
+		
 		/**
 		 * counts user since and before..
 		*/
@@ -400,4 +418,12 @@ class livecounterController extends Controller
 			
 			return $dataobject;
 		}
+}
+
+/**
+ * DEPRECATED!!
+*/
+class livecounterController extends liveCounter
+{
+		static $table = false;
 }
