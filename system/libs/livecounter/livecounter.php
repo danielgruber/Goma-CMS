@@ -124,6 +124,10 @@ class livecounter extends DataObject
 				return false;
 			}
 			
+			$host = $_SERVER["HTTP_HOST"];
+			if(!preg_match('^[0-9]+', $host) && $host != "localhost" && strpos($host, ".") !== false)
+				$host = "." . $host;
+			
 			// user identifier
 			if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']) || preg_match("/" . self::$no_cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']))) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
 				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);
@@ -153,6 +157,11 @@ class livecounter extends DataObject
 					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
 					// we set last update to next know the last update and better use database-index
 					$_SESSION["user_counted"] = TIME;
+					
+					// just rewirte cookie
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
+					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
+					
 					return true;
 				}
 			}
@@ -186,8 +195,8 @@ class livecounter extends DataObject
 					}
 					unset($data);
 					// set cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
-					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
+					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 					$_SESSION["user_counted"] = TIME;
 					return true;
 				} else {
@@ -195,8 +204,8 @@ class livecounter extends DataObject
 					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("versionid" => $data->versionid));
 					
 					// just rewrite cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
-					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
+					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 				}
 			}
 			
@@ -220,8 +229,8 @@ class livecounter extends DataObject
 			}
 			
 			// just rewirte cookie
-			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', "." . $_SERVER["HTTP_HOST"], false, true);
-			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', "." . $_SERVER["HTTP_HOST"], false, true);
+			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
+			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 			// we set last update to next know the last update and better use database-index
 			$_SESSION["user_counted"] = TIME;
 			
