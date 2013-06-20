@@ -125,7 +125,7 @@ class livecounter extends DataObject
 			}
 			
 			$host = $_SERVER["HTTP_HOST"];
-			if(!preg_match('^[0-9]+', $host) && $host != "localhost" && strpos($host, ".") !== false)
+			if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
 				$host = "." . $host;
 			
 			// user identifier
@@ -201,7 +201,7 @@ class livecounter extends DataObject
 					return true;
 				} else {
 					
-					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("versionid" => $data->versionid));
+					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
 					
 					// just rewrite cookie
 					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
@@ -214,7 +214,7 @@ class livecounter extends DataObject
 			*/
 			$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
 			if(count($data) > 0) {
-				DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("versionid" => $data->versionid));
+				DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
 			} else {
 				$data = new LiveCounter();
 				$data->user = $userid;
