@@ -7,7 +7,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0
+ * @version     1.0.2
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -20,10 +20,11 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	 * @param   string $inner HTML between a-tags
 	 * @param	mixed $requirePerm how to check if permissions is required (callback, string, boolean)
 	 */
-	public function __construct($destination, $inner, $requirePerm = false) {
+	public function __construct($destination, $inner, $title = null, $requirePerm = false) {
 		$this->destination = $destination;
 		$this->inner = $inner;
 		$this->requirePerm = $requirePerm;
+		$this->title = $title;
 	}
 	
 	
@@ -97,22 +98,30 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		
 		$data = $record;
 		
+		// format innerhtml
 		$format = str_replace('"', '\\"', $this->inner);
 		$format = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $format);
 		$format = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $format);
 		
 		eval('$value = "' . $format . '";');
 
-		
+		// format destination
 		$formatDestination = str_replace('"', '\\"', $this->destination);
 		$formatDestination = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $formatDestination);
 		$formatDestination = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $formatDestination);
 		eval('$destination = "' . $formatDestination . '";');
 		
+		// format title
+		$formatTitle = str_replace('"', '\\"', $this->title);
+		$formatTitle = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $formatTitle);
+		$formatTitle = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $formatTitle);
+		eval('$title = "' . $formatTitle . '";');
+		
 		
 		$data = new ViewAccessableData();
 		$data->destination = $destination;
 		$data->inner = $value;
+		$data->title = $title;
 		
 		return $data->renderWith("form/tableField/actionLink.html");
 	}

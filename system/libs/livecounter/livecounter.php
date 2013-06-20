@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 16*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2
+ * @version     2.2.1
  */
 class livecounter extends DataObject
 {
@@ -153,7 +153,7 @@ class livecounter extends DataObject
 			*/
 			if(isset($_SESSION["user_counted"])) {
 				$data = DataObject::get_one("livecounter", array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
-				if($data) {
+				if($data && date("d", $data->created) == date("d", NOW)) {
 					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
 					// we set last update to next know the last update and better use database-index
 					$_SESSION["user_counted"] = TIME;
@@ -176,7 +176,7 @@ class livecounter extends DataObject
 				if($user_identifier != $sessid)
 				{
 					$data = DataObject::get_one("livecounter", "phpsessid = '".convert::raw2sql($sessid)."' AND last_modified > ".convert::raw2sql($timeout)."");
-					if($data) {
+					if($data && date("d", $data->created) == date("d", NOW)) {
 						$data->user = $userid;
 						$data->phpsessid = $user_identifier;
 						$data->hitcount++;
@@ -212,8 +212,8 @@ class livecounter extends DataObject
 			/**
 			 * check for current sessid
 			*/
-			$data = DataObject::get("livecounter", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
-			if(count($data) > 0) {
+			$data = DataObject::get_one("livecounter", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
+			if($data && date("d", $data->created) == date("d", NOW)) {
 				DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
 			} else {
 				$data = new LiveCounter();
