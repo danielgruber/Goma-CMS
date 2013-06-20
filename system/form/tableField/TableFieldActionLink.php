@@ -7,7 +7,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0.1
+ * @version     1.0
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -97,13 +97,21 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		
 		$data = $record;
 		
-		$format = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $this->inner);
+		$format = str_replace('"', '\\"', $this->inner);
+		$format = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $format);
 		$format = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $format);
-		$format = str_replace('"', '\\"', $format);
+		
 		eval('$value = "' . $format . '";');
 
+		
+		$formatDestination = str_replace('"', '\\"', $this->destination);
+		$formatDestination = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $formatDestination);
+		$formatDestination = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $formatDestination);
+		eval('$destination = "' . $formatDestination . '";');
+		
+		
 		$data = new ViewAccessableData();
-		$data->destination = $this->destination;
+		$data->destination = $destination;
 		$data->inner = $value;
 		
 		return $data->renderWith("form/tableField/actionLink.html");

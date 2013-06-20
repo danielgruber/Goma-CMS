@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0
+ * @version     1.0.1
  */
 class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_ActionProvider {
 	/**
@@ -36,7 +36,7 @@ class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_Acti
 	*/
 	public function provideFragments($tableField) {
 		
-		$action = new TableField_FormAction($tableField, $this->name, $this->title, "globalaction_".$this->name."_callback");
+		$action = new TableField_FormAction($tableField, $this->name, $this->title, "globalaction_".strtolower($this->name)."_callback");
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(
@@ -54,15 +54,15 @@ class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_Acti
 	 *@access public
 	*/
 	public function getActions($tableField) {
-		return array("globalaction_" . $this->name . "_callback");
+		return array("globalaction_" . strtolower($this->name) . "_callback");
 	}
 	
 	/**
 	 * handles the actions
 	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
-		if($actionName == "globalaction_" . $this->name . "_callback") {
-			return call_user_func_array($callback, array($tableField, $actionName, $data));
+		if($actionName == "globalaction_" . strtolower($this->name) . "_callback") {
+			return call_user_func_array($this->callback, array($tableField, $actionName, $data));
 		}
 		return false;
 	}
