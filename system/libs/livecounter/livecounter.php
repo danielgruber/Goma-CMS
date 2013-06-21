@@ -6,7 +6,7 @@ loadlang('st');
 /**
  * session-timeout for goma-cookie. this also lives after browser has closed.
 */
-define("SESSION_TIMEOUT", 16*3600);
+define("SESSION_TIMEOUT", 24*3600);
 
 /**
  * This class handles everything about statistics.
@@ -35,7 +35,7 @@ class livecounter extends DataObject
 				'phpsessid' 	=> 'varchar(800)', 
 				"browser"		=> "varchar(200)",
 				"referer"		=> "varchar(400)",
-				"ip"			=> "varchar(30)",
+				"ip"			=> "varchar(200)",
 				"isbot"			=> "int(1)",
 				"hitcount"		=> "int(10)",
 				"recurring"		=> "int(1)"
@@ -141,7 +141,7 @@ class livecounter extends DataObject
 			/**
 			 * for users without enabled cookies, this works!
 			*/
-			if(!isset($_SESSION["user_counted"]) && DataObject::count("livecounter", array("ip" => $_SERVER["REMOTE_ADDR"], "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			if(!isset($_SESSION["user_counted"]) && DataObject::count("livecounter", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
 				$user_identifier = $ip;
@@ -187,7 +187,7 @@ class livecounter extends DataObject
 						$data->phpsessid = $user_identifier;
 						$data->browser = $_SERVER["HTTP_USER_AGENT"];
 						$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
-						$data->ip = $_SERVER["REMOTE_ADDR"];
+						$data->ip = md5($_SERVER["REMOTE_ADDR"]);
 						$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
 						$data->hitcount = 1;
 						$data->recurring = 1;
@@ -221,7 +221,7 @@ class livecounter extends DataObject
 				$data->phpsessid = $user_identifier;
 				$data->browser = $_SERVER["HTTP_USER_AGENT"];
 				$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
-				$data->ip = $_SERVER["REMOTE_ADDR"];
+				$data->ip = md5($_SERVER["REMOTE_ADDR"]);
 				$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
 				$data->hitcount = 1;
 				$data->recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $user_identifier)) > 0);
