@@ -237,6 +237,7 @@ fieldset > .form_field > .info_field {
 }
 .g-checkbox .g-check-handle {
 	background: #fff;
+
 	height: 25px;
 	width: 25px;
 	
@@ -249,8 +250,13 @@ fieldset > .form_field > .info_field {
 	left: 0px;
 	
 	border: 1px solid #ccc;
-	-webkit-box-shadow: 0 0 5px #999;
-	box-shadow: 0 0 5px #999;
+	-webkit-box-shadow: 0 0 3px #bbb;
+	box-shadow: 0 0 3px #bbb;
+}
+.g-checkbox.value-active .g-check-handle {
+	-webkit-box-shadow: 0 0 3px #1f848c;
+	box-shadow: 0 0 3px #1f848c;
+	border-color: #23a1aa;
 }
 .g-checkbox input[type=checkbox] {
 	display: none;

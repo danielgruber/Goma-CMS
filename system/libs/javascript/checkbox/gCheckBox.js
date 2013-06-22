@@ -55,12 +55,6 @@
 			    
 			    handle.appendTo($wrapper);
 			    
-				if(elem.prop("checked")) {
-					$wrapper.addClass(settings.activeClass);
-				}
-			    
-			   
-			    
 			    return $wrapper;
 			};
 			
@@ -69,10 +63,18 @@
         	if($this.get(0).tagName.toLowerCase() == "input" && $this.attr("type").toLowerCase() == "checkbox") {
 				var $wrapper = Init($this);
 				
-				var borderColor = "#ddd";
-				var borderColorActive = "#24ACB8";
-				var bgColor = "#fff";
-				var bgColorActive = "#24ACB8";
+				// get colors
+				var borderColor = $wrapper.css("border-color");
+				var bgColor = $wrapper.css("background-color");
+				
+				$wrapper.addClass(settings.activeClass);
+				var borderColorActive = $wrapper.css("border-color");
+				var bgColorActive = $wrapper.css("background-color");
+				$wrapper.removeClass(settings.activeClass);
+				
+				if($this.prop("checked")) {
+					$wrapper.addClass(settings.activeClass);
+				}
 				
 				// functions, who need the wrapper.
 	        	var currentlyClicking = false;
@@ -139,6 +141,7 @@
 				        start: function() {
 				        	var x2 = $wrapper.offset().left + $wrapper.outerWidth() - $wrapper.find("div").width() - 4;
 					        $wrapper.find("div").draggable("option", "containment", [$wrapper.offset().left, $wrapper.offset().top, x2, $wrapper.offset().top]);
+					        $wrapper.find("div").addClass("in-drag");
 				        },
 				        // shows the current status while dragging.
 				        drag: function() {
@@ -170,6 +173,8 @@
 				        stop: function(event, ui) {
 				        	var maxLeft = $wrapper.width() - $wrapper.find("div").width();
 				        	var left = $wrapper.find("div").position().left;
+				        	
+				        	$wrapper.find("div").removeClass("in-drag");
 				        	
 				        	// the borders are different if checked or not.
 				        	if($wrapper.find("input").prop("checked")) {
