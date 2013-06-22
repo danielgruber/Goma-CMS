@@ -751,12 +751,12 @@ class Core extends object {
 			if (is_array($arr["tmp_name"])) {
 				foreach ($arr["tmp_name"] as $tmp_file) {
 					if ($tmp_file && !is_uploaded_file($tmp_file)) {
-						throwError(6, 'PHP-Error', "" . $tmp_file . " is no valid upload! Please try again uploading the file.");
+						throw new LogicException($tmp_file . " is no valid upload! Please try again uploading the file.");
 					}
 				}
 			} else {
 				if ($arr["tmp_name"] && !is_uploaded_file($arr["tmp_name"])) {
-					throwError(6, 'PHP-Error', "" . $arr["tmp_name"] . " is no valid upload! Please try again uploading the file.");
+					throw new LogicException($arr["tmp_name"] . " is no valid upload! Please try again uploading the file.");
 				}
 			}
 		}
@@ -776,7 +776,7 @@ class Core extends object {
 
 					if (!ClassInfo::exists($controller)) {
 						ClassInfo::delete();
-						throwError(6, "Controller not found", "Controller $controller does not exist.");
+						throw new LogicException("Controller $controller does not exist.");
 					}
 
 					$inst = new $controller;
@@ -840,7 +840,7 @@ class Dev extends RequestHandler {
 		if (!isset($_SESSION["dev_without_perms"]) && !Permission::check("ADMIN")) {
 			makeProjectAvailable();
 
-			throwErrorByID(5);
+			throw new PermissionException();
 		}
 
 		return parent::handleRequest($request, $subController);

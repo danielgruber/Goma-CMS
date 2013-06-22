@@ -7,7 +7,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version		1.0.1
+ * @version		1.0.2
  */
 
 defined("IN_GOMA") OR die();
@@ -786,6 +786,21 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	return true;
 }
 
+function Goma_ExceptionHandler($exception) {
+	$message = get_class($exception) . " ".$exception->getCode().":\n\n" . $exception->getMessage() . "\n\n Backtrace: " . $exception->getTraceAsString();
+	log_error($message);
+	
+	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+	$content = str_replace('{BASE_URI}', BASE_URI, $content);
+	$content = str_replace('{$errcode}', $exception->getCode(), $content);
+	$content = str_replace('{$errname}', get_class($exception), $content);
+	$content = str_replace('{$errdetails}', $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">".$exception->getTraceAsString()."</textarea>", $content);
+	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+	
+	echo $content;
+	exit;
+}
+
 //!Logging
 
 /**
@@ -905,5 +920,58 @@ function writeServerConfig() {
 
 	if (!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
 		die("Could not write " . $file);
+	}
+}
+
+
+class MySQLException extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "") {
+		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
+		$m = $sqlerr . "\n" . $m;
+		parent::__construct($m);
+		$this->code = 3;
+	}
+}
+
+class SecurityException extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "") {
+		parent::__construct($m);
+		$this->code = 1;
+	}
+}
+
+class PermissionException extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "") {
+		parent::__construct($m);
+		$this->code = 5;
+	}
+}
+
+class PHPException extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "") {
+		parent::__construct($m);
+		$this->code = 6;
+	}
+}
+
+class DBConnectError extends MySQLException {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "") {
+		parent::__construct($m);
+		$this->code = 4;
 	}
 }

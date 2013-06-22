@@ -255,7 +255,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					return $row->count;
 			} else
 			{
-					throwErrorById(3);
+					throw new MySQLException();
 			}
 	}
 	
@@ -340,7 +340,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					return true;
 			} else
 			{
-					throwErrorById(3);
+					throw new MySQLException();
 			}
 	}
 
@@ -1006,7 +1006,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 			} else {
 				if(PROFILE) Profiler::unmark("DataObject::writeRecord");
-				throwErrorByID(5);
+				throw new PermissionException();
 			}
 		}
 				
@@ -1382,7 +1382,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$this->stateid = 0;
 				}
 			} else {
-				throwErrorByID(3);
+				throw new MySQLException();
 			}
 		}
 		
@@ -1614,7 +1614,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$existing[] = $row->{$data["extfield"]};
 				}
 			} else {
-				throwErrorByID(5);
+				throw new PermissionException();
 			}
 			
 			
@@ -1760,7 +1760,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					while($row = $query->fetch_object())
 						$ids[] = $row->id;
 				} else {
-					throwErrorByID(3);
+					throw new MySQLException();
 				}
 				// delete connection in state-table
 				
@@ -1889,7 +1889,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					return false;
 				}
 			} else {
-				throwErrorByID(3);
+				throw new MySQLException();
 			}
 		}
 	}
@@ -4070,7 +4070,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				if(sql::query($sql) && sql::query($sql2))
 					$log .= "Copying Version-Data\n";
 				else
-					throwErrorById(3);
+					throw new MySQLException();
 			}
 			
 			// set Database-Record

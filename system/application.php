@@ -142,7 +142,7 @@ require_once (FRAMEWORK_ROOT . 'core/applibs.php');
 require_once (FRAMEWORK_ROOT . 'core/Object.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassManifest.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassInfo.php');
-require_once (FRAMEWORK_ROOT . 'core/requesthandler.php');
+require_once (FRAMEWORK_ROOT . 'core/controller/RequestHandler.php');
 require_once (FRAMEWORK_ROOT . 'libs/file/FileSystem.php');
 require_once (FRAMEWORK_ROOT . 'libs/template/tpl.php');
 require_once (FRAMEWORK_ROOT . 'libs/http/httpresponse.php');
@@ -154,6 +154,7 @@ if (PROFILE)
 
 // set error-handler
 set_error_handler("Goma_ErrorHandler");
+set_exception_handler("Goma_ExceptionHandler");
 
 if (file_exists(ROOT . '_config.php')) {
 
