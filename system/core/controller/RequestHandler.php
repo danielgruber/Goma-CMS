@@ -398,5 +398,14 @@ class RequestHandler extends Object {
 	public function parentController() {
 		return Core::$Controller[$this -> requestHandlerKey - 1];
 	}
+}
 
+
+class RequestException extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "", $code = 8, Exception $previous) {
+		parent::__construct($m, $code, $previous);
+	}
 }

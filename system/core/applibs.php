@@ -729,6 +729,8 @@ function goma_version_compare($v1, $v2, $operator = null) {
 //!PHP-Error-Handling
 
 function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
+	HTTPResponse::setResHeader(500);
+	HTTPResponse::sendHeader();
 	switch ($errno) {
 		case E_ERROR :
 		case E_CORE_ERROR :
@@ -796,6 +798,13 @@ function Goma_ExceptionHandler($exception) {
 	$content = str_replace('{$errname}', get_class($exception), $content);
 	$content = str_replace('{$errdetails}', $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">".$exception->getTraceAsString()."</textarea>", $content);
 	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+	
+	if(Object::method_exists($exception, "http_status")) {
+		HTTPResponse::setResHeader($exception->http_status());
+	} else {
+		HTTPResponse::setResHeader(500);
+	}
+	HTTPResponse::sendHeader();
 	
 	echo $content;
 	exit;
@@ -928,11 +937,10 @@ class MySQLException extends Exception {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "") {
+	public function __construct($m = "", $code = 3, Exception $previous) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
-		parent::__construct($m);
-		$this->code = 3;
+		parent::__construct($m, $code, $previous);
 	}
 }
 
@@ -940,9 +948,8 @@ class SecurityException extends Exception {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "") {
-		parent::__construct($m);
-		$this->code = 1;
+	public function __construct($m = "", $code = 1, Exception $previous) {
+		parent::__construct($m, $code, $previous);
 	}
 }
 
@@ -950,9 +957,8 @@ class PermissionException extends Exception {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "") {
-		parent::__construct($m);
-		$this->code = 5;
+	public function __construct($m = "", $code = 5, Exception $previous) {
+		parent::__construct($m, $code, $previous);
 	}
 }
 
@@ -960,9 +966,8 @@ class PHPException extends Exception {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "") {
-		parent::__construct($m);
-		$this->code = 6;
+	public function __construct($m = "", $code = 6, Exception $previous) {
+		parent::__construct($m, $code, $previous);
 	}
 }
 
@@ -970,8 +975,20 @@ class DBConnectError extends MySQLException {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "") {
-		parent::__construct($m);
-		$this->code = 4;
+	public function __construct($m = "", $code = 4, Exception $previous) {
+		parent::__construct($m, $code, $previous);
+	}
+}
+
+class ServiceUnavailable extends Exception {
+	/**
+	 * constructor.
+	*/
+	public function __construct($m = "", $code = 7, Exception $previous) {
+		parent::__construct($m, $code, $previous);
+	}
+	
+	public function http_status() {
+		return 503;
 	}
 }

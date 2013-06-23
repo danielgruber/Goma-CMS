@@ -238,7 +238,7 @@ class HTTPresponse extends object
 				}
 				
 				$endWaitTime = microtime(true);
-				define("END_WAIT_TIME", $endWaitTime);
+				defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
 				
 				header('HTTP/1.1 ' . self::$response);
 				foreach(self::$headers as $name => $content)
