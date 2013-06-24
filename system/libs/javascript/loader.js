@@ -33,7 +33,7 @@ if(typeof goma.ui == "undefined") {
 		 * you must register the plugin in PHP
 		 * we stop execution of JavaScript while loading
 		*/
-		var gloaded = [];
+		var gloaded = {"-": true};
 		var loadScript = function(comp, fn) {
 			if(gloaded[comp] == null)
 			{

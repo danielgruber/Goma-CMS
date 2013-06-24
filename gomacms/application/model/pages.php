@@ -785,7 +785,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				// infos for users
 				$parentDropdown->info_field = "url";
 				$description->info = lang("description_info");
-				$keywords->info = lang("keywords_info");
 				$mainbartitle->info = lang("menupoint_title_info");
 				$wtitle->info = lang("window_title_info");
 				

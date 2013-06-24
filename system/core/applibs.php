@@ -729,8 +729,7 @@ function goma_version_compare($v1, $v2, $operator = null) {
 //!PHP-Error-Handling
 
 function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
-	HTTPResponse::setResHeader(500);
-	HTTPResponse::sendHeader();
+	
 	switch ($errno) {
 		case E_ERROR :
 		case E_CORE_ERROR :
@@ -738,6 +737,8 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 		case E_PARSE :
 		case E_USER_ERROR :
 		case E_RECOVERABLE_ERROR :
+			HTTPResponse::setResHeader(500);
+			HTTPResponse::sendHeader();
 			log_error("PHP-USER-Error: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
 			$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 			$content = str_replace('{BASE_URI}', BASE_URI, $content);
@@ -773,6 +774,8 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 			// nothing
 			break;
 		default :
+			HTTPResponse::setResHeader(500);
+			HTTPResponse::sendHeader();
 			log_error("PHP-Error: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
 			$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 			$content = str_replace('{BASE_URI}', BASE_URI, $content);
