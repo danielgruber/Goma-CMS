@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.1
+ * @version     2.2.2
  */
 class livecounter extends DataObject
 {
@@ -57,7 +57,7 @@ class livecounter extends DataObject
 			"recordid" 	    => false,
 			"security"	    => array(
                 "name"      => "Security",
-                "fields"    => "ip, browser, last_modified",
+                "fields"    => "ip, browser, phpsessid, last_modified",
                 "type"      => "INDEX"
             )
 		);
@@ -82,7 +82,7 @@ class livecounter extends DataObject
 		/**
 		 * bot-list
 		*/
-		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com)";
+		public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot)";
 		
 		/**
 		 * counts how much users are online
@@ -259,7 +259,7 @@ class livecounter extends DataObject
 		public static function countMembersOnline()
 		{
 				$last = TIME - 300;
-				return DataObject::count("livecounter", array('last_modified > '.$last.' AND user != ""'));
+				return DataObject::count("livecounter", array('last_modified > '.$last.' AND user != "" AND isbot = 0'));
 		}
 		
 		/**
@@ -414,6 +414,7 @@ class livecounter extends DataObject
 			}
 			unset($start, $end, $month, $year);
 			ksort($data);
+			
 			$dataobject = new DataSet();
 			foreach($data as $timestamp => $count) {
 				$dataobject->push(array(
@@ -427,6 +428,205 @@ class livecounter extends DataObject
 			
 			return $dataobject;
 		}
+		
+		/**
+		 * gets data for statistics-graph.
+		 *
+		 * @access public
+		 *
+		 * @param int $start timestamp to start
+		 * @param int $end timestamp to end
+		*/
+		static function statisticsData($start, $end, $maxPoints = 32) {
+			// first calculate how many days we have
+			$diff = $end - $start;
+			if($diff < 0) {
+				throw new LogicException('$start must be higher than $end');
+			}
+			
+			$day = (24 * 60 * 60);
+			
+			$pointsPerDay = $maxPoints / ($diff / $day);
+			if($pointsPerDay > 2) {
+				$pointsPerDay = round($pointsPerDay);
+				$timePerPoint = $day / $pointsPerDay;
+			} else if(floor($pointsPerDay) == 1) {
+				$pointsPerDay = 1;
+				$timePerPoint = $day / $pointsPerDay;
+			} else {
+				$daysPerPoint = round(1 / $pointsPerDay);
+				$pointsPerDay = 0;
+				$timePerPoint = $day * $daysPerPoint;
+			}
+			
+			$data = array();
+			$current = $start;
+			while($current <= $end) {
+				$hitsQuery = new SelectQuery("statistics", "sum(hitcount) as hitcount", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0');
+				if($hitsQuery->execute()) {
+					$record = $hitsQuery->fetch_assoc();
+					$hitCount = $record["hitcount"];
+				}
+				array_push($data, array(
+					"start" 	=> $current,
+					"flotStart"	=> $current * 1000,
+					"end" 		=> $current + $timePerPoint,
+					"flotEnd"	=> ($current + $timePerPoint) * 1000,
+					"visitors"	=> DataObject::count("livecounter", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0'),
+					"hits"		=> ($hitCount != 0) ? $hitCount : null
+				));
+				
+				$current += $timePerPoint;
+			}
+			
+			return $data;
+		}
+}
+
+class StatController extends Controller {
+	/**
+	 * url-handlers
+	 *
+	 *@name url_handlers
+	*/
+	public $url_handlers = array(
+		"lastWeek/\$page"		=> "lastWeek",
+		"lastMonth/\$page"		=> "lastMonth",
+		"lastYear/\$page"		=> "lastYear",
+		"yesterday/\$page"		=> "yesterday",
+		"\$start!/\$end/\$max"	=> "handleStats"
+	);
+	
+	/**
+	 * allow actions
+	*/
+	public $allowed_actions = array(
+		"handleStats"	=> "ADMIN",
+		"lastMonth"		=> "ADMIN",
+		"lastWeek"		=> "ADMIN",
+		"lastYear"		=> "ADMIN",
+		"yesterday"		=> "ADMIN"
+	);
+	
+	/**
+	 * handles stats.
+	*/
+	public function handleStats() {
+		$start = $this->getParam("start");
+		$end = $this->getParam("end") ? $this->getParam("end") : $start + (60 * 60 * 24 * 7);
+		$max = $this->getParam("max") ? $this->getParam("max") : 32;
+		
+		$data = LiveCounter::statisticsData($start, $end, $max);
+		
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::sendHeader();
+		echo json_encode($data);
+		exit;
+	}
+	
+	/**
+	 * handles stats for last week
+	*/
+	public function lastMonth() {
+		$page = $this->getParam("page") ? $this->getParam("page") : 1;
+		$showcount = 1;
+		
+		$last30Days = NOW - (60 * 60 * 24 * 30) * $page;
+		// get last month
+		$month = date("n", $last30Days);
+		$year = date("Y", $last30Days);
+		$day = date("d", $last30Days);
+		
+		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
+		
+		$end = NOW;
+		$max = 30;
+		
+		$data = LiveCounter::statisticsData($start, $end, $max);
+		
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::sendHeader();
+		echo json_encode($data);
+		exit;
+	}
+	
+	/**
+	 * last week-data.
+	*/
+	public function lastWeek() {
+		$page = $this->getParam("page") ? $this->getParam("page") : 1;
+		$showcount = 1;
+		
+		$last30Days = NOW - (60 * 60 * 24 * 7) * $page;
+		// get last month
+		$month = date("n", $last30Days);
+		$year = date("Y", $last30Days);
+		$day = date("d", $last30Days);
+		
+		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
+		
+		$end = NOW;
+		$max = 8;
+		
+		$data = LiveCounter::statisticsData($start, $end, $max);
+		
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::sendHeader();
+		echo json_encode($data);
+		exit;
+	}
+	
+	/**
+	 * last year-data.
+	*/
+	public function lastYear() {
+		$page = $this->getParam("page") ? $this->getParam("page") : 1;
+		$showcount = 1;
+		
+		$last30Days = NOW - (60 * 60 * 24 * 365) * $page;
+		// get last month
+		$month = date("n", $last30Days);
+		$year = date("Y", $last30Days);
+		$day = date("d", $last30Days);
+		
+		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
+		
+		$end = NOW;
+		$max = 36;
+		
+		$data = LiveCounter::statisticsData($start, $end, $max);
+		
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::sendHeader();
+		echo json_encode($data);
+		exit;
+	}
+	
+	/**
+	 * last day-data.
+	*/
+	public function yesterday() {
+		$page = $this->getParam("page") ? $this->getParam("page") : 1;
+		$showcount = 1;
+		
+		$last30Days = NOW - (60 * 60 * 24) * $page;
+		// get last month
+		$month = date("n", $last30Days);
+		$year = date("Y", $last30Days);
+		$day = date("d", $last30Days);
+		
+		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
+		
+		$end = NOW;
+		$max = ((NOW - $start) / (60 * 60));
+		
+		$data = LiveCounter::statisticsData($start, $end, $max);
+		
+		HTTPResponse::setHeader("content-type", "text/x-json");
+		HTTPResponse::sendHeader();
+		echo json_encode($data);
+		exit;
+	}
 }
 
 /**

@@ -121,7 +121,7 @@
 				<% ELSE %>
 					
 					<!-- root of content-area -->
-					<div class="notificationRoot content_inner overview">
+					<div class="notificationRoot content_inner adminContent">
 						<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
 							<% IF $TooManyLogs AND permission("superadmin") %>
 								<div class="notice">
@@ -133,90 +133,130 @@
 								
 						<!-- Statistics -->
 						
-						<% IF isMobile() %>
-							<div id="statistics" class="mobile">
-						<% ELSE %>
-							<div id="statistics">
-						<% END %>
+						<div class="content_container" id="stats">
+							<h2><% lang("statistics") %></h2>
+							
+							<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.js" %>
+							<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.time.js" %>
+							<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.selection.js" %>
+							<% INCLUDE_JS "system/libs/thirdparty/flot.tooltip-master/js/jquery.flot.tooltip.min.js" %>
+							
+							<script type="text/javascript">
+								(function($){
+									var url = "api/stats/lastMonth";
 								
-							<div class="title">
-								<% lang("visitors", "Visitors") %>
-							</div>
+									var options = {
+										xaxis: {
+											mode: "time",
+											timeformat: "%d.%m %H:%M",
+											minTickSize: [1, "hour"]
+										},
+										yaxis: {
+											min: 0,
+											autoscaleMargin: 0.1
+										},
+										selection: {
+											mode: "x"
+										},
+										series: {
+											lines: {
+												show: true,
+												lineWidth: 2
+											},
+											points: {
+												show: true
+											},
+											shadowSize: 0
+										},
+										grid: {
+											borderWidth: 0,
+											hoverable: true,
+											clickable: true
+										},
+										tooltip:            true,
+										tooltipOpts: {
+										    content:        "<h4>%s</h4> %y",
+										    xDateFormat:    "%y-%0m-%0d %H:%M:%S",
+										    yDateFormat:   	"",
+										    shifts: { 
+										        x:          10,
+										        y:          20 
+										    }
+										}
+									};
+									
+									var visitors = [];
+									var hits = [];
+									var plot;
+									
+									var drawVisitPlot = function() {
+										plot = $.plot("#plot-container", [{
+											label: lang("visitors"), 
+											data: visitors,
+											color: "#24ACB8"
+										}
+										,{	label: lang("page_views"), 
+											data: hits,
+											color: "#da097a"
+										}
+										], options);
+	
+									}
+									
+									$(function(){
+										$("#plot-navigation a.stat").click(function(){
+											$("#plot-navigation a.stat").removeClass("active");
+											$(this).addClass("active");
+											$("#plot-container").html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
+											$.ajax({
+												url: $(this).attr("href"),
+												success: function(data) {
+													visitors = [];
+													hits = [];
+													for(i in data) {
+														visitors.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].visitors]);
+														hits.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].hits]);
+													}
+													
+													drawVisitPlot();
+												}
+											});
+											
+											return false;
+										});
+										
+										$("#plot-navigation a.stat.active").click();
+									});
+									
+									
+									
+									$(window).resize(drawVisitPlot);
+								})(jQuery);
 								
-							<div class="controls">
-								<span style="color: #24acb8;">&middot;</span><a style="color: #24acb8;" href="{BASE_SCRIPT}{URL}{URLEND}"><% lang("visitors_by_day", "By Day") %></a> &nbsp; <span style="color: #da097a;">&middot; </span><a style="color: #da097a;" href="{BASE_SCRIPT}{URL}{URLEND}?month=1"><% lang("visitors_by_month", "By Month") %></a>
-							</div>
-								
-							<div id="buttonLeft">
-								<% IF $_GET_stat_page %>
-									<% IF $_GET_month %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
-									<% ELSE %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() + 1 %>" class="left"></a>
-									<% END %>
-								<% ELSE %>
-									<% IF $_GET_month %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=2" class="left"></a>
-									<% ELSE %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=2" class="left"></a>
-									<% END %>
-								<% END %>
-							</div>
-							<div id="buttonRight">
-								<% IF $_GET_stat_page AND _GET_stat_page.forTemplate() > 1 %>
-									<% IF $_GET_month %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?month=1&amp;stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
-									<% ELSE %>
-										<a href="{BASE_SCRIPT}{URL}{URLEND}?stat_page=<% echo _GET_stat_page.forTemplate() - 1 %>" class="left"></a>
-									<% END %>
-								<% END %>
+							</script>
+							
+							<div id="plot-navigation">
+								<ul>
+									<li>
+										<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_dayly}</a>
+									</li>
+									<li>
+										<a href="{BASE_SCIRPT}api/stats/lastWeek" class="active stat weekly">{$_lang_weekly}</a>
+									</li>
+									<li>
+										<a href="{BASE_SCIRPT}api/stats/lastMonth" class="stat monthly">{$_lang_monthly}</a>
+									</li>
+									<li>
+										<a href="{BASE_SCIRPT}api/stats/lastYear" class="stat yearly">{$_lang_yearly}</a>
+									</li>
+								</ul>
 							</div>
 							
-							<% IF $_GET_month %>
-								<% CONTROL statistics(true, $_GET_stat_page) %>
-									<a class="stat month">
-										<span class="data">
-											<span style="height:<% echo $statistics.percent*2 %>px"></span>
-										</span>
-										<span class="count">
-											$statistics.count
-										</span>
-										<% IF $statistics.timestamp.date("F Y") = date("F Y") %>
-											<span class="date today">
-												$statistics.timestamp.date("F")
-											</span>
-										<% ELSE %>
-											<span class="date">
-												$statistics.timestamp.date("F")
-											</span>
-										<% END %>
-									</a>
-								<% ENDCONTROL %>
-							<% ELSE %>
-							
-								<% CONTROL statistics(false, $_GET_stat_page) %>
-									<a class="stat">
-										<span class="data">
-											<span style="height:<% echo $statistics.percent*2 %>px"></span>
-										</span>
-										<span class="count">
-											$statistics.count
-										</span>
-										<% IF $statistics.timestamp.date("j M Y") = date("j M Y") %>
-											<span class="today date">
-												$statistics.timestamp.date("D j M")
-											</span>
-										<% ELSE %>
-											<span class="date">
-												$statistics.timestamp.date("D j M")
-											</span>
-										<% END %>
-									</a>
-								<% ENDCONTROL %>
-							<% END %>
-							<div class="clear"></div>
+							<div id="plot-container">
+								<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
+							</div>
 						</div>
-
+						
 						<!-- end of statistics -->
 						
 						<div id="home-container">
@@ -239,11 +279,11 @@
 											<% ENDCONTROL %>
 										</table>
 										<% IF PERMISSION("superadmin") %>
-											<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS=1"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}" class="button">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
+											<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS=1"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
 										<% END %>
 
 										<% IF DEV_MODE AND PERMISSION("superadmin") %>
-											<a href="{BASE_SCRIPT}dev/buildDistro{URLEND}" class="button"><% lang("distro_build", "build a version") %></a>
+											<a href="{BASE_SCRIPT}dev/buildDistro{URLEND}"><% lang("distro_build", "build a version") %></a>
 										<% END %>
 									</div>
 								</div>
@@ -256,9 +296,9 @@
 										<div class="info">
 											{$_lang_cache_del_info}
 										</div>
-										<a href="admin/?flush=1" class="button">{$_lang_del_cache}</a>
+										<a href="admin/?flush=1">{$_lang_del_cache}</a>
 										<% IF permission("superadmin") %>
-											<a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+											<a href="admin/flushLog/">{$_lang_flush_log}</a>
 										<% END %>
 									</div>
 								</div>
@@ -269,7 +309,7 @@
 										<p class="info">
 											{$_lang_db_update_info}
 										</p>
-										<a class="button" href="dev">{$_lang_db_update}</a>
+										<a href="dev">{$_lang_db_update}</a>
 									</div>
 								</div>
 								<% END %>

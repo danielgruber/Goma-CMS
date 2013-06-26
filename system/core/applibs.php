@@ -936,7 +936,7 @@ function writeServerConfig() {
 }
 
 
-class MySQLException extends Exception {
+class SQLException extends Exception {
 	/**
 	 * constructor.
 	*/
@@ -946,6 +946,8 @@ class MySQLException extends Exception {
 		parent::__construct($m, $code, $previous);
 	}
 }
+
+class MySQLException extends SQLException {}
 
 class SecurityException extends Exception {
 	/**

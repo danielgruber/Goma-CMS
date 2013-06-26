@@ -1,14 +1,17 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 12.05.2013
-  * $Version: 2.0.4
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+
+/**
+ * This is the generator and connect from Object-Based-Queries to the SQL-Based-Queries.
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0.5
+ */
+
 
 class SelectQuery extends Object
 {
@@ -564,7 +567,7 @@ class SelectQuery extends Object
 					
 				if(is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
 					if(!isset(ClassInfo::$database[$table])) {
-						throwError(6, "SQL-Missing-Error", "Table ".$table." doesn't exist!");
+						throw new SQLException("Table " . $table . " does not exist!");
 					}
 				}
 			}
@@ -744,7 +747,7 @@ class SelectQuery extends Object
 						return $this;
 				} else
 				{
-						throwErrorById(3);
+						throw new SQLException();
 				}
 		}
 		

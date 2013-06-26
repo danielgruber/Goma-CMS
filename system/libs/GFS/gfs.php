@@ -1574,7 +1574,7 @@ class GFS_Package_installer extends GFS {
 		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/requesthandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
+		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
@@ -1855,7 +1855,7 @@ class GFS_Package_Creator extends GFS {
 		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/requesthandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
+		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");

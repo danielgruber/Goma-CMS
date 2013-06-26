@@ -21,6 +21,7 @@ $lang = array(
 	"visitor_online_1"                             	=> "There is one visitor online!",
 	"livecounter"									=> "Realtime-Visitor-Counter",
 	"visitors"                                     	=> "visitors",
+	"statistics"									=> "statistics",
 	"page_views"                                   	=> "page-views",
 	"username"                                     	=> "username",
 	"email_or_username"								=> "email or username",
@@ -594,5 +595,12 @@ $lang = array(
     "user_defaultgroup"			=> "default group of new users",
     
     "on"						=> "on",
-    "off"						=> "off"
+    "off"						=> "off",
+    
+    ,
+    
+    "dayly"						=> "dayly",
+    "weekly"					=> "weekly",
+    "monthly"					=> "monthly",
+    "yearly"					=> "yearly"
 );
