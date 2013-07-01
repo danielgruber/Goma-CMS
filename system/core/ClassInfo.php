@@ -568,7 +568,6 @@ class ClassInfo extends Object {
 
 							require_once (FRAMEWORK_ROOT . "/libs/GFS/gfs.php");
 							require_once (FRAMEWORK_ROOT . "/libs/thirdparty/plist/CFPropertyList.php");
-<<<<<<< HEAD
 							
 							if (file_exists($appFolder . "/" . $file . ".plist") && filemtime($appFolder . "/" . $file . ".plist") >= filemtime($appFolder . "/" . $file)) {
 								$plist = new CFPropertyList();
@@ -580,13 +579,6 @@ class ClassInfo extends Object {
 									header("Location: " . $_SERVER["REQUEST_URI"]);
 									exit;
 								}
-=======
-
-							if(file_exists($appFolder . "/" . $file . ".plist") && filemtime($appFolder . "/" . $file . ".plist") >= filemtime($appFolder . "/" . $file)) {
-								$plist = new CFPropertyList();
-								$plist->parse(file_get_contents($appFolder . "/" . $file . ".plist"));
-								$info = $plist->toArray();
->>>>>>> 2e89d1b3c9aa44f8d32488adbfb260b556ac2cdf
 
 								$info["file"] = $file;
 								if(isset($info["type"], $info["version"])) {
