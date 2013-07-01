@@ -75,7 +75,6 @@
 }
 .leftandmaintable tr > .main > .inner > form > .actionsScroll {
 	border-top: 1px solid #ccc;
-	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
 }
 .leftandmaintable tr > .main > .inner > form > .error {
 	margin: 0 !important;
@@ -83,8 +82,7 @@
 .leftandmaintable tr > .main > .inner .headBar {
 	background: #eee;
 	border-bottom: 1px solid #ccc;
-	padding: 4px;
-	height: 28px;
+	padding: 0.3em;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
 	padding: 6px;
@@ -128,8 +126,8 @@
 }
 .leftandmaintable tr > .left a.create {
 	position: absolute;
-	top: 6px;
-	right: 5px;
+	top: 0.5em;
+	right: 0.25em;
 	height: 24px;
 	width: 24px;
 	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);

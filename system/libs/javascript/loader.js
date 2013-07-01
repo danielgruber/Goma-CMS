@@ -144,18 +144,15 @@ if(typeof goma.ui == "undefined") {
 			$container.css({"height": "0px !important", "display": "none"});
 			
 			// first make sure that the parent element is a Flex-Box
-			if(!updateFlexHeight($container.parent())) {
+			if(!(maxHeight = updateFlexHeight($container.parent()))) {
 				$container.css({"display": ""});
 				$container.css("height", "100%");
-				return true;
+				return $container.height();
 			}
 			
 			if(typeof $container.attr("id") == "undefined") {
 				$container.attr("id", randomString(10));
 			}
-			
-			// then get height of parent box
-			var maxHeight = $container.parent().height();
 			
 			$container.css({"display": ""});
 			
@@ -180,7 +177,7 @@ if(typeof goma.ui == "undefined") {
 			
 			$container.css("height", maxHeight);
 			
-			return true;
+			return maxHeight;
 		};
 		
 		// build module
@@ -1259,28 +1256,29 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
-				if(originalOptions.type == "post" && originalOptions.async != false) {
-					jqXHR.fail(function(){
-						if(jqXHR.textStatus == "timeout") {
-							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
-						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
-						} else {
-							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
-						}
-					});
-				} else {
-					jqXHR.fail(function(){
-						
-						if(jqXHR.textStatus == "timeout") {
-							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
-						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
-						} else {
-							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
-						}
-					});
-				}
+				if(originalOptions.silence != true)
+					if(originalOptions.type == "post" && originalOptions.async != false) {
+						jqXHR.fail(function(){
+							if(jqXHR.textStatus == "timeout") {
+								alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
+							} else if(jqXHR.textStatus == "abort") {
+								alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
+							} else {
+								alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
+							}
+						});
+					} else {
+						jqXHR.fail(function(){
+							
+							if(jqXHR.textStatus == "timeout") {
+								alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
+							} else if(jqXHR.textStatus == "abort") {
+								alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
+							} else {
+								alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
+							}
+						});
+					}
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);

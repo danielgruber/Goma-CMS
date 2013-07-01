@@ -64,11 +64,11 @@
 				var $wrapper = Init($this);
 				
 				// get colors
-				var borderColor = $wrapper.css("border-color");
+				var borderColor = $wrapper.css("border-top-color");
 				var bgColor = $wrapper.css("background-color");
 				
 				$wrapper.addClass(settings.activeClass);
-				var borderColorActive = $wrapper.css("border-color");
+				var borderColorActive = $wrapper.css("border-top-color");
 				var bgColorActive = $wrapper.css("background-color");
 				$wrapper.removeClass(settings.activeClass);
 				

@@ -83,15 +83,20 @@
 	overflow: hidden;
 }
 
-.tree .a:hover {
+.tree .a:hover, .tree .marked {
 	background: #666;
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #777777), color-stop(1, #5f5f5f));
+	background: -webkit-linear-gradient(#777777, #5f5f5f);
+	background: -moz-linear-gradient(#777777, #5f5f5f);
+	background: -ms-linear-gradient(#777777, #5f5f5f);
+	background: -o-linear-gradient(#777777, #5f5f5f);
+	background: linear-gradient(#777777, #5f5f5f);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f'); /* IE6 & IE7 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f')"; /* IE8+ */
+	
 	color: #fff;
 }
 .tree .a:hover * {
-	color: #fff;
-}
-.tree .marked {
-	background: #666;
 	color: #fff;
 }
 .tree .marked * {
