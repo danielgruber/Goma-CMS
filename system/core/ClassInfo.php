@@ -634,11 +634,17 @@ class ClassInfo extends Object {
 
 							require_once (FRAMEWORK_ROOT . "/libs/GFS/gfs.php");
 							require_once (FRAMEWORK_ROOT . "/libs/thirdparty/plist/CFPropertyList.php");
-
+							
 							if (file_exists($appFolder . "/" . $file . ".plist") && filemtime($appFolder . "/" . $file . ".plist") >= filemtime($appFolder . "/" . $file)) {
 								$plist = new CFPropertyList();
-								$plist -> parse(file_get_contents($appFolder . "/" . $file . ".plist"));
-								$info = $plist -> toArray();
+								try {
+									$plist -> parse(file_get_contents($appFolder . "/" . $file . ".plist"));
+									$info = $plist -> toArray();
+								} catch (Exception $e) {
+									@unlink($appFolder . "/" . $file . ".plist");
+									header("Location: " . $_SERVER["REQUEST_URI"]);
+									exit;
+								}
 
 								$info["file"] = $file;
 								if (isset($info["type"], $info["version"])) {

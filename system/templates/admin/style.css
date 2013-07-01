@@ -48,10 +48,9 @@ a:hover {
 }
 
 #wrapper {
-	min-height: 100%;
-	min-width: 100%;
-	position: absolute;
+	height: 100%;
 }
+
 #header h1 {
 	margin: 0;
 	text-transform: capitalize;
@@ -250,10 +249,12 @@ a:hover {
 	color: #444;
 	text-transform: capitalize;
 }
+
+/* begin content */
 #content {
 	z-index: 1;
 	min-width: 100%;
-	min-height: 100%;
+	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -278,22 +279,14 @@ a:hover {
 	text-align: left;
 	margin: 0;
 	padding: 10px;
-	padding-bottom: 5px;
-	font-size: 13px;
-	-webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	text-transform: capitalize;
+	font-size: 16px !important;
+	line-height: 20px;
+
 }
 #content .content_container > div {
 	padding: 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
 }
-#content .content_container > div a {
+#content #overview .content_container > div a {
 	padding: 10px;
 	display: inline-block
 }
@@ -312,7 +305,7 @@ a:hover {
 #plot-container {
 	height: 100%;
 	min-height: 250px;
-	margin: 15px;
+	margin: 10px;
 }
 #plot-container .loading {
 	width: 100px;
@@ -322,19 +315,16 @@ a:hover {
 }
 #plot-container .legend > div, #plot-container .legend > table {
 	background: none !important;
-	margin-top: -50px;
+	margin-top: -60px;
+	margin-right: -20px;
 }
 #plot-navigation {
 	position: absolute;
 	right: 140px;
-	top: 5px;
+	top: -5px;
 }
 #plot-navigation ul {
 	list-style: none;
-	border: 1px solid #24ACB8;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
-	-moz-border-radius: 5px;
 	margin: 0;
 	padding: 0;
 }
@@ -345,7 +335,8 @@ a:hover {
 }
 #plot-navigation ul li a {
 	display: block;
-	padding: 6px 8px !important;
+	padding: 13px 8px !important;
+	height: 14px;
 	
 	-webkit-transition: all linear 0.2s;
 	-moz-transition: all linear 0.2s;
@@ -357,6 +348,7 @@ a:hover {
 	padding-left: 10px !important;
 }
 #plot-navigation ul li a.active {
+	
 	background: #24ACB8;
 	color: #eee;
 }
@@ -1183,6 +1175,33 @@ form h2 {
 }
 .weblink .pageTitle {
 	color: #555;
+}
+
+#history {
+	display: none;
+}
+
+@media only screen and (min-width: 1200px) {
+	#history {
+		background: #fff url(../../../images/icons/modernui/halfdark/48x48/appbar.timer.forward.png) no-repeat 250px -5px;
+		min-height: 400px;
+		display: block;
+		float: right;
+		width: 300px;
+		height: 100%;
+		overflow: hidden;
+		border-left: 1px solid #ccc;
+		margin-top: -11px;
+	}
+	#history > div {
+		overflow: auto;
+	}
+	#overview {
+		margin-right: 320px;
+	}
+	#userbar-history.overview {
+		display: none;
+	}
 }
 
 @media print {

@@ -9,8 +9,11 @@
 .dropdownDialog #tabs_container_history {
 	margin: 0 -15px;
 }
-.dropdownDialog .historyoptions {
-	margin-top: -12px;
+.content_container .historyoptions, .dropdownDialog .historyoptions {
+	margin-top: -15px;
+}
+.content_container #tabs_container_history {
+	margin: 0 -5px;
 }
 .dropdownDialog .history {
 	width: 300px;

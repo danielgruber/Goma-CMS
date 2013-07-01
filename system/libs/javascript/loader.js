@@ -94,6 +94,8 @@ if(typeof goma.ui == "undefined") {
 			
 		}
 		
+		var flexBoxes = [];
+		
 		$(function() {	
 			$.extend(goma.ui, {
 				/**
@@ -117,7 +119,69 @@ if(typeof goma.ui == "undefined") {
 			}
 			
 			window.onbeforeunload = goma.ui.fireUnloadEvents;
+			
+			$(window).resize(function(){
+				for(i in flexBoxes) {
+					updateFlexHeight($(flexBoxes[i]));
+				}
+			});
 		});
+		
+		/**
+		 * this is the algorythm to calculate the 100% size of a box.
+		*/
+		var updateFlexHeight = function($container) {
+			if(typeof $container == "undefined" || typeof $container.html() == "undefined") {
+				return false;
+			}
+			
+			if($container.css("display") == "inline") {
+				throw new Error("inline-elements are not allowed for flex-boxing.");
+				return false;
+			}
+			
+			$container.css("height", "");
+			$container.css({"height": "0px !important", "display": "none"});
+			
+			// first make sure that the parent element is a Flex-Box
+			if(!updateFlexHeight($container.parent())) {
+				$container.css({"display": ""});
+				$container.css("height", "100%");
+				return true;
+			}
+			
+			if(typeof $container.attr("id") == "undefined") {
+				$container.attr("id", randomString(10));
+			}
+			
+			// then get height of parent box
+			var maxHeight = $container.parent().height();
+			
+			$container.css({"display": ""});
+			
+			// now calulate other elements' height
+			var inFloat = false;
+			$container.parent().find(" > *").each(function(){
+				if(inFloat && $(this).css("clear") == "both" || $(this).css("clear") == inFloat) {
+					inFloat = false;
+				}
+				
+				if($(this).attr("id") != $container.attr("id") && $(this).css("float") != "left" && $(this).css("float") != "right" && !inFloat && $(this).css("display") != "none") {
+					maxHeight = maxHeight - $(this).outerHeight(true);
+				}
+				
+				if($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
+					inFloat = $(this).css("float");
+				}
+			});
+			
+			// calculate the padding and border
+			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
+			
+			$container.css("height", maxHeight);
+			
+			return true;
+		};
 		
 		// build module
 		return {
@@ -131,6 +195,25 @@ if(typeof goma.ui == "undefined") {
 			 * defines if we are in backend
 			*/
 			is_backend: false,
+			
+			/**
+			 * registers a flex-box. A flex-box is a box, which have to be as high as the window minus some elements around. 
+			 * it calculates the correct elements around automatically.
+			 *
+			 * @access public
+			 * @param jquery-object
+			*/
+			addFlexBox: function($container) {
+				flexBoxes.push($container);
+				updateFlexHeight($($container));
+			},
+			
+			/**
+			 * fires an update for flex-boxes
+			*/
+			updateFlexBoxes: function() {
+				$(window).resize();
+			},
 			
 			/**
 			 * sets the main-content where to put by default content from ajax-requests

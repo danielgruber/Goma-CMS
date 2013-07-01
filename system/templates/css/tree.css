@@ -64,7 +64,7 @@
 	position: absolute;
 	left: 4px;
 	top: 4px;
-	background: #ffffff;
+	background: #fff;
 }
 .tree li div  a
 {
@@ -76,7 +76,7 @@
 .tree .a {
 	display: block;
 	margin: 0;
-	padding: 0;
+	padding: 2px;
 	margin-left: -300px;
 	padding-left: 300px;
 	height: 23px;
@@ -84,19 +84,15 @@
 }
 
 .tree .a:hover {
-	background: url(../admin/images/tree_hover.png) repeat-x #555;
+	background: #666;
 	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
 }
 .tree .a:hover * {
 	color: #fff;
 }
 .tree .marked {
-	background: url(../admin/images/tree_hover.png) repeat-x;
+	background: #666;
 	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
 }
 .tree .marked * {
 	color: #fff;
