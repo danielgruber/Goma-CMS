@@ -686,38 +686,44 @@ select {
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #9f9f9f;
+	border: 1px solid #bbb;
 	margin: 3px;
+    background: #eee;
 }
 select:focus {
-	-moz-box-shadow: 0 0 8px #999;
+	/*-moz-box-shadow: 0 0 8px #999;
 	-webkit-box-shadow: 0 0 8px #999;
 	box-shadow: 0 0 8px #999;
-	border-color: #999 !important;
+	border-color: #999 !important;*/
 }
 textarea, input[type=text], input[type=password] {
 	padding: 4px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #aaa;
 	margin: 3px;
+    
+    /*border: 1px solid #aaa;
 	-webkit-transition: all 0.2s linear;
 	-moz-transition: all 0.2s linear;
 	-o-transition: all 0.2s linear;
 	-ms-transition: all 0.2s linear;
-	background: #f5f5f5 url(images/input_bg.png) repeat-x;
+	background: #f5f5f5 url(images/input_bg.png) repeat-x;*/
+    background: #eee;
+    border: 1px solid #bbb;
 }
 textarea:hover, input[type=text]:hover, input[type=password]:hover {
-	border: 1px solid #888;
+	/*border: 1px solid #888;*/
 }
 textarea:focus, input[type=text]:focus, input[type=password]:focus {
-	-moz-box-shadow: 0 0 10px #999;
+	/*-moz-box-shadow: 0 0 10px #999;
 	-webkit-box-shadow: 0 0 10px #999;
 	box-shadow: 0 0 10px #999;
 	border-color: #888 !important;
-	outline-width: 0;
+	outline-width: 0;*/
+    outline: none;
 }
+
 
 .form_field {
 	padding: 12px;
