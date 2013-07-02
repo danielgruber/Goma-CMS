@@ -1,18 +1,18 @@
 <?php
-/**
+/*
  * Main file of Goma-CMS.
  * 
- * @package		Goma\System
+ * @package Goma\System
  * 
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * 
- * @version		2.6.8
+ * @version 2.6.8
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 
-/**
+/*
  * first check if we use a good version ;)
  *
  * PHP 5.2 is necessary

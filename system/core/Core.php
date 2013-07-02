@@ -42,9 +42,15 @@ class Core extends object {
 	public static $lang;
 
 	/**
-	 * cms-vars
+	 * An array that contains all CMS Variables.
+	 *
+	 * This arrays contains system wide system variables. They can be accessed by
+	 * using the mehtods Core::setCMSVar and Core::getCMSVar.
+	 *
+	 * @see Core::setCMSVar() to set variables.
+	 * @see Core::getCMSVar() to get variables.
 	 */
-	public static $cms_vars = array();
+	private static $cms_vars = array();
 
 	/**
 	 * Controllers used in this Request
@@ -203,7 +209,6 @@ class Core extends object {
 	}
 
 	/**
-	 *@access public
 	 *@param string - title of the link
 	 *@param string - href attribute of the link
 	 *@use: for adding breadcrumbs
@@ -260,23 +265,29 @@ class Core extends object {
 	}
 
 	/**
-	 * sets a cms-var
+	 * Sets a CMS variable.
 	 *
+	 * @see Core::$cms_vars for the variable containing array.
+	 * @see Core::getCMSVar() to get variables.
+	 *
+	 * @param string $name Variable name.
+	 * @param string $value Value of the variable.
+	 *
+	 * @return void
 	 */
 	public static function setCMSVar($name, $value) {
 		self::$cms_vars[$name] = $value;
 	}
 
 	/**
-	 * sets a CMS-Var-Handler
+	 * Returns a CMS variable.
 	 *
-	 *@param callback
-	 */
-
-	/**
-	 * gets a CMS-Var
+	 * @see Core::$cms_vars for the variable containing array.
+	 * @see Core::setCMSVar() to set variables.
 	 *
-	 *@param string - name: cms-var
+	 * @param string $name Variable name.
+	 *
+	 * @return mixed Value of the variable.
 	 */
 	public static function getCMSVar($name) {
 		if(PROFILE)

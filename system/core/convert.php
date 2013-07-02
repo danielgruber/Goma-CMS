@@ -1,18 +1,13 @@
 <?php
-/**
- * @package		Goma\System\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
-
 defined("IN_GOMA") OR die();
 
 /**
- * This class is a collection of text converting methods.
+ * This contains some text converting methods.
  *
- * @package		Goma\System\Core
- * @version		1.3.1
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Framework
+ * @version 1.3.1
  */
 class Convert extends Object {
 	/**
@@ -61,7 +56,11 @@ class Convert extends Object {
 	}
 
 	/**
-	 * converts raw to xml
+	 * Makes a string or array of strings XML suitable.
+	 *
+	 * @param string $val Input Text
+	 *
+	 * @return string XML suitable string.
 	 */
 	static function raw2xml($val) {
 		if(is_array($val)) {
@@ -74,9 +73,14 @@ class Convert extends Object {
 	}
 
 	/**
-	 * raw2xml alias
+	 * Alias for Convert::raw2xml().
+	 *
+	 * @see Convert::raw2xml()
+	 *
+	 * @param string $val Input Text
+	 *
+	 * @return string XML suitable string.
 	 */
-
 	static function raw2text($val) {
 		return self::raw2xml($val);
 	}

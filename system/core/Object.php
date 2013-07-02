@@ -1,5 +1,4 @@
 <?php
-
 defined("IN_GOMA") OR die();
 
 interface ExtensionModel {
@@ -431,7 +430,7 @@ abstract class Object {
 	}
 
 	/**
-	 * defines some basic stuff, but it has already an object loaded. You can hook in
+	 * Defines some basic stuff, but it has already an object loaded. You can hook in
 	 * here for subclasses.
 	 */
 	protected function defineStatics() {
@@ -439,7 +438,7 @@ abstract class Object {
 	}
 
 	/**
-	 * Method for overloading functions.
+	 * This method overloads functions.
 	 *
 	 * @link http://php.net/manual/de/language.oop5.overloading.php
 	 *

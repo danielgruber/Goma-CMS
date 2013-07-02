@@ -2,12 +2,12 @@
 /**
  * This file provides necessary functions for Goma.
  *
- * @package		Goma\System\Core
+ * @package Goma\System\Core
  *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version		1.0.2
+ * @version 1.0.2
  */
 
 defined("IN_GOMA") OR die();
@@ -15,10 +15,10 @@ defined("IN_GOMA") OR die();
 /**
  * Load a language file from /languages.
  *
- * @param	string $name Filename
- * @param	string $directory Subdirectory
+ * @param string $name Filename
+ * @param string $directory Subdirectory
  *
- * @return	void
+ * @return void
  */
 function loadlang($name = "lang", $directory = "") {
 	i18n::addLang($directory . '/' . $name);
@@ -27,10 +27,10 @@ function loadlang($name = "lang", $directory = "") {
 /**
  * Generates a random string.
  *
- * @param	int $length Length of the string.
- * @param	boolean $numeric Are numbers allowed?
+ * @param int $length Length of the string.
+ * @param boolean $numeric Are numbers allowed?
  *
- * @return	string
+ * @return string
  */
 function randomString($length, $numeric = true) {
 	$possible = "ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
@@ -47,10 +47,10 @@ function randomString($length, $numeric = true) {
 /**
  * Looks up for a localized version of a string.
  *
- * @param	string $name Name identifier for the string.
- * @param	string $default Default value for non existent localized strings.
+ * @param string $name Name identifier for the string.
+ * @param string $default Default value for non existent localized strings.
  *
- * @return	string Localized string or $default
+ * @return string Localized string or $default
  */
 function lang($name, $default = "") {
 	if(isset($GLOBALS["lang"][$name])) {
@@ -67,21 +67,21 @@ function lang($name, $default = "") {
 }
 
 /**
- * Checks a specific right for a group.
+ * Checks if a group has a right.
  *
- * @param	string $name Name identifier of the right.
- * @param	string $group Name identifier of the group.
+ * @param string $name Name identifier of the right.
+ * @param string $group Name identifier of the group.
  *
- * @return	boolean
+ * @return boolean
  */
 function advrights($right, $group) {
 	return Permission::advrights($right, $group);
 }
 
 /**
- * Checks a specific right for the current user.
+ * Checks if the current user has a right.
  *
- * @param string r Name identifier of the right.
+ * @param string $right Name identifier of the right.
  *
  * @return boolean
  */
@@ -99,10 +99,10 @@ function right($right) {
  * Numeric entries are appended, not replaced, but only if they are
  * unique.
  *
- * @author	mark dot roduner at gmail dot com
- * @link	http://php.net/manual/de/function.array-merge-recursive.php
+ * @author mark dot roduner at gmail dot com
+ * @link http://php.net/manual/de/function.array-merge-recursive.php
  *
- * @return	array
+ * @return array
  **/
 function array_merge_recursive_distinct() {
 	$arrays = func_get_args();
@@ -136,10 +136,12 @@ function array_merge_recursive_distinct() {
  * Because storing many data in a session is slow, the data is stored in a file.
  * This data can be accessed with an ID, that is stored in the session instead.
  *
- * @param	string $key Data identification key
- * @param	mixed $data The data, that has to be stored.
+ * @see session_restore() to restore data from a session.
  *
- * @return	bool Success
+ * @param string $key Data identification key
+ * @param mixed $data The data, that has to be stored.
+ *
+ * @return bool Success
  */
 function session_store($key, $data) {
 	if(isset($_SESSION["store"][$key]))
@@ -156,9 +158,11 @@ function session_store($key, $data) {
 /**
  * Accesses session data.
  *
- * @param	string $key Data identification key
+ * @see session_restore() to store data in a session.
  *
- * @return	mixed Data on success, otherwise false.
+ * @param string $key Data identification key
+ *
+ * @return mixed Data on success, otherwise false.
  */
 function session_restore($key) {
 	if(isset($_SESSION["store"][$key]))
@@ -173,9 +177,9 @@ function session_restore($key) {
 /**
  * Checks for a key, if he is linked with session data.
  *
- * @param	string $key Data identification key
+ * @param string $key Data identification key
  *
- * @return	boolean
+ * @return boolean
  */
 function session_store_exists($key) {
 	if(isset($_SESSION["store"][$key]))
@@ -190,9 +194,9 @@ function session_store_exists($key) {
 /**
  * Checks for an ID, if it is linked with session data.
  *
- * @param	string $id Data identification ID
+ * @param string $id Data identification ID
  *
- * @return	boolean
+ * @return boolean
  */
 function session_store_exists_byID($id) {
 	$id = basename($id);
@@ -202,9 +206,9 @@ function session_store_exists_byID($id) {
 /**
  * Accesses session data by ID.
  *
- * @param	string $id Data identification ID
+ * @param string $id Data identification ID
  *
- * @return	mixed Data on success, otherwise false.
+ * @return mixed Data on success, otherwise false.
  */
 function session_restore_byID($id) {
 	$id = basename($id);
@@ -218,10 +222,10 @@ function session_restore_byID($id) {
 /**
  * Binds a session data key to an ID.
  *
- * @param	string $id Data identification ID
- * @param	string $key Data identification key
+ * @param string $id Data identification ID
+ * @param string $key Data identification key
  *
- * @return	boolean
+ * @return boolean
  */
 function bindSessionKeyToID($id, $key) {
 	if(session_store_exists_byID($id)) {
@@ -235,9 +239,9 @@ function bindSessionKeyToID($id, $key) {
 /**
  * Gets the linked ID from a session data key.
  *
- * @param	string $key Data identification key
+ * @param string $key Data identification key
  *
- * @return	mixed ID on success, otherwise false.
+ * @return mixed ID on success, otherwise false.
  */
 function getStoreID($key) {
 	if(isset($_SESSION["store"][$key]))
@@ -246,6 +250,14 @@ function getStoreID($key) {
 		return false;
 }
 
+/**
+ * Gets the redirect.
+ *
+ * @param boolean $parentDir Get only the name of the parent directory in the
+ * url.
+ *
+ * @return string
+ */
 function getRedirect($parentDir = false) {
 	// AJAX Request
 	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
@@ -278,26 +290,29 @@ function getRedirect($parentDir = false) {
 	}
 }
 
+/**
+ * Gets the redirect.
+ *
+ * @param boolean $parentDir Get only the name of the parent directory in the
+ * url.
+ *
+ * @return string
+ */
 function getRedirection($parentDir = true) {
 	if($parentDir) {
-
 		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"]) && $_POST["redirect"]) {
 			return convert::raw2text($_POST["redirect"]);
 		} else {
-
 			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
 				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
 			} else {
 				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
 			}
-
 		}
-
 	} else {
-
 		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return convert::raw2text($_GET["redirect"]);
 		} else if(isset($_POST["redirect"]) && $_POST["redirect"]) {
@@ -305,15 +320,11 @@ function getRedirection($parentDir = true) {
 		} else {
 			return BASE_URI . BASE_SCRIPT;
 		}
-
 	}
 }
 
 /**
  * generates a translated date
- *
- *@name goma_date
- *@access public
  */
 function goma_date($format, $date = NOW) {
 
@@ -344,9 +355,6 @@ function isProjectUnavailable($project = APPLICATION) {
 
 /**
  * rewrites the Application-Configuration
- *
- *@name writeSystemConfig
- *@access public
  */
 function writeSystemConfig($data = array()) {
 
