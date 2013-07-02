@@ -175,8 +175,8 @@
 										},
 										tooltip:            true,
 										tooltipOpts: {
-										    content:        "<h4>%s</h4> %y",
-										    xDateFormat:    "%y-%0m-%0d %H:%M:%S",
+										    content:        "<h4>%x</h4> %y %s",
+										    xDateFormat:    "%d.%m %H:%M",
 										    yDateFormat:   	"",
 										    shifts: { 
 										        x:          10,
@@ -190,16 +190,15 @@
 									var plot;
 									
 									var drawVisitPlot = function() {
-										plot = $.plot("#plot-container", [{
+										plot = $.plot("#plot-container", [{	label: lang("page_views"), 
+											data: hits,
+											color: "#da097a"
+										},
+										{
 											label: lang("visitors"), 
 											data: visitors,
 											color: "#24ACB8"
-										}
-										,{	label: lang("page_views"), 
-											data: hits,
-											color: "#da097a"
-										}
-										], options);
+										}], options);
 	
 									}
 									
