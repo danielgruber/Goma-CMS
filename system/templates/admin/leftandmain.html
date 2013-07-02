@@ -8,54 +8,12 @@
 	<tr>
 		<td class="td left">
 			<div class="LaM_tabs">
-				<ul class="tabArea">
-					<% IF NOT  $addmode %>
-						<li class="active">
-					<% ELSE %>
-						<li>
-					<% END %>
-						<a class="tree" href="{$adminuri}">
-							<% lang("tree", "Tree") %>
-						</a>
-					</li>
-				<% IF  $addmode %>
-						<li class="active">
-					<% ELSE %>
-						<li>
-					<% END %>
-						<a class="create" href="{$adminuri}add/">
-							<% lang("Create", "Create") %>
-						</a>
-					</li>
-				</ul>
-				<% IF NOT  $addmode %>
-					<div class="create" style="display: none;">
-				<% ELSE %>
-					<div class="create">
-				<% END %>
-					<ul class="create">
-						<% CONTROL types() %>
-							<% IF $types.value == $activeAdd %>
-								<li class="active">
-							<% ELSE %>
-								<li>
-							<% END %>
-								<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="node {$types.value}">
-									<span>$types.title.text()</span>
-								</a>
-							</li>
-						<% ENDCONTROL %>
-					</ul>
-				</div>
-				<% IF NOT  $addmode %>
-					<div class="tree">
-				<% ELSE %>
-					<div class="tree" style="display: none;">
-				<% END %>
+				<div class="tree" style="display: none;">
 					<div class="classtree">
 						<div class="treesearch">
 							<form method="get" action="">
 								<input type="text" placeholder="{$_lang_search}" name="searchtree" value="{$searchtree}" />
+								<a class="create ajaxfy" href="{$adminuri}add/" title="{$_lang_Create}"></a>
 							</form>
 						</div>
 						<div class="treewrapper">

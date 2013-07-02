@@ -30,11 +30,11 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 	 *@name setOwner
 	 */
 	public function setOwner($object) {
-		if (!is_object($object)) {
+		if(!is_object($object)) {
 			throwError(20, 'PHP-Error', '$object isn\'t a object in ' . __FILE__ . ' on line ' . __LINE__ . '');
 		}
-		if (class_exists($object -> classname)) {
-			$this -> owner = $object;
+		if(class_exists($object->classname)) {
+			$this->owner = $object;
 		} else {
 			throwError(20, 'PHP-Error', 'Class ' . $class . ' doesn\'t exist in context.');
 		}
@@ -47,7 +47,7 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 	 *@name getOwner
 	 */
 	public function getOwner() {
-		return $this -> owner;
+		return $this->owner;
 	}
 
 }

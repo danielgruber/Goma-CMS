@@ -75,7 +75,6 @@
 }
 .leftandmaintable tr > .main > .inner > form > .actionsScroll {
 	border-top: 1px solid #ccc;
-	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
 }
 .leftandmaintable tr > .main > .inner > form > .error {
 	margin: 0 !important;
@@ -83,8 +82,7 @@
 .leftandmaintable tr > .main > .inner .headBar {
 	background: #eee;
 	border-bottom: 1px solid #ccc;
-	padding: 4px;
-	height: 28px;
+	padding: 0.3em;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
 	padding: 6px;
@@ -123,60 +121,44 @@
 .leftandmaintable tr > .left.active {
 	display: table-cell;
 }
-
-.leftandmaintable tr > .left > .LaM_tabs {
-	height: 100%;
-	min-width: 280px;
+.leftandmaintable tr > .left form {
+	position: relative;
 }
-.leftandmaintable tr > .left > .LaM_tabs > ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	height: 36px;
-	border-bottom: 1px solid #ccc;
-	background: #fff; 
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li {
-	float: left;
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li > a {
-	display: block;
-	padding: 10px;
-	font-size: 14px;
-	line-height: 16px;
-	border-right: 1px solid #ccc;
-	background: #fff;
-	text-decoration: none;
-	color: #555;
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li.active > a {
-	background: #eee;
-	padding-bottom: 11px !important;
-}
-
-.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
-	padding-left: 22px;
+.leftandmaintable tr > .left a.create {
+	position: absolute;
+	top: 0.5em;
+	right: 0.25em;
+	height: 24px;
+	width: 24px;
 	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
 	background-repeat: no-repeat;
 	background-position: left center;
+}
+.leftandmaintable tr > .left a.create:hover {
+	background-image: url(../../../images/icons/modernui/dark/24x24/appbar.add.png);
 }
 
 .leftandmaintable tr > .left .classtree .treesearch input {
 	border-radius: 0;
 	margin: 0;
 	border: 0;
-	padding: 5px;
+	padding: 10px;
 	width: 280px;
 	padding-right: 20px;
 	border-bottom: 1px solid #cfcfcf !important;
 	background: #eee;
 }
+.leftandmaintable tr > .left .classtree .treesearch input:focus {
+	border: 0;
+}
+
 .leftandmaintable tr > .left .create ul, ul.create {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	padding-top: 1px;
 }
+
 .create li:hover,.create li.active {
 	background: url(images/tree_hover.png) repeat-x;
 }
@@ -199,9 +181,7 @@
 .create .node {
 	text-decoration: none !important;
 }
-.leftandmaintable tr > .left .classtree .treesearch input:focus {
-	border: 0;
-}
+
 .leftandmaintable tr > .left {
 	overflow: hidden;
 }
@@ -209,7 +189,6 @@
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
 	background: #eee;
-	-webkit-box-shadow: inset 0 0 5px #ccc;
 	padding-bottom: 15px;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .legend {
@@ -232,8 +211,6 @@
 .legend div span {
 	background-image: none !important;
 }
-
-.loading span { background-image: url(../../../images/16x16/ajax-loader.gif) !important; }
 
 .create li a {
 	color: #555;

@@ -24,8 +24,6 @@ class Resources extends Object {
 	/**
 	 * version of this class
 	 *
-	 *@name VERSION
-	 *@access public
 	 *@var CONST
 	*/
 	const VERSION = "1.3.5";
@@ -33,16 +31,12 @@ class Resources extends Object {
 	/**
 	 * defines if gzip is enabled
 	 *
-	 *@name gzip
-	 *@access public
 	*/
 	public static $gzip = false;
 	
 	/**
 	 * this var defines if combining is enabled
 	 *
-	 *@name combine
-	 *@access private
 	 *@var bool
 	*/
 	private static $combine = true;
@@ -50,8 +44,6 @@ class Resources extends Object {
 	/**
 	 * folders to scan to class-info
 	 *
-	 *@name scanFolders
-	 *@access public
 	 *@var array
 	*/
 	public static $scanFolders = array(
@@ -62,8 +54,6 @@ class Resources extends Object {
 	/**
 	 * enables conbining
 	 *
-	 *@name enableCombine
-	 *@access public
 	*/
 	public static function enableCombine() {
 		self::$combine = true;
@@ -72,8 +62,6 @@ class Resources extends Object {
 	/**
 	 * disables combining
 	 *
-	 *@name disableCombine
-	 *@access public
 	*/
 	public static function disableCombine() {
 		self::$combine = false;
@@ -82,8 +70,6 @@ class Resources extends Object {
 	/**
 	 * this var contains all javascript-resources
 	 *
-	 *@name resources_js
-	 *@access private
 	 *@var array
 	*/
 	private static $resources_js = array();
@@ -91,8 +77,6 @@ class Resources extends Object {
 	/**
 	 * this var contains all css-resources
 	 *
-	 *@name resources_css
-	 *@access private
 	 *@var array
 	*/
 	private static $resources_css = array();
@@ -100,8 +84,6 @@ class Resources extends Object {
 	/**
 	 * this var contains names for special resources
 	 *
-	 *@name names
-	 *@access public
 	 *@var array
 	*/
 	public static $names = array();
@@ -109,8 +91,6 @@ class Resources extends Object {
 	/**
 	 * raw data
 	 *
-	 *@name resources_data
-	 *@access private
 	 *@var array
 	*/
 	private static $resources_data = array();
@@ -118,8 +98,6 @@ class Resources extends Object {
 	/**
 	 * raw js code
 	 *
-	 *@name rawjs
-	 *@access private
 	 *@var array
 	*/
 	private static $raw_js = array();
@@ -127,15 +105,11 @@ class Resources extends Object {
 	/**
 	 * if cache was updates this request
 	 *
-	 *@name cacheUpdated
-	 *@access public
 	*/
 	public static $cacheUpdated = false;
 	
 	/**
 	 * adds a special name
-	 *@name addName
-	 *@access public
 	 *@param string - name
 	 *@param string - file
 	*/
@@ -172,8 +146,6 @@ class Resources extends Object {
 	/**
 	 * add-functionality
 	 *
-	 *@name add
-	 *@access public
 	 *@param string - name: special name; name of gloader-resource @see gloader; filename
 	 *@param resource-type
 	 *@param combine-name
@@ -346,8 +318,6 @@ class Resources extends Object {
 	/**
 	 * registers a file as loaded
 	 *
-	 *@name registerLoaded
-	 *@access public
 	 *@param string - type
 	 *@param string - path
 	*/
@@ -363,8 +333,6 @@ class Resources extends Object {
 	/**
 	 * checks the file-path
 	 *
-	 *@name getFilePath
-	 *@access public
 	*/
 	public static function getFilePath($path) {
 		if(self::file_exists($path))
@@ -384,8 +352,6 @@ class Resources extends Object {
 	
 	/**
 	 * adds some javascript code
-	 *@name addJS
-	 *@access public
 	 *@param string - js
 	*/
 	public static function addJS($js, $combine_name = "scripts") {	
@@ -401,8 +367,6 @@ class Resources extends Object {
 	
 	/**
 	 * adds some css code
-	 *@name addCSS
-	 *@access public
 	 *@param string - js
 	*/
 	public static function addCSS($css) {
@@ -411,8 +375,6 @@ class Resources extends Object {
 	
 	/**
 	 * if you want to use some data in your scripts, which is from the database you can add it here
-	 *@name addData
-	 *@access public
 	 *@param string - javascript-code
 	*/
 	public static function addData($js) {
@@ -423,8 +385,6 @@ class Resources extends Object {
 	/**
 	 * gets the resources
 	 *
-	 *@name get
-	 *@access public
 	*/
 	public static function get() {
 		if(PROFILE) Profiler::mark("Resources::get");
@@ -493,8 +453,6 @@ class Resources extends Object {
 	/**
 	 * generates a css file given by combined data
 	 *
-	 *@name generateCSSFile
-	 *@access public
 	*/
 	public static function generateCSSFile($combine_css, $name = "",  &$css_files) {
 		$file = self::getFileName(CACHE_DIRECTORY . "css_".$name."_".md5(implode("_", $combine_css["files"]))."_".$combine_css["mtime"]."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).".css");
@@ -529,8 +487,6 @@ class Resources extends Object {
 	/**
 	 * this method generates all filename and gives them back
 	 *
-	 *@name generateFiles
-	 *@access public
 	*/
 	public static function generateFiles() {
 		
@@ -716,8 +672,6 @@ class Resources extends Object {
 	/**
 	 * makes a combined javascript-file
 	 *
-	 *@name makeCombinedJS
-	 *@access public
 	 *@param data-array
 	*/
 	public static function makeCombiedJS($data) {
@@ -796,16 +750,12 @@ class Resources extends Object {
 	/**
 	 * cache for following functions
 	 *
-	 *@name extCache
-	 *@access private
 	*/
 	private static $extCache = false;
 	
 	/**
 	 * gets the filename
 	 *
-	 *@name getFileExt
-	 *@access public
 	*/
 	public static function getFileExt() {
 		if(self::$extCache === false) {
@@ -828,8 +778,6 @@ class Resources extends Object {
 	/**
 	 * gets full file
 	 *
-	 *@name getFileName
-	 *@access public
 	 *@param string - file
 	*/
 	public static function getFileName($file) {
@@ -848,8 +796,6 @@ class Resources extends Object {
 	/**
 	 * gets the string encoded
 	 *
-	 *@name getEncodedString
-	 *@access public
 	*/
 	public static function getEncodedString($data) {
 		$ext = self::getFileExt();
@@ -865,8 +811,6 @@ class Resources extends Object {
 	/**
 	 * bacause the background-image-locations arent't right anymore, we have to correct them
 	 *
-	 *@name parseCSSURLs
-	 *@access public
 	*/
 	public static function parseCSSURLs($css, $file, $base) {
 		$path = substr($file, 0, strrpos($file, '/'));
@@ -885,8 +829,6 @@ class Resources extends Object {
 	 * checks if a file exists
 	 * for optional further caching
 	 *
-	 *@name file_exists
-	 *@access public
 	*/ 
 	public static function file_exists($file) {
   	 
@@ -909,8 +851,6 @@ class Resources extends Object {
 	/**
 	 * generates the Class-Info
 	 *
-	 *@name generateClassInfo
-	 *@access public
 	*/
 	public function generateClassInfo() {
 		if(PROFILE) Profiler::mark("Resources::GenerateClassInfo");
@@ -941,8 +881,6 @@ class Resources extends Object {
 	/**
 	 * scan's directories to class-info
 	 *
-	 *@name scanToClassInfo
-	 *@access public
 	 *@param string - dir
 	*/
 	public function scanToClassInfo($dir) {

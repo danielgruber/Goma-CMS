@@ -64,7 +64,7 @@
 	position: absolute;
 	left: 4px;
 	top: 4px;
-	background: #ffffff;
+	background: #fff;
 }
 .tree li div  a
 {
@@ -76,27 +76,28 @@
 .tree .a {
 	display: block;
 	margin: 0;
-	padding: 0;
+	padding: 2px;
 	margin-left: -300px;
 	padding-left: 300px;
 	height: 23px;
 	overflow: hidden;
 }
 
-.tree .a:hover {
-	background: url(../admin/images/tree_hover.png) repeat-x #555;
+.tree .a:hover, .tree .marked {
+	background: #666;
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #777777), color-stop(1, #5f5f5f));
+	background: -webkit-linear-gradient(#777777, #5f5f5f);
+	background: -moz-linear-gradient(#777777, #5f5f5f);
+	background: -ms-linear-gradient(#777777, #5f5f5f);
+	background: -o-linear-gradient(#777777, #5f5f5f);
+	background: linear-gradient(#777777, #5f5f5f);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f'); /* IE6 & IE7 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f')"; /* IE8+ */
+	
 	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
 }
 .tree .a:hover * {
 	color: #fff;
-}
-.tree .marked {
-	background: url(../admin/images/tree_hover.png) repeat-x;
-	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
 }
 .tree .marked * {
 	color: #fff;

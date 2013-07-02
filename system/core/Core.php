@@ -20,8 +20,6 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
  */
 class Core extends object {
 	/**
-	 *@name breadcrumbs
-	 *@access public
 	 *@var array
 	 */
 	public static $breadcrumbs = array();
@@ -29,16 +27,12 @@ class Core extends object {
 	/**
 	 * title of the page
 	 *
-	 *@name title
-	 *@access public
 	 */
 	public static $title = "";
 
 	/**
 	 * headers
 	 *
-	 *@name header
-	 *@access public
 	 */
 	public static $header = array();
 
@@ -48,9 +42,15 @@ class Core extends object {
 	public static $lang;
 
 	/**
-	 * cms-vars
+	 * An array that contains all CMS Variables.
+	 *
+	 * This arrays contains system wide system variables. They can be accessed by
+	 * using the mehtods Core::setCMSVar and Core::getCMSVar.
+	 *
+	 * @see Core::setCMSVar() to set variables.
+	 * @see Core::getCMSVar() to get variables.
 	 */
-	public static $cms_vars = array();
+	private static $cms_vars = array();
 
 	/**
 	 * Controllers used in this Request
@@ -60,8 +60,6 @@ class Core extends object {
 
 	/**
 	 * this var contains the site_mode
-	 *@name site_mode
-	 *@access public
 	 */
 	public static $site_mode = STATUS_ACTIVE;
 
@@ -75,8 +73,6 @@ class Core extends object {
 	/**
 	 * the current active controller
 	 *
-	 *@name requestController
-	 *@access public
 	 *@var object
 	 */
 	public static $requestController;
@@ -84,24 +80,18 @@ class Core extends object {
 	/**
 	 * global hooks
 	 *
-	 *@name hooks
-	 *@access public
 	 */
 	public static $hooks = array();
 
 	/**
 	 * current active url
 	 *
-	 *@name url
-	 *@access public
 	 */
 	public static $url;
 
 	/**
 	 * if mobile is activated
 	 *
-	 *@name isMobile
-	 *@access public
 	 */
 	public static $isMobile = true;
 
@@ -119,32 +109,30 @@ class Core extends object {
 	 *@name cmsVarCallbacks
 	 */
 	private static $cmsVarCallbacks = array();
-	
+
 	/**
 	 * contains the path to the favicon.
 	 *
 	 * @access public
 	 * @var string
-	*/
+	 */
 	public static $favicon;
 
 	/**
 	 * inits the core
 	 *
-	 *@name init
-	 *@access public
 	 */
 	public static function Init() {
 
 		ob_start();
 
-		if (isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
+		if(isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
 			Resources::addData("goma.ENV.is_backend = true;");
 			define("IS_BACKEND", true);
 		}
 
-		if (isset($_POST) && $handle = @fopen("php://input", "r")) {
-			if (PROFILE)
+		if(isset($_POST) && $handle = @fopen("php://input", "r")) {
+			if(PROFILE)
 				Profiler::mark("php://input read");
 			$random = randomString(20);
 			$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
@@ -154,21 +142,21 @@ class Core extends object {
 
 			register_shutdown_function(array("Core", "cleanUpInput"));
 
-			if (PROFILE)
+			if(PROFILE)
 				Profiler::unmark("php://input read");
 		}
 
 		// now init session
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::mark("session");
 		session_start();
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::unmark("session");
 
-		if (defined("SQL_LOADUP"))
+		if(defined("SQL_LOADUP"))
 			member::Init();
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::mark("Core::Init");
 
 		// init language-support
@@ -177,11 +165,11 @@ class Core extends object {
 		i18n::Init();
 
 		// delete-cache-support
-		if (isset($_GET['flush'])) {
-			if (PROFILE)
+		if(isset($_GET['flush'])) {
+			if(PROFILE)
 				Profiler::mark("delete_cache");
 
-			if (Permission::check("ADMIN")) {
+			if(Permission::check("ADMIN")) {
 				logging('Deleting FULL Cache');
 				self::deletecache(true);
 				// delete files in cache
@@ -191,14 +179,14 @@ class Core extends object {
 				// delete some files in cache
 			}
 
-			if (PROFILE)
+			if(PROFILE)
 				Profiler::unmark("delete_cache");
 		}
 
 		// some vars for javascript
 		Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '" . CURRENT_PROJECT . "';var root_path = '" . ROOT_PATH . "';var ROOT_PATH = '" . ROOT_PATH . "';var BASE_SCRIPT = '" . BASE_SCRIPT . "'; goma.ENV.framework_version = '" . GOMA_VERSION . "-" . BUILD_VERSION . "' }");
 
-		Object::instance("Core") -> callExtending("construct");
+		Object::instance("Core")->callExtending("construct");
 		self::callHook("init");
 
 		Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
@@ -216,12 +204,11 @@ class Core extends object {
 		HTTPResponse::setHeader("x-base-uri", BASE_URI);
 		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::unmark("Core::Init");
 	}
 
 	/**
-	 *@access public
 	 *@param string - title of the link
 	 *@param string - href attribute of the link
 	 *@use: for adding breadcrumbs
@@ -244,8 +231,6 @@ class Core extends object {
 	/**
 	 * adds a callback to a hook
 	 *
-	 *@name addToHook
-	 *@access public
 	 *@param string - name of the hook
 	 *@param callback
 	 */
@@ -256,15 +241,13 @@ class Core extends object {
 	/**
 	 * calls all callbacks for a hook
 	 *
-	 *@name callHook
-	 *@access public
 	 *@param string - name of the hook
 	 *@param array - params
 	 */
 	public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
-		if (isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
-			foreach (self::$hooks[strtolower($name)] as $callback) {
-				if (is_callable($callback))
+		if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
+			foreach(self::$hooks[strtolower($name)] as $callback) {
+				if(is_callable($callback))
 					call_user_func_array($callback, array($p1, $p2, $p3, $p4, $p5, $p6, $p7));
 			}
 		}
@@ -273,89 +256,87 @@ class Core extends object {
 	/**
 	 * registers an CMS-Var-Callback
 	 *
-	 *@name addCMSVarCallback
-	 *@access public
 	 *@param callback
 	 *@param int - priority
 	 */
 	public function addCMSVarCallback($callback, $prio = 10) {
-		if (is_callable($callback))
+		if(is_callable($callback))
 			self::$cmsVarCallbacks[$prio][] = $callback;
 	}
 
 	/**
-	 * sets a cms-var
+	 * Sets a CMS variable.
 	 *
-	 *@name setCMSVar
-	 *@access public
+	 * @see Core::$cms_vars for the variable containing array.
+	 * @see Core::getCMSVar() to get variables.
+	 *
+	 * @param string $name Variable name.
+	 * @param string $value Value of the variable.
+	 *
+	 * @return void
 	 */
 	public static function setCMSVar($name, $value) {
 		self::$cms_vars[$name] = $value;
 	}
 
 	/**
-	 * sets a CMS-Var-Handler
+	 * Returns a CMS variable.
 	 *
-	 *@name setCMSVarHandler
-	 *@access public
-	 *@param callback
-	 */
-
-	/**
-	 * gets a CMS-Var
+	 * @see Core::$cms_vars for the variable containing array.
+	 * @see Core::setCMSVar() to set variables.
 	 *
-	 *@name getCMSVar
-	 *@access public
-	 *@param string - name: cms-var
+	 * @param string $name Variable name.
+	 *
+	 * @return mixed Value of the variable.
 	 */
 	public static function getCMSVar($name) {
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::mark("Core::getCMSVar");
-		if ($name == "lang") {
-			if (PROFILE)
+		if($name == "lang") {
+			if(PROFILE)
 				Profiler::unmark("Core::getCMSVar");
 			return self::$lang;
 		}
 
-		if (isset(self::$cms_vars[$name])) {
-			if (PROFILE)
+		if(isset(self::$cms_vars[$name])) {
+			if(PROFILE)
 				Profiler::unmark("Core::getCMSVar");
 			return self::$cms_vars[$name];
 
 		}
 
-		if ($name == "year") {
-			if (PROFILE)
+		if($name == "year") {
+			if(PROFILE)
 				Profiler::unmark("Core::getCMSVar");
 			return date("Y");
 
 		}
 
-		if ($name == "tpl") {
-			if (PROFILE)
+		if($name == "tpl") {
+			if(PROFILE)
 				Profiler::unmark("Core::getCMSVar");
 			return self::getTheme();
 		}
 
-		if ($name == "user") {
-			self::$cms_vars["user"] = (member::$loggedIn) ? convert::raw2text(member::$loggedIn -> title()) : null;
-			if (PROFILE)
+		if($name == "user") {
+			self::$cms_vars["user"] = (member::$loggedIn) ? convert::raw2text(member::$loggedIn->title()) : null;
+			if(PROFILE)
 				Profiler::unmark("Core::getCMSVar");
 			return self::$cms_vars["user"];
 		}
 
 		krsort(self::$cmsVarCallbacks);
-		foreach (self::$cmsVarCallbacks as $callbacks) {
-			foreach ($callbacks as $callback) {
-				if (($data = call_user_func_array($callback, array($name))) !== null) {
-					if (PROFILE)
+		foreach(self::$cmsVarCallbacks as $callbacks) {
+			foreach($callbacks as $callback) {
+				if(($data = call_user_func_array($callback, array($name))) !== null) {
+					if(PROFILE)
 						Profiler::unmark("Core::getCMSVar");
 					return $data;
 				}
 			}
 		}
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::unmark("Core::getCMSVar");
 		return isset($GLOBALS["cms_" . $name]) ? $GLOBALS["cms_" . $name] : null;
 
@@ -364,8 +345,6 @@ class Core extends object {
 	/**
 	 * sets the theme
 	 *
-	 *@name setTheme
-	 *@access public
 	 */
 	public static function setTheme($theme) {
 		self::setCMSVar("theme", $theme);
@@ -374,8 +353,6 @@ class Core extends object {
 	/**
 	 * gets the theme
 	 *
-	 *@name getTheme
-	 *@access public
 	 */
 	public static function getTheme() {
 		return self::getCMSVar("theme") ? self::getCMSVar("theme") : "default";
@@ -384,22 +361,18 @@ class Core extends object {
 	/**
 	 * sets a header-field
 	 *
-	 *@name setHeader
-	 *@access public
 	 */
 	public static function setHeader($name, $value, $overwrite = true) {
-		if ($overwrite || !isset(self::$header[strtolower($name)]))
+		if($overwrite || !isset(self::$header[strtolower($name)]))
 			self::$header[strtolower($name)] = array("name" => $name, "value" => $value);
 	}
 
 	/**
 	 * sets a http-equiv header-field
 	 *
-	 *@name setHTTPHeader
-	 *@access public
 	 */
 	public static function setHTTPHeader($name, $value, $overwrite = true) {
-		if ($overwrite || !isset(self::$header[strtolower($name)]))
+		if($overwrite || !isset(self::$header[strtolower($name)]))
 			self::$header[strtolower($name)] = array("name" => $name, "value" => $value, "http" => true);
 	}
 
@@ -408,21 +381,19 @@ class Core extends object {
 	 * but if the given version is higher than the current, nothing happens
 	 * if DEV_MODE is not true, nothing happens
 	 *
-	 *@name Deprecate
-	 *@access public
 	 *@param int - version
 	 *@param string - method
 	 */
 	public static function Deprecate($version, $newmethod = "") {
-		if (DEV_MODE) {
-			if (!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $version, "<")) {
+		if(DEV_MODE) {
+			if(!version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $version, "<")) {
 
 				$trace = @debug_backtrace();
 
 				$method = (isset($trace[1]["class"])) ? $trace[1]["class"] . "::" . $trace[1]["function"] : $trace[1]["function"];
 				$file = isset($trace[1]["file"]) ? $trace[1]["file"] : (isset($trace[2]["file"]) ? $trace[2]["file"] : "Undefined");
 				$line = isset($trace[1]["line"]) ? $trace[1]["line"] : (isset($trace[2]["line"]) ? $trace[2]["line"] : "Undefined");
-				if ($newmethod == "")
+				if($newmethod == "")
 					log_error("DEPRECATED: " . $method . " is marked as DEPRECATED in " . $file . " on line " . $line);
 				else
 					log_error("DEPRECATED: " . $method . " is marked as DEPRECATED in " . $file . " on line " . $line . ". Please use " . $newmethod . " instead.");
@@ -433,36 +404,32 @@ class Core extends object {
 	/**
 	 * gets all headers
 	 *
-	 *@name getHeader
-	 *@access public
 	 */
 	public static function getHeaderHTML() {
 		$html = "";
 		$i = 0;
-		foreach (self::getHeader() as $data) {
-			if ($i == 0)
+		foreach(self::getHeader() as $data) {
+			if($i == 0)
 				$i++;
 			else
 				$html .= "		";
-			if (isset($data["http"])) {
+			if(isset($data["http"])) {
 				$html .= "<meta http-equiv=\"" . $data["name"] . "\" content=\"" . $data["value"] . "\" />\n";
 			} else {
 				$html .= "<meta name=\"" . $data["name"] . "\" content=\"" . $data["value"] . "\" />\n";
 			}
 		}
-		
+
 		if(self::$favicon) {
-			$html .= '		<link rel="icon" href="'.self::$favicon.'" type="image/x-icon" />';
+			$html .= '		<link rel="icon" href="' . self::$favicon . '" type="image/x-icon" />';
 		}
-		
+
 		return $html;
 	}
 
 	/**
 	 * gets all headers
 	 *
-	 *@name getHeader
-	 *@access public
 	 */
 	public static function getHeader() {
 
@@ -475,46 +442,44 @@ class Core extends object {
 
 	/**
 	 * detetes the cache
-	 *@name deletecache
-	 *@access public
 	 *@use to delete the cache
 	 */
 	public static function deletecache($all = false) {
 		$dir = ROOT . CACHE_DIRECTORY;
 
-		if (!$all && file_exists($dir . "/deletecache") && filemtime($dir . "/deletecache") > NOW - 60 * 5)
+		if(!$all && file_exists($dir . "/deletecache") && filemtime($dir . "/deletecache") > NOW - 60 * 5)
 			return true;
 
 		clearstatcache();
 
-		foreach (scandir($dir) as $file) {
-			if ((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude" || $file == "deletecache")
+		foreach(scandir($dir) as $file) {
+			if((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude" || $file == "deletecache")
 				continue;
 
 			// session store
-			if (preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
-				if (file_exists($dir . $file) && filemtime($dir . $file) < NOW - 3600) {
+			if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
+				if(file_exists($dir . $file) && filemtime($dir . $file) < NOW - 3600) {
 					@unlink($dir . $file);
 				}
 				continue;
 			}
 
-			if ($all) {
-				if ($file != "." && $file != "..") {
-					if (!is_dir($dir . $file) || !file_exists($dir . $file . "/.dontremove")) {
+			if($all) {
+				if($file != "." && $file != "..") {
+					if(!is_dir($dir . $file) || !file_exists($dir . $file . "/.dontremove")) {
 						FileSystem::Delete($dir . $file);
 					}
 				}
 			} else {
-				if (preg_match('/\.php$/i', $file) && is_file($dir . $file)) {
+				if(preg_match('/\.php$/i', $file) && is_file($dir . $file)) {
 					unlink($dir . $file);
 				}
 			}
 		}
 
 		// empty framework cache
-		foreach (scandir(ROOT . "system/temp/") as $file) {
-			if ($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove") && $file != "autoloader_exclude")
+		foreach(scandir(ROOT . "system/temp/") as $file) {
+			if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove") && $file != "autoloader_exclude")
 				FileSystem::delete(ROOT . "system/temp/" . $file);
 		}
 
@@ -530,13 +495,11 @@ class Core extends object {
 
 	/**
 	 * adds some rules to controller
-	 *@name addRules
-	 *@access public
 	 *@param array - rules
 	 *@param numeric - priority
 	 */
 	public static function addRules($rules, $priority = 50) {
-		if (isset(self::$rules[$priority])) {
+		if(isset(self::$rules[$priority])) {
 			self::$rules[$priority] = array_merge(self::$rules[$priority], $rules);
 		} else {
 			self::$rules[$priority] = $rules;
@@ -546,8 +509,6 @@ class Core extends object {
 
 	/**
 	 * checks if ajax
-	 *@name is_ajax
-	 *@access public
 	 *@return bool
 	 */
 	public static function is_ajax() {
@@ -557,31 +518,27 @@ class Core extends object {
 	/**
 	 * clean-up for saved file-data
 	 *
-	 *@name cleanUpInput
-	 *@access public
 	 */
 	public static function cleanUpInput() {
-		if (isset(self::$phpInputFile) && file_exists(self::$phpInputFile))
+		if(isset(self::$phpInputFile) && file_exists(self::$phpInputFile))
 			@unlink(self::$phpInputFile);
 	}
 
 	/**
 	 * clean-up for log-files
 	 *
-	 *@name cleanUpLog
-	 *@access public
 	 *@param int - days
 	 */
 	public static function cleanUpLog($count = 30) {
 		$logDir = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER;
-		foreach (scandir($logDir) as $type) {
-			if ($type != "." && $type != ".." && is_dir($logDir . "/" . $type))
-				foreach (scandir($logDir . "/" . $type . "/") as $date) {
-					if ($date != "." && $date != "..") {
+		foreach(scandir($logDir) as $type) {
+			if($type != "." && $type != ".." && is_dir($logDir . "/" . $type))
+				foreach(scandir($logDir . "/" . $type . "/") as $date) {
+					if($date != "." && $date != "..") {
 
-						if (preg_match('/^(\d{2})\-(\d{2})\-(\d{2})$/', $date, $matches)) {
+						if(preg_match('/^(\d{2})\-(\d{2})\-(\d{2})$/', $date, $matches)) {
 							$time = mktime(0, 0, 0, $matches[1], $matches[2], $matches[3]);
-							if ($time < NOW - 60 * 60 * 24 * $count || isset($_GET["forceAll"])) {
+							if($time < NOW - 60 * 60 * 24 * $count || isset($_GET["forceAll"])) {
 								FileSystem::delete($logDir . "/" . $type . "/" . $date);
 							}
 						}
@@ -593,14 +550,12 @@ class Core extends object {
 	/**
 	 * returns current active url
 	 *
-	 *@name activeURL
-	 *@access public
 	 */
 	public static function activeURL() {
-		if (Core::is_ajax()) {
-			if (isset($_GET["redirect"])) {
+		if(Core::is_ajax()) {
+			if(isset($_GET["redirect"])) {
 				return $_GET["redirect"];
-			} else if (isset($_SERVER["HTTP_REFERER"])) {
+			} else if(isset($_SERVER["HTTP_REFERER"])) {
 				return $_SERVER["HTTP_REFERER"];
 			}
 		}
@@ -612,12 +567,10 @@ class Core extends object {
 	/**
 	 * throw an eror
 	 *
-	 *@name thorwError
-	 *@access public
 	 */
 	public static function throwError($code, $name, $message) {
 
-		if (defined("ERROR_CODE")) {
+		if(defined("ERROR_CODE")) {
 			echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
 			exit ;
 		}
@@ -625,15 +578,15 @@ class Core extends object {
 		define("ERROR_CODE", $code);
 		define("ERROR_NAME", $name);
 		define("ERROR_MESSAGE", $message);
-		if ($code == 6) {
+		if($code == 6) {
 			ClassInfo::delete();
 		}
 
 		log_error("Code: " . $code . ", Name: " . $name . ", Details: " . $message . ", URL: " . $_SERVER["REQUEST_URI"]);
 
-		if (($code != 1 && $code != 2 && $code != 5)) {
+		if(($code != 1 && $code != 2 && $code != 5)) {
 			$data = debug_backtrace();
-			if (count($data) > 6) {
+			if(count($data) > 6) {
 				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
 			}
 
@@ -642,21 +595,21 @@ class Core extends object {
 			debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace unavailable due to call");
 		}
 
-		if (is_object(self::$requestController)) {
-			echo self::$requestController -> __throwError($code, $name, $message);
+		if(is_object(self::$requestController)) {
+			echo self::$requestController->__throwError($code, $name, $message);
 			exit ;
 		} else {
-			if (Core::is_ajax())
+			if(Core::is_ajax())
 				HTTPResponse::setResHeader(200);
 
-			if (class_exists("ClassInfo", false) && defined("CLASS_INFO_LOADED")) {
+			if(class_exists("ClassInfo", false) && defined("CLASS_INFO_LOADED")) {
 				$template = new template;
-				$template -> assign('errcode', convert::raw2text($code));
-				$template -> assign('errname', convert::raw2text($name));
-				$template -> assign('errdetails', $message);
+				$template->assign('errcode', convert::raw2text($code));
+				$template->assign('errname', convert::raw2text($name));
+				$template->assign('errdetails', $message);
 				HTTPresponse::sendHeader();
 
-				echo $template -> display('framework/error.html');
+				echo $template->display('framework/error.html');
 			} else {
 				header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
 				$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
@@ -678,18 +631,15 @@ class Core extends object {
 	/**
 	 * checks if debug-mode
 	 *
-	 *@name debug
-	 *@access public
 	 */
 	public static function is_debug() {
 		return (Permission::check(10) && isset($_GET["debug"]));
 	}
 
 	/**
-	 * gives back if the current logged in admin want's to be see everything as a simple user
+	 * gives back if the current logged in admin want's to be see everything as a
+	 * simple user
 	 *
-	 *@name adminAsUser
-	 *@access public
 	 */
 	public static function adminAsUser() {
 		return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
@@ -703,27 +653,25 @@ class Core extends object {
 	/**
 	 * serves the output given
 	 *
-	 *@name serve
-	 *@access public
 	 *@param string - content
 	 */
 	public static function serve($output) {
 
-		if (isset($_GET["flush"]) && Permission::check("ADMIN"))
+		if(isset($_GET["flush"]) && Permission::check("ADMIN"))
 			Notification::notify("Core", lang("cache_deleted"));
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::unmark("render");
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::mark("serve");
 
 		Core::callHook("serve", $output);
 
-		if (isset(self::$requestController))
-			$output = self::$requestController -> serve($output);
+		if(isset(self::$requestController))
+			$output = self::$requestController->serve($output);
 
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::unmark("serve");
 
 		Core::callHook("onBeforeServe", $output);
@@ -738,24 +686,22 @@ class Core extends object {
 
 	/**
 	 * renders the page
-	 *@name render
-	 *@access public
 	 */
 	public function render($url) {
 		self::$url = $url;
-		if (PROFILE)
+		if(PROFILE)
 			Profiler::mark("render");
 
 		// we will merge $_POST with $_FILES, but before we validate $_FILES
-		foreach ($_FILES as $name => $arr) {
-			if (is_array($arr["tmp_name"])) {
-				foreach ($arr["tmp_name"] as $tmp_file) {
-					if ($tmp_file && !is_uploaded_file($tmp_file)) {
+		foreach($_FILES as $name => $arr) {
+			if(is_array($arr["tmp_name"])) {
+				foreach($arr["tmp_name"] as $tmp_file) {
+					if($tmp_file && !is_uploaded_file($tmp_file)) {
 						throw new LogicException($tmp_file . " is no valid upload! Please try again uploading the file.");
 					}
 				}
 			} else {
-				if ($arr["tmp_name"] && !is_uploaded_file($arr["tmp_name"])) {
+				if($arr["tmp_name"] && !is_uploaded_file($arr["tmp_name"])) {
 					throw new LogicException($arr["tmp_name"] . " is no valid upload! Please try again uploading the file.");
 				}
 			}
@@ -766,15 +712,15 @@ class Core extends object {
 		krsort(Core::$rules);
 
 		// get  current controller
-		foreach (self::$rules as $priority => $rules) {
-			foreach ($rules as $rule => $controller) {
+		foreach(self::$rules as $priority => $rules) {
+			foreach($rules as $rule => $controller) {
 				$request = clone $orgrequest;
-				if ($args = $request -> match($rule, true)) {
-					if ($request -> getParam("controller")) {
-						$controller = $request -> getParam("controller");
+				if($args = $request->match($rule, true)) {
+					if($request->getParam("controller")) {
+						$controller = $request->getParam("controller");
 					}
 
-					if (!ClassInfo::exists($controller)) {
+					if(!ClassInfo::exists($controller)) {
 						ClassInfo::delete();
 						throw new LogicException("Controller $controller does not exist.");
 					}
@@ -783,8 +729,8 @@ class Core extends object {
 					self::$requestController = $inst;
 					self::$controller = array($inst);
 
-					$data = $inst -> handleRequest($request);
-					if ($data === false) {
+					$data = $inst->handleRequest($request);
+					if($data === false) {
 						continue;
 					}
 					self::serve($data);
@@ -798,7 +744,8 @@ class Core extends object {
 }
 
 /**
- * Controller for Dev-Mode of Goma-Framework. Handles stuff like rebuilding DB or building versions
+ * Controller for Dev-Mode of Goma-Framework. Handles stuff like rebuilding DB or
+ * building versions
  *
  * @package		Goma\Core
  * @version		2.0
@@ -807,8 +754,6 @@ class Dev extends RequestHandler {
 	/**
 	 * title of current view
 	 *
-	 *@name title
-	 *@access public
 	 */
 	public static $title = "Creating new Database";
 
@@ -819,8 +764,6 @@ class Dev extends RequestHandler {
 	/**
 	 * runs dev and redirects back to REDIRECT
 	 *
-	 *@name redirectToDev
-	 *@access public
 	 */
 	public static function redirectToDev() {
 		$_SESSION["dev_without_perms"] = true;
@@ -837,7 +780,7 @@ class Dev extends RequestHandler {
 
 		HTTPResponse::unsetCacheable();
 
-		if (!isset($_SESSION["dev_without_perms"]) && !Permission::check("ADMIN")) {
+		if(!isset($_SESSION["dev_without_perms"]) && !Permission::check("ADMIN")) {
 			makeProjectAvailable();
 
 			throw new PermissionException();
@@ -850,22 +793,18 @@ class Dev extends RequestHandler {
 	/**
 	 * serves data
 	 *
-	 *@name serve
-	 *@access public
 	 */
 	public function serve($content) {
 		$viewabledata = new ViewAccessableData();
-		$viewabledata -> content = $content;
-		$viewabledata -> title = self::$title;
+		$viewabledata->content = $content;
+		$viewabledata->title = self::$title;
 
-		return $viewabledata -> renderWith("framework/dev.html");
+		return $viewabledata->renderWith("framework/dev.html");
 	}
 
 	/**
 	 * sets chmod 0777 to the whole system
 	 *
-	 *@name setChmod777
-	 *@access public
 	 */
 	public function setChmod777() {
 		FileSystem::chmod(ROOT, 0777, false);
@@ -875,8 +814,6 @@ class Dev extends RequestHandler {
 	/**
 	 * returns if we are in dev-mode
 	 *
-	 *@name isDev
-	 *@access public
 	 */
 	public function isDev() {
 
@@ -897,7 +834,7 @@ class Dev extends RequestHandler {
 		Core::callHook("deleteCachesInDev");
 
 		// check if dev-without-perms, so redirect directly
-		if (isset($_SESSION["dev_without_perms"])) {
+		if(isset($_SESSION["dev_without_perms"])) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -929,7 +866,7 @@ class Dev extends RequestHandler {
 		define("DEV_BUILD", true);
 
 		// redirect if needed
-		if (isset($_SESSION["dev_without_perms"])) {
+		if(isset($_SESSION["dev_without_perms"])) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/builddev" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -961,12 +898,12 @@ class Dev extends RequestHandler {
 			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
 			<div><img src="images/success.png" height="16" alt="Success" />  Rebuilding Database...</div>';
 
-		if (defined("SQL_LOADUP")) {
+		if(defined("SQL_LOADUP")) {
 			// remake db
-			foreach (classinfo::getChildren("dataobject") as $value) {
+			foreach(classinfo::getChildren("dataobject") as $value) {
 				$obj = new $value;
 
-				$data .= nl2br($obj -> buildDB(DB_PREFIX));
+				$data .= nl2br($obj->buildDB(DB_PREFIX));
 			}
 		}
 
@@ -984,8 +921,8 @@ class Dev extends RequestHandler {
 		makeProjectAvailable();
 
 		// redirect if needed
-		if (isset($_GET["redirect"])) {
-			if (isset($_SESSION["dev_without_perms"])) {
+		if(isset($_GET["redirect"])) {
+			if(isset($_SESSION["dev_without_perms"])) {
 				unset($_SESSION["dev_without_perms"]);
 			}
 			HTTPResponse::redirect($_GET["redirect"]);
@@ -993,7 +930,7 @@ class Dev extends RequestHandler {
 		}
 
 		// redirect if needed
-		if (isset($_SESSION["dev_without_perms"])) {
+		if(isset($_SESSION["dev_without_perms"])) {
 			unset($_SESSION["dev_without_perms"]);
 			header("Location: " . ROOT_PATH);
 			Core::callHook("onBeforeShutDown");
@@ -1023,41 +960,37 @@ class Dev extends RequestHandler {
 	/**
 	 * builds a distributable of the application
 	 *
-	 *@name buildDistro
-	 *@access public
 	 */
 	public function buildDistro() {
 		self::$title = lang("distro_build");
-		return g_SoftwareType::listAllSoftware() -> renderWith("framework/buildDistro.html");
+		return g_SoftwareType::listAllSoftware()->renderWith("framework/buildDistro.html");
 	}
 
 	/**
 	 * builds an app-distro
 	 *
-	 *@name buildAppDistro
-	 *@access public
 	 */
 	public function buildAppDistro($name = null, $subname = null) {
-		if (!isset($name)) {
-			$name = $this -> getParam("name");
+		if(!isset($name)) {
+			$name = $this->getParam("name");
 		}
 
-		if (!isset($subname))
-			$subname = $this -> getParam("subname");
+		if(!isset($subname))
+			$subname = $this->getParam("subname");
 
 		self::$title = lang("distro_build");
 
-		if (!$name)
+		if(!$name)
 			return false;
 
-		if (ClassInfo::exists("G_" . $name . "SoftwareType") && is_subclass_of("G_" . $name . "SoftwareType", "G_SoftwareType")) {
+		if(ClassInfo::exists("G_" . $name . "SoftwareType") && is_subclass_of("G_" . $name . "SoftwareType", "G_SoftwareType")) {
 			$filename = call_user_func_array(array("G_" . $name . "SoftwareType", "generateDistroFileName"), array($subname));
-			if ($filename === false)
+			if($filename === false)
 				return false;
 			$file = ROOT . CACHE_DIRECTORY . "/" . $filename;
 
 			$return = call_user_func_array(array("G_" . $name . "SoftwareType", "buildDistro"), array($file, $subname));
-			if (is_string($return))
+			if(is_string($return))
 				return $return;
 
 			FileSystem::sendFile($file);
@@ -1070,38 +1003,36 @@ class Dev extends RequestHandler {
 	/**
 	 * cleans up versions
 	 *
-	 *@name cleanUpVersions
-	 *@access public
 	 */
 	public function cleanUpVersions() {
 		$log = "";
-		foreach (ClassInfo::getChildren("DataObject") as $child) {
-			if (ClassInfo::getParentClass($child) == "dataobject") {
+		foreach(ClassInfo::getChildren("DataObject") as $child) {
+			if(ClassInfo::getParentClass($child) == "dataobject") {
 				$c = new $child;
-				if (DataObject::versioned($child)) {
+				if(DataObject::versioned($child)) {
 
 					$baseTable = ClassInfo::$class_info[$child]["table"];
-					if (isset(ClassInfo::$database[$child . "_state"])) {
+					if(isset(ClassInfo::$database[$child . "_state"])) {
 						// first get ids NOT to delete
 
 						$recordids = array();
 						$ids = array();
 						// first recordids
 						$sql = "SELECT * FROM " . DB_PREFIX . $child . "_state";
-						if ($result = SQL::Query($sql)) {
-							while ($row = SQL::fetch_object($result)) {
-								$recordids[$row -> id] = $row -> id;
-								$ids[$row -> publishedid] = $row -> publishedid;
-								$ids[$row -> stateid] = $row -> stateid;
+						if($result = SQL::Query($sql)) {
+							while($row = SQL::fetch_object($result)) {
+								$recordids[$row->id] = $row->id;
+								$ids[$row->publishedid] = $row->publishedid;
+								$ids[$row->stateid] = $row->stateid;
 							}
 						}
 
 						$deleteids = array();
 						// now generate ids to delete
 						$sql = "SELECT id FROM " . DB_PREFIX . $baseTable . " WHERE id NOT IN('" . implode("','", $ids) . "') OR recordid NOT IN ('" . implode("','", $recordids) . "')";
-						if ($result = SQL::Query($sql)) {
-							while ($row = SQL::fetch_object($result)) {
-								$deleteids[] = $row -> id;
+						if($result = SQL::Query($sql)) {
+							while($row = SQL::fetch_object($result)) {
+								$deleteids[] = $row->id;
 							}
 						}
 
@@ -1109,15 +1040,15 @@ class Dev extends RequestHandler {
 
 						// first generate tables
 						$tables = array(ClassInfo::$class_info[$child]["table"]);
-						foreach (ClassInfo::dataClasses($child) as $class => $table) {
-							if ($baseTable != $table && isset(ClassInfo::$database[$table])) {
+						foreach(ClassInfo::dataClasses($child) as $class => $table) {
+							if($baseTable != $table && isset(ClassInfo::$database[$table])) {
 								$tables[] = $table;
 							}
 						}
 
-						foreach ($tables as $table) {
+						foreach($tables as $table) {
 							$sql = "DELETE FROM " . DB_PREFIX . $table . " WHERE id IN('" . implode("','", $deleteids) . "')";
-							if (SQL::Query($sql))
+							if(SQL::Query($sql))
 								$log .= '<div><img src="images/success.png" height="16" alt="Loading..." /> Delete versions of ' . $table . '</div>';
 							else
 								$log .= '<div><img src="images/16x16/del.png" height="16" alt="Loading..." /> Failed to delete versions of ' . $table . '</div>';
@@ -1135,9 +1066,9 @@ class Dev extends RequestHandler {
 	 * test-implementation
 	 */
 	public function test() {
-		if (DEV_MODE) {
+		if(DEV_MODE) {
 			$c = new GomaTestController();
-			return $c -> handleRequest($this -> request);
+			return $c->handleRequest($this->request);
 		} else {
 			return false;
 		}
@@ -1184,7 +1115,7 @@ function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwD
 function throwErrorById($code) {
 	$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 	$codes = array(1 => array('name' => 'Security Error', 'details' => '', "status_code" => 500), 2 => array('name' => 'Security Error', 'details' => 'Ip banned! Please wait 60 seconds!', "status_code" => 403), 3 => array('name' => $GLOBALS['lang']['mysql_error_small'], 'details' => $GLOBALS['lang']['mysql_error'] . $sqlerr, "status_code" => 500), 4 => array('name' => $GLOBALS['lang']['mysql_connect_error'], 'details' => $sqlerr, "status_code" => 500), 5 => array('name' => $GLOBALS['lang']['less_rights'], 'details' => '', "status_code" => 403), 6 => array('name' => "PHP-Error", 'details' => "", "status_code" => 500), 7 => array('name' => 'Service Unavailable', 'details' => 'The Service is currently not available', "status_code" => 503), );
-	if (isset($codes[$code])) {
+	if(isset($codes[$code])) {
 		HTTPresponse::setResHeader($codes[$code]["status_code"]);
 		Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details']);
 	} else {

@@ -94,6 +94,8 @@ if(typeof goma.ui == "undefined") {
 			
 		}
 		
+		var flexBoxes = [];
+		
 		$(function() {	
 			$.extend(goma.ui, {
 				/**
@@ -117,7 +119,66 @@ if(typeof goma.ui == "undefined") {
 			}
 			
 			window.onbeforeunload = goma.ui.fireUnloadEvents;
+			
+			$(window).resize(function(){
+				for(i in flexBoxes) {
+					updateFlexHeight($(flexBoxes[i]));
+				}
+			});
 		});
+		
+		/**
+		 * this is the algorythm to calculate the 100% size of a box.
+		*/
+		var updateFlexHeight = function($container) {
+			if(typeof $container == "undefined" || typeof $container.html() == "undefined") {
+				return false;
+			}
+			
+			if($container.css("display") == "inline") {
+				throw new Error("inline-elements are not allowed for flex-boxing.");
+				return false;
+			}
+			
+			$container.css("height", "");
+			$container.css({"height": "0px !important", "display": "none"});
+			
+			// first make sure that the parent element is a Flex-Box
+			if(!(maxHeight = updateFlexHeight($container.parent()))) {
+				$container.css({"display": ""});
+				$container.css("height", "100%");
+				return $container.height();
+			}
+			
+			if(typeof $container.attr("id") == "undefined") {
+				$container.attr("id", randomString(10));
+			}
+			
+			$container.css({"display": ""});
+			
+			// now calulate other elements' height
+			var inFloat = false;
+			$container.parent().find(" > *").each(function(){
+				if(inFloat && $(this).css("clear") == "both" || $(this).css("clear") == inFloat) {
+					inFloat = false;
+				}
+				
+				if($(this).attr("id") != $container.attr("id") && $(this).css("float") != "left" && $(this).css("float") != "right" && !inFloat && $(this).css("display") != "none") {
+					maxHeight = maxHeight - $(this).outerHeight(true);
+				}
+				
+				if($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
+					inFloat = $(this).css("float");
+				}
+			});
+			
+			// calculate the padding and border
+			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
+			
+			$container.css("height", maxHeight);
+			
+			return maxHeight;
+		};
 		
 		// build module
 		return {
@@ -131,6 +192,25 @@ if(typeof goma.ui == "undefined") {
 			 * defines if we are in backend
 			*/
 			is_backend: false,
+			
+			/**
+			 * registers a flex-box. A flex-box is a box, which have to be as high as the window minus some elements around. 
+			 * it calculates the correct elements around automatically.
+			 *
+			 * @access public
+			 * @param jquery-object
+			*/
+			addFlexBox: function($container) {
+				flexBoxes.push($container);
+				updateFlexHeight($($container));
+			},
+			
+			/**
+			 * fires an update for flex-boxes
+			*/
+			updateFlexBoxes: function() {
+				$(window).resize();
+			},
 			
 			/**
 			 * sets the main-content where to put by default content from ajax-requests
@@ -1176,28 +1256,29 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
-				if(originalOptions.type == "post" && originalOptions.async != false) {
-					jqXHR.fail(function(){
-						if(jqXHR.textStatus == "timeout") {
-							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
-						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
-						} else {
-							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
-						}
-					});
-				} else {
-					jqXHR.fail(function(){
-						
-						if(jqXHR.textStatus == "timeout") {
-							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
-						} else if(jqXHR.textStatus == "abort") {
-							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
-						} else {
-							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
-						}
-					});
-				}
+				if(originalOptions.silence != true)
+					if(originalOptions.type == "post" && originalOptions.async != false) {
+						jqXHR.fail(function(){
+							if(jqXHR.textStatus == "timeout") {
+								alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
+							} else if(jqXHR.textStatus == "abort") {
+								alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
+							} else {
+								alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
+							}
+						});
+					} else {
+						jqXHR.fail(function(){
+							
+							if(jqXHR.textStatus == "timeout") {
+								alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
+							} else if(jqXHR.textStatus == "abort") {
+								alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
+							} else {
+								alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
+							}
+						});
+					}
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);

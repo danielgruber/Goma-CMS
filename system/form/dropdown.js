@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 01.06.2013
+  * last modified: 01.07.2013
 */
 
 var DropDown = function(id, url, multiple) {
@@ -166,7 +166,7 @@ DropDown.prototype = {
 				//$this.widget.find(" > .field").css({height: ""});
 				$this.widget.find(" > .dropdown").fadeIn(200);
 				$this.setField(fieldhtml);
-				var width = $this.widget.find(" > .field").outerWidth(false);
+				var width = $this.widget.find(" > .field").outerWidth(false) - ($this.widget.find(" > .dropdown").outerWidth(false) - $this.widget.find(" > .dropdown").width());
 				$this.widget.find(" > .dropdown").css({ width: width});
 				$this.widget.find(" > .dropdown .search").focus();
 			});

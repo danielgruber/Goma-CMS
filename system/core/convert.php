@@ -1,29 +1,22 @@
 <?php
-/**
- * @package		Goma\System\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
-
 defined("IN_GOMA") OR die();
 
 /**
- * This class is a collection of text converting methods.
+ * This contains some text converting methods.
  *
- * @package		Goma\System\Core
- * @version		1.3.1
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Framework
+ * @version 1.3.1
  */
 class Convert extends Object {
 	/**
 	 * converts raw-code to js
-	 *@name raw2js
-	 *@access public
 	 *@param string - raw
 	 */
 	static function raw2js($str) {
-		if (is_array($str)) {
-			foreach ($str as $k => $v)
+		if(is_array($str)) {
+			foreach($str as $k => $v)
 				$str[$k] = self::raw2js($v);
 			return $str;
 		} else {
@@ -33,16 +26,14 @@ class Convert extends Object {
 
 	/**
 	 * converts raw to sql
-	 *@name raw2sql
-	 *@access public
 	 */
 	static function raw2sql($str) {
-		if (is_array($str)) {
-			foreach ($str as $k => $v)
+		if(is_array($str)) {
+			foreach($str as $k => $v)
 				self::raw2sql($v);
 			return $str;
 		} else {
-			if (function_exists("get_magic_quotes_gpc") && get_magic_quotes_gpc()) {
+			if(function_exists("get_magic_quotes_gpc") && get_magic_quotes_gpc()) {
 				return sql::escape_string(stripslashes($str));
 			}
 			$str = sql::escape_string($str);
@@ -53,12 +44,10 @@ class Convert extends Object {
 	/**
 	 * converts raw to text with correct Lines
 	 *
-	 *@name raw2xmlLines
-	 *@access public
 	 */
 	static function raw2xmlLines($val) {
-		if (is_array($val)) {
-			foreach ($val as $k => $v)
+		if(is_array($val)) {
+			foreach($val as $k => $v)
 				$val[$k] = self::raw2xmlLines($v);
 			return $val;
 		} else {
@@ -67,13 +56,15 @@ class Convert extends Object {
 	}
 
 	/**
-	 * converts raw to xml
-	 *@name raw2xml
-	 *@access public
+	 * Makes a string or array of strings XML suitable.
+	 *
+	 * @param string $val Input Text
+	 *
+	 * @return string XML suitable string.
 	 */
 	static function raw2xml($val) {
-		if (is_array($val)) {
-			foreach ($val as $k => $v)
+		if(is_array($val)) {
+			foreach($val as $k => $v)
 				$val[$k] = self::raw2xml($v);
 			return $val;
 		} else {
@@ -82,7 +73,13 @@ class Convert extends Object {
 	}
 
 	/**
-	 * raw2xml alias
+	 * Alias for Convert::raw2xml().
+	 *
+	 * @see Convert::raw2xml()
+	 *
+	 * @param string $val Input Text
+	 *
+	 * @return string XML suitable string.
 	 */
 	static function raw2text($val) {
 		return self::raw2xml($val);
@@ -130,8 +127,8 @@ class Convert extends Object {
 	 *@access public
 	 */
 	static function raw2url($val) {
-		if (is_array($val)) {
-			foreach ($url as $k => $v)
+		if(is_array($val)) {
+			foreach($url as $k => $v)
 				$url[$k] = self::raw2url($v);
 			return $val;
 		} else {
@@ -146,8 +143,8 @@ class Convert extends Object {
 	 *@access public
 	 */
 	static function url2raw($val) {
-		if (is_array($val)) {
-			foreach ($url as $k => $v)
+		if(is_array($val)) {
+			foreach($url as $k => $v)
 				$url[$k] = self::url2raw($v);
 			return $val;
 		} else {

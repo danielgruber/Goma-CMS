@@ -14,11 +14,18 @@ var LaM_type_timeout;
 
 (function($, w){
 	$(function(){
+		// first modify out view-controller in javascript.
 		goma.ui.setMainContent($("#content > .content_inner table td.main > .inner"));
 		
+		// make it visible.
 		$(".leftandmaintable").css("display", "");
 		
-		// searchfield bindings
+		// add flex-boxes
+		goma.ui.addFlexBox($(".leftandmaintable .LaM_tabs .treewrapper"));
+		goma.ui.addFlexBox(".leftandmaintable form .fieldsScroll");
+		goma.ui.addFlexBox(".leftandmaintable .main .inner");
+		
+		//! searchfield bindings
 		$(".treesearch form").submit(function(){
 			updateWithSearch($(this));
 			return false;
@@ -29,6 +36,8 @@ var LaM_type_timeout;
 			return false;
 		});
 		
+		
+		//! leftbar
 		$(document).on("click touchend", ".leftbar_toggle", function(){
 			if($(this).hasClass("active")) {
 				$(this).removeClass("active");
@@ -41,7 +50,7 @@ var LaM_type_timeout;
 				$(".leftandmaintable .left").removeClass("not_active");
 				$(".leftandmaintable .left").addClass("active");
 			}
-			renderSideBar();
+			goma.ui.updateFlexBoxes();
 			return false;
 		});
 		
@@ -53,6 +62,8 @@ var LaM_type_timeout;
 			}
 		}, 100);
 		
+		
+		//! history
 		if(getInternetExplorerVersion() > 7 || getInternetExplorerVersion() == -1) {
 			gloader.load("history");
 			HistoryLib.bind(function(url){
@@ -67,7 +78,6 @@ var LaM_type_timeout;
 					data: {"ajaxfy": true}
 				}).done(function(html, node, request) {
 					$("#content .success, #content .error, #content .notice").hide("fast");
-					renderSideBar();
 					$(".tree .marked").removeClass("marked");
 					$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
 					
@@ -98,9 +108,7 @@ var LaM_type_timeout;
 			});
 		}
 		
-		/**
-		 * tree-events
-		*/
+		//! tree-events
 		$(".treesearch form input[type=text]").keyup(function(){
 			self.LaM_current_text = $(this).val();
 			clearTimeout(self.LaM_type_timeout);
@@ -118,14 +126,21 @@ var LaM_type_timeout;
 			}
 		});
 		
-		// sort
+		// bindings
+		setTimeout(function(){
+			// bind now!
+			tree_bind_ajax(sort, $(".left div.tree ul"));
+		}, 150);
+		
+		
+		//! sort
 		if(	$(".treesearch form input[type=text]").val() == "" || $(".treesearch form input[type=text]").val() == lang("search", "Search...")) {
 			var sort = true;
 		} else {
 			var sort = false;
 		}
 		
-		// legend
+		//! legend
 		$(".legend").find(":checkbox").each(function(){
 			if(!$(this).prop("disabled")) {
 				$(this).click(function(){
@@ -134,97 +149,38 @@ var LaM_type_timeout;
 			}
 		});
 		
-		setTimeout(function(){
-			// bind now!
-			tree_bind_ajax(sort, $(".left div.tree ul"));
-		}, 150);
-		
-		/**
-		 * rendering of the whole page via javascript
-		*/
-		var renderSideBar = function() {
-			if($(".leftbar_toggle").css("display") != "none")
-				var tableHeight = $(window).height() - $("#header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight() - $(".leftbar_toggle").outerHeight(true);
-			else
-				var tableHeight = $(window).height() - $("#header").outerHeight() - $("#content > .addcontent").outerHeight() - $("#head").outerHeight();
-			if(tableHeight < 405)
-				tableHeight = 405;
-				
-			
-			$(".left-and-main").css("min-height", tableHeight);
-			$(".left-and-main > table").css("height", tableHeight);
-			
-			// set height for main-area
-			OuterDiff = $(".left-and-main > table td.main > .inner").outerHeight() - $(".left-and-main > table td.main > .inner").height();
-			$(".left-and-main > table td.main > .inner").css("height", tableHeight - OuterDiff);
-			
-			// render fixed actions
-			if($(".left-and-main > table td.main > .inner > form > .fields").length > 0 && $(".left-and-main > table td.main > .inner > form > .actions").length > 0) {
-				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
-				$(".left-and-main > table td.main > .inner > form > .fields").outerHeight(tableHeight - OuterDiff - $(".left-and-main > table td.main > .inner > form > .actions").outerHeight(true) - $(".left-and-main > table td.main > .inner > form > .error").outerHeight(true));
-				$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
-			}
-			
-			// set height for sidebar
-			var otherSideBar = $(".leftandmaintable tr > .left > .LaM_tabs > ul").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree > .treesearch").outerHeight() + $(".leftandmaintable tr > .left > .LaM_tabs > .tree .legend").outerHeight() + 15;
-			$(".leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper").css("height", tableHeight - otherSideBar - 30);
-			
-			if($(".headBar .leftbar_toggle").length > 0) {
-				$(".main > .leftbar_toggle").css("display", "none");
-			} else {
-				$(".main > .leftbar_toggle").css("display", "block");
-			}
-		}
-		
-		window.renderLeftSideBar = renderSideBar;
-		
-		$(window).resize(renderSideBar);
-		setTimeout(renderSideBar, 10)
-		
+		//! UI
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			jqXHR.done(function(){
-				setTimeout(renderSideBar, 1);
+				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
+				$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
+				setTimeout(goma.ui.updateFlexBoxes, 1);
 			});
 		});
 		
 		/**
 		 * tab-rendering
 		*/
-		$(".left-and-main .LaM_tabs > ul.tabArea > li > a").click(function(){
-			if($(".left-and-main .LaM_tabs").find("." + $(this).attr("class")).length > 0) {
-
-				$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
-				$(".left-and-main .LaM_tabs > div").css("display", "none");
-				$(".left-and-main .LaM_tabs").find("div." + $(this).attr("class")).css("display", "block");
-				$(this).parent().addClass("active");
-				if(typeof HistoryLib.push == "function")
-					HistoryLib.push($(this).attr("href"));
-			
-				renderSideBar();
-				
-				goma.ui.ajax(undefined, {
-					url: $(this).attr("href"),
-					data: {"ajaxfy": true}
-				}).done(function(){
-					$("#content .success, #content .error, #content .notice").hide("fast");
-					renderSideBar();
-					$("div.tree .marked").removeClass("marked");
-					$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
-												
-					// find optimal scroll by position of active element
-					if($(".treewrapper").find(".marked").length > 0) {
-						var oldscroll = $(".treewrapper").scrollTop();
+		$(".left-and-main a.create").click(function(){
+			goma.ui.ajax(undefined, {
+				url: $(this).attr("href"),
+				data: {"ajaxfy": true}
+			}).done(function(){
+				$("#content .success, #content .error, #content .notice").hide("fast");
+				$("div.tree .marked").removeClass("marked");
+											
+				// find optimal scroll by position of active element
+				if($(".treewrapper").find(".marked").length > 0) {
+					var oldscroll = $(".treewrapper").scrollTop();
+					$(".treewrapper").scrollTop(0);
+					var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
+					if(pos > 0) {
+						$(".treewrapper").scrollTop(oldscroll);
+						$(".treewrapper").scrollTop(pos);
+					} else
 						$(".treewrapper").scrollTop(0);
-						var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-						if(pos > 0) {
-							$(".treewrapper").scrollTop(oldscroll);
-							$(".treewrapper").scrollTop(pos);
-						} else
-							$(".treewrapper").scrollTop(0);
-					}
-				});
-				
-			}
+				}
+			});
 			return false;
 		});
 	});
@@ -442,7 +398,6 @@ var LaM_type_timeout;
 				}
 				
 				$("#content .success, #content .error, #content .notice").hide("fast");
-				renderLeftSideBar();
 				self.marked_node = $this.attr("nodeid");
 				$(".tree .marked").removeClass("marked");
 				$this.parent().parent().addClass("marked");

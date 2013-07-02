@@ -9,7 +9,7 @@
 body, html {
 	color: #222;
 	font-family: Helvetica, Arial, Verdana;
-	font-size: 10pt;
+	font-size: 11pt;
 	height: 100%;
 }
 
@@ -48,10 +48,9 @@ a:hover {
 }
 
 #wrapper {
-	min-height: 100%;
-	min-width: 100%;
-	position: absolute;
+	height: 100%;
 }
+
 #header h1 {
 	margin: 0;
 	text-transform: capitalize;
@@ -70,11 +69,11 @@ a:hover {
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
 	color: #ccc;
 	width: 100%;
-	height: 51px;
+	height: 3.5em;
 }
 #navi {
-	height: 51px;
-	padding-left: 7px;
+	height: 3.5em;
+	padding-left: 0.5em;
 	float: left;
 }
 #navi ul {
@@ -94,7 +93,7 @@ a:hover {
 }
 #navi span {
 	display: block;
-	padding: 18px 15px;
+	padding: 1.25em 1em;
 	color: #ddd;
 	font-weight: bold;
 }
@@ -114,7 +113,7 @@ a:hover {
 	position: absolute;
 	z-index: 950;
 	left: -2px;
-	top: 51px;
+	top: 3.5em;
 	background: #fff;
 	min-width: 100px;
 	color: #000;
@@ -221,10 +220,9 @@ a:hover {
 #head {
 	position: relative;
 	background: #eee;
-	border-bottom: 1px solid #fff;
 }
 #head_inner {
-	border-bottom: 1px solid #aaa;
+	border-bottom: 1px solid #ccc;
 	padding: 1px;
 }
 #head #logo {
@@ -250,10 +248,12 @@ a:hover {
 	color: #444;
 	text-transform: capitalize;
 }
+
+/* begin content */
 #content {
 	z-index: 1;
 	min-width: 100%;
-	min-height: 100%;
+	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -268,8 +268,8 @@ a:hover {
 	min-width: 640px;
 }
 #content .content_container {
-	margin-top: 10px;
-	margin-bottom: 10px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
 	border: 1px solid #bbb;
 	background: #f5f5f5;
 }
@@ -277,29 +277,21 @@ a:hover {
 	color: #444;
 	text-align: left;
 	margin: 0;
-	padding: 10px;
-	padding-bottom: 5px;
-	font-size: 13px;
-	-webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	text-transform: capitalize;
+	padding: 0.5em;
+	font-size: 1.25em;
+	line-height: 1.5em;
+
 }
 #content .content_container > div {
-	padding: 5px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
+	padding: 0.25em;
 }
-#content .content_container > div a {
-	padding: 10px;
+#content #overview .content_container > div a {
+	padding: 0.5em;
 	display: inline-block
 }
 
 #content .adminContent {
-	padding: 10px;
+	padding: 0.5em;
 }
 
 .flot-base {
@@ -311,32 +303,36 @@ a:hover {
 }
 #plot-container {
 	height: 100%;
-	min-height: 250px;
-	margin: 15px;
+	min-height: 18em;
+	margin: 0.5em;
 }
 #plot-container .loading {
-	width: 100px;
+	width: 10em;
 	display: block;
 	margin: auto;
 	padding-top: 100px;
 }
 #plot-container .legend > div, #plot-container .legend > table {
 	background: none !important;
-	margin-top: -50px;
+	margin-top: -5em;
+	margin-right: -2em;
+}
+#plot-container .legend .legendLabel {
+	font-size: 1.25em;
 }
 #plot-navigation {
 	position: absolute;
 	right: 140px;
-	top: 5px;
+	top: -5px;
 }
 #plot-navigation ul {
 	list-style: none;
+	margin: 10px;
+	padding: 0;
+	
 	border: 1px solid #24ACB8;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
-	-moz-border-radius: 5px;
-	margin: 0;
-	padding: 0;
 }
 #plot-navigation ul li {
 	display: inline-block;
@@ -345,7 +341,7 @@ a:hover {
 }
 #plot-navigation ul li a {
 	display: block;
-	padding: 6px 8px !important;
+	padding: 0.5em !important;
 	
 	-webkit-transition: all linear 0.2s;
 	-moz-transition: all linear 0.2s;
@@ -357,6 +353,7 @@ a:hover {
 	padding-left: 10px !important;
 }
 #plot-navigation ul li a.active {
+	
 	background: #24ACB8;
 	color: #eee;
 }
@@ -694,38 +691,44 @@ select {
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #9f9f9f;
+	border: 1px solid #bbb;
 	margin: 3px;
+    background: #eee;
 }
 select:focus {
-	-moz-box-shadow: 0 0 8px #999;
+	/*-moz-box-shadow: 0 0 8px #999;
 	-webkit-box-shadow: 0 0 8px #999;
 	box-shadow: 0 0 8px #999;
-	border-color: #999 !important;
+	border-color: #999 !important;*/
 }
 textarea, input[type=text], input[type=password] {
 	padding: 4px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #aaa;
 	margin: 3px;
+    
+    /*border: 1px solid #aaa;
 	-webkit-transition: all 0.2s linear;
 	-moz-transition: all 0.2s linear;
 	-o-transition: all 0.2s linear;
 	-ms-transition: all 0.2s linear;
-	background: #f5f5f5 url(images/input_bg.png) repeat-x;
+	background: #f5f5f5 url(images/input_bg.png) repeat-x;*/
+    background: #eee;
+    border: 1px solid #bbb;
 }
 textarea:hover, input[type=text]:hover, input[type=password]:hover {
-	border: 1px solid #888;
+	/*border: 1px solid #888;*/
 }
 textarea:focus, input[type=text]:focus, input[type=password]:focus {
-	-moz-box-shadow: 0 0 10px #999;
+	/*-moz-box-shadow: 0 0 10px #999;
 	-webkit-box-shadow: 0 0 10px #999;
 	box-shadow: 0 0 10px #999;
 	border-color: #888 !important;
-	outline-width: 0;
+	outline-width: 0;*/
+    outline: none;
 }
+
 
 .form_field {
 	padding: 12px;
@@ -1183,6 +1186,33 @@ form h2 {
 }
 .weblink .pageTitle {
 	color: #555;
+}
+
+#history {
+	display: none;
+}
+
+@media only screen and (min-width: 1200px) {
+	#history {
+		background: #fff url(../../../images/icons/modernui/halfdark/48x48/appbar.timer.forward.png) no-repeat 250px -5px;
+		min-height: 400px;
+		display: block;
+		float: right;
+		width: 300px;
+		height: 100%;
+		overflow: hidden;
+		border-left: 1px solid #ccc;
+		margin-top: -11px;
+	}
+	#history > div {
+		overflow: auto;
+	}
+	#overview {
+		margin-right: 320px;
+	}
+	#userbar-history.overview {
+		display: none;
+	}
 }
 
 @media print {
