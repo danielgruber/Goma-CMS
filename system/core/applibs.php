@@ -158,6 +158,9 @@ function session_store($key, $data) {
 /**
  * Accesses session data.
  *
+ * Because storing many data in a session is slow, the data is stored in a file.
+ * This data can be accessed with an ID, that is stored in the session instead.
+ *
  * @see session_restore() to store data in a session.
  *
  * @param string $key Data identification key
@@ -336,6 +339,18 @@ function goma_date($format, $date = NOW) {
 	return $str;
 }
 
+/**
+ * Places a file in the application folder, that indicates Goma, that this
+ * project is unavailable.
+ *
+ * @see makeProjectAvailable() to enable projects.
+ * @see isProjectUnavailable() to check, if a project is disabled.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function makeProjectUnavailable($project = APPLICATION) {
 	if(!file_put_contents(ROOT . "503." . md5(basename($project)) . ".goma", $_SERVER["REMOTE_ADDR"])) {
 		die("Could not make project unavailable.");
@@ -343,18 +358,47 @@ function makeProjectUnavailable($project = APPLICATION) {
 	chmod(ROOT . "503." . md5(basename($project)) . ".goma", 0777);
 }
 
+/**
+ * Removes the project unavailable file, that indicates Goma, that this project
+ * is unavailable.
+ *
+ * @see makeProjectUnavailable() to disable projects.
+ * @see isProjectUnavailable() to check, if a project is disabled.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function makeProjectAvailable($project = APPLICATION) {
 	if(file_exists(ROOT . "503." . md5(basename($project)) . ".goma")) {
 		@unlink(ROOT . "503." . md5(basename($project)) . ".goma");
 	}
 }
 
+/**
+ * Checks, if a project is unavailable.
+ *
+ * @see makeProjectUnavailable() to disable projects.
+ * @see makeProjectAvailable() to enable projects.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function isProjectUnavailable($project = APPLICATION) {
 	return (file_exists(ROOT . "503." . md5(basename($project)) . ".goma") && filemtime(ROOT . "503." . md5(basename($project)) . ".goma") > NOW - 10);
 }
 
 /**
- * rewrites the Application-Configuration
+ * Writes the system configuration.
+ *
+ * @see writeProjectConfig() to write the config for a project.
+ *
+ * @param array[] $data An array with configuration variables.
+ *
+ * @return void
  */
 function writeSystemConfig($data = array()) {
 
@@ -397,10 +441,9 @@ function writeSystemConfig($data = array()) {
 }
 
 /**
- * gets the SSL-public Key
+ * Returns the SSL public key of the installation.
  *
- *@name getPublicKey
- *@access public
+ * @return string SSL public key
  */
 function getSSLPublicKey() {
 	if(!file_exists(ROOT . "_config.php")) {
@@ -413,10 +456,9 @@ function getSSLPublicKey() {
 }
 
 /**
- * gets the SSL-private Key
+ * Returns the SSL private key of the installation.
  *
- *@name getPublicKey
- *@access public
+ * @return string SSL private key
  */
 function getSSLPrivateKey() {
 	if(!file_exists(ROOT . "_config.php")) {
@@ -429,10 +471,14 @@ function getSSLPrivateKey() {
 }
 
 /**
- * rewrites the project-config
+ * Writes the config of a project.
  *
- *@name writeProjectConfig
- *@access public
+ * @see writeSystemConfig() to write the system config.
+ *
+ * @param array[] $data An array with configuration variables.
+ * @param string $project Name of the project, default is CURRENT_PROJECT.
+ *
+ * @return void
  */
 function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 
@@ -443,7 +489,12 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 		include ($config);
 		$defaults = (array)$domaininfo;
 	} else {
-		$defaults = array("status" => 1, "date_format" => "d.m.Y - H:i", "timezone" => DEFAULT_TIMEZONE, "lang" => DEFAULT_LANG);
+		$defaults = array(
+			"status" => 1,
+			"date_format" => "d.m.Y - H:i",
+			"timezone" => DEFAULT_TIMEZONE,
+			"lang" => DEFAULT_LANG
+		);
 	}
 
 	$new = array_merge($defaults, $data);
@@ -472,10 +523,9 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 }
 
 /**
- * gets the private Key
+ * Gets the private key of the installation.
  *
- *@name getPrivateKey
- *@access public
+ * @return string 15 chars private key
  */
 function getPrivateKey() {
 	if(!file_exists(ROOT . "_config.php")) {
@@ -487,10 +537,7 @@ function getPrivateKey() {
 	return $privateKey;
 }
 
-/**
- * project-management
- *
- */
+/******************** project management ********************/
 
 /**
  * sets a project-folder in the project-stack
