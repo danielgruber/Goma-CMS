@@ -162,7 +162,7 @@ if(typeof goma.ui == "undefined") {
 					inFloat = false;
 				}
 				
-				if($(this).attr("id") != $container.attr("id") && $(this).css("float") != "left" && $(this).css("float") != "right" && !inFloat && $(this).css("display") != "none" && $(this).get(0).tagName.toLowerCase() != "td") {
+				if($(this).attr("id") != $container.attr("id") && $(this).css("float").toLowerCase() != "left" && $(this).css("float").toLowerCase() != "right" && !inFloat && $(this).css("display").toLowerCase() != "none" && $(this).get(0).tagName.toLowerCase() != "td" && $(this).css("position").toLowerCase() != "absolute" && $(this).css("position").toLowerCase() != "fixed") {
 					maxHeight = maxHeight - $(this).outerHeight(true);
 				}
 				
