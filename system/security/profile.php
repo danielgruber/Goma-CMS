@@ -112,7 +112,7 @@ class ProfileController extends FrontedController {
 			member::doLogout();
 		// if a user goes to login and is logged in, we redirect him home
 		} else if(member::login()) {
-			HTTPResponse::redirect(getRedirection(true));
+			HTTPResponse::redirect(getRedirect(true));
 		}
 			
 			

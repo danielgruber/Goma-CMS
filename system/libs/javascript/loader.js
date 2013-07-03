@@ -141,7 +141,6 @@ if(typeof goma.ui == "undefined") {
 			}
 			
 			$container.css("height", "");
-			$container.css({"height": "0px !important", "display": "none"});
 			
 			// first make sure that the parent element is a Flex-Box
 			if(!(maxHeight = updateFlexHeight($container.parent()))) {
@@ -163,7 +162,7 @@ if(typeof goma.ui == "undefined") {
 					inFloat = false;
 				}
 				
-				if($(this).attr("id") != $container.attr("id") && $(this).css("float") != "left" && $(this).css("float") != "right" && !inFloat && $(this).css("display") != "none") {
+				if($(this).attr("id") != $container.attr("id") && $(this).css("float") != "left" && $(this).css("float") != "right" && !inFloat && $(this).css("display") != "none" && $(this).get(0).tagName.toLowerCase() != "td") {
 					maxHeight = maxHeight - $(this).outerHeight(true);
 				}
 				

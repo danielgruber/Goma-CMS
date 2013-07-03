@@ -36,6 +36,7 @@ var LaM_type_timeout;
 			return false;
 		});
 		
+		updateSidebarToggle();
 		
 		//! leftbar
 		$(document).on("click touchend", ".leftbar_toggle", function(){
@@ -147,15 +148,6 @@ var LaM_type_timeout;
 					reloadTree();
 				});
 			}
-		});
-		
-		//! UI
-		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-			jqXHR.done(function(){
-				$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
-				$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
-				setTimeout(goma.ui.updateFlexBoxes, 1);
-			});
 		});
 		
 		/**
@@ -356,6 +348,19 @@ var LaM_type_timeout;
 		});
 	});
 	
+	var updateSidebarToggle = function() {
+		if($("#content > .content_inner table td.main > .inner .leftbar_toggle").length > 0) {
+			$("#content > .content_inner table td.main > .leftbar_toggle").css("display", "none");
+		} else {
+			$("#content > .content_inner table td.main > .leftbar_toggle").css("display", "");
+		}
+		
+		$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
+		$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
+		
+		goma.ui.updateFlexBoxes();
+	};
+	
 	// function to load content of a tree-item
 	w.LoadTreeItem = function (id) {
 
@@ -370,23 +375,13 @@ var LaM_type_timeout;
 			return true;
 		}
 		
-		// delay a bit to have enough resources for UI to draw
 		setTimeout(function(){
-			
 			goma.ui.ajax(undefined, {
 				beforeSend: function() {
 					$this.addClass("loading");
 					$this.parent().parent().addClass("marked");
 					if(typeof HistoryLib.push == "function")
 						HistoryLib.push($this.attr("href"));
-					
-					// switch to tree-tab if necessary
-					if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-						$(".left-and-main .LaM_tabs > ul > li.active").removeClass("active");
-						$(".left-and-main .LaM_tabs > div").css("display", "none");
-						$(".left-and-main .LaM_tabs").find("div.tree").css("display", "block");
-						$(".left-and-main .LaM_tabs").find("a.tree").parent().addClass("active");
-					}
 				},
 				url: $this.attr("href"),
 				data: {"ajaxfy": true}
@@ -402,7 +397,8 @@ var LaM_type_timeout;
 				$(".tree .marked").removeClass("marked");
 				$this.parent().parent().addClass("marked");
 				$this.removeClass("loading");
-				$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
+				
+				
 				// find optimal scroll by position of active element
 				if($(".treewrapper").find(".marked").length > 0) {
 					var oldscroll = $(".treewrapper").scrollTop();
@@ -414,9 +410,12 @@ var LaM_type_timeout;
 					} else
 						$(".treewrapper").scrollTop(0);
 				}
+				
+				updateSidebarToggle();
 			});
 			
 		}, 100);
+		
 		return false;
 	}
 })(jQuery, window);

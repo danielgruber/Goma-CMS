@@ -294,39 +294,6 @@ function getRedirect($parentDir = false) {
 }
 
 /**
- * Gets the redirect.
- *
- * @param boolean $parentDir Get only the name of the parent directory in the
- * url.
- *
- * @return string
- */
-function getRedirection($parentDir = true) {
-	if($parentDir) {
-		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
-			return convert::raw2text($_GET["redirect"]);
-		} else if(isset($_POST["redirect"]) && $_POST["redirect"]) {
-			return convert::raw2text($_POST["redirect"]);
-		} else {
-			if(URLEND == "/") {
-				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
-			} else {
-				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
-			}
-		}
-	} else {
-		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
-			return convert::raw2text($_GET["redirect"]);
-		} else if(isset($_POST["redirect"]) && $_POST["redirect"]) {
-			return convert::raw2text($_POST["redirect"]);
-		} else {
-			return BASE_URI . BASE_SCRIPT;
-		}
-	}
-}
-
-/**
  * generates a translated date
  */
 function goma_date($format, $date = NOW) {

@@ -473,7 +473,7 @@ class livecounter extends DataObject
 					"end" 		=> $current + $timePerPoint,
 					"flotEnd"	=> ($current + $timePerPoint) * 1000,
 					"visitors"	=> DataObject::count("livecounter", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0'),
-					"hits"		=> ($hitCount != 0) ? $hitCount : null
+					"hits"		=> $hitCount
 				));
 				
 				$current += $timePerPoint;
