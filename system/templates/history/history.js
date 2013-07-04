@@ -22,6 +22,7 @@
 			// load data from server
 			$.ajax({
 				url: older.attr("href"),
+				silence: true,
 				success: function(html) {
 					
 					// prase data

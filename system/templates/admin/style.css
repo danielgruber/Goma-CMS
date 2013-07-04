@@ -9,7 +9,8 @@
 body, html {
 	color: #222;
 	font-family: Helvetica, Arial, Verdana;
-	font-size: 11pt;
+	font-size: 12pt;
+	line-height: 1.25em;
 	height: 100%;
 }
 
@@ -23,7 +24,7 @@ a:hover, a:active {
 	text-decoration: underline;
 }
 p {
-	margin: 1px;
+	margin: 0.1em;
 }
 img {
 	border: 0;
@@ -37,13 +38,13 @@ a:hover {
 
 #loadingBar {
 	background: #da097a;
-	-webkit-box-shadow: 0 0 10px #da097a;
-	box-shadow: 0 0 10px #da097a;
-	-moz-box-shadow: 0 0 10px #da097a;
+	-webkit-box-shadow: 0 0 0.5em #da097a;
+	box-shadow: 0 0 0.5em #da097a;
+	-moz-box-shadow: 0 0 0.5em #da097a;
 	position: absolute;
 	top: 0;
 	left: 0;
-	height: 3px;
+	height: 0.2em;
 	z-index: 999;
 }
 
@@ -149,27 +150,27 @@ a:hover {
 }
 .userbar-js {
 	position: absolute;
-	top: 0px;
-	right: 0px;
-	z-index: 10
+	top: 0;
+	right: 0;
+	z-index: 10;
 }
 #userbar > div {
-	width: 50px;
-	height: 50px;
+	width: 3.5em;
+	height: 3.5em;
 	float: left;
 	background: transparent url("images/header_spacer.png") scroll repeat-y left
 }
 #userbar > div > a {
-	width: 50px;
-	height: 50px;
+	width: 3.5em;
+	height: 3.5em;
 	display: block;
 	vertical-align: middle;
 	text-align: center;
-	line-height: 50px;
+	line-height: 3.5em;
 	padding-left: 1.5px;
 }
 #userbar-logout input {
-	padding: 12.5px;
+	padding: 1em;
 }
 #userbar .active {
 	background-image: url("images/header_spacer.png"), url("images/header_bg_active.png");
@@ -177,7 +178,7 @@ a:hover {
 }
 #userbar-langSelect ul {
 	list-style-type: none;
-	padding: 10px 0;
+	padding: 1em 0;
 	margin: 0;
 	z-index: 100;
 	box-shadow: 0 2px 5px #999999;
@@ -186,13 +187,13 @@ a:hover {
 	top: 1px;
 	left: 2px;
 	display: block;
-	width: 115px;
+	width: 10em;
 	text-align: left;
-	line-height: 30px;
+	line-height: 2.5em;
 }
 #userbar-langSelect li {
-	padding: 0 10px;
-	margin: 2px 0;
+	padding: 0 1em;
+	margin: 0.1em 0;
 }
 #userbar-langSelect li:hover {
 	background: #eee;
@@ -227,7 +228,7 @@ a:hover {
 }
 #head #logo {
 	position: absolute;
-	right: 5px;
+	right: 0.75em;
 	top: 5px;
 	height: 30px;
 }
@@ -238,12 +239,12 @@ a:hover {
 #head .weblink strong {
 	display: block;
 	float: left;
-	font-size: 16px;
-	padding: 12px;
+	font-size: 1.2em;
+	padding: 0.5em;
 }
 #head .title {
-	font-size: 16pt;
-	padding: 8px;
+	font-size: 1.2em;
+	padding: 0.5em;
 	display: block;
 	color: #444;
 	text-transform: capitalize;
@@ -263,9 +264,9 @@ a:hover {
 	margin-top: 0;
 }
 #content .content_inner {
-	padding: 15px 0;
+	padding: 1em 0;
 	padding-right: 0;
-	min-width: 640px;
+	min-width: 40em;
 }
 #content .content_container {
 	margin-top: 0.5em;
@@ -276,8 +277,10 @@ a:hover {
 #content .content_container > h2 {
 	color: #444;
 	text-align: left;
+	font-weight: normal;
 	margin: 0;
 	padding: 0.5em;
+	padding-bottom: 0.25em;
 	font-size: 1.25em;
 	line-height: 1.5em;
 
@@ -286,7 +289,7 @@ a:hover {
 	padding: 0.25em;
 }
 #content #overview .content_container > div a {
-	padding: 0.5em;
+	padding: 0.6em 0.5em;
 	display: inline-block
 }
 
@@ -322,37 +325,40 @@ a:hover {
 }
 #plot-navigation {
 	position: absolute;
-	right: 140px;
+	right: 9em;
 	top: -5px;
 }
-#plot-navigation ul {
+
+.ui-grouped-buttons ul {
 	list-style: none;
-	margin: 10px;
+	margin: 0.7em;
 	padding: 0;
 	
 	border: 1px solid #24ACB8;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 }
-#plot-navigation ul li {
+.ui-grouped-buttons ul li {
 	display: inline-block;
 	margin: 0;
 	padding: 0;
 }
-#plot-navigation ul li a {
+.ui-grouped-buttons ul li a {
 	display: block;
-	padding: 0.5em !important;
+	padding: 0.4em 0.5em !important;
 	
 	-webkit-transition: all linear 0.2s;
 	-moz-transition: all linear 0.2s;
 	-o-transition: all linear 0.2;
 	-ms-transition: all linear 0.2s;
 	transition: all linear 0.2s;
+	
+	text-decoration: none;
 }
-#plot-navigation ul li:first-child a {
-	padding-left: 10px !important;
+.ui-grouped-buttons ul li:first-child a {
+	padding-left: 0.6em !important;
 }
-#plot-navigation ul li a.active {
+.ui-grouped-buttons ul li a.active {
 	
 	background: #24ACB8;
 	color: #eee;
@@ -374,18 +380,18 @@ a:hover {
 	background: #fff;
 }
 #wrapper_logout .wrapper_inner {
-	width: 650px;
+	width: 40em;
 	margin: auto;
-	padding-top: 100px;
-	padding-bottom: 100px;
+	padding-top: 8em;
+	padding-bottom: 8em;
 	min-height: 100%;
 }
 #wrapper_logout #logo {
-	padding: 10px;
+	padding: 0.6em;
 }
 #wrapper_logout .wrapper_inner .header h1 {
 	margin: 0;
-	font-size: 20px;
+	font-size: 1.5em;
 }
 #wrapper_logout .content h1, #wrapper_logout .content h2, #wrapper_logout .content h3, #wrapper_logout .content h4, #wrapper_logout .content h5, #wrapper_logout .content h6 {
 	color: #333;
@@ -399,17 +405,22 @@ a:hover {
 	background: linear-gradient(#ccc, #9f9f9f);
 	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#9f9f9f'); /* IE6 & IE7 */
 	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#9f9f9f')"; /* IE8+ */
-	height: 24px;
-	padding: 13px;
+	
+	height: 1.5em;
+	width: 40em;
+	padding: 1em;
+	
 	font-weight: bold;
 	color: #333;
+	
 	-webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
+	
 	z-index: 600;
+	
 	position: absolute;
-	width: 624px;
 }
 #wrapper_logout .wrapper_inner .header a h1 {
 	color: #333;
@@ -419,54 +430,55 @@ a:hover {
 }
 #wrapper_logout .wrapper_inner .logo_wrapper .beside_logo {
 	position: absolute;
-	bottom: 1px;
-	right: 5px;
+	bottom: 0.25em;
+	right: 0.5em;
 }
 #wrapper_logout .wrapper_inner .content {
-	width: 628px;
+	width: 40.5em;
 	margin: auto;
-	padding: 10px;
-	padding-top: 57px;
+	padding: 0.75em;
+	
+	padding-top: 4em;
+	
 	background: #fff;
+	
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	border: 1px solid #999;
+	
 	z-index: 500;
 }
 
 /* login form customs */
 #wrapper_logout .login_form {
-	width: 270px;
+	width: 16.4em;
 }
 #wrapper_logout .wrapper_inner_login {
-	width: 280px;
+	width: 17em;
 }
 
 #wrapper_logout .wrapper_inner_login .header {
-	width: 254px;
+	width: 15em;
 }
 #wrapper_logout .wrapper_inner_login .content {
-	width: 258px;
+	width: 15.4em;
 }
 
 #notificationsHolder {
-	margin-top: 100px;
+	margin-top: 4em;
 }
 
-#home-container {
-	max-width: 1000px;
-}
 #home-container #left {
-	width: 320px;
+	width: 20em;
 	float: left;
-	padding-top: 10px
+	padding-top: 0.5em
 }
 
 #right {
 	margin: 0;
-	padding-top: 10px;
-	margin-left: 350px;
+	padding-top: 0.5em;
+	margin-left: 21.5em;
 }
 
 #version {
@@ -477,12 +489,12 @@ a:hover {
 }
 #version .versionTable {
 	border-collapse: collapse;
-	padding-bottom: 5px;
-	margin-bottom: 3px;
+	padding-bottom: 0.5em;
+	margin-bottom: 0.25em;
 	border-bottom: 1px solid #ddd;
 }
 #version .versionTable td {
-	padding: 8px 5px;
+	padding: 0.6em 0.5em;
 }
 #version .versionTable .icon {
 	width: 20px;
@@ -490,12 +502,15 @@ a:hover {
 #version .versionTable .icon img {
 	width: 20px;
 }
+#version .versionTable {
+	text-align: left;
+}
 #update_response {
 	font-weight: bold;
 }
 #update {
 	position: relative;
-	margin-right: 10px;
+	margin-right: 0.5em;
 }
 #update .count {
 	position: absolute;
@@ -542,31 +557,35 @@ a:hover {
 }
 
 .button {
-	font-size: 10pt;
-	padding: 6px 13px;
-	margin: 5px 2px;
+	font-size: 0.9em;
+	padding: 0.5em 1em;
+	margin: 0.3em 0.1em;
 	/*background: #eee url(images/buttons.png) repeat-x;*/
 
-	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #f5f5f5), color-stop(1, #e0e0e0));
-	background: -webkit-linear-gradient(#f5f5f5, #e0e0e0);
-	background: -moz-linear-gradient(#f5f5f5, #e0e0e0);
-	background: -ms-linear-gradient(#f5f5f5, #e0e0e0);
-	background: -o-linear-gradient(#f5f5f5, #e0e0e0);
-	background: linear-gradient(#f5f5f5, #e0e0e0);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0');
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e0e0e0')";
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #f5f5f5), color-stop(1, #e9e9e9));
+	background: -webkit-linear-gradient(#f5f5f5, #e9e9e9);
+	background: -moz-linear-gradient(#f5f5f5, #e9e9e9);
+	background: -ms-linear-gradient(#f5f5f5, #e9e9e9);
+	background: -o-linear-gradient(#f5f5f5, #e9e9e9);
+	background: linear-gradient(#f5f5f5, #e9e9e9);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e9e9e9');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5', endColorstr='#e9e9e9')";
+	
 	color: #444 !important;
 	font-weight: normal;
-	font-family: sans-serif;;
+	font-family: Helvetica, Arial, Verdana;
 	display: inline-block;
-	border: 1px solid #bbb;
+	
+	border: 1px solid #ccc;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+
+	line-height: 1em;
+	
 	text-decoration: none !important;
 	cursor: pointer;
-	text-transform: capitalize;
-	text-shadow: 1px 1px 1px #fff;
+	
 	-webkit-appearance: none;
 }
 .button:hover {
@@ -651,7 +670,7 @@ a:hover {
 
 .form > .actions {
 	border-top: 0;
-	padding-top: 5px;
+	padding-top: 0.5em;
 }
 
 .flatButton {
@@ -659,11 +678,11 @@ a:hover {
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #999;
-	background: url(images/bg_states.png) repeat-x #ddd;
+	background: #ddd;
 	float: left;
-	margin: 5px;
-	height: 29px;
-	padding: 6px 12px;
+	margin: 0.3em;
+	height: 2em;
+	padding: 0.5em 1em;
 	display: block;
 	text-decoration: none !important;
 	color: #555;
@@ -671,10 +690,6 @@ a:hover {
 	-moz-box-sizing: border-box;
 	-ms-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-}
-.flatButton:hover {
-	background-position: 0px -81px;
-	color: #fff;
 }
 
 .logoutButton {
@@ -687,12 +702,12 @@ a:hover {
 }
 
 select {
-	padding: 3px;
+	padding: 0.32m;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	border: 1px solid #bbb;
-	margin: 3px;
+	margin: 0.3em;
     background: #eee;
 }
 select:focus {
@@ -702,11 +717,11 @@ select:focus {
 	border-color: #999 !important;*/
 }
 textarea, input[type=text], input[type=password] {
-	padding: 4px;
+	padding: 0.3em;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	margin: 3px;
+	margin: 0.2em;
     
     /*border: 1px solid #aaa;
 	-webkit-transition: all 0.2s linear;
@@ -731,8 +746,15 @@ textarea:focus, input[type=text]:focus, input[type=password]:focus {
 
 
 .form_field {
-	padding: 12px;
-	padding-bottom: 15px;
+	padding: 0.8em;
+	padding-bottom: 1em;
+}
+.form_field > label {
+	font-weight: normal;
+	color: #000;
+}
+.form_field > .info_field {
+	color: #777;
 }
 span.formaction {
 	padding: 3px;
@@ -946,35 +968,21 @@ form h2 {
 }
 
 .pageinfo .state {
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	border: 1px solid #999;
-	background: url(images/bg_states.png) repeat-x #ddd;
 	float: left;
-	margin-left: 10px;
-	height: 27px;
+	margin-left: 0.6em;
 }
 
 .pageinfo .state > div {
 	float: left;
-	height: 15px;
-	padding: 6px 12px;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	border-radius: 2px;
-	font-weight: bold;
-	color: #555;
+	height: 1em;
+	padding: 0.5em 1em;
+	color: #aaa;
 }
 .pageinfo .state .publish.active {
-	background: url(images/bg_states.png) repeat-x #24acb8;
-	background-position: 0px -27px;
-	color: #fff;
+	color: #24acb8;
 }
 .pageinfo .state .draft.active {
-	background: url(images/bg_states.png) repeat-x #da097a;
-	background-position: 0px -54px;
-	color: #fff;
+	color: #da097a;
 }
 
 .pageinfo .preview {
@@ -1190,6 +1198,35 @@ form h2 {
 
 #history {
 	display: none;
+}
+
+/* tabs */
+.tabs > ul li {
+	margin-left: 0;
+	margin-right: 0;
+}
+.tabs > ul li a, .tabs > ul li .tab {
+	background: #fff;
+	border: 0;
+	color: #24ACB8;
+	
+	margin-bottom: -0.3em;
+	padding-bottom: 0.7em;
+	
+	margin-left: 0;
+	margin-right: 0;
+}
+.tabs > ul li a:hover, .tabs > ul li input.tab:hover {
+	color: #24ACB8 !important;
+	border-bottom: 1px solid #24ACB8;
+}
+.tabs > ul li .active {
+	color: #da097a !important;
+	border: 0;
+	border-bottom: 1px solid #da097a !important;
+}
+.tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
+	color: #da097a !important;
 }
 
 @media only screen and (min-width: 1200px) {

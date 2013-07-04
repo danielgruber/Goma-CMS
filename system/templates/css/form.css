@@ -12,7 +12,7 @@ form {
 }
 fieldset { 
 	border: 0; 
-	margin: 5px 0; 
+	margin: 0.4em 0; 
 	padding: 0; 
 }
 
@@ -21,14 +21,14 @@ fieldset {
 	margin: 0;
 }
 .form_field {
-	padding: 4px;
+	padding: 0.3em;
 }
 .form_field > label {
 	font-weight: bold;
-	width: 250px;
+	width: 18em;
 }
 .form_field > .input  {
-	min-width: 250px;
+	min-width: 18em;
 }
 /*.one {
 	
@@ -43,21 +43,21 @@ fieldset {
 	color: #444;
 }
 .form_field > .err {
-	padding-left: 265px;
+	padding-left: 18.5em;
 }
 .form_field > label {
 	text-transform:capitalize;
 }
 
 .form_field .info_field {
-	padding: 5px 3px;
-	font-size: 9pt;
+	padding: 0.4em 0.2em;
+	font-size: 0.8em;
 	color: #666;
-	width: 600px;
+	width: 35em;
 }
 
 .form_field.fullSize > .info_field, fieldset > .form_field > .info_field {
-	padding-left: 5px;
+	padding-left: 0.4em;
 }
 
 .form_field_tabs {
@@ -112,8 +112,8 @@ fieldset {
 }
 
 .form_field .inputHolder {
-	margin-left: 264px;
-	margin-top: -20px;
+	margin-left: 18.5em;
+	margin-top: -1.5em;
 }
 span.formaction {
 	padding: 3px;

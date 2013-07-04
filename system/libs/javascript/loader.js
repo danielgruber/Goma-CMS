@@ -1255,7 +1255,7 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
-				if(originalOptions.silence != true)
+				if(typeof originalOptions.silence == "undefined" || originalOptions.silence != true)
 					if(originalOptions.type == "post" && originalOptions.async != false) {
 						jqXHR.fail(function(){
 							if(jqXHR.textStatus == "timeout") {

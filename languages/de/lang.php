@@ -182,6 +182,7 @@ $lang = array(
 	'switchlang'									=> "Sprache wechseln",
 	"select_lang"									=> "Wählen Sie Ihre Sprache",
 	'filemanager'                                  	=> "Dateimanager",
+	"cache"											=> "Temporäre Daten",
 	"del_cache"                                    	=> "Cache leeren",
 	"cache_deleted"									=> "Der Cache wurde erfolgreich geleert.",
 	"cache_del_info"								=> "Der Cache ist ein Zwischenspeicher, um die Geschwindigkeit zu optimieren.",
@@ -551,9 +552,9 @@ $lang = array(
 	"h_group_remove"		=> '$user löschte die Gruppe $group',
 	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
 	
-	"h_all_events"			=> "Alle Ereignisse",
+	"h_all_events"			=> "Alle Datenquellen",
 	"h_relevant"			=> "Wichtige",
-	"h_all"					=> "Alle",
+	"h_all"					=> "Alle Ereignisse",
 	
 	"older"					=> "Ältere Einträge",
 	"newer"					=> "Neuere Einträge",

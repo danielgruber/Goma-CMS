@@ -121,7 +121,7 @@ class ProfileController extends FrontedController {
 		{
 				if(member::doLogin($_POST['user'], $_POST['pwd']))
 				{
-						HTTPResponse::redirect(getRedirection(true));
+						HTTPResponse::redirect(getRedirect(true));
 				}
 		}
 		
@@ -151,6 +151,6 @@ class ProfileController extends FrontedController {
 				member::doLogout();
 			}
 							
-			HTTPResponse::redirect(getRedirection(true));
+			HTTPResponse::redirect(getRedirect(true));
 	}
 }

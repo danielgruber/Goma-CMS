@@ -7,38 +7,34 @@
 */
 
 .dropdownDialog #tabs_container_history {
-	margin: 0 -15px;
-}
-.content_container .historyoptions, .dropdownDialog .historyoptions {
-	margin-top: -15px;
+	margin: 0 -1em;
 }
 .content_container #tabs_container_history {
-	margin: 0 -5px;
+	margin: 0 -0.2em;
 }
 .dropdownDialog .history {
-	width: 300px;
-	height: 400px;
+	width: 19em;
+	height: 25em;
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
-	margin-top: -15px;
-	margin-bottom: -23px;
+	margin-top: -1em;
+	margin-bottom: -1.2em;
 }
 .dropdownDialog .history .event {
 	position: relative;
-	padding-bottom: 30px;
+	padding-bottom: 2.5em;
 }
 .dropdownDialog .history .event .date {
 	float: none;
 	position: absolute;
-	left: 33px;
-	bottom: 5px;
+	left: 2.6em;
+	bottom: 0.4em;
 }
 
 
 .historyoptions {
-	height: 30px;
+	height: 2.5em;
 	border-bottom: 1px solid #ddd;
-	box-shadow: 0px 1px 3px #ddd;
 }
 .historyoptions ul {
 	list-style: none;
@@ -50,18 +46,18 @@
 }
 .historyoptions ul li a {
 	display: block;
-	padding: 8px 14px;
+	padding: 0.75em 1em;
 	color: #777;
-	font-size: 12px;
-	line-height: 14px;
+	font-size: 1em;
+	line-height: 1em;
 	text-decoration: none;
 }
 .historyoptions ul li a:hover {
 	color: #222;
 }
 .historyoptions ul li a.active {
-	border-bottom: 1px solid #da097a;
-	color: #da097a;
+	border-bottom: 1px solid #24ACB8;
+	color: #24ACB8;
 }
 
 
@@ -73,46 +69,47 @@
 }
 .history .event {
 	display: block;
-	padding: 15px;
+	padding: 1em;
 	border-bottom: 1px solid #ddd;
 }
 .history.relevant .event.irrelevant {
 	display: none;
 }
 .history .event .version {
-	margin-left: 18px;
+	margin-left: 1em;
 }
 .history .event .version .button {
-	font-size: 9pt;
-	padding: 5px 9px;
+	font-size: 0.9em;
+	padding: 0.4em 0.7em;
 	border-color: #ccc;
 }
 .history .event img {
-	margin-right: 5px;
-	margin-top: 4px;
+	margin-right: 0.4em;
+	margin-top: 0.3em;
 	float: left;
 }
 .history .event p {
-	margin: 5px;
-	margin-left: 22px;
-	line-height: 150%;
+	margin: 0.4em;
+	margin-left: 1.5em;
+	line-height: 1.35em;
 }
 
 .history .event .date {
 	float: right;
 	color: #888;
-	margin: 5px;
+	margin: 0.4em;
+	font-size: 0.8em;
 }
 .history .newer, .history .older {
-	margin: 8px auto;
+	margin: 0.5em auto;
 	display: block;
-	width: 100px;
+	width: 8em;
 	text-align: center;
-	padding: 7px 10px;
+	padding: 0.5em 0.7em;
 	border: 1px solid #ccc;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	border-radius: 2px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
 	
 	background: -moz-linear-gradient(#f5f5f5, #e0e0e0);
 	background: -ms-linear-gradient(#f5f5f5, #e0e0e0);
@@ -124,4 +121,15 @@
 	
 	text-decoration: none;
 	color: #444;
+}
+
+#history .tabs ul li a {
+	background: transparent;
+	margin-bottom: -0.1em;
+}
+#history .tabs > .active {
+	margin-top: -0.2em;
+}
+#content #history.content_container > h2 {
+	padding-bottom: 0.25em;
 }

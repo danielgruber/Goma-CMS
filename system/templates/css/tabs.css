@@ -13,22 +13,21 @@
 	margin: 0;
 	list-style: none;
 	display: block;
-	padding-left: 8px;
-	margin-left: -5px;
-	padding-top: 5px;
-	height: 36px;
+	padding-left: 0.5em;
+	margin-left: -0.4em;
+	padding-top: 0.5em;
+	height: 2.5em;
 }
 .tabs > ul li {
 	float: left;
 	padding: 0;
-	margin: 3px 1px -3px 1px;
+	margin: 0.2em 0.1em -0.2em 0.1em;
 	
 }
 .tabs > ul li a, .tabs > ul li .tab {
 	display: block;
-	padding: 7px 14px;
+	padding: 0.6em 1em;
 	
-	font-weight: bold;
 	color: #666;
 	background: #eee;
 	
@@ -53,32 +52,27 @@
 	outline: 0 !important;
 	cursor: pointer !important;
 	
-	font-size: 11px;
-	line-height: 120%;
-	height: 34px;
+	font-size: 1em;
+	line-height: 1em;
 	
 	-webkit-box-shadow: none;
 	box-shadow: none;
 	-moz-box-shadow: none;
 }
 .tabs > ul li a {
-	padding: 8px 14px !important;
-	padding-top: 9px !important;
-	height: 15px !important;
+	padding: 0.5em 1em !important;
+	height: 1em;
 }
 .tabs > ul li a:hover, .tabs > ul li .tab:hover {
 	color: #444;
 }
-.tabs > ul li .active {
-	color: #444 !important;
-	background: #fff !important;
-	border: 1px solid #ccc;
-	border-bottom: 0 !important;
+.tabs > ul li input.active, .tabs > ul li input.active {
+	color: #444;
+	background: #fff;
+	border-bottom: 0;
 	cursor: text;
-	margin-bottom: 2px;
-	padding-bottom: 8px;
-	height: 34px;
-	background: #f5f5f5;
+	margin-bottom: -0.3em;
+	padding-bottom: 0.7em;
 }
 .tabs > ul li a.active {
 	padding-bottom: 9px !important;
@@ -92,6 +86,6 @@
 .tabs > .active {
 	display: block;
 	border-top: 1px solid #ccc;
-	padding-top: 15px !important;
-	padding-bottom: 8px !important;
+	margin-bottom: -0.3em;
+	padding-bottom: 0.7em;
 }

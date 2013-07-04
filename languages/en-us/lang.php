@@ -182,8 +182,9 @@ $lang = array(
 	'switchlang'									=> "Change Language",
 	"select_lang"									=> "Select Your Language",
 	'filemanager'                                  	=> "filemanager",
-	"del_cache"                                    	=> "empty cache",
-	"cache_deleted"									=> "Cache is now empty.",
+	"cache"											=> "temp-cache",
+	"del_cache"                                    	=> "flush cache",
+	"cache_deleted"									=> "The cache was flushed successfully.",
 	"cache_del_info"								=> "If you empty the cache, Goma regenerates some files, which are cached, so the performance may go down, but data is after that latest.",
 	"login"                                        	=> "Sign In" ,
 	/* infos */
@@ -433,7 +434,7 @@ $lang = array(
 	
 	"update"										=> "Update",
 	"updates"										=> "Updates",
-	"update_install"								=> "Install update",
+	"update_install"								=> "Install updates",
 	"update_file"									=> "Update-Archive",
 	"update_file_download"							=> "Download Update",
 	"update_file_upload"							=> "Upload Update",
@@ -552,8 +553,8 @@ $lang = array(
 	"h_group_remove"		=> '$user removed the group $group',
 	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "all",
-	"h_all_events"			=> "all events",
+	"h_all"					=> "all events",
+	"h_all_events"			=> "all sources",
 	"h_relevant"			=> "important",
 	
 	"older"					=> "older entries",
@@ -597,7 +598,6 @@ $lang = array(
     "on"						=> "on",
     "off"						=> "off",
     
-    ,
     
     "dayly"						=> "dayly",
     "weekly"					=> "weekly",

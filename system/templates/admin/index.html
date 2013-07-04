@@ -228,7 +228,8 @@
 														}
 														
 														drawVisitPlot();
-													}
+													},
+													silence: true
 												});
 												
 												return false;
@@ -238,7 +239,8 @@
 											
 											$("#userbar-history").addClass("overview");
 											goma.ui.ajax($("#history div"), {
-												url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}'
+												url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}',
+												silence: true
 											}, false, true);
 											goma.ui.addFlexBox($("#history > div"));
 										});
@@ -250,7 +252,7 @@
 									
 								</script>
 								
-								<div id="plot-navigation">
+								<div id="plot-navigation" class="ui-grouped-buttons">
 									<ul>
 										<li>
 											<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_dayly}</a>
@@ -306,7 +308,7 @@
 		
 								<div id="right">
 									<div id="cache" class="content_container">
-										<h2>{$_lang_del_cache}</h2>
+										<h2>{$_lang_cache}</h2>
 										<div>
 											<div class="info">
 												{$_lang_cache_del_info}
