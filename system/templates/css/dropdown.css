@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 01.07.2013
+  * last modified: 04.07.2013
 */
 .dropdownContainer .info_field {
 	padding-left: 6px !important;
@@ -49,7 +49,7 @@
 	outline-width:0;
 }
 
-.dropdown_widget .field .value-holder .value {
+.dropdown_widget.multi-value .field .value-holder .value {
 	display: block;
 	float: left;
 	padding: 3px;
@@ -69,11 +69,17 @@
 }
 .dropdown_widget .field .value-holder .value .value-remove { 
 	padding: 1px 3px;
+    color: #000;
 }
-.dropdown_widget .field .value-holder .value .value-remove:hover {
+.dropdown_widget.multi-value .field .value-holder .value .value-remove:hover {
 	text-decoration: none;
 	color: #fff;
 	background: #23acb8;
+}
+
+.dropdown_widget.single-value .field .value-holder .value .value-remove {
+    font-weight: bold;
+    float: right;
 }
 
 .dropdown_widget .hiddenbutton {
