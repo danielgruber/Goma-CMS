@@ -10,7 +10,7 @@
 	margin: 0 -1em;
 }
 .content_container #tabs_container_history {
-	margin: 0 -0.2em;
+	margin: 0 -0.3em;
 }
 .dropdownDialog .history {
 	width: 19em;
@@ -80,7 +80,7 @@
 }
 .history .event .version .button {
 	font-size: 0.9em;
-	padding: 0.4em 0.7em;
+	padding: 0.5em 0.7em;
 	border-color: #ccc;
 }
 .history .event img {
