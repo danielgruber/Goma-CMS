@@ -194,9 +194,6 @@
 	padding-bottom: 15px;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .legend {
-	position: absolute;
-	bottom: 0;
-	left: 0;
 	background: #eee;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .legend > div {
