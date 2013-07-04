@@ -83,7 +83,7 @@
 .leftandmaintable tr > .main > .inner .headBar {
 	background: #eee;
 	border-bottom: 1px solid #ccc;
-	padding: 0.4em;
+	padding: 0.27em;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
 	padding: 0.5em;
@@ -161,27 +161,21 @@
 	padding-top: 1px;
 }
 
-.create li:hover,.create li.active {
-	background: url(images/tree_hover.png) repeat-x;
-}
 .create li a {
 	display: block;
+	color: #555;
+	text-decoration: none;
+	padding: 0.5em;
+}
+.create li a:hover {
+	color: #000;
 }
 .create .node span {
 	background-repeat: no-repeat;
 	background-image: url(../../../images/icons/fatcow16/file.png);
 	background-position: 4px 4px;
-	color: 222;
-	text-decoration: none;
 	padding: 4px 6px 4px 23px;
 	display: block;
-}
-.create li:hover .node span, .create li.active .node span {
-	color: #fff;
-	font-weight: bold;
-}
-.create .node {
-	text-decoration: none !important;
 }
 
 .leftandmaintable tr > .left {
@@ -209,10 +203,6 @@
 }
 .legend div span {
 	background-image: none !important;
-}
-
-.create li a {
-	color: #555;
 }
 
 @media only screen and (min-width: 900px) {

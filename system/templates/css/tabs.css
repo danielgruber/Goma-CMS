@@ -21,7 +21,7 @@
 .tabs > ul li {
 	float: left;
 	padding: 0;
-	margin: 0.2em 0.1em -0.2em 0.1em;
+	margin: 0.2em 0.1em 0.25em 0.1em;
 	
 }
 .tabs > ul li a, .tabs > ul li .tab {
@@ -32,6 +32,7 @@
 	background: #eee;
 	
 	margin: 0 1px;
+	margin-top: -0.2em;
 	
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
@@ -60,7 +61,7 @@
 	-moz-box-shadow: none;
 }
 .tabs > ul li a {
-	padding: 0.5em 1em !important;
+	padding: 0.65em 1em !important;
 	height: 1em;
 }
 .tabs > ul li a:hover, .tabs > ul li .tab:hover {
@@ -74,10 +75,9 @@
 	margin-bottom: -0.3em;
 	padding-bottom: 0.7em;
 }
-.tabs > ul li a.active {
-	padding-bottom: 9px !important;
+.tabs > ul > li > a.active {
+	padding-bottom: 0.7em;
 }
-
 
 .tabs > div {
 	display: none;
@@ -87,5 +87,7 @@
 	display: block;
 	border-top: 1px solid #ccc;
 	margin-bottom: -0.3em;
+	margin-top: -0.20em;
+	padding-top: 0.20em;
 	padding-bottom: 0.7em;
 }

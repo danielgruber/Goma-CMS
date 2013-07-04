@@ -35,6 +35,10 @@ input {
 a:hover {
 	text-decoration: underline;
 }
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	color: #000;
+}
 
 #loadingBar {
 	background: #da097a;
@@ -269,10 +273,13 @@ a:hover {
 	min-width: 40em;
 }
 #content .content_container {
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	border: 1px solid #bbb;
+	margin-top: 0.7em;
+	margin-bottom: 0.7em;
+	border: 1px solid #ddd;
 	background: #f5f5f5;
+	
+	border-radius: 0.3em;
+	-webkit-border-radius: 0.3em;
 }
 #content .content_container > h2 {
 	color: #444;

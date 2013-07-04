@@ -45,10 +45,6 @@ fieldset {
 .form_field > .err {
 	padding-left: 18.5em;
 }
-.form_field > label {
-	text-transform:capitalize;
-}
-
 .form_field .info_field {
 	padding: 0.4em 0.2em;
 	font-size: 0.8em;

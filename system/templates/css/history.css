@@ -127,9 +127,6 @@
 	background: transparent;
 	margin-bottom: -0.1em;
 }
-#history .tabs > .active {
-	margin-top: -0.2em;
-}
 #content #history.content_container > h2 {
 	padding-bottom: 0.25em;
 }

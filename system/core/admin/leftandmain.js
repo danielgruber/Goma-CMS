@@ -154,9 +154,14 @@ var LaM_type_timeout;
 		 * tab-rendering
 		*/
 		$(".left-and-main a.create").click(function(){
+			var $this = $(this);
 			goma.ui.ajax(undefined, {
-				url: $(this).attr("href"),
-				data: {"ajaxfy": true}
+				url: $this.attr("href"),
+				data: {"ajaxfy": true},
+				beforeSend: function() {
+					if(typeof HistoryLib.push == "function")
+						HistoryLib.push($this.attr("href"));
+				}
 			}).done(function(){
 				$("#content .success, #content .error, #content .notice").hide("fast");
 				$("div.tree .marked").removeClass("marked");
