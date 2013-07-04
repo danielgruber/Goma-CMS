@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5
+ * @version     1.5.1
  */
 class DropDown extends FormField 
 {
@@ -87,7 +87,7 @@ class DropDown extends FormField
 		 * @param   string $title label for the field
 		 * @param 	array $options array of key-value for the data selectable
 		 * @param 	int|string $value a integer or string for the selected item
-		 * @param 	object $parent a Form object if you want to give the form it will be applied to
+		 * @param 	object $parent a Form object if you want to give the form it will be applied to
 		 *
 		 * @access public
 		 */
@@ -227,6 +227,11 @@ class DropDown extends FormField
 				))
 			));
 			
+            if($this->multiselect) {
+                $this->widget->addClass("multi-value");
+            } else {
+                $this->widget->addClass("single-value");    
+            }
 			
 		}
 		
@@ -234,7 +239,7 @@ class DropDown extends FormField
 		 * It renders the data displayed in the field, if not dropped down.
 		 *
 		 * @name renderInputWidget
-		 * @return HTMLNode Object of HTMLNode, which can be rendered with @link HTMLNode::render
+		 * @return HTMLNode Object of HTMLNode, which can be rendered with @link HTMLNode::render
 		*/
 		public function renderInputWidget() {
 			$data = $this->getInput();
@@ -386,7 +391,7 @@ class DropDown extends FormField
 		 * generates the data, which should be shown in the dropdown if the user searches.
 		 *
 		 * @param int $p number of page the user wants to see
-		 * @param string $search the phrase to search for
+		 * @param string $search the phrase to search for
 		 *
 		 * @access public
 		 * @return array this is an array which contains the data as data and some information about paginating.
@@ -490,7 +495,7 @@ class DropDown extends FormField
 		 * responds to a user-request and marks a value as checked.
 		 *
 		 * @access public
-		 * @return string rendered dropdown-input
+		 * @return string rendered dropdown-input
 		*/
 		public function checkValue() {
 			
@@ -515,7 +520,7 @@ class DropDown extends FormField
 		 * responds to a user-request and marks a value as unchecked.
 		 *
 		 * @access public
-		 * @return string rendered dropdown-input
+		 * @return string rendered dropdown-input
 		*/
 		public function uncheckValue() {
 			if($this->multiselect) {
