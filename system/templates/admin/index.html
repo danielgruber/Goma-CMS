@@ -11,6 +11,7 @@
 		<% INCLUDE_JS_MAIN "admin.js" %>
 		
 		<% INCLUDE_JS "apps/AddonStoreClient.js" %>
+		<% INCLUDE_JS "libs/thirdparty/blurjs/blur.min.js" %>
 		
 		{$header}
 
@@ -24,27 +25,27 @@
 			<script type="text/javascript">
 			// <![CDATA[
 			
-			goma.AddOnStore.onReady(function(){
-				goma.AddOnStore.ajax({
-					type: "post",
-					url: "updates",
-					data: {"updates": $updatables_json }
-				}).done(function(html, textStatus, jqXHR){
-					var a = jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0;
+				goma.AddOnStore.onReady(function(){
+					goma.AddOnStore.ajax({
+						type: "post",
+						url: "updates",
+						data: {"updates": $updatables_json }
+					}).done(function(html, textStatus, jqXHR){
+						var a = jqXHR.getResponseHeader("X-Update-Count") ? jqXHR.getResponseHeader("X-Update-Count") : 0;
+						
+						if(a == 0)
+							return null;
+						
+						if(a == 1) {
+							$("#update .count").html('1');
+						} else {
+							$("#update .count").text(a);
+						}
+						$("#update .count").css("display", "block");
+					});
 					
-					if(a == 0)
-						return null;
-					
-					if(a == 1) {
-						$("#update .count").html('1');
-					} else {
-						$("#update .count").text(a);
-					}
-					$("#update .count").css("display", "block");
+					$("#update").attr("href", $("#update").attr("data-href"));
 				});
-				
-				$("#update").attr("href", $("#update").attr("data-href"));
-			});
 			// ]]>
 			</script>
 		<% END %>
@@ -109,238 +110,240 @@
 						<div class="clear"></div>
 					</div>
 				</div>
-
-				<!-- content -->
-				<% IF $content %>
-					<div class="addcontent">
-						$addcontent
-					</div>
-					<div class="notificationRoot content_inner $content_class">
-						$content
-					</div>
-				<% ELSE %>
+				
+				<div id="maincontent">
 					
-					<!-- root of content-area -->
-					<div class="notificationRoot content_inner adminContent">
-						<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
-							<% IF $TooManyLogs AND permission("superadmin") %>
-								<div class="notice">
-									{$_lang_flush_log_recommended} <a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
-								</div>
-							<% END %>
+					<!-- content -->
+					<% IF $content %>
+						<div class="addcontent">
 							$addcontent
 						</div>
-						
-						<!-- history -->
-						<div id="history" class="content_container">
-							<h2>{$_lang_history}</h2>
-							<div>
-								<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
-							</div>
+						<div class="notificationRoot content_inner $content_class">
+							$content
 						</div>
+					<% ELSE %>
 						
-						<div id="overview">
+						<!-- root of content-area -->
+						<div class="notificationRoot content_inner adminContent">
+							<div id="addcontent" style="max-width: 1000px;max-height: 150px;overflow: auto;">
+								<% IF $TooManyLogs AND permission("superadmin") %>
+									<div class="notice">
+										{$_lang_flush_log_recommended} <a href="admin/flushLog/" class="button">{$_lang_flush_log}</a>
+									</div>
+								<% END %>
+								$addcontent
+							</div>
 							
-							<!-- Statistics -->
-							
-							<div class="content_container" id="stats">
-								<h2><% lang("statistics") %></h2>
-								
-								<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.js" %>
-								<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.time.js" %>
-								<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.selection.js" %>
-								<% INCLUDE_JS "system/libs/thirdparty/flot.tooltip-master/js/jquery.flot.tooltip.min.js" %>
-								
-								<script type="text/javascript">
-									(function($){
-										var url = "api/stats/lastMonth";
-									
-										var options = {
-											xaxis: {
-												mode: "time",
-												timeformat: "%d.%m %H:%M",
-												minTickSize: [1, "hour"]
-											},
-											yaxis: {
-												min: 0,
-												autoscaleMargin: 0.1
-											},
-											selection: {
-												mode: "x"
-											},
-											series: {
-												lines: {
-													show: true,
-													lineWidth: 2
-												},
-												points: {
-													show: true
-												},
-												shadowSize: 0
-											},
-											grid: {
-												borderWidth: 0,
-												hoverable: true,
-												clickable: true
-											},
-											tooltip:            true,
-											tooltipOpts: {
-											    content:        "<h4>%s</h4> %y",
-											    xDateFormat:    "%y-%0m-%0d %H:%M:%S",
-											    yDateFormat:   	"",
-											    shifts: { 
-											        x:          10,
-											        y:          20 
-											    }
-											}
-										};
-										
-										var visitors = [];
-										var hits = [];
-										var plot;
-										
-										var drawVisitPlot = function() {
-											plot = $.plot("#plot-container", [{	label: lang("page_views"), 
-												data: hits,
-												color: "#da097a"
-											},
-											{
-												label: lang("visitors"), 
-												data: visitors,
-												color: "#24ACB8"
-											}], options);
-		
-										}
-										
-										$(function(){
-											$("#plot-navigation a.stat").click(function(){
-												$("#plot-navigation a.stat").removeClass("active");
-												$(this).addClass("active");
-												$("#plot-container").html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
-												$.ajax({
-													url: $(this).attr("href"),
-													success: function(data) {
-														visitors = [];
-														hits = [];
-														for(i in data) {
-															visitors.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].visitors]);
-															hits.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].hits]);
-														}
-														
-														drawVisitPlot();
-													},
-													silence: true
-												});
-												
-												return false;
-											});
-											
-											$("#plot-navigation a.stat.active").click();
-											
-											$("#userbar-history").addClass("overview");
-											goma.ui.ajax($("#history div"), {
-												url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}',
-												silence: true
-											}, false, true);
-											goma.ui.addFlexBox($("#history > div"));
-										});
-										
-										
-										
-										$(window).resize(drawVisitPlot);
-									})(jQuery);
-									
-								</script>
-								
-								<div id="plot-navigation" class="ui-grouped-buttons">
-									<ul>
-										<li>
-											<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_dayly}</a>
-										</li>
-										<li>
-											<a href="{BASE_SCIRPT}api/stats/lastWeek" class="active stat weekly">{$_lang_weekly}</a>
-										</li>
-										<li>
-											<a href="{BASE_SCIRPT}api/stats/lastMonth" class="stat monthly">{$_lang_monthly}</a>
-										</li>
-										<li>
-											<a href="{BASE_SCIRPT}api/stats/lastYear" class="stat yearly">{$_lang_yearly}</a>
-										</li>
-									</ul>
-								</div>
-								
-								<div id="plot-container">
+							<!-- history -->
+							<div id="history" class="content_container">
+								<h2>{$_lang_history}</h2>
+								<div>
 									<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
 								</div>
 							</div>
 							
-							<!-- end of statistics -->
-							
-							<div id="home-container">
-	
-								<div id="left">
-									<div id="version" class="content_container">
-										<h2>Goma {$_lang_version}</h2>
-										<div>
-											<table class="versionTable" width="100%">
-												<% CONTROL Software() %>
-												<% IF NOT $software.white %>
-												<tr class="grey">
-													<% ELSE %>
-												<tr class="white">
-													<% END %>
-													<td class="icon"> <% IF $software.icon %> <img src="$software.icon" alt="" /> <% END %> </td>
-													<td class="name"> $software.title </td>
-													<td class="version"> $software.version </td>
-												</tr>
-												<% ENDCONTROL %>
-											</table>
-											<% IF PERMISSION("superadmin") %>
-												<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS=1"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
-											<% END %>
-	
-											<% IF DEV_MODE AND PERMISSION("superadmin") %>
-												<a href="{BASE_SCRIPT}dev/buildDistro{URLEND}"><% lang("distro_build", "build a version") %></a>
-											<% END %>
-										</div>
+							<div id="overview">
+								
+								<!-- Statistics -->
+								
+								<div class="content_container" id="stats">
+									<h2><% lang("statistics") %></h2>
+									
+									<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.js" %>
+									<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.time.js" %>
+									<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.selection.js" %>
+									<% INCLUDE_JS "system/libs/thirdparty/flot.tooltip-master/js/jquery.flot.tooltip.min.js" %>
+									
+									<script type="text/javascript">
+										(function($){
+											var url = "api/stats/lastMonth";
+										
+											var options = {
+												xaxis: {
+													mode: "time",
+													timeformat: "%d.%m %H:%M",
+													minTickSize: [1, "hour"]
+												},
+												yaxis: {
+													min: 0,
+													autoscaleMargin: 0.1
+												},
+												selection: {
+													mode: "x"
+												},
+												series: {
+													lines: {
+														show: true,
+														lineWidth: 2
+													},
+													points: {
+														show: true
+													},
+													shadowSize: 0
+												},
+												grid: {
+													borderWidth: 0,
+													hoverable: true,
+													clickable: true
+												},
+												tooltip:            true,
+												tooltipOpts: {
+												    content:        "<h4>%s</h4> %y",
+												    xDateFormat:    "%y-%0m-%0d %H:%M:%S",
+												    yDateFormat:   	"",
+												    shifts: { 
+												        x:          10,
+												        y:          20 
+												    }
+												}
+											};
+											
+											var visitors = [];
+											var hits = [];
+											var plot;
+											
+											var drawVisitPlot = function() {
+												plot = $.plot("#plot-container", [{	label: lang("page_views"), 
+													data: hits,
+													color: "#da097a"
+												},
+												{
+													label: lang("visitors"), 
+													data: visitors,
+													color: "#24ACB8"
+												}], options);
+			
+											}
+											
+											$(function(){
+												$("#plot-navigation a.stat").click(function(){
+													$("#plot-navigation a.stat").removeClass("active");
+													$(this).addClass("active");
+													$("#plot-container").html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
+													$.ajax({
+														url: $(this).attr("href"),
+														success: function(data) {
+															visitors = [];
+															hits = [];
+															for(i in data) {
+																visitors.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].visitors]);
+																hits.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].hits]);
+															}
+															
+															drawVisitPlot();
+														},
+														silence: true
+													});
+													
+													return false;
+												});
+												
+												$("#plot-navigation a.stat.active").click();
+												
+												$("#userbar-history").addClass("overview");
+												goma.ui.ajax($("#history div"), {
+													url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}',
+													silence: true
+												}, false, true);
+												goma.ui.addFlexBox($("#history > div"));
+											});
+											
+											
+											
+											$(window).resize(drawVisitPlot);
+										})(jQuery);
+										
+									</script>
+									
+									<div id="plot-navigation" class="ui-grouped-buttons">
+										<ul>
+											<li>
+												<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_dayly}</a>
+											</li>
+											<li>
+												<a href="{BASE_SCIRPT}api/stats/lastWeek" class="active stat weekly">{$_lang_weekly}</a>
+											</li>
+											<li>
+												<a href="{BASE_SCIRPT}api/stats/lastMonth" class="stat monthly">{$_lang_monthly}</a>
+											</li>
+											<li>
+												<a href="{BASE_SCIRPT}api/stats/lastYear" class="stat yearly">{$_lang_yearly}</a>
+											</li>
+										</ul>
+									</div>
+									
+									<div id="plot-container">
+										<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
 									</div>
 								</div>
+								
+								<!-- end of statistics -->
+								
+								<div id="home-container">
 		
-								<div id="right">
-									<div id="cache" class="content_container">
-										<h2>{$_lang_cache}</h2>
-										<div>
-											<div class="info">
-												{$_lang_cache_del_info}
+									<div id="left">
+										<div id="version" class="content_container">
+											<h2>Goma {$_lang_version}</h2>
+											<div>
+												<table class="versionTable" width="100%">
+													<% CONTROL Software() %>
+													<% IF NOT $software.white %>
+													<tr class="grey">
+														<% ELSE %>
+													<tr class="white">
+														<% END %>
+														<td class="icon"> <% IF $software.icon %> <img src="$software.icon" alt="" /> <% END %> </td>
+														<td class="name"> $software.title </td>
+														<td class="version"> $software.version </td>
+													</tr>
+													<% ENDCONTROL %>
+												</table>
+												<% IF PERMISSION("superadmin") %>
+													<a id="update" href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}?noJS=1"  data-href="{BASE_URI}{BASE_SCRIPT}admin/update{URLEND}">{$_lang_update_install}<span class="count" style="display: none;"></span></a>
+												<% END %>
+		
+												<% IF DEV_MODE AND PERMISSION("superadmin") %>
+													<a href="{BASE_SCRIPT}dev/buildDistro{URLEND}"><% lang("distro_build", "build a version") %></a>
+												<% END %>
 											</div>
-											<a href="admin/?flush=1">{$_lang_del_cache}</a>
-											<% IF permission("superadmin") %>
-												<a href="admin/flushLog/">{$_lang_flush_log}</a>
-											<% END %>
 										</div>
 									</div>
-									<% IF PERMISSION("superadmin") %>
-									<div id="database" class="content_container">
-										<h2>{$_lang_database}</h2>
-										<div>
-											<p class="info">
-												{$_lang_db_update_info}
-											</p>
-											<a href="dev">{$_lang_db_update}</a>
+			
+									<div id="right">
+										<div id="cache" class="content_container">
+											<h2>{$_lang_cache}</h2>
+											<div>
+												<div class="info">
+													{$_lang_cache_del_info}
+												</div>
+												<a href="admin/?flush=1">{$_lang_del_cache}</a>
+												<% IF permission("superadmin") %>
+													<a href="admin/flushLog/">{$_lang_flush_log}</a>
+												<% END %>
+											</div>
 										</div>
+										<% IF PERMISSION("superadmin") %>
+										<div id="database" class="content_container">
+											<h2>{$_lang_database}</h2>
+											<div>
+												<p class="info">
+													{$_lang_db_update_info}
+												</p>
+												<a href="dev">{$_lang_db_update}</a>
+											</div>
+										</div>
+										<% END %>
 									</div>
-									<% END %>
+			
+									<div class="clear"></div>
+			
 								</div>
-		
-								<div class="clear"></div>
-		
 							</div>
 						</div>
-					</div>
-				<% END %>
-
+					<% END %>
+	
+				</div>
 			</div>
-
 		</div>
 			<!--</div>-->
 	</body>

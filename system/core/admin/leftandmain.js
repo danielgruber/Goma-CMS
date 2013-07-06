@@ -15,7 +15,7 @@ var LaM_type_timeout;
 (function($, w){
 	$(function(){
 		// first modify out view-controller in javascript.
-		goma.ui.setMainContent($("#content > .content_inner table td.main > .inner"));
+		goma.ui.setMainContent($("#content > #maincontent > .content_inner table td.main > .inner"));
 		
 		// make it visible.
 		$(".leftandmaintable").css("display", "");
@@ -148,37 +148,6 @@ var LaM_type_timeout;
 					reloadTree();
 				});
 			}
-		});
-		
-		/**
-		 * tab-rendering
-		*/
-		$(".left-and-main a.create").click(function(){
-			var $this = $(this);
-			goma.ui.ajax(undefined, {
-				url: $this.attr("href"),
-				data: {"ajaxfy": true},
-				beforeSend: function() {
-					if(typeof HistoryLib.push == "function")
-						HistoryLib.push($this.attr("href"));
-				}
-			}).done(function(){
-				$("#content .success, #content .error, #content .notice").hide("fast");
-				$("div.tree .marked").removeClass("marked");
-											
-				// find optimal scroll by position of active element
-				if($(".treewrapper").find(".marked").length > 0) {
-					var oldscroll = $(".treewrapper").scrollTop();
-					$(".treewrapper").scrollTop(0);
-					var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-					if(pos > 0) {
-						$(".treewrapper").scrollTop(oldscroll);
-						$(".treewrapper").scrollTop(pos);
-					} else
-						$(".treewrapper").scrollTop(0);
-				}
-			});
-			return false;
 		});
 	});
 	

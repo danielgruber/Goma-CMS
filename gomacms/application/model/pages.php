@@ -743,8 +743,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$titleHolder = $form->meta;
 				}
 				
-				$titleHolder->add($title = new textField('title', lang("title_page", "title of the page")), 0);
-				$titleHolder->add($mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")), 0);
+				$titleHolder->add($title = new textField('title', lang("title_page", "title of the page")), 1);
+				$titleHolder->add($mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")), 1);
 				
 				$titleHolder->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
 					"root" => lang("no_parentpage", "Root Page"),
@@ -752,9 +752,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						lang("subpage","sub page"),
 						"parent"
 					)
-				)), 0);
+				)), 1);
 				
-				$titleHolder->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'), 1);
+				$titleHolder->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'), 2);
 				
 				
 				// check for permissions

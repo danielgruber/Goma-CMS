@@ -33,7 +33,7 @@
 	})(jQuery);
 </script>
 <% activatePagination($_GET_page, 10) %>
-<div class="historyoptions">
+<!--<div class="historyoptions">
 	<ul>
 		<li>
 			<a href="#relevant" class="active" name="relevant">{$_lang_h_relevant}</a>
@@ -42,8 +42,8 @@
 			<a href="#all" name="all">{$_lang_h_all}</a>
 		</li>
 	</ul>
-</div>
-<div id="$id" class="history scrollable relevant">
+</div>-->
+<div id="$id" class="history scrollable all">
 	<% IF isPageBefore() %>
 		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
 	<% END %>

@@ -13,7 +13,7 @@
 	margin: 0 -0.3em;
 }
 .dropdownDialog .history {
-	width: 19em;
+	width: 21em;
 	height: 25em;
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
@@ -32,7 +32,7 @@
 }
 
 
-.historyoptions {
+/*.historyoptions {
 	height: 2.5em;
 	border-bottom: 1px solid #ddd;
 }
@@ -58,7 +58,7 @@
 .historyoptions ul li a.active {
 	border-bottom: 1px solid #24ACB8;
 	color: #24ACB8;
-}
+}*/
 
 
 .history .no_entries {

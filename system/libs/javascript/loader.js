@@ -932,6 +932,24 @@ if(typeof self.loader == "undefined") {
 				});
 				return false;
 			});
+			
+			/**
+			 * ui-ajax is the class for loading data over goma.ui.ajax and rendering it into an element.
+			*/
+			$(document).on("click", "a[rel=ui-ajax], a.ui-ajax", function()
+			{
+				var $this = $(this);
+				var destination = $this.attr("data-destination") ? $this.attr("data-destination") : undefined;
+				goma.ui.ajax(destination, {
+					beforeSend: function() {
+						if(!$this.hasClass("no-history") && typeof HistoryLib.push == "function")
+							HistoryLib.push($this.attr("href"));
+					},
+					url: $this.attr("href"),
+					data: {"ui-ajax": true}
+				});
+				return false;
+			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
 		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
