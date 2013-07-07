@@ -15,53 +15,50 @@
 		"Sean bienvenidos"
 	];
 	
-	welcome = array_shuffle(welcome);
-	
 	$(function(){
-		var i = 0;
-		var a = 0;
-		var last;
-		var beforeLast;
-		$("#welcome_animation").css("display", "block");
-		var intro = function(init) {
-			if(i == welcome.length) {
+		var i = -1;
+		var update = function() {
+			if(welcome.length <= i) {
 				i = 0;
-				welcome = array_shuffle(welcome);
 			} else {
 				i++;
 			}
-			$("#welcome_animation").append('<span class="welcome_lang"></span>');
-			$("#welcome_animation span:last").html(welcome[i]);
-			$("#welcome_animation span:last").css({"left": $("#wrapper_logout .content").width(), "top": a * 30 + 13});
-			if(typeof init != "undefined") {
-				$("#welcome_animation span:last").css({"left": Math.round(Math.random() * $("#wrapper_logout .content").width() / 2)});
-				var duration = 10000;
-			} else {
-				var duration = 14000;
-			}
-			$("#welcome_animation span:last").animate({left: "-400"}, duration, function(){
-				$(this).remove();
+			
+			$("#welcome_animation").fadeTo(300, 0, function(){
+				$("#welcome_animation").html(welcome[i]);
+				$("#welcome_animation").fadeTo(300, 1);
 			});
-			a++;
-			if(a == 3) {
-				a = 0;
-			}
-		}
+		};
 		
-		// init some
-		intro(true);
-		intro(true);
-		intro(true);
-		intro();
-		intro();
-		setInterval(intro, 1200);
+		update();
+		setInterval(update, 2000);
+		
+		var show = function() {
+			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect").fadeTo(500, 1);
+			$("#info").fadeTo(200, 0);
+		};
+		
+		$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info").fadeTo(0, 0);
+		
+		var s = false;
+		$("body").on("mousemove touchstart", function(){
+			s = true;
+		});
+		setTimeout(function(){
+			$("#info").fadeTo(200, 1);
+			$("body").on("mousemove touchstart", show);
+			!s || show();
+		}, 2000);
 	});
 </script>
 <div id="welcome_animation">
 	
 </div>
-<h3>Please select your Language:</h3>
+<div id="info">
+	Move mouse to start
+</div>
 <div id="langSelect">
+	<h3>Please select your language </h3>
 	<div class="selectBox">
 		<ul>
 			<% CONTROL languages() AS $lang %>

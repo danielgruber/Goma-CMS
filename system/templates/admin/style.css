@@ -230,7 +230,7 @@ h1, h2, h3, h4, h5, h6 {
 .nav-inactive {
 	display: none;
 }
-#head {
+#adminPanel #head {
 	position: fixed;
 	background: #eee;
 	top: 3.5em;
@@ -240,27 +240,27 @@ h1, h2, h3, h4, h5, h6 {
 	z-index: 98;
 	opacity: 0.95;
 }
-#head_inner {
+#adminPanel #head_inner {
 	border-bottom: 1px solid #ccc;
 	padding: 1px;
 }
-#head #logo {
+#adminPanel #head #logo {
 	position: absolute;
 	right: 0.75em;
 	top: 5px;
 	height: 30px;
 }
-#head .weblink {
+#adminPanel #head .weblink {
 	float: right;
 	margin-right: 120px;
 }
-#head .weblink strong {
+#adminPanel #head .weblink strong {
 	display: block;
 	float: left;
 	font-size: 1.2em;
 	padding: 0.5em;
 }
-#head .title {
+#adminPanel #head .title {
 	font-size: 1.2em;
 	padding: 0.5em;
 	display: block;
@@ -387,107 +387,6 @@ h1, h2, h3, h4, h5, h6 {
 	
 	background: #24ACB8;
 	color: #eee;
-}
-
-#wrapper_logout {
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #eee), color-stop(1, #fff));
-	background: -webkit-linear-gradient(#eee, #fff);
-	background: -moz-linear-gradient(#eee, #fff);
-	background: -ms-linear-gradient(#eee, #fff);
-	background: -o-linear-gradient(#eee, #fff);
-	background: linear-gradient(#eee, #fff);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#ffffff'); /* IE6 & IE7 */
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#ffffff')"; /* IE8+ */
-	min-width: 850px;
-	min-height: 100%;
-}
-#wrapper_logout #head {
-	background: #fff;
-}
-#wrapper_logout .wrapper_inner {
-	width: 40em;
-	margin: auto;
-	padding-top: 8em;
-	padding-bottom: 8em;
-	min-height: 100%;
-}
-#wrapper_logout #logo {
-	padding: 0.6em;
-}
-#wrapper_logout .wrapper_inner .header h1 {
-	margin: 0;
-	font-size: 1.5em;
-}
-#wrapper_logout .content h1, #wrapper_logout .content h2, #wrapper_logout .content h3, #wrapper_logout .content h4, #wrapper_logout .content h5, #wrapper_logout .content h6 {
-	color: #333;
-}
-#wrapper_logout .wrapper_inner .header {
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #ccc), color-stop(1, #9f9f9f));
-	background: -webkit-linear-gradient(#ccc, #9f9f9f);
-	background: -moz-linear-gradient(#ccc, #9f9f9f);
-	background: -ms-linear-gradient(#ccc, #9f9f9f);
-	background: -o-linear-gradient(#ccc, #9f9f9f);
-	background: linear-gradient(#ccc, #9f9f9f);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#9f9f9f'); /* IE6 & IE7 */
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#9f9f9f')"; /* IE8+ */
-	
-	height: 1.5em;
-	width: 40em;
-	padding: 1em;
-	
-	font-weight: bold;
-	color: #333;
-	
-	-webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-	
-	z-index: 600;
-	
-	position: absolute;
-}
-#wrapper_logout .wrapper_inner .header a h1 {
-	color: #333;
-}
-#wrapper_logout .wrapper_inner .logo_wrapper {
-	position: relative;
-}
-#wrapper_logout .wrapper_inner .logo_wrapper .beside_logo {
-	position: absolute;
-	bottom: 0.25em;
-	right: 0.5em;
-}
-#wrapper_logout .wrapper_inner .content {
-	width: 40.5em;
-	margin: auto;
-	padding: 0.75em;
-	
-	padding-top: 4em;
-	
-	background: #fff;
-	
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	border: 1px solid #999;
-	
-	z-index: 500;
-}
-
-/* login form customs */
-#wrapper_logout .login_form {
-	width: 16.4em;
-}
-#wrapper_logout .wrapper_inner_login {
-	width: 17em;
-}
-
-#wrapper_logout .wrapper_inner_login .header {
-	width: 15em;
-}
-#wrapper_logout .wrapper_inner_login .content {
-	width: 15.4em;
 }
 
 #notificationsHolder {
@@ -1123,23 +1022,22 @@ form h2 {
 /* update */
 
 .updateInfo {
-	border: 1px solid #ccc;
 	border-spacing: 0;
 	width: 600px;
 }
 .updateInfo td {
-	padding: 10px;
+	padding: 1em 0.7em;
 	text-align: center;
 }
 .updateInfo .first td {
 	border-top: 0;
 }
 .updateInfo .value {
-	border-top: 1px solid #ccc;
+
 }
 .updateInfo .left {
 	background: #eee;
-	border-right: 1px solid #ccc;
+	border-right: 1px solid #ddd;
 	font-weight: bold;
 	width: 250px;
 }
@@ -1253,6 +1151,92 @@ form h2 {
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
 }
+
+
+#wrapper_logout {
+	background: #fff;
+	
+	min-width: 850px;
+	min-height: 100%;
+}
+#wrapper_logout #head {
+	background: #fff;
+}
+#wrapper_logout .wrapper_inner {
+	width: 42em;
+	margin: auto;
+	min-height: 100%;
+}
+#wrapper_logout .logo_wrapper {
+	padding: 0.5em;
+}
+#wrapper_logout #logo {
+	padding: 0.6em;
+}
+#wrapper_logout .wrapper_inner .header h1 {
+	margin: 0;
+	font-size: 1.5em;
+	padding: 1em;
+	text-align: center;
+}
+#wrapper_logout .content h1, #wrapper_logout .content h2, #wrapper_logout .content h3, #wrapper_logout .content h4, #wrapper_logout .content h5, #wrapper_logout .content h6 {
+	color: #333;
+}
+#wrapper_logout .wrapper_inner .header {
+	
+	
+	width: 40em;
+	padding: 1em;
+	height: 3.5em;
+	
+	font-weight: bold;
+	color: #333;
+	
+	z-index: 600;
+	
+	position: absolute;
+}
+#wrapper_logout .wrapper_inner .header a h1 {
+	color: #555;
+	font-weight: normal;
+	text-decoration: none;
+}
+#wrapper_logout .wrapper_inner .logo_wrapper {
+	position: relative;
+}
+#wrapper_logout .wrapper_inner .logo_wrapper .beside_logo {
+	position: absolute;
+	bottom: 0.25em;
+	right: 0.5em;
+}
+#wrapper_logout .wrapper_inner .content {
+	width: 40.4em;
+	margin: auto;
+	padding: 0.75em;
+	
+	padding-top: 6em;
+	
+	background: #fff;
+
+	
+	z-index: 500;
+}
+
+/* login form customs */
+#wrapper_logout .login_form {
+	width: 16.4em;
+}
+#wrapper_logout .wrapper_inner_login {
+	width: 17em;
+}
+
+#wrapper_logout .wrapper_inner_login .header {
+	width: 15em;
+}
+#wrapper_logout .wrapper_inner_login .content {
+	width: 15.4em;
+}
+
 
 @media only screen and (min-width: 1200px) {
 	#history {

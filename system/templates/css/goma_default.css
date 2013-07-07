@@ -68,19 +68,18 @@
 }
 #langSelect ul li {
 	margin: 5px;
-	float: left;
+	display: inline-block;
 }
 #langSelect ul li a {
 	display: block;
 	text-decoration: none;
-	color: #555;
 	padding: 5px;
 }
 #langSelect ul li a img {
 	margin-top: -1px;
 }
 #langSelect ul li a:hover, #langSelect ul li.active a {
-	background: #eee;
+	color: #da097a;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
