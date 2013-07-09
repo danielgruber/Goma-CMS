@@ -18,50 +18,55 @@
 				<div class="wrapper_inner">
 			<% END %>
 				<div class="logo_wrapper">
-					<div class="beside_logo">
-						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
+					<div class="content_wrapper">
+						<div class="beside_logo">
+							<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
+						</div>
+						<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
 					</div>
-					<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
 				</div>
 				<div class="header">
-					<% IF $content %>
-						<h1>{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></h1>
-					<% ELSE %>
-						<h1><% lang("login", "login") %></h1>
-					<% END %>
+					<div class="content_wrapper">
+						<% IF $content %>
+							<h1>{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></h1>
+						<% ELSE %>
+							<h1><% lang("login", "login") %></h1>
+						<% END %>
+					</div>
 				</div>
 				<div class="content">
-					$addcontent
-					<% IF $content %>
-						$content
-					<% ELSE %>
-						<script type="text/javascript">
-							(function(){
-								$(function(){
-									if($("#login_name").val() == "" || $("#login_name").val() == $("#login_name").attr("placeholder")) {
-										$("#login_name").focus();
-									} else {
-										$("#login_pwd").focus();
-									}
-								});
-							})(jQuery);
-						</script>
-						<form class="login_form" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REDIRECT.url()}" method="post">
-							<label for="login_name">{$_lang_email_or_username}</label>
-							<input type="text" name="user" title="{$_lang_email_or_username}" id="login_name" value="{$_POST_user.text()}" />
-							<label for="login_pwd">{$_lang_password}</label>
-							<input type="password" id="login_pwd" title="{$_lang_password}" name="pwd" />
-							<div class="_actions">
-								<div>
-									<input class="button" type="submit" class="submit" value="<% lang('perform_login', 'Login') %>"  />
-									<a href="{ROOT_PATH}"><% lang("back", "back") %></a>
+					<div class="content_wrapper">
+						$addcontent
+						<% IF $content %>
+							$content
+						<% ELSE %>
+							<script type="text/javascript">
+								(function(){
+									$(function(){
+										if($("#login_name").val() == "" || $("#login_name").val() == $("#login_name").attr("placeholder")) {
+											$("#login_name").focus();
+										} else {
+											$("#login_pwd").focus();
+										}
+									});
+								})(jQuery);
+							</script>
+							<form class="login_form" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REDIRECT.url()}" method="post">
+								<label for="login_name">{$_lang_email_or_username}</label>
+								<input type="text" name="user" title="{$_lang_email_or_username}" id="login_name" value="{$_POST_user.text()}" />
+								<label for="login_pwd">{$_lang_password}</label>
+								<input type="password" id="login_pwd" title="{$_lang_password}" name="pwd" />
+								<div class="_actions">
+									<div>
+										<input class="button" type="submit" class="submit" value="<% lang('perform_login', 'Login') %>"  />
+										<a href="{ROOT_PATH}"><% lang("back", "back") %></a>
+									</div>
+									<a href="profile/lost_password{URLEND}">{$_lang_lost_password}</a>
 								</div>
-								<a href="profile/lost_password{URLEND}">{$_lang_lost_password}</a>
-							</div>
-						</form>
-						
-					<% END %>
-					
+							</form>
+							
+						<% END %>
+					</div>
 				</div>
 			</div>
 		</div>

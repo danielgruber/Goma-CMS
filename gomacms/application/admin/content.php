@@ -1,14 +1,15 @@
-<?php
-/**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 08.04.2013
-  * $Version 2.0.8
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+/**
+ * Admin-Panel for @link pages.
+ *
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0.8
+ */
 
 class contentAdmin extends LeftAndMain
 {
@@ -65,7 +66,7 @@ class contentAdmin extends LeftAndMain
 	*/
 	public $colors = array(
 		"withmainbar"	=> array(
-			"color"	=> "#036",
+			"color"	=> "#24ACB8",
 			"name"	=> "{\$_lang_mainbar}" 
 		),
 		"nomainbar" 	=> array(

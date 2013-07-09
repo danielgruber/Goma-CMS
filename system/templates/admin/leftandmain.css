@@ -126,21 +126,14 @@
 .leftandmaintable tr > .left form {
 	position: relative;
 }
-.leftandmaintable tr > .left a.create {
-	position: absolute;
-	top: 0.5em;
-	right: 0.25em;
-	height: 24px;
-	width: 24px;
-	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
-	background-repeat: no-repeat;
-	background-position: left center;
-}
 .leftandmaintable tr > .left .add a {
-	padding: 0.7em;
+	padding: 0.7em 2em;
 	text-decoration: none;
-	display: block;
+	display: inline-block;
+}
+.leftandmaintable tr > .left .add {
 	border-bottom: 1px solid #ccc;
+	text-align: center;
 }
 .leftandmaintable tr > .left a.create:hover {
 	background-image: url(../../../images/icons/modernui/dark/24x24/appbar.add.png);

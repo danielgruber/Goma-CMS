@@ -450,6 +450,18 @@ class ClassInfo extends Object {
 
 		return parse_lang($c->name);
 	}
+	
+	/**
+	 * gets the icon of a class
+	 *
+	 */
+	public static function getClassIcon($class) {
+		if(self::hasStatic($class, "icon")) {
+			return parse_lang(self::getStatic($class, "icon"));
+		}
+
+		return null;
+	}
 
 	/**
 	 * loads the classinfo from file

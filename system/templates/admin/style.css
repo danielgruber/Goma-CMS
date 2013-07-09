@@ -1163,12 +1163,19 @@ form h2 {
 	background: #fff;
 }
 #wrapper_logout .wrapper_inner {
-	width: 42em;
-	margin: auto;
 	min-height: 100%;
 }
 #wrapper_logout .logo_wrapper {
-	padding: 0.5em;
+	padding: 1em;
+	background: #e3eff6;
+	width: 100%;
+}
+#wrapper_logout .logo_wrapper .content_wrapper {
+	position: relative;
+}
+#wrapper_logout .content_wrapper {
+	width: 42em;
+	margin: auto;
 }
 #wrapper_logout #logo {
 	padding: 0.6em;
@@ -1179,10 +1186,13 @@ form h2 {
 	padding: 1em;
 	text-align: center;
 }
+#wrapper_logout .wrapper_inner .header .content_wrapper {
+	
+}
 #wrapper_logout .content h1, #wrapper_logout .content h2, #wrapper_logout .content h3, #wrapper_logout .content h4, #wrapper_logout .content h5, #wrapper_logout .content h6 {
 	color: #333;
 }
-#wrapper_logout .wrapper_inner .header {
+#wrapper_logout .wrapper_inner .header .content_wrapper {
 	
 	
 	width: 40em;
@@ -1193,20 +1203,18 @@ form h2 {
 	color: #333;
 	
 	z-index: 600;
-	
-	position: absolute;
 }
-#wrapper_logout .wrapper_inner .header a h1 {
+#wrapper_logout .wrapper_inner .header h1 {
 	color: #555;
 	font-weight: normal;
 	text-decoration: none;
 }
-#wrapper_logout .wrapper_inner .logo_wrapper {
-	position: relative;
+#wrapper_logout .wrapper_inner .header a h1 {
+	color: #24ACB8;
 }
 #wrapper_logout .wrapper_inner .logo_wrapper .beside_logo {
 	position: absolute;
-	bottom: 0.25em;
+	bottom: 1.5em;
 	right: 0.5em;
 }
 #wrapper_logout .wrapper_inner .content {
@@ -1214,9 +1222,7 @@ form h2 {
 	margin: auto;
 	padding: 0.75em;
 	
-	padding-top: 6em;
-	
-	background: #fff;
+	padding-top: 1em;
 
 	
 	z-index: 500;
@@ -1226,14 +1232,14 @@ form h2 {
 #wrapper_logout .login_form {
 	width: 16.4em;
 }
-#wrapper_logout .wrapper_inner_login {
+#wrapper_logout .wrapper_inner_login .content_wrapper {
 	width: 17em;
 }
 
-#wrapper_logout .wrapper_inner_login .header {
+#wrapper_logout .wrapper_inner_login .header .content_wrapper {
 	width: 15em;
 }
-#wrapper_logout .wrapper_inner_login .content {
+#wrapper_logout .wrapper_inner_login .content .content_wrapper {
 	width: 15.4em;
 }
 

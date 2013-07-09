@@ -69,12 +69,15 @@
 }
 .dropdown_widget .field .value-holder .value .value-remove { 
 	padding: 1px 3px;
-    color: #000;
+    color: #10626a;
 }
 .dropdown_widget.multi-value .field .value-holder .value .value-remove:hover {
 	text-decoration: none;
 	color: #fff;
 	background: #23acb8;
+}
+.dropdown_widget.single-value .field .value-holder .value .value-remove {
+	color: #23acb8;
 }
 
 .dropdown_widget.single-value .field .value-holder .value .value-remove {

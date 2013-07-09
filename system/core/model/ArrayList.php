@@ -1,29 +1,24 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  * a basic class for managing multiple arrays or objects as a list of data
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 23.04.2013
-  * $Version 1.0
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * a basic class for managing data in an array and manipualte the group of records.
+ *
+ * @package		Goma\Model
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	1.0
+ */
 class ArrayList extends ViewAccessableData implements Countable {
 	/**
-	 * items in this list
-	 *
-	 *@name items
+	 * items in this list.
 	*/
 	protected $items = array();
 	
 	/**
-	 * constructor
+	 * constructor. 
 	 *
-	 *@name __construct
+	 * @param 	array $items items to start
 	*/
 	public function __construct(array $items = array()) {
 		$this->items = $items;
@@ -126,6 +121,17 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 	
 	/**
+	 * revereses an ArrayList and gives the new back.
+	*/ 
+	public function reverse() {
+		$list = new ArrayList();
+		foreach($this as $record) {
+			$list->unshift($record);
+		}
+		return $list;
+	}
+	
+	/**
 	 * adds a item to the end
 	 *
 	 *@name add
@@ -169,13 +175,146 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 	
 	/**
-	 * removes a specific item
-	 *
-	 *@name remove
+	 * removes a specific item or item-index.
+	 * 
+	 *@param object|array item
 	*/
 	public function remove($item) {
 		foreach($this->items as $key => $record)
 			if($item == $record)
 				unset($this->items[$key]);
+		
+		$this->items = array_values($this->items);
+		
+		return true;
+	}
+	
+	/**
+	 * removes all dupilicated from the list by given field. it modifies this list directly.
+	 *
+	 * @param 	string $field field for checking duplicated
+	 * @return 	void 
+	*/
+	public function removeDuplicates($field = "id") {
+		$data = array();
+		foreach($this->items as $key => $record) {
+			if(in_array($record[$field], $data)) {
+				unset($this->items[$key]);
+			} else {
+				array_push($data, $record[$field]);
+			}
+		}
+		
+		$this->items = array_values($this->items);
+	}
+	
+	/**
+	 * returns a specific range of this set of data.
+	 *
+	 * @param 	int $start element to start
+	 * @param 	int $length length
+	 * 
+	 * @return ArrayList
+	*/
+	public function getRange($start, $length) {
+		$list = new ArrayList();
+		for($i = $start; $i < count($this->items) && $i < $start + $length; $i++) {
+			if(isset($i))
+				$list->push($this->items[$i]);
+		}
+		
+		return $list;
+	}
+	
+	
+	/**
+	 * returns a specific range of this set of data.
+	 *
+	 * @param 	int $start element to start
+	 * @param 	int $length length default: 1
+	 * 
+	 * @return ArrayList
+	*/
+	public function limit($start, $length = 1) {
+		return $this->getRange($start, $length);
+	}
+	
+	/**
+	 * returns the first element of the list.
+	*/
+	public function first() {
+		return isset($this->items[0]) ? $this->items[0] : null;
+	}
+	
+	/**
+	 * returns the last element of the list.
+	*/
+	public function last() {
+		if(count($this) > 0)
+			return $this->items[count($this) - 1];
+		
+		return null;
+	}
+	
+	/**
+	 * Attribute-getter-API. it gets an element of the list at a specified position.
+	 *
+	 * @param 	int $offset offset
+	 * @return 	array|object
+	*/
+	public function __get($offset) {
+		if(isset($this->items[$offset]))
+			return $this->items[$offset];
+		
+		return null;
+	}
+	
+	/**
+	 * Attribute-setter-API. it replaces element at specified position.
+	 *
+	 * @param 	int $offset offset
+	 * @parma 	string $value value
+	*/
+	public function __set($offset, $value) {
+		if(isset($this->items[$offset])) {
+			$this->items[$offset] = $value;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * unsets an item with given offset.
+	 *
+	 * @param 	int $offset
+	 */
+	public function offsetUnset($offset) {
+		if(isset($this->items[$offset]))
+			unset($this->items[$offset]);
+	}
+	
+	/**
+	 * returns whether an item is set.
+	 *
+	 * @param 	int $offset
+	 * @return	boolean
+	 */
+	public function offsetExists($offset) {
+		return isset($this->items[$offset]);
+	}
+	
+	/**
+	 * returns an array of all the items of a specific column.
+	 *
+	 * @param 	string $column default: id
+	*/
+	public function column($column = "id") {
+		$data = array();
+		foreach($this as $record) {
+			$data[] = $record[$column];
+		}
+		
+		return $data;
 	}
 }

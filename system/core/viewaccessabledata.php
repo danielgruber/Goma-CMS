@@ -575,8 +575,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * gets the offset
-	 *@name offsetGet
+	 * gets a given offset.
+	 *
+	 *@param string $offset offset
 	 */
 	public function offsetGet($offset) {
 		return $this->__get($offset);
@@ -836,12 +837,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * new set method
-	 *@param string - offset
-	 *@param mixed - value
+	 * sets a value of a given field.
+	 *
+	 * @param 	string $var offset
+	 * @param 	mixed $value value
 	 */
 	public function setOffset($var, $value) {
 		$var = trim(strtolower($var));
+		
 		if(is_array($this->data)) {
 			// first unset, so the new value is last value of data stack
 			unset($this->data[$var]);
@@ -849,15 +852,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		} else {
 			$this->data = array($var => $value);
 		}
+		
 		$this->changed = true;
 	}
 
 	/**
-	 * sets the field
-	 *
+	 * sets the value of a given field.
 	 */
 	public function setField($name, $value) {
-		$this->changed = true;
 		$this->setOffset($name, $value);
 	}
 
