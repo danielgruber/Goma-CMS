@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 20.05.2013
+  * last modified: 08.06.2013
 */
 
 /* basics */
@@ -266,6 +266,16 @@
 }
 .tablefield-table .form_field {
 	border-bottom: 0;
+}
+
+.tablefield-table tbody tr.checked.even {
+	background: #ddd;
+}
+.tablefield-table tbody tr.checked.odd {
+	background: #cfcfcf;
+}
+.tablefield-table tbody tr.checked:hover {
+	background: #c0c0c0 !important;
 }
 
 @media print {

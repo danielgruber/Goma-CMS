@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.1
+ * @version     1.1.1
  */
 (function($){
 	$(function(){
@@ -26,6 +26,14 @@
 							$(this).parent().find(".col-checkboxes input").prop("checked", true);
 						}
 						$(this).parent().find(".col-checkboxes input").change();
+					}
+				});
+			} else {
+				$(this).find("input").change(function(){
+					if($(this).prop("checked")) {
+						$(this).parent().parent().addClass("checked");
+					} else {
+						$(this).parent().parent().removeClass("checked");
 					}
 				});
 			}

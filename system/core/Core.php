@@ -1,12 +1,11 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * @package		Goma\Core
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-
-defined("IN_GOMA") OR die();
 
 ClassInfo::AddSaveVar("Core", "rules");
 ClassInfo::AddSaveVar("Core", "hooks");
