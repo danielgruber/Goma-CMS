@@ -8,7 +8,7 @@
 
 body, html {
     color: #222;
-	font-family: Helvetica, Arial, Verdana;
+    font-family: Helvetica, Arial, Verdana;
 	font-size: 12pt;
 	line-height: 1.25em;
 	height: 100%;
@@ -1150,7 +1150,7 @@ form h2 {
 	color: #da097a !important;
 	border: 0;
 	border-bottom: 1px solid #da097a !important;
-    height: 2.3em;
+    height: 2.4em;
 }
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
