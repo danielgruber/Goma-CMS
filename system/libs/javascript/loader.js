@@ -266,6 +266,7 @@ if(typeof goma.ui == "undefined") {
 						if(typeof goma.ui.progress != "undefined") {
 							goma.ui.setProgress(100);
 						}
+						goma.ui.updateFlexBoxes();
 					}).done(deferred.resolve).fail(deferred.reject);
 				}).fail(function(a){
 					// try find out why it has failed
