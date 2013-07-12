@@ -542,7 +542,7 @@ class SQL extends object
 		 *@name parseValue
 		*/
 		static function parseValue($field, $value) {
-			if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<")) {
+			if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<" || $value[0] == ">=" || $value[0] == "<=" || $value[0] == "<>")) {
 				if($value[0] == "LIKE") {
 					return ' '.convert::raw2sql($field).' '.(defined("SQL_LIKE") ? SQL_LIKE : "LIKE").' "'.convert::raw2sql($value[1]).'"';
 				} else {

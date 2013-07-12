@@ -3,6 +3,15 @@
 /**
  * a basic class for managing data in an array and manipualte the group of records.
  *
+ * Note that the following methods create new instances of this Object:
+ *
+ * - reverse
+ * - filter
+ * - sort
+ * - exclude
+ * - limit
+ * - getReange
+ *
  * @package		Goma\Model
  *
  * @author		Goma-Team
@@ -254,6 +263,104 @@ class ArrayList extends ViewAccessableData implements Countable {
 			return $this->items[count($this) - 1];
 		
 		return null;
+	}
+	
+	/**
+	 * Filter the list to include items with these charactaristics.
+	 * 
+	 * @return ArrayList
+	 * @example $list->filter('Name', 'bob'); // only bob in the list
+	 * @example $list->filter('Name', array('aziz', 'bob'); // aziz and bob in list
+	 * @example $list->filter(array('Name'=>'bob, 'Age'=>21)); // bob with the Age 21 in list
+	 * @example $list->filter(array('Name'=>'bob, 'Age'=>array(21, 43))); // bob with the Age 21 or 43
+	 * @example $list->filter(array('Name'=>array('aziz','bob'), 'Age'=>array(21, 43))); 
+	 *          // aziz with the age 21 or 43 and bob with the Age 21 or 43
+	 */
+	public function filter() {
+		if(count(func_get_args())>2){
+			throw new InvalidArgumentException('filter takes one array or two arguments');
+		}
+
+		if(count(func_get_args()) == 1 && !is_array(func_get_arg(0))){
+			throw new InvalidArgumentException('filter takes one array or two arguments');
+		}
+
+		$keep = array();
+		if(count(func_get_args())==2){
+			$keep[func_get_arg(0)] = func_get_arg(1);
+		}
+
+		if(count(func_get_args())==1 && is_array(func_get_arg(0))){
+			foreach(func_get_arg(0) as $column => $value) {
+				$keep[$column] = $value;
+			}
+		}
+
+		$newItems = new ArrayList();
+		foreach($this->items as $item){
+			$keepItem = true;
+			foreach($keep as $column => $value ) {
+				if(is_array($value) && !in_array($item[$column], $value)) {
+					$keepItem = false;
+				} else if(!is_array($value) && $item[$column] != $value) {
+					$keepItem = false;
+				}
+			}
+			if($keepItem) {
+				$newItems->push($item);
+			}
+		}
+
+		return $newItems;
+	}
+	
+	/**
+	 * helper method to analyze if a item matches to a filter.
+	 *
+	 * @param 	Object|array $item item
+	 * @param 	array $filter
+	*/
+	static function itemMatchesFilter($item, $filter) {
+		foreach($filter as $column => $value) {
+			if(!is_array($value)) {
+				if($item[$column] != $value) {
+					return false;
+				}
+			} else if(isset($value[0], $value[1]) && count($value) == 2 && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "<" || $value[0] == "!=" || $value[0] == "<=" || $value[0] == ">=" || $value[0] == "<>")) {
+				switch($value[0]) {
+					case "LIKE":
+						$value[1] = preg_quote($value[1], "/");
+						$value[1] = str_replace('%', '.*', $value[1]);
+						$value[1] = str_replace('_', '.', $value[1]);
+						$value[1] = str_replace('\\.*', "%", $value[1]);
+						$value[1] = str_replace('\\.', "_", $value[1]);
+						
+						if(!preg_match("/" . $value[1] . "/i", $item[$column]))
+							return false;
+					break;
+					case "<":
+						if(strcmp($value[1], $item[$column]) == 0)
+							return false;
+							
+					case "<=":
+						if(strcmp($value[1], $item[$column]) == -1)
+							return false;
+					break;
+					case ">":
+						if(strcmp($value[1], $item[$column]) == 0)
+							return false;
+					case ">=":
+						if(strcmp($value[1], $item[$column]) == 1)
+							return false;
+					break;
+					case "<>":
+					case "!=":
+						if($value[1] == $item[$column])
+							return false;
+					break;
+				}
+			}
+		}
 	}
 	
 	/**
