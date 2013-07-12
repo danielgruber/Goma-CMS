@@ -274,6 +274,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @example $list->filter(array('Name'=>'bob, 'Age'=>21)); // bob with the Age 21 in list
 	 * @example $list->filter(array('Name'=>'bob, 'Age'=>array(21, 43))); // bob with the Age 21 or 43
 	 * @example $list->filter(array('Name'=>array('aziz','bob'), 'Age'=>array(21, 43))); 
+	 * @example $list->filter(array('Name'=>array('LIKE','bob'))) // all records with name bob, case-insensitive and comparable to the SQL-LIKE
+	 * @example $list->filter(array('Age' => array("<", 40))) // everybody with age lower 40
 	 *          // aziz with the age 21 or 43 and bob with the Age 21 or 43
 	 */
 	public function filter() {
@@ -291,22 +293,12 @@ class ArrayList extends ViewAccessableData implements Countable {
 		}
 
 		if(count(func_get_args())==1 && is_array(func_get_arg(0))){
-			foreach(func_get_arg(0) as $column => $value) {
-				$keep[$column] = $value;
-			}
+			$keep = func_get_arg(0);
 		}
 
 		$newItems = new ArrayList();
 		foreach($this->items as $item){
-			$keepItem = true;
-			foreach($keep as $column => $value ) {
-				if(is_array($value) && !in_array($item[$column], $value)) {
-					$keepItem = false;
-				} else if(!is_array($value) && $item[$column] != $value) {
-					$keepItem = false;
-				}
-			}
-			if($keepItem) {
+			if(self::itemMatchesFilter($item, $keep)) {
 				$newItems->push($item);
 			}
 		}
@@ -359,8 +351,94 @@ class ArrayList extends ViewAccessableData implements Countable {
 							return false;
 					break;
 				}
+			} else {
+				if(isset($value[0])) {
+					$found = false;
+					foreach($value as $data) {
+						if($item[$column] == $data) {
+							$found = true;
+						}
+					}
+					
+					if(!$found)
+						return false;
+				} else {
+					if(!self::itemMatchesFilter($item, $value)) {
+						return false;
+					}
+				}
 			}
 		}
+		
+		return true;
+	}
+	
+	/**
+	 * Sorts this list by one or more fields. You can either pass in a single
+	 * field name and direction, or a map of field names to sort directions.
+	 *
+	 * @author Silverstripe Team https://github.com/silverstripe/silverstripe-framework/blob/3.1/model/ArrayList.php
+	 *
+	 * @return ArrayList
+	 * @example $list->sort('Name'); // default ASC sorting
+	 * @example $list->sort('Name DESC'); // DESC sorting
+	 * @example $list->sort('Name', 'ASC');
+	 * @example $list->sort(array('Name'=>'ASC,'Age'=>'DESC'));
+	 */
+	public function sort() {
+		$args = func_get_args();
+
+		if(count($args)==0){
+			return $this;
+		}
+		if(count($args)>2){
+			throw new InvalidArgumentException('This method takes zero, one or two arguments');
+		}
+
+		// One argument and it's a string
+		if(count($args)==1 && is_string($args[0])){
+			$column = $args[0];
+			if(strpos($column, ' ') !== false) {
+				throw new InvalidArgumentException("You can't pass SQL fragments to sort()");
+			}
+			$columnsToSort[$column] = SORT_ASC;
+
+		} else if(count($args)==2){
+			$columnsToSort[$args[0]]=(strtolower($args[1])=='desc')?SORT_DESC:SORT_ASC;
+
+		} else if(is_array($args[0])) {
+			foreach($args[0] as $column => $sort_order){
+				$columnsToSort[$column] = (strtolower($sort_order)=='desc')?SORT_DESC:SORT_ASC;
+			}
+		} else {
+			throw new InvalidArgumentException("Bad arguments passed to sort()");
+		}
+
+		// This the main sorting algorithm that supports infinite sorting params
+		$multisortArgs = array();
+		$values = array();
+		foreach($columnsToSort as $column => $direction ) {
+			// The reason these are added to columns is of the references, otherwise when the foreach
+			// is done, all $values and $direction look the same
+			$values[$column] = array();
+			$sortDirection[$column] = $direction;
+			// We need to subtract every value into a temporary array for sorting
+			foreach($this->items as $index => $item) {
+				$values[$column][] = $this->extractValue($item, $column);
+			}
+			// PHP 5.3 requires below arguments to be reference when using array_multisort together 
+			// with call_user_func_array
+			// First argument is the 'value' array to be sorted
+			$multisortArgs[] = &$values[$column];
+			// First argument is the direction to be sorted, 
+			$multisortArgs[] = &$sortDirection[$column];
+		}
+
+		$list = clone $this;
+		// As the last argument we pass in a reference to the items that all the sorting will be applied upon
+		$multisortArgs[] = &$list->items;
+		call_user_func_array('array_multisort', $multisortArgs);
+		return $list;
 	}
 	
 	/**

@@ -115,7 +115,6 @@ class ProfileController extends FrontedController {
 			HTTPResponse::redirect(getRedirect(true));
 		}
 			
-			
 		// if no login and pwd and username isset, we login
 		if(isset($_POST['user'], $_POST['pwd']))
 		{
