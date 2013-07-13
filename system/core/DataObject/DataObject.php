@@ -1197,23 +1197,25 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			while($class != "dataobject") {
 				if(isset(ClassInfo::$class_info[$class]["belongs_many_many_extra"])) {
 					foreach(ClassInfo::$class_info[$class]["belongs_many_many_extra"] as $data) {
-						$manipulation[$data["table"]] = array(
-							"command" 		=> "insert",
-							"table_name"	=> $data["table"],
-							"fields"		=> array(
+						if(isset(ClassInfo::$database[$data["table"]])) {
+							$manipulation[$data["table"]] = array(
+								"command" 		=> "insert",
+								"table_name"	=> $data["table"],
+								"fields"		=> array(
+								
+								)
+							);
 							
-							)
-						);
-						
-						// get data from table
-						$query = new SelectQuery($data["table"], array($data["extfield"]), array($data["field"] => $oldid));
-						if($query->execute()) {
-							while($result = $query->fetch_assoc()) {
-								$manipulation[$data["table"]]["fields"][] = array(
-									$data["field"] => $this->versionid,
-									$data["extfield"] => $result[$data["extfield"]]
-								);
-							}
+							// get data from table
+							$query = new SelectQuery($data["table"], array($data["extfield"]), array($data["field"] => $oldid));
+							if($query->execute()) {
+								while($result = $query->fetch_assoc()) {
+									$manipulation[$data["table"]]["fields"][] = array(
+										$data["field"] => $this->versionid,
+										$data["extfield"] => $result[$data["extfield"]]
+									);
+								}
+							}	
 						}	
 					}
 				}
