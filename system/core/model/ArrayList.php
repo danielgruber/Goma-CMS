@@ -18,7 +18,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 	1.0
  */
-class ArrayList extends ViewAccessableData implements Countable {
+class ArrayList extends ViewAccessableData implements Countable, G_List {
 	/**
 	 * items in this list.
 	*/
@@ -90,40 +90,36 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 	
 	/**
-	 * pushes a new object or array to the end of the list
+	 * pushes a new object or array to the end of the list.
 	 *
-	 *@name push
-	 *@param array|object item
+	  *@param 	array|object $item item
 	*/
 	public function push($item) {
 		$this->items[] = $item;
 	}
 	
 	/**
-	 * removes a item from the end of the list
+	 * removes a item from the end of the list.
 	 *
-	 *@name pop
-	 *@return array|object item
+	 * @return 	array|object item
 	*/
 	public function pop() {
 		return array_pop($this->items);
 	}
 	
 	/**
-	 * unshifts a new object or array to the beginning of the list
+	 * unshifts a new object or array to the beginning of the list.
 	 *
-	 *@name unshift
-	 *@param array|object item
+	 * @param 	array|object $item item
 	*/
 	public function unshift($item) {
 		array_unshift($this->items, $item);
 	}
 	
 	/**
-	 * shifts a item from the beginning of the list
+	 * shifts a item from the beginning of the list.
 	 *
-	 *@name shift
-	 *@return array|object item
+	 * @return 	array|object the removed item
 	*/
 	public function shift() {
 		return array_shift($this->items);
@@ -141,7 +137,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 	
 	/**
-	 * adds a item to the end
+	 * adds a item to the list making no guerantee where it will appear.
 	 *
 	 *@name add
 	*/
@@ -435,10 +431,54 @@ class ArrayList extends ViewAccessableData implements Countable {
 		}
 
 		$list = clone $this;
+		
+		
 		// As the last argument we pass in a reference to the items that all the sorting will be applied upon
 		$multisortArgs[] = &$list->items;
 		call_user_func_array('array_multisort', $multisortArgs);
 		return $list;
+	}
+	
+	/**
+	 * returns if we can sort the ArrayList by a given column.
+	*/
+	public function canSortBy($column) {
+		return true;
+	}
+	
+	/**
+	 * returns if we can filter the ArrayList by a given column.
+	*/
+	public function canFilterBy($column) {
+		return true;
+	}
+	
+	/**
+	 * Returns the first item in the list where the key field is equal to the
+	 * value.
+	 *
+	 * @param  string $key
+	 * @param  mixed $value
+	 * @return mixed
+	 */
+	public function find($key, $value) {
+		foreach($this->items as $record) {
+			if(isset($record[$key]) && $record[$key] == $value) {
+				return $record;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Merges with another array or list by pushing all the items in it onto the
+	 * end of this list.
+	 *
+	 * @param array|object $with
+	 */
+	public function merge($with) {
+		foreach ($with as $item) $this->push($item);
 	}
 	
 	/**
@@ -502,4 +542,51 @@ class ArrayList extends ViewAccessableData implements Countable {
 		
 		return $data;
 	}
+	
+	/**
+	 * iterator
+	 * this extends this dataobject to use foreach on it
+	 * @link http://php.net/manual/en/class.iterator.php
+	 */
+	/**
+	 * this var is the current position
+	 */
+	private $position = 0;
+	
+	/**
+	 * rewind $position to 0.
+	 */
+	public function rewind() {
+		$this->position = 0;
+	}
+
+	/**
+	 * check if data exists and position is valid.
+	 */
+	public function valid() {
+		return ($this->position < count($this->items));
+	}
+
+	/**
+	 * gets the key of curren titem.
+	 */
+	public function key() {
+		return $this->position;
+	}
+
+	/**
+	 * moves pointer to the next item.
+	 */
+	public function next() {
+
+		$this->position++;
+	}
+
+	/**
+	 * gets the value of the current item.
+	 */
+	public function current() {
+		return $this->items[$this->position];
+	}
+
 }

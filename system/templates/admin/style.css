@@ -1132,9 +1132,7 @@ form h2 {
 	background: #fff;
 	border: 0;
 	color: #24ACB8;
-	
-    height: 2.3em;
-    
+	  
 	margin-bottom: -0.3em;
 	padding-bottom: 0.7em;
 	
@@ -1144,13 +1142,17 @@ form h2 {
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
 	color: #24ACB8 !important;
 	border-bottom: 1px solid #24ACB8;
-    height: 2.4em;
 }
 .tabs > ul li .active {
 	color: #da097a !important;
 	border: 0;
 	border-bottom: 1px solid #da097a !important;
-    height: 2.4em;
+}
+.tabs > ul li .tab {
+	height: 2.3em;
+}
+.tabs > ul li .tab.active, .tabs > ul li .tab:hover {
+	height: 2.4em;
 }
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
