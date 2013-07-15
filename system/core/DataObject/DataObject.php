@@ -4459,7 +4459,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if(isset($this->many_many_extra_fields[$key])) {
 				$extraFields = $this->many_many_extra_fields[$key];
 			} else if(self::isStatic($this->classname, "many_many_extra_fields")) {
-				$extraFields = self::getStatic($this->classname, "many_many_extra_fields");
+				$extraFields = self::getStatic($this->class, "many_many_extra_fields");
+				if(isset($extraFields[$key]))
+					$extraFields = $extraFields[$key];
+				else
+					$extraFields = array();
 			} else {
 				$extraFields = array();
 			}

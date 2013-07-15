@@ -1,13 +1,4 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 31.03.2013
-  * $Version - 2.4.5
- */
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined("IN_GOMA") OR die();
 
 loadlang('form');
 
@@ -32,6 +23,15 @@ interface FormActionHandler {
 	public function getSubmit();
 }
 
+/**
+ * the basic class for every Form in the Goma-Framework. It can have FormFields in it.
+ *
+ * @package		Goma\Form-Framework
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	2.3.2
+ */
 class Form extends object
 {
 		/**
@@ -70,17 +70,13 @@ class Form extends object
 		 * all fields the form has to generate from this object
 		 *@name showFields
 		 *@access public
-		 *@var array
+		 *@var arrayList
 		*/
-		public $showFields = array();
+		public $showFields;
 		
-		/**
-		 * to sort fields
-		 *@name fieldSort
-		 *@access public
-		 *@var array
-		*/
-		public $fieldSort = array();
+		public $fieldSort;
+		
+		public $fieldList;
 		
 		/**
 		  * actions
@@ -261,11 +257,15 @@ class Form extends object
 					unset($_SESSION["form_restore_" . $this->name]);
 				}
 				
+				//$this->showFields = array();
+				$this->fieldList = new ArrayList();
+				
 				// register fields
 				foreach($fields as $sort => $field)
 				{
-						$this->showFields[$field->name] = $field;
-						$this->fieldSort[$field->name] = 1 + $sort;
+						/*$this->showFields[$field->name] = $field;
+						$this->fieldSort[$field->name] = 1 + $sort;*/
+						$this->fieldList->push($field);
 						$field->setForm($this);
 						$sort++;
 				}
@@ -427,12 +427,12 @@ class Form extends object
 				$this->form->append('<input type="submit" name="default_submit" value="" class="default_submit" style="position: absolute;bottom: 0px;right: 0px;height: 0px !important;width:0px !important;background: transparent;color: transparent;border: none;-webkit-box-shadow: none;box-shadow:none;-moz-box-shadow:none;outline: 0;padding: 0;margin:0;" />');
 				
 				// first we have to sort the fields
-				usort($this->showFields, array($this, "sort"));			
+				//usort($this->showFields, array($this, "sort"));			
 				$i = 0;
 				
 				$fields = "";
 				
-				foreach($this->showFields as $field)
+				foreach($this->fieldList as $field)
 				{
 						$name = strtolower($field->name);
 						if($this->isFieldToRender($field->name))
@@ -741,9 +741,8 @@ class Form extends object
 						unset($this->fields[$field]);
 				}
 				
-				if(isset($this->showFields[$field]))
-				{
-						unset($this->showFields[$field]);
+				if(is_string($field)) {
+					$this->fieldList->remove($this->fieldList->find("name", $field, true));
 				}
 				
 				if(isset($this->actions[$field]))
@@ -751,7 +750,7 @@ class Form extends object
 						unset($this->actions[$field]);
 				}
 				
-				foreach($this->showFields as $_field) {
+				foreach($this->fieldList as $_field) {
 					if(is_subclass_of($_field, "FieldSet")) {
 						$_field->remove($field);
 					}
@@ -759,23 +758,21 @@ class Form extends object
 		}
 		
 		/**
-		 * adds a field
-		 *@name add
-		 *@access public
-		 *@param FormField $field
-		 *@param sort, 0 is on top, and count means after which field the field is rendered, null means default
-		 *@param to where the field is added, for example as a subfield to a tab
+		 * adds a field.
+		 *
+		 * @param 	FormField $field
+		 * @param 	integer $sort sort, 0 is on top, and count means after which field the field is rendered, null means default
+		 * @param 	String $to where the field is added, for example as a subfield to a tab
 		*/
 		public function add($field, $sort = null, $to = null)
 		{
 				if($to == "this" || !isset($to))
 				{
-						if(!isset($sort)) {
-							$sort = 1 + count($this->showFields);
-						}
-						
-						$this->showFields[$field->name] = $field;
-						$this->fieldSort[$field->name] = $sort;
+						if(isset($sort))
+							$this->fieldList->move($field, $sort, true);
+						else
+							$this->fieldList->add($field);
+							
 						$field->setForm($this);
 				} else
 				{
@@ -788,22 +785,18 @@ class Form extends object
 		}
 		
 		/**
-		 * adds a field
-		 *@name add
-		 *@access public
-		 *@param FormField $field
-		 *@param sort, 0 is on top, and count means after which field the field is rendered, null means default
-		 *@param to where the field is added, for example as a subfield to a tab
+		 * adds a field. alias to @see Form::add.
 		*/
 		public function addField($field, $sort = null, $to = null) {
 			return $this->add($field, $sort, $to);
 		}
 		
 		/**
-		 * adds a field to a given field set
+		 * adds a field to a given fieldset.
 		 *
-		 *@name addToField
-		 *@access public
+		 * @param 	String $fieldname fieldset
+		 * @param 	FormField $field the field
+		 * @param 	int $sort
 		*/
 		public function addToField($fieldname, $field, $sort = 0) {
 			return $this->add($field, $sort, $fieldname);

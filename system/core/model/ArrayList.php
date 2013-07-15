@@ -18,7 +18,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 	1.0
  */
-class ArrayList extends ViewAccessableData implements Countable, G_List {
+class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * items in this list.
 	*/
@@ -146,37 +146,64 @@ class ArrayList extends ViewAccessableData implements Countable, G_List {
 	}
 	
 	/**
-	 * inserts a item after a specefied item
+	 * inserts a item after a specefied item. if specified item does not exist it inserts it to the end of the list.
 	 *
 	 *@name insertAfter
 	*/
 	public function insertAfter($item, $after) {
 		$new = array();
+		$insert = false;
 		foreach($this->items as $key => $data) {
 			$new[] = $data;
-			if($data == $after) {
+			if(!$insert && $data == $after) {
 				$new[] = $item;
+				$insert = true;
 			}
 		}
+		
+		if(!$insert)
+			$new[] = $item;
 		
 		$this->items = $new;
 	}
 	
 	/**
-	 * inserts a item before a specefied item
+	 * inserts a item before a specefied item. if specified item does not exist it inserts it to the end of the list.
 	 *
 	 *@name insertBefore
 	*/
 	public function insertBefore($item, $before) {
 		$new = array();
+		$insert = false;
 		foreach($this->items as $key => $data) {
-			if($data == $before) {
+			if(!$insert && $data == $before) {
 				$new[] = $item;
+				$insert = true;
 			}
 			$new[] = $data;
 		}
 		
+		if(!$insert)	
+			$new[] = $item;
+		
 		$this->items = $new;
+	}
+	
+	/**
+	 * replaces a item.
+	 *
+	 * @param 	object|array $item item
+	 * @param	object|array $with new item
+	*/
+	public function replace($item, $with) {
+		foreach($this->items as $key => $record) {
+			if($record == $item) {
+				$this->items[$key] = $with;
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -185,6 +212,9 @@ class ArrayList extends ViewAccessableData implements Countable, G_List {
 	 *@param object|array item
 	*/
 	public function remove($item) {
+		if(!is_array($item) && !is_object($item))
+			return false;
+		
 		foreach($this->items as $key => $record)
 			if($item == $record)
 				unset($this->items[$key]);
@@ -231,6 +261,20 @@ class ArrayList extends ViewAccessableData implements Countable, G_List {
 		return $list;
 	}
 	
+	/**
+	 * returns the current position of a given item.
+	 *
+	 * @param 	array|object $item item
+	 * @return 	int|boolean integer for position of item, boolean false if not found
+	*/
+	public function getItemIndex($item) {
+		foreach($this->items as $key => $record) {
+			if($record == $item)
+				return $key;
+		}
+		
+		return false;
+	}
 	
 	/**
 	 * returns a specific range of this set of data.
@@ -440,6 +484,61 @@ class ArrayList extends ViewAccessableData implements Countable, G_List {
 	}
 	
 	/**
+	 * moves specific item to another position.
+	 *
+	 * @param 	array|object $item item
+	 * @param 	int $to destination position 
+	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
+	*/
+	public function move($item, $to, $insertIfNotExisting = false) {
+		if($insertIfNotExisting || $this->getItemIndex($item) !== false) {
+			$new = array();
+			foreach($this->items as $key => $val) {
+				if($key == $to) {
+					$new[] = $item;
+				}
+				
+				if($val != $item) {
+					$new[] = $val;
+				}
+			}
+			$this->items = $new;
+			return $this;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * moves specific item before another item.
+	 *
+	 * @param 	array|object $item item
+	 * @param 	array|object $before destination object 
+	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
+	*/
+	public function moveBefore($item, $before, $insertIfNotExisting = false) {
+		if(($index = $this->getItemIndex($before)) === false)
+			return false;
+		
+		return $this->move($item, $index, $insertIfNotExisting);
+	}
+	
+	/**
+	 * moves specific item behind another item.
+	 *
+	 * @param 	array|object $item item
+	 * @param 	array|object $behind destination object 
+	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
+	*/
+	public function moveBehind($item, $behind, $insertIfNotExisting = false) {
+		if(($index = $this->getItemIndex($behind)) === false)
+			return false;
+		
+		$index++;
+		return $this->move($item, $index, $insertIfNotExisting);
+	}
+	
+	/**
 	 * returns if we can sort the ArrayList by a given column.
 	*/
 	public function canSortBy($column) {
@@ -461,9 +560,11 @@ class ArrayList extends ViewAccessableData implements Countable, G_List {
 	 * @param  mixed $value
 	 * @return mixed
 	 */
-	public function find($key, $value) {
+	public function find($key, $value, $caseInsensitive = false) {
 		foreach($this->items as $record) {
-			if(isset($record[$key]) && $record[$key] == $value) {
+			if($caseInsensitive && isset($record[$key]) && strtolower($record[$key]) == strtolower($value)) {
+				
+			} else if(isset($record[$key]) && $record[$key] == $value) {
 				return $record;
 			}
 		}

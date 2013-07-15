@@ -34,11 +34,11 @@
 		setInterval(update, 2000);
 		
 		var show = function() {
-			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect").fadeTo(500, 1);
+			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #wrapper_logout .footer").fadeTo(500, 1);
 			$("#info").fadeTo(200, 0);
 		};
 		
-		$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info").fadeTo(0, 0);
+		$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info, #wrapper_logout .footer").fadeTo(0, 0);
 		
 		var s = false;
 		$("body").on("mousemove touchstart", function(){
@@ -49,6 +49,8 @@
 			$("body").on("mousemove touchstart", show);
 			!s || show();
 		}, 2000);
+		
+		goma.ui.addFlexBox("#welcome_animation");
 	});
 </script>
 <div id="welcome_animation">

@@ -38,12 +38,6 @@ var LaM_type_timeout;
 		
 		setTimeout(updateSidebarToggle, 10);
 		
-		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-			jqXHR.done(funciton(){
-				setTimeout(updateSidebarToggle, 10);
-			});
-		});
-		
 		//! leftbar
 		$(document).on("click touchend", ".leftbar_toggle", function(){
 			if($(this).hasClass("active")) {

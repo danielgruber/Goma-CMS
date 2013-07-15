@@ -1,16 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 24.02.2013
-  * $Version 2.3.2
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-class FormField extends RequestHandler
+ * a basic class for every form-field in a form.
+ *
+ * @package		Goma\Form-Framework
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	2.3.2
+ */
+class FormField extends RequestHandler implements ArrayAccess
 {
 		/**
 		 * secret key for this form field
@@ -148,8 +147,7 @@ class FormField extends RequestHandler
 						$this->form()->fields[$name] = $this;
 						if(is_a($this->parent, "form"))
 						{
-								$this->parent->showFields[$name] = $this;
-								$this->parent->fieldSort[$name] = count($this->parent->fieldSort);
+								$this->parent->fieldList->add($this);
 								
 						} else
 						{
@@ -445,6 +443,48 @@ class FormField extends RequestHandler
 			} else {
 				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->classname." with name ".$this->name.".");
 			}
+		}
+		
+		/**
+		 * unsets an attribute.
+		 *
+		 * @param 	string $offset
+		 */
+		public function offsetUnset($offset) {
+			if(isset($this->$offset))
+				unset($this->$offset);
+		}
+		
+		/**
+		 * returns whether an attribute is set.
+		 *
+		 * @param 	string $offset
+		 * @return	boolean
+		 */
+		public function offsetExists($offset) {
+			return property_exists($this, $offset);
+		}
+		
+		
+		/**
+		 * returns the value of an attribute.
+		 *
+		 * @param 	string $offset
+		 * @return	boolean
+		 */
+		public function offsetGet($offset) {
+			return property_exists($this, $offset) ? $this->$offset : null;
+		}
+		
+		/**
+		 * sets the value of an attribute.
+		 *
+		 * @param 	string $offset
+		 * @param	mixed $value
+		 * @return	boolean
+		 */
+		public function offsetSet($offset, $value) {
+			$this->$offset = $value;
 		}
 		
 		/**

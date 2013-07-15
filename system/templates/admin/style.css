@@ -516,14 +516,14 @@ h1, h2, h3, h4, h5, h6 {
 	/*background-color: #ddd;
 	 background-position: 0 -50px;*/
 
-	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #ececec), color-stop(1, #d5d5d5));
-	background: -webkit-linear-gradient(#ececec, #d5d5d5);
-	background: -moz-linear-gradient(#ececec, #d5d5d5);
-	background: -ms-linear-gradient(#ececec, #d5d5d5);
-	background: -o-linear-gradient(#ececec, #d5d5d5);
-	background: linear-gradient(#ececec, #d5d5d5);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ececec', endColorstr='#d5d5d5');
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ececec', endColorstr='#d5d5d5')";
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #eee), color-stop(1, #e0e0e0));
+	background: -webkit-linear-gradient(#eee, #e0e0e0);
+	background: -moz-linear-gradient(#eee, #e0e0e0);
+	background: -ms-linear-gradient(#eee, #e0e0e0);
+	background: -o-linear-gradient(#eee, #e0e0e0);
+	background: linear-gradient(#eee, #e0e0e0);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#e0e0e0');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#e0e0e0')";
 }
 
 .button.red {
@@ -1152,7 +1152,7 @@ form h2 {
 	height: 2.3em;
 }
 .tabs > ul li .tab.active, .tabs > ul li .tab:hover {
-	height: 2.4em;
+	height: 2.38em;
 }
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
@@ -1164,6 +1164,8 @@ form h2 {
 	
 	min-width: 850px;
 	min-height: 100%;
+	
+	position: relative;
 }
 #wrapper_logout #head {
 	background: #fff;
@@ -1229,6 +1231,7 @@ form h2 {
 	padding: 0.75em;
 	
 	padding-top: 1em;
+	padding-bottom: 10em;
 
 	
 	z-index: 500;
@@ -1247,6 +1250,18 @@ form h2 {
 }
 #wrapper_logout .wrapper_inner_login .content .content_wrapper {
 	width: 15.4em;
+}
+#wrapper_logout .footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: 20px;
+	
+	background: #eee;
+}
+#wrapper_logout .footer .branding {
+	float: right;
 }
 
 

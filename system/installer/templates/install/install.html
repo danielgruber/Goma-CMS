@@ -51,18 +51,28 @@
 							
 							<a href="{BASE_SCRIPT}install/langselect/?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
 						</div>
-						<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+						<a href="./"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
 					</div>
 				</div>
-				<div class="header">
+				<!--<div class="header">
 					<div class="content_wrapper">
 						<a href="{BASE_URI}{BASE_SCRIPT}"><h1>Goma</h1></a>
 					</div>
-				</div>
+				</div>-->
 				<div class="content">
 					<div class="content_wrapper">
 						<% addContent() %>
 						$content
+					</div>
+				</div>
+				<div class="footer">
+					<div class="content_wrapper">
+						<div class="branding">
+							Powered by <a href="http://goma-cms.org" target="_blank">Goma</a>
+						</div>
+						<div class="links">
+							<a href="./">{$_lang_homepage}</a>
+						</div>
 					</div>
 				</div>
 			</div>
