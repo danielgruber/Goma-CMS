@@ -65,6 +65,17 @@ class Uploads extends DataObject {
 	);
 	
 	/**
+	* indexes
+	*/
+	static $index = array(
+		array(
+			"name"      => "pathlookup",
+			"fields"    => "path,class_name",
+			"type"      => "INDEX"
+		)    
+	);
+
+	/**
 	 * adds a file to the upload-folder
 	 *
 	 *@name addFile
