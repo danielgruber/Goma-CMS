@@ -432,7 +432,7 @@ $lang = array(
 	/* update algorythm */
 	
 	"update"										=> "Aktualisierung",
-	"updates"										=> "Aktualiserungen",
+	"updates"										=> "Aktualisierungen",
 	"update_install"								=> "Aktualisieren",
 	"update_file"									=> "Aktualisierungsdatei",
 	"update_file_download"							=> "Aktualisierungsdatei herunterladen",
