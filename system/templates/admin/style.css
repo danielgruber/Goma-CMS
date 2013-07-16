@@ -1141,12 +1141,12 @@ form h2 {
 }
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
 	color: #24ACB8 !important;
-	border-bottom: 1px solid #24ACB8;
+	border-bottom: 2px solid #24ACB8;
 }
 .tabs > ul li .active {
 	color: #da097a !important;
 	border: 0;
-	border-bottom: 1px solid #da097a !important;
+	border-bottom: 2px solid #da097a !important;
 }
 .tabs > ul li .tab {
 	height: 2.3em;
@@ -1157,6 +1157,46 @@ form h2 {
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
 }
+
+ul.list-view {
+	margin: 20px 0;
+	list-style: none;
+	padding: 0;
+}
+ul.list-view li a {
+	padding: 1.5em;
+	padding-left: 3em;
+	border-top: 1px solid #ddd;
+	
+	display: block;
+	
+	-webkit-transition: all linear 0.2s;
+	-moz-transition: all linear 0.2s;
+	-o-transition: all linear 0.2;
+	-ms-transition: all linear 0.2s;
+	transition: all linear 0.2s;
+	
+	position: relative;
+	
+	text-decoration: none;
+	color: #666;
+	
+	background: #fff url(../../../images/icons/modernui/halfdark/48x48/appbar.chevron.right.png) no-repeat right center;
+}
+ul.list-view li:last-child a, ul.list-view li.last a {
+	border-bottom: 1px solid #ddd;
+}
+ul.list-view li a:hover {
+	background-color: #eee;
+}
+ul.list-view li a img {
+	position: absolute;
+	left: 0.5em;
+	top: 1.2em;
+	height: 2em;
+	width: 2em;
+}
+
 
 
 #wrapper_logout {
