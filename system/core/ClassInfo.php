@@ -457,7 +457,7 @@ class ClassInfo extends Object {
 	 */
 	public static function getClassIcon($class) {
 		if(self::hasStatic($class, "icon")) {
-			return parse_lang(self::getStatic($class, "icon"));
+			return ClassInfo::findFileRelative(self::getStatic($class, "icon"), $class);
 		}
 
 		return null;

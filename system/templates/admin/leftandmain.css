@@ -205,6 +205,13 @@
 	background-image: none !important;
 }
 
+ul.list-view.create li a {
+	padding-left: 2em;
+}
+ul.list-view.create li a img {
+	top: 1.65em;
+}
+
 @media only screen and (min-width: 900px) {
 	.leftandmaintable tr > .main {
 		min-width: 600px;

@@ -1181,20 +1181,20 @@ ul.list-view li a {
 	text-decoration: none;
 	color: #666;
 	
-	background: #fff url(../../../images/icons/modernui/halfdark/48x48/appbar.chevron.right.png) no-repeat right center;
+	background: #fff url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.right.png) no-repeat right center;
 }
 ul.list-view li:last-child a, ul.list-view li.last a {
 	border-bottom: 1px solid #ddd;
 }
-ul.list-view li a:hover {
+ul.list-view li a:hover, ul.list-view li a.loading {
 	background-color: #eee;
 }
 ul.list-view li a img {
 	position: absolute;
 	left: 0.5em;
 	top: 1.2em;
-	height: 2em;
-	width: 2em;
+	max-height: 2em;
+	max-width: 2em;
 }
 
 

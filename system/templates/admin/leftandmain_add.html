@@ -1,13 +1,14 @@
 <div class="adminContent">
 	<h1><% lang("Create") %></h1>
-	<ul class="create">
+	<ul class="create list-view">
 		<% CONTROL types() %>
 			<% IF $types.value == $activeAdd %>
 				<li class="active">
 			<% ELSE %>
 				<li>
 			<% END %>
-				<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="node {$types.value} ui-ajax">
+				<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="ui-ajax">
+					<img src="$types.icon" alt="" />
 					<span>$types.title.text()</span>
 				</a>
 			</li>

@@ -941,6 +941,7 @@ if(typeof self.loader == "undefined") {
 			{
 				var $this = $(this);
 				var destination = $this.attr("data-destination") ? $this.attr("data-destination") : undefined;
+				$this.addClass("loading");
 				goma.ui.ajax(destination, {
 					beforeSend: function() {
 						if(!$this.hasClass("no-history") && typeof HistoryLib.push == "function")
@@ -948,6 +949,8 @@ if(typeof self.loader == "undefined") {
 					},
 					url: $this.attr("href"),
 					data: {"ui-ajax": true}
+				}).done(function(){
+					$this.removeClass("loading");
 				});
 				return false;
 			});

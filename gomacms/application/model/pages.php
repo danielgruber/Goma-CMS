@@ -126,6 +126,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
 		
+		/**
+		 * icon
+		*/
+		static $icon = "images/icons/goma16/file.png";
+		
 		//!Getters and Setters
 		
 		/**

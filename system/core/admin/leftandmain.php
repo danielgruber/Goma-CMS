@@ -477,8 +477,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function Types() {
 		$data = $this->createOptions();
 		$arr = new DataSet();
-		foreach($data as $option => $title) {
-			$arr->push(array("value" => $option, "title" => $title));
+		foreach($data as $class => $title) {
+			$arr->push(array("value" => $class, "title" => $title, "icon" => ClassInfo::getClassIcon($class)));
 		}
 		return $arr;
 	}
