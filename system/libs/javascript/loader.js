@@ -15,6 +15,8 @@ if(typeof window.console == "undefined") {
    window.console = {log: function(){}};
 }
 
+$.touchPunch.setAutoAssign(false);
+
 // some regular expressions
 var json_regexp = /^\(?\{/;
 var html_regexp = new RegExp("<body");
