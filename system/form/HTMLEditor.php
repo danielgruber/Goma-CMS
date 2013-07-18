@@ -66,7 +66,6 @@ class HTMLEditor extends Textarea
 				Resources::add("system/libs/thirdparty/ckeditor4_1/ckeditor.js", "js");
 				if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
-				Resources::addData("var lang_page = '".lang("page")."';");
 				
 				$accessToken = randomString(20);
 				$_SESSION["uploadTokens"][$accessToken] = true;
@@ -109,7 +108,7 @@ $(function(){
 		}, 100);
 		
 		
-		$("#'.$this->form()->ID().'").bind("beforesubmit",function(){
+		$("#'.$this->form()->ID().'").on("beforesubmit",function(){
 			$("#'.$this->input->id.'").val(CKEDITOR.instances.'.$this->input->id.'.getData());
 		});
 		$("#'.$this->input->id.'").change(function(){

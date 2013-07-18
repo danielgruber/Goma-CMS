@@ -15,7 +15,7 @@ if(typeof window.console == "undefined") {
    window.console = {log: function(){}};
 }
 
-$.touchPunch.setAutoAssign(false);
+//$.touchPunch.setAutoAssign(false);
 
 // some regular expressions
 var json_regexp = /^\(?\{/;
@@ -1056,7 +1056,7 @@ if(typeof self.loader == "undefined") {
 				var jqXHR = $.ajax({
 					async: false,
 					cache: true,
-					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name),
+					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name) + "?l=" + activelang,
 					dataType: "json",
 					noRequestTrack: true
 				});
@@ -1113,7 +1113,7 @@ if(typeof self.loader == "undefined") {
 					async: async,
 					cache: true,
 					data: {"lang": names},
-					url: BASE_SCRIPT + "system/getLang/",
+					url: BASE_SCRIPT + "system/getLang/?l=" + activelang,
 					dataType: "html",
 					noRequestTrack: true,
 					success: function(html) {

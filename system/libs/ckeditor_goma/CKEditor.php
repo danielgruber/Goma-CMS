@@ -22,7 +22,19 @@ class GomaCKEditor extends GomaEditor {
 	 * javascript-config for HTML-Code.
 	*/
 	static $htmlConfig = '
-				toolbar : "Goma",
+				toolbar : [{ name: "document", items : [ "Source"] },
+					{ name: "links", items : [ "Link","Unlink","Anchor" ] },
+					{ name: "clipboard", items : [ "Cut","PasteText","PasteFromWord","-","Undo","Redo" ] },
+					{ name: "basicstyles", items : [ "Bold","Italic","Underline","-","RemoveFormat" ] },
+					{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
+					{ name: "tools", items : [ "Maximize" ] },
+					"/",
+					{ name: "insert", items : [ "Image","Table","PageBreak"] },
+					{ name: "styles", items : [ "Styles","Format" ] },
+					{ name: "colors", items : [ "TextColor","BGColor" ] },
+					{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
+					{ name: "Scayt", items: ["Scayt"]},
+					{ name: "paragraph", items : [ "NumberedList","BulletedList","-","Outdent","Indent"] }],
         		language: "$lang",
         		baseHref: "$baseUri",
         		contentsCss: "$css",
@@ -31,6 +43,19 @@ class GomaCKEditor extends GomaEditor {
         		width: "$width",
         		resize_dir: "vertical",
         		autoGrow_maxHeight: $(document).height() - 300';
+       
+    /**
+     * extra javascript-code for html.
+    */
+    static $htmlJS = '
+    CKEDITOR.config.floatingtools = "Basic";
+	CKEDITOR.config.floatingtools_Basic =
+	[
+		["Format", "Bold", "Italic", "Underline","-","RemoveFormat", "-", "JustifyLeft","JustifyCenter","JustifyRight", "-", "NumberedList", "BulletedList", "-", "Link"]
+	];
+	
+	CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
+	CKEDITOR.config.autoGrow_onStartup = true;';
 	
 	/**
 	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to generate the editor.
@@ -38,16 +63,83 @@ class GomaCKEditor extends GomaEditor {
 	 * @param 	string $name the name as which the data should posted to the server
 	 * @param 	string $type type for which the editor should be generated
 	 * @param 	string $text the text for the editor
+	 * @param	array $params list of some params like width css baseUri lang
 	*/
-	public static function generateEditor($name, $type, $text) {
+	public static function generateEditor($name, $type, $text, $params = array()) {
+		$id = $this->class . "_" . $name;
+		$width = isset($params["width"]) ? $params["width"] : "";
+		
 		if($type == "html") {
 			
+			$config = self::$htmlConfig;
+			$params = ArrayLib::map_key($params, "strtolower");
+			if(preg_match_all('/\$([a-zA-Z0-9_]+)/i', $config, $matches)) {
+				foreach($matches[1] as $k => $param) {
+					if(isset($params[$param]))
+						$config = str_replace($matches[0][$k], $params[$param], $config);
+				}
+			}
+			
+			Resources::addJS('var bindIEClickPatch = function() {
+	if(getInternetExplorerVersion() != -1) {
+		$(document).on("click", "a.cke_dialog_ui_button", function(){
+			self.leave_check = true;
+			setTimeout(function(){
+				self.leave_check = false;
+			}, 100);
+		});
+	}
+}
+
+$(function(){
+	// apple bug with contenteditable of iOS 4 and lower
+	// firefox 3 and above are supported, otherwise dont load up
+	if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
+		bindIEClickPatch();
+		setTimeout(function(){
+			
+			if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$this->input->id.');
+			'.self::$htmlJS.'
+			CKEDITOR.replace("'.$id.'", {
+        		'.$config.'
+    		});
+    		
+    		CKEDITOR.instances.'.$id.'.on("focus", function(){
+				self.leave_check = false;
+			});
+		}, 100);
+		
+		
+		$("#'.$id.'").parents("form").on("beforesubmit",function(){
+			$("#'.$id.'").val(CKEDITOR.instances.'.$this->input->id.'.getData());
+		});
+		$("#'.$id.'").change(function(){
+			
+			CKEDITOR.instances.'.$id.'.setData($("#'.$id.'").val());
+		});
+		$(".editor_toggle").css("display", "block");
+	}
+});
+window.toggleEditor_'.$id.' = function() {
+	if(CKEDITOR.instances["'.$id.'"] != null) {
+		CKEDITOR.instances["'.$id.'"].destroy();
+	} else {
+		CKEDITOR.replace("'.$id.'", {
+    		'.$config.'
+		});
+		CKEDITOR.instances.'.$id.'.on("focus", function(){
+			self.leave_check = false;
+		});
+	}
+		
+}');
 		} else if($type == "bbcode") {
 			
 		}
 		
 		return new HTMLNode("textarea", array(
 			"name"	=> $name,
+			"id"	=> $id,
 			"css"	=> "width: 100%; height: 400px;"
 		), convert::raw2text($text));
 	}
