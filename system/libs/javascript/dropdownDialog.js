@@ -69,7 +69,7 @@ self.dropdownDialogs = [];
 		*/
 		Init: function() {
 			
-			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
+			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
 			
 			var $this = this;
 			
@@ -89,12 +89,16 @@ self.dropdownDialogs = [];
 					"position": "absolute"
 				});
 				
-				this.dropdown.find(" > div > .content").resize(function(){
+				var d = function(){
 					$this.definePosition();
-				});
+				};
 				
-				$(window).resize(function(){
-					$this.definePosition();
+				
+				this.dropdown.find(" > div > .content").resize(d);
+				$(window).resize(d);
+				
+				$(window).scroll(function(){
+					$this.moveDropdown($this.currentPos);
 				});
 				
 				var loading = true;
@@ -129,7 +133,7 @@ self.dropdownDialogs = [];
 			if(loading)
 				this.setLoading();
 				
-			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
+			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
 		},
 		
 		/**
@@ -140,16 +144,15 @@ self.dropdownDialogs = [];
 		 *@param string - position: if to set this.position
 		*/
 		definePosition: function(position) {
-			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
+			if(console.log)
+				console.log("define position");
+				
+			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
 			
 			if(position != null) {
 	 			this.setPosition(position);
 			}
 			
-			if(this.elem.css("position") == "fixed") {
-				throw "dropdownDialog does not support elements with position:fixed yet";
-				return false;
-			}
 			if(this.elem.css("display") == "none") {
 				throw "dropdownDialog does not support elements with display:none yet";
 				return false;
@@ -189,11 +192,14 @@ self.dropdownDialogs = [];
 			this.dropdown.find(" > div").attr("class", "");
 			this.dropdown.find(" > div").addClass("position_" + position);
 			
+			this.currentPos = position;
 			// now move dropdown
 			this.moveDropdown(position);
 			
-			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
+			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
 			
+			if(console.log)
+				console.log("done: define position");
 		},
 		
 		/**

@@ -259,8 +259,8 @@ fieldset > .form_field > .info_field {
 }
 
 .g-checkbox.disabled {
-	background: #e0e0e0;
-	border-color: #d0d0d0;
+	background: #eee;
+	border-color: #d5d5d5;
 }
 .g-checkbox.disabled label {
 	color: #888 !important;

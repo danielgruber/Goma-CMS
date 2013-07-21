@@ -8,7 +8,7 @@
 
 body, html {
     color: #222;
-    font-family: Helvetica, Arial, Verdana;
+    font-family: "Helvetica Neue", Arial, Verdana;
 	font-size: 12pt;
 	line-height: 1.25em;
 	height: 100%;
@@ -83,6 +83,9 @@ h1, h2, h3, h4, h5, h6 {
 	top: 0;
 	left: 0;
 	z-index: 99;
+}
+.dropdownDialog .content {
+	opacity: 0.95;
 }
 #navi {
 	height: 3.5em;
@@ -597,24 +600,6 @@ h1, h2, h3, h4, h5, h6 {
 	padding-top: 0.5em;
 }
 
-.flatButton {
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	border: 1px solid #999;
-	background: #ddd;
-	float: left;
-	margin: 0.3em;
-	height: 2em;
-	padding: 0.5em 1em;
-	display: block;
-	text-decoration: none !important;
-	color: #555;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
 
 .logoutButton {
 	margin-top: -3px;
@@ -626,11 +611,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 select {
-	padding: 0.32em;
+	padding: 0.7em;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
-	border: 1px solid #ddd;
+	border: 1px solid #eee;
 	margin: 0.3em;
     background: #f5f5f5;
 }
@@ -641,7 +626,7 @@ select:focus {
 	border-color: #999 !important;*/
 }
 textarea, input[type=text], input[type=password] {
-	padding: 0.3em;
+	padding: 0.4em;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
@@ -654,7 +639,7 @@ textarea, input[type=text], input[type=password] {
 	-ms-transition: all 0.2s linear;
 	background: #f5f5f5 url(images/input_bg.png) repeat-x;*/
     background: #eee;
-    border: 1px solid #bbb;
+    border: 1px solid #ccc;
 }
 textarea:hover, input[type=text]:hover, input[type=password]:hover {
 	/*border: 1px solid #888;*/
@@ -918,58 +903,56 @@ form h2 {
 	background: #fff;
 }
 #preview #bottomBarWrapper {
-	border-top: 1px solid #999;
+	border-bottom: 1px solid #ccc;
+	top: 0;
+	left: 0;
+	position: absolute;
+	width: 100%;
+}
+#preview iframe {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
 }
 #preview #bottomBar {
-	background: #ddd;
-	border-top: 1px solid #eee;
+	background: #fff;
 }
 #preview #bottomBar .previewLinks {
-	border: 1px solid #999;
-	background: url(images/bg_states.png) repeat-x #ddd;
-	float: left;
-	height: 27px;
-	margin: 10px;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	padding: 0;
-}
-#preview #bottomBar .previewLink, #preview #bottomBar .edit {
-	float: left;
-	margin: 0;
+	margin-left: 3em;
+	margin-right: 3em;
+	text-align: center;
 }
 #preview #bottomBar .previewLink {
-	border: 0;
-	height: 27px;
-	font-weight: bold;
+	padding: 1em;
+	color: #24acb8;
+	padding: 1em;
+	display: inline-block;
 }
 #preview #bottomBar .state.active {
-	background: url(images/bg_states.png) repeat-x #da097a;
-	background-position: 0px -54px;
-	color: #fff;
+	color: #da097a
 }
 #preview #bottomBar .publish.active {
-	background: url(images/bg_states.png) repeat-x #24acb8;
-	background-position: 0px -27px;
-	color: #fff;
+	color: #da097a
 }
 
 #preview #bottomBar .edit {
-	float: right;
-	margin: 10px;
-	border: 1px solid #999;
+	float: left;
+	padding: 1em;
+	color: #888;
+	margin: 0 0.3em;
+	padding-left: 2.5em;
+	background: url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.left.png) no-repeat left center;
+	display: block;
 }
 #preview #bottomBar .edit:hover {
-	background: url(images/bg_states.png) repeat-x #24acb8;
-	background-position: 0px -81px;
-	color: #fff;
+	
 }
 #preview #bottomBar .new_window {
+	display: block;
 	margin: 16px 10px;
 	float: right;
-	color: #000;
-	font-weight: bold;
+	color: #24acb8;
 }
 
 /*.form_field_save_draft .formaction {
@@ -1147,6 +1130,9 @@ form h2 {
 	color: #da097a !important;
 	border: 0;
 	border-bottom: 2px solid #da097a !important;
+}
+.tabs > ul li a {
+	height: 0.95em;
 }
 .tabs > ul li .tab {
 	height: 2.3em;
