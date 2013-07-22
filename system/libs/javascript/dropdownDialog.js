@@ -533,8 +533,6 @@ self.dropdownDialogs = [];
 					var width = height * sv;
 				}
 				
-				preloader.src = null; // IE overflow bug
-				
 				// set img-tag
 				that.setContent('<img src="'+href+'" alt="'+href+'" height="'+height+'" width="'+width+'" />');
 			}
