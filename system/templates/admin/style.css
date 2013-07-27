@@ -36,7 +36,6 @@ a:hover {
 	text-decoration: underline;
 }
 h1, h2, h3, h4, h5, h6 {
-	font-weight: normal;
 	color: #000;
 }
 
@@ -109,9 +108,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 #navi span {
 	display: block;
-	padding: 1.11em 1em;
+	padding: 1.01em 1em;
+	font-size: 1.1em;
 	color: #ddd;
-	font-weight: bold;
 }
 #navi span:hover {
 	color: #fff;

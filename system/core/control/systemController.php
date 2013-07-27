@@ -102,8 +102,8 @@ class systemController extends Controller {
 			$output = $GLOBALS["lang"];
 		} else {
 			if(is_array($lang) && count($lang) > 0) {
-				
 				foreach($lang as $value) {
+					$value = strtoupper($value);
 					if(isset($GLOBALS["lang"][$value])) {
 						$output[$value] = $GLOBALS["lang"][$value];
 					} else {
@@ -112,6 +112,7 @@ class systemController extends Controller {
 					}
 				}
 			} else if(is_string($lang)) {
+				$lang = strtoupper($lang);
 				if(isset($GLOBALS["lang"][$lang])) {
 						$output[$lang] = $GLOBALS["lang"][$lang];
 					} else {

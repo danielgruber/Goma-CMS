@@ -1052,7 +1052,7 @@ if(typeof self.loader == "undefined") {
 			if(typeof BASE_SCRIPT == "undefined")
 				return false;
 			
-			if(typeof lang[name] == "undefined") {
+			if(typeof lang[name.toUpperCase()] == "undefined") {
 				var jqXHR = $.ajax({
 					async: false,
 					cache: true,
@@ -1064,17 +1064,17 @@ if(typeof self.loader == "undefined") {
 				try {
 					var data = parseJSON(jqXHR.responseText);
 					for(i in data) {
-						lang[i] = data[i];
+						lang[i.toUpperCase()] = data[i];
 					}
 				} catch(e) {
-					lang[name] = null;
+					lang[name.toUpperCase()] = null;
 				}
 			}
 			
-			if(lang[name] == null) {
+			if(lang[name.toUpperCase()] == null) {
 				return (typeof _default == "undefined") ? _default : name;
 			} else {
-				return lang[name];
+				return lang[name.toUpperCase()];
 			}
 		}
 		
@@ -1101,7 +1101,7 @@ if(typeof self.loader == "undefined") {
 			var names = [];
 			// check names
 			for(i in _names) {
-				if(typeof lang[_names[i]] == "undefined")
+				if(typeof lang[_names[i].toUpperCase()] == "undefined")
 					names.push(_names[i]);
 			}
 			
@@ -1120,7 +1120,7 @@ if(typeof self.loader == "undefined") {
 						try {
 							var data = parseJSON(html);
 							for(i in data) {
-								lang[i] = data[i];
+								lang[i.toUpperCase()] = data[i];
 							}
 						} catch(e) { 
 							alert(e);
