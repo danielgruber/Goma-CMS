@@ -723,7 +723,16 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						), lang("content", "content")),
 						
 						new Tab('meta', array(
-														
+							$title = new textField('title', lang("title_page", "title of the page")),
+							$mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")),
+							$parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+								"root" => lang("no_parentpage", "Root Page"),
+								"subpage" => array(
+									lang("subpage","sub page"),
+									"parent"
+								)
+							)),
+							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),			
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
 							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
@@ -742,7 +751,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				// append the field title, mainbar-title and hierarchy
 				// they are in Editor-Area in an other tab than in add-view
-				if($this->id == 0) {
+				/*if($this->id == 0) {
 					$titleHolder = $form->content;
 				} else {
 					$titleHolder = $form->meta;
@@ -759,7 +768,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					)
 				)), 1);
 				
-				$titleHolder->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'), 2);
+				$titleHolder->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'), 2);*/
 				
 				
 				// check for permissions

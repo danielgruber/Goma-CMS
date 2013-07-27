@@ -12,14 +12,14 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Hierarchy extends DataObjectExtension {
+class Hierarchy extends DataObjectExtension implements TreeModel {
 	/**
 	 * extra-methods
 	 *
 	 *@name extra_methods
 	*/
 	static $extra_methods = array(
-		"AllChildren", "getallChildVersionIDs", "getAllChildIDs", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents"
+		"AllChildren", "getallChildVersionIDs", "getAllChildIDs", "searchChildren", "searchAllChildren", "getAllParentIDs", "getAllParents", "build_tree"
 	);
 	
 	/**
@@ -316,5 +316,15 @@ class Hierarchy extends DataObjectExtension {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * generates a tree.
+	 *
+	 * @param 	object|null $parent parent
+	 * @return 	array|object TreeNodes
+	*/
+	static function build_tree($parent = null) {
+	
 	}
 }

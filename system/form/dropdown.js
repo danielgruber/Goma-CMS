@@ -417,6 +417,7 @@ DropDown.prototype = {
 		if(!this.multiple) {
 			if(that.input.val() == id) {
 				that.input.val(0);
+				this.showDropDown();
 			}
 		}
 	}

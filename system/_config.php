@@ -7,20 +7,21 @@
  */
 
 Core::addRules(array(
-	"dev" => "dev",
-	'admin//$item' => "adminController",
-	'api/stats' => "StatController",
-	'system/ajax//link/$id' => 'ajaxlink',
-	'system/ajax//popup/$id' => 'ajaxlink',
-	"api/v1//\$ClassName!" => "RestfulServer",
-	"treeserver" => "TreeServer",
-	'images/resampled' => "imageResize",
-	'profile//$Action' => "ProfileController",
-	'member/$id!' => "ProfileController",
-	"uploads" => "UploadController",
-	"gloader" => "Gloader",
-	"system/help" => "HelpController",
-	"pusher" => "PushController"
+	"dev" 						=> "dev",
+	'admin//$item' 				=> "adminController",
+	'api/stats' 				=> "StatController",
+	'system/ajax//link/$id' 	=> 'ajaxlink',
+	'system/ajax//popup/$id' 	=> 'ajaxlink',
+	"api/v1//\$ClassName!" 		=> "RestfulServer",
+	"treeserver" 				=> "TreeServer",
+	'images/resampled' 			=> "imageResize",
+	'profile//$Action' 			=> "ProfileController",
+	'member/$id!' 				=> "ProfileController",
+	"uploads" 					=> "UploadController",
+	"gloader" 					=> "Gloader",
+	"system/help" 				=> "HelpController",
+	"pusher" 					=> "PushController",
+	"treecallback"				=> "TreeCallbackUrl"
 ), 10);
 
 Core::addRules(array("system" => "SystemController", ), 9);
