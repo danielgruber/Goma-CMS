@@ -1,148 +1,53 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 22.12.2011
-  * $Version 1.2.6
+ * generates the Editor for HTML-Code.
+ *
+ * @package		Goma\libs\WYSIWYG
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.3
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class HTMLEditor extends Textarea
 {
-		/**
-		 * generates the field
-		 *
-		 *@name field
-		 *@access public
-		*/
-		public function field()
-		{
-				$this->callExtending("beforeField");
-				
-				$this->setValue();
-				
-				$this->container->append(new HTMLNode("label", array(
-					'for'	=> $this->ID()
-				), $this->title));
-				
-				$this->container->append(array(
-					new HTMLNode("a", array(
-						'href'		=> 'javascript:;',
-						'onclick'	=> 'toggleEditor_'.$this->input->id.'()',
-						"style"		=> "display: none;",
-						"class"		=> "editor_toggle"
-					), lang("editor_toggle", "Toggle Editor"))
-				));
-				
-				$this->container->append($this->input);
-				
-				$this->callExtending("afterRender");
-				
-				return $this->container;
-		}
-		
-		/**
-		 * generates the JavaScript
-		 *
-		 *@name JS
-		 *@access public
-		*/
-		public function JS()
-		{
-				if($this->width == "100%") {
-					$width = "";
-				} else if(strpos($this->width, "px") && (int) $this->width < 350) {
-					$width = "350px";
-				} else if($this->width < 350) {
-					$width = "350px";
-				} else {
-					$width = $this->width;
-				}
-				
-				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_1/";');
-				Resources::add("system/libs/thirdparty/ckeditor4_1/ckeditor.js", "js");
-				if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
-				Resources::add("ckeditor_goma.css", "css");
-				
-				$accessToken = randomString(20);
-				$_SESSION["uploadTokens"][$accessToken] = true;
-				Resources::addData("var CKEditor_Upload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken, true)."; var CKEditor_ImageUpload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken, true).";");
-				
-				$js = '
-var bindIEClickPatch = function() {
-	if(getInternetExplorerVersion() != -1) {
-		$(document).on("click", "a.cke_dialog_ui_button", function(){
-			self.leave_check = true;
-			setTimeout(function(){
-				self.leave_check = false;
-			}, 100);
-		});
-	}
-}
-
-$(function(){
-	// apple bug with contenteditable of iOS 4 and lower
-	// firefox 3 and above are supported, otherwise dont load up
-	if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
-		bindIEClickPatch();
-		setTimeout(function(){
+	/**
+	 * generates the field
+	 *
+	 *@name field
+	 *@access public
+	*/
+	public function field()
+	{
+			$this->callExtending("beforeField");
 			
-			if(CKEDITOR.instances.'.$this->input->id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$this->input->id.');
-			CKEDITOR.replace("'.$this->input->id.'", {
-        		toolbar : "Goma",
-        		language: "'.Core::getCMSVar("lang").'",
-        		baseHref: "'.BASE_URI.'",
-        		contentsCss: "'.self::buildEditorCSS().'",
-        		filebrowserUploadUrl: self.CKEditor_Upload_Path,
-        		filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
-        		width: "'.$width.'",
-        		resize_dir: "vertical",
-        		autoGrow_maxHeight: $(document).height() - 300
-    		});
-    		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
-				self.leave_check = false;
-			});
-		}, 100);
-		
-		
-		$("#'.$this->form()->ID().'").on("beforesubmit",function(){
-			$("#'.$this->input->id.'").val(CKEDITOR.instances.'.$this->input->id.'.getData());
-		});
-		$("#'.$this->input->id.'").change(function(){
+			$this->setValue();
 			
-			CKEDITOR.instances.'.$this->input->id.'.setData($("#'.$this->input->id.'").val());
-		});
-		$(".editor_toggle").css("display", "block");
+			$this->container->append(new HTMLNode("label", array(
+				'for'	=> $this->ID()
+			), $this->title));
+			
+			$this->container->append(array(
+				new HTMLNode("a", array(
+					'href'		=> 'javascript:;',
+					'onclick'	=> 'toggleEditor_'.$this->name.'()',
+					"style"		=> "display: none;",
+					"class"		=> "editor_toggle",
+					"id"		=> "editor_toggle_" . $this->name
+				), lang("EDITOR_TOGGLE", "Toggle Editor"))
+			));
+			
+			$accessToken = randomString(20);
+-			$_SESSION["uploadTokens"][$accessToken] = true;
+			
+			$params = array("width" => $this->width, "baseUri" => BASE_URI, "lang" => Core::$lang, "css" => $this->buildEditorCSS(), "uploadpath" => BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken=' . $accessToken, "imageuploadpath" => BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken);
+			$this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->value, $params));
+			
+			$this->callExtending("afterRender");
+			
+			return $this->container;
 	}
-});
-window.toggleEditor_'.$this->input->id.' = function() {
-	if(CKEDITOR.instances["'.$this->input->id.'"] != null) {
-		CKEDITOR.instances["'.$this->input->id.'"].destroy();
-	} else {
-		CKEDITOR.replace("'.$this->input->id.'", {
-    		toolbar : "Goma",
-    		language: "'.Core::getCMSVar("lang").'",
-    		baseHref: "'.BASE_URI.'",
-    		contentsCss: "'.self::buildEditorCSS().'",
-    		filebrowserUploadUrl: self.CKEditor_Upload_Path,
-        	filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
-        	width: "'.$width.'",
-        	resize_dir: "vertical",
-        	autoGrow_maxHeight : $(document).height() - 300
-		});
-		CKEDITOR.instances.'.$this->input->id.'.on("focus", function(){
-			self.leave_check = false;
-		});
-	}
-		
-}
-						';
-				return $js;
-		}
-		
+	
 	/**
 	 * builds editor.css
 	 *

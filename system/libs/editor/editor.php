@@ -27,15 +27,6 @@ abstract class GomaEditor extends Object {
 	);
 	
 	/**
-	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to generate the editor.
-	 *
-	 * @param 	string $name the name as which the data should posted to the server
-	 * @param 	string $type type for which the editor should be generated
-	 * @param 	string $text the text for the editor
-	*/
-	abstract public static function generateEditor($name, $type, $text);
-	
-	/**
 	 * here you can hook in to transform the code posted to code which can be saved to the database.
 	 *
 	 * @param 	string $code code
@@ -62,5 +53,15 @@ abstract class GomaEditor extends Object {
 		
 		return false;
 	}
+	
+	
+	/**
+	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to generate the editor.
+	 *
+	 * @param 	string $name the name as which the data should posted to the server
+	 * @param 	string $type type for which the editor should be generated
+	 * @param 	string $text the text for the editor
+	*/
+	abstract public function generateEditor($name, $type, $text);
 }
  

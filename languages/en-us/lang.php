@@ -165,8 +165,7 @@ $lang = array(
 	"text"                                         	=> "Text",
 	"menupoint_title"								=> "Navigation title",
 	"menupoint_title_info"							=> "This is the title of the page in the navigation.",
-	"js_disable_editor"                            	=> "You have to activate JavaScript to user the Editor.",
-	"overview"                                     	=> "Overview",
+	"OVERVIEW"                                     	=> "Overview",
 	"own_css"                                      	=> "Own CSS (For Developers)",
 	"less_rights"                                  	=> "You don't have the permission to do this!",
 	"wrong_login"                                  	=> "<strong>Error</strong><br />Unknowen user or wrong password!",
@@ -189,20 +188,20 @@ $lang = array(
 	"email_info"									=> "You can separate multiple e-mail-adresses with commas.",
 	"email_correct_info"							=> "This email-adresse should be yours.",
 	'dragndrop_info'								=> "Drag elements to sort them.",
+	"no_item_selected"								=> "No item selected."
 	"noscript"                                      => "Please activate JavaScript to use this function!",
 	"checked"                                       => "Selected",
 	/* edit tue 3.11.09 11:10 */
 	'login_locked'                                  => "The account is disabled by admin.",
 	"login_not_unlocked"							=> "The account wasn't activated right now.",
 	"not_unlocked"									=> "Not yet activated",
-	"page_wartung"                                  => "This site is currently under maintenance. Please come back later.",
-	"wartung"                                       => "maintenance active",
-	"site_status"                                   => "status of the website",
+	"SITE_CURRENT_MAINTENANCE"                      => "This site is currently under maintenance. Please come back later.",
+	"SITE_MAINTEANCE"                               => "maintenance mode",
+	"SITE_STATUS"                                   => "status of the website",
 	"site_exists"									=> "A page with this filename already exists.",
-	"normal"                                        => "Normal",
+	"SITE_ACTIVE"                                   => "Site reachable normally",
 	"phone"                                         => "Phone",
 	"settings_normal"                               => "General settings",
-	"editor_toggle"                                 => "Toggle editor",
 	"keywords"                                      => "Website keywords",
 	"web_description"                               => "Website description",
 	"site_keywords"									=> "Keywords of the site",
@@ -596,8 +595,12 @@ $lang = array(
     "off"						=> "off",
     
     
-    "dayly"						=> "dayly",
-    "weekly"					=> "weekly",
-    "monthly"					=> "monthly",
-    "yearly"					=> "yearly"
+    "DAYLY"						=> "dayly",
+    "WEEKLY"					=> "weekly",
+    "MONTHLY"					=> "monthly",
+    "YEARLY"					=> "yearly",
+    
+	"JS_DISABLE_EDITOR"         => "You have to activate JavaScript to user the Editor.",
+	"EDITOR_TOGGLE"             => "Toggle editor",
+	"NO_EDITOR"					=> "No WYSIWYG-Editor."
 );

@@ -310,7 +310,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 							<li class="expanded last" id="tree_'.$this->classname.'">
 								<span class="a  '.$marked.'">
 									<span class="b">
-										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("result", "result").'</span></a>
+										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("RESULT", "result").'</span></a>
 									</span>
 								</span>
 								<ul class="rootnode">
@@ -365,12 +365,12 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function ajaxSave($data, $response) {
 		if($model = $this->save($data)) {
 			// notify the user
-			Notification::notify($model->classname, lang("successful_saved", "The data was successfully written!"), lang("saved"));
+			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
 			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }, ".var_export($model["id"], true)."); }");
 			return $response;
 		} else {
-			$dialog = new Dialog(lang("less_rights"), lang("error"));
+			$dialog = new Dialog(lang("LESS_RIGHTS"), lang("ERROR"));
 			$response->exec($dialog);
 			return $response;
 		}
@@ -570,6 +570,9 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	*/
 	public function index() {
 		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
+		if(!$this->template)
+			return "";
 		return parent::index();
 	}
 }

@@ -110,6 +110,21 @@
 	width: 42px;
 }
 
+.leftandmaintable tr > .main .no_item {
+	font-size: 2em;
+	line-height: 2em;
+	color: #999;
+	text-align: center;
+	height: 100%;
+	display: table;
+	width: 100%;
+}
+
+.leftandmaintable tr > .main .no_item span {
+	display: table-cell; 
+	vertical-align: middle; 
+	text-align: center; 
+}
 /* sidebar */
 
 .leftandmaintable tr > .left {
@@ -161,22 +176,6 @@
 	padding-top: 1px;
 }
 
-.create li a {
-	display: block;
-	color: #555;
-	text-decoration: none;
-	padding: 0.5em;
-}
-.create li a:hover {
-	color: #000;
-}
-.create .node span {
-	background-repeat: no-repeat;
-	background-image: url(../../../images/icons/fatcow16/file.png);
-	background-position: 4px 4px;
-	padding: 4px 6px 4px 23px;
-	display: block;
-}
 
 .leftandmaintable tr > .left {
 	overflow: hidden;
@@ -204,12 +203,17 @@
 .legend div span {
 	background-image: none !important;
 }
-
-ul.list-view.create li a {
-	padding-left: 2em;
+ul.list-view.create {
+	margin-left: -0.7em;
+	margin-right: -0.7em;
 }
+ul.list-view.create li a {
+	padding-left: 3em;
+}
+
 ul.list-view.create li a img {
 	top: 1.65em;
+	left: 1.5em;
 }
 
 @media only screen and (min-width: 900px) {

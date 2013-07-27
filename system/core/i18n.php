@@ -15,7 +15,7 @@ ClassInfo::addSaveVar("i18n", "defaultLanguagefiles");
  * Class for localization.
  *
  * @package		Goma\System\Core
- * @version		1.4.3
+ * @version		1.4.4
  */
 class i18n extends Object {
 	/**
@@ -124,6 +124,8 @@ class i18n extends Object {
 				}
 			}
 
+			$lang = ArrayLib::map_key("strtoupper", $lang);
+			
 			$cacher->write($lang, 600);
 		}
 		if(PROFILE)
@@ -164,7 +166,7 @@ class i18n extends Object {
 
 		if(PROFILE)
 			Profiler::unmark("i18n::listLangs");
-
+		
 		return $data;
 	}
 

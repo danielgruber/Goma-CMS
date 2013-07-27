@@ -15,7 +15,7 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
  * Goma Core.
  *
  * @package		Goma\Core
- * @version		3.3.34
+ * @version		3.3.35
  */
 class Core extends object {
 	/**
@@ -658,7 +658,7 @@ class Core extends object {
 	public static function serve($output) {
 
 		if(isset($_GET["flush"]) && Permission::check("ADMIN"))
-			Notification::notify("Core", lang("cache_deleted"));
+			Notification::notify("Core", lang("CACHE_DELETED"));
 
 		if(PROFILE)
 			Profiler::unmark("render");
@@ -962,7 +962,7 @@ class Dev extends RequestHandler {
 	 *
 	 */
 	public function buildDistro() {
-		self::$title = lang("distro_build");
+		self::$title = lang("DISTRO_BUILD");
 		return g_SoftwareType::listAllSoftware()->renderWith("framework/buildDistro.html");
 	}
 
@@ -978,7 +978,7 @@ class Dev extends RequestHandler {
 		if(!isset($subname))
 			$subname = $this->getParam("subname");
 
-		self::$title = lang("distro_build");
+		self::$title = lang("DISTRO_BUILD");
 
 		if(!$name)
 			return false;
@@ -1114,7 +1114,7 @@ function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwD
  */
 function throwErrorById($code) {
 	$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
-	$codes = array(1 => array('name' => 'Security Error', 'details' => '', "status_code" => 500), 2 => array('name' => 'Security Error', 'details' => 'Ip banned! Please wait 60 seconds!', "status_code" => 403), 3 => array('name' => $GLOBALS['lang']['mysql_error_small'], 'details' => $GLOBALS['lang']['mysql_error'] . $sqlerr, "status_code" => 500), 4 => array('name' => $GLOBALS['lang']['mysql_connect_error'], 'details' => $sqlerr, "status_code" => 500), 5 => array('name' => $GLOBALS['lang']['less_rights'], 'details' => '', "status_code" => 403), 6 => array('name' => "PHP-Error", 'details' => "", "status_code" => 500), 7 => array('name' => 'Service Unavailable', 'details' => 'The Service is currently not available', "status_code" => 503), );
+	$codes = array(1 => array('name' => 'Security Error', 'details' => '', "status_code" => 500), 2 => array('name' => 'Security Error', 'details' => 'Ip banned! Please wait 60 seconds!', "status_code" => 403), 3 => array('name' => lang("MYSQL_ERROR_SMALL"), 'details' => lang("MYSQL_ERROR") . $sqlerr, "status_code" => 500), 4 => array('name' => lang("MYSQL_CONNECT_ERROR"), 'details' => $sqlerr, "status_code" => 500), 5 => array('name' => lang("LESS_RIGHTS"), 'details' => '', "status_code" => 403), 6 => array('name' => "PHP-Error", 'details' => "", "status_code" => 500), 7 => array('name' => 'Service Unavailable', 'details' => 'The Service is currently not available', "status_code" => 503), );
 	if(isset($codes[$code])) {
 		HTTPresponse::setResHeader($codes[$code]["status_code"]);
 		Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details']);

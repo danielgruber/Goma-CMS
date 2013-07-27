@@ -32,7 +32,7 @@
 	background: #eee;
 	
 	margin: 0 1px;
-	margin-top: -0.2em;
+	margin-top: -0.25em;
 	
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
@@ -61,7 +61,7 @@
 	-moz-box-shadow: none;
 }
 .tabs > ul li a {
-	padding: 0.65em 1em !important;
+	padding: 0.65em 1em;
 	height: 1em;
 }
 .tabs > ul li a:hover, .tabs > ul li .tab:hover {
@@ -76,6 +76,11 @@
 	padding-bottom: 0.7em;
 }
 .tabs > ul > li > a.active {
+	color: #444;
+	background: #fff;
+	border-bottom: 0;
+	cursor: text;
+	margin-bottom: -0.3em;
 	padding-bottom: 0.7em;
 }
 
@@ -87,7 +92,7 @@
 	display: block;
 	border-top: 1px solid #ccc;
 	margin-bottom: -0.3em;
-	margin-top: -0.20em;
-	padding-top: 0.20em;
+	margin-top: -0.23em;
+	padding-top: 0.26em;
 	padding-bottom: 0.7em;
 }

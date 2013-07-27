@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version 1.0.2
+ * @version 1.0.3
  */
 
 defined("IN_GOMA") OR die();
@@ -53,10 +53,13 @@ function randomString($length, $numeric = true) {
  * @return string Localized string or $default
  */
 function lang($name, $default = "") {
+	$name = strtoupper($name);
 	if(isset($GLOBALS["lang"][$name])) {
 		$lang = $GLOBALS["lang"][$name];
-	} else {
+	} else if($default) {
 		$lang = $default;
+	} else {
+		$lang = $name;
 	}
 
 	if(!strpos($lang, ">\n") && !strpos($lang, "</")) {
@@ -605,7 +608,7 @@ function parse_lang($str, $arr = array()) {
  *@return string - the parsed string
  */
 function var_lang($str, $replace = array()) {
-	$language = lang($str, "");
+	$language = lang($str, $str);
 	preg_match_all('/%(.*)%/', $language, $regs);
 	foreach($regs[1] as $key => $value) {
 		$re = $replace[$value];
@@ -961,7 +964,7 @@ class SQLException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 3, Exception $previous) {
+	public function __construct($m = "", $code = 3, Exception $previous = null) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
 		parent::__construct($m, $code, $previous);

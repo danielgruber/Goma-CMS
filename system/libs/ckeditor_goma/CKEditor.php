@@ -15,47 +15,52 @@ class GomaCKEditor extends GomaEditor {
 	 * supports HTML and BBCode.
 	*/
 	static $types = array(
-		"html", "bbcode"
+		"html"
 	);
+	
+	/**
+	 * representative title of this class.
+	*/
+	static $cname = "CKEditor";
 	
 	/**
 	 * javascript-config for HTML-Code.
 	*/
 	static $htmlConfig = '
-				toolbar : [{ name: "document", items : [ "Source"] },
-					{ name: "links", items : [ "Link","Unlink","Anchor" ] },
-					{ name: "clipboard", items : [ "Cut","PasteText","PasteFromWord","-","Undo","Redo" ] },
-					{ name: "basicstyles", items : [ "Bold","Italic","Underline","-","RemoveFormat" ] },
-					{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
-					{ name: "tools", items : [ "Maximize" ] },
-					"/",
-					{ name: "insert", items : [ "Image","Table","PageBreak"] },
-					{ name: "styles", items : [ "Styles","Format" ] },
-					{ name: "colors", items : [ "TextColor","BGColor" ] },
-					{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
-					{ name: "Scayt", items: ["Scayt"]},
-					{ name: "paragraph", items : [ "NumberedList","BulletedList","-","Outdent","Indent"] }],
-        		language: "$lang",
-        		baseHref: "$baseUri",
-        		contentsCss: "$css",
-        		filebrowserUploadUrl: "$uploadpath",
-        		filebrowserImageUploadUrl : "$ckeditorimageuploadpath",
-        		width: "$width",
-        		resize_dir: "vertical",
-        		autoGrow_maxHeight: $(document).height() - 300';
-       
+			toolbar : [{ name: "document", items : [ "Source"] },
+				{ name: "links", items : [ "Link","Unlink","Anchor" ] },
+				{ name: "clipboard", items : [ "Cut","PasteText","PasteFromWord","-","Undo","Redo" ] },
+				{ name: "basicstyles", items : [ "Bold","Italic","Underline","-","RemoveFormat" ] },
+				{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
+				{ name: "tools", items : [ "Maximize" ] },
+				"/",
+				{ name: "insert", items : [ "Image","Table","PageBreak"] },
+				{ name: "styles", items : [ "Styles","Format" ] },
+				{ name: "colors", items : [ "TextColor","BGColor" ] },
+				{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
+				{ name: "Scayt", items: ["Scayt"]},
+				{ name: "paragraph", items : [ "NumberedList","BulletedList","-","Outdent","Indent"] }],
+    		language: "$lang",
+    		baseHref: "$baseUri",
+    		contentsCss: "$css",
+    		filebrowserUploadUrl: "$uploadpath",
+    		filebrowserImageUploadUrl : "$imageuploadpath",
+    		width: "$width",
+    		resize_dir: "vertical",
+    		autoGrow_maxHeight: $(document).height() - 300';
+   
     /**
      * extra javascript-code for html.
     */
     static $htmlJS = '
-    CKEDITOR.config.floatingtools = "Basic";
-	CKEDITOR.config.floatingtools_Basic =
-	[
-		["Format", "Bold", "Italic", "Underline","-","RemoveFormat", "-", "JustifyLeft","JustifyCenter","JustifyRight", "-", "NumberedList", "BulletedList", "-", "Link"]
-	];
-	
-	CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
-	CKEDITOR.config.autoGrow_onStartup = true;';
+	    CKEDITOR.config.floatingtools = "Basic";
+		CKEDITOR.config.floatingtools_Basic =
+		[
+			["Format", "Bold", "Italic", "Underline","-","RemoveFormat", "-", "JustifyLeft","JustifyCenter","JustifyRight", "-", "NumberedList", "BulletedList", "-", "Link"]
+		];
+		
+		CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
+		CKEDITOR.config.autoGrow_onStartup = true;';
 	
 	/**
 	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to generate the editor.
@@ -65,9 +70,14 @@ class GomaCKEditor extends GomaEditor {
 	 * @param 	string $text the text for the editor
 	 * @param	array $params list of some params like width css baseUri lang
 	*/
-	public static function generateEditor($name, $type, $text, $params = array()) {
+	public function generateEditor($name, $type, $text, $params = array()) {
 		$id = $this->class . "_" . $name;
 		$width = isset($params["width"]) ? $params["width"] : "";
+		
+		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_1/";');
+		Resources::add("system/libs/thirdparty/ckeditor4_1/ckeditor.js", "js");
+		if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
+		Resources::add("ckeditor_goma.css", "css");
 		
 		if($type == "html") {
 			
@@ -79,6 +89,7 @@ class GomaCKEditor extends GomaEditor {
 						$config = str_replace($matches[0][$k], $params[$param], $config);
 				}
 			}
+			
 			
 			Resources::addJS('var bindIEClickPatch = function() {
 	if(getInternetExplorerVersion() != -1) {
@@ -98,7 +109,7 @@ $(function(){
 		bindIEClickPatch();
 		setTimeout(function(){
 			
-			if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$this->input->id.');
+			if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$id.');
 			'.self::$htmlJS.'
 			CKEDITOR.replace("'.$id.'", {
         		'.$config.'
@@ -111,7 +122,7 @@ $(function(){
 		
 		
 		$("#'.$id.'").parents("form").on("beforesubmit",function(){
-			$("#'.$id.'").val(CKEDITOR.instances.'.$this->input->id.'.getData());
+			$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
 		});
 		$("#'.$id.'").change(function(){
 			
@@ -120,7 +131,7 @@ $(function(){
 		$(".editor_toggle").css("display", "block");
 	}
 });
-window.toggleEditor_'.$id.' = function() {
+window.toggleEditor_'.$name.' = function() {
 	if(CKEDITOR.instances["'.$id.'"] != null) {
 		CKEDITOR.instances["'.$id.'"].destroy();
 	} else {
@@ -140,7 +151,7 @@ window.toggleEditor_'.$id.' = function() {
 		return new HTMLNode("textarea", array(
 			"name"	=> $name,
 			"id"	=> $id,
-			"css"	=> "width: 100%; height: 400px;"
+			"style"	=> "width: 100%;height: 400px;"
 		), convert::raw2text($text));
 	}
 }
