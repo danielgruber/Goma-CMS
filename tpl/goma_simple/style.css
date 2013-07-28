@@ -85,8 +85,8 @@ html, body {
 	color: #52abff;
 }
 #header #navi ul li a.active {
-	padding-bottom: 2.49em;
-	margin-bottom: -2.45em;
+	padding-bottom: 2.55em;
+	margin-bottom: -2.5em;
 	background: url(images/arrow_navi.png) no-repeat bottom center;
 	color: #52abff;
 }

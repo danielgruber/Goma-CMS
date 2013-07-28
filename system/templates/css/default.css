@@ -14,7 +14,7 @@ body, html {
 	margin: 0;
 	background: #fff;
 	color: #000;
-	font-size: 12pt;
+	font-size: 1em;
 	font-family: Verdana, Arial;
 	min-height: 100%;
 }
@@ -24,6 +24,10 @@ html, body, html * {
     box-sizing: content-box;
     -moz-box-sizing: content-box;
     -webkit-box-sizing: content-box;
+}
+
+* {
+	line-height: 1.25em;
 }
 
 /**
