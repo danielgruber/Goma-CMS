@@ -29,7 +29,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 *
 	 * @param 	array $items items to start
 	*/
-	public function __construct(array $items = array()) {
+	public function __construct($items = array()) {
 		$this->items = $items;
 		
 		parent::__construct();
@@ -233,7 +233,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function removeDuplicates($field = "id") {
 		$data = array();
 		foreach($this->items as $key => $record) {
-			if(in_array($record[$field], $data)) {
+			if(in_array($this->getItemProp($record, $field), $data)) {
 				unset($this->items[$key]);
 			} else {
 				array_push($data, $record[$field]);
@@ -355,9 +355,11 @@ class ArrayList extends ViewAccessableData implements Countable {
 	static function itemMatchesFilter($item, $filter) {
 		foreach($filter as $column => $value) {
 			if(!is_array($value)) {
-				if($item[$column] != $value) {
+				if($this->getItemProp($item, $column) != $value) {
 					return false;
 				}
+				
+				
 			} else if(isset($value[0], $value[1]) && count($value) == 2 && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "<" || $value[0] == "!=" || $value[0] == "<=" || $value[0] == ">=" || $value[0] == "<>")) {
 				switch($value[0]) {
 					case "LIKE":
@@ -395,7 +397,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 				if(isset($value[0])) {
 					$found = false;
 					foreach($value as $data) {
-						if($item[$column] == $data) {
+						if($this->getItemProp($item, $column) == $data) {
 							$found = true;
 						}
 					}
@@ -562,9 +564,9 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function find($key, $value, $caseInsensitive = false) {
 		foreach($this->items as $record) {
-			if($caseInsensitive && isset($record[$key]) && strtolower($record[$key]) == strtolower($value)) {
-				
-			} else if(isset($record[$key]) && $record[$key] == $value) {
+			if($caseInsensitive && strtolower($this->getItemProp($record, $key)) == strtolower($value)) {
+				return $record;
+			} else if($this->getItemProp($record, $key) == $value) {
 				return $record;
 			}
 		}
@@ -628,6 +630,23 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function offsetExists($offset) {
 		return isset($this->items[$offset]);
+	}
+	
+	/**
+	 * returns a property of a given Item in the List.
+	 *
+	 * @param 	array|object $item item
+	 * @param 	string $prop property
+	*/
+	public function getItemProp($item, $prop) {
+		if(is_array($item))
+			return isset($item[$prop]) ? $item[$prop] : null;
+		
+		if(is_object($item) && is_a($item, "ArrayList") && isset($item[$prop])) {
+			return $item[$prop];
+		}
+		
+		return property_exists($item, $prop) ? $item->$prop : null;
 	}
 	
 	/**

@@ -84,10 +84,10 @@ abstract class Object {
 			if(!empty($var)) {
 				return eval("return isset(" . $class . "::\$" . $var . ") ? " . $class . "::\$" . $var . " : null;");
 			} else {
-				throwError("6", "PHP-Error", "Invalid name of var in " . __METHOD__ . " in " . __FILE__ . "");
+				throw new LogicException("Invalid name of variable $var for $class");
 			}
 		} else {
-			throwError("6", "PHP-Error", "Invalid name of class in " . __METHOD__ . " in " . __FILE__ . "");
+			throw new LogicException("Invalid name of class $class");
 		}
 	}
 
@@ -107,10 +107,10 @@ abstract class Object {
 			if(!empty($var)) {
 				return eval("return isset(" . $class . "::\$" . $var . ");");
 			} else {
-				throwError("6", "PHP-Error", "Invalid name of var in " . __METHOD__ . " in " . __FILE__ . "");
+				throw new LogicException("Invalid name of variable $var for $class");
 			}
 		} else {
-			throwError("6", "PHP-Error", "Invalid name of class in " . __METHOD__ . " in " . __FILE__ . "");
+			throw new LogicException("Invalid name of class $class");
 		}
 	}
 
@@ -131,10 +131,10 @@ abstract class Object {
 			if(!empty($var)) {
 				return eval($class . "::\$" . $var . " = " . var_export($value, true) . ";");
 			} else {
-				throwError("6", "PHP-Error", "Invalid name of var in " . __METHOD__ . " in " . __FILE__ . "");
+				throw new LogicException("Invalid name of variable $var for $class");
 			}
 		} else {
-			throwError("6", "PHP-Error", "Invalid name of class in " . __METHOD__ . " in " . __FILE__ . "");
+			throw new LogicException("Invalid name of class $class");
 		}
 	}
 
@@ -154,10 +154,10 @@ abstract class Object {
 			if(!empty($func)) {
 				return call_user_func_array(array($class, $func), array($class));
 			} else {
-				throwError("6", "PHP-Error", "Invalid name of function in " . __METHOD__ . " in " . __FILE__ . "");
+				throw new LogicException("Invalid name of variable $var for $class");
 			}
 		} else {
-			throwError("6", "PHP-Error", "Invalid name of class in " . __METHOD__ . " in " . __FILE__ . "");
+			throw new LogicException("Invalid name of class $class");
 		}
 	}
 
@@ -334,10 +334,10 @@ abstract class Object {
 					}
 					self::$extensions[$obj][$ext] = $arguments;
 				} else {
-					throwError(6, 'PHP-Error', 'Extension ' . convert::raw2text($ext) . ' isn\'t a Extension.');
+					throw new LogicException("Extension $ext isn't a Extension");
 				}
 			} else {
-				throwError(6, 'PHP-Error', 'Extension ' . convert::raw2text($ext) . ' does not exist.');
+				throw new LogicException("Extension $ext does not exist.");
 			}
 		}
 	}

@@ -30,14 +30,16 @@ class TreeCallbackUrl extends RequestHandler {
 	 * @param	TreeNode $node the treenode for generating the URL
 	*/
 	static function generate_tree_url(TreeNode $treenode) {
-		if(isset($treenode->model)) {
+		if(isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . URLEND;
-		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID)) {
+		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID) && Object::method_exists($treenode->treeclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . URLEND;
-		} else {
+		} else if($treenode->getChildCallback() != null) {
 			$key = md5(serialize($treenode));
 			session_store("tree_node_" . $key, $treenode);
 			return "treecallback/key/" . $key . URLEND;
+		} else {
+			throw new LogicException("Could not generate URL from TreeNode. You are required to set the child-callback through TreeNode::setChildCallback(\$callback)");
 		}
 	}
 	
@@ -49,7 +51,7 @@ class TreeCallbackUrl extends RequestHandler {
 		$parent = $this->getParam("parent");
 		
 		if(ClassInfo::exists($model) && Object::method_exists($model, "build_tree")) {
-			$record = DataObject::get_by_id($model, $parent;
+			$record = DataObject::get_by_id($model, $parent);
 			$tree = call_user_func_array(array($model, "build_tree"), array($record));
 			
 			if(isset($_GET["renderer"]) && ClassInfo::exists($_GET["renderer"]) && is_subclass_of($_GET["renderer"], "TreeRenderer")) {

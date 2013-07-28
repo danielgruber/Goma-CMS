@@ -8,7 +8,7 @@
  * @version		1.0
  */
 
-class TreeNode extends Object {
+class TreeNode extends ArrayList {
 	/**
 	 * unique id of the node.
 	 *
@@ -61,11 +61,6 @@ class TreeNode extends Object {
 	protected $bubbles = array();
 	
 	/**
-	 * child-nodes of type TreeNode.
-	*/
-	protected $children = array();
-	
-	/**
 	 * stores the callback, which is called when children are needed.
 	*/
 	protected $childCallback;
@@ -86,7 +81,14 @@ class TreeNode extends Object {
 	 * @param 	string $title text of this node
 	 * @param 	string $class_name class-name for this node
 	*/
-	public function __construct($nodeid, $recordid, $title, $class_name = null, $icon = null) {
+	public function __construct($nodeid = null, $recordid = null, $title = null, $class_name = null, $icon = null) {
+		
+		parent::__construct(null);
+		
+		if(!isset($nodeid)) {
+			return false;
+		}
+			
 		
 		$this->nodeid = $nodeid;
 		$this->recordid = $recordid;
@@ -167,22 +169,30 @@ class TreeNode extends Object {
 	*/
 	public function setChildren($children) {
 		// validate and stack it in
-		$this->children = array();
-		foreach($children as $k => $child) {
-			$this->children[$child->nodeid] = $child;
+		$this->items = array();
+		foreach($children as $child) {
+			$this->push($child);
 		}
 	}
 	
 	/**
 	 * sets lazy-loading-child-callback.
 	 *
-	 * @param 
+	 * @param 	callback $callback
 	*/
 	public function setChildCallback($callback) {
 		if(is_callable($callback))
 			$this->childCallback = $callback;
 		else
 			throw new LogicException("TreeNode::setChildCallback: first argument must be a valid callback.");
+	}
+	
+	
+	/**
+	 * returns current child-callback.
+	*/
+	public function getChildCallback() {
+		return $this->childCallback = $callback;
 	}
 	
 	/**
@@ -193,10 +203,10 @@ class TreeNode extends Object {
 	*/
 	public function addChild(TreeNode $child) {
 		if($this->childCallback) {
-			if(!isset($this->children))
-				$this->children = array();
+			if(!isset($this->items))
+				$this->items = array();
 			
-			$this->children[$child->nodeid] = $child;
+			$this->push($child);
 		} else {
 			throw new LogicException("This is a lazy loading TreeNode, you cannot add a child.");
 		}
@@ -209,8 +219,8 @@ class TreeNode extends Object {
 	 *@access public
 	*/
 	public function removeChild(TreeNode $child) {
-		if(is_array($this->children)) {
-			unset($this->children[$child->nodeid]);
+		if(is_array($this->items)) {
+			$this->remove($child);
 		} else {
 			throw new LogicException("This is a lazy loading TreeNode, you cannot remove a child.");
 		}
@@ -222,7 +232,7 @@ class TreeNode extends Object {
 	 *@name Children
 	*/
 	public function Children() {
-		return $this->children;
+		return $this->items;
 	}
 	
 	/**
@@ -241,10 +251,10 @@ class TreeNode extends Object {
 	*/ 
 	public function forceChildren() {
 		if($this->childCallback) {
-			if(isset($this->children)) {
-				return $this->children();
+			if(isset($this->items)) {
+				return $this->items();
 			} else {
-				$this->children = call_user_func_array($this->childCallback, array($this));
+				$this->items = call_user_func_array($this->childCallback, array($this));
 				return $this->children();
 			}
 		} else {
