@@ -79,6 +79,7 @@
 	background: #fff;
 	border-bottom: 0;
 	cursor: text;
+	margin-top: 0;
 }
 
 .tabs > div {

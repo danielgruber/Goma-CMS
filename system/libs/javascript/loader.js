@@ -30,6 +30,8 @@ if(typeof goma.ui == "undefined") {
 		var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
 		var http_regexp = /https?\:\/\//;
 		
+		var loadSubscribers = [];
+		
 		/**
 		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
 		 * you must register the plugin in PHP
@@ -428,7 +430,19 @@ if(typeof goma.ui == "undefined") {
 					goma.ui.progress = undefined;
 				}
 				
+				for(i in loadSubscribers) {
+					loadSubscribers[i](percent, slow);
+				}
+				
 				return deferred.promise();
+			},
+			
+			/**
+			 * registers to the progress-event.
+			*/
+			onProgress: function(fn) {
+				if(typeof fn == "function")
+					loadSubscribers.push(fn);
 			},
 			
 			/**

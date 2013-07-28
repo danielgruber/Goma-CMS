@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 11.07.2013
+ * last modified: 28.07.2013
  */
 
 body, html {
@@ -108,9 +108,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 #navi ul li a span {
 	display: block;
-	padding: 0.889em;
-	font-size: 1.125em;
-	line-height: 1.333em;
+	padding: 0.89em;
+	font-size: 1.13em;
+	line-height: 1.34em;
 	color: #ddd;
 }
 #navi ul li a span:hover {
@@ -604,13 +604,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 select {
-	padding: 0.7em;
+	padding: 0.5em;
 	-moz-border-radius: 0.1875em;
 	-webkit-border-radius: 0.1875em;
 	border-radius: 0.1875em;
-	border: 0.063em solid #eee;
+	border: 0.063em solid #ddd;
 	margin: 0.3em;
-    background: #f5f5f5;
+    background: #eee url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.down.png) no-repeat right center;
+    
+    -webkit-appearance: none;
 }
 textarea, input[type=text], input[type=password] {
 	padding: 0.375em;
@@ -619,7 +621,7 @@ textarea, input[type=text], input[type=password] {
 	border-radius: 0.1875em;
 	margin: 0.2em;
     background: #eee;
-    border: 0.063em solid #ccc;
+    border: 0.063em solid #ddd;
 }
 textarea:focus, input[type=text]:focus, input[type=password]:focus {
     outline: none;
@@ -666,7 +668,7 @@ form h2 {
 
 .tableview {
 	width: 100%;
-	border-spacing: 0;
+	bar-spacing: 0;
 	border-bottom: 0.063em solid #ccc;
 	margin: 0;
 }
