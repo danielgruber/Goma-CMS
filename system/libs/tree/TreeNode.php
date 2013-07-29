@@ -132,7 +132,7 @@ class TreeNode extends ArrayList {
 	 *@name addBubble
 	 *@access public
 	 *@param text
-	 *@param color: green, yellow, red, blue, grey, orange
+	 *@param color: green, yellow, red, blue, grey, orange, purple
 	*/
 	public function addBubble($text, $color = "blue") {
 		

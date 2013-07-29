@@ -472,9 +472,9 @@ class HTMLNode extends Object
 										continue;
 								}
 								
-								if(_ereg('^([a-zA-Z0-9\-_]+):(.*)$', $item, $match))
+								if(_ereg('^\s*([a-zA-Z0-9\-_]+)\s*:\s*(.*)$', trim($item), $match))
 								{
-										$this->css[$match[1]] = $match[2];
+										$this->css[$match[1]] = trim($match[2]);
 								}
 						}
 				}
