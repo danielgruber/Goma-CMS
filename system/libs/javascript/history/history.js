@@ -1,11 +1,11 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 14.11.2012
-  * $Version 1.0.1
-*/
+ * With the history-lib you can easily create javascript-applications, which use ajax to get data from the server and edit the location of the site.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\JS-History-Lib
+ * @version	1.0.2
+ */
 
 window.__oldHash = location.hash;
 
@@ -44,7 +44,7 @@ var HistoryLib = {
 		}
 		
 		if(this.mode == "hash") {
-			if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+			if((location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") && document.location.hash.substr(2) != document.location.pathname) {
 				fn(document.location.hash.substr(2));
 			}
 		}
@@ -88,7 +88,10 @@ var HistoryLib = {
 			HistoryLib.mode = "history";
 		} else {
 			HistoryLib.mode = "hash";
-			HistoryLib.push(location.pathname);
+			
+			if(location.hash.substr(0, 2) != "#!" && location.hash.substr(0, 1) != "!")
+				HistoryLib.push(location.pathname);
+				
 			if(typeof window.onhashchange == "object") {
 				window.onhashchange = function() {
 					if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {

@@ -1,12 +1,12 @@
 /**
-  *@package goma framework
-  *@subpacke css
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 14.06.2013
-*/
-
+ * Default styles for forms and checkboxes.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\CSS-Framework
+ * @version	1.1
+ */
+ 
 form { 
 	margin: 0; 
 }
@@ -27,8 +27,31 @@ fieldset {
 	font-weight: bold;
 	width: 18em;
 }
-.form_field > .input  {
+.form_field > .input {
 	min-width: 18em;
+}
+.form_field > .select-wrapper {
+	
+	border: 0.063em solid #ccc;
+	margin: 0.3em;
+    background: #eee url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.down.png) no-repeat right center;
+	
+	-moz-border-radius: 0.1875em;
+	-webkit-border-radius: 0.1875em;
+	border-radius: 0.1875em;
+	
+	display: inline-block;
+}
+.form_field > .select-wrapper > select {
+	min-width: 18em;
+	
+	padding: 0.5em;
+	outline: 0 !important;
+	
+	-moz-appearance: window;
+	-webkit-appearance: none;
+	background: transparent;
+	border: 0;
 }
 /*.one {
 	
@@ -53,7 +76,7 @@ fieldset {
 }
 
 .form_field.fullSize > .info_field, fieldset > .form_field > .info_field {
-	padding-left: 0.4em;
+	padding-left: 0.433em;
 }
 
 .form_field_tabs {
@@ -85,26 +108,26 @@ fieldset {
 /* captcha */
 
 .form_field_captcha > label {
-	margin-top: 60px;
+	margin-top: 3.75em;
 }
 .form_field_captcha > div {
-	margin-left: 260px;
-	margin-top: -85px;
-	width: 250px;
+	margin-left: 16.25em;
+	margin-top: -5.313em;
+	width: 15.63em;
 	background: #ddd;
-	border: 1px solid #999;
-	padding: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+	border: 0.07em solid #999;
+	padding: 0.313em;
+	-webkit-border-radius: 0.313em;
+	-moz-border-radius: 0.313em;
+	border-radius: 50.313empx;
 }
 .form_field_captcha > div img {
 	display: block;
-	margin: 5px;
+	margin: 0.5em;
 }
 
 .form_field.checkbox label {
-	min-height: 20px;
+	min-height: 1.25em;
 }
 
 .form_field .inputHolder {
@@ -112,26 +135,25 @@ fieldset {
 	margin-top: -1.5em;
 }
 span.formaction {
-	padding: 3px;
+	padding: 0.25em;
 }
 
 fieldset, fieldset.hidden {
 	border: 0;
-	border-bottom: 1px solid #e0e0e0;
-	padding: 10px !important;
-	margin-bottom: -1px;
+	border-bottom: 0.07em solid #e0e0e0;
+	padding: 0.5em !important;
+	margin-bottom: -0.07em;
 }
 fieldset > legend {
-	width: 170px;
+	width: 11em;
 	float: left;
 	display: block;
-	margin-top: 7px;
-	font-weight: bold;
+	margin-top: 0.5em;
 	color: #555;
 }
 fieldset > .form_field {
-	margin-left: 180px !important;
-	margin-bottom: 7px;
+	margin-left: 12em !important;
+	margin-bottom: 0.5em;
 }
 fieldset fieldset > .form_field, .inputHolder fieldset > .form_field, fieldset .inputHolder {
 	margin-left: 0 !important;
@@ -140,7 +162,7 @@ fieldset fieldset > .form_field, .inputHolder fieldset > .form_field, fieldset .
 fieldset > .form_field > label {
 	display: block;
 	font-weight: normal;
-	padding: 4px 0;
+	padding: 0.25em 0;
 	color: #333;
 	cursor: pointer;
 }
@@ -150,15 +172,15 @@ fieldset > .form_field.checkbox > label {
 }
 fieldset > .form_field > .info_field {
 	color: #999;
-	padding: 5px 0;
+	padding: 0.25em 0;
 }
 
 .externalform {
-	padding-top: 10px;
-	padding-bottom: 10px;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
 }
 .externalform a {
-	float: right;
+	padding-left: 6.25em;
 }
 
 @media only screen and (max-width: 600px) { 
@@ -186,16 +208,16 @@ fieldset > .form_field > .info_field {
 }
 
 .g-checkbox {
-	border: 2px solid #ddd;
-	-webkit-border-radius: 15px;
-	border-radius: 15px;
-	-moz-border-radius: 15px;
+	border: 0.13em solid #ccc;
+	-webkit-border-radius: 1em;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
 	background: #fff;
 	display: inline-block;
-	padding: 3px 5px;
+	padding: 0.25em 0.375em;
 	position: relative;
-	height: 19px;
-	margin: 0 5px;
+	height: 1.25em;
+	margin: 0 0.25em;
 	
 	cursor: pointer;
 }
@@ -205,18 +227,18 @@ fieldset > .form_field > .info_field {
 }
 .g-checkbox label {
 	vertical-align: top;
-	line-height: 10pt;
-	font-size: 10pt;
+	line-height: 1em;
+	font-size: 1em;
 	font-family: Helvetica;
 	color: #555;
 	min-height: 0 !important;
-	padding: 3px;
+	padding: 0.125em;
 	margin: 0;
-	height: 13px;
+	height: 1em;
 	cursor: pointer;
 }
 .g-checkbox .g-check-label-on {
-	margin-right: 4px;
+	margin-right: 0.25em;
 }
 .g-checkbox.value-active label {
 	color: #eee;
@@ -234,24 +256,24 @@ fieldset > .form_field > .info_field {
 .g-checkbox .g-check-handle {
 	background: #fff;
 
-	height: 25px;
-	width: 25px;
+	height: 1.75em;
+	width: 1.75em;
 	
-	-webkit-border-radius: 15px;
-	border-radius: 15px;
-	-moz-border-radius: 15px;
+	-webkit-border-radius: 1em;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
 	
 	position: absolute;
-	top: -1px;
-	left: 0px;
+	top: -0.063em;
+	left: 0;
 	
-	border: 1px solid #ccc;
-	-webkit-box-shadow: 0 0 3px #bbb;
-	box-shadow: 0 0 3px #bbb;
+	border: 0.063em solid #ccc;
+	-webkit-box-shadow: 0 0 0.188em #bbb;
+	box-shadow: 0 0 0.188em #bbb;
 }
 .g-checkbox.value-active .g-check-handle {
-	-webkit-box-shadow: 0 0 3px #1f848c;
-	box-shadow: 0 0 3px #1f848c;
+	-webkit-box-shadow: 0 0 0.188em #1f848c;
+	box-shadow: 0 0 0.188em #1f848c;
 	border-color: #23a1aa;
 }
 .g-checkbox input[type=checkbox] {

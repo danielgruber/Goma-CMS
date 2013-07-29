@@ -240,6 +240,8 @@ if(typeof goma.ui == "undefined") {
 					
 				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
 				
+				node.addClass("loading");
+				
 				var deferred = $.Deferred();
 				
 				if(unload !== false) {
@@ -267,12 +269,14 @@ if(typeof goma.ui == "undefined") {
 					}
 					
 					goma.ui.renderResponse(r, a, node, undefined, false).done(function(){
+						node.removeClass("loading");
 						if(typeof goma.ui.progress != "undefined") {
 							goma.ui.setProgress(100);
 						}
 						goma.ui.updateFlexBoxes();
 					}).done(deferred.resolve).fail(deferred.reject);
 				}).fail(function(a){
+					node.addClass("failed").removeClass("loading");
 					// try find out why it has failed
 					if(a.textStatus == "timeout") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
@@ -393,7 +397,7 @@ if(typeof goma.ui == "undefined") {
 				
 				var slow = (typeof slow == "undefined") ? false : slow;
 				
-				var duration = (slow && percent != 100) ? 5000 : 500
+				var duration = (slow && percent != 100) ? 5000 : 500;
 				
 				goma.ui.progress = percent;
 				$("#loadingBar").stop().css({opacity: 1}).animate({

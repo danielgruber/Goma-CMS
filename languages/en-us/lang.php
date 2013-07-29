@@ -149,6 +149,7 @@ $lang = array(
 	/* USERGROUPS END USERS START */
 	"rank"                                         	=> "Rank",
 	"status"                                       	=> "Status",
+	"ACCESS"										=> "Access",
 	"edit_rights"                                  	=> "Edit permissions",
 	"user_del_confirm"                            	=> "Do you really want to delete this user?",
 	"user"											=> "User",

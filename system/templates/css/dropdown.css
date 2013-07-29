@@ -10,7 +10,7 @@
 }
 .dropdown_widget  {
 	position: relative;
-	display: block;
+	display: inline-block;
 }
 .widget_wrapper .nojs {
 	padding-left: 2px;

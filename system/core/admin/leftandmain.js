@@ -63,49 +63,93 @@ var LaM_type_timeout;
 			}
 		}, 100);
 		
+		// show progress in tree
+		goma.ui.onProgress(function(percent, slow) {
+			if($(".leftandmaintable .LaM_tabs .treewrapper .loading").length == 1) {
+				var item = $(".leftandmaintable .LaM_tabs .treewrapper .loading").parent().parent().parent().eq(0);
+				if(item.find(".loadingBar").length == 0) {
+					item.append('<div class="loadingBar"></div>');
+					item.find(".loadingBar").css({
+						position: "absolute",
+						left: item.position().left,
+						top: item.position().top + item.find(" > span").outerHeight() - 2,
+						height: "2px"
+					});
+				}
+				
+				var maxWidth = item.outerWidth();
+				
+				var slow = (typeof slow == "undefined") ? false : slow;
+			
+				var duration = (slow && percent != 100) ? 5000 : 500;
+				
+				goma.ui.progress = percent;
+				item.find(".loadingBar").stop().css({opacity: 1}).animate({
+					width: percent / 100 * maxWidth
+				}, {
+					duration: duration,
+					queue: false
+				});
+				
+				if(percent == 100) {
+					item.find(".loadingBar").animate({
+						opacity: 0
+					}, {
+						duration: 1000,
+						queue: false,
+						complete: function(){
+							item.find(".loadingBar").remove();
+						}
+					});
+				}
+			}
+		});
 		
 		//! history
 		if(getInternetExplorerVersion() > 7 || getInternetExplorerVersion() == -1) {
-			gloader.load("history");
-			HistoryLib.bind(function(url){
-				
-				if($(".treewrapper a[href='"+url+"']").length > 0) {
-					var $this = $(".treewrapper a[href='"+url+"']");
-					$this.addClass("loading");
-				}
-				
-				goma.ui.ajax(undefined, {
-					url: url,
-					data: {"ajaxfy": true}
-				}).done(function(html, node, request) {
-					$("#content .success, #content .error, #content .notice").hide("fast");
-					$(".tree .marked").removeClass("marked");
-					$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
+			goma.ui.loadAsync("history").done(function(){
+				HistoryLib.bind(function(url){
 					
-					if(typeof $this != "undefined") {
-						$this.removeClass("loading");
-						$this.parent().parent().addClass("marked");
+					if($(".treewrapper a[href='"+url+"']").length > 0) {
+						var $this = $(".treewrapper a[href='"+url+"']");
+						$this.addClass("loading");
 					}
 					
-					// find optimal scroll by position of active element
-					if($(".treewrapper").find(".marked").length > 0) {
-						// switch to tree-tab if necessary
-						if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-							$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+					goma.ui.ajax(undefined, {
+						url: url,
+						data: {"ajaxfy": true}
+					}).done(function(html, node, request) {
+						$("#content .success, #content .error, #content .notice").hide("fast");
+						$(".tree .marked").removeClass("marked");
+						$(".left-and-main .LaM_tabs > div.create ul li.active").removeClass("active");
+						
+						if(typeof $this != "undefined") {
+							$this.removeClass("loading");
+							$this.parent().parent().addClass("marked");
 						}
 						
-						// correct scroll-position
-						var oldscroll = $(".treewrapper").scrollTop();
-						$(".treewrapper").scrollTop(0);
-						var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-						if(pos > 0) {
-							$(".treewrapper").scrollTop(oldscroll);
-							$(".treewrapper").scrollTop(pos);
-						} else
+						// find optimal scroll by position of active element
+						if($(".treewrapper").find(".marked").length > 0) {
+							// switch to tree-tab if necessary
+							if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
+								$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
+							}
+							
+							// correct scroll-position
+							var oldscroll = $(".treewrapper").scrollTop();
 							$(".treewrapper").scrollTop(0);
-					}
+							var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
+							if(pos > 0) {
+								$(".treewrapper").scrollTop(oldscroll);
+								$(".treewrapper").scrollTop(pos);
+							} else
+								$(".treewrapper").scrollTop(0);
+						}
+						
+						updateSidebarToggle();
+					});
+					
 				});
-				
 			});
 		}
 		

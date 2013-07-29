@@ -274,12 +274,20 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				
 				unset($form->result["password"]);
 				
+				// if a user is not activated by mail, admin should have a option to activate him manually
+				if($this->status == 0) {
+					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
+				} else {
+					$status = new radiobutton("status", lang("ACCESS", "Access"), array(1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
+				}
+			
 				$form->add(new TabSet("tabs", array(
 					new Tab("general",array(
 							new TextField("nickname", lang("username")),
 							new TextField("name",  lang("name", "name")),
 							new TextField("email", lang("email", "email")),
 							new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
+							$status,
 							$this->doObject("timezone")->formfield(lang("timezone")),
 							new LangSelect("custom_lang", lang("lang")),
 							// password management in external window
@@ -296,21 +304,10 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				
 				
 				// group selection for admin
-				if($this["id"] != member::$id && Permission::check("USERS_MANAGE"))
+				if($this["id"] == member::$id || !Permission::check("USERS_MANAGE"))
 				{
-					
-					// if a user is not activated by mail, admin should have a option to activate him manually
-					if($this->status == 0) {
-						$status = new radiobutton("status", lang("status", "Status"), array(0 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
-					} else {
-						$status = new radiobutton("status", lang("status", "Status"), array(1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
-					}
-					
-					$form->add(new Tab("admin", array(
-						$status
-					), lang("administration")), null,"tabs");
-				} else {
 					$form->remove("groups");
+					$form->remove("status");
 				}
 				
 				// generate actions

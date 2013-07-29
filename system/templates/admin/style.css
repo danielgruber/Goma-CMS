@@ -51,6 +51,11 @@ h1, h2, h3, h4, h5, h6 {
 	z-index: 999;
 }
 
+.loadingBar {
+	background: #da097a !important;
+	z-index: 999;
+}
+
 #wrapper {
 	height: 100%;
 }
@@ -603,17 +608,6 @@ h1, h2, h3, h4, h5, h6 {
 	color: #555
 }
 
-select {
-	padding: 0.5em;
-	-moz-border-radius: 0.1875em;
-	-webkit-border-radius: 0.1875em;
-	border-radius: 0.1875em;
-	border: 0.063em solid #ddd;
-	margin: 0.3em;
-    background: #eee url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.down.png) no-repeat right center;
-    
-    -webkit-appearance: none;
-}
 textarea, input[type=text], input[type=password] {
 	padding: 0.375em;
 	-moz-border-radius: 0.1875em;
@@ -621,7 +615,7 @@ textarea, input[type=text], input[type=password] {
 	border-radius: 0.1875em;
 	margin: 0.2em;
     background: #eee;
-    border: 0.063em solid #ddd;
+    border: 0.063em solid #ccc;
 }
 textarea:focus, input[type=text]:focus, input[type=password]:focus {
     outline: none;

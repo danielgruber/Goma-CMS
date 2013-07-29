@@ -123,7 +123,7 @@ class Select extends FormField
 						}
 				//}
 				
-				$this->container->append($node);
+				$this->container->append(new HTMLNode("span", array("class" => "select-wrapper input"),$node));
 				
 				$this->callExtending("afterField");
 				
