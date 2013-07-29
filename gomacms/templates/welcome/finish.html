@@ -8,6 +8,7 @@
 		<meta charset="utf-8" />
 		<script type="text/javascript">
 			$(function(){
+				goma.ui.addFlexBox("#go_wrapper");
 				$("#go").click(function(){
 					$("body").fadeOut(300);
 					setTimeout(function(){
@@ -23,13 +24,21 @@
 			
 			<div class="wrapper_inner">
 				<div class="logo_wrapper">
-					<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{$BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
-				</div>
-				<div class="header">
-					<h1>Goma CMS</h1>
+					<div class="content_wrapper">
+						<a href="./"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+					</div>
 				</div>
 				<div class="content">
-					<a class="button" id="go" href="./"><% lang("goma_let's_start", "Goma - Let's start!") %></a>
+					<div id="go_wrapper">
+						<a id="go" href="./"><% lang("goma_let's_start", "Goma - Let's start!") %></a>
+					</div>
+				</div>
+				<div class="footer">
+					<div class="content_wrapper">
+						<div class="branding">
+							Powered by <a href="http://goma-cms.org" target="_blank">Goma</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

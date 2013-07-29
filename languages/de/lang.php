@@ -594,9 +594,13 @@ $lang = array(
     "off"						=> "Aus",
     
     "DAYLY"						=> "täglich",
+    "DAY"						=> "Tag",
     "WEEKLY"					=> "wöchentlich",
+    "WEEK"						=> "Woche",
     "MONTHLY"					=> "monatlich",
+    "MONTH"						=> "Monat",
     "YEARLY"					=> "jährlich",
+    "YEAR"						=> "Jahr",
     
     "NO_EDITOR"					=> "Kein grafischer Editor",
     "EDITOR_TOGGLE"             => "Editor an/aus",

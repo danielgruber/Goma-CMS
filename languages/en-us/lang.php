@@ -597,9 +597,13 @@ $lang = array(
     
     
     "DAYLY"						=> "dayly",
+    "DAY"						=> "day",
     "WEEKLY"					=> "weekly",
+    "WEEK"						=> "week",
     "MONTHLY"					=> "monthly",
+    "MONTH"						=> "month",
     "YEARLY"					=> "yearly",
+    "YEAR"						=> "year",
     
 	"JS_DISABLE_EDITOR"         => "You have to activate JavaScript to user the Editor.",
 	"EDITOR_TOGGLE"             => "Toggle editor",

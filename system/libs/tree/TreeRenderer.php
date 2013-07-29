@@ -152,11 +152,11 @@ class TreeRenderer extends Object {
 		$wrapper->attr("title", convert::raw2text($child->title));
 		
 		// render children
-		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded()) {
+		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded()) {
 			// children should be shown
 			$node->append(new HTMLNode("span", array("class" => "hitarea expanded")));
-			$node->append($ul = new HTMLNode("ul", array("class" => "expanded"))));
-			foreach($child->forceChildren()) as $node) {
+			$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
+			foreach($child->forceChildren() as $node) {
 				$ul->append($this->renderChild($node));
 			}
 		} else if($child->getChildCallback()) {
@@ -165,8 +165,8 @@ class TreeRenderer extends Object {
 		} else if($child->children()) {
 			// children available
 			$node->append(new HTMLNode("span", array("class" => "hitarea collapsed")));
-			$node->append($ul = new HTMLNode("ul", array("class" => "collapsed"))));
-			foreach($child->children()) as $node) {
+			$node->append($ul = new HTMLNode("ul", array("class" => "collapsed")));
+			foreach($child->children() as $node) {
 				$ul->append($this->renderChild($node));
 			}
 		} else {

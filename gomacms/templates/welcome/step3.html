@@ -13,13 +13,22 @@
 			
 			<div class="wrapper_inner">
 				<div class="logo_wrapper">
-					<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{$BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+					<div class="content_wrapper">
+						<a href="./"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+					</div>
 				</div>
 				<div class="header">
 					<h1><% lang("set_settings") %></h1>
 				</div>
 				<div class="content">
 					$form
+				</div>
+				<div class="footer">
+					<div class="content_wrapper">
+						<div class="branding">
+							Powered by <a href="http://goma-cms.org" target="_blank">Goma</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

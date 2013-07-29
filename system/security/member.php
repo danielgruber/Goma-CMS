@@ -225,13 +225,13 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				// add default tab
 				$form->add(new TabSet("tabs", array(
 					$general = new Tab("general",array(
-							new TextField("nickname", $GLOBALS["lang"]["username"]),
-							new TextField("name",$GLOBALS["lang"]["name"]),
-							$mail = new TextField("email", $GLOBALS["lang"]["email"]),
-							new PasswordField("password", $GLOBALS["lang"]["password"], ""),
-							new PasswordField("repeat", $GLOBALS["lang"]["repeat"], ""),
+							new TextField("nickname", lang("USERNAME")),
+							new TextField("name", lang("NAME")),
+							$mail = new TextField("email", lang("EMAIL")),
+							new PasswordField("password", lang("PASSWORD"), ""),
+							new PasswordField("repeat", lang("REPEAT"), ""),
 							new langSelect("custom_lang", lang("lang"), Core::$lang)
-						),$GLOBALS["lang"]["general"])
+						), lang("GENERAL"))
 				)));
 				
 				$mail->info = lang("email_correct_info");
