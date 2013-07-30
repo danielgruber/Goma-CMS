@@ -43,7 +43,7 @@ fieldset {
 	display: inline-block;
 }
 .form_field > .select-wrapper > select {
-	min-width: 18em;
+	min-width: 16em;
 	
 	padding: 0.5em;
 	outline: 0 !important;
