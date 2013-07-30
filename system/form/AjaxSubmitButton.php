@@ -79,7 +79,6 @@ class AjaxSubmitButton extends FormAction
 						if ( event.result === false ) {
 							return false;
 						}
-						self.leave_check = true;
 						button.css("display", "none");
 						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
 						$("body").css("cursor", "wait");

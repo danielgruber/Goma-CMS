@@ -3,8 +3,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.03.2013
-  * $Version - 1.0
+  * last modified: 31.07.2013
+  * $Version - 1.0.1
 */
 
 if(typeof goma == "undefined")

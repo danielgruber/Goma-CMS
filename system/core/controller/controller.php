@@ -1,15 +1,14 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 08.04.2013
-  * $Version 2.2.2
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * the basic class for each goma-controller, which handles models.
+ *
+ * @author    	Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package		Goma\Controller
+ * @version		2.2.3
+ */
 class Controller extends RequestHandler
 {		
 		/**
@@ -543,7 +542,7 @@ class Controller extends RequestHandler
 				
 				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"), null, null, $description)) {
 					
-					$data = clone $this->modelInst();
+					$data = clone $toDelete;
 					$toDelete->remove();
 					if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 						$response = new AjaxResponse();
