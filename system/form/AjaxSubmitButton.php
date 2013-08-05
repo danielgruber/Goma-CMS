@@ -79,7 +79,8 @@ class AjaxSubmitButton extends FormAction
 						if ( event.result === false ) {
 							return false;
 						}
-						self.leave_check = true;
+						
+						$("#'.$this->form()->id().'").gForm().setLeaveCheck(false);
 						button.css("display", "none");
 						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
 						$("body").css("cursor", "wait");
@@ -99,13 +100,18 @@ class AjaxSubmitButton extends FormAction
 								$("#'.$this->form()->id().'").trigger(eventb);
 							},
 							success: function(script, textStatus, jqXHR) {
+								
 								goma.ui.loadResources(jqXHR).done(function(){;
     								if (window.execScript)
     								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
     								else
     								 	method = eval("(function(){" + script + "});");
     								RunAjaxResources(jqXHR);
-    								return method.call($("#'.$this->form()->id().'").get(0));
+    								var r = method.call($("#'.$this->form()->id().'").get(0));
+    								
+    								$("#'.$this->form()->id().'").gForm().setLeaveCheck(false);
+    								
+    								return r;
 								});
 							},
 							error: function(jqXHR, textStatus, errorThrown)

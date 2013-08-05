@@ -10,65 +10,102 @@
 if(typeof goma == "undefined")
 	var goma = {};
 
-goma.form = function(id) {
-	this.leave_check = false;
-	var that = this;
-	
-	$("#" + id).bind("formsubmit",function(){
-		that.leave_check = true;
-	});
-	
-	var button = false;
-	$("#" + id).find("button[type=submit], input[type=submit]").click(function(){
-		button = true;
-		that.leave_check = false;
-	});
-	
-	$("#" + id).submit(function(){
-		if(button == false) {
+(function ( $ ) {
+	goma.form = function(id) {
+		if(!this instanceof goma.form)
+			return new goma.form(id);
+		
+		
+		var that = this;
+		
+		this.form = $("#" + id);
+		this.form.removeClass("leave_check");
+		
+		$("#" + id).bind("formsubmit",function(){
+			that.form.addClass("leave_check");
+		});
+		
+		var button = false;
+		$("#" + id).find("button[type=submit], input[type=submit]").click(function(){
 			button = true;
-			setTimeout(function(){
-				$("#"+id+" .default_submit").click();
-			}, 100);
-			return false;
-		}
-		var eventb = jQuery.Event("beforesubmit");
-		$("#"+id).trigger(eventb);
-		if ( eventb.result === false ) {
-			return false;
-		}
+			that.form.removeClass("leave_check");
+		});
 		
-		var event = jQuery.Event("formsubmit");
-		$("#"+id).trigger(event);
-		if ( event.result === false ) {
-			return false;
-		}
-		
-		that.leave_check = false;
-		button = false;
-	});
-	
-	$("#" + id).find("select, input, textarea").change(function(){
-		that.leave_check = true;
-	});
-	
-	$("#"+id+" > .default_submit").click(function(){
-		$("#"+id+" > .actions  input[type=submit]").each(function(){
-			if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
-				$(this).click();
+		$("#" + id).submit(function(){
+			if(button == false) {
+				button = true;
+				setTimeout(function(){
+					$("#"+id+" .default_submit").click();
+				}, 100);
 				return false;
 			}
+			var eventb = jQuery.Event("beforesubmit");
+			$("#"+id).trigger(eventb);
+			if ( eventb.result === false ) {
+				return false;
+			}
+			
+			var event = jQuery.Event("formsubmit");
+			$("#"+id).trigger(event);
+			if ( event.result === false ) {
+				return false;
+			}
+			
+			that.form.removeClass("leave_check");
+			button = false;
 		});
-		return false;
-	});
+		
+		$("#" + id).find("select, input, textarea").change(function(){
+			that.form.addClass("leave_check");
+		});
+		
+		$("#"+id+" > .default_submit").click(function(){
+			$("#"+id+" > .actions  input[type=submit]").each(function(){
+				if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
+					$(this).click();
+					return false;
+				}
+			});
+			return false;
+		});
+		
+		goma.ui.bindUnloadEvent($("#" + id), function(){
+			return that.unloadEvent();
+		});
+		
+		goma.form.list[id.toLowerCase()] = this;
+		return this;
+	}
 	
-	goma.ui.bindUnloadEvent($("#" + id), function(){
-		if(that.leave_check) {
-			return lang("unload_not_saved").replace('\n', "\n");
+	goma.form.prototype = {
+		setLeaveCheck: function(bool) {
+			if(bool)
+				this.form.addClass("leave_check");
+			else
+				this.form.removeClass("leave_check");
+		},
+		
+		unloadEvent: function() {
+			if(this.form.hasClass("leave_check")) {
+				return lang("unload_not_saved").replace('\n', "\n");
+			}
+			
+			return true;
+		}
+	};
+	
+	goma.form.list = [];
+	
+	$.fn.gForm = function() {
+		
+		if(this.get(0).tagName.toLowerCase() == "form") {
+			if(typeof goma.form.list[this.attr("id").toLowerCase()] != "undefined") {
+				return goma.form.list[this.attr("id").toLowerCase()];
+			} else {
+				return new goma.form(this.attr("id").toLowerCase());
+			}
 		}
 		
-		return true;
-	});
-}
-
-goma.form.prototype = {}; 
+		return false;
+	};
+})(jQuery);
