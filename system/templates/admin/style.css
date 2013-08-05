@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 28.07.2013
+ * last modified: 06.08.2013
  */
 
 body, html {
@@ -662,7 +662,7 @@ form h2 {
 
 .tableview {
 	width: 100%;
-	bar-spacing: 0;
+	border-spacing: 0;
 	border-bottom: 0.063em solid #ccc;
 	margin: 0;
 }
@@ -755,9 +755,9 @@ form h2 {
 	height: 30px;
 }
 .tableview thead tr.search input[type=image], .tableview thead tr.search .cancel {
-	height: 18px;
-	width: 18px;
-	padding: 4px;
+	height: 1.25em;
+	width: 1.25em;
+	padding: 0.31em;
 	margin: 0;
 	background: #ddd url(images/buttons.png) repeat-x 0 -10px;
 	border: 0.063em solid #ccc;
