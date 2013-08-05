@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.0.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 11.02.2013
+  * $Version 1.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -49,9 +49,14 @@ class userAdmin extends adminItem {
 	public function index() {
 		$config = TableFieldConfig_Editable::create();
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(
+			"id"		=> "ID",
+			"image"		=> lang("pic"),
 			"nickname" 	=> lang("username"),
 			"name"		=> lang("name"),
-			"email"		=> lang("email")
+			"email"		=> lang("email"),
+			"groupList"	=> lang("groups")
+		))->setFieldFormatting(array(
+			"image" => '$image.setSize(50, 50)'
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
 		

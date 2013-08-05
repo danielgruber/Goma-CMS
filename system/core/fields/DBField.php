@@ -3,39 +3,47 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.09.2012
-  * $Version 1.4.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.03.2013
+  * $Version 1.4.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 interface DataBaseField {
+	/**
+	 * constructor
+	*/
 	public function __construct($name, $value, $args = array());
+	
 	/**
 	 * set the value of the field
 	 *
 	 *@name setValue
 	*/
 	public function setValue($value);
+	
 	/**
 	 * gets the value of the field
 	 *
 	 *@name getValue
 	*/
 	public function getValue();
+	
 	/**
 	 * sets the name of the field
 	 *
 	 *@name setName
 	*/
 	public function setName($name);
+	
 	/**
 	 * gets the name of the field
 	 *
 	 *@name getName
 	*/
 	public function getName();
+	
 	/**
 	 * gets the raw-data of the field
 	 * should be give back the same as getValue
@@ -43,6 +51,7 @@ interface DataBaseField {
 	 *@name raw
 	*/
 	public function raw();
+	
 	/**
 	 * generates the default form-field for this field
 	 *
@@ -51,6 +60,7 @@ interface DataBaseField {
 	 *@param string - title
 	*/
 	public function formfield($title = null);
+	
 	/**
 	 * search-field for searching
 	 *
@@ -59,6 +69,7 @@ interface DataBaseField {
 	 *@param string - title
 	*/
 	public function searchfield($title = null);
+	
 	/**
 	 * this function uses more than one convert-method
 	 *
@@ -67,6 +78,7 @@ interface DataBaseField {
 	 *@param array - methods
 	*/
 	public function convertMulti($arr);
+	
 	/**
 	 * gets the field-type for the database, for example if you want to have the type varchar instead of the name of this class
 	 *
@@ -74,6 +86,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	static public function getFieldType($args = array());
+	
 	/**
 	 * toString-Method
 	 * should call default-convert
@@ -82,6 +95,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function __toString();
+	
 	/**
 	 * bool - for IF in template
 	 * should give back if the value of this field represents a false or true
@@ -90,6 +104,7 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function toBool();
+	
 	/**
 	 * to don't give errors for unknowen calls, should always give back raw-data
 	 *
@@ -97,22 +112,16 @@ interface DataBaseField {
 	 *@access public
 	*/
 	public function __call($name, $args);
+	
 	/**
 	 * bool, like toBool
 	*/
 	public function bool();
-}
-
-/**
- * defines a DataBase-Field as Field, which should convert each value on the fly on read
- *
- *@name DefaultConvert
-*/
-interface DefaultConvert {
+	
 	/**
-	 * this method is called when we read
+	 * returns datatype for view
 	*/
-	public function convertDefault();
+	public function forTemplate();
 }
 
 
@@ -128,12 +137,14 @@ class DBField extends Object implements DataBaseField
 	 *@var mixed
 	*/
 	protected $value;
+	
 	/**
 	 * this field contains the field-name of this object
 	 *@name name
 	 *@access protected
 	*/
 	protected $name;
+	
 	/**
 	 * args
 	 *
@@ -141,12 +152,21 @@ class DBField extends Object implements DataBaseField
 	 *@access public
 	*/
 	public $args = array();
+	
+	/**
+	 * cache for casting
+	 *
+	 *@name castingCache
+	 *@access private
+	*/
+	private static $castingCache = array();
+	
 	/**
 	 *@name __construct
 	 *@access public
 	 *@param mixed - value
 	*/
-	public function __construct($name,$value,$args = array())
+	public function __construct($name, $value, $args = array())
 	{
 			$this->name = $name;
 			$this->value = $value;
@@ -273,6 +293,7 @@ class DBField extends Object implements DataBaseField
 			
 			return $field;
 	}
+	
 	/**
 	 * search-field for searching
 	 *@name searchfield
@@ -283,6 +304,7 @@ class DBField extends Object implements DataBaseField
 	{
 			return $this->formfield($title);
 	}
+	
 	/**
 	 * this function uses more than one convert-method
 	 *@name convertMulti
@@ -301,6 +323,7 @@ class DBField extends Object implements DataBaseField
 			}
 			return $new->getValue();
 	}
+	
 	/**
 	 * gets the field-type
 	 *
@@ -310,6 +333,7 @@ class DBField extends Object implements DataBaseField
 	static public function getFieldType($args = array()) {
 		return "";
 	}
+	
 	/**
 	 * toString-Method
 	 *@name __toString
@@ -317,14 +341,18 @@ class DBField extends Object implements DataBaseField
 	*/
 	public function __toString()
 	{
-			if(ClassInfo::hasInterface($this->class, "DefaultConvert"))
-			{
-					return (string) $this->convertDefault();
-			} else
-			{
-					return (string) $this->value;
-			}
+		return $this->forTemplate();
 	}
+	
+	/**
+	 * gets Data Converted for Template
+	 *
+	 *@name forTemplate
+	*/
+	public function forTemplate() {
+		return (string) $this->value;
+	}
+	
 	/**
 	 * bool - for IF in template
 	 *
@@ -344,10 +372,12 @@ class DBField extends Object implements DataBaseField
 		if(DEV_MODE) {
 			$trace = debug_backtrace();
 			log_error('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
-			addcontent::add('<div class="notice"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
+			if(DEV_MODE)
+		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
 		}
 		return $this->__toString();
 	}
+	
 	/**
 	 * bool
 	*/
@@ -363,6 +393,12 @@ class DBField extends Object implements DataBaseField
 	 *@param string - casting
 	*/
 	public static function parseCasting($casting) {
+		
+		if(isset(self::$castingCache[$casting]))
+			return self::$castingCache[$casting];
+			
+		if(PROFILE) Profiler::mark("DBField::parseCasting");
+		
 		if(is_array($casting))
 			return $casting;
 
@@ -395,8 +431,11 @@ class DBField extends Object implements DataBaseField
 			$valid = true;
 		}
 		
-		if(!isset($valid))
+		if(!isset($valid)) {
+			self::$castingCache[$casting] = null;
+			if(PROFILE) Profiler::unmark("DBField::parseCasting");
 			return null;
+		}
 		
 		$data = array(
 			"class" => $name
@@ -413,7 +452,31 @@ class DBField extends Object implements DataBaseField
 			$data["method"] = $method;
 		}
 		
+		self::$castingCache[$casting] = $data;
+		if(PROFILE) Profiler::unmark("DBField::parseCasting");
+		
 		return $data;
+	}
+	
+	/**
+	 * gets a var for template
+	 *
+	 *@name getTemplateVar
+	*/
+	public function getTemplateVar($var) {
+		if(strpos($var, ".")) {
+			throwError(6, "Invalid Argument Error", "Argument " . $var . " is not allowed in a DB-Field, because it's recursive.");
+		}
+		
+		// check for args
+		if(strpos($var, "(") && substr($var, -1) == ")") {
+			$args = eval("return array(" . substr($var, strpos($var, "(") + 1, -1) . ");");
+			$var = substr($var, 0, strpos($var, "("));
+		} else {
+			$args = array();
+		}
+		
+		return call_user_func_array(array($this, $var), $args);
 	}
 	
 	/**
@@ -484,6 +547,15 @@ class DBField extends Object implements DataBaseField
 		} else {
 			return new DBField($name, $value, array());
 		}
+	}
+	
+	/**
+	 * returns false because no object can be done
+	 *
+	 *@name canDoObject
+	*/
+	public function canDoObject() {
+		return false;
 	}
 }
 
@@ -565,6 +637,15 @@ class Varchar extends DBField
 		public function date($format =	DATE_FORMAT)
 		{	
 			return goma_date($format, $this->value);
+		}
+		
+		/**
+		 * for template
+		 *
+		 *@name forTemplate
+		*/
+		public function forTemplate() {
+			return $this->text();
 		}
 }
 
@@ -687,6 +768,7 @@ class TimeZone extends DBField {
 	static public function getFieldType($args = array()) {
 		return 'enum("'.implode('","', i18n::$timezones).'")';
 	}
+	
 	/**
 	 * generatesa a numeric field
 	 *@name formfield
@@ -699,15 +781,7 @@ class TimeZone extends DBField {
 	}
 }
 
-class DateSQLField extends DBField implements DefaultConvert {
-	/**
-	 * field-type if you want to replace typed field type
-	 * for example int(30)
-	 *
-	 *@name field_type
-	 *@access public
-	*/ 
-	static public $field_type = "int(30)";
+class DateSQLField extends DBField {
 	
 	/**
 	 * gets the field-type
@@ -722,7 +796,7 @@ class DateSQLField extends DBField implements DefaultConvert {
 	/**
 	 * default convert
 	*/
-	public function convertDefault() {
+	public function forTemplate() {
 		if(isset($this->args[0]))
 			return $this->date($this->args[0]);
 		else
@@ -745,35 +819,142 @@ class DateSQLField extends DBField implements DefaultConvert {
 	 *@name ago
 	 *@access public
 	*/
-	public function ago() {
-		if($this->value - NOW < 60) {
-			return printf(lang("ago.seconds", "about %d seconds ago"), round($this->value - NOW));
-		} else if($this->value - NOW < 90) {
-			return '<span title="'.$this->convertDefault().'">' . lang("ago.minute", "about one minute ago") . '</span>';
+	public function ago($fullSentence = true) {
+		if(NOW - $this->value < 60) {
+			return '<span title="'.$this->forTemplate().'" class="ago-date">' . sprintf(lang("ago.seconds", "about %d seconds ago"), round(NOW - $this->value)) . '</span>';
+		} else if(NOW - $this->value < 90) {
+			return '<span title="'.$this->forTemplate().'" class="ago-date">' . lang("ago.minute", "about one minute ago") . '</span>';
 		} else {
-			$diff = $this->value - NOW;
+			$diff = NOW - $this->value;
 			$diff = $diff / 60;
 			if($diff < 60) {
-				return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
+				return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
 			} else {
 				$diff = round($diff / 60);
 				if($diff == 1) {
-					return '<span title="'.$this->convertDefault().'">' . lang("ago.hour", "about one hour ago") . '</span>';
+					return '<span title="'.$this->forTemplate().'">' . lang("ago.hour", "about one hour ago") . '</span>';
 				} else {
-					if($diff < 60) {
-						return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
+					if($diff < 24) {
+						return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
 					} else {
-						$diff = round($diff / 24);
-						if($diff == 1) {
-							return '<span title="'.$this->convertDefault().'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff < 10) {
-							return '<span title="'.$this->convertDefault().'">' . printf(lang("ago.days", "%d days ago"), round($diff)) . '</span>';
+						$diff = $diff / 24;
+						$diffRound = round($diff, 1);
+						if($diff <= 1.1) {
+							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
+						} else if($diff <= 7) {
+							$pre = ($fullSentence) ? lang("version_at") . " " : "";
+							return '<span title="'.$this->forTemplate().'">' . $pre . sprintf(lang("ago.weekday", "%s at %s"), $this->date("l"), $this->date("H:i")) . '</span>';
 						} else {
-							return $this->convertDefault();
+							if($fullSentence)
+								return lang("version_at") . " " . $this->forTemplate();
+							else
+								return $this->forTemplate();
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+class HTMLText extends Varchar {
+	/**
+	 * gets the field-type
+	 *
+	 *@name getFieldType
+	 *@access public
+	*/
+	static public function getFieldType($args = array()) {
+		return "mediumtext";
+	}
+	
+	/**
+	 * generatesa a numeric field
+	 *
+	 *@name formfield
+	 *@access public
+	 *@param string - title
+	*/
+	public function formfield($title = null)
+	{
+			return new HTMLEditor($this->name, $title, $this->value);
+	}
+	
+	/**
+	 * for template
+	 *
+	 *@name forTemplate
+	*/
+	public function forTemplate() {
+		// parse a bit
+		$value = $this->value;
+		
+		preg_match_all('/\<img[^\>]+src\="([^"]+)"[^\>]*>/Usi', $value, $matches);
+		
+		foreach($matches[1] as $k => $m) {
+			
+			// match if may be upload
+			if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
+				
+				// match for size
+				if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+					// sizes
+					$$sizes[1] = $sizes[2];
+					$$sizes[4] = $sizes[5];
+					
+				} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
+				
+					$$sizes[1] = $sizes[2];
+					
+				} else {
+					continue;
+				}
+				
+				$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+		
+				if($data->count() == 0) {
+					return false;
+				}
+				
+				if(isset($width, $height) && $data->width && $data->height) {
+					
+					if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+												
+						$url = "./" . $data->path . '/orgSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($width * 2 < $data->width && $height * 2 < $data->height) {
+							$retinaURL = "./" . $data->path . '/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+						} else {
+							$retinaURL = "./" . $data->path;
+						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					}
+				} else if(isset($width)) {
+					if($data->width > $width && $data->width < 4000) {
+						$url =  "./" . $data->path . '/orgSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($width * 2 < $data->width) {
+							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+						} else {
+							$retinaURL = "./" . $data->path;
+						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					}
+				} else {
+					if($data->height > $height && $data->height < 4000) {
+						$url = "./" . $data->path . '/orgSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+						// retina
+						if($height * 2 < $data->height) {
+							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+						} else {
+							$retinaURL = "./" . $data->path;
+						}
+						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					}
+				}
+			}
+		}
+		
+		return $value;
 	}
 }

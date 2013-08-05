@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 02.12.2012
+  * last modified: 25.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,7 @@ $lang = array(
 	"installed_version"								=> "Installierte Version",
 	"password"                                    	=> "Passwort",
 	'smilies'										=> "Smileys",
+	"edit_password"									=> "Passwort ändern",
 	"edit_password_ok"                             	=> "Das Passwort wurde ge&auml;ndert!",
 	"homepage"                                     	=> "Startseite",
 	"page"											=> "Seite",
@@ -47,6 +48,7 @@ $lang = array(
 	"smilie_title"									=> "Name des Smilies",
 	"register"                                     	=> "Registrieren",
 	"administration"                               	=> "Administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "Webseite verwalten",
 	'default_admin'									=> "Normale Administration",
 	"my_account"                                   	=> "Mein Account" ,
@@ -161,6 +163,8 @@ $lang = array(
 	'site'											=> "Seite",
 	"text"                                         	=> "Text",
 	"menupoint_title"								=> "Navigations-Titel",
+	"window_title"									=> "Titel des Browser-Fensters",
+	"window_title_info"								=> "Leer lassen um Standard-Titel zu verwenden",
 	"menupoint_title_info"							=> "Titel der Seite, der in der Navigation angezeigt wird.",
 	"js_disable_editor"                            	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
 	"overview"                                     	=> "&Uuml;bersicht",
@@ -184,7 +188,7 @@ $lang = array(
 	"login"                                        	=> "Anmeldung" ,
 	/* infos */
 	"usergroups_info"								=> "<h3>Willkommen</h3>Hier k&ouml;nnen Sie Benutzer und Gruppen verwalten. W&auml;hlen Sie im Baum, was Sie bearbeiten möchten.",
-	"email_info"									=> "Sie k&ouml;nenn mehrere E-Mail-Adressen mit Komma trennen.",
+	"email_info"									=> "Sie k&ouml;nnen mehrere E-Mail-Adressen mit Komma trennen.",
 	"email_correct_info"							=> "Diese E-Mail-Adresse sollte richtig sein und Ihnen gehören.",
 	'dragndrop_info'								=> "Ziehen Sie die Elemente, um sie zu sortieren.",
 	"noscript"                                      => "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen!",
@@ -209,8 +213,13 @@ $lang = array(
 	"captcha_wrong"                                 => "Der Sicherheitscode war falsch.",
 	"captcha_reload"                                => "Neu Laden",
 	'path'                                          => "Pfad",
+	"box_successful_saved"							=> "Die Box wurde erfolgreich gespeichert!",
 	"successful_saved"                              => "Die Daten wurden erfolgreich gespeichert!",
+	"saved"											=> "Gespeichert",
+	"successful_deleted"							=> "Die Daten wurden erfolgreich gelöscht",
+	"deleted"										=> "Gelöscht",
 	"successful_published"							=> "Die Daten wurden erfolgreich ver&ouml;ffentlicht!",
+	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
 	'admin_smilies'									=> "Smilies verwalten",
@@ -242,6 +251,7 @@ $lang = array(
 	'no_parentpage'									=> "Übergeordnete Seite",
 	"subpage"										=> "Untergeordnete Seite",
 	'boxes_page'									=> "Seite mit Boxsystem",
+	"boxes"											=> "Boxsystem",
 	'view_site'										=> "Seite aufrufen",
 	'show_in_search'								=> "In der Suche anzeigen",
 	'redirect'										=> "Weiterleitung",
@@ -268,6 +278,8 @@ $lang = array(
 	"active"										=> "Aktiviert",
 	'page_not_active'								=> "Diese Seite ist nicht Aktiv!",
 	'unload_lang'									=> "Soll die Seite wirklich verlassen werden?\n\nVorsicht: Die Änderungen wurden noch nicht gespeichert.\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.",
+	"unload_lang_start"								=> "Sollen die Seite wirklich verlassen werden?\n\n",
+	"unload_lang_end"								=> "\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.",
 	"unload_not_saved"								=> "Vorsicht: Die Änderungen wurden noch nicht gespeichert.",
 	"date_format"									=> "Datumsformat",
 	"timezone"										=> "Zeitzone",
@@ -280,16 +292,9 @@ $lang = array(
 	"pages_add"										=> "Seiten erstellen",
 	"pages_publish"									=> "Seiten veröffentlichen",
 	// default DataObjects
-	"dataobject_all"								=> "Vollzugriff auf andere Datenobjekte",
-	"dataobject_edit"								=> "Daten von anderen Datenobjekten bearbeiten",
-	"dataobject_add"								=> "Daten zu anderen Datenobjekten hinzufügen",
-	"dataobject_delete"								=> "Daten von anderen Datenobjekten löschen",
-
+	"data_manage" 									=> "Andere Daten verwalten",
 	// right-mangement
 	"following_groups"								=> "Folgende Gruppen",
-	"editor_groups"									=> "Bearbeitungs-Gruppen",
-	"viewer_groups"									=> "Betrachungsgruppen",
-	"content_edit_users"							=> "Alle Bearbeitungs-Gruppen",
 	"editors"										=> "Recht zur Bearbeitung",
 	"publisher"										=> "Recht zur Veröffentlichung",
 	"viewer_types"									=> "Betrachter-Rechte",
@@ -378,7 +383,6 @@ $lang = array(
 	"preview"										=> "Vorschau",
 	"publish"										=> "Ver&ouml;ffentlichen",
 	"published_site"								=> "Veröffentlichte Seite",
-	"published"										=> "Veröffentlicht",
 	"draft"											=> "Entwurf",
 	"draft_save"									=> "Entwurf speichern",
 	"save_publish"									=> "Speichern & Veröffentlichen",
@@ -386,10 +390,12 @@ $lang = array(
 	"current_state"									=> "Aktueller Zustand",
 	"browse_versions"								=> "Versionen durchsuchen",
 	"open_in_new_tab"								=> "Auf neuer Seite öffnen",
-	"revert_changes"								=> "Änderungen zurücksetzen",
+	"revert_changes"								=> "Änderungen verwerfen",
 	"revert_changes_confirm"						=> "Wollen Sie die Änderungen wirklich verwerfen und zur letzten Veröffentlichung zurückkehren?",
+	"reverted"										=> "Verworfen",
 	"revert_changes_success"						=> "Die letzte Version wurde erfolgreich wiederhergestellt.",
 	"unpublish"										=> "Veröffentlichung zurücknehmen",
+	"unpublished"									=> "Zurückgenommen",
 	"unpublish_success"								=> "Die Seite ist nun nicht mehr veröffentlicht.",
 	"state_publish"									=> "Veröffentlichung",
 	"state_state"									=> "Speicherpunkt",
@@ -399,8 +405,8 @@ $lang = array(
 	"version_at"									=> "am",
 	"versions_javascript"							=> "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen.",
 	"done"											=> "Fertig",
-	"restore"										=> "Zurücksetzen",
-	"restore_confirm"								=> "Wollen Sie diese Änderung wirklich rückgängig machen?",
+	"restore"										=> "Rückgängig",
+	"restore_confirm"								=> "Wollen Sie wirklich zu dieser Version zurückkehren?",
 	"compare"										=> "Vergleichen",
 	"no_versions"									=> "Keine Version vorhanden",
 	"versions_timeline"								=> "Zeitleiste",
@@ -474,9 +480,11 @@ $lang = array(
 	"hierarchy"										=> "Hierarchie",
 	
 	"full_admin_permissions"						=> "Volle Admin-Rechte",
+	"full_admin_permissions_info"					=> "Alle Rechte werden automatisch gewährt, auch wenn eines deaktiviert wird.",
 	"signed"										=> "Signatur",
 	"signed_true"									=> "Dieses Paket wurde vom Goma-Team geprüft und ist freigegeben!",
 	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
+	"signed_false_ssl"								=> "Das Paket konnte nicht vom Goma-Team geprüft werden. Open-SSL ist nicht auf Ihrem Server installiert. Bitte kontaktieren Sie den Server-Administrator oder holen Sie sich Support auf der <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Seite</a>.",
 	
 	/* install */
 	"install.folder"		=> "Installationsverzeichnis",
@@ -494,13 +502,13 @@ $lang = array(
 	
 	/* date for ago */
 	
-	"ago.seconds"			=> "Vor %d Sekunden",
-	"ago.minute"			=> "Vor etwa einer Minute",
-	"ago.minutes"			=> "Vor %d Minuten",
-	"ago.hour"				=> "Vor etwa einer Stunde",
-	"ago.hours"				=> "Vor %d Stunden",
-	"ago.day"				=> "Vor etwa einem Tag",
-	"ago.days"				=> "Vor %d Tagen",
+	"ago.seconds"			=> "vor %d Sekunden",
+	"ago.minute"			=> "vor etwa einer Minute",
+	"ago.minutes"			=> "vor %d Minuten",
+	"ago.hour"				=> "vor etwa einer Stunde",
+	"ago.hours"				=> "vor %d Stunden",
+	"ago.day"				=> "vor etwa einem Tag",
+	"ago.weekday"			=> "%s um %s",
 	
 	"domain"				=> "Domain",
 	"restoreType"			=> "Wiederherstellungsmethode",
@@ -516,8 +524,9 @@ $lang = array(
 	
 	"author"				=> "Autor",
 	
-	"flush_log"				=> "Log-Dateien löschen",
-	"flush_log_success"		=> "Alle Log-Dateien wurde erfolgreich gelöscht.",
+	"flush_log"				=> "Alte Log-Dateien löschen",
+	"flush_log_success"		=> "Alte Log-Dateien wurde erfolgreich gelöscht.",
+	"flush_log_recommended"	=> "Es sind zu viele Log-Dateien auf dem Server. Es wird Ihnen empfohlen alte Log-Dateien zu löschen.",
 
 	"tablefield_out_of"		=> "von",
 
@@ -526,6 +535,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user nahm die Seite <a href="$pageUrl">$page</a> zurück',
 	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
 	
@@ -541,8 +551,23 @@ $lang = array(
 	"h_group_remove"		=> '$user löschte die Gruppe $group',
 	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "Alle Ereignisse",
+	"h_all_events"			=> "Alle Ereignisse",
+	"h_relevant"			=> "Wichtige",
+	"h_all"					=> "Alle",
 	
 	"older"					=> "Ältere Einträge",
-	"newer"					=> "Neuere Einträge"
+	"newer"					=> "Neuere Einträge",
+	
+	"notification"			=> "Mitteilung",
+	"alert_big_image"		=> "Achtung:\n\nIhre hochgeladene Bilddatei ist zu groß für eine Webseite. Sie wird möglicherweise sehr lange laden.\n\nBitte reduzieren Sie die Bildgröße mit einem Bildbearbeitungsprogramm und laden Sie die Datei erneut hoch.",
+	
+	"wrapper_page"			=> "Liste mit Unterseiten",
+	
+	"toggle_navigation"		=> "Navigation umschalten",
+	"toggle_sidebar"		=> "Seitenleiste umschalten",
+	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
+	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit.",
+	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",
+	
+	"error_disk_space"		=> "Es ist nicht genügend freier Speicherplatz auf dem Webserver verfügbar.",
 );

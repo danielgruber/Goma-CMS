@@ -1,0 +1,15 @@
+<div id="page_wrapperpage">
+	<h1>$title</h1>
+	$content
+	<ul>
+		<% CONTROL children() %>
+			<li>
+				<h4>
+					<a href="$children.url">$children.title</a>
+				</h4>
+			</li>
+		<% ENDCONTROL %>
+	</ul>
+</div>
+
+<div class="clear"></div>

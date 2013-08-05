@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 16.08.2012
+  * last modified: 13.12.2012
 */
 
 .lam_noscript p {
@@ -34,9 +34,29 @@
 /* main-part */
 
 .leftandmaintable tr > .main {
-	min-width: 600px;
 	overflow: auto;
 }
+
+.leftandmaintable tr > .main .leftbar_toggle {
+	display: block;
+	margin-bottom: 3px;
+	background: #eee;
+	border: 1px solid #ccc;
+	border-width: 0 1px 1px 0; 
+	padding: 0 !important;
+	color: #333;
+	text-decoration: none;
+	font-weight: bold;
+	line-height: 30px;
+}
+.leftandmaintable tr > .main .leftbar_toggle.active {
+	background: #d0d0d0;
+	border-color: #aaa;
+}
+.leftandmaintable tr > .main .leftbar_toggle.index {
+	display: none !important;
+}
+
 /*.leftandmaintable tr > .main textarea {
 	max-width: 650px !important;
 }*/
@@ -44,17 +64,66 @@
 	overflow-y: auto;
 	ms-overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
-	padding: 5px 0;
+	padding: 0;
+	padding-bottom: 5px;
+}
+.leftandmaintable tr > .main > .inner > form > .fieldsScroll {
+	overflow: auto;
+}
+.leftandmaintable tr > .main > .inner > form > .fieldsScroll .visibleField:last-child {
+	border-bottom: 0 !important;
+}
+.leftandmaintable tr > .main > .inner > form > .actionsScroll {
+	border-top: 1px solid #ccc;
+	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
+}
+.leftandmaintable tr > .main > .inner > form > .error {
+	margin: 0 !important;
+}
+.leftandmaintable tr > .main > .inner .headBar {
+	background: #eee;
+	border-bottom: 1px solid #ccc;
+	padding: 4px;
+	height: 28px;
+}
+.leftandmaintable tr > .main > .inner .headBar span span {
+	padding: 6px;
+	margin-left: 4px;
+	background-repeat: no-repeat;
+	background-position: left center;
+	padding-left: 20px;
+	display: block;
+	float: left;
+}
+.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
+	float: left;
+	border: 0;
+	margin-top: -7px;
+	margin-left: -6px;
+	padding-left: 4px;
+	padding-right: 2px;
+	padding-bottom: 2px;
+	margin-right: 6px;
+	border-right: 1px solid #ccc;
+}
+.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle img {
+	height: 38px;
+	width: 38px;
 }
 
 /* sidebar */
 
 .leftandmaintable tr > .left {
+	display: none;
 	width: 280px !important;
 	background: #eee;
 	height: 100%;
 	border-right: 1px solid #ccc;
 }
+.leftandmaintable tr > .left.active {
+	display: table-cell;
+}
+
 .leftandmaintable tr > .left > .LaM_tabs {
 	height: 100%;
 	min-width: 280px;
@@ -168,6 +237,18 @@
 
 .create li a {
 	color: #555;
+}
+
+@media only screen and (min-width: 900px) {
+	.leftandmaintable tr > .main {
+		min-width: 600px;
+	}
+	.leftandmaintable tr > .left {
+		display: table-cell;
+	}
+	.leftandmaintable tr > .main .leftbar_toggle {
+		display: none;
+	}
 }
 
 /* here goes some retina-stuff */

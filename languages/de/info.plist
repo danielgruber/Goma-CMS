@@ -14,5 +14,12 @@
 	<string>Goma-Team</string>
 	<key>version</key>
 	<string>1.0</string>
+	<key>areaCodes</key>
+	<array>
+		<string>de-de</string>
+		<string>de</string>
+		<string>de-ch</string>
+		<string>de-at</string>
+	</array>
 </dict>
 </plist>

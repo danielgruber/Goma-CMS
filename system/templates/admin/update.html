@@ -2,94 +2,96 @@
 	<div id="storeUnavailable" class="notice">
 		<% lang("update_connection_failed") %>
 	</div>
-	<% gload("htmllib") %>
-	<script type="text/javascript">
-		// <![CDATA[
-			$(function(){
-				var u = {$updatables_json};
-				var uCount = $updatables.count();
-				var results = [];
-				
-				var checkResult = function() {
-					if(uCount == results.length) {
-						// render it
-						var a = $updates.count;
-						for(i in results) {
-							if(results[i] != null) {
-								a++;
-								var record = results[i].response;
-								$("#updates").append('<div class="update"></div>');
-								$("#updates .update:last-child").css("display", "none");
-								if(a == 1) {
-									$("#updates .update:last-child").addClass("first");
-								}
-								
-								if(a % 2 == 0) {
-									$("#updates .update:last-child").addClass("grey");
-								}
-								
-								$("#updates .update:last-child").html('<div class="icon"><img src="'+record.icon+'" alt="" width="64" /></div><div class="button_right"><a href="{BASE_SCRIPT}admin/update/upload/?download='+escape(record.download)+'" class="button">{$_lang_update_install}</a></div><div class="info"><h1></h1><p>'+record.autor+'</p><p>{$_lang_version} '+record.version+'</p></div><div class="description"></div><div class="clear"></div>');
-								
-								$("#updates .update:last-child .info h1").text(record.title);
-								$("#updates .update:last-child .description").html(nl2br(htmlentities(record.changelog)));
-								
-								$("#updates .update:last-child").slideDown("fast");
-							}
-						}
-						
-						// no new updates
-						if(a == 0) {
-							$("#updates .no_updates").html('<% lang("update_no_available") %>');
-						} else {
-							loading.remove();
-						}
-						
-						if(a == 1) {
-							$("#updates > h1").html('<span class="num">1</span> {$_lang_update}');
-						} else {
-							$("#updates > h1 > .num").text(a);
-						}
-						
-						// update number
-					} else {
-						setTimeout(checkResult, 1000);
-					}
-				}
-				
-				if($("#updates .no_updates").length > 0) {
-					$("#updates .no_updates").html('<img src="images/16x16/loading.gif" height="14" width="14" alt="" /> <% lang("update_checking") %>');
-					var loading = $("#updates .no_updates");
-				} else {
-					$("#updates > h1").prepend('<img src="images/16x16/loading.gif" height="14" width="14" alt="" />');
-					var loading = $("#updates > h1 > img");
-				}
-				
-				for(name in u) {
-					var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"];
-					$.ajax({
-						url: url,
-						dataType: "jsonp",
-						success: function(object) {
-							$("#storeUnavailable").slideUp(0);
-							if(object.name) {
-								results.push({response: object, current_version: u[name]["version"], webversion: object.version});
-							} else {
-								results.push(null);
-							}
-						},
-						error: function() {
-							$("#storeUnavailable").slideDown(0);
-						}
-					});
-				}
-				
-				$("#storeUnavailable").slideUp(0);
-				
-				setTimeout(checkResult, 1000);
-			});
-		// ]]>
-	</script>
 <% END %>
+
+<% gload("htmllib") %>
+<script type="text/javascript">
+	// <![CDATA[
+		$(function(){
+			var u = {$updatables_json};
+			var uCount = $updatables.count();
+			var results = [];
+			
+			var checkResult = function() {
+				if(uCount == results.length) {
+					// render it
+					var a = $updates.count ;
+					for(i in results) {
+						if(results[i] != null) {
+							a++;
+							var record = results[i].response;
+							$("#updates").append('<div class="update" id="update_'+record.name+'"></div>');
+							$("#updates .update:last-child").css("display", "none");
+							if(a == 1) {
+								$("#updates .update:last-child").addClass("first");
+							}
+							
+							if(a % 2 == 0) {
+								$("#updates .update:last-child").addClass("grey");
+							}
+							
+							$("#updates .update:last-child").html('<div class="icon"><img src="'+record.icon+'" alt="" width="64" /></div><div class="button_right"><a href="{BASE_SCRIPT}admin/update/upload/?download='+escape(record.download)+'" class="button">{$_lang_update_install}</a></div><div class="info"><h1></h1><p>'+record.autor+'</p><p>{$_lang_version} '+record.version+'</p></div><div class="description"></div><div class="clear"></div>');
+							
+							$("#updates .update:last-child .info h1").text(record.title);
+							$("#updates .update:last-child .description").html(nl2br(htmlentities(record.changelog)));
+							
+							$("#updates .update:last-child").slideDown("fast");
+						}
+					}
+					
+					// no new updates
+					if(a == 0) {
+						$("#updates .no_updates").html('<% lang("update_no_available") %>');
+					} else {
+						loading.remove();
+					}
+					
+					if(a == 1) {
+						$("#updates > h1").html('<span class="num">1</span> {$_lang_update}');
+					} else {
+						$("#updates > h1 > .num").text(a);
+					}
+					
+					// update number
+				} else {
+					setTimeout(checkResult, 1000);
+				}
+			}
+			
+			if($("#updates .no_updates").length > 0) {
+				$("#updates .no_updates").html('<img src="images/16x16/loading.gif" height="14" width="14" alt="" /> <% lang("update_checking") %>');
+				var loading = $("#updates .no_updates");
+			} else {
+				$("#updates > h1").prepend('<img src="images/16x16/loading.gif" height="14" width="14" alt="" />');
+				var loading = $("#updates > h1 > img");
+			}
+			
+			for(name in u) {
+				var url = "http://goma-cms.org/apps/api/v1/json/app/" + name + "?framework={GOMA_VERSION}-{BUILD_VERSION}&current=" + u[name]["version"] + "&base_uri={$BASEURI.url()}";
+				$.ajax({
+					url: url,
+					dataType: "jsonp",
+					noRequestTrack: true,
+					success: function(object) {
+						$("#storeUnavailable").slideUp(0);
+						if(object.name && $("#update_" + object.name).length == 0) {
+							results.push({response: object, current_version: u[name]["version"], webversion: object.version});
+						} else {
+							results.push(null);
+						}
+					},
+					error: function() {
+						$("#storeUnavailable").slideDown(0);
+					}
+				});
+			}
+			
+			$("#storeUnavailable").slideUp(0);
+			
+			setTimeout(checkResult, 1000);
+		});
+	// ]]>
+</script>
 <div id="updates">
 	<div class="upload">
 		<a class="button" href="{BASE_SCRIPT}admin/update/upload/"><% lang("update_upload", "Upload update-file") %></a>
@@ -98,11 +100,11 @@
 	<% IF $updates %>
 		<% CONTROL updates() AS $update %>
 			<% IF $update.first %>
-				<div class="update first">
+				<div class="update first" id="update_{$update.name}" data-version="{$update.version}">
 			<% ELSE IF NOT $update.white %>
-				<div class="update grey">
+				<div class="update grey" id="update_{$update.name}" data-version="{$update.version}">
 			<% ELSE %>
-				<div class="update">
+				<div class="update" id="update_{$update.name}" data-version="{$update.version}">
 			<% END %>
 				<div class="icon">
 					<% IF $update.icon %>

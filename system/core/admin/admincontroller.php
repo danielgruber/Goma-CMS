@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 1.4.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
+  * $Version 1.4.7
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -50,6 +50,21 @@ class adminController extends Controller
 		public $allowed_actions = array("handleItem", "switchlang", "handleUpdate", "flushLog", "history");
 		
 		/**
+		 * this var contains the templatefile
+		 * the str {admintpl} will be replaced with the current admintpl
+		 *@name template
+		 *@var string
+		*/
+		public $template = "admin/index.html";
+		
+		/**
+		 * tpl-vars
+		*/
+		public $tplVars = array(
+			"BASEURI"	=> BASE_URI
+		);
+		
+		/**
 		 * returns current controller
 		 *
 		 *@name activeController
@@ -64,6 +79,7 @@ class adminController extends Controller
 		*/
 		public function __construct()
 		{
+				Resources::addData("goma.ENV.is_backend = true;");
 				defined("IS_BACKEND") OR define("IS_BACKEND", true);
 				Core::setHeader("robots", "noindex, nofollow");
 				parent::__construct();
@@ -150,9 +166,12 @@ class adminController extends Controller
 		 *
 		 *@name flushLog
 		*/
-		public function flushLog() {
+		public function flushLog($count = 30) {
 			if(Permission::check("superadmin")) {
-				FileSystem::delete(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER);
+				
+				// we delete all logs that are older than 30 days
+				Core::CleanUpLog($count);
+				
 				AddContent::addSuccess(lang("flush_log_success"));
 				$this->redirectBack();
 			}
@@ -183,13 +202,7 @@ class adminController extends Controller
 			return $content;
 			
 		}
-		/**
-		 * this var contains the templatefile
-		 * the str {admintpl} will be replaced with the current admintpl
-		 *@name template
-		 *@var string
-		*/
-		public $template = "admin/index.html";
+		
 		/**
 		 * loads content and then loads page
 		 *@name index
@@ -216,7 +229,7 @@ class adminController extends Controller
 		*/
 		public function handleUpdate() {
 			
-			if(Permission::check("ADMIN")) {
+			if(Permission::check("superadmin")) {
 				$controller = new UpdateController();
 				self::$activeController = $controller;
 				return $controller->handleRequest($this->request);
@@ -309,6 +322,19 @@ class admin extends ViewAccessableData implements PermProvider
 				return Core::GetHeaderHTML();
 		}
 		
+		public function TooManyLogs() {
+			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
+				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
+				if($count > 60) {
+					$this->controller()->flushLog(60);
+				}
+				
+				return ($count > 30);
+			}
+			
+			return false;
+		}
+		
 		/**
 		 * returns title
 		*/
@@ -349,16 +375,18 @@ class admin extends ViewAccessableData implements PermProvider
 		{
 				return array(
 					"ADMIN"	=> array(
-						"title" 	=> '{$_lang_administration}',
-						'default'	=> array(
-							"type" => "admins"
-						)
+						"title" 		=> '{$_lang_administration}',
+						'default'		=> array(
+							"type" 		=> "admins"
+						),
+						"description"	=> '{$_lang_permission_administration}'
 					),
 					"ADMIN_HISTORY"	=> array(
 						"title"		=> '{$_lang_history}',
 						"default"	=> array(
 							"type"	=> "admins"
-						)
+						),
+						"category"	=> "ADMIN"
 					)
 				);
 		}
@@ -436,5 +464,54 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function Software($number = 7) {
 			return G_SoftwareType::listAllSoftware();
-		}				
+		}
+		
+		/**
+		 * lists local updates
+		 *
+		 *@name getUpdates
+		*/			
+		public function getUpdates() {
+			$updates = G_SoftwareType::listUpdatePackages();
+			foreach($updates as $name => $data) {
+				$data["secret"] = randomString(20);
+				if(!isset($data["AppStore"])) {
+					$_SESSION["updates"][$data["file"]] = $data["secret"];
+				} else {
+					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+				}
+				$updates[$name] = $data;
+			}
+			
+			return new DataSet($updates);
+		}
+		
+		/**
+		 * returns if store is available
+		 *
+		 *@name isStoreAvailable
+		 *@access public
+		*/
+		public function isStoreAvailable() {
+			return G_SoftwareType::isStoreAvailable();
+		}
+		
+		/**
+		 * returns updatable packages
+		 *
+		 *@name getUpdatables
+		 *@access public
+		*/
+		public function getUpdatables() {
+			return new DataSet(G_SoftwareType::listUpdatablePackages());
+		}
+		
+		/**
+		 * returns updatables as json
+		 *
+		 *@name getUpdatables_JSON
+		*/
+		public function getUpdatables_JSON() {
+			return json_encode(G_SoftwareType::listUpdatablePackages());
+		}
 }

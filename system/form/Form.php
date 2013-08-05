@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 27.02.2013
   * $Version - 2.4.4
  */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -193,6 +193,13 @@ class Form extends object
 		public $state;
 		
 		/**
+		 * request
+		 *
+		 *@name request
+		*/
+		public $request;
+		
+		/**
 		 *@name __construct
 		 *@access public
 		 *@param object - controller
@@ -222,6 +229,7 @@ class Form extends object
 				$this->name = $name;
 				$this->secretKey = randomString(30);
 				$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
+				$this->request = $request;
 				
 				if(isset($request)) {
 					$this->post = $request->post_params;
@@ -281,7 +289,6 @@ class Form extends object
 				$this->form = $this->createFormTag();
 				
 				if(PROFILE) Profiler::unmark("form::__construct");
-				
 		}
 		
 		/**
@@ -345,44 +352,10 @@ class Form extends object
 				
 				$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
 				// add that this is a submit-function
-				$this->add(new JavaScriptField("leave_check", '$(function(){
-					$("#'.$this->ID().'").bind("formsubmit",function(){
-						self.leave_check = true;
-					});
-					
-					$(function(){
-						$("#'.$this->ID().'").submit(function(){
-							var eventb = jQuery.Event("beforesubmit");
-							$("#'.$this->id().'").trigger(eventb);
-							if ( eventb.result === false ) {
-								return false;
-							}
-							
-							var event = jQuery.Event("formsubmit");
-							$("#'.$this->id().'").trigger(event);
-							if ( event.result === false ) {
-								return false;
-							}
-						});
-					});
-					
-					$("#'.$this->ID().'").find("select, input[type=text], input[type=hidden], input[type=radio], input[type=checkbox], input[type=password], textarea").change(function(){
-						self.leave_check = false;
-					});
-					
-					$("#'.$this->ID().' > .default_submit").click(function(){
-						$("#'.$this->ID().' > .actions  input[type=submit]").each(function(){
-							if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
-								$(this).click();
-								return false;
-							}
-						});
-						return false;
-					});
-				});'));
+				$this->add(new JavaScriptField("leave_check", '$(function(){ new goma.form('.var_export($this->ID(), true).'); });'));
 								
-				
-				
+				Resources::add("system/form/form.js", "js", "tpl");				
+								
 				if(!isset($this->fields["redirect"]))
 					$this->add(new HiddenField("redirect", getredirect()));
 		}
@@ -643,13 +616,6 @@ class Form extends object
 						}
 				}
 				
-				if($valid !== true)
-				{
-						$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
-						$this->form->append($errors);
-						return $this->renderForm();
-				}
-				
 				$result = $this->result;
 				if(is_object($result) && is_subclass_of($result, "dataobject")) {
 					$result = $result->to_array();
@@ -698,6 +664,12 @@ class Form extends object
 					}
 				}
 				
+				if($valid !== true)
+				{
+						$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
+						$this->form->append($errors);
+						return $this->renderForm();
+				}
 				
 				// no registered action has submitted the form
 				if($i == 0) {
@@ -1069,7 +1041,7 @@ class Form extends object
  *@name ExternalForm
  *@parent RequestHandler
 */
-class ExternalForm extends RequestHandler
+class ExternalFormController extends RequestHandler
 {
 		/**
 		 * handles the request
@@ -1089,6 +1061,7 @@ class ExternalForm extends RequestHandler
 				$field = $request->getParam("field");
 				return $this->FieldExtAction($form, $field);
 		}
+		
 		/**
 		 * a external resource for a form
 		 *@name FieldExtAction
@@ -1149,5 +1122,5 @@ class FormState extends Object {
 }
 
 Core::addRules(array(
-	'system/forms/$form!/$field!' => "ExternalForm"
+	'system/forms/$form!/$field!' => "ExternalFormController"
 ), 50);

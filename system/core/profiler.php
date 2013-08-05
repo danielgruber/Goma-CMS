@@ -5,8 +5,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.05.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 05.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -121,14 +121,6 @@ class Profiler
 						self::inst()->memories[$name] += $memory;
 				}
 				
-				if(isset(self::inst()->calls[$name]))
-				{
-						self::inst()->calls[$name]++;
-				} else
-				{
-						self::inst()->calls[$name] = 1;
-				}
-				
 				$data = array
 				(
 					"time"		=> microtime(true),
@@ -138,8 +130,6 @@ class Profiler
 				);
 				
 				self::inst()->marks[$name]["start"] = $data;
-				self::inst()->marks[$name][] = $data;
-				self::inst()->steps[] = $data;
 				
 				$t = microtime(true) - $start;
 				self::inst()->profile_time += $t;
@@ -151,31 +141,50 @@ class Profiler
 		 *@access public
 		 *@param name
 		*/
-		public static function unmark($name)
+		public static function unmark($name, $newname = null)
 		{
-				if(!PROFILE)
-				{
+				if(!PROFILE) {
 						return false;
 				}
 				
 				$start = microtime(true);
 				
+				
+				if(!isset($newname))
+					$newname = $name;
+				
 				$times = microtime(true) - self::inst()->startTime;
-				self::inst()->log .= "Unmark: ".$name."; Time since Start: ".$times * 1000 ." ms\n";
-				if(!isset(self::inst()->times[$name]))
+				self::inst()->log .= "Unmark: ".$name." with name $newname; Time since Start: ".$times * 1000 ." ms\n";
+				
+				if(!isset(self::inst()->times[$newname]))
 				{
-						self::inst()->times[$name] = 0;
+						self::inst()->times[$newname] = 0;
 				}
+				
+				if(!isset(self::inst()->memories[$newname]))
+				{
+						self::inst()->memories[$newname] = 0;
+				}
+				
 				
 				if(isset(self::inst()->marks[$name]["start"]))
 				{
 						$time = microtime(true) - self::inst()->marks[$name]["start"]["time"];
-						self::inst()->times[$name] += $time;
+						self::inst()->times[$newname] += $time;
 						$memory = memory_get_usage() - self::inst()->marks[$name]["start"]["memory"];
-						self::inst()->memories[$name] += $memory;
+						self::inst()->memories[$newname] += $memory;
 				}
 				
-				$data = array
+				if(isset(self::inst()->calls[$newname]))
+				{
+						self::inst()->calls[$newname]++;
+				} else
+				{
+						self::inst()->calls[$newname] = 1;
+				}
+						
+				
+				/*$data = array
 				(
 					"time"		=> microtime(true),
 					"memory"	=> memory_get_usage(),		
@@ -185,7 +194,7 @@ class Profiler
 				
 				self::inst()->marks[$name][] = $data;
 				
-				self::inst()->steps[] = $data;
+				self::inst()->steps[] = $data;*/
 				unset(self::inst()->marks[$name]["start"]);
 				
 				$t = microtime(true) - $start;

@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.11.2012
-  * $Version 1.0
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 01.03.2013
+  * $Version 1.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -98,7 +98,7 @@ class HistoryController extends Controller {
 				$tabs->addTab(ClassInfo::getClassTitle($filter["dbobject"]), $content, $filter["dbobject"]);
 			}
 		}
-		$tabs->addTab(lang("h_all"), HistoryController::renderHistory(array(), $this->namespace), "h_all");
+		$tabs->addTab(lang("h_all_events"), HistoryController::renderHistory(array(), $this->namespace), "h_all_events");
 		$output = $tabs->render();
 		
 		if(Core::is_ajax()) {
@@ -160,7 +160,19 @@ class HistoryController extends Controller {
 	public function restoreVersion() {
 		$version = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")));
 		if($version->canWrite($version) || $version->canPublish($version)) {
-			if($this->confirm(lang("restore_confirm"))) {
+			
+			$description = $version->generateRepresentation(true);
+			if(isset($description)) {
+				$description .= " " . lang("version_by") . " ";
+				if($version->editor) {
+					$description .= '<a href="member/'.$version->editor->ID . URLEND.'" class="user">' . convert::Raw2xml($version->editor->title) . '</a>';
+				} else {
+					$description .= '<span style="font-style: italic;">System</span>';
+				}
+				$description .= " " . $version->last_modified()->ago();
+			}
+			
+			if($this->confirm(lang("restore_confirm"), null, null, $description)) {
 				if($version->canWrite($version)) {
 					$version->write(false, true, 1);
 				} else {
@@ -309,8 +321,14 @@ class HistoryController extends Controller {
 		// run output fixes here
 		
 		// img-fixes
-		preg_match_all('/\<img(.*)\s\/\>/Usi', $output, $matches);
-		foreach($matches[0] as $tag) {
+		preg_match_all('/\<img(.*)\/\>/Usi', $output, $matches);
+		foreach($matches[0] as $key => $tag) {
+			if(preg_match('/float\:\s*(left|right)/i', $tag, $match)) {
+				$floating = 'float: ' . $match[1];
+			} else {
+				$floating = "";
+			}
+				
 			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
 				$delTag = $tag;
 				$delTag = str_replace('<del>', '', $delTag);
@@ -322,24 +340,25 @@ class HistoryController extends Controller {
 				$insTag = str_replace('</ins>', '', $insTag);
 				$insTag = preg_replace('/\<del>(.*)\<\/del\>/Usi', "", $insTag);
 				
-				$tag = "<del style=\"display: block;\">".$delTag."</del><ins style=\"display: block;\">".$insTag."</ins>";
+				$tag = "<del style=\"display: block;$floating\">".$delTag."</del><ins style=\"display: block;$floating\">".$insTag."</ins>";
 				
 			} else if(strpos($tag, "<ins>")) {
+
 				$tag = str_replace('<ins>', '', $tag);
 				$tag = str_replace('</ins>', '', $tag);
-				$tag = "<ins>".$tag."</ins>";
+				$tag = "<ins style='$floating'>".$tag."</ins>";
 			} else if(strpos($tag, "<del>")) {
 				$tag = str_replace('<del>', '', $tag);
 				$tag = str_replace('</del>', '', $tag);
-				$tag = "<del>".$tag."</del>";
+				$tag = "<del style='$floating'>".$tag."</del>";
 			}
 			
-			$output = str_replace($matches[0], $tag, $output);
+			$output = str_replace($matches[0][$key], $tag, $output);
 		}
 		
 		// a-fixes
-		preg_match_all('/\<(a)(.*)\>(.*)\<\/\1\>/Usi', $output, $matches);
-		foreach($matches[0] as $tag) {
+		preg_match_all('/\<a(.*)\>(.*)\<\/a\>/Usi', $output, $matches);
+		foreach($matches[0] as $key => $tag) {
 			if(strpos($tag, "<ins>") && strpos($tag, "<del>")) {
 				$delTag = $tag;
 				$delTag = str_replace('<del>', '', $delTag);
@@ -363,7 +382,7 @@ class HistoryController extends Controller {
 				$tag = "<del>".$tag."</del>";
 			}
 			
-			$output = str_replace($matches[0], $tag, $output);
+			$output = str_replace($matches[0][$key], $tag, $output);
 		}
 		
 		// script-tags - we remove them
@@ -378,7 +397,7 @@ class HistoryController extends Controller {
 	 *@name buildEditorCSS
 	*/
 	public function buildEditorCSS() {
-		$cache = ROOT . CACHE_DIRECTORY . "/editor.compare." . Core::GetTheme() . ".css";
+		$cache = ROOT . CACHE_DIRECTORY . "/editor_compare_" . Core::GetTheme() . ".css";
 		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
 			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			

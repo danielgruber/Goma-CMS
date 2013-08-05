@@ -1,59 +1,493 @@
 /**
-  * some basic functionality for goma, e.g. loaders for javascript and some global functions
+  * goma javascript framework
   *
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 02.12.2012
-  * $Version 1.5.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 27.03.2013
+  * $Version 2.0.1
 */
 
-// prevent from being executed twice
-if(typeof self.loader == "undefined") {
+// goma-framework
+if(typeof goma == "undefined")
+	var goma = {};
+
+
+// some regular expressions
+var json_regexp = /^\(?\{/;
+var html_regexp = new RegExp("<body");
+
+if(typeof goma.ui == "undefined") {
+	goma.ui = (function($){
+		
+		var external_regexp = /https?\:\/\/|ftp\:\/\//;
 	
-	self.loader = true;
-	
-	// some regular expressions
-	var json_regexp = /^\(?\{/;
-	var html_regexp = new RegExp("<body");
-	var external_regexp = /https?\:\/\/|ftp\:\/\//;
-	
-	var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
-	var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
-	
-	/**
-	 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
-	 * you must register the plugin in PHP
-	 * we stop execution of JavaScript while loading
-	*/
-	var gloader = {
-		load: function(component, fn)
-		{
-			if(gloader.loaded[component] == null)
+		var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
+		var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
+		
+		/**
+		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
+		 * you must register the plugin in PHP
+		 * we stop execution of JavaScript while loading
+		*/
+		var gloaded = [];
+		var loadScript = function(comp, fn) {
+			if(gloaded[comp] == null)
 			{
 				$("body").css("cursor", "wait");
 				$.ajax({
 					cache: true,
 					noRequestTrack: true,
-					url: BASE_SCRIPT + "gloader/" + component + ".js",
+					url: BASE_SCRIPT + "gloader/" + comp + ".js",
 					dataType: "script",
-					error: function(jqXHR, textStatus, errorThrown) {
-						alert(textStatus);
-						alert(errorThrown);
-					},
 					async: false
 				});
 				$("body").css("cursor", "auto");
 				
-				gloader.loaded[component] = true;
+				gloaded[comp] = true;
 				
 				if(fn != null)
 					fn();
 			}
-		},
-		loaded: []
-	};
+		};
+		
+		var CSSLoaded = [];
+		var CSSIncluded = [];
+		var JSLoaded = [];
+		
+		// retina support
+		var RetinaReplace = function() {
+			$("img").each(function(){ //.on("load", "img", function(){
+				var $this = $(this);
+				if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
+					if(goma.ui.IsImageOk($(this).get(0))) {
+						var img = new Image();
+						img.onload = function(){
+							$this.css("width", $this.width());
+							$this.css("height", $this.height());
+							$this.attr("src", $this.attr("data-retina"));
+							img.src = null;
+						}
+						img.src = $this.attr("data-retina");
+						$this.attr("data-retined", "complete");
+					}
+				}
+			});
+			
+		}
+		
+		$(function() {	
+			$.extend(goma.ui, {
+				/**
+				 * this area is by default used to place content loaded via Ajax
+				*/
+				mainContent: $("#content").length ? $("#content") : $("body"),
+				
+				/**
+				 * this area is by default used to place containers from javascript
+				*/
+				DocRoot: ($(".documentRoot").length == 1) ? $(".documentRoot") : $("body")
+			});
+			
+			if(goma.ui.getDevicePixelRatio() > 1.5) {
+				RetinaReplace();
+				// add retina-updae-event
+				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, !1);
+			    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
+			     	   /loaded|complete/.test(document.readyState) && RetinaReplace();
+			   	}, 10);
+			}
+			
+			window.onbeforeunload = goma.ui.fireUnloadEvents;
+		});
+		
+		// build module
+		return {
+			
+			/**
+			 * defines if we are in backend
+			*/
+			is_backend: false,
+			
+			/**
+			 * sets the main-content where to put by default content from ajax-requests
+			 *
+			 *@name setMainContent
+			 *@param jQuery-Object | string (CSS-Path)
+			*/
+			setMainContent: function(node) {
+				if($(node).length > 0)
+					goma.ui.mainContent = $(node);
+			},
+			
+			/**
+			 * returns the main-content as jQuery-Object
+			*/
+			getMainContent: function() {
+				return goma.ui.mainContent;
+			},
+			
+			ajax: function(destination, options, unload) {
+				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
+				
+				
+				if(unload !== false) {
+					var data = goma.ui.fireUnloadEvents(node);
+					if(typeof data == "string") {
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
+							return false;
+					}
+				}
+				
+				return $.ajax(options).done(function(r, c, a){	
+					goma.ui.renderResponse(r, a, node, undefined, false);
+				}).fail(function(a){
+					// try find out why it has failed
+					if(jqXHR.textStatus == "timeout") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
+					} else if(jqXHR.textStatus == "abort") {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The request was aborted.</div>');
+					} else {
+						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
+					}
+				});
+			},
+			
+			/**
+			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
+			 *
+			 *@name updateRetina
+			*/
+			updateRetina: function() {
+				if(goma.ui.getDevicePixelRatio() > 1.5)
+					RetinaReplace();	
+			},
+			
+			/**
+			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
+			 *
+			 *@name updateRetina
+			*/
+			updateRetina: function() {
+				if(goma.ui.getDevicePixelRatio() > 1.5)
+					RetinaReplace();	
+			},
+			
+			/**
+			 * fires unload events and returns perfect result for onbeforeunload event
+			 *
+			 *@name fireUnloadEvents
+			*/
+			fireUnloadEvents: function(node) {
+				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
+				var event = jQuery.Event("onbeforeunload");
+				var r = true;
+				
+				$(".g-unload-handler").each(function(){
+					if($(this).parents(node)) {
+						$(this).trigger(event);
+						if(typeof event.result == "string")
+							r = event.result;
+					}
+				});
+				
+				if(r !== true)
+					return r;
+			},
+			
+			/**
+			 * binds unload-event on specfic html-node
+			 *
+			 *@name bindUnloadEvent
+			 *@param string - selector for event-binding
+			 *@param object - data //optional
+			 *@param function - handler
+			*/
+			bindUnloadEvent: function(select, data, handler) {
+				$(select).addClass("g-unload-handler");
+				$(select).on("onbeforeunload", data, handler);
+			},
+			
+			/**
+			 * removes unbind-handler from specific object
+			 *
+			 *@name removeUnloadHandler
+			 *@param string - selector
+			 *@param function - handler to remove - optional
+			*/
+			unbindUnloadEvent: function(select, handler) {
+				$(select).off("onbeforeunload", handler);
+			},
+			
+			/**
+			 * for loading data
+			 * sets data loaded
+			*/
+			setLoaded: function(mod) {
+				gloaded[mod] = true;
+			},
+			
+			/**
+			 * loading-script
+			 *
+			 *@name load
+			 *@param string - mod
+			 *@param function - fn
+			*/
+			load: loadScript,
+			
+			/**
+			 * some base-roots in DOM
+			*/
+			getContentRoot: function() {
+				return goma.ui.mainContent;
+			},
+			getDocRoot: function() {
+				return goma.ui.DocRoot;
+			},
+			
+			/**
+			 * global ajax renderer
+			 *
+			 *@name renderResponse
+			 *@access public
+			*/
+			renderResponse: function(html, xhr, node, object, checkUnload) {
+				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
+				
+				if(checkUnload !== false) {
+					var data = goma.ui.fireUnloadEvents(node);
+					if(typeof data == "string") {
+						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end")))
+							return false;
+					}
+				}
+				
+				LoadAjaxResources(xhr);
+			
+				if(xhr != null) {
+					var content_type = xhr.getResponseHeader("content-type");
+					if(content_type == "text/javascript") {
+						if(typeof object != "undefined") {
+							var method;
+							if (window.execScript)
+							  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
+							else
+						  		method = eval('(function(){' + html + '});');
+						  	
+							method.call(object);
+						} else {
+							eval_global(html);
+						}
+						RunAjaxResources(xhr);
+						return true;
+					} else if(content_type == "text/x-json" && json_regexp.test(html)) {
+						
+						RunAjaxResources(xhr);
+						return false;
+					}
+				}
+				
+				var regexp = new RegExp("<body");
+				if(regexp.test(html)) {
+					var id = randomString(5);
+					top[id + "_html"] = html;
+					node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
+				} else {
+					node.html(html);
+				}
+				
+				RunAjaxResources(xhr);
+			},
+			
+			/**
+			 * css and javascript-management
+			*/
+			
+			/**
+			 * register a resource loaded
+			 *
+			 *@name registerResource
+			 *@access public
+			*/
+			registerResource: function(type, file) {
+				goma.ui.registerResources(type, [file]);
+			},
+			
+			/**
+			 * register resources loaded
+			 *
+			 *@name registerResources
+			 *@access public
+			*/
+			registerResources: function(type, files) {
+				switch(type) {
+					case "css":
+						
+						var i;
+						for(i in files) {
+							CSSLoaded[files[i]] = "";
+							CSSIncluded[files[i]] = true;
+						}
+					break;
+					case "js":
+						
+						var i;
+						for(i in files) {
+							JSLoaded[files[i]] = true;
+						}
+					break;
+				}
+			},
+			
+			loadResources: function(request) {
+				var css = request.getResponseHeader("X-CSS-Load");
+				var js = request.getResponseHeader("X-JavaScript-Load");
+				
+				if(css != null) {
+					var cssfiles = css.split(";");
+					var i;
+					
+					for(i in cssfiles) {
+						var file = cssfiles[i];
+						if(!external_regexp.test(file) && file != "") {
+							
+							if(typeof CSSLoaded[file] == "undefined") {
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(css){
+										// patch uris
+										var base = file.substring(0, file.lastIndexOf("/"));
+										//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+										css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
+										
+										CSSLoaded[file] = css;
+									}
+								});
+							}
+							
+							if(typeof CSSIncluded[file] == "undefined") {
+								$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
+								CSSIncluded[file] = true;
+							}
+						} else {
+							CSSLoaded[file] = css;
+							if($("head").html().indexOf(file) != -1) {
+								$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
+							}
+						}
+					}
+				}
+				
+				if(js != null) {
+					var jsfiles = js.split(";");
+					var i;
+					
+					for(i in jsfiles) {
+						var file = jsfiles[i];
+						if(file != "") {
+							if((!run_regexp.test(file) && JSLoaded[file] !== true) || load_alwaysLoad.test(file)) {
+								JSLoaded[file] = true;
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(js){
+										eval_global(js);
+									}
+								});
+							}
+							regexp = null;
+							
+						}
+					}
+				}
+				
+			},
+			
+			runResources: function(request) {
+				var js = request.getResponseHeader("X-JavaScript-Load");
+				if(js != null) {
+					var jsfiles = js.split(";");
+					var i;
+					for(i in jsfiles) {
+						
+						var file = jsfiles[i];
+						if(file != "") {
+							if(run_regexp.test(file)) {
+								$.ajax({
+									cache: true,
+									url: file,
+									noRequestTrack: true,
+									async: false,
+									dataType: "html",
+									success: function(js){
+										eval_global(js);
+									}
+								});
+							}
+							regexp = null;	
+						}
+					}
+				}
+			},
+			
+			// Helper Functions
+			getDevicePixelRatio: function() {
+		        if (window.devicePixelRatio === undefined) { return 1; }
+		        return window.devicePixelRatio;
+		    },
+		    
+		    /**
+		     * checks if a img were loaded correctly
+		     *
+		     *@name isImageOK
+		    */
+			IsImageOk: function(img) {
+			    // During the onload event, IE correctly identifies any images that
+			    // weren’t downloaded as not complete. Others should too. Gecko-based
+			    // browsers act like NS4 in that they report this incorrectly.
+			    if (!img.complete) {
+			        return false;
+			    }
+			
+			    // However, they do have two very useful properties: naturalWidth and
+			    // naturalHeight. These give the true size of the image. If it failed
+			    // to load, either of these should be zero.
+			
+			    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
+			        return false;
+			    }
+			
+			    // No other way of checking: assume it’s ok.
+			    return true;
+			}
+	
+		};
+	})(jQuery);
+	
+	var gloader = {load: goma.ui.load};
+}
+
+if(typeof goma.ENV == "undefined") {
+	goma.ENV = (function(){
+		return {
+			"jsversion": "2.0"
+		};
+	})();
+}
+
+// prevent from being executed twice
+if(typeof self.loader == "undefined") {
+	
+	self.loader = true;
 	
 	// shuffle
 	array_shuffle = function(array){
@@ -85,7 +519,7 @@ if(typeof self.loader == "undefined") {
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
 			*/
-			$(document).on("click", "a[rel=ajaxfy]", function()
+			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function()
 			{
 				var $this = $(this);
 				var _html = $this.html();
@@ -94,55 +528,32 @@ if(typeof self.loader == "undefined") {
 				$.ajax({
 					url: $this.attr("href"),
 					data: {ajaxfy: true, "ajaxcontent": true, "container": $container},
-					dataType: "html",
-					success: function(html, code, ajaxreq) {
-						eval_script(html, ajaxreq);
-						$this.html(_html);
-					},
-					error: function(ajaxreq) {
-						eval_script(ajaxreq.responseText, ajaxreq);
-						$this.html(_html);
-					}
+					dataType: "html"
+				}).done(function(html, textStatus, jqXHR){
+					eval_script(html, jqXHR);
+					$this.html(_html);
+				}).fail(function(jqXHR){
+					eval_script(jqXHR.responseText, jqXHR);
+					$this.html(_html);
 				});
-				return false;
-			});
-			
-			// the orangebox is not tested, yet, please don't use it!
-			$(document).on('click',"a[rel*=orangebox]",function(){	
-				gloader.load("orangebox");
-				$(this).orangebox();
-				$(this).removeAttr("rel");
-				$(this).click();
-			});
-	
-			// pretty old-fasioned bluefox, if you like it create an a-tag with rel="bluebox"
-			$(document).on('click', "a[rel*=bluebox], a[rel*=facebox]", function(){
-				gloader.load("dialog");
-				if($(this).hasClass("nodrag"))
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'), false);
-				} else
-				{
-					new bluebox($(this).attr('href'), $(this).attr('title'), $(this).attr('name'));
-				}
 				return false;
 			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
-		    $(document).on("click", "a[rel*=dropdownDialog]", function()
+		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
 			{
 				gloader.load("dropdownDialog");
 				
 				var options = {
 					uri: $(this).attr("href")
 				};
-				if($(this).attr("rel") == "dropdownDialog[left]")
+				if($(this).attr("rel") == "dropdownDialog[left]" || $(this).hasClass("dropdownDialog-left"))
 					options.position = "left";
-				else if($(this).attr("rel") == "dropdownDialog[center]")
+				else if($(this).attr("rel") == "dropdownDialog[center]" || $(this).hasClass("dropdownDialog-center"))
 					options.position = "center";
-				else if($(this).attr("rel") == "dropdownDialog[right]")
+				else if($(this).attr("rel") == "dropdownDialog[right]" || $(this).hasClass("dropdownDialog-right"))
 					options.position = "right";
-				else if($(this).attr("rel") == "dropdownDialog[bottom]")
+				else if($(this).attr("rel") == "dropdownDialog[bottom]" || $(this).hasClass("dropdownDialog-bottom"))
 					options.position = "bottom";
 				
 				$(this).dropdownDialog(options);
@@ -185,6 +596,24 @@ if(typeof self.loader == "undefined") {
 				}
 			);
 			
+			// scroll fix
+			$(document).on("click", "a", function(){
+				if($(this).attr("href").substr(0,1) == "#") {
+					scrollToHash($(this).attr("href").substr(1));
+					return false;
+				} else if(typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
+					scrollToHash($(this).attr("data-anchor"));
+					return false;
+				}
+			});
+			
+			// scroll to right position
+			if($("#frontedbar").length == 1) {
+				if(location.hash != "") {
+					scrollToHash(location.hash.substr(1));
+				}
+			}
+			
 		});
 		
 		// SOME GLOBAL METHODS
@@ -199,14 +628,14 @@ if(typeof self.loader == "undefined") {
 		 *@name lang
 		*/
 		w.lang = function(name, _default) {
-			if(typeof profiler != "undefined") profiler.mark("lang");
 			
 			if(typeof lang[name] == "undefined") {
 				var jqXHR = $.ajax({
 					async: false,
 					cache: true,
 					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name),
-					dataType: "json"
+					dataType: "json",
+					noRequestTrack: true
 				});
 				
 				try {
@@ -219,8 +648,6 @@ if(typeof self.loader == "undefined") {
 				}
 			}
 			
-			if(typeof profiler != "undefined") profiler.unmark("lang");
-			
 			if(lang[name] == null) {
 				return _default;
 			} else {
@@ -232,11 +659,7 @@ if(typeof self.loader == "undefined") {
 		 * returns the root of the document
 		*/
 		w.getDocRoot = function() {
-			if($(".documentRoot").length == 1) {
-				return $(".documentRoot");
-			} else {
-				return $("body");
-			}
+			return goma.ui.getDocRoot();
 		}
 		
 		/**
@@ -248,7 +671,6 @@ if(typeof self.loader == "undefined") {
 		 *@param bool - async request or not, default: true
 		*/
 		w.preloadLang = function(_names, async) {
-			if(typeof profiler != "undefined") profiler.mark("preloadLang");
 			
 			if(typeof async == "undefined")
 				async = true;
@@ -263,238 +685,41 @@ if(typeof self.loader == "undefined") {
 			if(names.length == 0)
 				return true;
 			
-			var jqXHR = $.ajax({
+			$.ajax({
 				async: async,
 				cache: true,
 				data: {"lang": names},
 				url: ROOT_PATH + "system/getLang/",
-				dataType: "json"
-			});
-			
-			try {
-				var data = parseJSON(jqXHR.responseText);
-				for(i in data) {
-					lang[i] = data[i];
+				dataType: "html",
+				noRequestTrack: true,
+				success: function(html) {
+					try {
+						var data = parseJSON(html);
+						for(i in data) {
+							lang[i] = data[i];
+						}
+					} catch(e) { 
+						alert(e);
+					}
 				}
-			} catch(e) { }
-			
-			if(typeof profiler != "undefined") profiler.unmark("preloadLang");
+			});
 		}
 			
 		// some response handlers
 		w.eval_script = function(html, ajaxreq, object) {
-			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("eval_script");
-			
-			var content_type = ajaxreq.getResponseHeader("content-type");
-			if(content_type == "text/javascript") {
-				if(typeof object != "undefined") {
-					var method;
-					if (window.execScript)
-					  	window.execScript('method = function(' + html + ')',''); // execScript doesn’t return anything
-					else
-					  	var method = eval('(function(){' + html + '});');
-					method.call(object);
-				} else {
-					 eval_global(html);
-				}
-			} else if(content_type == "text/x-json") {
-				var object = parseJSON(html);
-				var _class = object["class"];
-				var i;
-				for(i in object["areas"]) {
-					$("#"+_class+"_"+i+"").html(object["areas"][i]);
-				}
-			} else {
-				gloader.load("orangebox");
-				var id = randomString(5);
-				if(html_regexp.test(html)) {
-					self[id + "_html"] = html;
-					$("body").append('<div id="'+id+'_div" style="display: none;width: 800px;hieght: 300px;"><iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0" id="'+id+'"></iframe></div>');
-					
-					$("body").append('<a style="display: none;" href="#'+id+'_div" rel="orangebox" id="'+id+'_link"></a>');
-					$("#" + id + "_link").click();
-				} else{
-					$("body").append('<div id="'+id+'_div" style="display: none;">'+html+'</div>');
-					$("body").append('<a style="display: none;" href="#'+id+'_div" rel="orangebox" id="'+id+'_link"></a>');
-					$("#" + id + "_link").click();
-				}
-			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("eval_script");
-			
-			RunAjaxResources(ajaxreq);
+			return goma.ui.renderResponse(html, ajaxreq, undefined, object);
 		}
 		
 		w.renderResponseTo = function(html, node, ajaxreq, object) {
-			LoadAjaxResources(ajaxreq);
-			
-			if(typeof profiler != "undefined") profiler.mark("renderResponseTo");
-			
-			if(ajaxreq != null) {
-				var content_type = ajaxreq.getResponseHeader("content-type");
-				if(content_type == "text/javascript") {
-					if(typeof object != "undefined") {
-						var method = eval('(function(){' + html + '});');
-						method.call(object);
-					} else {
-						eval_global(html);
-					}
-					RunAjaxResources(ajaxreq);
-					return true;
-				} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-					var object = parseJSON(html);
-					var _class = object["class"];
-					var i;
-					for(i in object["areas"]) {
-						$("#"+_class+"_"+i+"").html(object["areas"][i]);
-					}
-					RunAjaxResources(ajaxreq);
-					return true;
-				}
-			}
-			
-			var regexp = new RegExp("<body");
-			if(regexp.test(html)) {
-				var id = randomString(5);
-				top[id + "_html"] = html;
-				node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
-			} else {
-				node.html(html);
-			}
-			
-			if(typeof profiler != "undefined") profiler.unmark("renderResponseTo");
-			
-			RunAjaxResources(ajaxreq);
+			return goma.ui.renderResponse(html, ajaxreq, node, object);
 		}
-		
-		w.ajax_submit = function(obj)
-		{
-			var $this = $(obj);
-			$form = $this.parents("form");
-			var data = $form.serialize();
-			var url = $form.attr("action");
-			var method = $form.attr("method");
-			$this.before('<img src="images/16x16/loading.gif" class="loader" alt="loading..." />');
-			$.ajax({
-				url: url,
-				type: method,
-				data: data,
-				dataType: "script",
-				complete: function()
-				{
-					$form.find(".loader").remove();
-				}
-			});
-			return false;
-		}
-		
-		if(typeof w.JSLoadedResources == "undefined")
-			w.JSLoadedResources = [];
-		
-		if(typeof w.CSSLoadedResources == "undefined")
-			w.CSSLoadedResources = [];
-		
-		if(typeof w.CSSIncludedResources == "undefined")
-			w.CSSIncludedResources = [];
-		
-		
 		
 		w.LoadAjaxResources = function(request) {
-			var css = request.getResponseHeader("X-CSS-Load");
-			var js = request.getResponseHeader("X-JavaScript-Load");
-			if(css != null) {
-				var cssfiles = css.split(";");
-				var i;
-				for(i in cssfiles) {
-					var file = cssfiles[i];
-					if(!external_regexp.test(file) && file != "") {
-						
-						if(typeof w.CSSLoadedResources[file] == "undefined") {
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(css) {
-									// patch uris
-									var base = file.substring(0, file.lastIndexOf("/"));
-									//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-									css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + root_path + base + '/$1)');
-									
-									w.CSSLoadedResources[file] = css;
-								}
-							});
-						}
-						
-						
-						if(typeof w.CSSIncludedResources[file] == "undefined") {
-							$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoadedResources[file]+'</style>');
-							w.CSSIncludedResources[file] = true;
-						}
-					} else {
-						w.CSSLoadedResources[file] = css;
-						if($("head").html().indexOf(file) != -1) {
-							$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
-						}
-					}
-				}
-			}
-			if(js != null) {
-				var jsfiles = js.split(";");
-				var i;
-				
-				for(i in jsfiles) {
-					var file = jsfiles[i];
-					if(file != "") {
-						if((!run_regexp.test(file) && w.JSLoadedResources[file] !== true) || load_alwaysLoad.test(file)) {
-							w.JSLoadedResources[file] = true;
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(js) {
-									eval_global(js);
-								}
-							});
-						}
-						regexp = null;
-						
-					}
-				}
-			}
-			
+			return goma.ui.loadResources(request);
 		}
 		
 		w.RunAjaxResources = function(request) {
-			var js = request.getResponseHeader("X-JavaScript-Load");
-			if(js != null) {
-				var jsfiles = js.split(";");
-				var i;
-				for(i in jsfiles) {
-					
-					var file = jsfiles[i];
-					if(file != "") {
-						if(run_regexp.test(file)) {
-							$.ajax({
-								cache: true,
-								url: file,
-								noRequestTrack: true,
-								async: false,
-								dataType: "html",
-								success: function(js) {
-									eval_global(js);
-								}
-							});
-						}
-						regexp = null;	
-					}
-				}
-			}
+			return goma.ui.runResources(request);
 		}
 	
 	
@@ -506,6 +731,7 @@ if(typeof self.loader == "undefined") {
 		 *@param node
 		*/
 		w.unbindFromFormSubmit = function(node) {
+			
 			// first make sure it works!
 			var active = false;
 			$(node).focus(function(){
@@ -517,13 +743,15 @@ if(typeof self.loader == "undefined") {
 			});
 			
 			$(node).parents("form").bind("formsubmit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			$(node).parents("form").bind("submit", function(){
-				if(active)
+				if(active) {
 					return false;
+				}
 			});
 			
 			// second use a better method, just if the browser support it
@@ -559,10 +787,10 @@ if(typeof self.loader == "undefined") {
 			}
 			
 			// function if we click anywhere
-			mouseDownFunc = function(){
+			mouseDownFunc = function(e){
 				setTimeout(function(){		
 					if(mouseover === false) {
-						fn();
+						fn(e);
 					}
 				}, 10);
 			}
@@ -570,15 +798,17 @@ if(typeof self.loader == "undefined") {
 			if(exceptions) {
 				var i;
 				for(i in exceptions) {
-					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("mouseup", exceptionFunc);
-					$(exceptions[i]).on("touchstart", exceptionFunc);
+					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("touchend", exceptionFunc);
+					$(exceptions[i]).on("touchstart", exceptionFunc);
 				}
 			}
 			// init mouseover-events
-			$(document).on("mouseup", mouseDownFunc);
-			$(document).on("touchend", mouseDownFunc);
+			$(window).on("mouseup", mouseDownFunc);
+			$(window).on("mousedown", mouseDownFunc);
+			$(window).on("touchend", mouseDownFunc);
+			$(window).on("touchstart", mouseDownFunc);
 			$("iframe").each(function(){
 				var w = $(this).get(0).contentWindow;
 				if(w) {
@@ -612,6 +842,7 @@ if(typeof self.loader == "undefined") {
 		
 		// save settings of last ajax request
 		w.request_history = [];
+		w.event_history = [];
 		
 		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
 			if(originalOptions.noRequestTrack == null) {
@@ -620,10 +851,92 @@ if(typeof self.loader == "undefined") {
 					w.request_history.push(data);
 				});
 				
+				if(originalOptions.type == "post" && originalOptions.async != false) {
+					jqXHR.fail(function(){
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
+						} else {
+							alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
+						}
+					});
+				} else {
+					jqXHR.fail(function(){
+						
+						if(jqXHR.textStatus == "timeout") {
+							alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
+						} else if(jqXHR.textStatus == "abort") {
+							alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
+						} else {
+							alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
+						}
+					});
+				}
 			}
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
+	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	 		if(goma.ENV.is_backend)
+	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
+		
+		w.event_history = [];
+		$.orgajax = $.ajax;
+		$.ajax = function(url, options) {
+			
+			var w = window;
+			
+			var jqXHR = $.orgajax.apply(this, [url, options]);
+			
+			if(typeof options != "undefined" && options.noRequestTrack == null || url.noRequestTrack == null) {
+				var i = w.event_history.length;
+				w.event_history[i] = {done: [], fail: [], always: []};
+				
+				jqXHR._done = jqXHR.done;
+				jqXHR.done = function(fn) {
+					w.event_history[i]["done"].push(fn);
+					return jqXHR._done(fn);
+				}
+				
+				jqXHR._fail = jqXHR.fail;
+				jqXHR.fail = function(fn) {
+					w.event_history[i]["fail"].push(fn);
+					return jqXHR._fail(fn);
+				}
+				
+				jqXHR._always = jqXHR.always;
+				jqXHR.always = function(fn) {
+					w.event_history[i]["always"].push(fn);
+					return jqXHR._always(fn);
+				}
+			}
+				
+			return jqXHR;
+		};
+		
+		/* API to run earlier Requests with a bit different options */
+		w.runLastRequest = function(data) {
+			return w.runPreRequest(0, data);
+		}
+		w.runPreRequest = function(i, data) {
+			var a = self.request_history.length - 1 - parseInt(i);
+			var options = $.extend(self.request_history[a], data);
+			if(self.request_history[a].data != null && typeof self.request_history[a].data != "string" && typeof data.data == "object") {
+				options.data = $.extend(self.request_history[a].data, data.data);
+			}
+			var jqXHR = $.ajax(options);
+			for(i in w.event_history[a]["done"]) {
+				jqXHR.done(w.event_history[a]["done"][i]);
+			}
+			for(i in w.event_history[a]["always"]) {
+				jqXHR.always(w.event_history[a]["always"][i]);
+			}
+			for(i in w.event_history[a]["fail"]) {
+				jqXHR.fail(w.event_history[a]["fail"][i]);
+			}
+			return jqXHR;
+		}
 		
 	})(jQuery, window);
 	
@@ -651,13 +964,6 @@ if(typeof self.loader == "undefined") {
 	
 	function is_string(input) {
 	    return (typeof(input) == 'string');
-	}
-	
-	function getLastRequest() {
-		return self.request_history[self.request_history.length -1];
-	}
-	function getPreRequest(i) {
-		return self.request_history[self.request_history.length - 1 - parseInt(i)];
 	}
 	
 	
@@ -732,10 +1038,15 @@ if(typeof self.loader == "undefined") {
 	
 	// patch for IE eval
 	function eval_global(codetoeval) {
-	    if (window.execScript)
-	        window.execScript(codetoeval); // execScript doesn’t return anything
-	    else
-	        window.eval(codetoeval);
+		try {
+		    if (window.execScript)
+		        window.execScript(codetoeval); // execScript doesn’t return anything
+		    else
+		        window.eval(codetoeval);
+		} catch(e) {
+			alert(e);
+			throw e;
+		}
 	}
 	
 	// parse JSON
@@ -777,66 +1088,27 @@ if(typeof self.loader == "undefined") {
 	    return new Array(multiplier + 1).join(input);
 	}
 	
-	// Helper Functions
-    var getDevicePixelRatio = function() {
-        if (window.devicePixelRatio === undefined) { return 1; }
-        return window.devicePixelRatio;
-    }
-    
-	// retina-support
-	$(function(){
-		var timeout;
-		var replace = function() {
-			if(getDevicePixelRatio() > 1.5) {
-				var setT = true;
-				$("img").each(function(){ //.on("load", "img", function(){
-					var $this = $(this);
-					if($this.attr("data-ratined") != "complete" && $this.attr("data-retina")) {
-						if(IsImageOk($(this).get(0))) {
-							var img = new Image();
-							img.onload = function(){
-								$this.css("width", $this.width());
-								$this.css("height", $this.height());
-								$this.attr("src", $this.attr("data-retina"));
-								img.src = null;
-							}
-							img.src = $this.attr("data-retina");
-							$this.attr("data-ratined", "complete");
-						} else {
-							clearTimeout(timeout);
-							timeout = setTimeout(replace, 100);
-							setT = false;
-						}
-					}
-				});
-				
-				if(setT === true) {
-					clearTimeout(timeout);
-					timeout = setTimeout(replace, 2000);
-				}
-			}
+	var scrollToHash = function(hash) {
+		if($("#" + hash).length > 0) {
+			var scrollPosition = $("#" + hash).offset().top;
+		} else if($("a[name="+hash+"]").length > 0) {
+			var scrollPosition = $("a[name="+hash+"]").offset().top;
+		} else {
+			var scrollPosition = 0;
 		}
-		replace();
-		window.retinaReplace = replace;
-	});
-	
-	function IsImageOk(img) {
-	    // During the onload event, IE correctly identifies any images that
-	    // weren’t downloaded as not complete. Others should too. Gecko-based
-	    // browsers act like NS4 in that they report this incorrectly.
-	    if (!img.complete) {
-	        return false;
-	    }
-	
-	    // However, they do have two very useful properties: naturalWidth and
-	    // naturalHeight. These give the true size of the image. If it failed
-	    // to load, either of these should be zero.
-	
-	    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
-	        return false;
-	    }
-	
-	    // No other way of checking: assume it’s ok.
-	    return true;
+		
+		scrollPosition = Math.round(scrollPosition);
+		
+		if(scrollPosition != 0 && $("#frontedbar").length == 1) {
+			scrollPosition -= $("#frontedbar").height();
+		}
+		
+		var scroll = $(window).scrollTop();
+		window.location.hash = hash;
+		$(window).scrollTop(scroll);
+		
+		$("html, body").animate({
+			"scrollTop": scrollPosition
+		}, 200);
 	}
 }

@@ -3,8 +3,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 02.12.2012
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 25.03.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,7 @@ $lang = array(
 	"installed_version"								=> "Installed version",
 	"password"                                     	=> "password",
 	'smilies'										=> "emoticons",
+	"edit_password"									=> "change password",
 	"edit_password_ok"                             	=> "The password was successfully changed!",
 	"homepage"                                     	=> "home",
 	"page"											=> "page",
@@ -47,6 +48,7 @@ $lang = array(
 	"smilie_title"									=> "Name of emotion",
 	"register"                                     	=> "Sign Up",
 	"administration"                               	=> "administration",
+	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "manage website",
 	'default_admin'									=> "normal administration",
 	"my_account"                                   	=> "my account" ,
@@ -136,6 +138,8 @@ $lang = array(
 	"register_code"                                	=> "Registration-code",
 	"title"                                        	=> "Title",
 	"title_page"									=> "Title of the page",
+	"window_title"									=> "title of the browser-window",
+	"window_title_info"								=> "keep empty to use default title",
 	/* SETTINGS END TPL START */
 	"available_styles"                             	=> "Available designs",
 	"available_adminstyles"                        	=> "available designs for admin",
@@ -209,7 +213,13 @@ $lang = array(
 	"captcha_wrong"                                 => "The security-code was wrong",
 	"captcha_reload"                                => "reload",
 	'path'                                          => "path",
-	"successful_saved"                              => "The data was successfully saved!",
+	"box_successful_saved"							=> "The box was successfully saved!",
+	"successful_saved"                              => "The data were successfully saved!",
+	"saved"											=> "Saved",
+	"successful_deleted"							=> "The data was successfully removed.",
+	"deleted"										=> "Removed",
+	"successful_published"							=> "The data was successfully published!",
+	"published"										=> "Published",
 	'sites_edit'									=> "edit and create sites",
 	'admin_rating'									=> "edit rating",
 	'admin_smilies'									=> "manage emotions",
@@ -241,6 +251,7 @@ $lang = array(
 	'no_parentpage'									=> "Root-Page",
 	"subpage"										=> "Child-Page",
 	'boxes_page'									=> "Page with box-system",
+	"boxes"											=> "box-system",
 	'view_site'										=> "view site",
 	'show_in_search'								=> "Show in search",
 	'redirect'										=> "Weiterleitung",
@@ -267,6 +278,8 @@ $lang = array(
 	"active"										=> "active",
 	'page_not_active'								=> "This page isn't active!",
 	'unload_lang'									=> "Do you really wish to leave this page?\n\nAttention: The modifications hasn\\\'t saved, yet.\n\nPress OK to continue or Cancel to stay in this page.",
+	"unload_lang_start"								=> "Do you really wish to leave this page?\n\n",
+	"unload_lang_end"								=> "\n\nPress OK to continue or Cancel to stay in this page.",
 	"unload_not_saved"								=> "Attention: The modifications hasn\'t saved, yet.",
 	"date_format"									=> "Date-format",
 	"timezone"										=> "timezone",
@@ -279,16 +292,10 @@ $lang = array(
 	"pages_add"										=> "create page",
 	"pages_publish"									=> "publish page",
 	// default DataObjects
-	"dataobject_all"								=> "Full access to various dataobjects.",
-	"dataobject_edit"								=> "Edit data of various dataobjects.",
-	"dataobject_add"								=> "Add data to various dataobjects.",
-	"dataobject_delete"								=> "Delete data from various dataobjects.",
+	"data_manage"									=> "manage other data",
 
 	// right-mangement
 	"following_groups"								=> "Following groups",
-	"editor_groups"									=> "edit-groups",
-	"viewer_groups"									=> "viewer-groups",
-	"content_edit_users"							=> "every edit-group",
 	"editors"										=> "Permission to edit",
 	"publish"										=> "Permission to publish",
 	"viewer_types"									=> "Permission to view",
@@ -374,7 +381,6 @@ $lang = array(
 	"preview"										=> "preview",
 	"publish"										=> "publish",
 	"published_site"								=> "published page",
-	"published"										=> "published",
 	"draft"											=> "draft",
 	"draft_save"									=> "save draft",
 	"save_publish"									=> "save & publish",
@@ -382,11 +388,13 @@ $lang = array(
 	"current_state"									=> "Current State",
 	"open_in_new_tab"								=> "Open in new window",
 	"browse_versions"								=> "Browse all Versions",
-	"revert_changes"								=> "Revert Changes",
+	"revert_changes"								=> "Revert changes",
 	"revert_changes_confirm"						=> "Do you really want to revert changes and go back to the last published version?",
+	"revert"										=> "reverted",
 	"revert_changes_success"						=> "The last version was recovered successfully.",
 	"unpublish"										=> "Unpublish",
 	"unpublish_success"								=> "The site was successfully unpublished.",
+	"unpublished"									=> "unpublished",
 	"state_publish"									=> "Published version",
 	"state_state"									=> "Saved version",
 	"state_autosave"								=> "Auto-saved version",
@@ -396,7 +404,7 @@ $lang = array(
 	"versions_javascript"							=> "Please enable JavaScript to use this page.",
 	"done"											=> "Done",
 	"restore"										=> "Undo",
-	"restore_confirm"								=> "Do you really want to undo this change?",
+	"restore_confirm"								=> "Do you really want to revert back to this version?",
 	"compare"										=> "compare",
 	"no_versions"									=> "No version found",
 	"versions_timeline"								=> "Timeline",
@@ -472,10 +480,11 @@ $lang = array(
 	"hierarchy"										=> "hierarchy",
 	
 	"full_admin_permissions"						=> "Full admin permissions",
+	"full_admin_permissions_info"					=> "Everything is allowed, also if some rights are disabled.",
 	"signed"										=> "signature",
 	"signed_true"									=> "This package was validated by the Goma-Team and is safe to install!",
 	"signed_false"									=> "This package wasn't validated by the Goma-Team! Installing is at own risk!",
-
+	"signed_false_ssl"								=> "The package could not be validated, because Open-SSL is not installed on this server. Please contact your Server-administrator or get help at the <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Page</a>.",
 	
 	/* install */
 	"install.folder"			=> "Install-Folder",
@@ -498,7 +507,7 @@ $lang = array(
 	"ago.hour"				=> "about one hour ago",
 	"ago.hours"				=> "%d hours ago",
 	"ago.day"				=> "about one day ago",
-	"ago.days"				=> "%d days ago",
+	"ago.weekday"			=> "%s at %s",
 	
 	"domain"				=> "Domain",
 	"restoreType"			=> "Restoremethod",
@@ -514,8 +523,9 @@ $lang = array(
 	
 	"author"				=> "author",
 	
-	"flush_log"				=> "Delete log-files",
-	"flush_log_success"		=> "All log-files were deleted successfully.",
+	"flush_log"				=> "Delete old log-files",
+	"flush_log_success"		=> "All old log-files were deleted successfully.",
+	"flush_log_recommended"	=> "There are too many log-files on this server. It's recommended to delete old ones.",
 
 	"tablefield_out_of"		=> "out of",
 	
@@ -524,6 +534,7 @@ $lang = array(
 	// history
 	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a>',
 	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a>',
+	"h_pages_unpublish"		=> '$user unpublished the page <a href="$pageUrl">$page</a>',
 	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a>',
 	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a>',
 	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
@@ -538,9 +549,26 @@ $lang = array(
 	"h_group_remove"		=> '$user removed the group $group',
 	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',
 	
-	"h_all"					=> "All Events",
+	"h_all"					=> "all",
+	"h_all_events"			=> "all events",
+	"h_relevant"			=> "important",
 	
 	"older"					=> "older entries",
-	"newer"					=> "newer entries"
+	"newer"					=> "newer entries",
+	
+	"notification"			=> "notification",
+	"alert_big_image"		=> "Warning:\n\nYour uploaded image is too big for a website. It may load a long time.\n\nPlease reduce the image-size and try again.",
+	
+	"wrapper_page"			=> "list with subpages",
+	
+	"toggle_navigation"		=> "toggle navigation",
+	"toggle_sidebar"		=> "toggle sidebar",
+	
+	"time_not_in_range"		=> "The time must be between \$start and \$end.",
+	"no_valid_time"			=> "The given time is not valid.",
+	
+	"mail_successful_sent"	=> "The mail was sent successfully.",
+	
+	"error_disk_space"		=> "There's not enough disk space on the webserver available."
 
 );

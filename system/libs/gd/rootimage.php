@@ -17,23 +17,23 @@ class ROOTImage extends GD
 		 *@name md5
 		*/
 		public $md5;
+		
 		/**
 		 * the orgignial pic
 		 *@name org_pic
 		 *@var string
 		*/
 		public $org_pic;
+		
 		/**
 		 * constructs the class
 		 *@name __construct
 		 *@param string - filename relative to the uploaded-directory
 		 *@access public
 		*/
-		public function __construct($image)
-		{
-				parent::__construct();
+		public function __construct($image) {
 				$this->org_pic = $image;
-				if(substr($image, 0, strlen("Uploads")) == "Uploads") {
+				if(substr($image, 0, 7) == "Uploads") {
 					if($data = DataObject::Get_one("Uploads", array("path" => $image))) {
 						$this->md5 = md5_file($data->realfile);
 						parent::__construct($data->realfile);
@@ -45,6 +45,8 @@ class ROOTImage extends GD
 				{				
 						$this->md5 = md5_file(ROOT . $image);
 						parent::__construct(ROOT . $image);
+				} else {
+					parent::__construct();
 				}
 				
 		}

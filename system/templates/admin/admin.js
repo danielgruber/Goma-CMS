@@ -1,68 +1,66 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.09.2012
-*/
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+ *@Copyright (C) 2009 - 2013  Goma-Team
+ * last modified: 27.02.2013
+ */
 
-$(document).ready(function(){
-	$("#content > .header > .userbar-js").addClass("userbar");
-	//$("#content > .header > .userbar").removeClass("userbar");
+function updateNav() {
+	// Width of the entire page
+	var headerWidth = $("#header").width();
+	// Width of the userbar right
+	var userbarWidth = $("#userbar").outerWidth();
+	// Width of all navigation nodes
+	var naviWidth = $("#navi").outerWidth();
+	// Maximum available space for the navigation
+	var naviWidthMax = headerWidth - userbarWidth - 15;
+	var curNode;
 
-	var update = function(){
-		var headerWidth = $("#content > .header").width();
-		var userbarWidth = $("#content > .header > .userbar").outerWidth();
-		var naviWidth = $("#navi").outerWidth();
-		var naviWidthMax = headerWidth - userbarWidth - 25;
-		var curNode;
-		var active = $("#navi > ul > li.active").index() + 1;
-				
-		if(naviWidth <= naviWidthMax)
-		{
-			if($("#navMore-sub li").length > 0)
-			{
+	if (naviWidth < naviWidthMax) {
+		if ($("#navMore-sub li").length != 0) {
+			curNode = $("#navi li.nav-inactive").first();
+			while (naviWidthMax - naviWidth > curNode.outerWidth(true) && curNode.length != 0) {
+				$("#navMore-sub li").first().remove();
+				curNode.removeClass("nav-inactive");
 				curNode = $("#navi li.nav-inactive").first();
-				if(naviWidthMax - naviWidth > curNode.outerWidth(true))
-				{
-					$("#navMore-sub li").first().remove();
-					curNode.removeClass("nav-inactive");
-				}
 			}
-			else
-			{
+			if ($("#navMore-sub li").length == 0)
 				$("#navMore").css("display", "none");
-			}
 		}
-		else
-		{
-			while($("#navi").outerWidth() > naviWidthMax)
-			{
-				curNode = $("#navi").find(" > ul > li").not($("#navMore")).not($("#navi li.active")).not($("#navi li.nav-inactive")).last();
-				curNode.clone().prependTo("#navMore-sub");
-				curNode.addClass("nav-inactive");
-				$("#navMore").css("display", "block");
-			}
+	} else {
+		while ($("#navi").outerWidth() > naviWidthMax) {
+			curNode = $("#navi").find(" > ul > li").not($("#navMore")).not($("#navi li.active")).not($("#navi li.nav-inactive")).last();
+			curNode.clone().prependTo("#navMore-sub");
+			curNode.addClass("nav-inactive");
+			$("#navMore").css("display", "block");
 		}
 	}
-	
-	$("#navMore > a").click(function(){
-		if($(this).parent().hasClass("open")) {
-			$("#navMore-sub").slideUp("fast");
-			$(this).parent().removeClass("open");
-		} else {
-			$("#navMore-sub").slideDown("fast");
-			$(this).parent().addClass("open");
-		}
+}
+
+
+$(document).ready(function() {
+	$("#userbar").addClass("userbar-js");
+	$("#userbar").removeClass("userbar-no-js");
+
+	$(window).resize(function() {
+		updateNav();
+	});
+
+	updateNav();
+
+	$("#navMore > a").click(function() {
+		$(this).parent().toggleClass("open");
+		$("#navMore-sub").stop().slideToggle("fast");
 		return false;
 	});
 	
-	CallonDocumentClick(function(){
-		$("#navMore-sub").slideUp("fast");
+	var hideNavMore = function() {
 		$("#navMore").removeClass("open");
-	}, [$("#navMore")]);
+		$("#navMore-sub").stop().slideUp("fast");
+	}
 	
-	$(window).resize(update);
-	$("#wrapper").bind("resize", update);
-	update();
-});
+	CallonDocumentClick(hideNavMore, [$("#navMore"), $("#navMore-sub")]);
+	
+	goma.ui.setMainContent($("#contnet > content_inner"));
+})

@@ -3,8 +3,8 @@
   *@subpacke css
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 26.02.2013
 */
 
 form { 
@@ -14,10 +14,6 @@ fieldset {
 	border: 0; 
 	margin: 5px 0; 
 	padding: 0; 
-}
-
-.dropdown_widget {
-	clear: both;
 }
 
 .form_field.hiddenfield {
@@ -30,6 +26,9 @@ fieldset {
 .form_field > label {
 	font-weight: bold;
 	width: 250px;
+}
+.form_field > .input  {
+	min-width: 250px;
 }
 /*.one {
 	
@@ -108,14 +107,12 @@ fieldset {
 	margin: 5px;
 }
 
-
-.form_field.checkbox {
-	margin-bottom: 10px;
+.form_field.checkbox label {
+	min-height: 20px;
 }
-.form_field.checkbox > .info_field {
-	margin-top: 12px;
-	margin-bottom: -10px;
-	text-align: right;
+.form_field.checkbox .iPhoneCheckContainer {
+	margin-left: 260px;
+	margin-top: -20px;
 }
 
 .form_field .inputHolder {
@@ -144,6 +141,9 @@ fieldset > .form_field {
 	margin-left: 180px !important;
 	margin-bottom: 7px;
 }
+fieldset fieldset > .form_field, .inputHolder fieldset > .form_field, fieldset .inputHolder {
+	margin-left: 0 !important;
+}
 
 fieldset > .form_field > label {
 	display: block;
@@ -159,4 +159,36 @@ fieldset > .form_field.checkbox > label {
 fieldset > .form_field > .info_field {
 	color: #999;
 	padding: 5px 0;
+}
+
+.externalform {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.externalform a {
+	float: right;
+}
+
+@media only screen and (max-width: 600px) { 
+	.form_field_captcha > label {
+		margin-top: 0;
+	}
+	.form_field_captcha > div {
+		display: block;
+		margin-left: 0;
+		margin-top: 0;
+	}
+	.form_field.checkbox .iPhoneCheckContainer {
+		margin-left: 0;
+		margin-top: 0;
+	}
+}
+@media only screen and (max-width: 800px) {
+	fieldset > .form_field, .inputHolder {
+		margin-left: 30px !important;
+		margin-top: 4px !important;
+	}
+	.form_field .info_field {
+		padding: 5px;
+	}
 }

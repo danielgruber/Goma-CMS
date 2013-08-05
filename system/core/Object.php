@@ -8,9 +8,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 10.09.2012
-  * $Version 3.1.9
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 22.01.2013
+  * $Version 3.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -68,9 +68,119 @@ abstract class Object
 		public $inExpansion;
 		
 		/**
+		 * get a static param for a class
+		 *@name getStatic
+		 *@access public
+		 *@param string - class_name
+		 *@param string - var_name
+		*/
+		public static function getStatic($class_name, $var)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval("return isset(".$class_name."::\$".$var.") ? ".$class_name."::\$".$var." : null;");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * checks if a static var isset
+		 *@name hasStatic
+		 *@access public 
+		 *@param string - class_name
+		 *@param string - var_name
+		*/
+		public static function hasStatic($class_name, $var)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval("return isset(".$class_name."::\$".$var.");");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * checks if a static var isset
+		 *@name setStatic
+		 *@access public 
+		 *@param string - class_name
+		 *@param string - var_name
+		 *@param mixed - value
+		*/
+		public static function setStatic($class_name, $var, $value)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class_name))
+				{
+						if(!empty($var))
+						{
+								return eval($class_name."::\$".$var." = ".var_export($value, true).";");
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
+		 * calls a static function
+		 *@name callStatic
+		 *@access public
+		 *@param string - class_name
+		 *@param string - func-name
+		 *@return mixed
+		*/
+		public static function callStatic($class, $func)
+		{
+				if(is_object($class_name))
+					$class_name = $class_name->class;
+				
+				if(!empty($class))
+				{
+						if(!empty($func))
+						{
+								return call_user_func_array(array($class, $func), array($class));
+						} else
+						{
+								throwError("6","PHP-Error", "Invalid name of function in ".__METHOD__." in ".__FILE__."");
+						}
+				} else
+				{
+						throwError("6","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
+				}
+		}
+		
+		/**
 		 * creates a method on the class
 		 *
-		 *@name creatMethod
+		 *@name createMethod
 		 *@param string - class for the method
 		 *@param string - method-name
 		 *@param string - code
@@ -153,7 +263,7 @@ abstract class Object
 					ClassManifest::load($class);
 				
 				// check native
-				if(method_exists($class, $method))
+				if(method_exists($class, $method) && is_callable(array($class, $method)))
 				{
 					self::$method_cache[$class . "::" . $method] = true;
 					unset($class, $method);
@@ -224,7 +334,7 @@ abstract class Object
 						$obj = strtolower($obj);
 						$ext = strtolower($ext);
 						$arguments = "";
-						if(_ereg('^([a-zA-Z0-9_-]+)\((.*)\)$', $ext, $exts)) {
+						if(preg_match('/^([a-zA-Z0-9_\-]+)\((.*)\)$/', $ext, $exts)) {
 								$ext = $exts[0];
 								$arguments = $exts[1];
 						}
@@ -241,11 +351,11 @@ abstract class Object
 										self::$extensions[$obj][$ext] = $arguments;
 								} else
 								{
-										throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' isn\'t a Extension.');
+										throwError(6, 'PHP-Error', 'Extension '.convert::raw2text($ext).' isn\'t a Extension.');
 								}
 						} else
 						{
-								throwError(6, 'PHP-Error', 'Extension '.text::protect($ext).' does not exist.');
+								throwError(6, 'PHP-Error', 'Extension '.convert::raw2text($ext).' does not exist.');
 						}
 				}
 		}
@@ -258,7 +368,6 @@ abstract class Object
 		*/
 		public static function instance($class)
 		{
-				if(PROFILE) Profiler::mark("Object::instance");
 				
 				if(is_object($class))
 				{
@@ -267,25 +376,31 @@ abstract class Object
 				
 				$class = strtolower($class);
 				
+				if(PROFILE) Profiler::mark("Object::instance");
+				
 				/* --- */
 				
+                // caching
 				if(isset(self::$cache_singleton_classes[$class]))
 				{
+						if(PROFILE) Profiler::unmark("Object::instance");
 						$class = clone self::$cache_singleton_classes[$class];
 				} else
 				{
-						if($class == "")
-						{
-							
+                        
+                        // error catching
+						if($class == "") {
 							$trace = debug_backtrace();
-							throwError(6, 'PHP-Error', 'Cannot initiate empty Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
+							throwError(6, 'Class-Initiate-Error', 'Cannot initiate empty Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
-						if(classinfo::isAbstract($class)) {
+                        
+						if(ClassInfo::isAbstract($class)) {
 							$trace = debug_backtrace();
-							throwError(6, 'PHP-Error', 'Cannot initiate abstract Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
+							throwError(6, 'Class-Initiate-Error', 'Cannot initiate abstract Class in '.$trace[0]["file"].' on line '.$trace[0]["line"].'');
 						}
 						
-						if((defined("INSTALL") && class_exists($class)) || classinfo::exists($class)) {
+                        // generate Class
+						if((defined("INSTALL") && class_exists($class)) || ClassInfo::exists($class)) {
 								self::$cache_singleton_classes[$class] = new $class;
 								$class = clone self::$cache_singleton_classes[$class];
 						} else {
@@ -352,8 +467,13 @@ abstract class Object
 				return $this->callExtraMethod($name, self::$cache_extra_methods[$this->class][$name], $args);
 			}
 			
-			if(method_exists($this, $name))
+			if(method_exists($this, $name) && is_callable(array($this, $name)))
 				return call_user_func_array(array($this, $name), $args);
+			
+			// check last
+			if(isset(self::$temp_extra_methods[$this->class][$name])) {
+				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
+			}
 			
 			// check parents
 			$c = $this->class;
@@ -372,11 +492,6 @@ abstract class Object
 					}
 			}
 			
-			
-			// check last
-			if(isset(self::$temp_extra_methods[$this->class][$name])) {
-				return $this->callExtraMethod($name, self::$temp_extra_methods[$this->class][$name], $args);
-			}
 			
 			$trace = debug_backtrace();
 			throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line'].'');
@@ -400,6 +515,7 @@ abstract class Object
 					array_unshift($args, $method_name);
 					$extra_method[0] = $this;
 				}
+				
 				return call_user_func_array($extra_method, $args);
 			}
 			
@@ -418,7 +534,7 @@ abstract class Object
 		 	if($this->class == "") {
 		 		$this->class = strtolower(get_class($this));
 		 	}
-
+		 	
 	 		if($recursive === true) {
 	 			if(defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->class])) {
 	 				$this->buildExtCache();
@@ -575,14 +691,28 @@ abstract class Object
 		  *@name getResourceFolder
 		  *@access public
 		 */
-		 public function getResourceFolder($forceAbsolute = false) {
-		 	if(isset(ClassInfo::$class_info[$this->class]["inExpansion"]) && isset(ClassInfo::$appENV["expansion"][ClassInfo::$class_info[$this->class]["inExpansion"]])) {
-		 		$ext = ClassInfo::$class_info[$this->class]["inExpansion"];
-		 		$extFolder = ClassInfo::getExpansionFolder($ext, false, $forceAbsolute);
-		 		return isset(ClassInfo::$appENV["expansion"][$ext]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$ext]["resourceFolder"] : $extFolder . "resources";
+		 public function getResourceFolder($forceAbsolute = false, $exp = null) {
+		 	if(!isset($exp)) {
+		 		$exp = isset(ClassInfo::$class_info[$this->class]["inExpansion"]) ? ClassInfo::$class_info[$this->class]["inExpansion"] : null;
+		 	}
+		 	if(isset(ClassInfo::$appENV["expansion"][$exp])) {
+		 		$extFolder = ClassInfo::getExpansionFolder($exp, false, $forceAbsolute);
+		 		return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
 		 	}
 		 	
 		 	return null;
+		 }
+		 
+		 /**
+		  * generates class-info
+		  *
+		  *@name buildClassInfo
+		  *@access public
+		 */
+		 static function buildClassInfo($class) {
+			 foreach((array) self::getStatic($class, "extend") as $ext) {
+				 Object::extend($class, $ext);
+			 }
 		 }
 		 
 }

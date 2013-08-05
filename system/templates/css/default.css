@@ -4,9 +4,14 @@
   *@package goma css framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 03.12.2012
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 20.02.2013
 */
+
+* {
+	margin: 0;
+	padding: 0;
+}
 
 /* defaults */
 body, html {
@@ -41,14 +46,50 @@ img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
    Lists
    ========================================================================== */
 
-/*ul, ol { margin: 1em 0; padding: 0 0 0 40px; }*/
-dd { margin: 0 0 0 40px; }
-/*nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }*/
+ul, ol { margin: 0.5em 0; padding: 0 0 0 30px; }
+dd { margin: 0 0 0 30px; }
+nav ul, nav ol, #nav ul, #nav ol, #navigation ul, #navigation ol, .nav ul, .nav ol, .navigation ul, .navigation ol, #navi ul, #navi ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
 /* remove cause of annyoing sometimes, maybe readded later */
 
 /* =============================================================================
    Typography
    ========================================================================== */
+
+/**
+ * Address font sizes and margins set differently in IE 6/7.
+ * Address font sizes within `section` and `article` in Firefox 4+, Safari 5,
+ * and Chrome.
+ */
+
+h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: 0.83em 0;
+}
+
+h3 {
+    font-size: 1.17em;
+    margin: 1em 0;
+}
+
+h4 {
+    font-size: 1em;
+    margin: 1.33em 0;
+}
+
+h5 {
+    font-size: 0.83em;
+    margin: 1.67em 0;
+}
+
+h6 {
+    font-size: 0.67em;
+    margin: 2.33em 0;
+}
 
 b, strong { font-weight: bold; }
 
@@ -69,6 +110,14 @@ q:before, q:after { content: ""; content: none; }
 
 small { font-size: 85%; }
 
+/**
+ * Address styling not present in Safari 5 and Chrome.
+ */
+
+dfn {
+    font-style: italic;
+}
+
 /* SELECTION */
 
 ::-moz-selection { 
@@ -78,6 +127,15 @@ small { font-size: 85%; }
 ::selection { 
 	background: #a1d7ff; 
 	text-shadow: none; 
+}
+
+/* Form */
+/**
+ * Correct margin displayed oddly in IE 6/7.
+ */
+
+form {
+    margin: 0;
 }
 
 input[type=text], input[type=password], input[type=email] {

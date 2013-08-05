@@ -25,7 +25,7 @@
 							<a href="profile/" class="user">$loggedInUser.image.setSize(16, 16)  <strong>{$_cms_user}</strong></a>
 							|
 							<a href="#" onclick="$('#loginFormGlobe').submit();return false;">{$_lang_logout}</a>
-							<form method="post" id="loginFormGlobe" action="profile/logout">
+							<form method="post" id="loginFormGlobe" action="{BASE_SCRIPT}profile/logout">
 								<input type="hidden" name="logout" value="1" />
 								<input type="hidden" name="redirect" value="{$_SERVER_REQUEST_URI}" />
 								<noscript>
@@ -80,9 +80,7 @@
 						<% PrependedContent() %>
 					</div>
 					
-					<garea name="content">
-						<h1>404 - Not found!</h1>
-					</garea>
+					$content
 					
 					<div id="appendedContent">
 						<% AppendedContent() %>

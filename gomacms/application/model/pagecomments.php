@@ -3,9 +3,9 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 1.1.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.01.2013
+  * $Version 1.1.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -15,7 +15,7 @@ loadlang('comments');
 class PageComments extends DataObject
 {
 
-		public $db_fields = array('name' 		=> 'varchar(200)',
+		static $db = array('name' 		=> 'varchar(200)',
 								  'text'        => 'text',
 								  'timestamp'   => 'int(200)');
 								  
@@ -25,7 +25,7 @@ class PageComments extends DataObject
 		 *@name has_one
 		 *@access public
 		*/
-		public $has_one = array('page' => 'pages'); // has one page
+		static $has_one = array('page' => 'pages'); // has one page
 		
 		/**
 		 * sort
@@ -33,17 +33,17 @@ class PageComments extends DataObject
 		 *@name default_sort
 		 *@access public
 		*/
-		public static $default_sort = "timestamp DESC";
+		static $default_sort = "timestamp DESC";
+		
+		/**
+		 * indexes for faster look-ups
+		*/
+		static $index = array("name" => true);
 		
 		/**
 		 * rights
 		*/
 		public $writeField = "autorid";
-		
-		/**
-		 * indexes for faster look-ups
-		*/
-		public $indexes = array("name" => true);
 		
 		/**
 		 * insert is always okay
@@ -71,8 +71,8 @@ class PageComments extends DataObject
 				$form->add(new BBCodeEditor("text", lang("text", "text"), null, null, null, array("showAlign" => false)));
 				if(!member::login())
 					$form->add(new Captcha("captcha"));
-				$form->addAction(new AjaxSubmitButton("save", lang("co_add_comment", "add comment"),  "ajaxsave","safe"));
 				$form->addValidator(new RequiredFields(array("text", "name", "captcha")), "fields");
+				$form->addAction(new AjaxSubmitButton("save", lang("co_add_comment", "add comment"),  "ajaxsave","safe", array("green")));
 		}
 		
 		/**
@@ -86,8 +86,8 @@ class PageComments extends DataObject
 				$form->add(new HTMLField("heading", "<h3>".lang("co_edit", "edit comments")."</h3>"));
 				$form->add(new BBCodeEditor("text", lang("text", "text")));
 				
-				$form->addAction(new FormAction("save", lang("save", "save")));
 				$form->addAction(new CancelButton("cancel", lang("cancel", "cancel")));
+				$form->addAction(new FormAction("save", lang("save", "save"), null, array("green")));
 		}
 }
 
@@ -135,17 +135,17 @@ class PageCommentsDataObjectExtension extends DataObjectExtension {
 	/**
 	 * make relation
 	*/
-	public $has_many = array(
+	static $has_many = array(
 		"comments"	=> "pagecomments"
 	);
 	/**
 	 * make field for enable/disable
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"showcomments"	=> "int(1)"
 	);
 	
-	public $defaults = array(
+	static $default = array(
 		"showcomments"	=> 0
 	);
 	/**

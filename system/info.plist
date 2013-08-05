@@ -9,9 +9,9 @@
 	<key>autor</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0</string>
+	<string>2.0b6</string>
 	<key>build</key>
-	<string>056</string>
+	<string>074</string>
 	<key>icon</key>
 	<string>templates/images/app-icon.png</string>
 	<key>Codename</key>

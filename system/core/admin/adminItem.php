@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 2.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 2.3.1
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -108,10 +108,11 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function url() {
-		return BASE_SCRIPT . "admin/".substr($this->class, 0, -5)."/";
+		return $this->originalNamespace . "/";
 	}
+	
 	public function adminURI() {
-		return BASE_SCRIPT . "admin/".substr($this->class, 0, -5)."/";
+		return $this->originalNamespace . "/";
 	}
 	
 	/**
@@ -337,7 +338,7 @@ class adminItem extends AdminController implements PermProvider {
 			}
 		}
 		
-		if($model->versioned && $model->canWrite($model)) {
+		if(DataObject::versioned($model->dataClass) && $model->canWrite($model)) {
 			$model->queryVersion = "state";
 		}
 		

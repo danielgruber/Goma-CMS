@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version 1.5.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 05.03.2013
+  * $Version 1.5.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -206,6 +206,8 @@ abstract class g_SoftwareType {
 					
 					if($gfs->isSigned(self::getAppStorePublic())) {
 						$data["signed"] = true;
+					} else if(GFS::$openssl_problems) {
+						$data["signed_ssl_not_installed"] = true;
 					}
 					
 					return $data;
@@ -348,17 +350,17 @@ abstract class g_SoftwareType {
 	}
 	
 	/**
-	 * forces that installer/data/apps/.index.db is Live
+	 * forces that installer/data/apps/.index-db is Live
 	 *
 	 *@name forceLiveDB
 	 *@access public
 	*/
 	public static function forceLiveDB() {
-		if(!file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(!file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			ClassInfo::delete();
 			ClassInfo::loadFile();
 		} else {
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			if($data["fileindex"] != scandir(FRAMEWORK_ROOT . "installer/data/apps/")) {
 				ClassInfo::delete();
 				ClassInfo::loadFile();
@@ -373,9 +375,9 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listUpdatePackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			
 			$updates = array();
 			
@@ -418,7 +420,7 @@ abstract class g_SoftwareType {
 			
 			// app
 			$app = ClassInfo::$appENV["app"]["name"];
-			if($data = self::getAppStoreInfo($app)) {
+			if($data = self::getAppStoreInfo($app, null, ClassInfo::appVersion())) {
 				$data["installed_version"] = ClassInfo::appVersion();
 				$data["appinfo"]["autor"] = $data["autor"];
 				$data["AppStore"] = $data["download"];
@@ -434,7 +436,7 @@ abstract class g_SoftwareType {
 			
 			// framework
 			$app = ClassInfo::$appENV["framework"]["name"];
-			if($data = self::getAppStoreInfo($app)) {
+			if($data = self::getAppStoreInfo($app, null, GOMA_VERSION . "-" . BUILD_VERSION)) {
 				$data["installed_version"] = GOMA_VERSION . "-" . BUILD_VERSION;
 				$data["appinfo"]["autor"] = $data["autor"];
 				$data["AppStore"] = $data["download"];
@@ -451,7 +453,7 @@ abstract class g_SoftwareType {
 			if(isset(ClassInfo::$appENV["expansion"]) && ClassInfo::$appENV["expansion"]) {
 				// expansions
 				foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-					if($data = self::getAppStoreInfo($app)) {
+					if($data = self::getAppStoreInfo($app, null, ClassInfo::expVersion($app))) {
 						$data["installed_version"] = ClassInfo::expVersion($app);
 						$data["appinfo"]["autor"] = $data["autor"];
 						$data["AppStore"] = $data["download"];
@@ -492,12 +494,14 @@ abstract class g_SoftwareType {
 			"version"	=> ClassInfo::appVersion()
 		);
 		
-		// expansions
-		foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-			$apps[$app] = array(
-				"name" 		=> $app,
-				"version"	=> ClassInfo::expVersion($app)
-			);
+		if(isset(ClassInfo::$appENV["expansion"])) {
+			// expansions
+			foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
+				$apps[$app] = array(
+					"name" 		=> $app,
+					"version"	=> ClassInfo::expVersion($app)
+				);
+			}
 		}
 		
 		return $apps;
@@ -528,23 +532,29 @@ abstract class g_SoftwareType {
 	 *@name getAppStoreInfo
 	 *@access public
 	*/
-	public function getAppStoreInfo($name, $version = null) {
+	public function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
 		if(PROFILE) Profiler::mark("G_SoftwareType::getAppStoreInfo");
 		
 		if(!self::isStoreAvailable()) {
 			return false;
 		}
 		
-		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name . "?framework=" . GOMA_VERSION . "-" . BUILD_VERSION;
+		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name;
+		
+		if(isset($version)) {
+			$url .= "/" . $version;
+		}
+		
+		$url .= "?framework=" . urlencode(GOMA_VERSION . "-" . BUILD_VERSION);
+		$url .= "&current=".urlencode($currVersion);
+		$url .= "&base_uri=" . urlencode(BASE_URI);
 		
 		$cacher = new Cacher("AppStore_" . md5($url));
 		if($cacher->checkValid()) {
 			if(PROFILE) Profiler::unmark("G_SoftwareType::getAppStoreInfo");
 			return $cacher->getData();
 		} else {
-			if(isset($version)) {
-				$url .= "/" . $version;
-			}
+			
 			if($response = @file_get_contents($url)) {
 				if(substr($response, 0, 1) == "(")
 					$response = substr($response, 1, -1);
@@ -587,9 +597,9 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listInstallPackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index.db")) {
+		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
 			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index.db"));
+			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
 			
 			$updates = array();
 			
@@ -881,7 +891,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			$gfs->setAutoCommit(false);
 			$gfs->add(FRAMEWORK_ROOT, "/data/system/", array("temp", LOG_FOLDER, "/installer/data", "version.php"));
-			$gfs->add(ROOT . "images/", "/data/images/");
+			$gfs->add(ROOT . "images/", "/data/images/", array("resampled"));
 			$gfs->add(ROOT . "languages/", "/data/languages/");
 			$gfs->commit();
 		}	
@@ -1640,6 +1650,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 	public static function backup($file, $name, $changelog = null) {
 		
 		$tables = ClassInfo::Tables("user");
+		$tables = array_merge($tables, ClassInfo::Tables("history"));
+		$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
 				$tables = array_merge($tables, ClassInfo::Tables($model));

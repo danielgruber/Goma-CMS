@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 2.2.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 09.01.2013
+  * $Version 2.2.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -363,9 +363,9 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	*/
 	public function ajaxSave($data, $response) {
 		if($model = $this->save($data)) {
-			$dialog = new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay", "Okay"));
-			$dialog->close(3);
-			$response->exec($dialog);
+			// notify the user
+			Notification::notify($model->class, lang("successful_saved", "The data was successfully written!"), lang("saved"));
+			
 			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
 			return $response;
 		} else {
@@ -439,10 +439,10 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function ajaxPublish($data, $response) {
 		
 		if($model = $this->save($data, 2)) {
-			$dialog = new Dialog(lang("successful_published", "The data was successfully published!"), lang("okay", "Okay"));
-			$dialog->close(3);
-			$response->exec($dialog);
-			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
+			// notify the user
+			Notification::notify($model->class, lang("successful_published", "The data was successfully published!"), lang("published"));
+			
+			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
@@ -500,7 +500,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	 *@access public 
 	*/
 	public function versions() {
-		if($this->ModelInst() && $this->ModelInst()->versioned) {
+		if($this->ModelInst() && DataObject::Versioned($this->ModelInst()->dataClass)) {
 			$controller = new VersionsViewController($this->ModelInst());
 			$controller->subController = true;
 			return $controller->handleRequest($this->request);
@@ -549,16 +549,26 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 				}
 			}
 		} else {
-			
+			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
 			$model = new ViewAccessableData();
 			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
 		}
 		
-		if($model->versioned && $model->canWrite($model)) {
+		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
 			$model->queryVersion = "state";
 		}
 		
 		return $this->selectModel($model)->form();
 	}
 	
+	/**
+	 * index-method
+	 *
+	 *@name index
+	*/
+	public function index() {
+		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		return parent::index();
+	}
 }

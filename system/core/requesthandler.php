@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version: 2.2.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 24.02.2013
+  * $Version: 2.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -52,6 +52,13 @@ class RequestHandler extends Object
 		public $namespace;
 		
 		/**
+		 * original namespace, so always from first controller
+		 *
+		 *@name originalNamespace
+		*/
+		public $originalNamespace;
+		
+		/**
 		 * sets vars
 		 *
 		 *@name __construct
@@ -83,6 +90,14 @@ class RequestHandler extends Object
 		*/
 		public function Init()
 		{
+			if(!isset($this->namespace)) {
+				$this->namespace = $this->request->shiftedPart;
+				$this->originalNamespace = $this->namespace;
+			} else {
+				$this->originalNamespace = $this->namespace;
+				$this->namespace = $this->request->shiftedPart;
+			}
+				
 			if(!isset($this->subController) || !$this->subController) {
 				Core::$requestController = $this;
 				Core::$controller[] = $this;
@@ -101,7 +116,6 @@ class RequestHandler extends Object
 						throwError(6, 'PHP-Error', 'Class '.get_class($this).' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
 				}
 				$this->request = $request;
-				$this->namespace = $request->shiftedPart;
 				
 				$this->subController = $subController;
 				$this->Init();			
@@ -130,12 +144,12 @@ class RequestHandler extends Object
 										if($action{0} == "$")
 										{
 												$action = substr($action, 1);
-												if($this->getParam($action)) {
-													$action = $this->getParam($action);
+												if($this->getParam($action, false)) {
+													$action = $this->getParam($action, false);
 												}
 										}
 										
-										$action = strtolower($action);
+										$action = str_replace('-', '_', strtolower($action));
 										
 										if(!$this->hasAction($action))
 										{
@@ -348,31 +362,27 @@ class RequestHandler extends Object
 		 *@name __throwError
 		 *@access public
 		*/
-		public function __throwError($errcode, $errname, $errdetails) {
+		public function __throwError($errcode, $errname, $errdetails, $debug = true) {
 			
-			if(Core::is_ajax()) {
+			if(Core::is_ajax())
+				HTTPResponse::setResHeader(200);
+			
+			if(class_exists("ClassInfo", false)) {
+				$template = new template;
+				$template->assign('errcode',convert::raw2text($errcode));
+				$template->assign('errname',convert::raw2text($errname));
+				$template->assign('errdetails',$errdetails);
+				$template->assign("throwdebug", $debug);
 				HTTPresponse::sendHeader();
-				echo "<h1>".convert::raw2text($errcode).": ".convert::raw2text($errname)."</h1>\n";
-				echo $errdetails;
-				exit;
-			} else if(Core::is_ajax() && isset($_GET["ajaxfy"])) {
-				
-			} else  {
-				if(class_exists("ClassInfo", false)) {
-					$template = new template;
-					$template->assign('errcode',convert::raw2text($errcode));
-					$template->assign('errname',convert::raw2text($errname));
-					$template->assign('errdetails',$errdetails);
-					HTTPresponse::sendHeader();
-	 				
-					echo $template->display('framework/error.html');
-				} else {
-					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-					echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails ;
-				}
-				
-				exit;
+ 				
+				echo $template->display('framework/error.html');
+			} else {
+				header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
+				echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails ;
 			}
+			
+			exit;
+			
 		}
 		
 		/**

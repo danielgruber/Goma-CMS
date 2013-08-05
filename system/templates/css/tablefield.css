@@ -3,8 +3,8 @@
   *@subpacke css
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
 */
 
 /* basics */
@@ -16,6 +16,18 @@
 	width: 100%;
 	border: 1px solid #bbb;
 	border-spacing: 0;
+}
+.tablefield-table fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.tablefield-table fieldset legend {
+	display: none;
+}
+.tablefield-table fieldset .form_field {
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 /* headers */
@@ -52,6 +64,7 @@
 	padding: 4px 8px;
 	background: #fff;
 	border: 1px solid #c0c0c0;
+	min-width: 0 !important;
 }
 .tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
 	color: transparent !important;
@@ -109,6 +122,9 @@
 .tablefield-table .sortable-header {
 	
 }
+.tablefield-table .sortable-header .form_field {
+	border: 0 !important;
+}
 .tablefield-table .sortable-header .tablefield-button-filter input {
 	font-size: 0;
 	height: 26px;
@@ -150,6 +166,7 @@
 	width: 100%;
 	text-align: left;
 	padding: 12px;
+	padding-right: 24px;
 	background: none;
 	background: url(images/tablefield/arrows.png) no-repeat right center;
 	filter: none;
@@ -169,6 +186,11 @@
 	background-image: url(images/tablefield/arrow_desc.png);
 	filter: none;
 	-ms-filter: none;
+}
+.tablefield-table .sortable-header td .non-sortable {
+	padding: 8px;
+	font-size: 11pt;
+	color: #333;
 }
 
 .tablefield-table .toolbar_header h2 {

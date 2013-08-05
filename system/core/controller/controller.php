@@ -3,25 +3,15 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 27.11.2012
-  * $Version 2.1.12
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.02.2013
+  * $Version 2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Controller extends RequestHandler
-{
-				
-		/**
-		 * if this var is set to true areas are always used
-		 *
-		 *@name useAreas
-		 *@access public
-		 *@var bool
-		*/
-		public static $useAreas;
-		
+{		
 		/**
 		 * showform if no edit right
 		 *
@@ -277,26 +267,7 @@ class Controller extends RequestHandler
 					exit;
 				}
 				
-				if(Core::is_ajax() && isset($_GET["ajaxcontent"]) && (count($this->areaData) > 0 || $this->useAreas === true)) {
-					HTTPResponse::addHeader("content-type", "text/x-json");
-					$areas = array_keys($this->areaData);
-					if(!empty($data) && !is_bool($data)) {
-						$this->areaData["content"] = $data;
-					}
-					return array("areas" => $this->areaData, "class" => $this->model_inst->class);					
-				} else {
-					if(count($this->areaData) > 0 || ClassInfo::getStatic($this->class, "useAreas") === true) {
-						if(!empty($data) && !is_bool($data)) {
-							$this->areaData["content"] = $data;
-						}
-						
-						
-						return $this->renderWithAreas($this->template);
-					} else {
-						return $data;
-					}
-				}
-				
+				return $data;
 		}
 		
 		/**
@@ -318,6 +289,7 @@ class Controller extends RequestHandler
 		public function index()
 		{
 			if($this->template) {
+				$this->tplVars["namespace"] = $this->namespace;
 				if(is_a($this->modelInst(), "DataObject") && $this->modelInst()->controller != $this) {
 					$model = DataObject::Get($this->model(), $this->where);
 					$model->controller = clone $this;
@@ -332,7 +304,7 @@ class Controller extends RequestHandler
 		}
 		
 		/**
-		 * renders with areas
+		 * renders given view with areas
 		 *
 		 *@name renderWithAreas
 		 *@access public
@@ -344,11 +316,24 @@ class Controller extends RequestHandler
 				$model = $this->modelInst();
 			
 			foreach($this->areaData as $key => $value) {
-				$this->tplVars[$model->class . "_" . $key] = $value;
+				$this->tplVars[$key] = $value;
 			}
 			// get iAreas
 			
-			return $model->customise($this->tplVars)->renderWith($template, $areas);
+			return $model->customise($this->tplVars)->renderWith($template);
+		}
+		
+		/**
+		 * renders with given view
+		 *
+		 *@name renderWith
+		 *@access public
+		*/
+		public function renderWith($template, $model = null) {			
+			if(!isset($model))
+				$model = $this->modelInst();
+			
+			return $model->customise($this->tplVars)->renderWith($template);
 		}
 		
 		/**
@@ -364,7 +349,8 @@ class Controller extends RequestHandler
 				$this->callExtending("decorateRecord", $model);
 				$this->decorateRecord($data);
 				if($data) {
-					return $data->controller()->handleRequest($this->request);
+					$controller = $data->controller();
+					return $controller->handleRequest($this->request);
 				} else {
 					return $this->index();
 				}
@@ -441,7 +427,7 @@ class Controller extends RequestHandler
 			$controller = clone $this;
 			$model->controller($controller);
 			
-			$form = $model->generateForm($name, $edit, $disabled, @$this->request);
+			$form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null);
 			$form->setSubmission($submission);
 			
 			// we add where to the form
@@ -480,7 +466,7 @@ class Controller extends RequestHandler
 		public function edit()
 		{
 			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
-				if(!$this->modelInst()->canWrite($this->modelInst()))
+				if(!$this->modelInst()->can("Write"))
 				{
 					if(ClassInfo::getStatic($this->class, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
@@ -495,11 +481,16 @@ class Controller extends RequestHandler
 					
 				), true, "safe", $disabled);
 			} else if($this->getParam("id")) {
-				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
-				if($model) {
-					return $model->controller(clone $this)->edit();
+				if(preg_match('/^[0-9]+$/', $this->getParam("id"))) {
+					$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+					if($model) {
+						return $model->controller(clone $this)->edit();
+					} else {
+						throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
+					}
 				} else {
-					throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
+					log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
+					$this->redirectBack();
 				}
 			} else {
 				throwError(6, "Invalid Argument", "Controller::Edit should be called if you just have one Record or a given ID in URL.");
@@ -517,16 +508,27 @@ class Controller extends RequestHandler
 		public function delete($object = null)
 		{
 			if($this->countModelRecords() == 1) {
-				if(!$this->modelInst()->canDelete($this->modelInst()))
+				if(!$this->modelInst()->can("Delete"))
 				{
 					return lang("less_rights", "You don't have permissions to access this page.");
 				} else {
 					$disabled = false;
 				}
 				
-				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"))) {
+				if(is_a($this->modelInst(), "DataObjectSet"))
+					$toDelete = $this->modelInst()->first();
+				else
+					$toDelete = $this->modelInst();
+				
+				// generate description for data to delete
+				$description = $toDelete->generateRepresentation(false);
+				if(isset($description))
+					$description = '<a href="'.$this->namespace.'/edit/'.$toDelete->id . URLEND .'" target="_blank">'.$description.'</a>';
+				
+				if($this->confirm(lang("delete_confirm", "Do you really want to delete this record?"), null, null, $description)) {
+					
 					$data = clone $this->modelInst();
-					$this->modelInst()->remove();
+					$toDelete->remove();
 					if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 						$response = new AjaxResponse();
 						if($object !== null)
@@ -545,11 +547,16 @@ class Controller extends RequestHandler
 					}
 				}
 			} else {
-				$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
-				if($model) {
-					return $model->controller(clone $this)->delete();
+				if(preg_match('/^[0-9]+$/', $this->getParam("id"))) {
+					$model = DataObject::get_one($this->model(), array_merge($this->where, array("id" => $this->getParam("id"))));
+					if($model) {
+						return $model->controller(clone $this)->delete();
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					log_error("Warning: Param ID for Action delete is not an integer: " . print_r($this->request, true));
+					$this->redirectBack();	
 				}
 			}
 		}
@@ -575,7 +582,7 @@ class Controller extends RequestHandler
 		{
 				if($this->save($data) !== false)
 				{
-						addcontent::add('<div class="success">'.lang("successful_saved", "The data was successfully saved.").'</div>');
+						addcontent::add('<div class="success">'.lang("successful_saved", "The data were successfully saved.").'</div>');
 						$this->redirectback();
 				} else
 				{
@@ -649,7 +656,7 @@ class Controller extends RequestHandler
 		{	
 				if($this->save($data, 2) !== false)
 				{
-						AddContent::add('<div class="success">'.lang("successful_published", "The data was successfully published.").'</div>');
+						AddContent::add('<div class="success">'.lang("successful_published", "The data were successfully published.").'</div>');
 						$this->redirectback();
 				} else
 				{
@@ -694,11 +701,14 @@ class Controller extends RequestHandler
 		 *@param string - title of the okay-button, if you want to set it, default: "yes"
 		 *@param string|null - redirect on cancel button
 		*/
-		public function confirm($title, $btnokay = null, $redirectOnCancel = null) {
+		public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null) {
 			
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
 			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->class), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
+			if(isset($description)) {
+				$form->add(new HTMLField("description", '<div class="confirmDescription">'.$description.'</div>'));
+			}
 			$form->get();
 			return true;
 			
@@ -739,7 +749,7 @@ class Controller extends RequestHandler
 		*/
 		public static function keyChainAdd($password, $cookie = null, $cookielt = null) {
 			if(!isset($cookie)) {
-				$cookie = true;
+				$cookie = false;
 			}
 			
 			if(!isset($cookielt)) {
@@ -763,7 +773,7 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public static function KeyChainCheck($password) {
-			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password))) {
+			if((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password)) || isset($_GET[getPrivateKey()])) {
 				return true;
 			} else {
 				return false;

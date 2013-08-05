@@ -1,6 +1,6 @@
 <div id="login_page">
 	<script type="text/javascript">
-		(function(){
+		(function($){
 			$(function(){
 				setTimeout(function(){
 					if($("#login_name").val() == "" || $("#login_name").val() == $("#login_name").attr("placeholder")) {
@@ -31,7 +31,7 @@
 	<div class="right">
 		<div id="langSelect">
 			<div class="back">
-				<a href="{$_SERVER_REDIRECT_PARENT.url()}">{$_lang_back}</a>
+				<a href="{$_SERVER_REDIRECT_PARENT}">{$_lang_back}</a>
 			</div>
 			<h3>{$_lang_select_lang}</h2>
 			<div class="selectBox">
@@ -43,7 +43,7 @@
 							<li>
 						<% END %>
 							<a href="<% echo addParamToURL($_SERVER_REQUEST_URI, "setlang", $lang.code) %>">
-								<img src="$lang.icon" alt="$currentLang.code" />
+								<img src="$lang.icon" alt="<% echo $currentLang.code %>" />
 								<span>$lang.title</span>
 							</a>
 						</li>

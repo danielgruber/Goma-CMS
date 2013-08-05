@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 22.11.2012
-  * $Version 2.6.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.03.2013
+  * $Version 2.6.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -159,6 +159,13 @@ class GFS extends Object {
 	private $certValidCache;
 	
 	/**
+	 * contains whether problem is with openssl
+	 *
+	 *@name openssl_problems
+	*/
+	static $openssl_problems = false;
+	
+	/**
 	 *@name __construct
 	 *@access public
 	 *@param filename
@@ -167,6 +174,12 @@ class GFS extends Object {
 		parent::__construct();
 		
 		$this->file = $filename;
+		if(is_dir($this->file)) {
+			$this->valid = false;
+			$this->error = 8;
+			return false;
+		}
+		
 		$filesize = @filesize($this->file);
 		if(file_exists($this->file)) {
 			$this->file = realpath($this->file);
@@ -1178,25 +1191,29 @@ class GFS extends Object {
 		}
 		
 		
-		
 		if(isset($this->certificate)) {
-			// generate data to encrypt
-			$data = "";
-			foreach($this->db as $path => $entry) {
-				$data .= $path;
-				if(isset($entry["checksum"])) {
-					$data .= $entry["checksum"];
-				} else if(isset($entry["contents"])) {
-					$data .= md5($entry["contents"]);
+			if(function_exists("openssl_public_decrypt")) {
+				// generate data to encrypt
+				$data = "";
+				foreach($this->db as $path => $entry) {
+					$data .= $path;
+					if(isset($entry["checksum"])) {
+						$data .= $entry["checksum"];
+					} else if(isset($entry["contents"])) {
+						$data .= md5($entry["contents"]);
+					}
 				}
-			}
-			
-			$data = md5($data);
-			if(openssl_public_decrypt($this->certificate, $decrypted, $publicKey)) {
-				if($decrypted == $data) {
-					$this->certValidCache = true;
-					return true;
+				
+				$data = md5($data);
+				if(openssl_public_decrypt($this->certificate, $decrypted, $publicKey)) {
+					if($decrypted == $data) {
+						$this->certValidCache = true;
+						return true;
+					}
 				}
+			} else {
+				self::$openssl_problems = true;
+				return false;
 			}
 		}
 		
@@ -1236,7 +1253,7 @@ class GFS extends Object {
 			$this->updateDB();
 		}
 		
-		if($this->private && !$this->readonly) {
+		if($this->private && !$this->readonly && function_exists("openssl_private_encrypt")) {
 			$enc = "";
 		
 			// generate data to encrypt
@@ -1261,6 +1278,8 @@ class GFS extends Object {
 			if(@fread($this->pointer, 5) != "!SIGN") {
 				@fwrite($this->pointer, "\n\n" . $this->certificate . "\n" . strlen($this->certificate) . "!SIGN");
 			}
+		} else if(!function_exists("openssl_private_encrypt")) {
+			self::$openssl_problems = true;
 		}
 		
 		if(isset($this->pointer)) {
@@ -1324,6 +1343,20 @@ class GFS_Package_installer extends GFS {
 		
 		// first we write everything to a temporary folder
 		$tempfolder = ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
+		
+		
+		$f = @disk_free_space("/");
+		if($f !== null && $f !== "" && $f !== false) {
+			// check for disk-quote
+			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+			define("GOMA_FREE_SPACE", $free);
+			if($free / 1024 / 1024 < 5) {
+				// free space
+				FileSystem::delete($tempfolder);
+				header("HTTP/1.1 500 Server Error");
+				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+			}
+		}
 		
 		// write files
 		$this->status = "Writing files...";
@@ -1527,7 +1560,10 @@ class GFS_Package_installer extends GFS {
 		
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
 		
+		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
+		
 		// copy some files
+		copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
 		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
 		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
 		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
@@ -1542,6 +1578,7 @@ class GFS_Package_installer extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
 		// includes
+		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
 		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
 		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';
@@ -1666,6 +1703,19 @@ class GFS_Package_Creator extends GFS {
 			$this->fileIndex = $index;
 		}
 		
+		$f = @disk_free_space("/");
+		if($f !== null && $f !== "" && $f !== false) {
+			// check for disk-quote
+			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+			define("GOMA_FREE_SPACE", $free);
+			if($free / 1024 / 1024 < 20) {
+				// free space
+				@unlink($this->file);
+				header("HTTP/1.1 500 Server Error");
+				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+			}
+		}
+		
 		// Adding files...
 		$this->status = "Adding files...";
 		$this->current = "";
@@ -1787,7 +1837,10 @@ class GFS_Package_Creator extends GFS {
 		
 		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
 		
+		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
+		
   	 	// copy some files
+  	 	copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
 		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
 		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
 		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
@@ -1802,6 +1855,7 @@ class GFS_Package_Creator extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
 		// includes
+		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
 		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
 		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';

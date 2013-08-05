@@ -7,9 +7,9 @@
   *@subpackage framework loader
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 14.11.2012
-  * $Version 3.2.5
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified 17.01.2013
+  * $Version 3.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -157,9 +157,9 @@ class ClassManifest {
 				
 				// test compatiblity
 				if(!isset($data["requiredPHPVersion"]) || version_compare($data["requiredPHPVersion"], phpversion(), "<=")) {
-					if(!isset($data["requireFrameworkVersion"]) || version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
+					if(!isset($data["requireFrameworkVersion"]) || goma_version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
 						if(!isset($data["requireApp"]) || $data["requireApp"] == ClassInfo::$appENV["app"]["name"]) {
-							if(!isset($data["requireAppVersion"]) || !isset($data["requireApp"]) || version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "<=")) {
+							if(!isset($data["requireAppVersion"]) || !isset($data["requireApp"]) || goma_version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "<=")) {
 								
 								// compatible!!
 								
@@ -213,6 +213,37 @@ class ClassManifest {
 					self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
 				} else if(_eregi('\.php$', $file)) {
 					$contents = file_get_contents($dir . "/" . $file);
+					
+					// check for old APIs
+					//!Deprecation for 2.1
+					if(!preg_match('/class (DataObject|SelectQuery|Viewaccessabledata)/i', $contents)) {
+						preg_match_all('/(static\s+)?public\s+\$(has_one|has_many|many_many|belongs_many_many|db_fields|defaults|casting|indexes|searchable_fields)\s/i', $contents, $matches);
+						if(count($matches[2]) > 0) {
+							foreach($matches[2] as $k => $name) {
+								if($matches[1][$k] != "static") {
+									// translate name-changes
+									if($name == "db_fields")
+										$name = "db";
+									
+									if($name == "defaults")
+										$name = "default";
+									
+									if($name == "indexes")
+										$name = "index";
+									
+									if($name == "searchable_fields")
+										$name = "search_fields";
+									
+									// switch to static
+									$contents = str_replace($matches[0][$k], 'static $' . $name . " ", $contents);
+								}
+							}
+							
+							if(!FileSystem::write($dir . "/" . $file, $contents)) {
+								throwError(6, "File-System Error", "Could not write $dir/$file, cause of trouble with your old used syntax." );
+							}
+						}
+					}
 					
 					$contents = preg_replace('/\/\*(.*)\*\//Usi', '', $contents);
 					$contents = preg_replace('/\?\>(.*)\<?php/Usi', '', $contents);
@@ -313,9 +344,10 @@ class ClassManifest {
 						}
 
 						$class_info[$class]["abstract"] = true;
-						$class_info[$class]["interface"] = true;
-						
+						$class_info[$class]["interface"] = true;	
 					}
+					
+					
 					
 					unset($contents, $parts, $key, $class);
 				}

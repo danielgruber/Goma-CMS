@@ -5,9 +5,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * Version: 1.2.7
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
+  * Version: 1.3.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -28,7 +28,7 @@ class Resources extends Object {
 	 *@access public
 	 *@var CONST
 	*/
-	const VERSION = "1.2.7";
+	const VERSION = "1.3.5";
 	
 	/**
 	 * defines if gzip is enabled
@@ -150,6 +150,13 @@ class Resources extends Object {
 	private static $default_directory_contents = false;
 	
 	/**
+	 * registered resources
+	 *
+	 *@name registeredResources
+	*/
+	protected static $registeredResources = array("js" => array(), "css" => array());
+	
+	/**
 	 * add-functionality
 	 *
 	 *@name add
@@ -227,20 +234,21 @@ class Resources extends Object {
 						self::$resources_css["combine"]["files"][$content] = $content;
 					}
 					
-					// register in autoloader
-					self::addData("self.CSSLoadedResources['".$content."'] = '';self.CSSIncludedResources['".$content."'] = true;");
- 	 				
+					self::registerLoaded("css", $content);
 					
 				} else {
 					if(!$path && self::file_exists(SYSTEM_TPL_PATH . "/css/" . $content)) {
 						$content = SYSTEM_TPL_PATH . "/css/" . $content;
 					} else if(!$path) {
-						self::addData("self.CSSLoadedResources['".$content."'] = '';self.CSSIncludedResources['".$content."'] = true;");
-						self::$resources_css["default"]["files"][$content] = $content;
+						self::registerLoaded("css", $content);
+	 	 				
+	 	 				// register
+	 	 				self::$resources_css["default"]["files"][$content] = $content;
 						break;
 					}
 					
 					if(self::$combine) {
+						
 						// we have to classes main and normal combines
 						if($combine_name == "main") {
 							if(!isset(self::$resources_css["main"]["mtime"])) {
@@ -254,9 +262,13 @@ class Resources extends Object {
 							}
 							self::$resources_css["main"]["files"][$content] = $content;
 						} else {
+							
+							// if m-time for consolidated file is not set, we set it to this file
 							if(!isset(self::$resources_css["combine"]["mtime"])) {
 								self::$resources_css["combine"]["mtime"] = filemtime(ROOT . $content);
 							} else {
+								
+								// check if consolidated file has a earlier mtime than this file
 								$mtime = filemtime(ROOT . $content);
 								if(self::$resources_css["combine"]["mtime"] < $mtime) {
 									self::$resources_css["combine"]["mtime"] = $mtime;
@@ -266,12 +278,12 @@ class Resources extends Object {
 							self::$resources_css["combine"]["files"][$content] = $content;
 						}
 						
-						// register in autoloader
-						self::addData("self.CSSLoadedResources['".$content."'] = '';self.CSSIncludedResources['".$content."'] = true;");
+						self::registerLoaded("css", $content);
+	 	 				
 						break;
 					} else {
-						self::addData("self.CSSLoadedResources['".$content."'] = '';self.CSSIncludedResources['".$content."'] = true;");
 						self::$resources_css["default"]["files"][$content] = $content;
+						self::registerLoaded("css", $content);
 					}
 				
 				}
@@ -319,6 +331,23 @@ class Resources extends Object {
 	}
 	
 	/**
+	 * registers a file as loaded
+	 *
+	 *@name registerLoaded
+	 *@access public
+	 *@param string - type
+	 *@param string - path
+	*/
+	static function registerLoaded($type, $path) {
+		$type = (strtolower($type) == "css") ? "css" : "js";
+		// register in autoloader
+		if(file_exists($path))
+			self::$registeredResources[$type][] = $path."?".filemtime($path);
+		else
+			self::$registeredResources[$type][] = $path;
+	}
+	
+	/**
 	 * checks the file-path
 	 *
 	 *@name getFilePath
@@ -346,7 +375,7 @@ class Resources extends Object {
 	 *@access public
 	 *@param string - js
 	*/
-	public static function addJS($js, $combine_name = "scripts") {
+	public static function addJS($js, $combine_name = "scripts") {	
 		if(self::$combine && $combine_name != "") {
 			if(!isset(self::$resources_js[$combine_name])) {
 				self::$resources_js[$combine_name] = array("files" => array(), "raw" => array(), "mtime"	=> 1, "name"	=> $combine_name);
@@ -399,6 +428,11 @@ class Resources extends Object {
 		$js = $files[1];
 		$css = $files[0];
 		
+		if(self::$registeredResources["js"])
+			self::$resources_data[] = "goma.ui.registerResources('js', ".json_encode(self::$registeredResources["js"]).");";
+		
+		if(self::$registeredResources["css"])
+			self::$resources_data[] = "goma.ui.registerResources('css', ".json_encode(self::$registeredResources["css"]).");";
 		
 		if(Core::is_ajax()) {
 			// write data to file
@@ -493,7 +527,7 @@ class Resources extends Object {
 		if(self::$combine) {
 			// css
 			
-  	 	
+			if(PROFILE) Profiler::mark("Resources::generateFiles CSS");
 			if(isset(self::$resources_css["default"])) {
 				$css_files = array_merge($css_files, self::$resources_css["default"]);
 			}
@@ -506,8 +540,9 @@ class Resources extends Object {
 	 			self::generateCSSFile(self::$resources_css["main"], "main", $css_files);
 			}
 			
+			if(PROFILE) Profiler::unmark("Resources::generateFiles CSS");
 			
-			
+			if(PROFILE) Profiler::mark("Resources::generateFiles JS");
 			
 			// javascript
 			$resources_js = self::$resources_js;
@@ -516,11 +551,16 @@ class Resources extends Object {
 					$js_files[] = self::makeCombiedJS($resources_js["main"]);
 					unset($resources_js["main"]);
 			}
+			
 			// default
 			if(isset($resources_js["default"])) {
 					foreach($resources_js["default"]["files"] as $jsfile) {
-						$js_files[] = $jsfile;
-						Resources::addData("self.JSLoadedResources[\"".$jsfile."\"] = true;");
+						if(file_exists($jsfile)) {
+							$js_files[] = $jsfile . "?" . filemtime($jsfile);
+						} else {
+							$js_files[] = $jsfile;
+						}
+						self::registerLoaded("js", $jsfile);
 					}
 					unset($resources_js["default"], $jsfile);
 			}
@@ -554,16 +594,29 @@ class Resources extends Object {
 				}
 			}
 			usort($js_files, array("Resources", "sortjs"));
+			
+			if(PROFILE) Profiler::unmark("Resources::generateFiles JS");
 		} else {
 			
 			$css_files = isset(self::$resources_css["default"]["files"]) ? array_values(self::$resources_css["default"]["files"]) : array();
 			$js_files = isset(self::$resources_js["default"]["files"]) ? array_values(self::$resources_js["default"]["files"]) : array();
 			
+			foreach($css_files as $k => $f) {
+				if(file_exists($f)) {
+					$css_files[$k] = $f . "?" . filemtime($f);
+				}
+			}
+			
 			if(isset(self::$resources_js["main"]["files"])) {
 				$js_files = array_merge(array_values(self::$resources_js["main"]["files"]), $js_files);
 			}
+						
+			foreach($js_files as $k => $f) {
+				if(file_exists($f)) {
+					$js_files[$k] = $f . "?" . filemtime($f);
+				}
+			}
 			
-
 			// raw
 			if(isset(self::$resources_js["default"]["raw"])) {
 				self::$raw_js = array_merge(self::$raw_js, self::$resources_js["default"]["raw"]);
@@ -592,7 +645,7 @@ class Resources extends Object {
 			
 			if(!Core::is_ajax()) {
 				foreach($js_files as $file) {
-					Resources::addData("if(self.JSLoadedResources == null) self.JSLoadedResources = []; self.JSLoadedResources[\"".$file."\"] = true;\n");
+					self::registerLoaded("js", $file);
 				}
 			}
 			
@@ -655,11 +708,15 @@ class Resources extends Object {
 	 *@param data-array
 	*/
 	public static function makeCombiedJS($data) {
+		if(PROFILE) Profiler::mark("Resources::makeCombinedJS");
+		
 		if(isset($data["raw"])) {
 			$hash = md5(implode("", $data["files"])) . md5(implode("", $data["raw"]));
 		} else {
 			$hash = md5(implode("", $data["files"]));
 		}
+		
+		
 		$file = self::getFileName(CACHE_DIRECTORY . "js_combined_".$data["name"]."_".$hash."_".$data["mtime"]."_".preg_replace('/[^0-9a-zA-Z_]/', '_', self::VERSION).".js");
 		if(self::file_exists($file)) {
 			return $file;
@@ -669,23 +726,18 @@ class Resources extends Object {
  *@builder goma resources ".self::VERSION."
  *@license to see license of the files, go to the specified path for the file 
 */\n\n";
-			$i = 0;
 			foreach($data["files"] as $jsfile) {
-				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".js";
+				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".".self::VERSION.".js";
 				if(self::file_exists($cachefile) && filemtime($cachefile) > filemtime(ROOT . $jsfile)) {
 					$js .= file_get_contents($cachefile);
 				} else {
-					$data = "/* File ".$jsfile." */\n\n";
-					if($i == 0) {
-						$i++;
-						$data .= "if(self.JSLoadedResources == null) self.JSLoadedResources = [];";
-					}
-					$data .= "self.JSLoadedResources[\"".$jsfile."\"] = true;\n";
-					$data .= jsmin::minify(file_get_contents(ROOT . $jsfile)) . "\n\n";
-					$js .= $data;
-  	 				FileSystem::Write($cachefile,$data);
+					$jsdata = "/* File ".$jsfile." */\n";
+					
+					$jsdata .= jsmin::minify(file_get_contents(ROOT . $jsfile)) . ";\n\n";
+					$js .= $jsdata;
+  	 				FileSystem::Write($cachefile,$jsdata);
 				}
-				unset($cfile, $data, $cachefile);
+				unset($cfile, $jsdata, $cachefile);
 			}
 			
 			if(isset($data["raw"])) {
@@ -695,21 +747,35 @@ class Resources extends Object {
 						if(self::file_exists($cachefile)) {
 							$js .= file_get_contents($cachefile);
 						} else {
-							$data = "/* RAW */\n\n";
-							$data .= jsmin::minify($code) . "\n\n";
-							$js .= $data;
-							FileSystem::Write($cachefile,$data);
+							$jsdata = "/* RAW */\n\n";
+							$jsdata .= jsmin::minify($code) . ";\n\n";
+							$js .= $jsdata;
+							FileSystem::Write($cachefile,$jsdata);
 						}
-						unset($cfile, $data, $cachefile);
+						unset($cfile, $jsdata, $cachefile);
 					} else {
 						$js .= "/* RAW */\n\n";
-						$js .= jsmin::minify($code) . "\n\n";
+						$js .= jsmin::minify($code) . ";\n\n";
 					}
 				}
 			}
 			
+			$files = array();
+			if(isset($data["files"]))
+				foreach((array) $data["files"] as $jsfile) {
+					if(file_exists($jsfile))
+						$files[] = $jsfile . "?" . filemtime($jsfile);
+					else
+						$files[] = $jsfile;
+				}
+			
+			if(count($files) > 0) {
+				$js .= "goma.ui.registerResources('js', ".json_encode($files).");";
+			}
+			
 			FileSystem::Write($file,self::getEncodedString($js));
 			unset($filepointer, $js);
+			if(PROFILE) Profiler::unmark("Resources::generateFiles");
 			return $file;
 		}
 	}

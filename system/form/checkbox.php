@@ -60,14 +60,13 @@ class CheckBox extends FormField
 				
 				$this->setValue();
 				
-				
-				$this->container->append($this->input);
-				
 				$this->container->append(new HTMLNode(
 					"label",
-					array("for"	=> $this->ID(), "style"	=> array("display" => "inline")),
+					array("for"	=> $this->ID()),
 					$this->title
 				));
+				
+				$this->container->append($this->input);
 				
 				
 				$this->callExtending("afterField");
@@ -98,7 +97,7 @@ class CheckBox extends FormField
 					}
 				}, 500);
 				//$("#'.$this->divID().'").addClass("clearfix");
-				$("#'.$this->divID().' .iPhoneCheckContainer").css("float", "right");
+				//$("#'.$this->divID().' .iPhoneCheckContainer").css("float", "right");
 			});';
 		}
 		

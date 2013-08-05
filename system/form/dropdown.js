@@ -2,11 +2,11 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.08.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 21.03.2013
 */
 
-function DropDown(id, url, multiple) {
+var DropDown = function(id, url, multiple) {
 	this.url = url;
 	this.multiple = multiple;
 	this.widget = $("#" + id + "_widget");
@@ -17,7 +17,7 @@ function DropDown(id, url, multiple) {
 	this.init();
 	this.id = id;
 	return this;
-}
+};
 
 DropDown.prototype = {
 	/**
@@ -102,45 +102,28 @@ DropDown.prototype = {
 	*/
 	showDropDown: function() {
 		if(this.widget.find(" > .dropdown").css("display") == "none") {
+			
+			
 			this.widget.find(" > .field").addClass("active");
 			// set correct position
 			this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 			
-			if(is_mobile || ($.browser.msie && getInternetExplorerVersion() < 9)) {
-				var fieldhtml = this.widget.find(" > .field").html();
-				//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
-				this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-				var $this = this;
-				this.reloadData(function(){
-					//$this.widget.find(" > .field").css({height: ""});
-					$this.widget.find(" > .dropdown").fadeIn(200);
-					$this.widget.find(" > .field").html(fieldhtml);
-					var width = $this.widget.find(" > .field").width() +  /* padding */10;
-					$this.widget.find(" > .dropdown").css({ width: width});
-					$this.widget.find(" > .dropdown .search").focus();
-				});
-			} else {
-				var fieldhtml = this.widget.find(" > .field").html();
-				//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
-				this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-				var $this = this;
-				gloader.load("jquery.scale.rotate");
-				this.reloadData(function(){
-					//$this.widget.find(" > .field").css({height: ""});
-					$this.widget.find(" > .dropdown").css("display", "block");
-					var destheight = $this.widget.find(" > .dropdown").height();
-					$this.widget.find(" > .field").html(fieldhtml);
-					var width = $this.widget.find(" > .field").width() +  /* padding */10;
-					$this.widget.find(" > .dropdown").css({width: width, height: destheight,"opacity": 0.4});
-					$this.widget.find(" > .dropdown").scale(0.1);
-					$this.widget.find(" > .dropdown").animate({scale: 1.05, opacity: 0.9}, 150, function(){
-						$this.widget.find(" > .dropdown").animate({scale:1, "opacity": 0.95}, 100, function(){
-							$this.widget.find(" > .dropdown").css({ height: "", "-moz-transform": ""});
-							$this.widget.find(" > .dropdown .search").focus();
-						});
-					});
-				});
-			}
+			var fieldhtml = this.widget.find(" > .field").html();
+			//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
+			
+			// show loading
+			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+			var $this = this;
+			
+			// load data
+			this.reloadData(function(){
+				//$this.widget.find(" > .field").css({height: ""});
+				$this.widget.find(" > .dropdown").fadeIn(200);
+				$this.widget.find(" > .field").html(fieldhtml);
+				var width = $this.widget.find(" > .field").width() +  /* padding */10;
+				$this.widget.find(" > .dropdown").css({ width: width});
+				$this.widget.find(" > .dropdown .search").focus();
+			});
 		}
 	},
 	/**
@@ -226,25 +209,19 @@ DropDown.prototype = {
 						i = -1;
 						for(i in data.data) {
 							var val = data.data[i];
-							if(typeof val == "object") {
-								smallText = val[1];
-								val = val[0];
-							}
 							
 							content += "<li>";
 							
-							if(this.value[i] || this.value[i] === 0)
-								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+i+"\">"+val+"</a>";
+							if(this.value[val.key] || this.value[val.key] === 0)
+								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
 							else
-								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+i+"\">"+val+"</a>";
+								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
 								
-							if(typeof smallText == "string") {
-								content += "<span class=\"record_info\">"+smallText+"</span>";
+							if(typeof val.smallText == "string") {
+								content += "<span class=\"record_info\">"+val.smallText+"</span>";
 							}
 							
 							content += "</li>";
-							
-							smallText = null;
 						}
 						
 						content += "</ul>";
@@ -277,7 +254,6 @@ DropDown.prototype = {
 		var that = this;
 		this.widget.find(" > .dropdown > .content ul li a").click(function(){
 			if(that.multiple) {
-				
 				if($(this).hasClass("checked")) {
 					that.uncheck($(this).attr("id"));
 				} else {
@@ -286,6 +262,7 @@ DropDown.prototype = {
 			} else {
 				that.check($(this).attr("id"));
 			}
+			return false;
 		});
 	},
 	
@@ -299,7 +276,10 @@ DropDown.prototype = {
 		var that = this;
 		if(this.multiple) {
 			
-			$("#" + id).addClass("checked");
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).addClass("checked");
+			
+			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
 			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({
@@ -316,7 +296,11 @@ DropDown.prototype = {
 			});
 		} else {
 			this.widget.find(" > .dropdown > .content ul li a.checked").removeClass("checked");
-			$("#" + id).addClass("checked");
+			
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).addClass("checked");
+			
+			// id contains id of form-field and value
 			var value = id.substring(10 + this.id.length);
 			this.input.val(value);
 			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
@@ -349,7 +333,8 @@ DropDown.prototype = {
 		var that = this;
 		// this is just for dropdowns with multiple values
 		if(this.multiple) {
-			$("#" + id).removeClass("checked");
+			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+			$(document.getElementById(id)).removeClass("checked");
 			var value = id.substring(10 + this.id.length);
 			that.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
 			$.ajax({

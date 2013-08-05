@@ -15,7 +15,8 @@ class HomePageController extends RequestHandler {
 	 * shows install fronted if language is already selected, else shows lang-select
 	*/
 	public function index() {
-		if(isset($_SESSION["lang"])) {
+		if(isset($_SESSION["langselected"]) || isset($_GET["setlang"])) {
+			$_SESSION["langselected"] = true;
 			$controller = new InstallController();
 			return $controller->handleRequest($this->request);
 		} else {

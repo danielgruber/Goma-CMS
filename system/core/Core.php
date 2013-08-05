@@ -3,15 +3,16 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.12.2012
-  * $Version 3.3.18
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
+  * $Version 3.3.30
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::AddSaveVar("Core", "rules");
 ClassInfo::AddSaveVar("Core", "hooks");
+ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
 
 class Core extends object
 {
@@ -112,6 +113,96 @@ class Core extends object
 		public static $phpInputFile;
 		
 		/**
+		 * callbacks for $_cms_blah
+		 *
+		 *@name cmsVarCallbacks
+		*/
+		private static $cmsVarCallbacks = array();
+		
+		/**
+		 * inits the core
+		 *
+		 *@name init
+		 *@access public
+		*/
+		public static function Init() {
+			
+			ob_start();
+			
+			if(isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
+				Resources::addData("goma.ENV.is_backend = true;");
+				define("IS_BACKEND", true);
+			}
+			
+			if(isset($_POST) && $handle = @fopen("php://input", "r")) {
+				if(PROFILE) Profiler::mark("php://input read");
+				$random = randomString(20);
+				$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
+				file_put_contents($file, $handle);
+				fclose($handle);
+				self::$phpInputFile = $file;
+				
+				register_shutdown_function(array("Core", "cleanUpInput"));
+				
+				if(PROFILE) Profiler::unmark("php://input read");
+			}
+			
+			// now init session
+			if(PROFILE) Profiler::mark("session");
+			session_start();
+			if(PROFILE) Profiler::unmark("session");
+			
+			if(defined("SQL_LOADUP"))
+				member::Init();
+			
+			if(PROFILE) Profiler::mark("Core::Init");
+			
+			// init language-support
+			require_once(FRAMEWORK_ROOT . "core/i18n.php");
+ 	 	 	ClassManifest::$loaded["i18n"] = true;
+			i18n::Init();
+			
+			
+			// delete-cache-support
+			if(isset($_GET['flush']))
+			{
+					if(PROFILE)
+							Profiler::mark("delete_cache");
+					
+					if(Permission::check("ADMIN"))
+					{
+						logging('Deleting FULL Cache');
+						self::deletecache(true); // delete files in cache
+					} else {
+						logging("Deleting Cache");
+						 self::deletecache(); // delete some files in cache
+					}
+					
+					if(PROFILE)
+ 	 	 				Profiler::unmark("delete_cache");
+			}
+			
+			// some vars for javascript
+			Resources::addData("var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."';");
+			
+			Object::instance("Core")->callExtending("construct");
+			self::callHook("init");
+			
+			Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
+			Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
+			Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
+			Resources::add("system/libs/javascript/loader.js", "js", "main");
+			Resources::add("box.css", "css", "main");
+			
+			Resources::add("default.css", "css", "main");
+			Resources::add("goma_default.css", "css", "main");
+			
+			if(PROFILE) Profiler::unmark("Core::Init");
+		}
+		
+		/**
 		 *@access public
 		 *@param string - title of the link
 		 *@param string - href attribute of the link
@@ -154,16 +245,27 @@ class Core extends object
 		 *@param string - name of the hook
 		 *@param array - params
 		*/
-		public static function callHook($name, $params = array()) {
+		public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
 			if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
 				foreach(self::$hooks[strtolower($name)] as $callback) {
 					if(is_callable($callback))
-						call_user_func_array($callback, $params);
+						call_user_func_array($callback, array($p1, $p2, $p3, $p4, $p5, $p6, $p7));
 				}
 			}
 		}
 		
-		
+		/**
+		 * registers an CMS-Var-Callback
+		 *
+		 *@name addCMSVarCallback
+		 *@access public
+		 *@param callback
+		 *@param int - priority
+		*/
+		public function addCMSVarCallback($callback, $prio = 10) {
+			if(is_callable($callback))
+				self::$cmsVarCallbacks[$prio][] = $callback;
+		}
 		
 		/**
 		 * sets a cms-var
@@ -174,6 +276,15 @@ class Core extends object
 		public static function setCMSVar($name, $value) {
 			self::$cms_vars[$name] = $value;
 		}
+		
+		/**
+		 * sets a CMS-Var-Handler
+		 *
+		 *@name setCMSVarHandler
+		 *@access public
+		 *@param callback
+		*/
+		
 		/**
 		 * gets a CMS-Var
 		 *
@@ -206,11 +317,20 @@ class Core extends object
 			}
 			
 			if($name == "user") {
-				self::$cms_vars["user"] = convert::raw2text(member::$loggedIn->title());
+				self::$cms_vars["user"] = (member::$loggedIn) ? convert::raw2text(member::$loggedIn->title()) : null;
 				if(PROFILE) Profiler::unmark("Core::getCMSVar");
 				return self::$cms_vars["user"];
 			}
 			
+			krsort(self::$cmsVarCallbacks);
+			foreach(self::$cmsVarCallbacks as $callbacks) {
+				foreach($callbacks as $callback) {
+					if(($data = call_user_func_array($callback, array($name))) !== null) {
+						if(PROFILE) Profiler::unmark("Core::getCMSVar");
+						return $data;
+					}
+				}
+			}
 			
 			if(PROFILE) Profiler::unmark("Core::getCMSVar");
 			return isset($GLOBALS["cms_" . $name]) ? $GLOBALS["cms_" . $name] : null;
@@ -337,6 +457,10 @@ class Core extends object
 				clearstatcache();
 				
 				foreach(scandir($dir) as $file) {
+					if(substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200)
+						continue;
+					
+					
 					// session store
 					if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi',$file)) {
 						if(file_exists($dir . $file) && filemtime($dir . $file) < NOW - 3600) {
@@ -360,17 +484,19 @@ class Core extends object
 				
 				// empty framework cache
 				foreach(scandir(ROOT . "system/temp/") as $file) {
-					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 60 < NOW && !file_exists($dir . $file . "/.dontremove"))
+					if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove"))
 						FileSystem::delete (ROOT . "system/temp/" . $file);
 				}
 				
 				FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
 				
-				Core::callHook("deletecache", array($all));
+				Core::callHook("deletecache", $all);
+				
 				global $_REGISTRY;
 				$_REGISTRY["cache"] = array();
 				
 		}
+		
 		/**
 		 * adds some rules to controller
 		 *@name addRules
@@ -389,6 +515,7 @@ class Core extends object
 				}	 
 						
 		}
+		
 		/**
 		 * checks if ajax
 		 *@name is_ajax
@@ -404,84 +531,6 @@ class Core extends object
 		}
 		
 		/**
-		 * inits the core
-		 *
-		 *@name init
-		 *@access public
-		*/
-		public static function Init() {
-			
-			ob_start();
-			
-			if(isset($_POST) && $handle = @fopen("php://input", "r")) {
-				if(PROFILE) Profiler::mark("php://input read");
-				$random = randomString(20);
-				$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
-				file_put_contents($file, $handle);
-				fclose($handle);
-				self::$phpInputFile = $file;
-				
-				register_shutdown_function(array("Core", "cleanUpInput"));
-				
-				if(PROFILE) Profiler::unmark("php://input read");
-			}
-			
-			// now init session
-			if(PROFILE) Profiler::mark("session");
-			session_start();
-			if(PROFILE) Profiler::unmark("session");
-			
-			if(PROFILE) Profiler::mark("Core::Init");
-			
-			// init language-support
-			require_once(FRAMEWORK_ROOT . "core/i18n.php");
- 	 	 	ClassManifest::$loaded["i18n"] = true;
-			i18n::Init();
-			
-			
-			// delete-cache-support
-			if(isset($_GET['flush']))
-			{
-					if(PROFILE)
-							Profiler::mark("delete_cache");
-					
-					if(Permission::check(7))
-					{
-						logging('Deleting FULL Cache');
-						self::deletecache(true); // delete files in cache
-					} else {
-						logging("Deleting Cache");
-						 self::deletecache(); // delete some files in cache
-					}
-					
-					if(PROFILE)
- 	 	 				Profiler::unmark("delete_cache");
-			}
-			
-			// some vars for javascript
-			Resources::addData("var current_project = '".CURRENT_PROJECT."';var root_path = '".ROOT_PATH."';var ROOT_PATH = '".ROOT_PATH."';var BASE_SCRIPT = '".BASE_SCRIPT."';var is_mobile = ".var_export(self::isMobile(), true).";");
-			
-			Object::instance("Core")->callExtending("construct");
-			self::callHook("init");
-			
-			Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
-			Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
-			Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
-			Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
-			Resources::add("system/libs/javascript/loader.js", "js", "main");
-			Resources::add("box.css", "css", "main");
-			
-			Resources::add("default.css", "css", "main");
-			Resources::add("goma_default.css", "css", "main");
-			
-			if(DEV_MODE) {
-				Resources::add("system/libs/javascript/profiler.js", "js", "main");
-			}
-			
-			if(PROFILE) Profiler::unmark("Core::Init");
-		}
-		
-		/**
 		 * clean-up for saved file-data
 		 *
 		 *@name cleanUpInput
@@ -493,9 +542,175 @@ class Core extends object
 		}
 		
 		/**
-		 * END STATIC METHODS
+		 * clean-up for log-files
+		 *
+		 *@name cleanUpLog
+		 *@access public
+		 *@param int - days 
+		*/
+		public static function cleanUpLog($count = 30) {
+			$logDir = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER;
+			foreach(scandir($logDir) as $type) {
+				if($type != "." && $type != ".." && is_dir($logDir . "/" . $type))
+					foreach(scandir($logDir . "/" . $type . "/") as $date) {
+						if($date != "." && $date != "..") {
+							
+							if(preg_match('/^(\d{2})\-(\d{2})\-(\d{2})$/', $date, $matches)) {
+								$time = mktime(0, 0, 0, $matches[1], $matches[2], $matches[3]);
+								if($time < NOW - 60 * 60 * 24 * $count || isset($_GET["forceAll"])) {
+									FileSystem::delete($logDir . "/" . $type . "/" . $date);
+								}
+							}
+						}
+					}
+			}
+		}
+		
+		/**
+		 * returns current active url
+		 *
+		 *@name activeURL
+		 *@access public
+		*/
+		public static function activeURL() {
+			if(Core::is_ajax()) {
+				if(isset($_GET["redirect"])) {
+					return $_GET["redirect"];
+				} else if(isset($_SERVER["HTTP_REFERER"])) {
+					return $_SERVER["HTTP_REFERER"];
+				}
+			}
+				
+			return $_SERVER["REQUEST_URI"];
+			
+		}
+		
+		/**
+		 * throw an eror
+		 *
+		 *@name thorwError
+		 *@access public
+		*/		
+		public static function throwError($code, $name, $message) {
+ 	 	 	
+			if(defined("ERROR_CODE")) {
+				echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
+				exit;
+			}
+			
+			define("ERROR_CODE", $code);
+			define("ERROR_NAME", $name);
+			define("ERROR_MESSAGE", $message);
+			if($code == 6) {
+				ClassInfo::delete();
+			}
+			
+			log_error("Code: " . $code . ", Name: " . $name . ", Details: ".$message.", URL: " . $_SERVER["REQUEST_URI"]);
+			
+			if(($code != 1 && $code != 2 && $code != 5)) {
+				$data = debug_backtrace();
+				if(count($data) > 6) {
+					$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
+				}
+	 	 		 
+	 	 		debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace:\n" . print_r($data, true));
+	 	 	} else {
+		 	 	debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace unavailable due to call");
+	 	 	}
+			
+			if(is_object(self::$requestController)) {
+				echo self::$requestController->__throwError($code, $name, $message);
+				exit;
+			} else {
+				if(Core::is_ajax())
+					HTTPResponse::setResHeader(200);
+				
+				if(class_exists("ClassInfo", false) && defined("CLASS_INFO_LOADED")) {
+					$template = new template;
+					$template->assign('errcode',convert::raw2text($code));
+					$template->assign('errname',convert::raw2text($name));
+					$template->assign('errdetails',$message);
+					HTTPresponse::sendHeader();
+			 		
+					
+			 		
+					echo $template->display('framework/error.html');
+				} else {
+					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
+					$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+					$content = str_replace('{BASE_URI}', BASE_URI, $content);
+					$content = str_replace('{$errcode}', $code, $content);
+					$content = str_replace('{$errname}', $name, $content);
+					$content = str_replace('{$errdetails}', $message, $content);
+					$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+					echo $content;
+					exit;
+				}
+
+				exit;
+			}
+			
+			exit;
+		}
+		
+		/**
+		 * checks if debug-mode
+		 *
+		 *@name debug
+		 *@access public
+		*/
+		public static function is_debug() {
+			return (Permission::check(10) && isset($_GET["debug"]));
+		}
+		
+		/**
+		 * gives back if the current logged in admin want's to be see everything as a simple user
+		 *
+		 *@name adminAsUser
+		 *@access public
+		*/
+		public static function adminAsUser() {
+			return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
+		}
+		
+		//!Rendering-Methods
+		/**
+		 * Rendering-Methods
 		*/
 		
+		/**
+		 * serves the output given
+		 *
+		 *@name serve
+		 *@access public
+		 *@param string - content
+		*/
+		public static function serve($output) {
+			
+			if(isset($_GET["flush"]) && Permission::check("ADMIN"))
+				Notification::notify("Core", lang("cache_deleted"));
+			
+			if(PROFILE) Profiler::unmark("render");
+			
+			
+			if(PROFILE) Profiler::mark("serve");
+			
+			Core::callHook("serve", $output);
+			
+			if(isset(self::$requestController))
+				$output = self::$requestController->serve($output);
+			
+			if(PROFILE) Profiler::unmark("serve");
+			
+			Core::callHook("onBeforeServe", $output);
+			
+			HTTPResponse::setBody($output);
+			HTTPResponse::output();
+			
+			Core::callHook("onBeforeShutdown");
+			
+			exit;
+		}
 		
 		/**
 		 * renders the page
@@ -528,7 +743,7 @@ class Core extends object
 						}
 				}
 				
-				$request = new Request(
+				$orgrequest = new Request(
 					(isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'],
 					$url,
 					$_GET,
@@ -542,6 +757,7 @@ class Core extends object
 				{
 						foreach($rules as $rule => $controller)
 						{
+								$request = clone $orgrequest;
 								if($args = $request->match($rule, true))
 								{
 										if($request->getParam("controller"))
@@ -550,228 +766,18 @@ class Core extends object
 										}
 										$inst = new $controller;
 										self::$requestController = $inst;
-										self::$controller[] = $inst;
+										self::$controller = array($inst);
 										
-										self::serve($inst->handleRequest($request));
+										$data = $inst->handleRequest($request);
+										if($data === false) {
+											continue;
+										}
+										self::serve($data);
 										break 2;
 								}
 						}
 				}
 				
-		}
- 	  
-		/**
-		 * serves the output given
-		 *
-		 *@name serve
-		 *@access public
-		 *@param string - content
-		*/
-		public static function serve($output) {
-			
-			
-			if(PROFILE) Profiler::unmark("render");
-			
-			
-			if(PROFILE) Profiler::mark("serve");
-			
-			Core::callHook("serve", array($output));
-			
-			if(isset(self::$requestController))
-				$output = self::$requestController->serve($output);
-			
-			if(PROFILE) Profiler::unmark("serve");
-			
-			Core::callHook("onBeforeShutdown");
-			
-			HTTPResponse::setBody($output);
-			HTTPResponse::output();
-			exit;
-		}
-		
-		/**
-		 * returns current active url
-		 *
-		 *@name activeURL
-		 *@access public
-		*/
-		public static function activeURL() {
-			if(Core::is_ajax()) {
-				if(isset($_GET["redirect"])) {
-					return $_GET["redirect"];
-				} else if(isset($_SERVER["HTTP_REFERER"])) {
-					return $_SERVER["HTTP_REFERER"];
-				}
-			}
-				
-			return $_SERVER["REQUEST_URI"];
-			
-		}
-		
-		/**
-		 * throw an eror
-		 *
-		 *@name thorwError
-		 *@access public
-		*/		
-		public static function throwError($code, $name, $message, $callDebug = true) {
- 	 	 	
-			if(defined("ERROR_CODE")) {
-				echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
-				exit;
-			}
-			
-			define("ERROR_CODE", $code);
-			define("ERROR_NAME", $name);
-			define("ERROR_MESSAGE", $message);
-			if($code == 6) {
-				ClassInfo::delete();
-			}
-			
-			log_error("Code: " . $code . ", Name: " . $name . ", Details: ".$message.", URL: " . $_SERVER["REQUEST_URI"]);
-			
-			if(($code != 1 && $code != 2 && $code != 5) || !$callDebug) {
-	 	 		  debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV["app"], true) . "\n\n\nBacktrace:\n" . print_r(debug_backtrace(), true));
-	 	 	}
-			
-			if(is_object(self::$requestController)) {
-				echo self::$requestController->__throwError($code, $name, $message);
-				exit;
-			} else {
-				if(class_exists("ClassInfo", false) && CLASS_INFO_LOADED) {
-					$template = new template;
-					$template->assign('errcode',convert::raw2text($code));
-					$template->assign('errname',convert::raw2text($name));
-					$template->assign('errdetails',$message);
-					HTTPresponse::sendHeader();
-			 		
-					
-			 		
-					echo $template->display('framework/error.html');
-				} else {
-					header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-					echo "Code: " . $code . "<br /> Name: " . $name . "<br /> Details: " . $message ;
-				}
-
-				exit;
-			}
-			
-			exit;
-		}
-		
-		/**
-		 * checks if debug-mode
-		 *
-		 *@name debug
-		 *@access public
-		*/
-		public static function is_debug() {
-			return (Permission::check(10) && isset($_GET["debug"]));
-		}
-		/**
-		 * checks if mobile browser
-		 *
-		 *@name is_mobile
-		 *@access public
-		 *@thanks to http://detectmobilebrowser.com/
-		*/
-		public static function isMobile() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			if(self::$isMobile && preg_match('/android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i',substr($useragent,0,4)) || isset($_GET["mobile"]))
-			{
-				if(!isset($_SESSION["nomobile"])) {
-					return true;
-				}
-			}
-			
-			
-			return false;
-		}
-		
-		/**
-		 * checks if iPod/iPhone
-		 *
-		 *@name isiPhone
-		 *@access public
-		*/
-		public static function isiPhone() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			return (self::$isMobile && preg_match("/(iphone|ipod)/Usi", $useragent) && !isset($_SESSION["nomobile"]));
-		}
-		
-		/**
-		 * checks if iPad
-		 *
-		 *@name isiPad
-		 *@access public
-		*/
-		public static function isiPad() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			return (self::$isMobile && preg_match("/ipad/Usi", $useragent)  && !isset($_SESSION["nomobile"]));
-		}
-		
-		/**
-		 * checks if mobile is available, but not activated, because the user didn't want to see mobile version
-		 *
-		 *@name isMobileAvailable
-		 *@access public
-		*/
-		public static function isMobileAvailable() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			if(self::$isMobile && preg_match('/android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i',substr($useragent,0,4)) || isset($_GET["mobile"]))
-			{
-				return true;
-			}
-			
-			
-			return false;
-		}
-		/**
-		 * checks if iPod/iPhone is available, but not activated, because the user didn't want to see mobile version
-		 *
-		 *@name isiPhoneAvailable
-		 *@access public
-		*/
-		public static function isiPhoneAvailable() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			return (self::$isMobile && preg_match("/(iphone|ipod)/Usi",$useragent));
-		}
-		/**
-		 * checks if iPad is available, but not activated, because the user didn't want to see mobile version
-		 *
-		 *@name isiPhoneAvailable
-		 *@access public
-		*/
-		public static function isiPadAvailable() {
-			$useragent=isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
-			return (self::$isMobile && preg_match("/(ipad/Usi", $useragent));
-		}
-		/**
-		 * disables whole mobile functionallity
-		 *
-		 *@name disableMobile
-		 *@access public
-		*/
-		public static function disableMobile() {
-			self::$isMobile = false;
-		}
-		/**
-		 * enables mobile functionallity
-		 *
-		 *@name enableMobile
-		 *@access public
-		*/
-		public static function enableMobile() {
-			self::$isMobile = true;
-		}
-		/**
-		 * gives back if the current logged in admin want's to be see everything as a simple user
-		 *
-		 *@name adminAsUser
-		 *@access public
-		*/
-		public static function adminAsUser() {
-			return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
 		}
 }
 
@@ -894,18 +900,19 @@ class Dev extends RequestHandler
 			
 			// check if dev-without-perms, so redirect directly
 			if(isset($_SESSION["dev_without_perms"])) {
-				$redirect = getRedirect(true);
-				header("Location: " . ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches?redirect=" . urlencode($redirect));
+				$url = ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches".URLEND."?redirect=" . urlencode(getredirect(true));
+				header("Location: " . $url);
+				echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='".$url."'>'.$url.'</a>";
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}
  	 	 return '<h3>Creating new Database</h3>
 			<script type="text/javascript">
-				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches"; }, 500);
+				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches/"; }, 500);
 			</script>
 			
 			<img src="images/16x16/loading.gif" alt="Loading..." /> Rebuilding Caches... <br /><br />If it doesn\'t reload within 15 seconds, please click <a href="'.ROOT_PATH.'dev/rebuildcaches">here</a>.
-			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches">here</a>.</noscript>';
+			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/rebuildcaches/">here</a>.</noscript>';
 		}
 		
 		/**
@@ -925,17 +932,19 @@ class Dev extends RequestHandler
 			
 			// redirect if needed
 			if(isset($_SESSION["dev_without_perms"])) {
-				header("Location: " . ROOT_PATH . BASE_SCRIPT . "dev/builddev?redirect=" . urlencode(getredirect(true)));
+				$url = ROOT_PATH . BASE_SCRIPT . "dev/builddev".URLEND."?redirect=" . urlencode(getredirect(true));
+				header("Location: " . $url);
+				echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='".$url."'>'.$url.'</a>";
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}
 			
 			return '<h3>Creating new Database</h3>
 			<script type="text/javascript">
-				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/builddev"; }, 500);
+				setTimeout(function(){ location.href = "'.ROOT_PATH . BASE_SCRIPT.'dev/builddev/"; }, 500);
 			</script>
 			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
-			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev">here</a>.<br /></noscript>
+			<noscript>Please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev/">here</a>.<br /></noscript>
 			<img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...<br /><br /> If it doesn\'t reload within 15 seconds, please click <a href="'.ROOT_PATH . BASE_SCRIPT.'dev/builddev">here</a>.';
 		}
 		
@@ -966,6 +975,7 @@ class Dev extends RequestHandler
 			}
 			
 			logging(strip_tags(preg_replace("/(\<br\s*\\\>|\<\/div\>)/", "\n", $data)));
+			
 			// after that rewrite classinfo
 			ClassInfo::write();
 			
@@ -991,7 +1001,7 @@ class Dev extends RequestHandler
 			// redirect if needed
 			if(isset($_SESSION["dev_without_perms"])) {
 				unset($_SESSION["dev_without_perms"]);
-				header("Location: " . ROOT_PATH . "");
+				header("Location: " . ROOT_PATH);
 				Core::callHook("onBeforeShutDown");
 				exit;
 			}
@@ -1153,10 +1163,10 @@ function dbescape($str)
 *@param string - errordetails
 *@return  null
 */ 
-function throwerror($errcode, $errname, $errdetails, $http_status = 500)
+function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwDebug = true)
 {
 		HTTPResponse::setResHeader($http_status);
-		return Core::throwError($errcode, $errname, $errdetails);
+		return Core::throwError($errcode, $errname, $errdetails, $throwDebug);
 }
 /**
 * shows an page with error details and nothing else
@@ -1167,7 +1177,7 @@ function throwerror($errcode, $errname, $errdetails, $http_status = 500)
 */ 
 function throwErrorById($code)
 {
-		$sqlerr = sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>".sql::$last_query."</code>\n";
+		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>".sql::$last_query."</code>\n";
 		$codes = array(
 			1 => array('name' => 'Security Error',		 						'details' => ''	,											"status_code"		=> 500),
 			2 => array('name' => 'Security Error',		 						'details' => 'Ip banned! Please wait 60 seconds!',			"status_code"		=> 403),
@@ -1179,107 +1189,11 @@ function throwErrorById($code)
 		);
 		if(isset($codes[$code]))
 		{
-				
-				Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details'], HTTPresponse::setResHeader($codes[$code]["status_code"]));
+				HTTPresponse::setResHeader($codes[$code]["status_code"]);
+				Core::throwerror($code, $codes[$code]['name'], $codes[$code]['details']);
 		} else
 		{
-				Core::throwerror(6, $codes[6]['name'], $codes[6]['details'], 500);
+				HTTPresponse::setResHeader(500);
+				Core::throwerror(6, $codes[6]['name'], $codes[6]['details']);
 		}
-}
-
-/**
- * logging
- *
- * log an error
- *
- *@name log_error
- *@access public
- *@param string - error-string
-*/
-function log_error($string)
-{
-	if(PROFILE) Profiler::mark("log_error");
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/");
-	if(isset($GLOBALS["error_logfile"])) {
-		$file = $GLOBALS["error_logfile"];	
-	} else {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y"));
-		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/".date("m-d-y")."/";
-		$file = $folder . "1.log";
-		$i = 1;
-		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
-			$i++;
-			$file = $folder.$i.".log";
-		}
-		$GLOBALS["error_logfile"] = $file;
-	}
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if(!file_exists($file))
-	{
-			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
-	} else
-	{
-			FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
-	}
-	
-	 if(PROFILE) Profiler::unmark("log_error");
-}
-
-/**
- * log things
- *
- *@name logging
- *@access public
- *@param string - log-string
-*/
-function logging($string)
-{
-	if(PROFILE) Profiler::mark("logging");
-	
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/");
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if(isset($GLOBALS["log_logfile"])) {
-		$file = $GLOBALS["log_logfile"];	
-	} else {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y"));
-		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/".date("m-d-y")."/";
-		$file = $folder . "1.log";
-		$i = 1;
-		while(file_exists($folder.$i.".log") && filesize($file) > 10000) {
-			$i++;
-			$file = $folder.$i.".log";
-		}
-		$GLOBALS["log_logfile"] = $file;
-	}
-	if(!file_exists($file)) {
-		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", null, 0777);
-	} else {
-		FileSystem::write($file,date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
-	}
-	
-	if(PROFILE) Profiler::unmark("logging");
-}
-
-/**
- * logs debug-information
- *
- * this information may uploaded to the goma-server for debug-use
- *
- *@name debug_log
- *@access public
- *@param string - debug-string
-*/
-function debug_log($data) {
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/");
-	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y"));
-	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/".date("m-d-y")."/" . date("H_i_s");
-	$file = $folder . "-1.log";
-	$i = 1;
-	while(file_exists($folder. "-" . $i.".log")) {
-		$i++;
-		$file = $folder. "-" . $i.".log";
-	}
-
-	FileSystem::write($file,$data, null, 0777);
 }

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.12.2012
-  * $Version 2.4.2
+  * last modified: 21.03.2012
+  * $Version 2.4.8
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -30,32 +30,15 @@ class userController extends Controller
 	*/
 	public function pwdsave($result)
 	{
-		AddContent::add('<div class="success">'.lang("successful_saved", "The data was successfully written!").'</div>');
+		AddContent::add('<div class="success">'.lang("edit_password_ok", "The password were successfully changed!").'</div>');
 		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
 		$this->redirectback();
-	}
-	/**
-	 * saves the user-pwd
-	 *@access public
-	 *@name savepwd
-	*/
-	public function ajaxpwdsave($result, $response)
-	{
-		$user = DataObject::get("user", array("id" => $result["id"]));
-		$user->password = $result["password"];
-		$user->write(false, true);			
-		if(isset($_GET["boxid"])) {
-			$response->exec(dialog::closeById($_GET["boxid"]));
-		} else if(isset($_GET["dropElem"])) {
-			$response->exec("dropdownDialog.get(".var_export($_GET["dropElem"], true).").hide();");
-		}
-		return $response->render();
 	}
 		
 }
 
 
-class User extends DataObject implements HistoryData, PermProvider
+class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
 		/**
 		 * the name of this dataobject
@@ -68,28 +51,55 @@ class User extends DataObject implements HistoryData, PermProvider
 		/**
 		 * the database fields of a user
 		 *
-		 *@name db_fields
+		 *@name db
 		 *@access public
 		*/
-		public $db_fields = array(		'nickname'		=> 'varchar(200)',
-										'name'			=> 'varchar(200)',
-										'email'			=> 'varchar(200)',
-										'password'		=> 'varchar(200)',
-										'signatur'		=> 'text',
-										'status'		=> 'int(2)',
-										'phpsess'		=> 'varchar(200)',
-										"code"			=> "varchar(200)",
-										"timezone"		=> "timezone",
-										"custom_lang"	=> "varchar(10)");
+		static $db = array(	'nickname'		=> 'varchar(200)',
+							'name'			=> 'varchar(200)',
+							'email'			=> 'varchar(200)',
+							'password'		=> 'varchar(1000)',
+							'signatur'		=> 'text',
+							'status'		=> 'int(2)',
+							'phpsess'		=> 'varchar(200)',
+							"code"			=> "varchar(200)",
+							"timezone"		=> "timezone",
+							"custom_lang"	=> "varchar(10)");
 		
 		
 		/**
-		 * the table_name is users not user
+		 * we add an index to username and password, because of logins
 		 *
-		 *@name table_name
+		 *@name index
 		 *@access public
 		*/
-		public $table_name = "users";
+		static $index = array(
+			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
+		);
+		
+		/**
+		 * fields which are searchable
+		 *
+		 *@name search_fields
+		 *@access public
+		*/
+		static $search_fields = array(
+			"nickname", "name", "email", "signatur"
+		);
+		
+		/**
+		 * the table is users not user
+		 *
+		 *@name table
+		 *@access public
+		*/
+		static $table = "users";
+		
+		/**
+		 * use versions here
+		 *
+		 *@name versions
+		*/
+		static $versions = true;
 		
 		/**
 		 * every user has one group and an avatar-picture, which is reflected in this relation
@@ -97,7 +107,7 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name has_one
 		 *@access public
 		*/
-		public $has_one = array("avatar" => "Uploads"); 
+		static $has_one = array("avatar" => "Uploads"); 
 		
 		/**
 		 * every user has additional groups
@@ -105,7 +115,12 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name many_many
 		 *@access public
 		*/
-		public $many_many = array("groups" => "group");
+		static $many_many = array("groups" => "group");
+		
+		/**
+		 * sort by name
+		*/
+		static $default_sort = array("name", "ASC");
 		
 		/**
 		 * users are activated by default
@@ -113,38 +128,11 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@name defaults
 		 *@access public
 		*/
-		public $defaults = array(
+		static $default = array(
 				'status'	=> '1'
 		);
 		
-		/**
-		 * we add an index to username and password, because of logins
-		 *
-		 *@name indexes
-		 *@access public
-		*/
-		public $indexes = array(
-			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
-		);
-		
-		/**
-		 * fields which are searchable
-		 *
-		 *@name searchable_fields
-		 *@access public
-		*/
-		public $searchable_fields = array(
-			"nickname", "name", "email", "signatur"
-		);
-		
 		public $insertRights = 1;
-		
-		/**
-		 * use versions here
-		 *
-		 *@name versioned
-		*/
-		public $versioned = true;
 		
 		/**
 		 * gets all groups if a object
@@ -262,7 +250,7 @@ class User extends DataObject implements HistoryData, PermProvider
 							$this->doObject("timezone")->formfield(lang("timezone")),
 							new LangSelect("custom_lang", lang("lang")),
 							// password management in external window
-							new ajaxexternalform("passwort", lang("password", "password"), '**********', $this->pwdform($this->id)),
+							new ExternalForm("passwort", lang("password", "password"), lang("edit_password", "change password"), '**********', array($this, "pwdform")),
 							new ImageUpload("avatar", lang("pic", "image")),
 							new TextArea("signatur", lang("signatur", "signature"), null, "100px")
 							
@@ -307,8 +295,11 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *
 		 *@name pwdform
 		*/
-		public function pwdform($id)
+		public function pwdform($id = null)
 		{
+				if(!isset($id))
+					$id = $this->id;
+				
 				if(Permission::check("USERS_MANAGE") && $id != member::$id) {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
@@ -316,7 +307,7 @@ class User extends DataObject implements HistoryData, PermProvider
 						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+					$pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
 				} else {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
@@ -325,7 +316,7 @@ class User extends DataObject implements HistoryData, PermProvider
 						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new AjaxSubmitButton("submit", lang("save", "save"), "ajaxpwdsave", "pwdsave"));
+					$pwdform->addAction(new FormAction("submit", lang("save", "save"),"pwdsave"));
 				}
 				return $pwdform;
 		}
@@ -351,6 +342,18 @@ class User extends DataObject implements HistoryData, PermProvider
 						return lang("passwords_not_match");
 				}
 		}
+		
+		/**
+		 * nickname is always lowercase
+		 *
+		 *@name onbeforewrite
+		*/
+		public function onBeforeWrite() {
+			parent::onBeforeWrite();
+			
+			$this->nickname = strtolower($this->nickname);
+		}
+		
 		/**
 		 * sets the password with md5
 		 *
@@ -474,6 +477,23 @@ class User extends DataObject implements HistoryData, PermProvider
 		}
 		
 		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			$title = $this->title;
+			
+			$title = $this->image()->setSize(20, 20) . " " . $title;
+			
+			if($link)
+				$title = '<a href="member/'.$this->id.'" target="_blank">' . $title . '</a>';
+			
+			return $title;
+		}
+		
+		/**
 		 * performs a login
 		 *
 		 *@name performLogin
@@ -513,6 +533,14 @@ class User extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			if(!$record->newversion()) {
+				return false;
+			}
+			
+			$relevant = true;
+			if(!$record->autor)
+				$relevant = false;
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -520,6 +548,7 @@ class User extends DataObject implements HistoryData, PermProvider
 						$icon = "images/icons/fatcow16/user_go.png";
 						$lang = lang("h_user_login");
 						$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
+						$relevant = false;
 					} else {
 						if($record->autorid == $record->newversion()->id) {
 							$lang = lang("h_profile_update", '$user updated the own profile');
@@ -544,7 +573,27 @@ class User extends DataObject implements HistoryData, PermProvider
 			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
+		}
+		
+		/**
+		 * returns a comma-seperated list of all groups
+		 *
+		 *@name getGroupList
+		 *@access public
+		*/
+		public function getGroupList() {
+			$str = "";
+			$i = 0;
+			foreach($this->groups() as $group) {
+				if($i == 0) {
+					$i++;
+				} else {
+					$str .= ", ";
+				}
+				$str .= Convert::raw2text($group->name);
+			}
+			return $str;
 		}
 		
 		/**
@@ -584,6 +633,20 @@ class User extends DataObject implements HistoryData, PermProvider
 				return new GravatarImageHandler(array("email" => $this->email));
 			}
 		}
+		
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
+	}
 }
 
 /**
@@ -646,28 +709,37 @@ class Member extends Object {
 	 *@access public
 	*/
 	public static function checkDefaults() {
-		if(DataObject::count("group", array("type" => 2)) == 0) {
-			$group = new Group();
-			$group->name = lang("admins", "admins");
-			$group->type = 2;
-			$group->write(true, true);
+		
+		$cacher = new Cacher("groups-checkDefaults");
+		if($cacher->checkValid()) {
+		
+		} else {
+			if(DataObject::count("group", array("type" => 2)) == 0) {
+				$group = new Group();
+				$group->name = lang("admins", "admin");
+				$group->type = 2;
+				$group->write(true, true, 2, false, false);
+			}
+			
+			if(DataObject::count("group", array("type" => 1)) == 0) {
+				$group = new Group();
+				$group->name = lang("user", "users");
+				$group->type = 1;
+				$group->write(true, true, 2, false, false);
+			}
+			
+			if(isset(self::$default_admin) && DataObject::count("user") == 0) {
+				$user = new User();
+				$user->nickname = self::$default_admin["nickname"];
+				$user->password = self::$default_admin["password"];
+				$user->write(true, true);
+				$user->groups()->add(DataObject::get_one("group", array("type" => 2)));
+				$user->groups()->write(false, true);
+			}
+			
+			$cacher->write(true, 3600);
 		}
 		
-		if(DataObject::count("group", array("type" => 1)) == 0) {
-			$group = new Group();
-			$group->name = lang("user", "users");
-			$group->type = 1;
-			$group->write(true, true);
-		}
-		
-		if(isset(self::$default_admin) && DataObject::count("user") == 0) {
-			$user = new User();
-			$user->nickname = self::$default_admin["nickname"];
-			$user->password = self::$default_admin["password"];
-			$user->write(true, true);
-			$user->groups()->add(DataObject::get_one("group", array("type" => 2)));
-			$user->groups()->write(false, true);
-		}
 	}
 	
 	/**
@@ -676,7 +748,8 @@ class Member extends Object {
 	 *@name checkLogin
 	 *@access public
 	*/
-	public static function checkLogin() {
+	public static function Init() {
+		if(PROFILE) Profiler::mark("member::Init");
 		if(isset(self::$id)) {
 			return true;
 		}
@@ -686,10 +759,11 @@ class Member extends Object {
 		if(isset($_SESSION["g_userlogin"])) {
 			if($data = DataObject::get_one("user", array("id" => $_SESSION["g_userlogin"]))) {
 				$currsess = session_id();
-								
+				
 				if($data['phpsess'] != $currsess)
 				{
 					self::doLogout();
+					if(PROFILE) Profiler::unmark("member::Init");
 					return false;
 				}
 				
@@ -708,11 +782,11 @@ class Member extends Object {
 					$group = DataObject::get_one("group", array("type" => 1));
 					if(!$group) {
 						$group = new Group(array("name" => lang("user"), "type" => 1));
-						$group->write(true, true);
+						$group->write(true, true, 2, false, false);
 					}
 					
 					self::$groups->add($group);
-					self::$groups->write(false, true);
+					self::$groups->write(false, true, 2, false, false);
 				}
 				
 				self::$groupType = self::$groups->first()->type;
@@ -725,14 +799,20 @@ class Member extends Object {
 				}
 				
 				self::$loggedIn = $data;
-				
+				if(PROFILE) Profiler::unmark("member::Init");
 				return true;
 			} else {
 				self::doLogout();
+				if(PROFILE) Profiler::unmark("member::Init");
 				return false;
 			}
 		}
 	}
+	
+	/**
+	 * old method
+	*/
+	public static function checkLogin() {}
 	
 	/**
 	 * returns the groupids of the groups of the user
@@ -793,7 +873,7 @@ class Member extends Object {
 	{
 		self::checkDefaults();
 
-		$data = DataObject::get_one("user", array("nickname" => array("LIKE", $user), "OR", "email" => array("LIKE", $user)));
+		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
 		
 		if($data) {
 			// check password
@@ -807,10 +887,10 @@ class Member extends Object {
 					
 					return true;
 				} else if($data->status == 0) {
-					addcontent::addError(login("login_not_unlocked"));
+					addcontent::addError(lang("login_not_unlocked"));
 					return false;
 				} else {
-					addcontent::addError(login("login_locked"));
+					addcontent::addError(lang("login_locked"));
 					return false;
 				}
 			} else {
@@ -847,7 +927,7 @@ class Member extends Object {
 	*/
 	public function require_login() {
 		if(!self::login()) {
-			AddContent::addError(lang("require_login"));
+			AddContent::addNotice(lang("require_login"));
 			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
 		}
 		return true;

@@ -6,9 +6,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 23.11.2012
-  * $Version 3.6.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 25.03.2013
+  * $Version 3.6.9
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -133,126 +133,6 @@ class ClassInfo extends Object
 		}
 		
 		/**
-		 * get a static param for a class
-		 *@name getStatic
-		 *@access public
-		 *@param string - class_name
-		 *@param string - var_name
-		*/
-		public static function getStatic($class_name, $var)
-		{
-				if(is_object($class_name))
-					$class_name = $class_name->class;
-				
-				if(!empty($class_name))
-				{
-						if(!empty($var))
-						{
-								return eval("return ".$class_name."::\$".$var.";");
-						} else
-						{
-								throwError("20","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
-						}
-				} else
-				{
-						throwError("20","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
-				}
-		}
-		
-		/**
-		 * checks if a static var isset
-		 *@name hasStatic
-		 *@access public 
-		 *@param string - class_name
-		 *@param string - var_name
-		*/
-		public static function hasStatic($class_name, $var)
-		{
-				if(is_object($class_name))
-					$class_name = $class_name->class;
-				
-				if(!empty($class_name))
-				{
-						if(!empty($var))
-						{
-								return eval("return isset(".$class_name."::\$".$var.");");
-						} else
-						{
-								throwError("20","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
-						}
-				} else
-				{
-						throwError("20","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
-				}
-		}
-		
-		/**
-		 * checks if a static var isset
-		 *@name setStatic
-		 *@access public 
-		 *@param string - class_name
-		 *@param string - var_name
-		 *@param mixed - value
-		*/
-		public static function setStatic($class_name, $var, $value)
-		{
-				if(is_object($class_name))
-					$class_name = $class_name->class;
-				
-				if(!empty($class_name))
-				{
-						if(!empty($var))
-						{
-								return eval($class_name."::\$".$var." = ".var_export($value, true).";");
-						} else
-						{
-								throwError("20","PHP-Error", "Invalid name of var in ".__METHOD__." in ".__FILE__."");
-						}
-				} else
-				{
-						throwError("20","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
-				}
-		}
-		
-		/**
-		 * calls a static function
-		 *@name callStatic
-		 *@access public
-		 *@param string - class_name
-		 *@param string - func-name
-		 *@return mixed
-		*/
-		public static function callStatic($class, $func)
-		{
-				if(is_object($class_name))
-					$class_name = $class_name->class;
-				
-				if(!empty($class))
-				{
-						if(!empty($func))
-						{
-								return call_user_func_array(array($class, $func), array($class));
-						} else
-						{
-								throwError("20","PHP-Error", "Invalid name of function in ".__METHOD__." in ".__FILE__."");
-						}
-				} else
-				{
-						throwError("20","PHP-Error", "Invalid name of class in ".__METHOD__." in ".__FILE__."");
-				}
-		}
-		
-		/**
-		 * class
-		 *@name name
-		 *@param object
-		*/
-		public static function name($class)
-		{
-				return get_class($class);
-		}
-		
-		/**
 		 * gets the childs of a class
 		 *
 		 *@name getChildren
@@ -321,7 +201,7 @@ class ClassInfo extends Object
 		*/
 		public static function classTable($class)
 		{
-				return isset(classinfo::$class_info[$class]["table_name"]) ? classinfo::$class_info[$class]["table_name"] : false;
+				return isset(classinfo::$class_info[$class]["table"]) ? classinfo::$class_info[$class]["table"] : false;
 		}
 		
 		/**
@@ -464,10 +344,10 @@ class ClassInfo extends Object
 			
 			if(self::$class_info[$class]["baseclass"] == $class) {
 				$tables = array();
-				if(!isset(self::$class_info[$class]["table_name"]) || empty(self::$class_info[$class]["table_name"]))
+				if(!isset(self::$class_info[$class]["table"]) || empty(self::$class_info[$class]["table"]))
 					return array();
 				
-				$tables[self::$class_info[$class]["table_name"]] = self::$class_info[$class]["table_name"];
+				$tables[self::$class_info[$class]["table"]] = self::$class_info[$class]["table"];
 				$tables[$class . "_state"] = $class . "_state";
 				
 				if(isset(self::$class_info[$class]["many_many_tables"]) && self::$class_info[$class]["many_many_tables"]) {
@@ -477,8 +357,8 @@ class ClassInfo extends Object
 				}
 				
 				foreach(self::getChildren($class) as $_class) {
-					if(isset(self::$class_info[$_class]["table_name"]) && self::$class_info[$_class]["table_name"])
-						$tables[self::$class_info[$_class]["table_name"]] = self::$class_info[$_class]["table_name"];
+					if(isset(self::$class_info[$_class]["table"]) && self::$class_info[$_class]["table"])
+						$tables[self::$class_info[$_class]["table"]] = self::$class_info[$_class]["table"];
 					
 					if(isset(self::$class_info[$_class]["many_many_tables"]) && self::$class_info[$_class]["many_many_tables"]) {
 						foreach(self::$class_info[$_class]["many_many_tables"] as $data) {
@@ -582,12 +462,17 @@ class ClassInfo extends Object
 			}
 			
 			if(isset(self::$files[$class])) {
-				if(file_exists(dirname(self::$files[$class]) . "/" . $file)) {
+				if(file_exists(dirname(self::$files[$class]) . "/" . $file) && !is_dir(dirname(self::$files[$class]) . "/" . $file)) {
 					return dirname(self::$files[$class]) . "/" . $file;
 				}
 			}
 			
-			if(file_exists($file))
+			
+			if(file_exists(APPLICATION . "/" . $file) && !is_dir(APPLICATION . "/" . $file)) {
+				return APPLICATION . "/" . $file;
+			}
+			
+			if(file_exists($file) && !is_dir($file))
 				return $file;
 			else
 				return false;
@@ -745,8 +630,8 @@ class ClassInfo extends Object
 							@unlink($appFolder . "/write.test");
 							
 							$files = scandir($appFolder);
-							if(file_exists($appFolder . "/.index.db")) {
-								$data = unserialize(file_get_contents($appFolder . "/.index.db"));
+							if(file_exists($appFolder . "/.index-db") && $data = @unserialize(file_get_contents($appFolder . "/.index-db"))) {
+								;
 							} else {
 								$data = array("fileindex" => array(), "packages" => array());
 							}
@@ -794,7 +679,7 @@ class ClassInfo extends Object
 								}
 
 								if($permissionsValid) {
-									FileSystem::write(ROOT . "system/installer/data/apps/.index.db", serialize($data));
+									FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
 								}
 							}
 							
@@ -826,7 +711,7 @@ class ClassInfo extends Object
 								unset($data);
 							} else {
 								$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
-								$error = str_replace('{$error}', 'You need to have a installed GD-Library 2.', $error);
+								$error = str_replace('{$error}', /*'You need to have GD-Library 2 installed.'*/ 'Sie benötigen GD-Library 2, um Goma auszuführen.', $error);
 								$error = str_replace('{BASE_URI}', BASE_URI, $error);
 								header("HTTP/1.1 500 Server Error");
 								echo $error;
@@ -855,9 +740,7 @@ class ClassInfo extends Object
 						
 						if(file_exists($file) && (filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist"))) {
 							if(!preg_match("/^dev/i", URL)) {
-								$_SESSION["dev_without_perms"] = true;
-								header("Location:" . BASE_URI . BASE_SCRIPT . "dev?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
-								exit;	
+								Dev::redirectToDev();
 							}
 						}
 						
@@ -866,7 +749,13 @@ class ClassInfo extends Object
 						
 						// end filesystem checks
 						
-						
+						// check for clean-up
+						if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
+							$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
+							if($count > 60) {
+								register_shutdown_function(array("ClassInfo", "autoCleanUpLog"));
+							}
+						}						
 						require_once(ROOT . "system/libs/thirdparty/plist/CFPropertyList.php");
 						// get some data about app-env
 						$frameworkplist = new CFPropertyList(FRAMEWORK_ROOT . "info.plist");
@@ -900,6 +789,12 @@ class ClassInfo extends Object
 						makeProjectUnavailable();
 						
 						Core::deletecache(true);
+						
+						// check for disk-quote
+						if(GOMA_FREE_SPACE / 1024 / 1024 < 20) {
+							header("HTTP/1.1 500 Server Error");
+							die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+						}
 						
 						// register shutdown hook
 						register_shutdown_function(array("ClassInfo", "finalizeClassInfo"));
@@ -944,6 +839,17 @@ class ClassInfo extends Object
 						
 						foreach(self::$class_info as $class => $data)
 						{
+							if(Object::method_exists($class, "buildClassInfo")) {
+								call_user_func_array(array($class, "buildClassInfo"), array($class));
+							}
+						}
+						
+						foreach(self::$class_info as $class => $data)
+						{
+							if(Object::method_exists($class, "buildClassInfo")) {
+								call_user_func_array(array($class, "buildClassInfo"), array($class));
+							}
+							
 							Object::instance("ClassInfo")->callExtending("generate", $class);
 								
 							// generates save-vars
@@ -976,6 +882,7 @@ class ClassInfo extends Object
 									if(!isset($c)) $c = new $class;
 									$c->generateClassInfo();
 								}
+								
 								unset($c);
 							}
 							
@@ -1037,7 +944,6 @@ class ClassInfo extends Object
 						
 						define("CLASS_INFO_GENERATED", true);
 						
-						DataObject::$donothing = false; // dataobject reset
 						Object::$cache_singleton_classes = array(); // object reset
 						self::$set_save_vars = array(); // class_info reset
 						
@@ -1150,7 +1056,7 @@ class ClassInfo extends Object
 				defined("APPLICATION_BUILD") OR define("APPLICATION_BUILD", self::$appENV["app"]["build"]);
 				
 				if(isset(self::$appENV["app"]["requireFrameworkVersion"])) {
-					if(version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
+					if(goma_version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-".BUILD_VERSION, ">")) {
 						throwError(7, 'Application-Error', "Application does not support this version of the goma-framework, please update the framework to <strong>".self::$appENV["app"]["requireFrameworkVersion"]."</strong>. <br />Framework-Version: <strong>".GOMA_VERSION."-".BUILD_VERSION."</strong>");
 					}
 				}
@@ -1182,6 +1088,16 @@ class ClassInfo extends Object
 				
 				ClassInfo::write();
 			}
+		}
+		
+		/**
+		 * callback for auto-clean-up for log-files
+		 *
+		 *@name autoCleanUpLog
+		 *@access public
+		*/
+		public static function autoCleanUpLog() {
+			Core::cleanUpLog(60);
 		}
 		
 		/**
@@ -1271,9 +1187,9 @@ class ClassInfo extends Object
 						$dataclasses = array();
 						foreach(self::$class_info[$class]["dataclasses"] as $c)
 						{
-								if(isset(self::$class_info[$c]["table_name"]) && self::$class_info[$c]["table_name"] !== false)
+								if(isset(self::$class_info[$c]["table"]) && self::$class_info[$c]["table"] !== false)
 								{
-										$dataclasses[$c] = self::$class_info[$c]["table_name"];
+										$dataclasses[$c] = self::$class_info[$c]["table"];
 								}
 						}
 						
@@ -1351,5 +1267,5 @@ class ClassInfo extends Object
 		}
 }
 
-ClassInfo::addSaveVar("object", "extensions");
-ClassInfo::addSaveVar("object", "extra_methods");
+ClassInfo::addSaveVar("Object", "extensions");
+ClassInfo::addSaveVar("Object", "extra_methods");

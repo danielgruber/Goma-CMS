@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 21.03.2012
+  * last modified: 12.12.2012
   * $Version 1.0.3
 */
 $(function(){
@@ -56,11 +56,14 @@ $(function(){
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').append('<a href="javascript:;" class="cancelButton"></a>');
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').append('<div class="textDropDown"><ul></ul></div>');
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(" > .textDropDown").css({
-								left: 0,
-								top: $("#" + $edit.getInputElement().getId() ).outerHeight() - 1,
-								width: $("#" + $edit.getInputElement().getId() ).outerWidth() - ($("#" + $edit.getInputElement().getId() ).outerWidth() - $("#" + $edit.getInputElement().getId() ).width()) / 2,
+								left: ($("#" + $edit.getInputElement().getId() ).outerWidth(true) - $("#" + $edit.getInputElement().getId() ).outerWidth()) / 2,
+								top: $("#" + $edit.getInputElement().getId() ).outerHeight() + 1,
+								width: $("#" + $edit.getInputElement().getId() ).outerWidth() + 1 - ($("#" + $edit.getInputElement().getId() ).outerWidth(true) - $("#" + $edit.getInputElement().getId() ).outerWidth()) / 2,
 								display: "none"
 							});
+							
+							$("#" + $edit.getInputElement().getId() ).attr("placeholder", lang("search"));
+							
 							$("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(".cancelButton").click(function(){
 								url = "";
 								$("#" + $edit.getInputElement().getId() ).prop("disabled", false);
@@ -90,7 +93,7 @@ $(function(){
 										data: {search: $("#" + $edit.getInputElement().getId() ).val()},
 										dataType: "html",
 										success: function(data) {
-											var data = eval_global('(' + data + ')');
+											var data = parseJSON(data);
 											if(data.count > 0) {
 												var ul = $("#" + $edit.getInputElement().getId() ).parents('.cke_dialog_ui_text').find(" > .textDropDown > ul");
 												ul.html("");

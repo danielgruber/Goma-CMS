@@ -133,6 +133,7 @@ a.button {
     padding: 10px;
     padding-left: 25px;
     margin:10px 0px;
+    color: #222;
 }
 
 .success {
@@ -151,6 +152,10 @@ a.button {
 	padding: 10px;
 	margin: 10px 0px;
 	color: #252525;
+}
+
+.error a {
+	color: #fff !important;
 }
 
 .info_box {
@@ -176,4 +181,11 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		background-image: url(../../../images/icons/fatcow16/bullet_error@2x.png);
 		background-size: 16px 16px;
 	}
+}
+
+#page_wrapperpage li h4 {
+	margin: 0;
+}
+.confirmDescription {
+	padding: 10px;
 }

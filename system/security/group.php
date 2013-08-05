@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.12.2012
-  * $Version 1.1.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 03.02.2013
+  * $Version 1.2.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -28,6 +28,26 @@ class Group extends DataObject implements HistoryData, PermProvider
 		*/
 		static public $icon = "images/icons/fatcow16/group.png";
 		
+		/**
+		 * database-fields
+		 *
+		 *@name db
+		 *@access public
+		 *@var array
+		*/
+		static $db = array(	"name"	 	=> 'varchar(100)',
+							"type"		=> 'enum("0", "1", "2")');
+		
+		
+		/**
+		 * fields, whch are searchable
+		 *
+		 *@name search_fields
+		 *@access public
+		*/
+		static $search_fields = array(
+			"name"
+		);
 		
 		/**
 		 * belongs many-many
@@ -35,10 +55,15 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@name belongs_many_many
 		 *@access public
 		*/
-		public $belongs_many_many = array(
+		static $belongs_many_many = array(
 			"users"			=> "user",
 			"permissions"	=> "Permission"
 		);
+		
+		/**
+		 * sort by name
+		*/
+		static $default_sort = array("name", "ASC");
 		
 		/**
 		 * the table_name
@@ -47,26 +72,6 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public $table_name = "groups";
-		
-		/**
-		 * database-fields
-		 *
-		 *@name db_fields
-		 *@access public
-		 *@var array
-		*/
-		public $db_fields = array(	"name"	 	=> 'varchar(100)',
-									"type"		=> 'enum("0", "1", "2")');
-		
-		/**
-		 * fields, whch are searchable
-		 *
-		 *@name searchable_fields
-		 *@access public
-		*/
-		public $searchable_fields = array(
-			"name"
-		);
 		
 		/**
 		 * generates the form to create a new group
@@ -106,15 +111,14 @@ class Group extends DataObject implements HistoryData, PermProvider
 				
 				// permissions
 				if(Permission::check("canManagePermissions")) {
-					$form->tabs->add(new Tab("permissionstab", array(
-						
-					), lang("rights")));
-					
-					$form->permissionstab->add(new ClusterFormField("permissions", ""));
+					$form->general->add(new ClusterFormField("permissions", lang("rights")));
 					
 					foreach(Permission::$providedPermissions as $name => $data) {
 						$active = ($this->permissions(array("name" => $name))->count() > 0) ? 1 : 0;
 						$form->permissions->add(new Checkbox($name, parse_lang($data["title"]), $active));
+						if(isset($data["description"])) {
+							$form->permissions->{$name}->info = parse_lang($data["description"]);
+						}
 					}
 					
 					$form->addDataHandler(array($this, "handlePerms"));
@@ -149,126 +153,6 @@ class Group extends DataObject implements HistoryData, PermProvider
 		}
 		
 		/**
-		 * TREE-API v2
-		 * this API renders trees more flexibel and with better performance
-		*/ 
-		
-		/**
-		 * gets the subtree from a given parentid or from 0, so from root
-		 *
-		 *@name getTree
-		 *@access public
-		 *@param numeric - parentid of subtree
-		 *@param array - fields
-		*/
-		public function getTree($parentid = 0)
-		{
-			if(PROFILE) Profiler::mark("group::getTree");
-			
-			/* --- */
-			
-			
-			$arr = array();
-			if($parentid == 0) {
-				$data = DataObject::get("group");
-				foreach($data as $record) {
-					$class = $record["class_name"];
-					
-					// count subtree
-					$count = $record->Users()->Count();
-					if($count > 0) {
-						if($count == 5) {
-							$children = "ajax";
-						} else {
-							$children = $this->getTree($record["id"]);
-						}
-					} else {
-						$children = array();
-					}
-					
-					// get data
-					$arr[] = array(
-						"title" 		=> $record["name"],
-						"attributes"	=> array("class" => $class),
-						"data"			=> $record->toArray(),
-						"children"		=> $children
-					);
-				}
-			} else {
-				$data = DataObject::get("group", array("id" => $parentid))->Users();
-				foreach($data as $record) {
-					if($record["status"] == 0) {
-						$status = "not_unlocked";
-					} else if($record["status"] == 2) {
-						$status = "disabled";
-					} else {
-						$status = "activated";
-					}
-					$class = $record["class_name"] . " " . $status;
-					// get data
-					$arr[] = array(
-						"title" 		=> $record["nickname"],
-						"attributes"	=> array("class" => $class),
-						"data"			=> $record->toArray(),
-						"children"		=> array()
-					);
-				}
-			}
-			
-			if(PROFILE) Profiler::unmark("group::getTree");
-			
-			return $arr;
-		}
-		/**
-		 * gets the subtree from a given parentid or from 0, so from root
-		 *
-		 *@name searchTree
-		 *@access public
-		 *@param array - words
-		 *@param array - fields
-		*/
-		public function searchTree($words = array())
-		{
-			if(PROFILE) Profiler::mark("group::searchTree");
-			
-			$arr = array();
-			
-			$data = DataObject::_search("user", $words, array());
-			foreach($data as $record) {
-				if(!isset($arr[$record["groupid"]])) {
-					$parent = DataObject::_get("group", array("id" => $record["groupid"]));
-					$arr[$parent["id"]] = array(
-						"title"			=> $parent["name"],
-						"attributes"	=> array("class" => $parent["class_name"]),
-						"data"			=> $parent->toArray(),
-						"children"		=> array(),
-						"collapsable"	=> false,
-						"collapsed"		=> false
-					);
-				}
-				if($record["status"] == 0) {
-					$status = "not_unlocked";
-				} else if($record["status"] == 2) {
-					$status = "disabled";
-				} else {
-					$status = "activated";
-				}
-				
-				
-				$arr[$record["groupid"]]["children"][] =  array(
-					"title" 		=> $record["nickname"],
-					"attributes"	=> array("class" => $record["class_name"] . " " . $status),
-					"data"			=> $record->toArray(),
-					"children"		=> array()
-				);
-			}
-			
-			if(PROFILE) Profiler::unmark("group::searchTree");
-			
-			return $arr;
-		}
-		
-		/**
 		 * provide perms
 		*/
 		public function providePerms() {
@@ -277,7 +161,8 @@ class Group extends DataObject implements HistoryData, PermProvider
 					"title"		=> '{$_lang_rights_manage}',
 					"default"	=> array(
 						"type"	=> "admins"
-					)
+					),
+					"category"	=> "ADMIN"
 				)
 			);
 		}
@@ -289,6 +174,15 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@access public
 		*/
 		public static function generateHistoryData($record) {
+			if(!$record->record())
+				return false;
+			
+			$relevant = true;
+			
+			if(!$record->autor || $record->record()->name == "") {
+				$relevant = false;
+			}
+			
 			switch($record->action) {
 				case "update":
 				case "publish":
@@ -311,7 +205,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 			$lang = str_replace('$groupUrl', "admin/group/" . $record->record()->id . URLEND, $lang);
 			$lang = str_replace('$group', convert::Raw2text($record->record()->name), $lang);
 			
-			return array("icon" => $icon, "text" => $lang);
+			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
 		}
 		
 }

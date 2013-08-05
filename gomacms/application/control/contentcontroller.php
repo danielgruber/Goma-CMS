@@ -4,12 +4,12 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.10.2012
-  * $Version 2.0.2
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.03.2013
+  * $Version 2.0.5
 */
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
+defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class contentController extends FrontedController
 {
@@ -125,10 +125,11 @@ class contentController extends FrontedController
 			
 			// register a PAGE_PATH
 			define("PAGE_PATH", $this->modelInst()->url);
+			define("PAGE_ORG_PATH", $this->modelInst()->orgurl);
 			
 			if($this->modelInst()->parentid == 0 && $this->modelInst()->sort == 0) {
 				defined("HOMEPAGE") OR define("HOMEPAGE", true);
-				Core::setTitle($this->modelInst()->title);
+				Core::setTitle($this->modelInst()->windowtitle);
 			} else {
 				defined("HOMEPAGE") OR define("HOMEPAGE", false);
 			}
@@ -179,7 +180,189 @@ class contentController extends FrontedController
 				ContentTPLExtension::AppendContent($this->modelInst()->appendedContent);
 				ContentTPLExtension::PrependContent($this->modelInst()->prependedContent);
 			}
+			
+			if($content !== null) {
+				if($this->modelInst()->meta_keywords == "") {
+					$index = array();
+					foreach(HTMLParser::list_words($content) as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)]++;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h1") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 7;
+						} else {
+							$index[strtolower($word)] = 7;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h2") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 6;
+						} else {
+							$index[strtolower($word)] = 6;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h3") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 5;
+						} else {
+							$index[strtolower($word)] = 5;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h4") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 4;
+						} else {
+							$index[strtolower($word)] = 4;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h5") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 3;
+						} else {
+							$index[strtolower($word)] = 3;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "h6") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 2;
+						} else {
+							$index[strtolower($word)] = 2;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "b") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 1;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					foreach(HTMLParser::list_words_in_tag($content, "strong") as $word) {
+						if(isset($index[strtolower($word)])) {
+							$index[strtolower($word)] += 1;
+						} else {
+							$index[strtolower($word)] = 1;
+						}
+					}
+					
+					arsort($index);
+					$str = "";
+					$i = 0;
+					foreach($index as $word => $prio) {
+						if($i == 0) {
+							$i++;
+						} else if($i == 5) {
+							break;
+						} else {
+							$i++;
+							$str .= ", ";
+						}
+						$str .= $word;
+					}
+					Core::setHeader("keywords", $str);
+				}
+			}
 		}
 		
+		/**
+		 * output-hook
+		 *
+		 *@name outputHook
+		*/
+		public static function outputHook($content) {
+			if(is_a(Core::$requestController, "contentController")) {
+				$uploadObjects = array();
+				$uploadHash = "";
+				
+				// a-tags
+				preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $content, $links);
+				foreach($links[2] as $key => $href)
+				{
+					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
+						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+							if(file_exists($data->path) && filemtime(ROOT . "Uploads/" . $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
+								@unlink($data->path);
+							}
+							
+							$uploadObjects[] = $data;
+							$uploadHash .= $data->realfile;
+						}
+					}
+				}
+				
+				// img-tags
+				preg_match_all('/<img([^>]+)src="([^">]+)"([^>]*)>/Usi', $content, $links);
+				foreach($links[2] as $key => $href)
+				{
+					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
+						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+							$uploadObjects[] = $data;
+							$uploadHash .= $data->realfile;
+						}
+					}
+				}
+				
+				if(count($uploadObjects) > 0) {
+
+					$hash = md5($uploadHash);
+					$cacher = new Cacher("track_" . Core::$requestController->modelInst()->id . "_" . $hash);
+					if($cacher->checkValid())
+						return true;
+					else {
+						Core::$requestController->modelInst()->UploadTracking()->setData(array());
+						foreach($uploadObjects as $upload)
+							Core::$requestController->modelInst()->UploadTracking()->push($upload);
+						
+						Core::$requestController->modelInst()->UploadTracking()->write(false, true);
+						$cacher->write(1, 14 * 86400);
+					}
+				}
+				
+			}
+		}
 }
 
+class UploadsPageLinkExtension extends DataObjectExtension {
+	/**
+	 * many-many
+	*/
+	static $belongs_many_many = array(
+		"pagelinks"	=> "pages"
+	);
+}
+
+class UploadsPageBacktraceController extends ControllerExtension {
+	/**
+	 * on before handle an action we redirect if needed
+	 *
+	 *@name onBeforeHandleAction
+	*/
+	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
+		$data = $this->getOwner()->modelInst()->linkingPages();
+		$data->setVersion(false);
+		if($data->Count() > 0) {
+			foreach($data as $page) {
+				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
+					return true;
+				}
+			}
+			
+			$handleWithMethod = false;
+			$content = false;
+		}
+	}
+}
+
+Object::extend("UploadsController", "UploadsPageBacktraceController");
+Core::addToHook("onBeforeServe", array("contentController", "outputHook"));

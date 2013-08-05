@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 2.2.1
+  * last modified: 18.12.2012
+  * $Version 2.2.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -54,13 +54,9 @@ class UpdateController extends adminController {
 		
 		$updates = new DataSet($updates);
 		$storeAvailable = G_SoftwareType::isStoreAvailable();
-		if(!$storeAvailable) {
-			$updatables = G_SoftwareType::listUpdatablePackages();
-		} else {
-			$updatables = null;
-		}
+		$updatables = G_SoftwareType::listUpdatablePackages();
 		
-		$view->customise(array("updates" => $updates, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
+		$view->customise(array("updates" => $updates, "BASEURI" => BASE_URI, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
 		
 		return $view->renderWith("admin/update.html");
 	}
@@ -138,7 +134,15 @@ class UpdateController extends adminController {
 	 *@access public
 	*/
 	public function upload() {
-		if(isset($_GET["download"])) {
+		if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
+			$filename = ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs";
+			if(file_put_contents(ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs", @file_get_contents($_GET["download"]))) {
+				if($model = Uploads::addFile(basename($_GET["download"]), $filename, "updates")) {
+					HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
+					exit;
+				}
+			}
+			
 			$form = new Form($this, "update", array(
 				new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'),
 				$file = new FileUpload("file", lang("update_file_upload"), array("gfs"), null, "updates")

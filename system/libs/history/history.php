@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.12.2012
-  * $Version 1.0.1
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 27.02.2013
+  * $Version 1.0.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -14,7 +14,7 @@ class History extends DataObject {
 	/**
 	 * db-fields
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"dbobject"		=> "varchar(100)",
 		"record"		=> "int(10)",
 		"oldversion"	=> "int(10)",
@@ -25,12 +25,23 @@ class History extends DataObject {
 	);
 	
 	/**
+	 * indexes
+	*/
+	static $index = array(
+		"dbobject"	=> array(
+			"type"		=> "INDEX",
+			"name"		=> "dbobject",
+			"fields"	=> "dbobject,class_name"
+		)
+	);
+	
+	/**
 	 * disable history for this dataobject, because we would have an endless loop
 	 *
 	 *@name history
 	 *@access public
 	*/
-	public static $history = false;
+	static $history = false;
 	
 	/**
 	 * small cache for classes supporting HistoryView
@@ -38,7 +49,14 @@ class History extends DataObject {
 	 *@name supportHistoryView
 	 *@access private
 	*/
-	private static $supportHistoryView;
+	static $supportHistoryView;
+	
+	/**
+	 * sort-direction of the history
+	 *
+	 *@name default_sort
+	*/ 
+	static $default_sort = "created DESC";
 	
 	/**
 	 * cache for history-data
@@ -79,7 +97,7 @@ class History extends DataObject {
 			return false;
 		}
 		
-		if(isset($changed)) {
+		if(isset($changed) && !DataObject::versioned($class)) {
 			$cc = count($changed);
 			$c = serialize($changed);
 		} else {
@@ -99,7 +117,7 @@ class History extends DataObject {
 		));
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
-		return $record->write(true, true);
+		return $record->write(true, true, 2, true, false);
 	}
 	
 	/**
@@ -128,7 +146,7 @@ class History extends DataObject {
 	 *@name canSeeEvent
 	*/
 	public function canSeeEvent() {
-		if(call_user_func_array(array($this->dbobject, "canViewHistory"), array($this)) && $this->historyData()) {
+		if($this->historyData() !== false && call_user_func_array(array($this->dbobject, "canViewHistory"), array($this))) {
 			return true;
 		}
 		return false;
@@ -144,13 +162,17 @@ class History extends DataObject {
 	public function getContent() {
 		if($data = $this->historyData()) {
 			$text = $data["text"];
-			// generate user
-			if($this->autor) {
-				$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
+			if(preg_match('/\$user/', $text)) {
+				// generate user
+				if($this->autor) {
+					$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
+				} else {
+					$user = '<span style="font-style: italic;">System</span>';
+				}
+				return str_replace('$user', $user, $text);
 			} else {
-				$user = '<span style="font-style: italic;">System</span>';
+				return $text;
 			}
-			return str_replace('$user', $user, $text);
 		}
 		
 		return false;
@@ -165,7 +187,7 @@ class History extends DataObject {
 	*/
 	public function getIcon() {
 		if($data = $this->historyData()) {
-			return $data["icon"];
+			return ClassInfo::findFile($data["icon"], $this->dbobject);
 		}
 		
 		return false;
@@ -174,16 +196,22 @@ class History extends DataObject {
 	/**
 	 * gets the info if all versions are available for this history-object
 	 *
-	 *@name getVersioned
+	 *@name getIsVersioned
 	*/
-	public function getVersioned() {
+	public function getIsVersioned() {
+		if(isset($this->_versioned)) {
+			return $this->_versioned;
+		}
+		
+		$this->_versioned = false;
 		$data = $this->historyData();
 		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
-			$temp = new $this->dbobject();
-			if(!$temp->versioned)
+			if(!DataObject::versioned($this->dbobject) || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
 				return false;
+			}
 			
 			if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
+				$this->_versioned = true;
 				return true;
 			}
 			
@@ -212,7 +240,7 @@ class History extends DataObject {
 		$data = $this->historyData();
 		$temp = new $this->dbobject();
 		if(!isset($data["compared"]) || $data["compared"]) {
-			return ($this->getVersioned() && $temp->getVersionedFields());
+			return ($this->getIsVersioned() && $temp->getVersionedFields());
 		}
 		
 		return false;
@@ -227,7 +255,7 @@ class History extends DataObject {
 	*/
 	public function getRetinaIcon() {
 		if($data = $this->historyData()) {
-			$icon = $data["icon"];
+			$icon = ClassInfo::findFile($data["icon"], $this->dbobject);
 			$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
 			if(file_exists($retinaPath))
 				return $retinaPath;
@@ -256,6 +284,7 @@ class History extends DataObject {
 				} else if(is_array($data)) {
 					throwError(6, "Invalid Result", "Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
 				} else {
+					$this->historyData = false;
 					return false;
 				}
 				return $data;
@@ -277,12 +306,9 @@ class History extends DataObject {
 	*/
 	public function newversion() {
 		if($this->fieldGet("newversion") && ClassInfo::exists($this->dbobject)) {
-			$temp = new $this->dbobject();
-			$versioned = $temp->versioned;
-			$temp = null;
 			
-			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
+			if(DataObject::versioned($this->dbobject)) {
+				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
 		}
 		
@@ -309,12 +335,9 @@ class History extends DataObject {
 	*/
 	public function oldversion() {
 		if($this->fieldGet("oldversion") && ClassInfo::exists($this->dbobject)) {
-			$temp = new $this->dbobject();
-			$versioned = $temp->versioned;
-			$temp = null;
 			
-			if($versioned) {
-				return DataObject::get($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
+			if(DataObject::versioned($this->dbobject)) {
+				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
 			}
 		}
 		
@@ -344,6 +367,16 @@ class History extends DataObject {
 		
 		return false;
 	}
+	
+	/**
+	 * class-name of a event
+	 *
+	 *@name EventClass
+	*/
+	public function EventClass() {
+		$data = $this->HistoryData();
+		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
+	}
 }
 
 interface HistoryData {
@@ -356,5 +389,3 @@ interface HistoryData {
 	*/
 	public static function generateHistoryData($record);
 }
-
-interface HistoryView {}

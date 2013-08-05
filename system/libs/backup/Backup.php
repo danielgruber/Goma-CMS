@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.08.2012
-  * $Version 1.2.6
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 02.02.2013
+  * $Version 1.2.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,7 +37,7 @@ class Backup extends Object {
 	 *@access public
 	*/
 	public static function generateDBBackup($file, $prefix = DB_PREFIX, $excludeList = array()) {
-		$excludeList = array_merge(self::$excludeList, $excludeList);
+		$excludeList = array_merge(self::getStatic("Backup", "excludeList"), $excludeList);
 		// force GFS
 		if(!preg_match('/\.sgfs$/i', $file))
 			$file .= ".sgfs";
@@ -78,7 +78,7 @@ class Backup extends Object {
 					// get all fields
 					while($array = sql::fetch_array($result))
 					{
-							$tab_name = '`'.$array["Field"].'`';
+							$tab_name = $array["Field"];
 							$tab_type = $array["Type"];
 							$tab_null = " NOT NULL";
 							$tab_default = (empty($array["Default"])) ? "" : " DEFAULT '" . $array["Default"] . "'";
@@ -101,11 +101,11 @@ class Backup extends Object {
 							$sub_part = (isset($info["Sub_part"])) ? $info["Sub_part"] : "";
 							if($keyname != "PRIMARY" && $info["Non_unique"] == 0) 
 							{
-									$keyname = "UNIQUE `".$keyname."`";
+									$keyname = "UNIQUE ".$keyname;
 							}
 							if($comment == "FULLTEXT") 
 							{
-									$keyname="FULLTEXT `".$keyname."`";
+									$keyname="FULLTEXT ".$keyname;
 							}
 							if(!isset($keyarray[$keyname])) 
 							{
@@ -130,7 +130,7 @@ class Backup extends Object {
 											$data .= "FULLTEXT " . substr($keyname, 9) . " (";
 									} else 
 									{
-											$data .= "KEY `" . $keyname . "` (";
+											$data .= "KEY " . $keyname . " (";
 									}
 									$data .= implode($columns, ", ") . ")";
 
@@ -140,11 +140,11 @@ class Backup extends Object {
 					$data .= ");\n";
 					$data .= "\n";
 			}
-			
+
 			if(!in_array($table, $excludeList)) {
 				
 				// values
-				$sql = "SELECT * FROM `".DB_PREFIX."".$table."`";
+				$sql = "SELECT * FROM ".DB_PREFIX."".$table."";
 				if($result = sql::query($sql))
 				{
 						if(sql::num_rows($result) > 0)
@@ -154,7 +154,7 @@ class Backup extends Object {
 								while($row = sql::fetch_assoc($result))
 								{
 										if($i == 0) {
-											$data .= "-- INSERT \n INSERT INTO ".$prefix."".$table." (`".implode("` , `", array_keys($row))."`) VALUES ";
+											$data .= "-- INSERT \n INSERT INTO ".$prefix."".$table." (".implode(", ", array_keys($row)).") VALUES ";
 										}
 										foreach($row as $key => $value)
 										{
@@ -249,10 +249,11 @@ class Backup extends Object {
 			}
 		}
 		
-		if(defined("LOG_FOLDER"))
+		if(defined("LOG_FOLDER")) {
 			self::$fileExcludeList[] = "/" . LOG_FOLDER;
+		}
 		
-		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::$fileExcludeList, $excludeList));
+		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::getStatic("Backup", "fileExcludeList"), $excludeList));
 		$backup->commit();
 		
 		$backup->close();
@@ -306,7 +307,7 @@ class Backup extends Object {
 		$dict->add("excludedFiles", $excludeListPlist);
 		
 		$td = new CFTypeDetector();  
-		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, self::$excludeList));
+		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, self::getStatic("Backup", "excludeList")));
 		$dict->add("excludedTables", $excludeSQLListPlist);
 		
 		$dict->add("DB_PREFIX", new CFString($SQLprefix));

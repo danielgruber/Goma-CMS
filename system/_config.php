@@ -49,7 +49,6 @@ gloader::addLoadAble("tabs", "system/libs/javascript/ui/tabs.js");
 gloader::addLoadAble("gtabs", "system/libs/tabs/tabs.js");
 gloader::addLoadAble("progessbar", "system/libs/javascript/ui/progessbar.js");
 gloader::addLoadAble("tree", "system/libs/javascript/tree.js");
-gloader::addLoadAble("orangebox", "system/libs/javascript/orangebox/js/orangebox.min.js");
 gloader::addLoadAble("datepicker", "system/libs/javascript/ui/datepicker.js");
 gloader::addLoadAble("uiEffects", "system/libs/javascript/ui/effects.js");
 gloader::addLoadAble("touch", "system/libs/javascript/ui/jquery.ui.touch.js");
@@ -58,6 +57,7 @@ gloader::addLoadAble("dropdownDialog", "system/libs/javascript/dropdownDialog.js
 gloader::addLoadAble("ajaxupload", "system/libs/ajax/ajaxupload.js");
 gloader::addLoadAble("htmllib", "system/libs/javascript/html.js");
 gloader::addLoadAble("history", "system/libs/javascript/history/history.js");
+gloader::addLoadAble("notifications", "system/libs/notifications/notifications.js");
 
 /**
  * here you can define the seperator for the creadcrumbs

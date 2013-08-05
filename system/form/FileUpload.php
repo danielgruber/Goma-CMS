@@ -3,9 +3,9 @@
   *@package goma form framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 04.08.2012
-  * $Version 1.1.7
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 19.03.2013
+  * $Version 1.1.8
 */
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -142,7 +142,7 @@ class FileUpload extends FormField
 				"type"	=> "hidden",
 				"value"	=> $this->value->fieldGet("path"),
 				"class"	=> "FileUploadValue"
-			))	
+			))
 			
 		));
 		
@@ -335,18 +335,22 @@ class FileUpload extends FormField
 			
 			$this->container->append($this->leftContainer);
 			
-			$this->container->append(new HTMLNode("div", array("class" => "FileUpload_right"), array(
+			$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(
 				new HTMLNode('div', array(
 					"class" => "no-js-fallback"
 				), array(
 					new HTMLNode('h3', array(), lang("files.replace")),
 					$this->input
-				)),
-				new HTMLNode('div', array("class" => "delete"), array(
+				))
+			));
+			
+			if($this->value->realfile)
+				$nojs->append(new HTMLNode('div', array("class" => "delete"), array(
 					new HTMLNode('input', array("id" => $this->ID() ."__delete", "name" => $this->PostName() . "__deletefile", "type" => "checkbox")),
 					new HTMLNode('label', array("for" => $this->ID() ."__delete"), lang("files.delete"))
-				))
-			)));
+				)));
+			
+			$this->container->append($nojs);
 			
 			$this->container->append(new HTMLNode("div", array("class" => "clear")));
 			
@@ -366,6 +370,10 @@ class FileUpload extends FormField
 	public function handleUpload($upload) {
 		if(!isset($upload["name"])) {
 			return "No Upload defined.";
+		}
+		
+		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
+			return lang("error_disk_space");
 		}
 		
 		if($upload["size"] <= $this->max_filesize || $this->max_filesize == -1) {

@@ -1,0 +1,40 @@
+/**
+  *@package goma css framework
+  *@link http://goma-cms.org
+  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@Copyright (C) 2009 - 2013 Goma-Team
+  * last modified: 17.02.2013
+*/
+
+.templateSwitcher {
+	padding: 5px;
+}
+.templateSwitcher .template {
+	float: left;
+	padding: 10px;
+	margin: 5px;
+	border: 1px solid #ccc;
+	cursor: pointer;
+	width: 200px;
+}
+.templateSwitcher .template h3 {
+	color: #333;
+	text-align: center;
+}
+.templateSwitcher .template.selected {
+	background: #eee;
+}
+
+.templateSwitcher .template .screenshot {
+	 width: 220px;
+	 height: 200px;
+	 margin: 10px -10px;
+	 border-top: 1px solid #ccc;
+	 border-bottom: 1px solid #ccc;
+}
+.templateSwitcher .template .description table {
+	border: 0;
+}
+.templateSwitcher .template .description table .key {
+	font-weight: bold;
+}

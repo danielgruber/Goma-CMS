@@ -98,7 +98,7 @@
 							<% ENDCONTROL %>
 							<td class="actions">
 								<% CONTROL Action() %>
-									<a href="{$action.url}/{$this.id}?redirect={$_SERVER_REQUEST_URI.url()}">{$action.title}</a>
+									<a href="{$action.url}/{$this.id}{URLEND}?redirect={$_SERVER_REQUEST_URI.url()}">{$action.title}</a>
 								<% ENDCONTROL %>
 							</td>
 						</tr>
@@ -120,12 +120,12 @@
 					<% IF $pages.black %>
 						<span class="black">$pages.page</span>
 					<% ELSE %>
-						<a href="<% echo addParamToURL($_SERVER_REDIRECT, "bp", $pages.page) %>">{$pages.page}</a>
+						<a href="<% echo addParamToURL($_SERVER_REQUEST_URI, "bp", $pages.page) %>">{$pages.page}</a>
 					<% END %>
 				<% ENDCONTROL %>
 			</div>
 			<% CONTROL GlobalAction() AS $action %>
-				<a href="{$action.url}{URLEND}?redirect={$_SERVER_REQUEST_URI}" class="button">{$action.title}</a>
+				<a href="{$action.url}{URLEND}?redirect={$_SERVER_REQUEST_URI.url()}" class="button">{$action.title}</a>
 			<% ENDCONTROL %>
 			<div class="clear"></div>
 		</div>

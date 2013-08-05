@@ -3,76 +3,128 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.04.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 17.01.2013
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Page extends pages
 {
-				
-		/**
-		 * name
-		*/
-		public static $cname = '{$_lang_just_content_page}';
+	/**
+	 * allowed children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array(
+		"Page", "ChildPage", "WrapperPage"
+	);
+	
+	/**
+	 * name
+	*/
+	public static $cname = '{$_lang_just_content_page}';
+	
+	static $icon = "images/icons/fatcow-icons/16x16/file.png";
+	
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	static $db = array();
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	static $has_one = array();
+	/**
+	 * don't use from parent-class
+	 * there would be much tables, which we don't need
+	*/
+	static $many_many = array();
+	/**
+	 * belongs-many-many
+	*/
+	static $belongs_many_many = array();
+	/**
+	 * we need no indexes, indexes are in parent class
+	*/
+	static $index = array(
 		
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $db_fields = array();
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $has_one = array();
-		/**
-		 * don't use from parent-class
-		 * there would be much tables, which we don't need
-		*/
-		public $many_many = array();
-		/**
-		 * belongs-many-many
-		*/
-		public $belongs_many_many = array();
-		/**
-		 * we need no indexes, indexes are in parent class
-		*/
-		public $indexes = array(
-			
-		);
-		/**
-		 * searchable fields
-		*/
-		public $searchable_fields = array(
-		
-		);
-		
-		public $prefix = "Page_";
-		
-		/**
-		 * orderby
-		*/
-		public $orderby = array('field' => 'sort', 'type' => 'ASC');
-		
-		/**
-		 * which parents are allowed
-		*/
-		public $can_parent = array('page', 'boxpage','modulepage', 'pages');
-		/**
-		 * gets the FORM
-		*/
-		public function getForm(&$form)
-		{
-				parent::getForm($form);
-				// HACK HACK HACK!
-				if($this->class == "page")
-						$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
-						
-				
+	);
+	/**
+	 * searchable fields
+	*/
+	static $search_fields = array(
+	
+	);
+	
+	public $prefix = "Page_";
+	
+	/**
+	 * orderby
+	*/
+	public $orderby = array('field' => 'sort', 'type' => 'ASC');
+	
+	/**
+	 * gets the FORM
+	*/
+	public function getForm(&$form)
+	{
+		parent::getForm($form);
+		// HACK HACK HACK!
+		if($this->class == "page" || $this->class == "wrapperpage")
+				$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
+	}				
+}
 
-		}				
+class WrapperPage extends Page {
+	/**
+	 * name
+	*/
+	public static $cname = '{$_lang_wrapper_page}';
+	
+	/**
+	 * icon
+	*/
+	public static $icon = "images/icons/fatcow16/column_four.png";
+	
+	/**
+	 * allowed children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array(
+		"Page", "ChildPage", "WrapperPage"
+	);
+}
+
+class ChildPage extends Page {
+	/**
+	 * limit parents
+	*/
+	public static $allow_parent = array(
+		"WrapperPage"
+	);
+	
+	/**
+	 * children
+	 *
+	 *@name allow_children
+	*/
+	public static $allow_children = array();
+	
+	/**
+	 * hide this type of page
+	 *
+	 *@name hidden
+	*/
+	public static function hidden($class = null) {
+		if($class == "childpage")
+			return true;
+			
+		return false;
+	}
 }
 
 class pageController extends contentController
@@ -95,4 +147,18 @@ class pageController extends contentController
 			)
 		);
 	}
+}
+
+class WrapperPageController extends pageController
+{
+	/**
+	 * other template for this
+	 *
+	 *@name template
+	*/
+	public $template = "pages/wrapperPage.html";
+}
+
+class ChildPageController extends pageController {
+	
 }

@@ -4,8 +4,13 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
   *@Copyright (C) 2009 - 2013  Goma-Team
+<<<<<<< HEAD
   * last modified: 17.01.2013
   * $Version 1.4.3
+=======
+  * last modified: 21.03.2013
+  * $Version 1.4.5
+>>>>>>> 1d6521876cda620f5e0cde3fcbeda73f86045860
 */
 
 defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
@@ -125,12 +130,17 @@ class DropDown extends FormField
 					$this->key = randomString(5);
 				} else if($this->POST && isset($this->form()->result[$this->dbname]) && $this->value == null) {
 					$this->dataset = $this->form()->result[$this->dbname];
+					
 					$this->key = randomString(5);
 				} else {
-					$this->dataset = array();
+					$this->dataset = null;
 					$this->key = randomString(5);
 				}
 				$this->input->value = $this->key;
+				
+				if(is_object($this->dataset) && Object::method_exists($this->dataset->class, "toArray")) {
+					$this->dataset = $this->dataset->ToArray();
+				}
 				
 			 } else {
 			 	parent::getValue();
@@ -311,51 +321,43 @@ class DropDown extends FormField
 		 *@param numeric - page
 		*/
 		public function getDataFromModel($p = 1) {
-			if(count($this->options) > 10) {
-				$start = ($p * 10) - 10;
-				$end = $start + 9;
-				$i = 0;
-				$left = ($p == 1) ? false : true;
-				if(isset($this->options[0])) {
-					$arr = array();
-					foreach($this->options as $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[$value] = $value;
+			$start = ($p * 10) - 10;
+			$end = $start + 9;
+			$i = 0;
+			$left = ($p == 1) ? false : true;
+			if(isset($this->options[0])) {
+				$arr = array();
+				foreach($this->options as $value) {
+					if($i < $start) {
 						$i++;
+						continue;
 					}
-				} else {
-					$arr = array();
-					foreach($this->options as $key => $value) {
-						if($i < $start) {
-							$i++;
-							continue;
-						}
-						if($i >= $end) {
-							$right = true;
-							break;
-						}
-						$arr[$key] = $value;
-						$i++;
+					if($i >= $end) {
+						$right = true;
+						break;
 					}
+					$arr[] = array("key" => $value, "value" => $value);
+					$i++;
 				}
-				// clean up
-				unset($i, $start, $end);
-				$arr = array_map(array("text", "protect"), $arr);
-				return array("data"	=> $arr, "right" => $right, "left" => $left);
 			} else {
-				if(isset($this->options[0])) {
-					return array("data" => array_map(array("convert", "raw2text"), ArrayLib::key_value($this->options)));
-				} else {
-					return array("data" => array_map(array("convert", "raw2text"), $this->options));
+				$arr = array();
+				foreach($this->options as $key => $value) {
+					if($i < $start) {
+						$i++;
+						continue;
+					}
+					if($i >= $end) {
+						$right = true;
+						break;
+					}
+					$arr[] = array("key" => $key, "value" => $value);
+					$i++;
 				}
 			}
+			// clean up
+			unset($i, $start, $end);
+			$arr = array_map(array("text", "protect"), $arr);
+			return array("data"	=> $arr, "right" => $right, "left" => $left);
 		}
 		
 		/**
@@ -390,7 +392,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$value] = $value;
+						$arr[] = array("key" => $value, "value" => $value);
 						$i++;
 					}
 				} else {
@@ -404,7 +406,7 @@ class DropDown extends FormField
 							$right = true;
 							break;
 						}
-						$arr[$key] = $value;
+						$arr[] = array("key" => $key, "value" => $value);
 						$i++;
 					}
 				}
@@ -489,6 +491,7 @@ class DropDown extends FormField
 				unset($this->dataset[$key]);
 				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 			}
+			
 			if(Core::is_ajax()) {
 				return $this->renderInput();
 			} else {

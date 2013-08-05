@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 01.12.2011
-  * $Version 1.2.4
+  * last modified: 22.12.2011
+  * $Version 1.2.6
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -64,12 +64,13 @@ class HTMLEditor extends Textarea
 				
 				Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4/";');
 				Resources::add("system/libs/thirdparty/ckeditor4/ckeditor.js", "js");
-				//Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
+				if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 				Resources::add("ckeditor_goma.css", "css");
 				Resources::addData("var lang_page = '".lang("page")."';");
 				
 				$accessToken = randomString(20);
 				$_SESSION["uploadTokens"][$accessToken] = true;
+				Resources::addData("var CKEditor_Upload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken, true)."; var CKEditor_ImageUpload_Path = ".var_export(BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken, true).";");
 				
 				$js = '
 var bindIEClickPatch = function() {
@@ -95,8 +96,9 @@ $(function(){
         		toolbar : "Goma",
         		language: "'.Core::getCMSVar("lang").'",
         		baseHref: "'.BASE_URI.'",
-        		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/editor.css",
-        		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken='.$accessToken.'",
+        		contentsCss: "'.self::buildEditorCSS().'",
+        		filebrowserUploadUrl: self.CKEditor_Upload_Path,
+        		filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
         		width: "'.$width.'",
         		resize_dir: "vertical",
         		autoGrow_maxHeight: $(document).height() - 300
@@ -125,8 +127,9 @@ window.toggleEditor_'.$this->input->id.' = function() {
     		toolbar : "Goma",
     		language: "'.Core::getCMSVar("lang").'",
     		baseHref: "'.BASE_URI.'",
-    		contentsCss: "'.BASE_URI . 'tpl/' .  Core::getTheme().'/typography.css",
-    		filebrowserUploadUrl : "'.BASE_URI . BASE_SCRIPT.'/system/ck_uploader/",
+    		contentsCss: "'.self::buildEditorCSS().'",
+    		filebrowserUploadUrl: self.CKEditor_Upload_Path,
+        	filebrowserImageUploadUrl : self.CKEditor_ImageUpload_Path,
         	width: "'.$width.'",
         	resize_dir: "vertical",
         	autoGrow_maxHeight : $(document).height() - 300
@@ -140,4 +143,45 @@ window.toggleEditor_'.$this->input->id.' = function() {
 						';
 				return $js;
 		}
+		
+	/**
+	 * builds editor.css
+	 *
+	 *@name buildEditorCSS
+	*/
+	public function buildEditorCSS() {
+		$cache = CACHE_DIRECTORY . "/htmleditor_compare_" . Core::GetTheme() . ".css";
+		if(/*(!file_exists($cache) || filemtime($cache) < TIME + 300) && */file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
+			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			
+			// parse CSS
+			//$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
+			FileSystem::write($cache, $css);
+			
+			return BASE_URI . $cache;
+		} else {
+			return false;
+		}
+	}	
+	
+	/**
+	 * gets a consolidated CSS-File, where imports are merged with original file
+	 *
+	 *@name importCSS
+	 *@param string - file
+	*/
+	public static function importCSS($file) {
+		if(file_exists($file)) {
+			$css = file_get_contents($file);
+			// import imports
+			preg_match_all('/\@import\s*url\(("|\')([^"\']+)("|\')\)\;/Usi', $css, $m);
+			foreach($m[2] as $key => $_file) {
+				$css = str_replace($m[0][$key], self::importCSS(dirname($file) . "/" . $_file), $css);
+			}
+			
+			return $css;
+		}
+		
+		return "";
+	}
 }

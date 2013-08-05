@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.08.2012
+  * last modified: 12.12.2012
   * $Version 2.1
 */
 
@@ -257,7 +257,8 @@ class BackupAdmin extends TableView
 					"default"	=> array(
 						"type" 			=> "admins",
 						"inherit"		=> "ADMIN"
-					)
+					),
+					"category"	=> "ADMIN"
 				)
 			);
 		}
@@ -279,7 +280,7 @@ if(class_exists("NewSettings")) {
 		 *@name db_fields
 		 *@access public
 		*/ 
-		public $db_fields = array(
+		static $db = array(
 			"excludeFolders" => "text"
 		);
 		

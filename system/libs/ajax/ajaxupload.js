@@ -5,9 +5,9 @@
   *@package goma
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.10.2012
-  * $Version 2.0.3
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 21.03.2013
+  * $Version 2.0.4
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -292,23 +292,26 @@ AjaxUpload.prototype = {
 	_progress: function(event, upload) {
 		if (event.lengthComputable) {
 			var percentage = Math.round((event.loaded * 100) / event.total);
+			
+			// update for percentage only every percent
 			if (upload.currentProgress != percentage) {
 
 				// log(this.fileIndex + " --> " + percentage + "%");
 
 				upload.currentProgress = percentage;
 				this.progressUpdate(upload.fileIndex, upload.fileObj, upload.currentProgress);
+			}
+			
+			// update speed
+			var elapsed = new Date().getTime();
+			var diffTime = elapsed - upload.currentStart;
+			if (diffTime >= this.uploadRateRefreshTime) {
+				var diffData = event.loaded - upload.startData;
+				var speed = diffData / diffTime; // in KB/sec
 				
-				var elapsed = new Date().getTime();
-				var diffTime = elapsed - upload.currentStart;
-				if (diffTime >= this.uploadRateRefreshTime) {
-					var diffData = event.loaded - upload.startData;
-					var speed = diffData / diffTime; // in KB/sec
-					
-					this.speedUpdate(upload.fileIndex, upload.fileObj, speed);
+				this.speedUpdate(upload.fileIndex, upload.fileObj, speed);
 
-					return elapsed;
-				}
+				return elapsed;
 			}
 		}
 	},
@@ -469,9 +472,11 @@ AjaxUpload.prototype = {
 			
 			// first create the iframe, we want to send the file through
 			
+            
 			this.loading = true;
 			
 			var iframe = randomString(10);
+            
 			this.frameID = iframe;
 			
 			var upload = {};
@@ -490,7 +495,7 @@ AjaxUpload.prototype = {
 			var form = $(field).parents("form");
 			
 			form.attr("id", "");
-			
+            
 			this.queue[upload.fileIndex] = {
 				send: function() {
 					form.submit();
@@ -503,8 +508,7 @@ AjaxUpload.prototype = {
 			};
 			
 			var i = document.getElementById("frame_" + iframe);
-			
-			
+            
 			var testing = function(){
 				if (i.contentDocument) {
 					var d = i.contentDocument;
@@ -519,7 +523,11 @@ AjaxUpload.prototype = {
 				$this.loading = false;
 				
 			};
-			i.onload = testing;
+            
+            if(getInternetExplorerVersion() == -1)
+			    i.onload = testing;
+            else
+                i.attachEvent("onload", testing);
 			
 			this.processQueue();
 		}

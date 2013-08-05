@@ -16,12 +16,14 @@ class AjaxExternalForm extends FormField
 		public $allowed_actions = array(
 			"render"
 		);
+		
 		/**
 		 * external-form
 		 *@name external-form
 		 *@access public
 		*/
 		public $external_form;
+		
 		/**
 		 *@name __construct
 		 *@param string - name
@@ -38,6 +40,7 @@ class AjaxExternalForm extends FormField
 				
 				parent::__construct($name, $title, $value, $form);
 		}
+		
 		/**
 		 *@name createNode
 		 *@access public

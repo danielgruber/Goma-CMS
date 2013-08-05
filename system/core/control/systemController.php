@@ -3,9 +3,9 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
-  * $Version 1.4.4
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 19.03.2013
+  * $Version 1.4.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -28,10 +28,11 @@ class systemController extends Controller {
 		"setUserView/\$bool!"	=> "setUserView",
 		"switchView",
 		"getLang/\$lang"		=> "getLang",
-		"ck_uploader"			=> "ckeditor_upload"
+		"ck_uploader"			=> "ckeditor_upload",
+		"ck_imageuploader"		=> "ckeditor_imageupload"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "logJSProfile");
+	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload");
 	
 	/**
 	 * disables the mobile version
@@ -96,6 +97,7 @@ class systemController extends Controller {
 	public function getLang() {
 		$lang = $this->getParam("lang");
 		$output = array();
+		$outputNull = false;
 		if(empty($lang) || $lang == "*") {
 			$output = $GLOBALS["lang"];
 		} else {
@@ -106,6 +108,7 @@ class systemController extends Controller {
 						$output[$value] = $GLOBALS["lang"][$value];
 					} else {
 						$output[$value] = null;
+						$outputNull = true;
 					}
 				}
 			} else if(is_string($lang)) {
@@ -113,6 +116,7 @@ class systemController extends Controller {
 						$output[$lang] = $GLOBALS["lang"][$lang];
 					} else {
 						$output[$lang] = null;
+						$outputNull = true;
 					}
 			}
 		}
@@ -120,9 +124,12 @@ class systemController extends Controller {
 		$expCount = isset(ClassInfo::$appENV["expansion"]) ? count(ClassInfo::$appENV["expansion"]) : 0;
 		$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . $expCount);
 		$mtime = $cacher->created;
-		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . $output));
-		HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
-		HTTPResponse::addHeader("pragma","Public");
+		$etag = strtolower(md5("lang_" . var_export($this->getParam("lang"),true) . var_export($output, true)));
+		if($outputNull === false) {
+			HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
+			HTTPResponse::addHeader("pragma","Public");
+		}
+		
 		HTTPResponse::addHeader("Etag", '"'.$etag.'"');
 		
 		// 304 by HTTP_IF_MODIFIED_SINCE
@@ -155,29 +162,13 @@ class systemController extends Controller {
 		}
 		
 		$expiresAdd = defined("DEV_MODE") ? 3 * 60 * 60 : 48 * 60 * 60;
-		HTTPResponse::setCachable(NOW + $expiresAdd, $mtime, true);
+		if($outputNull === false) {
+			HTTPResponse::setCachable(NOW + $expiresAdd, $mtime, true);
+		}
 		
 		HTTPResponse::setHeader("content-type", "text/x-json");
 		HTTPResponse::output('('.json_encode($output).')');
 		exit;
-	}
-	
-	/**
-	 * saves a debug-log for javascript
-	 *
-	 *@name logJSProfile
-	 *@access public
-	*/
-	public function logJSProfile() {
-		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/");
-		if(Core::is_ajax() && isset($_POST["JSProfile"]) && (strlen($_POST["JSProfile"]) / 1024) <= self::JS_DEBUG_LIMIT && DEV_MODE) {
-			$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/jsprofile/".date("m-d-y");
-			FileSystem::requireFolder($folder);
-			foreach($_POST["JSProfile"]["profiles"] as $data) {
-				file_put_contents($folder . "/" . $data["name"] . ".log", "\n\nCount: ".$data["count"]."   Time: ".$data["time"] * 1000 ."ms   User-Agent: ".$_POST["JSProfile"]["user-agent"]."   URL: ".$_POST["JSProfile"]["url"]."", FILE_APPEND);
-			}
-			return 1;
-		}
 	}
 	
 	/**
@@ -207,17 +198,88 @@ class systemController extends Controller {
 			"7z",
 			"gif",
 			"mp3",
-			"xls"
+			"xls",
+			"xlsx",
+			"docx",
+			"pptx",
+			"numbers",
+			"key",
+			"pages"
 		);
-		$allowed_size = 20 * 1024 * 1024;
+		$allowed_size = 100 * 1024 * 1024;
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
+				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
+				}
+		
+		
 				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {
 						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+						} else {
+							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+						}
+					} else {
+						return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filesize_failure").'");</script>';
+					}
+				} else {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filetype_failure").'");</script>';
+
+				}
+			} else {
+				return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+			}
+		} else {
+			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+		}
+	}
+	
+	/**
+	 * uploads files for the ckeditor
+	 *
+	 *@name ckeditor_upload
+	 *@access public
+	*/
+	public function ckeditor_imageupload() {
+	
+		if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
+			die(0);
+		}
+	
+		$allowed_types = array(
+			"jpg",
+			"png",
+			"bmp",
+			"jpeg",
+			"gif"
+		);
+		$allowed_size = 20 * 1024 * 1024;
+		
+		if(isset($_FILES["upload"])) {
+			if($_FILES["upload"]["error"] == 0) {
+				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
+					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
+				}
+				
+				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
+					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
+					if($_FILES["upload"]["size"] <= $allowed_size) {
+						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
+							$info = GetImageSize($response->realfile);
+							$width = $info[0];
+							$height = $info[0];
+							if(filesize($response->realfile) > 1024 * 1024 || $width > 2000 || $height > 2000) {
+								$add = 'alert(parent.lang("alert_big_image"));';
+							} else {
+								$add = "";
+							}
+							
+							return '<script type="text/javascript">'.$add.'
+							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'", "");</script>';
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}

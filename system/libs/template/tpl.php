@@ -5,9 +5,9 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version 3.3.8
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 14.01.2013
+  * $Version 3.5.2
 */   
  
  
@@ -104,10 +104,38 @@ class tpl extends Object
          *@param array - required areas
          *@use: parse tpl
          */
-		public static function render($name,$replacement = array(),$class = "", $required_areas = array(), $expansion = null)
+		public static function render($name,$replacement = array(),$class = "", $expansion = null)
 		{
-				$file = self::getFilename($name, $class, false, $expansion);
+			if($file = self::getFilename($name, $class, false, $expansion)) {
+				return self::parser($file,  $replacement, realpath($file),$class);
+			} else {
+				HTTPresponse::setResHeader(500);
+				/* an error so show an error ;-) */
+				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+			}
+		}
+		
+		/**
+		 * new init method
+		 *
+		 *@name render
+         *@access public
+         *@param string - filename
+         *@param array - for replacement like {$content}
+         *@param object - class
+         *@param array - required areas
+         *@use: parse tpl
+         */
+		public static function renderAreas($name,$replacement = array(),$class = "", $required_areas, $expansion = null)
+		{
+			Core::deprecated(2.0, "Don't use areas anymore, use render and vars instead");
+			if($file = self::getFilename($name, $class, false, $expansion)) {
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
+			} else {
+				HTTPresponse::setResHeader(500);
+				/* an error so show an error ;-) */
+				throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+			}
 		}
 		
 		/**
@@ -126,8 +154,7 @@ class tpl extends Object
 								return ROOT . $name;
 						} else
 						{
-								HTTPresponse::setResHeader(500);
-								throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+								return false;
 						}
 				} else
 				{
@@ -180,10 +207,83 @@ class tpl extends Object
 						{
 								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
 						}
-								
-						HTTPresponse::setResHeader(500);
-						/* an error so show an error ;-) */
-						throwerror(7, 'Could not open Templatefile','Could not open '.$name.'.');
+						
+						return self::getFileNameUncached($name, $class, $inc, $expansion);
+				}
+		}
+		
+		/**
+		 * gets the filename of a given template-name uncached!
+		 * just returns false
+		 *
+		 *@name getFilenameUncached
+		 *@access public
+		 *@param string - name
+		 *@param use include-folders
+		*/
+		public static function getFilenameUncached($name, $class = "", $inc = false, $expansion = null) {
+				if(preg_match('/^\//', $name))
+				{
+						if(is_file(ROOT . $name))
+						{
+								return ROOT . $name;
+						} else
+						{
+								return false;
+						}
+				} else
+				{
+						if(is_file(ROOT . self::$tplpath . Core::getTheme() . "/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/" . $name;
+						}
+						
+						if($inc === true && is_file(ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name))
+						{
+								return ROOT . self::$tplpath . Core::getTheme() . "/includes/" . $name;
+						}
+						
+						if(file_exists(APPLICATION_TPL_PATH . "/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(APPLICATION_TPL_PATH . "/includes/" . $name))
+						{
+								return ROOT . APPLICATION_TPL_PATH . '/includes/' . $name;
+						}
+						
+						if(is_object($class) && $class->inExpansion) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(isset($expansion)) {
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							if(file_exists($viewpath . "/" . $name))
+							{
+								return $viewpath . "/" . $name;
+							} else if($inc === true && file_exists($viewpath . "/includes/" . $name)) {
+								return $viewpath . "/includes/" . $name;
+							}
+						}
+						
+						if(file_exists(SYSTEM_TPL_PATH . "/" . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/' . $name;
+						}
+						
+						if($inc === true && file_exists(SYSTEM_TPL_PATH . '/includes/' . $name))
+						{
+								return ROOT . SYSTEM_TPL_PATH . '/includes/' . $name;
+						}
+						
+						return false;
 						
 				}
 		}
@@ -369,8 +469,8 @@ class tpl extends Object
 				$tpl = preg_replace_callback('/<%\s*IF\s+(.+)\s*%>/Usi', array("tpl","PHPrenderIF"), $tpl);
 				$tpl = preg_replace_callback('/<%\s*ELSE\s*IF\s+(.+)\s*%>/Usi', array("tpl", "PHPrenderELSEIF"), $tpl);
 				$tpl = preg_replace('/<%\s*ELSE\s*%>/Usi', '<?php } else { ?>', $tpl);
-				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php }  $data->convertDefault = null;?>', $tpl);
-				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }   $data->convertDefault = null; ?>', $tpl);
+				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php } ?>', $tpl);
+				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }  ?>', $tpl);
 				// parse functions
 				$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php echo \\1\\2(\\3); ?>', $tpl);
 				
@@ -463,11 +563,9 @@ $data = array_pop($dataStack);
 					throwError(10, 'Template-Parse-Error.','Expected <% CONTROL [method] %> '.($endControlCount - $controlCount).' more time(s) in '.self::$tpl.'.');
 				}
 				
-				// areas
-				self::$areas = array();
-				self::$iAreas = array();
+				// areas, DEPRECATED!
 				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "areas"), $tpl);
-				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s+reload=("|\')([a-zA-Z0-9_-]+)\3\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "iAreas"), $tpl);
+				$tpl = preg_replace_callback('/\<garea\s+name=("|\')([a-zA-Z0-9_-]+)\1\s+reload=("|\')([a-zA-Z0-9_-]+)\3\s*\>(.*?)\<\/garea\s*\>/si', array("tpl", "iareas"), $tpl);
 				
 				// check areas in includes
 				preg_match_all('/'.preg_quote('<?php echo $caller->INCLUDE(', '/') . '("|\')([a-zA-Z0-9_\.\-\/]+)\1\); \?\>/Usi', $tpl, $matches);
@@ -477,53 +575,12 @@ $data = array_pop($dataStack);
 						continue;
 					}
 					self::buildFilesForTemplate($filename, realpath($filename));
-					$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", $filename);
-					$_name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-					$areafile = ROOT . CACHE_DIRECTORY . "/tpl.areas.".$name.".php";
-					if(file_exists($areafile)) {
-						include($areafile);
-						self::$areas = array_merge(self::$areas, $areas);
-						self::$iAreas = array_merge(self::$iAreas, $iAreas);
-						foreach($areas as $area => $bool) {
-							$_areafile = ROOT . CACHE_DIRECTORY . "/tpl.area.".$area.".".$name.".php";
-							$secondareafile = ROOT . CACHE_DIRECTORY . "/tpl.area.".$area.".".$_name.".php";
-							copy($_areafile, $secondareafile);
-							unset($_areafile, $secondareafile, $area, $bool);
-						}
-					}
-					unset($iAreas, $areas, $name, $areafile, $filename, $_name);
 				}
 				unset($matches);
 				
-				if(count(self::$areas) > 0)  {
-					$tpl = '<?php if(isset($required_areas)) { 
-								$available_areas = '.var_export(self::$areas, true).'; 
-								foreach($required_areas as $area) { 
-									if(!isset($available_areas[$area])) {
-										throwError("6", "PHP-Error", "Error in Template-File ".$tpl.". Area ".$area." not found! Please add <code>&lt;garea name=\"".$area."\"&gt;...&lt;/garea&gt;");
-									}
-								}
-							} ?>' . $tpl;
-				}
-				
-				
-				
-				if(count(self::$areas) > 0) {
-					$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-					$file = ROOT . CACHE_DIRECTORY . "/tpl.areas.".$name.".php";
-					FileSystem::Write($file, '<?php defined("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-	
-	$areas = '.var_export(self::$areas,true).';
-	$iAreas = '.var_export(self::$iAreas, true).';');
-					self::$areas = array();
-				}
-				unset($file, $f, $name, $percents);
-				
 				// you can hook into it
-				Core::callHook("compileTPL", array($tpl));
+				Core::callHook("compileTPL", $tpl);
 				if(PROFILE) Profiler::unmark("tpl::compile");
-				
-				
 				
 				return $tpl;
 		}
@@ -570,17 +627,8 @@ $data = array_pop($dataStack);
 		 *@access public
 		*/
 		public static function areas($matches) {
-			$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-			$file = ROOT . CACHE_DIRECTORY . "/tpl.area.".$matches[2].".".$name.".php";
-			FileSystem::Write($file, '<?php define("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-// area '.$matches[2].'
-?>
-' . $matches[3]);
-			unset($f, $file, $name);
-			self::$areas[$matches[2]] = true;
-			return '<div class="area" id="<?php echo $data->class; ?>_'.$matches[2].'"><?php if(isset($data[$data->class . "_'.$matches[2].'"])) { echo $data[$data->class . "_'.$matches[2].'"]; } else { ?>
-			' . $matches[3] . '
-			<?php } ?></div>';
+			Core::deprecate(2.0, "Use of areas is Deprecated! Please use normal vars instead in " . self::$tpl);
+			return '<?php if($data->getTemplateVar('.var_export($matches[2], true).')) { echo $data->getTemplateVar('.var_export($matches[2], true).'); } else { ?>' . $matches[3] . "<?php } ?>";
 		}
 		
 		/**
@@ -589,20 +637,11 @@ $data = array_pop($dataStack);
 		 *@name areas
 		 *@access public
 		*/
-		public static function iAreas($matches) {
-			$name = preg_replace("/[^a-zA-Z0-9_\-]/", "_", self::$tpl);
-			$file = ROOT . CACHE_DIRECTORY . "/tpl.area.".$matches[2].".".$name.".php";
-			FileSystem::Write($file, '<?php define("IN_GOMA") OR die("<!-- Restricted Access"); // silence is golden
-// area '.$matches[2].'
-?>
-' . $matches[3]);
-			unset($f, $file, $name);
-			self::$areas[$matches[2]] = true;
-			self::$iAreas[$matches[2]] = true;
-			return '<div class="area" id="<?php echo $data->class; ?>_'.$matches[2].'"><?php if(isset($data[$data->class . "_'.$matches[2].'"])) { echo $data[$data->class . "_'.$matches[2].'"]; } else { ?>
-			' . $matches[5] . '
-			<?php } ?></div>';
+		public static function iareas($matches) {
+			Core::deprecate(2.0, "Use of areas is Deprecated! Please use normal vars instead in " . self::$tpl);
+			return '<?php if($data->getTemplateVar('.var_export($matches[2], true).')) { echo $data->getTemplateVar('.var_export($matches[2], true).'); } else { ?>' . $matches[5] . "<?php } ?>";
 		}
+		
 		
 		/**
 		 * renders the IF with php-tags
@@ -755,19 +794,7 @@ $data = array_pop($dataStack);
 						return '<?php echo Core::getCMSVar('.var_export($data[1], true).'); ?>';
 				}
 				
-				if(strpos($name, "."))
-				{
-						$php = '$data';
-						$parts = explode(".",$name);
-						foreach($parts as $part)
-						{
-								$php .= '["'.$part.'"]';
-						}
-						return '<?php echo '.$php.'; ?>';
-				} else
-				{
-						return '<?php echo $data["'.$name.'"]; ?>';
-				}
+				return '<?php echo $data->getTemplateVar('.var_export($name, true).'); ?>';
 		}
 		
 		/**
@@ -775,7 +802,7 @@ $data = array_pop($dataStack);
 		 *@name renderIF
 		 *@access public
 		*/
-		public static function renderIF($matches, $includeConvert = true)
+		public static function renderIF($matches)
 		{
 				$clause = $matches[1];
 				// first parse
@@ -816,10 +843,7 @@ $data = array_pop($dataStack);
 				
 				$newclause = str_replace('$$','$',$newclause);
 				// render clause
-				if($includeConvert)
-					return '$data->convertDefault = false; if(' . $newclause . ') { $data->convertDefault = null;';
-				else
-					return 'if(' . $newclause . ') {';
+				return 'if(' . $newclause . ') {';
 		}
 		
 		/**
@@ -829,7 +853,7 @@ $data = array_pop($dataStack);
 		*/
 		public static function renderELSEIF($matches)
 		{
-				return '$data->convertDefault = false; } else ' . self::renderIF($matches, false) . "  \$data->convertDefault = null;";
+				return '$data->convertDefault = false; } else ' . self::renderIF($matches) . "  \$data->convertDefault = null;";
 		}
 		
 		/**
@@ -987,6 +1011,7 @@ class tplCaller extends Object implements ArrayAccess
 				
 				$this->setTplPath($tpl);
 				$this->dataobject = $dataobject;
+				$this->inExpansion = $this->dataobject->inExpansion;
 				
 		}
 		/**
@@ -1085,14 +1110,13 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function printDebug() {
-			if(count(debug_backtrace()) > 30) {
-				debug_print_backtrace();
-			} else {
-				$data = debug_backtrace();
-				unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
-				echo convert::raw2text(print_r(array_values($data), true));
+			$data = debug_backtrace();
+			unset($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
+			$data = array_values($data);
+			if(count($data) > 6) {
+				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
 			}
-			
+			echo convert::raw2text(print_r($data, true));
 		}
 		
 		/**
@@ -1210,7 +1234,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@param string - name
 		*/
 		public function getVar($name) {
-			return isset($this->dataobject[$name]) ? $this->dataobject[$name] : null;
+			return $this->getTemplateVar($name);
 		}
 		
 		/**
@@ -1416,34 +1440,7 @@ class tplCaller extends Object implements ArrayAccess
 			return Resources::file_exists($filename);
 		}
 		
-		/**
-		 * Mobility Functions
-		*/
-		
-		public function isMobile() {
-			return Core::isMobile();
-		}
-		
-		public function isiPhone() {
-			return Core::isiPhone();
-		}
-		
-		public function isiPad() {
-			return Core::isiPad();
-		}
-		
-		public function isMobileAvailable() {
-			return Core::isMobileAvailable();
-		}
-		
-		public function isiPhoneAvailable() {
-			return Core::isiPhoneAvailable();
-		}
-		
-		public function isiPadAvailable() {
-			return Core::isiPadAvailable();
-		}
-		
+				
 		/**
 		 * returns if homepage
 		*/
@@ -1565,7 +1562,7 @@ class tplCaller extends Object implements ArrayAccess
 		 *@access public
 		*/
 		public function currentLang() {
-			return array_merge(i18n::getLangInfo(), array("code" => Core::$lang));
+			return new ViewAccessableData(array_merge(i18n::getLangInfo(), array("code" => Core::$lang)));
 		}
 		
 		/**
@@ -1794,7 +1791,6 @@ defined(\'IN_GOMA\') OR die(\'<!-- restricted access -->\'); // silence is golde
 if(!isset($data))
 	return false;
 ?>
-
 ';
 				
 				/*if(function_exists("__autoload")) {

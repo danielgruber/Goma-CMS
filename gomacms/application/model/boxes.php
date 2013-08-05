@@ -3,14 +3,14 @@
   *@package goma cms
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 29.11.2012
-  * $Version 1.1.7
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 06.02.2013
+  * $Version 1.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Boxes extends DataObject {
+class Boxes extends DataObject implements Notifier {
 	
 	/**
 	 * title of this dataobject
@@ -22,14 +22,14 @@ class Boxes extends DataObject {
 	 *
 	 *@name versioned
 	*/
-	public $versioned = true;
+	static $versions = true;
 	
 	/**
 	 * some database fields
 	*/
-	public $db_fields = array(
+	static $db = array(
 		"title"		=> "varchar(100)",
-		"text"		=> "text",
+		"text"		=> "HTMLtext",
 		"border"	=> "switch",
 		"sort"		=> "int(3)",
 		"seiteid"	=> "varchar(50)",
@@ -39,7 +39,7 @@ class Boxes extends DataObject {
 	/**
 	 * some searchable fields
 	*/
-	public $searchable_fields = array(
+	static $search_fields = array(
 		"text",
 		"title"
 	);
@@ -47,14 +47,14 @@ class Boxes extends DataObject {
 	/**
 	 * for performance, some indexes
 	*/
-	public $indexes = array(
+	static $index = array(
 		"view"	=> array("type"	=> "INDEX", "fields" => "seiteid,sort", "name"	=> "_show")
 	);
 	
 	/**
 	 * sort
 	*/
-	public static $default_sort = "sort ASC";
+	static $default_sort = "sort ASC";
 	
 	/**
 	 * generates the form to add boxes
@@ -73,9 +73,9 @@ class Boxes extends DataObject {
 	public function getActions(&$form) {
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		if(Core::is_ajax()) {
-			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish"));
+			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish", array("green")));
 		} else {
-			$form->addAction(new FormAction("submit", lang("save"), "publish"));
+			$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
 		}
 	}
 	
@@ -161,6 +161,21 @@ class Boxes extends DataObject {
 		
 		return Permission::check("PAGES_INSERT");
 	}
+	
+	/**
+	 * returns information about notification-settings of this class
+	 * these are:
+	 * - title
+	 * - icon
+	 * this API may extended with notification settings later
+	 * 
+	 *@name NotifySettings
+	 *@access public
+	*/
+	public static function NotifySettings() {
+		return array("title" => lang("boxes"), "icon" => "images/icons/fatcow16/layout_content@2x.png");
+	}
+		
 	
 }
 
@@ -326,6 +341,7 @@ class BoxesController extends FrontedController {
 	public function ajaxSave($data, $response) {
 		if($this->save($data, 2) !== false)
 		{
+			Notification::notify("boxes", lang("box_successful_saved", "The data was successfully written!"), lang("saved"));
 			//$response->exec(new Dialog(lang("successful_saved", "The data was successfully written!"), lang("okay"), 3));
 			$response->exec('$("#boxes_new_'.convert::raw2js($data["seiteid"]).'").html("'.convert::raw2js(BoxesController::renderBoxes($data["seiteid"])).'");');
 			$response->exec('dropdownDialog.get(ajax_button.parents(".dropdownDialog").attr("id")).hide();');
@@ -353,19 +369,19 @@ class Box extends Boxes
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $db_fields = array();
+		static $db = array();
 		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $has_one = array();
+		static $has_one = array();
 		
 		/**
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		public $many_many = array();
+		static $many_many = array();
 		
 		/**
 		 * prefix of table
@@ -391,13 +407,9 @@ class Box extends Boxes
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		
-		public function getText()
-		{
-				return $this->data['text'];
-		}
 		public function getContent()
 		{
-				return $this->data['text'];
+				return $this->text()->forTemplate();
 		}
 }
 /**

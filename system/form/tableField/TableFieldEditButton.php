@@ -6,8 +6,8 @@
   *@package goma framework
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 05.12.2012
+  *@Copyright (C) 2009 - 2013  Goma-Team
+  * last modified: 10.02.2013
   * $Version - 1.0.1
  */
  
@@ -69,7 +69,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 * @return string - the HTML for the column 
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
-		if(!$record->canWrite($record)){
+		if(!$record->can("Write")){
 			return;
 		}
 		
