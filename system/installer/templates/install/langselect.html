@@ -67,7 +67,7 @@
 			<% CONTROL languages() AS $lang %>
 				<li>
 					<a href="<% echo addParamToURL("", "setlang", $lang.code) %>">
-						<img src="$lang.icon" alt="$currentLang.code" />
+						<img src="$lang.icon" alt="$lang.code" />
 						<span>$lang.title</span>
 					</a>
 				</li>
