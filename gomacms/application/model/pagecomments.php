@@ -92,6 +92,17 @@ class PageComments extends DataObject
 		public function timestamp() {
 			return $this->created();
 		}
+		
+		
+		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			return lang("CO_COMMENT") . " " . lang("CO_OF") . ' '.convert::raw2text($this->name).' '.lang("CO_ON").' '.$this->created()->date().'';
+		}
 }
 
 class PageCommentsController extends FrontedController

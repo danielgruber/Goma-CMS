@@ -79,7 +79,7 @@ class AjaxSubmitButton extends FormAction
 						if ( event.result === false ) {
 							return false;
 						}
-						
+			
 						$("#'.$this->form()->id().'").gForm().setLeaveCheck(false);
 						button.css("display", "none");
 						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
