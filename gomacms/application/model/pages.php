@@ -645,7 +645,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				} else {
 					return true;
 				}
-			else if(DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."'") > 0) {
+			else if(DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid)) > 0) {
 					return lang("site_exists", "The page with this filename already exists.");
 			} else {
 				return true;
