@@ -333,17 +333,17 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				if(Permission::check("USERS_MANAGE") && $id != member::$id) {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
-						new PasswordField("password",$GLOBALS["lang"]["new_password"]),
-						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
+						new PasswordField("password",lang("NEW_PASSWORD")),
+						new PasswordField("repeat", lang("REPEAT"))
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
 					$pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
 				} else {
 					$pwdform = new Form($this->controller(), "editpwd", array(
 						new HiddenField("id", $id),
-						new PasswordField("oldpwd", $GLOBALS["lang"]["old_password"]),
-						new PasswordField("password",$GLOBALS["lang"]["new_password"]),
-						new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
+						new PasswordField("oldpwd", lang("OLD_PASSWORD")),
+						new PasswordField("password",lang("NEW_PASSWORD")),
+						new PasswordField("repeat", lang("REPEAT"))
 					));
 					$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
 					$pwdform->addAction(new FormAction("submit", lang("save", "save"),"pwdsave"));

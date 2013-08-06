@@ -91,22 +91,10 @@ class GomaCKEditor extends GomaEditor {
 			}
 			
 			
-			Resources::addJS('var bindIEClickPatch = function() {
-	if(getInternetExplorerVersion() != -1) {
-		$(document).on("click", "a.cke_dialog_ui_button", function(){
-			self.leave_check = true;
-			setTimeout(function(){
-				self.leave_check = false;
-			}, 100);
-		});
-	}
-}
-
-$(function(){
+			Resources::addJS('$(function(){
 	// apple bug with contenteditable of iOS 4 and lower
 	// firefox 3 and above are supported, otherwise dont load up
 	if((!isIDevice() || isiOS5()) && (getFirefoxVersion() > 2 || getFirefoxVersion() == -1)) {
-		bindIEClickPatch();
 		setTimeout(function(){
 			
 			if(CKEDITOR.instances.'.$id.' != null) CKEDITOR.remove(CKEDITOR.instances.'.$id.');
@@ -115,9 +103,6 @@ $(function(){
         		'.$config.'
     		});
     		
-    		CKEDITOR.instances.'.$id.'.on("focus", function(){
-				self.leave_check = false;
-			});
 		}, 100);
 		
 		
@@ -138,12 +123,9 @@ window.toggleEditor_'.$name.' = function() {
 		CKEDITOR.replace("'.$id.'", {
     		'.$config.'
 		});
-		CKEDITOR.instances.'.$id.'.on("focus", function(){
-			self.leave_check = false;
-		});
 	}
 		
-}');
+};');
 		} else if($type == "bbcode") {
 			
 		}

@@ -1056,6 +1056,37 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 		}
 		
+		/**
+		 * builds the tree.
+		 * 
+		 * @param 	TreeNode|int $parent parent node or no parent node = 0
+		 * @param 	array $dataparams "version", "filter"
+		*/
+		static function build_tree($parentNode = null, $dataParams = array()) {
+			if($parentNode == 0) {
+				$data = DataObject::get("pages", array("parentid" => 0));
+			} else if(is_a($parentNode, "TreeNode")) {
+				if($parentNode->model) {
+					$data = $parentNode->model->children();
+				} else {
+					$data = DataObject::get("pages", array("parentid" => $parentNode->recordid));
+				}
+			} else if(is_int($parentNode)) {
+				$data = DataObject::get("pages", array("parentid" => $parentNode));
+			}
+			
+			if(isset($dataParams["version"]))
+				$data->setVersion($dataParams["version"]);
+			
+			if(isset($dataParams["filter"]))
+				$data->addFilter($dataParams["filter"]);
+				
+			$nodes = array();
+			foreach($data as $record) {
+				
+			}
+		}
+		
 		//!SiteTree
 		
 		public function getSiteTree($search = "") {
