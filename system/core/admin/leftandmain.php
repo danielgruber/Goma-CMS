@@ -254,6 +254,17 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	}
 	
 	/**
+	 * generates the tree-links.
+	*/
+	public function generateTreeLink($child, $bubbles) {
+		return new HTMLNode("a", array("href" => $this->originalNamespace . "/record/" . $child->recordid . "/edit" . URLEND, "class" => "node-area"), array(
+			new HTMLNode("img", array("src" => $child->icon)),
+			$child->title,
+			$bubbles
+		));
+	}
+	
+	/**
 	 * creates the Tree
 	 *
 	 *@name createTree
@@ -265,7 +276,14 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 			throwError(6, 'PHP-Error', "Failed to load \$tree_class! Please define \$tree_class in ".$this->classname."");
 		}
 		
-		if(isset($_GET["searchtree"])) {
+		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state")));
+		$treeRenderer = new TreeRenderer($tree);
+		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
+		$treeRenderer->mark($this->getParam("id"));
+		
+		return $treeRenderer->render(true);
+		
+		/*if(isset($_GET["searchtree"])) {
 			$search = $_GET["searchtree"];
 		} else if(isset($_POST["searchtree"])) {
 			$search = $_POST["searchtree"];
@@ -333,7 +351,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 							</li>
 							
 						</ul>';
-		}
+		}*/
 	}
 	/**
 	 * gets updated data of tree for searching or normal things

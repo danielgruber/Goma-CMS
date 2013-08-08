@@ -6,6 +6,96 @@
   * last modified: 10.12.2011
 */
 
+.goma-tree {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.goma-tree li {
+	position: relative;
+}
+.goma-tree li .node-area {
+	padding: 0.5em;
+	padding-left: 1.5em;
+	display: block;
+	color: #555;
+	font-weight: normal;
+	text-decoration: none;
+}
+.goma-tree li:hover .node-area, .goma-tree li.active .node-area, .goma-tree li .node-area:hover, .goma-tree li.marked .node-area {
+	background: #ddd;
+}
+.goma-tree li .node-area img {
+	padding-right: 0.25em;
+	margin-top: -0.063em;
+	height: 1em;
+	width: 1em;
+}
+.goma-tree li .node-area .tree-bubbles {
+	float: right;
+	font-size: 0.75em;
+}
+.goma-tree li .node-area .tree-bubbles span {
+	line-height: 1em;
+	padding: 0.5em;
+	margin: -0.167em 0.167em;
+	display: inline-block;
+	
+	background: #008ed4;
+	color: #fff;
+	
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+	border-radius: 0.25em;
+}
+.goma-tree li .node-area .tree-bubbles span.yellow {
+	background: #f7ff7f;
+	color: #8c891a;
+}
+
+.goma-tree li .node-area .tree-bubbles span.orange {
+	background: #f0ad4e;
+	color: #80551b;
+}
+.goma-tree li .node-area .tree-bubbles span.green {
+	background: #24ACB8;
+	color: #fff;
+}
+.goma-tree li .node-area .tree-bubbles span.grey {
+	background: #999;
+	color: #000;
+}
+.goma-tree li .node-area .tree-bubbles span.red {
+	background: #da097a;
+	color: #fff;
+}
+.goma-tree li .node-area .tree-bubbles span.purple {
+	background: #f79eff;
+	color: #a600ff;
+}
+
+.goma-tree li .hitarea {
+	position: absolute;
+	left: 0;
+	top: 0;
+	cursor: pointer;
+	padding: 0;
+	height: 2.25em;
+}
+.goma-tree li .hitarea a {
+	width: 1em;
+	height: 1em;
+	padding: 0.625em 0.25em;
+	display: inline-block;
+}
+
+.goma-tree li.collapsed > .hitarea a {
+	background: transparent url(../admin/images/pfeil_close.png) no-repeat center center;
+}
+.goma-tree li.expanded > .hitarea a { 
+	background: transparent url(../admin/images/pfeil.png) no-repeat center center;
+}
+
 .tree {
 	margin: 0;
 	padding: 0;
@@ -107,14 +197,6 @@
 	padding: 4px;
 	position: relative;
 	
-}
-.hitarea {
-	background: transparent !important;
-}
-.hitarea a {
-	margin: -4px -6px -9px -6px;
-	padding: 4px 9px 9px 6px;
-	background-position: 6px 6px !important;
 }
 .tree li.collapsed > .a > .b > div > a {
 	background: transparent url(../admin/images/pfeil_close.png) no-repeat;

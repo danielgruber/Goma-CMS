@@ -413,8 +413,11 @@ $lang = array(
 	"versions_timeline"								=> "Timeline",
 	"backups"										=> "Backups",
 	
-	"deleted_page"									=> "Deleted page",
-	"edited_page"									=> "Edited page",
+	"DELETED_PAGE"									=> "Deleted page",
+	"EDITED_PAGE"									=> "Edited page",
+	
+	"CHANGED"										=> "changed",
+	"NEW"											=> "new",
 	
 	/* goma welcome */
 	"before_you_begin"								=> "Before you begin...",

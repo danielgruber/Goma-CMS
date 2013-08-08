@@ -12,8 +12,8 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 $lang = array(
 	/*  OTHER THINGS*/
 	"okay"											=> "OK",
-	"confirm"										=> "Bestätigen...",
-	"prompt"										=> "Text eingeben...",
+	"confirm"										=> "Bestätigen",
+	"prompt"										=> "Text eingeben",
 	"mysql_error"                                 	=> "<div class=\"error\"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>",
 	"mysql_connect_error"							=> "Keine Verbindung zur Datenbank",
 	'mysql_error_small'								=> "Zugriff fehlgeschlagen!",
@@ -413,8 +413,12 @@ $lang = array(
 	"versions_timeline"								=> "Zeitleiste",
 	"backups"										=> "Sicherungen",
 	
-	"deleted_page"									=> "Gel&ouml;schte Seite",
-	"edited_page"									=> "Geänderte Seite",
+	"DELETED_PAGE"									=> "Gel&ouml;schte Seite",
+	"EDITED_PAGE"									=> "Geänderte Seite",
+	
+	"CHANGED"										=> "Geändert",
+	"NEW"											=> "Neu",
+	
 	
 	/* goma welcome */
 	"before_you_begin"								=> "Bevor Sie beginnen",

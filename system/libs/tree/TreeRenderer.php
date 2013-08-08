@@ -98,7 +98,7 @@ class TreeRenderer extends Object {
 	 * sets the linkCallback, which should generate the link of the tree-item.
 	*/
 	public function setLinkCallback($callback) {
-		$this->actionCallback = $callback;
+		$this->linkCallback = $callback;
 		return $this;
 	}
 	
@@ -138,10 +138,21 @@ class TreeRenderer extends Object {
 	 * @return	String
 	*/
 	protected function renderChild(TreeNode $child) {
+		
+		Resources::add("tree.css", "css", "tpl");
+		
 		$node = new HTMLNode("li", array("id" => "treenode_" . $this->class . "_" . $child->nodeid, "class" => "tree-node"));
-		$node->append($wrapper = new HTMLNode("span", array("class" => "tree-wrapper")));
+		$node->append($wrapper = new HTMLNode("span", array("class" => "tree-wrapper ")));
+		
+		if(isset($this->marked[$child->nodeid]) || isset($this->marked[$child->recordid])) {
+			$node->addClass("marked");
+		}
 		
 		// now generate link through link-callback.
+		if($child->linkCallback()) {
+			$link = call_user_func_array($child->linkCallback(), array($child, $this->renderBubbles($child->bubbles())));
+			$wrapper->html($link);
+		} else
 		if($this->linkCallback) {
 			$link = call_user_func_array($this->linkCallback, array($child, $this->renderBubbles($child->bubbles())));
 			$wrapper->html($link);
@@ -152,24 +163,35 @@ class TreeRenderer extends Object {
 				$text,
 				$this->renderBubbles($child->bubbles())
 			));
+			$wrapper->addClass("node-area");
 		}
+		
+		foreach($child->getClasses() as $class)
+			$node->addClass($class);
 		
 		$wrapper->attr("title", convert::raw2text($child->title));
 		
 		// render children
 		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded()) {
 			// children should be shown
-			$node->append(new HTMLNode("span", array("class" => "hitarea expanded")));
+			$node->addClass("expanded");
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded")));
 			$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
 			foreach($child->forceChildren() as $node) {
 				$ul->append($this->renderChild($node));
 			}
-		} else if($child->getChildCallback()) {
+			
+			
+		} else if(is_callable($child->getChildCallback())) {
 			// children via ajax
-			$node->append(new HTMLNode("span", array("class" => "hitarea collapsed")), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child))));
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed"), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child)))));
+			$node->addClass("collapsed");
+			
+			
 		} else if($child->children()) {
 			// children available
-			$node->append(new HTMLNode("span", array("class" => "hitarea collapsed")));
+			$node->addClass("collapsed");
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed")));
 			$node->append($ul = new HTMLNode("ul", array("class" => "collapsed")));
 			foreach($child->children() as $node) {
 				$ul->append($this->renderChild($node));

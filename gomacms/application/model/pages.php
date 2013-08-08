@@ -1063,7 +1063,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 * @param 	array $dataparams "version", "filter"
 		*/
 		static function build_tree($parentNode = null, $dataParams = array()) {
-			if($parentNode == 0) {
+			if(!is_object($parentNode) && $parentNode == 0) {
 				$data = DataObject::get("pages", array("parentid" => 0));
 			} else if(is_a($parentNode, "TreeNode")) {
 				if($parentNode->model) {
@@ -1075,6 +1075,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$data = DataObject::get("pages", array("parentid" => $parentNode));
 			}
 			
+			// add Version-Params
 			if(isset($dataParams["version"]))
 				$data->setVersion($dataParams["version"]);
 			
@@ -1083,8 +1084,24 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 			$nodes = array();
 			foreach($data as $record) {
+				$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
 				
+				// add a bubble for changed or new pages.
+				if(!$record->isPublished())
+					if($record->everPublished())
+						$node->addBubble(lang("CHANGED"), "yellow");
+					else
+						$node->addBubble(lang("NEW"), "blue");
+						
+						
+				if($record->children()->count() > 0) {
+					$node->setChildCallback(array("pages", "build_tree"));
+				}
+				
+				$nodes[] = $node;
 			}
+			
+			return $nodes;
 		}
 		
 		//!SiteTree

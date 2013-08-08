@@ -21,7 +21,7 @@ class TreeNode extends ArrayList {
 	 *
 	 *@var int
 	*/
-	public $recordID;
+	public $recordid;
 	
 	/**
 	 * text of the node.
@@ -50,7 +50,7 @@ class TreeNode extends ArrayList {
 	/**
 	 * you can put the model-connection here.
 	 *
-	 *@param object
+	 * @param 	object
 	*/
 	public $model;
 	
@@ -67,11 +67,13 @@ class TreeNode extends ArrayList {
 	
 	/**
 	 * html-classes.
-	 *
-	 *@name htmlClasses
-	 *@access protected
 	*/
 	protected $htmlClasses = array();
+	
+	/**
+	 * the callback over which this node is rendered.
+	*/
+	protected $linkCallback;
 	
 	/**
 	 * generates a new treenode.
@@ -137,6 +139,7 @@ class TreeNode extends ArrayList {
 	public function addBubble($text, $color = "blue") {
 		
 		$this->bubbles[md5($text)] = array("text" => $text, "color" => $color);
+		return $this;
 	}
 	
 	/**
@@ -148,6 +151,7 @@ class TreeNode extends ArrayList {
 	*/
 	public function removeBubble($text) {
 		unset($this->bubbles[md5($text)]);
+		return $this;
 	}
 	
 	/**
@@ -192,7 +196,7 @@ class TreeNode extends ArrayList {
 	 * returns current child-callback.
 	*/
 	public function getChildCallback() {
-		return $this->childCallback = $callback;
+		return $this->childCallback;
 	}
 	
 	/**
@@ -353,5 +357,20 @@ class TreeNode extends ArrayList {
 	*/
 	public function getClasses() {
 		return $this->htmlClasses;
+	}
+	
+	/**
+	 * sets the linkCallback, which should generate the link of the tree-item.
+	*/
+	public function setLinkCallback($callback) {
+		$this->linkCallback = $callback;
+		return $this;
+	}
+	
+	/**
+	 * returns the current linkCallback.
+	*/
+	public function LinkCallback() {
+		return $this->linkCallback;
 	}
 }
