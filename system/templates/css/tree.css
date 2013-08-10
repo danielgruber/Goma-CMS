@@ -14,6 +14,9 @@
 .goma-tree li {
 	position: relative;
 }
+.goma-tree li .tree-wrapper {
+	display: block;
+}
 .goma-tree li .node-area {
 	padding: 0.5em;
 	padding-left: 1.5em;
@@ -95,129 +98,3 @@
 .goma-tree li.expanded > .hitarea a { 
 	background: transparent url(../admin/images/pfeil.png) no-repeat center center;
 }
-
-.tree {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	overflow: hidden;
-	background: #eee;
-}
-.tree ul {
-	margin: 0;
-	list-style: none;
-	padding-left: 0px;
-	background-image: none;
-}
-.tree > li {
-	padding: 0 !important;
-}
-
-
-/* fix for IE6 */
-* html .hitarea {
-	display: inline;
-	float:none;
-	background: transparent;
-}
-
-
-.tree li { 
-	margin: 0;
-	padding: 0;
-	padding-left: 15px;
-}
-
-.tree li .a > .b > a {
-	color: #222;
-	display: block;
-}
-.tree li .a > .b > a span {
-	line-height: 18px;
-}
-.tree li .a > .b > a :hover {
-	text-decoration: none;
-}
-
-
-.tree li.collapsed > ul {
-	display: none;
-}
-.tree li.expanded > ul {
-	display: block;
-}
-
-.tree li div {
-	width: 9px;
-	height: 9px;
-	display: block;
-	position: absolute;
-	left: 4px;
-	top: 4px;
-	background: #fff;
-}
-.tree li div  a
-{
-	width: 9px;
-	height: 9px;
-	display: block;
-}
-
-.tree .a {
-	display: block;
-	margin: 0;
-	padding: 2px;
-	margin-left: -300px;
-	padding-left: 300px;
-	height: 23px;
-	overflow: hidden;
-}
-
-.tree .a:hover, .tree .marked {
-	background: #666;
-	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #777777), color-stop(1, #5f5f5f));
-	background: -webkit-linear-gradient(#777777, #5f5f5f);
-	background: -moz-linear-gradient(#777777, #5f5f5f);
-	background: -ms-linear-gradient(#777777, #5f5f5f);
-	background: -o-linear-gradient(#777777, #5f5f5f);
-	background: linear-gradient(#777777, #5f5f5f);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f'); /* IE6 & IE7 */
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#5f5f5f')"; /* IE8+ */
-	
-	color: #fff;
-}
-.tree .a:hover * {
-	color: #fff;
-}
-.tree .marked * {
-	color: #fff;
-}
-
-.tree .b {
-	padding: 4px;
-	position: relative;
-	
-}
-.tree li.collapsed > .a > .b > div > a {
-	background: transparent url(../admin/images/pfeil_close.png) no-repeat;
-}
-.tree li.expanded  > .a > .b > div > a { 
-	background: transparent url(../admin/images/pfeil.png) no-repeat;
-}
-.tree li.collapsed > .marked > .b > div > a, .tree li.collapsed > .a:hover > .b > div > a {
-	background-image: url(../admin/images/pfeil_active_close.png);
-}
-.tree li.expanded > .marked > .b > div > a, .tree li.expanded > .a:hover > .b > div > a {
-	background-image: url(../admin/images/pfeil_active.png);
-}
-
-.tree .b { background: none; }
-.tree li.collapsable > .a > .b, .tree li.expandable > .a > .b { background-position: 0 -176px; }
-
-.tree li.last > .a > .b { background-position: 0 -1766px }
-.tree li.last > ul {
-	background-image: none;
-}
-.tree a.page span { background-image: url(../../../images/icons/fatcow-icons/16x16/file.png); }
-.tree a span {  background-repeat: no-repeat; background-position: 0 0; }
-.tree .b, .tree .b a span { padding-left: 18px; display: block; } 

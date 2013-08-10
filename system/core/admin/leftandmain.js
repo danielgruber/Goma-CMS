@@ -67,13 +67,13 @@ var LaM_type_timeout;
 		// show progress in tree
 		goma.ui.onProgress(function(percent, slow) {
 			if($(".leftandmaintable .LaM_tabs .treewrapper .loading").length == 1) {
-				var item = $(".leftandmaintable .LaM_tabs .treewrapper .loading").parent().parent().parent().eq(0);
+				var item = $(".leftandmaintable .LaM_tabs .treewrapper .loading").parent().eq(0);
 				if(item.find(".loadingBar").length == 0) {
 					item.append('<div class="loadingBar"></div>');
 					item.find(".loadingBar").css({
 						position: "absolute",
 						left: item.position().left,
-						top: item.position().top + item.find(" > span").outerHeight() - 2,
+						top: item.position().top + item.outerHeight() - 2,
 						height: "2px"
 					});
 				}
@@ -287,8 +287,6 @@ var LaM_type_timeout;
 		}
 	}
 	
-	var last_dragged = 0;
-	
 	function tree_bind_ajax(sortable, node, findPos) {
 		// normally we trigger the javascript to find optimal scroll-position
 		if(typeof findPos == "undefined") {
@@ -308,13 +306,14 @@ var LaM_type_timeout;
 		}
 		
 		// bind events to the nodes to load the content then
-		node.find(".treelink").click(function(){
-			if($(this).attr("nodeid") == 0 || self.last_dragged != $(this).attr("nodeid")) {
+		node.find("a.node-area").click(function(){
+			if($(this).parent().parent().attr("data-recordid") != 0) {
 				// no ajax in IE
 				if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
 					return true;
 				}
-				LoadTreeItem($(this).attr("nodeid"));
+				
+				LoadTreeItem($(this).parent().parent().attr("data-recordid"));
 			}
 			return false;
 		});
@@ -381,8 +380,7 @@ var LaM_type_timeout;
 	
 	// function to load content of a tree-item
 	w.LoadTreeItem = function (id) {
-
-		var $this = $("a[nodeid="+id+"]");
+		var $this = $("li[data-recordid="+id+"] > span > a.node-area");
 		if($this.length == 0) {
 			return false;
 		}
@@ -393,10 +391,11 @@ var LaM_type_timeout;
 			return true;
 		}
 		
+		$this.addClass("loading");
+		
 		setTimeout(function(){
 			goma.ui.ajax(undefined, {
 				beforeSend: function() {
-					$this.addClass("loading");
 					$this.parent().parent().addClass("marked");
 					if(typeof HistoryLib.push == "function")
 						HistoryLib.push($this.attr("href"));
@@ -427,6 +426,8 @@ var LaM_type_timeout;
 					} else
 						$(".treewrapper").scrollTop(0);
 				}
+				
+				$(".treewrapper .loadingBar").remove();
 				
 				updateSidebarToggle();
 			});

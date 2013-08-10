@@ -153,7 +153,7 @@ function show_preview(publish, state, usePublish) {
 			if(current != $("#previewFrame").get(0).contentWindow.location.href) {
 				current = $("#previewFrame").get(0).contentWindow.location.href;
 				changeCount++;
-				if(changeCount > 0) {
+				if(changeCount > 0 && current.match(/^http\:\/\//)) {
 					location.href = current;
 					$("#preview .edit").click();
 				}
@@ -161,4 +161,6 @@ function show_preview(publish, state, usePublish) {
 			
 		}, 500);
 	}
+	
+	return false;
 }

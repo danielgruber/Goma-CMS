@@ -144,6 +144,9 @@ class TreeRenderer extends Object {
 		$node = new HTMLNode("li", array("id" => "treenode_" . $this->class . "_" . $child->nodeid, "class" => "tree-node"));
 		$node->append($wrapper = new HTMLNode("span", array("class" => "tree-wrapper ")));
 		
+		$node->attr("data-nodeid", $child->nodeid);
+		$node->attr("data-recordid", $child->recordid);
+		
 		if(isset($this->marked[$child->nodeid]) || isset($this->marked[$child->recordid])) {
 			$node->addClass("marked");
 		}
