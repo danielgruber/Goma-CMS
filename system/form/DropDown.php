@@ -1,6 +1,5 @@
 <?php defined("IN_GOMA") OR die();
 
-
 /**
  * This is a simple searchable dropdown.
  *
@@ -194,6 +193,7 @@ class DropDown extends FormField
 					), array(
 						new HTMLNode("input", array(
 							"type"			=> "text",
+							"autocomplete"	=> "off",
 							"id"			=> $this->ID() . "_search",
 							"class"			=> "search",
 							"placeholder"	=> lang("search", "search...")
@@ -351,7 +351,6 @@ class DropDown extends FormField
 			$end = $start + 9;
 			$i = 0;
 			$left = ($p == 1) ? false : true;
-			
 			// check if this is an array with numeric indexes or not
 			if(isset($this->options[0])) {
 				$arr = array();

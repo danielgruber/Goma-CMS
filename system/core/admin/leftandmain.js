@@ -1,4 +1,4 @@
-/**
+ /**
  * JavaScript for the simple two column admin-panel.
  *
  * @package     Goma\Admin\LeftAndMain
@@ -8,6 +8,7 @@
  *
  * @version     2.2.5
  */
+
 
 var LaM_current_text = "";
 var LaM_type_timeout;
@@ -128,15 +129,14 @@ var LaM_type_timeout;
 							$this.parent().parent().addClass("marked");
 						}
 						
-						// find optimal scroll by position of active element
-						if($(".treewrapper").find(".marked").length > 0) {
-							// switch to tree-tab if necessary
-							if(!$(".left-and-main .LaM_tabs > ul > li > a.tree").parent().hasClass("active")) {
-								$(".left-and-main .LaM_tabs > ul > li > a.tree").click();
-							}
-							
-							// correct scroll-position
-							var oldscroll = $(".treewrapper").scrollTop();
+						// correct scroll-position
+						var oldscroll = $(".treewrapper").scrollTop();
+						$(".treewrapper").scrollTop(0);
+						var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
+						if(pos > 0) {
+							$(".treewrapper").scrollTop(oldscroll);
+							$(".treewrapper").scrollTop(pos);
+						} else {
 							$(".treewrapper").scrollTop(0);
 							var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
 							if(pos > 0) {
@@ -415,8 +415,7 @@ var LaM_type_timeout;
 				$(".tree .marked").removeClass("marked");
 				$this.parent().parent().addClass("marked");
 				$this.removeClass("loading");
-				
-				
+						
 				// find optimal scroll by position of active element
 				if($(".treewrapper").find(".marked").length > 0) {
 					var oldscroll = $(".treewrapper").scrollTop();

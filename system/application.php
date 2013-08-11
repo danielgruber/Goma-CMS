@@ -154,6 +154,7 @@ if (PROFILE)
 
 // set error-handler
 set_error_handler("Goma_ErrorHandler");
+
 set_exception_handler("Goma_ExceptionHandler");
 
 if (file_exists(ROOT . '_config.php')) {
@@ -214,6 +215,7 @@ if (file_exists(ROOT . '_config.php')) {
 				if (_eregi($data['domain'] . '$', $_SERVER['SERVER_NAME'])) {
 					$application = $data["directory"];
 					define("DOMAIN_LOAD_DIRECTORY", $data["directory"]);
+
 					break;
 				}
 			}
@@ -387,7 +389,8 @@ function loadApplication($directory) {
 				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver"]);
 			}
 
-		} else {			define("DATE_FORMAT", "d.m.Y - H:i");
+		} else {			
+			define("DATE_FORMAT", "d.m.Y - H:i");
 			Core::setCMSVar("TIMEZONE", DEFAULT_TIMEZONE);
 		}
 

@@ -755,6 +755,20 @@ class ImageUploads extends Uploads {
 				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
 			}
 		}
+		
+		if($absolute) {
+			if(file_exists($file)) {
+				$file = BASE_URI . $file;
+			} else {
+				$file = BASE_URI . BASE_SCRIPT . $file;
+			}
+			
+			if(file_exists($fileRetina)) {
+				$fileRetina = BASE_URI . $fileRetina;
+			} else {
+				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
+			}
+		}
 				
 		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
@@ -1179,10 +1193,9 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function orgSetSize() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
 			if(!file_exists(ROOT . URL . ".permit"))
 				return false;
-			
+
 			$height = (int) $this->getParam("height");
 			$width = (int) $this->getParam("width");
 			
@@ -1209,10 +1222,9 @@ class ImageUploadsController extends UploadsController {
 	*/
 	public function orgSetWidth() {
 		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
 			if(!file_exists(ROOT . URL . ".permit"))
 				return false;
-			
+
 			$width = (int) $this->getParam("width");
 			
 			// create image
@@ -1241,7 +1253,6 @@ class ImageUploadsController extends UploadsController {
 			
 			if(!file_exists(ROOT . URL . ".permit"))
 				return false;
-			
 			$height = (int) $this->getParam("height");
 			
 			// create image

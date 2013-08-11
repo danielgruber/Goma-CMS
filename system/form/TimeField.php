@@ -4,11 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-<<<<<<< HEAD
   * last modified: 22.02.2013
-=======
-  * last modified: 17.02.2013
->>>>>>> some updates for timeField and Language
   * $Version
 */
 

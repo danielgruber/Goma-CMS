@@ -441,7 +441,7 @@ class FormField extends RequestHandler implements ArrayAccess
 			} else if(isset($this->$name)) {
 				return $this->$name;
 			} else {
-				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->classname." with name ".$this->name.".");
+				throw new LogicException("\$" . $name . " is not defined in ".$this->classname." with name ".$this->name.".");
 			}
 		}
 		

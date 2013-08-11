@@ -1238,8 +1238,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$this->onBeforeManipulate($manipulation, $b = "write");
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
 		
+
 		self::$datacache[$this->baseClass] = array();
-		
+
 		// fire manipulation to DataBase
 		if(SQL::manipulate($manipulation)) {
 			

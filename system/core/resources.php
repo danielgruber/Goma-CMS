@@ -1,24 +1,23 @@
 <?php
 /**
-  * this class provides features of handling JavaScript and CSS
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 28.04.2013
-  * Version: 1.3.8
-*/
+ * @package		Goma\System\Core
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined("IN_GOMA") OR die();
+
 
 ClassInfo::AddSaveVar("Resources", "names");
 ClassInfo::AddSaveVar("Resources", "scanFolders");
 
 /**
- * new resources class
-*/
-
+ * This class manages all Resources like CSS and JS-Files in a Goma-Page.
+ *
+ * @package		Goma\System\Core
+ * @version		1.4
+ */
 class Resources extends Object {
     
 	/**
@@ -406,7 +405,7 @@ class Resources extends Object {
 		
 		if(self::$registeredResources["css"])
 			self::$resources_data[] = "goma.ui.registerResources('css', ".json_encode(array_values(self::$registeredResources["css"])).");";
-		
+
 		if(Core::is_ajax()) {
 			// write data to file
 			$datajs = implode("\n", self::$resources_data);

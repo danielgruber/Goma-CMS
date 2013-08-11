@@ -1614,6 +1614,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					if(!$found) {
 						unset($allowed_parents[$parent]);
 					}
+					
+					// if not found, unset
+					if(!$found) {
+						unset($allowed_parents[$parent]);
+					}
 				}
 			}
 	        
@@ -1625,8 +1630,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	        
 			return $allowed_parents;
 		} else {
-            		if(PROFILE) Profiler::unmark("pages::allowed_parents");
-			return self::$cache_parent[$this->classname];
+            if(PROFILE) Profiler::unmark("pages::allowed_parents");
+				return self::$cache_parent[$this->classname];
 		}		
 	}
 	

@@ -127,7 +127,7 @@ class livecounter extends DataObject
 			$host = $_SERVER["HTTP_HOST"];
 			if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
 				$host = "." . $host;
-			
+
 			// user identifier
 			if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']) || preg_match("/" . self::$no_cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']))) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
 				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);

@@ -14,7 +14,7 @@ ClassInfo::addSaveVar("gLoader", "resources");
 
 class gLoader extends Controller
 {
-		const VERSION = "1.1.1";
+		const VERSION = "1.1.3";
 		/**
 		 * url-handlers
 		 *
@@ -22,6 +22,7 @@ class gLoader extends Controller
 		 *@access public
 		*/
 		public $url_handlers = array(
+            "v2/\$name"    => "deliver",
 			"\$name"	=> "deliver"
 		);
 		

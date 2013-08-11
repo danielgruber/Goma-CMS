@@ -99,7 +99,7 @@ if(typeof goma.ui == "undefined") {
 		}
 		
 		var flexBoxes = [];
-		
+
 		$(function() {	
 			$.extend(goma.ui, {
 				/**
@@ -325,7 +325,6 @@ if(typeof goma.ui == "undefined") {
 					if(typeof event.result == "string")
 						r = event.result;
 				}
-				
 				if(r !== true)
 					return r;
 			},

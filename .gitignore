@@ -48,3 +48,4 @@ tpl/
 !tpl/goma_simple/
 !tpl/smoothOrange/*
 !tpl/smoothOrange/
+*.permit

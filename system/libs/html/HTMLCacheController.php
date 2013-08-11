@@ -66,7 +66,7 @@ class HTMLCacheController extends Object
 			}
 			
 			// $word is ! a longer help word
-			
+
 			$cache [] = $word;
 		}
 		
@@ -88,7 +88,7 @@ class HTMLCacheController extends Object
 	 * checks if word is in the "list of unnecessary words"
 	 * @param - string word
 	 * @return - boolean
-	*/
+	*/	
 	static function is_unnecessary($word)
 	{
 		return in_array(strtolower($word), self::$$unnecessary_words);
@@ -106,7 +106,6 @@ class HTMLCacheController extends Object
 	 * load the list of unneccessary words for a specific language
 	 * @param - string language
 	 **/
-	
 	static function load_word_filter($lang)
 	{
 		if(self::$current_filter != $lang) {

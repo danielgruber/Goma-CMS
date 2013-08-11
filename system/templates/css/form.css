@@ -183,6 +183,14 @@ fieldset > .form_field > .info_field {
 	padding-left: 6.25em;
 }
 
+.externalform {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.externalform a {
+	float: right;
+}
+
 @media only screen and (max-width: 600px) { 
 	.form_field_captcha > label {
 		margin-top: 0;

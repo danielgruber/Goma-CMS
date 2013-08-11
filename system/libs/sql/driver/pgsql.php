@@ -971,4 +971,3 @@ class pgsqlDriver extends object implements SQLDriver
 		return $type;
 	}
 }
-?>

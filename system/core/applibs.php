@@ -297,7 +297,7 @@ function getRedirect($parentDir = false) {
 }
 
 /**
- * generates a translated date
+ * generates a translated date.
  */
 function goma_date($format, $date = NOW) {
 
@@ -531,6 +531,7 @@ function setProject($project, $domain = null) {
 	foreach($apps as $key => $data) {
 		if($data["directory"] == $app["directory"]) {
 			if(!isset($app["domain"]) || (isset($data["domain"]) && $data["domain"] == $app["domain"])) {
+
 				return true;
 			} else {
 				$apps[$key]["domain"] = $app["domain"];
@@ -580,7 +581,7 @@ function str2int($string, $concat = true) {
 	for($i = 0, $int = '', $concat_flag = true; $i < $length; $i++) {
 		if(is_numeric($string[$i]) && $concat_flag) {
 			$int .= $string[$i];
-		} elseif(!$concat && $concat_flag && strlen($int) > 0) {
+		} else if(!$concat && $concat_flag && strlen($int) > 0) {
 			$concat_flag = false;
 		}
 	}
@@ -611,6 +612,7 @@ function var_lang($str, $replace = array()) {
 	$language = lang($str, $str);
 	preg_match_all('/%(.*)%/', $language, $regs);
 	foreach($regs[1] as $key => $value) {
+
 		$re = $replace[$value];
 		$language = preg_replace("/%" . preg_quote($value, '/') . "%/", $re, $language);
 	}
@@ -754,7 +756,6 @@ function goma_version_compare($v1, $v2, $operator = null) {
 //!PHP-Error-Handling
 
 function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
-
 	switch ($errno) {
 		case E_ERROR:
 		case E_CORE_ERROR:
@@ -955,6 +956,7 @@ function writeServerConfig() {
 
 	require (ROOT . "system/resources/" . $file . ".php");
 
+
 	if(!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
 		die("Could not write " . $file);
 	}
@@ -967,7 +969,10 @@ class SQLException extends Exception {
 	public function __construct($m = "", $code = 3, Exception $previous = null) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 }
@@ -980,7 +985,10 @@ class SecurityException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 1, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 }
@@ -990,7 +998,10 @@ class PermissionException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 5, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 }
@@ -1000,7 +1011,10 @@ class PHPException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 6, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 }
@@ -1010,7 +1024,10 @@ class DBConnectError extends MySQLException {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 4, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 }
@@ -1020,7 +1037,10 @@ class ServiceUnavailable extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 7, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
 	}
 
 	public function http_status() {

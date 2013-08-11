@@ -95,6 +95,7 @@ class i18n extends Object {
 						} else if(isset($data["defaulLang"]) && file_exists($folder . "languages/" . $data["defaultLang"] . ".php")) {
 							self::loadExpansionLang($folder . "languages/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
 						}
+						unset($default);
 					}
 				}
 			}
@@ -298,7 +299,6 @@ class i18n extends Object {
 			return $db;
 		}
 	}
-
 	/**
 	 * returns an array of locale-codes for given code
 	 *
@@ -311,5 +311,4 @@ class i18n extends Object {
 		else
 			return array($code);
 	}
-
 }
