@@ -30,6 +30,11 @@ class TreeRenderer extends Object {
 	protected $actionCallback;
 	
 	/**
+	 * marked nodes.
+	*/
+	public $marked = array();
+	
+	/**
 	 * generates the treerenderer with a given tree.
 	 *
 	 * @param 	array|TreeNode $tree tree
@@ -185,5 +190,25 @@ class TreeRenderer extends Object {
 			$node->append(new HTMLNode("span", array("class" => "tree-bubble ".$bubble["color"]), $bubble["text"]));
 		}
 		return $node;
+	}
+	
+	/**
+	 * marks a node.
+	*/
+	public function mark($node) {
+		if(is_object($node))
+			$this->marked[$node->nodeid] = true;
+		else
+			$this->marked[$node] = true;
+	}
+	
+	/**
+	 * unmarks a node.
+	*/
+	public function unmark($node) {
+		if(is_object($node))
+			unset($this->marked[$node->nodeid]);
+		else
+			unset($this->marked[$node]);
 	}
 }

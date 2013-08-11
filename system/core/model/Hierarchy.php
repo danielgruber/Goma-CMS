@@ -324,7 +324,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 	 * @param 	object|null $parent parent
 	 * @return 	array|object TreeNodes
 	*/
-	static function build_tree($parent = null) {
+	static function build_tree($parent = null, $dataParams = array()) {
 	
 	}
 }

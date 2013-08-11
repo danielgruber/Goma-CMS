@@ -453,7 +453,6 @@ class Form extends object
 						}
 				}
 				
-				
 				unset($field);
 				
 				$i = 0;
@@ -768,12 +767,19 @@ class Form extends object
 		{
 				if($to == "this" || !isset($to))
 				{
-						if(isset($sort))
-							$this->fieldList->move($field, $sort, true);
-						else
-							$this->fieldList->add($field);
-							
-						$field->setForm($this);
+					
+					// if it already exists, we should remove it.
+					if($this->fieldList->find("name", $field->name)) {
+						$this->fieldList->remove($this->fieldList->find("name", $field->name));
+					}
+					
+					if(isset($sort))
+						$this->fieldList->move($field, $sort, true);
+					else
+						$this->fieldList->add($field);
+				
+						
+					$field->setForm($this);
 				} else
 				{
 						if(isset($this->$to))

@@ -764,7 +764,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 		if(Object::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
 			return parent::getOffset($offset, $args);
 		} else {
-			if(is_a($this->first(), "ViewAccessableData")) {
+			if(is_object($this->first())) {
 				return $this->first()->getOffset($offset, $args);
 			}
 		}

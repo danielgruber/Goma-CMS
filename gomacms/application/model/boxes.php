@@ -63,7 +63,7 @@ class Boxes extends DataObject implements Notifier {
 		$insertAfter = (isset($_GET["insertafter"])) ? ++$_GET["insertafter"] : 1000;
 		$form->add(new Hiddenfield("sort", $insertAfter));
 		$form->add(new HiddenField("seiteid", $this->seiteid));
-		$form->add(new Select("class_name", lang("boxtype", "boxtype"),$this->getBoxTypes()));
+		$form->add(new Select("class_name", lang("BOXTYPE", "boxtype"), $this->getBoxTypes()));
 		$form->add(new Hiddenfield("width", "auto"));
 	}
 	
@@ -72,10 +72,13 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function getActions(&$form) {
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
+		
+		$lang = ($this->ID == 0) ? lang("CREATE_BOX", "Create box") : lang("SAVE_BOX", "Save box");
+		
 		if(Core::is_ajax()) {
-			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish", array("green")));
+			$form->addAction(new AjaxSubmitButton("submit", $lang, "ajaxSave", "publish", array("green")));
 		} else {
-			$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
+			$form->addAction(new FormAction("submit", $lang, "publish", array("green")));
 		}
 	}
 	

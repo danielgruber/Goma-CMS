@@ -897,10 +897,12 @@ form h2 {
 	display: inline-block;
 }
 #preview #bottomBar .state.active {
-	color: #da097a
+	color: #da097a;
+	font-weight: bold;
 }
 #preview #bottomBar .publish.active {
-	color: #da097a
+	color: #da097a;
+	font-weight: bold;
 }
 
 #preview #bottomBar .edit {
