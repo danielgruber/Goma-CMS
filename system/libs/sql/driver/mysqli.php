@@ -116,6 +116,7 @@ class mysqliDriver extends object implements SQLDriver
 		 * some debug-operations
 		*/
 		public function runDebug($sql) {
+			SQL::$track = false;
 			if($this->errno() == 1054) {
 				// match out table
 				if(preg_match('/from\s+([a-zA-Z0-9_\-]+)/i', $sql, $matches)) {
@@ -131,6 +132,7 @@ class mysqliDriver extends object implements SQLDriver
 					}
 				}
 			}
+			SQL::$track = true;
 		}
 		
 		/**

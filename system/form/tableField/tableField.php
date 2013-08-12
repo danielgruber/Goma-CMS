@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0.1
+ * @version     1.1
  */
 class tableField extends FormField {
 	/**
@@ -318,6 +318,13 @@ class tableField extends FormField {
 		$container = $this->container;
 		
 		$columns = $this->getColumns();
+		
+		// first init all
+		foreach($this->getComponents() as $item) {
+ 			if(Object::method_exists($item, "Init")) {
+				$data = $item->Init($this);
+			}
+		}
 		
 		$data = $this->getData();
 		foreach($this->getComponents() as $item) {

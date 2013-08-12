@@ -2923,6 +2923,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				}
 			}
 			
+			$hasOnes = array();
+			$has_one = $this->hasOne();
+			
 			// some specific addons for relations
 			if(is_array($filter))
 			{
@@ -2990,27 +2993,37 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 									}
 							} else
 							
-							/*// has-one
+							// has-one
 							
-							$has_one = $this->hasOne();
-							if(isset($has_one[$key]))
-							{
-									if(is_array($value))
-									{
-											$c = $has_one[$key];
-											$table = ClassInfo::$class_info[$c]["table"];
-											$query->from[] = ' INNER JOIN '.DB_PREFIX . $table.' AS '.$table.' ON '.$table.'.id = '.$this->Table().'.'.$key.'id ';
-											unset($filter[$key]);
-									}
-									
-									
-							}*/
-							
+							if(strpos($key, ".") !== false) {
+								if(isset($has_one[strtolower(substr($key, 0, strpos($key, ".")))])) {
+									$has_oneField = substr($key, strpos($key, ".") + 1);
+									$hasOnes[strtolower(substr($key, 0, strpos($key, ".")))][$has_oneField] = $value;
+									$query->removeFilter($key);
+								}
+							}
 							unset($key, $value, $table, $data, $__table, $_table);
 					}
 			}
 			
-			
+			if(count($hasOnes) > 0) {
+				foreach($hasOnes as $key => $fields) {
+					$c = $has_one[$key];
+					$table = ClassInfo::$class_info[$c]["table"];
+					
+					foreach($fields as $field => $val) {
+						$fields[$table . "." . $field] = $val;
+						unset($fields[$field]);
+					}
+					
+					$query->from[] = ' INNER JOIN 
+													'.DB_PREFIX . $table.' 
+												AS 
+													'.$table.' 
+												ON  
+												 '.$table.'.id = '.$this->Table().'.'.$key.'id AND ('.SQL::ExtractToWhere($fields, false).')';
+				}
+			}
 			
 			// sort
 			if(!empty($sort))			
@@ -3178,7 +3191,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				
 			}
 			
-			$query->addFilter(array($filter));
+			if($filter)
+				$query->addFilter(array($filter));
+			else
+				throw new LogicException("Could not search for ".$searchQuery.". No Search-Fields defined in {$this->baseClass}.");
 		}
 		return $query;
 	}
@@ -3520,7 +3536,26 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@access public
 	*/
 	public function canSortBy($field) {
-		$fields = $this->DataBaseFields();
+		$fields = $this->DataBaseFields(true);
+		return isset($fields[$field]);
+	}
+	
+	/**
+	 * checks if we can filter by a specified field
+	 *
+	 *@name canSortBy
+	 *@access public
+	*/
+	public function canFilterBy($field) {
+		if(strpos($field, ".") !== false) {
+			$has_one = $this->HasOne();
+			
+			if(isset($has_one[strtolower(substr($field, 0, strpos($field, ".")))])) {
+				return true;
+			}
+		}
+		
+		$fields = $this->DataBaseFields(true);
 		return isset($fields[$field]);
 	}
 	
@@ -3626,8 +3661,21 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *
 	 *@name DataBaseFields
 	*/
-	public function DataBaseFields() {
-		return isset(ClassInfo::$class_info[$this->classname]["db"]) ? ClassInfo::$class_info[$this->classname]["db"] : array();
+	public function DataBaseFields($recursive = false) {
+		if($recursive) {
+			$db = array();
+			if(isset(ClassInfo::$class_info[$this->baseClass]["db"]))
+				$db = array_merge($db, ClassInfo::$class_info[$this->baseClass]["db"]);
+			
+			if(ClassInfo::DataClasses($this->baseClass))
+				foreach(ClassInfo::DataClasses($this->baseClass) as $class) {
+					if(isset(ClassInfo::$class_info[$class]["db"]))
+						$db = array_merge($db, ClassInfo::$class_info[$class]["db"]);
+				}
+			
+			return $db;
+		} else
+			return isset(ClassInfo::$class_info[$this->classname]["db"]) ? ClassInfo::$class_info[$this->classname]["db"] : array();
 	}
 	
 	/**

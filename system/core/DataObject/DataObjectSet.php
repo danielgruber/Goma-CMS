@@ -1,18 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  * DataSet: for multiple viewaccessable-data records or DataObject records with all in one set without lazy loading, so it's poor performance for much data
-  * DataObjectSet: lazy-loading DataSet, so loads Data from DB on demand, so better Performance
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  *********
-  * last modified: 04.04.2013
-  * $Version: 1.4.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Basic class for all Sets of ViewAccessableData-Objects. Maybe in Future this will be replaced by @ArrayList.
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
 	 * pagination-attributes
@@ -933,7 +930,16 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 }
 
 
-
+/**
+ * Basic class for getting Data as DataSet from DataBase. It implements all types of DataBase-Queriing and always needs a DataObject to query the DataBase.
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class DataObjectSet extends DataSet {
 	
 	/**
@@ -1034,7 +1040,7 @@ class DataObjectSet extends DataSet {
 				$this->controller = $this->dataobject->controller;
 			
 			$this->filter($filter);
-			$this->sort = ClassInfo::getStatic($class, "default_sort");
+			$this->sort = (isset($sort) && !empty($sort)) ? $sort : ClassInfo::getStatic($class, "default_sort");
 			$this->limit($limit);
 			$this->join($join);
 			$this->search($search);
@@ -1478,7 +1484,7 @@ class DataObjectSet extends DataSet {
 	 *@name canSortBy
 	*/
 	public function canFilterBy($field) {
-		return $this->canSortBy($field); //! TODO: Implement Filter in DataObjectSet
+		return $this->dataobject->canFilterBy($field); //! TODO: Implement Filter in DataObjectSet
 	}
 	
 	/**

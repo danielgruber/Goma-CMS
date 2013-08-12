@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 27.02.2013
-  * $Version 2.2.3
+  * last modified: 12.08.2013
+  * $Version 2.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,11 @@ class SQL extends object
 		 *@use: count queries
 		**/
 		static $queries = 0;
+		
+		/**
+		 * with this var you can freeze error-reporting.
+		*/
+		static $track = true;
 		
 		/**
 		 * factory - selects the sql-driver
@@ -138,7 +143,7 @@ class SQL extends object
 				//echo $sql . "\n";
 				//logging($_sql);
 				
-				if($track)
+				if($track && self::$track)
 					self::$last_query = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql);
 				
 				if(PROFILE) Profiler::mark("sql::query");
@@ -155,7 +160,7 @@ class SQL extends object
 				}
 			
 				
-				if(!$result && $track) {
+				if(!$result && $track && self::$track) {
 					self::$error = self::$driver->error();
 					self::$errno = self::$driver->errno();
 				}

@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version 1.0.2
+ * @version 1.0.3
 */
  
 (function( $ ) {
@@ -210,7 +210,7 @@
 				
 				$wrapper.disableSelection();
 				
-				$this.click(function(){
+				$this.on("click change", function(){
 					if(currentlyClicking)
 						return ;
 					
@@ -220,8 +220,6 @@
 					} else {
 						switchValueToOff($wrapper);
 					}
-					
-					
 				});
 			}
 	        

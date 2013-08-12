@@ -43,7 +43,7 @@ class TreeRenderer extends Object {
 	*/
 	public function __construct($tree, $linkCallback = null, $actionCallback = null) {
 		$this->tree = $tree;
-		$thia->actionCallback = $actionCallback;
+		$this->actionCallback = $actionCallback;
 		$this->linkCallback = $linkCallback;
 		
 		parent::__construct();

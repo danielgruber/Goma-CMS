@@ -8,7 +8,7 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
   * last modified: 17.05.2013
-  * $Version - 1.0.1
+  * $Version - 1.0.2
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,6 +37,17 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	 *@access public
 	*/
 	public $displayFields = array();
+	
+	/**
+	 * Inits the Component.
+	*/
+	public function Init($tableField) {
+		if($filter = $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')) {
+			foreach($this->fieldFormatting as $field => $values) {
+				$filter->addCastedValues($field, array_flip($values));
+			}
+		}
+	}
 	
 	/**
 	 * sets the display-fields
@@ -75,6 +86,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	public function setFieldFormatting($fieldFormatting) {
 		if(is_array($fieldFormatting)) {
 			$this->fieldFormatting = $fieldFormatting;
+			
 			return $this;
 		} else {
 			throwError(6, "Invalid Argument", "First argument for TableFieldDataColumns::setFieldFormatting should be an array.");
@@ -90,6 +102,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	public function setFieldCasting($fieldCasting) {
 		if(is_array($fieldCasting)) {
 			$this->fieldCasting = $fieldCasting;
+			
 			return $this;
 		} else {
 			throwError(6, "Invalid Argument", "First argument for TableFieldDataColumns::setFieldCasting should be an array.");
