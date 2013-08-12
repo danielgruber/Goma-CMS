@@ -321,22 +321,19 @@ var LaM_type_timeout;
 		// bind the sort
 		if(sortable && self.LaMsort) {
 			gloader.load("sortable");
-			node.find("ul").each(function(){
+			node.parent().find("ul").each(function(){
 				var s = this;
 				$(this).find( " > li " ).css("cursor", "move");
 				$(this).sortable({
 					helper: 'clone',
 					items: ' > li',
 					cursor: "move",
+					axis: "y",
 					update: function(event, ui)
 					{
-						$(ui.item).find(" > .a a").addClass("loading");
-						// rerender
-						$(s).find(" > li.last").removeClass("last");
-						$(s).find(" > li:last").addClass("last");
 						$.ajax({
 							url: BASE_SCRIPT + adminURI + "/savesort/" + marked_node + "/",
-							data: $(s).sortable('serialize', {key: "treenode[]"}),
+							data: $(s).sortable('serialize', {key: "treenode[]", attribute: "data-recordid", expression: /(.+)/}),
 							type: 'post',
 							error: function(e)
 							{
@@ -345,7 +342,7 @@ var LaM_type_timeout;
 							success: function(html, code, jqXHR)
 							{
 								renderResponseTo(html, $(".left .treewrapper"), jqXHR).done(function(){;
-									tree_bind($(".left .treewrapper").find(".tree"));
+									tree_bind($(".left .treewrapper").find(".goma-tree"));
 									tree_bind_ajax(true, $(".left div.tree ul"));
 								});
 							}

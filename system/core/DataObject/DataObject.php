@@ -3021,7 +3021,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 												AS 
 													'.$table.' 
 												ON  
-												 '.$table.'.id = '.$this->Table().'.'.$key.'id AND ('.SQL::ExtractToWhere($fields, false).')';
+												 '.$table.'.recordid = '.$this->Table().'.'.$key.'id AND ('.SQL::ExtractToWhere($fields, false).')';
 				}
 			}
 			

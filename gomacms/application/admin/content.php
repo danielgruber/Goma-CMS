@@ -182,6 +182,122 @@ class contentAdmin extends LeftAndMain
 	}
 	
 	/**
+	 * add-form
+	 *
+	 *@name cms_add
+	 *@access public
+	*/
+	public function cms_add() {	
+		
+		define("LAM_CMS_ADD", 1);
+		
+		if($this->getParam("model")) {
+			if(count($this->models) > 1) {
+				foreach($this->models as $_model) {
+					$_model = trim(strtolower($_model));
+					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+						$type = $this->getParam("model");
+						$model = new $type;
+						break;
+					}
+				}
+			} else {
+				$models = array_values($this->models);
+				$_model = trim(strtolower($models[0]));
+				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+					$type = $this->getParam("model");
+					$model = new $type;
+				}
+			}
+		} else {
+			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
+			$model = new ViewAccessableData();
+			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
+		}
+		
+		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
+			$model->queryVersion = "state";
+		}
+		
+		$allowed_parents = $model->allowed_parents();
+		$this->selectModel($model, true);
+		
+		// render head-bar
+		$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$model->classname.' pageType"><img src="'.ClassInfo::getClassIcon($model->classname).'" alt="" /><span>';
+
+		$html .= convert::raw2text(ClassInfo::getClassTitle($model->classname));
+		
+		// end of title in head-bar
+		$html .= ' </span></span></div>';
+		
+		$form = new Form($this, "add_page", array(
+			new HTMLField('headbar', $html),
+			$title = new textField('title', lang("title_page", "title of the page")),
+			$mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")),
+			$parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+				"root" => lang("no_parentpage", "Root Page"),
+				"subpage" => array(
+					lang("subpage","sub page"),
+					"parent"
+				)
+			), "root"),
+			$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'),
+			$filename = new textField('filename', lang("path")),
+			new HiddenField("class_name", $model->classname)
+		));
+		
+		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
+		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");
+		$form->addValidator(new FormValidator(array($model, "validatePageFileName")), "filename");
+		
+		// add some js
+		$form->add(new JavaScriptField("change",'$(function(){
+			$("#'.$title->ID().'").change(function(){
+				if($(this).val() != "") {
+					var value = $(this).val();
+					$("#'.$mainbartitle->ID().'").val(value);
+					if($("#'.$filename->ID().'").length > 0) {
+						if($("#'.$filename->ID().'").val() == "") {
+							// generate filename
+							var filename = value.toLowerCase();
+							filename = filename.trim();
+							filename = filename.replace("ä", "ae");
+							filename = filename.replace("ö", "oe");
+							filename = filename.replace("ü", "ue");
+							filename = filename.replace("ß", "ss");
+							while(filename.match(/[^a-zA-Z0-9-_]/))
+								filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
+							
+							while(filename.match(/\-\-/))
+								filename = filename.replace("--", "-");
+							
+
+							$("#'.$filename->ID().'").val(filename);
+							
+						}
+					}
+				}
+				
+			});
+		});'));
+		
+		// default submission
+		$form->setSubmission("submit_form");	
+			
+		$form->addValidator(new DataValidator($model), "datavalidator");
+		
+		if($model->can("Write"))
+			$form->addAction(new AjaxSubmitButton("save_draft",lang("draft_save", "Save draft"),"AjaxSave"));
+		
+		if($model->can("Publish"))
+			$form->addAction(new AjaxSubmitButton('publish',lang("publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
+		
+		return $form->render();
+	}
+	
+	
+	/**
 	 * unpublishes the current version
 	 *
 	 *@name unpublish

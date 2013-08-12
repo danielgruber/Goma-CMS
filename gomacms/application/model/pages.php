@@ -740,7 +740,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
 							new checkbox('search', lang("show_in_search", "show in search?")),		
-							$filename = new textField('filename', lang("filename"))
+							$filename = new textField('filename', lang("path"))
 						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(
 							$read = new PermissionField("read_permission", lang("viewer_types"), null, true),
