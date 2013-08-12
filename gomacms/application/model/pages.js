@@ -135,6 +135,7 @@ function show_preview(publish, state, usePublish) {
 	});
 	
 	var current = state;
+	var current2 = publish;
 	var changeCount = -1;
 	$("#previewFrame").get(0).onload = function() {
 		interval = setInterval(function(){
@@ -150,7 +151,7 @@ function show_preview(publish, state, usePublish) {
 				return false;
 			}
 			
-			if(current != $("#previewFrame").get(0).contentWindow.location.href) {
+			if(current != $("#previewFrame").get(0).contentWindow.location.href && current2 != $("#previewFrame").get(0).contentWindow.location.href) {
 				current = $("#previewFrame").get(0).contentWindow.location.href;
 				changeCount++;
 				if(changeCount > 0 && current.match(/^http\:\/\//)) {

@@ -3,29 +3,35 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 10.12.2011
+  * last modified: 12.08.2013
 */
 
-.goma-tree {
+.goma-tree, .goma-tree ul {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 .goma-tree li {
 	position: relative;
+	padding-left: 1em;
 }
 .goma-tree li .tree-wrapper {
 	display: block;
+	margin-left: -10em;
+	padding-left: 10em;
+}
+.goma-tree li .tree-wrapper.node-area {
+	padding-left: 11.75em;
 }
 .goma-tree li .node-area {
 	padding: 0.5em;
-	padding-left: 1.5em;
+	padding-left: 1.75em;
 	display: block;
 	color: #555;
 	font-weight: normal;
 	text-decoration: none;
 }
-.goma-tree li:hover .node-area, .goma-tree li.active .node-area, .goma-tree li .node-area:hover, .goma-tree li.marked .node-area {
+.goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span {
 	background: #ddd;
 }
 .goma-tree li .node-area img {
@@ -83,18 +89,36 @@
 	top: 0;
 	cursor: pointer;
 	padding: 0;
-	height: 2.25em;
+	height: 0;
+	width: 0;
+	
+	user-select: none;
 }
 .goma-tree li .hitarea a {
-	width: 1em;
-	height: 1em;
-	padding: 0.625em 0.25em;
 	display: inline-block;
 }
 
-.goma-tree li.collapsed > .hitarea a {
-	background: transparent url(../admin/images/pfeil_close.png) no-repeat center center;
+.goma-tree li.collapsed > .hitarea a span {
+	border-width: 0.375em 0.375em 0.375em 0.75em;
+	border-style: solid;
+	border-color: transparent transparent transparent #444;
+	display: inline-block;
 }
-.goma-tree li.expanded > .hitarea a { 
-	background: transparent url(../admin/images/pfeil.png) no-repeat center center;
+.goma-tree li.collapsed > .hitarea a {
+	padding: 0.5em 0.375em;
+}
+.goma-tree li.collapsed > .hitarea:hover a span {
+	border-left-color: #777;
+}
+.goma-tree li.expanded > .hitarea a span {
+	border-width: 0.75em 0.375em 0.375em 0.375em;
+	border-style: solid;
+	border-color:  #444 transparent transparent transparent;
+	display: inline-block;
+}
+.goma-tree li.expanded > .hitarea:hover a span {
+	border-top-color: #777;
+}
+.goma-tree li.expanded > .hitarea a {
+	padding: 0.69em 0.375em 0.19em 0.375em;
 }

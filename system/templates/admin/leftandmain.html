@@ -23,25 +23,6 @@
 							$SITETREE
 						</div>
 					</div>
-					<div class="legend">
-						<div>
-							<h2>{$_lang_legend}</h2>
-							<% CONTROL legend() %>
-								<div class="{$legend.class} legendpoint">
-									<span>
-										<% IF $legend.checkbox AND $legend.checked %> 
-											<input name="$legend.class" type="checkbox" checked="checked" /> 
-										<% ELSE IF $legend.checkbox %> 
-											<input name="$legend.class" type="checkbox" /> 
-										<% ELSE %> 
-											<input name="$legend.class" type="checkbox" checked="checked" disabled="disabled" />
-										<% END %>
-										{$legend.title}
-									</span>
-								</div>
-							<% ENDCONTROL %>
-						</div>
-					</div>
 				</div>
 			</div>
 		</td>

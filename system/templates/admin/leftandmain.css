@@ -82,17 +82,15 @@
 }
 .leftandmaintable tr > .main > .inner .headBar {
 	background: #eee;
-	border-bottom: 1px solid #ccc;
-	padding: 0.20em;
+	border-bottom: 0.063em solid #ccc;
+	padding: 0.25em;
+}
+.leftandmaintable tr > .main > .inner .headBar span {
+	padding: 0.5em;
+	display: inline-block;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
-	padding: 0.5em;
-	margin-left: 4px;
-	background-repeat: no-repeat;
-	background-position: left center;
-	padding-left: 20px;
-	display: block;
-	float: left;
+	padding: 0 0.25em;
 }
 .leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
 	float: left;
@@ -106,8 +104,8 @@
 	border-right: 1px solid #ccc;
 }
 .leftandmaintable tr > .main > .inner .headBar .leftbar_toggle img {
-	height: 42px;
-	width: 42px;
+	height: 3em;
+	width: 3em;
 }
 
 .leftandmaintable tr > .main .no_item {
@@ -142,7 +140,7 @@
 	position: relative;
 }
 .leftandmaintable tr > .left .add a {
-	padding: 0.7em 2em;
+	padding: 0.75em 2em;
 	text-decoration: none;
 	display: inline-block;
 }
@@ -245,4 +243,34 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		background-image: url(../../../images/icons/fatcow16/file@2x.png);
 		background-size: 16px 16px;
 	}
+}
+
+.pageinfo {
+	float: right;
+}
+
+.pageinfo > .version {
+	display: block;
+	float: left;
+}
+
+.pageinfo .state {
+	float: left;
+	margin-left: 0.6em;
+}
+
+.pageinfo .state > div {
+	float: left;
+	padding: 0.5em 1em;
+	color: #aaa
+}
+.pageinfo .state .publish.active {
+	color: #24acb8;
+}
+.pageinfo .state .draft.active {
+	color: #da097a;
+}
+
+.pageinfo .preview {
+	margin: 0;
 }

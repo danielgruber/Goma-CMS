@@ -833,39 +833,6 @@ form h2 {
 	padding: 4px;
 }
 
-.pageinfo {
-	float: right;
-}
-
-.pageinfo > .version {
-	display: block;
-	float: left;
-	margin-top: 7px;
-}
-
-.pageinfo .state {
-	float: left;
-	margin-left: 0.6em;
-}
-
-.pageinfo .state > div {
-	float: left;
-	height: 1em;
-	padding: 0.5em 1em;
-	color: #aaa;
-}
-.pageinfo .state .publish.active {
-	color: #24acb8;
-}
-.pageinfo .state .draft.active {
-	color: #da097a;
-}
-
-.pageinfo .preview {
-	margin: 0;
-	margin-left: 10px;
-}
-
 #preview {
 	background: #fff;
 }
@@ -899,10 +866,14 @@ form h2 {
 #preview #bottomBar .state.active {
 	color: #da097a;
 	font-weight: bold;
+	cursor: text;
+	text-decoration: none !important;
 }
 #preview #bottomBar .publish.active {
 	color: #da097a;
 	font-weight: bold;
+	cursor: text;
+	text-decoration: none !important;
 }
 
 #preview #bottomBar .edit {
@@ -1061,9 +1032,6 @@ form h2 {
 	text-align: center;
 }
 
-.page > span {
-	background: url(../../../images/icons/fatcow16/file.png);
-}
 #visit_webpage .page {
 	font-style: italic;
 }

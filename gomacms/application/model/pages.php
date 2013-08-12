@@ -676,11 +676,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$this->queryVersion = "state";
 				
 				// render head-bar
-				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->classname.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->classname));
+				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->classname.' pageType"><img src="'.ClassInfo::getClassIcon($this->classname).'" alt="" /><span>';
 				
 				// title in head-bar
 				if($this->title)
-					$html .= ': <strong>'.convert::raw2text($this->title).'</strong>';
+					$html .= convert::raw2text($this->title);
+				else
+					$html .= convert::raw2text(ClassInfo::getClassTitle($this->classname));
 				
 				// end of title in head-bar
 				$html .= ' </span></span>';

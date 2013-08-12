@@ -54,34 +54,6 @@ class LeftAndMain extends AdminItem {
 	public $tree_class = "";
 	
 	/**
-	 * title of root-node
-	 *
-	 *@name root_node
-	 *@access public
-	*/
-	public $root_node = "";
-	
-	/**
-	 * colors of the nodes
-	 * key is class, value is a array with color and name
-	 * for example:
-	 * array("withmainbar" => array("color" => "#cfcfcf", "name" => "with mainbar"))
-	 *
-	 *@name colors
-	 *@access public
-	 *@var array
-	*/
-	public $colors = array();
-	
-	/**
-	 * icons
-	 *
-	 *@name icons
-	 *@access public
-	*/
-	public $icons = array("root" => "images/icons/fatcow16/world.png");
-	
-	/**
 	 * marked node
 	 *
 	 *@name marked
@@ -103,29 +75,6 @@ class LeftAndMain extends AdminItem {
 	 *@access protected
 	*/
 	protected $sort_field;
-	
-	/**
-	 * gets the icons from all classes and the $icons-var
-	 *
-	 *@name getIcons
-	 *@access public
-	*/
-	public function getIcons() {
-		$icons = $this->icons;
-		$icons["searchresult"] = "images/icons/fatcow16/magnifier.png";
-		foreach($this->models as $model) {
-			if(ClassInfo::hasStatic($model, "icon")) {
-				$icons[$model] = ClassInfo::findFile(ClassInfo::getStatic($model, "icon"), $model);
-			}
-			foreach(ClassInfo::getChildren($model) as $child) {
-				if(ClassInfo::hasStatic($child, "icon")) {
-					$icons[$child] = ClassInfo::findFile(ClassInfo::getStatic($child, "icon"), $child);
-				}
-			}
-		}
-		return $icons;
-	}
-	
 	
 	/**
 	 * gets the title of the root node
@@ -175,8 +124,6 @@ class LeftAndMain extends AdminItem {
 		}
 		
 		// add resources
-		$filename = $this->getCSS();
-		Resources::add(CACHE_DIRECTORY . "/" . $filename, "css");
 		Resources::add("system/core/admin/leftandmain.js", "js", "tpl");
 		
 		if(isset($this->sort_field)) {
@@ -192,8 +139,6 @@ class LeftAndMain extends AdminItem {
 		
 		$data = $this->ModelInst();
 		
-		$this->ModelInst()->customise(array("legend" => $this->legend()));
-		
 		if(defined("LAM_CMS_ADD"))
 			$this->ModelInst()->addmode = 1;
 		
@@ -205,53 +150,6 @@ class LeftAndMain extends AdminItem {
 		return parent::serve($output);
 	}
 	
-	/**
-	 * gets css-code from colors and icons
-	 *
-	 *@name getCSS
-	 *@access public
-	*/
-	public function getCSS() {
-		$filename = "left_and_main_on_the_fly_".$this->classname.".css";
-		if(!file_exists(ROOT . CACHE_DIRECTORY . "/" . $filename)) {
-			$css = "";
-			$retinaCSS = "";
-			foreach($this->getIcons() as $class => $icon) {
-				$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
-				if(file_exists($retinaPath)) {
-					$retinaCSS .= '.'.$class.' span { background-image: url(../../'.$retinaPath.') !important; background-size: 16px 16px }';
-				}
-				$css .= '.'.$class.' span { background-image: url(../../'.$icon.') !important }';
-			}
-			
-			foreach($this->colors as $class => $data) {
-				$css .= '.'.$class.' { color: '.$data["color"].' !important; }';
-			}
-			
-			if(Object::method_exists($this->tree_class, "provideTreeParams")) {
-				$params = Object::instance($this->tree_class)->provideTreeParams();
-				foreach($params as $class => $data) {
-					$css .= '.'.$class.' {';
-					foreach($data["css"] as $key => $value) {
-						$css .= $key . ': ' . $value . ";\n";
-					}
-					$css .= "}";
-				}
-			}
-			
-			$wholecss = $css . "\n\n/* here goes some retina-stuff */
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1) { 
-  ".$retinaCSS."
-}";
-			
-			FileSystem::write(ROOT . CACHE_DIRECTORY . "/" . $filename, $wholecss);
-			unset($file, $css);
-		}
-		return $filename;	
-	}
 	
 	/**
 	 * generates the tree-links.
@@ -424,30 +322,6 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	}
 	
 	/**
-	 * gets the options for add
-	 *
-	 *@name legend
-	 *@access public
-	*/
-	public function legend() {
-		$data = $this->colors;
-		$arr = array();
-		foreach($data as $class => $data) {
-			$arr[] = array("class"	=> $class, "title"	=> parse_lang($data["name"]));
-		}
-		if(Object::method_exists($this->tree_class, "provideTreeParams")) {
-				$params = Object::instance($this->tree_class)->provideTreeParams();
-				foreach($params as $class => $data) {
-					if(isset($_SESSION[$this->classname . "_tree_params"][$class])) 
-						$data["default"] = $_SESSION[$this->classname . "_tree_params"][$class];
-					
-					$arr[] = array("class" => $class, "title" => parse_lang($data["title"]), "checkbox" => true, "checked" => $data["default"]);
-				}
-			}
-		return new ViewAccessAbleData($arr);
-	}
-	
-	/**
 	 * publishes data for editing a site via ajax
 	 *
 	 *@name ajaxSave
@@ -481,8 +355,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	*/
 	public function decorateModel($model, $add = array(), $controller = null) {
 		$add["types"] = $this->Types();
-		$add["legend"] = $this->Legend();
-		
+
 		return parent::decorateModel($model, $add, $controller);
 	}
 	

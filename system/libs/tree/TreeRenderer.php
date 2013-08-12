@@ -116,6 +116,10 @@ class TreeRenderer extends Object {
 	 * @return 	String
 	*/
 	public function render($includeUL = false) {
+		
+		Resources::add("tree.css", "css", "tpl");
+		Resources::add("system/libs/tree/gTree.js", "js", "tpl");
+		
 		if(is_array($this->tree)) {
 			$html = "\n";
 			foreach($this->tree as $node) {
@@ -138,8 +142,6 @@ class TreeRenderer extends Object {
 	 * @return	String
 	*/
 	protected function renderChild(TreeNode $child) {
-		
-		Resources::add("tree.css", "css", "tpl");
 		
 		$node = new HTMLNode("li", array("id" => "treenode_" . $this->class . "_" . $child->nodeid, "class" => "tree-node"));
 		$node->append($wrapper = new HTMLNode("span", array("class" => "tree-wrapper ")));
@@ -175,30 +177,31 @@ class TreeRenderer extends Object {
 		$wrapper->attr("title", convert::raw2text($child->title));
 		
 		// render children
-		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded()) {
+		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded() || (isset($_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid]) && $_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid] == 1)) {
 			// children should be shown
 			$node->addClass("expanded");
-			$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded")));
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
 			$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
-			foreach($child->forceChildren() as $node) {
-				$ul->append($this->renderChild($node));
+			foreach($child->forceChildren() as $childNode) {
+				$ul->append($this->renderChild($childNode));
 			}
 			
 			
 		} else if(is_callable($child->getChildCallback())) {
 			// children via ajax
-			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed"), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child)))));
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
 			$node->addClass("collapsed");
 			
 			
 		} else if($child->children()) {
 			// children available
 			$node->addClass("collapsed");
-			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed")));
+			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
 			$node->append($ul = new HTMLNode("ul", array("class" => "collapsed")));
 			foreach($child->children() as $node) {
 				$ul->append($this->renderChild($node));
 			}
+			
 		} else {
 			// no children
 		}

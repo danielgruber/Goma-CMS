@@ -12,8 +12,8 @@ class TreeCallbackUrl extends RequestHandler {
 	 * url-handler.
 	*/
 	public $url_handlers = array(
-		"model/\$model!/\$parent!"	=> "handleByModel",
-		"key/\$key!"				=> "handleByKey"
+		"model/\$model!/\$parent!/\$renderer!"	=> "handleByModel",
+		"key/\$key!/\$renderer!"					=> "handleByKey"
 	);
 	
 	/**
@@ -29,15 +29,20 @@ class TreeCallbackUrl extends RequestHandler {
 	 *
 	 * @param	TreeNode $node the treenode for generating the URL
 	*/
-	static function generate_tree_url(TreeNode $treenode) {
+	static function generate_tree_url(TreeNode $treenode, TreeRenderer $renderer) {
+		
+		$renderer->tree = null;
+		$renderKey = md5(serialize($renderer));
+		session_store("tree_renderer_" . $renderKey, $renderer);
+		
 		if(isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
-			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . URLEND;
+			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
 		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID) && Object::method_exists($treenode->treeclass, "build_tree")) {
-			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . URLEND;
+			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
 		} else if($treenode->getChildCallback() != null) {
 			$key = md5(serialize($treenode));
 			session_store("tree_node_" . $key, $treenode);
-			return "treecallback/key/" . $key . URLEND;
+			return "treecallback/key/" . $key . "/" . $renderKey . URLEND . "?redirect=" . urlencode(getRedirect());
 		} else {
 			throw new LogicException("Could not generate URL from TreeNode. You are required to set the child-callback through TreeNode::setChildCallback(\$callback)");
 		}
@@ -49,22 +54,28 @@ class TreeCallbackUrl extends RequestHandler {
 	public function handleByModel() {
 		$model = $this->getParam("model");
 		$parent = $this->getParam("parent");
-		
-		if(ClassInfo::exists($model) && Object::method_exists($model, "build_tree")) {
-			$record = DataObject::get_by_id($model, $parent);
-			$tree = call_user_func_array(array($model, "build_tree"), array($record));
+		$renderer = session_restore("tree_renderer_" . $this->getParam("renderer"));
 			
-			if(isset($_GET["renderer"]) && ClassInfo::exists($_GET["renderer"]) && is_subclass_of($_GET["renderer"], "TreeRenderer")) {
-				$renderClass = $_GET["renderer"];
-			} else {
-				$renderClass = "TreeRenderer";
+		if(Core::is_ajax()) {
+			
+			if(ClassInfo::exists($model) && Object::method_exists($model, "build_tree")) {
+				$record = DataObject::get_by_id($model, $parent);
+				$tree = call_user_func_array(array($model, "build_tree"), array($record));
+				
+				$renderer->tree = $tree;
+				return $renderer->render();
 			}
 			
-			$renderer = new $renderClass($tree);
-			return $renderer->render();
+			return false;
+		} else {
+			if($_COOKIE["tree_" .  $model . "_" . $parent] == 1)
+				setcookie("tree_" . $model . "_" . $parent, 0);
+			else
+				setcookie("tree_" . $model . "_" . $parent, 1);
+			
+			HTTPResponse::redirect(getRedirect());
+			exit;
 		}
-		
-		return false;
 	}
 	
 	/**
@@ -72,18 +83,24 @@ class TreeCallbackUrl extends RequestHandler {
 	*/
 	public function handleByKey() {
 		$key = $this->getParam("key");
+		$renderer = session_restore("tree_renderer_" . $this->getParam("renderer"));
 		
 		if(session_store_exists("tree_node_" . $key)) {
-			$tree = session_restore("tree_node_" . $key)->forceChildren();
+			$node = session_restore("tree_node_" . $key);
+			$tree = $node->forceChildren();
 			
-			if(isset($_GET["renderer"]) && ClassInfo::exists($_GET["renderer"]) && is_subclass_of($_GET["renderer"], "TreeRenderer")) {
-				$renderClass = $_GET["renderer"];
+			if(Core::is_ajax()) {
+				$renderer->tree = $tree;
+				return $renderer->render();
 			} else {
-				$renderClass = "TreeRenderer";
+				if($_COOKIE["tree_" .  $node->treeclass . "_" . $node->recordid] == 1)
+					setcookie("tree_" .  $node->treeclass . "_" . $node->recordid, 0, 0, '/');
+				else
+					setcookie("tree_" .  $node->treeclass . "_" . $node->recordid, 1, 0, "/");
+				
+				HTTPResponse::redirect(getRedirect());
+				exit;
 			}
-			
-			$renderer = new $renderClass($tree);
-			return $renderer->render();
 		}
 		
 		return false;
