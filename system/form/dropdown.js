@@ -1,11 +1,11 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 01.07.2013
-*/
-
+ * The JS for dropdowns.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.0
+ */
 var DropDown = function(id, url, multiple) {
 	this.url = url;
 	this.multiple = multiple;

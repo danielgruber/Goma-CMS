@@ -1,15 +1,14 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 20.03.2013
-  * $Version 1.1.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * A file upload set.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.1.9
+ */
 class FileUploadSet extends FormField {
 	/**
 	 * url-handlers

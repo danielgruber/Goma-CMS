@@ -1,12 +1,11 @@
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 11.03.2013
-  * $Version - 1.0
-*/
-
+ * The JS for forms.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.0
+ */
 if(typeof goma == "undefined")
 	var goma = {};
 

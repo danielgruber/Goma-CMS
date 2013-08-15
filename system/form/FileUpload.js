@@ -1,16 +1,11 @@
 /**
-  * simple fileupload
-  * 
-  * thanks to https://github.com/pangratz/dnd-file-upload/blob/master/jquery.dnd-file-upload.js
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 11.04.2012
-  * $Version 1.1.1
-*/
-
-
+ * The JS for field sets.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.0
+ */
 function FileUpload(formelement, url, size) {
 	
 	preloadLang(["files.filesize_failure"]);
