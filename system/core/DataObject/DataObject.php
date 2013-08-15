@@ -2276,7 +2276,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					return false;
 			}
 
-			$query = new SelectQuery($table, array($data["extfield"]), array($data["field"] => $this["versionid"]));	
+			$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
+
+			$query = new SelectQuery($table, array($data["extfield"]), array($data["field"] => $this["versionid"]));
+			
+			// filter for not existing records
+			$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"];
 			
 			$query->execute();			
 			$arr = array();

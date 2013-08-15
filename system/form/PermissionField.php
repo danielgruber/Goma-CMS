@@ -177,9 +177,9 @@ class PermissionField extends ClusterFormField {
 			$this->value->parentid = 0;
 			$this->value->parent = null;
 			// now remodify it by the given fields
-			foreach($this->fields as $key => $val) {
+			foreach($this->fields as $val) {
 				if($result = $val->result()) {
-					$this->value->$key = $result;
+					$this->value->{$val->dbname} = $result;
 				}
 			}
 		}

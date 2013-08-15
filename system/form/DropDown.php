@@ -116,6 +116,7 @@ class DropDown extends FormField
 					}
 				}
 				
+				
 				if($this->value !== null && $this->value !== false && !is_object($this->value)) {
 					if(is_array($this->value)) {
 						$this->dataset = $this->value;
@@ -291,6 +292,9 @@ class DropDown extends FormField
 		 * @return mixed it is an array in case of multiselect-field or string in single-select-mode.
 		*/
 		public function result() {
+			
+			$this->getValue();
+			
 			if(!$this->disabled)
 				if($this->multiselect)
 					return $this->dataset;
@@ -501,6 +505,7 @@ class DropDown extends FormField
 			if($this->multiselect) {
 				$this->dataset[] = $this->getParam("value");
 				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+				var_dump($this->dataset);
 			} else {
 				$this->value = $this->getParam("value");
 			}

@@ -363,7 +363,7 @@ class ClusterFormField extends FormField {
 		$this->result = array();
 		foreach($this->fields as $field) {
 
-			$this->result[$field->name] = $field->result();
+			$this->result[$field->dbname] = $field->result();
 		}
 	
 		return $this->result;
