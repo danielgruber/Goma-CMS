@@ -1,15 +1,16 @@
-<?php
-defined("IN_GOMA") OR die();
+<?php defined("IN_GOMA") OR die();
 
 /**
  * This is a simple searchable dropdown.
  *
  * It supports the same as Select, but also Search and Pagination for big data.
  *
- * @package     Goma\Form
- * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @author      Goma-Team
- * @version     1.5.1
+ * @package Goma\Form
+ *
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author Goma-Team
+ *
+ * @version 1.5.1
  */
 class DropDown extends FormField {
 	/**
@@ -86,11 +87,11 @@ class DropDown extends FormField {
 	/**
 	 * Constructor.
 	 *
-	 * @param   string $name unique name in the form
-	 * @param   string $title label for the field
-	 * @param 	array $options array of key-value for the data selectable
-	 * @param 	int|string $value a integer or string for the selected item
-	 * @param 	object $parent a Form object if you want to give the form it will be
+	 * @param string $name unique name in the form
+	 * @param string $title label for the field
+	 * @param array $options array of key-value for the data selectable
+	 * @param int|string $value a integer or string for the selected item
+	 * @param object $parent a Form object if you want to give the form it will be
 	 * applied to
 	 *
 	 * @access public
@@ -118,19 +119,11 @@ class DropDown extends FormField {
 					$this->input->value = $this->key;
 					return true;
 				}
+			}
 
-				if($this->value !== null && $this->value !== false && !is_object($this->value)) {
-					if(is_array($this->value)) {
-						$this->dataset = $this->value;
-					} else {
-						$this->dataset = array($this->value);
-					}
-					$this->key = randomString(5);
-				} else if($this->POST && isset($this->form()->result[$this->dbname]) && $this->value == null) {
-					$this->dataset = $this->form()->result[$this->dbname];
-					
-					$this->key = randomString(5);
-
+			if($this->value !== null && $this->value !== false && !is_object($this->value)) {
+				if(is_array($this->value)) {
+					$this->dataset = $this->value;
 				} else {
 					$this->dataset = array($this->value);
 				}
@@ -286,24 +279,6 @@ class DropDown extends FormField {
 		} else {
 			return isset($this->options[$this->value]) ? array($this->options[$this->value]) : array($this->value);
 		}
-<<<<<<< HEAD
-		
-		/**
-		 * generates the result of this form-field.
-		 *
-		 * @access public
-		 * @return mixed it is an array in case of multiselect-field or string in single-select-mode.
-		*/
-		public function result() {
-			
-			$this->getValue();
-			
-			if(!$this->disabled)
-				if($this->multiselect)
-					return $this->dataset;
-				else
-					return parent::result();
-=======
 	}
 
 	/**
@@ -314,10 +289,12 @@ class DropDown extends FormField {
 	 * single-select-mode.
 	 */
 	public function result() {
+
+		$this->getValue();
+
 		if(!$this->disabled)
 			if($this->multiselect)
 				return $this->dataset;
->>>>>>> Some docu and format
 			else
 				return parent::result();
 		else
@@ -512,33 +489,6 @@ class DropDown extends FormField {
 		} else {
 			$data = $this->getDataFromModel($page);
 		}
-<<<<<<< HEAD
-		
-		/**
-		 * responds to a user-request and marks a value as checked.
-		 *
-		 * @access public
-		 * @return string rendered dropdown-input
-		*/
-		public function checkValue() {
-			
-			if($this->multiselect) {
-				$this->dataset[] = $this->getParam("value");
-				session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
-				var_dump($this->dataset);
-			} else {
-				$this->value = $this->getParam("value");
-			}
-			if(Core::is_ajax()) {
-				return $this->renderInputWidget();
-			} else {
-				if($this->multiselect)
-					$this->form()->post[$this->PostName()] = $this->key;
-				else
-					$this->form()->post[$this->PostName()] = $this->value;
-				$this->form()->redirectToForm();
-			}
-=======
 
 		$arr = $data["data"];
 
@@ -551,7 +501,6 @@ class DropDown extends FormField {
 			$value = array();
 		} else {
 			$value = array_flip($value);
->>>>>>> Some docu and format
 		}
 
 		$return = array(
@@ -586,6 +535,7 @@ class DropDown extends FormField {
 		if($this->multiselect) {
 			$this->dataset[] = $this->getParam("value");
 			session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			var_dump($this->dataset);
 		} else {
 			$this->value = $this->getParam("value");
 		}
