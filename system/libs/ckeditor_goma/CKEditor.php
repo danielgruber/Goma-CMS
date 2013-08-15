@@ -7,7 +7,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.0
+ * @version		1.0.1
 */
 
 class GomaCKEditor extends GomaEditor {
@@ -85,8 +85,8 @@ class GomaCKEditor extends GomaEditor {
 			$params = ArrayLib::map_key($params, "strtolower");
 			if(preg_match_all('/\$([a-zA-Z0-9_]+)/i', $config, $matches)) {
 				foreach($matches[1] as $k => $param) {
-					if(isset($params[$param]))
-						$config = str_replace($matches[0][$k], $params[$param], $config);
+					if(isset($params[strtolower($param)]))
+						$config = str_replace($matches[0][$k], $params[strtolower($param)], $config);
 				}
 			}
 			

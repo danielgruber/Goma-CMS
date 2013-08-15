@@ -1578,6 +1578,7 @@ class GFS_Package_installer extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
+		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
 		// includes
 		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
@@ -1593,6 +1594,7 @@ class GFS_Package_installer extends GFS {
 		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
+		$code .= 'if(!class_exists("Convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
 		$code .= '$gfs = new GFS_Package_Installer('.var_export($this->file, true).');';
 		$code .= '$gfs->unpack('.var_export($destination, true).');';
 		FileSystem::write(ROOT . $file, $code);
@@ -1859,6 +1861,7 @@ class GFS_Package_Creator extends GFS {
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
+		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
 		// includes
 		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
@@ -1874,6 +1877,7 @@ class GFS_Package_Creator extends GFS {
 		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
+		$code .= 'if(!class_exists("convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
 		$code .= '$gfs = new GFS_Package_Creator('.var_export($this->file, true).');';
 		$code .= '$gfs->commit(__FILE__, '.var_export($index, true).');';
 		FileSystem::write(ROOT . $file, $code);

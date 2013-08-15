@@ -336,7 +336,7 @@ class admin extends ViewAccessableData implements PermProvider
 			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
 				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
 				if($count > 45) {
-					Core::CleanUpLog(44);
+					Core::CleanUpLog(40);
 				
 					AddContent::addSuccess(lang("flush_log_success"));
 				}
