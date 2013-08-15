@@ -307,13 +307,13 @@ var LaM_type_timeout;
 		
 		// bind events to the nodes to load the content then
 		node.find("a.node-area").click(function(){
-			if($(this).parent().parent().attr("data-recordid") != 0) {
+			if($(this).parent().parent().attr("data-nodeid") != 0) {
 				// no ajax in IE
 				if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
 					return true;
 				}
 				
-				LoadTreeItem($(this).parent().parent().attr("data-recordid"));
+				LoadTreeItem($(this).parent().parent().attr("data-nodeid"));
 			}
 			return false;
 		});
@@ -377,10 +377,16 @@ var LaM_type_timeout;
 	
 	// function to load content of a tree-item
 	w.LoadTreeItem = function (id) {
-		var $this = $("li[data-recordid="+id+"] > span > a.node-area");
-		if($this.length == 0) {
+		var $this = $("li[data-nodeid="+id+"] > span > a.node-area");
+		if($this.length == 0 && $("li[data-recordid="+id+"] > span > a.node-area").length == 0) {
 			return false;
 		}
+		
+		if($this.length == 0) {
+			$this = $("li[data-recordid="+id+"] > span > a.node-area");
+		}
+		
+		
 		
 		// Internet Explorer seems not to work correctly with Ajax, maybe we'll fix it later on, but until then, we will just load the whole page ;)
 		if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {

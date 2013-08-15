@@ -283,7 +283,7 @@ class LeftAndMain extends AdminItem {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
-			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }, ".var_export($model["id"], true)."); }");
+			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('" . $model["id"]."'); }, ".var_export($model["id"], true)."); }");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("LESS_RIGHTS"), lang("ERROR"));
@@ -317,7 +317,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function hideDeletedObject($response, $data) {
-		$response->exec("reloadTree(function(){ LoadTreeItem(0);});");
+		$response->exec("reloadTree(function(){ goma.ui.ajax(undefined, {url: '".$this->originalNamespace."'}); });");
 		return $response;
 	}
 	
@@ -335,7 +335,7 @@ class LeftAndMain extends AdminItem {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
-			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }, ".var_export($model["id"], true).");}");
+			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('" . $model["id"]."'); }, ".var_export($model["id"], true).");}");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));
