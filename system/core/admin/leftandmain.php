@@ -175,7 +175,7 @@ class LeftAndMain extends AdminItem {
 		}
 		
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state")));
-		$treeRenderer = new TreeRenderer($tree);
+		$treeRenderer = new LeftAndMain_TreeRenderer($tree, null, null, $this->originalNamespace);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->mark($this->getParam("id"));
 		

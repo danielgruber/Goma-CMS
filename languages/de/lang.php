@@ -291,6 +291,7 @@ $lang = array(
 	"pages_delete"									=> "Seiten l&ouml;schen",
 	"pages_edit"									=> "Seiten bearbeiten",
 	"pages_add"										=> "Seiten erstellen",
+	"PAGE_CREATE"									=> "Neue Seite erstellen",
 	"pages_publish"									=> "Seiten veröffentlichen",
 	// default DataObjects
 	"data_manage" 									=> "Andere Daten verwalten",
@@ -305,7 +306,7 @@ $lang = array(
 	"version_available"								=> "Es ist eine neuere Version verfügbar.",
 	"upgrade_to_next"								=> "N&auml;chste Version herunterladen",
 	"version_current"								=> "Sie haben die aktuellste Version!",
-	"Create"										=> "Erstellen",
+	"CREATE"										=> "Erstellen",
 	"no_result"										=> "Keine Elemente",
 	"delete_okay"									=> "Der Eintrag wurden erfolgreich entfernt!",
 	

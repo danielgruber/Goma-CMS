@@ -289,9 +289,10 @@ $lang = array(
 	"errorcode"										=> "errorcode",
 	"general"										=> "general",
 	"delete_confirm"								=> "Do you really want to delete this data?",
-	"pages_delete"									=> "delete page",
-	"pages_edit"									=> "edit page",
-	"pages_add"										=> "create page",
+	"pages_delete"									=> "delete pages",
+	"pages_edit"									=> "edit pages",
+	"pages_add"										=> "create pages",
+	"PAGE_CREATE"									=> "Create new page",
 	"pages_publish"									=> "publish page",
 	// default DataObjects
 	"data_manage"									=> "manage other data",

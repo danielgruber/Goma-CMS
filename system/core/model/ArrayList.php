@@ -594,6 +594,9 @@ class ArrayList extends ViewAccessableData implements Countable {
 		if(isset($this->items[$offset]))
 			return $this->items[$offset];
 		
+		if(property_exists($this, $offset))
+			return $this->$offset;
+		
 		return null;
 	}
 	
@@ -608,6 +611,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 			$this->items[$offset] = $value;
 			return true;
 		}
+		
+		$this->$offset = $value;
 		
 		return false;
 	}

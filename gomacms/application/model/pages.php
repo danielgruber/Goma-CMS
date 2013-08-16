@@ -1094,7 +1094,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						$node->addBubble(lang("CHANGED"), "red");
 					else
 						$node->addBubble(lang("NEW"), "blue");
-						
+				
+				if(!$record->mainbar) {
+					$node->addClass("hidden");
+				}
 						
 				if($record->children()->count() > 0) {
 					$node->setChildCallback(array("pages", "build_tree"));
@@ -1103,9 +1106,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$nodes[] = $node;
 			}
 			
+			
 			return $nodes;
 		}
-		
 		
 		//!APIs
 		/**

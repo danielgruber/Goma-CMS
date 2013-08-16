@@ -30,9 +30,15 @@
 	padding: 0.5em;
 	padding-left: 1.75em;
 	display: block;
-	color: #555;
+	color: #000;
 	font-weight: normal;
 	text-decoration: none;
+}
+.goma-tree li.hidden .node-area {
+	color: #666;
+}
+.goma-tree li.action .node-area {
+	color: #999;
 }
 .goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span {
 	background: #ddd;

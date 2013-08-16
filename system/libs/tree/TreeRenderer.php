@@ -109,22 +109,19 @@ class TreeRenderer extends Object {
 		return $this->linkCallback;
 	}
 	
-	
 	/**
 	 * renders the tree.
 	 *
 	 * @return 	String
 	*/
-	public function render($includeUL = false) {
+	public function render($includeUL = false, $parentID = 0) {
 		
 		Resources::add("tree.css", "css", "tpl");
 		Resources::add("system/libs/tree/gTree.js", "js", "tpl");
 		
 		if(is_array($this->tree)) {
 			$html = "\n";
-			foreach($this->tree as $node) {
-				$html .= $this->renderChild($node);
-			}
+			$html .= $this->renderSubChildren($this->tree, $parentID);
 			
 			if($includeUL)
 				return '<ul class="goma-tree '.$this->class.'">'.$html.'</ul>';
@@ -133,6 +130,20 @@ class TreeRenderer extends Object {
 		} else {
 			return $this->renderChild($this->tree);
 		}
+	}
+	
+	/**
+	 * method to render all subchildren of given array of children.
+	 *
+	 * @name	renderSubChildren
+	 * @access	protected
+	*/
+	protected function renderSubChildren($nodes, $parentID = 0) {
+		$html = "";
+		foreach($nodes as $node) {
+			$html .= $this->renderChild($node);
+		}
+		return $html;
 	}
 	
 	/**
@@ -182,9 +193,7 @@ class TreeRenderer extends Object {
 			$node->addClass("expanded");
 			$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
 			$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
-			foreach($child->forceChildren() as $childNode) {
-				$ul->append($this->renderChild($childNode));
-			}
+			$ul->html($this->renderSubChildren($child->forceChildren(), $child->recordid));
 			
 			
 		} else if(is_callable($child->getChildCallback())) {
@@ -198,9 +207,7 @@ class TreeRenderer extends Object {
 			$node->addClass("collapsed");
 			$node->prepend(new HTMLNode("span", array("class" => "hitarea collapsed", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
 			$node->append($ul = new HTMLNode("ul", array("class" => "collapsed")));
-			foreach($child->children() as $node) {
-				$ul->append($this->renderChild($node));
-			}
+			$ul->html($this->renderSubChildren($child->Children(), $child->recordid));
 			
 		} else {
 			// no children

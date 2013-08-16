@@ -98,7 +98,7 @@ class TreeNode extends ArrayList {
 		$this->treeclass = $class_name;
 		if(isset($icon) && $icon && $icon = ClassInfo::findFile($icon, $class_name)) {
 			$this->icon = $icon;
-		} else if(strtolower($class_name) != "treeholder") {
+		} else if(strtolower($class_name) != "treeholder" && !empty($class_name)) {
 			$this->icon = ClassInfo::getClassIcon($class_name);
 		}
 	}
@@ -190,7 +190,6 @@ class TreeNode extends ArrayList {
 		else
 			throw new LogicException("TreeNode::setChildCallback: first argument must be a valid callback.");
 	}
-	
 	
 	/**
 	 * returns current child-callback.

@@ -221,6 +221,7 @@ class contentAdmin extends LeftAndMain
 		}
 		
 		$allowed_parents = $model->allowed_parents();
+		
 		$this->selectModel($model, true);
 		
 		// render head-bar
@@ -231,21 +232,34 @@ class contentAdmin extends LeftAndMain
 		// end of title in head-bar
 		$html .= ' </span></span></div>';
 		
-		$form = new Form($this, "add_page", array(
-			new HTMLField('headbar', $html),
-			$title = new textField('title', lang("title_page", "title of the page")),
-			$mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")),
-			$parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+		$form = new Form($this, "add_page");
+		
+		if(isset($_GET["parentid"]) && $_GET["parentid"] != 0) {
+			$form->setResult(array(
+				"parenttype"	=> "subpage",
+				"parentid"		=> $_GET["parentid"]
+			));
+		} else {
+			$form->setResult(array(
+				"parenttype"	=> "root",
+				"parentid"		=> 0
+			));
+
+		}
+		
+		$form->add(new HTMLField('headbar', $html));
+		$form->add($title = new textField('title', lang("title_page", "title of the page")));
+		$form->add($mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")));
+		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
 				"root" => lang("no_parentpage", "Root Page"),
 				"subpage" => array(
 					lang("subpage","sub page"),
 					"parent"
 				)
-			), "root"),
-			$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'),
-			$filename = new textField('filename', lang("path")),
-			new HiddenField("class_name", $model->classname)
-		));
+			)));
+		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
+		$form->add($filename = new textField('filename', lang("path")));
+		$form->add(new HiddenField("class_name", $model->classname));
 		
 		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
 		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");

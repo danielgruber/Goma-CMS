@@ -7,7 +7,7 @@
 			<% ELSE %>
 				<li>
 			<% END %>
-				<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="ui-ajax">
+				<a href="{$adminuri}add/{$types.value.url()}{URLEND}?parentid=$_GET_parentid" class="ui-ajax">
 					<img src="$types.icon" alt="" />
 					<span>$types.title.text()</span>
 				</a>

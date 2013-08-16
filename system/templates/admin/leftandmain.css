@@ -139,15 +139,15 @@
 .leftandmaintable tr > .left form {
 	position: relative;
 }
-.leftandmaintable tr > .left .add a {
-	padding: 0.75em 2em;
-	text-decoration: none;
-	display: inline-block;
+.leftandmaintable tr > .left a.create {
+	position: absolute;
+	top: 0.7em;
+	right: 0.5em;
+	height: 24px;
+	width: 24px;
+	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
 }
-.leftandmaintable tr > .left .add {
-	border-bottom: 1px solid #ccc;
-	text-align: center;
-}
+
 .leftandmaintable tr > .left a.create:hover {
 	background-image: url(../../../images/icons/modernui/dark/24x24/appbar.add.png);
 }
@@ -161,7 +161,7 @@
 	padding-right: 20px;
 	border-bottom: 1px solid #cfcfcf !important;
 	background: #eee;
-	height: 2.85em;
+	height: 2.81em;
 }
 .leftandmaintable tr > .left .classtree .treesearch input:focus {
 	border: 0;
@@ -173,33 +173,14 @@
 	padding: 0;
 	padding-top: 1px;
 }
-
-
-.leftandmaintable tr > .left {
-	overflow: hidden;
-}
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
 	background: #eee;
 	padding-bottom: 15px;
 }
-.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend {
-	background: #eee;
-}
-.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend > div {
-	padding: 10px;
-}
 .leftandmaintable tr > .left .classtree .treewrapper > ul > li {
 	padding-left: 0;
-}
-
-.legend h2 {
-	margin: 0;
-	margin-bottom: 7px;
-}
-.legend div span {
-	background-image: none !important;
 }
 ul.list-view.create {
 	margin-left: -0.7em;

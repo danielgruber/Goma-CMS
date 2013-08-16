@@ -63,7 +63,7 @@ class TreeCallbackUrl extends RequestHandler {
 				$tree = call_user_func_array(array($model, "build_tree"), array($record));
 				
 				$renderer->tree = $tree;
-				return $renderer->render();
+				return $renderer->render(false, $parent);
 			}
 			
 			return false;
@@ -91,7 +91,7 @@ class TreeCallbackUrl extends RequestHandler {
 			
 			if(Core::is_ajax()) {
 				$renderer->tree = $tree;
-				return $renderer->render();
+				return $renderer->render(false, $node->recordid);
 			} else {
 				if($_COOKIE["tree_" .  $node->treeclass . "_" . $node->recordid] == 1)
 					setcookie("tree_" .  $node->treeclass . "_" . $node->recordid, 0, 0, '/');
