@@ -43,7 +43,7 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 		$addNode->addClass("hidden");
 		$addNode->addClass("action");
 		
-		$html .= $this->renderChild($addNode);
+		$html = $this->renderChild($addNode) . $html;
 		
 		return $html;
 	}
@@ -53,7 +53,7 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 	*/
 	public function createAddLink($child, $bubbles) {
 		return new HTMLNode("a", array("href" => $this->namespace . "/add" . URLEND . "?parentid=" . $child->parentid, "class" => "node-area"), array(
-			new HTMLNode("img", array("src" => "images/icons/modernui/dark/24x24/appbar.add.png")),
+			new HTMLNode("img", array("src" => "images/icons/goma16/page_new.png", "data-retina" => "images/icons/goma16/page_new@2x.png")),
 			$child->title,
 			$bubbles
 		));

@@ -766,8 +766,9 @@ class Dev extends RequestHandler {
 	 *
 	 */
 	public static function redirectToDev() {
+		@session_start();
 		$_SESSION["dev_without_perms"] = true;
-		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(true));
+		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
 		exit ;
 	}
 

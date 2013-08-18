@@ -326,9 +326,10 @@ var LaM_type_timeout;
 				$(this).find( " > li " ).css("cursor", "move");
 				$(this).sortable({
 					helper: 'clone',
-					items: ' > li',
+					items: ' > li:not(.action)',
 					cursor: "move",
 					axis: "y",
+					cancel: " > li.action",
 					update: function(event, ui)
 					{
 						$.ajax({

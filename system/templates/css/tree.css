@@ -38,7 +38,8 @@
 	color: #666;
 }
 .goma-tree li.action .node-area {
-	color: #999;
+	color: #333;
+	font-style: italic;
 }
 .goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span {
 	background: #ddd;
