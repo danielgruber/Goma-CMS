@@ -77,6 +77,11 @@ class LeftAndMain extends AdminItem {
 	protected $sort_field;
 	
 	/**
+	 * render-class.
+	*/
+	static $render_class = "LeftAndMain_TreeRenderer";
+	
+	/**
 	 * gets the title of the root node
 	 *
 	 *@name getRootNode
@@ -163,6 +168,32 @@ class LeftAndMain extends AdminItem {
 	}
 	
 	/**
+	 * generates the context-menu.
+	*/
+	public function generateContextMenu($child) {
+		if($child->treeclass) {
+			return array(
+				array(
+					"icon"		=> "images/icons/goma16/page_new.png",
+					"label"		=> lang("SUBPAGE_CREATE"),
+					"ajaxhref"	=> $this->originalNamespace . "/add" . URLEND . "?parentid=" . $child->recordid
+				),
+				"hr",
+				array(
+					"icon"		=> "images/16x16/edit.png",
+					"label" 	=> lang("edit"),
+					"onclick"	=> "LoadTreeItem(".$child->recordid.");"
+				),
+				array(
+					"icon"		=> "images/16x16/del.png",
+					"label" 	=> lang("delete"),
+					"ajaxhref"	=> $this->originalNamespace . "/record/" . $child->recordid . "/delete" . URLEND
+				)
+			);
+		}
+	}
+	
+	/**
 	 * creates the Tree
 	 *
 	 *@name createTree
@@ -171,12 +202,17 @@ class LeftAndMain extends AdminItem {
 	public function createTree($search = "", $marked = null) {
 		$tree_class = $this->tree_class;
 		if($tree_class == "") {
-			throwError(6, 'PHP-Error', "Failed to load \$tree_class! Please define \$tree_class in ".$this->classname."");
+			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
+		}
+		
+		if(!Object::method_exists($tree_class, "build_tree")) {
+			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
 		
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state")));
-		$treeRenderer = new LeftAndMain_TreeRenderer($tree, null, null, $this->originalNamespace);
+		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
+		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
 		$treeRenderer->mark($this->getParam("id"));
 		
 		return $treeRenderer->render(true);

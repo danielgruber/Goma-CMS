@@ -50,6 +50,34 @@ function tree_bind(tree) {
 				
 		return false;
 	});
+	
+	gloader.load("history");
+	HistoryLib.bind(function(url){
+		node.find("li a").each(function(){
+			var a = $(this);
+			var li = a.parent().parent();
+			var path = a.attr("href");
+			if(path.length > url.length) {
+				if(path.substr(path.length - url.length) == url) {
+					li.addClass("marked");
+				} else {
+					li.removeClass("marked");
+				}
+			} else if(path.length < url.length) {
+				if(url.substr(url.length - path.length) == path) {
+					li.addClass("marked");
+				} else {
+					li.removeClass("marked");
+				}
+			} else {
+				if(url == path) {
+					li.addClass("marked");
+				} else {
+					li.removeClass("marked");
+				}
+			}
+		});
+	}, true);
 }
 
 

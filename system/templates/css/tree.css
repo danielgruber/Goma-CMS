@@ -13,6 +13,11 @@
 }
 .goma-tree {
 	margin-left: -1em;
+	
+	 -webkit-user-select: none;
+       -moz-user-select: -moz-none;
+        -ms-user-select: none;
+            user-select: none;
 }
 .goma-tree li {
 	position: relative;
@@ -33,13 +38,14 @@
 	color: #000;
 	font-weight: normal;
 	text-decoration: none;
+	text-overflow: ellipsis;
 }
 .goma-tree li.hidden .node-area {
 	color: #666;
 }
 .goma-tree li.action .node-area {
 	color: #333;
-	font-style: italic;
+	font-style: italic
 }
 .goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span {
 	background: #ddd;

@@ -263,12 +263,17 @@ if(typeof goma.ui == "undefined") {
 					
 				}
 				
+				if(options.pushToHistory) {
+					if(typeof HistoryLib.push == "function")
+						HistoryLib.push(options.url);
+				}
+				
 				$.ajax(options).done(function(r, c, a){
 					if(typeof goma.ui.progress != "undefined") {
 						goma.ui.setProgress(50);
 					}
 					
-					goma.ui.renderResponse(r, a, node, undefined, false).done(function(){
+					goma.ui.renderResponse(r, a, node, undefined, false, true).done(function(){
 						node.removeClass("loading");
 						if(typeof goma.ui.progress != "undefined") {
 							goma.ui.setProgress(100);
@@ -454,7 +459,7 @@ if(typeof goma.ui == "undefined") {
 			 *@name renderResponse
 			 *@access public
 			*/
-			renderResponse: function(html, xhr, node, object, checkUnload) {
+			renderResponse: function(html, xhr, node, object, checkUnload, progress) {
 				var deferred = $.Deferred();
 				
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
@@ -471,7 +476,7 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
-				goma.ui.loadResources(xhr).done(function(){
+				goma.ui.loadResources(xhr, progress).done(function(){
 					
 					if(xhr != null) {
 						var content_type = xhr.getResponseHeader("content-type");
@@ -555,7 +560,7 @@ if(typeof goma.ui == "undefined") {
 				}
 			},
 			
-			loadResources: function(request) {
+			loadResources: function(request, progress) {
 				var deferred = $.Deferred();
 				
 				var css = request.getResponseHeader("X-CSS-Load");
@@ -566,7 +571,8 @@ if(typeof goma.ui == "undefined") {
 				var jsfiles = (js != null) ? js.split(";") : [];
 				
 				var perProgress = Math.round((50 / (jsfiles.length + cssfiles.length)));
-			
+				var p = progress;
+				
 				var i = 0;
 				// we create a function which we call for each of the files and it iterates through the files
 				// if it finishes it notifies the deferred object about the finish
@@ -600,7 +606,7 @@ if(typeof goma.ui == "undefined") {
 											noRequestTrack: true,
 											dataType: "html"
 										}).done(function(css) {
-											if(typeof goma.ui.progress != "undefined") {
+											if(typeof goma.ui.progress != "undefined" && p) {
 												goma.ui.setProgress(goma.ui.progress + perProgress);
 											}
 											
@@ -663,7 +669,7 @@ if(typeof goma.ui == "undefined") {
 										noRequestTrack: true,
 										dataType: "html"
 									}).done(function(js){
-										if(typeof goma.ui.progress != "undefined") {
+										if(typeof goma.ui.progress != "undefined" && p) {
 											goma.ui.setProgress(goma.ui.progress + perProgress);
 										}
 										// build into internal cache
@@ -962,10 +968,7 @@ if(typeof self.loader == "undefined") {
 				var destination = $this.attr("data-destination") ? $this.attr("data-destination") : undefined;
 				$this.addClass("loading");
 				goma.ui.ajax(destination, {
-					beforeSend: function() {
-						if(!$this.hasClass("no-history") && typeof HistoryLib.push == "function")
-							HistoryLib.push($this.attr("href"));
-					},
+					pushToHistory: (!$(this).hasClass("no-history")),
 					url: $this.attr("href"),
 					data: {"ui-ajax": true}
 				}).done(function(){

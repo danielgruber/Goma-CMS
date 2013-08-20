@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-History-Lib
- * @version	1.0.2
+ * @version	1.1
  */
 
 window.__oldHash = location.hash;
@@ -16,6 +16,13 @@ var HistoryLib = {
 	 *@name binded
 	*/
 	binded: [],
+	
+	/**
+	 * binded to all
+	 *
+	 *@name bindedAll
+	*/
+	bindedAll: [],
 	
 	/**
 	 * mode how we handle it
@@ -38,9 +45,12 @@ var HistoryLib = {
 	/**
 	 * bind
 	*/
-	bind: function(fn) {
+	bind: function(fn, all) {
 		if(typeof fn == "function") {
-			HistoryLib.binded.push(fn);
+			if(all)
+				HistoryLib.bindedAll.push(fn);
+			else
+				HistoryLib.binded.push(fn);
 		}
 		
 		if(this.mode == "hash") {
@@ -54,6 +64,9 @@ var HistoryLib = {
 		HistoryLib.lastPush = true;
 		if(HistoryLib.mode == "history") {
 			window.history.pushState({}, null, url);
+			for(i in HistoryLib.bindedAll) {
+				HistoryLib.bindedAll[i](url);
+			}
 		} else {
 			var scroll = $(window).scrollTop();
 			if(url.substr(0,1) == "#")
@@ -83,6 +96,9 @@ var HistoryLib = {
 					for(i in HistoryLib.binded) {
 						HistoryLib.binded[i](path);
 					}
+					for(i in HistoryLib.bindedAll) {
+						HistoryLib.binded[i](path);
+					}
 				}
 			};
 			HistoryLib.mode = "history";
@@ -102,6 +118,10 @@ var HistoryLib = {
 								HistoryLib.binded[i](document.location.hash.substr(2));
 							}
 						}
+						
+						for(i in HistoryLib.bindedAll) {
+							HistoryLib.binded[i](document.location.hash.substr(2));
+						}
 					}
 				};
 			} else {
@@ -115,6 +135,10 @@ var HistoryLib = {
 								for(i in HistoryLib.binded) {
 									HistoryLib.binded[i](document.location.hash.substr(2));
 								}
+							}
+							
+							for(i in HistoryLib.bindedAll) {
+								HistoryLib.bindedAll[i](document.location.hash.substr(2));
 							}
 						}
 					}

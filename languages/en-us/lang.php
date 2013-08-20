@@ -293,6 +293,7 @@ $lang = array(
 	"pages_edit"									=> "edit pages",
 	"pages_add"										=> "create pages",
 	"PAGE_CREATE"									=> "Create new page",
+	"SUBPAGE_CREATE"								=> "Create new subpage",
 	"pages_publish"									=> "publish page",
 	// default DataObjects
 	"data_manage"									=> "manage other data",

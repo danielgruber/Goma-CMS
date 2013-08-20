@@ -43,7 +43,10 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 		$addNode->addClass("hidden");
 		$addNode->addClass("action");
 		
-		$html = $this->renderChild($addNode) . $html;
+		if($parentID == 0)
+			$html = $this->renderChild($addNode) . $html;
+		else
+			$html .= $this->renderChild($addNode);
 		
 		return $html;
 	}
