@@ -236,18 +236,16 @@ class TreeNode extends ArrayList {
 	}
 	
 	/**
-	 * gets all children
+	 * gets all children as ArrayList.
 	 *
-	 *@name Children
+	 * @return	Array
 	*/
 	public function Children() {
 		return $this->items;
 	}
 	
 	/**
-	 * gets all children
-	 *
-	 *@name getChildren
+	 * gets all children as Array.
 	*/
 	public function getChildren() {
 		return $this->children();
@@ -261,7 +259,7 @@ class TreeNode extends ArrayList {
 	public function forceChildren() {
 		if($this->childCallback) {
 			if(isset($this->items)) {
-				return $this->items();
+				return $this->children();
 			} else {
 				$this->items = call_user_func_array($this->childCallback, array($this, (array) $this->childParams));
 				return $this->children();

@@ -61,6 +61,7 @@ var HistoryLib = {
 	},
 	
 	push: function(url) {
+		
 		HistoryLib.lastPush = true;
 		if(HistoryLib.mode == "history") {
 			window.history.pushState({}, null, url);

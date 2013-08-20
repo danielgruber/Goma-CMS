@@ -715,9 +715,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$html .= '</div>';
 				$form->add($links = new HTMLField('links', $html));
 				$links->container->addClass("hidden");
-				
-				define("EDIT_ID", $this->id);
-				
+
 				$form->add(new TabSet('tabs', array(
 						new Tab('content', array(
 							

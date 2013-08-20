@@ -123,9 +123,6 @@ class TreeRenderer extends Object {
 		
 		Resources::add("system/libs/thirdparty/jquery-contextmenu/src/jquery.contextMenu.css", "css", "tpl");
 		Resources::add("system/libs/thirdparty/jquery-contextmenu/src/jquery.contextMenu.js", "js", "tpl");
-		Resources::addJS("$(function(){
-    $.contextMenu('html5');
-});");
 		
 		if(is_array($this->tree)) {
 			$html = "\n";
@@ -197,8 +194,8 @@ class TreeRenderer extends Object {
 				
 				$this->renderContextMenu($menu, $menuNode);
 				
-				$node->append($menuNode);
-				$node->contextmenu = "menu_" . $child->nodeid;
+				$wrapper->append($menuNode);
+				$wrapper->contextmenu = "menu_" . $child->nodeid;
 			}
 		}
 		
@@ -208,13 +205,14 @@ class TreeRenderer extends Object {
 		$wrapper->attr("title", convert::raw2text($child->title));
 		
 		// render children
-		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || $child->isExpanded() || (isset($_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid]) && $_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid] == 1)) {
-			// children should be shown
-			$node->addClass("expanded");
-			$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
-			$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
-			$ul->html($this->renderSubChildren($child->forceChildren(), $child->recordid));
-			
+		if((isset($this->expandedIDs[$child->nodeid]) && $this->expandedIDs[$child->nodeid]) || (isset($this->expandedIDs[$child->recordid]) && $this->expandedIDs[$child->recordid]) || $child->isExpanded() || (isset($_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid]) && $_COOKIE["tree_" . $child->treeclass . "_" . $child->recordid] == 1)) {
+			if(count($child->forceChildren()) > 0) {
+				// children should be shown
+				$node->addClass("expanded");
+				$node->prepend(new HTMLNode("span", array("class" => "hitarea expanded", "data-cookie" => "tree_" . $child->treeclass . "_" . $child->recordid), new HTMLNode("a", array("href" => TreeCallbackURL::generate_tree_url($child, $this)), new HTMLNode("span"))));
+				$node->append($ul = new HTMLNode("ul", array("class" => "expanded")));
+				$ul->html($this->renderSubChildren($child->forceChildren(), $child->recordid));
+			}
 			
 		} else if(is_callable($child->getChildCallback())) {
 			// children via ajax

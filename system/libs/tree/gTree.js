@@ -6,6 +6,8 @@
  * @version		1.0
  */
 function tree_bind(tree) {
+	$.contextMenu('html5');
+	
 	var node = tree;
 	tree = null;
 	node.find(".goma-tree").removeClass("goma-tree");
@@ -51,8 +53,7 @@ function tree_bind(tree) {
 		return false;
 	});
 	
-	gloader.load("history");
-	HistoryLib.bind(function(url){
+	var manageMarkByUrl = function(url){
 		node.find("li a").each(function(){
 			var a = $(this);
 			var li = a.parent().parent();
@@ -77,7 +78,12 @@ function tree_bind(tree) {
 				}
 			}
 		});
-	}, true);
+	};
+	
+	gloader.load("history");
+	HistoryLib.bind(manageMarkByUrl, true);
+	
+	manageMarkByUrl(location.pathname);
 }
 
 

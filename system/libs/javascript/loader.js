@@ -265,7 +265,9 @@ if(typeof goma.ui == "undefined") {
 				
 				if(options.pushToHistory) {
 					if(typeof HistoryLib.push == "function")
-						HistoryLib.push(options.url);
+						setTimeout(function(){
+							HistoryLib.push(options.url);
+						}, 30);
 				}
 				
 				$.ajax(options).done(function(r, c, a){

@@ -224,34 +224,23 @@ var LaM_type_timeout;
 			$this.find("input[type=text]").blur();
 		}
 		
-		
-		
 		$this.parents(".classtree").find(".treewrapper").html("&nbsp;<img src=\"images/16x16/ajax-loader.gif\" alt=\"\" /> Loading...");
 		var treewrapper = $this.parents(".classtree").find(".treewrapper");
 		// if no search
 		if(value == "") {
-			
-			var params = "";
-			$(".legend").find(":checkbox").each(function(){
-				if(!$(this).prop("disabled")) {
-					if($(this).prop("checked")) {
-						params += "&tree_params["+$(this).attr("name")+"]=1";
-					} else {
-						params += "&tree_params["+$(this).attr("name")+"]=0";
-					}
-				}
-			});
-			
+			var params;
 			if(typeof openid != "undefined")
-				params += "&edit_id=" + escape(openid);
-			
+				params = "?edit_id=" + escape(openid);
+			else
+				params = "";
+				
 			$.ajax({
-				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/?" + params,
+				url: BASE_SCRIPT + adminURI + "/updateTree/" + params,
 				success: function(html, code, jqXHR) {
 					
 					renderResponseTo(html, treewrapper, jqXHR).done(function(){
-						tree_bind(treewrapper.find(".tree"));
-						tree_bind_ajax(true, $(".left div.tree ul"));
+						tree_bind(treewrapper.find(".goma-tree"));
+						tree_bind_ajax(true, $(".left ul.goma-tree"));
 						
 						
 						if(fn != null) {
@@ -275,8 +264,8 @@ var LaM_type_timeout;
 				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/" + escape(value),
 				success: function(html, code, jqXHR) {
 					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR).done(function(){
-						tree_bind($this.parents(".classtree").find(".treewrapper").find(".tree"));
-						tree_bind_ajax(false, $(".left div.tree ul"));
+						tree_bind($this.parents(".classtree").find(".treewrapper").find(".goma-tree"));
+						tree_bind_ajax(false, $(".left ul.goma-tree"));
 						
 						if(fn != null) {
 							fn();
@@ -344,7 +333,7 @@ var LaM_type_timeout;
 							{
 								renderResponseTo(html, $(".left .treewrapper"), jqXHR).done(function(){;
 									tree_bind($(".left .treewrapper").find(".goma-tree"));
-									tree_bind_ajax(true, $(".left div.tree ul"));
+									tree_bind_ajax(true, $(".left ul.goma-tree"));
 								});
 							}
 						});

@@ -28,7 +28,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $url_handlers = array(
-		"updateTree/\$marked!/\$search"	=> "updateTree",
+		"updateTree/\$search"			=> "updateTree",
 		"edit/\$id!/\$model"			=> "cms_edit",
 		"del/\$id!/\$model"				=> "cms_del",
 		"add/\$model"					=> "cms_add",
@@ -215,77 +215,30 @@ class LeftAndMain extends AdminItem {
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
 		$treeRenderer->mark($this->getParam("id"));
 		
+		// check for logical opened tree-items.
+		if(isset($_GET["edit_id"])) {
+			// here we check for Ajax-Opening. It is given to the leftandmain-js-api.
+			if($current = DataObject::get_versioned("pages", "state", array("id" => $_GET["edit_id"]))->first()) {
+				$treeRenderer->setExpanded($current->id);
+				while($current->parent) {
+					$current = $current->parent;
+					$treeRenderer->setExpanded($current->id);
+				}
+			}
+		} else
+		
+		// here we check for complete generated pages.
+		if($this->getParam("id")) {
+			if($current = DataObject::get_versioned("pages", "state", array("id" => $this->getParam("id")))->first()) {
+				$treeRenderer->setExpanded($current->id);
+				while($current->parent) {
+					$current = $current->parent;
+					$treeRenderer->setExpanded($current->id);
+				}
+			}
+		}
+		
 		return $treeRenderer->render(true);
-		
-		/*if(isset($_GET["searchtree"])) {
-			$search = $_GET["searchtree"];
-		} else if(isset($_POST["searchtree"])) {
-			$search = $_POST["searchtree"];
-		}
-		
-		$object = Object::instance($tree_class);
-		
-		if(empty($search)) {
-			$search_parentid = 0;
-		} else {
-			$search_parentid = array($search);
-		}
-		
-		if(isset($_GET["tree_params"]) && is_array($_GET["tree_params"])) {
-			if(!isset($_SESSION[$this->classname . "_tree_params"])) $_SESSION[$this->classname . "_tree_params"] = array();
-			$params = array_merge($_SESSION[$this->classname . "_tree_params"], $_GET["tree_params"]);
-			$_SESSION[$this->classname . "_tree_params"] = $params;
-			
-		} else if(isset($_SESSION[$this->classname . "_tree_params"]) && is_array($_SESSION[$this->classname . "_tree_params"])) {
-			$params = $_SESSION[$this->classname . "_tree_params"];
-		} else {
-			$params = array();
-		}
-		
-		if(!isset($marked))
-			$marked = $this->marked;
-		
-		if(count($this->models) > 1) {
-			$default_tree = $object->renderTree($this->adminURI() . "model/\$class_name/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
-		} else {
-			$default_tree = $object->renderTree($this->adminURI() . "record/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
-		}
-		
-		if($marked == "0") {
-			$marked = "marked";
-		} else {
-			$marked = "";
-		}
-		
-		if(!empty($search)) {
-			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->classname.'">
-								<span class="a  '.$marked.'">
-									<span class="b">
-										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("RESULT", "result").'</span></a>
-									</span>
-								</span>
-								<ul class="rootnode">
-									'.$default_tree.'
-								</ul>
-							</li>
-							
-						</ul>';
-		} else {
-			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->classname.'">
-								<span class="a '.$marked.'">
-									<span class="b">
-										<a nodeid="0" class="treelink root" href="'.$this->adminURI() .'"><span>'.$this->getRootNode().'</span></a>
-									</span>
-								</span>
-								<ul class="rootnode">
-									'.$default_tree.'
-								</ul>
-							</li>
-							
-						</ul>';
-		}*/
 	}
 	/**
 	 * gets updated data of tree for searching or normal things
@@ -319,7 +272,7 @@ class LeftAndMain extends AdminItem {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
-			$response->exec("var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("LESS_RIGHTS"), lang("ERROR"));
@@ -371,7 +324,7 @@ class LeftAndMain extends AdminItem {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
-			$response->exec("var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id.");");
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id."); }");
 			return $response;
 		} else {
 			$dialog = new Dialog(lang("less_rights"), lang("error"));

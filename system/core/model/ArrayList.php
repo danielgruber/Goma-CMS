@@ -647,7 +647,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 		if(is_array($item))
 			return isset($item[$prop]) ? $item[$prop] : null;
 		
-		if(is_object($item) && is_a($item, "ArrayList") && isset($item[$prop])) {
+		if(is_object($item) && is_a($item, "ArrayAccess") && isset($item[$prop])) {
 			return $item[$prop];
 		}
 		

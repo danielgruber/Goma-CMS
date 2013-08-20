@@ -47,7 +47,7 @@
 	color: #333;
 	font-style: italic
 }
-.goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span, .goma-tree li.context-menu-active > span {
+.goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span, .goma-tree li > span.context-menu-active {
 	background: #ddd;
 }
 .goma-tree li .node-area img {

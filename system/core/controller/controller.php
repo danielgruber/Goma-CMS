@@ -558,7 +558,7 @@ class Controller extends RequestHandler
 						HTTPResponse::output();
 						exit;
 					} else {
-						$this->redirectback();
+						return $this->actionComplete("delete_success", $data);
 					}
 				}
 			} else {
@@ -708,6 +708,9 @@ class Controller extends RequestHandler
 					
 					return lang("less_rights", "You are not allowed to visit this page or perform this action.");
 				break;
+				case "delete_success":
+					$this->redirectback();
+				break;
 			}
 		}
 		
@@ -729,12 +732,9 @@ class Controller extends RequestHandler
 				} else if(isset($_POST["redirect"]))
 				{
 						$redirect = $_POST["redirect"];
-				} else if(isset($_SERVER["HTTP_REFERER"]))
+				} else 
 				{
-						$redirect = $_SERVER["HTTP_REFERER"];
-				} else
-				{
-						$redirect = BASE_URI;
+						$redirect = $this->originalNamespace;
 				}
 				
 				if(isset($param) && isset($value))
