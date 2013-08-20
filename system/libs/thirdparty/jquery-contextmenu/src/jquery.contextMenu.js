@@ -165,9 +165,10 @@ var // currently active contextMenu trigger
         zIndex: 1,
         // show hide animation settings
         animation: {
-            duration: 50,
+            duration: 0,
+            hideDuration: 200,
             show: 'slideDown',
-            hide: 'slideUp'
+            hide: 'fadeOut'
         },
         // events
         events: {
@@ -887,7 +888,7 @@ var // currently active contextMenu trigger
             //$(document).off('.contextMenuAutoHide keydown.contextMenu'); // http://bugs.jquery.com/ticket/10705
             $(document).off('.contextMenuAutoHide').off('keydown.contextMenu');
             // hide menu
-            opt.$menu && opt.$menu[opt.animation.hide](opt.animation.duration, function (){
+            opt.$menu && opt.$menu[opt.animation.hide](opt.animation.hideDuration, function (){
                 // tear down dynamically built menu after animation is completed.
                 if (opt.build) {
                     opt.$menu.remove();
