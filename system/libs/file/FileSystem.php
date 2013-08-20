@@ -41,6 +41,7 @@ class FileSystem extends Object {
 	 *@access public
 	*/
 	public static function requireDir($dir, $mode = 0777, $throwOnFail = true) {
+		clearstatcache();
 		if(!file_exists($dir)) {
 			if(mkdir($dir, $mode, true)) {
 				@chmod($dir, $mode);
