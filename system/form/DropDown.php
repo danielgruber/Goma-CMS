@@ -535,7 +535,6 @@ class DropDown extends FormField {
 		if($this->multiselect) {
 			$this->dataset[] = $this->getParam("value");
 			session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
-			var_dump($this->dataset);
 		} else {
 			$this->value = $this->getParam("value");
 		}

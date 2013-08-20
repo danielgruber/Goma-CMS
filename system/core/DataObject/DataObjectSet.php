@@ -1488,10 +1488,9 @@ class DataObjectSet extends DataSet {
 	}
 	
 	/**
-	 * sets version-type
+	 * sets version-type.
 	 *
-	 *@name version
-	 *@access public
+	 * @param	mixed $version type: "published"/"state"/"grouped"/false (get all records not grouped by recordid)/integer
 	*/
 	public function setVersion($version) {
 		$this->version = $version;

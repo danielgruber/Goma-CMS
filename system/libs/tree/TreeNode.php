@@ -66,6 +66,11 @@ class TreeNode extends ArrayList {
 	protected $childCallback;
 	
 	/**
+	 * child-params.
+	*/
+	protected $childParams;
+	
+	/**
 	 * html-classes.
 	*/
 	protected $htmlClasses = array();
@@ -184,10 +189,11 @@ class TreeNode extends ArrayList {
 	 *
 	 * @param 	callback $callback
 	*/
-	public function setChildCallback($callback) {
-		if(is_callable($callback))
+	public function setChildCallback($callback, $params = array()) {
+		if(is_callable($callback)) {
 			$this->childCallback = $callback;
-		else
+			$this->childParams = $params;
+		} else
 			throw new LogicException("TreeNode::setChildCallback: first argument must be a valid callback.");
 	}
 	
@@ -257,7 +263,7 @@ class TreeNode extends ArrayList {
 			if(isset($this->items)) {
 				return $this->items();
 			} else {
-				$this->items = call_user_func_array($this->childCallback, array($this));
+				$this->items = call_user_func_array($this->childCallback, array($this, (array) $this->childParams));
 				return $this->children();
 			}
 		} else {

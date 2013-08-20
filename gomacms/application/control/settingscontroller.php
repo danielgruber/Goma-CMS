@@ -279,6 +279,7 @@ class TemplateSettings extends NewSettings {
 		}
 		return $tpl;
 	}
+	
 	/**
 	 * gets the form
 	 *
@@ -318,6 +319,36 @@ class PushSettings extends NewSettings {
 			"p_app_key"			=> lang("p_app_key", "App-Key"),
 			"p_app_id"			=> lang("p_app_id", "App-ID")
 		);
+	}
+}
+
+
+class EditorSettings extends NewSettings {
+	/**
+	 * database-fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
+		"editor" 	=> "varchar(200)"
+	);
+	
+	public $tab = "{\$_lang_EDITOR}";
+	
+	public function getFieldTitles() {
+		return array(
+			"editor"	=> "{\$_lang_EDITOR}"
+		);
+	}
+	
+	/**
+	 * gets the form
+	 *
+	 *@name getFormFromDB
+	 *@access public
+	*/
+	public function getFormFromDB(&$form) {
+		
 	}
 }
 

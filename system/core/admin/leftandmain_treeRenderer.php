@@ -45,8 +45,6 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 		
 		if($parentID == 0)
 			$html = $this->renderChild($addNode) . $html;
-		else
-			$html .= $this->renderChild($addNode);
 		
 		return $html;
 	}

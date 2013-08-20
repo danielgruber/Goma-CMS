@@ -249,7 +249,6 @@ class contentAdmin extends LeftAndMain
 		
 		$form->add(new HTMLField('headbar', $html));
 		$form->add($title = new textField('title', lang("title_page", "title of the page")));
-		$form->add($mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")));
 		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
 				"root" => lang("no_parentpage", "Root Page"),
 				"subpage" => array(
@@ -258,54 +257,19 @@ class contentAdmin extends LeftAndMain
 				)
 			)));
 		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
-		$form->add($filename = new textField('filename', lang("path")));
 		$form->add(new HiddenField("class_name", $model->classname));
 		
 		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
 		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");
 		$form->addValidator(new FormValidator(array($model, "validatePageFileName")), "filename");
 		
-		// add some js
-		$form->add(new JavaScriptField("change",'$(function(){
-			$("#'.$title->ID().'").change(function(){
-				if($(this).val() != "") {
-					var value = $(this).val();
-					$("#'.$mainbartitle->ID().'").val(value);
-					if($("#'.$filename->ID().'").length > 0) {
-						if($("#'.$filename->ID().'").val() == "") {
-							// generate filename
-							var filename = value.toLowerCase();
-							filename = filename.trim();
-							filename = filename.replace("ä", "ae");
-							filename = filename.replace("ö", "oe");
-							filename = filename.replace("ü", "ue");
-							filename = filename.replace("ß", "ss");
-							while(filename.match(/[^a-zA-Z0-9-_]/))
-								filename = filename.replace(/[^a-zA-Z0-9-_]/, "-");
-							
-							while(filename.match(/\-\-/))
-								filename = filename.replace("--", "-");
-							
-
-							$("#'.$filename->ID().'").val(filename);
-							
-						}
-					}
-				}
-				
-			});
-		});'));
-		
 		// default submission
-		$form->setSubmission("submit_form");	
+		$form->setSubmission("submit_form_generate");	
 			
 		$form->addValidator(new DataValidator($model), "datavalidator");
 		
 		if($model->can("Write"))
-			$form->addAction(new AjaxSubmitButton("save_draft",lang("draft_save", "Save draft"),"AjaxSave"));
-		
-		if($model->can("Publish"))
-			$form->addAction(new AjaxSubmitButton('publish',lang("publish", "Save & Publish"),"AjaxPublish", "Publish", array("green")));
+			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate"));
 		
 		return $form->render();
 	}
@@ -349,5 +313,83 @@ class contentAdmin extends LeftAndMain
 			$this->redirectBack();
 			exit;
 		}
+	}
+	
+	/**
+	 * generates mainbar-title and path for page.
+	*/
+	public function submit_form_generate($data) {
+		$data["mainbartitle"] = $data["title"];
+		$value = $data["title"];
+		$value = trim($value);
+		$value = strtolower($value);
+		
+		// special chars
+		$value = str_replace("ä", "ae", $value);
+		$value = str_replace("ö", "oe", $value);
+		$value = str_replace("ü", "ue", $value);
+		$value = str_replace("ß", "ss", $value);
+		$value = str_replace("ù", "u", $value);
+		$value = str_replace("û", "u", $value);
+		$value = str_replace("ú", "u", $value);
+		
+		$value = str_replace(" ",  "-", $value);
+		// normal chars
+		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+		$value = str_replace('--', '-', $value);
+		
+		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
+		$i = 1;
+		$current = $value;
+		while(DataObject::count("pages", array("parentid" => $parentid, "path" => $current)) > 0) {
+			$i++;
+			$current = $value . "-" . $i;
+		}
+		
+		$data["path"] = $current;
+		return $this->submit_form($data);
+	}
+	
+	/**
+	 * saves data for editing a site via ajax
+	 *
+	 *@name ajaxSave
+	 *@access public
+	 *@param array - data
+	 *@param object - response
+	*/
+	public function ajaxSaveGenerate($data, $response) {
+		$data["mainbartitle"] = $data["title"];
+		$value = $data["title"];
+		$value = trim($value);
+		$value = strtolower($value);
+		
+		// special chars
+		$value = str_replace("ä", "ae", $value);
+		$value = str_replace("ö", "oe", $value);
+		$value = str_replace("ü", "ue", $value);
+		$value = str_replace("ß", "ss", $value);
+		$value = str_replace("ù", "u", $value);
+		$value = str_replace("û", "u", $value);
+		$value = str_replace("ú", "u", $value);
+		
+		$value = str_replace(" ",  "-", $value);
+		// normal chars
+		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+		$value = str_replace('--', '-', $value);
+		
+		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
+		$i = 1;
+		$current = $value;
+		$object = DataObject::get("pages", array("parentid" => $parentid, "path" => $current));
+		$object->setVersion("state");
+		while($object->count() > 0) {
+			$i++;
+			$current = $value . "-" . $i;
+			$object->filter(array("parentid" => $parentid, "path" => $current));
+		}
+		
+		$data["path"] = $current;
+		return $this->ajaxSave($data, $response);
 	}
 }

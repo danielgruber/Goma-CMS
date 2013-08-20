@@ -261,7 +261,7 @@ self.dropdownDialogs = [];
 			
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
-			this.dropdown.css({"display": "block", top: "-1000px"});
+			//this.dropdown.css({"display": "block", top: "-1000px"});
 			
 			switch(position) {
 				case "bottom":
@@ -277,7 +277,6 @@ self.dropdownDialogs = [];
 					var positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
 					var contentwidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
-					this.dropdown.css("display", "none");
 					
 					// check if this is logical
 					if(contentwidth + positionLeft > $(document).width()) {
@@ -314,7 +313,6 @@ self.dropdownDialogs = [];
 					var positionRight = elemleft + 2 - contentWidth;
 					
 					this.dropdown.css({
-						display: "none",
 						top: positionTop,
 						left: positionRight,
 						right: "auto",
@@ -333,7 +331,6 @@ self.dropdownDialogs = [];
 					
 					var positionLeft = elemleft + elemwidth - 2;
 					this.dropdown.css({
-						"display": "none",
 						top: positionTop,
 						left: positionLeft,
 						right: "auto",
@@ -347,6 +344,7 @@ self.dropdownDialogs = [];
 			if(typeof triangle_margin_top != "undefined") {
 				this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
 			}
+			
 			if(display)
 				this.dropdown.css("display", "block");
 			else

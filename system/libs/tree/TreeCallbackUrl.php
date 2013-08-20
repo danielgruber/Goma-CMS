@@ -35,7 +35,7 @@ class TreeCallbackUrl extends RequestHandler {
 		$renderKey = md5(serialize($renderer));
 		session_store("tree_renderer_" . $renderKey, $renderer);
 		
-		if(isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
+		if($treenode->getChildCallback() == null && isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
 		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID) && Object::method_exists($treenode->treeclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());

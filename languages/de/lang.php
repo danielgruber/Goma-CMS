@@ -611,6 +611,7 @@ $lang = array(
     "YEAR"						=> "Jahr",
     
     "NO_EDITOR"					=> "Kein grafischer Editor",
+    "EDITOR"					=> "Editor",
     "EDITOR_TOGGLE"             => "Editor an/aus",
 	"JS_DISABLE_EDITOR"        	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
 );

@@ -614,5 +614,6 @@ $lang = array(
     
 	"JS_DISABLE_EDITOR"         => "You have to activate JavaScript to user the Editor.",
 	"EDITOR_TOGGLE"             => "Toggle editor",
+	"EDITOR"					=> "Editor",
 	"NO_EDITOR"					=> "No WYSIWYG-Editor."
 );

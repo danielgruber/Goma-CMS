@@ -31,7 +31,7 @@ class redirector extends Page
 		public function getForm(&$form)
 		{
 				parent::getForm($form);
-				$form->add(new textField('data', $GLOBALS['lang']['url']), null, "content");
+				$form->add(new textField('data', lang("URL")), null, "content");
 				
 				$form->addValidator(new requiredFields(array("data")), "requireURL");
 		}
