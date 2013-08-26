@@ -144,7 +144,7 @@
 								<!-- Statistics -->
 								
 								<div class="content_container" id="stats">
-									<h2><% lang("statistics") %></h2>
+									<h2><% lang("statistics") %> <span id="statistics_range"></span></h2>
 									
 									<% INCLUDE_JS "system/libs/thirdparty/flot/excanvas.min.js" %>
 									<% INCLUDE_JS "system/libs/thirdparty/flot/jquery.flot.js" %>
@@ -160,7 +160,7 @@
 												xaxis: {
 													mode: "time",
 													timeformat: "%d.%m %H:%M",
-													minTickSize: [1, "hour"]
+													minTickSize: [4, "hour"]
 												},
 												yaxis: {
 													min: 0,
@@ -186,8 +186,8 @@
 												},
 												tooltip:            true,
 												tooltipOpts: {
-												    content:        "<h4>%s</h4> %y",
-												    xDateFormat:    "%y-%0m-%0d %H:%M:%S",
+												    content:        "<h4>%s %x</h4> %y",
+												    xDateFormat: 	"%d.%m %H:%M",
 												    yDateFormat:   	"",
 												    shifts: { 
 												        x:          10,
@@ -218,17 +218,33 @@
 													$("#plot-navigation a.stat").removeClass("active");
 													$(this).addClass("active");
 													$("#plot-container").html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
+													$("#statistics_range").html("");
+													
 													$.ajax({
 														url: $(this).attr("href"),
 														success: function(data) {
 															visitors = [];
 															hits = [];
-															for(i in data) {
-																visitors.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].visitors]);
-																hits.push([(data[i].flotStart + data[i].flotEnd) / 2, data[i].hits]);
+															for(i in data.data) {
+																visitors.push([(data.data[i].flotStart + data.data[i].flotEnd) / 2, data.data[i].visitors]);
+																hits.push([(data.data[i].flotStart + data.data[i].flotEnd) / 2, data.data[i].hits]);
 															}
 															
+															$("#statistics_range").html(data.title);
+															
+															if(typeof data.minTickSize != "undefined") {
+																options.xaxis.minTickSize = data.minTickSize;
+															} else {
+																options.xaxis.minTickSize = [4, "hour"];
+															}
+															
+															if(typeof data.timeFormat != "undefined") {
+																options.xaxis.timeformat = data.timeFormat;
+															} else {
+																options.xaxis.timeformat = "%d.%m %H:%M";
+															}
 															drawVisitPlot();
+																
 														},
 														silence: true
 													});

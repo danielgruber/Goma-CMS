@@ -47,6 +47,10 @@
 	color: #333;
 	font-style: italic
 }
+.goma-tree li .node-area .text-holder {
+	padding: 0.25em;
+	display: inline-block;
+}
 .goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span, .goma-tree li > span.context-menu-active {
 	background: #ddd;
 }
@@ -59,11 +63,14 @@
 .goma-tree li .node-area .tree-bubbles {
 	float: right;
 	font-size: 0.75em;
+	height: 100%;
+	display: inline-block;
+	margin: 0.167em;
 }
 .goma-tree li .node-area .tree-bubbles span {
 	line-height: 1em;
 	padding: 0.5em;
-	margin: -0.167em 0.167em;
+	margin: 0 0.167em;
 	display: inline-block;
 	
 	background: #008ed4;

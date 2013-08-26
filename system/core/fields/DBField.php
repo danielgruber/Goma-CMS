@@ -641,7 +641,7 @@ class Varchar extends DBField
 		 *@name date
 		 *@access public
 		*/
-		public function date($format =	DATE_FORMAT)
+		public function date($format = DATE_FORMAT)
 		{	
 			return goma_date($format, $this->value);
 		}

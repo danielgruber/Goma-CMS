@@ -161,8 +161,8 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function generateTreeLink($child, $bubbles) {
 		return new HTMLNode("a", array("href" => $this->originalNamespace . "/record/" . $child->recordid . "/edit" . URLEND, "class" => "node-area"), array(
-			new HTMLNode("img", array("src" => $child->icon)),
-			$child->title,
+			new HTMLNode("span", array("class" => "img-holder"), new HTMLNode("img", array("src" => $child->icon))),
+			new HTMLNode("span", array("class" => "text-holder"), $child->title),
 			$bubbles
 		));
 	}

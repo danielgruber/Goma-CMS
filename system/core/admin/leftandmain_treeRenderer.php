@@ -54,8 +54,8 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 	*/
 	public function createAddLink($child, $bubbles) {
 		return new HTMLNode("a", array("href" => $this->namespace . "/add" . URLEND . "?parentid=" . $child->parentid, "class" => "node-area"), array(
-			new HTMLNode("img", array("src" => "images/icons/goma16/page_new.png", "data-retina" => "images/icons/goma16/page_new@2x.png")),
-			$child->title,
+			new HTMLNode("span", array("class" => "img-holder"),new HTMLNode("img", array("src" => "images/icons/goma16/page_new.png", "data-retina" => "images/icons/goma16/page_new@2x.png"))),
+			new HTMLNode("span", array("class" => "text-holder"),$child->title),
 			$bubbles
 		));
 	}

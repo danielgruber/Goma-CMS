@@ -404,20 +404,6 @@ class admin extends ViewAccessableData implements PermProvider
 		}
 		
 		/**
-		 * Statistics
-		 *
-		 *@name statistics
-		 *@access public
-		*/
-		public function statistics($month = true, $page = 1) {
-			if($month) {
-				return liveCounter::statisticsByMonth(10, $page);
-			} else {
-				return liveCounter::statisticsByDay(10, 1, $page);
-			}
-		}
-		
-		/**
 		 * gets data fpr available points
 		 *@name this
 		 *@access public

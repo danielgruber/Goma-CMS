@@ -32,6 +32,21 @@
 	overflow: auto;
 }
 
+.leftandmaintable .dialog > .title {
+	background: #eee;
+}
+.leftandmaintable .adminContent > h2:first-child {
+	margin: -0.57em -0.7em;
+	padding: 0.5em 1em;
+	font-size: 1.25em;
+	line-height: 1.2em;
+	background: #eee;
+	color: #444;
+	font-weight: normal;
+	border-bottom: 1px solid #ccc;
+	display: block;
+}
+
 /* main-part */
 
 .leftandmaintable tr > .main {
@@ -45,7 +60,7 @@
 	border: 1px solid #ccc;
 	border-width: 0 1px 1px 0; 
 	padding: 0 !important;
-	color: #333;
+	color: #444;
 	text-decoration: none;
 	font-weight: bold;
 	line-height: 30px;
@@ -87,11 +102,16 @@
 	padding: 0.25em;
 }
 .leftandmaintable tr > .main > .inner .headBar span {
-	padding: 0.5em;
+	padding: 0.44em;
 	display: inline-block;
 }
 .leftandmaintable tr > .main > .inner .headBar span span {
 	padding: 0 0.25em;
+	font-size: 1.125em;
+	color: #444;
+}
+.leftandmaintable tr > .main > .inner .headBar span img {
+	margin-top: -.25em;
 }
 .leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
 	float: left;
@@ -160,12 +180,9 @@
 	padding: 0.69em;
 	width: 280px;
 	padding-right: 20px;
-	border-bottom: 1px solid #cfcfcf !important;
+	border-bottom: 1px solid #ccc;
 	background: #eee;
 	height: 2.82em;
-}
-.leftandmaintable tr > .left .classtree .treesearch input:focus {
-	border: 0;
 }
 
 .leftandmaintable tr > .left .create ul, ul.create {
@@ -173,6 +190,12 @@
 	margin: 0;
 	padding: 0;
 	padding-top: 1px;
+}
+.leftandmaintable tr .main ul.create.list-view {
+	margin-top: 12px;
+}
+.leftandmaintable tr .main ul.create.list-view li:first-child a {
+	border-top: 0;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;

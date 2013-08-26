@@ -465,7 +465,7 @@ class livecounter extends DataObject
 				$hitsQuery = new SelectQuery("statistics", "sum(hitcount) as hitcount", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0');
 				if($hitsQuery->execute()) {
 					$record = $hitsQuery->fetch_assoc();
-					$hitCount = $record["hitcount"];
+					$hitCount = (int) $record["hitcount"];
 				}
 				array_push($data, array(
 					"start" 	=> $current,
@@ -479,7 +479,14 @@ class livecounter extends DataObject
 				$current += $timePerPoint;
 			}
 			
-			return $data;
+			
+			if($diff < 24 * 30 * 2 * 60 * 60) {
+				$title = goma_date(DATE_FORMAT_DATE, $start) . " - " . goma_date(DATE_FORMAT_DATE, $end);
+			} else {
+				$title = goma_date("M Y", $start) . " - " . goma_date("M Y", $end);
+			}
+			
+			return array("data" => $data, "title" => $title);
 		}
 }
 
@@ -539,7 +546,7 @@ class StatController extends Controller {
 		
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
-		$end = NOW;
+		$end = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
 		$max = 30;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
@@ -565,7 +572,7 @@ class StatController extends Controller {
 		
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
-		$end = NOW;
+		$end = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
 		$max = 8;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
@@ -591,7 +598,7 @@ class StatController extends Controller {
 		
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
-		$end = NOW;
+		$end = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
 		$max = 36;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
@@ -617,8 +624,8 @@ class StatController extends Controller {
 		
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
-		$end = NOW;
-		$max = ((NOW - $start) / (60 * 60));
+		$end = mktime(date("H"), 0, 0, date("m"), date("d"), date("Y"));
+		$max = 24 + date("H");
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
 		

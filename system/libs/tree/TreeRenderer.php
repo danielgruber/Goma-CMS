@@ -177,15 +177,19 @@ class TreeRenderer extends Object {
 		if($this->linkCallback) {
 			$link = call_user_func_array($this->linkCallback, array($child, $this->renderBubbles($child->bubbles())));
 			$wrapper->html($link);
+			$link->addClass("clearfix");
 		} else {
 			$text = $child->title;
 			$wrapper->html(array(
-				new HTMLNode("img", array("src" => $child->icon)),
-				$text,
+				new HTMLNode("span", array("class" => "img-holder"), new HTMLNode("img", array("src" => $child->icon))),
+				new HTMLNode("span", array("class" => "text-holder"), $text),
 				$this->renderBubbles($child->bubbles())
 			));
 			$wrapper->addClass("node-area");
+			$wrapper->addClass("clearfix");
 		}
+		
+		
 		
 		if(is_callable($this->actionCallback)) {
 			$menu = call_user_func_array($this->actionCallback, array($child));
