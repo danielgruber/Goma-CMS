@@ -141,7 +141,7 @@ $lang = array(
 	/* TPL END USERGROUPS START */
 	"rights"                                       	=> "Rechte",
 	"rights_manage"									=> "Rechte verwalten",
-	"delete"                                       	=> "l&ouml;schen",
+	"delete"                                       	=> "Löschen",
 	"group"											=> "Gruppe",
 	/* USERGROUPS END USERS START */
 	"rank"                                         	=> "Rang",
