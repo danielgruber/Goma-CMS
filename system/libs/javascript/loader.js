@@ -8,38 +8,40 @@
  */
 
 // goma-framework
-if(typeof goma == "undefined")
+if (goma === undefined) {
 	var goma = {};
+}
 
-if(typeof window.console == "undefined") {
-   window.console = {log: function(){}};
+if (window.console === undefined) {
+   window.console = {log: function(){;}};
 }
 
 //$.touchPunch.setAutoAssign(false);
 
 // some regular expressions
-var json_regexp = /^\(?\{/;
-var html_regexp = new RegExp("<body");
+var json_regexp = /^\(?\{/, 
+	html_regexp = new RegExp("<body");
 
-if(typeof goma.ui == "undefined") {
-	goma.ui = (function($){
+if (goma.ui === undefined) {
+	goma.ui = (function ($) {
 		
-		var external_regexp = /https?\:\/\/|ftp\:\/\//;
-	
-		var run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/;
-		var load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/;
-		var http_regexp = /https?\:\/\//;
+		'use strict';
 		
-		var loadSubscribers = [];
+		var external_regexp = /https?\:\/\/|ftp\:\/\//,
+			run_regexp = /\/[^\/]*(script|raw)[^\/]+\.js/,
+			load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/,
+			http_regexp = /https?\:\/\//,
+			loadSubscribers = [],
 		
 		/**
 		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
 		 * you must register the plugin in PHP
 		 * we stop execution of JavaScript while loading
 		*/
-		var gloaded = {"-": true};
-		var loadScript = function(comp, fn) {
-			if(gloaded[comp] == null)
+		gloaded = {"-": true},
+		loadScript = function (comp, fn) {
+			
+			if (gloaded[comp] == null)
 			{
 				$.ajax({
 					cache: true,
@@ -51,22 +53,23 @@ if(typeof goma.ui == "undefined") {
 				
 				gloaded[comp] = true;
 				
-				if(fn != null)
+				if (fn != null) {
 					fn();
+				}
 			}
 			
-		};
+		},
 		
-		var loadScriptAsync = function(comp) {
+		loadScriptAsync = function (comp) {
 			var deferred = $.Deferred();
-			if(gloaded[comp] == null)
+			if (gloaded[comp] == null)
 			{
 				$.ajax({
 					cache: true,
 					noRequestTrack: true,
 					url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
 					dataType: "script"
-				}).done(function(){
+				}).done(function () {
 					gloaded[comp] = true;
 					deferred.resolve();
 				}).fail(deferred.reject);
@@ -75,102 +78,76 @@ if(typeof goma.ui == "undefined") {
 			}
 			
 			return deferred.promise();
-		};
+		},
 		
 		// retina support
-		var RetinaReplace = function() {
-			$("img").each(function(){ //.on("load", "img", function(){
-				var $this = $(this);
-				if($this.attr("data-retined") != "complete" && $this.attr("data-retina") && $this.width() != 0 && $this.height() != 0) {
-					if(goma.ui.IsImageOk($(this).get(0))) {
-						var img = new Image();
-						img.onload = function(){
+		RetinaReplace = function () {
+			$("img").each(function () { //.on("load", "img", function () {
+				var $this = $(this),
+					img = new Image();
+				
+				if ($this.attr("data-retined") !== "complete" && $this.attr("data-retina") && $this.width() !== 0 && $this.height() !== 0) {
+					if (goma.ui.IsImageOk($(this).get(0))) {
+						img.onload = function () {
 							$this.css("width", $this.width());
 							$this.css("height", $this.height());
 							$this.attr("src", $this.attr("data-retina"));
 							img.src = null;
-						}
+						};
 						img.src = $this.attr("data-retina");
 						$this.attr("data-retined", "complete");
 					}
 				}
 			});
 			
-		}
+		},
 		
-		var flexBoxes = [];
-
-		$(function() {	
-			$.extend(goma.ui, {
-				/**
-				 * this area is by default used to place content loaded via Ajax
-				*/
-				mainContent: $("#content").length ? $("#content") : $("body"),
-				
-				/**
-				 * this area is by default used to place containers from javascript
-				*/
-				DocRoot: ($(".documentRoot").length == 1) ? $(".documentRoot") : $("body")
-			});
-			
-			if(goma.ui.getDevicePixelRatio() > 1.5) {
-				RetinaReplace();
-				// add retina-updae-event
-				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, !1);
-			    	if (/WebKit/i.test(navigator.userAgent)) var t = setInterval(function () {
-			     	   /loaded|complete/.test(document.readyState) && RetinaReplace();
-			   	}, 10);
-			}
-			
-			window.onbeforeunload = goma.ui.fireUnloadEvents;
-			
-			$(window).resize(function(){
-				for(i in flexBoxes) {
-					updateFlexHeight($(flexBoxes[i]));
-				}
-			});
-		});
+		flexBoxes = [],
 		
 		/**
 		 * this is the algorythm to calculate the 100% size of a box.
 		*/
-		var updateFlexHeight = function($container) {
-			if(typeof $container == "undefined" || typeof $container.html() == "undefined") {
+		updateFlexHeight = function ($container) {
+		
+			var maxHeight, 
+			inFloat = false;
+			
+			if ($container === undefined || $container.html() === undefined) {
 				return false;
 			}
 			
-			if($container.css("display") == "inline") {
+			if ($container.css("display") == "inline") {
 				throw new Error("inline-elements are not allowed for flex-boxing.");
 				return false;
 			}
 			
 			$container.css("height", "");
+			maxHeight = updateFlexHeight($container.parent());
 			
 			// first make sure that the parent element is a Flex-Box
-			if(!(maxHeight = updateFlexHeight($container.parent()))) {
+			if (!maxHeight) {
 				$container.css({"display": ""});
 				$container.css("height", "100%");
 				return $container.height();
 			}
 			
-			if(typeof $container.attr("id") == "undefined") {
+			if ($container.attr("id") === undefined) {
 				$container.attr("id", randomString(10));
 			}
 			
 			$container.css({"display": ""});
 			
 			// now calulate other elements' height
-			var inFloat = false;
-			$container.parent().find(" > *").each(function(){
-				if(inFloat && $(this).css("clear") == "both" || $(this).css("clear") == inFloat) {
+			$container.parent().find(" > *").each(function () {
+				if ((inFloat && $(this).css("clear") == "both") || $(this).css("clear") == inFloat) {
 					inFloat = false;
 				}
 				
-				if($(this).attr("id") != $container.attr("id") && $(this).css("float").toLowerCase() != "left" && $(this).css("float").toLowerCase() != "right" && !inFloat && $(this).css("display").toLowerCase() != "none" && $(this).get(0).tagName.toLowerCase() != "td" && $(this).css("position").toLowerCase() != "absolute" && $(this).css("position").toLowerCase() != "fixed") {
+				if ($(this).attr("id") != $container.attr("id") && $(this).css("float").toLowerCase() != "left" && $(this).css("float").toLowerCase() != "right" && !inFloat && $(this).css("display").toLowerCase() != "none" && $(this).get(0).tagName.toLowerCase() != "td" && $(this).css("position").toLowerCase() != "absolute" && $(this).css("position").toLowerCase() != "fixed") {
 					maxHeight = maxHeight - $(this).outerHeight(true);
 				}
 				
-				if($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
+				if ($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
 					inFloat = $(this).css("float");
 				}
 			});
@@ -182,6 +159,41 @@ if(typeof goma.ui == "undefined") {
 			
 			return maxHeight;
 		};
+
+		$(function () {	
+			$.extend(goma.ui, {
+				/**
+				 * this area is by default used to place content loaded via Ajax
+				*/
+				mainContent: $("#content").length ? $("#content") : $("body"),
+				
+				/**
+				 * this area is by default used to place containers from javascript
+				*/
+				DocRoot: ($(".documentRoot").length === 1) ? $(".documentRoot") : $("body")
+			});
+			
+			if (goma.ui.getDevicePixelRatio() > 1.5) {
+				RetinaReplace();
+				// add retina-updae-event
+				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, false);
+			    	if (/WebKit/i.test(navigator.userAgent)) {	
+			    		setInterval(function () {
+			    			/loaded|complete/.test(document.readyState) && RetinaReplace();
+						}, 10);
+					}
+			}
+			
+			window.onbeforeunload = goma.ui.fireUnloadEvents;
+			
+			$(window).resize(function () {
+				var i;
+				for ( i in flexBoxes) {
+					updateFlexHeight($(flexBoxes[i]));
+				}
+			});
+		});
+		
 		
 		// build module
 		return {
@@ -203,7 +215,7 @@ if(typeof goma.ui == "undefined") {
 			 * @access public
 			 * @param jquery-object
 			*/
-			addFlexBox: function($container) {
+			addFlexBox: function ($container) {
 				flexBoxes.push($container);
 				updateFlexHeight($($container));
 			},
@@ -211,7 +223,7 @@ if(typeof goma.ui == "undefined") {
 			/**
 			 * fires an update for flex-boxes
 			*/
-			updateFlexBoxes: function() {
+			updateFlexBoxes: function () {
 				$(window).resize();
 			},
 			
@@ -221,34 +233,35 @@ if(typeof goma.ui == "undefined") {
 			 *@name setMainContent
 			 *@param jQuery-Object | string (CSS-Path)
 			*/
-			setMainContent: function(node) {
-				if($(node).length > 0)
+			setMainContent: function (node) {
+				if ($(node).length > 0) {
 					goma.ui.mainContent = $(node);
+				}
 			},
 			
 			/**
 			 * returns the main-content as jQuery-Object
 			*/
-			getMainContent: function() {
+			getMainContent: function () {
 				return goma.ui.mainContent;
 			},
 			
-			ajax: function(destination, options, unload, hideLoading) {
-				if(typeof hideLoading == "undefined") {
+			ajax: function (destination, options, unload, hideLoading) {
+				if (hideLoading === undefined) {
 					hideLoading = false;
 				}
 					
-				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent();
+				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent(),
+				deferred = $.Deferred(),
+				data;
 				
 				node.addClass("loading");
 				
-				var deferred = $.Deferred();
-				
-				if(unload !== false) {
-					var data = goma.ui.fireUnloadEvents(node);
-					if(typeof data == "string") {
-						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
-							setTimeout(function(){
+				if (unload !== false) {
+					data = goma.ui.fireUnloadEvents(node);
+					if (typeof data == "string") {
+						if (!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
+							setTimeout(function () {
 								deferred.reject("unload");
 							}, 1);
 							return deferred.promise();
@@ -256,28 +269,29 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
-				if(!hideLoading) {
-					goma.ui.setProgress(5).done(function(){	
-						goma.ui.setProgress(15, true)
+				if (!hideLoading) {
+					goma.ui.setProgress(5).done(function () {	
+						goma.ui.setProgress(15, true);
 					});
 					
 				}
 				
-				if(options.pushToHistory) {
-					if(typeof HistoryLib.push == "function")
-						setTimeout(function(){
+				if (options.pushToHistory) {
+					if (typeof HistoryLib.push == "function") {
+						setTimeout(function () {
 							HistoryLib.push(options.url);
 						}, 30);
+					}
 				}
 				
-				$.ajax(options).done(function(r, c, a){
-					if(typeof goma.ui.progress != "undefined") {
+				$.ajax(options).done(function (r, c, a) {
+					if (goma.ui.progress !== undefined) {
 						goma.ui.setProgress(50);
 					}
 					
-					goma.ui.renderResponse(r, a, node, undefined, false, true).done(deferred.resolve).done(function(){
+					goma.ui.renderResponse(r, a, node, undefined, false, true).done(deferred.resolve).done( function() {
 						node.removeClass("loading");
-						if(typeof goma.ui.progress != "undefined") {
+						if (goma.ui.progress !== undefined) {
 							goma.ui.setProgress(100);
 						}
 						goma.ui.updateFlexBoxes();
@@ -285,9 +299,9 @@ if(typeof goma.ui == "undefined") {
 				}).fail(function(a){
 					node.addClass("failed").removeClass("loading");
 					// try find out why it has failed
-					if(a.textStatus == "timeout") {
+					if (a.textStatus == "timeout") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The response timed out.</div>');
-					} else if(a.textStatus == "abort") {
+					} else if (a.textStatus == "abort") {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> The request was aborted.</div>');
 					} else {
 						destination.prepend('<div class="error">Error while fetching data from the server: <br /> Failed to fetch data from the server.</div>');
@@ -304,9 +318,10 @@ if(typeof goma.ui == "undefined") {
 			 *
 			 *@name updateRetina
 			*/
-			updateRetina: function() {
-				if(goma.ui.getDevicePixelRatio() > 1.5)
-					RetinaReplace();	
+			updateRetina: function () {
+				if (goma.ui.getDevicePixelRatio() > 1.5) {
+					RetinaReplace();
+				}
 			},
 			
 			/**
@@ -314,26 +329,29 @@ if(typeof goma.ui == "undefined") {
 			 *
 			 *@name fireUnloadEvents
 			*/
-			fireUnloadEvents: function(node) {
+			fireUnloadEvents: function (node) {
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
-				var event = jQuery.Event("onbeforeunload");
-				var r = true;
+				var event = jQuery.Event("onbeforeunload"),
+				r = true;
 				
-				$(".g-unload-handler").each(function(){
-					if($(this).parents(node)) {
+				$(".g-unload-handler").each(function () {
+					if ($(this).parents(node)) {
 						$(this).trigger(event);
-						if(typeof event.result == "string")
+						if (typeof event.result == "string") {
 							r = event.result;
+						}
 					}
 				});
 				
-				if(node.hasClass("g-unload-handler")) {
+				if (node.hasClass("g-unload-handler")) {
 					node.trigger(event);
-					if(typeof event.result == "string")
+					if (typeof event.result == "string") {
 						r = event.result;
+					}
 				}
-				if(r !== true)
+				if (r !== true) {
 					return r;
+				}
 			},
 			
 			/**
@@ -344,7 +362,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param object - data //optional
 			 *@param function - handler
 			*/
-			bindUnloadEvent: function(select, data, handler) {
+			bindUnloadEvent: function (select, data, handler) {
 				$(select).addClass("g-unload-handler");
 				$(select).on("onbeforeunload", data, handler);
 			},
@@ -356,7 +374,7 @@ if(typeof goma.ui == "undefined") {
 			 *@param string - selector
 			 *@param function - handler to remove - optional
 			*/
-			unbindUnloadEvent: function(select, handler) {
+			unbindUnloadEvent: function (select, handler) {
 				$(select).off("onbeforeunload", handler);
 			},
 			
@@ -364,7 +382,7 @@ if(typeof goma.ui == "undefined") {
 			 * for loading data
 			 * sets data loaded
 			*/
-			setLoaded: function(mod) {
+			setLoaded: function (mod) {
 				gloaded[mod] = true;
 			},
 			
@@ -381,10 +399,10 @@ if(typeof goma.ui == "undefined") {
 			/**
 			 * some base-roots in DOM
 			*/
-			getContentRoot: function() {
+			getContentRoot: function () {
 				return goma.ui.mainContent;
 			},
-			getDocRoot: function() {
+			getDocRoot: function () {
 				return goma.ui.DocRoot;
 			},
 			
@@ -393,17 +411,18 @@ if(typeof goma.ui == "undefined") {
 			 *
 			 *@name setProgress
 			*/
-			setProgress: function(percent, slow) {
-				var deferred = $.Deferred();
+			setProgress: function (percent, slowp) {
+				var deferred = $.Deferred(),
 				
-				if($("#loadingBar").length == 0) {
+				slow = (slowp === undefined) ? false : slowp,
+				
+				duration = (slow && percent != 100) ? 5000 : 500,
+				i;
+				
+				if ($("#loadingBar").length == 0) {
 					$("body").append('<div id="loadingBar"></div>');
 					$("#loadingBar").css("width", 0);
 				}
-				
-				var slow = (typeof slow == "undefined") ? false : slow;
-				
-				var duration = (slow && percent != 100) ? 5000 : 500;
 				
 				goma.ui.progress = percent;
 				$("#loadingBar").stop().css({opacity: 1}).animate({
@@ -411,36 +430,36 @@ if(typeof goma.ui == "undefined") {
 				}, {
 					duration: duration,
 					queue: false,
-					complete: function() {
-						if(percent != 100) {
+					complete: function () {
+						if (percent != 100) {
 							deferred.resolve();
 						}
 					},
-					fail: function() {
-						if(percent != 100) {
+					fail: function () {
+						if (percent != 100) {
 							deferred.reject();
 						}
 					}
 				});
 				
-				if(percent == 100) {
+				if (percent == 100) {
 					$("#loadingBar").animate({
 						opacity: 0
 					}, {
 						duration: 1000,
 						queue: false,
-						complete: function(){
+						complete: function () {
 							$("#loadingBar").css({width: 0, opacity: 1});
 							deferred.resolve();
 						},
-						fail: function() {
+						fail: function () {
 							deferred.reject();
 						}
 					});
 					goma.ui.progress = undefined;
 				}
 				
-				for(i in loadSubscribers) {
+				for (i in loadSubscribers) {
 					loadSubscribers[i](percent, slow);
 				}
 				
@@ -450,9 +469,10 @@ if(typeof goma.ui == "undefined") {
 			/**
 			 * registers to the progress-event.
 			*/
-			onProgress: function(fn) {
-				if(typeof fn == "function")
+			onProgress: function (fn) {
+				if (typeof fn == "function") {
 					loadSubscribers.push(fn);
+				}
 			},
 			
 			/**
@@ -461,16 +481,17 @@ if(typeof goma.ui == "undefined") {
 			 *@name renderResponse
 			 *@access public
 			*/
-			renderResponse: function(html, xhr, node, object, checkUnload, progress) {
-				var deferred = $.Deferred();
+			renderResponse: function (html, xhr, node, object, checkUnload, progress) {
+				var deferred = $.Deferred(),
+				method;
 				
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
 				
-				if(checkUnload !== false) {
+				if (checkUnload !== false) {
 					var data = goma.ui.fireUnloadEvents(node);
-					if(typeof data == "string") {
-						if(!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
-							setTimeout(function(){
+					if (typeof data == "string") {
+						if (!confirm(lang("unload_lang_start") + data + lang("unload_lang_end"))) {
+							setTimeout(function () {
 								deferred.reject("unload");
 							}, 1);
 							return deferred.promise();
@@ -478,35 +499,39 @@ if(typeof goma.ui == "undefined") {
 					}
 				}
 				
-				goma.ui.loadResources(xhr, progress).done(function(){
+				goma.ui.loadResources(xhr, progress).done(function () {
 					
-					if(xhr != null) {
-						var content_type = xhr.getResponseHeader("content-type");
-						if(content_type == "text/javascript") {
-							if(typeof object != "undefined") {
-								var method;
-								if (window.execScript)
-								  	window.execScript('method = ' + 'function(' + html + ')',''); // execScript doesn’t return anything
-								else
-							  		method = eval('(function(){' + html + '});');
-							  	
-								method.call(object);
-							} else {
-								eval_global(html);
-							}
-							RunAjaxResources(xhr);
-							return true;
-						} else if(content_type == "text/x-json" && json_regexp.test(html)) {
-							
-							RunAjaxResources(xhr);
-							return false;
-						}
+					if (xhr === undefined) {
+						throw new Exception("xhr is not defined but required param.");
 					}
 					
-					var regexp = new RegExp("<body");
-					if(regexp.test(html)) {
-						var id = randomString(5);
-						top[id + "_html"] = html;
+					var content_type = xhr.getResponseHeader("content-type"),
+						
+					regexp = new RegExp("<body"),
+					id = randomString(5);
+					
+					if (content_type == "text/javascript") {
+						if (object !== undefined) {
+							if (window.execScript) {
+							  	window.execScript('method = ' + 'function (' + html + ')',''); // execScript doesn’t return anything
+							} else {
+						  		method = eval('(function () {' + html + '});');
+						  	}
+						  	
+							method.call(object);
+						} else {
+							eval_global(html);
+						}
+						RunAjaxResources(xhr);
+						return true;
+					} else if (content_type == "text/x-json" && json_regexp.test(html)) {
+						RunAjaxResources(xhr);
+						return false;
+					}
+					
+					
+					if (regexp.test(html)) {
+						window.top[id + "_html"] = html;
 						node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
 					} else {
 						node.html(html);
@@ -515,7 +540,7 @@ if(typeof goma.ui == "undefined") {
 					RunAjaxResources(xhr);
 					
 					deferred.resolve();
-				}).fail(function(err){
+				}).fail(function (err) {
 					deferred.reject(err);
 				});
 				
@@ -532,7 +557,7 @@ if(typeof goma.ui == "undefined") {
 			 *@name registerResource
 			 *@access public
 			*/
-			registerResource: function(type, file) {
+			registerResource: function (type, file) {
 				goma.ui.registerResources(type, [file]);
 			},
 			
@@ -542,73 +567,66 @@ if(typeof goma.ui == "undefined") {
 			 *@name registerResources
 			 *@access public
 			*/
-			registerResources: function(type, files) {
+			registerResources: function (type, files) {
+				var i;
 				switch(type) {
 					case "css":
 						
-						var i;
-						for(i in files) {
+						for (i in files) {
 							goma.ui.CSSFiles[files[i]] = "";
 							goma.ui.CSSIncluded[files[i]] = true;
 						}
 					break;
 					case "js":
 						
-						var i;
-						for(i in files) {
+						for (i in files) {
 							goma.ui.JSIncluded[files[i]] = true;
 						}
 					break;
 				}
 			},
 			
-			loadResources: function(request, progress) {
-				var deferred = $.Deferred();
+			loadResources: function (request, progress) {
+				var deferred = $.Deferred(),
 				
-				var css = request.getResponseHeader("X-CSS-Load");
-				var js = request.getResponseHeader("X-JavaScript-Load");
-				var base_uri = request.getResponseHeader("x-base-uri");
-				var root_path = request.getResponseHeader("x-root-path");
-				var cssfiles = (css != null) ? css.split(";") : [];
-				var jsfiles = (js != null) ? js.split(";") : [];
+				css = request.getResponseHeader("X-CSS-Load"),
+				js = request.getResponseHeader("X-JavaScript-Load"),
+				base_uri = request.getResponseHeader("x-base-uri"),
+				//root_path = request.getResponseHeader("x-root-path"),
+				cssfiles = (css != null) ? css.split(";") : [],
+				jsfiles = (js != null) ? js.split(";") : [],
 				
-				var perProgress = Math.round((50 / (jsfiles.length + cssfiles.length)));
-				var p = progress;
+				perProgress = Math.round((50 / (jsfiles.length + cssfiles.length))),
+				p = progress,
 				
-				var i = 0;
+				i = 0,
 				// we create a function which we call for each of the files and it iterates through the files
 				// if it finishes it notifies the deferred object about the finish
-				var loadFile = function() {
+				loadFile = function () {
 
 					// i is for both js and css files
 					// first we load js files and then css, cause when js files fail we can't show the page anymore, so no need of loading css is needed
-					if(i >= jsfiles.length) {
+					if (i >= jsfiles.length) {
 						
 						// get correct index for css-files
 						var a = i - jsfiles.length;
-						if(a < cssfiles.length) {
+						if (a < cssfiles.length) {
 							
-							var file = cssfiles[a];
-							
-							// append base-uri if no external link
-							if(!http_regexp.test(file)) {
-								var loadfile = base_uri + file;
-							} else {
-								var loadfile = file;
-							}
-							
+							var file = cssfiles[a],
+							loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
+						
 							// scope to don't have problems with data
-							(function(f){
+							(function (f) {
 								var file = f;
-								if(!external_regexp.test(file) && file != "") {
-									if(typeof goma.ui.CSSFiles[file] == "undefined") {
+								if (!external_regexp.test(file) && file != "") {
+									if (goma.ui.CSSFiles[file] === undefined) {
 										return $.ajax({
 											cache: true,
 											url: loadfile,
 											noRequestTrack: true,
 											dataType: "html"
-										}).done(function(css) {
-											if(typeof goma.ui.progress != "undefined" && p) {
+										}).done(function (css) {
+											if (goma.ui.progress !== undefined && p) {
 												goma.ui.setProgress(goma.ui.progress + perProgress);
 											}
 											
@@ -624,17 +642,17 @@ if(typeof goma.ui == "undefined") {
 											
 											i++;
 											loadFile();
-										}).fail(function(){
+										}).fail(function () {
 											deferred.reject();
 										});
-									} else if(typeof goma.ui.CSSIncluded[file] == "undefined") {
+									} else if (goma.ui.CSSIncluded[file] === undefined) {
 										$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
 										goma.ui.CSSIncluded[file] = true;
 									}
 								} else {
 									goma.ui.CSSFiles[file] = css;
 									goma.ui.CSSIncluded[file] = true;
-									if($("head").html().indexOf(file) != -1) {
+									if ($("head").html().indexOf(file) != -1) {
 										$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
 									}
 								}
@@ -643,42 +661,36 @@ if(typeof goma.ui == "undefined") {
 								loadFile();
 							})(file);
 						} else {
-							setTimeout(function(){
+							setTimeout(function () {
 								deferred.notify("loaded");
 							}, 10);
 						}
 					} else {
-						var file = jsfiles[i];
+						var file = jsfiles[i],
+						loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
 						
-						// append base-uri if no external link
-						if(!http_regexp.test(file)) {
-							var loadfile = base_uri + file;
-						} else {
-							var loadfile = file;
-						}
-						
-						if(file != "") {
+						if (file != "") {
 							
 							// check for internal cache
 							// we don't load modenizr, because it causes trouble sometimes if you load it via AJAX
-							if(typeof goma.ui.JSFiles[file] == "undefined" && !file.match(/modernizr\.js/)) {
+							if (goma.ui.JSFiles[file] === undefined && !file.match(/modernizr\.js/)) {
 								
 								// we create a new scope for this to don't have problems with overwriting vars and then callbacking with false ones
-								return (function(file){
+								return (function (file) {
 									$.ajax({
 										cache: true,
 										url: loadfile,
 										noRequestTrack: true,
 										dataType: "html"
-									}).done(function(js){
-										if(typeof goma.ui.progress != "undefined" && p) {
+									}).done(function (js) {
+										if (goma.ui.progress !== undefined && p) {
 											goma.ui.setProgress(goma.ui.progress + perProgress);
 										}
 										// build into internal cache
 										goma.ui.JSFiles[file] = js;
 										i++;
 										loadFile();
-									}).fail(function(){
+									}).fail(function () {
 										deferred.reject();
 									});
 								})(file);
@@ -688,27 +700,32 @@ if(typeof goma.ui == "undefined") {
 						i++;
 						loadFile();
 					}
-				}
+				};
 				
 				// init loading
 				loadFile();
 				
 				
-				deferred.progress(function(data){
-					for(var i in jsfiles) {
-						var file = jsfiles[i];
-						if(((!run_regexp.test(file) && goma.ui.JSIncluded[file] !== true) || load_alwaysLoad.test(file)) && typeof goma.ui.JSFiles[file] != "undefined") {
+				deferred.progress(function () {
+					var i,
+					file;
+					
+					for (i in jsfiles) {
+						file = jsfiles[i];
+						if (((!run_regexp.test(file) && goma.ui.JSIncluded[file] !== true) || load_alwaysLoad.test(file)) && goma.ui.JSFiles[file] !== undefined) {
 							goma.ui.JSIncluded[file] = true;
 							eval_global(goma.ui.JSFiles[file]);
 						}
 					}
 					
-					setTimeout(function(){
+					setTimeout(function () {
 						deferred.resolve();
 					}, 10);
 					
-					if(!respond.mediaQueriesSupported)
+					if (!respond.mediaQueriesSupported) {
 						respond.update();
+					}
+					
 				});
 				
 				return deferred.promise();
@@ -719,17 +736,19 @@ if(typeof goma.ui == "undefined") {
 			 *
 			 *@name runResources
 			*/
-			runResources: function(request) {
-				var js = request.getResponseHeader("X-JavaScript-Load");
-				var base_uri = request.getResponseHeader("x-base-uri");
+			runResources: function (request) {
+				var js = request.getResponseHeader("X-JavaScript-Load"),
+				//base_uri = request.getResponseHeader("x-base-uri"),
+				jsfiles = js.split(";"),
+				i,
+				file;
 				
-				if(js != null) {
-					var jsfiles = js.split(";");
-					for(var i in jsfiles) {
+				if (js != null) {
+					for (i in jsfiles) {
 						
-						var file = jsfiles[i];
+						file = jsfiles[i];
 						
-						if(run_regexp.test(file) && typeof goma.ui.JSFiles[file] != "undefined" && goma.ui.JSIncluded[file] !== true) {
+						if (run_regexp.test(file) && goma.ui.JSFiles[file] !== undefined && goma.ui.JSIncluded[file] !== true) {
 							eval_global(goma.ui.JSFiles[file]);
 						}
 					}
@@ -737,7 +756,7 @@ if(typeof goma.ui == "undefined") {
 			},
 			
 			// Helper Functions
-			getDevicePixelRatio: function() {
+			getDevicePixelRatio: function () {
 		        if (window.devicePixelRatio === undefined) { return 1; }
 		        return window.devicePixelRatio;
 		    },
@@ -747,7 +766,7 @@ if(typeof goma.ui == "undefined") {
 		     *
 		     *@name isImageOK
 		    */
-			IsImageOk: function(img) {
+			IsImageOk: function (img) {
 			    // During the onload event, IE correctly identifies any images that
 			    // weren’t downloaded as not complete. Others should too. Gecko-based
 			    // browsers act like NS4 in that they report this incorrectly.
@@ -759,7 +778,7 @@ if(typeof goma.ui == "undefined") {
 			    // naturalHeight. These give the true size of the image. If it failed
 			    // to load, either of these should be zero.
 			
-			    if (typeof img.naturalWidth != "undefined" && img.naturalWidth == 0) {
+			    if (img.naturalWidth !== undefined && img.naturalWidth == 0) {
 			        return false;
 			    }
 			
@@ -774,9 +793,9 @@ if(typeof goma.ui == "undefined") {
 			 *@param node
 			 *@param function
 			*/
-			bindESCAction: function(node, fn) {
+			bindESCAction: function (node, fn) {
 				var f = fn;
-				$(node).keydown(function(e){
+				$(node).keydown(function (e) {
 					var code = e.keyCode ? e.keyCode : e.which;
 					if (code == 27) {
 		       	 		f();
@@ -790,22 +809,24 @@ if(typeof goma.ui == "undefined") {
 	var gloader = {load: goma.ui.load};
 }
 
-if(typeof goma.help == "undefined") {
-	goma.help = (function($){
+if (goma.help === undefined) {
+	goma.help = (function ($) {
 		
-		$(function(){
-			if(goma.help.link == null) {
+		'use strict';
+		
+		$(function () {
+			if (goma.help.link == null) {
 				goma.help.setHelpLink($("a.help"));
 			}
 		});
 		
 		return {
 			link: null,
-			setHelpLink: function(node) {
-				if($(node).length > 0) {
+			setHelpLink: function (node) {
+				if ($(node).length > 0) {
 					goma.help.link = $(node);
 					$(node).css("display", "none");
-					if($(node).parent().hasClass("help-wrapper")) {
+					if ($(node).parent().hasClass("help-wrapper")) {
 						$(node).parent().css("display", "none");
 					}
 				} else {
@@ -813,23 +834,23 @@ if(typeof goma.help == "undefined") {
 				}
 			},
 			
-			initWithParams: function(params) {
-				$(function(){
+			initWithParams: function (params) {
+				$(function () {
 					var url = root_path + BASE_SCRIPT + "system/help?";
 				
-					if(typeof params["yt"] != "undefined") {
-						url += "yt=" + escape(params["yt"]);
+					if (params.yt !== undefined) {
+						url += "yt=" + escape(params.yt);
 					}
 					
-					if(typeof params["wiki"] != "undefined") {
-						url += "&wiki=" + escape(params["wiki"]);
+					if (params.wiki !== undefined) {
+						url += "&wiki=" + escape(params.wiki);
 					}
 					
-					if($(goma.help.link).length > 0) {
+					if ($(goma.help.link).length > 0) {
 						goma.help.link.attr("href", url);
 						goma.help.link.attr("rel", "dropdownDialog");
 						$(goma.help.link).css("display", "");
-						if($(goma.help.link).parent().hasClass("help-wrapper")) {
+						if ($(goma.help.link).parent().hasClass("help-wrapper")) {
 							$(goma.help.link).parent().css("display", "");
 						}
 					}
@@ -839,42 +860,44 @@ if(typeof goma.help == "undefined") {
 	})(jQuery);
 }
 
-if(typeof goma.ENV == "undefined") {
-	goma.ENV = (function(){
+if (goma.ENV === undefined) {
+	goma.ENV = (function () {
 		return {
 			"jsversion": "2.0"
 		};
 	})();
 }
 
-if(typeof goma.Pusher == "undefined") {
-	goma.Pusher = (function(){
+if (goma.Pusher === undefined) {
+	goma.Pusher = (function () {
+		'use strict';
+		
 		var js = "http://js.pusher.com/2.0/pusher.min.js";
 		return {
 			
-			init: function(pub_key, options) {
+			init: function (pub_key, options) {
 				goma.Pusher.key = pub_key;
 				goma.Pusher.options = options;
 			},
-			subscribe: function(id, fn) {
-				if(!goma.Pusher.channel(id)) {
-					var _id = id;
-					if(typeof id == "undefined") {
+			subscribe: function (id, fn) {
+				if (!goma.Pusher.channel(id)) {
+					var cid = id;
+					if (cid === undefined) {
 						return false;
 					}
 					
-					if(typeof fn == "undefined") {
-						fn = function(){}
+					if (fn === undefined) {
+						throw new Exception("subscribing without function is not supported");
 					}
 					
-					if(typeof goma.Pusher.key != "undefined") {
-						if(typeof goma.Pusher.pusher != "undefined") {
+					if (goma.Pusher.key !== undefined) {
+						if (goma.Pusher.pusher !== undefined) {
 							fn(goma.Pusher.pusher.subscribe(id));
 						} else {
-							$.getScript(js, function(data, textStatus, jqxhr) {
+							$.getScript(js, function () {
 								goma.Pusher.pusher = new Pusher(goma.Pusher.key, goma.Pusher.options);
 								Pusher.channel_auth_endpoint = root_path + 'pusher/auth';
-								fn(goma.Pusher.pusher.subscribe(_id));
+								fn(goma.Pusher.pusher.subscribe(cid));
 							});
 							return true;
 						}
@@ -882,21 +905,24 @@ if(typeof goma.Pusher == "undefined") {
 						return false;
 					}
 				} else {
-					if(typeof fn != "undefined")
+					if (fn !== undefined) {
 						fn(goma.Pusher.channel(id));
+					}
+					
 					return true;
 				}
 			},
-			unsubscribe: function(id) {
-				if(typeof goma.Pusher.pusher != "undefined") {
+			unsubscribe: function (id) {
+				if (goma.Pusher.pusher !== undefined) {
 					goma.Pusher.pusher.unsubscribe(id);
 				}
 			},
-			channel: function(id) {
-				if(typeof id == "undefined") {
+			channel: function (id) {
+				if (id === undefined) {
 					id = "presence-goma";
 				}
-				if(typeof goma.Pusher.pusher != "undefined") {
+				
+				if (goma.Pusher.pusher !== undefined) {
 					return goma.Pusher.pusher.channel(id);
 				}
 				
@@ -907,14 +933,14 @@ if(typeof goma.Pusher == "undefined") {
 }
 
 // prevent from being executed twice
-if(typeof self.loader == "undefined") {
+if (window.loader === undefined) {
 	
-	self.loader = true;
+	window.loader = true;
 	
 	// shuffle
-	array_shuffle = function(array){
-	  var tmp, rand;
-	  for(var i =0; i < array.length; i++){
+	var array_shuffle = function (array) {
+	  var tmp, rand, i;
+	  for (i = 0; i < array.length; i++) {
 	    rand = Math.floor(Math.random() * array.length);
 	    tmp = array[i]; 
 	    array[i] = array[rand]; 
@@ -924,37 +950,40 @@ if(typeof self.loader == "undefined") {
 	};
 	
 	// put methods into the right namespace
-	(function($, w){
+	(function ($, w) {
 		
 		// some browsers don't like this =D
-		//"use strict";
+		"use strict";
 		
-		$.fn.inlineOffset = function() {
-			var el = $('<i/>').css('display','inline').insertBefore(this[0]);
-			var pos = el.offset();
+		$.fn.inlineOffset = function () {
+			var el = $('<i/>').css('display','inline').insertBefore(this[0]),
+			pos = el.offset();
+			
 			el.remove();
 			return pos;
 		};
 		
-		$(function(){
+		$(function () {
 			
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
 			*/
-			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function()
+			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function ()
 			{
-				var $this = $(this);
-				var _html = $this.html();
+				var $this = $(this),
+				_html = $this.html(),
+				$container = $this.parents(".record").attr("id");
+				
 				$this.html("<img src=\"images/16x16/ajax-loader.gif\" alt=\"loading...\" />");
-				var $container = $this.parents(".record").attr("id");
+				
 				$.ajax({
 					url: $this.attr("href"),
 					data: {ajaxfy: true, "ajaxcontent": true, "container": $container},
 					dataType: "html"
-				}).done(function(html, textStatus, jqXHR){
+				}).done(function (html, textStatus, jqXHR) {
 					eval_script(html, jqXHR);
 					$this.html(_html);
-				}).fail(function(jqXHR){
+				}).fail(function (jqXHR) {
 					eval_script(jqXHR.responseText, jqXHR);
 					$this.html(_html);
 				});
@@ -964,7 +993,7 @@ if(typeof self.loader == "undefined") {
 			/**
 			 * ui-ajax is the class for loading data over goma.ui.ajax and rendering it into an element.
 			*/
-			$(document).on("click", "a[rel=ui-ajax], a.ui-ajax", function()
+			$(document).on("click", "a[rel=ui-ajax], a.ui-ajax", function ()
 			{
 				var $this = $(this);
 				var destination = $this.attr("data-destination") ? $this.attr("data-destination") : undefined;
@@ -973,28 +1002,28 @@ if(typeof self.loader == "undefined") {
 					pushToHistory: (!$(this).hasClass("no-history")),
 					url: $this.attr("href"),
 					data: {"ui-ajax": true}
-				}).done(function(){
+				}).done(function () {
 					$this.removeClass("loading");
 				});
 				return false;
 			});
 		    
 		    // new dropdownDialog, which is very dynamic and greate
-		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function()
+		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function ()
 			{
 				var $this = $(this);
-				goma.ui.loadAsync("dropdownDialog").done(function(){
+				goma.ui.loadAsync("dropdownDialog").done(function () {
 					
 					var options = {
 						uri: $this.attr("href")
 					};
-					if($this.attr("rel") == "dropdownDialog[left]" || $this.hasClass("dropdownDialog-left"))
+					if ($this.attr("rel") == "dropdownDialog[left]" || $this.hasClass("dropdownDialog-left"))
 						options.position = "left";
-					else if($this.attr("rel") == "dropdownDialog[center]" || $this.hasClass("dropdownDialog-center"))
+					else if ($this.attr("rel") == "dropdownDialog[center]" || $this.hasClass("dropdownDialog-center"))
 						options.position = "center";
-					else if($this.attr("rel") == "dropdownDialog[right]" || $this.hasClass("dropdownDialog-right"))
+					else if ($this.attr("rel") == "dropdownDialog[right]" || $this.hasClass("dropdownDialog-right"))
 						options.position = "right";
-					else if($this.attr("rel") == "dropdownDialog[bottom]" || $this.hasClass("dropdownDialog-bottom"))
+					else if ($this.attr("rel") == "dropdownDialog[bottom]" || $this.hasClass("dropdownDialog-bottom"))
 						options.position = "bottom";
 					
 					$this.dropdownDialog(options);
@@ -1008,27 +1037,27 @@ if(typeof self.loader == "undefined") {
 			 * every element with class="windowzindex" is with this plugin
 			 * it makes the clicked one on top
 			*/
-			$(document).on('click', ".windowzindex", function(){
+			$(document).on('click', ".windowzindex", function () {
 				$(".windowzindex").parent().css('z-index', 900);
 				$(this).parent().css("z-index", 901);
 			});
 			
 			// html5 placeholder
 			$("input").each(
-				function(){
-					if(($(this).attr("type") == "text" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
-						if(!Modernizr.input.placeholder) {
+				function () {
+					if (($(this).attr("type") == "text" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
+						if (!Modernizr.input.placeholder) {
 							$(this).val($(this).attr("placeholder"));
 							$(this).css("color", "#999");
 							
-							$(this).focus(function(){
-								if($(this).val()==$(this).attr("placeholder")) {
+							$(this).focus(function () {
+								if ($(this).val()==$(this).attr("placeholder")) {
 									$(this).val("");
 								} 
 								$(this).css("color", "");
 							});
-							$(this).blur(function(){
-								if($(this).val()=="") {
+							$(this).blur(function () {
+								if ($(this).val()=="") {
 									 $(this).val($(this).attr("placeholder"));	
 									 $(this).css("color", "#999");
 									
@@ -1040,19 +1069,19 @@ if(typeof self.loader == "undefined") {
 			);
 			
 			// scroll fix
-			$(document).on("click", "a", function(){
-				if($(this).attr("href").substr(0,1) == "#") {
+			$(document).on("click", "a", function () {
+				if ($(this).attr("href").substr(0,1) == "#") {
 					scrollToHash($(this).attr("href").substr(1));
 					return false;
-				} else if(typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
+				} else if (typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
 					scrollToHash($(this).attr("data-anchor"));
 					return false;
 				}
 			});
 			
 			// scroll to right position
-			if($("#frontedbar").length == 1) {
-				if(location.hash != "") {
+			if ($("#frontedbar").length == 1) {
+				if (location.hash != "") {
 					scrollToHash(location.hash.substr(1));
 				}
 			}
@@ -1070,11 +1099,11 @@ if(typeof self.loader == "undefined") {
 		 *
 		 *@name lang
 		*/
-		w.lang = function(name, _default) {
-			if(typeof BASE_SCRIPT == "undefined")
+		w.lang = function (name, _default) {
+			if (typeof BASE_SCRIPT == "undefined")
 				return false;
 			
-			if(typeof lang[name.toUpperCase()] == "undefined") {
+			if (typeof lang[name.toUpperCase()] == "undefined") {
 				var jqXHR = $.ajax({
 					async: false,
 					cache: true,
@@ -1085,7 +1114,7 @@ if(typeof self.loader == "undefined") {
 				
 				try {
 					var data = parseJSON(jqXHR.responseText);
-					for(i in data) {
+					for (var i in data) {
 						lang[i.toUpperCase()] = data[i];
 					}
 				} catch(e) {
@@ -1093,7 +1122,7 @@ if(typeof self.loader == "undefined") {
 				}
 			}
 			
-			if(lang[name.toUpperCase()] == null) {
+			if (lang[name.toUpperCase()] == null) {
 				return (typeof _default == "undefined") ? _default : name;
 			} else {
 				return lang[name.toUpperCase()];
@@ -1103,7 +1132,7 @@ if(typeof self.loader == "undefined") {
 		/**
 		 * returns the root of the document
 		*/
-		w.getDocRoot = function() {
+		w.getDocRoot = function () {
 			return goma.ui.getDocRoot();
 		}
 		
@@ -1115,22 +1144,22 @@ if(typeof self.loader == "undefined") {
 		 *@param array - names
 		 *@param bool - async request or not, default: true
 		*/
-		w.preloadLang = function(_names, async) {
+		w.preloadLang = function (_names, async) {
 			
-			if(typeof async == "undefined")
+			if (typeof async == "undefined")
 				async = true;
 			
 			var names = [];
 			// check names
-			for(i in _names) {
-				if(typeof lang[_names[i].toUpperCase()] == "undefined")
+			for (var i in _names) {
+				if (typeof lang[_names[i].toUpperCase()] == "undefined")
 					names.push(_names[i]);
 			}
 			
-			if(names.length == 0)
+			if (names.length == 0)
 				return true;
 			
-			$(function(){
+			$(function () {
 				$.ajax({
 					async: async,
 					cache: true,
@@ -1138,10 +1167,10 @@ if(typeof self.loader == "undefined") {
 					url: BASE_SCRIPT + "system/getLang/?l=" + activelang,
 					dataType: "html",
 					noRequestTrack: true,
-					success: function(html) {
+					success: function (html) {
 						try {
 							var data = parseJSON(html);
-							for(i in data) {
+							for (var i in data) {
 								lang[i.toUpperCase()] = data[i];
 							}
 						} catch(e) { 
@@ -1153,19 +1182,19 @@ if(typeof self.loader == "undefined") {
 		}
 			
 		// some response handlers
-		w.eval_script = function(html, ajaxreq, object) {
+		w.eval_script = function (html, ajaxreq, object) {
 			return goma.ui.renderResponse(html, ajaxreq, undefined, object);
 		}
 		
-		w.renderResponseTo = function(html, node, ajaxreq, object) {
+		w.renderResponseTo = function (html, node, ajaxreq, object) {
 			return goma.ui.renderResponse(html, ajaxreq, node, object);
 		}
 		
-		w.LoadAjaxResources = function(request) {
+		w.LoadAjaxResources = function (request) {
 			return goma.ui.loadResources(request);
 		}
 		
-		w.RunAjaxResources = function(request) {
+		w.RunAjaxResources = function (request) {
 			return goma.ui.runResources(request);
 		}
 	
@@ -1177,32 +1206,32 @@ if(typeof self.loader == "undefined") {
 		 *@name unbindFormFormSubmit
 		 *@param node
 		*/
-		w.unbindFromFormSubmit = function(node) {
+		w.unbindFromFormSubmit = function (node) {
 			
 			// first make sure it works!
 			var active = false;
-			$(node).focus(function(){
+			$(node).focus(function () {
 				active = true;
 			});
 			
-			$(node).blur(function(){
+			$(node).blur(function () {
 				active = false;
 			});
 			
-			$(node).parents("form").bind("formsubmit", function(){
-				if(active) {
+			$(node).parents("form").bind("formsubmit", function () {
+				if (active) {
 					return false;
 				}
 			});
 			
-			$(node).parents("form").bind("submit", function(){
-				if(active) {
+			$(node).parents("form").bind("submit", function () {
+				if (active) {
 					return false;
 				}
 			});
 			
 			// second use a better method, just if the browser support it
-			$(node).keydown(function(e){
+			$(node).keydown(function (e) {
 				var code = e.keyCode ? e.keyCode : e.which;
 				if (code == 13) {
 		       	 	return false;
@@ -1218,34 +1247,33 @@ if(typeof self.loader == "undefined") {
 		 *@param fn
 		 *@param array - areas, which aren't calling this function (css-selectors)
 		*/
-		w.CallonDocumentClick = function(call, exceptions) {
-			var fn = call;
-			var mouseover = false;
-			var timeout;
-			var i;
+		w.CallonDocumentClick = function (call, exceptions) {
+			var fn = call,
+			mouseover = false,
+			timeout,
+			i,
 			
 			
 			// function if we click or tap on an exception
-			var exceptionFunc = function(){
+			exceptionFunc = function () {
 				clearTimeout(timeout);
 				mouseover = true;
-				timeout = setTimeout(function(){
+				timeout = setTimeout(function () {
 					mouseover = false;
 				}, 300);
-			}
+			},
 			
 			// function if we click anywhere
-			mouseDownFunc = function(e){
-				setTimeout(function(){		
-					if(mouseover === false) {
+			mouseDownFunc = function (e) {
+				setTimeout(function () {		
+					if (mouseover === false) {
 						fn(e);
 					}
 				}, 10);
-			}
+			};
 			
-			if(exceptions) {
-				var i;
-				for(i in exceptions) {
+			if (exceptions) {
+				for (i in exceptions) {
 					$(exceptions[i]).on("mouseup", exceptionFunc);
 					$(exceptions[i]).on("mousedown", exceptionFunc);
 					$(exceptions[i]).on("touchend", exceptionFunc);
@@ -1257,10 +1285,10 @@ if(typeof self.loader == "undefined") {
 			$(window).on("mousedown", mouseDownFunc);
 			$(window).on("touchend", mouseDownFunc);
 			$(window).on("touchstart", mouseDownFunc);
-			$("iframe").each(function(){
+			$("iframe").each(function () {
 				try {
 					var w = $(this).get(0).contentWindow;
-					if(w) {
+					if (w) {
 						$(w).on("mouseup", mouseDownFunc);
 						$(w).on("touchend", mouseDownFunc);
 					}
@@ -1275,13 +1303,13 @@ if(typeof self.loader == "undefined") {
 		//this parse style & remove style & rebuild style. I like the first one.. but anyway exploring..
 		$.fn.extend
 		({
-		    removeCSS: function(cssName) {
-		        return this.each(function() {
+		    removeCSS: function (cssName) {
+		        return this.each(function () {
 		
 		            return $(this).attr('style',
 		
 		            $.grep($(this).attr('style').split(";"),
-		                    function(curCssName) {
+		                    function (curCssName) {
 		                        if (curCssName.toUpperCase().indexOf(cssName.toUpperCase() + ':') <= 0)
 		                            return curCssName;
 		                    }).join(";"));
@@ -1294,30 +1322,30 @@ if(typeof self.loader == "undefined") {
 		w.request_history = [];
 		w.event_history = [];
 		
-		$.ajaxPrefilter( function( options, originalOptions, jqXHR ) {
-			if(originalOptions.noRequestTrack == null) {
+		$.ajaxPrefilter( function ( options, originalOptions, jqXHR ) {
+			if (originalOptions.noRequestTrack == null) {
 				var data = originalOptions;
-				jqXHR.always(function(){
+				jqXHR.always(function () {
 					w.request_history.push(data);
 				});
 				
-				if(typeof originalOptions.silence == "undefined" || originalOptions.silence != true)
-					if(originalOptions.type == "post" && originalOptions.async != false) {
-						jqXHR.fail(function(){
-							if(jqXHR.textStatus == "timeout") {
+				if (typeof originalOptions.silence == "undefined" || originalOptions.silence != true)
+					if (originalOptions.type == "post" && originalOptions.async != false) {
+						jqXHR.fail(function () {
+							if (jqXHR.textStatus == "timeout") {
 								alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
-							} else if(jqXHR.textStatus == "abort") {
+							} else if (jqXHR.textStatus == "abort") {
 								alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
 							} else {
 								alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
 							}
 						});
 					} else {
-						jqXHR.fail(function(){
+						jqXHR.fail(function () {
 							
-							if(jqXHR.textStatus == "timeout") {
+							if (jqXHR.textStatus == "timeout") {
 								alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
-							} else if(jqXHR.textStatus == "abort") {
+							} else if (jqXHR.textStatus == "abort") {
 								alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
 							} else {
 								alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
@@ -1328,36 +1356,36 @@ if(typeof self.loader == "undefined") {
 				
 	 		jqXHR.setRequestHeader("X-Referer", location.href);
 	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-	 		if(goma.ENV.is_backend)
+	 		if (goma.ENV.is_backend)
 	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
 		
 		w.event_history = [];
 		$.orgajax = $.ajax;
-		$.ajax = function(url, options) {
+		$.ajax = function (url, options) {
 			
 			var w = window;
 			
 			var jqXHR = $.orgajax.apply(this, [url, options]);
 			
-			if(typeof options != "undefined" && options.noRequestTrack == null || url.noRequestTrack == null) {
+			if (typeof options != "undefined" && options.noRequestTrack == null || url.noRequestTrack == null) {
 				var i = w.event_history.length;
 				w.event_history[i] = {done: [], fail: [], always: []};
 				
 				jqXHR._done = jqXHR.done;
-				jqXHR.done = function(fn) {
+				jqXHR.done = function (fn) {
 					w.event_history[i]["done"].push(fn);
 					return jqXHR._done(fn);
 				}
 				
 				jqXHR._fail = jqXHR.fail;
-				jqXHR.fail = function(fn) {
+				jqXHR.fail = function (fn) {
 					w.event_history[i]["fail"].push(fn);
 					return jqXHR._fail(fn);
 				}
 				
 				jqXHR._always = jqXHR.always;
-				jqXHR.always = function(fn) {
+				jqXHR.always = function (fn) {
 					w.event_history[i]["always"].push(fn);
 					return jqXHR._always(fn);
 				}
@@ -1367,23 +1395,23 @@ if(typeof self.loader == "undefined") {
 		};
 		
 		/* API to run earlier Requests with a bit different options */
-		w.runLastRequest = function(data) {
+		w.runLastRequest = function (data) {
 			return w.runPreRequest(0, data);
 		}
-		w.runPreRequest = function(i, data) {
+		w.runPreRequest = function (i, data) {
 			var a = self.request_history.length - 1 - parseInt(i);
 			var options = $.extend(self.request_history[a], data);
-			if(self.request_history[a].data != null && typeof self.request_history[a].data != "string" && typeof data.data == "object") {
+			if (self.request_history[a].data != null && typeof self.request_history[a].data != "string" && typeof data.data == "object") {
 				options.data = $.extend(self.request_history[a].data, data.data);
 			}
 			var jqXHR = $.ajax(options);
-			for(i in w.event_history[a]["done"]) {
+			for (var i in w.event_history[a]["done"]) {
 				jqXHR.done(w.event_history[a]["done"][i]);
 			}
-			for(i in w.event_history[a]["always"]) {
+			for (var i in w.event_history[a]["always"]) {
 				jqXHR.always(w.event_history[a]["always"][i]);
 			}
-			for(i in w.event_history[a]["fail"]) {
+			for (var i in w.event_history[a]["fail"]) {
 				jqXHR.fail(w.event_history[a]["fail"][i]);
 			}
 			return jqXHR;
@@ -1393,13 +1421,13 @@ if(typeof self.loader == "undefined") {
 	
 	// trim
 	// thanks to @url http://www.somacon.com/p355.php
-	String.prototype.trim = function() {
+	String.prototype.trim = function () {
 		return this.replace(/^\s+|\s+$/g,"");
 	}
-	String.prototype.ltrim = function() {
+	String.prototype.ltrim = function () {
 		return this.replace(/^\s+/,"");
 	}
-	String.prototype.rtrim = function() {
+	String.prototype.rtrim = function () {
 		return this.replace(/\s+$/,"");
 	}
 	
@@ -1441,7 +1469,7 @@ if(typeof self.loader == "undefined") {
 		var rv = -1; // if not found
 		var ua = navigator.userAgent;
 		var regexp_firefox = /Firefox/i;
-		if(regexp_firefox.test(ua)) {
+		if (regexp_firefox.test(ua)) {
 			var re  = new RegExp("Firefox/([0-9]{1,}[\.0-9]{0,})");
 	    	if (re.exec(ua) != null)
 	      		rv = parseFloat( RegExp.$1 );
@@ -1502,11 +1530,11 @@ if(typeof self.loader == "undefined") {
 	
 	// parse JSON
 	function parseJSON(str) {
-		if(str.substring(0, 1) == "(") {
+		if (str.substring(0, 1) == "(") {
 			str = str.substr(1);
 		}
 		
-		if(str.substr(str.length - 1) == ")") {
+		if (str.substr(str.length - 1) == ")") {
 			str = str.substr(0, str.length -1);
 		}
 		
@@ -1539,10 +1567,10 @@ if(typeof self.loader == "undefined") {
 	    return new Array(multiplier + 1).join(input);
 	}
 	
-	var scrollToHash = function(hash) {
-		if($("#" + hash).length > 0) {
+	var scrollToHash = function (hash) {
+		if ($("#" + hash).length > 0) {
 			var scrollPosition = $("#" + hash).offset().top;
-		} else if($("a[name="+hash+"]").length > 0) {
+		} else if ($("a[name="+hash+"]").length > 0) {
 			var scrollPosition = $("a[name="+hash+"]").offset().top;
 		} else {
 			var scrollPosition = 0;
@@ -1550,7 +1578,7 @@ if(typeof self.loader == "undefined") {
 		
 		scrollPosition = Math.round(scrollPosition);
 		
-		if(scrollPosition != 0 && $("#frontedbar").length == 1) {
+		if (scrollPosition != 0 && $("#frontedbar").length == 1) {
 			scrollPosition -= $("#frontedbar").height();
 		}
 		
@@ -1563,7 +1591,7 @@ if(typeof self.loader == "undefined") {
 		}, 200);
 	}
 	
-	var now = function() {
+	var now = function () {
 		return Math.round(+new Date()/1000);
 	}
 	
@@ -1573,25 +1601,25 @@ if(typeof self.loader == "undefined") {
 	 *@name ago
 	 *@param int - unix timestamp
 	*/
-	var ago = function(time) {
+	var ago = function (time) {
 		var diff = now() - time;
-		if(diff < 60) {
+		if (diff < 60) {
 			return lang("ago.seconds", "about %d seconds ago").replace("%d", Math.round(diff));
-		} else if(diff < 90) {
+		} else if (diff < 90) {
 			return lang("ago.minute", "about one minute ago");
 		} else {
 			diff = diff / 60;
-			if(diff < 60) {
+			if (diff < 60) {
 				return lang("ago.minutes", "about %d minutes ago").replace("%d", Math.round(diff));
 			} else {
 				diff = diff / 60;
-				if(Math.round(diff) == 1) {
+				if (Math.round(diff) == 1) {
 					return lang("ago.hour", "about one hour ago");
-				} else if(diff < 24) {
+				} else if (diff < 24) {
 					return lang("ago.hours", "%d hours ago").replace("%d", Math.round(diff));
 				} else {
 					diff = diff / 24;
-					if(Math.round(diff * 10) <= 11) {
+					if (Math.round(diff * 10) <= 11) {
 						return lang("ago.day", "about one day ago");
 					} else {
 						// unsupported right now
@@ -1602,9 +1630,9 @@ if(typeof self.loader == "undefined") {
 		}
 	}
 	
-	setInterval(function(){
-		$(".ago-date").each(function(){
-			if($(this).attr("data-date")) {
+	setInterval(function () {
+		$(".ago-date").each(function () {
+			if ($(this).attr("data-date")) {
 				$(this).html(ago($(this).attr("data-date")));
 			}
 		});
