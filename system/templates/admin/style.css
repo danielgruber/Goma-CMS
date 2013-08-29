@@ -1079,9 +1079,11 @@ ul.list-view {
 	padding: 0;
 }
 ul.list-view li a {
-	padding: 1.5em;
+	padding: 1.4375em 1.5em;
+	padding-bottom: 1.375em;
 	padding-left: 3em;
 	border-top: 0.063em solid #ddd;
+	height: 1.25em;
 	
 	display: block;
 	

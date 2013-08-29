@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version	2.1.1
+ * @version	2.1.2
  */
 
 // goma-framework
@@ -275,13 +275,13 @@ if(typeof goma.ui == "undefined") {
 						goma.ui.setProgress(50);
 					}
 					
-					goma.ui.renderResponse(r, a, node, undefined, false, true).done(function(){
+					goma.ui.renderResponse(r, a, node, undefined, false, true).done(deferred.resolve).done(function(){
 						node.removeClass("loading");
 						if(typeof goma.ui.progress != "undefined") {
 							goma.ui.setProgress(100);
 						}
 						goma.ui.updateFlexBoxes();
-					}).done(deferred.resolve).fail(deferred.reject);
+					}).fail(deferred.reject);
 				}).fail(function(a){
 					node.addClass("failed").removeClass("loading");
 					// try find out why it has failed

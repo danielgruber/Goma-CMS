@@ -23,7 +23,7 @@ var LaM_type_timeout;
 		
 		// add flex-boxes
 		goma.ui.addFlexBox($(".leftandmaintable .LaM_tabs .treewrapper"));
-		goma.ui.addFlexBox(".leftandmaintable form .fieldsScroll");
+		goma.ui.addFlexBox(".left-and-main > table td.main > .inner > form > .fields");
 		goma.ui.addFlexBox(".leftandmaintable .main .inner");
 		
 		//! searchfield bindings
@@ -358,9 +358,6 @@ var LaM_type_timeout;
 		} else {
 			$("#content > .content_inner table td.main > .leftbar_toggle").css("display", "");
 		}
-		
-		$(".left-and-main > table td.main > .inner > form > .fields").addClass("fieldsScroll");
-		$(".left-and-main > table td.main > .inner > form > .actions").addClass("actionsScroll");
 		
 		goma.ui.updateFlexBoxes();
 	};
