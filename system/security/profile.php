@@ -64,7 +64,7 @@ class ProfileController extends FrontedController {
 	public function index($id = null) {
 		$id = ($id == null) ? $this->getParam("id") : $id;
 		if(!$id && !member::login()) {
-			HTTPResponse::redirect(BASE_URI . "profile/login/?redirect=".urlencode(ROOT_PATH . BASE_SCRIPT . "profile/")."");
+			HTTPResponse::redirect(BASE_URI);
 			exit;
 		}
 		

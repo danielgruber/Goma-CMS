@@ -27,27 +27,24 @@
 	padding: 0 10px;
 }
 
-.login_form > label {
-	font-weight: 8pt;
-	display: block;
-	font-weight: bold;
+.login_form {
+	padding: 0.25em 0;
 }
-
 .login_form input[type=text], .login_form input[type=password] {
 	width: 90%;
+	margin-bottom: 0.5em;
 }
 
-.login_form > ._actions {
-	padding-top: 5px;
+.login_form > ._actions div {
+	padding: 0.25em 0;
 }
 .login_form > ._actions a {
 	display: block;
-	margin: 5px 4px;
+	margin: 0.25em;
 }
 .login_form > ._actions div a {
 	float: right;
-	margin: 13px 20px;
-	color: #777;
+	margin: 0.75em 1.5em;
 }
 
 /* lang-select */

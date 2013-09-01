@@ -881,7 +881,7 @@ class Dev extends RequestHandler {
 			</script>
 			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
 			<noscript>Please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev/">here</a>.<br /></noscript>
-			<img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...<br /><br /> If it doesn\'t reload within 15 seconds, please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev">here</a>.';
+			<div><img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...</div>If it doesn\'t reload within 15 seconds, please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev">here</a>.';
 	}
 
 	/**

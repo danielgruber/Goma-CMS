@@ -80,14 +80,14 @@ class RequestHandler extends Object {
 		if (PROFILE)
 			Profiler::mark("RequestHandler::__construct");
 
-		$this -> allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions));
-		$this -> url_handlers = array_map("strtolower", $this -> url_handlers);
+		$this->allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions));
+		$this->url_handlers = array_map("strtolower", $this->url_handlers);
 
 		if (isset(ClassInfo::$class_info[$this -> classname]["allowed_actions"]))
-			$this -> allowed_actions = array_merge($this -> allowed_actions, ClassInfo::$class_info[$this -> classname]["allowed_actions"]);
+			$this->allowed_actions = array_merge(ClassInfo::$class_info[$this->classname]["allowed_actions"], $this->allowed_actions);
 
 		if (isset(ClassInfo::$class_info[$this -> classname]["url_handlers"]))
-			$this -> url_handlers = array_merge($this -> url_handlers, ClassInfo::$class_info[$this -> classname]["url_handlers"]);
+			$this->url_handlers = array_merge(ClassInfo::$class_info[$this->classname]["url_handlers"], $this->url_handlers);
 
 		if (PROFILE)
 			Profiler::unmark("RequestHandler::__construct");

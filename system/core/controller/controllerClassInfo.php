@@ -27,7 +27,7 @@ class ControllerClassInfo extends Extension {
 				
 				$allowed_actions = array();
 				foreach($c->callExtending("allowed_actions") as $actions) {
-					$allowed_actions = array_merge($allowed_actions, $actions);
+					$allowed_actions = array_merge($actions, $allowed_actions);
 					unset($actions);
 				}
 				if(count($allowed_actions) > 0) {
@@ -38,7 +38,7 @@ class ControllerClassInfo extends Extension {
 				
 				$url_handlers = array();
 				foreach($c->callExtending("url_handlers") as $handlers) {
-					$url_handlers = array_merge($url_handlers, $handlers);
+					$url_handlers = array_merge($handlers, $url_handlers);
 					unset($handlers);
 				}
 				

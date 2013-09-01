@@ -189,7 +189,7 @@ $lang = array(
 	"email_info"									=> "You can separate multiple e-mail-adresses with commas.",
 	"email_correct_info"							=> "This email-adresse should be yours.",
 	'dragndrop_info'								=> "Drag elements to sort them.",
-	"no_item_selected"								=> "No item selected."
+	"no_item_selected"								=> "No item selected.",
 	"noscript"                                      => "Please activate JavaScript to use this function!",
 	"checked"                                       => "Selected",
 	/* edit tue 3.11.09 11:10 */
