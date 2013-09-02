@@ -38,7 +38,11 @@
 			$("#info").fadeTo(200, 0);
 		};
 		
-		$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info, #wrapper_logout .footer").fadeTo(0, 0);
+		if(!isIDevice()) {
+			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info, #wrapper_logout .footer").fadeTo(0, 0);
+		} else {
+			$("#info").remove();
+		}
 		
 		var s = false;
 		$("body").on("mousemove touchstart", function(){

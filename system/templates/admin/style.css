@@ -88,6 +88,7 @@ h1, h2, h3, h4, h5, h6 {
 	left: 0;
 	z-index: 99;
 }
+
 .dropdownDialog .content {
 	opacity: 0.95;
 }
@@ -246,6 +247,7 @@ h1, h2, h3, h4, h5, h6 {
 .nav-inactive {
 	display: none;
 }
+
 #adminPanel #head {
 	position: fixed;
 	background: #eee;
@@ -1078,8 +1080,8 @@ ul.list-view {
 	padding: 0;
 }
 ul.list-view li a {
-	padding: 1.4375em 1.5em;
-	padding-bottom: 1.375em;
+	padding: 1.063em 1.5em;
+	padding-top: 1em;
 	padding-left: 3em;
 	border-top: 0.063em solid #ddd;
 	height: 1.25em;
@@ -1108,7 +1110,7 @@ ul.list-view li a:hover, ul.list-view li a.loading {
 ul.list-view li a img {
 	position: absolute;
 	left: 0.5em;
-	top: 1.2em;
+	top: 1.063em;
 	max-height: 2em;
 	max-width: 2em;
 }
@@ -1118,7 +1120,6 @@ ul.list-view li a img {
 #wrapper_logout {
 	background: #fff;
 	
-	min-width: 850px;
 	min-height: 100%;
 	
 	position: relative;
@@ -1139,7 +1140,7 @@ ul.list-view li a img {
 	position: relative;
 }
 #wrapper_logout .content_wrapper {
-	width: 42em;
+	width: 100%;
 	margin: auto;
 }
 #wrapper_logout #logo {
@@ -1155,9 +1156,6 @@ ul.list-view li a img {
 	color: #333;
 }
 #wrapper_logout .wrapper_inner .header .content_wrapper {
-	
-	
-	width: 40em;
 	padding: 0.125em;
 	height: 3.0em;
 	
@@ -1180,7 +1178,6 @@ ul.list-view li a img {
 	right: 0.5em;
 }
 #wrapper_logout .wrapper_inner .content {
-	width: 40.4em;
 	margin: auto;
 	padding: 0.75em;
 	
@@ -1225,8 +1222,25 @@ ul.list-view li a img {
 	float: right;
 }
 
+@media only screen and (min-width: 42em) {
+	#wrapper_logout {
+		min-width: 42em;
+	}
+	
+	#wrapper_logout .content_wrapper {
+		width: 42em;
+	}
+	
+	#wrapper_logout .wrapper_inner .header .content_wrapper {
+		width: 40em;
+	}
+	
+	#wrapper_logout .wrapper_inner .content {
+		width: 40.4em;
+	}
+}
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 75em) {
 	#history {
 		background: #fff url(../../../images/icons/modernui/halfdark/48x48/appbar.timer.forward.png) no-repeat 250px -5px;
 		min-height: 400px;
@@ -1248,6 +1262,20 @@ ul.list-view li a img {
 		display: none;
 	}
 }
+
+
+/* on small touch devices fall back to non-fixed-bars. */
+@media only screen and (min-width: 45em) {
+	html.touch #header {
+		position: absolute;
+	}
+	
+	html.touch #adminPanel #head {
+		position: absolute;
+	}
+}
+
+/* print support */
 
 @media print {
 	#header {

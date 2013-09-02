@@ -82,7 +82,7 @@
 	-webkit-overflow-scrolling: touch;
 	padding: 0;
 }
-.leftandmaintable tr > .main > .inner > form > .fieldsScroll {
+.leftandmaintable tr > .main > .inner > form > .fields {
 	overflow: auto;
 }
 .leftandmaintable tr > .main > .inner > form > .fields .visibleField:last-child {
@@ -196,7 +196,7 @@
 }
 .leftandmaintable tr .main ul.create.list-view li:first-child a {
 	border-top: 0;
-	padding-top: 1.4375em;
+	padding-top: 1.063em;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
@@ -216,7 +216,7 @@ ul.list-view.create li a {
 }
 
 ul.list-view.create li a img {
-	top: 1.65em;
+	top: 1.13em;
 	left: 1.5em;
 }
 

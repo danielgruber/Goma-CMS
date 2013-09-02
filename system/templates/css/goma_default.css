@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 03.12.2012
+  * last modified: 02.09.2013
 */
 
 
@@ -13,18 +13,14 @@
  * default-pages-style
 */
 .pages a, .pages span.black {
-	padding: 4px;
+	padding: 0.25em;
 }
 
 #login_page .left {
-	float: left;
-	padding: 10px;
-	width: 250px;
+	padding: 0.5em;
 }
 #login_page .right {
-	margin-left: 280px;
-	border-left: 1px solid #eee;
-	padding: 0 10px;
+	padding: 1em 0.5em;
 }
 
 .login_form {
@@ -49,11 +45,11 @@
 
 /* lang-select */
 #langSelect {
-	padding: 10px;
+	padding: 0.5em;
 }
 #langSelect .back {
 	float: right;
-	margin-top: 14px;
+	margin-top: 10.25em;
 }
 #langSelect .selectBox {
 	margin: -8px;
@@ -64,30 +60,30 @@
 	padding: 0;
 }
 #langSelect ul li {
-	margin: 5px;
+	margin: 0.25em;
 	display: inline-block;
 }
 #langSelect ul li a {
 	display: block;
 	text-decoration: none;
-	padding: 5px;
+	padding: 0.25em;
 }
 #langSelect ul li a img {
 	margin-top: -1px;
 }
 #langSelect ul li a:hover, #langSelect ul li.active a {
 	color: #da097a;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+	border-radius: 0.25em;
 }
 
 .icon.arrow_left {
-	height: 10px;
-	width: 8px;
+	height: 0.5em;
+	width: 0.5em;
 	background: url(../images/arrow_left.png) no-repeat;
 	display: inline-block;
-	margin: 0 5px;
+	margin: 0 0.25em;
 }
 
 /* js */
@@ -106,7 +102,7 @@
 .actions .submitbutton
 {
 	display: inline;
-	margin: 4px;
+	margin: 0.25em;
 }
 
 /* styles for a-tags as buttons most of the time */
@@ -126,27 +122,27 @@ a.button {
 .notice {
     background: #fae98c url(../../../images/icons/fatcow16/bullet_error.png) no-repeat 2px center;
     border: 1px solid #d7c143;
-    padding: 10px;
-    padding-left: 25px;
-    margin:10px 0px;
+    padding: 0.5em;
+    padding-left: 1.25em;
+    margin: 0.5em 0px;
     color: #222;
 }
 
 .success {
     text-align:left;
-    padding:10px;
+    padding:0.5em;
     border: 1px solid #8fb865;
     color: #222;
-    margin:10px 0px;
-    background: #afe37b url(../../../images/icons/fatcow16/success.png) no-repeat 5px center;
+    margin:0.5em 0px;
+    background: #afe37b url(../../../images/icons/fatcow16/success.png) no-repeat 0.25em center;
     padding-left: 30px;
 }
 
 .error {
    	background: #ffbdaf;
 	border: 1px solid #d53f3f;
-	padding: 10px;
-	margin: 10px 0px;
+	padding: 0.5em;
+	margin: 0.5em 0px;
 	color: #252525;
 }
 
@@ -155,13 +151,20 @@ a.button {
 }
 
 .info_box {
-	padding: 10px;
-	margin: 10px 0px;
+	padding: 0.5em;
+	margin: 0.5em 0px;
 	border: 1px solid #6cd2ff;
 	background: #bfebff;
 	color: #222;
 }
 
+
+#page_wrapperpage li h4 {
+	margin: 0;
+}
+.confirmDescription {
+	padding: 0.5em;
+}
 
 /* retina support */
 @media
@@ -179,9 +182,15 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	}
 }
 
-#page_wrapperpage li h4 {
-	margin: 0;
-}
-.confirmDescription {
-	padding: 10px;
+@media only screen and (min-width: 30em) {
+	#login_page .left {
+		float: left;
+		padding: 0.5em;
+		width: 15em;
+	}
+	#login_page .right {
+		margin-left: 17.5em;
+		border-left: 1px solid #eee;
+		padding: 0 0.5em;
+	}
 }

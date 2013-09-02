@@ -502,7 +502,7 @@ if (goma.ui === undefined) {
 				goma.ui.loadResources(xhr, progress).done(function () {
 					
 					if (xhr === undefined) {
-						throw new Exception("xhr is not defined but required param.");
+						throw new Error("xhr is not defined but required param.");
 					}
 					
 					var content_type = xhr.getResponseHeader("content-type"),
@@ -887,7 +887,7 @@ if (goma.Pusher === undefined) {
 					}
 					
 					if (fn === undefined) {
-						throw new Exception("subscribing without function is not supported");
+						fn = function(){};
 					}
 					
 					if (goma.Pusher.key !== undefined) {

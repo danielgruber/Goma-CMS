@@ -192,7 +192,7 @@ class Core extends object {
 		Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
 		Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
 		Resources::add("system/libs/thirdparty/jquery-throttle-debounce/debounce-throttle.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jquery-ui-touch-punch-master/jquery.ui.touch-punch.min.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jquery-ui-touch-punch-master/jquery.ui.touch-punch.js", "js", "main");
 		Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
 		Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
 		Resources::add("system/libs/javascript/loader.js", "js", "main");
