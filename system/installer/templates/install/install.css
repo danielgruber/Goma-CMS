@@ -27,7 +27,7 @@ body, html {
 }
 
 #welcome_animation {
-	padding: 5em 5em;
+	padding: 5em 0;
 	text-align: center;
 	font-size: 2em;
 	line-height: 2em;
