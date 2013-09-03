@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 19.03.2013
-  * $Version 1.4.9
+  * last modified: 31.08.2013
+  * $Version 1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -29,10 +29,11 @@ class systemController extends Controller {
 		"switchView",
 		"getLang/\$lang"		=> "getLang",
 		"ck_uploader"			=> "ckeditor_upload",
-		"ck_imageuploader"		=> "ckeditor_imageupload"
+		"ck_imageuploader"		=> "ckeditor_imageupload",
+		"indexSearch/\$max"		=> "indexSearch"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload");
+	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload", "indexSearch");
 	
 	/**
 	 * disables the mobile version
@@ -297,5 +298,42 @@ class systemController extends Controller {
 		} else {
 			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 		}
+	}
+	
+	/**
+	 * indexes some records for search.
+	*/
+	public function indexSearch() {
+		if(!Permission::check("ADMIN"))
+			return false;
+		
+		session_write_close();
+		$maximum = $this->getParam("max") ? $this->getParam("max") : 10;
+		$manipulation = array();
+		foreach(ClassInfo::getChildren("DataObject") as $class) {
+			
+			
+			if (in_array("searchindex", Object::$extensions[$class])) {
+				$notIndexed = DataObject::get($class, "indexversion = 0 OR indexversion < '".SearchIndex::VERSION."'", array(), $max);
+				foreach($notIndexed as $record) {
+					if(microtime(true) - EXEC_START_TIME > 2.0)
+						return true;
+					
+					SearchIndex::indexRecord($record);
+					$manipulation[] = array(
+							"command"		=> "update",
+							"table_name"	=> $record->table(),
+							"id"			=> $record->versionid,
+							array(
+								"indexversion"	=> SearchIndex::VERSION
+							)
+						)
+				}
+				
+				SQL::manipulate($manipulation);
+			}
+		}
+		
+		return 1;
 	}
 }

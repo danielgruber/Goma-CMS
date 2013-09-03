@@ -502,7 +502,7 @@ if (goma.ui === undefined) {
 				goma.ui.loadResources(xhr, progress).done(function () {
 					
 					if (xhr === undefined) {
-						throw new Exception("xhr is not defined but required param.");
+						throw new Error("xhr is not defined but required param.");
 					}
 					
 					var content_type = xhr.getResponseHeader("content-type"),
@@ -887,7 +887,8 @@ if (goma.Pusher === undefined) {
 					}
 					
 					if (fn === undefined) {
-						throw new Exception("subscribing without function is not supported");
+						//throw new Error("subscribing without function is not supported");
+						fn = function(){};
 					}
 					
 					if (goma.Pusher.key !== undefined) {
@@ -1127,14 +1128,25 @@ if (window.loader === undefined) {
 			} else {
 				return lang[name.toUpperCase()];
 			}
-		}
+		};
+		
+		/**
+		 * starts a indexing for search.
+		*/
+		w.startIndexing = function() {
+			$.ajax({
+				url: BASE_SCRIPT + "system/indexSearch"
+			}).done(function(){
+				startIndexing();
+			});
+		};
 		
 		/**
 		 * returns the root of the document
 		*/
 		w.getDocRoot = function () {
 			return goma.ui.getDocRoot();
-		}
+		};
 		
 		/**
 		 * reloads lang that if you need it javascript does not have to make an ajax-request to get it, which can freeze the browser in very performance-exzessive-operations
@@ -1179,24 +1191,24 @@ if (window.loader === undefined) {
 					}
 				});
 			});
-		}
+		};
 			
 		// some response handlers
 		w.eval_script = function (html, ajaxreq, object) {
 			return goma.ui.renderResponse(html, ajaxreq, undefined, object);
-		}
+		};
 		
 		w.renderResponseTo = function (html, node, ajaxreq, object) {
 			return goma.ui.renderResponse(html, ajaxreq, node, object);
-		}
+		};
 		
 		w.LoadAjaxResources = function (request) {
 			return goma.ui.loadResources(request);
-		}
+		};
 		
 		w.RunAjaxResources = function (request) {
 			return goma.ui.runResources(request);
-		}
+		};
 	
 	
 		/**
