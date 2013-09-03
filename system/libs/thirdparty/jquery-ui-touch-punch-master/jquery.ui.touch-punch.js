@@ -16,17 +16,13 @@
   // Ignore browsers without touch support
   if (!$.support.touch) {
     return;
-  }
+  };
 
   var mouseProto = $.ui.mouse.prototype,
       _mouseInit = mouseProto._mouseInit,
       touchHandled;
       
   var autoAssign = true;
-  
-  $.touchPunch.setAutoAssign = function(b) {
-	  autoAssign = b;  
-  };
   
   $.fn.touchPunch = function() {
 	  // Delegate the touch handlers to the widget's element
@@ -35,7 +31,13 @@
 	      .on('touchmove', $.proxy(mouseProto, "_touchMove"))
 	      .on('touchend', $.proxy(mouseProto, '_touchEnd'));
   };
-
+  
+  $.touchPunch = {
+	  setAutoAssign: function(b) {
+		  autoAssign = b;  
+	  }
+  };
+  
   /**
    * Simulate a mouse event based on a corresponding touch event
    * @param {Object} event A touch event

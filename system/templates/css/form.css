@@ -72,7 +72,7 @@ fieldset {
 	padding: 0.4em 0.2em;
 	font-size: 0.8em;
 	color: #666;
-	width: 35em;
+	max-width: 35em;
 }
 
 .form_field.fullSize > .info_field, fieldset > .form_field > .info_field {

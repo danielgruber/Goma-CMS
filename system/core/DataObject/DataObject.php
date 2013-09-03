@@ -3995,7 +3995,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		$this->callExtending("afterBuildDB", $prefix, $log);
 		
-		$output = '<div style="padding-top: 6px;"><div><img src="images/success.png" height="16" alt="Success" /> Checking Database of '.$this->classname."</div><div style=\"padding-left: 21px;width: 550px;\">";
+		$output = '<div style="padding-top: 6px;"><img src="images/success.png" height="16" alt="Success" /> Checking Database of '.$this->classname."</div><div style=\"padding-left: 21px;width: 550px;\">";
 		$output .= str_replace("\n", "<br />",$log);
 		$output .= "</div>";
 		return $output;

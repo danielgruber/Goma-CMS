@@ -188,6 +188,7 @@ class adminController extends Controller
 			if(!Permission::check("ADMIN") && Core::is_ajax()) {
 				Resources::addJS("location.reload();");
 			}
+			
 			if(!Core::is_ajax()) {
 				if(!_eregi('</html', $content)) {
 					if(!Permission::check("ADMIN")) {

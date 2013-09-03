@@ -173,7 +173,6 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 }
 
 input[type=button], input[type=submit], input[type=reset], button, .button {
-	font-size: 0.9em;
 	font-family: Arial !important;
 	line-height: 18px;
 	padding: 0.40em 0.75em;
@@ -262,9 +261,6 @@ select {
 	padding: 2px;
 }
 
-.login_form > ._actions div a {
-	margin-top: 8px;
-}
 
 #login_page .right {
 	border-left-color: #eee;

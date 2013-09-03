@@ -4,6 +4,8 @@
 		<base href="{BASE_URI}" />
 		<title>$title</title>
 		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+		
+		<meta name="viewport" content="width=device-width" />
 	</head>
 	<body>
 		<div id="wrapper_logout">
@@ -29,6 +31,11 @@
 						<div style="float: right;"><a href="{BASE_URI}{BASE_SCRIPT}admin/">{$_lang_administration}</a></div>
 						$content
 						<div class="clear"></div>
+					</div>
+				</div>
+				<div class="footer">
+					<div class="content_wrapper">
+						<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
 					</div>
 				</div>
 			</div>
