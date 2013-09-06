@@ -1390,7 +1390,8 @@ class ContentTPLExtension extends Extension {
 		"active_mainbar_url",
 		"pageByID",
 		"pageByPath",
-		"active_mainbar"
+		"active_mainbar",
+		"active_page"
 	);
 	
 	/**
@@ -1527,18 +1528,28 @@ class ContentTPLExtension extends Extension {
 		if($level == 2 && isset(self::$active_mainbar)) {
 			$data = self::$active_mainbar;
 		} else { 
-			$data = DataObject::get("pages", array("id"	=> $id));
+			$data = DataObject::get_one("pages", array("id"	=> $id));
 			if($level == 2)
 				self::$active_mainbar = $data;
 		}
-		return $data;
-			
+		return $data;	
+	}
+	
+	/**
+	 * returns the active page
+	 *
+	 *@name active_page
+	 *@access public
+	*/
+	public function active_page()
+	{
+
+		return $this->active_mainbar(2);
 	}
 	
 	/**
 	 * returns the prepended content
 	 *
-	 *@prependedContent
 	 *@access public
 	*/
 	public static function prependedContent() {
@@ -1550,7 +1561,6 @@ class ContentTPLExtension extends Extension {
 	/**
 	 * returns the appended content
 	 *
-	 *@appendedContent
 	 *@access public
 	*/
 	public static function appendedContent() {

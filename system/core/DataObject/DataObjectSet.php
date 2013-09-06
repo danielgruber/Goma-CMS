@@ -353,6 +353,13 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	}
 	
 	/**
+	 * 
+	*/
+	public function can() {
+		return call_user_func_array(array($this->first(), "can"), func_get_args());
+	}
+	
+	/**
 	 * iterator
 	 * this extends this dataobject to use foreach on it
 	 * @link http://php.net/manual/en/class.iterator.php
