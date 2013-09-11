@@ -852,6 +852,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	public function setOffset($var, $value) {
 		$var = trim(strtolower($var));
 		
+		if($value instanceof DBField) {
+			$value = $value->raw();
+			$this->casting[$var] = $value->classname;
+		}
+		
 		if(is_array($this->data)) {
 			// first unset, so the new value is last value of data stack
 			unset($this->data[$var]);

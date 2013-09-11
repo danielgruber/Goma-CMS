@@ -2232,7 +2232,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		if (isset($has_many[$relname])) {
 				// has-many
 				/**
-				 * getMany returns a DataObject
+				 * getMany returns a DataObjectSet
 				 * parameters:
 				 * name of relation
 				 * where
@@ -3761,11 +3761,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	}
 	
 	/**
-	 * has-many-relations
+	 * returns one or many hasMany-Relations.
 	 *
-	 *@name hasMany
+	 * @name hasMany
+	 * @param name of has-many-relation to give back.
+	 * @param if to only give back the class or also give the relation to inverse back.
 	*/
-	public function hasMany() {
+	public function hasMany($component = null, $classOnly = true) {
 		$has_many = (isset(ClassInfo::$class_info[$this->classname]["has_many"]) ? ClassInfo::$class_info[$this->classname]["has_many"] : array());
 		
 		if ($classes = ClassInfo::dataclasses($this->classname)) {
@@ -3775,7 +3777,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 		}
 		
-		return $has_many;
+		if($component) {
+			if($has_many && isset($has_many[strtolower($component)])) {
+				$has_many = $has_many[strtolower($component)];
+			} else {
+				return false;
+			}
+		}
+		
+		if($has_many && $classOnly) {
+			return preg_replace('/(.+)?\..+/', '$1', $hasMany);
+		} else {
+			return $hasMany ? $hasMany : array();
+		}
 	}
 	
 	/**
