@@ -1,15 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 11.03.2013
-  * $Version: 2.2.1
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Class for parsing HTML for inline Scripts and styles and updates all links to correct values.
+ *
+ * @package     Goma\HTML-Processing
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.3
+ */
 class HTMLParser extends Object
 {
 		/**
@@ -24,7 +24,7 @@ class HTMLParser extends Object
 				if(PROFILE) Profiler::mark("HTMLParser scriptParse");
 				if(!HTTPResponse::$disabledparsing)
 				{
-						preg_match_all('/\<script[^\>]*\>(.*)\<\/script\s*\>/Usi', $html, $no_tags);
+						preg_match_all('/\<script[^\>]*type\=\"text\/javascript\"[^\>]*\>(.*)\<\/script\s*\>/Usi', $html, $no_tags);
 						foreach($no_tags[1] as $key => $js)
 						{
 								if(!empty($js))

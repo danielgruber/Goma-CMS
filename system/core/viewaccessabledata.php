@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.2.9
+ * @version		2.3
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -283,6 +283,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			}
 			return $data;
 		}
+	}
+	
+	/**
+	 * to array if we need data for REST-API.
+	*/
+	public function ToRESTArray($addtional_fields = array()) {
+		return $this->ToArray($additional_fields);
 	}
 
 	/**

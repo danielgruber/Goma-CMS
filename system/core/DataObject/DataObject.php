@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.13
+ * @version     4.7.14
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -3658,6 +3658,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		} else {
 			self::$datacache = array();
 		}
+	}
+	
+	/**
+	 * to array if we need data for REST-API.
+	 *
+	 * It also embeds has-one-relations to this record.
+	*/
+	public function ToRESTArray($addtional_fields = array()) {
+		$data = parent::ToRestArray();
+		foreach($this->HasOne() as $name => $class) {
+			if ($this->$name)
+				$data[$name] = $this->$name()->ToRestArray();
+			else
+				$data[$name] = array();
+		}
+		return $data;
 	}
 	
 	//!API for Config
