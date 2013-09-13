@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 28.04.2013
-  * $Version 3.5.4
+  * last modified: 09.09.2013
+  * $Version 3.5.5
 */   
  
  
@@ -422,9 +422,10 @@ class tpl extends Object
 				self::$convert_vars_temp = array();
 				
 				// constants
-				$tpl = preg_replace('/{([a-zA-Z0-9_]+)}/Usi', '<?php echo defined("\\1") ? constant("\\1") : null; ?>', $tpl);
-				$tpl = preg_replace('/<%\s*('.implode("|", self::$language_reserved_words).')\s+(.*)\s*%>/Usi', '<% \\1(\\2) %>', $tpl);
+				while(preg_match('/([^{]){([a-zA-Z0-9_]+)}([^}])/Usi', $tpl))
+					$tpl = preg_replace('/([^{]){([a-zA-Z0-9_]+)}([^}])/Usi', '\\1<?php echo defined("\\2") ? constant("\\2") : null; ?>\\3', $tpl);
 				
+				$tpl = preg_replace('/<%\s*('.implode("|", self::$language_reserved_words).')\s+(.*)\s*%>/Usi', '<% \\1(\\2) %>', $tpl);
 
 				// this array is for storing the percent and prohibit twice parsing of variables
 				$percents = array(); 
