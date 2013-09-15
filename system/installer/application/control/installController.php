@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 26.05.2012
-  * $Version 2.1
+  * last modified: 15.09.2012
+  * $Version 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -215,12 +215,6 @@ class InstallController extends Controller {
 			
 		if(file_exists(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")))) {
 			$gfs = new GFS(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
-			if(!$gfs->valid) {
-				if($gfs->error == 1) {
-					return lang("file_perm_error") . " (<strong>installer/data/restores/" . text::protect(basename($this->getParam("restore"))) ."</strong>)";
-				}
-				return "Package corrupded.";
-			}
 			$data = $gfs->parsePlist("info.plist");
 			$t = G_SoftwareType::getByType($data["type"], APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
 			

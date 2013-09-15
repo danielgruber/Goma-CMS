@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 04.05.2013
-  * $Version 2.7
+  * last modified: 15.09.2013
+  * $Version 2.7.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -119,13 +119,6 @@ class GFS extends Object {
 	protected $oldDBSize;
 	
 	/**
-	 * error on opening
-	 *
-	 *@name error
-	*/
-	public $error = 0;
-	
-	/**
 	 * if this archive is opened as readonly
 	 *
 	 *@name readonly
@@ -176,8 +169,7 @@ class GFS extends Object {
 		$this->file = $filename;
 		if(is_dir($this->file)) {
 			$this->valid = false;
-			$this->error = 8;
-			return false;
+			throw new LogicException("GFS-File is a Folder.");
 		}
 		
 		$filesize = @filesize($this->file);
@@ -212,25 +204,19 @@ class GFS extends Object {
 							$this->valid = true;
 							$this->version = $version;
 						} else {
-							$this->error = 6;
-							log_error("Could not open GFS ".$filename.". Version not supported.");
 							$this->valid = false;
-							return false;
+							throw new GFSVersionException("Could not open GFS ".$filename.". Version is not supported.");
 						}
 						
 						if(version_compare($version, self::VERSION, ">")) {
-							$this->error = 6;
-							log_error("Could not open GFS ".$filename.". Version not supported.");
 							$this->valid = false;
-							return false;
+							throw new GFSVersionException("Could not open GFS ".$filename.". Version is not supported.");
 						}
 						
 						$this->setPosition(6 + strlen($version));
 						if(fread($this->pointer, 2) != "\n\n") {
-							$this->error = 2;
-							log_error("Could not open GFS ".$filename.". Malformed file.");
 							$this->valid = false;
-							return false;
+							throw new GFSFileException("Could not open GFS ".$filename.". Malformed file at Start.");
 						}
 						
 						// check if this is a signed archive
@@ -247,9 +233,8 @@ class GFS extends Object {
 								// reset filesize
 								$filesize = $filesize - 8 - strlen((string)$certSize) - $certSize;
 							} else {
-								$this->error = 7;
 								$this->valid = false;
-								return false;
+								throw new GFSFileException("Could not open signed GFS ".$filename.". Malformed file at signing.");
 							}
 						}
 						
@@ -271,21 +256,16 @@ class GFS extends Object {
 								if($data !== false) {
 									$this->db = $data;
 								} else {
-									log_error("Could not open GFS ".$filename.". Could not decode json-Database.");
-									$this->error = 5;
 									$this->valid = false;
-									return false;
+									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode JSON-DB.");
 								}
 							} else {
 								$data = unserialize($db);
 								if($data !== false) {
 									$this->db = $data;
 								} else {
-									echo $data;
-									log_error("Could not open GFS ".$filename.". Could not decode serialize-Database.");
 									$this->valid = false;
-									$this->error = 5;
-									return false;
+									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode Serialized DB.");
 								}
 							}
 							
@@ -296,26 +276,20 @@ class GFS extends Object {
 							$this->setPosition();
 							$this->valid = true;
 						} else {
-							log_error("Could not open GFS ".$filename.". Damaged database.");
 							$this->valid = false;
-							$this->error = 4;
-							return false;
+							throw new GFSFileException("Could not open GFS ".$filename.". Malformed DataBase.");
 						}
 					} else {
-						log_error("Could not open GFS ".$filename.". Malformed version number.");
 						$this->valid = false;
-						$this->error = 3;
-						return false;
+						throw new GFSVersionException("Could not open GFS ".$filename.". Malformed Version-Number,");
 					}
 				} else {
-					log_error("Could not open GFS ".$filename.". Malformed file.");
 					$this->valid = false;
-					$this->error = 2;
-					return false;
+					throw new GFSFileException("Could not open GFS ".$filename.". Malformed File.");
 				}
 			} else {
 				$this->valid = false;
-				$this->error = 1;
+				throw new LogicException("Could not open GFS " . $filename . ". FileSystem returns an error.");
 			}
 		} else {
 			$this->pointer = fopen($filename, "wb+");
@@ -1925,4 +1899,45 @@ class GFS_Package_Creator extends GFS {
 		echo $template->display("/system/templates/GFSUnpacker.html");
 		exit;
 	}
+}
+
+/**
+ * EXCEPTIONS
+*/
+class GFSVersionException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 41, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+}
+
+class GFSFileException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 42, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class GFSDBException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 43, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
 }

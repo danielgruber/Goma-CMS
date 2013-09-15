@@ -614,8 +614,8 @@ class ClassInfo extends Object {
 									}
 								}
 							} else {
-								$gfs = new GFS($appFolder . "/" . $file);
-								if($gfs->valid) {
+								try {
+									$gfs = new GFS($appFolder . "/" . $file);
 									$info = $gfs->parsePlist("info.plist");
 
 									$info["file"] = $file;
@@ -636,10 +636,10 @@ class ClassInfo extends Object {
 									}
 
 									$gfs->writeToFileSystem("info.plist", $appFolder . "/" . $file . ".plist");
-								} else {
-									if($gfs->error == 1) {
+								} catch(Exception $e) {
+									if(strtolower(get_class($e)) == "logicexception") {
 										$permissionsValid = false;
-										$permissionsFalse .= '<li>./system/installer/data/apps/' . $file . '</li>';
+										$permissionsFalse .= '<li>./system/installer/data/apps/' . $file . ': '.$e->getMessage().'</li>';
 									}
 								}
 							}
