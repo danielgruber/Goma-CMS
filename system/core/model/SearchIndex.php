@@ -54,7 +54,7 @@ class SearchIndex extends DataObjectExtension {
 			}
 			
 			return SQL::Manipulate($manipulation);
-		} else {
+		} else {
 			return false;
 		}
 	}

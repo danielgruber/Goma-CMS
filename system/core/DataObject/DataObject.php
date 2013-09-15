@@ -3786,9 +3786,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		}
 		
 		if($has_many && $classOnly) {
-			return preg_replace('/(.+)?\..+/', '$1', $hasMany);
+			return preg_replace('/(.+)?\..+/', '$1', $has_many);
 		} else {
-			return $hasMany ? $hasMany : array();
+			return $has_many ? $has_many : array();
 		}
 	}
 	

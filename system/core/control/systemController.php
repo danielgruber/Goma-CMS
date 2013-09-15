@@ -320,14 +320,14 @@ class systemController extends Controller {
 						return true;
 					
 					SearchIndex::indexRecord($record);
-					$manipulation[] = array(
+					$manipulation[] = array(
 							"command"		=> "update",
 							"table_name"	=> $record->table(),
 							"id"			=> $record->versionid,
 							array(
 								"indexversion"	=> SearchIndex::VERSION
 							)
-						)
+						);
 				}
 				
 				SQL::manipulate($manipulation);
