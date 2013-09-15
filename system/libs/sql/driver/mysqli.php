@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.03.2013
+  * last modified: 15.09.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -86,7 +86,7 @@ class mysqliDriver extends object implements SQLDriver
 					return true;
 				} else {
 					if($test = new MySQLi($dbhost, $dbuser, $dbpass)) {
-						if($test->query("CREATE DATABASE " . $dbdb))
+						if($test->query("CREATE DATABASE " . $dbdb . " DEFAULT COLLATE = utf8_general_ci"))
 							return true;
 					}
 					return false;
@@ -692,7 +692,7 @@ class mysqliDriver extends object implements SQLDriver
 					
 					$sql .= ''.$type.' '.$name.' ('.implode(',', $ifields).')';
 				}
-				$sql .= ") DEFAULT CHARACTER SET 'utf8'";
+				$sql .= ") DEFAULT CHARACTER SET 'utf8' COLLATE utf8_general_ci";
 				$log .= $sql . "\n";
 				
 				if(sql::query($sql)) {

@@ -912,12 +912,6 @@ form h2 {
  border-bottom-left-radius: 0;
  }*/
 
-#welcome_animation {
-	height: 110px;
-	overflow: hidden;
-	position: relative;
-	display: none;
-}
 #welcome_animation span {
 	display: block;
 	position: absolute;

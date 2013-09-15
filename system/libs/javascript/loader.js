@@ -153,6 +153,7 @@ if (goma.ui === undefined) {
 			});
 			
 			// calculate the padding and border
+			var paddingMargin = ($container.outerHeight(true) - $container.height());
 			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
 			
 			$container.css("height", maxHeight);

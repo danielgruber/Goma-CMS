@@ -35,7 +35,9 @@
 		
 		var show = function() {
 			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #wrapper_logout .footer").fadeTo(500, 1);
-			$("#info").fadeTo(200, 0);
+			$("#info").fadeTo(200, 0, function(){
+				goma.ui.updateFlexBoxes();
+			});
 		};
 		
 
