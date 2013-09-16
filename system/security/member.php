@@ -756,6 +756,8 @@ class Member extends Object {
 				$group = new Group();
 				$group->name = lang("admins", "admin");
 				$group->type = 2;
+				$group->permissions()->add(Permission::forceExisting("superadmin"));
+				$group->permissions()->write(false, true, 2);
 				$group->write(true, true, 2, false, false);
 			}
 			
@@ -822,7 +824,7 @@ class Member extends Object {
 					
 						$groupCount = DataObject::count("group", array("type" => 1));
 						
-						if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
+						if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
 							$group = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
 							$group->write(true, true, 2, false, false);
 						} else {

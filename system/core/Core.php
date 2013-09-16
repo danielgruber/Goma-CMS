@@ -151,18 +151,20 @@ class Core extends object {
 		session_start();
 		if(PROFILE)
 			Profiler::unmark("session");
-
+			
+			
+		// init language-support
+		require_once (FRAMEWORK_ROOT . "core/i18n.php");
+		ClassManifest::$loaded["i18n"] = true;
+		i18n::Init();	
+		
 		if(defined("SQL_LOADUP"))
 			member::Init();
 
 		if(PROFILE)
 			Profiler::mark("Core::Init");
 
-		// init language-support
-		require_once (FRAMEWORK_ROOT . "core/i18n.php");
-		ClassManifest::$loaded["i18n"] = true;
-		i18n::Init();
-
+		
 		// delete-cache-support
 		if(isset($_GET['flush'])) {
 			if(PROFILE)

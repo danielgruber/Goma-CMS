@@ -1108,6 +1108,9 @@ ul.list-view li a img {
 	max-height: 2em;
 	max-width: 2em;
 }
+#installitems.list-view li a img {
+	top: 0.75em;
+}
 
 
 
