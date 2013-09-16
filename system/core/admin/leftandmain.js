@@ -261,7 +261,7 @@ var LaM_type_timeout;
 			
 			// if search
 			$.ajax({
-				url: BASE_SCRIPT + adminURI + "/updateTree/"+marked_node+"/" + escape(value),
+				url: BASE_SCRIPT + adminURI + "/updateTree/" + escape(value),
 				success: function(html, code, jqXHR) {
 					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR).done(function(){
 						tree_bind($this.parents(".classtree").find(".treewrapper").find(".goma-tree"));

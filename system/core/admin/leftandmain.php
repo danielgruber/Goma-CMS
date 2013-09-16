@@ -147,7 +147,7 @@ class LeftAndMain extends AdminItem {
 		if(defined("LAM_CMS_ADD"))
 			$this->ModelInst()->addmode = 1;
 		
-		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree(), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
+		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
 		
 		$_SESSION[$this->classname . "_LaM_marked"] = $this->marked;
 		
@@ -209,7 +209,7 @@ class LeftAndMain extends AdminItem {
 			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
 		
-		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state")));
+		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state", "search" => $search)));
 		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));

@@ -3150,6 +3150,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	public function decorateSearchQuery($query, $searchQuery) {
 		if ($searchQuery) {
 			$filter = array();
+			
+			if(!is_array($searchQuery)) 
+				$searchQuery = array($searchQuery);
+			
 			foreach($searchQuery as $word) {
 				$i = 0;
 				$table_name = ClassInfo::$class_info[$this->baseClass]["table"];

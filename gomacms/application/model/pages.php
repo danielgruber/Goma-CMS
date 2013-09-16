@@ -1063,49 +1063,90 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 * @param 	array $dataparams "version", "filter"
 		*/
 		static function build_tree($parentNode = null, $dataParams = array()) {
-			if(!is_object($parentNode) && $parentNode == 0) {
-				$data = DataObject::get("pages", array("parentid" => 0));
-			} else if(is_a($parentNode, "TreeNode")) {
-				if($parentNode->model) {
-					$data = $parentNode->model->children();
+			if(!isset($dataParams["search"]) || !$dataParams["search"]) {
+				if(!is_object($parentNode) && $parentNode == 0) {
+					$data = DataObject::get("pages", array("parentid" => 0));
+				} else if(is_a($parentNode, "TreeNode")) {
+					if($parentNode->model) {
+						$data = $parentNode->model->children();
+					} else {
+						$data = DataObject::get("pages", array("parentid" => $parentNode->recordid));
+					}
+				} else if(is_int($parentNode)) {
+					$data = DataObject::get("pages", array("parentid" => $parentNode));
+				}
+				
+				// add Version-Params
+				if(isset($dataParams["version"]))
+					$data->setVersion($dataParams["version"]);
+				
+				if(isset($dataParams["filter"]))
+					$data->addFilter($dataParams["filter"]);
+					
+				$nodes = array();
+				foreach($data as $record) {
+					$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
+					
+					// add a bubble for changed or new pages.
+					if(!$record->isPublished())
+						if($record->everPublished())
+							$node->addBubble(lang("CHANGED"), "red");
+						else
+							$node->addBubble(lang("NEW"), "blue");
+					
+					if(!$record->mainbar) {
+						$node->addClass("hidden");
+					}
+							
+					if($record->children()->count() > 0) {
+						$node->setChildCallback(array("pages", "build_tree"), $dataParams);
+					}
+					
+					$nodes[] = $node;
+				}
+				
+				
+				return $nodes;
+			} else {
+				if(!is_object($parentNode) && $parentNode == 0) {
+					$data = DataObject::search_object("pages", $dataParams["search"]);
 				} else {
-					$data = DataObject::get("pages", array("parentid" => $parentNode->recordid));
+					if($parentNode->model) {
+						$data = $parentNode->model->SearchAllChildren($dataParams["search"]);
+					} else {
+						$record = DataObject::get_by_id("pages", $parentNode->recordid);
+						$data = $record->SearchAllChildren($dataParams["search"]);
+					}
 				}
-			} else if(is_int($parentNode)) {
-				$data = DataObject::get("pages", array("parentid" => $parentNode));
+				// add Version-Params
+				if(isset($dataParams["version"]))
+					$data->setVersion($dataParams["version"]);
+				
+				if(isset($dataParams["filter"]))
+					$data->addFilter($dataParams["filter"]);
+				
+				$nodes = array();
+				foreach($data as $record) {
+					$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
+					
+					// add a bubble for changed or new pages.
+					if(!$record->isPublished())
+						if($record->everPublished())
+							$node->addBubble(lang("CHANGED"), "red");
+						else
+							$node->addBubble(lang("NEW"), "blue");
+					
+					if(!$record->mainbar) {
+						$node->addClass("hidden");
+					}
+					
+					$nodes[] = $node;
+				}
+				
+				
+				return $nodes;
+				
 			}
-			
-			// add Version-Params
-			if(isset($dataParams["version"]))
-				$data->setVersion($dataParams["version"]);
-			
-			if(isset($dataParams["filter"]))
-				$data->addFilter($dataParams["filter"]);
-				
-			$nodes = array();
-			foreach($data as $record) {
-				$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
-				
-				// add a bubble for changed or new pages.
-				if(!$record->isPublished())
-					if($record->everPublished())
-						$node->addBubble(lang("CHANGED"), "red");
-					else
-						$node->addBubble(lang("NEW"), "blue");
-				
-				if(!$record->mainbar) {
-					$node->addClass("hidden");
-				}
-						
-				if($record->children()->count() > 0) {
-					$node->setChildCallback(array("pages", "build_tree"), $dataParams);
-				}
-				
-				$nodes[] = $node;
-			}
-			
-			
-			return $nodes;
 		}
 		
 		//!APIs
