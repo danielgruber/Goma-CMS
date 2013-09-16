@@ -605,8 +605,12 @@ function str2int($string, $concat = true) {
  *@return string - the parsed string
  */
 function parse_lang($str, $arr = array()) {
-	return preg_replace('/\{\$_lang_(.*)\}/Usie', "''.var_lang('\\1').''", $str);
+	return preg_replace_callback('/\{\$_lang_(.*)\}/Usi', "var_lang_callback", $str);
 	// find lang vars
+}
+
+function var_lang_callback($data) {
+	return var_lang($data[1]);
 }
 
 /**
@@ -617,6 +621,9 @@ function parse_lang($str, $arr = array()) {
  *@return string - the parsed string
  */
 function var_lang($str, $replace = array()) {
+	if(!is_string($str))
+		throw new LogicException("first argument of var_lang must be string.");
+	
 	$language = lang($str, $str);
 	preg_match_all('/%(.*)%/', $language, $regs);
 	foreach($regs[1] as $key => $value) {
