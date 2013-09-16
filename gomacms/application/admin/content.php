@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.0.8
+ * @version     2.0.9
  */
 
 class contentAdmin extends LeftAndMain
@@ -269,7 +269,7 @@ class contentAdmin extends LeftAndMain
 		$form->addValidator(new DataValidator($model), "datavalidator");
 		
 		if($model->can("Write"))
-			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate"));
+			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate", null, array("green")));
 		
 		return $form->render();
 	}
