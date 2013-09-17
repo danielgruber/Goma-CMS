@@ -5,12 +5,30 @@
   *@link http://goma-cms.org
   *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 20.02.2013
+  * last modified: 17.09.2013
 */
 
 * {
 	margin: 0;
 	padding: 0;
+}
+
+/* default table style for border-tables */
+td, th {
+    padding: 0.5em;
+}
+table[border="1"], table[border="1"] td, table[border="1"] th {
+    border: 1px solid #aaa;
+    border-collapse:collapse;
+}
+table[border="1"] tr:first-child td, table[border="1"] tr:first-child th {
+    background: #ddd;
+}
+table[border="1"] tr:nth-child(2n+1) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #eee;
+}
+table[border="1"] tr:nth-child(2n) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #fff;
 }
 
 /* defaults */
