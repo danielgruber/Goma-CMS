@@ -14,8 +14,12 @@
 }
 
 /* default table style for border-tables */
+
 td, th {
     padding: 0.5em;
+}
+table {
+    margin: 0.5em 0;
 }
 table[border="1"], table[border="1"] td, table[border="1"] th {
     border: 1px solid #aaa;
