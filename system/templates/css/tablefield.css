@@ -60,8 +60,8 @@
 }
 .tablefield-table .filter-header .form_field input[type=text] {
 	width: 99% !important;
-	margin: 3px;
-	padding: 4px 8px;
+	margin: 0.25em;
+	padding: 0.25em 0.5em;
 	background: #fff;
 	border: 1px solid #c0c0c0;
 	min-width: 0 !important;
@@ -84,8 +84,12 @@
 }
 .tablefield-table .filter-header td fieldset .tablefield-button-resetFields {
 	position: absolute;
-	right: -1px;
-	top: -2px;
+	right: 0.31em;
+	top: 0.18em;
+}
+.tablefield-table .filter-header .button {
+    background-color: transparent !important;
+    border: 0 !important;
 }
 
 /**
@@ -97,7 +101,7 @@
 .tablefield-table .filter-header td fieldset.sortActionsWithField span {
 	position: absolute;
 	right: 0;
-	top: -2px;
+	top: 0;
 }
 .tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-filter input {
 	-webkit-border-top-left-radius: 0;
@@ -132,12 +136,13 @@
 	background:  transparent url(images/loope_switch.png) no-repeat 4px 4px;
 	filter: none;
 	-ms-filter: none;
-	margin: 4px 10px;
+	margin: 0.25em 0.5em;
 	border: 0;
+	display: block;
 }
 .tablefield-table .sortable-header td {
 	font-weight: bold;
-	padding: 12px;
+	padding: 0.75em;
 	border-bottom: 1px solid #bbb;
 	border-right: 1px solid #bbb;
 	border-top: 1px solid #eee;
@@ -165,8 +170,8 @@
 	float: none;
 	width: 100%;
 	text-align: left;
-	padding: 12px;
-	padding-right: 24px;
+	padding: 0.75em;
+	padding-right: 1.5em;
 	background: none;
 	background: url(images/tablefield/arrows.png) no-repeat right center;
 	filter: none;
@@ -188,14 +193,14 @@
 	-ms-filter: none;
 }
 .tablefield-table .sortable-header td .non-sortable {
-	padding: 8px;
+	padding: 0.5em;
 	font-size: 11pt;
 	color: #333;
 }
 
 .tablefield-table .toolbar_header h2 {
 	text-align: left;
-	margin: 5px;
+	margin: 0.25em;
 	color: #555
 }
 .tablefield-table .toolbar_header th {
@@ -209,7 +214,7 @@
 }
 
 .tablefield-table .tablefield-items .tablefield-item td {
-	padding: 5px;
+	padding: 0.25em;
 }
 .tablefield-table .tablefield-items .odd {
 	background: #fff;
@@ -223,7 +228,7 @@
 	font-size: 0.9em;
 }
 .tablefield-table .tablefield-no-items td {
-	padding: 10px !important;
+	padding: 0.75em !important;
 	color: #999;
 	font-style: italic;
 	text-align: center;
@@ -245,7 +250,7 @@
 }
 
 .tablefield_pagination th {
-	padding: 10px;
+	padding: 0.75em;
 	border-top: 1px solid #ccc;
 	font-weight: normal;
 }
