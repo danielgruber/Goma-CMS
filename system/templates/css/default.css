@@ -3,8 +3,8 @@
   *
   *@package goma css framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013 Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 17.09.2013
 */
 
@@ -12,8 +12,6 @@
 	margin: 0;
 	padding: 0;
 }
-
-/* default table style for border-tables */
 
 td, th {
     padding: 0.5em;
@@ -41,7 +39,7 @@ body, html {
 	margin: 0;
 	background: #fff;
 	color: #000;
-	font-size: 12pt;
+	font-size: 1em;
 	font-family: Verdana, Arial;
 	min-height: 100%;
 }
@@ -51,6 +49,10 @@ html, body, html * {
     box-sizing: content-box;
     -moz-box-sizing: content-box;
     -webkit-box-sizing: content-box;
+}
+
+* {
+	line-height: 1.25em;
 }
 
 /**
@@ -193,6 +195,7 @@ button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
 button, input[type="button"], input[type="reset"], input[type="submit"], .border-box, .button { 
 	cursor: pointer; 
 	-webkit-appearance: button;
+	
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -225,6 +228,7 @@ input[type="checkbox"], input[type="radio"] {
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
+	
 	margin: 2px 1px;
 }
 
