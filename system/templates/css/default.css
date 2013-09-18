@@ -5,12 +5,32 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 20.02.2013
+  * last modified: 17.09.2013
 */
 
 * {
 	margin: 0;
 	padding: 0;
+}
+
+td, th {
+    padding: 0.5em;
+}
+table {
+    margin: 0.5em 0;
+}
+table[border="1"], table[border="1"] td, table[border="1"] th {
+    border: 1px solid #aaa;
+    border-collapse:collapse;
+}
+table[border="1"] tr:first-child td, table[border="1"] tr:first-child th {
+    background: #ddd;
+}
+table[border="1"] tr:nth-child(2n+1) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #eee;
+}
+table[border="1"] tr:nth-child(2n) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #fff;
 }
 
 /* defaults */
