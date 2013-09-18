@@ -20,7 +20,7 @@
 	border-bottom: 1px solid #ddd;
 }
 .compareView td {
-	padding: 10px;
+	padding: 0.5em !important;
 }
 .compareView .title {
 	width: 25%;
