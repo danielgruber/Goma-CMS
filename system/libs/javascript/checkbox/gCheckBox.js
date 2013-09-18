@@ -13,8 +13,6 @@
  
     // Plugin definition.
     $.fn.gCheckBox = function( options ) {
-    	
-    	
         var settings = $.extend( true, {}, $.fn.gCheckBox.defaults, options );
         
         goma.ui.load("draggable");
@@ -77,69 +75,70 @@
 				// some classes
 				$wrapper.addClass(settings.activeClass);
 				
-				if ($this.prop("checked")) {
-					$wrapper.addClass(settings.activeClass);
-				}
-				
-				// functions, who need the wrapper.
-	        	var currentlyClicking = false,
-	        	acurrentlyClicking = function() {
-			        currentlyClicking = true;
-			        setTimeout(function() {
-			        	currentlyClicking = false;
-			        }, 20);
-		        },
-		        
-				switchValueToOff = function() {
+				/**
+				 * set the switch to off. It just makes a UI-Change.
+				*/
+				var switchUIValueToOff = function() {
 					// run drag-animation.
-					$wrapper.find("div").stop().css({"left": $wrapper.find("div").position().left, "right": "auto"}).animate({"left": 0}, 300, function() {
-						$wrapper.removeClass(settings.activeClass);
-						$wrapper.css({backgroundColor: "", borderColor: ""});
-					});
+					$wrapper.find("div").stop().css({"left": $wrapper.find("div").position().left, "right": "auto"}).animate({"left": 0, queue:false}, 300);
 					
 					// animate color
-					$wrapper.stop().animate({backgroundColor: bgColor, borderColor: borderColor}, 290);
-					
-					// set value
-					$wrapper.find("input").prop("checked", false).change();
+					$wrapper.stop().animate({backgroundColor: bgColor, borderColor: borderColor, queue: false}, 300, function() {
+						$wrapper.removeClass(settings.activeClass);
+						$wrapper.css({backgroundColor: "", borderColor: "", queue:false});
+					});
 				},
 				
-				switchValueToOn = function() {
+				/**
+				 * set the switch to on. It just makes a UI-Change.
+				*/
+				
+				switchUIValueToOn = function() {
 					// calculate and run drag-animation
 					var left = $wrapper.width() - $wrapper.find("div").width();
-					$wrapper.find("div").stop().animate({left: left}, 300, function() {
+					$wrapper.find("div").stop().animate({left: left, queue:false}, 300);
+					
+					// animate color
+					$wrapper.stop().animate({backgroundColor: bgColorActive, borderColor: borderColorActive, queue:false}, 300, function() {
 						$wrapper.addClass(settings.activeClass);
 						$wrapper.find("div").css({left: "auto", right: 0});
 						$wrapper.css({backgroundColor: "", borderColor: ""});
 					});
-					
-					// animate color
-					$wrapper.stop().animate({backgroundColor: bgColorActive, borderColor: borderColorActive}, 290);
-					
-					// set value
-					$wrapper.find("input").prop("checked", true).change();
 				},
-				
-				// called when switch is clicked.
-				switchValue = function() {
-					if (currentlyClicking) {
-						return ;
-					}
-					
-					acurrentlyClicking();
+                
+			    /**
+			     * checks for value and updates the ui
+			    */
+			    checkForValue = function() {
+			        if($this.prop("checked")) {
+				        switchUIValueToOn();
+				    } else {
+				        switchUIValueToOff();
+				    }
+			    },
+			    
+				/**
+				 * really switches the value.
+				*/
+				switchValue = function(value) {
 					var $wrapper = $(this);
+
 					// if checked.
-					if ($wrapper.find("input").prop("checked")) {
-						switchValueToOff();
-					} else {
-						switchValueToOn();
-					}
+					if(value === true || value === false) {
+					    $this.prop("checked", value);
+					} else if($this.prop("checked")) {
+				        $this.prop("checked", false);
+				    } else {
+				        $this.prop("checked", true);
+				    }
+				    checkForValue();
+				    return false;
 				},
 		        
 		        // inits drag-functionallity.
 		        InitDrag = function() {
 		        	var x2 = $wrapper.offset().left + $wrapper.outerWidth() - $wrapper.find("div").width() - 4;
-			        $wrapper.find("div").draggable({
+                    $wrapper.find("div").draggable({
 				        axis: "x",
 				        appendTo: $wrapper,
 				        iframeFix: true,
@@ -185,15 +184,19 @@
 				        	// the borders are different if checked or not.
 				        	if ($wrapper.find("input").prop("checked")) {
 					        	if (left < maxLeft / 1.3) {
-						        	switchValueToOff();
+						        	switchUIValueToOff();
+						             $this.prop("checked", false);
 					        	} else {
-						        	switchValueToOn();
+						        	switchUIValueToOn();
+						        	$this.prop("checked", true);
 					        	}
 					        } else {
 						        if (left < maxLeft / 3) {
-						        	switchValueToOff();
+						        	switchUIValueToOff();
+						            $this.prop("checked", false);
 					        	} else {
-						        	switchValueToOn();
+						        	switchUIValueToOn();
+						        	$this.prop("checked", true);
 					        	}
 					        }
 				        }
@@ -205,9 +208,15 @@
 			        });
 		        };
 				
+				if ($this.prop("checked")) {
+					switchUIValueToOn();
+				} else {
+				 	switchUIValueToOff();
+				}
+				
 				if (!$this.prop("disabled")) {
-				    $wrapper.click(switchValue);
-						
+                    $wrapper.find("div, label").click(switchValue);
+					
 					InitDrag();
 				} else {
 					$wrapper.addClass("disabled");
@@ -216,18 +225,9 @@
 				
 				$wrapper.disableSelection();
 				
-				$this.on("click change", function() {
-					if (currentlyClicking) {
-						return ;
-					}
-					
-					acurrentlyClicking();
-					if ($this.prop("checked")) {
-						switchValueToOn($wrapper);
-					} else {
-						switchValueToOff($wrapper);
-					}
-				});
+				$this.on("change", checkForValue);
+				
+				
 			}
 	        
         });
