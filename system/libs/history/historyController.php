@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 01.03.2013
-  * $Version 1.0.2
+ * gives Controls to get history-information and compare two versions.
+ *
+ * @package		Goma\libs\History
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.1.1
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class HistoryController extends Controller {
 	/**
 	 * url-handlers
@@ -400,7 +399,7 @@ class HistoryController extends Controller {
 	public function buildEditorCSS() {
 		$cache = ROOT . CACHE_DIRECTORY . "/editor_compare_" . Core::GetTheme() . ".css";
 		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
-			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			$css =  self::importCSS("system/templates/css/default.css") . "\n" .  self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			
 			// parse CSS
 			$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
