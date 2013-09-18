@@ -7,7 +7,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.3
+ * @version		1.3.1
 */
 class HTMLEditor extends Textarea
 {
@@ -56,7 +56,7 @@ class HTMLEditor extends Textarea
 	public function buildEditorCSS() {
 		$cache = CACHE_DIRECTORY . "/htmleditor_compare_" . Core::GetTheme() . ".css";
 		if(/*(!file_exists($cache) || filemtime($cache) < TIME + 300) && */file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
-			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			$css = self::importCSS("system/templates/css/default.css") . "\n" . self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			
 			// parse CSS
 			//$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
