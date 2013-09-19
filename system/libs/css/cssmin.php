@@ -6,7 +6,7 @@
   *@author Goma-Team
   *@todo remove hacks
   *@author Fabian Parzefall, edited by Daniel Gruber
-  * last modified: 05.07.2011
+  * last modified: 18.09.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -95,13 +95,20 @@ class CSSMin extends Object
 		/**
 		 *@name __construct
 		 *@param string - css-code
+		 *@param boolean pase as less-file
 		*/
-		public function __construct($input)
+		public function __construct($input, $less = true)
 		{
+			if($less) {
+				$less = new lessc;
+				$this->input = $less->compile($input);
+			} else {
 				$this->input = $input;
-				$this->input = str_replace(array("\r\n", "\r", "\n", "	"), " ", $this->input);
-				$this->input = preg_replace("/\/\*(.*)\*\//Usi", "", $this->input); // comments
-				$this->inputLenght = strlen($this->input);
+			}
+			
+			$this->input = str_replace(array("\r\n", "\r", "\n", "	"), " ", $this->input);
+			$this->input = preg_replace("/\/\*(.*)\*\//Usi", "", $this->input); // comments
+			$this->inputLenght = strlen($this->input);
 		}
 		/**
 		 * minfied the css-code

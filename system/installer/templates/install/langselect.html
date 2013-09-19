@@ -16,6 +16,9 @@
 	];
 	
 	$(function(){
+		
+		location.hash = "#welcome_animation";
+	
 		var i = -1;
 		var update = function() {
 			if(welcome.length <= i) {
@@ -34,14 +37,12 @@
 		setInterval(update, 2000);
 		
 		var show = function() {
-			$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #wrapper_logout .footer").fadeTo(500, 1);
-			$("#info").fadeTo(200, 0, function(){
-				goma.ui.updateFlexBoxes();
-			});
+			$("#document .logo_wrapper, #document .header, #langSelect, #document .footer").fadeTo(500, 1);
+			$("#info").fadeTo(200, 0);
 		};
 		
 
-		$("#wrapper_logout .logo_wrapper, #wrapper_logout .header, #langSelect, #info, #wrapper_logout .footer").fadeTo(0, 0);
+		$("#document .logo_wrapper, #document .header, #langSelect, #info, #document .footer").fadeTo(0, 0);
 		
 		var s = false;
 		$("body").on("mousemove touchstart", function(){
@@ -52,8 +53,6 @@
 			$("body").on("mousemove touchstart", show);
 			!s || show();
 		}, 2000);
-		
-		goma.ui.addFlexBox("#welcome_animation");
 	});
 </script>
 <div id="welcome_animation">

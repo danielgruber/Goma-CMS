@@ -571,7 +571,11 @@ class Resources extends Object {
 			
 			foreach($css_files as $k => $f) {
 				if(file_exists($f)) {
-					$css_files[$k] = $f . "?" . filemtime($f);
+					// generate less-file
+					$less = new lessc;
+					$less->checkedCompile($f, ROOT . CACHE_DIRECTORY . md5($f) . "_" . basename($f));
+
+					$css_files[$k] =  CACHE_DIRECTORY . md5($f) . "_" . basename($f) . "?" . filemtime($f);
 				}
 			}
 			

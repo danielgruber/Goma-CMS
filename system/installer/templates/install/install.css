@@ -27,12 +27,16 @@ body, html {
 }
 
 #welcome_animation {
-	padding: 5em 0;
+	padding: 2.5em 0;
 	text-align: center;
-	font-size: 2em;
+	font-size: 2.5em;
+	font-weight: 100;
 	line-height: 2em;
 	height: 2em;
 	color: #555;
+}
+#info {
+	font-weight: 200;
 }
 
 #apps {

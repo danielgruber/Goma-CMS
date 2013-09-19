@@ -215,6 +215,8 @@ class FormField extends RequestHandler implements ArrayAccess
 					$this->title
 				));
 				
+				$this->input->placeholder = $this->title;
+				
 				$this->container->append($this->input);
 				
 				$this->callExtending("afterField");

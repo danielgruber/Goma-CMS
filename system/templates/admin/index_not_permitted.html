@@ -5,39 +5,42 @@
 		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - {$_lang_administration} <% END %></title>
 		
 		<!-- some css -->
-		<% INCLUDE_CSS_MAIN "style.css" %>
+		<% INCLUDE_CSS_MAIN "style-front.css" %>
 		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
 	
 		{$header}
 		
 		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 	</head>
-	<body>
-		<div id="wrapper_logout">
-			<% IF NOT $content %>
-				<div class="wrapper_inner wrapper_inner_login">
-			<% ELSE %>
-				<div class="wrapper_inner">
-			<% END %>
-				<div class="logo_wrapper">
-					<div class="content_wrapper">
-						<div class="beside_logo">
-							<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
-						</div>
-						<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+	<% IF $content AND URL != "admin/switchlang" %>
+		<body>
+	<% ELSE %>
+		<body id="small">
+	<% END %>
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
+					<div class="beside_logo">
+						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
 					</div>
+					<a href="{BASE_SCRIPT}admin{URLEND}"><img id="logo" src="system/templates/admin/images/logo.png" data-retina="system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
+			</div>
+			
+			<div id="wrapper" class="content_wrapper">
+			
 				<div class="header">
-					<div class="content_wrapper">
+					<div class="">
 						<% IF $content %>
-							<h1>{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></h1>
+							<h1>{$_cms_ptitle}</h1>
 						<% ELSE %>
 							<h1><% lang("login", "login") %></h1>
 						<% END %>
 					</div>
 				</div>
+				
 				<div class="content">
-					<div class="content_wrapper">
+					<div class="">
 						$addcontent
 						<% IF $content %>
 							$content
@@ -53,27 +56,25 @@
 									});
 								})(jQuery);
 							</script>
-							<form class="login_form" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REDIRECT.url()}" method="post">
-								<label for="login_name">{$_lang_email_or_username}</label>
-								<input type="text" name="user" title="{$_lang_email_or_username}" id="login_name" value="{$_POST_user.text()}" />
-								<label for="login_pwd">{$_lang_password}</label>
-								<input type="password" id="login_pwd" title="{$_lang_password}" name="pwd" />
-								<div class="_actions">
-									<div>
-										<input class="button" type="submit" class="submit" value="<% lang('perform_login', 'Login') %>"  />
-										<a href="{ROOT_PATH}"><% lang("back", "back") %></a>
-									</div>
-									<a href="admin/lost_password{URLEND}">{$_lang_lost_password}</a>
+							<form cid="login" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REDIRECT.url()}" method="post">
+								<input type="text" name="user" title="{$_lang_email_or_username}" id="login_name" value="{$_POST_user.text()}" placeholder="{$_lang_email_or_username}" />
+								<input type="password" id="login_pwd" title="{$_lang_password}" name="pwd" placeholder="{$_lang_password}" />
+								<div class="actions">
+									<input type="submit" value="{$_lang_login}" class="button main-submit" />
+									<a href="{ROOT_PATH}" class="back"><% lang("back", "back") %></a>
+									<a href="admin/lost_password{URLEND}" class="lost-password">{$_lang_lost_password}</a>
 								</div>
 							</form>
 							
 						<% END %>
 					</div>
 				</div>
-				<div class="footer">
-					<div class="content_wrapper">
-						<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
-					</div>
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
 				</div>
 			</div>
 		</div>

@@ -5,25 +5,25 @@
 		<base href="{BASE_URI}" />
 		<link rel="stylesheet" href="{BASE_URI}system/templates/css/default.css" />
 		<link rel="stylesheet" href="{BASE_URI}system/templates/css/goma_default.css" />
-		<link rel="stylesheet" href="{BASE_URI}system/templates/admin/style.css" />
+		<link rel="stylesheet/less" type="text/css"  href="{BASE_URI}system/templates/admin/style-front.css" />
 		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 		
 		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		
+		<script src="system/libs/thirdparty/less/less.1.4.1.js" type="text/javascript"></script>
 	</head>
 	<body>
-		<div id="wrapper_logout">
-			
-			<div class="wrapper_inner">
-				<div class="logo_wrapper">
-					<div class="content_wrapper">
-						<div class="beside_logo">
-							<!--<a href="#" title="{$_lang_help}" target="_blank" class="help"><img src="images/icons/goma32/help.png" data-retina="images/icons/goma32/help@2x.png" alt="{$_lang_help}" /></a>
-							
-							<a href="{BASE_SCRIPT}install/langselect/?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>-->
-						</div>
-						<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
+					<div class="beside_logo">
+						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
 					</div>
+					<a href="{BASE_SCRIPT}admin{URLEND}"><img id="logo" src="system/templates/admin/images/logo.png" data-retina="system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
+			</div>
+			
+			<div id="wrapper" class="content_wrapper">
 				<div class="header">
 					<div class="content_wrapper">
 						<h1>Goma</h1>
@@ -44,6 +44,13 @@
 					</div>
 				</div>
 				
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
+				</div>
 			</div>
 		</div>
 	</body>
