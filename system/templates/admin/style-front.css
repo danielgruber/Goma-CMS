@@ -174,14 +174,15 @@ input[type=text], input[type=email], textarea, input[type=password] {
 	border: 0;
 	
 	font-weight: 700;
+	text-decoration: none !important;
 	
-	color: @color-action;
+	color: @color-action !important;
 	
 	-webkit-appearance: none;
 	-moz-appearance: none;
 }
 .button:hover {
-	color: darken(@color-action, 10%);
+	color: darken(@color-action, 10%) !important;
 }
 
 .error {
