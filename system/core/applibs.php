@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version 1.0.3
+ * @version 1.0.4
  */
 
 defined("IN_GOMA") OR die();
@@ -833,8 +833,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 }
 
 function Goma_ExceptionHandler($exception) {
-	$message = get_class($exception) . " " . $exception->getCode() . ":\n\n" . $exception->getMessage() . "\n\n Backtrace: " . $exception->getTraceAsString();
-	log_error($message);
+	log_exception($exception);
 
 	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 	$content = str_replace('{BASE_URI}', BASE_URI, $content);
@@ -852,6 +851,14 @@ function Goma_ExceptionHandler($exception) {
 
 	echo $content;
 	exit ;
+}
+
+function log_exception(Exception $exception) {
+	$message = get_class($exception) . " " . $exception->getCode() . ":\n\n" . $exception->getMessage() . "\n\n Backtrace: " . $exception->getTraceAsString();
+	log_error($message);
+	
+	$debugMsg = "URL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n" . $message;
+	debug_log($debugMsg);
 }
 
 //!Logging
