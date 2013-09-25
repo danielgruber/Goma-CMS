@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 03.05.2013
-  * $Version 1.5.8
+  * last modified: 25.09.2013
+  * $Version 1.5.9
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -702,6 +702,10 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setHeight($height, $absolute = false, $html = "", $style = "") {
+	    if(!$this->path)
+	        return "";
+	        
+	       
 		// normal URL Cache
 		$file = $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -734,6 +738,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setWidth($width, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -780,6 +787,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -812,6 +822,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);		
@@ -844,6 +857,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -876,6 +892,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -908,6 +927,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function noCropSetSize($width, $height, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path .'/noCropSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -940,6 +962,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function noCropSetWidth($width, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path . "/noCropSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
@@ -972,6 +997,9 @@ class ImageUploads extends Uploads {
 	 *@access public
 	*/
 	public function noCropSetHeight($height, $absolute = false, $html = "", $style = "") {
+	     if(!$this->path)
+	        return "";
+	        
 		// normal URL Cache
 		$file = $this->path . "/noCropSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($file);
