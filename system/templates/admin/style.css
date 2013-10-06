@@ -1061,19 +1061,21 @@ form h2 {
 	
 	margin-left: 0;
 	margin-right: 0;
+	
+	padding-top: 0.63em;
+	padding-bottom: 0.64em;
+	margin-top: -0.063em !important;
 }
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
 	color: #24ACB8 !important;
 	border-bottom: 2px solid #24ACB8;
-	
-	margin-top: -0.063em !important;
 }
 .tabs > ul li .active {
 	color: #da097a !important;
 	border: 0;
 	border-bottom: 2px solid #da097a !important;
 	
-	margin-top: -0.063em !important;
+	
 }
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
 	color: #da097a !important;
