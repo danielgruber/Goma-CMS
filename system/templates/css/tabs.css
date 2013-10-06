@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 17.05.2012
+  * last modified: 06.10.2013
 */
 .tabs {
 	
@@ -27,13 +27,13 @@
 .tabs > ul li a, .tabs > ul li .tab {
 	
 	display: block;
-	padding: 0.63em 1em;
+	padding: 0.5em 1em;
 	
 	color: #666;
 	background: #eee;
 	
-	margin: 0 0.063em;
-	margin-top: -0.063em;
+	margin: 0 1px;
+	margin-top: 0.2em;
 	
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
@@ -73,6 +73,8 @@
 	border-bottom: 0;
 	cursor: text;
 	margin-top: 0;
+	padding-top: 0.63em;
+	padding-bottom: 0.64em;
 }
 .tabs > ul > li > a.active {
 	color: #444;
