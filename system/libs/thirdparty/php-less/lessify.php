@@ -10,7 +10,7 @@
  *
  */
 
-require "lessc.inc.php";
+require_once "lessc.inc.php";
 
 //
 // check if the merge during mixin is overwriting values. should or should it not?
