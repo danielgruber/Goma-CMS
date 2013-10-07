@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 06.08.2013
+ * last modified: 06.10.2013
  */
 
 body, html {
@@ -100,7 +100,11 @@ h1, h2, h3, h4, h5, h6 {
 #navi {
 	height: 3.5em;
 	padding-left: 0.5em;
-	float: left;
+	position: fixed;
+	top: 0;
+	left: 0;
+	
+	z-index: 100;
 }
 #navi ul {
 	list-style-type: none;
@@ -179,6 +183,21 @@ h1, h2, h3, h4, h5, h6 {
 	top: 0;
 	right: 0;
 	z-index: 10;
+}
+#userbar {
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 101;
+	
+	background: -webkit-gradient(linear, left top, left bottom,	color-stop(0, #5c5c5b), color-stop(1, #424242));
+	background: -webkit-linear-gradient(#5c5c5b, #424242);
+	background: -moz-linear-gradient(#5c5c5b, #424242);
+	background: -ms-linear-gradient(#5c5c5b, #424242);
+	background: -o-linear-gradient(#5c5c5b, #424242);
+	background: linear-gradient(#5c5c5b, #424242);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242'); /* IE6 & IE7 */
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5c5c5b', endColorstr='#424242')"; /* IE8+ */
 }
 #userbar > div {
 	width: 3.5em;

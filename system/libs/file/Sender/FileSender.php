@@ -74,4 +74,7 @@ if(file_exists("../../../temp/download." . basename($_GET["downloadID"]) . ".gom
 		fclose($handle);
 		exit;
 	}
-} 
+} else {
+	echo "File not found";
+	exit;
+}

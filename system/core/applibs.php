@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version 1.0.4
+ * @version 1.0.3
  */
 
 defined("IN_GOMA") OR die();
@@ -852,6 +852,7 @@ function Goma_ExceptionHandler($exception) {
 	echo $content;
 	exit ;
 }
+
 
 function log_exception(Exception $exception) {
 	$message = get_class($exception) . " " . $exception->getCode() . ":\n\n" . $exception->getMessage() . "\n\n Backtrace: " . $exception->getTraceAsString();

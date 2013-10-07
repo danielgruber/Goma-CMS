@@ -134,6 +134,10 @@ class Core extends object {
 			if(PROFILE)
 				Profiler::mark("php://input read");
 			$random = randomString(20);
+			if(!file_exists(FRAMEWORK_ROOT . "temp/")) {
+				mkdir(FRAMEWORK_ROOT . "temp/", 0777, true);
+				chmod(FRAMEWORK_ROOT . "temp/", 0777);
+			}
 			$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
 			file_put_contents($file, $handle);
 			fclose($handle);

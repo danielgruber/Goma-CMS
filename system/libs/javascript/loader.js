@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version	2.1.2
+ * @version	2.1.3
  */
 
 // goma-framework
@@ -121,6 +121,8 @@ if (goma.ui === undefined) {
 				return false;
 			}
 			
+			var scroll = $container.scrollTop();
+			
 			$container.css("height", "");
 			maxHeight = updateFlexHeight($container.parent());
 			
@@ -157,6 +159,7 @@ if (goma.ui === undefined) {
 			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
 			
 			$container.css("height", maxHeight);
+			$container.scrollTop(scroll);
 			
 			return maxHeight;
 		};
@@ -634,7 +637,7 @@ if (goma.ui === undefined) {
 											// patch uris
 											var base = file.substring(0, file.lastIndexOf("/"));
 											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-											css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + base + '/$1)');
+											//css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + base + '/$1)');
 											
 											goma.ui.CSSFiles[file] = css;
 											goma.ui.CSSIncluded[file] = true;
@@ -748,7 +751,7 @@ if (goma.ui === undefined) {
 					for (i in jsfiles) {
 						
 						file = jsfiles[i];
-						
+
 						if (run_regexp.test(file) && goma.ui.JSFiles[file] !== undefined && goma.ui.JSIncluded[file] !== true) {
 							eval_global(goma.ui.JSFiles[file]);
 						}

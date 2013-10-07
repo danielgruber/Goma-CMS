@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 12.08.2013
+  * last modified: 06.10.2013
 */
 
 .goma-tree, .goma-tree ul {
@@ -33,15 +33,17 @@
 }
 .goma-tree li .node-area {
 	padding: 0.25em;
-	padding-left: 1.75em;
+	padding-left: 2.5em;
 	display: block;
 	color: #000;
 	font-weight: normal;
 	text-decoration: none;
 	text-overflow: ellipsis;
+	
+	position: relative;
 }
 .goma-tree li.hidden .node-area {
-	color: #666;
+	color: #555;
 }
 .goma-tree li.action .node-area {
 	color: #333;
@@ -54,11 +56,14 @@
 .goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span, .goma-tree li > span.context-menu-active {
 	background: #ddd;
 }
-.goma-tree li .node-area img {
+.goma-tree li .node-area .img-holder img {
 	padding-right: 0.25em;
 	margin-top: -0.063em;
 	height: 1em;
 	width: 1em;
+	position: absolute;
+	left: 1.5em;
+	top: 0.75em;
 }
 .goma-tree li .node-area .tree-bubbles {
 	float: right;
@@ -114,6 +119,8 @@
 	padding: 0;
 	height: 0;
 	width: 0;
+	
+	z-index: 900;
 	
 	user-select: none;
 }

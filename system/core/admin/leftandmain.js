@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.5
+ * @version     2.2.6
  */
 
 
@@ -16,7 +16,7 @@ var LaM_type_timeout;
 (function($, w){
 	$(function(){
 		// first modify out view-controller in javascript.
-		goma.ui.setMainContent($("#content > #maincontent > .content_inner table td.main > .inner"));
+		goma.ui.setMainContent($("table.leftandmaintable td.main > .inner"));
 		
 		// make it visible.
 		$(".leftandmaintable").css("display", "");
@@ -106,6 +106,24 @@ var LaM_type_timeout;
 			}
 		});
 		
+		var scrollTimeout,
+		optimizeScroll = function() {
+			clearTimeout(scrollTimeout);
+			scrollTimeout = setTimeout(function(){
+
+				var treewrapper = $(".leftandmaintable .LaM_tabs .treewrapper");
+				// find optimal scroll by position of active element
+				if(treewrapper.find(".marked").length > 0) {
+					var pos = treewrapper.find(".marked").position().top - treewrapper.position().top;
+					if(treewrapper.scrollTop() > pos) {
+						treewrapper.scrollTop(pos);
+					} else if(treewrapper.scrollTop() + treewrapper.height() < pos) {
+						treewrapper.scrollTop(pos);
+					}
+				}
+			}, 50);
+		};
+		
 		//! history
 		if(getInternetExplorerVersion() > 7 || getInternetExplorerVersion() == -1) {
 			goma.ui.loadAsync("history").done(function(){
@@ -129,29 +147,16 @@ var LaM_type_timeout;
 							$this.parent().parent().addClass("marked");
 						}
 						
-						// correct scroll-position
-						var oldscroll = $(".treewrapper").scrollTop();
-						$(".treewrapper").scrollTop(0);
-						var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-						if(pos > 0) {
-							$(".treewrapper").scrollTop(oldscroll);
-							$(".treewrapper").scrollTop(pos);
-						} else {
-							$(".treewrapper").scrollTop(0);
-							var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-							if(pos > 0) {
-								$(".treewrapper").scrollTop(oldscroll);
-								$(".treewrapper").scrollTop(pos);
-							} else
-								$(".treewrapper").scrollTop(0);
-						}
-						
 						updateSidebarToggle();
 					});
 					
 				});
+				
+				HistoryLib.bind(optimizeScroll, true);
 			});
 		}
+		
+		optimizeScroll();
 		
 		//! tree-events
 		$(".treesearch form input[type=text]").keyup(function(){
@@ -246,12 +251,6 @@ var LaM_type_timeout;
 						if(fn != null) {
 							fn();
 						}
-						// find optimal scroll by position of active element
-						if(treewrapper.find(".marked").length > 0) {
-							var pos = treewrapper.find(".marked").position().top - treewrapper.position().top - treewrapper.height() / 2 + 20;
-							if(pos > 0)
-								treewrapper.scrollTop(pos);
-						}
 					});
 				}
 			});
@@ -276,23 +275,8 @@ var LaM_type_timeout;
 		}
 	}
 	
-	function tree_bind_ajax(sortable, node, findPos) {
-		// normally we trigger the javascript to find optimal scroll-position
-		if(typeof findPos == "undefined") {
-			findPos = true;
-		}
+	function tree_bind_ajax(sortable, node) {
 		
-		// find optimal scroll by position of active element
-		if(findPos && node.parents(".treewrapper").find(".marked").length > 0) {
-			var oldscroll = $(".treewrapper").scrollTop();
-			$(".treewrapper").scrollTop(0);
-			var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-			if(pos > 0) {
-				$(".treewrapper").scrollTop(oldscroll);
-				$(".treewrapper").scrollTop(pos);
-			} else
-				$(".treewrapper").scrollTop(0);
-		}
 		
 		// bind events to the nodes to load the content then
 		node.find("a.node-area").click(function(){
@@ -404,18 +388,6 @@ var LaM_type_timeout;
 				$(".tree .marked").removeClass("marked");
 				$this.parent().parent().addClass("marked");
 				$this.removeClass("loading");
-						
-				// find optimal scroll by position of active element
-				if($(".treewrapper").find(".marked").length > 0) {
-					var oldscroll = $(".treewrapper").scrollTop();
-					$(".treewrapper").scrollTop(0);
-					var pos = $(".treewrapper").find(".marked").offset().top - $(".treewrapper").position().top - $(".treewrapper").height() / 2 + 20;
-					if(pos > 0) {
-						$(".treewrapper").scrollTop(oldscroll);
-						$(".treewrapper").scrollTop(pos);
-					} else
-						$(".treewrapper").scrollTop(0);
-				}
 				
 				$(".treewrapper .loadingBar").remove();
 				

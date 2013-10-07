@@ -3,7 +3,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.0
+ * @version		1.0.1
  */
 function tree_bind(tree) {
 	$.contextMenu('html5');
@@ -28,22 +28,22 @@ function tree_bind(tree) {
 			$.ajax({
 				url: link.attr("href")
 			}).done(function(html) {
-				li.find("ul").removeClass("loading").slideUp(0);
-				li.find("ul").html(html);
-				li.find("ul").slideDown("fast");
+				li.find(" > ul").removeClass("loading").slideUp(0);
+				li.find(" > ul").html(html);
+				li.find(" > ul").slideDown("fast");
 				
 				tree_bind(li.find(" > ul"));
 				
 				node.trigger("treeupdate", [li]);
 			});
 		}  else if($(this).hasClass("expanded")) {
-			li.find("ul").slideUp("fast");
+			li.find(" > ul").slideUp("fast");
 			li.addClass("collapsed").removeClass("expanded");
 			hitarea.addClass("collapsed").removeClass("expanded");
 			
 			setCookie(hitarea.attr("data-cookie"), 0);
 		}  else if($(this).hasClass("collapsed")) {
-			li.find("ul").slideDown("fast");
+			li.find(" > ul").slideDown("fast");
 			li.removeClass("collapsed").addClass("expanded");
 			hitarea.removeClass("collapsed").addClass("expanded");
 			
