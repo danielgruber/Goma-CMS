@@ -15,7 +15,7 @@
 @color-text: #222;
 @color-headlines: #555;
 @color-light: #888;
-@color-grey: darken(#fff, 15%);
+@color-grey: darken(#fff, 20%);
 @color-darkgrey: #555;
 
 @color-action: @color-green;
@@ -36,7 +36,6 @@ body, html {
     color: @color-text;
     font-family: "Helvetica Neue", Arial, Verdana;
 	font-size: 1em;
-	font-weight: 300;
 	line-height: 1.25em;
 	height: 100%;
 }
@@ -142,16 +141,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 input[type=text], input[type=email], textarea, input[type=password] {
-	background: #fff;
-	padding: 0.75em 0;
+	background: #eee;
+	padding: 0.75em;
 	border: 0;
 	border-bottom: 1px solid @color-grey;
 	
 	font-family: "Helvetica Neue", serif;
 	font-size: 1em;
 	margin-bottom: @space-small;
-	
-	font-weight: 200;
 	
 	color: @color-text;
 	
@@ -163,10 +160,6 @@ input[type=text], input[type=email], textarea, input[type=password] {
 	-moz-border-radius: 0;
 }
 
-.form_field input[type=text], .form_field input[type=email], .form_field input[type=password], textarea {
-	background: #eee;
-	padding: 0.75em;
-}
 
 .button {
 	background: #fff !important;

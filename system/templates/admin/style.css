@@ -3,8 +3,29 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 06.10.2013
+ * last modified: 08.10.2013
  */
+
+@color-text: #222;
+@color-headlines: #555;
+@color-light: #888;
+@color-grey: darken(#fff, 15%);
+@color-darkgrey: #555;
+@color-tint: @system-tint;
+
+@color-action: @system-action;
+@color-highlight: @system-highlight;
+
+@space-wide: 1em;
+@space-normal: 0.5em;
+@space-small: 0.25em;
+
+@rounded-wide: 2em;
+@rounded-normal: 0.5em;
+@rounded-small: 0.125em;
+
+@container-width: 45em;
+@container-width-small: 18em;
 
 body, html {
     color: #222;
@@ -15,12 +36,12 @@ body, html {
 }
 
 a, a:visited {
-	color: #24ACB8;
+	color: @color-action;
 	text-decoration: none;
 	outline: none;
 }
 a:hover, a:active {
-	color: #24ACB8;
+	color: @color-action;
 	text-decoration: underline;
 }
 p {
@@ -45,10 +66,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 #loadingBar {
-	background: #da097a;
-	-webkit-box-shadow: 0 0 0.5em #da097a;
-	box-shadow: 0 0 0.5em #da097a;
-	-moz-box-shadow: 0 0 0.5em #da097a;
+	background: @color-highlight;
+	-webkit-box-shadow: 0 0 0.5em @color-highlight;
+	box-shadow: 0 0 0.5em @color-highlight;
+	-moz-box-shadow: 0 0 0.5em @color-highlight;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -57,7 +78,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .loadingBar {
-	background: #da097a !important;
+	background: @color-highlight !important;
 	z-index: 999;
 }
 
@@ -97,6 +118,8 @@ h1, h2, h3, h4, h5, h6 {
 .dropdownDialog .content {
 	opacity: 0.95;
 }
+
+
 #navi {
 	height: 3.5em;
 	padding-left: 0.5em;
@@ -105,57 +128,73 @@ h1, h2, h3, h4, h5, h6 {
 	left: 0;
 	
 	z-index: 100;
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		
+		li {
+			float: left;
+			border-right: 0.063em solid #333;
+			
+			a {
+				border-left: 0.063em solid #666;
+				border-right: 0.063em solid #666;
+				text-decoration: none;
+				display: block;
+				
+				span {
+					display: block;
+					padding: 0.89em;
+					font-size: 1.13em;
+					line-height: 1.34em;
+					color: #ddd;
+					
+					:hover {
+						color: #fff;
+					}
+
+				}
+
+			}
+			
+			a.active span {
+				background: #eee;
+				margin-right: -0.063em;
+				color: #444;
+			}
+
+		}
+
+	}
 }
-#navi ul {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-}
-#navi ul li {
-	float: left;
-	border-right: 0.063em solid #333;
-}
-#navi ul li a {
-	border-left: 0.063em solid #666;
-	border-right: 0.063em solid #666;
-	text-decoration: none;
-	display: block;
-}
-#navi ul li a span {
-	display: block;
-	padding: 0.89em;
-	font-size: 1.13em;
-	line-height: 1.34em;
-	color: #ddd;
-}
-#navi ul li a span:hover {
-	color: #fff;
-}
-#navi ul li a.active span {
-	background: #eee;
-	margin-right: -0.063em;
-	color: #444;
-}
+
+
 #navMore {
 	position: relative;
+	
+	ul {
+		display: none;
+		position: absolute;
+		z-index: 950;
+		left: 0.125em;
+		top: 3.5em;
+		background: #fff;
+		min-width: 6.25em;
+		color: #000;
+		-webkit-box-shadow: #999 0 0.125em 0.3125em;
+		-moz-box-shadow: #999 0 0.125em 0.3125em;
+		box-shadow: #999 0 0.125em 0.3125em;
+		border-bottom: 0.063em solid #999;
+	}
+	
+	 > ul > li {
+		float: none;
+	}
+
 }
-#navMore > ul {
-	display: none;
-	position: absolute;
-	z-index: 950;
-	left: 0.125em;
-	top: 3.5em;
-	background: #fff;
-	min-width: 6.25em;
-	color: #000;
-	-webkit-box-shadow: #999 0 0.125em 0.3125em;
-	-moz-box-shadow: #999 0 0.125em 0.3125em;
-	box-shadow: #999 0 0.125em 0.3125em;
-	border-bottom: 0.063em solid #999;
-}
-#navMore > ul > li {
-	float: none;
-}
+
+
 #navMore > ul > li, #navMore > ul > li > a, #navMore > ul > li > a > span {
 	border: 0 !important;
 	margin: 0;
@@ -401,7 +440,7 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0.7em;
 	padding: 0;
 	
-	border: 0.063em solid #24ACB8;
+	border: 0.063em solid @color-action;
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 }
@@ -427,7 +466,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .ui-grouped-buttons ul li a.active {
 	
-	background: #24ACB8;
+	background: @color-action;
 	color: #eee;
 }
 
@@ -724,7 +763,7 @@ form h2 {
 }
 .tableview thead td a:hover {
 	text-decoration: none;
-	color: #da097a;
+	color: @color-highlight;
 	background-color: #ddd;
 }
 .tableview tbody td {
@@ -734,7 +773,7 @@ form h2 {
 	display: inline-block;
 }
 .tableview thead td a.orderdesc, .tableview thead td a.orderasc {
-	color: #da097a;
+	color: @color-highlight;
 	background-color: #ddd;
 }
 .tableview thead td a.orderdesc span, .tableview thead td a.orderasc span, .tableview thead td a:hover span, .tableview thead td a.orderdesc:hover span {
@@ -884,18 +923,18 @@ form h2 {
 }
 #preview #bottomBar .previewLink {
 	padding: 1em;
-	color: #24acb8;
+	color: @color-action;
 	padding: 1em;
 	display: inline-block;
 }
 #preview #bottomBar .state.active {
-	color: #da097a;
+	color: @color-highlight;
 	font-weight: bold;
 	cursor: text;
 	text-decoration: none !important;
 }
 #preview #bottomBar .publish.active {
-	color: #da097a;
+	color: @color-highlight;
 	font-weight: bold;
 	cursor: text;
 	text-decoration: none !important;
@@ -917,7 +956,7 @@ form h2 {
 	display: block;
 	margin: 16px 10px;
 	float: right;
-	color: #24acb8;
+	color: @color-action;
 }
 
 /*.form_field_save_draft .formaction {
@@ -1009,24 +1048,24 @@ form h2 {
 /* SELECTION */
 
 ::-moz-selection {
-	background: #da097a;
+	background: @color-highlight;
 	color: #fff;
 	text-shadow: none;
 }
 ::selection {
-	background: #da097a;
+	background: @color-highlight;
 	color: #fff;
 	text-shadow: none;
 }
 
 .error {
 	background-color: #e765b0;
-	border-color: #da097a;
+	border-color: @color-highlight;
 	color: #000;
 }
 .info_box {
 	background-color: #7ccdd4;
-	border-color: #24acb8;
+	border-color: @color-action;
 }
 
 #updates {
@@ -1076,7 +1115,7 @@ form h2 {
 .tabs > ul li a, .tabs > ul li .tab {
 	background: #fff;
 	border: 0;
-	color: #24ACB8;
+	color: @color-action;
 	
 	margin-left: 0;
 	margin-right: 0;
@@ -1086,18 +1125,18 @@ form h2 {
 	margin-top: -0.063em !important;
 }
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
-	color: #24ACB8 !important;
-	border-bottom: 2px solid #24ACB8;
+	color: @color-action !important;
+	border-bottom: 2px solid @color-action;
 }
 .tabs > ul li .active {
-	color: #da097a !important;
+	color: @color-highlight !important;
 	border: 0;
-	border-bottom: 2px solid #da097a !important;
+	border-bottom: 2px solid @color-highlight !important;
 	
 	
 }
 .tabs > ul li a.active:hover, .tabs > ul li input.active:hover {
-	color: #da097a !important;
+	color: @color-highlight !important;
 }
 
 ul.list-view {
@@ -1155,7 +1194,7 @@ ul.list-view li a img {
 }
 #wrapper_logout .wrapper_inner {
 	min-height: 100%;
-	border-top: 3px solid #24ACB8;
+	border-top: 3px solid @color-action;
 }
 #wrapper_logout .logo_wrapper {
 	padding: 1em;
@@ -1196,7 +1235,7 @@ ul.list-view li a img {
 	text-decoration: none;
 }
 #wrapper_logout .wrapper_inner .header a h1 {
-	color: #24ACB8;
+	color: @color-action;
 }
 #wrapper_logout .wrapper_inner .logo_wrapper .beside_logo {
 	position: absolute;
@@ -1236,7 +1275,7 @@ ul.list-view li a img {
 	padding: 1em;
 	
 	border-top: 1px solid #ddd;
-	border-bottom: 3px solid #DA097A;
+	border-bottom: 3px solid @color-highlight;
 	
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -1292,7 +1331,7 @@ ul.list-view li a img {
 
 /* on small touch devices fall back to non-fixed-bars. */
 @media only screen and (min-width: 45em) {
-	html.touch #header {
+	html.touch #header, html.touch #navi, html.touch #userbar {
 		position: absolute;
 	}
 	
