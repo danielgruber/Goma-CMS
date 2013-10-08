@@ -31,7 +31,7 @@ CKEDITOR.editorConfig = function( config ) {
 		['Format', 'Bold', 'Italic', 'Underline','-','RemoveFormat', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
 	];
 	
-	config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
+	config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt,imagepaste";
 	config.autoGrow_onStartup = true;
 	config.allowedContent = true;
 	
