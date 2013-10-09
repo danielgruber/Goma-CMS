@@ -12,6 +12,7 @@
 	background: rgba(255, 255, 255, 0.95);
 	border-bottom: 1px solid #ccc;
 	border-color: rgba(230, 230, 230, 0.95);
+	overflow: auto;
 	
 	z-index: 800;
 }
@@ -20,10 +21,10 @@
 	padding: 0;
 	background: url(images/logo_frontendbar.png) no-repeat left 0.563em;
 	padding-left: 100px;
-	overflow: hidden;
+	height: 3.25em !important;
 }
 #frontedbar_inner div {
-	float: left;
+	display: inline-block;
 }
 #frontedbar_inner div a, #frontedbar_inner div span {
 	display: block;
@@ -42,18 +43,6 @@
 	#frontedbar_inner {
 		width: 800px;
 		margin: auto;
-	}
-}
-@media only screen and (max-width: 650px) {
-	#frontedbar_inner div a, #frontedbar_inner div span {
-		padding: 8px 8px;
-		margin: 4px 0;
-	}
-}
-@media only screen and (max-width: 450px) {
-	#frontedbar_inner div a, #frontedbar_inner div span {
-		font-size: 10px;
-		padding: 10px 4px;
 	}
 }
 
