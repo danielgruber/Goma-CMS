@@ -178,27 +178,6 @@ input[type=text], input[type=email], textarea, input[type=password] {
 	color: darken(@color-action, 10%) !important;
 }
 
-.error {
-	background: lighten(@color-red, 40%);
-	border: 0;
-	border-bottom: 1px solid @color-red;
-	padding: @space-wide;
-}
-
-.success {
-	background: lighten(@color-green, 40%);
-	border: 0;
-	border-bottom: 1px solid @color-green;
-	padding: @space-wide;
-}
-
-.notice {
-	background: @color-blue;
-	border: 0;
-	border-bottom: 1px solid darken(@color-blue, 20%);
-	padding: @space-wide;
-}
-
 ul.list-view {
 	margin: @space-wide 0;
 	list-style: none;

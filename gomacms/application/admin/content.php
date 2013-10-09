@@ -47,7 +47,9 @@ class contentAdmin extends LeftAndMain
 	 *
 	 *@name models
 	*/
-	public $models = array("pages");		
+	public $models = array("pages");	
+	
+	static $icon = "templates/images/content.png";	
 	
 	public $sort = 990;
 	
@@ -130,6 +132,7 @@ class contentAdmin extends LeftAndMain
 	 * init JavaScript-Files
 	*/
 	public function Init($request = null) {
+		Resources::$lessVars = "tint-blue.less";
 		Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
 		return parent::Init($request);
 	}

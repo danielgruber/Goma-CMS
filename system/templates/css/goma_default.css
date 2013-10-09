@@ -119,31 +119,25 @@ a.button {
 }
 
 /* some styles for notifications */
-.notice {
-    background: #fae98c url(../../../images/icons/fatcow16/bullet_error.png) no-repeat 2px center;
-    border: 1px solid #d7c143;
-    padding: 0.5em;
-    padding-left: 1.25em;
-    margin: 0.5em 0px;
-    color: #222;
+.error {
+	background: lighten(@system-red, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-red;
+	padding: 1em;
 }
 
 .success {
-    text-align:left;
-    padding:0.5em;
-    border: 1px solid #8fb865;
-    color: #222;
-    margin:0.5em 0px;
-    background: #afe37b url(../../../images/icons/fatcow16/success.png) no-repeat 0.25em center;
-    padding-left: 30px;
+	background: lighten(@system-green, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-green;
+	padding: 1em;
 }
 
-.error {
-   	background: #ffbdaf;
-	border: 1px solid #d53f3f;
-	padding: 0.5em;
-	margin: 0.5em 0px;
-	color: #252525;
+.notice {
+	background: darken(@system-blue, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-blue;
+	padding: 1em;
 }
 
 .error a {

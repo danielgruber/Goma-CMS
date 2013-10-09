@@ -328,6 +328,7 @@ $lang = array(
 	"loading"										=> "Laden...",
 	"waiting"										=> "Warten...",
 	"view_website"									=> "Seite aufrufen",
+	"preview_website"								=> "Vorschau aufrufen",
 	"dashboard"										=> "Übersicht",
 	"visitors_by_day"								=> "Pro Tag",
 	"visitors_by_month"								=> "Pro Monat",

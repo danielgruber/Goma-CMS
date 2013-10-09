@@ -70,10 +70,10 @@ h1, h2, h3 {
 }
 
 #loadingBar {
-	background: @color-highlight;
-	-webkit-box-shadow: 0 0 0.5em @color-highlight;
-	box-shadow: 0 0 0.5em @color-highlight;
-	-moz-box-shadow: 0 0 0.5em @color-highlight;
+	background: @system-red;
+	-webkit-box-shadow: 0 0 0.5em @system-red;
+	box-shadow: 0 0 0.5em @system-red;
+	-moz-box-shadow: 0 0 0.5em @system-red;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -82,7 +82,7 @@ h1, h2, h3 {
 }
 
 .loadingBar {
-	background: @color-highlight !important;
+	background: @system-red !important;
 	z-index: 999;
 }
 
@@ -94,55 +94,6 @@ h1, h2, h3 {
 	opacity: 0.95;
 }
 
-
-/*#navi {
-	height: 3.5em;
-	padding-left: 0.5em;
-	position: fixed;
-	top: 0;
-	left: 0;
-	
-	z-index: 100;
-	ul {
-		list-style-type: none;
-		margin: 0;
-		padding: 0;
-		
-		li {
-			float: left;
-			border-right: 0.063em solid #333;
-			
-			a {
-				border-left: 0.063em solid #666;
-				border-right: 0.063em solid #666;
-				text-decoration: none;
-				display: block;
-				
-				span {
-					display: block;
-					padding: 0.89em;
-					font-size: 1.13em;
-					line-height: 1.34em;
-					color: #ddd;
-					
-					:hover {
-						color: #fff;
-					}
-
-				}
-
-			}
-			
-			a.active span {
-				background: #eee;
-				margin-right: -0.063em;
-				color: #444;
-			}
-
-		}
-
-	}
-}*/
 
 #navigation {
 	display: none;
@@ -188,7 +139,7 @@ h1, h2, h3 {
 			margin-top: -0.1em;
 			height: 0.95em;
 			width: 2em;
-			background: url(images/arrows-bottom.png) no-repeat 0 0em;
+			background: url("images/@{system-arrows-bottom}") no-repeat 0 0;
 			
 			position: absolute;
 			right: 0;
@@ -223,6 +174,7 @@ h1, h2, h3 {
 		}
 		
 		#userbar-user {
+			margin-top: -0.125em;
 			img {
 				border-radius: 2.25em;
 				-webkit-border-radius: 2.25em;
@@ -242,12 +194,13 @@ h1, h2, h3 {
 			> a {
 				display: block;
 				padding: 0.75em;
+				padding-top: 0.64em;
 			}
 			
 			> ul {
 				list-style: none;
 				position: absolute;
-				top: 3em;
+				top: 2.875em;
 				left: 0;
 				
 				margin: 0;
@@ -276,6 +229,7 @@ h1, h2, h3 {
 				background: transparent;
 				border: 0;
 				padding: 0.75em 0;
+				padding-top: 0.64em;
 				margin: 0;
 				
 				color: @color-action;
@@ -288,10 +242,13 @@ h1, h2, h3 {
 		}
 		
 		.weblink {
-			padding: 0.25em;
+			padding: 0.64em;
+			font-weight: 500;
+			letter-spacing: normal;
+			display: inline-block;
 			
 			a.button {
-				margin-top: 0.125em;
+				margin-top: 0;
 				margin-bottom: 0;
 			}
 			
@@ -372,7 +329,7 @@ h1, h2, h3 {
 
 
 #maincontent {
-	padding-top: 3.5em;
+	padding-top: 3.375em;
 	
 	#navigation {
 		list-style: none;
@@ -426,12 +383,12 @@ h1, h2, h3 {
 		li.active {
 			a {
 				span {
-					background: @color-action;
-					color: #fff;
+					background: transparent;
+					border: 1px solid @color-action;
 					
-					margin: 0.125em;
-					padding: 0.375em;
-					margin-top: 0.25em;
+					margin: 0.25em 0;
+					padding: 0.25em 0.5em;
+					margin-top: 0.375em;
 					
 					border-radius: 0.5em;
 					-webkit-border-radius: 0.5em;

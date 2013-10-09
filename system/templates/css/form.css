@@ -232,8 +232,8 @@ fieldset > .form_field > .info_field {
 	cursor: pointer;
 }
 .g-checkbox.value-active {
-	background: #24ACB8;
-	border-color: #24ACB8;
+	background: @system-tint;
+	border-color: @system-tint;
 }
 .g-checkbox label {
 	vertical-align: top;
@@ -251,13 +251,13 @@ fieldset > .form_field > .info_field {
 	margin-right: 0.25em;
 }
 .g-checkbox.value-active label {
-	color: #eee;
+	color: @system-tint-bg;
 }
 .g-checkbox.value-active .g-check-label-off {
-	color: #24ACB8;
+	color: @system-tint;
 }
 .g-checkbox .g-check-label-on {
-	color: #fff;
+	color: @system-tint-bg;
 }
 .g-checkbox.value-active .g-check-handle {
 	right: 0px;
@@ -282,9 +282,9 @@ fieldset > .form_field > .info_field {
 	box-shadow: 0 0 0.188em #bbb;
 }
 .g-checkbox.value-active .g-check-handle {
-	-webkit-box-shadow: 0 0 0.188em #1f848c;
-	box-shadow: 0 0 0.188em #1f848c;
-	border-color: #23a1aa;
+	-webkit-box-shadow: 0 0 0.188em darken(@system-tint, 15%);
+	box-shadow: 0 0 0.188em darken(@system-tint, 15%);
+	border-color: darken(@system-tint, 5%);
 }
 .g-checkbox input[type=checkbox] {
 	display: none;

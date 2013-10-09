@@ -224,6 +224,14 @@ var CKAjaxUpload = function(editor, options) {
 	
 	if(document.addEventListener) {
 		document.addEventListener("drop", function(event){
+			var dt = event.dataTransfer;
+			if(dt.files) {
+				
+				event.stopPropagation();
+				event.preventDefault();
+				return false;
+			}
+
 			return $this._dragLeaveDocument(event);
 		});
 	}
@@ -371,9 +379,9 @@ CKAjaxUpload.prototype = {
 		this.dragInDocument(event);
 		
 		
-		event.stopPropagation();
+		/*event.stopPropagation();
 		event.preventDefault();
-		return false;
+		return false;*/
 	},
 	
 	/**
@@ -386,9 +394,9 @@ CKAjaxUpload.prototype = {
 		this.dragLeaveDocument(event);
 		
 		
-		event.stopPropagation();
+		/*event.stopPropagation();
 		event.preventDefault();
-		return false;
+		return false;*/
 	},
 	
 	/**
@@ -401,9 +409,9 @@ CKAjaxUpload.prototype = {
 		this.dragEnter(event);
 		this.dragOver(event);
 		
-		event.stopPropagation();
+		/*event.stopPropagation();
 		event.preventDefault();
-		return false;
+		return false;*/
 	},
 	
 	/**
@@ -415,9 +423,9 @@ CKAjaxUpload.prototype = {
 		
 		this.dragOver(event);
 		
-		event.stopPropagation();
+		/*event.stopPropagation();
 		event.preventDefault();
-		return false;
+		return false;*/
 	},
 	
 	/**
@@ -428,17 +436,21 @@ CKAjaxUpload.prototype = {
 	_drop: function(event) {
 		
 		this.dragLeaveDocument();
-		this.newFilesDropped();
+		
 		var dt = event.dataTransfer;
 		if(dt.files) {
+			this.newFilesDropped();
+			
 			var files = dt.files;
 			this.transferAjax(files);
+			
+			
+			event.stopPropagation();
+			event.preventDefault();
+			return false;
 		}
 	
 		
-		event.stopPropagation();
-		event.preventDefault();
-		return false;
 	},
 	
 	/**
@@ -579,11 +591,12 @@ CKAjaxUpload.prototype = {
 			}
 		}, false);
 
-		xhr.open("POST", this.ajaxurl);
+		xhr.open("PUT", this.ajaxurl);
 		xhr.setRequestHeader("Cache-Control", "no-cache");
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 		xhr.setRequestHeader("X-File-Name", file.fileName);
 		xhr.setRequestHeader("X-File-Size", file.fileSize);
+		xhr.setRequestHeader("content-type", "application/octet-stream");
 		
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState == 4) {

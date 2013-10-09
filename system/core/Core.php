@@ -129,8 +129,8 @@ class Core extends object {
 			Resources::addData("goma.ENV.is_backend = true;");
 			define("IS_BACKEND", true);
 		}
-
-		if(isset($_POST) && $handle = @fopen("php://input", "r")) {
+		
+		if(isset($_POST) && $handle = @fopen("php://input", "rb")) {
 			if(PROFILE)
 				Profiler::mark("php://input read");
 			$random = randomString(20);
@@ -138,10 +138,13 @@ class Core extends object {
 				mkdir(FRAMEWORK_ROOT . "temp/", 0777, true);
 				chmod(FRAMEWORK_ROOT . "temp/", 0777);
 			}
-			$file = FRAMEWORK_ROOT . "temp/php_input_" . $random;
-			file_put_contents($file, $handle);
+			$filename = FRAMEWORK_ROOT . "temp/php_input_" . $random;
+			
+			$file = fopen($filename, 'wb');
+			stream_copy_to_stream($handle, $file);
 			fclose($handle);
-			self::$phpInputFile = $file;
+			fclose($file);
+			self::$phpInputFile = $filename;
 
 			register_shutdown_function(array("Core", "cleanUpInput"));
 

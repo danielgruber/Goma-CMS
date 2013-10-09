@@ -423,11 +423,12 @@ AjaxUpload.prototype = {
 			}
 		}, false);
 
-		xhr.open("POST", this.ajaxurl);
+		xhr.open("PUT", this.ajaxurl);
 		xhr.setRequestHeader("Cache-Control", "no-cache");
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 		xhr.setRequestHeader("X-File-Name", file.fileName);
 		xhr.setRequestHeader("X-File-Size", file.fileSize);
+		xhr.setRequestHeader("content-type", "application/octet-stream");
 		
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState == 4) {

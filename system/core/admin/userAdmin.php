@@ -33,6 +33,8 @@ class userAdmin extends adminItem {
 		"user"
 	);
 	
+	static $icon = "system/templates/admin/images/user.png";
+	
 	/**
 	 * history-url
 	 *

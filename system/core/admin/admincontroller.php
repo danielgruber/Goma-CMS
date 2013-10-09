@@ -79,8 +79,8 @@ class adminController extends Controller
 		*/
 		public function __construct()
 		{
-				Resources::$lessVars = "admin.less";
-		
+				
+				
 				Resources::addData("goma.ENV.is_backend = true;");
 				defined("IS_BACKEND") OR define("IS_BACKEND", true);
 				Core::setHeader("robots", "noindex, nofollow");
@@ -97,6 +97,8 @@ class adminController extends Controller
 			if(isset(ClassInfo::$appENV["app"]["enableAdmin"]) && !ClassInfo::$appENV["app"]["enableAdmin"]) {
 				HTTPResponse::redirect(BASE_URI);
 			}
+			
+			Resources::$lessVars = "admin.less";
 			
 			return parent::handleRequest($request, $subController);
 		}
