@@ -221,7 +221,8 @@ class systemController extends Controller {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {
 						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
-							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+							echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+							exit;
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}
@@ -280,8 +281,9 @@ class systemController extends Controller {
 								$add = "";
 							}
 							
-							return '<script type="text/javascript">'.$add.'
-							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'", "");</script>';
+							echo '<script type="text/javascript">'.$add.'
+							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'\', "");</script>';
+							exit;
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}

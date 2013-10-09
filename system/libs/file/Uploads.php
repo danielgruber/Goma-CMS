@@ -1142,10 +1142,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			
 			$img = $image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-			
-			// write to cache
-			FileSystem::requireDir($cacheDir);
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir($cacheDir);
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1172,9 +1175,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1202,9 +1209,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1231,9 +1242,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb($width, $height, 0, 0, 100, 100);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1259,9 +1274,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb($width, null, 0, 0, 100, 100);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1287,9 +1306,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb(null, $height, 0, 0, 100, 100);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1318,8 +1341,12 @@ class ImageUploadsController extends UploadsController {
 			$img = $image->resize($width, $height, true);
 			
 			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();
@@ -1346,10 +1373,13 @@ class ImageUploadsController extends UploadsController {
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb($width, null, 0, 0, 100, 100);
 			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
-			
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			// output
 			$img->Output();
 		}
@@ -1374,10 +1404,13 @@ class ImageUploadsController extends UploadsController {
 			// create image
 			$image = new RootImage($this->modelInst()->realfile);
 			$img = $image->createThumb(null, $height, 0, 0, 100, 100);
-			
-			// write to cache
-			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-			$img->toFile(ROOT . URL);
+			try {
+				// write to cache
+				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
+				$img->toFile(ROOT . URL);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
 			
 			// output
 			$img->Output();

@@ -48,7 +48,7 @@ class FileSystem extends Object {
 				return true;
 			} else {
 				if($throwOnFail) {
-					throwError(6, "PHP-Error", "Could not Create Folder '".$dir."'");
+					throw new LogicException("Could not create folder '" . $dir . "'.");
 				}
 				self::$errFile = $dir;
 				return false;

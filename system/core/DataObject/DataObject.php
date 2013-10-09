@@ -2275,9 +2275,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			{
 					return false;
 			}
-
-			$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
-
+			
+			if(isset($many_many[$relname])) {
+				$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
+			} else {
+				$extTable = ClassInfo::$class_info[$belongs_many_many[$relname]]["table"];
+			}
+			
 			$query = new SelectQuery($table, array($data["extfield"]), array($data["field"] => $this["versionid"]));
 			
 			if ($extTable)

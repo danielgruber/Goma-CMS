@@ -533,13 +533,14 @@ if (goma.ui === undefined) {
 						return false;
 					}
 					
-					
 					if (regexp.test(html)) {
 						window.top[id + "_html"] = html;
 						node.html('<iframe src="javascript:document.write(top.'+id+'_html);" height="500" width="100%" name="'+id+'" frameborder="0"></iframe>');
 					} else {
 						node.html(html);
 					}
+					
+					
 					
 					RunAjaxResources(xhr);
 					

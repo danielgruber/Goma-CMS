@@ -38,9 +38,9 @@ CKEDITOR.plugins.add( 'imagepaste',
 			// strip out webkit-fake-url as they are useless:
 			if (CKEDITOR.env.webkit && (html.indexOf("webkit-fake-url")>0) )
 			{
-				alert("Sorry, the images pasted with Safari aren't usable");
-				window.open("https://bugs.webkit.org/show_bug.cgi?id=49141");
-				html = html.replace( /<img src="webkit-fake-url:.*?">/g, "");
+				//alert("Sorry, the images pasted with Safari aren't usable");
+				//window.open("https://bugs.webkit.org/show_bug.cgi?id=49141");
+				html = html.replace( /<img src="webkit-fake-url:.*?">/g, "<img src='' alt='Upload Your Image here' width='100' height='50' />");
 			}
 
 			// Replace data: images in Firefox and upload them
@@ -58,6 +58,7 @@ CKEDITOR.plugins.add( 'imagepaste',
 						// Upon finish, get the url and update the file
 						var imageUrl = xhr.responseText.match(/2,\s*'(.*?)',/)[1];
 						var theImage = editor.document.getById( id );
+						
 						theImage.data( 'cke-saved-src', imageUrl);
 						theImage.setAttribute( 'src', imageUrl);
 						theImage.removeAttribute( 'id' );
