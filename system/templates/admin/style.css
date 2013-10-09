@@ -403,6 +403,7 @@ h1, h2, h3 {
 					display: block;
 					color: @color-action;
 					padding: @space-normal;
+					margin-top: 0.125em;
 					text-align: center;
 				}
 				
@@ -425,7 +426,15 @@ h1, h2, h3 {
 		li.active {
 			a {
 				span {
-					color: @color-highlight;
+					background: @color-action;
+					color: #fff;
+					
+					margin: 0.125em;
+					padding: 0.375em;
+					margin-top: 0.25em;
+					
+					border-radius: 0.5em;
+					-webkit-border-radius: 0.5em;
 				}
 			}
 		}

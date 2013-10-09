@@ -210,6 +210,23 @@ class systemController extends Controller {
 		);
 		$allowed_size = 100 * 1024 * 1024;
 		
+		
+		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
+			if(Core::$phpInputFile) {
+				$tmp_name = Core::$phpInputFile;
+
+				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
+					$_FILES["upload"] = array(
+						"name" => $_SERVER["HTTP_X_FILE_NAME"],
+						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
+						"error" => 0,
+						"tmp_name" => $tmp_name
+					);
+				}
+				
+			}
+		}
+		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
 				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
@@ -221,7 +238,7 @@ class systemController extends Controller {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {
 						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
-							echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+							echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path.'\', "");</script>';
 							exit;
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
@@ -261,6 +278,22 @@ class systemController extends Controller {
 			"gif"
 		);
 		$allowed_size = 20 * 1024 * 1024;
+		
+		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
+			if(Core::$phpInputFile) {
+				$tmp_name = Core::$phpInputFile;
+
+				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
+					$_FILES["upload"] = array(
+						"name" => $_SERVER["HTTP_X_FILE_NAME"],
+						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
+						"error" => 0,
+						"tmp_name" => $tmp_name
+					);
+				}
+				
+			}
+		}
 		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {

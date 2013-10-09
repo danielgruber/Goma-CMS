@@ -27,16 +27,16 @@ var AjaxUpload = function(DropZone, options) {
 	
 	
 	// bind events on document to stop the browser showing the file, if the user does not hit the dropzone
-	$(document).bind("dragenter", function(event){
+	$(document).on("dragenter", function(event){
 		$this.dragEnterDocument(event);
 		return $this._dragInDocument(event);
 	});
 	
-	$(document).bind("dragleave", function(event){
+	$(document).on("dragleave", function(event){
 		return $this._dragLeaveDocument(event);
 	});
 	
-	$(document).bind("dragover", function(event){
+	$(document).on("dragover", function(event){
 		return $this._dragInDocument(event);
 	});
 	
@@ -47,10 +47,10 @@ var AjaxUpload = function(DropZone, options) {
 	}
 	
 	// now bind events to dropzone
-	this.DropZone.bind("dragenter", function(event){
+	this.DropZone.on("dragenter", function(event){
 		return $this._dragEnter(event);
 	});
-	this.DropZone.bind("dragover", function(event){
+	this.DropZone.on("dragover", function(event){
 		return $this._dragOver(event);
 	});
 	

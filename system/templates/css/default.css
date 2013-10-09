@@ -282,3 +282,13 @@ html[xmlns] .clearfix {
 * html .clearfix {
 	height: 1%;
 }
+
+body.fileupload-drag {
+	background: #eee;
+}
+
+body.fileupload-drag-over {
+	background: #eee;
+	-webkit-box-shadow: inset 0 0 0.5em #ccc;
+	box-shadow: inset 0 0 0.5em #ccc;
+}

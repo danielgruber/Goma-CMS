@@ -84,7 +84,10 @@ var CKBUILDER_CONFIG = {
 		'showborders' : 1,
 		'liststyle' : 1,
 		'font' : 1,
-		'find' : 1
+		'find' : 1,
+		'indentlist' : 1,
+		'bidi' : 1,
+		'youtube' : 1
 	},
 	languages : {
 		'en' : 1,
