@@ -35,9 +35,9 @@ function pages_pushPreviewURL(publish, state, usePublish, title) {
 	});
 	
 	if(typeof title != "undefined") {
-		$("#visit_webpage").html(lang("view_page").replace("%s", '<span class="page">' + title + "</span>") + " &raquo;");
+		$("#visit_webpage .flex").html(lang("view_page").replace("%s", '<span class="page">' + title + "</span>"));
 	} else {
-		$("#visit_webpage").html(lang("view_site") + " &raquo;");
+		$("#visit_webpage .flex").html(lang("preview_site"));
 	}
 }
 
@@ -45,7 +45,7 @@ function pages_unbindPreviewURL() {
 	$("#visit_webpage").unbind("click");
 	$("#visit_webpage").attr("href", ROOT_PATH);
 	$("#visit_webpage").removeClass("preview");
-	$("#visit_webpage").html(lang("view_website") + " &raquo;");
+	$("#visit_webpage .flex").html(lang("preview_website"));
 }
 
 $(function(){

@@ -247,17 +247,10 @@ h1, h2, h3 {
 			letter-spacing: normal;
 			display: inline-block;
 			
-			a.button {
-				margin-top: 0;
-				margin-bottom: 0;
+			a {
+				text-decoration: none;
 			}
 			
-			a.pageTitle {
-				font-size: 1.25em;
-				display: inline-block;
-				padding-right: 0.25em;
-				vertical-align: center;
-			}
 		}
 	}
 }

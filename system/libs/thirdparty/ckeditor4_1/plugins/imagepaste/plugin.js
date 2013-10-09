@@ -241,14 +241,14 @@ var CKAjaxUpload = function(editor, options) {
 		
 		// now bind events to dropzone
 		editor.document.on("dragenter", function(event){
-			return $this._dragEnter(event.data.$);
+			$this._dragEnter(event.data.$);
 		});
 		editor.document.on("dragover", function(event){
-			return $this._dragOver(event.data.$);
+			$this._dragOver(event.data.$);
 		});
 		
 		editor.document.on("drop", function(ev) {
-			return $this._drop(ev.data.$);
+			$this._drop(ev.data.$);
 		});
 	});
 	
@@ -438,19 +438,18 @@ CKAjaxUpload.prototype = {
 		this.dragLeaveDocument();
 		
 		var dt = event.dataTransfer;
-		if(dt.files) {
+		if(dt.types && dt.types == "Files" && dt.files) {
 			this.newFilesDropped();
 			
 			var files = dt.files;
 			this.transferAjax(files);
-			
 			
 			event.stopPropagation();
 			event.preventDefault();
 			return false;
 		}
 	
-		
+		return true;
 	},
 	
 	/**

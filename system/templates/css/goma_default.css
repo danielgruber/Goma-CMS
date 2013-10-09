@@ -134,7 +134,7 @@ a.button {
 }
 
 .notice {
-	background: darken(@system-blue, 40%);
+	background: lighten(@system-blue, 40%);
 	border: 0;
 	border-bottom: 1px solid @system-blue;
 	padding: 1em;
