@@ -3,31 +3,30 @@
 	<head>
 		<base href="{BASE_URI}" />
 		<title>Goma CMS</title>
-		
-		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+		<% INCLUDE_CSS_MAIN "admin/style-front.css" %>
 		<% INCLUDE_CSS "welcome.css" %>
 		<meta charset="utf-8" />
 	</head>
 	<body>
-		<div id="wrapper_logout">
-			
-			<div class="wrapper_inner">
-				<div class="logo_wrapper">
-					<div class="content_wrapper">
-						<a href="./"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
+					<div class="beside_logo">
+						
 					</div>
-				</div>
+					<img id="logo" src="system/templates/admin/images/logo.png" data-retina="system/templates/admin/images/logo@2x.png" alt="logo" />					</div>
+			</div>			
+			<div id="wrapper" class="content_wrapper">
 				<div class="header">
 					<h1><% lang("create_user") %></h1>
 				</div>
 				<div class="content">
 					$form
 				</div>
+				<div class="footer-spacer"></div>
 				<div class="footer">
 					<div class="content_wrapper">
-						<div class="branding">
-							Powered by <a href="http://goma-cms.org" target="_blank">Goma</a>
-						</div>
+						<div class="branding" style="text-align: center;float: none;">Powered by <a target="_blank" href="http://goma-cms.org">Goma</a></div>
 					</div>
 				</div>
 			</div>
