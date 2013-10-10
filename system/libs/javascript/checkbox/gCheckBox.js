@@ -131,6 +131,11 @@
 				    } else {
 				        $this.prop("checked", true);
 				    }
+				    
+				    setTimeout(function(){
+				    	$this.change();
+				    }, 25);
+				    
 				    checkForValue();
 				    return false;
 				},

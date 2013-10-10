@@ -246,6 +246,9 @@ var CKAjaxUpload = function(editor, options) {
 		editor.document.on("dragover", function(event){
 			$this._dragOver(event.data.$);
 		});
+		editor.document.on("dragleave", function(event){
+			$this._dragLeaveDocument(event.data.$);
+		});
 		
 		editor.document.on("drop", function(ev) {
 			$this._drop(ev.data.$);
