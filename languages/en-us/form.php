@@ -15,6 +15,7 @@ $form_lang = array(
 	'no_number'					=> "Your input is not numeric. Please check the field ",
 	"number_wrong_area"			=> "The number is not within the given range. Please check the field ",
 	"dropdown_nothing_select"	=> "Nothing selected",
+	"click_to_select"			=> "Click to select",
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
 	"not_saved_yet"				=> "The action could not be completed for security reason, yet. Please repeat it!",

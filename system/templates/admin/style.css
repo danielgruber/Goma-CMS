@@ -139,7 +139,7 @@ h1, h2, h3 {
 			margin-top: -0.1em;
 			height: 0.95em;
 			width: 2em;
-			background: url("images/@{system-arrows-bottom}") no-repeat 0 0;
+			background: url("../css/images/arrows/arrows-bottom-@{system-arrows}.png") no-repeat 0 0;
 			
 			position: absolute;
 			right: 0;

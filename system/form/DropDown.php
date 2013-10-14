@@ -255,7 +255,7 @@ class DropDown extends FormField {
 
 			return $node;
 		} else {
-			return new HTMLNode("span", array("class" => "no-value"), lang("form_dropdown_nothing_select", "Nothing Selected"));
+			return new HTMLNode("span", array("class" => "no-value"), lang("form_click_to_select", "Click to select"));
 		}
 
 	}

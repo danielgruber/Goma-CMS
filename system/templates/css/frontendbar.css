@@ -20,6 +20,7 @@
 	width: 100%;
 	padding: 0;
 	background: url(images/logo_frontendbar.png) no-repeat left 0.563em;
+	background-size: 6em 1.875em;
 	padding-left: 100px;
 	height: 3.25em !important;
 }
