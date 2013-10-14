@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 08.04.2013
-  * $Version 1.2.7
+  * last modified: 14.10.2013
+  * $Version 1.2.8
 */
 
 class SettingsController extends Controller {
@@ -25,7 +25,13 @@ class SettingsController extends Controller {
 	 *@access public
 	*/
 	public static function PreInit() {
-		self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
+		$cacher = new Cacher("settings");
+		if($cacher->checkValid()) {
+			self::$settingsCache = new newSettings($cacher->getData());
+		} else {
+			self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
+			$cacher->write(self::$settingsCache->toArray(), 3600);
+		}
 	}
 	/**
 	 * gets one static
@@ -134,6 +140,11 @@ class Newsettings extends DataObject implements HistoryData {
 				"useSSL"			=> str_replace('$link', $url, lang("useSSL_unsupported"))
 			);
 		}
+	}
+	
+	public function onBeforeWrite() {
+		$cacher = new Cacher("settings");
+		$cacher->delete();
 	}
 	
 	/**

@@ -3993,6 +3993,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						"fields"	=> array($data["field"], $data["extfield"]),
 						"type"		=> "INDEX"
 					),
+					"dataindex_reverse"	=> array(
+						"name" 		=> "dataindex_reverse",
+						"fields"	=> array($data["extfield"], $data["field"]),
+						"type"		=> "INDEX"
+					),
+
 					"dataindexunique"	=> array(
 						"name"		=> "dataindexunique",
 						"type"		=> "UNIQUE",

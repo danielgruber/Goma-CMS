@@ -186,6 +186,9 @@ class contentController extends FrontedController
 		 *@name outputHook
 		*/
 		public static function outputHook($content) {
+			
+			if(PROFILE) Profiler::mark("contentController checkupload");
+			
 			if(is_a(Core::$requestController, "contentController")) {
 				$uploadObjects = array();
 				$uploadHash = "";
@@ -195,7 +198,7 @@ class contentController extends FrontedController
 				foreach($links[2] as $key => $href)
 				{
 					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
-						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+						if($data = Uploads::getFile($match[1] . "/" . $match[2] . "/" . $match[3])) {
 							if(file_exists($data->path) && filemtime(ROOT . "Uploads/" . $match[1] . "/" . $match[2] . "/" . $match[3]) < NOW - Uploads::$cache_life_time && file_exists($data->realfile)) {
 								@unlink($data->path);
 							}
@@ -211,7 +214,7 @@ class contentController extends FrontedController
 				foreach($links[2] as $key => $href)
 				{
 					if(strpos($href, "Uploads/") !== false && preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $href, $match)) {
-						if($data = DataObject::Get_One("Uploads", array("path" => $match[1] . "/" . $match[2] . "/" . $match[3]))) {
+						if($data = Uploads::getFile($match[1] . "/" . $match[2] . "/" . $match[3])) {
 							$uploadObjects[] = $data;
 							$uploadHash .= $data->realfile;
 						}
@@ -235,6 +238,8 @@ class contentController extends FrontedController
 				}
 				
 			}
+			
+			if(PROFILE) Profiler::unmark("contentController checkupload");
 		}
 }
 

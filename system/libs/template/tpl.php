@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 09.09.2013
-  * $Version 3.5.5
+  * last modified: 14.10.2013
+  * $Version 3.6
 */   
  
  
@@ -70,7 +70,9 @@ class tpl extends Object
 			"INCLUDE_CSS",
 			"INCLUDE",
 			"INCLUDE_CSS_MAIN",
-			"GLOAD"
+			"GLOAD",
+			"CACHED",
+			"ENDCACHED"
 		 );
 		 
 		/**
@@ -368,6 +370,8 @@ class tpl extends Object
 				$data = $class;
 				$callerStack = array();
 				$dataStack = array();
+				$cacheBuffer = array();
+				$cacher = array();
 				
 				
 				
@@ -472,6 +476,10 @@ class tpl extends Object
 				$tpl = preg_replace('/<%\s*ELSE\s*%>/Usi', '<?php } else { ?>', $tpl);
 				$tpl = preg_replace('/<%\s*ENDIF\s*%>/Usi', '<?php } ?>', $tpl);
 				$tpl = preg_replace('/<%\s*END\s*%>/Usi', '<?php }  ?>', $tpl);
+				// parse cached
+				$tpl = preg_replace('/<%\s*(\$)(caller\-\>Cached)\((.*)\);?\s*%>/Usi', '<?php if(\\1\\2(\\3)) { ?>', $tpl);
+				$tpl = preg_replace('/<%\s*(\$)(caller\-\>ENDCached)\((.*)\);?\s*%>/Usi', '<?php \\1\\2(\\3); } ?>', $tpl);
+				
 				// parse functions
 				$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php echo \\1\\2(\\3); ?>', $tpl);
 				
@@ -1000,6 +1008,16 @@ class tplCaller extends Object implements ArrayAccess
 		private $dataobject;
 		
 		/**
+		 * cache-bufffar.
+		*/
+		private $cacheBuffer = array();
+		
+		/**
+		 * cachers.
+		*/
+		private $cacher = array();
+		
+		/**
 		 *@name __construct
 		 *@param object - dataobject
 		*/
@@ -1184,6 +1202,56 @@ class tplCaller extends Object implements ArrayAccess
 				$c->clicks = $parts[4];
 				$c->online = $parts[5];
 				return $c->getBoxContent( );
+		}
+		
+		/**
+		 * starts a cache-block.
+		*/
+		public function cached() {
+			if(PROFILE) Profiler::mark("tplcaller::cached");
+			
+			$args = func_get_args();
+			foreach($args as $k => $v) {
+				if(is_object($v)) {
+					if(is_a($v, "DataObjectSet")) {
+						$args[$k] = md5(serialize($v->forceData()->toArray()));
+					} else if(Object::method_exists($v, "toArray")) {
+						$args[$k] = md5(serialize($v->ToArray()));
+					} else {
+						$args[$k] = md5(serialize($v));
+					}
+				} else if(is_array($v)) {
+					$args[$k] = md5(serialize($v));
+				}
+			}
+			
+			array_push($this->cacheBuffer, ob_get_clean());
+			ob_start();
+			$cacher = new Cacher("tpl_" . $this->tpl . "_" . $this->dataobject->versionid . "_" . implode("_", $args));
+			array_push($this->cacher, $cacher);
+			if($cacher->checkValid()) {
+				echo array_pop($this->cacheBuffer);
+				echo $cacher->getData();
+				
+				if(PROFILE) Profiler::unmark("tplcaller::cached", "tplcaller::cached load");
+				return false;
+			} else {
+				if(PROFILE) Profiler::unmark("tplcaller::cached");
+				return true;
+			}
+		}
+		
+		/**
+		 * ends cache-block.
+		*/
+		public function endcached() {
+			$dataUntilNow = ob_get_clean();
+			ob_start();
+			if($cacher = array_pop($this->cacher)) {
+				$cacher->write($dataUntilNow, 3600);
+			}
+			echo array_pop($this->cacheBuffer);
+			echo $dataUntilNow;
 		}
 		
 		/**

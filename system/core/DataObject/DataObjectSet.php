@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5
+ * @version     1.5.2
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1223,6 +1223,41 @@ class DataObjectSet extends DataSet {
 			} else {
 				return null;
 			}
+		}
+	}
+	
+	/**
+	 * gets the maximum value of given field in this set.
+	 *
+	 *@name max
+	 *@access public
+	 *@param string $field
+	*/
+	public function Max($field) {
+		$data = $this->dataobject->getAggregate($this->version, 'max("'.convert::raw2sql($field).'") as max', $this->filter, array(), $this->limit, $this->join, $this->search);
+		
+		if(isset($data[0]["max"])) {	
+			return $data[0]["max"];
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * gets the minimum value of given field in this set.
+	 *
+	 *@name min
+	 *@access public
+	 *@param string $field
+	*/
+	public function Min($field) {
+		$data = $this->dataobject->getAggregate($this->version, 'min("'.convert::raw2sql($field).'") as min', $this->filter, array(), $this->limit, $this->join, $this->search);
+		
+		if(isset($data[0]["min"])) {	
+			return $data[0]["min"];
+		} else {
+			return null;
 		}
 	}
 	

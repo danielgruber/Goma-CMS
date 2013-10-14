@@ -202,6 +202,14 @@ class Uploads extends DataObject {
 				@unlink($this->realfile);
 			}
 		}
+		
+		$cacher = new Cacher("file_" . $this->fieldGet("path"));
+		$cacher->delete();
+		
+		$cacher = new Cacher("file_" . $this->fieldGet("realfile"));
+		$cacher->delete();
+		
+		
 		parent::onAfterRemove();
 	}
 	
@@ -212,12 +220,20 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function getFile($path) {
-		if(($data = DataObject::get_one("Uploads", array("path" => $this->value))) !== false) {
-			return $data;
-		} else if(($data = DataObject::get_one("Uploads", array("realfile" => $this->value))) !== false) {
-			return $data;
+		$cacher = new Cacher("file_" . $path);
+		if($cacher->checkValid()) {
+			$data = $cacher->getData();
+			return new $data["class_name"]($data);
 		} else {
-			return false;
+			if(($data = DataObject::get_one("Uploads", array("path" => $this->value))) !== false) {
+				$cacher->write($data->toArray(), 86400);
+				return $data;
+			} else if(($data = DataObject::get_one("Uploads", array("realfile" => $this->value))) !== false) {
+				$cacher->write($data->toArray(), 86400);
+				return $data;
+			} else {
+				return false;
+			}
 		}
 	}
 	
@@ -247,6 +263,13 @@ class Uploads extends DataObject {
 	public function onBeforeWrite() {
 		if(!$this->forceDeletable)
 			$this->deletable = true;
+		
+		$cacher = new Cacher("file_" . $this->fieldGet("path"));
+		$cacher->delete();
+		
+		$cacher = new Cacher("file_" . $this->fieldGet("realfile"));
+		$cacher->delete();
+		
 	}
 	
 	/**
