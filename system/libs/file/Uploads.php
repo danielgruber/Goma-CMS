@@ -225,10 +225,10 @@ class Uploads extends DataObject {
 			$data = $cacher->getData();
 			return new $data["class_name"]($data);
 		} else {
-			if(($data = DataObject::get_one("Uploads", array("path" => $this->value))) !== false) {
+			if(($data = DataObject::get_one("Uploads", array("path" => $path))) !== false) {
 				$cacher->write($data->toArray(), 86400);
 				return $data;
-			} else if(($data = DataObject::get_one("Uploads", array("realfile" => $this->value))) !== false) {
+			} else if(($data = DataObject::get_one("Uploads", array("realfile" => $path))) !== false) {
 				$cacher->write($data->toArray(), 86400);
 				return $data;
 			} else {

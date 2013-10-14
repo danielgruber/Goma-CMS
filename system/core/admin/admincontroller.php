@@ -118,6 +118,8 @@ class adminController extends Controller
 			if(classinfo::exists($class)) {
 				$c = new $class;
 				
+				Core::$favicon = ClassInfo::getClassIcon($class);
+				
 				if(Permission::check($c->rights))
 				{
 						self::$activeController = $c;

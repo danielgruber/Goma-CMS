@@ -172,8 +172,8 @@ class GFS extends Object {
 			throw new LogicException("GFS-File is a Folder.");
 		}
 		
-		$filesize = @filesize($this->file);
 		if(file_exists($this->file)) {
+			$filesize = filesize($this->file);
 			$this->file = realpath($this->file);
 			if($flag == GFS_READONLY) {
 				$this->pointer = @fopen($this->file, "r");

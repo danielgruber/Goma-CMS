@@ -75,6 +75,8 @@ class tpl extends Object
 			"ENDCACHED"
 		 );
 		 
+		 static $cacheTime = 86400;
+		 
 		/**
 		  * this is a static array for convert_vars
 		  *@name convert_var_temp
@@ -1248,7 +1250,7 @@ class tplCaller extends Object implements ArrayAccess
 			$dataUntilNow = ob_get_clean();
 			ob_start();
 			if($cacher = array_pop($this->cacher)) {
-				$cacher->write($dataUntilNow, 3600);
+				$cacher->write($dataUntilNow, tpl::$cacheTime);
 			}
 			echo array_pop($this->cacheBuffer);
 			echo $dataUntilNow;
