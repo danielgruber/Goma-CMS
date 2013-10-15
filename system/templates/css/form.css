@@ -241,14 +241,16 @@ fieldset > .form_field > .info_field {
 	font-size: 1em;
 	font-family: Helvetica;
 	color: #555;
+	font-size: 1.125em;
+	line-height: 1em;
 	min-height: 0 !important;
-	padding: 0.125em;
+	padding: 1px .125em;
 	margin: 0;
 	height: 1em;
 	cursor: pointer;
 }
 .g-checkbox .g-check-label-on {
-	margin-right: 0.25em;
+	padding-right: 0;
 }
 .g-checkbox.value-active label {
 	color: @system-tint-bg;

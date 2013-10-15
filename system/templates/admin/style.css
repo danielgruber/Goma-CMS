@@ -268,6 +268,13 @@ h1, h2, h3 {
 		margin: 0;
 		padding: @space-normal;
 		
+		position: fixed;
+		top: 3.375em;
+		left: 0;
+		width: 100%;
+		opacity: 0.95;
+		z-index: 990;
+		
 		li {
 			float: left;
 			
@@ -563,7 +570,7 @@ h1, h2, h3 {
 	font-family: Helvetica, Arial, Verdana;
 	display: inline-block;
 	
-	border: 0.071em solid @color-action;
+	border: 1px solid @color-action;
 	-webkit-border-radius: 0.25em;
 	-moz-border-radius: 0.25em;
 	border-radius: 0.25em;
@@ -572,7 +579,7 @@ h1, h2, h3 {
 	
 	text-decoration: none !important;
 	cursor: pointer;
-	
+
 	-webkit-appearance: none;
 }
 .button:hover {
@@ -708,7 +715,7 @@ form h2 {
 }
 .tableview thead td a:hover {
 	text-decoration: none;
-	color: @color-highlight;
+	color: @color-action;
 	background-color: #ddd;
 }
 .tableview tbody td {
@@ -718,7 +725,7 @@ form h2 {
 	display: inline-block;
 }
 .tableview thead td a.orderdesc, .tableview thead td a.orderasc {
-	color: @color-highlight;
+	color: @color-action;
 	background-color: #ddd;
 }
 .tableview thead td a.orderdesc span, .tableview thead td a.orderasc span, .tableview thead td a:hover span, .tableview thead td a.orderdesc:hover span {
@@ -728,10 +735,10 @@ form h2 {
 	display: block;
 	position: absolute;
 	top: 0.5em;
-	left: 0.2em;
-	height: 10px;
-	width: 10px;
-	margin-top: 3px;
+	left: 0.25em;
+	height: 0.75em;
+	width: 0.75em;
+	margin-top: 0.25em;
 }
 .tableview thead td a.orderdesc span, .tableview thead td a.orderasc:hover span {
 	background-position: 0 -9px;
@@ -740,34 +747,34 @@ form h2 {
 .tableview thead tr.search input[type=search] {
 	-webkit-appearance: none;
 	border: 0.063em solid #ccc;
-	padding: 5px;
-	padding-right: 25px;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-top-left-radius: 5px;
-	border-top-left-radius: 5px;
-	border-bottom-left-radius: 5px;
+	padding: 0.31em;
+	padding-right: 1.5em;
+	-webkit-border-bottom-left-radius: 0.25em;
+	-webkit-border-top-left-radius: 0.25em;
+	border-top-left-radius: 0.25em;
+	border-bottom-left-radius: 0.25em;
 	background: #fff;
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 85px;
+	width: 6em;
 }
 .tableview thead tr.search td {
 	border-top: 0.063em solid #fff;
 }
 .tableview thead tr.search td.field {
-	min-width: 120px;
+	min-width: 8em;
 }
 .tableview thead tr.search td > div {
 	position: relative;
-	height: 30px;
+	height: 2em;
 }
 .tableview thead tr.search input[type=image], .tableview thead tr.search .cancel {
 	height: 1.25em;
 	width: 1.25em;
 	padding: 0.31em;
 	margin: 0;
-	background: #ddd url(images/buttons.png) repeat-x 0 -10px;
+	background: #eee;
 	border: 0.063em solid #ccc;
 	-webkit-border-bottom-right-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
@@ -775,7 +782,7 @@ form h2 {
 	border-bottom-right-radius: 5px;
 	position: absolute;
 	top: 0;
-	left: 115px;
+	left: 7.5em;
 	box-sizing: content-box;
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
@@ -784,14 +791,14 @@ form h2 {
 	background-position: 0 -60px;
 }
 .tableview thead tr.search .cancel {
-	left: 92px;
-	padding: 4px 2px;
+	left: 5.75em;
+	padding: 0.25em 0.125em;
 	-webkit-border-radius: 0;
 	border-radius: 0;
 }
 
 .tableview .no_data {
-	padding: 15px;
+	padding: 1em;
 	color: #999;
 	font-style: italic;
 	font-weight: normal;
@@ -801,17 +808,17 @@ form h2 {
 	text-align: right;
 }
 .tableview_wrapper .foot {
-	padding: 5px 15px;
+	padding: 0.5em 1em;
 }
 .tableview_wrapper .foot .pages {
 	float: right;
 	max-width: 50%;
-	padding: 6px;
+	padding: 0.375em;
 }
 
 .tableview_wrapper .pages {
 	float: right;
-	margin: 10px;
+	margin: 0.25em 0.5em;
 }
 
 
