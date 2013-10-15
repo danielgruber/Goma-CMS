@@ -130,13 +130,13 @@ class RequestForm extends Object {
 		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), $redirect, $this->dialog->getcloseJS() . "return false;");
 			if(isset($_GET["dropdownDialog"]))
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit");
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit", array("green"));
 			else
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajax", "submit");
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajax", "submit", array("green"));
 			
 		} else {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), getredirect(true));
-			$submit = new FormAction("okay", $this->btnokay);
+			$submit = new FormAction("okay", $this->btnokay, null, array("green"));
 		}
 			
 		// add field to identify current submit

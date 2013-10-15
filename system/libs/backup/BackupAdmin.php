@@ -59,6 +59,11 @@ class BackupAdmin extends TableView
 		public $models = array("BackupModel");	
 		
 		/**
+		 * icon
+		*/
+		static $icon = "system/templates/admin/images/backup.png";
+		
+		/**
 		 * fields we want to show in the table
 		 *
 		 *@name fields
@@ -86,6 +91,14 @@ class BackupAdmin extends TableView
 			"add_db"		=> array("{\$_lang_backup_create_sql}"),
 			"upload"		=> array('{$_lang_backup_upload}')
 		);
+		
+		/**
+		 * set correct color-theme.
+		*/
+		public function Init($request = null) {
+			Resources::$lessVars = "tint-blue.less";
+			parent::Init($request);
+		}
 		
 		/**
 		 * sends the file to the browser

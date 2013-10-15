@@ -79,9 +79,7 @@
 	margin-left: 1em;
 }
 .history .event .version .button {
-	font-size: 0.9em;
-	padding: 0.5em 0.7em;
-	border-color: #ccc;
+	font-size: 0.875em;
 }
 .history .event img {
 	margin-right: 0.4em;
