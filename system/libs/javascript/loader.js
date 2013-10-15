@@ -884,7 +884,9 @@ if (goma.Pusher === undefined) {
 				goma.Pusher.key = pub_key;
 				goma.Pusher.options = options;
 			},
-			subscribe: function (id, fn) {
+			
+			subscribe: function (id, fn) {	
+				console.log && console.log("subscribe " + id);
 				if (!goma.Pusher.channel(id)) {
 					var cid = id;
 					if (cid === undefined) {
@@ -898,12 +900,14 @@ if (goma.Pusher === undefined) {
 					
 					if (goma.Pusher.key !== undefined) {
 						if (goma.Pusher.pusher !== undefined) {
-							fn(goma.Pusher.pusher.subscribe(id));
+							fn.apply(goma.Pusher.pusher.subscribe(id));
 						} else {
 							$.getScript(js, function () {
 								goma.Pusher.pusher = new Pusher(goma.Pusher.key, goma.Pusher.options);
 								Pusher.channel_auth_endpoint = root_path + 'pusher/auth';
-								fn(goma.Pusher.pusher.subscribe(cid));
+								goma.Pusher.pusher.connection.bind('connected', function() {
+									fn.apply(goma.Pusher.pusher.subscribe(cid));
+								});
 							});
 							return true;
 						}
@@ -912,7 +916,7 @@ if (goma.Pusher === undefined) {
 					}
 				} else {
 					if (fn !== undefined) {
-						fn(goma.Pusher.channel(id));
+						fn.apply(goma.Pusher.channel(id));
 					}
 					
 					return true;

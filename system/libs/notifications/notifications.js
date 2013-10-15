@@ -106,4 +106,16 @@ goma.ui.Notifications = {
 
 $(function(){
 	goma.ui.Notifications.Init();
+	console.log && console.log("init");
+	if(window.uniqueID && goma.Pusher) {
+		
+		var c = goma.Pusher.subscribe("private-" + window.uniqueID, function(){
+			this.bind("notification", function(data){
+				goma.ui.Notifications.notify(data[0], data[1], data[2], data[3]);
+			});
+		});
+		
+		return true;
+	};
+
 });

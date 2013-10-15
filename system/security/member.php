@@ -678,6 +678,13 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	public static function NotifySettings() {
 		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
 	}
+	
+	/**
+	 * unique identifier of this user.
+	*/
+	public function uniqueID() {
+		return md5($this->id . "_" . $this->nickname . "_" . $this->password . "_" . $this->last_modified);
+	}
 }
 
 /**
@@ -990,5 +997,22 @@ class Member extends Object {
 			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
 		}
 		return true;
+	}
+	
+	/**
+	 * unique identifier of this user.
+	*/
+	public function uniqueID() {
+		if(isset($_SESSION["uniqueID"])) {
+			return $_SESSION["uniqueID"];
+		} else {
+			if(self::$loggedIn) {
+				$_SESSION["uniqueID"] = self::$loggedIn->uniqueID();
+				return $_SESSION["uniqueID"];
+			} else {
+				$_SESSION["uniqueID"] = md5(randomString(20));
+				return $_SESSION["uniqueID"];
+			}
+		}
 	}
 }

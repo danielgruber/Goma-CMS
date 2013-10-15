@@ -39,6 +39,8 @@ class Notification extends Object {
 		if(!isset($type))
 			$type = "notification";
 		
+		$type = strtolower($type);
+		
 		gloader::load("notifications");
 		Resources::add("notifications.css", "css");
 		
@@ -57,6 +59,8 @@ class Notification extends Object {
 		
 		if($type == "notification") {
 			Resources::addJS("$(function(){ goma.ui.Notifications.notify(".var_export($class, true).",".var_export(parse_lang($title), true).", ".var_export($icon, true).", ".var_export($text, true)."); });");
+		} else if($type == "pushnotification" && PushController::$pusher) {
+			PushController::triggerToUser("notification", array($class, parse_lang($title), $icon, $text));
 		} else {
 			// other types are unsupported right now
 			throwError(6, "PHP-Error", "Unsupported notification type " . $type);

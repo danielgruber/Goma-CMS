@@ -33,7 +33,10 @@ class PushController extends Controller {
 	*/
 	static function initPush($key, $secret, $app_id) {
 		self::$pusher = new Pusher($key, $secret, $app_id);
-		Resources::addJS("$(function(){goma.Pusher.init('".$key."');goma.Pusher.subscribe('presence-goma');});");
+		Resources::addData("goma.Pusher.init('".$key."');var uniqueID = ".var_export(member::uniqueID(), true).";");
+		
+		Resources::add("notifications.css", "css");
+		gloader::load("notifications");
 	}
 	
 	/**
@@ -51,18 +54,34 @@ class PushController extends Controller {
 	}
 	
 	/**
+	 * triggers a event to the currently logged-in user.
+	*/
+	static function triggerToUser($event, $data) {
+		if(isset(self::$pusher)) {
+			return self::$pusher->trigger("private-" . member::uniqueID(), $event, $data);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * make auth
 	 *
 	 *@name auth
 	 *@access public
 	*/
 	public function auth() {
-		if(member::login()) {
-			if(self::$pusher && isset($_POST['channel_name'], $_POST['socket_id'])) {
+		if(isset($_POST['channel_name']) && preg_match('/^presence\-/', $_POST['channel_name']) && member::login()) {
+			if(self::$pusher && isset($_POST['socket_id'])) {
 				echo self::$pusher->presence_auth($_POST['channel_name'], $_POST['socket_id'], member::$loggedIn->id, member::$loggedIn->toArray());
 				exit;
 			}
-		} 
+		} else if(isset($_POST['channel_name']) && preg_match('/^private\-/', $_POST['channel_name'])) {
+			if(self::$pusher && isset($_POST['socket_id']) && $_POST["channel_name"] == "private-" . member::uniqueID()) {
+				echo self::$pusher->socket_auth($_POST['channel_name'], $_POST['socket_id']);
+				exit;
+			}
+		}
 		
 		header('', true, 403);
 		echo "Forbidden";
