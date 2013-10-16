@@ -107,7 +107,7 @@ if (goma.ui === undefined) {
 		/**
 		 * this is the algorythm to calculate the 100% size of a box.
 		*/
-		updateFlexHeight = function ($container) {
+		updateFlexHeight = function ($container, setHeight) {
 		
 			var maxHeight, 
 			inFloat = false;
@@ -124,7 +124,7 @@ if (goma.ui === undefined) {
 			var scroll = $container.scrollTop();
 			
 			$container.css("height", "");
-			maxHeight = updateFlexHeight($container.parent());
+			maxHeight = updateFlexHeight($container.parent(), false);
 			
 			// first make sure that the parent element is a Flex-Box
 			if (!maxHeight) {
@@ -158,7 +158,8 @@ if (goma.ui === undefined) {
 			var paddingMargin = ($container.outerHeight(true) - $container.height());
 			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
 			
-			$container.css("height", maxHeight);
+			if(setHeight !== false)
+				$container.css("height", maxHeight);
 			$container.scrollTop(scroll);
 			
 			return maxHeight;

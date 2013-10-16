@@ -201,8 +201,8 @@ fieldset > .form_field > .info_field {
 		margin-top: 0;
 	}
 	.form_field.checkbox .g-checkbox {
-		margin-left: 0;
-		margin-top: 0;
+		float: right;
+		margin-top: -1.75em;
 	}
 }
 @media only screen and (max-width: 800px) {
@@ -251,6 +251,9 @@ fieldset > .form_field > .info_field {
 }
 .g-checkbox .g-check-label-on {
 	padding-right: 0;
+}
+.g-checkbox .g-check-label-off {
+	padding-left: .25em;
 }
 .g-checkbox.value-active label {
 	color: @system-tint-bg;

@@ -3,9 +3,9 @@
 	<head>
 		<% IF $reload %>
 			<% IF $destination %>
-				<meta http-equiv="refresh" content="2; URL=$destination" />
+				<meta http-equiv="refresh" content="3; URL=$destination" />
 			<% ELSE %>
-				<meta http-equiv="refresh" content="2" />
+				<meta http-equiv="refresh" content="3" />
 			<% END %>
 		<% END %>
 		<title>Archive $archive</title>
@@ -44,7 +44,7 @@
 					<% ELSE %>
 						location.reload();
 					<% END %>
-				}, 1900);
+				}, 3000);
 			}
 		</script>
 		

@@ -9,19 +9,31 @@
 
 $(document).ready(function() {
 	
+	var scroll;
+	
 	var hideNavBar = function() {
-		$("#navigation").stop().slideUp("fast");
+		if($("#head .dropdown").hasClass("show")) {
+			$("#head .dropdown").removeClass("show");
+			$("#head").removeClass("show-dropdown");
+			
+			$(window).scrollTop(scroll);
+		}
 	}
 	
-	CallonDocumentClick(hideNavBar, [$("#navigation"), $("#navi-toggle")]);
+	CallonDocumentClick(hideNavBar, [$("#head")]);
 	
-	goma.ui.setMainContent($("#contnet > #maincontent > content_inner"));
+	goma.ui.setMainContent($("#content > #maincontent > content_inner"));
 
 	$("#navi-toggle").click(function(){
-		if($("#navigation").css("display") == "none") {
-			$("#navigation").stop().slideDown("fast");
+		if(!$("#head .dropdown").hasClass("show")) {
+			$("#head .dropdown").addClass("show");
+			$("#head").addClass("show-dropdown");
+			
+			scroll = $(window).scrollTop();
+			
+			$(window).scrollTop(0);
 		} else {
-			$("#navigation").stop().slideUp("fast");
+			hideNavBar();
 		}
 	});
 	

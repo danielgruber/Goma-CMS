@@ -57,13 +57,15 @@
 						
 						
 					}
+					
+					
 				});
 				
 			// ]]>
 			</script>
 		<% END %>
 		
-		
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
 	</head>
 	<body id="adminPanel">
 		<!--<div id="viewport">-->
@@ -75,44 +77,96 @@
 				<!-- header subbar in grey -->
 				<div id="head" class="clear">
 					<div id="head_inner">
-						<div class="right">
+						
+						<div class="user">
+							<a href="profile{URLEND}" title="{$_cms_user}">$loggedInUser.image.setSize(40, 40)</a>
+						</div>
+						
+						<div class="dropdown">
+							<div class="dropdown_inner">
 							
-							<div class="weblink"> 
-								<!--<a class="pageTitle" target="_blank" title="{$_lang_view_site}" href="./">
-									{$_cms_ptitle}
-								</a>-->
-								<a id="visit_webpage" href="{$previewURL}">{$_cms_title} - <span class="flex"><% lang("preview_website", "Preview Website") %> </span> <span class="arrow"></span></a>
-							</div>
-							
-							<div id="userbar-langSelect">
-								<% CONTROL array(currentLang()) AS $currentLang %>
-								<a title="{$_lang_switchlang}" href="{BASE_SCRIPT}admin/switchLang{URLEND}?redirect={$_SERVER_REDIRECT.url()}"><img src="$currentLang.icon" alt="$currentLang.code" /></a>
-								<% ENDCONTROL %>
-								<ul style="display: none;">
-									<% CONTROL languages() AS $lang %>
-									<% IF $lang.code = $_cms_lang %>
-									<li class="active">
-										<% ELSE %>
-									<li>
-										<% END %>
-										<a href="<% addParamToUrl($_SERVER_REDIRECT, "setlang", $lang.code) %>"><img src="$lang.icon" alt="$lang.code" /> <span>$lang.title</span></a>
+								<div id="sidebar_head">
+									
+									<div class="weblink"> 
+										<!--<a class="pageTitle" target="_blank" title="{$_lang_view_site}" href="./">
+											{$_cms_ptitle}
+										</a>-->
+										<a id="visit_webpage" href="{$previewURL}">{$_cms_title} - <span class="flex"><% lang("preview_website", "Preview Website") %> </span> <span class="arrow"></span></a>
+									</div>
+									
+									<div id="userbar-langSelect">
+										<% CONTROL array(currentLang()) AS $currentLang %>
+										<a title="{$_lang_switchlang}" href="{BASE_SCRIPT}admin/switchLang{URLEND}?redirect={$_SERVER_REDIRECT.url()}"><img src="$currentLang.icon" alt="$currentLang.code" /></a>
+										<% ENDCONTROL %>
+										<ul style="display: none;">
+											<% CONTROL languages() AS $lang %>
+											<% IF $lang.code = $_cms_lang %>
+											<li class="active">
+												<% ELSE %>
+											<li>
+												<% END %>
+												<a href="<% addParamToUrl($_SERVER_REDIRECT, "setlang", $lang.code) %>"><img src="$lang.icon" alt="$lang.code" /> <span>$lang.title</span></a>
+											</li>
+											<% ENDCONTROL %>
+										</ul>
+									</div>
+									
+									<div id="userbar-user">
+										<a href="profile/" title="{$_cms_user}">$loggedInUser.image.setSize(40, 40)</a>
+									</div>
+									
+									<div id="userbar-logout">
+										<form method="post" id="loginFormGlobe" action="{BASE_SCRIPT}profile/logout">
+											<input type="hidden" name="logout" value="1" />
+											<input type="hidden" name="redirect" value="{BASE_URI}" />
+											<input title="{$_lang_logout}" alt="{$_lang_logout}" type="submit" value="{$_lang_logout}" />
+										</form>
+									</div>
+									
+									<div class="clear"></div>
+								</div>
+								
+								<ul id="navigation">
+									<span class="arrow"></span>
+									<% IF NOT $content %>
+										<li class="active">
+									<% ELSE %>
+										<li>
+									<% END %>
+										<a href="{BASE_SCRIPT}admin/" title="{$_lang_overview}">
+											<img src="system/templates/admin/images/home_icon.png" data-retina="system/templates/admin/images/home_icon@2x.png" alt="{$_lang_overview}" />
+											<span class="text-holder">
+												<span>{$_lang_overview}</span>
+											</span>
+										</a>
 									</li>
+									
+									<% CONTROL this() %>
+										<% IF $this.active %>
+											<li class="active">	
+										<% ELSE %>
+											<li>
+										<% END %>
+											<a href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}" title="$this.text">
+												<% IF $this.icon %>
+													<img src="$this.icon" alt="$this.text" />
+												<% ELSE %>
+													<div class="no-image"></div>
+												<% END %>
+												<span class="text-holder">
+													<span>$this.text</span>
+												</span>
+											</a>
+										</li>
 									<% ENDCONTROL %>
+									
+									<li class="clear"></li>
 								</ul>
-							</div>
-							
-							<div id="userbar-user">
-								<a href="profile/" title="{$_cms_user}">$loggedInUser.image.setSize(40, 40)</a>
-							</div>
-							
-							<div id="userbar-logout">
-								<form method="post" id="loginFormGlobe" action="{BASE_SCRIPT}profile/logout">
-									<input type="hidden" name="logout" value="1" />
-									<input type="hidden" name="redirect" value="{BASE_URI}" />
-									<input title="{$_lang_logout}" alt="{$_lang_logout}" type="submit" value="{$_lang_logout}" />
-								</form>
+								
+								
 							</div>
 						</div>
+						
 						<a id="navi-toggle" href="javascript:;">
 							<img src="system/templates/admin/images/logo.png" alt="logo" />
 							<% IF $title %>
@@ -128,39 +182,6 @@
 				</div>
 				
 				<div id="maincontent">
-					
-					<ul id="navigation">
-						<span class="arrow"></span>
-						<% IF NOT $content %>
-							<li class="active">
-						<% ELSE %>
-							<li>
-						<% END %>
-							<a href="{BASE_SCRIPT}admin/" title="{$_lang_overview}">
-								<img src="system/templates/admin/images/home_icon.png" data-retina="system/templates/admin/images/home_icon@2x.png" alt="{$_lang_overview}" />
-								<span>{$_lang_overview}</span>
-							</a>
-						</li>
-						
-						<% CONTROL this() %>
-							<% IF $this.active %>
-								<li class="active">	
-							<% ELSE %>
-								<li>
-							<% END %>
-								<a href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}" title="$this.text">
-									<% IF $this.icon %>
-										<img src="$this.icon" alt="$this.text" />
-									<% ELSE %>
-										<div class="no-image"></div>
-									<% END %>
-									<span>$this.text</span>
-								</a>
-							</li>
-						<% ENDCONTROL %>
-						
-						<li class="clear"></li>
-					</ul>
 					
 					<!-- content -->
 					<% IF $content %>
@@ -321,26 +342,27 @@
 										
 									</script>
 									
-									<div id="plot-navigation" class="ui-grouped-buttons">
-										<ul>
-											<li>
-												<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_day}</a>
-											</li>
-											<li>
-												<a href="{BASE_SCIRPT}api/stats/lastWeek" class="active stat weekly">{$_lang_week}</a>
-											</li>
-											<li>
-												<a href="{BASE_SCIRPT}api/stats/lastMonth" class="stat monthly">{$_lang_month}</a>
-											</li>
-											<li>
-												<a href="{BASE_SCIRPT}api/stats/lastYear" class="stat yearly">{$_lang_year}</a>
-											</li>
-										</ul>
-									</div>
+										<div id="plot-navigation" class="ui-grouped-buttons">
+											<ul>
+												<li>
+													<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_day}</a>
+												</li>
+												<li>
+													<a href="{BASE_SCIRPT}api/stats/lastWeek" class="active stat weekly">{$_lang_week}</a>
+												</li>
+												<li>
+													<a href="{BASE_SCIRPT}api/stats/lastMonth" class="stat monthly">{$_lang_month}</a>
+												</li>
+												<li>
+													<a href="{BASE_SCIRPT}api/stats/lastYear" class="stat yearly">{$_lang_year}</a>
+												</li>
+											</ul>
+										</div>
+										
+										<div id="plot-container">
+											<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
+										</div>
 									
-									<div id="plot-container">
-										<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
-									</div>
 								</div>
 								
 								<!-- end of statistics -->

@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\CSS-Framework
- * @version	2.1.1
+ * @version	2.1.2
  */
 
 .lam_noscript p {
@@ -30,6 +30,7 @@
 }
 .leftandmaintable tr > .td.left {
 	overflow: auto;
+	min-width: 18em;
 }
 
 .leftandmaintable .dialog > .title {
@@ -76,9 +77,13 @@
 /*.leftandmaintable tr > .main textarea {
 	max-width: 650px !important;
 }*/
+
+.leftandmaintable.left-active tr > .main {
+	display: none;
+}
+
 .leftandmaintable tr > .main > .inner {
-	overflow-y: auto;
-	ms-overflow-y: auto;
+	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	padding: 0;
 }
@@ -116,18 +121,19 @@
 .leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
 	float: left;
 	border: 0;
-	margin-top: -7px;
-	margin-left: -6px;
-	padding-left: 4px;
-	padding-right: 2px;
-	padding-bottom: 2px;
-	margin-right: 6px;
+	margin-top: -0.375em;
+	margin-bottom: -0.375em;
+	margin-left: -0.25em;
+	margin-right: 0.5em;
 	border-right: 1px solid #ccc;
+	
+	img {
+		height: 2.875em;
+		width: 2.8
+		75em;
+	}
 }
-.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle img {
-	height: 3em;
-	width: 3em;
-}
+
 
 .leftandmaintable tr > .main .no_item {
 	font-size: 2em;
@@ -148,7 +154,7 @@
 
 .leftandmaintable tr > .left {
 	display: none;
-	width: 280px !important;
+	width: 18em !important;
 	background: #eee;
 	height: 100%;
 	border-right: 1px solid #ccc;
@@ -162,10 +168,10 @@
 }
 .leftandmaintable tr > .left a.create {
 	position: absolute;
-	top: 0.7em;
+	top: 0.75em;
 	right: 0.5em;
-	height: 24px;
-	width: 24px;
+	height: 1.5em;
+	width: 1.5em;
 	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
 }
 
@@ -178,11 +184,16 @@
 	margin: 0;
 	border: 0;
 	padding: 0.69em;
-	width: 280px;
-	padding-right: 20px;
+	width: 100%;
+	padding-right: 1.25em;
 	border-bottom: 1px solid #ccc;
 	background: #eee;
 	height: 2.82em;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 }
 
 .leftandmaintable tr > .left .create ul, ul.create {
@@ -192,7 +203,7 @@
 	padding-top: 1px;
 }
 .leftandmaintable tr .main ul.create.list-view {
-	margin-top: 12px;
+	margin-top: 0.75em;
 }
 .leftandmaintable tr .main ul.create.list-view li:first-child a {
 	border-top: 0;
@@ -202,14 +213,14 @@
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
 	background: #eee;
-	padding-bottom: 15px;
+	padding-bottom: 1em;
 }
 .leftandmaintable tr > .left .classtree .treewrapper > ul > li {
 	padding-left: 0;
 }
 ul.list-view.create {
-	margin-left: -0.7em;
-	margin-right: -0.7em;
+	margin-left: -0.75em;
+	margin-right: -0.75em;
 }
 ul.list-view.create li a {
 	padding-left: 3em;
@@ -218,6 +229,12 @@ ul.list-view.create li a {
 ul.list-view.create li a img {
 	top: 1.13em;
 	left: 1.5em;
+}
+
+@media only screen and (min-width: 35em) {
+	.leftandmaintable.left-active tr > .main {
+		display: table-row;
+	}
 }
 
 @media only screen and (min-width: 900px) {

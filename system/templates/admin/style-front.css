@@ -224,7 +224,7 @@ ul.list-view li a img {
 
 
 /* on small touch devices fall back to non-fixed-bars. */
-@media only screen and (min-width: 50em) {
+@media only screen and (min-width: 35em) {
 	.content_wrapper {
 		width: @container-width;
 		margin: auto;

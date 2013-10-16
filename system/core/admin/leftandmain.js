@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.6
+ * @version     2.2.7
  */
 
 
@@ -37,20 +37,20 @@ var LaM_type_timeout;
 			return false;
 		});
 		
-		setTimeout(updateSidebarToggle, 10);
+		setTimeout(updateSidebarToggle, 50);
 		
 		//! leftbar
 		$(document).on("click touchend", ".leftbar_toggle", function(){
 			if($(this).hasClass("active")) {
 				$(this).removeClass("active");
-				$(this).addClass("not_active");
-				$(".leftandmaintable .left").addClass("not_active");
 				$(".leftandmaintable .left").removeClass("active");
+				
+				$(".leftandmaintable").removeClass("left-active");
 			} else {
 				$(this).addClass("active");
-				$(this).removeClass("not_active");
-				$(".leftandmaintable .left").removeClass("not_active");
 				$(".leftandmaintable .left").addClass("active");
+				
+				$(".leftandmaintable").addClass("left-active");
 			}
 			goma.ui.updateFlexBoxes();
 			return false;
@@ -58,9 +58,11 @@ var LaM_type_timeout;
 		
 		setTimeout(function(){
 			if(!$(".leftbar_toggle").hasClass("active")) {
-				$(".leftbar_toggle, .leftandmaintable .left").addClass("not_active");
+				$(".leftbar_toggle, .leftandmaintable .left").removeClass("active");
+				$(".leftandmaintable").removeClass("left-active");
 			} else {
 				$(".leftandmaintable .left").addClass("active");
+				$(".leftandmaintable").addClass("left-active");
 			}
 		}, 100);
 		
@@ -280,6 +282,17 @@ var LaM_type_timeout;
 		
 		// bind events to the nodes to load the content then
 		node.find("a.node-area").click(function(){
+			if($(this).parent().parent().hasClass("marked")) {
+				// it is loaded already
+				$("td.left").removeClass("active");
+				$("table.leftandmaintable").removeClass("left-active");
+				
+				$(".leftbar_toggle").removeClass("active");
+				
+				goma.ui.updateFlexBoxes();
+				
+				return false;
+			} else
 			if($(this).parent().parent().attr("data-nodeid") != 0) {
 				// no ajax in IE
 				if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
@@ -337,10 +350,10 @@ var LaM_type_timeout;
 	});
 	
 	var updateSidebarToggle = function() {
-		if($("#content > .content_inner table td.main > .inner .leftbar_toggle").length > 0) {
-			$("#content > .content_inner table td.main > .leftbar_toggle").css("display", "none");
+		if($("table.leftandmaintable td.main > .inner .leftbar_toggle").length > 0) {
+			$("table.leftandmaintable td.main > .leftbar_toggle").css("display", "none");
 		} else {
-			$("#content > .content_inner table td.main > .leftbar_toggle").css("display", "");
+			$("table.leftandmaintable td.main > .leftbar_toggle").css("display", "");
 		}
 		
 		goma.ui.updateFlexBoxes();
@@ -356,8 +369,6 @@ var LaM_type_timeout;
 		if($this.length == 0) {
 			$this = $("li[data-recordid="+id+"] > span > a.node-area");
 		}
-		
-		
 		
 		// Internet Explorer seems not to work correctly with Ajax, maybe we'll fix it later on, but until then, we will just load the whole page ;)
 		if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) {
@@ -379,8 +390,10 @@ var LaM_type_timeout;
 			}).done(function(){
 				if(id == 0) {
 					$("td.left").addClass("active");
+					$("table.leftandmaintable").addClass("left-active");
 				} else {
 					$("td.left").removeClass("active");
+					$("table.leftandmaintable").removeClass("left-active");
 				}
 				
 				$("#content .success, #content .error, #content .notice").hide("fast");

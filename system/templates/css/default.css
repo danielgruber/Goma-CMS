@@ -235,6 +235,7 @@ input[type="checkbox"], input[type="radio"] {
 .clear
 {
 	clear: both;
+	float: none !important;
 }
 
 /* placeholders */

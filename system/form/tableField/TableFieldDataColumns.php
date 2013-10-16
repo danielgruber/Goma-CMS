@@ -44,7 +44,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	public function Init($tableField) {
 		if($filter = $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')) {
 			foreach($this->fieldFormatting as $field => $values) {
-				$filter->addCastedValues($field, array_flip($values));
+				$filter->addCastedValues($field, array_flip((array) $values));
 			}
 		}
 	}
