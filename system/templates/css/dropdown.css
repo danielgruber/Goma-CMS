@@ -75,7 +75,7 @@
 			.value-remove {
 				padding: 0 0.25em;
 				margin-top: -0.125em;
-				color: darken(@system-tint, 5%);
+				color: darken(@system-tint, 15%);
 				
 				font-weight: bold;
 				float: right;
@@ -281,7 +281,7 @@
 }
 
 .dropdown_widget .dropdown .no_data {
-	padding: 5px;
+	padding: 1em;
 	text-align: center;
 	color: #999;
 	font-style: italic;

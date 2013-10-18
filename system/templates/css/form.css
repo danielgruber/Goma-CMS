@@ -200,9 +200,14 @@ fieldset > .form_field > .info_field {
 		margin-left: 0;
 		margin-top: 0;
 	}
+	.form_field {
+		clear: both;
+	}
 	.form_field.checkbox .g-checkbox {
 		float: right;
-		margin-top: -1.75em;
+	}
+	.form_field.checkbox label {
+		width: auto;
 	}
 }
 @media only screen and (max-width: 800px) {

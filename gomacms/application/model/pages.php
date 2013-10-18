@@ -370,13 +370,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$args = func_get_args();
 			array_unshift($args, "edit_permission");
 			
-			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
-				return $data;
+			$dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
+			if($dataHasOne && $dataHasOne->type != "all") {
+				return $dataHasOne;
 			} else if(!$this->isPublished() && $this->wasPublished()) {
-				if($data = DataObject::Get_one("Permission", array(), array(), array(
+				$dataHistoric = DataObject::Get_one("Permission", array(), array(), array(
 					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.edit_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
-				))) {
-					return $data;
+				));
+				if($dataHistoric  && $dataHistoric->type != "all") {
+					return $dataHistoric;
 				}
 			}
 			
@@ -432,13 +434,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$args = func_get_args();
 			array_unshift($args, "publish_permission");
 			
-			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
-				return $data;
+			$dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
+			if($dataHasOne && $dataHasOne->type != "all") {
+				return $dataHasOne;
 			} else if(!$this->isPublished() && $this->wasPublished()) {
-				if($data = DataObject::Get_one("Permission", array(), array(), array(
+				$dataHistoric = DataObject::Get_one("Permission", array(), array(), array(
 					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.publish_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
-				))) {
-					return $data;
+				));
+				if($dataHistoric  && $dataHistoric->type != "all") {
+					return $dataHistoric;
 				}
 			}
 			
