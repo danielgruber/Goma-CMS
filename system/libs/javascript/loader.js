@@ -158,7 +158,7 @@ if (goma.ui === undefined) {
 			var paddingMargin = ($container.outerHeight(true) - $container.height());
 			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
 			
-			if(setHeight !== false)
+			if(setHeight !== false && ($container.hasClass("flexbox") || $container.css("overflow").toLowerCase() == "auto" || $container.css("overflow").toLowerCase() == "scroll" || $container.css("overflow").toLowerCase() == "hidden"))
 				$container.css("height", maxHeight);
 			$container.scrollTop(scroll);
 			

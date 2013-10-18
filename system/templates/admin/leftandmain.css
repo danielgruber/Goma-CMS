@@ -50,10 +50,6 @@
 
 /* main-part */
 
-.leftandmaintable tr > .main {
-	overflow: auto;
-}
-
 .leftandmaintable tr > .main .leftbar_toggle {
 	display: block;
 	margin-bottom: 3px;
@@ -83,12 +79,7 @@
 }
 
 .leftandmaintable tr > .main > .inner {
-	overflow: auto;
-	-webkit-overflow-scrolling: touch;
 	padding: 0;
-}
-.leftandmaintable tr > .main > .inner > form > .fields {
-	overflow: auto;
 }
 .leftandmaintable tr > .main > .inner > form > .fields .visibleField:last-child {
 	border-bottom: 0 !important;
@@ -106,14 +97,22 @@
 	border-bottom: 0.063em solid #ccc;
 	padding: 0.25em;
 }
-.leftandmaintable tr > .main > .inner .headBar span {
-	padding: 0.44em;
+.leftandmaintable tr > .main > .inner .headBar .pageType {
+	padding: 0.44em 0.25em;
+	max-width: 35%;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	display: inline-block;
 }
-.leftandmaintable tr > .main > .inner .headBar span span {
+.leftandmaintable tr > .main > .inner .headBar .pageType span {
 	padding: 0 0.25em;
 	font-size: 1.125em;
 	color: #444;
+	display: inline-block;
+	max-width: 65%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	
 }
 .leftandmaintable tr > .main > .inner .headBar span img {
 	margin-top: -.25em;
@@ -231,9 +230,68 @@ ul.list-view.create li a img {
 	left: 1.5em;
 }
 
+
+.pageinfo {
+	float: right; 
+	
+	> .version {
+		display: block;
+		float: left;
+	} 
+	
+	.state {
+		float: left;
+		margin-left: 0.6em;
+		
+		> div {
+			float: left;
+			padding: 0.5em 1em;
+			color: #aaa;
+			
+			display: none;
+		}
+		
+		.publish.active {
+			color: #24acb8;
+			display: block;
+		}
+
+		.draft.active {
+			color: #da097a;
+			display: block;
+		}
+
+	}
+	
+	.preview {
+		margin: 0;
+	}
+
+}
+
+
 @media only screen and (min-width: 35em) {
 	.leftandmaintable.left-active tr > .main {
-		display: table-row;
+		display: table-cell;
+	}
+}
+
+@media only screen and (min-width: 45em) {
+	.leftandmaintable tr > .main > .inner {
+		overflow: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+	
+	.leftandmaintable tr > .main {
+		overflow: auto;
+	}
+	
+	.leftandmaintable tr > .main > .inner > form > .fields {
+		overflow: auto;
+	}
+	
+	.pageinfo .state > div {
+		display: block;
 	}
 }
 
@@ -266,34 +324,4 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		background-image: url(../../../images/icons/fatcow16/file@2x.png);
 		background-size: 16px 16px;
 	}
-}
-
-.pageinfo {
-	float: right;
-}
-
-.pageinfo > .version {
-	display: block;
-	float: left;
-}
-
-.pageinfo .state {
-	float: left;
-	margin-left: 0.6em;
-}
-
-.pageinfo .state > div {
-	float: left;
-	padding: 0.5em 1em;
-	color: #aaa
-}
-.pageinfo .state .publish.active {
-	color: #24acb8;
-}
-.pageinfo .state .draft.active {
-	color: #da097a;
-}
-
-.pageinfo .preview {
-	margin: 0;
 }

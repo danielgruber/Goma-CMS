@@ -456,6 +456,8 @@ h1, h2, h3 {
 }
 #stats {
 	position: relative;
+	
+	
 }
 #plot-container {
 	height: 100%;
@@ -477,7 +479,7 @@ h1, h2, h3 {
 		
 		> div, > table {
 			
-			margin-top: -3em;
+			margin-top: -3.25em;
 			
 			tr {
 				float: left;
@@ -496,7 +498,7 @@ h1, h2, h3 {
 	
 	ul {
 		margin: 0.25em;
-		margin-bottom: 1em;
+		margin-bottom: 1.5em;
 	}
 }
 
