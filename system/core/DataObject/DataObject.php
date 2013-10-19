@@ -925,6 +925,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					else if (!isset($newdata[$name . "ids"]) && is_array($newdata[$name]))
 						$newdata[$name . "ids"] = $newdata[$name];
 				}
+				
 				unset($data);
 			} else {
 

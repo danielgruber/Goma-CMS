@@ -157,6 +157,12 @@ class Group extends DataObject implements HistoryData, PermProvider
 						$dataset->add($record);
 				}
 			}
+			
+			// get all permissions not listed above and preserve them
+			foreach($this->Permissions(array("name" => "")) as $perm) {
+				$dataset->add($perm);
+			}
+			
 			$data["permissions"] = $dataset;
 
 			return $data;
