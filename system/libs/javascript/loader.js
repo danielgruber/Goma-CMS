@@ -1196,7 +1196,7 @@ if (window.loader === undefined) {
 								lang[i.toUpperCase()] = data[i];
 							}
 						} catch(e) { 
-							alert(e);
+							console.log && console.log(e);
 						}
 					}
 				});
@@ -1355,22 +1355,22 @@ if (window.loader === undefined) {
 					if (originalOptions.type == "post" && originalOptions.async != false) {
 						jqXHR.fail(function () {
 							if (jqXHR.textStatus == "timeout") {
-								alert('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
+								console.log && console.log('Error while saving data to the server: \nThe response timed out.\n\n' + originalOptions.url);
 							} else if (jqXHR.textStatus == "abort") {
-								alert('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
+								console.log && console.log('Error while saving data to the server: \nThe request was aborted.\n\n' + originalOptions.url);
 							} else {
-								alert('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
+								console.log && console.log('Error while saving data to the server: \nFailed to save data on the server.\n\n' + originalOptions.url);
 							}
 						});
 					} else {
 						jqXHR.fail(function () {
 							
 							if (jqXHR.textStatus == "timeout") {
-								alert('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
+								console.log && console.log('Error while fetching data from the server: \nThe response timed out.\n\n' + originalOptions.url);
 							} else if (jqXHR.textStatus == "abort") {
-								alert('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
+								console.log && console.log('Error while fetching data from the server: \nThe request was aborted.\n\n' + originalOptions.url);
 							} else {
-								alert('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
+								console.log && console.log('Error while fetching data from the server: \nFailed to fetch data from the server.\n\n' + originalOptions.url);
 							}
 						});
 					}
@@ -1545,7 +1545,7 @@ if (window.loader === undefined) {
 		    else
 		        window.eval(codetoeval);
 		} catch(e) {
-			alert(e);
+			console.log && console.log(e);
 			throw e;
 		}
 	}

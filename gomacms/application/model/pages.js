@@ -67,12 +67,12 @@ function show_preview(publish, state, usePublish) {
 		left: 0,
 		width: "100%",
 		height: "100%",
-		zIndex: 900
+		zIndex: 975
 	});
 	
 	$("#preview").html('<iframe src="'+state+'" frameBorder="0" name="previewFrame" id="previewFrame" width="100%"></iframe><div id="bottomBarWrapper"><div id="bottomBar"></div></div>');
 
-	$("#bottomBar").html('<a class="edit flatButton" href="#">'+lang("edit")+'</a><a href="'+state+'" target="_blank" class="new_window">'+lang("open_in_new_tab")+'</a><div class="previewLinks"><a href="'+state+'" target="previewFrame" class="flatButton previewLink state active">'+lang("draft")+'</a><a href="'+publish+'" target="previewFrame" class="flatButton previewLink publish">'+lang("published_site")+'</a></div><div class="clear"></div>');
+	$("#bottomBar").html('<a class="edit flatButton" href="#"><span></span> '+lang("edit")+'</a><a href="'+state+'" target="_blank" class="new_window">'+lang("open_in_new_tab")+' <span></span></a><div class="previewLinks"><a href="'+state+'" target="previewFrame" class="flatButton previewLink state active">'+lang("draft")+'</a><a href="'+publish+'" target="previewFrame" class="flatButton previewLink publish">'+lang("published_site")+'</a></div><div class="clear"></div>');
 	
 	$("#bottomBar .state, #bottomBar .publish").click(function(){
 		$("#bottomBar .state, #bottomBar .publish").removeClass("active");

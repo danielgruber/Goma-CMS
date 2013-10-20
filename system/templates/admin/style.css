@@ -881,6 +881,7 @@ form h2 {
 
 #preview {
 	background: #fff;
+	border-top: 0.25em solid #888;
 }
 #preview #bottomBarWrapper {
 	border-bottom: 0.063em solid #ccc;
@@ -896,7 +897,7 @@ form h2 {
 	width: 100%;
 }
 #preview #bottomBar {
-	background: #fff;
+	background: #eee;
 }
 #preview #bottomBar .previewLinks {
 	margin-left: 3em;
@@ -908,16 +909,14 @@ form h2 {
 	color: @color-action;
 	padding: 1em;
 	display: inline-block;
+	text-decoration: none;
 }
-#preview #bottomBar .state.active {
-	color: @color-highlight;
-	font-weight: bold;
-	cursor: text;
-	text-decoration: none !important;
+#preview #bottomBar .previewLink:hover {
+	color: darken(@color-action, 25%);
 }
-#preview #bottomBar .publish.active {
-	color: @color-highlight;
-	font-weight: bold;
+
+#preview #bottomBar .previewLink.active {
+	color: #333;
 	cursor: text;
 	text-decoration: none !important;
 }
@@ -927,18 +926,64 @@ form h2 {
 	padding: 1em;
 	color: #888;
 	margin: 0 0.3em;
-	padding-left: 2.5em;
-	background: url(../../../images/icons/modernui/halflight/48x48/appbar.chevron.left.png) no-repeat left center;
 	display: block;
+	
+	text-decoration: none;
+}
+#preview #bottomBar .edit span {
+	background: url("../css/images/arrows/arrows-left-@{system-arrows}.png") no-repeat right center;
+	background-size: 6em 1.5em;
+	background-position: -3em 0;
+	-webkit-background-position: -3em 0;
+	
+	margin-bottom: -0.375em;
+	
+	display: inline-block;
+	width: 1em;
+	height: 1.5em;
+	
+	margin-right: 0.25em;
+	
 }
 #preview #bottomBar .edit:hover {
-	
+
+	color: #555;
+
+	span {
+		background-position: -2em 0;
+		-webkit-background-position: -2em 0;
+	}
 }
 #preview #bottomBar .new_window {
 	display: block;
 	margin: 16px 10px;
 	float: right;
 	color: @color-action;
+	text-decoration: none;
+	
+	span {
+		background: url("../css/images/arrows/arrows-right-@{system-arrows}.png") no-repeat right center;
+		background-size: 6em 1.5em;
+		background-position: 0 0;
+		-webkit-background-position: 0 0;
+		
+		margin-bottom: -0.375em;
+		
+		display: inline-block;
+		width: 1em;
+		height: 1.5em;
+		
+		margin-left: 0.25em;
+	}
+	
+	:hover {
+		color: darken(@color-action, 15%);
+		
+		span {
+			background-position: -1em 0;
+			-webkit-background-position: -1em 0;
+		}
+	}
 }
 
 
