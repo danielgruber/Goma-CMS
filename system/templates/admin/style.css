@@ -982,18 +982,6 @@ form h2 {
 	padding: 10px;
 	text-align: left;
 }
-/* SELECTION */
-
-::-moz-selection {
-	background: @color-highlight;
-	color: #fff;
-	text-shadow: none;
-}
-::selection {
-	background: @color-highlight;
-	color: #fff;
-	text-shadow: none;
-}
 
 .error {
 	background-color: #e765b0;

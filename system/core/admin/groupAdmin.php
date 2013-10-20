@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 20.02.2013
-  * $Version 1.0.3
+  * last modified: 21.10.2013
+  * $Version 1.0.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -33,6 +33,8 @@ class groupAdmin extends adminItem {
 		"group"
 	);
 	
+	static $icon = "system/templates/admin/images/group.png";
+	
 	/**
 	 * history-url
 	 *
@@ -48,6 +50,9 @@ class groupAdmin extends adminItem {
 	 * logic
 	*/
 	public function index() {
+		
+		Resources::$lessVars = "tint-brown.less";
+		
 		$config = TableFieldConfig_Editable::create();
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(
 			"id"		=> "ID",

@@ -145,11 +145,11 @@ dfn {
 /* SELECTION */
 
 ::-moz-selection { 
-	background: #a1d7ff; 
+	background: @selection-color; 
 	text-shadow: none; 
 }
 ::selection { 
-	background: #a1d7ff; 
+	background: @selection-color; 
 	text-shadow: none; 
 }
 
