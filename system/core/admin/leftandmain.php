@@ -172,13 +172,8 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function generateContextMenu($child) {
 		if($child->treeclass) {
+			
 			return array(
-				array(
-					"icon"		=> "images/icons/goma16/page_new.png",
-					"label"		=> lang("SUBPAGE_CREATE"),
-					"ajaxhref"	=> $this->originalNamespace . "/add" . URLEND . "?parentid=" . $child->recordid
-				),
-				"hr",
 				array(
 					"icon"		=> "images/16x16/edit.png",
 					"label" 	=> lang("edit"),
@@ -191,6 +186,8 @@ class LeftAndMain extends AdminItem {
 				)
 			);
 		}
+		
+		return array();
 	}
 	
 	/**
@@ -210,7 +207,7 @@ class LeftAndMain extends AdminItem {
 		}
 		
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state", "search" => $search)));
-		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace);
+		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace, $this);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
 		$treeRenderer->mark($this->getParam("id"));

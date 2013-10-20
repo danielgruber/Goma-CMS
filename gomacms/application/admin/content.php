@@ -259,7 +259,16 @@ class contentAdmin extends LeftAndMain
 					"parent"
 				)
 			)));
+			
+		
+		if(!$this->modelInst()->can("insert")) {
+			$parenttype->disableOption("root");
+		}
+		
 		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
+		
+		
+		
 		$form->add(new HiddenField("class_name", $model->classname));
 		
 		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
@@ -271,7 +280,7 @@ class contentAdmin extends LeftAndMain
 			
 		$form->addValidator(new DataValidator($model), "datavalidator");
 		
-		if($model->can("Write"))
+		//if($model->can("Write"))
 			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate", null, array("green")));
 		
 		return $form->render();
@@ -319,7 +328,24 @@ class contentAdmin extends LeftAndMain
 	}
 	
 	/**
-	 * generates mainbar-title and path for page.
+	 * generates the context-menu.
+	*/
+	public function generateContextMenu($child) {
+		if(!$child->model || $child->model->can("write")) {
+			return array_merge(array(array(
+				"icon"		=> "images/icons/goma16/page_new.png",
+				"label"		=> lang("SUBPAGE_CREATE"),
+				"ajaxhref"	=> $this->originalNamespace . "/add" . URLEND . "?parentid=" . $child->recordid
+			),
+			"hr"), parent::generateContextMenu($child));
+		}
+		
+		return parent::generateContextMenu($child);
+			
+	}
+	
+	/**
+	 * generates mainbar-title and path for newly generated page.
 	*/
 	public function submit_form_generate($data) {
 		$data["mainbartitle"] = $data["title"];

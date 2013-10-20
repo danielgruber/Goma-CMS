@@ -18,8 +18,9 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 	 * @param	callback $actionCallback a function which should generate the subaction of a tree-item accessable via right-click or by holding the option-key.
 	 * @param 	string $namespace namespace of the leftandmain-panel
 	*/
-	public function __construct($tree, $linkCallback = null, $actionCallback = null, $namespace = null) {
+	public function __construct($tree, $linkCallback = null, $actionCallback = null, $namespace = null, $controller) {
 		$this->namespace = $namespace;
+		$this->controller = $controller;
 		parent::__construct($tree, $linkCallback, $actionCallback);
 	}
 	
@@ -35,16 +36,17 @@ class LeftAndMain_TreeRenderer extends TreeRenderer {
 			$html .= $this->renderChild($node);
 		}
 		
-		// add-button
-		$addNode = new TreeNode("page_" . $parentID . "_addButton", 0, lang("PAGE_CREATE"), "");
-		$addNode->setChildren(array());
-		$addNode->parentid = $parentID;
-		$addNode->setLinkCallback(array($this, "createAddLink"));
-		$addNode->addClass("hidden");
-		$addNode->addClass("action");
-		
-		if($parentID == 0)
+		if($parentID == 0) {
+			// add-button
+			$addNode = new TreeNode("page_" . $parentID . "_addButton", 0, lang("PAGE_CREATE"), "");
+			$addNode->setChildren(array());
+			$addNode->parentid = $parentID;
+			$addNode->setLinkCallback(array($this, "createAddLink"));
+			$addNode->addClass("hidden");
+			$addNode->addClass("action");
+			
 			$html = $this->renderChild($addNode) . $html;
+		}
 		
 		return $html;
 	}

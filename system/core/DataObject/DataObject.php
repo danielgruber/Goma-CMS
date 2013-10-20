@@ -1232,13 +1232,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		} else {
 			$historyOldID = isset($oldid) ? $oldid : 0;
 		}
-		
+
+				
 		// fire events!
 		$this->onBeforeWriteData();
 		$this->callExtending("onBeforeWriteData");
 		$this->onBeforeManipulate($manipulation, $b = "write");
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
-		
+
 
 		self::$datacache[$this->baseClass] = array();
 

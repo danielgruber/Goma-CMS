@@ -706,7 +706,7 @@ class Controller extends RequestHandler
 				break;
 				case "less_rights":
 					
-					return lang("less_rights", "You are not allowed to visit this page or perform this action.");
+					return '<div class="error">' . lang("less_rights", "You are not allowed to visit this page or perform this action.") . '</div>';
 				break;
 				case "delete_success":
 					$this->redirectback();
