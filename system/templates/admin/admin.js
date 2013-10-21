@@ -9,7 +9,7 @@
 
 $(document).ready(function() {
 	
-	var scroll;
+	var scroll, scrollLeft;
 	
 	var hideNavBar = function() {
 		if($("#head .dropdown").hasClass("show")) {
@@ -17,6 +17,7 @@ $(document).ready(function() {
 			$("#head").removeClass("show-dropdown");
 			
 			$(window).scrollTop(scroll);
+			$(window).scrollLeft(scrollLeft);
 		}
 	}
 	
@@ -30,8 +31,10 @@ $(document).ready(function() {
 			$("#head").addClass("show-dropdown");
 			
 			scroll = $(window).scrollTop();
+			scrollLeft = $(window).scrollLeft();
 			
 			$(window).scrollTop(0);
+			$(window).scrollLeft(0);
 		} else {
 			hideNavBar();
 		}

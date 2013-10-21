@@ -431,6 +431,7 @@ class Core extends object {
 
 		if(self::$favicon) {
 			$html .= '		<link rel="icon" href="' . self::$favicon . '" type="image/x-icon" />';
+			$html .= '		<link rel="apple-touch-icon-precomposed" href="'.self::$favicon.'" />';
 		}
 
 		return $html;

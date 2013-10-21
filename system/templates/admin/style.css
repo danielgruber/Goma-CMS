@@ -1029,13 +1029,13 @@ form h2 {
 }
 
 .error {
-	background-color: #e765b0;
-	border-color: @color-highlight;
+	background-color: lighten(@system-red, 25%);
+	border-color: @system-red;
 	color: #000;
 }
 .info_box {
 	background-color: #7ccdd4;
-	border-color: @color-action;
+	border-color: @system-green;
 }
 
 #updates {
