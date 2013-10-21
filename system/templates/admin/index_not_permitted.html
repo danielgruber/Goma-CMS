@@ -56,7 +56,7 @@
 									});
 								})(jQuery);
 							</script>
-							<form cid="login" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REDIRECT.url()}" method="post">
+							<form cid="login" action="{BASE_SCRIPT}profile/login/?redirect={$_SERVER_REQUEST_URI.url()}" method="post">
 								<input type="text" name="user" title="{$_lang_email_or_username}" id="login_name" value="{$_POST_user.text()}" placeholder="{$_lang_email_or_username}" />
 								<input type="password" id="login_pwd" title="{$_lang_password}" name="pwd" placeholder="{$_lang_password}" />
 								<div class="actions">

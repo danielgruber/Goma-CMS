@@ -483,8 +483,14 @@ h1, h2, h3 {
 			
 			tr {
 				float: left;
-				margin: 0 .5em;
+				margin: 0 2.5%;
+				width: 45%;
 			}
+		}
+		
+		> table {
+		 	width: 100%;
+		 	right: 0 !important;
 		}
 		
 		.legendLabel {
@@ -1281,14 +1287,17 @@ ul.list-view li a img {
 			}
 			
 			table {
-					
+
 				background: none !important;
 				margin-top: -4.75em;
 				margin-right: -2.25em;
+				width: auto;
+				right: 39px !important;
 				
 				tr {
 					float: none;
 					margin: 0;
+					width: auto;
 				}
 			}
 		}

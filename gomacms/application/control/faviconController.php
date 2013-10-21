@@ -22,7 +22,7 @@ class FaviconController extends Controller {
 			} else {
 				if(!file_exists(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".ico")) {
 					$image = new Image($file->realfile);
-					$fav = $image->resize(64, 64);
+					$fav = $image->resize(240, 240);
 					$fav->toFile(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".ico", 70, "ico");
 				}
 				
