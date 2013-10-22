@@ -107,6 +107,7 @@ h1, h2, h3 {
 	padding-top: 0.25em;
 	border-top: 0.25em solid #666;
 	
+	
 	#navi-toggle {
 		text-decoration: none !important;
 		position: relative;
@@ -168,6 +169,9 @@ h1, h2, h3 {
 		left: 0;
 		z-index: 950;
 		top: 3.125em;
+		
+		-webkit-overflow-scrolling: touch;
+		overflow: auto;
 		
 		#navigation {
 			list-style: none;

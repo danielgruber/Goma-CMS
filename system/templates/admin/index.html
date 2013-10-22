@@ -149,7 +149,7 @@
 										<% END %>
 											<a href="{BASE_SCRIPT}admin/{$this.uname}{URLEND}" title="$this.text">
 												<% IF $this.icon %>
-													<img src="$this.icon" alt="$this.text" />
+													<img src="$this.icon" data-retina="<% retinaPath($this.icon) %>" alt="$this.text" />
 												<% ELSE %>
 													<div class="no-image"></div>
 												<% END %>

@@ -962,6 +962,19 @@ function debug_log($data) {
 }
 
 /**
+ * checks for available retina-file on file-path.
+ *
+ * @param file
+*/
+function RetinaPath($file) {
+	$retinaPath = substr($file, 0, strrpos($file, ".")) . "@2x." . substr($file, strpos($file, ".") + 1);
+	if(file_exists($retinaPath))
+		return $retinaPath;
+	
+	return $file;
+}
+
+/**
  * Writes the server configuration file
  *@name writeServerConfig
  *@access public

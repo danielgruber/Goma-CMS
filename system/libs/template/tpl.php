@@ -1849,6 +1849,13 @@ class tplCaller extends Object implements ArrayAccess
 				}
 		}
 		
+		/**
+		 * retina.
+		*/
+		public function RetinaPath($file) {
+			return RetinaPath($file);
+		}
+		
 }
 /**
  * tpl-cacher
