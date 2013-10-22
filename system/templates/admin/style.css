@@ -157,7 +157,8 @@ h1, h2, h3 {
 	
 	.dropdown {
 		
-					
+		z-index: 960;
+				
 		width: 100%;
 		
 		display: none;
@@ -170,9 +171,6 @@ h1, h2, h3 {
 		z-index: 950;
 		top: 3.125em;
 		
-		-webkit-overflow-scrolling: touch;
-		overflow: auto;
-		
 		#navigation {
 			list-style: none;
 			margin: 0;
@@ -183,6 +181,9 @@ h1, h2, h3 {
 			clear: left;
 			
 			z-index: 950;
+			
+			-webkit-overflow-scrolling: touch;
+			overflow: auto;
 			
 			li {
 				float: left;
@@ -269,6 +270,10 @@ h1, h2, h3 {
 				float: left;
 				margin: 0 @space-normal;
 			}
+			
+			-webkit-overflow-scrolling: touch;
+			overflow: auto;
+
 			
 			#userbar-user {
 				display: none;
@@ -1202,32 +1207,39 @@ ul.list-view li a img {
 
 /* on small touch devices fall back to non-fixed-bars. */
 @media only screen and (min-width: 45em) {
-	html.touch #header, html.touch #navi, html.touch #userbar {
-		position: absolute;
-	}
-	
-	html.touch #adminPanel #head {
-		position: absolute;
-	}
-	
 	#adminPanel #head {
 		
 		.dropdown {
 			border: 0;
 			background: transparent;
 			display: block;
+			position: static;
+			height: auto;
 			
 			#navigation {
 				background: #eee;
 				border-bottom: 1px solid #ccc;
 				border-top: 1px solid #ccc;
 				display: none;
+				
+				box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+				-ms-box-sizing: border-box;
+
+				
+				position: absolute;
+				top: 50px;
+				left: 0;
+				width: 100%;
 			}
 			
 			#sidebar_head {
 				position: fixed;
 				top: 0em;
 				right: 0em;
+				
+				z-index: 965;
 				
 				border-bottom: 0;
 				
