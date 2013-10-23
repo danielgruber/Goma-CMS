@@ -13,6 +13,14 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldCheckable implements TableField_ColumnProvider {
+	
+	/**
+	 * returns the currently checked values by name of tablefield.
+	*/
+	public static function getChecked($checkName = "check") {
+		self::updateSession($checkName);
+		return isset($_SESSION["tablefield"]["check_" . $checkName]) ? $_SESSION["tablefield"]["check_" . $checkName] : array();
+	}
 	/**
 	 * You can define the name of the Checkboxes here.
 	 *
@@ -20,6 +28,27 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	*/
 	public function __construct($name = "check") {
 		$this->checkname = $name;
+		self::updateSession($name);
+	}
+	
+	/**
+	 * updates the session-data.
+	*/
+	public static function updateSession($name) {
+		if(!isset($_POST[$name . "_check"])) {
+			unset($_SESSION["tablefield"]["check_" . $name]);
+		}
+		
+		if(isset($_POST[$name . "_check"])) {
+			isset($_SESSION["tablefield"]["check_" . $name]) OR $_SESSION["tablefield"]["check_" . $name] = array();
+			foreach($_POST[$name . "_check"] as $k => $v) {
+				if(isset($_POST[$name][$k])) {
+					$_SESSION["tablefield"]["check_" . $name][$k] = true;
+				} else {
+					unset($_SESSION["tablefield"]["check_" . $name][$k]);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -85,6 +114,8 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 		$data = new ViewAccessableData();
 		$data->id = $record->id;
 		$data->name = $this->checkname;
+		$data->checked = isset($_SESSION["tablefield"]["check_" . $this->checkname][$record->ID]);
+		
 		
 		return $data->renderWith("form/tableField/checkbox.html");
 	}
