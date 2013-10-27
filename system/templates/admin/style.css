@@ -1112,7 +1112,7 @@ form h2 {
 	margin-right: 0;
 }
 .tabs > ul li a, .tabs > ul li .tab {
-	background: #fff;
+	background: transparent !important;
 	border: 0;
 	color: @color-action;
 	
@@ -1122,6 +1122,8 @@ form h2 {
 	padding-top: 0.63em;
 	padding-bottom: 0.64em;
 	margin-top: -0.063em !important;
+	margin-bottom: -0.063em;
+	border-bottom: 2px solid transparent;
 }
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
 	color: @color-action !important;

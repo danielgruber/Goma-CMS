@@ -32,6 +32,7 @@ if (goma.ui === undefined) {
 			load_alwaysLoad = /\/[^\/]*(data)[^\/]+\.js/,
 			http_regexp = /https?\:\/\//,
 			loadSubscribers = [],
+			prefixes = ["webkit", "moz", "ms", "o"],
 		
 		/**
 		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
@@ -197,6 +198,8 @@ if (goma.ui === undefined) {
 					updateFlexHeight($(flexBoxes[i]));
 				}
 			});
+			
+			window.hammer = $(document.body).hammer();
 		});
 		
 		
@@ -241,6 +244,36 @@ if (goma.ui === undefined) {
 			setMainContent: function (node) {
 				if ($(node).length > 0) {
 					goma.ui.mainContent = $(node);
+				}
+			},
+			
+			/**
+			 * enables css-transforms on a specified element with specified time and easing.
+			*/
+			enableCSSAnimation: function(elem, time, easing) {
+				if(time === undefined)
+					time = 300;
+				
+				if(easing == undefined)
+					easing = "linear";
+					
+				var elem = $(elem);
+				
+				elem.css("transition", "all "+Math.round(time)+"ms "+easing);
+				for(i in prefixes) {
+					elem.css("-" + prefixes[i] + "-transition", "all "+Math.round(time)+"ms "+easing);
+				}
+			},
+			
+			/**
+			 * enables css-transforms on a specified element.
+			*/
+			disableCSSAnimation: function(elem) {
+				var elem = $(elem);
+				
+				elem.css("transition", "");
+				for(i in prefixes) {
+					elem.css("-" + prefixes[i] + "-transition", "");
 				}
 			},
 			
