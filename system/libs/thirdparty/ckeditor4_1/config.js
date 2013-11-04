@@ -4,44 +4,35 @@
  */
 
 CKEDITOR.editorConfig = function( config ) {
-	// Define changes to default configuration here. For example:
-	// config.language = 'fr';
-	// config.uiColor = '#AADC6E';
-	
-	config.toolbar_Goma =
-	[
-		{ name: 'document', items : [ 'Source'/*,'-','Templates'*/] },
-		{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
-		{ name: 'clipboard', items : [ 'Cut','PasteText','PasteFromWord','-','Undo','Redo' ] },
-		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','-','RemoveFormat' ] },
-		{ name: 'justify', items: ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
-		{ name: 'tools', items : [ 'Maximize' ] },
+	// Define changes to default configuration here.
+	// For the complete reference:
+	// http://docs.ckeditor.com/#!/api/CKEDITOR.config
+
+	// The toolbar groups arrangement, optimized for two toolbar rows.
+	config.toolbarGroups = [
+		{ name: 'clipboard',   groups: [ 'clipboard', 'undo' ] },
+		{ name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
+		{ name: 'links' },
+		{ name: 'insert' },
+		{ name: 'forms' },
+		{ name: 'tools' },
+		{ name: 'document',	   groups: [ 'mode', 'document', 'doctools' ] },
+		{ name: 'others' },
 		'/',
-		{ name: 'insert', items : [ 'Image','Table','PageBreak'] },
-		{ name: 'styles', items : [ 'Styles','Format' ] },
-		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		{ name: 'editing', items : [ 'BidiLtr','BidiRtl' ] },
-		{ name: "Scayt", items: ["Scayt"]},
-		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] }
+		{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+		{ name: 'paragraph',   groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
+		{ name: 'styles' },
+		{ name: 'colors' },
+		{ name: 'about' }
 	];
-	
-	CKEDITOR.config.floatingtools = 'Basic';
-	CKEDITOR.config.floatingtools_Basic =
-	[
-		['Format', 'Bold', 'Italic', 'Underline','-','RemoveFormat', '-', 'JustifyLeft','JustifyCenter','JustifyRight', '-', 'NumberedList', 'BulletedList', '-', 'Link']
-	];
-	
-	config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt,imagepaste";
-	config.autoGrow_onStartup = true;
-	config.allowedContent = true;
-	
-	config.fillEmptyBlocks = function( element )
-	{
-		if ( element.attributes[ 'class' ].indexOf ( 'clear' ) != -1 )
-			return false;
-		
-		if ( element.is("span") || element.is("strong") || element.is("em") || element.is("u") || element.is("b") )
-			return false;
-	}
-	//config.fillEmptyBlocks = false; // Prevent filler nodes in all empty blocks.
+
+	// Remove some buttons, provided by the standard plugins, which we don't
+	// need to have in the Standard(s) toolbar.
+	config.removeButtons = 'Underline,Subscript,Superscript';
+
+	// Se the most common block elements.
+	config.format_tags = 'p;h1;h2;h3;pre';
+
+	// Make dialogs simpler.
+	config.removeDialogTabs = 'image:advanced;link:advanced';
 };
