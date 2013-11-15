@@ -8,7 +8,7 @@
 
 // put the data into the right namespace
 (function($){
-    var helpData = [], w = window;
+    var helpData = [], w = window, shown = false;
     
     w.addHelp = function(data) {
         for(i in data)  {
@@ -33,6 +33,10 @@
             }
             
             var id = helpData[i].id, box = $("#" + id), s = $(data.selector), position;
+            
+            if(!shown) {
+	            box.css("display", "none");
+            }
             
             if(s.length == 1) {
                 // get position
@@ -120,10 +124,12 @@
     w.showHelp = function() {
     	renderHelp();
         $(".help-box").fadeIn("fast");
+        shown = true;
     };
     
     w.hideHelp = function() {
         $(".help-box").fadeOut("fast");
+        shown = false;
     };
     
     $(function(){

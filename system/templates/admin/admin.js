@@ -55,11 +55,23 @@ $(function() {
 		"#navi-toggle .title" : "Click to get the menu"
 	});
 	
-	$("#help-button").addClass("active").click(function(){
+	if(getCookie("help") == 2) {
+		$("#help-button").removeClass("active");
+		hideHelp();
+	} else {
+		$("#help-button").addClass("active");
+		setTimeout(function(){
+			showHelp();
+		}, 500);
+	}
+	
+	$("#help-button").click(function(){
 		if($(this).hasClass("active")) {
 			hideHelp();
+			setCookie("help", 2, 365);
 		} else {
 			showHelp();
+			setCookie("help", 1, 365);
 		}
 		$(this).toggleClass("active");
 		
@@ -74,8 +86,6 @@ $(function() {
 				url: BASE_SCRIPT + "admin/flushLog/"
 			});
 		}, 3000);
-		
-		
 	}
 
 	CallonDocumentClick(hide, [$("#userbar-langSelect"), $("#userbar-langSelect ul")]);
