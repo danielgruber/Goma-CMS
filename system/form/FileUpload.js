@@ -4,9 +4,9 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.0
+ * @version 1.1
  */
-function FileUpload(formelement, url, size) {
+function FileUpload(formelement, url, size, types) {
 	
 	preloadLang(["files.filesize_failure"]);
 	
@@ -29,6 +29,8 @@ function FileUpload(formelement, url, size) {
 		browse: this.browse,
 		
 		max_size: size,
+		
+		allowed_types: types,
 		
 		// events
 		uploadStarted: function() {
@@ -115,6 +117,10 @@ function FileUpload(formelement, url, size) {
 		
 		failSize: function(i) {
 			$this.infoZone.html('<div class="error">'+lang("files.filesize_failure")+'</div>');
+		},
+		
+		failExt: function() {
+			$this.infoZone.html('<div class="error">'+lang("files.filetype_failure")+'</div>');
 		}
 		
 	});

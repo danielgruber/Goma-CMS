@@ -3,11 +3,11 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 01.07.2013
+ * last modified: 14.11.2013
  */
 
 
-$(document).ready(function() {
+$(function() {
 	
 	var scroll, scrollLeft;
 	
@@ -51,5 +51,32 @@ $(document).ready(function() {
 		return false;
 	});
 
+	addHelp({
+		"#navi-toggle .title" : "Click to get the menu"
+	});
+	
+	$("#help-button").addClass("active").click(function(){
+		if($(this).hasClass("active")) {
+			hideHelp();
+		} else {
+			showHelp();
+		}
+		$(this).toggleClass("active");
+		
+		return false;
+	});
+
+	if($("#flush-log-recommend").length == 1) {
+		$("#flush-log-recommend").remove();
+		
+		setTimeout(function(){
+			$.ajax({
+				url: BASE_SCRIPT + "admin/flushLog/"
+			});
+		}, 3000);
+		
+		
+	}
+
 	CallonDocumentClick(hide, [$("#userbar-langSelect"), $("#userbar-langSelect ul")]);
-})
+});

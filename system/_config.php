@@ -60,6 +60,7 @@ gloader::addLoadAble("history", "system/libs/javascript/history/history.js");
 gloader::addLoadAble("notifications", "system/libs/notifications/notifications.js");
 gloader::addLoadAble("json", "system/libs/javascript/json.js");
 gloader::addLoadAble("jquery-color", "system/libs/thirdparty/jquery-color/jquery.color.min.js");
+gloader::addLoadAble("helpbox", "system/libs/javascript/helpBox.js");
 
 // Breadcrump seperator
 define('BREADCRUMB_SEPERATOR', ' &raquo; ');

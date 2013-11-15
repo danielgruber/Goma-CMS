@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.04.2013
-  * $Version 2.0.5
+  * last modified: 11.11.2013
+  * $Version 2.0.6
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -17,8 +17,10 @@ var AjaxUpload = function(DropZone, options) {
 	this["multiple"] = false;
 	this.id = randomString(10);
 	this.max_size = -1;
+	this.allowed_types = true;
+	
 	for(i in options) {
-		if(typeof options[i] != "undefined")
+		if(options[i] !== undefined)
 			this[i] = options[i];
 	}
 	this.loading = false;
@@ -452,17 +454,37 @@ AjaxUpload.prototype = {
 	processQueue: function() {
 		for(i in this.queue) {
 			if(!this.queue[i].loading && !this.queue[i].loaded) {
-				if(this.max_size == -1 || typeof this.queue[i].upload.fileSize == "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
-					this.queue[i].loading = true;
-					this.queue[i].send();
-					this.uploadStarted(i, this.queue[i].upload);
+				if(this.checkFileExt(this.queue[i].upload.fileName)) {
+					if(this.max_size == -1 || typeof this.queue[i].upload.fileSize == "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
+						this.queue[i].loading = true;
+						this.queue[i].send();
+						this.uploadStarted(i, this.queue[i].upload);
+					} else {
+						this.abort(i);
+						this.failSize(i);
+					}
 				} else {
 					this.abort(i);
-					this.failSize(i);
+					this.failExt(i);
 				}
 			}
 			this.placeBrowseHandler();
 		}
+	},
+	
+	/**
+	 * checks the file-extension.
+	*/
+	checkFileExt: function(name) {
+		if(this.allowed_types === true) {
+			return true;
+		}
+		
+		console.log(this.allowed_types);
+		
+		var regexp = new RegExp("\.("+this.allowed_types.join("|")+")$", "i");
+		alert(regexp);
+		return name.match(regexp);
 	},
 	
 	/**

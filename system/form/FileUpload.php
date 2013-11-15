@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.1.8
+ * @version 1.1.9
  */
 class FileUpload extends FormField {
 	/**
@@ -359,7 +359,7 @@ class FileUpload extends FormField {
 		gloader::load("ajaxupload");
 		Resources::add("system/form/FileUpload.js", "js", "tpl");
 		Resources::add("FileUpload.css", "css");
-		Resources::addJS("$(function(){new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ");});");
+		Resources::addJS("$(function(){new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
 		// modify form for right datatype
 		$this->form()->form->enctype = "multipart/form-data";
 

@@ -7,7 +7,8 @@
 		<% INCLUDE_CSS_MAIN "style.css" %>
 		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
 		<% INCLUDE_CSS_MAIN "notifications.css" %>
-
+		<% INCLUDE_CSS_MAIN "font-awsome/font-awesome.css" %>
+		<% gload("helpbox") %>
 		<% INCLUDE_JS_MAIN "admin.js" %>
 		
 		<% INCLUDE_JS "apps/AddonStoreClient.js" %>
@@ -19,6 +20,7 @@
 		
 		<% IF NOT $content AND PERMISSION("superadmin") %>
 			<% gload("htmllib") %>
+			
 	
 			<script type="text/javascript">
 			// <![CDATA[
@@ -45,21 +47,9 @@
 					$("#update").attr("href", $("#update").attr("data-href"));
 				});
 				
-				$(function(){
-					if($("#flush-log-recommend").length == 1) {
-						$("#flush-log-recommend").remove();
-						
-						setTimeout(function(){
-							$.ajax({
-								url: BASE_SCRIPT + "admin/flushLog/"
-							});
-						}, 3000);
-						
-						
-					}
-					
-					
-				});
+				
+				
+				
 				
 			// ]]>
 			</script>
@@ -91,7 +81,11 @@
 										<!--<a class="pageTitle" target="_blank" title="{$_lang_view_site}" href="./">
 											{$_cms_ptitle}
 										</a>-->
-										<a id="visit_webpage" href="{$previewURL}">{$_cms_title} - <span class="flex"><% lang("preview_website", "Preview Website") %> </span> <span class="arrow"></span></a>
+										<a id="visit_webpage" href="{$previewURL}">{$_cms_title} - <span class="flex"><% lang("preview_website", "Preview Website") %> </span> <i class="fa fa-angle-right fa-2x"></i></a>
+									</div>
+									
+									<div class="help" id="help-button">
+										<a href="#"><i class="fa fa-question-circle fa-2x"></i></a>
 									</div>
 									
 									<div id="userbar-langSelect">
@@ -174,7 +168,7 @@
 							<% ELSE %>
 								<span class="title">{$_lang_overview}</span>
 							<% END %>
-							<span class="arrow"></span>
+							<i class="fa fa-angle-down fa-3x"></i>
 						</a>
 
 						<div class="clear"></div>

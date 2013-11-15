@@ -206,11 +206,11 @@ class DropDown extends FormField {
 					)),
 					new HTMLNode("div", array("class" => "pagination"), array(
 						new HTMLNode("span", array("class" => "left"), array(new HTMLNode("a", array(
-								"class" => "left disabled",
+								"class" => "left disabled fa fa-angle-left fa-3x",
 								"href" => "javascript:;"
 							), ""))),
 						new HTMLNode("span", array("class" => "right"), array(new HTMLNode("a", array(
-								"class" => "right disabled",
+								"class" => "right disabled fa fa-angle-right fa-3x",
 								"href" => "javascript:;"
 							), "")))
 					)),
