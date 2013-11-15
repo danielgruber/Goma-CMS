@@ -34,7 +34,7 @@ class GomaCKEditor extends GomaEditor {
 				{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
 				{ name: "tools", items : [ "Maximize" ] },
 				"/",
-				{ name: "insert", items : [ "Image","Table","PageBreak"] },
+				{ name: "insert", items : [ "image2","Table","PageBreak"] },
 				{ name: "styles", items : [ "Styles","Format" ] },
 				{ name: "colors", items : [ "TextColor","BGColor" ] },
 				{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
@@ -53,13 +53,7 @@ class GomaCKEditor extends GomaEditor {
      * extra javascript-code for html.
     */
     static $htmlJS = '
-	    CKEDITOR.config.floatingtools = "Basic";
-		CKEDITOR.config.floatingtools_Basic =
-		[
-			["Format", "Bold", "Italic", "Underline","-","RemoveFormat", "-", "JustifyLeft","JustifyCenter","JustifyRight", "-", "NumberedList", "BulletedList", "-", "Link"]
-		];
-		
-		CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,sharedspace,scayt";
+		CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,scayt,imagepaste";
 		CKEDITOR.config.autoGrow_onStartup = true;';
 	
 	/**

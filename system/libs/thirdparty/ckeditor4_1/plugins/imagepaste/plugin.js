@@ -100,6 +100,7 @@ CKEDITOR.plugins.add( 'imagepaste',
 		
 		if(editor.config.filebrowserUploadUrl) {
 			var url= editor.config.filebrowserUploadUrl + '&CKEditor=' + editor.name + '&CKEditorFuncNum=2&langCode=' + editor.langCode;
+			
 			new CKAjaxUpload(editor, {
 				ajaxurl: url,
 				uploadStarted: function(index, upload) {

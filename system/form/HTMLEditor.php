@@ -59,6 +59,15 @@ class HTMLEditor extends Textarea
 			$css = self::importCSS("system/templates/css/default.css") . "\n" . self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			$css .= "body, html {padding: 0.5em;}";
 			
+			$css = file_get_contents(FRAMEWORK_ROOT . "/templates/css/default.less") . $css;
+			
+			try {
+				$less = new lessc;
+				$css = $less->compile($css);
+			} catch(Exception $e) {
+				log_exception($e);
+			}
+			
 			// parse CSS
 			//$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);
 			FileSystem::write($cache, $css);

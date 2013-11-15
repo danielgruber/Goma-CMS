@@ -40,7 +40,6 @@ var CKBUILDER_CONFIG = {
 		'htmlwriter' : 1,
 		'horizontalrule' : 1,
 		'wysiwygarea' : 1,
-		'image' : 1,
 		'indent' : 1,
 		'link' : 1,
 		'list' : 1,
@@ -84,10 +83,12 @@ var CKBUILDER_CONFIG = {
 		'find' : 1,
 		'indentlist' : 1,
 		'bidi' : 1,
-		'youtube' : 1
+		'lineutils' : 1,
+		'widget' : 1,
+		'image2' : 1
 	},
 	languages : {
 		'en' : 1,
-		'de' : 1,
+		'de' : 1
 	}
 };

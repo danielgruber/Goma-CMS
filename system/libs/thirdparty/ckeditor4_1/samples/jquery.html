@@ -7,7 +7,7 @@ For licensing, see LICENSE.md or http://ckeditor.com/license
 <head>
 	<meta charset="utf-8">
 	<title>jQuery Adapter &mdash; CKEditor Sample</title>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="../ckeditor.js"></script>
 	<script src="../adapters/jquery.js"></script>
 	<link href="sample.css" rel="stylesheet">
@@ -23,9 +23,37 @@ For licensing, see LICENSE.md or http://ckeditor.com/license
 	<script>
 
 		CKEDITOR.disableAutoInline = true;
-
+			
+			function randomString(string_length) {
+		var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+		var randomstring = '';
+		for (var i=0; i<string_length; i++) {
+			var rnum = Math.floor(Math.random() * chars.length);
+			randomstring += chars.substring(rnum,rnum+1);
+		}
+		return randomstring;
+	}	
 		$( document ).ready( function() {
-			$( '#editor1' ).ckeditor(); // Use CKEDITOR.replace() if element is <textarea>.
+			$( '#editor1' ).ckeditor({
+				toolbar: [
+					{ name: 'document', items : [ 'Source'/*,'-','Templates'*/] },
+					{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+					{ name: 'clipboard', items : [ 'Cut','PasteText','PasteFromWord','-','Undo','Redo' ] },
+					{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','-','RemoveFormat' ] },
+					{ name: 'justify', items: ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
+					{ name: 'tools', items : [ 'Maximize' ] },
+					'/',
+					{ name: 'insert', items : [ 'image2','Table','PageBreak'] },
+					{ name: 'styles', items : [ 'Styles','Format' ] },
+					{ name: 'colors', items : [ 'TextColor','BGColor' ] },
+					{ name: 'editing', items : [ 'BidiLtr','BidiRtl' ] },
+					{ name: "Scayt", items: ["Scayt"]},
+					{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent'] }
+				],
+				extraPlugins: "autogrow,stylesheetparser,tableresize,scayt,imagepaste",
+				filebrowserUploadUrl: "$uploadpath",
+				filebrowserImageUploadUrl : "$imageuploadpath",
+			}); // Use CKEDITOR.replace() if element is <textarea>.
 			$( '#editable' ).ckeditor(); // Use CKEDITOR.inline().
 		} );
 
@@ -42,7 +70,7 @@ For licensing, see LICENSE.md or http://ckeditor.com/license
 	<form action="sample_posteddata.php" method="post">
 		<div class="description">
 			<p>
-				This sample shows how to use the <a href="http://docs.ckeditor.com/#!/api/adapters.jQuery">jQuery adapter</a>.
+				This sample shows how to use the <a href="http://docs.ckeditor.com/#!/api/CKEDITOR_Adapters.jQuery">jQuery adapter</a>.
 				Note that you have to include both CKEditor and jQuery scripts before including the adapter.
 			</p>
 <pre class="samples">
