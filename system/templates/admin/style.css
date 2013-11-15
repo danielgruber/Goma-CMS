@@ -938,20 +938,10 @@ form h2 {
 #preview #bottomBar .edit {
 	float: left;
 	padding: 1em;
-	color: #888;
 	margin: 0 0.3em;
 	display: block;
 	
 	text-decoration: none;
-}
-#preview #bottomBar .edit:hover {
-
-	color: #555;
-
-	span {
-		background-position: -2em 0;
-		-webkit-background-position: -2em 0;
-	}
 }
 #preview #bottomBar .new_window {
 	display: block;
