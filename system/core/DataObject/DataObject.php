@@ -3899,7 +3899,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$db_fields = $this->DataBaseFields();
 		$indexes = $this->indexes();
 		$casting = $this->casting();
-	
+		
 		// add some fields for versioning
 		if ($this->Table() && $this->Table() == $this->baseTable) {
 			if (!isset($db_fields["recordid"]))

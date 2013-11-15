@@ -199,7 +199,11 @@ if (goma.ui === undefined) {
 				}
 			});
 			
-			window.hammer = $(document.body).hammer();
+			window.hammer = $(document.body).hammer({
+				stop_browser_behavior: {
+					userSelect: ""
+				}
+			});
 		});
 		
 		
