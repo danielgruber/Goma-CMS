@@ -212,6 +212,12 @@ class adminController extends Controller
 				Resources::addJS("location.reload();");
 			}
 			
+			if(Permission::check("ADMIN")) {
+				$data = $this->helpData();
+				$data["#help-button a"] = lang("HELP.HELP");
+				Resources::addJS("addHelp(".json_encode($data).");");
+			}
+			
 			if(!Core::is_ajax()) {
 				if(!_eregi('</html', $content)) {
 					if(!Permission::check("ADMIN")) {
@@ -307,6 +313,21 @@ class adminController extends Controller
 		*/
 		public function historyURL() {
 			return "admin/history";
+		}
+		
+		/**
+		 * help-texts.
+		*/
+		public function helpData() {
+			return array(
+				"#navi-toggle span" => array(
+					"text" 		=> lang("HELP.SHOW-MENU")
+				),
+				"#history"			=> array(
+					"text"		=> lang("HELP.HISTORY"),
+					"position"	=> "left"
+				)
+			);
 		}
 }
 

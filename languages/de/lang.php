@@ -162,8 +162,8 @@ $lang = array(
 	'site'											=> "Seite",
 	"text"                                         	=> "Text",
 	"MENUPOINT_TITLE"								=> "Navigations-Titel",
-	"MENUPOINT_TITLE_INFO"							=> "Titel der Seite in den Navigations-Ebenen",
-	"WINDOW_TITLE"									=> "Titel des Browser-Fensters",
+	"MENUPOINT_TITLE_INFO"							=> "Titel der Seite im Menü.",
+	"WINDOW_TITLE"									=> "Titel des Browser-Fensters.",
 	"WINDOW_TITLE_INFO"								=> "Leer lassen, um Standard-Titel zu verwenden",
 	"OVERVIEW"                                     	=> "&Uuml;bersicht",
 	"own_css"                                      	=> "Eigenes CSS (F&uuml;r Profis)",
@@ -341,9 +341,7 @@ $lang = array(
 	/* infos for settings */
 	"registercode_info"								=> "Gäste werden vor der Registrierung nach diesem Code gefragt. Sie können dieses Feld leer lassen, um die Abfrage zu deaktivieren.",
 	"gzip_info"										=> "G-Zip hilft Webseiten-Bandbreite zu sparen und beschleunigt die Ladezeit, jedoch benötigt der Server dann mehr Leistung.",
-	"keywords_info"									=> "Schlagwörter helfen Suchmaschinen zu entscheiden, unter welchen Wörtern Sie gefunden werden wollen.",
-	"description_info"								=> "Eine kleine Beschreibung Ihrer Seite.",
-	"livecounter_info"								=> "Der Echtzeit-Besucherzähler zeigt Ihnen, wie viele Besucher aktuell auf der Seite sind. Die Webseite lädt jedoch etwas langsamer, da der Zähler mehr Leistung benötigt.",
+	"description_info"								=> "Die Beschreibung wird von Suchmaschinen benutzt, um den Inhalt Ihrer Seite für Nutzer klarer zu machen.",
 	"register_enabled_info"							=> "Ermöglicht es Gästen sich zu registrieren",
 	"register_require_email_info"					=> "Es wird bei der Registrierung eine Bestätigungs-E-Mail gesendet, um die E-Mail-Adresse zu validieren.",
 	"sitestatus_info"								=> "Wenn sich die Seite im Wartungsmodus befindet, kann Sie nur von Mitgliedern angezeigt werden, die auch die Administration aufrufen können. Sie können diese Funktion z.B. verwenden, wenn Sie Wartungsarbeiten durchführen.",
@@ -615,4 +613,11 @@ $lang = array(
     "EDITOR"					=> "Editor",
     "EDITOR_TOGGLE"             => "Editor an/aus",
 	"JS_DISABLE_EDITOR"        	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
+	
+	"HELP.SHOW-MENU"			=> "Klicken, um das Menü anzuzeigen.",
+	"HELP.ADD-NEW-PAGE"			=> "Neue Seite erstellen",
+	"HELP.HISTORY"				=> "In der Änderungshistorie sehen Sie, was in letzter Zeit auf der Seite geändert wurde.",
+	"HELP.HIERARCHY_OPEN"		=> "Klicken, um Baum auszuklappen.",
+	"HELP.PAGES_SORT"			=> "Ziehen, um Seiten umzusortieren.",
+	"HELP.HELP"					=> "Hilfe ein/ausblenden"
 );

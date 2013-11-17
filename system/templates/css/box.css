@@ -234,63 +234,71 @@
 		.arrow {
 			border: 1em solid @color-yellow;
 			position: absolute;
+			display: none;
 		}
 		
 		.content {
 			background: @color-yellow;
-			padding: 1em;
+			padding: 0.75em;
 			color: @color-brown;
 		}
 	}
+	
+	pointer-events:none;
+	opacity: 0.9;
 }
 
-.help-box.position-top {
+.help-box.position-bottom {
 		
 	padding-top: 1em;
 	
 	.arrow {
 		border-color: transparent transparent @color-yellow  transparent;
 		left: 50%;
-		margin-left: -.5em;
+		margin-left: -1em;
 		top: -2em;
+		display: block;
 	}
 }
 
-.help-box.position-bottom {
+.help-box.position-top {
 	padding-bottom: 1em;
 	
 	.arrow {
 		border-color: @color-yellow transparent transparent transparent;
 		border-bottom-width: 0;
 		
-		bottom: -2em;
+		bottom: -1em;
 		left: 50%;
-		margin-left: -.5em;
+		margin-left: -1em;
+		display: block;
 	}
 }
 
 .help-box.position-left { 
-	padding-left: 1em;
-	
-	.arrow {
-		border-color: transparent @color-yellow transparent transparent;
-		border-right-width: 0;
-		
-		left: -2em;
-		top: 50%;
-		margin-top: -.5em;
-	}
-}
-
-.help-box.position-right {
 	padding-right: 1em;
 	
 	.arrow {
 		border-color: transparent transparent transparent @color-yellow;
+		border-right-width: 0;
+		
+		right: -1em;
+		top: 50%;
+		margin-top: -1em;
+		display: block;
+	}
+}
+
+.help-box.position-right {
+	padding-left: 1em;
+	
+	.arrow {
+		border-color: transparent @color-yellow transparent transparent;
 		border-left-width: 0;
 		
-		right: -2em;
+		left: -1em;
 		top: 50%;
-		margin-top: -.5em;
+		margin-top: -1em;
+		display: block;
 	}
 }

@@ -19,7 +19,7 @@
             }
         }
         
-        renderHelp();
+        $(renderHelp);
     };
     
     w.renderHelp = function() {
@@ -36,9 +36,15 @@
             
             if(!shown) {
 	            box.css("display", "none");
+            } else {
+	            box.css("display", "block");
             }
             
             if(s.length == 1) {
+            	if(!s.is(":visible")) {
+	            	box.css("display", "none");
+	            	continue;
+            	}
                 // get position
                 
                 if(data.position === undefined) {
@@ -60,13 +66,14 @@
                     }
     
                     // validate
-                    if(position == "bottom") {
-                        if((elemtop - this.dropdown.height() - 2) < -10)
-                            position = "top";
+                    if(position == "top") {
+                        if((elemtop - box.height() - 2) < -10)
+                            position = "bottom";
                     }
                 } else {
                     position = data.position;
                 }
+                
                 var display = box.css("display");
                 box.css("display", "block");
                 
@@ -76,54 +83,79 @@
                 elemleft = s.offset().left,
                 elemWidth = s.outerWidth(true),
                 elemHeight = s.outerHeight(true),
-                positionTop = 0, 
-                positionLeft = 0;
+                positionTop = "auto", 
+                positionLeft = "auto",
+                positionRight = "auto",
+                positionBottom = "auto",
+                _position = "absolute";
+                
                 
                 box.css("display", display);
                 
                 box.removeClass("position-left").removeClass("position-top").removeClass("position-bottom").removeClass("position-right").addClass("position-" + position);
                 
+                // reset
+                box.find(".arrow").css({left: "", right: "", top: "", bottom: ""});
+                
                 switch(position) {
-                    case "top":
+                    case "bottom":
                     case "center":
                         positionTop = elemtop + elemHeight;
                         positionLeft = elemleft + elemWidth / 2 - boxWidth / 2 + 4;
+                        
+                        if(positionLeft < 0) {
+	                        positionLeft = 0;
+	                        box.find(".arrow").css("left", 5);
+                        }
                     break;
                     
-                    case "left":
+                    case "right":
                         positionLeft = elemleft + elemWidth;
                         positionTop = elemtop + elemHeight / 2 - boxHeight / 2;
                     break;
                     
-                    case "right":
+                    case "left":
                         positionLeft = elemleft - boxWidth;
                         positionTop = elemtop + elemHeight / 2 - boxHeight / 2;
                     break;
                     
-                    case "bottom":
+                    case "top":
                         positionTop = elemtop - boxWidth;
                         positionLeft = elemleft + elemWidth / 2 - boxWidth / 2 - 4;
+                    break;
+                    case "fixed":
+                    	_position = "fixed";
+                    	
+                    	if(data.top !== undefined)
+                    		positionTop = data.top;
+                    		
+                    	if(data.left !== undefined)
+                    		positionLeft = data.left;
+                    		
+                    	if(data.bottom !== undefined)
+                    		positionBottom = data.bottom;
+                    	
+                    	if(data.Right !== undefined)
+                    		positionRight = data.right;
                     break;
                 }
                 
                 box.css({
-                    position: "absolute",
+                    position: _position,
                     top: positionTop,
-                    left: positionLeft
+                    left: positionLeft,
+                    right: positionRight,
+                    bottom: positionBottom
                 });
                 
-                if(data.autoHide !== false) {
-	                s.click(function(){
-		               	 box.fadeOut("fast");
-	                });
-                }
+                
             }
         }
     };
     
     w.showHelp = function() {
-    	renderHelp();
         $(".help-box").fadeIn("fast");
+        $(renderHelp);
         shown = true;
     };
     
@@ -133,12 +165,6 @@
     };
     
     $(function(){
-       $(window).resize(function(){
-           renderHelp();
-       });
-       
-       $(window).scroll(function(){
-           renderHelp();
-       });
+       $(window).on("resize scroll updatehtml", renderHelp);
     });
 })(jQuery);

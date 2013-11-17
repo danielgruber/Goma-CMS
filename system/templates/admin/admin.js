@@ -50,10 +50,6 @@ $(function() {
 		$(this).parent().find("ul").clearQueue().stop().slideToggle(100);
 		return false;
 	});
-
-	addHelp({
-		"#navi-toggle .title" : "Click to get the menu"
-	});
 	
 	if(getCookie("help") == 2) {
 		$("#help-button").removeClass("active");

@@ -337,6 +337,9 @@ if (goma.ui === undefined) {
 							goma.ui.setProgress(100);
 						}
 						goma.ui.updateFlexBoxes();
+						
+						var event = jQuery.Event( "updatehtml" );
+						$(window).trigger(event);
 					}).fail(deferred.reject);
 				}).fail(function(a){
 					node.addClass("failed").removeClass("loading");
