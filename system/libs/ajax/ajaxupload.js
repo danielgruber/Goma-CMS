@@ -483,7 +483,6 @@ AjaxUpload.prototype = {
 		console.log(this.allowed_types);
 		
 		var regexp = new RegExp("\.("+this.allowed_types.join("|")+")$", "i");
-		alert(regexp);
 		return name.match(regexp);
 	},
 	

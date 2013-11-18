@@ -5,7 +5,7 @@
 		<title>{$_cms_ptitle} <% IF $title %> - $title <% ELSE %> - {$_lang_administration} <% END %></title>
 		
 		<!-- some css -->
-		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+		<% INCLUDE_CSS_MAIN "admin/style-front.css" %>
 		<% INCLUDE_CSS_MAIN "jqueryui/theme.css" %>
 		
 		<% headerHTML() %>
@@ -13,18 +13,17 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 	</head>
 	<body>
-		<div id="wrapper_logout">
-			<% IF NOT $content %>
-				<div class="wrapper_inner wrapper_inner_login">
-			<% ELSE %>
-				<div class="wrapper_inner">
-			<% END %>
-				<div class="logo_wrapper">
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
 					<div class="beside_logo">
 						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
 					</div>
-					<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
+					<a href="{BASE_SCRIPT}admin{URLEND}"><img id="logo" src="system/templates/admin/images/logo.png" data-retina="system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
+			</div>
+			
+			<div id="wrapper" class="content_wrapper">
 				<div class="header">
 					<% IF $content %>
 						<h1><a href="/">{$_cms_ptitle} - <% lang("administration", "Admin-Panel") %></a></h1>
@@ -68,6 +67,13 @@
 						
 					<% END %>
 					
+				</div>
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a target="_blank" href="http://goma-cms.org">Goma</a></div>
 				</div>
 			</div>
 		</div>

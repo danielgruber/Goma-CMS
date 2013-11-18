@@ -356,7 +356,8 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	 * 
 	*/
 	public function can() {
-		return call_user_func_array(array($this->first(), "can"), func_get_args());
+		$args = func_get_args();
+		return call_user_func_array(array($this->first(), "can"), $args);
 	}
 	
 	/**
