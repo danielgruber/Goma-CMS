@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 17.05.2013
+  * last modified: 19.11.2013
 */
 
 if(typeof goma.AddOnStore == "undefined") {
@@ -31,6 +31,10 @@ if(typeof goma.AddOnStore == "undefined") {
 			var ReactToMessage = function(e) {
 				gloader.load("json");
 				
+				if(e.origin != "https://goma-cms.org") {
+					return false;
+				}
+				
 				try {
 					var data = JSON.parse(e.data);
 					switch(data.action) {
@@ -56,8 +60,9 @@ if(typeof goma.AddOnStore == "undefined") {
 							}
 						break;
 					}
-				} catch(e) {
-					alert(e);
+				} catch(err) {
+					console.log(e);
+					console.log && console.log(err);
 				}
 			}
 			

@@ -194,6 +194,9 @@ h1, h2, h3 {
 							display: inline-block;
 							color: @color-action;
 							text-align: center;
+							max-width: 6.25em;
+							text-overflow: ellipsis;
+							overflow: hidden;
 						}
 					}
 					

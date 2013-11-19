@@ -1569,7 +1569,7 @@ class GFS_Package_installer extends GFS {
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
 		$code .= 'if(!class_exists("Convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
-		$code .= '$gfs = new GFS_Package_Installer('.var_export($this->file, true).');';
+		$code .= 'try { $gfs = new GFS_Package_Installer('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">location.reload();</script> An Error occurred. Please <a href=\"\">Reload</a>"; }';
 		$code .= '$gfs->unpack('.var_export($destination, true).');';
 		FileSystem::write(ROOT . $file, $code);
 		return $file;
@@ -1852,7 +1852,7 @@ class GFS_Package_Creator extends GFS {
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
 		$code .= 'if(!class_exists("convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
-		$code .= '$gfs = new GFS_Package_Creator('.var_export($this->file, true).');';
+		$code .= 'try { $gfs = new GFS_Package_Creator('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">location.reload();</script> An Error occurred. Please <a href=\"\">Reload</a>"; }';
 		$code .= '$gfs->commit(__FILE__, '.var_export($index, true).');';
 		FileSystem::write(ROOT . $file, $code);
 		return $file;
