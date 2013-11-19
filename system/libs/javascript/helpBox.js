@@ -155,8 +155,9 @@
     
     w.showHelp = function() {
         $(".help-box").fadeIn("fast");
-        $(renderHelp);
         shown = true;
+        $(renderHelp);
+        
     };
     
     w.hideHelp = function() {

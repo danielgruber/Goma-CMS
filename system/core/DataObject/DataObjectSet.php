@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.2
+ * @version     1.5.3
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1235,7 +1235,11 @@ class DataObjectSet extends DataSet {
 	 *@param string $field
 	*/
 	public function Max($field) {
-		$data = $this->dataobject->getAggregate($this->version, 'max("'.convert::raw2sql($field).'") as max', $this->filter, array(), $this->limit, $this->join, $this->search);
+		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
+			$field = $this->dataobject->table() . "." . $field;
+		}
+		
+		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max', $this->filter, array(), $this->limit, $this->join, $this->search);
 		
 		if(isset($data[0]["max"])) {	
 			return $data[0]["max"];
@@ -1253,6 +1257,12 @@ class DataObjectSet extends DataSet {
 	 *@param string $field
 	*/
 	public function Min($field) {
+		
+		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
+			$field = $this->dataobject->table() . "." . $field;
+		}
+		
+		
 		$data = $this->dataobject->getAggregate($this->version, 'min("'.convert::raw2sql($field).'") as min', $this->filter, array(), $this->limit, $this->join, $this->search);
 		
 		if(isset($data[0]["min"])) {	

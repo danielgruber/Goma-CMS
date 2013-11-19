@@ -441,6 +441,9 @@ class contentAdmin extends LeftAndMain
 				"autoHide"	=> false,
 				"bottom"	=> "1em",
 				"left"		=> "0.5em"
+			),
+			"#visit_webpage"		=> array(
+				"text"		=> lang("PREVIEW")
 			)
 		);
 	}
