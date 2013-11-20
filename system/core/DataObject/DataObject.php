@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.14
+ * @version     4.7.15
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -2893,13 +2893,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					// if we get as normal, so just published records
 					if ($version === null || $version == "published") {
 						$query->data["includedVersionTable"] = true;
-						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.publishedid = ".$baseTable.".id");
+						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.publishedid = ".$baseTable.".id AND ".$baseTable."_state.id = ".$baseTable.".recordid");
 						$query->db_fields["id"] = $baseTable . "_state";
 					
 					// if we use state mode
 					} else if ($version == "state") {
 						$query->data["includedVersionTable"] = true;
-						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.stateid = ".$baseTable.".id");
+						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.stateid = ".$baseTable.".id AND ".$baseTable."_state.id = ".$baseTable.".recordid");
 						$query->db_fields["id"] = $baseTable . "_state";
 					
 					// if we prefer specific versions
