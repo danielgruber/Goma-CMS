@@ -1,20 +1,22 @@
 <?php defined("IN_GOMA") OR die();
 
 /**
- * Form-Field to select a specific time.
+ * Date-Field for SQL-Date.
  *
  * @package		Goma\Core\Model
- * @version		1.1
+ * @version		1.5
  */
-class TimeField extends FormField
+class DateField extends FormField
 {
 		/**
-		 *@name __construct
-		 *@param string -name
-		 *@param string - title
-		 *@param string - value
-		 *@param array - between: key 0 for start and key 1 for end
-		 *@param object - form
+		 * generates this field.
+		 *
+		 * @name 	__construct
+		 * @param 	string $name name
+		 * @param 	string $title title
+		 * @param 	string $value value
+		 * @param 	array $between key 0 for start and key 1 for end and key 2 indicates whether to allow the values given
+		 * @param 	object $form
 		*/
 		public function __construct($name, $title = null, $value = null, $between = null, $form = null)
 		{
@@ -23,7 +25,7 @@ class TimeField extends FormField
 		}
 		
 		/**
-		 * creates the field
+		 * creates the field.
 		 *
 		 *@name createNode
 		 *@access public
@@ -31,7 +33,7 @@ class TimeField extends FormField
 		public function createNode() {
 			$node = parent::createNode();
 			$node->type = "text";
-			$node->addClass("timepicker");
+			$node->addClass("datepicker");
 			return $node;
 		}
 		
@@ -42,13 +44,15 @@ class TimeField extends FormField
 		*/
 		public function validate($value) {
 			if (($timestamp = strtotime($value)) === false) {
-			    return lang("no_valid_time", "No valid timestamp!");
+			    return lang("no_valid_date", "No valid date.");
 			} else {
 				if($this->between && is_array($this->between)) {
 					$between = array_values($this->between);
 					$start = strtotime($between[0]);
 					$end = strtotime($between[1]);
-					if($start < $timestamp && $timestamp < $end) {
+					if((!isset($between[2]) || $between[2] === false) && $start < $timestamp && $timestamp < $end) {
+						return true;
+					} if(isset($between[2]) && $between[2] === true && $start <= $timestamp && $timestamp <= $end) { 
 						return true;
 					} else {
 						$err = lang("time_not_in_range", "The given time is not between the range \$start and \$end.");
@@ -66,16 +70,10 @@ class TimeField extends FormField
 		 * render JavaScript
 		*/
 		public function JS() {
-			Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.js");
-			Resources::add("system/libs/thirdparty/ui-timepicker/jquery.ui.timepicker.css");
-			$regional = "";
-			foreach(i18n::getLangCodes(Core::$lang) as $code) {
-				if(file_exists("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-".$code.".js")) {
-					Resources::add("system/libs/thirdparty/ui-timepicker/i18n/jquery.ui.timepicker-".$code.".js");
-					$regional = $code;
-					break;
-				}
-			}
-			return '$(function(){$("#'.$this->ID().'").timepicker({regional: '.var_export($regional, true).'});});';
+			Resources::add("system/libs/javascript/ui/datepicker.js");
+			Resources::add("system/libs/javascript/ui/datepicker.i18n.js");
+			return '$(function(){
+			if($.datepicker.regional["'.Core::$lang.'"] !== undefined) { $.datepicker.setDefaults( $.datepicker.regional[ "'.Core::$lang.'" ] ); }
+			$("#'.$this->ID().'").datepicker();});';
 		}
 }

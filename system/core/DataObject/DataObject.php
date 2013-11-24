@@ -1572,6 +1572,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$arr["last_modified"] = NOW;
 			}
 			
+			// casting
+			foreach($arr as $field => $val) {
+				$casting = $this->casting();
+				if(isset($casting[$field])) {
+					$object = DBField::getObjectByCasting($casting[$field], $field, $val);
+					$arr[$field] = $object->raw();
+				}
+			}
+			
 			return $arr;
 	}
 	
@@ -4177,9 +4186,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." = 0 OR ". $data["extfield"] ." = 0";
 				if (SQL::Query($sql)) {
 					if (SQL::affected_rows() > 0)
-						$log .= 'Clean-Up Many-Many-Table '.$data["table"].'' . "\n";
+						$log .= 'Clean-Up Many-Many-Table '.$data["table"]  . "\n";
 				} else {
-					$log .= 'Failed to clean-up Many-Many-Table '.$data["table"].'' . "\n";
+					$log .= 'Failed to clean-up Many-Many-Table '.$data["table"]. "\n";
 				}
 			}
 		}
@@ -4196,9 +4205,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		if (strtolower(get_parent_class($class)) == "dataobject") {
 			return array(	
 					'id'			=> 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
-					'last_modified' => 'date()',
+					'last_modified' => 'DateTime()',
 					'class_name' 	=> 'enum("'.implode('","', array_merge(Classinfo::getChildren($class), array($class))).'")',
-					"created"		=> "date()"
+					"created"		=> "DateTime()"
 				);
 		} else {
 			return array(	

@@ -52,12 +52,12 @@ class settingsAdmin extends adminItem
 		 *@name submit_form
 		*/
 		public function submit_form($data, $form, $model = null) {
-			if(isset($data["lang"], $data["status"], $data["timezone"], $data["date_format"])) {
+			if(isset($data["lang"], $data["status"], $data["timezone"], $data["date_format_date"])) {
 				if(!file_exists(ROOT . LANGUAGE_DIRECTORY . $data["lang"])) {
 					throwError(6, "Invalid-Error", "Selected language not existing!");
 				}
 				$status = (SITE_MODE == STATUS_DISABLED) ? STATUS_DISABLED : $data["status"]; 
-				writeProjectConfig(array('lang' => $data["lang"], "status" => $status, "timezone" => $data["timezone"], "date_format" => $data["date_format"]));
+				writeProjectConfig(array('lang' => $data["lang"], "status" => $status, "timezone" => $data["timezone"], "date_format_date" => $data["date_format_date"], "date_format_time" => $data["date_format_time"]));
 			} else {
 				throwError(6, "Invalid-Error", "Too less keys in data to write settings.");
 			}

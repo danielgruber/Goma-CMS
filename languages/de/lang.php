@@ -283,6 +283,7 @@ $lang = array(
 	"unload_lang_end"								=> "\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.",
 	"unload_not_saved"								=> "Vorsicht: Die Änderungen wurden noch nicht gespeichert.",
 	"date_format"									=> "Datumsformat",
+	"time_format"									=> "Zeitformat",
 	"timezone"										=> "Zeitzone",
 	"errorpage"										=> "Fehlerseite",
 	"errorcode"										=> "Fehlercode",
@@ -572,7 +573,8 @@ $lang = array(
 	"toggle_navigation"		=> "Navigation umschalten",
 	"toggle_sidebar"		=> "Seitenleiste umschalten",
 	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
-	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit.",
+	"no_valid_time"			=> "Die eingegebene Zeit ist nicht im richtigen Format.",
+	"no_valid_date"			=> "Das angegebene Datum ist nicht im richtigen Format.",
 	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",
 	
 	"error_disk_space"		=> "Es ist nicht genügend freier Speicherplatz auf dem Webserver verfügbar.",

@@ -1150,6 +1150,12 @@ ul.list-view li a img {
 
 /* on small touch devices fall back to non-fixed-bars. */
 @media only screen and (min-width: 45em) {
+	
+	#adminPanel #head.show-dropdown .dropdown #sidebar_head {
+		position: absolute;
+		top: -0.125em;
+	}
+	
 	#adminPanel #head {
 		
 		.dropdown {

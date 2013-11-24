@@ -159,7 +159,8 @@ class Newsettings extends DataObject implements HistoryData {
 		$this->getFormFromDB($general);
 		$general->add(new langselect('lang',lang("lang"),PROJECT_LANG));
 		$general->add(new select("timezone",lang("timezone"), ArrayLib::key_value(i18n::$timezones) ,Core::getCMSVar("TIMEZONE")));
-		$general->add($date_format = new Select("date_format", lang("date_format"), $this->generateDate(), DATE_FORMAT));			
+		$general->add($date_format = new Select("date_format_date", lang("date_format"), $this->generateDate(), DATE_FORMAT_DATE));
+		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));			
 						
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => lang("SITE_ACTIVE"), STATUS_MAINTANANCE => lang("SITE_MAINTENANCE")), SITE_MODE));
 		if(STATUS_DISABLED)
@@ -184,7 +185,7 @@ class Newsettings extends DataObject implements HistoryData {
 	}
 	
 	/**
-	 * generates the date-formats
+	 * generates date-formats
 	 *
 	 *@name generateDate
 	 *@access public
@@ -192,6 +193,20 @@ class Newsettings extends DataObject implements HistoryData {
 	public function generateDate() {
 		$formats = array();
 		foreach(i18n::$date_formats as $format) {
+			$formats[$format] = goma_date($format);
+		}
+		return $formats;
+	}
+	
+	/**
+	 * generates time-formats
+	 *
+	 *@name generateTime
+	 *@access public
+	*/
+	public function generateTime() {
+		$formats = array();
+		foreach(i18n::$time_formats as $format) {
 			$formats[$format] = goma_date($format);
 		}
 		return $formats;

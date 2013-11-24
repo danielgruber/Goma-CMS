@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6
+ * @version     2.6.1
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -396,7 +396,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->edit_permissionid = $perm->id;
-				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
 			return $perm;
@@ -460,7 +460,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->publish_permissionid = $perm->id;
-				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
 			return $perm;

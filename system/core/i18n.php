@@ -49,7 +49,9 @@ class i18n extends Object {
 	 * date-formats
 	 *
 	 */
-	public static $date_formats = array("d.m.Y - H:i", "d-m-Y H:i", "F j, Y, g:i a", "F jS, Y, g:i a", "Y-m-d H:i");
+	public static $date_formats = array("d.m.Y", "d-m-Y", "F j, Y", "F jS Y", "Y-m-d");
+	
+	public static $time_formats = array("H:i", "g:i a", "g.i a", "H.i");
 
 	/**
 	 * inits i18n

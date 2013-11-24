@@ -282,7 +282,8 @@ $lang = array(
 	"unload_lang_start"								=> "Do you really wish to leave this page?\n\n",
 	"unload_lang_end"								=> "\n\nPress OK to continue or Cancel to stay in this page.",
 	"unload_not_saved"								=> "Attention: The modifications hasn\'t saved, yet.",
-	"date_format"									=> "Date-format",
+	"date_format"									=> "date format",
+	"time_format"									=> "time format"
 	"timezone"										=> "timezone",
 	"errorpage"										=> "errorpage",
 	"errorcode"										=> "errorcode",
@@ -574,6 +575,7 @@ $lang = array(
 	
 	"time_not_in_range"		=> "The time must be between \$start and \$end.",
 	"no_valid_time"			=> "The given time is not valid.",
+	"no_valid_date"			=> "The given date is not valid.",
 	
 	"mail_successful_sent"	=> "The mail was sent successfully.",
 	

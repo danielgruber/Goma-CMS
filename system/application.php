@@ -111,8 +111,8 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("GOMA_VERSION", "2.0b9");
-define("BUILD_VERSION", "087");
+define("GOMA_VERSION", "2.0b10");
+define("BUILD_VERSION", "088");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -381,7 +381,7 @@ function loadApplication($directory) {
 			$domaininfo['date_format_date'] = isset($domaininfo['date_format_date']) ? $domaininfo['date_format_date'] : "d.m.Y";
 			$domaininfo['date_format_time'] = isset($domaininfo['date_format_time']) ? $domaininfo['date_format_time'] : "H:i";
 			
-			define('DATE_FORMAT', $domaininfo['date_format']);
+			define('DATE_FORMAT', $domaininfo['date_format_date'] . " - " . $domaininfo['date_format_time']);
 			define('DATE_FORMAT_DATE', $domaininfo['date_format_date']);
 			define('DATE_FORMAT_TIME', $domaininfo['date_format_time']);
 			define("SITE_MODE", $domaininfo["status"]);

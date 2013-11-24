@@ -1,15 +1,11 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 01.05.2013
-  * $Version 1.4.7
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Base-Interface for all DB-Fields.
+ *
+ * @package		Goma\Core\Model
+ * @version		1.5
+ */
 interface DataBaseField {
 	/**
 	 * constructor
@@ -173,6 +169,7 @@ class DBField extends Object implements DataBaseField
 			$this->args = $args;
 			parent::__construct();
 	}
+	
 	/**
 	 * sets the value
 	 *@name setvalue
@@ -785,82 +782,6 @@ class TimeZone extends DBField {
 	public function formfield($title = null)
 	{
 			return new Select($this->name, $title, ArrayLib::key_value(i18n::$timezones), $this->value);
-	}
-}
-
-class DateSQLField extends DBField {
-	
-	/**
-	 * gets the field-type
-	 *
-	 *@name getFieldType
-	 *@access public
-	*/
-	static public function getFieldType($args = array()) {
-		return "int(30)";
-	}
-	
-	/**
-	 * default convert
-	*/
-	public function forTemplate() {
-		if(isset($this->args[0]))
-			return $this->date($this->args[0]);
-		else
-			return $this->date();
-	}
-	
-	/**
-	 * converts this with date
-	 *@name date
-	 *@access public
-	*/
-	public function date($format =	DATE_FORMAT)
-	{	
-		return goma_date($format, $this->value);
-	}
-	
-	/**
-	 * returns date as ago
-	 *
-	 *@name ago
-	 *@access public
-	*/
-	public function ago($fullSentence = true) {
-		if(NOW - $this->value < 60) {
-			return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . sprintf(lang("ago.seconds", "about %d seconds ago"), round(NOW - $this->value)) . '</span>';
-		} else if(NOW - $this->value < 90) {
-			return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . lang("ago.minute", "about one minute ago") . '</span>';
-		} else {
-			$diff = NOW - $this->value;
-			$diff = $diff / 60;
-			if($diff < 60) {
-				return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . sprintf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
-			} else {
-				$diff = round($diff / 60);
-				if($diff == 1) {
-					return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . lang("ago.hour", "about one hour ago") . '</span>';
-				} else {
-					if($diff < 24) {
-						return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
-					} else {
-						$diff = $diff / 24;
-						$diffRound = round($diff, 1);
-						if($diff <= 1.1) {
-							return '<span title="'.$this->forTemplate().'" class="ago-date" data-date="'.$this->value.'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff <= 7) {
-							$pre = ($fullSentence) ? lang("version_at") . " " : "";
-							return '<span title="'.$this->forTemplate().'" data-date="'.$this->value.'">' . $pre . sprintf(lang("ago.weekday", "%s at %s"), $this->date("l"), $this->date("H:i")) . '</span>';
-						} else {
-							if($fullSentence)
-								return lang("version_at") . " " . $this->forTemplate();
-							else
-								return $this->forTemplate();
-						}
-					}
-				}
-			}
-		}
 	}
 }
 

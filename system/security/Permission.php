@@ -207,7 +207,7 @@ class Permission extends DataObject
 							self::$perm_cache[$r] = $data->hasPermission();
 							$data->forModel = "permission";
 							if($data->type != "groups") {
-								$data->write(false, true, 2);
+								$data->write(false, true, 2, false, false);
 							}
 							return self::$perm_cache[$r];
 						} else {
@@ -231,7 +231,7 @@ class Permission extends DataObject
 								$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
 							
 							self::$perm_cache[$r] = $perm->hasPermission();
-							$perm->write(true, true, 2);
+							$perm->write(true, true, 2, false, false);
 							return self::$perm_cache[$r];
 						}
 					} else {
@@ -265,7 +265,7 @@ class Permission extends DataObject
 							$perm->name = $r;
 							$data->forModel = "permission";
 							self::$perm_cache[$r] = $perm->hasPermission();
-							$perm->write(true, true, 2);
+							$perm->write(true, true, 2, false, false);
 							return self::$perm_cache[$r];
 						}
 					}
@@ -274,7 +274,7 @@ class Permission extends DataObject
 					if(isset(self::$providedPermissions[$r]["default"]["type"]))
 						$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
 					
-					$perm->write(true, true, 2);
+					$perm->write(true, true, 2, false, false);
 					
 					return $perm;
 				}

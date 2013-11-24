@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version 1.0.3
+ * @version 1.0.4
  */
 
 defined("IN_GOMA") OR die();
@@ -469,7 +469,8 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	} else {
 		$defaults = array(
 			"status" => 1,
-			"date_format" => "d.m.Y - H:i",
+			"date_format_date" => "d.m.Y",
+			"date_format_time"	=> " H:i",
 			"timezone" => DEFAULT_TIMEZONE,
 			"lang" => DEFAULT_LANG
 		);
@@ -478,7 +479,13 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	$new = array_merge($defaults, $data);
 	$info = array();
 	$info["status"] = $new["status"];
-	$info["date_format"] = $new["date_format"];
+	
+	if(isset($new["date_format_date"]))
+		$info["date_format_date"] = $new["date_format_date"];
+		
+	if(isset( $new["date_format_time"]))
+		$info["date_format_time"] = $new["date_format_time"];
+	
 	$info["timezone"] = $new["timezone"];
 	$info["lang"] = $new["lang"];
 
