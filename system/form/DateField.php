@@ -4,7 +4,7 @@
  * Date-Field for SQL-Date.
  *
  * @package		Goma\Core\Model
- * @version		1.5
+ * @version		1.5.1
  */
 class DateField extends FormField
 {
@@ -48,16 +48,27 @@ class DateField extends FormField
 			} else {
 				if($this->between && is_array($this->between)) {
 					$between = array_values($this->between);
-					$start = strtotime($between[0]);
-					$end = strtotime($between[1]);
+
+					if(!preg_match("/^[0-9]+$/", trim($between[0]))) {
+				    	$start = strtotime($between[0]);
+				    } else {
+				        $start = $between[0];
+				    }
+				    
+				    if(!preg_match("/^[0-9]+$/", trim($between[1]))) {
+				    	$end = strtotime($between[1]);
+				    } else {
+				        $end = $between[1];
+				    }
+				    
 					if((!isset($between[2]) || $between[2] === false) && $start < $timestamp && $timestamp < $end) {
 						return true;
 					} if(isset($between[2]) && $between[2] === true && $start <= $timestamp && $timestamp <= $end) { 
 						return true;
 					} else {
 						$err = lang("time_not_in_range", "The given time is not between the range \$start and \$end.");
-						$err = str_replace('$start', date("H:i:s", $start), $err);
-						$err = str_replace('$end', date("H:i:s", $end), $err);
+						$err = str_replace('$start', date(DATE_FORMAT_DATE, $start), $err);
+						$err = str_replace('$end', date(DATE_FORMAT_DATE, $end), $err);
 						return $err;
 					}
 				}
