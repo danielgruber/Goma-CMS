@@ -1577,7 +1577,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$casting = $this->casting();
 				if(isset($casting[$field])) {
 					$object = DBField::getObjectByCasting($casting[$field], $field, $val);
-					$arr[$field] = $object->raw();
+					if(Object::method_exists($object, "forDB")) {
+						$arr[$field] = $object->forDB();
+					} else {
+						$arr[$field] = $object->raw();
+					}					
 				}
 			}
 			
@@ -2418,22 +2422,33 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		}
 		
 		$class = $has_many[$name];
-		$key = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
-		if ($key === false)
-		{
-			$c = $this->classname;
-			while($c = ClassInfo::getParentClass($c))
-			{
-				if ($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
-				{
-					break;
-				}
+		$inverse = null;
+		if(is_array($has_many[$name]) && isset($has_many[$name]["class"])) {
+			$class = $has_many[$name]["class"];
+			if(isset($has_many[$name]["inverse"]) && isset(ClassInfo::$class_info[$class]["has_one"][$has_many[$name]["inverse"]])) {
+				$inverse = $has_many[$name]["inverse"];
 			}
 		}
-
-		if ($key === false)
-		{
-				return false;
+		
+		if(!isset($inverse)) {
+			
+			$inverse = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
+			if ($key === false)
+			{
+				$c = $this->classname;
+				while($c = ClassInfo::getParentClass($c))
+				{
+					if ($inverse = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
+					{
+						break;
+					}
+				}
+			}
+	
+			if ($inverse === false)
+			{
+				throw new LogicException("No inverse has-one-relationship on '" . $class . "' found.");
+			}
 		}
 
 		$filter[$key . "id"] = $this["id"];
@@ -3481,6 +3496,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$this->controller = clone $controller;
 				$this->controller->model_inst = $this;
 				$this->controller->model = $this->classname;
+				$this->controller->request = null;
 				return $this->controller;
 			}
 			

@@ -105,7 +105,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "deletebtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
+			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
 		}
 		return false;
 	}

@@ -22,10 +22,11 @@ class TableFieldGlobalAction implements TableField_HTMLProvider, TableField_Acti
 		$this->name = $name;
 		$this->title = $title;
 		
-		if(is_callable($callback))
+		if(is_callable($callback)) {
 			$this->callback = $callback;
-		else
-			throwError(6, "Invalid Argument Error", '$callback must be a valid Argument for TableFieldGlobalAction::__construct.');
+		} else {
+			throw new InvalidArgumentException('$callback must be a valid Argument for TableFieldGlobalAction::__construct.');
+		}
 	}
 	
 	

@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 27.12.2012
-  * $Version 1.2.1
+  * last modified: 25.11.2013
+  * $Version 1.2.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -56,20 +56,20 @@ class NumberField extends FormField {
 	{
 		if($this->maxlength !== null) {
 			if(strlen($value) > $this->maxlength)
-				return lang("form_too_long") . '"' . $this->title . '"';
+				return lang("form_too_long") . '"' . $this->title . '" ';
 		}
 		
-		if(!is_int($value) || !_ereg('^[0-9\.\-\s\,]+$', $value)) {
+		if(!preg_match('/^[0-9\.\-\s\,]+$/', $value)) {
 			
-			return lang("form_no_number") . '"' . $this->title . '"';
+			return lang("form_no_number") . '"' . $this->title . '" ';
 		}
 		
 		if(isset($this->rangeStart) && $value < $this->rangeStart) {
-			return lang("form_number_wrong_area") . '"' . $this->title . '"';
+			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
 		
 		if(isset($this->rangeEnd) && $value > $this->rangeEnd) {
-			return lang("form_number_wrong_area") . '"' . $this->title . '"';
+			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
 		
 		return true;

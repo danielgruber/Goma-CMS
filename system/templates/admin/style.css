@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 08.10.2013
+ * last modified: 25.11.2013
  */
 
 @color-text: #222;
@@ -653,6 +653,17 @@ h1, h2, h3 {
 .button:hover {
 	background: @color-action;
 	color: #fff !important;
+}
+
+.button.no-border {
+	border: 1px solid transparent !important;
+	padding-left: 0;
+	padding-right: 0;
+	
+	&:hover {
+		color: darken(@color-action, 15%) !important;
+		background: transparent;
+	}
 }
 
 .button.red {

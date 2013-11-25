@@ -14,79 +14,97 @@
 	max-width: 100%;
 	overflow: auto;
 	border-bottom: 0;
-}
-.tablefield-table {
-	width: 100%;
-	border: 1px solid #bbb;
-	border-spacing: 0;
-}
-.tablefield-table fieldset, .tablefield-fieldset .tablefield-table fieldset {
-	margin: 0 !important;
-	padding: 0 !important;
-	border: 0 !important;
-}
-.tablefield-table fieldset legend {
-	display: none;
-}
-.tablefield-table fieldset .form_field {
-	margin: 0 !important;
-	padding: 0 !important;
-}
+	
+	.tablefield-table {
+		width: 100%;
+		border-spacing: 0;
+		margin: 1em 0 !important;
+		
+		.button {
+			border: 0 !important;
+			font-weight: bold;
+		}
+		
+		fieldset {
+			margin: 0 !important;
+			padding: 0 !important;
+			border: 0 !important;
+			
+			legend {
+				display: none;
+			}
+			
+			.form_field {
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+		}
+		
+		.filter-header {
+			
+			.button {
+			    background-color: transparent !important;
+			    border: 0 !important;
+			}
+			
+			
+			td {
+				border-bottom: 0.125em solid @system-tint;
+				filter: none;
+				-ms-filter: none;
+				
+				fieldset {
+					position: relative;
+					
+					.tablefield-button-filter, .tablefield-button-reset, .tablefield-button-resetFields {
+						input {
+							color: transparent !important;
+							font-size: 0;
+							height: 26px;
+							width: 26px;
+							background:  #eee url(images/loope.png) no-repeat 4px 4px;
+							filter: none;
+							-ms-filter: none;
+							border: 1px solid #c0c0c0;
+						}
+					}
+					
+					.tablefield-button-reset input, .tablefield-button-resetFields input {
+						background-image: url(images/delete.png);
+					}
+					
+					.tablefield-button-resetFields {
+						position: absolute;
+						right: 0.31em;
+						top: 0.18em;
+					}
+				}
+				
+				.form_field {
+					padding: 0;
+					margin: 0;
+					
+					label {
+						display: none;
+					}
+					
+					input[type=text] {
+						width: 99% !important;
+						margin: .25em .125em;
+						padding: .25em .5em;
+						background: #fff;
+						border: 1px solid #ddd;
+						min-width: 0 !important;
+						
+						border-radius: 0;
+						-webkit-border-radius: 0;
+					}
+				}
 
-/* headers */
-.tablefield-table thead tr td, .tablefield_pagination th {
-	background: #dfdfdf;
-}
-
-/* filter-header */
-.tablefield-table .filter-header td {
-	border-bottom: 1px solid #c5c5c5;
-	background: #ddd;
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .filter-header td fieldset {
-	position: relative;
-}
-.tablefield-table .filter-header .form_field {
-	margin: 0;
-	padding: 0;
-}
-.tablefield-table .filter-header .form_field label {
-	display: none;
-}
-.tablefield-table .filter-header .form_field input[type=text] {
-	width: 99% !important;
-	margin: 0.25em;
-	padding: 0.25em 0.5em;
-	background: #fff;
-	border: 1px solid #c0c0c0;
-	min-width: 0 !important;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
-	color: transparent !important;
-	font-size: 0;
-	height: 26px;
-	width: 26px;
-	background:  #eee url(images/loope.png) no-repeat 4px 4px;
-	filter: none;
-	-ms-filter: none;
-	border: 1px solid #c0c0c0;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
-	background-image: url(images/delete.png);
-}
-.tablefield-table .filter-header td fieldset {
-	position: relative;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-resetFields {
-	position: absolute;
-	right: 0.31em;
-	top: 0.18em;
-}
-.tablefield-table .filter-header .button {
-    background-color: transparent !important;
-    border: 0 !important;
+			}
+			
+		}
+	}		
 }
 
 /**
@@ -145,8 +163,7 @@
 	td {
 		font-weight: bold;
 		padding: 0.75em;
-		border-bottom: 1px solid #bbb;
-		border-right: 1px solid #bbb;
+		border-bottom: 1px solid @system-tint;
 		padding: 0;
 		margin: 0;
 		
@@ -242,18 +259,24 @@
 	font-style: italic;
 	text-align: center;
 }
-.tablefield-table .tablefield-editbutton input, .tablefield-table .tablefield-deletebutton input {
-	border: 0;
-	background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
-	filter: none;
-	-ms-filter: none;
-	color: transparent !important;
-	font-size: 0;
-	width: 16px;
-	height: 16px;
-	padding: 0;
-	margin: 0;
+.tablefield-table .tablefield-editbutton, .tablefield-table .tablefield-deletebutton {
+	margin-top: -0.25em;
+	display: inline-block;
+	
+	input {
+		border: 0;
+		background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
+		filter: none;
+		-ms-filter: none;
+		color: transparent !important;
+		font-size: 0;
+		width: 16px;
+		height: 16px;
+		padding: 0;
+		margin: 0;
+	}
 }
+
 .tablefield-table .tablefield-deletebutton input {
 	background-image: url(../../../images/icons/fatcow16/delete.png);
 }

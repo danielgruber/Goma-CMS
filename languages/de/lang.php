@@ -573,6 +573,7 @@ $lang = array(
 	"toggle_navigation"		=> "Navigation umschalten",
 	"toggle_sidebar"		=> "Seitenleiste umschalten",
 	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
+	"date_not_in_range"		=> "Das Datum muss zwischen dem \$start und dem \$end liegen.",
 	"no_valid_time"			=> "Die eingegebene Zeit ist nicht im richtigen Format.",
 	"no_valid_date"			=> "Das angegebene Datum ist nicht im richtigen Format.",
 	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",

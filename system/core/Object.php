@@ -697,5 +697,14 @@ abstract class Object {
 			Object::extend($class, $ext);
 		}
 	}
+	
+	
+	/**
+	 * deep cloning.
+	*/
+	public function deepClone() {
+		$c = unserialize(serialize($this));
+		return $c;
+	}
 
 }

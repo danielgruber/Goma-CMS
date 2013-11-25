@@ -77,7 +77,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 		$action->addExtraClass("tablefield-editbutton");
 		
 		$data = new ViewAccessableData();
-		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode(getRedirect());
+		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]);
 		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/editButton.html");
 	}
 	

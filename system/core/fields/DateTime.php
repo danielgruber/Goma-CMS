@@ -54,6 +54,21 @@ class DateTimeSQLField extends DBField {
 		return goma_date($format, $this->value);
 	}
 	
+	/**
+	 * returns raw-data.
+	*/
+	public function raw() {
+		return date(DATE_FORMAT, $this->value);
+	}
+	
+	/**
+	 * for db.
+	*/
+	public function forDB() {
+		return $this->value;
+	}
+	
+	
 	
 	/**
 	 * returns date as ago
@@ -139,6 +154,20 @@ class DateSQLField extends DateTimeSQLField {
 	public function formfield($title = null)
 	{
 			return new DateField($this->name, $title, date(DATE_FORMAT_DATE, $this->value));
+	}
+	
+	/**
+	 * returns raw-data.
+	*/
+	public function raw() {
+		return date(DATE_FORMAT_DATE, $this->value);
+	}
+	
+	/**
+	 * for db.
+	*/
+	public function forDB() {
+		return $this->value;
 	}
 	
 	/**

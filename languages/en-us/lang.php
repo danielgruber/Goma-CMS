@@ -574,6 +574,7 @@ $lang = array(
 	"toggle_sidebar"		=> "toggle sidebar",
 	
 	"time_not_in_range"		=> "The time must be between \$start and \$end.",
+	"date_not_in_range"		=> "The date must be in the range of \$start and \$end.",
 	"no_valid_time"			=> "The given time is not valid.",
 	"no_valid_date"			=> "The given date is not valid.",
 	

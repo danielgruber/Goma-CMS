@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.2.3
+ * @version		2.2.4
  */
 class Controller extends RequestHandler
 {		
@@ -501,14 +501,14 @@ class Controller extends RequestHandler
 					if($model) {
 						return $model->controller(clone $this)->edit();
 					} else {
-						throwError(6, "Data-Error", "No data found for ID ".$this->getParam("id"));
+						throw new InvalidArgumentException("No data found for ID ".$this->getParam("id");
 					}
 				} else {
 					log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
 					$this->redirectBack();
 				}
 			} else {
-				throwError(6, "Invalid Argument", "Controller::Edit should be called if you just have one Record or a given ID in URL.");
+				throw new InvalidArgumentException("Controller::Edit should be called if you just have one Record or a given ID in URL.");
 			}
 		}
 		

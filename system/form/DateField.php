@@ -66,7 +66,7 @@ class DateField extends FormField
 					} if(isset($between[2]) && $between[2] === true && $start <= $timestamp && $timestamp <= $end) { 
 						return true;
 					} else {
-						$err = lang("time_not_in_range", "The given time is not between the range \$start and \$end.");
+						$err = lang("date_not_in_range", "The given time is not between the range \$start and \$end.");
 						$err = str_replace('$start', date(DATE_FORMAT_DATE, $start), $err);
 						$err = str_replace('$end', date(DATE_FORMAT_DATE, $end), $err);
 						return $err;

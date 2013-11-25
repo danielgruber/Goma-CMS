@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.7
+ * @version     2.2.8
  */
 
 
@@ -116,14 +116,14 @@ var LaM_type_timeout;
 				var treewrapper = $(".leftandmaintable .LaM_tabs .treewrapper");
 				// find optimal scroll by position of active element
 				if(treewrapper.find(".marked").length > 0) {
-					var pos = treewrapper.find(".marked").position().top - treewrapper.position().top;
+					var pos = treewrapper.find(".marked").offset().top + treewrapper.find(".marked").outerHeight() - treewrapper.offset().top;
 					if(treewrapper.scrollTop() > pos) {
 						treewrapper.scrollTop(pos);
 					} else if(treewrapper.scrollTop() + treewrapper.height() < pos) {
-						treewrapper.scrollTop(pos);
+						treewrapper.scrollTop(pos - treewrapper.height() / 5);
 					}
 				}
-			}, 50);
+			}, 100);
 		};
 		
 		//! history

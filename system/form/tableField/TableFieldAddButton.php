@@ -62,7 +62,7 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "addbtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode(getRedirect()));
+			HTTPResponse::redirect($tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
 		}
 		return false;
 	}
