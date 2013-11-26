@@ -501,7 +501,7 @@ class Controller extends RequestHandler
 					if($model) {
 						return $model->controller(clone $this)->edit();
 					} else {
-						throw new InvalidArgumentException("No data found for ID ".$this->getParam("id");
+						throw new InvalidArgumentException("No data found for ID ".$this->getParam("id"));
 					}
 				} else {
 					log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
