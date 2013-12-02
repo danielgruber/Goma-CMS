@@ -4,7 +4,7 @@
  * Base-Class for saving Dates with times as a timestamp.
  *
  * @package		Goma\Core\Model
- * @version		1.5
+ * @version		1.5.1
  */
 class DateTimeSQLField extends DBField {
 	
@@ -52,6 +52,15 @@ class DateTimeSQLField extends DBField {
 	public function date($format =	DATE_FORMAT)
 	{	
 		return goma_date($format, $this->value);
+	}
+	
+	/**
+	 * returns date with format given.
+	 * 
+	 * @param String format
+	*/
+	public function dateWithFormat($format) {
+	    return $this->date($format);
 	}
 	
 	/**
@@ -203,6 +212,25 @@ class TimeSQLField extends DBField {
 	{
 			$value = date("H:i:s", strtotime(str_replace(".", ":", $value)));
 			parent::__construct($name, $value, $args);
+	}
+	
+	/**
+	 * converts this with date
+	 * 
+	 * @param String format optional
+	*/
+	public function date($format =	DATE_FORMAT)
+	{	
+		return goma_date($format, strtotime($this->value));
+	}
+	
+	/**
+	 * returns time with format given.
+	 * 
+	 * @param String format
+	*/
+	public function timeWithFormat($format) {
+	    return $this->date($format);
 	}
 	
 	/**
