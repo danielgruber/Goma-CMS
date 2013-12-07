@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 14.10.2013
-  * $Version 3.6
+  * last modified: 08.12.2013
+  * $Version 3.6.1
 */   
  
  
@@ -1655,8 +1655,12 @@ class tplCaller extends Object implements ArrayAccess
 		/**
 		 * returns addcontent
 		*/
-		public function addcontent() {
-			return addcontent::get();
+		public function addcontent($flush = false) {
+			$c = addcontent::get();
+			if($flush) {
+				addcontent::flush();
+			}
+			return $c;
 		}
         
         /**

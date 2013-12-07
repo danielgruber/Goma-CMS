@@ -93,5 +93,6 @@ class addcontent extends object
 		*/
 		public static function flush() {
 			unset($_SESSION['addcontent']);
+			self::$addcontent = "";
 		}
 }

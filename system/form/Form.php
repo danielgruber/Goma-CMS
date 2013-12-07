@@ -31,7 +31,7 @@ interface FormActionHandler {
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.2
+ * @version 2.3.3
  */
 class Form extends object {
 	/**
@@ -362,6 +362,16 @@ class Form extends object {
 	 *@access public
 	 */
 	public function render() {
+	
+		// just watch out for external-form.
+		if($this->controller->request && count($this->controller->request->url_parts) > 2 && strtolower($this->controller->request->url_parts[0]) == "forms" && strtolower($this->controller->request->url_parts[1]) == strtolower($this->name)) {
+			$request = $this->controller->request;
+			$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
+			$request->shift(3);
+			$externForm = new ExternalFormController();
+			Core::serve($externForm->handleRequest($request));
+		}
+	
 		Resources::add("form.css", "css");
 		if(isset($_POST["form_submit_" . $this->name()]) && session_store_exists("form_" . strtolower($this->name))) {
 			// check secret
@@ -984,7 +994,11 @@ class Form extends object {
 	 *@access public
 	 */
 	public function externalURL() {
-		return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
+		if(isset($this->controller->request)) {
+			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/" . $this->name;
+		} else {
+			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
+		}
 	}
 
 	/**
