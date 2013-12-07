@@ -1121,7 +1121,7 @@ if (window.loader === undefined) {
 			
 			// scroll fix
 			$(document).on("click", "a", function () {
-				if ($(this) && $(this).attr("href").substr(0,1) == "#") {
+				if ($(this).attr("href").substring(0,1) == "#") {
 					scrollToHash($(this).attr("href").substr(1));
 					return false;
 				} else if (typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
@@ -1133,7 +1133,7 @@ if (window.loader === undefined) {
 			// scroll to right position
 			if ($("#frontedbar").length == 1) {
 				if (location.hash != "") {
-					scrollToHash(location.hash.substr(1));
+					scrollToHash(location.hash.substring(1));
 				}
 			}
 			
