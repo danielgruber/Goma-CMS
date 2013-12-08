@@ -4,7 +4,7 @@
  * Base-Class for saving Dates with times as a timestamp.
  *
  * @package		Goma\Core\Model
- * @version		1.5.2
+ * @version		1.5.3
  */
 class DateTimeSQLField extends DBField {
 	
@@ -23,12 +23,13 @@ class DateTimeSQLField extends DBField {
 	*/
 	public function __construct($name, $value, $args = array())
 	{
-			
-			if(preg_match('/^[0-9]+$/', trim($value))) {
-				$value = trim($value);
-			} else {
-				$time = strtotime($value);
-				$value = $time;
+			if($value !== null) {
+				if(preg_match('/^[0-9]+$/', trim($value))) {
+					$value = trim($value);
+				} else {
+					$time = strtotime($value);
+					$value = $time;
+				}
 			}
 			
 			parent::__construct($name, $value, $args);
@@ -51,6 +52,9 @@ class DateTimeSQLField extends DBField {
 	*/
 	public function date($format =	DATE_FORMAT)
 	{	
+		if($this->value === null)
+			return null;
+		
 		return goma_date($format, $this->value);
 	}
 	
@@ -67,6 +71,9 @@ class DateTimeSQLField extends DBField {
 	 * returns raw-data.
 	*/
 	public function raw() {
+		if($this->value === null)
+			return null;
+		
 		return date(DATE_FORMAT, $this->value);
 	}
 	
@@ -143,13 +150,16 @@ class DateSQLField extends DateTimeSQLField {
 	*/
 	public function __construct($name, $value, $args = array())
 	{
-			if(preg_match("/^[0-9]+$/", trim($value))) {
-				$value = trim($value);
-			} else {
-				$time = strtotime($value);
-				$value = mktime(0,0,0, date("n", $time), date("j", $time), date("Y", $time));
+			if($value !== null) {
+				
+				if(preg_match("/^[0-9]+$/", trim($value))) {
+					$value = trim($value);
+				} else {
+					$time = strtotime($value);
+					$value = mktime(0,0,0, date("n", $time), date("j", $time), date("Y", $time));
+				}
 			}
-			
+
 			parent::__construct($name, $value, $args);
 	}
 	
@@ -169,6 +179,10 @@ class DateSQLField extends DateTimeSQLField {
 	 * returns raw-data.
 	*/
 	public function raw() {
+		if($this->value === null) {
+			return null;
+		}
+		
 		return date(DATE_FORMAT_DATE, $this->value);
 	}
 	
@@ -210,7 +224,10 @@ class TimeSQLField extends DBField {
 	*/
 	public function __construct($name, $value, $args = array())
 	{
-			$value = date("H:i:s", strtotime(str_replace(".", ":", $value)));
+			if($value !== null) {
+				$value = date("H:i:s", strtotime(str_replace(".", ":", $value)));	
+			}
+			
 			parent::__construct($name, $value, $args);
 	}
 	
@@ -221,6 +238,9 @@ class TimeSQLField extends DBField {
 	*/
 	public function date($format =	DATE_FORMAT)
 	{
+		if($this->value === null)
+			return null;
+			
 		return goma_date($format, strtotime($this->value));
 	}
 	
