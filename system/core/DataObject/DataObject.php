@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.15
+ * @version     4.7.17
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -841,6 +841,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	*/
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
 	{
+
 		if (!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
 		}
@@ -1053,7 +1054,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$many_many_data[$key] = $value;
 					unset($newdata[$key]);
 				}
-				unset($newdata[$key], $key, $value);
+				unset($key, $value);
 			}
 		}
 		
@@ -1108,29 +1109,69 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			unset($this->data[$key . "ids"]);
 		}
 		
-		// many-many
-		if ($this->ManyMany())
-			foreach($this->ManyMany() as $name => $table)
-			{
-					if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
-					{
-							$manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
-					}
-					
-					
-			}
+		$many_many = array_merge((array) $this->ManyMany(), (array) $this->BelongsManyMany());
 		
-		if ($this->BelongsManyMany())
-			foreach($this->BelongsManyMany() as $name => $table)
+		// many-many
+		if ($many_many) {
+			foreach($many_many as $name => $table)
 			{
+					
+					if(isset($this->data[$name]) && is_array($this->data[$name])) {
+
+						$manipulation["insert_many_" . $table] = array(
+								"command"	=> "insert",
+								"table_name"=> $many_many_tables[$name]["table"],
+								"fields"	=> array(
+									
+								),
+								"ignore"	=> true
+							);
+					
+						// prefetch version-ids.
+
+						$i = 0;
+						foreach($this->data[$name] as $id => $extraFields) {
+							
+							if(is_array($extraFields)) {
+								if(isset($extraFields["versionid"])) {
+									$id = $extraFields["versionid"];
+								} else {
+									$id = DataObject::get_by_id($table, $id)->versionid;
+								}
+								
+								$manipulation["insert_many_" . $table]["fields"][$i] = array(
+									$many_many_tables[$name]["field"] 	=> $this->versionid,
+									$many_many_tables[$name]["extfield"]=> $id
+								);
+								
+
+								foreach($extraFields as $field => $val) {
+								
+									if(isset($many_many_tables[$name]["extraFields"][$field])) {
+										$manipulation["insert_many_" . $table]["fields"][$i][$field] = $val;
+									}
+								}
+								$i++;
+							} else {
+								throw new Exception("Many-Many-Array for relationship '" . $name . "' corrupted.");
+							}
+						}
+						
+						unset($this->data[$name]);
+						unset($this->data[$name . "ids"]);
+					} else
 					
 					if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
 					{
-							$manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
+						$manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
 					}
 					
 					
+					
+					
 			}
+		}
+		
 		
 		// has-many
 		if ($this->hasMany())
@@ -1239,7 +1280,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$this->callExtending("onBeforeWriteData");
 		$this->onBeforeManipulate($manipulation, $b = "write");
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
-
 
 		self::$datacache[$this->baseClass] = array();
 
@@ -2433,7 +2473,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		if(!isset($inverse)) {
 			
 			$inverse = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
-			if ($key === false)
+			if ($inverse === false)
 			{
 				$c = $this->classname;
 				while($c = ClassInfo::getParentClass($c))
@@ -2451,9 +2491,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 		}
 
-		$filter[$key . "id"] = $this["id"];
+		$filter[$inverse . "id"] = $this["id"];
 		$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
-		$set->setRelationENV($name, $key . "id");
+		$set->setRelationENV($name, $inverse . "id");
 		
 		if ($this->queryVersion == "state") {
 			$set->setVersion("state");
