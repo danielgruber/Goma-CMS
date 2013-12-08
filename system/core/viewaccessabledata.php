@@ -36,6 +36,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @access public
 	 */
 	static $casting = array();
+	
+	/**
+	 * extended casting.
+	*/
+	public $extendedCasting = array();
 
 	/**
 	 * data is stored in this var.
@@ -854,7 +859,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		
 		if($value instanceof DBField) {
 			$value = $value->raw();
-			$this->casting[$var] = $value->classname;
+			$this->extendedCasting[$var] = $value->classname;
 		}
 		
 		if(is_array($this->data)) {
@@ -900,7 +905,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function casting() {
-		return isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : self::getStatic($this->classname, "casting");
+		$casting = isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : self::getStatic($this->classname, "casting");
+		
+		return array_merge($casting, $this->extendedCasting);
 	}
 
 	/**

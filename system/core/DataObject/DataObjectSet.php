@@ -2096,6 +2096,21 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	}
 	
 	/**
+	 * converts the item to the right format
+	 *
+	 *@name getConverted
+	 *@access protected
+	 *@param various - data
+	*/
+	public function getConverted($item) {
+	 	$item = parent::getConverted($item);
+	 	
+	 	$item->extendedCasting = array_merge($item->extendedCasting, $this->extraFields);
+	 	
+	 	return $item;
+	}
+	
+	/**
 	 * sets the variable join
 	 *
 	 *@name join
