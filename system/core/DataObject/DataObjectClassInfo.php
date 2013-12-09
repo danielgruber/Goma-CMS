@@ -1,14 +1,13 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 24.01.2013
-  * $Version 4.1.2
-*/
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined('IN_GOMA') OR die(); 
 
+
+/**
+  * @package    goma framework
+  * @link       http://goma-cms.org
+  * @license:   LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author     Goma-Team
+  * @version 4.1.4
+*/
 class DataObjectClassInfo extends Extension
 {
 		/**
@@ -152,12 +151,14 @@ class DataObjectClassInfo extends Extension
 						// many-many
 						foreach($many_many as $key => $_class) {
 							$table = ClassInfo::$class_info[$class]["many_many_tables"][$key]["table"];
-							$many_many_tables_belongs = Object::instance($_class)->generateManyManyTables();
-							
-							foreach($many_many_tables_belongs as $data) {
-								if($data["table"] == $table) {
-									continue 2;
-								}
+							if(!ClassInfo::isAbstract($_class)) {
+    							$many_many_tables_belongs = Object::instance($_class)->generateManyManyTables();
+    							
+    							foreach($many_many_tables_belongs as $data) {
+    								if($data["table"] == $table) {
+    									continue 2;
+    								}
+    							}
 							}
 							
 							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$key] = array(
