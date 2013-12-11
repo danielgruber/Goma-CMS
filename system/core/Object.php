@@ -14,7 +14,7 @@ interface ExtensionModel {
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Framework
- * @version 3.2.2
+ * @version 3.3
  */
 abstract class Object {
 
@@ -371,13 +371,11 @@ abstract class Object {
 
 			// error catching
 			if($class == "") {
-				$trace = debug_backtrace();
-				throwError(6, 'Class-Initiate-Error', 'Cannot initiate empty Class in ' . $trace[0]["file"] . ' on line ' . $trace[0]["line"] . '');
+				throw new LogicException("Cannot initiate empty Class");
 			}
 
 			if(ClassInfo::isAbstract($class)) {
-				$trace = debug_backtrace();
-				throwError(6, 'Class-Initiate-Error', 'Cannot initiate abstract Class in ' . $trace[0]["file"] . ' on line ' . $trace[0]["line"] . '');
+				throw new LogicException("Cannot initiate empty Class");
 			}
 
 			// generate Class
@@ -385,7 +383,7 @@ abstract class Object {
 				self::$cache_singleton_classes[$class] = new $class;
 				$class = clone self::$cache_singleton_classes[$class];
 			} else {
-				throwError(6, 'PHP-Error', "Class " . $class . " not found in " . __FILE__ . " on line " . __LINE__ . "");
+				throw new LogicException("Cannot initiate empty Class");
 			}
 		}
 
@@ -484,8 +482,7 @@ abstract class Object {
 			}
 		}
 
-		$trace = debug_backtrace();
-		throwError(6, 'PHP-Error', '<b>Fatal Error</b> Call to undefined method ' . $this->classname . '::' . $name . ' in ' . $trace[0]['file'] . ' on line ' . $trace[0]['line'] . '');
+		throw new BadMethodCallException("Call to undefined method ' . $this->classname . '::' . $name . '");
 	}
 
 	/**

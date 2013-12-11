@@ -4418,7 +4418,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$many_many = array_merge(Object::instance($parent)->generateMany_many(), $many_many);
 		}
 		
-		$many_many = array_map("strtolower", $many_many);
+		foreach($many_many as $k => $v) {
+			if(is_string($v)) {
+				$many_many[$k] = strtolower($v);
+			} else {
+				$many_many[$k]["class"] = strtolower($v["class"]);
+			}
+		}
+		
 		$many_many = ArrayLib::map_key("strtolower", $many_many);
 		return $many_many;
 	}
@@ -4440,7 +4447,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$belongs_many_many = array_merge(Object::instance($parent)->generateBelongs_Many_many(), $belongs_many_many);
 		}
 		
-		$belongs_many_many = array_map("strtolower", $belongs_many_many);
+		foreach($belongs_many_many as $k => $v) {
+			if(is_string($v)) {
+				$belongs_many_many[$k] = strtolower($v);
+			} else {
+				$belongs_many_many[$k]["class"] = strtolower($v["class"]);
+			}
+		}
+		
 		$belongs_many_many = ArrayLib::map_key("strtolower", $belongs_many_many);
 		return $belongs_many_many;
 	}
@@ -4460,7 +4474,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (isset($this->many_many_extra_fields[$key])) {
 				$extraFields = $this->many_many_extra_fields[$key];
 			} else if (self::isStatic($this->classname, "many_many_extra_fields")) {
-				$extraFields = self::getStatic($this->class, "many_many_extra_fields");
+				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->class, "many_many_extra_fields"));
 				if (isset($extraFields[$key]))
 					$extraFields = $extraFields[$key];
 				else
@@ -4468,6 +4482,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			} else {
 				$extraFields = array();
 			}
+			
 			$extendExtraFields = $this->localCallExtending("many_many_extra_fields");
 			if (isset($extendExtraFields[$key])) {
 				$extraFields = array_merge($extraFields, $extendExtraFields[$key]);
@@ -4494,11 +4509,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 		}                                                                                                                                              
 		
-		// belongs-many-many
+		//# belongs-many-many
 		foreach($this->generateBelongs_Many_many(false) as $key => $value) {
 			if (is_array($value)) {
 				if (isset($value["relation"]) && isset($value["class"])) {
 					$relation = $value["relation"];
+					$value = $value["class"];
+				} else if (isset($value["inverse"]) && isset($value["class"])) {
+					$relation = $value["inverse"];
 					$value = $value["class"];
 				} else {
 					$value = array_values($value);
@@ -4506,31 +4524,75 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$value = $value[0];
 				}
 			}
+			
+			
 			if (class_exists($value)) {
 				if (is_subclass_of($value, "DataObject")) {
 					$inst = Object::instance($value);
 					$relations = $inst->generateMany_Many();
 					
+					$field = strtolower(get_class($this));
+					
 					if (is_array($relations)) {
 						if (isset($relation)) {
-							if (isset($relations[$relation]) && $relations[$relation] == $this->classname) {
+							if (isset($relations[$relation]) && ($relations[$relation] == $this->classname) || is_subclass_of($this->classname, $relations[$relation])) {
 								// everything okay
 							} else {
-								throwError(6, "Logcal Error", "Relation ".$relation." does not exist on ".$value.".");
+								throw new LogicException("Relation ".$relation." does not exist on ".$value.".");
 							}
 						} else {
-							$relation = array_search(strtolower(get_class($this)), $relations);
+							$relation = null;
+							foreach($relations as $r => $d) {
+								if(is_array($d) && $d["class"] == $this->classname) {
+									$relation = $r;
+									break;
+								} else if(is_string($d) && $d == $this->classname) {
+									$relation = $r;
+									break;
+								}
+							}
+							
+							// search for inverse with parent class-names.
+							if(!isset($relation)) {
+								$c = $this->classname;
+								while($c = ClassInfo::getParentClass($c))
+								{
+									foreach($relations as $r => $d) {
+										if(is_array($d) && $d["class"] == $c) {
+											$relation = $r;
+											$field = $c;
+											break 2;
+										} else if(is_string($d) && $d == $c) {
+											$relation = $r;
+											$field = $c;
+											break 2;
+										}
+									}
+
+								}
+							}
+							
+							if(!isset($relation)) {
+								throw new Exception("No inverse on ".$value." found.");
+							}
 						}
 					} else {
-						throwError(6, "Logcal Error", "Relation ".$relation." does not exist on ".$value.".");
+						throw new LogicException("Relation ".$relation." does not exist on ".$value.".");
 					}
 					
 					// generate extra-fields
 					if (isset($inst->many_many_extra_fields[$relation])) {
-						$extraFields = $inst->many_many_extra_fields[$relation];
+						$extraFields = $this->many_many_extra_fields[$key];
+					} else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
+						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->class, "many_many_extra_fields"));
+						if (isset($extraFields[$relation]))
+							$extraFields = $extraFields[$relation];
+						else
+							$extraFields = array();
 					} else {
 						$extraFields = array();
 					}
+					
 					$extendExtraFields = $inst->localCallExtending("many_many_extra_fields");
 					if (isset($extendExtraFields[$relation])) {
 						$extraFields = array_merge($extraFields, $extendExtraFields);
@@ -4540,6 +4602,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				} else {
 					throwError(6, "Logical Exception", $value . " must be subclass of DataObject to be a handler for a many-many-relation.");
 				}
+				
 				if ($relation) {
 					$table = "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this));
 					if (!SQL::getFieldsOfTable($table))
@@ -4548,7 +4611,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 					$tables[$key] = array(
 						"table"			=> $table,
-						"field"			=> strtolower(get_class($this)) . "id",
+						"field"			=> $field . "id",
 						"extfield"		=> $value . "id",
 					);
 					if ($extraFields) {
