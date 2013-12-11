@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.17
+ * @version     4.7.18
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -1127,8 +1127,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 								"ignore"	=> true
 							);
 					
-						// prefetch version-ids.
-
+						// prefetch DataBase-Fields for external class.
+						$o = new $table;
+						$db = $o->DataBaseFields(true);
+						
+						unset($o);
+						
+						
 						$i = 0;
 						foreach($this->data[$name] as $id => $extraFields) {
 							
@@ -1136,7 +1141,37 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 								if(isset($extraFields["versionid"])) {
 									$id = $extraFields["versionid"];
 								} else {
-									$id = DataObject::get_by_id($table, $id)->versionid;
+									$data = DataObject::get_by_id($table, $id);
+									if($data) {
+										$id = $data->versionid;
+									} else {
+										$id = 0;
+									}
+								}
+								
+								if($id == 0) {
+									$object = new $table(array_merge($extraFields, array("id" => 0, "versionid" => 0)));
+									$object->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
+									$id = $object->versionid;
+									
+									unset($object);
+								} else {
+									$d = null;
+									// just find out if we may be update the record given.
+									foreach($extraFields as $field => $v) {
+										if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
+											if(!isset($d)) {
+												$d = DataObject::get_one($table, array("versionid" => $id));
+											}
+											
+											$d[$field] = $v;
+										}
+									}
+									
+									if(isset($d)) {
+										$d->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
+										$id = $d->versionid;
+									}
 								}
 								
 								$manipulation["insert_many_" . $table]["fields"][$i] = array(
