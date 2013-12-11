@@ -119,7 +119,7 @@ class siteController extends Controller
                 
                 if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN"))
                 {
-                		HTTPResponse::setResHeader(503);
+                		//HTTPResponse::setResHeader(503);
                 		$data = new ViewAccessAbleData();
                 		HTTPResponse::output($data->customise()->renderWith("page_maintenance.html"));
                 		exit;

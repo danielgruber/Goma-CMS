@@ -20,15 +20,15 @@ class FaviconController extends Controller {
 				readfile($file->realfile);
 				exit;
 			} else {
-				if(!file_exists(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".ico")) {
+				if(!file_exists(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".v2.ico")) {
 					$image = new Image($file->realfile);
-					$fav = $image->resize(240, 240);
-					$fav->toFile(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".ico", 70, "ico");
+					$fav = $image->resize(240, 240, false);
+					$fav->toFile(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".v2.ico", 70, "ico");
 				}
 				
 				HTTPResponse::setHeader("content-type", "image/x-icon");
 				HTTPResponse::sendHeader();
-				readfile(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".ico");
+				readfile(ROOT . CACHE_DIRECTORY . "/favicon.".$file->id.".v2.ico");
 				exit;
 			}
 		} else {
