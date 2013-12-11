@@ -1377,7 +1377,7 @@ class GFS_Package_installer extends GFS {
 			}
 			$this->current = basename($path);
 			
-			// maximum 0.5 second
+			// maximum 2.0 second
 			if(microtime(true) - $start > 2.0) {
 				$i++;
 				$count++;
@@ -1720,8 +1720,8 @@ class GFS_Package_Creator extends GFS {
 		
 		// iterate through the index
 		while($i < count($this->fileIndex)){
-			// maximum of 1.0 seconds
-			if(microtime(true) - $start < 1.0) {
+			// maximum of 2.0 seconds
+			if(microtime(true) - $start < 2.0) {
 				if(!$this->exists($paths[$i])) {
 					$this->addFromFile($realfiles[$i], $paths[$i]);
 				}

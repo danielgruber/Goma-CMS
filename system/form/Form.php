@@ -31,7 +31,7 @@ interface FormActionHandler {
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.3
+ * @version 2.3.4
  */
 class Form extends object {
 	/**
@@ -363,13 +363,23 @@ class Form extends object {
 	 */
 	public function render() {
 	
-		// just watch out for external-form.
-		if($this->controller->request && count($this->controller->request->url_parts) > 2 && strtolower($this->controller->request->url_parts[0]) == "forms" && strtolower($this->controller->request->url_parts[1]) == strtolower($this->name)) {
-			$request = $this->controller->request;
-			$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
-			$request->shift(3);
-			$externForm = new ExternalFormController();
-			Core::serve($externForm->handleRequest($request));
+		if($this->controller->request) {
+			$params = array_values($this->controller->request->params);
+			
+			// just watch out for external-form.
+			if(count($this->controller->request->url_parts) > 2 && strtolower($this->controller->request->url_parts[0]) == "forms" && strtolower($this->controller->request->url_parts[1]) == strtolower($this->name)) {
+				$request = $this->controller->request;
+				$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
+				$request->shift(3);
+				$externForm = new ExternalFormController();
+				Core::serve($externForm->handleRequest($request));
+			} else if(count($this->controller->request->url_parts) > 1 && strtolower($this->controller->request->url_parts[0]) == strtolower($this->name) && $params[count($params) - 1] == "forms") {
+				$request = $this->controller->request;
+				$request->params = array("form" => strtolower($request->url_parts[0]), "field" => strtolower($request->url_parts[1]));
+				$request->shift(2);
+				$externForm = new ExternalFormController();
+				Core::serve($externForm->handleRequest($request));
+			}
 		}
 	
 		Resources::add("form.css", "css");
