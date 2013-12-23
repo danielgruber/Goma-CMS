@@ -87,7 +87,7 @@ if (goma.ui === undefined) {
 				var $this = $(this),
 					img = new Image();
 				
-				if ($this.attr("data-retined") !== "complete" && $this.attr("data-retina") && $this.width() !== 0 && $this.height() !== 0) {
+				if ($this.attr("data-retined") !== "complete" && $this.attr("data-retina") && $this.width() !== 0 && $this.height() !== 0) {
 					if (goma.ui.IsImageOk($(this).get(0))) {
 						img.onload = function () {
 							$this.css("width", $this.width());
@@ -159,7 +159,7 @@ if (goma.ui === undefined) {
 			var paddingMargin = ($container.outerHeight(true) - $container.height());
 			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
 			
-			if(setHeight !== false && ($container.hasClass("flexbox") || $container.css("overflow").toLowerCase() == "auto" || $container.css("overflow").toLowerCase() == "scroll" || $container.css("overflow").toLowerCase() == "hidden"))
+			if(setHeight !== false && ($container.hasClass("flexbox") || $container.css("overflow").toLowerCase() == "auto" || $container.css("overflow").toLowerCase() == "scroll" || $container.css("overflow").toLowerCase() == "hidden"))
 				$container.css("height", maxHeight);
 			$container.scrollTop(scroll);
 			
@@ -1183,7 +1183,7 @@ if (window.loader === undefined) {
 		/**
 		 * starts a indexing for search.
 		*/
-		w.startIndexing = function() {
+		w.startIndexing = function() {
 			$.ajax({
 				url: BASE_SCRIPT + "system/indexSearch"
 			}).done(function(){
@@ -1694,7 +1694,7 @@ if (window.loader === undefined) {
 	
 	setInterval(function () {
 		$(".ago-date").each(function () {
-			if ($(this).attr("data-date")) {
+			if ($(this).attr("data-date")) {
 				$(this).html(ago($(this).attr("data-date")));
 			}
 		});
