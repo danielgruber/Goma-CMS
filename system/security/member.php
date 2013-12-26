@@ -787,6 +787,7 @@ class Member extends Object {
 			$cacher->write(true, 3600);
 		}
 		
+		
 	}
 	
 	/**
@@ -806,7 +807,7 @@ class Member extends Object {
 		if(isset($_SESSION["g_userlogin"])) {
 			if($data = DataObject::get_one("user", array("id" => $_SESSION["g_userlogin"]))) {
 				$currsess = session_id();
-				
+
 				if($data['phpsess'] != $currsess)
 				{
 					self::doLogout();
@@ -821,6 +822,7 @@ class Member extends Object {
 				
 				self::$id = $data->id;
 				self::$nickname = $data->nickname;
+				
 				
 				self::$groups = $data->groups(null, "type DESC");
 				

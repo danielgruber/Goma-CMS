@@ -124,6 +124,7 @@ class livecounter extends DataObject
 				return false;
 			}
 			
+			// set correct host, avoid problems with localhost
 			$host = $_SERVER["HTTP_HOST"];
 			if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
 				$host = "." . $host;
@@ -141,7 +142,7 @@ class livecounter extends DataObject
 			/**
 			 * for users without enabled cookies, this works!
 			*/
-			if(!isset($_SESSION["user_counted"]) && DataObject::count("livecounter", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			if(!isset($_SESSION["user_counted"]) && !isset($_COOKIE["goma_sessid"]) && !isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
 				$user_identifier = $ip;
@@ -166,6 +167,7 @@ class livecounter extends DataObject
 				}
 			}
 			
+			// now we are in normal not high-performance-optimized mode.
 			$timeout = TIME - SESSION_TIMEOUT;
 			
 			// check if a cookie exists, that means that the user was here in the last 16 hours.
@@ -176,6 +178,9 @@ class livecounter extends DataObject
 				if($user_identifier != $sessid)
 				{
 					$data = DataObject::get_one("livecounter", "phpsessid = '".convert::raw2sql($sessid)."' AND last_modified > ".convert::raw2sql($timeout)."");
+					
+					
+					// check if we are on the same day or not.
 					if($data && date("d", $data->created) == date("d", NOW)) {
 						$data->user = $userid;
 						$data->phpsessid = $user_identifier;
@@ -193,19 +198,14 @@ class livecounter extends DataObject
 						$data->recurring = 1;
 						$data->write(true, true);
 					}
+					
+					// free memory
 					unset($data);
 					// set cookie
 					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
 					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 					$_SESSION["user_counted"] = TIME;
 					return true;
-				} else {
-					
-					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
-					
-					// just rewrite cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
-					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 				}
 			}
 			
@@ -224,7 +224,7 @@ class livecounter extends DataObject
 				$data->ip = md5($_SERVER["REMOTE_ADDR"]);
 				$data->isbot = preg_match("/" . self::$bot_list . "/i", $_SERVER['HTTP_USER_AGENT']);
 				$data->hitcount = 1;
-				$data->recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $user_identifier)) > 0);
+				$data->recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $_COOKIE["goma_lifeid"])) > 0);
 				$data->write(true, true);
 			}
 			

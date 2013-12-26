@@ -130,27 +130,6 @@ class Core extends object {
 			define("IS_BACKEND", true);
 		}
 		
-		if(isset($_POST) && $handle = @fopen("php://input", "rb")) {
-			if(PROFILE)
-				Profiler::mark("php://input read");
-			$random = randomString(20);
-			if(!file_exists(FRAMEWORK_ROOT . "temp/")) {
-				mkdir(FRAMEWORK_ROOT . "temp/", 0777, true);
-				chmod(FRAMEWORK_ROOT . "temp/", 0777);
-			}
-			$filename = FRAMEWORK_ROOT . "temp/php_input_" . $random;
-			
-			$file = fopen($filename, 'wb');
-			stream_copy_to_stream($handle, $file);
-			fclose($handle);
-			fclose($file);
-			self::$phpInputFile = $filename;
-
-			register_shutdown_function(array("Core", "cleanUpInput"));
-
-			if(PROFILE)
-				Profiler::unmark("php://input read");
-		}
 
 		// now init session
 		if(PROFILE)
@@ -197,6 +176,68 @@ class Core extends object {
 
 		if(PROFILE)
 			Profiler::unmark("Core::Init");
+	}
+	
+	/**
+	 * inits framework-resources.
+	*/
+	public static function InitResources() {
+		// some vars for javascript
+		Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '" . CURRENT_PROJECT . "';var root_path = '" . ROOT_PATH . "';var ROOT_PATH = '" . ROOT_PATH . "';var BASE_SCRIPT = '" . BASE_SCRIPT . "'; goma.ENV.framework_version = '" . GOMA_VERSION . "-" . BUILD_VERSION . "'; var activelang = '".Core::$lang."'; }");
+
+
+		Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
+		//Resources::add("system/libs/thirdparty/jquery-throttle-debounce/debounce-throttle.js", "js", "main");
+		Resources::add("system/libs/thirdparty/hammer.js/hammer.js", "js", "main");
+		Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
+		Resources::add("system/libs/javascript/loader.js", "js", "main");
+		Resources::add("box.css", "css", "main");
+
+		Resources::add("default.css", "css", "main");
+		Resources::add("goma_default.css", "css", "main");
+
+		HTTPResponse::setHeader("x-base-uri", BASE_URI);
+		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
+	}
+
+	/**
+	 * returns the data of php://input as a file.
+	*/
+	public static function phpInputFile() {
+		if(isset(self::$phpInputFile)) {
+			return self::$phpInputFile;
+		}
+		
+		
+		if(isset($_POST) && $handle = @fopen("php://input", "rb")) {
+			if(PROFILE)
+				Profiler::mark("php://input read");
+				
+			$random = randomString(20);
+			if(!file_exists(FRAMEWORK_ROOT . "temp/")) {
+				mkdir(FRAMEWORK_ROOT . "temp/", 0777, true);
+				chmod(FRAMEWORK_ROOT . "temp/", 0777);
+			}
+			$filename = FRAMEWORK_ROOT . "temp/php_input_" . $random;
+			
+			$file = fopen($filename, 'wb');
+			stream_copy_to_stream($handle, $file);
+			fclose($handle);
+			fclose($file);
+			self::$phpInputFile = $filename;
+
+			register_shutdown_function(array("Core", "cleanUpInput"));
+
+			if(PROFILE)
+				Profiler::unmark("php://input read");
+		} else {
+			self::$phpInputFile = false;
+		}
+		
+		return self::$phpInputFile;
 	}
 
 	/**
@@ -681,25 +722,7 @@ class Core extends object {
 	 */
 	public function render($url) {
 	
-		// some vars for javascript
-		Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '" . CURRENT_PROJECT . "';var root_path = '" . ROOT_PATH . "';var ROOT_PATH = '" . ROOT_PATH . "';var BASE_SCRIPT = '" . BASE_SCRIPT . "'; goma.ENV.framework_version = '" . GOMA_VERSION . "-" . BUILD_VERSION . "'; var activelang = '".Core::$lang."'; }");
-
-
-		Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
-		//Resources::add("system/libs/thirdparty/jquery-throttle-debounce/debounce-throttle.js", "js", "main");
-		Resources::add("system/libs/thirdparty/hammer.js/hammer.js", "js", "main");
-		Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
-		Resources::add("system/libs/javascript/loader.js", "js", "main");
-		Resources::add("box.css", "css", "main");
-
-		Resources::add("default.css", "css", "main");
-		Resources::add("goma_default.css", "css", "main");
-
-		HTTPResponse::setHeader("x-base-uri", BASE_URI);
-		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
+		self::InitResources();
 		
 	
 		self::$url = $url;

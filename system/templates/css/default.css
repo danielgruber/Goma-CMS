@@ -8,11 +8,6 @@
   * last modified: 17.09.2013
 */
 
-* {
-	margin: 0;
-	padding: 0;
-}
-
 td, th {
     padding: 0.5em;
 }
@@ -44,16 +39,6 @@ body, html {
 	min-height: 100%;
 }
 
-/* box-sizing */
-html, body, html * {    
-    box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-}
-
-* {
-	line-height: 1.25em;
-}
 
 /**
  * some HTML5-resets and defaults

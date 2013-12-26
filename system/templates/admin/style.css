@@ -1079,6 +1079,7 @@ form h2 {
 }
 .tabs > ul li a:hover, .tabs > ul li input.tab:hover {
 	color: @color-action !important;
+	padding-bottom: 0.75em;
 	border-bottom: 2px solid @color-action;
 }
 .tabs > ul li .active {

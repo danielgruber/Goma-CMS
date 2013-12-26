@@ -24,6 +24,11 @@ class HTMLParser extends Object
 				if(PROFILE) Profiler::mark("HTMLParser scriptParse");
 				if(!HTTPResponse::$disabledparsing)
 				{
+						preg_match_all('/\<\!\-\-(.*)\-\-\>/Usi', $html, $comments);
+						foreach($comments[1] as $k => $v) {
+							$html = str_replace($comments[0][$k], "<!--comment_".$k."-->", $html);
+						}
+				
 						preg_match_all('/\<script[^\>]*type\=\"text\/javascript\"[^\>]*\>(.*)\<\/script\s*\>/Usi', $html, $no_tags);
 						foreach($no_tags[1] as $key => $js)
 						{
@@ -41,6 +46,10 @@ class HTMLParser extends Object
 								{
 										$html = str_replace($no_tags[0][$key], self::jsFile(ROOT . $js), $html );
 								}
+						}
+						
+						foreach($comments[1] as $k => $v) {
+							$html = str_replace("<!--comment_".$k."-->", $comments[0][$k], $html);
 						}
 				}
 				if(PROFILE) Profiler::unmark("HTMLParser scriptParse");

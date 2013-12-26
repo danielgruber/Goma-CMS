@@ -196,8 +196,8 @@ class FileUpload extends FormField {
 			$_SERVER["HTTP_X_FILE_NAME"] = "";
 
 		if($this->allowed_file_types == "*" || preg_match('/\.(' . implode("|", $this->allowed_file_types) . ')$/i', $_SERVER["HTTP_X_FILE_NAME"])) {
-			if(Core::$phpInputFile) {
-				$tmp_name = Core::$phpInputFile;
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
 
 				if(filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
 					HTTPResponse::setHeader("Content-Type", "text/x-json");

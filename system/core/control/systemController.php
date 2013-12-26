@@ -212,8 +212,8 @@ class systemController extends Controller {
 		
 		
 		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
-			if(Core::$phpInputFile) {
-				$tmp_name = Core::$phpInputFile;
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
 
 				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
 					$_FILES["upload"] = array(
@@ -280,8 +280,8 @@ class systemController extends Controller {
 		$allowed_size = 20 * 1024 * 1024;
 		
 		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
-			if(Core::$phpInputFile) {
-				$tmp_name = Core::$phpInputFile;
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
 
 				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
 					$_FILES["upload"] = array(
