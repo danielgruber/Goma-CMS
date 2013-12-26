@@ -132,10 +132,12 @@ dfn {
 ::-moz-selection { 
 	background: @selection-color; 
 	text-shadow: none; 
+	color: #fff;
 }
 ::selection { 
 	background: @selection-color; 
 	text-shadow: none; 
+	color: #fff;
 }
 
 /* Form */
