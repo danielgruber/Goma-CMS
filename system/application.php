@@ -337,8 +337,7 @@ function loadFramework() {
 
 	if (PROFILE)
 		Profiler::unmark("loadFramework");
-
-	// let's init Core
+		
 	Core::Init();
 }
 

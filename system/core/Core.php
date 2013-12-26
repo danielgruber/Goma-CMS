@@ -116,7 +116,7 @@ class Core extends object {
 	 * @var string
 	 */
 	public static $favicon;
-
+	
 	/**
 	 * inits the core
 	 *
@@ -191,27 +191,9 @@ class Core extends object {
 				Profiler::unmark("delete_cache");
 		}
 
-		// some vars for javascript
-		Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '" . CURRENT_PROJECT . "';var root_path = '" . ROOT_PATH . "';var ROOT_PATH = '" . ROOT_PATH . "';var BASE_SCRIPT = '" . BASE_SCRIPT . "'; goma.ENV.framework_version = '" . GOMA_VERSION . "-" . BUILD_VERSION . "'; var activelang = '".Core::$lang."'; }");
-
+		
 		Object::instance("Core")->callExtending("construct");
 		self::callHook("init");
-
-		Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
-		//Resources::add("system/libs/thirdparty/jquery-throttle-debounce/debounce-throttle.js", "js", "main");
-		Resources::add("system/libs/thirdparty/hammer.js/hammer.js", "js", "main");
-		Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
-		Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
-		Resources::add("system/libs/javascript/loader.js", "js", "main");
-		Resources::add("box.css", "css", "main");
-
-		Resources::add("default.css", "css", "main");
-		Resources::add("goma_default.css", "css", "main");
-
-		HTTPResponse::setHeader("x-base-uri", BASE_URI);
-		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
 
 		if(PROFILE)
 			Profiler::unmark("Core::Init");
@@ -698,6 +680,28 @@ class Core extends object {
 	 * renders the page
 	 */
 	public function render($url) {
+	
+		// some vars for javascript
+		Resources::addData("if(typeof current_project == 'undefined'){ var current_project = '" . CURRENT_PROJECT . "';var root_path = '" . ROOT_PATH . "';var ROOT_PATH = '" . ROOT_PATH . "';var BASE_SCRIPT = '" . BASE_SCRIPT . "'; goma.ENV.framework_version = '" . GOMA_VERSION . "-" . BUILD_VERSION . "'; var activelang = '".Core::$lang."'; }");
+
+
+		Resources::add("system/libs/thirdparty/modernizr/modernizr.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jquery/jquery.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jquery/jquery.ui.js", "js", "main");
+		//Resources::add("system/libs/thirdparty/jquery-throttle-debounce/debounce-throttle.js", "js", "main");
+		Resources::add("system/libs/thirdparty/hammer.js/hammer.js", "js", "main");
+		Resources::add("system/libs/thirdparty/respond/respond.min.js", "js", "main");
+		Resources::add("system/libs/thirdparty/jResize/jResize.js", "js", "main");
+		Resources::add("system/libs/javascript/loader.js", "js", "main");
+		Resources::add("box.css", "css", "main");
+
+		Resources::add("default.css", "css", "main");
+		Resources::add("goma_default.css", "css", "main");
+
+		HTTPResponse::setHeader("x-base-uri", BASE_URI);
+		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
+		
+	
 		self::$url = $url;
 		if(PROFILE)
 			Profiler::mark("render");
