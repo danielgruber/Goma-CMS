@@ -596,6 +596,27 @@ h1, h2, h3 {
 #update {
 	position: relative;
 	margin-right: 0.5em;
+	padding-left: 2em !important;
+	
+	.count {
+		position: absolute;
+		top: 0.5em;
+		left: 0;
+		
+		background: @system-red;;
+		
+		padding: .25em;
+		
+		color: #fff;
+		line-height: 1em;
+		
+		height:1em;
+		width:1em;
+		
+		border-radius: 1.5em;
+		-webkit-border-radius: 1.5em;
+		-moz-border-radius: 1.5em;
+	}
 }
 
 .boxheader {
