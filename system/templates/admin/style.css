@@ -1058,7 +1058,8 @@ form h2 {
 }
 #updates .upload {
 	float: right;
-	margin-top: -10px;
+	margin-top: -0.875em;
+	margin-right: 0.25em;
 }
 #appStoreArea {
 	margin: 5px 0;
