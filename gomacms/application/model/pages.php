@@ -679,28 +679,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->useStateData = true;
 				$this->queryVersion = "state";
 				
-				// render head-bar
-				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->classname.' pageType"><img src="'.ClassInfo::getClassIcon($this->classname).'" alt="" /><span>';
-				
-				// title in head-bar
-				if($this->title)
-					$html .= convert::raw2text($this->title);
-				else
-					$html .= convert::raw2text(ClassInfo::getClassTitle($this->classname));
-				
-				// end of title in head-bar
-				$html .= ' </span></span>';
 				
 				// version-state-status
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
-					
-					$html .= '<div class="pageinfo versionControls">';
-					
-					if($this->isPublished()) {
-						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
-					} else {
-						$html .= '<div class="state"><div class="draft active">'.lang("draft", "draft").'</div><div class="publish">'.lang("published", "published").'</div></div>';
-					}
+
 					
 					if($this->everPublished()) {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
@@ -709,15 +691,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
 						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
 					}
-					$html .= '</div>';
 					
 				}
 				
-				$html .= '<div style="clear:both;"></div>';
-				
-				// end of headbar and add it to form
-				$html .= '</div>';
-				$form->add($links = new HTMLField('links', $html));
+
+				$form->add($links = new HTMLField('links', $this->customise(array("icon" => ClassInfo::getClassIcon($this->classname), "classtitle" => convert::raw2text(ClassInfo::getClassTitle($this->classname))))->renderWith("admin/content_header.html")));
 				$links->container->addClass("hidden");
 
 				$form->add(new TabSet('tabs', array(

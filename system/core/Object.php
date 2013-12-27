@@ -703,5 +703,12 @@ abstract class Object {
 		$c = unserialize(serialize($this));
 		return $c;
 	}
+	
+	/**
+	 * returns class-icon.
+	*/
+	public function ClassIcon() {
+		return ClassInfo::getClassIcon($this->classname);
+	} 
 
 }
