@@ -357,6 +357,16 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			return $title;
 		}
 	
+		/**
+		 * returns all mainbar-activated children.
+		 *
+		 *@access public
+		 *
+		*/
+		public function mainbar($filter = array(), $sort = null) {
+			return $this->children(array_merge($filter, array("mainbar" => 1)), $sort);
+		}
+	
 		
 		//!Permission-Getters and Setters
 		
