@@ -6,6 +6,9 @@
  * @package	Goma\CSS-Framework
  * @version	2.1.2
  */
+ 
+ @color-grey: #f5f4f2;
+ @color-border-grey: #e0e0e0;
 
 .lam_noscript p {
 	font-size: 20pt;
@@ -34,17 +37,17 @@
 }
 
 .leftandmaintable .dialog > .title {
-	background: #eee;
+	background: @color-grey;
 }
 .leftandmaintable .adminContent > h2:first-child {
 	margin: -0.57em -0.7em;
 	padding: 0.5em 1em;
 	font-size: 1.25em;
 	line-height: 1.2em;
-	background: #eee;
+	background: @color-grey;
 	color: #444;
 	font-weight: normal;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 1px solid @color-border-grey;
 	display: block;
 }
 
@@ -53,8 +56,8 @@
 .leftandmaintable tr > .main .leftbar_toggle {
 	display: block;
 	margin-bottom: 3px;
-	background: #eee;
-	border: 1px solid #ccc;
+	background: @color-grey;
+	border: 1px solid @color-border-grey;
 	border-width: 0 1px 1px 0; 
 	padding: 0 !important;
 	color: #444;
@@ -85,7 +88,7 @@
 	border-bottom: 0 !important;
 }
 .leftandmaintable tr > .main > .inner > form > .actions {
-	border-top: 1px solid #ccc;
+	border-top: 1px solid @color-border-grey;
 	padding-bottom: 0.375em;
 	padding-top: 0.375em;
 }
@@ -93,8 +96,8 @@
 	margin: 0 !important;
 }
 .leftandmaintable tr > .main > .inner .headBar {
-	background: #eee;
-	border-bottom: 0.063em solid #ccc;
+	background: @color-grey;
+	border-bottom: 0.063em solid @color-border-grey;
 	padding: 0.43em;
 	line-height: 1em;
 	
@@ -129,7 +132,7 @@
 		margin-bottom: -0.375em;
 		margin-left: -0.25em;
 		margin-right: 0.5em;
-		border-right: 1px solid #ccc;
+		border-right: 1px solid @color-border-grey;
 		
 		img {
 			height: 2.875em;
@@ -161,9 +164,9 @@
 .leftandmaintable tr > .left {
 	display: none;
 	width: 18em !important;
-	background: #eee;
+	background: @color-grey;
 	height: 100%;
-	border-right: 1px solid #ccc;
+	border-right: 1px solid @color-border-grey;
 }
 
 .leftandmaintable tr > .left.active {
@@ -192,8 +195,8 @@
 	padding: 0.69em;
 	width: 100%;
 	padding-right: 1.25em;
-	border-bottom: 1px solid #ccc;
-	background: #eee;
+	border-bottom: 1px solid @color-border-grey;
+	background: @color-grey;
 	height: 2.82em;
 	
 	box-sizing: border-box;
@@ -218,7 +221,7 @@
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
-	background: #eee;
+	background: @color-grey;
 	padding-bottom: 1em;
 }
 .leftandmaintable tr > .left .classtree .treewrapper > ul > li {

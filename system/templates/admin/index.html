@@ -310,6 +310,7 @@
 															} else {
 																options.xaxis.timeformat = "%d.%m %H:%M";
 															}
+
 															drawVisitPlot();
 																
 														},
@@ -319,12 +320,17 @@
 													return false;
 												});
 												
-												$("#plot-navigation a.stat.active").click();
+												
 												
 												$("#userbar-history").addClass("overview");
 												goma.ui.ajax($("#history div"), {
 													url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}',
-													silence: true
+													silence: true,
+													complete: function() {
+														setTimeout(function(){
+															$("#plot-navigation a.stat.active").click();
+														}, 200);
+													}
 												}, false, true);
 												goma.ui.addFlexBox($("#history > div"));
 											});
