@@ -724,8 +724,9 @@ class CheckBoxSQLField extends DBField {
 	static public function getFieldType($args = array()) {
 		return 'enum("0","1")';
 	}
+	
 	/**
-	 * generatesa a numeric field
+	 * generatesa a switch.
 	 *@name formfield
 	 *@access public
 	 *@param string - title
@@ -783,6 +784,50 @@ class TimeZone extends DBField {
 	{
 			return new Select($this->name, $title, ArrayLib::key_value(i18n::$timezones), $this->value);
 	}
+}
+
+/**
+ * timezone-field
+*/
+class BoolDBField extends DBField {
+
+	/**
+	 * converts every type of value into bool.
+	*/
+	public function __construct($name, $value, $args = array())
+	{
+		if(strtolower($value) == strtolower(lang("no")) || strtolower($value) == "no") {
+			$value = false;
+		}
+		
+		$value = (bool) $value;
+		
+		parent::__construct($name, $value, $args);
+	}
+
+	/**
+	 * default convert
+	*/
+	public function forTemplate() {
+		if($this->value) {
+			return lang("yes");
+		} else {
+			return lang("no");
+		}
+	}
+	
+	/**
+	 * generatesa a switch.
+	 *
+	 *@name formfield
+	 *@access public
+	 *@param string - title
+	*/
+	public function formfield($title = null)
+	{
+		return new Checkbox($this->name, $title, $this->value);
+	}
+	
 }
 
 class HTMLText extends Varchar {
