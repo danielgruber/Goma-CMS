@@ -446,6 +446,7 @@ class tpl extends Object
 					
 					$data = preg_replace('/exit;?\s*$/Usi', "", $data);
 					$data = str_replace('$caller->.', '->', $data);
+					$data = preg_replace('/\)\.([a-zA-Z_])/', ")->\\1", $data);
 					
 					$_key = md5($data);
 					$percents[$_key] = $data;
@@ -1639,6 +1640,14 @@ class tplCaller extends Object implements ArrayAccess
         	}
         	
 	        return convert::raw2text($modified);
+        }
+        
+        /**
+         * returns if matches url.
+        */
+        public function urlMatches($regexp) {
+        	$regexp = str_replace('/', '\\/', $regexp);
+	        return preg_match('/'.$regexp.'/Usi', URL);
         }
         
         /**

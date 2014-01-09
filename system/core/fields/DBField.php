@@ -268,7 +268,7 @@ class DBField extends Object implements DataBaseField
 	 *@name uppercase
 	 *@access public
 	*/ 
-	public function LowerrCase()
+	public function LowerCase()
 	{
 			return strtolower($this->value);
 	}

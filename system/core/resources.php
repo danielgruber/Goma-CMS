@@ -422,12 +422,14 @@ class Resources extends Object {
 			$lessFiles = array_merge($lessFiles, $combine_css["less"]);
 		}
 		
-		$lessStr = (self::$debug) ? "_debug_" : "";
+		$lessStr = "";
 		foreach($lessFiles as $file) {
 			$lessStr .= $file . "?" . filemtime($file);
 		}
+		
+		$debugStr = (self::$debug) ? "debug" : "";
 	
-		$file = self::getFileName(CACHE_DIRECTORY . "css_".$name."_".md5($lessStr)."_".md5(implode("_", $combine_css["files"]))."_".$combine_css["mtime"]."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).".css");
+		$file = self::getFileName(CACHE_DIRECTORY . "css_".$name."_".md5($lessStr)."_".md5(implode("_", $combine_css["files"]))."_".$combine_css["mtime"]."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).$debugStr.".css");
 		
 		
 		if (is_file($file)) {
@@ -441,7 +443,7 @@ class Resources extends Object {
 			foreach($combine_css["files"] as $cssfile) {
 				
 				$less = isset($combine_css["less"][$cssfile]) ? $combine_css["less"][$cssfile] : self::$lessVars;
-				$cachefile = ROOT . CACHE_DIRECTORY  . ".cache.".md5($less)."." . md5($cssfile) . ".css";
+				$cachefile = ROOT . CACHE_DIRECTORY  . ".cache.".md5($less)."." . md5($cssfile) . $debugStr . ".css";
 				if (self::file_exists($cachefile) && filemtime($cachefile) > filemtime(ROOT . $cssfile)) {
 					$css .= file_get_contents($cachefile);
 				} else {
@@ -572,9 +574,11 @@ class Resources extends Object {
 				$js_files[] = self::makeCombiedJS($combine_name);
 			}
 			
+			$debugStr = (self::$debug) ? "debug" : "";
+			
 			// we have to make raw-file
 			if (count(self::$raw_js) > 0) {
-				$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw_".md5(implode("", self::$raw_js))."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).".js");
+				$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw_".md5(implode("", self::$raw_js))."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).$debugStr.".js");
 				if (!is_file($file)) {
 						$js = "";
 						foreach(self::$raw_js as $code) {
@@ -651,8 +655,9 @@ class Resources extends Object {
 			$hash = md5(implode("", $data["files"]));
 		}
 		
+		$debugStr = (self::$debug) ? "debug" : "";
 		
-		$file = self::getFileName(CACHE_DIRECTORY . "js_combined_".$data["name"]."_".$hash."_".$data["mtime"]."_".preg_replace('/[^0-9a-zA-Z_]/', '_', self::VERSION).".js");
+		$file = self::getFileName(CACHE_DIRECTORY . "js_combined_".$data["name"]."_".$hash."_".$data["mtime"]."_".preg_replace('/[^0-9a-zA-Z_]/', '_', self::VERSION).$debugStr.".js");
 		if (self::file_exists($file)) {
 			return $file;
 		} else {
@@ -662,7 +667,7 @@ class Resources extends Object {
  *@license to see license of the files, go to the specified path for the file 
 */\n\n";
 			foreach($data["files"] as $jsfile) {
-				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".".self::VERSION.".js";
+				$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($jsfile).".".self::VERSION.$debugStr.".js";
 				if (self::file_exists($cachefile) && filemtime($cachefile) > filemtime(ROOT . $jsfile)) {
 					$js .= file_get_contents($cachefile);
 				} else {
@@ -678,7 +683,7 @@ class Resources extends Object {
 			if (isset($data["raw"])) {
 				foreach($data["raw"] as $code) {
 					if (strlen($code) > 4000) {
-						$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($code).".js";
+						$cachefile = ROOT . CACHE_DIRECTORY . ".cache.".md5($code).$debugStr.".js";
 						if (self::file_exists($cachefile)) {
 							$js .= file_get_contents($cachefile);
 						} else {

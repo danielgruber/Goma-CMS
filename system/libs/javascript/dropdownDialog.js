@@ -235,6 +235,8 @@ self.dropdownDialogs = [];
 		*/ 
 		moveDropdown: function(position) {
 			
+			console.log("define position");
+			
 			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.moveDropdown");
 			
 			this.triangle_position = "center";
@@ -274,6 +276,7 @@ self.dropdownDialogs = [];
 					if(typeof positionTop == "undefined")
 						var positionTop = elemtop + elemheight - 2;
 					
+					this.dropdown.find(" > div > .content").css("width", "");
 					var positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
 					var contentwidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
