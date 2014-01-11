@@ -160,22 +160,6 @@ a.button {
 	padding: 0.5em;
 }
 
-/* retina support */
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1) {  
-	.success {
-		background-image: url(../../../images/icons/fatcow16/success@2x.png);
-		background-size: 16px 16px;
-	}
-	
-	.notice {
-		background-image: url(../../../images/icons/fatcow16/bullet_error@2x.png);
-		background-size: 16px 16px;
-	}
-}
-
 @media only screen and (min-width: 30em) {
 	#login_page .left {
 		float: left;
