@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.3
+ * @version     1.5.4
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1067,6 +1067,7 @@ class DataObjectSet extends DataSet {
 	public function setData($data = array()) {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
+		$this->count = count($this->data);
 		$this->reRenderSet();
 	}
 	
