@@ -307,8 +307,8 @@ h1, h2, h3 {
 					padding: @space-normal 0;
 					width: 10em;
 					
-					background: #eee;
-					border: 1px solid #ccc;
+					background: @color-grey;
+					border: 1px solid #ddd;
 					
 					li {
 						padding: 0;
@@ -599,7 +599,7 @@ h1, h2, h3 {
 #update {
 	position: relative;
 	margin-right: 0.5em;
-	padding-left: 2em !important;
+	padding-left: 1.75em !important;
 	
 	.count {
 		position: absolute;
@@ -856,7 +856,7 @@ form h2 {
 .tableview thead tr.search input[type=search] {
 	-webkit-appearance: none;
 	border: 0.063em solid #ccc;
-	padding: 0.31em;
+	padding: 0.37em;
 	padding-right: 1.5em;
 	-webkit-border-bottom-left-radius: 0.25em;
 	-webkit-border-top-left-radius: 0.25em;
@@ -866,7 +866,7 @@ form h2 {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 6em;
+	width: 8em;
 }
 .tableview thead tr.search td {
 	border-top: 0.063em solid #fff;
@@ -949,7 +949,7 @@ form h2 {
 	width: 100%;
 }
 #preview #bottomBar {
-	background: #eee;
+	background: @color-grey;
 }
 #preview #bottomBar .previewLinks {
 	margin-left: 3em;

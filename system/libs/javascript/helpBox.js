@@ -41,7 +41,7 @@
             }
             
             if(s.length == 1) {
-            	if(!s.is(":visible")) {
+            	if(!s.is(":visible") || s.width() < 5) {
 	            	box.css("display", "none");
 	            	continue;
             	}
