@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionProvider, TableField_URLHandler {
+class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHandler {
 	
 	/**
 	 * provides HTML-fragments
@@ -22,14 +22,13 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 			return;
 		}
 		
-		$action = new TableField_FormAction($tableField, "addbtn", lang("add_record"), "addbtn_redirect");
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(
-				"pagination-footer-right" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/addButton.html")
+				"pagination-footer-right" => $view->customise(array("link" => $tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/addButton.html")
 			);
 		} else {
-			return array("footer" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/addButtonWithFooter.html"));
+			return array("footer" => $view->customise(array("link" => $tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/addButtonWithFooter.html"));
 		}
 	}
 	
@@ -47,25 +46,6 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 		);
 	}
 	
-	/**
-	 * provide some actions of this tablefield
-	 *
-	 *@name getActions
-	 *@access public
-	*/
-	public function getActions($tableField) {
-		return array("addbtn_redirect");
-	}
-	
-	/**
-	 * handles the actions
-	*/
-	public function handleAction($tableField, $actionName, $arguments, $data) {
-		if($actionName == "addbtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
-		}
-		return false;
-	}
 	
 	/**
 	 * edit-action
