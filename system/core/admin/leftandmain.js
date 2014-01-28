@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.8
+ * @version     2.2.9
  */
 
 
@@ -113,10 +113,14 @@ var LaM_type_timeout;
 			clearTimeout(scrollTimeout);
 			scrollTimeout = setTimeout(function(){
 
-				var treewrapper = $(".leftandmaintable .LaM_tabs .treewrapper");
+				var treewrapper = $(".leftandmaintable .LaM_tabs .treewrapper"),
+					scroll = treewrapper.scrollTop();
 				// find optimal scroll by position of active element
-				if(treewrapper.find(".marked").length > 0) {
-					var pos = treewrapper.find(".marked").offset().top + treewrapper.find(".marked").outerHeight() - treewrapper.offset().top;
+				if(treewrapper.find(".marked").length == 1) {
+					
+					var pos = treewrapper.find(".marked:first").offset().top + treewrapper.find(".marked:first > span.tree-wrapper").outerHeight() - treewrapper.offset().top + scroll;
+					
+					
 					if(treewrapper.scrollTop() > pos) {
 						treewrapper.scrollTop(pos);
 					} else if(treewrapper.scrollTop() + treewrapper.height() < pos) {
