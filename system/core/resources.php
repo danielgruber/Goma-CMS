@@ -16,7 +16,7 @@ ClassInfo::AddSaveVar("Resources", "scanFolders");
  * This class manages all Resources like CSS and JS-Files in a Goma-Page.
  *
  * @package		Goma\System\Core
- * @version		1.5.1
+ * @version		1.5.2
  */
 class Resources extends Object {
     
@@ -392,6 +392,20 @@ class Resources extends Object {
 			foreach($js as $file) {
 				$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."\"></script>\n";
 			}
+			
+			if(isset(ClassInfo::$appENV["expansion"])) {
+			    $file = CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]) . ".js";
+    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
+    		} else {
+    		    $file = CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . ".js";
+    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
+    		}
+    		
+    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
+    		    FileSystem::write($file, 'setLang('.json_encode($GLOBALS["lang"]).');');
+    		}
+    		
+    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
 			
 			$html .= "\n\n
 		<script type=\"text/javascript\">
