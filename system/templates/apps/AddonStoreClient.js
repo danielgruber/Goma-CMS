@@ -3,7 +3,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 19.11.2013
+  * last modified: 12.02.2014
 */
 
 if(typeof goma.AddOnStore == "undefined") {
@@ -29,41 +29,42 @@ if(typeof goma.AddOnStore == "undefined") {
 			*/
 			
 			var ReactToMessage = function(e) {
-				gloader.load("json");
-				
-				if(e.origin != "https://goma-cms.org") {
-					return false;
-				}
-				
-				try {
-					var data = JSON.parse(e.data);
-					switch(data.action) {
-						case "init":
-							if(data.message == "Hello") {
-								// it works
-								goma.AddOnStore.active = true;
-								if(console.log)
-									console.log("store available");
-								
-								for(var i in readyQueue) {
-									readyQueue[i]();
-								}
-							}
-						break;
-						case "error":
-							alert(data.message);
-						break;
-						case "ajaxResponse":
-							if(typeof ajaxRequest[data.id] != "undefined") {
-								ajaxRequest[data.id].done = 1;
-								ajaxRequest[data.id].callback(data.status, data.textStatus, data.responses, data.headers);
-							}
-						break;
+				goma.ui.loadAsync("json").done(function(e){
+					
+					if(e.origin != "https://goma-cms.org") {
+						return false;
 					}
-				} catch(err) {
-					console.log(e);
-					console.log && console.log(err);
-				}
+					
+					try {
+						var data = JSON.parse(e.data);
+						switch(data.action) {
+							case "init":
+								if(data.message == "Hello") {
+									// it works
+									goma.AddOnStore.active = true;
+									if(console.log)
+										console.log("store available");
+									
+									for(var i in readyQueue) {
+										readyQueue[i]();
+									}
+								}
+							break;
+							case "error":
+								alert(data.message);
+							break;
+							case "ajaxResponse":
+								if(typeof ajaxRequest[data.id] != "undefined") {
+									ajaxRequest[data.id].done = 1;
+									ajaxRequest[data.id].callback(data.status, data.textStatus, data.responses, data.headers);
+								}
+							break;
+						}
+					} catch(err) {
+						console.log(e);
+						console.log && console.log(err);
+					}
+				}.bind(this, e));
 			}
 			
 			/**
@@ -102,7 +103,7 @@ if(typeof goma.AddOnStore == "undefined") {
 			
 			$.ajaxTransport('+*', function(options, originalOptions, jqXHR) {
 				
-				if(goma.AddOnStore.active && (options.url.match(/^https\:\/\/goma\-cms\.org\/apps/i) || (options.url.match(/^https\:\/\/goma\-cms\.org\//) && options.url.match(/\.(css|js|gfs)/i)))) {
+				if(goma.AddOnStore.active && (options.url.match(/^https\:\/\/goma\-cms\.org\/apps/i) || (options.url.match(/^https\:\/\/goma\-cms\.org\//) && options.url.match(/\.(css|js|gfs)/i)))) {
 					
 					var reqID = randomString(10);
 					return {
@@ -337,7 +338,7 @@ if(typeof goma.AddOnStore == "undefined") {
 					Init: function() {
 						if(typeof window.onhashchange == "object") {
 							window.onhashchange = function() {
-								if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+								if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
 									
 									if(goma.AddOnStore.history.lastPush) {
 										goma.AddOnStore.history.lastPush = false;
@@ -363,7 +364,7 @@ if(typeof goma.AddOnStore == "undefined") {
 							setInterval(function(){
 								if(window.___oldHash != location.hash) {
 									window.___oldHash = location.hash;
-									if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
+									if(location.hash.substr(0, 2) == "#!" || location.hash.substr(0, 1) == "!") {
 										
 										if(goma.AddOnStore.history.lastPush) {
 											goma.AddOnStore.history.lastPush = false;
