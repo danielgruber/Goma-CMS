@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version	2.1.3
+ * @version	2.1.4
  */
 
 // goma-framework
@@ -1145,8 +1145,7 @@ if (window.loader === undefined) {
 		var lang = [];
 		
 		/**
-		 * load language for name from PHP with default value as second argument
-		 * e.g. lang("loading", "loading..."); should return for german: "Laden..."
+		 * returns language-data.
 		 *
 		 *@name lang
 		*/
@@ -1154,31 +1153,19 @@ if (window.loader === undefined) {
 			if (typeof BASE_SCRIPT == "undefined")
 				return false;
 			
-			if (typeof lang[name.toUpperCase()] == "undefined") {
-				var jqXHR = $.ajax({
-					async: false,
-					cache: true,
-					url: ROOT_PATH + BASE_SCRIPT + "system/getLang/" + escape(name) + "?l=" + activelang,
-					dataType: "json",
-					noRequestTrack: true
-				});
-				
-				try {
-					var data = parseJSON(jqXHR.responseText);
-					for (var i in data) {
-						lang[i.toUpperCase()] = data[i];
-					}
-				} catch(e) {
-					lang[name.toUpperCase()] = null;
-				}
-			}
-			
 			if (lang[name.toUpperCase()] == null) {
 				return (typeof _default == "undefined") ? _default : name;
 			} else {
 				return lang[name.toUpperCase()];
 			}
 		};
+		
+		/**
+		 * sets language-data.
+		*/
+		w.setLang = function(data) {
+		    lang = data;
+		}
 		
 		/**
 		 * starts a indexing for search.
@@ -1198,49 +1185,8 @@ if (window.loader === undefined) {
 			return goma.ui.getDocRoot();
 		};
 		
-		/**
-		 * reloads lang that if you need it javascript does not have to make an ajax-request to get it, which can freeze the browser in very performance-exzessive-operations
-		 * do this if you know the names before
-		 *
-		 *@name preloadLang
-		 *@param array - names
-		 *@param bool - async request or not, default: true
-		*/
-		w.preloadLang = function (_names, async) {
-			
-			if (typeof async == "undefined")
-				async = true;
-			
-			var names = [];
-			// check names
-			for (var i in _names) {
-				if (typeof lang[_names[i].toUpperCase()] == "undefined")
-					names.push(_names[i]);
-			}
-			
-			if (names.length == 0)
-				return true;
-			
-			$(function () {
-				$.ajax({
-					async: async,
-					cache: true,
-					data: {"lang": names},
-					url: BASE_SCRIPT + "system/getLang/?l=" + activelang,
-					dataType: "html",
-					noRequestTrack: true,
-					success: function (html) {
-						try {
-							var data = parseJSON(html);
-							for (var i in data) {
-								lang[i.toUpperCase()] = data[i];
-							}
-						} catch(e) { 
-							console.log && console.log(e);
-						}
-					}
-				});
-			});
+		w.preloadLang = function () {
+
 		};
 			
 		// some response handlers
