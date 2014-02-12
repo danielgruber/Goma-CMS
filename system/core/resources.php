@@ -394,15 +394,15 @@ class Resources extends Object {
 			}
 			
 			if(isset(ClassInfo::$appENV["expansion"])) {
-			    $file = CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]) . ".js";
+			    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]) . ".js");
     			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
     		} else {
-    		    $file = CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . ".js";
+    		    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . ".js");
     			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
     		}
     		
     		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
-    		    FileSystem::write($file, 'setLang('.json_encode($GLOBALS["lang"]).');');
+    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
     		}
     		
     		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
