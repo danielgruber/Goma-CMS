@@ -336,6 +336,13 @@
 														},
 														silence: true
 													});
+													
+													$("#plot-navigation #plot-arrow-next").removeClass("disabled");
+													if(page > 1) {
+														$("#plot-navigation #plot-arrow-prev").removeClass("disabled");
+													} else {
+														$("#plot-navigation #plot-arrow-prev").addClass("disabled");
+													}
 												};
 											
 											$(function(){
@@ -354,12 +361,30 @@
 												});
 												
 												$("#plot-navigation #plot-arrow-next").click(function(){
+													if($(this).hasClass("disabled")) {
+														return false;
+													}
+													
 													page++; 
 													
 													updateFlot();
 													
 													return false;
 												});
+												
+												$("#plot-navigation #plot-arrow-prev").click(function(){
+													
+													if($(this).hasClass("disabled")) {
+														return false;
+													}
+													
+													page--; 
+													
+													updateFlot();
+													
+													return false;
+												});
+												
 												
 												
 												
@@ -383,12 +408,12 @@
 									
 										<div id="plot-navigation" class="ui-grouped-buttons">
 										    										
-    										<div id="plot-arrow-next" class="disabled">
+    										<div id="plot-arrow-prev" class="disabled">
     										    <a href="#">
     										        <i class="fa fa-angle-right fa-lg"></i>
     										    </a>
     										</div>
-    										<div id="plot-arrow-prev" class="disabled">
+    										<div id="plot-arrow-next" class="disabled">
         										<a href="#">
         										    <i class="fa fa-angle-left fa-lg"></i>
         										</a>
