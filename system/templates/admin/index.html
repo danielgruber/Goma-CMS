@@ -221,8 +221,9 @@
 									
 									<script type="text/javascript">
 										(function($){
+
 											var url = "api/stats/lastMonth";
-										
+											
 											var options = {
 												xaxis: {
 													mode: "time",
@@ -253,69 +254,109 @@
 												},
 												tooltip:            true,
 												tooltipOpts: {
-												    content:        "<h4>%s %x</h4> %y",
-												    xDateFormat: 	"%d.%m %H:%M",
-												    yDateFormat:   	"",
-												    shifts: { 
-												        x:          10,
-												        y:          20 
-												    }
+													content:        "<h4>%s %x</h4> %y",
+													xDateFormat: 	"%d.%m %H:%M",
+													yDateFormat:   	"",
+													shifts: { 
+														x:          10,
+														y:          20 
+													}
 												}
 											};
 											
-											var visitors = [];
-											var hits = [];
-											var plot;
-											
-											var drawVisitPlot = function() {
-												plot = $.plot("#plot-container", [{	label: lang("page_views"), 
-													data: hits,
-													color: "#da097a"
+											var visitors = [],
+												hits = [],
+												plot,
+												
+												page = 1,
+												currentURL,
+												
+												drawVisitPlot = function() {
+													plot = $.plot("#plot-container", [{	label: lang("page_views"), 
+																					   data: hits,
+																					   color: "#da097a"
+																					  },
+																					  {
+																						  label: lang("visitors"), 
+																						  data: visitors,
+																						  color: "#24ACB8"
+																					  }], options);
+													
 												},
-												{
-													label: lang("visitors"), 
-													data: visitors,
-													color: "#24ACB8"
-												}], options);
-			
-											}
-											
-											$(function(){
-												$("#plot-navigation a.stat").click(function(){
-													$("#plot-navigation a.stat").removeClass("active");
-													$(this).addClass("active");
+												
+												updateFlot = function() {
+													
 													$("#plot-container").html('<span class="loading"><img src="images/16x16/loading.gif" alt="" /> '+lang("loading")+'</span>');
 													$("#statistics_range").html("");
 													
 													$.ajax({
-														url: $(this).attr("href"),
+														url: currentURL,
+														type: 'post',
+														data: {page: page},
 														success: function(data) {
+															
+															var timePositionMiddle = (data.timePositionMiddle !== undefined) ? data.timePosition : true;
+															
 															visitors = [];
 															hits = [];
-															for(i in data.data) {
-																visitors.push([(data.data[i].flotStart + data.data[i].flotEnd) / 2, data.data[i].visitors]);
-																hits.push([(data.data[i].flotStart + data.data[i].flotEnd) / 2, data.data[i].hits]);
+															for(var i in data.data) {
+																var time;
+																if(timePositionMiddle) {
+																	time = (data.data[i].flotStart + data.data[i].flotEnd) / 2;
+																} else {
+																	time = data.data[i].flotStart;
+																}
+																
+																visitors.push([time, data.data[i].visitors]);
+																hits.push([time, data.data[i].hits]);
 															}
 															
 															$("#statistics_range").html(data.title);
 															
-															if(typeof data.minTickSize != "undefined") {
+															if(data.minTickSize !== undefined) {
 																options.xaxis.minTickSize = data.minTickSize;
 															} else {
 																options.xaxis.minTickSize = [4, "hour"];
 															}
 															
-															if(typeof data.timeFormat != "undefined") {
-																options.xaxis.timeformat = data.timeFormat;
+															if(data.timeFormat !== undefined) {
+																options.xaxis.timeformat = options.tooltipOpts.xDateFormat = data.timeFormat;
 															} else {
-																options.xaxis.timeformat = "%d.%m %H:%M";
+																options.xaxis.timeformat = options.tooltipOpts.xDateFormat = "%d.%m %H:%M";
 															}
-
+															
+															if(data.toolTipContent !== undefined) {
+																options.tooltipOpts.content = data.toolTipContent;
+															} else {
+																options.tooltipOpts.content = "<h4>%s %x</h4> %y";
+															}
+															
 															drawVisitPlot();
-																
+															
 														},
 														silence: true
 													});
+												};
+											
+											$(function(){
+												
+												$("#plot-navigation a.stat").click(function(){
+													$("#plot-navigation a.stat").removeClass("active");
+													$(this).addClass("active");
+													
+													
+													currentURL = $(this).attr("href");
+													page = 1;
+													
+													updateFlot();
+													
+													return false;
+												});
+												
+												$("#plot-navigation #plot-arrow-next").click(function(){
+													page++; 
+													
+													updateFlot();
 													
 													return false;
 												});
@@ -325,13 +366,11 @@
 												$("#userbar-history").addClass("overview");
 												goma.ui.ajax($("#history div"), {
 													url: '{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}',
-													silence: true,
-													complete: function() {
-														setTimeout(function(){
-															$("#plot-navigation a.stat.active").click();
-														}, 200);
-													}
+													silence: true
 												}, false, true);
+												
+												$("#plot-navigation a.stat.active").click();
+												
 												goma.ui.addFlexBox($("#history > div"));
 											});
 											
@@ -343,6 +382,18 @@
 									</script>
 									
 										<div id="plot-navigation" class="ui-grouped-buttons">
+										    										
+    										<div id="plot-arrow-next" class="disabled">
+    										    <a href="#">
+    										        <i class="fa fa-angle-right fa-lg"></i>
+    										    </a>
+    										</div>
+    										<div id="plot-arrow-prev" class="disabled">
+        										<a href="#">
+        										    <i class="fa fa-angle-left fa-lg"></i>
+        										</a>
+    										</div>
+										
 											<ul>
 												<li>
 													<a href="{BASE_SCIRPT}api/stats/yesterday" class="stat dayly">{$_lang_day}</a>
@@ -358,6 +409,7 @@
 												</li>
 											</ul>
 										</div>
+
 										
 										<div id="plot-container">
 											<span class="loading"><img src="images/16x16/loading.gif" alt="" /> $_lang_loading</span>
