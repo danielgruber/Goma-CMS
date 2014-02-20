@@ -13,9 +13,6 @@
 @color-darkgrey: #555;
 @color-tint: @system-tint;
 
-@color-grey: #f5f4f2;
-@color-border-grey: #e0e0e0;
-
 @color-action: @system-action;
 @color-highlight: @system-highlight;
 
@@ -99,7 +96,7 @@ h1, h2, h3 {
 
 #adminPanel #head {
 	position: fixed;
-	background: @color-grey;
+	background: #eee;
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -147,9 +144,9 @@ h1, h2, h3 {
 		width: 100%;
 		
 		display: none;
-		background: @color-grey;
+		background: #eee;
 		
-		border: 1px solid @color-border-grey;
+		border: 1px solid #ccc;
 		
 		position: absolute;
 		left: 0;
@@ -210,7 +207,7 @@ h1, h2, h3 {
 						width: 3.875em;
 						display: block;
 						margin: 0 auto;
-						background: @color-grey;
+						background: #eee;
 						border: 1px solid #ccc;
 						
 						border-radius: 0.5em;
@@ -247,7 +244,7 @@ h1, h2, h3 {
 		
 		#sidebar_head {
 			
-			border-bottom: 1px solid @color-border-grey;
+			border-bottom: 1px solid #ccc;
 			
 			padding: 0.5em;
 			
@@ -307,8 +304,8 @@ h1, h2, h3 {
 					padding: @space-normal 0;
 					width: 10em;
 					
-					background: @color-grey;
-					border: 1px solid #ddd;
+					background: #eee;
+					border: 1px solid #ccc;
 					
 					li {
 						padding: 0;
@@ -383,7 +380,7 @@ h1, h2, h3 {
 	}
 	
 	#head_inner {
-		border-bottom: 0.063em solid @color-border-grey;
+		border-bottom: 0.063em solid #ccc;
 		padding: 0.063em;
 	}
 	
@@ -423,8 +420,8 @@ h1, h2, h3 {
 	.content_container {
 		margin-top: 0.75em;
 		margin-bottom: 0.75em;
-		border: 0.063em solid @color-border-grey;
-		background: @color-grey;
+		border: 0.063em solid #ddd;
+		background: #f5f5f5;
 		
 		border-radius: 0.25em;
 		-webkit-border-radius: 0.25em;
@@ -522,46 +519,70 @@ h1, h2, h3 {
 	}
 }
 
-.ui-grouped-buttons ul {
-	list-style: none;
-	width: auto;
-	display: inline-block;
-	margin: 0.75em;
-	padding: 0;
-	
-	border: 0.063em solid @color-action;
-	-webkit-border-radius: 0.25em;
-	border-radius: 0.25em;
-	
-	li {
-		display: inline-block;
-		margin: 0;
-		padding: 0;
-		
-		a {
-			display: block;
-			padding: 0.375em 0.5em !important;
-			
-			-webkit-transition: all linear 0.2s;
-			-moz-transition: all linear 0.2s;
-			-o-transition: all linear 0.2;
-			-ms-transition: all linear 0.2s;
-			transition: all linear 0.2s;
-			
-			text-decoration: none;
-		}
-		
-		a.active {
-			background: @color-action;
-			color: #fff;
-		}
-	}
-	
-	li:first-child {
-		a {
-			padding-left: 0.625em;
-		}
-	}
+.ui-grouped-buttons {
+    
+    #plot-arrow-next, #plot-arrow-prev {
+        float: left;
+        padding: .75em .25em;
+        
+        a {
+            margin: 0;
+            padding: 0 !important;
+        }
+    }
+    
+    #plot-arrow-prev {
+        float: right;
+    }
+    
+    #plot-arrow-next.disabled, #plot-arrow-prev.disabled {
+        a {
+            color: #bbb;
+        }
+    }
+    
+    
+    ul {
+    	list-style: none;
+    	width: auto;
+    	display: inline-block;
+    	margin: 0.75em;
+    	padding: 0;
+    	
+    	border: 0.063em solid @color-action;
+    	-webkit-border-radius: 0.25em;
+    	border-radius: 0.25em;
+    	
+    	li {
+    		display: inline-block;
+    		margin: 0;
+    		padding: 0;
+    		
+    		a {
+    			display: block;
+    			padding: 0.375em 0.5em !important;
+    			
+    			-webkit-transition: all linear 0.2s;
+    			-moz-transition: all linear 0.2s;
+    			-o-transition: all linear 0.2;
+    			-ms-transition: all linear 0.2s;
+    			transition: all linear 0.2s;
+    			
+    			text-decoration: none;
+    		}
+    		
+    		a.active {
+    			background: @color-action;
+    			color: #fff;
+    		}
+    	}
+    	
+    	li:first-child {
+    		a {
+    			padding-left: 0.625em;
+    		}
+    	}
+    }
 }
 
 
@@ -734,7 +755,7 @@ textarea, input[type=text], input[type=password] {
 	-webkit-border-radius: 0.1875em;
 	border-radius: 0.1875em;
 	margin: 0.2em;
-    background: @color-grey;
+    background: #eee;
     border: 0.063em solid #ccc;
     
     :focus {
@@ -791,13 +812,13 @@ form h2 {
 	margin: 0;
 }
 .tableview tbody > tr:hover {
-	background: @color-grey;
+	background: #e0e0e0;
 }
 .tableview td {
 	padding: 0.4em 0.6em;
 }
 .tableview thead {
-	background: @color-grey;
+	background: #eee;
 	font-weight: bold;
 	color: #333;
 }
@@ -856,7 +877,7 @@ form h2 {
 .tableview thead tr.search input[type=search] {
 	-webkit-appearance: none;
 	border: 0.063em solid #ccc;
-	padding: 0.37em;
+	padding: 0.31em;
 	padding-right: 1.5em;
 	-webkit-border-bottom-left-radius: 0.25em;
 	-webkit-border-top-left-radius: 0.25em;
@@ -866,7 +887,7 @@ form h2 {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 8em;
+	width: 6em;
 }
 .tableview thead tr.search td {
 	border-top: 0.063em solid #fff;
@@ -949,7 +970,7 @@ form h2 {
 	width: 100%;
 }
 #preview #bottomBar {
-	background: @color-grey;
+	background: #eee;
 }
 #preview #bottomBar .previewLinks {
 	margin-left: 3em;
@@ -1203,7 +1224,7 @@ ul.list-view li a img {
 			height: auto;
 			
 			#navigation {
-				background: @color-grey;
+				background: #eee;
 				border-bottom: 1px solid #ccc;
 				border-top: 1px solid #ccc;
 				display: none;
@@ -1313,7 +1334,7 @@ html.touch {
 		overflow: auto;
 	}
 	
-	#navigation {
+	#navigation {
 		
 			-webkit-overflow-scrolling: touch;
 			overflow: auto;

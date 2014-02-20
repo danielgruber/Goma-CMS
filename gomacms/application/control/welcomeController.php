@@ -23,6 +23,7 @@ class welcomeController extends Controller {
 	 * index
 	*/ 
 	public function index() {
+		Resources::add("default.css");
 		$_SESSION["welcome_screen"] = true;
 		// make some correction to database
 		if(defined("SQL_LOADUP")) {
@@ -45,6 +46,7 @@ class welcomeController extends Controller {
 	 * step 2
 	*/
 	public function step2() {
+		Resources::add("default.css");
 		$form = new Form($this, "user_create", array(
 			new TextField("username", lang("username")),
 			new TextField("email", lang("email")),
@@ -62,6 +64,7 @@ class welcomeController extends Controller {
 	 * step 3
 	*/
 	public function step3() {
+		Resources::add("default.css");
 		$form = new Form($this, "settings", array(
 			new TextField("pagetitle", lang("title")),
 			new Select("timezone", lang("timezone"), i18n::$timezones)
@@ -120,6 +123,7 @@ class welcomeController extends Controller {
 	 *@access public
 	*/
 	public function finish() {
+		Resources::add("default.css");
 		unset($_SESSION["welcome_screen"]);
 		if(@fopen(APP_FOLDER . "application/WELCOME_RUN.php", "w")) {
 			fclose(APP_FOLDER . "application/WELCOME_RUN.php");

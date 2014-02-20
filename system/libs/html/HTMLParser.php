@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.3
+ * @version     2.3.1
  */
 class HTMLParser extends Object
 {
@@ -55,17 +55,19 @@ class HTMLParser extends Object
 				if(PROFILE) Profiler::unmark("HTMLParser scriptParse");
 				
 				if(!Core::is_ajax())
-					if(_eregi('</title>',$html)) {
-						if(_eregi('\<base',$html)) {
-							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
+					if(preg_match('/\<\/title\>/Usi',$html) && preg_match('/\<\/body\>/Usi',$html)) {
+						if(preg_match('/\<base/Usi',$html)) {
+							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n\n		<!--Resources-->\n" . resources::get(true, false) . "\n		<noscript><style type=\"text/css\">.hide-on-js { display: block !important; } .show-on-js { display: none !important; }</style></noscript>\n", $html);
+							$html = str_replace('</body>', "\n" . resources::get(false, true) . "\n	</body>", $html);
 						} else {
-							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n<base href=\"".BASE_URI."\" />\n\n\n		<!--Resources-->\n" . resources::get() . "\n", $html);
+							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n<base href=\"".BASE_URI."\" />\n\n\n		<!--Resources-->\n" . resources::get(true, false) . "\n		<noscript><style type=\"text/css\">.hide-on-js { display: block !important; } .show-on-js { display: none !important; }</style></noscript>\n", $html);
+							$html = str_replace('</body>', "\n" . resources::get(false, true) . "\n	</body>", $html);
 						}
 					} else {
-						if(_eregi('\<base',$html)) {
+						if(preg_match('/\<base/Usi',$html)) {
 							$html = '<meta charset="utf-8" />' . resources::get() . $html;
 						} else {
-							$html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get() . "\n</head><body>" . $html . "\n</body></html>";
+							$html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get(true, false) . "\n</head><body>" . $html . "\n".resources::get(false, true)."</body></html>";
 						}
 					}
 				

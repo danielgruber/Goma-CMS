@@ -16,7 +16,7 @@ ClassInfo::AddSaveVar("Resources", "scanFolders");
  * This class manages all Resources like CSS and JS-Files in a Goma-Page.
  *
  * @package		Goma\System\Core
- * @version		1.5.2
+ * @version		1.5.3
  */
 class Resources extends Object {
     
@@ -345,7 +345,7 @@ class Resources extends Object {
 	 * gets the resources
 	 *
 	*/
-	public static function get() {
+	public static function get($css = true, $js = true) {
 		if (PROFILE) Profiler::mark("Resources::get");
 		
 		if($path = self::getFilePath(self::$lessVars)) {
@@ -354,67 +354,72 @@ class Resources extends Object {
 			throw new LogicException("static \$lessVars must be an existing less-file.");
 		}
 		
-		
-		
 		// generate files
-		$files = self::generateFiles();
+		$files = self::generateFiles($css, $js);
 		$js = $files[1];
 		$css = $files[0];
 		
-		if (self::$registeredResources["js"])
+		if ($js && self::$registeredResources["js"])
 			self::$resources_data[] = "goma.ui.registerResources('js', ".json_encode(array_values(self::$registeredResources["js"])).");";
 		
-		if (self::$registeredResources["css"])
+		if ($css && self::$registeredResources["css"])
 			self::$resources_data[] = "goma.ui.registerResources('css', ".json_encode(array_values(self::$registeredResources["css"])).");";
 
 		if (Core::is_ajax()) {
 			// write data to file
-			$datajs = implode("\n", self::$resources_data);
-			FileSystem::Write(ROOT . CACHE_DIRECTORY . "/data.".md5($datajs).".js",$datajs);
-			$js = array_merge(array(CACHE_DIRECTORY . "/data.".md5($datajs).".js"), $js);
+			if($js) {
+				$datajs = implode("\n", self::$resources_data);
+				FileSystem::Write(ROOT . CACHE_DIRECTORY . "/data.".md5($datajs).".js",$datajs);
+				$js = array_merge(array(CACHE_DIRECTORY . "/data.".md5($datajs).".js"), $js);
+			}
+			
 			return array("css"	=> $css, "js"	=> $js);
 		} else {
-			// generate data
-			$datajs = implode("\n			", self::$resources_data);
+			
 			// now render
 			$html = "";
-			if (isset($css["files"])) {
-				foreach($css["files"] as $file) {
+			
+			if($css) {
+				if (isset($css["files"])) {
+					foreach($css["files"] as $file) {
+						$html .= "			<link rel=\"stylesheet\" type=\"text/css\" href=\"".ROOT_PATH . $file."\" />\n";
+					}
+					unset($css["files"]);
+				}
+				foreach($css as $key => $file) {
 					$html .= "			<link rel=\"stylesheet\" type=\"text/css\" href=\"".ROOT_PATH . $file."\" />\n";
 				}
-				unset($css["files"]);
-			}
-			foreach($css as $key => $file) {
-				$html .= "			<link rel=\"stylesheet\" type=\"text/css\" href=\"".ROOT_PATH . $file."\" />\n";
 			}
 			
-			
-			foreach($js as $file) {
-				$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."\"></script>\n";
+			if($js) {
+				foreach($js as $file) {
+					$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."\"></script>\n";
+				}
+				
+				if(isset(ClassInfo::$appENV["expansion"])) {
+				    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]) . ".js");
+	    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
+	    		} else {
+	    		    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . ".js");
+	    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
+	    		}
+	    		
+	    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
+	    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
+	    		}
+	    		
+	    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
+				
+				// generate data
+				$datajs = implode("\n			", self::$resources_data);
+				
+				$html .= "\n\n
+			<script type=\"text/javascript\">
+			// <![CDATA[
+				".$datajs."
+			// ]]>
+			</script>";
 			}
-			
-			if(isset(ClassInfo::$appENV["expansion"])) {
-			    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]) . ".js");
-    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
-    		} else {
-    		    $file = self::getFileName(CACHE_DIRECTORY . "lang." . Core::$lang . count(i18n::$languagefiles) . ".js");
-    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
-    		}
-    		
-    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
-    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
-    		}
-    		
-    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
-			
-			$html .= "\n\n
-		<script type=\"text/javascript\">
-		// <![CDATA[
-			".$datajs."
-		// ]]>
-		</script>\n
-		<noscript><style type=\"text/css\">.hide-on-js { display: block !important; } .show-on-js { display: none !important; }</style></noscript>";
-			
 			
 			
 			if (PROFILE) Profiler::unmark("Resources::get");
@@ -480,144 +485,146 @@ class Resources extends Object {
 	 * this method generates all filename and gives them back
 	 *
 	*/
-	public static function generateFiles() {
+	public static function generateFiles($css = true, $js = true) {
 		
 		if (PROFILE) Profiler::mark("Resources::generateFiles");
 		$css_files = array();
 		$js_files = array();
+		
+		if($css) {
+			// css
+			
+			if (isset(self::$resources_css["default"])) {
+				$css_files = array_merge($css_files, self::$resources_css["default"]);
+			}
+			// normal combines
+			if (isset(self::$resources_css["combine"])) {
+				self::generateCSSFile(self::$resources_css["combine"], "combine", $css_files);
+			}
+			// main combines
+			if (isset(self::$resources_css["main"])) {
+	 			self::generateCSSFile(self::$resources_css["main"], "main", $css_files);
+			}
+		}
+
+		if($js) {
+			if(Core::is_ajax()) {
+				// javascript
+				$resources_js = self::$resources_js;
 	
-		// css
-		
-		if (isset(self::$resources_css["default"])) {
-			$css_files = array_merge($css_files, self::$resources_css["default"]);
-		}
-		// normal combines
-		if (isset(self::$resources_css["combine"])) {
-			self::generateCSSFile(self::$resources_css["combine"], "combine", $css_files);
-		}
-		// main combines
-		if (isset(self::$resources_css["main"])) {
- 			self::generateCSSFile(self::$resources_css["main"], "main", $css_files);
-		}
-
-		
-		if(Core::is_ajax()) {
-			// javascript
-			$resources_js = self::$resources_js;
-
-
-			if(isset($resources_js["main"]["files"])) {
-				$js_files = array_merge(array_values(self::$resources_js["main"]["files"]), $js_files);
-			}
-			if(isset($resources_js["default"]["files"])) {
-				$js_files = array_merge(array_values(self::$resources_js["default"]["files"]), $js_files);
-			}
-			
-			
-			// raw
-			if(isset($resources_js["default"]["raw"])) {
-				self::$raw_js = array_merge(self::$raw_js, self::$resources_js["default"]["raw"]);
-			}
-			if(isset($resources_js["main"]["raw"])) {
-				self::$raw_js = array_merge(self::$raw_js, self::$resources_js["main"]["raw"]);
-			}
-			
-			
-			unset($resources_js["main"]);
-			unset($resources_js["default"]);
-
-
-			foreach($resources_js as $data) {
-				if(isset($data["files"])) {
-					$js_files = array_merge($data["files"], $js_files);
+	
+				if(isset($resources_js["main"]["files"])) {
+					$js_files = array_merge(array_values(self::$resources_js["main"]["files"]), $js_files);
+				}
+				if(isset($resources_js["default"]["files"])) {
+					$js_files = array_merge(array_values(self::$resources_js["default"]["files"]), $js_files);
 				}
 				
-				if(isset($data["raw"])) {
-					self::$raw_js = array_merge(self::$raw_js, $data["raw"]);
+				
+				// raw
+				if(isset($resources_js["default"]["raw"])) {
+					self::$raw_js = array_merge(self::$raw_js, self::$resources_js["default"]["raw"]);
 				}
-			}
-			
-			foreach($js_files as $k => $f) {
-				if(file_exists($f)) {
-					$js_files[$k] = $f . "?" . filemtime($f);
+				if(isset($resources_js["main"]["raw"])) {
+					self::$raw_js = array_merge(self::$raw_js, self::$resources_js["main"]["raw"]);
 				}
-			}
-
-			
-
-			if(PROFILE) Profiler::mark("Resources::get");
-			// we have to make raw-file
-			if(count(self::$raw_js) > 0) {
-				$file = self::getFilename(CACHE_DIRECTORY . "/raw_".md5(implode("", self::$raw_js)).".js");
-				if(!is_file(ROOT . $file)) {
-						$js = "";
-						foreach(self::$raw_js as $code) {
-							$js .= "/* RAW */\n\n";
-							$js .= self::jsMin($code) . "\n\n";
-						}
-						FileSystem::Write($file,self::getEncodedString($js));
-						$js_files[] = $file;
-				} else {
-						$js_files[] = $file;
-				}
-			}
-		} else {
-			// javascript
-			$resources_js = self::$resources_js;
-			// main
-			if (isset($resources_js["main"])) {
-					$js_files[] = self::makeCombiedJS($resources_js["main"]);
-					unset($resources_js["main"]);
-			}
-			
-			// default
-			if (isset($resources_js["default"])) {
-					foreach($resources_js["default"]["files"] as $jsfile) {
-						if (file_exists($jsfile)) {
-							$js_files[] = $jsfile . "?" . filemtime($jsfile);
-						} else {
-							$js_files[] = $jsfile;
-						}
-						self::registerLoaded("js", $jsfile);
+				
+				
+				unset($resources_js["main"]);
+				unset($resources_js["default"]);
+	
+	
+				foreach($resources_js as $data) {
+					if(isset($data["files"])) {
+						$js_files = array_merge($data["files"], $js_files);
 					}
-					unset($resources_js["default"], $jsfile);
-			}
-			
-			// all others
-			foreach($resources_js as $combine_name) {
-				$js_files[] = self::makeCombiedJS($combine_name);
-			}
-			
-			$debugStr = (self::$debug) ? "debug" : "";
-			
-			// we have to make raw-file
-			if (count(self::$raw_js) > 0) {
-				$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw_".md5(implode("", self::$raw_js))."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).$debugStr.".js");
-				if (!is_file($file)) {
-						$js = "";
-						foreach(self::$raw_js as $code) {
-							$js .= "/* RAW */\n\n";
-							$js .= self::jsMIN($code) . "\n\n";
+					
+					if(isset($data["raw"])) {
+						self::$raw_js = array_merge(self::$raw_js, $data["raw"]);
+					}
+				}
+				
+				foreach($js_files as $k => $f) {
+					if(file_exists($f)) {
+						$js_files[$k] = $f . "?" . filemtime($f);
+					}
+				}
+	
+				
+	
+				if(PROFILE) Profiler::mark("Resources::get");
+				// we have to make raw-file
+				if(count(self::$raw_js) > 0) {
+					$file = self::getFilename(CACHE_DIRECTORY . "/raw_".md5(implode("", self::$raw_js)).".js");
+					if(!is_file(ROOT . $file)) {
+							$js = "";
+							foreach(self::$raw_js as $code) {
+								$js .= "/* RAW */\n\n";
+								$js .= self::jsMin($code) . "\n\n";
+							}
+							FileSystem::Write($file,self::getEncodedString($js));
+							$js_files[] = $file;
+					} else {
+							$js_files[] = $file;
+					}
+				}
+			} else {
+				// javascript
+				$resources_js = self::$resources_js;
+				// main
+				if (isset($resources_js["main"])) {
+						$js_files[] = self::makeCombiedJS($resources_js["main"]);
+						unset($resources_js["main"]);
+				}
+				
+				// default
+				if (isset($resources_js["default"])) {
+						foreach($resources_js["default"]["files"] as $jsfile) {
+							if (file_exists($jsfile)) {
+								$js_files[] = $jsfile . "?" . filemtime($jsfile);
+							} else {
+								$js_files[] = $jsfile;
+							}
+							self::registerLoaded("js", $jsfile);
 						}
-						FileSystem::Write($file,self::getEncodedString($js));
-						$js_files[] = $file;
+						unset($resources_js["default"], $jsfile);
 				}
-			}
-			
-			// raw JS
-			if (isset(self::$resources_css["raw"]["data"]) && count(self::$resources_css["raw"]["data"]) > 0) {
-				$css = implode("\n\n", self::$resources_css["raw"]["data"]);
-				$filename = self::getFileName(CACHE_DIRECTORY . "/raw_" . md5($css) . ".css");
-				if (!is_file(ROOT . $filename)) {
-					FileSystem::Write($filename,self::getEncodedString($css));
-					$css_files[] = $filename;
-				} else {
-					$css_files[] = $filename;
+				
+				// all others
+				foreach($resources_js as $combine_name) {
+					$js_files[] = self::makeCombiedJS($combine_name);
 				}
+				
+				$debugStr = (self::$debug) ? "debug" : "";
+				
+				// we have to make raw-file
+				if (count(self::$raw_js) > 0) {
+					$file = self::getFileName(ROOT . CACHE_DIRECTORY . "raw_".md5(implode("", self::$raw_js))."_".preg_replace('/[^a-zA-Z0-9_]/', '_', self::VERSION).$debugStr.".js");
+					if (!is_file($file)) {
+							$js = "";
+							foreach(self::$raw_js as $code) {
+								$js .= "/* RAW */\n\n";
+								$js .= self::jsMIN($code) . "\n\n";
+							}
+							FileSystem::Write($file,self::getEncodedString($js));
+							$js_files[] = $file;
+					}
+				}
+				
+				// raw JS
+				if (isset(self::$resources_css["raw"]["data"]) && count(self::$resources_css["raw"]["data"]) > 0) {
+					$css = implode("\n\n", self::$resources_css["raw"]["data"]);
+					$filename = self::getFileName(CACHE_DIRECTORY . "/raw_" . md5($css) . ".css");
+					if (!is_file(ROOT . $filename)) {
+						FileSystem::Write($filename,self::getEncodedString($css));
+						$css_files[] = $filename;
+					} else {
+						$css_files[] = $filename;
+					}
+				}
+				usort($js_files, array("Resources", "sortjs"));
 			}
-			usort($js_files, array("Resources", "sortjs"));
 		}
-
 
 		if (PROFILE) Profiler::unmark("Resources::generateFiles");
 		return array($css_files, $js_files);
