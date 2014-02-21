@@ -60,8 +60,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@access public
 		*/
 		static $index = array(
-			array("type" => "INDEX", "fields" => "path,sort,class_name", "name" => "path"),
-			array("type" => "INDEX", "fields" => "parentid,mainbar,class_name", "name"	=> "mainbar"),
+			array("type" => "INDEX", "fields" => "path,sort", "name" => "path"),
+			array("type" => "INDEX", "fields" => "parentid,mainbar", "name"	=> "mainbar"),
 			array("type" => "INDEX", "fields" => "class_name,data,title,mainbartitle,meta_keywords,id","name" => "sitesearch")
 		);
 		
@@ -1030,18 +1030,18 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			if(!Permission::check("superadmin")) {
 				if(!member::login()) {
-					$query->leftJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
-					$query->leftJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
 					
 					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password')");
 				} else if(Permission::check("ADMIN_CONTENT")) {
-					$query->leftJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
-					$query->leftJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
-					
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
+										
 					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users', 'admin') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
 				} else {
-					$query->leftJOIN("permission_state", "view_permission_state.id = pages.read_permissionid", "view_permission_state");
-					$query->leftJOIN("permission", "view_permission.id = view_permission_state.publishedid", "view_permission");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
 					
 					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
 				}
