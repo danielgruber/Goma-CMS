@@ -52,7 +52,6 @@ if (isset($_REQUEST["profile"]) || defined("PROFILE")) {
 	require_once (dirname(__FILE__) . '/core/profiler.php');
 	Profiler::init();
 	defined("PROFILE") OR define("PROFILE", true);
-	Profiler::mark("init");
 } else {
 	define("PROFILE", false);
 }
@@ -251,9 +250,6 @@ date_default_timezone_set(DEFAULT_TIMEZONE);
 
 parseUrl();
 
-if (PROFILE)
-	Profiler::unmark("init");
-
 if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
 	writeServerConfig();
 }
@@ -323,9 +319,6 @@ function loadFramework() {
 	}
 
 	if (PROFILE)
-		Profiler::mark("loadFramework");
-
-	if (PROFILE)
 		Profiler::mark("Manifest");
 
 	ClassInfo::loadfile();
@@ -336,9 +329,6 @@ function loadFramework() {
 	// set some object-specific vars
 	ClassInfo::setSaveVars("core");
 	ClassInfo::setSaveVars("object");
-
-	if (PROFILE)
-		Profiler::unmark("loadFramework");
 		
 	Core::Init();
 }

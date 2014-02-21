@@ -91,6 +91,11 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static $ClassInfoHooks = array();
+	
+	/**
+	 * list of all known interfaces.
+	*/
+	public static $interfaces = array();
 
 	/**
 	 * registers a hook on class info loaded
@@ -857,7 +862,9 @@ class ClassInfo extends Object {
 
 				unset($class, $data);
 			}
-
+			
+			
+			
 			foreach(self::$class_info as $class => $data) {
 				if(!ClassInfo::isAbstract($class)) {
 					if(ClassInfo::hasInterface($class, "PermProvider")) {
@@ -873,7 +880,11 @@ class ClassInfo extends Object {
 
 					unset($c);
 				}
-
+				
+				if(isset(self::$class_info[$class]["interfaces"])) {
+					self::$interfaces = array_merge(self::$interfaces, ArrayLib::key_value(self::$class_info[$class]["interfaces"]));
+				}
+				
 				if(isset(self::$class_info[$class]["child"]) && !empty(self::$class_info[$class]["child"])) {
 					self::$childData[$class] = self::$class_info[$class]["child"];
 					//chmod($f, 0777);
@@ -889,10 +900,13 @@ class ClassInfo extends Object {
 			// reappend
 			self::$class_info["permission"]["providedPermissions"] = Permission::$providedPermissions;
 
+			
+			
 			if(PROFILE)
 				Profiler::unmark("classinfo_renderafter");
 
 			$php = "<?php\n";
+			$php .= "ClassInfo::\$interfaces = " . var_export(array_values(self::$interfaces), true) . ";\n";
 			$php .= "ClassInfo::\$appENV = " . var_export(self::$appENV, true) . ";\n";
 			$php .= "ClassInfo::\$class_info = " . var_export(self::$class_info, true) . ";\n";
 			$php .= "ClassInfo::\$files = " . var_export(self::$files, true) . ";\n";
@@ -911,7 +925,7 @@ class ClassInfo extends Object {
 			}
 
 			if(function_exists("apc_store")) {
-				$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
+				$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "interfaces" => self::$interfaces, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
 				apc_store(CLASS_INFO_DATAFILE, $data);
 			}
 
@@ -956,6 +970,7 @@ class ClassInfo extends Object {
 				self::$tables = $data["tables"];
 				self::$database = $data["database"];
 				self::$childData = $data["childData"];
+				self::$interfaces = $data["interfaces"];
 				ClassManifest::$preload = $data["preload"];
 
 				// load preloads
@@ -1042,6 +1057,10 @@ class ClassInfo extends Object {
 					// that are own function, for generating class-info
 					foreach(ClassInfo::getStatic($class, "ci_funcs") as $name => $func) {
 						self::$class_info[$class][$name] = classinfo::callStatic($class, $func);
+					}
+					
+					if(isset(self::$class_info[$class]["interfaces"])) {
+						self::$interfaces = array_merge(self::$interfaces, ArrayLib::key_value(self::$class_info[$class]["interfaces"]));
 					}
 				}
 			}
@@ -1160,6 +1179,7 @@ class ClassInfo extends Object {
 
 		// generate file
 		$php = "<?php\n";
+		$php .= "ClassInfo::\$interfaces = " . var_export(array_values(self::$interfaces), true) . ";\n";
 		$php .= "ClassInfo::\$appENV = " . var_export(self::$appENV, true) . ";\n";
 		$php .= "ClassInfo::\$class_info = " . var_export(self::$class_info, true) . ";\n";
 		$php .= "ClassInfo::\$files = " . var_export(self::$files, true) . ";\n";
@@ -1175,7 +1195,7 @@ class ClassInfo extends Object {
 
 		// generate apc-part
 		if(function_exists("apc_store")) {
-			$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
+			$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "interfaces" => self::$interfaces, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
 			apc_store(CLASS_INFO_DATAFILE, $data);
 		}
 

@@ -382,14 +382,3 @@ class History extends DataObject {
 		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
 	}
 }
-
-interface HistoryData {
-	/**
-	 * returns text what to show about the event
-	 *
-	 *@name generateHistoryData
-	 *@access public
-	 *@return array("icon" => ..., "text" => ...)
-	*/
-	public static function generateHistoryData($record);
-}

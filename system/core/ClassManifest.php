@@ -45,10 +45,18 @@ class ClassManifest {
 	 */
 	public static function load($class) {
 
-		if(PROFILE)
-			Profiler::mark("Manifest::load");
 
 		$class = strtolower(trim($class));
+		
+		if(is_array(ClassInfo::$interfaces) && in_array($class, ClassInfo::$interfaces) && !interface_exists($class, false)) {
+			eval('interface '.$class.' {}');
+			if(PROFILE)
+			Profiler::unmark("Manifest::load " . $class);
+			return true;
+		}
+		
+		if(PROFILE)
+			Profiler::mark("Manifest::load " . $class);
 
 		if(!isset(self::$loaded[$class])) {
 			if(isset(ClassInfo::$files[$class])) {
@@ -70,7 +78,7 @@ class ClassManifest {
 		}
 
 		if(PROFILE)
-			Profiler::unmark("Manifest::load");
+			Profiler::unmark("Manifest::load " . $class);
 	}
 
 	/**

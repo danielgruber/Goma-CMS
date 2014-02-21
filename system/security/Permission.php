@@ -14,19 +14,6 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::addSaveVar("Permission","providedPermissions");
 
-/**
- * Permission-provider
-*/
-interface PermissionProvider
-{
-		public function providePermissions();
-}
-
-interface PermProvider {
-	public function providePerms();
-}
-
-
 class Permission extends DataObject
 {
 		/**
