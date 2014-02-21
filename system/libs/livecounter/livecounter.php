@@ -55,11 +55,7 @@ class livecounter extends DataObject
 		*/
 		static $index = array(
 			"recordid" 	    => false,
-			"security"	    => array(
-                "name"      => "Security",
-                "fields"    => "ip, browser, phpsessid, last_modified",
-                "type"      => "INDEX"
-            )
+            "phpsessid"		=> "INDEX"
 		);
 		
 		

@@ -64,15 +64,17 @@ class DataObjectClassInfo extends Extension
 								{
 										$fields = $value["fields"];
 										$indexes[$key]["fields"] = array();
-										$fields = explode(",", $fields);
+										if(!is_array($fields))
+											$fields = explode(",", $fields);
+											
 										$maxlength = $length = floor(333 / count($fields));
 										$fields_ordered = array();
-										
+			
 										foreach($fields as $field)
 										{
 												if(isset($db_fields[$field]))
 												{
-													if(_ereg('\(\s*([0-9]+)\s*\)', $db_fields[$field], $matches))
+													if(preg_match('/\(\s*([0-9]+)\s*\)/Us', $db_fields[$field], $matches))
 													{
 														
 														$fields_ordered[$field] = $matches[1] - 1;
@@ -96,16 +98,16 @@ class DataObjectClassInfo extends Extension
 													$maxlength = floor($indexlength / (count($fields) - $i));
 													$indexlength -= $length;
 													$indexes[$key]["fields"][] = $field;
-												} else if(_eregi('enum', $db_fields[$field])) {
+												} else if(preg_match('/enum/i', $db_fields[$field])) {
 													$indexes[$key]["fields"][] = $field;
 												} else {
 													$length = $maxlength;
 													// support for ASC/DESC
 													if(_eregi("(ASC|DESC)", $field, $matches)) {
 														$field = preg_replace("/(ASC|DESC)/i", "", $field);
-														$indexes[$key]["fields"][] = $field . "(".$length.") ".$matches[1]."";
+														$indexes[$key]["fields"][] = $field . " (".$length.") ".$matches[1]."";
 													} else {
-														$indexes[$key]["fields"][] = $field . "(".$length.")";
+														$indexes[$key]["fields"][] = $field . " (".$length.")";
 													}
 													unset($matches);
 												}

@@ -3188,7 +3188,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@param array - join
 	 *@param string|int|false - version
 	*/
-	public function buildSearchQuery($searchQuery = array(), $filter = array(), $sort = array(), $limit = array(), $join = array(), $version = false) {
+	public function buildSearchQuery($searchQuery = array(), $filter = array(), $sort = array(), $limit = array(), $join = array(), $version = false, $forceClasses = true) {
 		if (PROFILE) Profiler::mark("DataObject::buildSearchQuery");
 		
 		$query = $this->buildQuery($version, $filter, $sort, $limit, $join);
@@ -3197,16 +3197,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 		foreach($this->getextensions() as $ext)
 		{
-				if (Object::method_exists($ext, "argumentSQL")) {
-					$newquery = $this->getinstance($ext)->setOwner($this)->argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
+				if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
+					$newquery = $this->getinstance($ext)->setOwner($this)->argumentQuery($query, $version, $filter, $sort, $limit, $join, $forceClasses);
 					if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
 						$query = $newquery;
 						unset($newquery);
 					}
 				}
 				
-				if (Object::method_exists($ext, "argumentSelectSQL")) {
-					$newquery = $this->getinstance($ext)->setOwner($this)->argumentSelectQuery($query, $searchQuery, $version, $filter, $sort, $limit, $joins, $forceClasses);
+				if (ClassInfo::hasInterface($ext, "argumentsSearchQuery")) {
+					$newquery = $this->getinstance($ext)->setOwner($this)->argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
 					if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
 						$query = $newquery;
 						unset($newquery);
@@ -3343,7 +3343,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$query = $this->buildQuery($version, $filter, $sort, $limit, $joins, $forceClasses);
 			foreach($this->getextensions() as $ext)
 			{
-					if (Object::method_exists($ext, "argumentSQL")) {
+					if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
 						$newquery = $this->getinstance($ext)->setOwner($this)->argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
 						if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
 							$query = $newquery;
@@ -4779,4 +4779,11 @@ abstract class DataObjectExtension extends Extension
 		public function generateDefaults() {		
 			return array();
 		}
+}
+
+interface argumentsQuery {
+	public function argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
+}
+interface argumentsSearchQuery {
+	public function argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
 }

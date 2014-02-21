@@ -39,17 +39,14 @@ class SearchController extends FrontedController
         }
 }
 
-class SearchPageExtension extends DataObjectExtension
+class SearchPageExtension extends DataObjectExtension implements argumentsSearchQuery
 {
-        public function argumentSearchSQL($query, $search)
+        public function argumentSearchSQL($query, $search, $version, $filter, $sort, $limit, $join, $forceClasses)
         {
-                $_query = Object::instance("boxes")->buildSearchQuery(array("seiteid"));
-                
-                // override default fields, because goma loads as default id, class_name, autorid and last_modfied
-                $_query->fields = array("seiteid" => "seiteid");               
+                $_query = Object::instance("boxes")->buildSearchQuery($search);
                 
                 // now generate query and new addWhere
-                $query->addFilter(array("OR", "pages.id IN ( ".$_query->build() ." )" ));                
+                $query->addFilter(array("OR", "pages.id IN ( ".$_query->build("seiteid") ." )" ));                
                 
                 return $query;
         }

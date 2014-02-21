@@ -548,6 +548,7 @@ class mysqliDriver extends object implements SQLDriver
 				// sort sql, so first drop and then add
 				$removeindexsql = "";
 				$addindexsql = "";
+
 				
 				// check indexes
 				foreach($indexes as $key => $data) {
@@ -558,7 +559,7 @@ class mysqliDriver extends object implements SQLDriver
 						$name = $data["name"];
 						$ifields = $data["fields"];
 						$type = $data["type"];
-					} else if(_ereg("\(", $data)) {
+					} else if(preg_match("/\(/", $data)) {
 						$name = $key;
 						$allowed_indexes[$name] = true;
 						if(isset($currentindexes[$key])) {

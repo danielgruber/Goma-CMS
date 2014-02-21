@@ -151,6 +151,8 @@ require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
 if (PROFILE)
 	Profiler::unmark("core_requires");
+	
+	
 
 // set error-handler
 set_error_handler("Goma_ErrorHandler");
