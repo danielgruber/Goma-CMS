@@ -48,8 +48,12 @@ class ClassManifest {
 
 		$class = strtolower(trim($class));
 		
-		if(is_array(ClassInfo::$interfaces) && in_array($class, ClassInfo::$interfaces) && !interface_exists($class, false)) {
-			eval('interface '.$class.' {}');
+		if(isset(ClassInfo::$interfaces[$class]) && !interface_exists($class, false)) {
+			if(ClassInfo::$interfaces[$class]) {
+				eval('interface '.$class.' extends '.ClassInfo::$interfaces[$class].' {}');
+			} else {
+				eval('interface '.$class.' {}');
+			}
 			if(PROFILE)
 			Profiler::unmark("Manifest::load " . $class);
 			return true;

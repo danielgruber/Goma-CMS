@@ -8,22 +8,6 @@ require_once (FRAMEWORK_ROOT . "libs/html/HTMLNode.php");
 require_once (FRAMEWORK_ROOT . "form/FormAction.php");
 require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
 
-interface FormActionHandler {
-	/**
-	 * returns if this action can submit the form
-	 *
-	 *@name canSubmit
-	 *@return bool
-	 */
-	public function canSubmit($data);
-
-	/**
-	 *@name getsubmit
-	 *@return string - method on controller OR @default for Default-Submission
-	 */
-	public function getSubmit();
-}
-
 /**
  * The basic class for every Form in the Goma-Framework. It can have FormFields
  * in it.

@@ -882,7 +882,9 @@ class ClassInfo extends Object {
 				}
 				
 				if(isset(self::$class_info[$class]["interfaces"])) {
-					self::$interfaces = array_merge(self::$interfaces, ArrayLib::key_value(self::$class_info[$class]["interfaces"]));
+					foreach(self::$class_info[$class]["interfaces"] as $interface) {
+						self::addInterface($interface);
+					}
 				}
 				
 				if(isset(self::$class_info[$class]["child"]) && !empty(self::$class_info[$class]["child"])) {
@@ -906,7 +908,7 @@ class ClassInfo extends Object {
 				Profiler::unmark("classinfo_renderafter");
 
 			$php = "<?php\n";
-			$php .= "ClassInfo::\$interfaces = " . var_export(array_values(self::$interfaces), true) . ";\n";
+			$php .= "ClassInfo::\$interfaces = " . var_export(self::$interfaces, true) . ";\n";
 			$php .= "ClassInfo::\$appENV = " . var_export(self::$appENV, true) . ";\n";
 			$php .= "ClassInfo::\$class_info = " . var_export(self::$class_info, true) . ";\n";
 			$php .= "ClassInfo::\$files = " . var_export(self::$files, true) . ";\n";
@@ -1038,6 +1040,26 @@ class ClassInfo extends Object {
 			}
 		}
 	}
+	
+	/**
+	 * adds interface to list.
+	*/
+	static function addInterface($interface) {
+		
+		$interface = strtolower($interface);
+		
+		if($interface == "")
+			return;
+		
+		if(!isset(self::$interfaces[$interface])) {
+			$parentsi = array_values(class_implements($interface));
+			self::$interfaces[$interface] = isset($parentsi[0]) ? $parentsi[0] : false;
+			
+			if(isset($parentsi[0])) {
+				self::addInterface($parentsi[0]);
+			}
+		}
+	}
 
 	/**
 	 * finalizes the classinfo
@@ -1060,7 +1082,9 @@ class ClassInfo extends Object {
 					}
 					
 					if(isset(self::$class_info[$class]["interfaces"])) {
-						self::$interfaces = array_merge(self::$interfaces, ArrayLib::key_value(self::$class_info[$class]["interfaces"]));
+						foreach(self::$class_info[$class]["interfaces"] as $interface) {
+							self::addInterface($interface);
+						}
 					}
 				}
 			}
@@ -1179,7 +1203,7 @@ class ClassInfo extends Object {
 
 		// generate file
 		$php = "<?php\n";
-		$php .= "ClassInfo::\$interfaces = " . var_export(array_values(self::$interfaces), true) . ";\n";
+		$php .= "ClassInfo::\$interfaces = " . var_export(self::$interfaces, true) . ";\n";
 		$php .= "ClassInfo::\$appENV = " . var_export(self::$appENV, true) . ";\n";
 		$php .= "ClassInfo::\$class_info = " . var_export(self::$class_info, true) . ";\n";
 		$php .= "ClassInfo::\$files = " . var_export(self::$files, true) . ";\n";
