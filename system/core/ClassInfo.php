@@ -18,7 +18,7 @@ interface SaveVarSetter {
  * This class provides information about other classes.
  *
  * @package		Goma\System\Core
- * @version		3.7
+ * @version		3.7.1
  */
 class ClassInfo extends Object {
 	/**
@@ -949,7 +949,11 @@ class ClassInfo extends Object {
 					call_user_func_array($hook, array());
 				}
 			}
-
+			
+			foreach(self::$class_info as $class => $data) {
+				Core::callHook("loadedClass" . $class);
+			}
+			
 			if(PROFILE)
 				Profiler::unmark("generate_class_info");
 		} else {

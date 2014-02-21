@@ -63,7 +63,7 @@ class RegisterExtension extends ControllerExtension
 		 *
 		 *@name extra_methods
 		*/
-		public static $extra_methods = array("register");
+		public static $extra_methods = array("register", "doRegister");
 		
 		/**
 		 * add custom method to handle the action
@@ -106,7 +106,7 @@ class RegisterExtension extends ControllerExtension
 				// great, let's show a form
 				} else {
 					$user = new user();
-					return $user->controller()->form(false, false, array(), false, "doregister");
+					return $user->controller($this->getOwner())->form(false, false, array(), false, "doregister");
 				}
 		}
 		
@@ -122,6 +122,7 @@ class RegisterExtension extends ControllerExtension
 				if(self::$validateMail) {
 					$data["status"] = 0;
 					$data["code"] = randomString(10);
+					
 					// send out mail
 					$email = "";
 					$email .= lang("hello") . " ".text::protect($data["nickname"])."<br />\n<br />\n";
@@ -133,13 +134,13 @@ class RegisterExtension extends ControllerExtension
 					if(!$mail->sendHTML($data["email"], lang("register"), $email)) {
 						throwError(6, 'Server-Error', 'Could not send out mail.');
 					}
-					if($this->save($data))			
+					if($this->getOwner()->save($data))			
 						return '<div class="success">' . lang('register_ok_activate', "User successful created. Please visit your e-mail-provider to check out the e-mail we sent to you.") . '</div>';		
 					else
 						throwError(6, 'Server-Error', 'Could not save data.');
 
 				} else {
-					if($this->save($data))			
+					if($this->getOwner()->save($data))			
 						return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		
 					else
 						throwError(6, 'Server-Error', 'Could not save data.');

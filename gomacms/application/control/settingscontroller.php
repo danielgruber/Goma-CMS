@@ -2,13 +2,14 @@
 /**
   * Settings
   *
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 14.10.2013
-  * $Version 1.2.8
+  *	@package 	goma cms
+  *	@link 		http://goma-cms.org
+  *	@license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *	@author 	Goma-Team
+  * @Version 	1.2.9
 */
+
+Core::addToHook("loadedClassRegisterExtension", array("settingsController", "setRegisterVars"));
 
 class SettingsController extends Controller {
 	/**
@@ -42,6 +43,12 @@ class SettingsController extends Controller {
 	public static function get($name)
 	{	
 			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
+	}
+	
+	public static function setRegisterVars() {
+		RegisterExtension::$enabled = settingsController::get("register_enabled");
+		RegisterExtension::$validateMail = settingsController::get("register_email");
+		RegisterExtension::$registerCode = settingsController::get("register");
 	}
 
 }

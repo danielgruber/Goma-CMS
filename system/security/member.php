@@ -16,7 +16,7 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.2.2
+ * @version		1.2.3
  */
 class userController extends Controller
 {
@@ -248,7 +248,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						if($code != "")
 						{
 								$general->add(new TextField("code", lang("register_code", "Code")));
-								$form->addValidator(new FormValidator(array($this, 'validatecode')), "validatecode");
+								$form->addValidator(new FormValidator(array($this, '_validatecode')), "validatecode");
 						}
 				}
 				if(Permission::check("USERS_MANAGE"))
@@ -405,13 +405,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		 *@param string - value
 		 *@return true|string
 		*/
-		public function validateCode($value)
+		public function _validateCode($obj)
 		{
+				$value = $obj->form->result["code"];
 				if(is_array($value)) {
 					return true;
 				}
 				if(!defined("IS_BACKEND")) {
-						$code = RegisterExtension::$registerCode;;
+						$code = RegisterExtension::$registerCode;
 						if($code != "")
 								return ($code == $value) ? true : lang("register_code_wrong", "The Code was wrong!");
 						else
