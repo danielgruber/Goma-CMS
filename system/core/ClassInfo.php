@@ -10,10 +10,6 @@ defined("IN_GOMA") OR die();
 
 define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
 
-interface SaveVarSetter {
-	public static function __setSaveVars($class);
-}
-
 /**
  * This class provides information about other classes.
  *

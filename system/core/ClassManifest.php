@@ -49,7 +49,7 @@ class ClassManifest {
 		$class = strtolower(trim($class));
 		
 		if(PROFILE)
-			Profiler::mark("Manifest::load " . $class);
+			Profiler::mark("Manifest::load " );
 		
 		if(isset(ClassInfo::$interfaces[$class]) && !interface_exists($class, false)) {
 			if(ClassInfo::$interfaces[$class]) {
@@ -58,7 +58,7 @@ class ClassManifest {
 				eval('interface '.$class.' {}');
 			}
 			if(PROFILE)
-				Profiler::unmark("Manifest::load " . $class);
+				Profiler::unmark("Manifest::load " );
 			return true;
 		}
 
@@ -81,11 +81,14 @@ class ClassManifest {
 			}
 		}
 		
-		Core::callHook("loadedClass", $class);
-		Core::callHook("loadedClass" . $class);
+		if(class_exists("Core", false)) {
+			
+			Core::callHook("loadedClass", $class);
+			Core::callHook("loadedClass" . $class);
+		}
 		
 		if(PROFILE)
-			Profiler::unmark("Manifest::load " . $class);
+			Profiler::unmark("Manifest::load ");
 	}
 
 	/**
