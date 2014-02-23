@@ -57,7 +57,7 @@ class HTMLEditor extends Textarea
 		$cache = CACHE_DIRECTORY . "/htmleditor_compare_" . Core::GetTheme() . ".css";
 		if(/*(!file_exists($cache) || filemtime($cache) < TIME + 300) && */file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
 			$css = self::importCSS("system/templates/css/default.css") . "\n" . self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
-			$css .= "body, html {padding: 0.5em;}";
+			$css .= "body {padding: 0.5em;}";
 			
 			$css = file_get_contents(FRAMEWORK_ROOT . "/templates/css/default.less") . $css;
 			

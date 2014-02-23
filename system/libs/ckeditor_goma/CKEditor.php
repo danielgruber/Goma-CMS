@@ -34,7 +34,7 @@ class GomaCKEditor extends GomaEditor {
 				{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
 				{ name: "tools", items : [ "Maximize" ] },
 				"/",
-				{ name: "insert", items : [ "image2","Table","PageBreak"] },
+				{ name: "insert", items : [ "Image","Table"] },
 				{ name: "styles", items : [ "Styles","Format" ] },
 				{ name: "colors", items : [ "TextColor","BGColor" ] },
 				{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
