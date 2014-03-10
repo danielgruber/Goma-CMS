@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 23.04.2013
-  * $Version 1.2.2
+  * last modified: 06.03.2014
+  * $Version 1.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -33,7 +33,11 @@ class Boxes extends DataObject implements Notifier {
 		"border"	=> "switch",
 		"sort"		=> "int(3)",
 		"seiteid"	=> "varchar(50)",
-		"width"		=> "varchar(5)"
+		"width"		=> "varchar(5)",
+		"fullsized"	=> "switch",
+		"usebgcolor"=> "switch",
+		"color"		=> "varchar(200)",
+		"cssclass"	=> "varchar(200)"
 	);
 	
 	/**
@@ -105,7 +109,9 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function getWidth() {
 		if($this->fieldGet("width") == "auto") {
-			return "100";
+			return "100%";
+		} else if(preg_match('/^[0-9\s]+$/', $this->fieldGet("width"))) {
+			return $this->fieldGet("width") . "px";
 		} else {
 			return $this->fieldGet("width");
 		}
@@ -118,7 +124,32 @@ class Boxes extends DataObject implements Notifier {
 	 *@access public
 	*/
 	public function getborder_class() {
-		return ($this->fieldGet("border")) ? "box_with_border" : "";
+		$class = ($this->fieldGet("border")) ? "box_with_border " : "";
+		if($this->fullsized) {
+			$class .= "fullsized";
+		}
+		
+		$class .= " " . $this->cssclass;
+		
+		return $class;
+	}
+	
+	/**
+	 * returns color when activated
+	*/
+	public function getColor() {
+		return ($this->usebgcolor) ? $this->fieldGet("color") : "";
+	}
+	
+	/**
+	 * returns background-image.
+	*/
+	public function getBG() {
+		if($this->background) {
+			return 'url('.$this->background()->raw().')';
+		}
+		
+		return '';
 	}
 	
 	/**
@@ -382,7 +413,9 @@ class Box extends Boxes
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		static $has_one = array();
+		static $has_one = array(
+			"background"	=> "ImageUploads"
+		);
 		
 		/**
 		 * don't use from parent-class
@@ -406,11 +439,31 @@ class Box extends Boxes
 		public function getForm(&$form)
 		{
 			$form->add(new HiddenField("seiteid", $this->seiteid));
-			$form->add(new TextField("title", lang("box_title")));
+			
+			$form->add(new TabSet("tabs", array(
+				new Tab("content", array(),  lang("content")),
+				new Tab("settings", array(),  lang("settings"))
+			)));
+			$form->add(new TextField("title", lang("box_title")), null, "content");
 			if($this->RecordClass == "box") {
-				$form->add(new HTMLEditor("text", lang("content"), null, null, $this->width . "px"));
+				if($this->fullsized) {
+					$width = "";
+				} else if(strpos($this->width, "%") === false) {
+					$width = $this->width;
+				} else {
+					$width = "";
+				}
+				
+				$form->add(new HTMLEditor("text", lang("content"), null, null, $width), null, "content");
+				$form->add(new ImageUpload("background", lang("bgimage")), null, "settings");
 			}
-			$form->add(new AutoFormField("border", lang("border")));
+			
+			$form->add(new AutoFormField("border", lang("border")), null, "settings");
+			$form->add(new AutoFormField("fullsized", lang("fullwidth")), null, "settings");
+			$form->add(new AutoFormField("usebgcolor", lang("color")), null, "settings");
+			$form->add(new ColorPicker("color", lang("color")), null, "settings");
+			$form->add(new TextField("cssclass", lang("cssclass")), null, "settings");
+			$form->add(new TextField("width", lang("width")), null, "settings");
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		

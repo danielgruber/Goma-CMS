@@ -66,13 +66,13 @@
 	<% IF $this %>
 		<% CONTROL this() AS $box %>
 			<% IF $box.can("write") AND NOT adminAsUser() AND $box.title %>
-				<div class="box_new adminview {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new adminview {$box.class_name} box_with_title $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% ELSE IF $box.can("write") AND NOT adminAsUser() %>
-				<div class="box_new adminview {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new adminview {$box.class_name} $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% ELSE IF $box.title %>
-				<div class="box_new {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new {$box.class_name} box_with_title $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% ELSE %>
-				<div class="box_new {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new {$box.class_name} $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% END %>
 				<% IF $box.can("write") AND NOT adminAsUser() %>
 					<div class="adminhead">
