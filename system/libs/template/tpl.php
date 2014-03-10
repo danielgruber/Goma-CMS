@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 08.12.2013
-  * $Version 3.6.1
+  * last modified: 20.12.2013
+  * $Version 3.6.2
 */   
  
  
@@ -496,8 +496,9 @@ class tpl extends Object
 									'
 <?php 
 	// begin control
-	array_push($callerStack, clone $caller); 
-	array_push($dataStack, clone $data); 
+	$callerStack[] = clone $caller;
+	$dataStack[] = clone $data;
+
 	$value = \\1\\2->\\3(\\4);
 	if(is_object($value) && is_a($value, "DataObject")) {
 		$value = new DataSet(array($value));
@@ -516,8 +517,9 @@ class tpl extends Object
 									'
 <?php 
 	// begin control
-	array_push($callerStack, clone $caller); 
-	array_push($dataStack, clone $data); 
+	$callerStack[] = clone $caller;
+	$dataStack[] = clone $data;
+	
 	$value = \\1\\2->\\3(\\4);
 	if(is_object($value) && is_a($value, "DataObject")) {
 		$value = new DataSet(array($value));
@@ -537,8 +539,9 @@ class tpl extends Object
 									'
 <?php 
 	// begin control
-	array_push($callerStack, clone $caller); 
-	array_push($dataStack, clone $data); 
+	$callerStack[] = clone $caller;
+	$dataStack[] = clone $data;
+	
 	$value = array(\\1);
 	if(is_object($value) && is_a($value, "DataObject")) {
 		$value = new DataSet(array($value));

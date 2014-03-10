@@ -130,16 +130,17 @@ dfn {
 /* SELECTION */
 
 ::-moz-selection { 
-	background: @selection-color; 
+	background: @selection-color;
+	color: #fff;
 	text-shadow: none; 
 	color: #fff;
 }
 ::selection { 
-	background: @selection-color; 
+	background: @selection-color;
+	color: #fff;
 	text-shadow: none; 
 	color: #fff;
 }
-
 /* Form */
 /**
  * Correct margin displayed oddly in IE 6/7.

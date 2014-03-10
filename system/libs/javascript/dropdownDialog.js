@@ -282,7 +282,7 @@ self.dropdownDialogs = [];
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
 					
 					// check if this is logical
-					if(contentwidth + positionLeft > $(document).width()) {
+					if(contentwidth + positionLeft + 100 > $(document).width()) {
 						this.triangle_position = "right";
 						var positionLeft = elemleft + elemwidth - contentwidth + 14;
 					}

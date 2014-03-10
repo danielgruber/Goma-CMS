@@ -7,7 +7,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.3.1
+ * @version		1.3.2
 */
 class HTMLEditor extends Textarea
 {
@@ -59,7 +59,14 @@ class HTMLEditor extends Textarea
 			$css = self::importCSS("system/templates/css/default.css") . "\n" . self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			$css .= "body {padding: 0.5em;}";
 			
-			$css = file_get_contents(FRAMEWORK_ROOT . "/templates/css/default.less") . $css;
+			if(file_exists(ROOT . tpl::$tplpath . Core::getTheme() . "/default.less")) {
+				$css = file_get_contents(ROOT . tpl::$tplpath . Core::getTheme() . "/default.less") . $css;
+			} else
+			if(file_exists(ROOT . APPLICATION . "/templates/default.less")) {
+				$css = file_get_contents(ROOT . APPLICATION . "/templates/default.less") . $css;
+			} else {
+				$css = file_get_contents(FRAMEWORK_ROOT . "/templates/css/default.less") . $css;
+			}
 			
 			try {
 				$less = new lessc;
