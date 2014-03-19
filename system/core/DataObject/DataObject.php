@@ -4465,15 +4465,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name generateManyManyTables
 	 *@access public
 	*/
-	public function generateManyManyTables() {
+	public function generateManyManyTables($getFromInverse = true) {
 		$tables = array();
 		
 		// many-many
 		foreach($this->generateMany_many(false) as $key => $value) {
 			// generate extra-fields
-			if (isset($this->many_many_extra_fields[$key])) {
-				$extraFields = $this->many_many_extra_fields[$key];
-			} else if (self::isStatic($this->classname, "many_many_extra_fields")) {
+			if (self::isStatic($this->classname, "many_many_extra_fields")) {
 				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->class, "many_many_extra_fields"));
 				if (isset($extraFields[$key]))
 					$extraFields = $extraFields[$key];
@@ -4581,9 +4579,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					}
 					
 					// generate extra-fields
-					if (isset($inst->many_many_extra_fields[$relation])) {
-						$extraFields = $this->many_many_extra_fields[$key];
-					} else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
+					if (self::isStatic($inst->classname, "many_many_extra_fields")) {
 						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->class, "many_many_extra_fields"));
 						if (isset($extraFields[$relation]))
 							$extraFields = $extraFields[$relation];
@@ -4597,6 +4593,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					if (isset($extendExtraFields[$relation])) {
 						$extraFields = array_merge($extraFields, $extendExtraFields);
 					}
+					
 					
 					
 				} else {
@@ -4614,6 +4611,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						"field"			=> $field . "id",
 						"extfield"		=> $value . "id",
 					);
+					
 					if ($extraFields) {
 						$tables[$key]["extraFields"] = $extraFields;
 					}

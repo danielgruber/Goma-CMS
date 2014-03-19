@@ -734,7 +734,7 @@ class Controller extends RequestHandler
 						$redirect = $_POST["redirect"];
 				} else 
 				{
-						$redirect = $this->originalNamespace;
+						$redirect = BASE_URI . BASE_SCRIPT . $this->originalNamespace;
 				}
 				
 				if(isset($param) && isset($value))
