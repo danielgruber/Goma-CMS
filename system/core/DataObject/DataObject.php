@@ -1740,7 +1740,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			if($sameObject) {
-				$sql = "SELECT ". $data["extfield"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["extfield"]." = ".$this["versionid"];
+				$sql = "SELECT ". $data["field"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["extfield"]." = ".$this["versionid"];
 				if ($result = SQL::Query($sql)) {
 					$existing = array();
 					while($row = SQL::fetch_object($result)) {
