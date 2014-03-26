@@ -137,6 +137,8 @@ class RequestHandler extends Object {
 
 		$class = $this -> classname;
 
+		$this -> callExtending("onBeforeHandleRequest", $request, $subController);
+
 		while ($class != "object") {
 			if (empty($class)) {
 				break;
