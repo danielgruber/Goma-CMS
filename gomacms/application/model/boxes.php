@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 06.03.2014
-  * $Version 1.3
+  * last modified: 26.03.2014
+  * $Version 1.3.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -522,6 +522,39 @@ class boxpage extends Page
 		*/
 		public static $icon = "images/icons/fatcow-icons/16x16/layout_content.png";
 		
+		/**
+		 * gets a object of this record with id and versionid set to 0
+		 *
+		 *@name duplicate
+		 *@access public
+		*/
+		public function duplicate() {
+			$new = parent::duplicate();
+			
+			$new->boxes_seite_id = $this->id;
+			
+			return $new;
+		}
+		
+		/**
+		 * will be called after write.
+		 * duplicate boxes here.
+		 *
+		 * @name onAfterWrite
+		 * @access public
+		*/
+		public function onAfterWrite()
+		{
+			if($this->boxes_seite_id) {
+				$data = DataObject::get("boxes", array("seiteid" => $this->boxes_seite_id));
+				
+				foreach($data as $record) {
+					$new = $record->duplicate();
+					$new->seiteid = $this->id;
+					$new->write(true, true);
+				}
+			}
+		}
 		/**
 		 * we render boxes if it is already created
 		*/

@@ -3728,7 +3728,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	}
 	
 	/**
-	 * gets a object of this record with id and versionid set to 0
+	 * gets a object of this record with id and versionid set to 0.
+	 * it also adds hasmany-relations.
 	 *
 	 *@name duplicate
 	 *@access public
@@ -3739,6 +3740,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		$data->id = 0;
 		$data->versionid = 0;
+		
+		foreach($this->hasMany() as $name => $class) {
+			$manydata = new HasMany_DataObjectSet($class);
+			$manydata->setData(array());
+			foreach($this->getHasMany($name) as $record) {
+				$manydata->push($record);
+			}
+			
+			$data->data[$name] = $manydata;
+		}
 		
 		return $data;
 	}
