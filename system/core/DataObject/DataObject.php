@@ -958,7 +958,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		$newdata["snap_priority"] = $snap_priority;
 		$newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->classname;
-		
+
 		// find out if we should write data
 		if ($command != "insert" && !$forceWrite) {
 			if (!$this->checkForChange($snap_priority, $newdata, $changed)) {
@@ -1206,7 +1206,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 			}
 		}
-		
 		
 		// has-many
 		if ($this->hasMany())
@@ -1682,14 +1681,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$object = $many_many[$relation];
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
+					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
 					
-			} else if (isset($belongs_many_many[$relation]))
+			} else
 			{
 					$object = $belongs_many_many[$relation];
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
 					
+					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+					
 			}
+			
 			if (isset($many_many_tables[$relation]))
 			{
 					$table = $many_many_tables[$relation]["table"];
@@ -1710,7 +1713,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				throw new PermissionException();
 			}
 			
-			
 			$mani_insert = array(
 				"table_name"	=> $table,
 				"command"		=> "insert",
@@ -1718,7 +1720,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 				)
 			);
-			
+
 			foreach($ids as $id)
 			{
 				if (is_array($id)) {
@@ -1731,13 +1733,49 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				
 				if (!in_array($id, $existing)) {
 					$mani_insert["fields"][] = array_merge($extraData, array(
-						$data["field"] 	=> $this["versionid"],
-						$object . "id" 	=> $id
+						$data["field"] 		=> $this["versionid"],
+						$data["extfield"] 	=> $id
 					));
 				}
 			}
 			
-			$manipulation[$table . "_insert"] = $mani_insert;
+			if($sameObject) {
+				$sql = "SELECT ". $data["extfield"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["extfield"]." = ".$this["versionid"];
+				if ($result = SQL::Query($sql)) {
+					$existing = array();
+					while($row = SQL::fetch_object($result)) {
+						$existing[] = $row->{$data["extfield"]};
+					}
+				} else {
+					throw new PermissionException();
+				}
+				
+				foreach($ids as $id)
+				{
+					if (is_array($id)) {
+						$extraData = $id;
+						$id = $extraData["id"];
+						unset($extraData["id"], $extraData["versionid"]);
+					} else {
+						$extraData = array();
+					}
+					
+					if (!in_array($id, $existing)) {
+						$mani_insert["fields"][] = array_merge($extraData, array(
+							$data["field"] 		=> $id,
+							$data["extfield"] 	=> $this["versionid"]
+						));
+					}
+				}
+			}
+			
+			
+			if(isset($manipulation[$table . "_insert"])) {
+				$manipulation[$table . "_insert"]["fields"] = array_merge($manipulation[$table . "_insert"]["fields"], $mani_insert["fields"]);
+			} else {
+				$manipulation[$table . "_insert"] = $mani_insert;
+			}
+			
 			
 			return $manipulation;
 	}
@@ -2372,6 +2410,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$extTable = ClassInfo::$class_info[$belongs_many_many[$relname]]["table"];
 			}
 			
+			// check if it is the same table.
 			$query = new SelectQuery($table, array($data["extfield"]), array($data["field"] => $this["versionid"]));
 			
 			if ($extTable)
@@ -4494,6 +4533,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				if (!SQL::getFieldsOfTable($table)) {
 					$table = "many_".strtolower(get_class($this))."_".  $key;
 				}
+				
+				if($value === strtolower(get_class($this))) {
+					$value = $value . "_" . $value;
+				}
 			
 				$tables[$key] = array(
 					"table"			=> $table,
@@ -4610,6 +4653,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					if (!SQL::getFieldsOfTable($table))
 						$table = "many_" . $value . "_" . $relation;
 					
+					if($value === $field) {
+						$field = $field . "_" . $field;
+					}
 					
 					$tables[$key] = array(
 						"table"			=> $table,

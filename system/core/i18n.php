@@ -162,7 +162,7 @@ class i18n extends Object {
 				$contents = $plist->ToArray();
 				if(isset($contents["title"], $contents["type"], $contents["icon"]) && $contents["type"] == "language") {
 					$contents["icon"] = LANGUAGE_DIRECTORY . "/" . $lang . "/" . $contents["icon"];
-					$contents[$lang]["code"] = $lang;
+					$contents["code"] = $lang;
 					$data[$lang] = $contents;
 				}
 			}
