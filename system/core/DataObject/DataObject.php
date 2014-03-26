@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.18
+ * @version     4.7.19
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -4465,13 +4465,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name generateManyManyTables
 	 *@access public
 	*/
-	public function generateManyManyTables($getFromInverse = true) {
+	public function generateManyManyTables() {
 		$tables = array();
 		
 		// many-many
 		foreach($this->generateMany_many(false) as $key => $value) {
 			// generate extra-fields
-			if (self::isStatic($this->classname, "many_many_extra_fields")) {
+			if (isset($this->many_many_extra_fields[$key])) {
+				$extraFields = $this->many_many_extra_fields[$key];
+			} else if (self::isStatic($this->classname, "many_many_extra_fields")) {
 				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->class, "many_many_extra_fields"));
 				if (isset($extraFields[$key]))
 					$extraFields = $extraFields[$key];
@@ -4527,13 +4529,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (class_exists($value)) {
 				if (is_subclass_of($value, "DataObject")) {
 					$inst = Object::instance($value);
-					$relations = $inst->generateMany_Many();
+					$relations = ArrayLib::map_key("strtolower", $inst->generateMany_Many());
 					
 					$field = strtolower(get_class($this));
-					
+
 					if (is_array($relations)) {
 						if (isset($relation)) {
-							if (isset($relations[$relation]) && ($relations[$relation] == $this->classname) || is_subclass_of($this->classname, $relations[$relation])) {
+						    $relation = strtolower($relation);
+
+							if (isset($relations[$relation]) && ($relations[$relation] == $this->classname) || is_subclass_of($this->classname, $relations[$relation]) || $this->classname == $relations[$relation] || is_subclass_of($relations[$relation], $this->classname)) {
 								// everything okay
 							} else {
 								throw new LogicException("Relation ".$relation." does not exist on ".$value.".");
@@ -4579,7 +4583,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					}
 					
 					// generate extra-fields
-					if (self::isStatic($inst->classname, "many_many_extra_fields")) {
+					if (isset($inst->many_many_extra_fields[$relation])) {
+						$extraFields = $this->many_many_extra_fields[$key];
+					} else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
 						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->class, "many_many_extra_fields"));
 						if (isset($extraFields[$relation]))
 							$extraFields = $extraFields[$relation];
@@ -4593,7 +4599,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					if (isset($extendExtraFields[$relation])) {
 						$extraFields = array_merge($extraFields, $extendExtraFields);
 					}
-					
 					
 					
 				} else {
@@ -4611,7 +4616,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						"field"			=> $field . "id",
 						"extfield"		=> $value . "id",
 					);
-					
 					if ($extraFields) {
 						$tables[$key]["extraFields"] = $extraFields;
 					}
