@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 20.12.2013
-  * $Version 3.6.2
+  * last modified: 26.03.2014
+  * $Version 3.6.3
 */   
  
  
@@ -95,7 +95,13 @@ class tpl extends Object
 		{
 				Core::deprecate(2.0, "TPL::render");
 				$file = self::getFilename($name, $class);
-				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
+				if($file !== false) {
+					return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
+				} else {
+					HTTPresponse::setResHeader(500);
+					/* an error so show an error ;-) */
+					throw new LogicException("Could not open Template-File '".$name."'");
+				}
 		}
 		
 		/**
@@ -110,12 +116,13 @@ class tpl extends Object
          */
 		public static function render($name, $replacement = array(), $class = "", $expansion = null)
 		{
-			if($file = self::getFilename($name, $class, false, $expansion)) {
+			$file = self::getFilename($name, $class, false, $expansion);
+			if($file !== false) {
 				return self::parser($file,  $replacement, realpath($file),$class);
 			} else {
 				HTTPresponse::setResHeader(500);
 				/* an error so show an error ;-) */
-				throwerror(7, "Missing Template-File", "Could not open Template-File '".$name."'");
+				throw new LogicException("Could not open Template-File '".$name."'");
 			}
 		}
 		
@@ -133,12 +140,13 @@ class tpl extends Object
 		public static function renderAreas($name,$replacement = array(),$class = "", $required_areas, $expansion = null)
 		{
 			Core::deprecated(2.0, "Don't use areas anymore, use render and vars instead");
-			if($file = self::getFilename($name, $class, false, $expansion)) {
+			$file = self::getFilename($name, $class, false, $expansion);
+			if($file !== false) {
 				return self::parser($file,  $replacement, realpath($file),$class, $required_areas);
 			} else {
 				HTTPresponse::setResHeader(500);
 				/* an error so show an error ;-) */
-				throwerror(7, "Missing Template-File", "Could not open Template-File '".$name."'");
+				throw new LogicException("Could not open Template-File '".$name."'");
 			}
 		}
 		
@@ -237,6 +245,7 @@ class tpl extends Object
 						}
 				} else
 				{
+						
 						if(is_file(ROOT . self::$tplpath . Core::getTheme() . "/" . $name))
 						{
 								return ROOT . self::$tplpath . Core::getTheme() . "/" . $name;
@@ -356,7 +365,7 @@ class tpl extends Object
 				
 				$filename = self::buildFilesForTemplate($tpl, $tmpname);
 				if($filename === false) {
-					throwError(6, "Template-Error", "Could not create Template-Cache-Files for Template <strong>".$tpl."</strong>");
+					throw new LogicException("Could not open Template-File '".$filename."'");
 				}
 				
 				

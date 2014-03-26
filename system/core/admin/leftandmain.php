@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.5
+ * @version     2.2.6
  */
  
 class LeftAndMain extends AdminItem {
@@ -171,9 +171,10 @@ class LeftAndMain extends AdminItem {
 	 * generates the context-menu.
 	*/
 	public function generateContextMenu($child) {
+		$data = array();
 		if($child->treeclass) {
 			
-			return array(
+			$data = array(
 				array(
 					"icon"		=> "images/16x16/edit.png",
 					"label" 	=> lang("edit"),
@@ -187,7 +188,9 @@ class LeftAndMain extends AdminItem {
 			);
 		}
 		
-		return array();
+		$this->callExtending("generateContextMenu", $data);
+		
+		return $data;
 	}
 	
 	/**
