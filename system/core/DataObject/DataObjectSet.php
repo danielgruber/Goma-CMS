@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.4
+ * @version     1.5.5
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1768,8 +1768,9 @@ class DataObjectSet extends DataSet {
 				}
 			}
 			return true;
-		} else
+		} else if($this->dataobject->hasChanged()) {
 			return $this->dataobject->write();
+		}
 	}
 	
 	/**
