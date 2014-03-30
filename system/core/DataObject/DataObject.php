@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.19
+ * @version     4.7.20
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -827,7 +827,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	//!Data-Manipulation
 	
 	/**
-	 * writes changed data
+	 * writes changed data without throwing exceptions.
 	 *
 	 *@name write
 	 *@access public
@@ -840,6 +840,30 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@return bool
 	*/
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
+	{
+		try {
+			return $this->writeToDB($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent);
+			
+		} catch(Exception $e) {
+			AddContent::addError($e->getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * writes changed data and throws exceptions.
+	 *
+	 *@name writeToDB
+	 *@access public
+	 *@param bool - to force insert (default: false)
+	 *@param bool - to force write (default: false)
+	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	 *@param bool - if to force publishing also when not permitted (default: false)
+	 *@param bool - whether to track in history (default: true)
+	 *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
+	 *@return bool
+	*/
+	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
 	{
 
 		if (!defined("CLASS_INFO_LOADED")) {
@@ -854,8 +878,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			ClassInfo::write();
 		}
 		
-		if ($this->data === null)
+		if ($this->data === null) {
 			return true;
+		}
 		
 		if (PROFILE) Profiler::mark("DataObject::write");
 		
@@ -882,8 +907,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			// check rights
 			if (!$forceInsert && !$forceWrite) {
 				if (!$this->can("Insert", $this)) {
-					if ($snap_priority == 2 && !$this->can("Publish", $this))
-						return false;
+					if ($snap_priority != 2 || !$this->can("Publish", $this)) {
+						throw new PermissionException("You don't have the Permission to publish objects of type ".$this->class.".");
+					}
 				}
 			}
 			
@@ -901,8 +927,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				// check rights
 				if (!$forceWrite)
 					if (!$this->can("Write", $this))
-						if ($snap_priority == 2 && !$this->can("Publish", $this))
-							return false;
+						if ($snap_priority != 2 || !$this->can("Publish", $this))
+							throw new PermissionException("You don't have the Permission to write or publish objects of type ".$this->class.".");
 				
 				$this->onBeforeWrite();
 				
@@ -933,7 +959,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				// check rights
 				if (!$forceInsert)
 					if (!$this->can("Insert", $this->data))
-						return false;
+						throw new PermissionException("You don't have the Permission to create objects of type ".$this->class.".");
 				
 				$this->onBeforeWrite();
 				
@@ -1008,7 +1034,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 			} else {
 				if (PROFILE) Profiler::unmark("DataObject::writeRecord");
-				throw new PermissionException();
+				throw new SQLException();
 			}
 		}
 				
@@ -1226,11 +1252,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					}
 					if ($key === false)
 					{
-							return false;
+							throw new LogicException("Could not find relation for ".$name."ids.");
 					}
 					$this->data[$name]->setRelationENV($name, $key . "id", $this->ID);
-					if (!$this->data[$name]->write($forceInsert, $forceWrite, $snap_priority))
-						return false;
+					$this->data[$name]->writeToDB($forceInsert, $forceWrite, $snap_priority);
 				} else {
 					if (isset($this->data[$name]) && !isset($this->data[$name . "ids"]))
 						$this->data[$name . "ids"] = $this->data[$name];
@@ -1252,7 +1277,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				
 							if ($key === false)
 							{
-									return false;
+									throw new LogicException("Could not find relation for ".$name."ids.");
 							}
 							
 							foreach($this->data[$name . "ids"] as $id) {
@@ -1320,8 +1345,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		// fire manipulation to DataBase
 		if (SQL::manipulate($manipulation)) {
 			
-			if ($this->versionid == 0)
-				return false;
+			if ($this->versionid == 0) {
+				throw new LogicException("There's is not versionid defined.");
+			}
 			
 			
 			// update state-table
@@ -1333,7 +1359,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						if (!$forceWrite) {
 							if (!$this->can("Publish")) {
 								if (PROFILE) Profiler::unmark("DataObject::write");
-								return false;
+								throw new PermissionException("You don't have the Permission to publish objects of type ".$this->class.".");
 							}
 						}
 					}
@@ -1424,12 +1450,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				}
 			} else {
 				if (PROFILE) Profiler::unmark("DataObject::write");
-				return false;
+				throw new SQLException();
 			}
 			
 		} else {
 			if (PROFILE) Profiler::unmark("DataObject::write");
-			return false;
+			throw new SQLException();
 		}
 			
 	}
@@ -1682,8 +1708,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
 					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
-					
-			} else
+					 
+			} else if (isset($belongs_many_many[$relation]))
 			{
 					$object = $belongs_many_many[$relation];
 
@@ -1691,6 +1717,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
 					
+			} else {
+				throw new LogicException("Many-Many-Relationship ".$relation." does not exist on DataObject ".$this->class.".");
 			}
 			
 			if (isset($many_many_tables[$relation]))
@@ -1716,6 +1744,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$mani_insert = array(
 				"table_name"	=> $table,
 				"command"		=> "insert",
+				"ignore"		=> true,
 				"fields"		=> array(
 					
 				)
