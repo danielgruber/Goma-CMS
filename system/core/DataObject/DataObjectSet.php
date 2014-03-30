@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.5
+ * @version     1.5.4
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1770,6 +1770,32 @@ class DataObjectSet extends DataSet {
 			return true;
 		} else if($this->dataobject->hasChanged()) {
 			return $this->dataobject->write();
+		}
+	}
+	
+	/**
+	 * write to DB with Exceptions.
+	 *
+	 *@name write
+	 *@access public
+	 *@param bool - to force insert
+	 *@param bool - to force write
+	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	*/
+	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+		$writtenIDs = array();
+		if(count($this->data) > 0) {
+			foreach($this->data as $record) {
+				if(is_object($record) && (!isset($writtenIDs[$record->id]) || $record->id == 0)) {
+					$writtenIDs[$record->id] = true;
+					if(!$record->writeToDB($forceInsert, $forceWrite, $snap_priority)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		} else if($this->dataobject->hasChanged()) {
+			return $this->dataobject->writeToDB();
 		}
 	}
 	

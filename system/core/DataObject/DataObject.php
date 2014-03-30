@@ -848,6 +848,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			AddContent::addError($e->getMessage());
 			return false;
 		}
+			
 	}
 	
 	/**

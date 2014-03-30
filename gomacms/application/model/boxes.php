@@ -545,6 +545,7 @@ class boxpage extends Page
 		*/
 		public function onAfterWrite()
 		{
+
 			if($this->boxes_seite_id) {
 				$data = DataObject::get("boxes", array("seiteid" => $this->boxes_seite_id));
 				
