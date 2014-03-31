@@ -64,6 +64,8 @@ Core::setTheme(settingsController::Get("stpl"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
 
+i18n::loadTPLLang(Core::getTheme());
+
 if(settingsController::get("favicon")) {
 	Core::$favicon = "./favicon.ico";
 }

@@ -131,8 +131,19 @@ class i18n extends Object {
 			
 			$cacher->write($lang, 600);
 		}
+		
 		if(PROFILE)
 			Profiler::unmark("i18n::Init");
+	}
+	
+	/**
+	 * load template language.
+	*/
+	public static function loadTPLLang($tpl) {
+		
+		if(file_exists(ROOT . "/tpl/" . $tpl . "/lang/" . Core::$lang . ".php")) {
+			self::loadExpansionLang(ROOT . "tpl/" . $tpl . "/lang/" . Core::$lang . ".php", "tpl", $GLOBALS["lang"]);
+		}
 	}
 
 	/**
@@ -142,7 +153,7 @@ class i18n extends Object {
 	public static function loadExpansionLang($file, $name, &$language) {
 		require ($file);
 		foreach($lang as $key => $val) {
-			$language[$name . "." . $key] = $val;
+			$language[strtoupper($name . "." . $key)] = $val;
 		}
 	}
 

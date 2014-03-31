@@ -14,7 +14,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.20
+ * @version     4.7.22
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -1705,18 +1705,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$many_many_tables = $this->ManyManyTables();
 			
 			if (isset($many_many[$relation])) {
-					$object = $many_many[$relation];
-
 					$table_name = ClassInfo::$class_info[$object]["table"];
-					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+
 					 
 			} else if (isset($belongs_many_many[$relation]))
 			{
-					$object = $belongs_many_many[$relation];
 
 					$table_name = ClassInfo::$class_info[$object]["table"];
-					
-					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+
 					
 			} else {
 				throw new LogicException("Many-Many-Relationship ".$relation." does not exist on DataObject ".$this->class.".");
@@ -1726,6 +1722,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			{
 					$table = $many_many_tables[$relation]["table"];
 					$data = $many_many_tables[$relation];
+					
+					$object = $data["object"];
+					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
 			} else
 			{
 					return false;
@@ -2413,10 +2412,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (isset($this->data[$relname . "ids"]))
 				return $this->data[$relname . "ids"];
 			
-			if (isset($this->data[$relname]) && is_a($this->data[$relname], "ManyMany_DataObjectSet")) {
-				
-			}
-			
 			/**
 			 * there is the var many_many_tables, which contains data for the table, which stores the relation
 			 * for exmaple: array(
@@ -2431,8 +2426,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$data = $many_many_tables[$relname];
 			} else
 			{
-					return false;
+					throw new LogicException("Many-Many-Relationship " . $relname . " does not exist or hasn't been created, yet.");
 			}
+			
+			
+			$object = $data["object"];
+			$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
 			
 			if(isset($many_many[$relname])) {
 				$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
@@ -2443,16 +2442,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			// check if it is the same table.
 			$query = new SelectQuery($table, array($data["extfield"]), array($data["field"] => $this["versionid"]));
 			
-			if ($extTable)
+			if ($extTable && $sameObject) {
+				// filter for not existing records
+				$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"] . ' AND '.$extTable.'.recordid != "'.$this["id"].'"';
+			} else if($extTable) {
 				// filter for not existing records
 				$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"];
+			}
 			
 			$query->execute();			
 			$arr = array();
 			while($row = $query->fetch_assoc())
 			{
+				if($row[$data["extfield"]] != $this->versionid) {
 					$arr[] = $row[$data["extfield"]];
+				}
 			}
+			
 			$this->data[$relname . "ids"] = $arr;
 			return $arr;
 		} else {
@@ -2710,8 +2716,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			// this relation was modfied, so we use the data from the datacache
 			$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit);
 			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
+			
 			if ($this->queryVersion == "state") {
 				$instance->setVersion("state");
+			} else {
+				$instance->setVersion("published");
 			}
 			
 			$this->viewcache[$cache] =& $instance;
@@ -2728,7 +2737,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$where[$data["field"]] = $this["versionid"];
 		
 		$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit, array(
-			' INNER JOIN '.DB_PREFIX . $data["table"].' AS '.$data["table"].' ON '.$data["table"].'.'.$object . 'id = '.$table.'.id ' // Join other Table with many-many-table
+			' INNER JOIN '.DB_PREFIX . $data["table"].' AS '.$data["table"].' ON '.$data["table"].'.'. $data["extfield"] . ' = '.$table.'.id ' // Join other Table with many-many-table
 		));
 		$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 		if ($this->queryVersion == "state") {
@@ -2736,7 +2745,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		}
 		
 		$this->viewcache[$cache] = $instance;
-		
+
 		return $instance;
 	}
 	
@@ -3028,8 +3037,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (is_array($filter)) {
 				if (isset($filter["versionid"])) {
 					$filter["".$this->baseTable.".id"] = $filter["versionid"];
-					unset($filter["versionid"]);					
-					$version = false;
+					unset($filter["versionid"]);	
+					
+					if($version === null) {				
+						$version = false;
+					}
 				}
 			}
 			
@@ -4582,7 +4594,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$tables[$key] = array(
 					"table"			=> $table,
 					"field"			=> strtolower(get_class($this)) . "id",
-					"extfield"		=> $value . "id"
+					"extfield"		=> $value . "id",
+					"object"		=> $value
 				);
 				if ($extraFields) {
 					$tables[$key]["extraFields"] = $extraFields;
@@ -4702,6 +4715,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						"table"			=> $table,
 						"field"			=> $field . "id",
 						"extfield"		=> $value . "id",
+						"object"    	=> $value
 					);
 					if ($extraFields) {
 						$tables[$key]["extraFields"] = $extraFields;
