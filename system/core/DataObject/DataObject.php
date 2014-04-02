@@ -1,6 +1,5 @@
 <?php defined("IN_GOMA") OR die();
 
-
 /**
  * Basic class for all models with DB-Connection of Goma.
  *
@@ -14,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.22
+ * @version     4.7.23
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -1333,8 +1332,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		} else {
 			$historyOldID = isset($oldid) ? $oldid : 0;
 		}
-
-				
+		
 		// fire events!
 		$this->onBeforeWriteData();
 		$this->callExtending("onBeforeWriteData");
@@ -1731,7 +1729,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			// check for existing entries
-			$sql = "SELECT ". $data["extfield"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"];
+			$sql = "SELECT ". $data["extfield"] . " FROM ".DB_PREFIX . $table." WHERE ".$data["field"]." = ".$this["versionid"];
 			if ($result = SQL::Query($sql)) {
 				$existing = array();
 				while($row = SQL::fetch_object($result)) {
@@ -1749,7 +1747,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					
 				)
 			);
-
+            
 			foreach($ids as $id)
 			{
 				if (is_array($id)) {
@@ -1769,7 +1767,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			if($sameObject) {
+			    // on the same table, we need two relationships to reflect a relationship instead of one.
 				$sql = "SELECT ". $data["field"] . ""." FROM ".DB_PREFIX . $table." WHERE ".$data["extfield"]." = ".$this["versionid"];
+				
 				if ($result = SQL::Query($sql)) {
 					$existing = array();
 					while($row = SQL::fetch_object($result)) {
@@ -1804,7 +1804,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			} else {
 				$manipulation[$table . "_insert"] = $mani_insert;
 			}
-			
 			
 			return $manipulation;
 	}
@@ -4587,6 +4586,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$table = "many_".strtolower(get_class($this))."_".  $key;
 				}
 				
+				$object = $value;
 				if($value === strtolower(get_class($this))) {
 					$value = $value . "_" . $value;
 				}
@@ -4595,7 +4595,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					"table"			=> $table,
 					"field"			=> strtolower(get_class($this)) . "id",
 					"extfield"		=> $value . "id",
-					"object"		=> $value
+					"object"		=> $object
 				);
 				if ($extraFields) {
 					$tables[$key]["extraFields"] = $extraFields;
