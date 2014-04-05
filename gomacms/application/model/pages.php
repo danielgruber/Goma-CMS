@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6.1
+ * @version     2.6.2
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -406,6 +406,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->edit_permissionid = $perm->id;
+				
+				logging("Writing " . $this->title . " cause of EDIT_PERMISSION.");
 				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
@@ -470,6 +472,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->publish_permissionid = $perm->id;
+				
+				logging("Writing " . $this->title . " cause of PUBLISH_PERMISSION.");
 				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
@@ -522,6 +526,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->read_permissionid = $perm->id;
+				
+				logging("Writing " . $this->title . " cause of READ_PERMISSION.");
 				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
@@ -571,12 +577,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name onBeforeWrite
 		*/
 		public function onBeforeWrite() {
+		
+			logging("Write record " . $this->title . ".");
+			
 			$this->data["uploadtrackingids"] = array();
 			
 			if($this->sort == 10000) {
-				if($this->id == 0)
+				if($this->id == 0) {
 					$this->data["sort"] = DataObject::count("pages", array("parentid" => $this->data["parentid"]));
-				else {
+				} else {
 					$i = 0;
 					$sort = 0;
 					foreach(DataObject::get("pages", array("parentid" => $this->data["parentid"])) as $record) {

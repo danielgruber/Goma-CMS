@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.3.1
+ * @version     2.3.2
  */
 class HTMLParser extends Object
 {
@@ -54,8 +54,9 @@ class HTMLParser extends Object
 				}
 				if(PROFILE) Profiler::unmark("HTMLParser scriptParse");
 				
-				if(!Core::is_ajax())
-					if(preg_match('/\<\/title\>/Usi',$html) && preg_match('/\<\/body\>/Usi',$html)) {
+				if(!Core::is_ajax()) {
+
+					if(strpos($html, "</title>") && strpos($html, "</body>")) {
 						if(preg_match('/\<base/Usi',$html)) {
 							$html = str_replace('</title>', "</title>\n		<meta charset=\"utf-8\" />\n\n		<!--Resources-->\n" . resources::get(true, false) . "\n		<noscript><style type=\"text/css\">.hide-on-js { display: block !important; } .show-on-js { display: none !important; }</style></noscript>\n", $html);
 							$html = str_replace('</body>', "\n" . resources::get(false, true) . "\n	</body>", $html);
@@ -64,12 +65,13 @@ class HTMLParser extends Object
 							$html = str_replace('</body>', "\n" . resources::get(false, true) . "\n	</body>", $html);
 						}
 					} else {
-						if(preg_match('/\<base/Usi',$html)) {
+						if(strpos('<base',$html)) {
 							$html = '<meta charset="utf-8" />' . resources::get() . $html;
 						} else {
 							$html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get(true, false) . "\n</head><body>" . $html . "\n".resources::get(false, true)."</body></html>";
 						}
 					}
+				}
 				
 				if(!HTTPResponse::$disabledparsing)
 				{
@@ -92,32 +94,34 @@ class HTMLParser extends Object
 				foreach($links[2] as $key => $href)
 				{
 						$attrs = "";
+						$lowerhref = strtolower($href);
 						// check http
-						if(preg_match('/^(http|https|ftp)/Usi', $href))
+						if(substr($lowerhref, 0, 3) == "ftp" || substr($lowerhref, 0, 4) == "http" || substr($lowerhref, 0, 5) == "https")
 						{
 								continue;
 						}
-						if(preg_match('/^#(.+)/', $href, $m))
+						if(substr($href, 0, 1) == "#")
 						{
-								$href = URL . URLEND . "#" . $m[1];
-								$attrs = ' data-anchor="'.$m[1].'"';
+								$href = URL . URLEND . $href;
+								$attrs = ' data-anchor="'.substr($href, 1).'"';
 						}
-						if(preg_match('/^javascript:/i', $href))
+						if(strtolower(substr($lowerhref, 0, 11)) == "javascript:")
 						{
 								continue;
 						}
-						if(preg_match('/^mailto:/', $href))
+						
+						if(substr($lowerhref, 0, 7) == "mailto:")
 						{
 								continue;
 						}
 						
 						// check ROOT_PATH
-						if(preg_match('/^' . preg_quote(ROOT_PATH, '/') . '/Usi', $href))
+						if(substr($lowerhref, 0, strlen(ROOT_PATH)) == strtolower(ROOT_PATH))
 						{
 								$href = substr($href, strlen(ROOT_PATH));
 						}
 						
-						if(!_eregi('\.php/(.*)', $href) && !strpos($href, "?"))
+						if(!preg_match('/\.php\/(.*)/i', $href) && !strpos($href, "?"))
 						{
 								if(file_exists(ROOT . $href))
 								{
@@ -125,13 +129,14 @@ class HTMLParser extends Object
 								}
 						}
 						
-						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href) || preg_match('/^.\/' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
+						if(substr($lowerhref, 0, strlen(BASE_SCRIPT)) == strtolower(BASE_SCRIPT) || substr($lowerhref, 0, 2) == "./")
 						{
 						
 						} else
 						{
 								$href = BASE_SCRIPT . $href;
 						}
+						
 						$newlink = '<a'.$links[1][$key].'href="'.$href.'"'.$links[3][$key].' '.$attrs.'>';
 						$html = str_replace($links[0][$key], $newlink, $html);
 				}
@@ -140,27 +145,33 @@ class HTMLParser extends Object
 				foreach($frames[2] as $key => $href)
 				{
 						// check http
-						if(preg_match('/^(http|https|ftp)/Usi', $href))
+						$lowerhref = strtolower($href);
+						// check http
+						if(substr($lowerhref, 0, 3) == "ftp" || substr($lowerhref, 0, 4) == "http" || substr($lowerhref, 0, 5) == "https")
 						{
 								continue;
 						}
-						if(preg_match('/^#/', $href))
+						if(substr($href, 0, 1) == "#")
 						{
-								continue;
+								$href = URL . URLEND . $href;
+								$attrs = ' data-anchor="'.substr($href, 1).'"';
 						}
+						
 						// check ROOT_PATH
-						if(preg_match('/^' . preg_quote(ROOT_PATH, '/') . '/Usi', $href))
+						if(substr($lowerhref, 0, strlen(ROOT_PATH)) == strtolower(ROOT_PATH))
 						{
 								$href = substr($href, strlen(ROOT_PATH));
 						}
-						if(!_eregi('\.php/(.+)', $href) && !strpos($href, "?"))
+						
+						if(!preg_match('/\.php\/(.*)/i', $href) && !strpos($href, "?"))
 						{
 								if(file_exists(ROOT . $href))
 								{
 										continue;
 								}
 						}
-						if(preg_match('/^' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href) || preg_match('/^.\/' . preg_quote(BASE_SCRIPT, '/') . '/Usi', $href))
+						
+						if(substr($lowerhref, 0, strlen(BASE_SCRIPT)) == strtolower(BASE_SCRIPT) || substr($lowerhref, 0, 2) == "./")
 						{
 						
 						} else
@@ -174,7 +185,7 @@ class HTMLParser extends Object
 				preg_match_all('/<img([^>]+)src="([^">]+)"([^>]*)>/Usi', $html, $images);
 				foreach($images[2] as $key => $href)
 				{
-						if(!preg_match('/^images\/resampled/i', $href)) {
+						if(strtolower(substr($href, 0, 17)) != "images/resampled/") {
 							continue;
 						}
 						$href = BASE_SCRIPT . $href;

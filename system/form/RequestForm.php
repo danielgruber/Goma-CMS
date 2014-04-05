@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 24.12.2012
-  * $Version 1.4.2
+  * last modified: 04.04.2014
+  * $Version 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -59,6 +59,11 @@ class RequestForm extends Object {
 	 *@var null - string
 	*/
 	public $redirect;
+	
+	/**
+	 * cause we are acting like a controller, we need also the current request.
+	*/
+	public $request;
 	
 	/**
 	 * constructing the form
