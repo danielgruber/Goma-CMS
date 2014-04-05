@@ -591,7 +591,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					foreach(DataObject::get("pages", array("parentid" => $this->data["parentid"])) as $record) {
 						if($record->id != $this->id) {
 							$record->sort = $i;
-							$record->writeSilent(false, true, $this->isOrgPublished() ? 2 : 1, false);
+							$record->writeSilent(false, true, $record->isOrgPublished() ? 2 : 1, false);
 							logging("Write Record " . $record->id . " to sort " . $i);
 						} else {
 							$sort = $i;

@@ -654,7 +654,13 @@ class Form extends object {
 
 		session_store("form_state_" . $this->name, $this->state->ToArray());
 
-		return $this->controller->$submission($result, $data);
+		return call_user_func_array(array(
+			$form->controller,
+			$submission
+		), array(
+			$result,
+			$form
+		));
 	}
 
 	//! Manipulate the form
@@ -988,11 +994,11 @@ class Form extends object {
 	 *@access public
 	 */
 	public function externalURL() {
-		if(isset($this->controller->request)) {
+		/*if(isset($this->controller->request)) {
 			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/" . $this->name;
-		} else {
+		} else {*/
 			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
-		}
+		//}
 	}
 
 	/**
