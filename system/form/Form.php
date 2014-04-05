@@ -655,7 +655,7 @@ class Form extends object {
 		session_store("form_state_" . $this->name, $this->state->ToArray());
 
 		return call_user_func_array(array(
-			$form->controller,
+			$this->controller,
 			$submission
 		), array(
 			$result,
