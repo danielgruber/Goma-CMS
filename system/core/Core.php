@@ -15,7 +15,7 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
  * Goma Core.
  *
  * @package		Goma\Core
- * @version		3.3.35
+ * @version		3.3.36
  */
 class Core extends object {
 	/**
@@ -271,7 +271,9 @@ class Core extends object {
 	 *@param callback
 	 */
 	public static function addToHook($name, $callback) {
-		self::$hooks[strtolower($name)][] = $callback;
+		// check for existance
+		if(!in_array($callback, self::$hooks[strtolower($name)]))
+			self::$hooks[strtolower($name)][] = $callback;
 	}
 
 	/**
