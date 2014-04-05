@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.3
+ * @version     2.2.4
  */
 class livecounter extends DataObject
 {
@@ -107,6 +107,7 @@ class livecounter extends DataObject
 		 * this function updates the database and user-status for us, that we count all visitors
 		*/
 		public static function run() {
+
 			if(self::$alreadyRun) {
 				return true;
 			}
@@ -482,7 +483,7 @@ class livecounter extends DataObject
 			
 			
 			if($diff < 24 * 30 * 2 * 60 * 60) {
-				$title = goma_date(DATE_FORMAT_DATE, $start) . " - " . goma_date(DATE_FORMAT_DATE, $end);
+				$title = goma_date(DATE_FORMAT_DATE, $start) . " - " . goma_date(DATE_FORMAT_DATE, $end - 86400);
 			} else {
 				$title = goma_date("M Y", $start) . " - " . goma_date("M Y", $end);
 			}
@@ -577,7 +578,7 @@ class StatController extends Controller {
 		
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
-		$endTime = $start + (60 * 60 * 24 * 6);
+		$endTime = $start + (60 * 60 * 24 * 7);
 		$end = mktime(0, 0, 0, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
 		$max = 7;
 		
