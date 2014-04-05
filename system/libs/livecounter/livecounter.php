@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.4
+ * @version     2.2.5
  */
 class livecounter extends DataObject
 {
@@ -435,60 +435,69 @@ class livecounter extends DataObject
 		 * @param int $end timestamp to end
 		*/
 		static function statisticsData($start, $end, $maxPoints = 32) {
-			// first calculate how many days we have
-			$diff = $end - $start;
-			if($diff < 0) {
-				throw new LogicException('$start must be higher than $end');
-			}
 			
-			$day = (24 * 60 * 60);
-			
-			$pointsPerDay = $maxPoints / ($diff / $day);
-			if($pointsPerDay > 2) {
-				$pointsPerDay = round($pointsPerDay);
-				$timePerPoint = $day / $pointsPerDay;
-			} else if(floor($pointsPerDay) == 1) {
-				$pointsPerDay = 1;
-				$timePerPoint = $day / $pointsPerDay;
+			$cacher = new Cacher("stat_data_" . $start . "_" . $end . "_" . $maxPoints);
+			if($cacher->checkValid()) {
+				return $cacher->getData();
 			} else {
-				$daysPerPoint = round(1 / $pointsPerDay);
-				$pointsPerDay = 0;
-				$timePerPoint = $day * $daysPerPoint;
-			}
-			
-			$data = array();
-			$current = $start;
-			$hitCount = -1;
-			
-			while($current <= $end) {
-				$hitsQuery = new SelectQuery("statistics", "sum(hitcount) as hitcount", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0');
-				if($hitsQuery->execute()) {
-					$record = $hitsQuery->fetch_assoc();
-					$hitCount = (int) $record["hitcount"];
+				
+				// first calculate how many days we have
+				$diff = $end - $start;
+				if($diff < 0) {
+					throw new LogicException('$start must be higher than $end');
+				}
+				
+				$day = (24 * 60 * 60);
+				
+				$pointsPerDay = $maxPoints / ($diff / $day);
+				if($pointsPerDay > 2) {
+					$pointsPerDay = round($pointsPerDay);
+					$timePerPoint = $day / $pointsPerDay;
+				} else if(floor($pointsPerDay) == 1) {
+					$pointsPerDay = 1;
+					$timePerPoint = $day / $pointsPerDay;
+				} else {
+					$daysPerPoint = round(1 / $pointsPerDay);
+					$pointsPerDay = 0;
+					$timePerPoint = $day * $daysPerPoint;
+				}
+				
+				$data = array();
+				$current = $start;
+				$hitCount = -1;
+				
+				while($current <= $end) {
+					$hitsQuery = new SelectQuery("statistics", "sum(hitcount) as hitcount", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0');
+					if($hitsQuery->execute()) {
+						$record = $hitsQuery->fetch_assoc();
+						$hitCount = (int) $record["hitcount"];
+						
+						array_push($data, array(
+	    					"start" 	=> $current,
+	    					"flotStart"	=> $current * 1000,
+	    					"end" 		=> $current + $timePerPoint,
+	    					"flotEnd"	=> ($current + $timePerPoint) * 1000,
+	    					"visitors"	=> DataObject::count("livecounter", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0'),
+	    					"hits"		=> $hitCount
+	    				));
+					}
 					
-					array_push($data, array(
-    					"start" 	=> $current,
-    					"flotStart"	=> $current * 1000,
-    					"end" 		=> $current + $timePerPoint,
-    					"flotEnd"	=> ($current + $timePerPoint) * 1000,
-    					"visitors"	=> DataObject::count("livecounter", 'last_modified > ' . $current . ' AND last_modified < ' . ($current + $timePerPoint) . ' AND isbot = 0'),
-    					"hits"		=> $hitCount
-    				));
+					
+					
+					$current += $timePerPoint;
 				}
 				
 				
+				if($diff < 24 * 30 * 2 * 60 * 60) {
+					$title = goma_date(DATE_FORMAT_DATE, $start) . " - " . goma_date(DATE_FORMAT_DATE, $end - 86400);
+				} else {
+					$title = goma_date("M Y", $start) . " - " . goma_date("M Y", $end);
+				}
 				
-				$current += $timePerPoint;
+				$data = array("data" => $data, "title" => $title);
+				$cacher->write($data, 300);
+				return $data;
 			}
-			
-			
-			if($diff < 24 * 30 * 2 * 60 * 60) {
-				$title = goma_date(DATE_FORMAT_DATE, $start) . " - " . goma_date(DATE_FORMAT_DATE, $end - 86400);
-			} else {
-				$title = goma_date("M Y", $start) . " - " . goma_date("M Y", $end);
-			}
-			
-			return array("data" => $data, "title" => $title);
 		}
 }
 
