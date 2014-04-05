@@ -17,10 +17,26 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !^/system/application.php
 RewriteRule (.*) system/application.php [QSA]
 	
+<IfModule mod_expires.c>
+	ExpiresActive On
+	ExpiresByType image/jpg "access 1 year"
+	ExpiresByType image/jpeg "access 1 year"
+	ExpiresByType image/gif "access 1 year"
+	ExpiresByType image/png "access 1 year"
+	ExpiresByType text/css "access 1 month"
+	ExpiresByType application/pdf "access 1 month"
+	ExpiresByType text/x-javascript "access 1 month"
+	ExpiresByType application/x-shockwave-flash "access 1 month"
+	ExpiresByType image/x-icon "access 1 year"
+	ExpiresDefault "access 2 days"
+</IfModule>
 	
 <IfModule mod_headers.c>
-	<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
-		Header set Cache-Control "max-age=86400, public"
+	<FilesMatch ".(jpg|jpeg|png|gif)$">
+		Header set Cache-Control "max-age=31536000, public"
+	</FilesMatch>
+	<FilesMatch ".(js|css|swf|pdf|ico)$">
+		Header set Cache-Control "max-age=2678400, public"
 	</FilesMatch>
 </IfModule>
 

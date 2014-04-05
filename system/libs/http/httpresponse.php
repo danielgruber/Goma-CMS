@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 13.03.2013
-  * $Version: 2.1.7
+  * last modified: 05.04.2014
+  * $Version: 2.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -185,10 +185,14 @@ class HTTPresponse extends object
 				$data = ob_get_contents();
 				ob_end_clean();
 				
+				ob_start("ob_gzhandler");
+				
 				if(PROFILE) Profiler::mark("sendDataToClient");
 				echo $body;
 				echo $data;
 				if(PROFILE) Profiler::unmark("sendDataToClient");
+				
+				ob_end_flush();
 				
 				Core::callHook("onafteroutput");
 				
@@ -231,11 +235,17 @@ class HTTPresponse extends object
 					HTTPResponse::addHeader("cache-control", "no-store; no-cache");
 				}
 				
+				if(!isset(self::$headers["content-type"])) {
+					self::$headers["content-type"] = "text/html;charset=utf-8";
+				}
+				
 				if(DEV_MODE) {
 					global $start;
 					$time =  microtime(true) - EXEC_START_TIME;
 					self::addHeader("X-Time", $time);
 				}
+				
+				
 				
 				$endWaitTime = microtime(true);
 				defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
