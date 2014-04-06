@@ -1702,20 +1702,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$belongs_many_many = $this->BelongsManyMany();
 			$many_many_tables = $this->ManyManyTables();
 			
-			if (isset($many_many[$relation])) {
-					$table_name = ClassInfo::$class_info[$object]["table"];
-
-					 
-			} else if (isset($belongs_many_many[$relation]))
-			{
-
-					$table_name = ClassInfo::$class_info[$object]["table"];
-
-					
-			} else {
-				throw new LogicException("Many-Many-Relationship ".$relation." does not exist on DataObject ".$this->class.".");
-			}
-			
 			if (isset($many_many_tables[$relation]))
 			{
 					$table = $many_many_tables[$relation]["table"];
@@ -1725,7 +1711,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
 			} else
 			{
-					return false;
+					throw new LogicException("Many-Many-Relationship ".$relation." does not exist on DataObject ".$this->class.".");
 			}
 			
 			// check for existing entries
