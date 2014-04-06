@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.5
+ * @version     2.2.6
  */
 class livecounter extends DataObject
 {
@@ -579,7 +579,7 @@ class StatController extends Controller {
 		$page = $this->getParam("page") ? $this->getParam("page") : 1;
 		$showcount = 1;
 		
-		$last7Days = mktime(0, 0, 0, date("n"), date("d"), date("Y")) + (60 * 60 * 24) - (60 * 60 * 24 * 7) * $page;
+		$last7Days = mktime(12, 0, 0, date("n"), date("d"), date("Y")) - (60 * 60 * 24 * 7) * $page;
 		// get last month
 		$month = date("n", $last7Days);
 		$year = date("Y", $last7Days);
