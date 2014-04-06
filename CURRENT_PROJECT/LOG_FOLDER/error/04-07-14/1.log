@@ -1,0 +1,4 @@
+2014-04-07 01:23:05: PHP-USER-Warning: 2 require(/Applications/XAMPP/xamppfiles/htdocs/Goma/_config.php): failed to open stream: Permission denied in /Applications/XAMPP/xamppfiles/htdocs/Goma/system/application.php on line 165.
+
+2014-04-07 01:23:06: PHP-USER-Warning: 2 require(/Applications/XAMPP/xamppfiles/htdocs/Goma/_config.php): failed to open stream: Permission denied in /Applications/XAMPP/xamppfiles/htdocs/Goma/system/application.php on line 165.
+
