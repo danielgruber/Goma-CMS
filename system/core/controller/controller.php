@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.2.6
+ * @version		2.2.7
  */
 class Controller extends RequestHandler
 {		
@@ -140,15 +140,13 @@ class Controller extends RequestHandler
 				
 				if(ClassInfo::getStatic($this->classname, "live_counter")) {
 					// run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
-					if(settingsController::get("livecounter") == 1 || !isset($_SESSION["user_counted"])  || member::login()) {
-					// livecounter
-						
-						if(PROFILE) Profiler::mark("livecounter");		
-						register_shutdown_function(array("livecounterController", "run"));	
-						//livecounterController::run();				
-						if(PROFILE) Profiler::unmark("livecounter");
-						$_SESSION["user_counted"] = TIME; 
-					}
+					
+					if(PROFILE) Profiler::mark("livecounter");		
+					register_shutdown_function(array("livecounterController", "run"));	
+					//livecounterController::run();				
+					if(PROFILE) Profiler::unmark("livecounter");
+					$_SESSION["user_counted"] = TIME; 
+					
 				}
 				
 				if($title = $this->PageTitle()) {

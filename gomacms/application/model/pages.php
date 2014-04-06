@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6.2
+ * @version     2.6.3
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -426,7 +426,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = Permission::forceExisting("PAGES_WRITE")->id;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->edit_permission->id;
 				}
 			}
@@ -491,10 +491,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = Permission::forceExisting("PAGES_PUBLISH")->id;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->publish_permission->id;
 				}
 			}
+			
 			$perm->name = "";
 			
 			$this->setField("Publish_Permission", $perm);
@@ -544,7 +545,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = 0;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
