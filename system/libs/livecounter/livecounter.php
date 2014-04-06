@@ -103,16 +103,42 @@ class livecounter extends DataObject
 			return true;
 		}
 		
-		/**
-		 * this function updates the database and user-status for us, that we count all visitors
-		*/
 		public static function run() {
-
+			
 			if(self::$alreadyRun) {
 				return true;
 			}
 			
 			self::$alreadyRun = true;
+			
+			// set correct host, avoid problems with localhost
+			$host = $_SERVER["HTTP_HOST"];
+			if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
+				$host = "." . $host;
+		
+			// user identifier
+			if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']) || preg_match("/" . self::$no_cookie_support . "/i", $_SERVER['HTTP_USER_AGENT']))) || $_SERVER['HTTP_USER_AGENT'] == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
+				$user_identifier = md5($_SERVER['HTTP_USER_AGENT'] . $_SERVER["REMOTE_ADDR"]);
+			} else if(isset($_COOKIE['goma_sessid'])) {
+				$user_identifier = $_COOKIE['goma_sessid'];
+			} else {
+				$user_identifier = session_id();
+			}
+			
+	
+			// just rewirte cookie
+			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
+			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
+			
+			register_shutdown_function(array("livecounter", "run"));
+			
+		}
+		
+		/**
+		 * this function updates the database and user-status for us, that we count all visitors
+		*/
+		public static function onBeforeShutdown() {
+			
 			
 			// first get userid
 			$userid = member::$id;
@@ -155,10 +181,6 @@ class livecounter extends DataObject
 					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
 					// we set last update to next know the last update and better use database-index
 					$_SESSION["user_counted"] = TIME;
-					
-					// just rewirte cookie
-					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
-					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 					
 					return true;
 				}
@@ -225,9 +247,6 @@ class livecounter extends DataObject
 				$data->write(true, true);
 			}
 			
-			// just rewirte cookie
-			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
-			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 			// we set last update to next know the last update and better use database-index
 			$_SESSION["user_counted"] = TIME;
 			
@@ -549,7 +568,7 @@ class StatController extends Controller {
 		$page = $this->getParam("page") ? $this->getParam("page") : 1;
 		$showcount = 1;
 		
-		$last30Days = NOW - (60 * 60 * 24 * 30) * $page;
+		$last30Days = mktime(0, 0, 0, date("n"), date("d"), date("Y")) - 1 - (60 * 60 * 24 * 30) * $page;
 		// get last month
 		$month = date("n", $last30Days);
 		$year = date("Y", $last30Days);
@@ -558,7 +577,7 @@ class StatController extends Controller {
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
 		$endTime = $start + (60 * 60 * 24 * 30);
-		$end = mktime(0, 0, 0, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
+		$end = mktime(23, 59, 59, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
 		$max = 30;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
@@ -579,7 +598,7 @@ class StatController extends Controller {
 		$page = $this->getParam("page") ? $this->getParam("page") : 1;
 		$showcount = 1;
 		
-		$last7Days = mktime(12, 0, 0, date("n"), date("d"), date("Y")) - (60 * 60 * 24 * 7) * $page;
+		$last7Days = mktime(0, 0, 0, date("n"), date("d"), date("Y")) - 1 - (60 * 60 * 24 * 7) * $page;
 		// get last month
 		$month = date("n", $last7Days);
 		$year = date("Y", $last7Days);
@@ -588,7 +607,7 @@ class StatController extends Controller {
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
 		$endTime = $start + (60 * 60 * 24 * 7);
-		$end = mktime(0, 0, 0, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
+		$end = mktime(23, 59, 59, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
 		$max = 7;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);
@@ -619,7 +638,7 @@ class StatController extends Controller {
 		$start = mktime(0, 0, 0, $month, $day, $year); // get 1st of last month 00:00:00
 		
 		$endTime = $start + (60 * 60 * 24 * 365);
-		$end = mktime(0, 0, 0, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
+		$end = mktime(23, 59, 59, date("m", $endTime), date("d", $endTime), date("Y", $endTime));
 		$max = 36;
 		
 		$data = LiveCounter::statisticsData($start, $end, $max);

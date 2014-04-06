@@ -272,7 +272,7 @@ class Core extends object {
 	 */
 	public static function addToHook($name, $callback) {
 		// check for existance
-		if(!in_array($callback, self::$hooks[strtolower($name)]))
+		if(!isset(self::$hooks[strtolower($name)]) || !in_array($callback, self::$hooks[strtolower($name)]))
 			self::$hooks[strtolower($name)][] = $callback;
 	}
 
@@ -285,8 +285,9 @@ class Core extends object {
 	public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
 		if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
 			foreach(self::$hooks[strtolower($name)] as $callback) {
-				if(is_callable($callback))
+				if(is_callable($callback)) {
 					call_user_func_array($callback, array($p1, $p2, $p3, $p4, $p5, $p6, $p7));
+				}
 			}
 		}
 	}

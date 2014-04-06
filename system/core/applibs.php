@@ -813,7 +813,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 		case E_NOTICE:
 		case E_USER_NOTICE:
 			if(strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
-				logging("Notice: [$errno] $errstr");
+				logging("Notice: [$errno] $errstr in $errfile on line $errline");
 				if(DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"))
 					echo "<b>NOTICE:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
 			}

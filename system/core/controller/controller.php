@@ -142,7 +142,7 @@ class Controller extends RequestHandler
 					// run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
 					
 					if(PROFILE) Profiler::mark("livecounter");		
-					register_shutdown_function(array("livecounterController", "run"));	
+					livecounter::run();	
 					//livecounterController::run();				
 					if(PROFILE) Profiler::unmark("livecounter");
 					$_SESSION["user_counted"] = TIME; 

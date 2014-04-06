@@ -186,8 +186,6 @@ class contentController extends FrontedController
 
 			if(is_a(Core::$requestController, "contentController")) {
 				
-				$debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-				
 				$contentmd5 = md5($content);
 				$cache = new Cacher("uploadTracking_" . $contentmd5);
 				if($cache->checkValid()) {
