@@ -111,7 +111,10 @@ h1, h2, h3 {
 	#navi-toggle {
 		text-decoration: none !important;
 		position: relative;
-		
+		display: inline-block;
+		z-index: 510;
+		background: #eee;
+		padding-right: .5em;
 		
 		img {
 			height: 1.5em;
@@ -128,6 +131,7 @@ h1, h2, h3 {
 			
 			display: inline-block;
 			padding: 0.5em 0.25em;
+			margin: 0;
 		}
 		
 		:hover {
@@ -150,7 +154,7 @@ h1, h2, h3 {
 		
 		position: absolute;
 		left: 0;
-		z-index: 950;
+		z-index: 500;
 		top: 3.125em;
 		
 		#navigation {
@@ -382,6 +386,7 @@ h1, h2, h3 {
 	#head_inner {
 		border-bottom: 0.063em solid #ccc;
 		padding: 0.063em;
+		height: 2.75em;
 	}
 	
 	
@@ -1246,7 +1251,7 @@ ul.list-view li a img {
 				top: 0.125em;
 				right: 0em;
 				
-				z-index: 965;
+				z-index: 505;
 				
 				border-bottom: 0;
 				
