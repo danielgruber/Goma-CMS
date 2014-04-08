@@ -130,7 +130,7 @@ class livecounter extends DataObject
 			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
 			setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
 			
-			register_shutdown_function(array("livecounter", "run"));
+			register_shutdown_function(array("livecounter", "onBeforeShutdown"));
 			
 		}
 		
