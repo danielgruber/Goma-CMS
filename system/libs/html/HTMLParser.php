@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.3.2
+ * @version     2.3.3
  */
 class HTMLParser extends Object
 {
@@ -102,8 +102,9 @@ class HTMLParser extends Object
 						}
 						if(substr($href, 0, 1) == "#")
 						{
-								$href = URL . URLEND . $href;
+								
 								$attrs = ' data-anchor="'.substr($href, 1).'"';
+								$href = URL . URLEND . $href;
 						}
 						if(strtolower(substr($lowerhref, 0, 11)) == "javascript:")
 						{
@@ -153,8 +154,9 @@ class HTMLParser extends Object
 						}
 						if(substr($href, 0, 1) == "#")
 						{
-								$href = URL . URLEND . $href;
+								
 								$attrs = ' data-anchor="'.substr($href, 1).'"';
+								$href = URL . URLEND . $href;
 						}
 						
 						// check ROOT_PATH
