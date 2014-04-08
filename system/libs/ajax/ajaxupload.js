@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 11.11.2013
-  * $Version 2.0.6
+  * last modified: 10.04.2014
+  * $Version 2.0.7
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -428,8 +428,8 @@ AjaxUpload.prototype = {
 		xhr.open("PUT", this.ajaxurl);
 		xhr.setRequestHeader("Cache-Control", "no-cache");
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		xhr.setRequestHeader("X-File-Name", file.fileName);
-		xhr.setRequestHeader("X-File-Size", file.fileSize);
+		xhr.setRequestHeader("X-File-Name", file.fileName.replace(/[^\w\.\-]/g, '-'));
+		xhr.setRequestHeader("X-File-Size", file.fileSize.toString());
 		xhr.setRequestHeader("content-type", "application/octet-stream");
 		
 		xhr.onreadystatechange = function (event) {
