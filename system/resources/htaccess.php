@@ -38,6 +38,8 @@ RewriteRule (.*) system/application.php [QSA]
 	<FilesMatch ".(js|css|swf|pdf|ico)$">
 		Header set Cache-Control "max-age=2678400, public"
 	</FilesMatch>
+	
+	Header set Connection keep-alive
 </IfModule>
 
 <IfModule mod_headers.c>

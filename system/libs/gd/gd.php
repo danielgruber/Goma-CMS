@@ -5,8 +5,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
   ********
-  * last modified: 30.04.2013
-  * $Version: 2.1
+  * last modified: 10.04.2014
+  * $Version: 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -445,17 +445,10 @@ class GD extends Object
 						return $file;
 				} else if($extension == "png")
 				{
-						if($quality > 9 && $quality < 100)
-						{
-								$quality = $quality / 10;
-						} else
-						{
-								$quality = 7;
-						}
 						
 						imagealphablending($this->gd(), false);
 						imagesavealpha($this->gd(), true);
-						imagepng($this->gd(), $file, $quality);
+						imagepng($this->gd(), $file, 9);
 						
 						$this->pic = $file;
 						@chmod($file, 0777);
