@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 07.04.2013
-  * $Version 1.0.7
+  * last modified: 12.04.2013
+  * $Version 1.0.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -380,5 +380,30 @@ class History extends DataObject {
 	public function EventClass() {
 		$data = $this->HistoryData();
 		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
+	}
+	
+	/**
+	 * clean up DB
+	 *
+	 *@name cleanUpDB
+	 *@åccess public
+	*/
+	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
+		parent::cleanUpDB();
+		
+		$id = null;
+		$sql = "SELECT id FROM ".DB_PREFIX.$this->classname." WHERE last_modified < " . (NOW - 90 * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
+		if ($result = SQL::Query($sql)) {
+			if($row = SQL::fetch_object($result)) {
+				$id = $row->id;
+			}
+		}
+		
+		// delete
+		$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
+		$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE publishedid < ".$id."";
+		
+		SQL::Query($sqlDeleteData);
+		SQL::Query($sqlDeleteState);
 	}
 }

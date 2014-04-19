@@ -223,11 +223,11 @@ class mysqliDriver extends object implements SQLDriver
 		{
 				if(is_array($str))
 				{
-						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Array is not allowed as given value for escape_string. Expected string.");
 				}
 				if(is_object($str))
 				{
-						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Object is not allowed as given value for escape_string. Expected string.");
 				}
 				
 				return $this->_db->real_escape_string((string) $str);
@@ -240,11 +240,11 @@ class mysqliDriver extends object implements SQLDriver
 		{
 				if(is_array($str))
 				{
-						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Array is not allowed as given value for escape_string. Expected string.");
 				}
 				if(is_object($str))
 				{
-						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Object is not allowed as given value for escape_string. Expected string.");
 				}
 				
 				return $this->_db->real_escape_string((string) $str);
@@ -366,7 +366,7 @@ class mysqliDriver extends object implements SQLDriver
 						return true;
 				} else
 				{
-						throwErrorByID(3);
+						throw new MySQLException();
 				}
 		}
 		/**
@@ -387,7 +387,7 @@ class mysqliDriver extends object implements SQLDriver
 						return true;
 				} else
 				{
-						throwErrorByID(3);
+						throw new MySQLException();
 				}
 		}
 		
@@ -633,14 +633,14 @@ class mysqliDriver extends object implements SQLDriver
 							$updates = substr($updates, 0, -1);
 						}
 						if(!SQL::Query($updates)) {
-							throwError(3,'SQL-Error', "SQL-Query ".$updates." failed");
+							throw new MySQLException();
 						}
 					}
 					
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else
-					throwError(3,'SQL-Error', "SQL-Query ".$editsql." failed");
+					throw new MySQLException();
 				
 				
 			} else {
@@ -700,7 +700,7 @@ class mysqliDriver extends object implements SQLDriver
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else {
-					throwErrorByID(3);
+					throw new MySQLException();
 				}
 			}
 		}
@@ -809,7 +809,7 @@ class mysqliDriver extends object implements SQLDriver
 																	// everything is fine
 															} else
 															{
-																	throwErrorById(3);
+																	throw new MySQLException();
 															}
 													}
 											}
@@ -898,7 +898,7 @@ class mysqliDriver extends object implements SQLDriver
 															// everything is fine
 													} else
 													{
-															throwErrorById(3);
+															throw new MySQLException();
 													}
 											}
 									}
@@ -921,7 +921,7 @@ class mysqliDriver extends object implements SQLDriver
 													if(sql::query($sql)) {
 															// everything is fine
 													} else {
-															throwErrorById(3);
+															throw new MySQLException();
 													}
 											}
 									}

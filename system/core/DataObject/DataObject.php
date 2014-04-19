@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.24
+ * @version     4.7.23
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -2547,7 +2547,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$has_many = $this->hasMany();
 		if (!isset($has_many[$name]))
 		{
-			throw new LogicException("No Has-many-relation '".$name."' on ".$this->classname.".");
+			$debug = debug_backtrace();
+			throwError(6, "PHP-Error", "No Has-many-relation '".$name."' on ".$this->classname." in ".$trace[1]["file"]." on line ".$trace[1]["line"].".");
 		}
 		
 		$cache = "has_many_{$name}_".var_export($filter, true)."_".var_export($sort, true) . "_" . var_export($limit, true);
@@ -2584,22 +2585,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				throw new LogicException("No inverse has-one-relationship on '" . $class . "' found.");
 			}
 		}
+
+		$filter[$inverse . "id"] = $this["id"];
+		$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
+		$set->setRelationENV($name, $inverse . "id");
 		
-		if($this["id"]) {
-			$filter[$inverse . "id"] = $this["id"];
-			$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
-			$set->setRelationENV($name, $inverse . "id");
-			
-			if ($this->queryVersion == "state") {
-				$set->setVersion("state");
-			}
-			
-			$this->viewcache[$cache] = $set;
-			
-			return $set;
-		} else {
-			return false;
+		if ($this->queryVersion == "state") {
+			$set->setVersion("state");
 		}
+		
+		$this->viewcache[$cache] = $set;
+		
+		return $set;
 	}
 	
 	/**
