@@ -29,6 +29,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		static $versions = true;
 		
 		/**
+		 * parent type set in this object.
+		*/
+		public $parentSet;
+		
+		/**
 		 * the db-fields
 		 *
 		 *@name db
@@ -177,6 +182,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 		}
 		
+		public function setParentType($value) {
+			$this->parentSet = $value;
+			if($value == "root") {
+				$this->setParentId(0);
+			}
+		}
+		
 		/**
 		 * gets prepended content
 		 *
@@ -213,13 +225,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function setParentId($value)
 		{
-				if($this->fieldGet("parenttype") == "root")
-						$this->setField("parentid", "0");
-				else
-						$this->setField("parentid", $value);
-					
-				$this->viewcache = array();
-				$this->data["parent"] = null;
+			if($this->parentSet == "root") {
+				$this->setField("parentid", "0");
+			} else {
+				$this->setField("parentid", $value);
+			}
+				
+			$this->viewcache = array();
+			$this->data["parent"] = null;
 		}
 		
 		/**
@@ -571,14 +584,16 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$record->remove(true);
 			}
 		}
-
+		
 		/**
 		 * on before writing
 		 *
 		 *@name onBeforeWrite
 		*/
 		public function onBeforeWrite() {
-
+		
+			logging("Write record " . $this->title . ".");
+			
 			$this->data["uploadtrackingids"] = array();
 			
 			if($this->sort == 10000) {

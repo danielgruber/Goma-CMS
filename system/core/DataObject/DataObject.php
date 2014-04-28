@@ -844,7 +844,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			return $this->writeToDB($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent);
 			
 		} catch(Exception $e) {
-			AddContent::addError($e->getMessage());
+			log_exception($e);
 			return false;
 		}
 			
@@ -865,7 +865,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	*/
 	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
 	{
-
+		
 		if (!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
 		}
@@ -1142,93 +1142,93 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			foreach($many_many as $name => $table)
 			{
 					
-					if(isset($this->data[$name]) && is_array($this->data[$name])) {
+				if(isset($this->data[$name]) && is_array($this->data[$name])) {
 
-						$manipulation["insert_many_" . $table] = array(
-								"command"	=> "insert",
-								"table_name"=> $many_many_tables[$name]["table"],
-								"fields"	=> array(
-									
-								),
-								"ignore"	=> true
-							);
+					$manipulation["insert_many_" . $table] = array(
+							"command"	=> "insert",
+							"table_name"=> $many_many_tables[$name]["table"],
+							"fields"	=> array(
+								
+							),
+							"ignore"	=> true
+						);
+				
+					// prefetch DataBase-Fields for external class.
+					$o = new $table;
+					$db = $o->DataBaseFields(true);
 					
-						// prefetch DataBase-Fields for external class.
-						$o = new $table;
-						$db = $o->DataBaseFields(true);
+					unset($o);
+					
+					
+					$i = 0;
+					foreach($this->data[$name] as $id => $extraFields) {
 						
-						unset($o);
-						
-						
-						$i = 0;
-						foreach($this->data[$name] as $id => $extraFields) {
-							
-							if(is_array($extraFields)) {
-								if(isset($extraFields["versionid"])) {
-									$id = $extraFields["versionid"];
-								} else {
-									$data = DataObject::get_by_id($table, $id);
-									if($data) {
-										$id = $data->versionid;
-									} else {
-										$id = 0;
-									}
-								}
-								
-								if($id == 0) {
-									$object = new $table(array_merge($extraFields, array("id" => 0, "versionid" => 0)));
-									$object->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
-									$id = $object->versionid;
-									
-									unset($object);
-								} else {
-									$d = null;
-									// just find out if we may be update the record given.
-									foreach($extraFields as $field => $v) {
-										if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
-											if(!isset($d)) {
-												$d = DataObject::get_one($table, array("versionid" => $id));
-											}
-											
-											$d[$field] = $v;
-										}
-									}
-									
-									if(isset($d)) {
-										$d->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
-										$id = $d->versionid;
-									}
-								}
-								
-								$manipulation["insert_many_" . $table]["fields"][$i] = array(
-									$many_many_tables[$name]["field"] 	=> $this->versionid,
-									$many_many_tables[$name]["extfield"]=> $id
-								);
-								
-
-								foreach($extraFields as $field => $val) {
-								
-									if(isset($many_many_tables[$name]["extraFields"][$field])) {
-										$manipulation["insert_many_" . $table]["fields"][$i][$field] = $val;
-									}
-								}
-								$i++;
+						if(is_array($extraFields)) {
+							if(isset($extraFields["versionid"])) {
+								$id = $extraFields["versionid"];
 							} else {
-								throw new Exception("Many-Many-Array for relationship '" . $name . "' corrupted.");
+								$data = DataObject::get_by_id($table, $id);
+								if($data) {
+									$id = $data->versionid;
+								} else {
+									$id = 0;
+								}
 							}
+							
+							if($id == 0) {
+								$object = new $table(array_merge($extraFields, array("id" => 0, "versionid" => 0)));
+								$object->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
+								$id = $object->versionid;
+								
+								unset($object);
+							} else {
+								$d = null;
+								// just find out if we may be update the record given.
+								foreach($extraFields as $field => $v) {
+									if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
+										if(!isset($d)) {
+											$d = DataObject::get_one($table, array("versionid" => $id));
+										}
+										
+										$d[$field] = $v;
+									}
+								}
+								
+								if(isset($d)) {
+									$d->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
+									$id = $d->versionid;
+								}
+							}
+							
+							$manipulation["insert_many_" . $table]["fields"][$i] = array(
+								$many_many_tables[$name]["field"] 	=> $this->versionid,
+								$many_many_tables[$name]["extfield"]=> $id
+							);
+							
+
+							foreach($extraFields as $field => $val) {
+							
+								if(isset($many_many_tables[$name]["extraFields"][$field])) {
+									$manipulation["insert_many_" . $table]["fields"][$i][$field] = $val;
+								}
+							}
+							$i++;
+						} else {
+							throw new Exception("Many-Many-Array for relationship '" . $name . "' corrupted.");
 						}
-						
-						unset($this->data[$name]);
-						unset($this->data[$name . "ids"]);
-					} else
-					
-					if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
-					{
-						$manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
 					}
 					
-					
-					
+					unset($this->data[$name]);
+					unset($this->data[$name . "ids"]);
+				} else
+				
+				if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
+				{
+					$manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
+				}
+				
+				
+				
 					
 			}
 		}
@@ -1254,6 +1254,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					{
 							throw new LogicException("Could not find relation for ".$name."ids.");
 					}
+					
 					$this->data[$name]->setRelationENV($name, $key . "id", $this->ID);
 					$this->data[$name]->writeToDB($forceInsert, $forceWrite, $snap_priority);
 				} else {
@@ -2589,7 +2590,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$filter[$inverse . "id"] = $this["id"];
 		$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
 		$set->setRelationENV($name, $inverse . "id");
-		
+
 		if ($this->queryVersion == "state") {
 			$set->setVersion("state");
 		}
@@ -3769,14 +3770,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$data->versionid = 0;
 		
 		foreach($this->hasMany() as $name => $class) {
-			$manydata = new HasMany_DataObjectSet($class);
-			$manydata->setData(array());
-			foreach($this->getHasMany($name) as $record) {
-				$manydata->push($record);
-			}
-			
-			$data->data[$name] = $manydata;
+			$data->data[$name] = $this->getHasMany($name);
 		}
+		
+		return $data;
+	}
+	
+	public function _clone() {
+		$this->consolidate();
+		$data = clone $this;
+		
+		$data->id = 0;
+		$data->versionid = 0;
 		
 		return $data;
 	}

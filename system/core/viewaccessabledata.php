@@ -865,6 +865,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		if(is_array($this->data)) {
 			// first unset, so the new value is last value of data stack
 			unset($this->data[$var]);
+			if(isset($this->data[$var]) && $this->data[$var] == $value) {
+				return;
+			}
+			
 			$this->data[$var] = $value;
 		} else {
 			$this->data = array($var => $value);
