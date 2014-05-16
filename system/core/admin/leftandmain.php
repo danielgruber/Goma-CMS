@@ -275,8 +275,7 @@ class LeftAndMain extends AdminItem {
 			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
 			return $response;
 		} else {
-			$dialog = new Dialog(lang("LESS_RIGHTS"), lang("ERROR"));
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			return $response;
 		}
 	}
@@ -327,8 +326,7 @@ class LeftAndMain extends AdminItem {
 			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id."); }");
 			return $response;
 		} else {
-			$dialog = new Dialog(lang("less_rights"), lang("error"));
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			return $response;
 		}
 	}

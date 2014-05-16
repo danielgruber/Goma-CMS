@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6.3
+ * @version     2.6.4
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -979,14 +979,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function canInsert($row = null)
 		{	
+
 			if(isset($row)) {
 				if($row->parentid != 0) {
-					$data = DataObject::get_versioned("pages", "state", $row->parentid);
+					$data = DataObject::get_versioned("pages", "state", array("id" => $row->parentid));
+
 					if($data->Count() > 0) {
 						return $data->first()->can("Write", $data);
 					}
 				}
 			}
+
 			
 			return Permission::check("PAGES_INSERT");
 		}

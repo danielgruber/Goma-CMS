@@ -42,7 +42,7 @@
 	
 	position: relative;
 }
-.goma-tree li.hidden .node-area {
+.goma-tree li.hidden > span > a > span.text-holder {
 	color: #555;
 }
 .goma-tree li.action .node-area {

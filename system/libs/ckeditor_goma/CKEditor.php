@@ -101,7 +101,11 @@ class GomaCKEditor extends GomaEditor {
 		
 		
 		$("#'.$id.'").parents("form").on("beforesubmit",function(){
-			$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
+			try {
+				$("#'.$id.'").val(CKEDITOR.instances.'.$id.'.getData());
+			} catch(e) {
+			
+			}
 		});
 		$("#'.$id.'").change(function(){
 			

@@ -119,7 +119,7 @@ class contentAdmin extends LeftAndMain
 	*/
 	public function redirectback($param = null, $value = null)
 	{
-			if($this->getParam(0) == "del" || $this->request->getParam(1) == "add")
+			if($this->getParam(0) == "del" || $this->getParam(1,false) == "add")
 			{
 					HTTPresponse::redirect(ROOT_PATH . 'admin/content' . URLEND);
 			} else
@@ -312,9 +312,7 @@ class contentAdmin extends LeftAndMain
 		}
 		if(Core::is_ajax()) {
 			$response = new AjaxResponse();
-			$dialog = new Dialog(lang("less_rights"), lang("error", "error"));
-			$dialog->close(3);
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			$this->removeResume();
 			HTTPResponse::setBody($response->render());
 			HTTPResponse::output();

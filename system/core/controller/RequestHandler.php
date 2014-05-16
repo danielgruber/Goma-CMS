@@ -354,7 +354,11 @@ class RequestHandler extends Object {
 		if (strtolower($useall) == "post") {
 			return isset($_POST[$param]) ? $_POST[$param] : null;
 		}
-
+		
+		if($useall === false) {
+			return null;
+		}
+		
 		if (isset($_GET[$param])) {
 			return $_GET[$param];
 		} else if (isset($_POST[$param])) {

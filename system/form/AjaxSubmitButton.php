@@ -82,6 +82,8 @@ class AjaxSubmitButton extends FormAction {
 						button.css("display", "none");
 						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
 						$("body").css("cursor", "wait");
+						
+						goma.ui.updateFlexBoxes();
 						$.ajax({
 							url: url_' . $this->name . '' . $append . ',
 							type: "post",
