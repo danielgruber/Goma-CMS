@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.0.9
+ * @version     2.0.10
  */
 
 class contentAdmin extends LeftAndMain
@@ -267,7 +267,7 @@ class contentAdmin extends LeftAndMain
 		
 		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
 		
-		
+		$parentDropdown->info_field = "url";
 		
 		$form->add(new HiddenField("class_name", $model->classname));
 		

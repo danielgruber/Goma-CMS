@@ -109,6 +109,8 @@ class AjaxSubmitButton extends FormAction {
     								
     								$("#' . $this->form()->id() . '").gForm().setLeaveCheck(false);
     								
+    								goma.ui.updateFlexBoxes();
+    								
     								return r;
 								});
 							},

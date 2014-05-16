@@ -222,6 +222,11 @@
 						box-sizing: border-box;
 						-webkit-box-sizing: border-box;
 						-moz-box-sizing: border-box;
+						
+						span {
+							background: #eee;
+							padding: .125em;
+						}
 					}
 					
 					.record_info {

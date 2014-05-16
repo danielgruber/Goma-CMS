@@ -26,7 +26,9 @@ DropDown.prototype = {
 	 *@name init
 	*/
 	init: function() {
-		var that = this;
+		var that = this,
+			currentSearch = "";
+			
 		this.widget.disableSelection();
 		this.widget.find(" > .field").css("cursor", "pointer");
 		
@@ -55,6 +57,9 @@ DropDown.prototype = {
 				that.reloadData();
 			}
 		});
+		
+		this.currentRequest = null;
+		this.currentSearch = "";
 		
 		this.widget.find(" > .dropdown").click(function(){
 			that.widget.find(" > .dropdown > .header > .search").focus();
@@ -208,21 +213,24 @@ DropDown.prototype = {
 		var that = this;
 		var search = this.widget.find(" > .dropdown > .header > .search").val();
 		
-		
 		this.setContent("<div class=\"loading\" style=\"text-align: center;\"><img src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading...")+"</div>");
 		clearTimeout(this.timeout);
-		var that = this;
+		
 		// we limit the request, so just send if in the last 200 milliseconds no edit in search was done
 		if(search != "" && search != lang("search", "search...")) {
 			this.widget.find(" > .dropdown > .header > .cancel").fadeIn(100);
-			var timeout = 200;
+			var timeout = 300;
 		} else  { // if no search is set, limit is not needed
 			this.widget.find(" > .dropdown > .header > .cancel").fadeOut(100);
 			var timeout = 0;
 		}
 		
 		var makeAjax = function(){
-			$.ajax({
+			if(that.currentRequest !== null) {
+				that.currentRequest.abort();
+			}
+			
+			that.currentRequest = $.ajax({
 				url: that.url + "/getData/" + that.page + "/",
 				type: "post",
 				data: {"search": search},
@@ -262,9 +270,9 @@ DropDown.prototype = {
 							content += "<li>";
 							
 							if(this.value[val.key] || this.value[val.key] === 0)
-								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
+								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span>"+val.value+"</span></a>";
 							else
-								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\">"+val.value+"</a>";
+								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span>"+val.value+"</span></a>";
 								
 							if(typeof val.smallText == "string") {
 								content += "<span class=\"record_info\">"+val.smallText+"</span>";
