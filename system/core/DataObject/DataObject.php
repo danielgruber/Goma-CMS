@@ -4172,11 +4172,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				
 				// require Table
 				$log .= SQL::requireTable($table, $fields, array(
-					"dataindex"	=> array(
-						"name" 		=> "dataindex",
-						"fields"	=> array($data["field"], $data["extfield"]),
-						"type"		=> "INDEX"
-					),
 					"dataindex_reverse"	=> array(
 						"name" 		=> "dataindex_reverse",
 						"fields"	=> array($data["extfield"], $data["field"]),
@@ -4299,13 +4294,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		return true;
 	}
 	
+	public static $cleanUp = array();
+	
 	/**
 	 * clean up DB
 	 *
 	 *@name cleanUpDB
 	 *@åccess public
 	*/
-	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
+	public function cleanUpDB($prefix = DB_PREFIX, &$log = null) {
 		$this->callExtending("cleanUpDB", $prefix);
 		
 		if (self::Versioned($this->classname) && $this->baseClass == $this->classname) {
@@ -4326,7 +4323,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$last_modified = NOW-(180*24*60*60);
 			
 			// now generate ids to delete
-			$sql = "SELECT id FROM ".DB_PREFIX . $this->baseTable." WHERE (id NOT IN('".implode("','", $ids)."') OR recordid NOT IN ('".implode("','", $recordids)."')) AND (snap_priority = 1 AND last_modified < ".$last_modified.")";
+			$sql = "SELECT id FROM ".DB_PREFIX . $this->baseTable." WHERE (id NOT IN('".implode("','", $ids)."') OR recordid NOT IN ('".implode("','", $recordids)."')) AND (last_modified < ".$last_modified.")";
 			if ($result = SQL::Query($sql)) {
 				while($row = SQL::fetch_object($result)) {
 					$deleteids[] = $row->id;
@@ -4353,9 +4350,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						$log .= 'Failed to delete old versions of '.$table."\n";
 				}	        
 			}
-			
-			// clean up many-many-tables
-			foreach($this->manyManyTables() as $name => $data) {
+		}
+		
+		// clean up many-many-tables
+		foreach($this->manyManyTables() as $name => $data) {
+			if(!isset(self::$cleanUp[$data["table"]])) {
 				$sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." = 0 OR ". $data["extfield"] ." = 0";
 				if (SQL::Query($sql)) {
 					if (SQL::affected_rows() > 0)
@@ -4363,8 +4362,20 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				} else {
 					$log .= 'Failed to clean-up Many-Many-Table '.$data["table"]. "\n";
 				}
+				
+				if(isset(ClassInfo::$class_info[$data["object"]]["baseclass"])) {
+					$extBaseTable = ClassInfo::ClassTable(ClassInfo::$class_info[$data["object"]]["baseclass"]);
+					$sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $data["extfield"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
+					register_shutdown_function(array("sql", "query"), $sql);
+				}
+				
+				self::$cleanUp[$data["table"]] = true;
 			}
 		}
+	}
+	
+	public static function cleanUpOldVersions($class, $recordid) {
+		
 	}
 	
 	//!Generate Information for ClassInfo
