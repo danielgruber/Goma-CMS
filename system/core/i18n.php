@@ -66,6 +66,13 @@ class i18n extends Object {
 			Profiler::mark("i18n::Init");
 		ClassInfo::setSaveVars("i18n");
 
+	
+		// set correct host, avoid problems with localhost
+		$host = $_SERVER["HTTP_HOST"];
+		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
+			$host = "." . $host;
+
+
 		// check lang selection
 		Core::$lang = self::AutoSelectLang($language);
 		$_SESSION["lang"] = Core::$lang;
