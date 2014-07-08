@@ -16,7 +16,7 @@ ClassInfo::AddSaveVar("Resources", "scanFolders");
  * This class manages all Resources like CSS and JS-Files in a Goma-Page.
  *
  * @package		Goma\System\Core
- * @version		1.5.3
+ * @version		1.5.4
  */
 class Resources extends Object {
     
@@ -25,7 +25,7 @@ class Resources extends Object {
 	 *
 	 *@var CONST
 	*/
-	const VERSION = "1.3.5";
+	const VERSION = "1.5.4";
 	
 	/**
 	 * defines if gzip is enabled
@@ -405,7 +405,7 @@ class Resources extends Object {
 	    		}
 	    		
 	    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
-	    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
+	    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($cacher->getData()).');'));
 	    		}
 	    		
 	    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
