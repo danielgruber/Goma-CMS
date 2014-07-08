@@ -53,7 +53,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 				$action = new TableField_FormAction($tableField, "setPage" . $data["page"], $data["page"], "setPage", array("page" => $data["page"]));
 				$view->push(array("field" => $action->field()));
 			} else {
-				$view->push(array("field" => $data["page"]));
+				$view->push(array("field" => '<span class="active-page">' . $data["page"] . '</span>'));
 			}
 		}
 		
