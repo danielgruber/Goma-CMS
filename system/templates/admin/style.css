@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 25.11.2013
+ * last modified: 09.07.2014
  */
 
 @color-text: #222;
@@ -1181,8 +1181,8 @@ ul.list-view li a img {
 	position: absolute;
 	left: 0.5em;
 	top: 1.063em;
-	max-height: 2em;
-	max-width: 2em;
+	max-height: 1em;
+	max-width: 1em;
 }
 
 

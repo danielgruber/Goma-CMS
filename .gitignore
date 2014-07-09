@@ -49,3 +49,6 @@ tpl/
 !tpl/smoothOrange/*
 !tpl/smoothOrange/
 *.permit
+
+#sublime
+*.sublime-workspace
