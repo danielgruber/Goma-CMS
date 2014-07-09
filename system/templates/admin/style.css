@@ -1185,6 +1185,11 @@ ul.list-view li a img {
 	max-width: 1em;
 }
 
+.pageType img {
+	max-width: 1.25em;
+	max-height: 1.25em;
+}
+
 
 
 @media only screen and (min-width: 75em) {

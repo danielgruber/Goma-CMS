@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.5
+ * @version 2.3.6
  */
 class Form extends object {
 	/**
@@ -659,7 +659,7 @@ class Form extends object {
 			$submission
 		), array(
 			$result,
-			$form
+			$this
 		));
 	}
 
