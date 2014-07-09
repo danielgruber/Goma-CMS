@@ -21,11 +21,15 @@
 	}); 
 </script>
 <div id="userbar" class="userbar-no-js">
+	<div id="userbar-help" class="help-wrapper">
+		<a href="#" title="{$_lang_help}" class="dropdownDialog-bottom help noAutoHide"><img src="images/icons/goma32/help_white.png" data-retina="images/icons/goma32/help_white@2x.png" height="32" width="32" alt="{$_lang_help}" /></a>
+	</div>
+
 
 	<% IF PERMISSION("ADMIN_HISTORY") %>
-	<div id="userbar-history">
-		<a href="{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_history}" class="dropdownDialog-bottom"><img src="images/icons/modernui/halflight/48x48/appbar.timer.forward.png" height="32" width="32" alt="{$_lang_history}" /></a>
-	</div>
+		<div id="userbar-history">
+			<a href="{BASE_URI}{BASE_SCRIPT}{$historyURL}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_history}" class="dropdownDialog-bottom"><img src="images/icons/modernui/halflight/48x48/appbar.timer.forward.png" height="32" width="32" alt="{$_lang_history}" /></a>
+		</div>
 	<% END %>
 
 	<div id="userbar-langSelect">

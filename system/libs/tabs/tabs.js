@@ -1,8 +1,8 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 05.06.2011
 */
 (function($){
@@ -25,7 +25,7 @@
 				tabs.find(" > ul .active").removeClass("active");
 				$(this).addClass("active");
 				newtab.addClass("active");
-				setCookie(o.cookiename, $("#" + newtab.attr("id") + "_tab").attr("name").substr(5));
+				//setCookie(o.cookiename, $("#" + newtab.attr("id") + "_tab").attr("name").substr(5));
 				var newheight = newtab.height();
 				
 				if($(this).hasClass("ajax")) {

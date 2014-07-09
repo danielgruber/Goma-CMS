@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.03.2013
-  * $Version 1.0.2
+ * gives Controls to get history-information and compare two versions.
+ *
+ * @package		Goma\libs\History
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		1.1.1
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class HistoryController extends Controller {
 	/**
 	 * url-handlers
@@ -62,7 +61,8 @@ class HistoryController extends Controller {
 		
 		$id = "history_" . md5(var_export($filter, true));
 		
-		return $data->customise(array("id" => $id, "namespace" => $namespace))->renderWith("history/history.html");
+		$dbfilter = is_array($filter["dbobject"]) ? $filter["dbobject"] : array();
+		return $data->customise(array("id" => $id, "namespace" => $namespace, "filter" => json_encode($dbfilter)))->renderWith("history/history.html");
 	}
 	
 	/**
@@ -221,7 +221,7 @@ class HistoryController extends Controller {
 			
 			return $view->customise(array("fields" => $fieldset, "css" => $this->buildEditorCSS()))->renderWith("history/compare.html");
 		} else {
-			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->class.". Please create method ".$oldversion->class."::getVersionedFields with array as return-value.");
+			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->classname.". Please create method ".$oldversion->classname."::getVersionedFields with array as return-value.");
 		}
 	}
 	
@@ -253,7 +253,7 @@ class HistoryController extends Controller {
 			return $version[$field];
 		}
 		
-		throwError(6, "Invalid-Data-Error", "$field doesn't exist on version of type ".$version->class." with id ".$version->versionid."");
+		throwError(6, "Invalid-Data-Error", "$field doesn't exist on version of type ".$version->classname." with id ".$version->versionid."");
 	}
 	
 	/**
@@ -399,7 +399,7 @@ class HistoryController extends Controller {
 	public function buildEditorCSS() {
 		$cache = ROOT . CACHE_DIRECTORY . "/editor_compare_" . Core::GetTheme() . ".css";
 		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
-			$css = self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
+			$css =  self::importCSS("system/templates/css/default.css") . "\n" .  self::importCSS("tpl/" . Core::getTheme() . "/editor.css");
 			
 			// parse CSS
 			$css = preg_replace_callback('/([\.a-zA-Z0-9_\-,#\>\s\:\[\]\=]+)\s*{/Usi', array("historyController", "interpretCSS"), $css);

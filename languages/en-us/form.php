@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 10.02.2013
 */   
 $form_lang = array(
@@ -15,6 +15,7 @@ $form_lang = array(
 	'no_number'					=> "Your input is not numeric. Please check the field ",
 	"number_wrong_area"			=> "The number is not within the given range. Please check the field ",
 	"dropdown_nothing_select"	=> "Nothing selected",
+	"click_to_select"			=> "Click to select",
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
 	"not_saved_yet"				=> "The action could not be completed for security reason, yet. Please repeat it!",

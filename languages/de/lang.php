@@ -1,30 +1,30 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 25.03.2013
-*/
+ * @package		Goma\Lang\de
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	09.06.2013
+ */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 $lang = array(
 	/*  OTHER THINGS*/
 	"okay"											=> "OK",
-	"confirm"										=> "Bestätigen...",
-	"prompt"										=> "Text eingeben...",
+	"confirm"										=> "Bestätigen",
+	"prompt"										=> "Text eingeben",
 	"mysql_error"                                 	=> "<div class=\"error\"><strong>Fehler</strong><br />Zugriff fehlgeschlagen!</div>",
 	"mysql_connect_error"							=> "Keine Verbindung zur Datenbank",
 	'mysql_error_small'								=> "Zugriff fehlgeschlagen!",
 	"visitor_online_multi"                          => "Es sind %user% Besucher online!",
 	"visitor_online_1"                             	=> "Es ist ein Besucher online!",
-	"livecounter"									=> "Online-Besucher-Z&auml;hler",
 	"visitors"                                     	=> "Besucher",
+	"statistics"									=> "Statistiken",
 	"page_views"                                   	=> "Seitenaufrufe",
 	"username"                                     	=> "Benutzername",
 	"email_or_username"								=> "E-Mail oder Benutzername",
-	"register_disabled"								=> "Die Registrierung ist auf dieser Seite leider nicht verfügbar.",
+	"register_disabled"								=> "Registrierung leider nicht verfügbar.",
 	"db_edit"                                      	=> "Datenbank",
 	"more"                                         	=> "mehr",
 	'content'										=> "Inhalt",
@@ -50,7 +50,6 @@ $lang = array(
 	"administration"                               	=> "Administration",
 	"permission_administration"						=> "Zugriff auf die Administration",
 	"manage_website"								=> "Webseite verwalten",
-	'default_admin'									=> "Normale Administration",
 	"my_account"                                   	=> "Mein Account" ,
 	"really welcome"                               	=> "Herzlich Willkommen",
 	"perform_login"                                	=> "Einloggen",
@@ -81,7 +80,6 @@ $lang = array(
 	"kontakt_email"                                	=> "Ihre E-Mail-Adresse",
 	"back"                                         	=> "Zur&uuml;ck",
 	"new_messages"                                 	=> "Neue Nachrichten",
-	"user_online"                                  	=> "Benutzer online:",
 	"you_are_here"                                 	=> "Sie befinden sich hier",
 	"stats"                                        	=> "Statistiken",
 	"hits"                                         	=> "Aufrufe",
@@ -105,11 +103,11 @@ $lang = array(
 	"user_creat_bad"                               	=> "Fehler bei anlegen des Benutzers!",
 	/* ADMIN AREA  */
 	/* boxes START  */
-	"new_box"                                      => "Neue Box erstellen",
-	"edit_box"                                     => "Diese Box bearbeiten",
-	"del_box"                                      => "Die Box l&ouml;schen",
+	"NEW_BOX"                                      => "Box erstellen",
+	"EDIT_BOX"                                     => "Box bearbeiten",
+	"DEL_BOX"                                      => "Box l&ouml;schen",
 	"ansicht_page"                                 => "Sie sehen die Seite als ",
-	"box_edited_ok"                                => "Die Box wurde erfolgreich bearbeitet",
+	"box_edited_ok"                                => "Die Box wurde erfolgreich bearbeitet.",
 	"close_window"                                 => "Fenster schliessen",
 	"box_title"                                    => "Titel der Box (leer lassen um Titel auszublenden):",
 	"confirm_delbox"                               => "Box wirklich l&ouml;schen",
@@ -129,7 +127,7 @@ $lang = array(
 	/* ADDBOX END */
 	/* BOXES END */
 	"time"                                         	=> "Zeit",
-	"update_ok"                                    	=> "Die Operation wurde erfolgreich ausgef&uuml;hrt!",   // if updated
+	"update_ok"                                    	=> "Die Aktion wurde erfolgreich ausgef&uuml;hrt!",   // if updated
 	/* SETTINGS START */
 	"settings"                                     	=> "Einstellungen",       // setting for admin
 	"edit_settings"                                	=> "Einstellungen bearbeiten",
@@ -143,11 +141,12 @@ $lang = array(
 	/* TPL END USERGROUPS START */
 	"rights"                                       	=> "Rechte",
 	"rights_manage"									=> "Rechte verwalten",
-	"delete"                                       	=> "l&ouml;schen",
+	"delete"                                       	=> "Löschen",
 	"group"											=> "Gruppe",
 	/* USERGROUPS END USERS START */
 	"rank"                                         	=> "Rang",
 	"status"                                       	=> "Status",
+	"ACCESS"										=> "Zugang",
 	"edit_rights"                                  	=> "Rechte &auml;ndern",
 	"user_del_confirm"                            	=> "Wollen Sie diesen Benutzer wirklich l&ouml;schen?",
 	"user"											=> "Benutzer",
@@ -162,12 +161,11 @@ $lang = array(
 	"rename"                                       	=> "umbenennen",
 	'site'											=> "Seite",
 	"text"                                         	=> "Text",
-	"menupoint_title"								=> "Navigations-Titel",
-	"window_title"									=> "Titel des Browser-Fensters",
-	"window_title_info"								=> "Leer lassen um Standard-Titel zu verwenden",
-	"menupoint_title_info"							=> "Titel der Seite, der in der Navigation angezeigt wird.",
-	"js_disable_editor"                            	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
-	"overview"                                     	=> "&Uuml;bersicht",
+	"MENUPOINT_TITLE"								=> "Navigations-Titel",
+	"MENUPOINT_TITLE_INFO"							=> "Titel der Seite im Menü.",
+	"WINDOW_TITLE"									=> "Titel des Browser-Fensters.",
+	"WINDOW_TITLE_INFO"								=> "Leer lassen, um Standard-Titel zu verwenden",
+	"OVERVIEW"                                     	=> "&Uuml;bersicht",
 	"own_css"                                      	=> "Eigenes CSS (F&uuml;r Profis)",
 	"less_rights"                                  	=> "Sie haben nicht die Berechtigung diese Aktion auszuführen!",
 	"wrong_login"                                  	=> "<strong>Fehler</strong><br />Falscher Benutzername oder falsches Passwort!",
@@ -176,34 +174,35 @@ $lang = array(
 	"profile"										=> "Profil",
 	"save"                                         	=> "Speichern",
 	"cancel"                                       	=> "Abbrechen",
-	"site_exists"                                   => "Eine Seite mit diesem Dateinamen existiert schon!",
+	"site_exists"                                   => "Eine Seite mit diesem Pfadnamen existiert schon!",
 	"userstatus_admin"                             	=> "Benutzerstatus: <strong>Adminstrator</strong>",
 	'lang'                                         	=> "Sprache",
 	'switchlang'									=> "Sprache wechseln",
 	"select_lang"									=> "Wählen Sie Ihre Sprache",
 	'filemanager'                                  	=> "Dateimanager",
+	"cache"											=> "Temporäre Daten",
 	"del_cache"                                    	=> "Cache leeren",
 	"cache_deleted"									=> "Der Cache wurde erfolgreich geleert.",
-	"cache_del_info"								=> "Der Cache ist ein Zwischenspeicher für einige Temporäre angelegte Dateien, um die Geschwindigkeit zu optimieren. Wenn Sie den Cache leeren, generiert Goma diese Dateien neu.",
+	"cache_del_info"								=> "Der Cache ist ein Zwischenspeicher, um die Geschwindigkeit zu optimieren.",
 	"login"                                        	=> "Anmeldung" ,
 	/* infos */
 	"usergroups_info"								=> "<h3>Willkommen</h3>Hier k&ouml;nnen Sie Benutzer und Gruppen verwalten. W&auml;hlen Sie im Baum, was Sie bearbeiten möchten.",
-	"email_info"									=> "Sie k&ouml;nnen mehrere E-Mail-Adressen mit Komma trennen.",
-	"email_correct_info"							=> "Diese E-Mail-Adresse sollte richtig sein und Ihnen gehören.",
+	"email_info"									=> "Mehrere Adressen mit Komma trennen",
+	"email_correct_info"							=> "Die E-Mail-Adresse muss richtig sein und Ihnen gehören.",
 	'dragndrop_info'								=> "Ziehen Sie die Elemente, um sie zu sortieren.",
+	"no_item_selected"								=> "Kein Element ausgewählt",
 	"noscript"                                      => "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen!",
 	"checked"                                       => "Ausgew&auml;hlte",
 	/* edit tue 3.11.09 11:10 */
 	'login_locked'                                  => "Der Benutzeraccount wurde gesperrt!",
 	"login_not_unlocked"							=> "Der Benutzeraccount wurde noch nicht aktiviert!",
 	"not_unlocked"									=> "Noch nicht aktiviert",
-	"page_wartung"                                  => "Diese Seite befindet sich gerade im Wartungsmodus! Bitte kommen Sie sp&auml;ter wieder!",
-	"wartung"                                       => "Wartungsmodus aktiv",
-	"site_status"                                   => "Status der Website",
-	"normal"                                        => "Normal",
+	"SITE_CURRENT_MAINTENANCE"                      => "Diese Seite befindet sich gerade im Wartungsmodus! Bitte kommen Sie sp&auml;ter wieder!",
+	"SITE_MAINTENANCE"                              => "Wartungsmodus aktiv",
+	"SITE_STATUS"                                   => "Status der Internetseite",
+	"SITE_ACTIVE"                                   => "Normal",
 	"phone"                                         => "Telefon",
 	"settings_normal"                               => "Allgemeine Einstellungen",
-	"editor_toggle"                                 => "Editor an/aus",
 	"keywords"                                      => "Website-Schlagwörter",
 	"web_description"                               => "Website-Beschreibung",
 	"site_keywords"									=> "Schlagwörter dieser Seite",
@@ -214,11 +213,11 @@ $lang = array(
 	"captcha_reload"                                => "Neu Laden",
 	'path'                                          => "Pfad",
 	"box_successful_saved"							=> "Die Box wurde erfolgreich gespeichert!",
-	"successful_saved"                              => "Die Daten wurden erfolgreich gespeichert!",
+	"successful_saved"                              => "Die Informationen wurden erfolgreich gespeichert!",
 	"saved"											=> "Gespeichert",
-	"successful_deleted"							=> "Die Daten wurden erfolgreich gelöscht",
+	"successful_deleted"							=> "Der Eintrag wurden erfolgreich gelöscht",
 	"deleted"										=> "Gelöscht",
-	"successful_published"							=> "Die Daten wurden erfolgreich ver&ouml;ffentlicht!",
+	"successful_published"							=> "Der Eintrag wurden erfolgreich gespeichert und veröffentlicht!",
 	"published"										=> "Veröffentlicht",
 	'edit_settings'									=> "Einstellungen bearbeiten",
 	'sites_edit'									=> "Seiten verwalten und anlegen",
@@ -252,16 +251,18 @@ $lang = array(
 	"subpage"										=> "Untergeordnete Seite",
 	'boxes_page'									=> "Seite mit Boxsystem",
 	"boxes"											=> "Boxsystem",
-	'view_site'										=> "Seite aufrufen",
+	'view_site'										=> "Startseite aufrufen",
+	"view_page"										=> "%s aufrufen",
 	'show_in_search'								=> "In der Suche anzeigen",
 	'redirect'										=> "Weiterleitung",
 	'legend'										=> "Legende",
 	'nomainbar'										=> "Kein Men&uuml;punkt",
 	'mainbar'										=> "Mit Men&uuml;punkt",
 	'just_content_page'								=> "Standard-Seite",
-	'pagetype'										=> "Seitentyp",
-	"boxtype"										=> "Box-Typ",
-	'confirm_change_url'							=> "Wollen Sie den Dateinamen der Seite zu folgendem ändern:",
+	'PAGETYPE'										=> "Seitentyp",
+	"BOXTYPE"										=> "Box-Typ",
+	"CREATE_BOX"									=> "Box erstellen",
+	"SAVE_BOX"										=> "Box speichern",
 	'filename'										=> "Dateiname",
 	'search'										=> "Suchen...",
 	'close'											=> "Schliessen",
@@ -282,6 +283,7 @@ $lang = array(
 	"unload_lang_end"								=> "\n\nDrücken Sie OK, um fortzusetzen oder Abbrechen,um auf der Aktuellen Seite zu bleiben.",
 	"unload_not_saved"								=> "Vorsicht: Die Änderungen wurden noch nicht gespeichert.",
 	"date_format"									=> "Datumsformat",
+	"time_format"									=> "Zeitformat",
 	"timezone"										=> "Zeitzone",
 	"errorpage"										=> "Fehlerseite",
 	"errorcode"										=> "Fehlercode",
@@ -290,6 +292,8 @@ $lang = array(
 	"pages_delete"									=> "Seiten l&ouml;schen",
 	"pages_edit"									=> "Seiten bearbeiten",
 	"pages_add"										=> "Seiten erstellen",
+	"PAGE_CREATE"									=> "Neue Seite erstellen",
+	"SUBPAGE_CREATE"								=> "Unterseite erstellen",
 	"pages_publish"									=> "Seiten veröffentlichen",
 	// default DataObjects
 	"data_manage" 									=> "Andere Daten verwalten",
@@ -304,9 +308,9 @@ $lang = array(
 	"version_available"								=> "Es ist eine neuere Version verfügbar.",
 	"upgrade_to_next"								=> "N&auml;chste Version herunterladen",
 	"version_current"								=> "Sie haben die aktuellste Version!",
-	"Create"										=> "Erstellen",
+	"CREATE"										=> "Erstellen",
 	"no_result"										=> "Keine Elemente",
-	"delete_okay"									=> "Die Daten wurden erfolgreich gelöscht!",
+	"delete_okay"									=> "Der Eintrag wurden erfolgreich entfernt!",
 	
 	/*mobile*/
 	"classic_version"								=> "Klassische Ansicht",
@@ -325,6 +329,7 @@ $lang = array(
 	"loading"										=> "Laden...",
 	"waiting"										=> "Warten...",
 	"view_website"									=> "Seite aufrufen",
+	"preview_website"								=> "Vorschau aufrufen",
 	"dashboard"										=> "Übersicht",
 	"visitors_by_day"								=> "Pro Tag",
 	"visitors_by_month"								=> "Pro Monat",
@@ -335,12 +340,9 @@ $lang = array(
 	"gzip"											=> "G-Zip",
 	"style"											=> "Design",
 	/* infos for settings */
-	"registercode_info"								=> "Gäste werden vor der Registrierung nach diesem Code gefragt. Sie können dieses Feld leer lassen um die Abfrage zu deaktivieren.",
-	"date_format_info"								=> "Datumsformat in der von PHP vorgeschriebenen Syntax. Die Bedeutung der Buchstaben finden Sie hier: <a href=\"http://php.net/manual/en/function.date.php\" target=\"_blank\">http://php.net/...date.php</a>",
+	"registercode_info"								=> "Gäste werden vor der Registrierung nach diesem Code gefragt. Sie können dieses Feld leer lassen, um die Abfrage zu deaktivieren.",
 	"gzip_info"										=> "G-Zip hilft Webseiten-Bandbreite zu sparen und beschleunigt die Ladezeit, jedoch benötigt der Server dann mehr Leistung.",
-	"keywords_info"									=> "Schlagwörter helfen Suchmaschienen zu entscheiden, unter welchen Wörtern Sie gefunden werden wollen.",
-	"description_info"								=> "Eine kleine Beschreibung Ihrer Seite.",
-	"livecounter_info"								=> "Der Echtzeit-Besucherzähler zeigt Ihnen, wie viele Besucher aktuell auf der Seite sind. Die Webseite lädt jedoch etwas langsamer, da der Zähler mehr Leistung benötigt.",
+	"description_info"								=> "Die Beschreibung wird von Suchmaschinen benutzt, um den Inhalt Ihrer Seite für Nutzer klarer zu machen.",
 	"register_enabled_info"							=> "Ermöglicht es Gästen sich zu registrieren",
 	"register_require_email_info"					=> "Es wird bei der Registrierung eine Bestätigungs-E-Mail gesendet, um die E-Mail-Adresse zu validieren.",
 	"sitestatus_info"								=> "Wenn sich die Seite im Wartungsmodus befindet, kann Sie nur von Mitgliedern angezeigt werden, die auch die Administration aufrufen können. Sie können diese Funktion z.B. verwenden, wenn Sie Wartungsarbeiten durchführen.",
@@ -381,7 +383,7 @@ $lang = array(
 	 * versions
 	*/
 	"preview"										=> "Vorschau",
-	"publish"										=> "Ver&ouml;ffentlichen",
+	"publish"										=> "Veröffentlichen",
 	"published_site"								=> "Veröffentlichte Seite",
 	"draft"											=> "Entwurf",
 	"draft_save"									=> "Entwurf speichern",
@@ -397,7 +399,7 @@ $lang = array(
 	"unpublish"										=> "Veröffentlichung zurücknehmen",
 	"unpublished"									=> "Zurückgenommen",
 	"unpublish_success"								=> "Die Seite ist nun nicht mehr veröffentlicht.",
-	"state_publish"									=> "Veröffentlichung",
+	"state_publish"									=> "Veröffentlicht",
 	"state_state"									=> "Speicherpunkt",
 	"state_autosave"								=> "Auto-Speicher-Punkt",
 	"state_current"									=> "Diese Version",
@@ -405,15 +407,20 @@ $lang = array(
 	"version_at"									=> "am",
 	"versions_javascript"							=> "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen.",
 	"done"											=> "Fertig",
-	"restore"										=> "Rückgängig",
+	"undo"											=> "Rückgängig",
+	"restore"										=> "Wiederherstellen",
 	"restore_confirm"								=> "Wollen Sie wirklich zu dieser Version zurückkehren?",
 	"compare"										=> "Vergleichen",
 	"no_versions"									=> "Keine Version vorhanden",
 	"versions_timeline"								=> "Zeitleiste",
 	"backups"										=> "Sicherungen",
 	
-	"deleted_page"									=> "Gel&ouml;schte Seite",
-	"edited_page"									=> "Geänderte Seite",
+	"DELETED_PAGE"									=> "Gel&ouml;schte Seite",
+	"EDITED_PAGE"									=> "Geänderte Seite",
+	
+	"CHANGED"										=> "Geändert",
+	"NEW"											=> "Neu",
+	
 	
 	/* goma welcome */
 	"before_you_begin"								=> "Bevor Sie beginnen",
@@ -431,7 +438,7 @@ $lang = array(
 	/* update algorythm */
 	
 	"update"										=> "Aktualisierung",
-	"updates"										=> "Aktualiserungen",
+	"updates"										=> "Aktualisierungen",
 	"update_install"								=> "Aktualisieren",
 	"update_file"									=> "Aktualisierungsdatei",
 	"update_file_download"							=> "Aktualisierungsdatei herunterladen",
@@ -551,9 +558,9 @@ $lang = array(
 	"h_group_remove"		=> '$user löschte die Gruppe $group',
 	"h_group_create"		=> '$user erstellte die Gruppe <a href="$groupUrl">$group</a>',
 	
-	"h_all_events"			=> "Alle Ereignisse",
+	"h_all_events"			=> "Alle Datenquellen",
 	"h_relevant"			=> "Wichtige",
-	"h_all"					=> "Alle",
+	"h_all"					=> "Alle Ereignisse",
 	
 	"older"					=> "Ältere Einträge",
 	"newer"					=> "Neuere Einträge",
@@ -566,8 +573,54 @@ $lang = array(
 	"toggle_navigation"		=> "Navigation umschalten",
 	"toggle_sidebar"		=> "Seitenleiste umschalten",
 	"time_not_in_range"		=> "Die Zeit muss zwischen \$start und \$end liegen.",
-	"no_valid_time"			=> "Die eingegebene Zeit ist keine Zeit.",
+	"date_not_in_range"		=> "Das Datum muss zwischen dem \$start und dem \$end liegen.",
+	"no_valid_time"			=> "Die eingegebene Zeit ist nicht im richtigen Format.",
+	"no_valid_date"			=> "Das angegebene Datum ist nicht im richtigen Format.",
 	"mail_successful_sent"	=> "Die E-Mail wurde erfolgreich gesendet.",
 	
 	"error_disk_space"		=> "Es ist nicht genügend freier Speicherplatz auf dem Webserver verfügbar.",
+	
+	"help"					=> "Hilfe",
+	"video"					=> "Video",
+	"help_article"			=> "Hilfe-Artikel",
+	
+	"useSSL"				=> "SSL benutzen",
+	"useSSL_info"			=> "Sie sollten diese Option nur aktivieren, wenn Ihr Server SSL unterstützt und Sie ein SSL-Zertifikat besitzen.",
+	"useSSL_unsupported"	=> "Um SSL zu aktivieren, rufen Sie diese Seite via SSL auf: <a href='\$link'>Einstellungen SSL</a>",
+	
+	"push"					    => "Push",
+	"p_app_key"				    => "App-Key",
+	"p_app_secret"			    => "App-Secret",
+	"p_app_id"				    => "App-ID",
+	"push_info"				    => 'API-Informationen <a target="_blank" href="http://pusher.com?utm_source=badge"><img src="http://pusher.com/images/badges/pusher_badge_light_1.png"></a>.',
+    "google-site-verification"  => "Google-Webmaster-Key",
+    
+    "no_value"					=> "Kein Wert",
+    "favicon"					=> "Lesezeichen-Symbol",
+    
+    "user_defaultgroup"			=> "Standard-Gruppe neuer Nutzer",
+    
+    "on"						=> "An",
+    "off"						=> "Aus",
+    
+    "DAYLY"						=> "täglich",
+    "DAY"						=> "Tag",
+    "WEEKLY"					=> "wöchentlich",
+    "WEEK"						=> "Woche",
+    "MONTHLY"					=> "monatlich",
+    "MONTH"						=> "Monat",
+    "YEARLY"					=> "jährlich",
+    "YEAR"						=> "Jahr",
+    
+    "NO_EDITOR"					=> "Kein grafischer Editor",
+    "EDITOR"					=> "Editor",
+    "EDITOR_TOGGLE"             => "Editor an/aus",
+	"JS_DISABLE_EDITOR"        	=> "Sie m&uuml;ssen Javascript aktivieren um den Editor zu benutzen!",
+	
+	"HELP.SHOW-MENU"			=> "Klicken, um das Menü anzuzeigen.",
+	"HELP.ADD-NEW-PAGE"			=> "Neue Seite erstellen",
+	"HELP.HISTORY"				=> "In der Änderungshistorie sehen Sie, was in letzter Zeit auf der Seite geändert wurde.",
+	"HELP.HIERARCHY_OPEN"		=> "Klicken, um Baum auszuklappen.",
+	"HELP.PAGES_SORT"			=> "Ziehen, um Seiten umzusortieren.",
+	"HELP.HELP"					=> "Hilfe ein/ausblenden"
 );

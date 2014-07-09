@@ -2,9 +2,9 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 18.03.2013
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 12.05.2013
   * $Version 1.1.3
 */
 
@@ -77,9 +77,9 @@ class gLoader extends Controller
 				{					
 						if(isset(self::$resources[$name]))
 						{
-								foreach(self::$resources[$name]["required"] as $name)
+								foreach(self::$resources[$name]["required"] as $_name)
 								{
-										self::load($name);
+										self::load($_name);
 								}
 								Resources::add(self::$resources[$name]["file"], "js", "preload");
 						}
@@ -146,7 +146,8 @@ class gLoader extends Controller
 					if(!file_exists($temp) || filemtime($temp) < $mtime) {
 						FileSystem::write($temp, $this->buildFile($name, $data));
 					}
-
+					
+					
 					HTTPResponse::sendHeader();
 					readfile($temp);
 					exit;

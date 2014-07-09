@@ -1,37 +1,32 @@
 <?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 03.09.2012
-  * $Version 2.0.2
-*/
+/*
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Framework
+ * @version 2.0.5
+ */
 
 Core::addRules(array(
-	"dev" 											=> "dev",
-	'admin//$item' 									=> "adminController",
-	'system/ajax//link/$id'							=> 'ajaxlink',
-	'system/ajax//popup/$id'						=> 'ajaxlink',
-	"api/v1//\$ClassName!"							=> "RestfulServer",
-	"treeserver"									=> "TreeServer",
-	'uploaded/images/resampled/$width!/$height!' 	=> "imageResize",
-	'uploaded/images/resampled/$width!' 			=> "imageResize",
-	'images/resampled/$width!/$height!'				=> "imageResize",
-	'images/resampled/$width!'						=> "imageResize",
-	'profile//$Action'								=> "ProfileController",
-	'member/$id!'				 					=> "ProfileController",
-	"uploads"										=> "UploadController",
-	"gloader"										=> "Gloader"
+	"dev" 						=> "dev",
+	'admin//$item' 				=> "adminController",
+	'api/stats' 				=> "StatController",
+	'system/ajax//link/$id' 	=> 'ajaxlink',
+	'system/ajax//popup/$id' 	=> 'ajaxlink',
+	"api/v1//\$ClassName!" 		=> "RestfulServer",
+	"treeserver" 				=> "TreeServer",
+	'images/resampled' 			=> "imageResize",
+	'profile//$Action' 			=> "ProfileController",
+	'member/$id!' 				=> "ProfileController",
+	"uploads" 					=> "UploadController",
+	"gloader" 					=> "Gloader",
+	"system/help" 				=> "HelpController",
+	"pusher" 					=> "PushController",
+	"treecallback"				=> "TreeCallbackUrl"
 ), 10);
 
-Core::addRules(array(
-	"system"						=> "SystemController",
-), 9);
+Core::addRules(array("system" => "SystemController", ), 9);
 
-Core::addRules(array(
-	''							   => "HomePageController"
-), 1);
+Core::addRules(array('' => "HomePageController"), 1);
 
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));
@@ -41,9 +36,14 @@ gloader::addLoadAble("sortable", "system/libs/javascript/ui/sortable.js");
 gloader::addLoadAble("selectable", "system/libs/javascript/ui/selectable.js");
 gloader::addLoadAble("resizable", "system/libs/javascript/ui/resizable.js");
 gloader::addLoadAble("accordion", "system/libs/javascript/ui/accordion.js");
-gloader::addLoadAble("autocomplete", "system/libs/javascript/ui/autocomplete.js");
+gloader::addLoadAble("autocomplete", "system/libs/javascript/ui/autocomplete.js", array("menu"));
+gloader::addLoadAble("menu", "system/libs/javascript/ui/menu.js");
 gloader::addLoadAble("button", "system/libs/javascript/ui/button.js");
-gloader::addLoadAble("uidialog", "system/libs/javascript/ui/dialog.js", array("button", "resizable", "draggable"));
+gloader::addLoadAble("uidialog", "system/libs/javascript/ui/dialog.js", array(
+	"button",
+	"resizable",
+	"draggable"
+));
 gloader::addLoadAble("slider", "system/libs/javascript/ui/slider.js");
 gloader::addLoadAble("tabs", "system/libs/javascript/ui/tabs.js");
 gloader::addLoadAble("gtabs", "system/libs/tabs/tabs.js");
@@ -58,8 +58,9 @@ gloader::addLoadAble("ajaxupload", "system/libs/ajax/ajaxupload.js");
 gloader::addLoadAble("htmllib", "system/libs/javascript/html.js");
 gloader::addLoadAble("history", "system/libs/javascript/history/history.js");
 gloader::addLoadAble("notifications", "system/libs/notifications/notifications.js");
+gloader::addLoadAble("json", "system/libs/javascript/json.js");
+gloader::addLoadAble("jquery-color", "system/libs/thirdparty/jquery-color/jquery.color.min.js");
+gloader::addLoadAble("helpbox", "system/libs/javascript/helpBox.js");
 
-/**
- * here you can define the seperator for the creadcrumbs
-*/
-define('BREADCRUMB_SEPERATOR',' &raquo; ');
+// Breadcrump seperator
+define('BREADCRUMB_SEPERATOR', ' &raquo; ');

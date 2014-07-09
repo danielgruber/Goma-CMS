@@ -4,10 +4,10 @@
   * thanks to https://github.com/pangratz/dnd-file-upload/blob/master/jquery.dnd-file-upload.js
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 2.0.4
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 10.04.2014
+  * $Version 2.0.7
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -16,8 +16,12 @@ var AjaxUpload = function(DropZone, options) {
 	this.ajaxurl = location.href;
 	this["multiple"] = false;
 	this.id = randomString(10);
+	this.max_size = -1;
+	this.allowed_types = true;
+	
 	for(i in options) {
-		this[i] = options[i];
+		if(options[i] !== undefined)
+			this[i] = options[i];
 	}
 	this.loading = false;
 	
@@ -25,16 +29,16 @@ var AjaxUpload = function(DropZone, options) {
 	
 	
 	// bind events on document to stop the browser showing the file, if the user does not hit the dropzone
-	$(document).bind("dragenter", function(event){
+	$(document).on("dragenter", function(event){
 		$this.dragEnterDocument(event);
 		return $this._dragInDocument(event);
 	});
 	
-	$(document).bind("dragleave", function(event){
+	$(document).on("dragleave", function(event){
 		return $this._dragLeaveDocument(event);
 	});
 	
-	$(document).bind("dragover", function(event){
+	$(document).on("dragover", function(event){
 		return $this._dragInDocument(event);
 	});
 	
@@ -45,10 +49,10 @@ var AjaxUpload = function(DropZone, options) {
 	}
 	
 	// now bind events to dropzone
-	this.DropZone.bind("dragenter", function(event){
+	this.DropZone.on("dragenter", function(event){
 		return $this._dragEnter(event);
 	});
-	this.DropZone.bind("dragover", function(event){
+	this.DropZone.on("dragover", function(event){
 		return $this._dragOver(event);
 	});
 	
@@ -172,6 +176,14 @@ AjaxUpload.prototype = {
 		
 	},
 	
+	failSize: function(index) {
+		
+	},
+	
+	failExt: function(index) {
+		
+	},
+	
 	/**
 	 * called on cancel
 	*/
@@ -274,6 +286,7 @@ AjaxUpload.prototype = {
 		var timeDiff = now - upload.downloadStartTime;
 		
 		this.browse.removeAttr("disabled");
+		this.placeBrowseHandler();
 		
 		this.queue[fileIndex].loading = false;
 		this.queue[fileIndex].loaded = true;
@@ -402,6 +415,7 @@ AjaxUpload.prototype = {
 		upload.currentProgress = 0;
 		upload.startData = 0;
 		upload.fileName = file.fileName;
+		upload.fileSize = file.fileSize;
 		
 		// add listeners
 		upload.addEventListener("progress", function(event){
@@ -411,12 +425,12 @@ AjaxUpload.prototype = {
 			}
 		}, false);
 
-		xhr.open("POST", this.ajaxurl);
+		xhr.open("PUT", this.ajaxurl);
 		xhr.setRequestHeader("Cache-Control", "no-cache");
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		xhr.setRequestHeader("X-File-Name", file.fileName);
-		xhr.setRequestHeader("X-File-Size", file.fileSize);
-		xhr.setRequestHeader("Content-Type", "multipart/form-data");
+		xhr.setRequestHeader("X-File-Name", file.fileName.replace(/[^\w\.\-]/g, '-'));
+		xhr.setRequestHeader("X-File-Size", file.fileSize.toString());
+		xhr.setRequestHeader("content-type", "application/octet-stream");
 		
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState == 4) {
@@ -440,11 +454,36 @@ AjaxUpload.prototype = {
 	processQueue: function() {
 		for(i in this.queue) {
 			if(!this.queue[i].loading && !this.queue[i].loaded) {
-				this.queue[i].loading = true;
-				this.queue[i].send();
-				this.uploadStarted(i, this.queue[i].upload);
+				if(this.checkFileExt(this.queue[i].upload.fileName)) {
+					if(this.max_size == -1 || typeof this.queue[i].upload.fileSize == "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
+						this.queue[i].loading = true;
+						this.queue[i].send();
+						this.uploadStarted(i, this.queue[i].upload);
+					} else {
+						this.abort(i);
+						this.failSize(i);
+					}
+				} else {
+					this.abort(i);
+					this.failExt(i);
+				}
 			}
+			this.placeBrowseHandler();
 		}
+	},
+	
+	/**
+	 * checks the file-extension.
+	*/
+	checkFileExt: function(name) {
+		if(this.allowed_types === true) {
+			return true;
+		}
+		
+		console.log(this.allowed_types);
+		
+		var regexp = new RegExp("\.("+this.allowed_types.join("|")+")$", "i");
+		return name.match(regexp);
 	},
 	
 	/**
@@ -591,6 +630,7 @@ AjaxUpload.prototype = {
 		
 		var $form = $("#" + this.id + "_uploadForm");
 		$form.css({top: - 400, left: this.browse.offset().left});
+		this.browse.attr("disabled", "disabled");
 	},
 	
 	/**
@@ -617,6 +657,9 @@ AjaxUpload.prototype = {
 			if(typeof this.queue[fileIndex] != "undefined") {
 				this.queue[fileIndex].abort();
 				this.cancel(fileIndex);
+				this._complete(this, this.queue[fileIndex].upload, fileIndex);
+				this.queue[fileIndex].loading = false;
+				this.queue[fileIndex].loaded = true;
 			}
 		} 
 		

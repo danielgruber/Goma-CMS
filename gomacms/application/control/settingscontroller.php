@@ -2,13 +2,14 @@
 /**
   * Settings
   *
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.2.5
+  *	@package 	goma cms
+  *	@link 		http://goma-cms.org
+  *	@license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *	@author 	Goma-Team
+  * @Version 	1.2.9
 */
+
+Core::addToHook("loadedClassRegisterExtension", array("settingsController", "setRegisterVars"));
 
 class SettingsController extends Controller {
 	/**
@@ -25,7 +26,13 @@ class SettingsController extends Controller {
 	 *@access public
 	*/
 	public static function PreInit() {
-		self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
+		$cacher = new Cacher("settings");
+		if($cacher->checkValid()) {
+			self::$settingsCache = new newSettings($cacher->getData());
+		} else {
+			self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
+			$cacher->write(self::$settingsCache->toArray(), 3600);
+		}
 	}
 	/**
 	 * gets one static
@@ -36,6 +43,12 @@ class SettingsController extends Controller {
 	public static function get($name)
 	{	
 			return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
+	}
+	
+	public static function setRegisterVars() {
+		RegisterExtension::$enabled = settingsController::get("register_enabled");
+		RegisterExtension::$validateMail = settingsController::get("register_email");
+		RegisterExtension::$registerCode = settingsController::get("register");
 	}
 
 }
@@ -59,7 +72,8 @@ class Newsettings extends DataObject implements HistoryData {
 		"register"			=> "varchar(100)",
 		"register_enabled"	=> "Switch",
 		"register_email"	=> "Switch",
-		"gzip"				=> "Switch"
+		"gzip"				=> "Switch",
+		"useSSL"			=> "Switch"
 	);
 	
 	/**
@@ -73,7 +87,8 @@ class Newsettings extends DataObject implements HistoryData {
 		"register_email"	=> "1",
 		"register_enabled"	=> "0",
 		"status"			=> "1",
-		"stpl"				=> "default"
+		"stpl"				=> "default",
+		"useSSL"			=> "0"
 	);
 	
 	/**
@@ -101,8 +116,42 @@ class Newsettings extends DataObject implements HistoryData {
 			"register_enabled"	=> lang("register_enabled", "Enable Registration"),
 			"register_email"	=> lang("register_require_email", "Send Registration Mail"),
 			"titel"				=> lang("title"),
-			"gzip"				=> lang("gzip", "G-Zip")
+			"gzip"				=> lang("gzip", "G-Zip"),
+			"useSSL"			=> lang("useSSL")
 		);
+	}
+	
+	/**
+	 * returns the titles for the fields for automatic form generation
+	 *
+	 *@name getFieldTitles
+	*/
+	public function getFieldInfo() {
+		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+		if($http == "https")
+			return  array(
+				"useSSL"			=> lang("useSSL_info")
+			);
+		else {
+			$port = $_SERVER["SERVER_PORT"];
+			if ($http == "http" && $port == 80) {
+				$port = "";
+			} else if ($http == "https" && $port == 443) {
+				$port = "";
+			} else {
+				$port = ":" . $port;
+			}
+
+			$url = 'https://' . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"];
+			return  array(
+				"useSSL"			=> str_replace('$link', $url, lang("useSSL_unsupported"))
+			);
+		}
+	}
+	
+	public function onBeforeWrite() {
+		$cacher = new Cacher("settings");
+		$cacher->delete();
 	}
 	
 	/**
@@ -117,9 +166,10 @@ class Newsettings extends DataObject implements HistoryData {
 		$this->getFormFromDB($general);
 		$general->add(new langselect('lang',lang("lang"),PROJECT_LANG));
 		$general->add(new select("timezone",lang("timezone"), ArrayLib::key_value(i18n::$timezones) ,Core::getCMSVar("TIMEZONE")));
-		$general->add($date_format = new Select("date_format", lang("date_format"), $this->generateDate(), DATE_FORMAT));			
+		$general->add($date_format = new Select("date_format_date", lang("date_format"), $this->generateDate(), DATE_FORMAT_DATE));
+		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));			
 						
-		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => $GLOBALS['lang']['normal'], STATUS_MAINTANANCE => $GLOBALS['lang']['wartung']), SITE_MODE));
+		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => lang("SITE_ACTIVE"), STATUS_MAINTANANCE => lang("SITE_MAINTENANCE")), SITE_MODE));
 		if(STATUS_DISABLED)
 			$status->disable();
 			
@@ -132,12 +182,17 @@ class Newsettings extends DataObject implements HistoryData {
 			$inst->getFormFromDB($currenttab);
 		}
 		
+		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+		if($http == "http" && $this->useSSL != 1) {
+			$form->useSSL->disable();
+		}
+		
 		$form->addAction(new CancelButton('cancel',lang("cancel")));
 		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 	}
 	
 	/**
-	 * generates the date-formats
+	 * generates date-formats
 	 *
 	 *@name generateDate
 	 *@access public
@@ -145,6 +200,20 @@ class Newsettings extends DataObject implements HistoryData {
 	public function generateDate() {
 		$formats = array();
 		foreach(i18n::$date_formats as $format) {
+			$formats[$format] = goma_date($format);
+		}
+		return $formats;
+	}
+	
+	/**
+	 * generates time-formats
+	 *
+	 *@name generateTime
+	 *@access public
+	*/
+	public function generateTime() {
+		$formats = array();
+		foreach(i18n::$time_formats as $format) {
 			$formats[$format] = goma_date($format);
 		}
 		return $formats;
@@ -190,20 +259,19 @@ class metaSettings extends Newsettings {
 	 *@name db
 	*/
 	static $db = array(
-		"meta_keywords"		=> "varchar(100)",
-		"meta_description"	=> "varchar(100)"
+		"meta_description"	        => "varchar(100)",
+        "google_site_verification"  => "varchar(100)"
 	);
 	
 	public $tab = "{\$_lang_meta}";
 	
 	public $fieldInfo = array(
-		"meta_keywords"		=> "{\$_lang_keywords_info}",
 		"meta_description"	=> "{\$_lang_description_info}"
 	);
 	public function getFieldTitles() {
 		return array(
-			"meta_keywords"		=> lang("keywords"),
-			"meta_description"	=> lang("web_description", "Description of the Site")
+			"meta_description"	        => lang("web_description", "Description of the Site"),
+            "google_site_verification"  => lang("google-site-verification", "Google-Webmaster-Key")
 		);
 	}
 }
@@ -217,6 +285,13 @@ class TemplateSettings extends NewSettings {
 	static $db = array(
 		"stpl"			=> "varchar(64)",
 		"css_standard"	=> "text"
+	);
+	
+	/**
+	 * has-one
+	*/
+	static $has_one = array(
+		"favicon"	=> "ImageUploads"
 	);
 	
 	public $tab = "{\$_lang_style}";
@@ -237,6 +312,7 @@ class TemplateSettings extends NewSettings {
 		}
 		return $tpl;
 	}
+	
 	/**
 	 * gets the form
 	 *
@@ -245,7 +321,67 @@ class TemplateSettings extends NewSettings {
 	*/
 	public function getFormFromDB(&$form) {
 		$form->add(new TemplateSwitcher("stpl", lang("available_styles"), ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), GOMA_VERSION . "-" . BUILD_VERSION));
+		$form->add($img = new ImageUpload("favicon", lang("favicon")));
+		
+		$img->allowed_file_types = array("jpg", "png", "bmp", "gif", "jpeg", "ico");
+		
 		$form->add(new TextArea("css_standard", lang("own_css")));
+	}
+}
+
+class PushSettings extends NewSettings {
+	/**
+	 * database-fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
+		"p_app_key"		=> "varchar(64)",
+		"p_app_secret"	=> "varchar(64)",
+		"p_app_id"		=> "varchar(64)"
+	);
+	
+	public $tab = "{\$_lang_push}";
+	
+	public $fieldInfo = array(
+		"p_app_id"			=> "{\$_lang_push_info}"
+	);
+	public function getFieldTitles() {
+		return array(
+			"p_app_secret"		=> lang("p_app_secret", "App-Secret"),
+			"p_app_key"			=> lang("p_app_key", "App-Key"),
+			"p_app_id"			=> lang("p_app_id", "App-ID")
+		);
+	}
+}
+
+
+class EditorSettings extends NewSettings {
+	/**
+	 * database-fields
+	 *
+	 *@name db
+	*/
+	static $db = array(
+		"editor" 	=> "varchar(200)"
+	);
+	
+	public $tab = "{\$_lang_EDITOR}";
+	
+	public function getFieldTitles() {
+		return array(
+			"editor"	=> "{\$_lang_EDITOR}"
+		);
+	}
+	
+	/**
+	 * gets the form
+	 *
+	 *@name getFormFromDB
+	 *@access public
+	*/
+	public function getFormFromDB(&$form) {
+		
 	}
 }
 

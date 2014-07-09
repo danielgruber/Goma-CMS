@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 25.06.2012
   * $Version 1.6.2
 */
@@ -41,13 +41,14 @@ class FileSystem extends Object {
 	 *@access public
 	*/
 	public static function requireDir($dir, $mode = 0777, $throwOnFail = true) {
+		clearstatcache();
 		if(!file_exists($dir)) {
 			if(mkdir($dir, $mode, true)) {
 				@chmod($dir, $mode);
 				return true;
 			} else {
 				if($throwOnFail) {
-					throwError(6, "PHP-Error", "Could not Create Folder '".$dir."'");
+					throw new LogicException("Could not create folder '" . $dir . "'.");
 				}
 				self::$errFile = $dir;
 				return false;

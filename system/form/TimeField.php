@@ -1,19 +1,11 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-<<<<<<< HEAD
-  * last modified: 22.02.2013
-=======
-  * last modified: 17.02.2013
->>>>>>> some updates for timeField and Language
-  * $Version
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Form-Field to select a specific time.
+ *
+ * @package		Goma\Core\Model
+ * @version		1.1.1
+ */
 class TimeField extends FormField
 {
 		/**
@@ -54,14 +46,25 @@ class TimeField extends FormField
 			} else {
 				if($this->between && is_array($this->between)) {
 					$between = array_values($this->between);
-					$start = strtotime($between[0]);
-					$end = strtotime($between[1]);
+					
+					if(!preg_match("/^[0-9]+$/", trim($between[0]))) {
+				    	$start = strtotime($between[0]);
+				    } else {
+				        $start = $between[0];
+				    }
+				    
+				    if(!preg_match("/^[0-9]+$/", trim($between[1]))) {
+				    	$end = strtotime($between[1]);
+				    } else {
+				        $end = $between[1];
+				    }
+				    
 					if($start < $timestamp && $timestamp < $end) {
 						return true;
 					} else {
 						$err = lang("time_not_in_range", "The given time is not between the range \$start and \$end.");
-						$err = str_replace('$start', date("H:i:s", $start), $err);
-						$err = str_replace('$end', date("H:i:s", $end), $err);
+						$err = str_replace('$start', date(DATE_FORMAT_TIME, $start), $err);
+						$err = str_replace('$end', date(DATE_FORMAT_TIME, $end), $err);
 						return $err;
 					}
 				}

@@ -1,15 +1,16 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 2.2.3
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * A simple two column admin-panel.
+ *
+ * @package     Goma\Admin\LeftAndMain
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.2.6
+ */
+ 
 class LeftAndMain extends AdminItem {
 	
 	/**
@@ -27,7 +28,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public $url_handlers = array(
-		"updateTree/\$marked!/\$search"	=> "updateTree",
+		"updateTree/\$search"			=> "updateTree",
 		"edit/\$id!/\$model"			=> "cms_edit",
 		"del/\$id!/\$model"				=> "cms_del",
 		"add/\$model"					=> "cms_add",
@@ -53,34 +54,6 @@ class LeftAndMain extends AdminItem {
 	public $tree_class = "";
 	
 	/**
-	 * title of root-node
-	 *
-	 *@name root_node
-	 *@access public
-	*/
-	public $root_node = "";
-	
-	/**
-	 * colors of the nodes
-	 * key is class, value is a array with color and name
-	 * for example:
-	 * array("withmainbar" => array("color" => "#cfcfcf", "name" => "with mainbar"))
-	 *
-	 *@name colors
-	 *@access public
-	 *@var array
-	*/
-	public $colors = array();
-	
-	/**
-	 * icons
-	 *
-	 *@name icons
-	 *@access public
-	*/
-	public $icons = array("root" => "images/icons/fatcow16/world.png");
-	
-	/**
 	 * marked node
 	 *
 	 *@name marked
@@ -104,27 +77,9 @@ class LeftAndMain extends AdminItem {
 	protected $sort_field;
 	
 	/**
-	 * gets the icons from all classes and the $icons-var
-	 *
-	 *@name getIcons
-	 *@access public
+	 * render-class.
 	*/
-	public function getIcons() {
-		$icons = $this->icons;
-		$icons["searchresult"] = "images/icons/fatcow16/magnifier.png";
-		foreach($this->models as $model) {
-			if(ClassInfo::hasStatic($model, "icon")) {
-				$icons[$model] = ClassInfo::findFile(ClassInfo::getStatic($model, "icon"), $model);
-			}
-			foreach(ClassInfo::getChildren($model) as $child) {
-				if(ClassInfo::hasStatic($child, "icon")) {
-					$icons[$child] = ClassInfo::findFile(ClassInfo::getStatic($child, "icon"), $child);
-				}
-			}
-		}
-		return $icons;
-	}
-	
+	static $render_class = "LeftAndMain_TreeRenderer";
 	
 	/**
 	 * gets the title of the root node
@@ -143,7 +98,7 @@ class LeftAndMain extends AdminItem {
 	 *@access public
 	*/
 	public function removeResume() {
-		unset($_SESSION["goma_resume_".$this->class.""]);
+		unset($_SESSION["goma_resume_".$this->classname.""]);
 	}
 	
 	/**
@@ -174,8 +129,6 @@ class LeftAndMain extends AdminItem {
 		}
 		
 		// add resources
-		$filename = $this->getCSS();
-		Resources::add(CACHE_DIRECTORY . "/" . $filename, "css");
 		Resources::add("system/core/admin/leftandmain.js", "js", "tpl");
 		
 		if(isset($this->sort_field)) {
@@ -191,65 +144,53 @@ class LeftAndMain extends AdminItem {
 		
 		$data = $this->ModelInst();
 		
-		$this->ModelInst()->customise(array("legend" => $this->legend()));
-		
 		if(defined("LAM_CMS_ADD"))
 			$this->ModelInst()->addmode = 1;
 		
-		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree(), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
+		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
 		
-		$_SESSION[$this->class . "_LaM_marked"] = $this->marked;
+		$_SESSION[$this->classname . "_LaM_marked"] = $this->marked;
 		
 		// parent-serve
 		return parent::serve($output);
 	}
 	
+	
 	/**
-	 * gets css-code from colors and icons
-	 *
-	 *@name getCSS
-	 *@access public
+	 * generates the tree-links.
 	*/
-	public function getCSS() {
-		$filename = "left_and_main_on_the_fly_".$this->class.".css";
-		if(!file_exists(ROOT . CACHE_DIRECTORY . "/" . $filename)) {
-			$css = "";
-			$retinaCSS = "";
-			foreach($this->getIcons() as $class => $icon) {
-				$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
-				if(file_exists($retinaPath)) {
-					$retinaCSS .= '.'.$class.' span { background-image: url(../../'.$retinaPath.') !important; background-size: 16px 16px }';
-				}
-				$css .= '.'.$class.' span { background-image: url(../../'.$icon.') !important }';
-			}
+	public function generateTreeLink($child, $bubbles) {
+		return new HTMLNode("a", array("href" => $this->originalNamespace . "/record/" . $child->recordid . "/edit" . URLEND, "class" => "node-area"), array(
+			new HTMLNode("span", array("class" => "img-holder"), new HTMLNode("img", array("src" => $child->icon))),
+			new HTMLNode("span", array("class" => "text-holder"), $child->title),
+			$bubbles
+		));
+	}
+	
+	/**
+	 * generates the context-menu.
+	*/
+	public function generateContextMenu($child) {
+		$data = array();
+		if($child->treeclass) {
 			
-			foreach($this->colors as $class => $data) {
-				$css .= '.'.$class.' { color: '.$data["color"].' !important; }';
-			}
-			
-			if(Object::method_exists($this->tree_class, "provideTreeParams")) {
-				$params = Object::instance($this->tree_class)->provideTreeParams();
-				foreach($params as $class => $data) {
-					$css .= '.'.$class.' {';
-					foreach($data["css"] as $key => $value) {
-						$css .= $key . ': ' . $value . ";\n";
-					}
-					$css .= "}";
-				}
-			}
-			
-			$wholecss = $css . "\n\n/* here goes some retina-stuff */
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1) { 
-  ".$retinaCSS."
-}";
-			
-			FileSystem::write(ROOT . CACHE_DIRECTORY . "/" . $filename, $wholecss);
-			unset($file, $css);
+			$data = array(
+				array(
+					"icon"		=> "images/16x16/edit.png",
+					"label" 	=> lang("edit"),
+					"onclick"	=> "LoadTreeItem(".$child->recordid.");"
+				),
+				array(
+					"icon"		=> "images/16x16/del.png",
+					"label" 	=> lang("delete"),
+					"ajaxhref"	=> $this->originalNamespace . "/record/" . $child->recordid . "/delete" . URLEND
+				)
+			);
 		}
-		return $filename;	
+		
+		$this->callExtending("generateContextMenu", $data);
+		
+		return $data;
 	}
 	
 	/**
@@ -261,78 +202,43 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function createTree($search = "", $marked = null) {
 		$tree_class = $this->tree_class;
 		if($tree_class == "") {
-			throwError(6, 'PHP-Error', "Failed to load \$tree_class! Please define \$tree_class in ".$this->class."");
+			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
 		}
 		
-		if(isset($_GET["searchtree"])) {
-			$search = $_GET["searchtree"];
-		} else if(isset($_POST["searchtree"])) {
-			$search = $_POST["searchtree"];
+		if(!Object::method_exists($tree_class, "build_tree")) {
+			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
 		
-		$object = Object::instance($tree_class);
+		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state", "search" => $search)));
+		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace, $this);
+		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
+		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
+		$treeRenderer->mark($this->getParam("id"));
 		
-		if(empty($search)) {
-			$search_parentid = 0;
-		} else {
-			$search_parentid = array($search);
+		// check for logical opened tree-items.
+		if(isset($_GET["edit_id"])) {
+			// here we check for Ajax-Opening. It is given to the leftandmain-js-api.
+			if($current = DataObject::get_versioned("pages", "state", array("id" => $_GET["edit_id"]))->first()) {
+				$treeRenderer->setExpanded($current->id);
+				while($current->parent) {
+					$current = $current->parent;
+					$treeRenderer->setExpanded($current->id);
+				}
+			}
+		} else
+		
+		// here we check for complete generated pages.
+		if($this->getParam("id")) {
+			if($current = DataObject::get_versioned("pages", "state", array("id" => $this->getParam("id")))->first()) {
+				$treeRenderer->setExpanded($current->id);
+				while($current->parent) {
+					$current = $current->parent;
+					$treeRenderer->setExpanded($current->id);
+				}
+			}
 		}
 		
-		if(isset($_GET["tree_params"]) && is_array($_GET["tree_params"])) {
-			if(!isset($_SESSION[$this->class . "_tree_params"])) $_SESSION[$this->class . "_tree_params"] = array();
-			$params = array_merge($_SESSION[$this->class . "_tree_params"], $_GET["tree_params"]);
-			$_SESSION[$this->class . "_tree_params"] = $params;
-			
-		} else if(isset($_SESSION[$this->class . "_tree_params"]) && is_array($_SESSION[$this->class . "_tree_params"])) {
-			$params = $_SESSION[$this->class . "_tree_params"];
-		} else {
-			$params = array();
-		}
-		
-		if(!isset($marked))
-			$marked = $this->marked;
-		
-		if(count($this->models) > 1) {
-			$default_tree = $object->renderTree($this->adminURI() . "model/\$class_name/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
-		} else {
-			$default_tree = $object->renderTree($this->adminURI() . "record/\$id/edit" . URLEND, $marked, $search_parentid, $params, false);
-		}
-		
-		if($marked == "0") {
-			$marked = "marked";
-		} else {
-			$marked = "";
-		}
-		
-		if(!empty($search)) {
-			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->class.'">
-								<span class="a  '.$marked.'">
-									<span class="b">
-										<a nodeid="0" class="treelink searchresult" href="'.$this->adminURI() .'"><span>'.lang("result", "result").'</span></a>
-									</span>
-								</span>
-								<ul class="rootnode">
-									'.$default_tree.'
-								</ul>
-							</li>
-							
-						</ul>';
-		} else {
-			return '<ul class="tree">
-							<li class="expanded last" id="tree_'.$this->class.'">
-								<span class="a '.$marked.'">
-									<span class="b">
-										<a nodeid="0" class="treelink root" href="'.$this->adminURI() .'"><span>'.$this->getRootNode().'</span></a>
-									</span>
-								</span>
-								<ul class="rootnode">
-									'.$default_tree.'
-								</ul>
-							</li>
-							
-						</ul>';
-		}
+		return $treeRenderer->render(true);
 	}
 	/**
 	 * gets updated data of tree for searching or normal things
@@ -344,7 +250,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		$this->marked = $this->getParam("marked");
 		$search = $this->getParam("search");
-		HTTPResponse::setBody($this->createTree($search), isset($_SESSION[$this->class . "_LaM_marked"]) ? $_SESSION[$this->class . "_LaM_marked"] : 0);
+		HTTPResponse::setBody($this->createTree($search), isset($_SESSION[$this->classname . "_LaM_marked"]) ? $_SESSION[$this->classname . "_LaM_marked"] : 0);
 		HTTPResponse::output();
 		exit;
 	}
@@ -364,13 +270,12 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function ajaxSave($data, $response) {
 		if($model = $this->save($data)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_saved", "The data was successfully written!"), lang("saved"));
+			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
-			$response->exec("if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); }); }");
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 7 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else { reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true}); }, ".var_export($model["id"], true)."); }");
 			return $response;
 		} else {
-			$dialog = new Dialog(lang("less_rights"), lang("error"));
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			return $response;
 		}
 	}
@@ -385,7 +290,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function savesort() {
 		$field = $this->sort_field;
 		foreach($_POST["treenode"] as $key => $value) {
-			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value));
+			DataObject::update($this->tree_class, array($field => $key), array("recordid" => $value), "", true);
 		}
 		$this->marked = $this->getParam("id");
 		HTTPResponse::setBody($this->createTree());
@@ -400,32 +305,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	 *@access public
 	*/
 	public function hideDeletedObject($response, $data) {
-		$response->exec("reloadTree(function(){ LoadTreeItem(0);});");
+		$response->exec("reloadTree(function(){ goma.ui.ajax(undefined, {url: '".$this->originalNamespace."'}); });");
 		return $response;
-	}
-	
-	/**
-	 * gets the options for add
-	 *
-	 *@name legend
-	 *@access public
-	*/
-	public function legend() {
-		$data = $this->colors;
-		$arr = array();
-		foreach($data as $class => $data) {
-			$arr[] = array("class"	=> $class, "title"	=> parse_lang($data["name"]));
-		}
-		if(Object::method_exists($this->tree_class, "provideTreeParams")) {
-				$params = Object::instance($this->tree_class)->provideTreeParams();
-				foreach($params as $class => $data) {
-					if(isset($_SESSION[$this->class . "_tree_params"][$class])) 
-						$data["default"] = $_SESSION[$this->class . "_tree_params"][$class];
-					
-					$arr[] = array("class" => $class, "title" => parse_lang($data["title"]), "checkbox" => true, "checked" => $data["default"]);
-				}
-			}
-		return new ViewAccessAbleData($arr);
 	}
 	
 	/**
@@ -440,13 +321,12 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 		
 		if($model = $this->save($data, 2)) {
 			// notify the user
-			Notification::notify($model->class, lang("successful_published", "The data was successfully published!"), lang("published"));
+			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
-			$response->exec("if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { var href = '".BASE_URI . $this->adminURI()."/record/".$model->id."/edit".URLEND."'; if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ LoadTreeItem('".$model["class_name"] . "_" . $model["id"]."'); });}");
+			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id."); }");
 			return $response;
 		} else {
-			$dialog = new Dialog(lang("less_rights"), lang("error"));
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			return $response;
 		}
 	}
@@ -462,8 +342,7 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	*/
 	public function decorateModel($model, $add = array(), $controller = null) {
 		$add["types"] = $this->Types();
-		$add["legend"] = $this->Legend();
-		
+
 		return parent::decorateModel($model, $add, $controller);
 	}
 	
@@ -476,8 +355,8 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	public function Types() {
 		$data = $this->createOptions();
 		$arr = new DataSet();
-		foreach($data as $option => $title) {
-			$arr->push(array("value" => $option, "title" => $title));
+		foreach($data as $class => $title) {
+			$arr->push(array("value" => $class, "title" => $title, "icon" => ClassInfo::getClassIcon($class)));
 		}
 		return $arr;
 	}
@@ -569,6 +448,9 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
 	*/
 	public function index() {
 		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
+		if(!$this->template)
+			return "";
 		return parent::index();
 	}
 }

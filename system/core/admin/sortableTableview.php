@@ -2,8 +2,8 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 11.02.2013
   * $Version 1.0
 */
@@ -107,11 +107,11 @@ class SortableTableView extends adminItem {
 			
 			$this->modelInst()->sort($this->sort_field, "ASC");
 			
-			$_SESSION["deletekey"][$this->class] = randomString(10);
+			$_SESSION["deletekey"][$this->classname] = randomString(10);
 			
 			Resources::addData("var adminURI = ".var_export($this->namespace, true).";");
 			
-			return $this->model_inst->customise(array("datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->class], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
+			return $this->model_inst->customise(array("datafields" => $fields,  "action" => $actions, "globalaction" => $globalactions), array_merge(array("deletekey" => $_SESSION["deletekey"][$this->classname], "deletable" => isset($this->actions["delete"])), $this->tplVars))->renderWith($this->template);
 	}
 	
 	/**
@@ -156,7 +156,7 @@ class SortableTableView extends adminItem {
 	 *@access public
 	*/
 	public function deleteMany() {
-		if(isset($_SESSION["deletekey"][$this->class]) && $_SESSION["deletekey"][$this->class] == $_POST["deletekey"]) {
+		if(isset($_SESSION["deletekey"][$this->classname]) && $_SESSION["deletekey"][$this->classname] == $_POST["deletekey"]) {
 			$data = $_POST["data"];
 			unset($data["all"]);
 			foreach($data as $key => $value) {

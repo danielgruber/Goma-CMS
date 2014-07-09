@@ -1,14 +1,18 @@
-<?php
-/**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 18.03.2013
-  * $Version 2.5.6
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+/**
+ * Base-Class for each GomaCMS-Page.
+ *
+ * It defines basic fields like Title, Meta-Tags, Hierarchy and Permissions. It also implements Tree-Generation and History. 
+ * If you want to create a new page-type, you have to extend (@link Page).
+ *
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.6.4
+ */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 {
@@ -25,6 +29,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		static $versions = true;
 		
 		/**
+		 * parent type set in this object.
+		*/
+		public $parentSet;
+		
+		/**
 		 * the db-fields
 		 *
 		 *@name db
@@ -39,8 +48,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							'data' 				=> 'HTMLtext',
 							'sort'				=> 'int(8)',
 							'search'			=> 'int(1)',
-							'meta_description'	=> 'varchar(200)',
-							'meta_keywords'		=> 'varchar(200)');
+							'meta_description'	=> 'varchar(200)');
 		
 		/**
 		 * searchable fields
@@ -57,8 +65,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@access public
 		*/
 		static $index = array(
-			array("type" => "INDEX", "fields" => "path,sort,class_name", "name" => "path"),
-			array("type" => "INDEX", "fields" => "parentid,mainbar,class_name", "name"	=> "mainbar"),
+			array("type" => "INDEX", "fields" => "path,sort", "name" => "path"),
+			array("type" => "INDEX", "fields" => "parentid,mainbar", "name"	=> "mainbar"),
 			array("type" => "INDEX", "fields" => "class_name,data,title,mainbartitle,meta_keywords,id","name" => "sitesearch")
 		);
 		
@@ -123,6 +131,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									"mainbar"		=> 1,
 									"sort"			=> 10000);
 		
+		/**
+		 * icon
+		*/
+		static $icon = "images/icons/goma16/file.png";
+		
 		//!Getters and Setters
 		
 		/**
@@ -169,6 +182,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				}
 		}
 		
+		public function setParentType($value) {
+			$this->parentSet = $value;
+			if($value == "root") {
+				$this->setParentId(0);
+			}
+		}
+		
 		/**
 		 * gets prepended content
 		 *
@@ -205,13 +225,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function setParentId($value)
 		{
-				if($this->fieldGet("parenttype") == "root")
-						$this->setField("parentid", "0");
-				else
-						$this->setField("parentid", $value);
-					
-				$this->viewcache = array();
-				$this->data["parent"] = null;
+			if($this->parentSet == "root") {
+				$this->setField("parentid", "0");
+			} else {
+				$this->setField("parentid", $value);
+			}
+				
+			$this->viewcache = array();
+			$this->data["parent"] = null;
 		}
 		
 		/**
@@ -265,7 +286,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				$value = str_replace(" ",  "-", $value);
 				// normal chars
-				$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+				$value = preg_replace('/[^a-zA-Z0-9\-_]/', '-', $value);
 				$value = str_replace('--', '-', $value);
 				$this->setField("path", $value);					
 
@@ -339,14 +360,24 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		public function generateRepresentation($link = false) {
 			$title = $this->title;
 			
-			if(ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class)) {
-				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->class, "icon"), $this->class).'" /> ' . $title;
+			if(ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname)) {
+				$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
 			}
 			
 			if($link)
 				$title = '<a href="'.BASE_URI.'?r='.$this->id.'&pages_version='.$this->versionid.'" target="_blank">' . $title . '</a>';
 			
 			return $title;
+		}
+	
+		/**
+		 * returns all mainbar-activated children.
+		 *
+		 *@access public
+		 *
+		*/
+		public function subbar($filter = array(), $sort = null) {
+			return $this->children(array_merge($filter, array("mainbar" => 1)), $sort);
 		}
 	
 		
@@ -362,13 +393,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$args = func_get_args();
 			array_unshift($args, "edit_permission");
 			
-			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
-				return $data;
+			$dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
+			if($dataHasOne && $dataHasOne->type != "all") {
+				return $dataHasOne;
 			} else if(!$this->isPublished() && $this->wasPublished()) {
-				if($data = DataObject::Get_one("Permission", array(), array(), array(
+				$dataHistoric = DataObject::Get_one("Permission", array(), array(), array(
 					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.edit_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
-				))) {
-					return $data;
+				));
+				if($dataHistoric  && $dataHistoric->type != "all") {
+					return $dataHistoric;
 				}
 			}
 			
@@ -386,7 +419,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->edit_permissionid = $perm->id;
-				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+				
+				logging("Writing " . $this->title . " cause of EDIT_PERMISSION.");
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
 			return $perm;
@@ -404,7 +439,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = Permission::forceExisting("PAGES_WRITE")->id;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->edit_permission->id;
 				}
 			}
@@ -424,13 +459,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$args = func_get_args();
 			array_unshift($args, "publish_permission");
 			
-			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
-				return $data;
+			$dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
+			if($dataHasOne && $dataHasOne->type != "all") {
+				return $dataHasOne;
 			} else if(!$this->isPublished() && $this->wasPublished()) {
-				if($data = DataObject::Get_one("Permission", array(), array(), array(
+				$dataHistoric = DataObject::Get_one("Permission", array(), array(), array(
 					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.publish_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
-				))) {
-					return $data;
+				));
+				if($dataHistoric  && $dataHistoric->type != "all") {
+					return $dataHistoric;
 				}
 			}
 			
@@ -448,7 +485,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->publish_permissionid = $perm->id;
-				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false);
+				
+				logging("Writing " . $this->title . " cause of PUBLISH_PERMISSION.");
+				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
 			return $perm;
@@ -465,10 +504,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = Permission::forceExisting("PAGES_PUBLISH")->id;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->publish_permission->id;
 				}
 			}
+			
 			$perm->name = "";
 			
 			$this->setField("Publish_Permission", $perm);
@@ -500,6 +540,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($this->ID != 0) {
 				$perm->write(true, true, 2, false, false);
 				$this->read_permissionid = $perm->id;
+				
+				logging("Writing " . $this->title . " cause of READ_PERMISSION.");
 				$this->write(false, true, $this->isOrgPublished() ? 2 : 1, false, false);
 			}
 			
@@ -516,7 +558,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			if($perm->parentid != 0) {
 				if($perm->parent->name == "" && $this->parentid == 0) {
 					$perm->parentid = 0;
-				} else if($this->parentid != 0) {
+				} else if($this->parent) {
 					$perm->parentid = $this->parent->read_permission->id;
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
@@ -549,39 +591,34 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@name onBeforeWrite
 		*/
 		public function onBeforeWrite() {
+		
+			logging("Write record " . $this->title . ".");
+			
 			$this->data["uploadtrackingids"] = array();
+			
+			if($this->sort == 10000) {
+				if($this->id == 0) {
+					$this->data["sort"] = DataObject::count("pages", array("parentid" => $this->data["parentid"]));
+				} else {
+					$i = 0;
+					$sort = 0;
+					foreach(DataObject::get("pages", array("parentid" => $this->data["parentid"])) as $record) {
+						if($record->id != $this->id) {
+							$record->sort = $i;
+							$record->writeSilent(false, true, $record->isOrgPublished() ? 2 : 1, false);
+							logging("Write Record " . $record->id . " to sort " . $i);
+						} else {
+							$sort = $i;
+						}
+						$i++;
+					}
+					
+					$this->data["sort"] = $sort;
+				}
+			}
 		}
 		
 		//!Validators
-		
-		
-		/**
-		 * validates the path
-		 *
-		 *@name validatePath
-		 *@access public
-		*/
-		public function validatePath($data)
-		{
-				$fullpath = "";
-				$path = $data["path"];
-				$parentid = $data["parentid"];
-				
-				if($data["parenttype"] == "root")
-				{
-						$parentid = 0;
-				}
-				
-				if(isset($data["id"]))
-				{
-						$add = " AND pages.id != '".convert::raw2text($data["id"])."'";
-				} else
-				{
-						$add = "";
-				}
-				
-				return true;
-		}
 
 		/**
 		 * validates the field parentid
@@ -639,13 +676,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			$data = $obj->form->result;
 			$filename = $data["filename"];
 			$parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
-			if(isset($obj->form->result["recordid"]))
-				if(DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."' AND pages.recordid != '".$obj->form->result["recordid"]."'") > 0) {
+			if(isset($obj->form->result["recordid"])) {
+				if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->form->result["recordid"]))) > 0) {
 					return lang("site_exists", "The page with this filename already exists.");
 				} else {
 					return true;
 				}
-			else if(DataObject::count("pages", " path LIKE '".$filename."' AND parentid = '".$parentid."'") > 0) {
+			} else if(DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid)) > 0) {
 					return lang("site_exists", "The page with this filename already exists.");
 			} else {
 				return true;
@@ -661,7 +698,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		 *@access public
 		 *@param object - form
 		*/
-		public function getForm(&$form)
+		public function getForm(Form &$form)
 		{		
 				
 				parent::getForm($form);
@@ -675,50 +712,34 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				$form->useStateData = true;
 				$this->queryVersion = "state";
 				
-				// render head-bar
-				$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$this->class.' pageType"><span>'.convert::raw2text(ClassInfo::getClassTitle($this->class));
-				
-				// title in head-bar
-				if($this->title)
-					$html .= ': <strong>'.convert::raw2text($this->title).'</strong>';
-				
-				// end of title in head-bar
-				$html .= ' </span></span>';
 				
 				// version-state-status
 				if($this->id != 0 && isset($this->data["stateid"]) && $this->data["stateid"] !== null) {
-					
-					$html .= '<div class="pageinfo versionControls">';
-					
-					if($this->isPublished()) {
-						$html .= '<div class="state"><div class="draft">'.lang("draft", "draft").'</div><div class="publish active">'.lang("published", "published").'</div></div>';
-					} else {
-						$html .= '<div class="state"><div class="draft active">'.lang("draft", "draft").'</div><div class="publish">'.lang("published", "published").'</div></div>';
-					}
+
 					
 					if($this->everPublished()) {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
-						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false")."); });");
+						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL('".BASE_URI . BASE_SCRIPT.'?r='.$this->id."', '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', ".($this->isPublished() ? "true" : "false").", ".var_export($this->title, true)."); });");
 					} else {
 						define("PREVIEW_URL", BASE_URI . BASE_SCRIPT.'?r='.$this->id);
 						Resources::addJS("$(function(){ if(typeof pages_pushPreviewURL != 'undefined') pages_pushPreviewURL(false, '".BASE_URI . BASE_SCRIPT."?r=".$this->id . "&".$this->baseClass."_state', false); });");
 					}
-					$html .= '</div><div style="clear:right;"></div>';
 					
 				}
 				
-				// end of headbar and add it to form
-				$html .= '</div>';
-				$form->add($links = new HTMLField('links', $html));
+
+				$form->add($links = new HTMLField('links', $this->customise(array("icon" => ClassInfo::getClassIcon($this->classname), "classtitle" => convert::raw2text(ClassInfo::getClassTitle($this->classname))))->renderWith("admin/content_header.html")));
 				$links->container->addClass("hidden");
-				
-				define("EDIT_ID", $this->id);
-				
+
 				$form->add(new TabSet('tabs', array(
 						new Tab('content', array(
+							
+							
+						), lang("content", "content")),
+						
+						new Tab('meta', array(
 							$title = new textField('title', lang("title_page", "title of the page")),
 							$mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")),
-							
 							$parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
 								"root" => lang("no_parentpage", "Root Page"),
 								"subpage" => array(
@@ -726,19 +747,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 									"parent"
 								)
 							)),
-							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),
-							
-						), lang("content", "content")),
-						
-						new Tab('meta', array(
-							
+							$parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'),			
 							$description = new textField('meta_description', lang("site_description", "Description of this site")),
-							$keywords = new textField('meta_keywords',lang("site_keywords", "Keywords of this site")),
 							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
 							new checkbox('search', lang("show_in_search", "show in search?")),		
-							$filename = new textField('filename', lang("filename"))
+							$filename = new textField('filename', lang("path"))
 						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(
 							$read = new PermissionField("read_permission", lang("viewer_types"), null, true),
@@ -749,6 +764,29 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					) 
 				));
 				
+				// append the field title, mainbar-title and hierarchy
+				// they are in Editor-Area in an other tab than in add-view
+				/*if($this->id == 0) {
+					$titleHolder = $form->content;
+				} else {
+					$titleHolder = $form->meta;
+				}
+				
+				$titleHolder->add($title = new textField('title', lang("title_page", "title of the page")), 1);
+				$titleHolder->add($mainbartitle = new textField('mainbartitle', lang("menupoint_title", "title on menu")), 1);
+				
+				$titleHolder->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+					"root" => lang("no_parentpage", "Root Page"),
+					"subpage" => array(
+						lang("subpage","sub page"),
+						"parent"
+					)
+				)), 1);
+				
+				$titleHolder->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'") AND `pages`.`id` != "'.$this->id.'"'), 2);*/
+				
+				
+				// check for permissions
 				if(!$this->can("Write") || !Permission::check("PAGES_WRITE")) {
 					$write->disable();
 				}
@@ -778,7 +816,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				// infos for users
 				$parentDropdown->info_field = "url";
 				$description->info = lang("description_info");
-				$keywords->info = lang("keywords_info");
 				$mainbartitle->info = lang("menupoint_title_info");
 				$wtitle->info = lang("window_title_info");
 				
@@ -837,7 +874,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			} else if($this->id != 0) {
 				
 				if($this->can("Delete")) {
-					$form->addAction(new HTMLAction("deletebutton", '<a rel="dropdownDialog" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button delete formaction">'.lang("delete").'</a>'));
+					$form->addAction(new HTMLAction("deletebutton", '<a rel="dropdownDialog" href="'.Core::$requestController->namespace.'/delete'.URLEND.'?redirect='.ROOT_PATH.'admin/content/" class="button red delete formaction">'.lang("delete").'</a>'));
 				}
 				
 				if($this->everPublished() && !$this->isOrgPublished() && $this->can("Write")) {
@@ -942,14 +979,17 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function canInsert($row = null)
 		{	
+
 			if(isset($row)) {
 				if($row->parentid != 0) {
-					$data = DataObject::get_versioned("pages", "state", $row->parentid);
+					$data = DataObject::get_versioned("pages", "state", array("id" => $row->parentid));
+
 					if($data->Count() > 0) {
 						return $data->first()->can("Write", $data);
 					}
 				}
 			}
+
 			
 			return Permission::check("PAGES_INSERT");
 		}
@@ -1004,377 +1044,128 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			);
 		}
 		
-		//!SiteTree
+		/**
+		 * local argument sql to inherit view-permissions
+		 *
+		 *@name argumentQuery
+		 *@access public
+		*/
 		
-		public function getSiteTree($search = "") {
-			return $this->renderTree("admin/content/record/\$id/edit", 0, array($search), true, false);
+		public function argumentQuery(&$query) {
+			parent::argumentQuery($query);
+			
+			if(!Permission::check("superadmin")) {
+				if(!member::login()) {
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
+					
+					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password')");
+				} else if(Permission::check("ADMIN_CONTENT")) {
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
+										
+					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users', 'admin') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+				} else {
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+					array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
+					
+					$query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+				}
+			}
 		}
 		
 		/**
-		 * TREE-API v2
-		 * this API renders trees more flexibel and with better performance
-		*/ 
-		
-		/**
-		 * gets the subtree from a given parentid or from 0, so from root
-		 *
-		 *@name getTree
-		 *@access public
-		 *@param numeric - parentid of subtree
-		 *@param array - fields
+		 * builds the tree.
+		 * 
+		 * @param 	TreeNode|int $parent parent node or no parent node = 0
+		 * @param 	array $dataparams "version", "filter"
 		*/
-		public function getTree($parentid = 0, $fields = array(), $activenode = 0, $params = array())
-		{
-			if(PROFILE) Profiler::mark("pages::getTree");
-			
-			/* --- */
-			
-			$arr = array();
-			
-			// get ids that are NOT collapsed cause of current edit-node
-			$ids = array();
-			if(defined("EDIT_ID") && EDIT_ID != 0 && $d = DataObject::get_by_id("pages", EDIT_ID)) {
-				while($d->parent) {
-					$ids[] = $d->parent->id;
-					$d = $d->parent;
-				}
-			}
-			
-			// create filter
-			$where = array("parentid" => $parentid);
-			if(isset($params["deleted"]) && $params["deleted"]) {
-				$data = DataObject::get_Versioned($this, "group", $where);
-			} else {
-				$data = DataObject::get($this, $where);
-			}
-			
-			if(Permission::check("ADMIN_CONTENT") && (!isset($params["deleted"]) || !$params["deleted"])) $data->setVersion("state");
-			
-			foreach($data as $record) {
-				
-				$collapsed = null;
-				
-				if($record->id != $activenode && isset($params["published"]) && !$params["published"] && $record->isPublished() === true)
-					if(!isset($params["deleted"]) || !$params["deleted"] || $record->isDeleted() === false)
-						continue;
-					
-				if($record->id != $activenode && isset($params["edited"]) && !$params["edited"] && $record->isPublished() === false)
-					if(!isset($params["deleted"]) || !$params["deleted"] || $record->isDeleted() === false)
-						continue;
-				
-				if(isset($params["deleted"]) && $params["deleted"] && $record->isDeleted()) {
-					$state = "deleted";
-				}
-				
-				
-				
-				$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-				if(!isset($state)) {
-					if($record->isPublished())	
-						$state = "published";
-					else
-						$state = "edited";
-				}
-				$class = "".$record["class_name"]. " " . $mainbar . " " . $state;
-				
-				$where["parentid"] = $record->recordid;
-				// children
-				if(isset($params["deleted"]) && $params["deleted"]) {
-					$children = DataObject::get_Versioned($this, "group", $where);					
-				} else {
-					$children = DataObject::get_Versioned($this, "state", $where);
-				}
-				
-				$childcount = $children->count;
-				unset($children);
-				
-				if($childcount > 0) {
-					// we prefetch a maximum of 5 sites
-					if($childcount < 6 || in_array($record["recordid"], $ids)) {
-						$id = $record["recordid"];
-						if(PROFILE) Profiler::unmark("pages::getTree");
-						$children = $this->getTree($id, $fields, $activenode, $params);
-						if(PROFILE) Profiler::mark("pages::getTree");
-						if(in_array($record["recordid"], $ids)) {
-							$collapsed = false;
-						}
+		static function build_tree($parentNode = null, $dataParams = array()) {
+			if(!isset($dataParams["search"]) || !$dataParams["search"]) {
+				if(!is_object($parentNode) && $parentNode == 0) {
+					$data = DataObject::get("pages", array("parentid" => 0));
+				} else if(is_a($parentNode, "TreeNode")) {
+					if($parentNode->model) {
+						$data = $parentNode->model->children();
 					} else {
-						$children = "ajax";
+						$data = DataObject::get("pages", array("parentid" => $parentNode->recordid));
 					}
-				} else {
-					$children = "";
+				} else if(is_int($parentNode)) {
+					$data = DataObject::get("pages", array("parentid" => $parentNode));
 				}
 				
-				// get data
-				$arr[] = array(
-					"title" 		=> $record["title"],
-					"attributes"	=> array("class" => $class),
-					"data"			=> $record->ToArray(),
-					"children"		=> $children,
-					"collapsed"		=> $collapsed
-				);
+				// add Version-Params
+				if(isset($dataParams["version"]))
+					$data->setVersion($dataParams["version"]);
 				
-				unset($state);
-			}
-			if(PROFILE) Profiler::unmark("pages::getTree");
-			
-			return $arr;
-		}
-		
-		/**
-		 * provides tree-arguments
-		 *
-		 *@name provideTreeParams
-		 *@access public
-		*/
-		public function provideTreeParams() {
-			return array(
-				"deleted" 	=> array(
-					"title"		=> '{$_lang_deleted_page}',
-					"default"	=> false,
-					"css"		=> array(
-						'text-decoration' 	=> 'line-through !important',
-						"color"				=> '#c60004 !important'
-					)
-				),
-				"published"	=> array(
-					"title"		=> '{$_lang_published_site}',
-					"default"	=> true,
-					"css"		=> array(
-					)
-				),
-				"edited"	=> array(
-					"title"		=> '{$_lang_edited_page}',
-					"default"	=> true,
-					"css"		=> array(
-						'font-style' => 'italic'
-					)
-				)
-			);
-		}
-		/**
-		 * gets the subtree from a given parentid or from 0, so from root
-		 *
-		 *@name searchTree
-		 *@access public
-		 *@param array - words
-		 *@param array - fields
-		*/
-		public function searchTree($words = array(), $fields = array(), $activenode = 0)
-		{
-			if(PROFILE) Profiler::mark("pages::searchTree");
-			
-			/* --- */
-			
-			$arr = array();
-		
-			$where = array();
-			
-			$data = DataObject::search_Object($this, $words, $where, array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
-			$data->setVersion(false);
-			if(Permission::check("ADMIN_CONTENT")) $data->setVersion("state");
-			
-			$parentid_cache = array();
-			
-			foreach($data as $record) {
-				if($record["parentid"] == 0) {
-					if(!isset($arr["_" . $record["id"]])) {
-						if($record->first()->isDeleted()) {
-							$state = "deleted";
-						}
-						// get class-attribute
-						$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-						if(!isset($state))
-							$state = ($record->isPublished()) ? "published" : "edited";
-						$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
-						unset($state);
-						
-						$arr["_" . $record["id"]] = array(
-							"title" 		=> $record["title"],
-							"attributes"	=> array("class" => $class),
-							"data"			=> $record->first()->ToArray(),
-							"collapsed"		=> false,
-							"collapsable"	=> false,
-							"children"		=> array()
-						);
-						
-						unset($class, $mainbar); // free memory
+				if(isset($dataParams["filter"]))
+					$data->addFilter($dataParams["filter"]);
+					
+				$nodes = array();
+				foreach($data as $record) {
+					$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
+					
+					// add a bubble for changed or new pages.
+					if(!$record->isPublished())
+						if($record->everPublished())
+							$node->addBubble(lang("CHANGED"), "red");
+						else
+							$node->addBubble(lang("NEW"), "blue");
+					
+					if(!$record->mainbar) {
+						$node->addClass("hidden");
 					}
+							
+					if($record->children()->count() > 0) {
+						$node->setChildCallback(array("pages", "build_tree"), $dataParams);
+					}
+					
+					$nodes[] = $node;
+				}
+				
+				
+				return $nodes;
+			} else {
+				if(!is_object($parentNode) && $parentNode == 0) {
+					$data = DataObject::search_object("pages", $dataParams["search"]);
 				} else {
-					
-					$parentid = $record["parentid"];
-					if(isset($arr[$parentid])) { // we are on the second level of the tree
-						
-						if(!isset($arr["_" . $parentid]["children"]["_" . $record["id"]])) {
-							if($record->first()->isDeleted()) {
-								$state = "deleted";
-							}
-							// get class-attribute
-							$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-							if(!isset($state))
-								$state = ($record->first()->isPublished()) ? "published" : "edited";
-							$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
-							unset($state);
-							
-							$arr["_" . $parentid]["children"]["_" . $record["recordid"]] = array(
-								"title" 		=> $record["title"],
-								"attributes"	=> array("class" => $class),
-								"data"			=> $record->first()->ToArray(),
-								"collapsed"		=> false,
-								"collapsable"	=> false,
-								"children"		=> array()
-							);
-							
-							unset($class, $mainbar); // free memory
-						}
-					
-					} else { // we are at the third or lower level of the tree, so we have to generate path to root
-						
-						// we have to draw the tree from this node to top
-						$to_insert = array($parentid => array($record));
-						$current_parent_id = $parentid;
-						// now read through data
-						while($current_parent_id != 0) {
-							
-							$data = DataObject::get($this, array("id" => $current_parent_id),array('('.$this->baseTable.'.id = "'.$this->version.'")', 'DESC'), array(), array(), false, "recordid");
-							$data->version = false;
-							if(Permission::check("ADMIN_CONTENT")) $data->version = "state";
-							
-							if(isset($arr["_" . $data["parentid"]]) || $data["parentid"] == 0) { // found
-								if($data["parentid"] != 0 && isset($arr["_" . $data["parentid"]])) {
-									// if isn't set
-									if(!isset($arr["_" . $data["parentid"]]["children"]["_" . $data["id"]])) {
-										if($data->first()->isDeleted()) {
-											$state = "deleted";
-										}
-										// get class-attribute
-										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-										if(!isset($state))
-											$state = ($data->first()->isPublished()) ? "published" : "edited";
-										$class = "".$data["class_name"]. " page ".$mainbar . " " . $state;
-										unset($state);
-										
-										$arr["_" . $data["parentid"]]["children"]["_" . $data["id"]] = array(
-											"title" 		=> $data["title"],
-											"attributes"	=> array("class" => $class),
-											"data"			=> $data->first()->ToArray(),
-											"collapsed"		=> false,
-											"collapsable"	=> false,
-											"children"		=> array()
-										);
-										
-										unset($class, $mainbar); // free memory
-										
-									}
-									
-																		// now insert $to_insert-array
-									$id = $data["id"];
-									if(!isset($arr["_" . $data["parentid"]]["children"]["_" . $data["id"]]["children"])) {
-										$arr["_" . $data["parentid"]]["children"]["_" . $data["id"]]["children"] = array();
-									}
-									
-									
-									$arr["_" . $data["parentid"]]["children"]["_" . $data["id"]]["children"] = array_merge_recursive_distinct($arr["_" . $data["parentid"]]["children"]["_" . $data["id"]]["children"],$this->generateFromToInsert($id, $to_insert));
-									unset($to_insert);
-									break;
-								} else { // parentid is 0
-									// if isn't set
-									if(!isset($arr["_" . $data["id"]])) {
-										if($data->first()->isDeleted()) {
-											$state = "deleted";
-										}
-										// get class-attribute
-										$mainbar = ($data["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-										if(!isset($state))
-											$state = ($data->first()->isPublished()) ? "published" : "edited";
-										$class = "".$data["class_name"]. " page ".$mainbar;
-										unset($state);
-										
-										$arr["_" . $data["id"]] = array(
-											"title" 		=> $data["title"],
-											"attributes"	=> array("class" => $class),
-											"data"			=> $data->first()->ToArray(),
-											"collapsed"		=> false,
-											"collapsable"	=> false,
-											"children"		=> array()
-										);
-										
-										unset($class, $mainbar); // free memory
-										
-									}
-									
-									// now insert $to_insert-array
-									$id = $data["id"];
-									if(!isset($arr["_" . $id]["children"])) {
-										$arr["_" . $id]["children"] = array();
-									}
-									
-									
-									$arr["_" . $id]["children"] = array_merge_recursive_distinct($arr["_" . $id]["children"], $this->generateFromToInsert($id, $to_insert));
-									unset($to_insert);
-									break;
-								}
-								
-								
-							} else { // add entry to to_insert-array and progress
-								$current_parent_id = $data["parentid"];
-								$to_insert[$data["parentid"]][] = $data;
-								unset($data);
-								continue;
-							}
-						}
+					if($parentNode->model) {
+						$data = $parentNode->model->SearchAllChildren($dataParams["search"]);
+					} else {
+						$record = DataObject::get_by_id("pages", $parentNode->recordid);
+						$data = $record->SearchAllChildren($dataParams["search"]);
 					}
 				}
-			}
-			if(PROFILE) Profiler::unmark("pages::searchTree");
-			return $arr;
-		}
-		
-		/**
-		 * this helper-function generates the array from the to_insert-array
-		 *
-		 *@name generateFromToInsert
-		 *@access protected
-		 *@param numeric - id to start
-		 *@param to_insert-array
-		*/
-		protected function generateFromToInsert($id, $to_insert) {
-			
-			$arr = array();
-			if(isset($to_insert[$id])) {
-				foreach($to_insert[$id] as $record) {
-					if(!$record["id"])
-						continue;
+				// add Version-Params
+				if(isset($dataParams["version"]))
+					$data->setVersion($dataParams["version"]);
+				
+				if(isset($dataParams["filter"]))
+					$data->addFilter($dataParams["filter"]);
+				
+				$nodes = array();
+				foreach($data as $record) {
+					$node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
 					
-					if($record->first()->isDeleted()) {
-						$state = "deleted";
-					}				
-					// get class-attribute
-					$mainbar = ($record["mainbar"] == 1) ? "withmainbar" : "nomainbar";
-					if(!isset($state))
-						$state = ($record->first()->isPublished()) ? "published" : "edited";
-					$class = "".$record["class_name"]. " page ".$mainbar . " " . $state;
-					unset($state);
+					// add a bubble for changed or new pages.
+					if(!$record->isPublished())
+						if($record->everPublished())
+							$node->addBubble(lang("CHANGED"), "red");
+						else
+							$node->addBubble(lang("NEW"), "blue");
 					
-					$arr["_" . $record["id"]] = array(
-						"title" 		=> $record["title"],
-						"attributes"	=> array("class" => $class),
-						"data"			=> $record->first()->ToArray(),
-						"collapsed"		=> false,
-						"collapsable"	=> false,
-						"children"		=> $this->generateFromToInsert($record["id"], $to_insert)
-					);
+					if(!$record->mainbar) {
+						$node->addClass("hidden");
+					}
 					
-					unset($class, $mainbar, $record); // free memory
+					$nodes[] = $node;
 				}
-				return $arr;
-			} else
-			{
-				return array();
+				
+				
+				return $nodes;
+				
 			}
-			
 		}
-		
 		
 		//!APIs
 		/**
@@ -1495,7 +1286,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         	}
         
 		// for performance reason we cache this part
-		if(!isset(self::$cache_parent[$this->class]) || self::$cache_parent[$this->class] == array()) {
+		if(!isset(self::$cache_parent[$this->classname]) || self::$cache_parent[$this->classname] == array()) {
 				
 			
 			$allowed_parents = array();
@@ -1512,12 +1303,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						
 						// if ! these children are absolutly prohibited
 						if(substr($allow, 0, 1) == "!") {
-							if(substr($allow, 1) == $this->class || is_subclass_of($this->class, substr($allow, 1))) {
+							if(substr($allow, 1) == $this->classname || is_subclass_of($this->classname, substr($allow, 1))) {
 								unset($allowed_parents[$child]);
 								continue 2;
 							}
 						} else {
-							if($allow == $this->class || is_subclass_of($this->class, $allow)) {
+							if($allow == $this->classname || is_subclass_of($this->classname, $allow)) {
 								$allowed_parents[$child] = $child;
 							}
 						}
@@ -1526,7 +1317,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			}
 			
 			// now filter
-			$allow_parents = ClassInfo::getStatic($this->class, "allow_parent");
+			$allow_parents = ClassInfo::getStatic($this->classname, "allow_parent");
 			if(count($allow_parents) > 0) {
 				foreach($allowed_parents as $parent) {
 					
@@ -1552,10 +1343,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					if(!$found) {
 						unset($allowed_parents[$parent]);
 					}
+					
+					// if not found, unset
+					if(!$found) {
+						unset($allowed_parents[$parent]);
+					}
 				}
 			}
 	        
-	        	self::$cache_parent[$this->class] = $allowed_parents;
+	        	self::$cache_parent[$this->classname] = $allowed_parents;
 				
 			if(PROFILE) Profiler::unmark("pages::allowed_parents", "pages::allowed_parents generate");
 	        
@@ -1563,8 +1359,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 	        
 			return $allowed_parents;
 		} else {
-            		if(PROFILE) Profiler::unmark("pages::allowed_parents");
-			return self::$cache_parent[$this->class];
+            if(PROFILE) Profiler::unmark("pages::allowed_parents");
+				return self::$cache_parent[$this->classname];
 		}		
 	}
 	
@@ -1606,11 +1402,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 }
 
 /**
- * extension for the template to use mainbar-methods
+ * Extends the TemplateCaller with some new methods to get content of pages.
  *
- *@name ContentTPLExtension
- *@access public
-*/
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0
+ */
 class ContentTPLExtension extends Extension {
 	/**
 	 * prepended content
@@ -1649,7 +1449,8 @@ class ContentTPLExtension extends Extension {
 		"active_mainbar_url",
 		"pageByID",
 		"pageByPath",
-		"active_mainbar"
+		"active_mainbar",
+		"active_page"
 	);
 	
 	/**
@@ -1748,7 +1549,7 @@ class ContentTPLExtension extends Extension {
 	 *@access public
 	*/
 	public function pageByPath($path) {
-		return DataObject::get_one("pages", array("path" => $path));
+		return DataObject::get_one("pages", array("path" => array("LIKE" => $path)));
 	}
 	
 	/**
@@ -1757,7 +1558,7 @@ class ContentTPLExtension extends Extension {
 	*/
 	public function active_mainbar_title($level = 2)
 	{
-		return ($this->active_mainbar()) ? $this->active_mainbar()->mainbartitle : "";
+		return ($this->active_mainbar($level)) ? $this->active_mainbar($level)->mainbartitle : "";
 	}
 	
 	/**
@@ -1766,7 +1567,7 @@ class ContentTPLExtension extends Extension {
 	*/
 	public function active_mainbar_url($level = 2)
 	{
-		return ($this->active_mainbar()) ? $this->active_mainbar()->url : null;
+		return ($this->active_mainbar($level)) ? $this->active_mainbar($level)->url : null;
 	}
 	
 	/**
@@ -1786,18 +1587,28 @@ class ContentTPLExtension extends Extension {
 		if($level == 2 && isset(self::$active_mainbar)) {
 			$data = self::$active_mainbar;
 		} else { 
-			$data = DataObject::get("pages", array("id"	=> $id));
+			$data = DataObject::get_one("pages", array("id"	=> $id));
 			if($level == 2)
 				self::$active_mainbar = $data;
 		}
-		return $data;
-			
+		return $data;	
+	}
+	
+	/**
+	 * returns the active page
+	 *
+	 *@name active_page
+	 *@access public
+	*/
+	public function active_page()
+	{
+
+		return $this->active_mainbar(2);
 	}
 	
 	/**
 	 * returns the prepended content
 	 *
-	 *@prependedContent
 	 *@access public
 	*/
 	public static function prependedContent() {
@@ -1809,7 +1620,6 @@ class ContentTPLExtension extends Extension {
 	/**
 	 * returns the appended content
 	 *
-	 *@appendedContent
 	 *@access public
 	*/
 	public static function appendedContent() {

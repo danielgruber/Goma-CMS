@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 13.03.2013
-  * $Version: 2.1.7
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 05.04.2014
+  * $Version: 2.1.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -185,10 +185,14 @@ class HTTPresponse extends object
 				$data = ob_get_contents();
 				ob_end_clean();
 				
+				ob_start("ob_gzhandler");
+				
 				if(PROFILE) Profiler::mark("sendDataToClient");
 				echo $body;
 				echo $data;
 				if(PROFILE) Profiler::unmark("sendDataToClient");
+				
+				ob_end_flush();
 				
 				Core::callHook("onafteroutput");
 				
@@ -206,6 +210,7 @@ class HTTPresponse extends object
 						self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
 				}
 				
+				HTTPResponse::setHeader("vary", "Accept-Encoding");
 				self::addHeader('X-Powered-By', self::$XPoweredBy);
 				if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
 					self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));
@@ -230,14 +235,20 @@ class HTTPresponse extends object
 					HTTPResponse::addHeader("cache-control", "no-store; no-cache");
 				}
 				
+				if(!isset(self::$headers["content-type"])) {
+					self::$headers["content-type"] = "text/html;charset=utf-8";
+				}
+				
 				if(DEV_MODE) {
 					global $start;
 					$time =  microtime(true) - EXEC_START_TIME;
 					self::addHeader("X-Time", $time);
 				}
 				
+				
+				
 				$endWaitTime = microtime(true);
-				define("END_WAIT_TIME", $endWaitTime);
+				defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
 				
 				header('HTTP/1.1 ' . self::$response);
 				foreach(self::$headers as $name => $content)

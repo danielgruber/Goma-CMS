@@ -3,24 +3,47 @@
 	<head>
 		<base href="./" />
 		<title>500 - Internal Server Error</title>
-		<link rel="stylesheet" href="http://goma-cms.org/system/templates/css/default.css" />
-		<link rel="stylesheet" href="http://goma-cms.org/system/templates/css/goma_default.css" />
-		<link rel="stylesheet" href="http://goma-cms.org/system/templates/admin/style.css" />
+		
+		
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/css/default.css" />
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/css/goma_default.css" />
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/admin/style-front.css" />
+
 		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+		
+		<meta name="viewport" content="width=device-width" />
 	</head>
-	<body id="wrapper_logout">
-		<!--<div id="wrapper_logout">-->
-			
-			<div class="wrapper_inner">
-				<a href="http://goma-cms.org" target="_blank"><img id="logo" src="http://goma-cms.org/system/templates/admin/images/logo.png" alt="logo" /></a>
-				<div class="header">
-					<h1>Goma Framework</h1>
-				</div>
-				<div class="content">
-					<h3>500 - Internal Server Error</h3>
-					<p>A critical Error occured. Please try again later.</p>
+	<body>
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
+					<div class="beside_logo">
+						
+					</div>
+					<a href=""><img id="logo" src="//goma-cms.org/system/templates/admin/images/logo.png" data-retina="//goma-cms.org/system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
 			</div>
-		<!--</div>-->
+			
+			<div id="wrapper" class="content_wrapper">
+				<div class="header">
+					<div class="content_wrapper">
+						<h1>Goma</h1>
+					</div>
+				</div>
+				<div class="content">
+					<div class="content_wrapper">
+						<h3>500 - Internal Server Error</h3>
+						<p>A Server-Error occured. Please try again.</p>
+					</div>
+				</div>
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

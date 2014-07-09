@@ -5,10 +5,10 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 01.02.2013
-  * $Version - 1.0
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 17.05.2013
+  * $Version - 1.0.2
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,6 +37,17 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	 *@access public
 	*/
 	public $displayFields = array();
+	
+	/**
+	 * Inits the Component.
+	*/
+	public function Init($tableField) {
+		if($filter = $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')) {
+			foreach($this->fieldFormatting as $field => $values) {
+				$filter->addCastedValues($field, array_flip((array) $values));
+			}
+		}
+	}
 	
 	/**
 	 * sets the display-fields
@@ -75,6 +86,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	public function setFieldFormatting($fieldFormatting) {
 		if(is_array($fieldFormatting)) {
 			$this->fieldFormatting = $fieldFormatting;
+			
 			return $this;
 		} else {
 			throwError(6, "Invalid Argument", "First argument for TableFieldDataColumns::setFieldFormatting should be an array.");
@@ -90,6 +102,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	public function setFieldCasting($fieldCasting) {
 		if(is_array($fieldCasting)) {
 			$this->fieldCasting = $fieldCasting;
+			
 			return $this;
 		} else {
 			throwError(6, "Invalid Argument", "First argument for TableFieldDataColumns::setFieldCasting should be an array.");
@@ -220,6 +233,11 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 		$spec = $this->fieldFormatting[$fieldName];
 		if(is_callable($spec)) {
 			return $spec($value, $data);
+		} else if(is_array($spec)) {
+			if(isset($spec[$value]))
+				return $spec[$value];
+			
+			return $value;
 		} else {
 				
 			$format = str_replace('$value', "__VAL__", $spec);
@@ -245,7 +263,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 			$params = $matches[3];
 			
 			// isset-part
-			$isset = 'isset($data';
+			$isset = '$data';
 			// parse params
 			$params = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("tpl", "percent_vars"), $params);
 			// parse functions in params
@@ -276,9 +294,8 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 					$php .= '->doObject("'.$var.'")';
 					$isset .= '["'.$var.'"]';
 			}
-			$isset .= ')';
 			$php .= "->" . $function . "(".$params.")";
-			$php = '" . ('.$isset.' ? '.$php.' : "") . "';
+			$php = '" . ((isset('.$isset.') && '.$isset.') ? '.$php.' : "") . "';
 			
 			return $php;
 	}

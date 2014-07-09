@@ -2,8 +2,8 @@
 /**
   *@package goma form framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 20.09.2012
   * $Version 1.2.1
 */
@@ -123,7 +123,7 @@ class Select extends FormField
 						}
 				//}
 				
-				$this->container->append($node);
+				$this->container->append(new HTMLNode("span", array("class" => "select-wrapper input"),$node));
 				
 				$this->callExtending("afterField");
 				

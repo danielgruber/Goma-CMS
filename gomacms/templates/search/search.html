@@ -1,15 +1,18 @@
 <h1><% lang("search.search", "Search") %></h1>
-<div class="searchbox">
+<div class="searchbox" itemscope itemtype="http://schema.org/ItemList">
+	<meta itemprop="mainContentOfPage" content="true"/>
+	
 	<form method="get" action="">
 		<input type="text" name="q" value="{$word}" /> <input type="submit" value="<% lang("search.search", "Search") %>" class="button" />
 	</form>
 	
 	<% IF $word %>
+		<strong>$word</strong>
 		<div class="result">
 			<% CONTROL this() %>
 				<div class="item">
 					<div class="title"><a href="{$this.url}">{$this.title}</a></div>
-					<div class="url">{BASE_URI}{$this.path}{URLEND}</div>
+					<div class="url" itemprop="significantLink">{BASE_URI}{$this.path}{URLEND}</div>
 				</div>
 			<% ENDCONTROL %>
 		</div>

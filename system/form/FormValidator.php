@@ -2,8 +2,8 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 30.08.2012
   * $Version 2.0.2
 */
@@ -37,7 +37,7 @@ class FormValidator extends Object
 		{
 				parent::__construct();
 				
-				if($this->class == "formvalidator" && !is_callable($data)) {
+				if($this->classname == "formvalidator" && !is_callable($data)) {
 					throwError(6, "Invalid Argument", "FormValidator requires a valid callback to be given.");
 				}
 				

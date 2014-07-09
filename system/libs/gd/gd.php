@@ -2,11 +2,11 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   ********
-  * last modified: 02.01.2013
-  * $Version: 2.0.4
+  * last modified: 10.04.2014
+  * $Version: 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -148,8 +148,9 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new width
 		 *@param numeric - height
+		 *@param bool - automatic crop or skew
 		*/
-		public function resize($width, $height)
+		public function resize($width, $height, $crop = true)
 		{
 				if($this->extension)
 				{
@@ -165,34 +166,36 @@ class GD extends Object
 						$img_width = $width;
 						$img_height = $height;
 						
-						$relation = $this->width / $this->height;
-						
-						if($dest_height > $this->height)
-						{
-								$dest_height = $this->height;
-								$img_height = $dest_height;
-						}
-						
-						$_width = round($dest_height * $relation);
-						
-						if($_width > $width)
-						{
-								$diff = round($_width - $width);
-								$rel_width = $src_width / $_width;
-								$src_x = round($diff / 2 * $rel_width);
-								$src_width = round($width * $rel_width);
-								
-						} else if($_width < $width)
-						{
-								$diff = round($width - $_width);
-								$dest_width = $_width;
-								$dest_x = round($diff / 2);
-						}
-						
-						if($dest_width > $this->width)
-						{
-								$dest_width = $this->width;
-								$img_width = $dest_width;
+						if($crop) {
+							$relation = $this->width / $this->height;
+							
+							if($dest_height > $this->height)
+							{
+									$dest_height = $this->height;
+									$img_height = $dest_height;
+							}
+							
+							$_width = round($dest_height * $relation);
+							
+							if($_width > $width)
+							{
+									$diff = round($_width - $width);
+									$rel_width = $src_width / $_width;
+									$src_x = round($diff / 2 * $rel_width);
+									$src_width = round($width * $rel_width);
+									
+							} else if($_width < $width)
+							{
+									$diff = round($width - $_width);
+									$dest_width = $_width;
+									$dest_x = round($diff / 2);
+							}
+							
+							if($dest_width > $this->width)
+							{
+									$dest_width = $this->width;
+									$img_width = $dest_width;
+							}
 						}
 					
 						$old = $this->gd();
@@ -221,7 +224,7 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new width
 		*/
-		public function resizeByWidth($width)
+		public function resizeByWidth($width, $crop = true)
 		{
 				$new_width = 0;
 				$new_height = 0;
@@ -229,7 +232,7 @@ class GD extends Object
 				$relation = $this->height / $this->width;
 				$new_width = $width;
 				$new_height = $new_width * $relation;
-				return $this->resize($new_width, $new_height);			
+				return $this->resize($new_width, $new_height, $crop);			
 		}
 		/**
 		 * resizes an image by its height
@@ -237,7 +240,7 @@ class GD extends Object
 		 *@access public
 		 *@param numeric - new height
 		*/
-		public function resizeByHeight($height)
+		public function resizeByHeight($height, $crop = true)
 		{
 				$new_width = 0;
 				$new_height = 0;
@@ -245,7 +248,7 @@ class GD extends Object
 				$relation = $this->width / $this->height;
 				$new_height = $height;
 				$new_width = round($new_height * $relation);
-				return $this->resize($new_width, $new_height);			
+				return $this->resize($new_width, $new_height, $crop);			
 		}
 		
 		
@@ -412,11 +415,17 @@ class GD extends Object
 		 *@access public
 		 *@param string - file
 		 *@param numeric - quality
+		 *@param string - extension
 		 *@return string - file
 		*/
-		public function toFile($file, $quality = 70)
+		public function toFile($file, $quality = 70, $extension = null)
 		{
-				if($this->extension == "gif")
+				$supported = array("gif", "ico", "jpg", "jpeg", "png", "bmp");
+				
+				if(!isset($extension) || !in_array(strtolower($extension), $supported)) 
+					$extension = $this->extension;
+				
+				if($extension == "gif")
 				{
 						imagegif($this->gd(), $file, $quality);
 						$this->pic = $file;
@@ -425,7 +434,7 @@ class GD extends Object
 						unset($this->gd);
 						clearstatcache();
 						return $file;
-				} else if($this->extension == "jpg")
+				} else if($extension == "jpg" || $extension == "jpeg")
 				{
 						imagejpeg($this->gd(), $file, $quality);
 						$this->pic = $file;
@@ -434,19 +443,12 @@ class GD extends Object
 						unset($this->gd);
 						clearstatcache();
 						return $file;
-				} else if($this->extension == "png")
+				} else if($extension == "png")
 				{
-						if($quality > 9 && $quality < 100)
-						{
-								$quality = $quality / 10;
-						} else
-						{
-								$quality = 7;
-						}
 						
 						imagealphablending($this->gd(), false);
 						imagesavealpha($this->gd(), true);
-						imagepng($this->gd(), $file, $quality);
+						imagepng($this->gd(), $file, 9);
 						
 						$this->pic = $file;
 						@chmod($file, 0777);
@@ -454,7 +456,7 @@ class GD extends Object
 						unset($this->gd);
 						clearstatcache();
 						return $file;
-				} else if($this->extension == "bmp") {
+				} else if($extension == "bmp") {
 						
 						ImageJPEG($this->gd(), $file, 100);
 						$this->pic = $file;
@@ -463,9 +465,15 @@ class GD extends Object
 						unset($this->gd);
 						clearstatcache();
 						return $file;
+				} else if($extension == "ico") {
+					$this->toFile(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
+					$ico = new PHP_ICO(ROOT . CACHE_DIRECTORY . "temp." . $this->extension, array($this->width, $this->height));
+					$ico->save_ico($file);
+					return $file;
 				}
 				return false;
 		}
+		
 		/**
 		 * shows the image to the browser
 		 *@name output
@@ -588,6 +596,19 @@ class GD extends Object
 						exit;
 				}
 				return false;
+		}
+		
+		/**
+		 * explicit output for ico-files
+		 *
+		 *@name toIco
+		 *@access public
+		*/
+		public function toIco($file, $sizes = array()) {
+			$this->toFile(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
+			$ico = new PHP_ICO(ROOT . CACHE_DIRECTORY . "temp." . $this->extension, $sizes);
+			$ico->save_ico($file);
+			return $file;
 		}
 }
 

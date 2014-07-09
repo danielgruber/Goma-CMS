@@ -4,12 +4,12 @@
 		<base href="{BASE_URI}" />
 		<title><% lang("install.install_goma", "Install Goma") %></title>
 		<meta charset="UTF-8" />
-		<% INCLUDE_CSS_MAIN "admin/style.css" %>
+		<% INCLUDE_CSS_MAIN "admin/style-front.css" %>
 		<% INCLUDE_CSS_MAIN "install.css" %>
 		
 		<% IF $firstrun %>
 			<script type="text/javascript">
-				$(function(){
+				/*$(function(){
 					$("#wrapper_logout").fadeTo(0,0);
 					$("body").append('<div id="introAnimation"><img src="{BASE_URI}system/templates/admin/images/logo.png" alt="Logo" /><p>Open Source CMS/Framework</p></div>');
 					$("#introAnimation img").css({display: "block",position: "absolute", top: "50%", left: "50%", "margin-left": "-96px", "margin-top": "-30px"});
@@ -35,27 +35,44 @@
 							});
 						});
 					}, 2000);
-				});
+				});*/
 			</script>
 		<% END %>
 		
 		<% HeaderHTML() %>
+		
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 	</head>
 	<body>
-		<div id="wrapper_logout">
-			<div class="wrapper_inner">
-				<div class="logo_wrapper">
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
 					<div class="beside_logo">
-						<a href="{BASE_SCRIPT}install/langselect/?redirect={$_SERVER_REDIRECT.url()}" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
+						<a href="{BASE_SCRIPT}admin/switchlang/" title="{$_lang_switchlang}"><img src="images/icons/fatcow-icons/32x32/locate.png" alt="{$_lang_switchlang}" /></a>
 					</div>
-					<a target="_blank" href="http://goma-cms.org" target="_blank"><img id="logo" src="{BASE_URI}system/templates/admin/images/logo.png" alt="logo" /></a>
+					<a href="{BASE_SCRIPT}admin{URLEND}"><img id="logo" src="system/templates/admin/images/logo.png" data-retina="system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
-				<div class="header">
-					<a href="{BASE_URI}{BASE_SCRIPT}"><h1>Goma Framework</h1></a>
-				</div>
+			</div>
+			
+			<div id="wrapper" class="content_wrapper">
+
+				<!--<div class="header">
+					<div class="content_wrapper">
+						<a href="{BASE_URI}{BASE_SCRIPT}"><h1>Goma</h1></a>
+					</div>
+				</div>-->
 				<div class="content">
-					<% addContent() %>
-					$content
+					<div class="content_wrapper">
+						<% addContent() %>
+						$content
+					</div>
+				</div>
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a target="_blank" href="http://goma-cms.org">Goma</a></div>
 				</div>
 			</div>
 		</div>

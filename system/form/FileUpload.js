@@ -1,17 +1,15 @@
 /**
-  * simple fileupload
-  * 
-  * thanks to https://github.com/pangratz/dnd-file-upload/blob/master/jquery.dnd-file-upload.js
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 06.03.2012
-  * $Version 1.1
-*/
-
-
-function FileUpload(formelement, url) {
+ * The JS for field sets.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.1
+ */
+function FileUpload(formelement, url, size, types) {
+	
+	preloadLang(["files.filesize_failure"]);
+	
 	var $this = this;
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);
@@ -29,6 +27,10 @@ function FileUpload(formelement, url) {
 		url: url + "/frameUpload/",
 		ajaxurl: url + "/ajaxUpload/",
 		browse: this.browse,
+		
+		max_size: size,
+		
+		allowed_types: types,
 		
 		// events
 		uploadStarted: function() {
@@ -112,6 +114,14 @@ function FileUpload(formelement, url) {
 				}
 			}
 		},
+		
+		failSize: function(i) {
+			$this.infoZone.html('<div class="error">'+lang("files.filesize_failure")+'</div>');
+		},
+		
+		failExt: function() {
+			$this.infoZone.html('<div class="error">'+lang("files.filetype_failure")+'</div>');
+		}
 		
 	});
 	

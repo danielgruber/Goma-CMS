@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 19.01.2012
   * $Version 1.3
 */   
@@ -19,6 +19,7 @@ class Cacher extends Object {
 	 *@var bool
 	*/
 	private $active = true;
+	
 	/**
 	 * it is the data of the cachefile
 	 *@name data
@@ -27,6 +28,7 @@ class Cacher extends Object {
 	 *@var string
 	*/
 	private $data;
+	
 	/**
 	 * whether cache is valid
 	 *@name valid
@@ -35,6 +37,7 @@ class Cacher extends Object {
 	 *@var bool
 	*/
 	private $valid;
+	
 	/**
 	 * the filename
 	 *@name filename
@@ -43,12 +46,14 @@ class Cacher extends Object {
 	 *@var string
 	*/
 	private $filename;
+	
 	/**
 	 * time created
 	 *
 	 *@name created
 	*/
 	public $created;
+	
 	/**
 	 * name of this cache
 	 *
@@ -56,6 +61,7 @@ class Cacher extends Object {
 	 *@access public
 	*/
 	public $name;
+	
 	/**
 	 * don't set from external
 	 * directory
@@ -65,13 +71,15 @@ class Cacher extends Object {
 	 *@use to save the directory
 	 *@var sting
 	*/
-	static public $dir = CACHE_DIRECTORY;
+	static $dir = CACHE_DIRECTORY;
+	
 	/**
 	 * current data
 	 *@name _data
 	 *@var array
 	*/
-	static public $_data = array();
+	static $_data = array();
+	
 	
 	/**
 	 * constructs the cacher
@@ -81,7 +89,7 @@ class Cacher extends Object {
 	 *@param string - name of the cache
 	 *@use to init an cacher
 	*/
-	public function __construct($name) {
+	public function __construct($name, $important = false) {
 		
 		if(PROFILE) Profiler::mark("cacher");
 		
@@ -89,9 +97,13 @@ class Cacher extends Object {
 		
 		/* --- */
 		
-		$this->filename = self::$dir.'cache.'.urlencode($name).".php";
+		if(!$important)
+			$this->filename = self::$dir . 'cache.' . urlencode($name) . ".php";
+		else
+			$this->filename = self::$dir . 'cache.' . urlencode($name) . ".cache";
+			
 		$this->name = $name;
-		if(isset($_GET['flush']) ) {
+		if(isset($_GET['flush']) && !$important) {
 			$this->active = false;
 		} else {
 			// internal cache

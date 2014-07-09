@@ -1,75 +1,126 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 19.12.2011
-*/
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
+ * last modified: 30.03.2013
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+// silence is golden ;)
+defined('IN_GOMA') OR die('<!-- restricted access -->');
 
-class ImageSQLField extends DBField {	
-		/**
-		 * gets the field-type
-		 *
-		 *@name getFieldType
-		 *@access public
-		*/
-		static public function getFieldType($args = array()) {
-			return "varchar(200)";
+class ImageSQLField extends DBField {
+	/**
+	 * gets the field-type
+	 *
+	 *@name getFieldType
+	 *@access public
+	 */
+	static public function getFieldType($args = array()) {
+		return "varchar(200)";
+	}
+
+	/**
+	 * generates a image from the image-uri
+	 */
+	public function makeImage($absolute = false, $html = "", $style = "") {
+		$url = $this -> value;
+		if ($absolute)
+			$url = BASE_URI . BASE_SCRIPT . $url;
+
+		return '<img src="' . $url . '" alt="' . $this -> value . '" style="' . $style . '" ' . $html . ' />';
+	}
+
+	/**
+	 * sets the width of the image
+	 *
+	 *@name setWidth
+	 *@access public
+	 *@param int - width of the image
+	 *@param boolean - absolute path to the image?
+	 *@param string - additional html code
+	 *@param string - additional css code
+	 */
+	public function setWidth($width, $absolute = false, $html = "", $style = "") {
+		if (_ereg("^[0-9]+$", $width)) {
+			$url = 'images/resampled/' . $width . '/' . $this -> value;
+			if ($absolute) {
+				$url = BASE_URI . BASE_SCRIPT . $url;
+			}
+
+			$retinaUrl = 'images/resampled/' . ($width * 2) . '/' . $this -> value;
+			if ($absolute) {
+				$retinaUrl = BASE_URI . BASE_SCRIPT . $retinaUrl;
+			}
+
+			return '<img src="' . $url . '" data-retina="' . $retinaUrl . '" style="width:' . $width . 'px;' . $style . '" alt="' . $this -> value . '" ' . $html . ' />';
+		} else {
+			return $this -> makeImage($absolute, $html, $style);
 		}
-		
-		/**
-		 * generates a image from the image-uri
-		*/
-		public function makeImage() {
-			return '<img src="'.$this->value.'" alt="'.$this->value.'" />';
+	}
+
+	/**
+	 * sets the height of the image
+	 *
+	 *@name setWidth
+	 *@access public
+	 *@param int - height of the image
+	 *@param boolean - absolute path to the image?
+	 *@param string - additional html code
+	 *@param string - additional css code
+	 */
+	public function setHeight($height, $absolute = false, $html = "", $style = "") {
+		if (_ereg("^[0-9]+$", $height)) {
+			$url = 'images/resampled/x/' . $height . '/' . $this -> value;
+			if ($absolute) {
+				$url = BASE_URI . BASE_SCRIPT . $url;
+			}
+
+			$retinaUrl = 'images/resampled/x/' . ($height * 2) . '/' . $this -> value;
+			if ($absolute) {
+				$retinaUrl = BASE_URI . BASE_SCRIPT . $retinaUrl;
+			}
+
+			return '<img src="' . $url . '" data-retina="' . $retinaUrl . '"  style="height:' . $height . 'px;' . $style . '" alt="' . $this -> value . '" ' . $html . ' />';
+		} else {
+			return $this -> makeImage($absolute, $html, $style);
 		}
-		
-		/**
-		 * sets the width of the image
-		 *
-		 *@name setWidth
-		 *@access public
-		*/
-		public function setWidth($width) {
-			if(_ereg("^[0-9]+$",$width))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.($width*2).'/'.$this->value.'" style="width:'.$width.'px;" alt="'.$this->value.'" />';
-			else 
-					return $this->makeImage();
+	}
+
+	/**
+	 * sets the size of the image
+	 *
+	 *@name setWidth
+	 *@access public
+	 *@param int - width of the image
+	 *@param int - height of the image
+	 *@param boolean - absolute path to the image?
+	 *@param string - additional html code
+	 *@param string - additional css code
+	 */
+	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
+		if (_ereg("^[0-9]+$", $width) && _ereg("^[0-9]+$", $height)) {
+			$url = 'images/resampled/' . $width . '/' . $height . '/' . $this -> value;
+			if ($absolute)
+				$url = BASE_URI . BASE_SCRIPT . $url;
+
+			$retinaUrl = 'images/resampled/' . ($width * 2) . '/' . ($height * 2) . '/' . $this -> value;
+			if ($absolute) {
+				$retinaUrl = BASE_URI . BASE_SCRIPT . $retinaUrl;
+			}
+
+			return '<img src="' . $url . '" data-retina="' . $retinaUrl . '" style="width: ' . $width . 'px; height: ' . $height . 'px;' . $style . '" alt="' . $this -> value . '" ' . $html . ' />';
+		} else {
+			return $this -> makeImage($absolute, $html, $style);
 		}
-		
-		/**
-		 * sets the width of the image
-		 *
-		 *@name setWidth
-		 *@access public
-		*/
-		public function setHeight($height) {	
-			if(_ereg("^[0-9]+$",$height))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/x/'.$height.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/x/'.($height*2).'/'.$this->value.'"  style="height:'.$height.'px;" alt="'.$this->value.'" />';
-			else 
-					return $this->makeImage();
-		}
-		
-		/**
-		 * sets the width of the image
-		 *
-		 *@name setWidth
-		 *@access public
-		*/
-		public function setSize($width, $height) {
-			if(_ereg("^[0-9]+$",$width) && _ereg("^[0-9]+$",$height))
-					return '<img src="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.$width.'/'.$height.'/'.$this->value.'" data-retina="'.ROOT_PATH.BASE_SCRIPT.'images/resampled/'.($width*2).'/'.($height*2).'/'.$this->value.'" style="width: '.$width.'px; height: '.$height.'px;" alt="'.$this->value.'" />';
-			else 
-					return $this->makeImage();
-		}
-		
-		/**
-		 * default convert
-		*/
-		public function forTemplate() {
-			return $this->makeImage();
-		}
+	}
+
+	/**
+	 * default convert
+	 */
+	public function forTemplate() {
+		return $this -> makeImage();
+	}
+
 }

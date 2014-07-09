@@ -1,15 +1,11 @@
 /**
-  * simple fileupload
-  * 
-  * thanks to https://github.com/pangratz/dnd-file-upload/blob/master/jquery.dnd-file-upload.js
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 07.05.2012
-  * $Version 2.0.1
-*/
-
+ * Ths JS for file upload sets.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 2.0.1
+ */
 var FileUploadSet = function(name, table, url) {
 	this.table = $(table);
 	this.url = url;

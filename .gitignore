@@ -3,8 +3,11 @@
 Thumbs.db
 
 # Aptana
-.settings/*
+.settings/
 .project
+
+# Netbeans
+nbproject/
 
 # Goma files
 _config.php
@@ -41,5 +44,11 @@ images/resampled/*
 
 # Developer
 tpl/
+!tpl/goma_simple/*
 !tpl/goma_simple/
+!tpl/smoothOrange/*
 !tpl/smoothOrange/
+*.permit
+
+#sublime
+*.sublime-workspace

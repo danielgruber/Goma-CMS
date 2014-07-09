@@ -1,69 +1,82 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2010  Goma-Team
-  *@todo remove hacks
-  *@author Fabian Parzefall, edited by Daniel Gruber
-  * last modified: 05.07.2011
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * This is the CSS-Minifier.
+ *
+ * @package Goma\System\Core
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ *
+ * @version 1.0.5
+ */
 class CSSMin extends Object
 {
 		/**
-		  * the before char
+		  * the before char.
+		  *
 		  *@name a
 		  *@access protected
 		  *@var string
 		*/
 		protected $a = "";
+		
 		/**
-		  * the current char
+		  * the current char.
+		  *
 		  *@name b
 		  *@access protected
 		  *@var string
 		*/
 		protected $b = "";
+		
 		/**
-		 * the next char
+		 * the next char.
 		 *
 		 *@name c
 		 *@access protected 
 		*/
 		protected $c = "";
+		
 		/**
-		  * the data to minify
+		  * the data to minify.
+		  *
 		  *@name input
 		  *@access protected
 		  *@var string
 		*/
 		protected $input = "";
+		
 		/**
-		  * the length of the data
+		  * the length of the data.
+		  *
 		  *@name inputLength
 		  *@access protected
 		  *@var numeric
 		*/
 		protected $inputLenght = 0;
+		
 		/**
-		  * the current position
+		  * the current position.
+		  *
 		  *@name inputIndex
 		  *@access protected
 		  *@var numeric
 		*/
 		protected $inputIndex = 0;
+		
 		/**
-		  * the minfied version
+		  * the minfied version.
+		  *
 		  *@name output
 		  *@access public
 		  *@var string
 		*/
 		public $output = "";
+		
 		/**
-		 * this array contains the data for the obfuscator
+		 * this array contains the data for the obfuscator.
+		 *
 		 *@name dataarray1
 		 *@access public
 		 *@var string
@@ -71,8 +84,10 @@ class CSSMin extends Object
 		public static $dataarray1 = array(
 				" :", " {", " }", " ;", " '", " \"", " ,", "  ", ";;"
 		);
+		
 		/**
-		 * this array contains the data for the obfuscator
+		 * this array contains the data for the obfuscator.
+		 *
 		 *@name dataarray2
 		 *@access public
 		 *@var string
@@ -80,6 +95,7 @@ class CSSMin extends Object
 		public static $dataarray2 = array(
 				": ", "{ ", "} ", "; ", "' ", "\" ", ", ", "  "
 		);
+		
 		/**
 		 * minfies css-code
 		 *@name minify
@@ -92,17 +108,31 @@ class CSSMin extends Object
 			$cssmin->min();
 			return $cssmin->output;
 		}
+		
 		/**
 		 *@name __construct
 		 *@param string - css-code
+		 *@param boolean pase as less-file
 		*/
-		public function __construct($input)
+		public function __construct($input, $less = true)
 		{
+			if($less) {
+				try {			
+					$less = new lessc;
+					$this->input = $less->compile($input);
+				} catch(Exception $e) {
+					$this->input = $input;
+					log_exception($e);
+				}
+			} else {
 				$this->input = $input;
-				$this->input = str_replace(array("\r\n", "\r", "\n", "	"), " ", $this->input);
-				$this->input = preg_replace("/\/\*(.*)\*\//Usi", "", $this->input); // comments
-				$this->inputLenght = strlen($this->input);
+			}
+			
+			$this->input = str_replace(array("\r\n", "\r", "\n", "	"), " ", $this->input);
+			$this->input = preg_replace("/\/\*(.*)\*\//Usi", "", $this->input); // comments
+			$this->inputLenght = strlen($this->input);
 		}
+		
 		/**
 		 * minfied the css-code
 		 *@name min
@@ -131,6 +161,7 @@ class CSSMin extends Object
 				
 				$this->output = str_replace(";}", "}", $this->output);
 				$this->output = str_replace(" 0px", " 0", $this->output);
+				
 				return $this->output;
 		}
 }

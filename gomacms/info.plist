@@ -8,14 +8,14 @@
 	<string>gomacms</string>
 	<key>title</key>
 	<string>Goma CMS</string>
-	<key>autor</key>
+	<key>author</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0b6</string>
+	<string>2.0b10</string>
 	<key>build</key>
-	<string>056</string>
+	<string>066</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0b5-073</string>
+	<string>2.0b10-088</string>
 	<key>icon</key>
 	<string>templates/images/app-icon.png</string>
 	<key>excludeModelsFromDistro</key>
@@ -23,7 +23,8 @@
 	</array>
 	<key>excludeFiles</key>
 	<array>
-		<string>application/.WELCOME_RUN</string>
+		<string>/application/.WELCOME_RUN</string>
+		<string>/application/WELCOME_RUN.php</string>
 	</array>
 </dict>
 </plist>

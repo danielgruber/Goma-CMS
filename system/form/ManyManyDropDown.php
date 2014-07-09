@@ -1,15 +1,17 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 1.1.2
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
+ * This is a simple searchable dropdown, which can be used to select many-many-connections.
+ *
+ * It supports many-many-relations of DataObjects and MultiSelecting.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.3
+ */
 class ManyManyDropDown extends MultiSelectDropDown
 {		
 		/**
@@ -37,6 +39,13 @@ class ManyManyDropDown extends MultiSelectDropDown
 		public $where;
 		
 		/**
+		 * base-model for querying DataBase.
+		 *
+		 * @name model
+		*/
+		protected $model;
+		
+		/**
 		 *@param string - name
 		 *@param string - title
 		 *@param array - options
@@ -50,6 +59,20 @@ class ManyManyDropDown extends MultiSelectDropDown
 				$this->relation = strtolower($name);
 				$this->showfield = $showfield;
 				$this->where = $where;
+		}
+		
+		/**
+		 * sets the base-model for queriing DB.
+		*/
+		public function setModel(DataObjectSet $model) {
+			$this->model = $model;
+		}
+		
+		/**
+		 * returns the model.
+		*/
+		public function getModel() {
+			return $this->model;
 		}
 		
 		/**
@@ -83,10 +106,10 @@ class ManyManyDropDown extends MultiSelectDropDown
 						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 						$this->dataset = call_user_func_array(array($this->form()->controller->modelInst(), $this->relation), array())->FieldToArray("versionid");
 					} else {
-						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
+						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 					}
 				} else {
-					throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
+					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 				}
 			} else {
 				if(is_object($this->form()->result)) {
@@ -107,18 +130,24 @@ class ManyManyDropDown extends MultiSelectDropDown
 						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
 						
 					} else {
-						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
+						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 					}
 				} else {
-					throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form in ".__FILE__." on line ".__LINE__, 500, false);
+					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 				}
 			}
+			
+			if(!isset($this->model))
+				$this->model = DataObject::get($this->_object);
 		}
 		
 		/**
-		 * renders the data in the input
+		 * generates the values displayed in the field, if not dropped down.
+		 *
+		 * @access protected
+		 * @return array values
 		*/
-		public function renderInput() {
+		protected function getInput() {
 			$data = DataObject::get($this->_object, array("versionid" => $this->dataset));
 			
 			if($this->form()->useStateData) {
@@ -126,23 +155,16 @@ class ManyManyDropDown extends MultiSelectDropDown
 			}
 			
 			if($data && $data->count() > 0) {
-				$str = "";
-				$i = 0;
+				$return = array();
 				foreach($data as $record) {
-					if($i == 0) {
-						$i++;
-					} else {
-						$str .= ", ";
-					}
-					$str .= $record[$this->showfield];
+					$return[$record->versionid] = convert::raw2text($record[$this->showfield]);
 				}
-				unset($data, $record, $i);
-				return $str;
+				return $return;
 			} else {
-				return lang("form_dropdown_nothing_select", "Nothing Selected");
+				return array();
 			}
 		}
-		
+				
 		/**
 		 * getDataFromModel
 		 *
@@ -150,7 +172,8 @@ class ManyManyDropDown extends MultiSelectDropDown
 		*/
 		public function getDataFromModel($p = 1) {
 			
-			$data = DataObject::get($this->_object, $this->where);
+			$data = clone $this->model;
+			$data->filter($this->where);
 			$data->activatePagination($p);
 			
 			if($this->form()->useStateData) {
@@ -174,7 +197,9 @@ class ManyManyDropDown extends MultiSelectDropDown
 		 *@param numeric - page
 		*/
 		public function searchDataFromModel($p = 1, $search = "") {
-			$data = DataObject::search_object($this->_object, array($search),$this->where);
+			$data = clone $this->model;
+			$data->filter($this->where);
+			$data->search($search);
 			$data->activatePagination($p);
 			
 			if($this->form()->useStateData) {

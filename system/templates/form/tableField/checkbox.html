@@ -1,0 +1,7 @@
+
+<% IF $checked %>
+	<input type="checkbox" class="no-change-track" name="{$name}[$id]" value="1"  checked="checked" /> 
+<% ELSE %>
+	<input type="checkbox" class="no-change-track" name="{$name}[$id]" value="1" /> 
+<% END %>
+<input type="hidden" class="no-change-track" name="{$name}_check[$id]" value="1" />

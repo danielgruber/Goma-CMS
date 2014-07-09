@@ -1,9 +1,9 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 02.06.2011
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 29.03.2013
 */
 
 function tree_bind(tree) {
@@ -20,9 +20,10 @@ function tree_bind(tree) {
 		var li = link.parent().parent().parent().parent();
 		if(link.parent().hasClass("collapsed")) {
 			// if ajax
-			if(link.parent().hasClass("ajax")) {
+			if(link.parent().hasClass("ajax") && link.parent().find(".load").length == 0) {
 				li.addClass("expanded").removeClass("collapsed");
-				li.append("<ul><li><img src=\"images/16x16/loading.gif\" alt=\"\" /> Loading...</li></ul>");
+				li.append("<ul><li class=\"load\"><span class=\"a\"><span class=\"b\"><img src=\"images/16x16/loading.gif\" alt=\"\" /> Loading...</span></span></li></ul>");
+				
 				link.parent().removeClass("ajax");
 				$.ajax({
 					url: link.attr("href"),
@@ -31,10 +32,13 @@ function tree_bind(tree) {
 						li.find(" > ul").remove();
 						li.append(html);
 						tree_bind(li.find(" > ul"));
-						li.find(" > ul").slideDown(150, function(){
-							li.addClass("expanded").removeClass("collapsed");
-						});
-						link.parent().addClass("expanded").removeClass("collapsed");
+						
+						setTimeout(function(){
+							li.find(" > ul").slideDown(150, function(){
+								li.addClass("expanded").removeClass("collapsed");
+							});
+							link.parent().addClass("expanded").removeClass("collapsed");
+						}, 50);
 						link.attr("href","treeserver/setCollapsed/"+link.attr("name")+"/"+link.attr("id")+"/?redirect="+ escape(location.pathname + location.search));
 						li.find(".tree").removeClass("tree");
 						node.trigger("treeupdate", [li]);

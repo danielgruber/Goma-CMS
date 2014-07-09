@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 12.12.2012
-  * $Version 2.1
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 30.03.2013
+  * $Version 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -59,6 +59,11 @@ class BackupAdmin extends TableView
 		public $models = array("BackupModel");	
 		
 		/**
+		 * icon
+		*/
+		static $icon = "system/templates/admin/images/backup.png";
+		
+		/**
 		 * fields we want to show in the table
 		 *
 		 *@name fields
@@ -88,6 +93,14 @@ class BackupAdmin extends TableView
 		);
 		
 		/**
+		 * set correct color-theme.
+		*/
+		public function Init($request = null) {
+			Resources::$lessVars = "tint-blue.less";
+			parent::Init($request);
+		}
+		
+		/**
 		 * sends the file to the browser
 		 *
 		 *@name download
@@ -113,13 +126,16 @@ class BackupAdmin extends TableView
 		public function upload() {
 			
 			$form = new Form($this, "Backup_Upload", array(
-				new FileUpload("file", lang("backup_upload", "Upload a Backup..."), array("gfs", "sgfs"))
+				$file = new FileUpload("file", lang("backup_upload", "Upload a Backup..."), array("gfs", "sgfs"))
 			), array(
 				new CancelButton("cancel", lang("cancel")),
 				new FormAction("submit", lang("submit"), "saveupload")
 			), array(
 				new RequiredFields(array("file"), "validate")
 			));
+			
+			
+			$file->max_filesize = -1;
 			return $form->render();
 		}
 		
@@ -162,7 +178,10 @@ class BackupAdmin extends TableView
 		 *@name add_db
 		*/
 		public function add_db() {
-			Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/sql." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".sgfs");
+			$_SESSION["dbfile"] = $file = isset($_SESSION["dbfile"]) ? $_SESSION["dbfile"] : "sql." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".sgfs";
+			Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $file);
+			unset($_SESSION["dbfile"]);
+			BackupModel::forceSyncFolder();
 			$this->redirectBack();
 		}
 		
@@ -182,7 +201,10 @@ class BackupAdmin extends TableView
 				$exclude[$key] = "/" . $val;
 			}
 			
-			Backup::generateBackup(BackupModel::BACKUP_PATH . "/full." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".gfs", $exclude);
+			$_SESSION["backupfile"] = $file = isset($_SESSION["backupfile"]) ? $_SESSION["backupfile"] : "full." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".gfs";
+			Backup::generateBackup(BackupModel::BACKUP_PATH . "/" . $file, $exclude);
+			unset($_SESSION["backupfile"]);
+			BackupModel::forceSyncFolder();
 			$this->redirectBack();
 		}
 		

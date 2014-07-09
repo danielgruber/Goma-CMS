@@ -1,10 +1,11 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011 Goma-Team
-  * last modified: 13.12.2012
-*/
+ * Base CSS for each Site with leftandmain-view.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\CSS-Framework
+ * @version	2.1.2
+ */
 
 .lam_noscript p {
 	font-size: 20pt;
@@ -29,13 +30,25 @@
 }
 .leftandmaintable tr > .td.left {
 	overflow: auto;
+	min-width: 18em;
+}
+
+.leftandmaintable .dialog > .title {
+	background: #eee;
+}
+.leftandmaintable .adminContent > h2:first-child {
+	margin: -0.57em -0.7em;
+	padding: 0.5em 1em;
+	font-size: 1.25em;
+	line-height: 1.2em;
+	background: #eee;
+	color: #444;
+	font-weight: normal;
+	border-bottom: 1px solid #ccc;
+	display: block;
 }
 
 /* main-part */
-
-.leftandmaintable tr > .main {
-	overflow: auto;
-}
 
 .leftandmaintable tr > .main .leftbar_toggle {
 	display: block;
@@ -44,7 +57,7 @@
 	border: 1px solid #ccc;
 	border-width: 0 1px 1px 0; 
 	padding: 0 !important;
-	color: #333;
+	color: #444;
 	text-decoration: none;
 	font-weight: bold;
 	line-height: 30px;
@@ -60,183 +73,233 @@
 /*.leftandmaintable tr > .main textarea {
 	max-width: 650px !important;
 }*/
+
+.leftandmaintable.left-active tr > .main {
+	display: none;
+}
+
 .leftandmaintable tr > .main > .inner {
-	overflow-y: auto;
-	ms-overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
 	padding: 0;
-	padding-bottom: 5px;
 }
-.leftandmaintable tr > .main > .inner > form > .fieldsScroll {
-	overflow: auto;
-}
-.leftandmaintable tr > .main > .inner > form > .fieldsScroll .visibleField:last-child {
+.leftandmaintable tr > .main > .inner > form > .fields .visibleField:last-child {
 	border-bottom: 0 !important;
 }
-.leftandmaintable tr > .main > .inner > form > .actionsScroll {
+.leftandmaintable tr > .main > .inner > form > .actions {
 	border-top: 1px solid #ccc;
-	-webkit-box-shadow: 0 -3px 5px #dfdfdf;
+	padding-bottom: 0.375em;
+	padding-top: 0.375em;
 }
 .leftandmaintable tr > .main > .inner > form > .error {
 	margin: 0 !important;
 }
 .leftandmaintable tr > .main > .inner .headBar {
 	background: #eee;
-	border-bottom: 1px solid #ccc;
-	padding: 4px;
-	height: 28px;
-}
-.leftandmaintable tr > .main > .inner .headBar span span {
-	padding: 6px;
-	margin-left: 4px;
-	background-repeat: no-repeat;
-	background-position: left center;
-	padding-left: 20px;
-	display: block;
-	float: left;
-}
-.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle {
-	float: left;
-	border: 0;
-	margin-top: -7px;
-	margin-left: -6px;
-	padding-left: 4px;
-	padding-right: 2px;
-	padding-bottom: 2px;
-	margin-right: 6px;
-	border-right: 1px solid #ccc;
-}
-.leftandmaintable tr > .main > .inner .headBar .leftbar_toggle img {
-	height: 38px;
-	width: 38px;
+	border-bottom: 0.063em solid #ccc;
+	padding: 0.375em;
+	line-height: 1em;
+	
+	.pageType {
+		padding: 0.33em 0.375em;
+		max-width: 35%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: inline-block;
+		line-height: 1em;
+		
+		span {
+			padding: 0 0.25em;
+			font-size: 1.125em;
+			color: #444;
+			display: inline-block;
+			max-width: 65%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			
+			img {
+				margin-top: -.25em;
+			}
+
+		}
+	}
+	
+	.leftbar_toggle {
+		float: left;
+		border: 0;
+		margin-top: -0.375em;
+		margin-bottom: -0.375em;
+		margin-left: -0.25em;
+		margin-right: 0.5em;
+		border-right: 1px solid #ccc;
+		
+		img {
+			height: 2.875em;
+			width: 2.8
+			75em;
+		}
+	}
 }
 
+
+
+.leftandmaintable tr > .main .no_item {
+	font-size: 2em;
+	line-height: 2em;
+	color: #999;
+	text-align: center;
+	height: 100%;
+	display: table;
+	width: 100%;
+}
+
+.leftandmaintable tr > .main .no_item span {
+	display: table-cell; 
+	vertical-align: middle; 
+	text-align: center; 
+}
 /* sidebar */
 
 .leftandmaintable tr > .left {
 	display: none;
-	width: 280px !important;
+	width: 18em !important;
 	background: #eee;
 	height: 100%;
 	border-right: 1px solid #ccc;
 }
+
 .leftandmaintable tr > .left.active {
 	display: table-cell;
 }
-
-.leftandmaintable tr > .left > .LaM_tabs {
-	height: 100%;
-	min-width: 280px;
+.leftandmaintable tr > .left form {
+	position: relative;
 }
-.leftandmaintable tr > .left > .LaM_tabs > ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	height: 36px;
-	border-bottom: 1px solid #ccc;
-	background: #fff; 
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li {
-	float: left;
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li > a {
-	display: block;
-	padding: 10px;
-	font-size: 14px;
-	line-height: 16px;
-	border-right: 1px solid #ccc;
-	background: #fff;
-	text-decoration: none;
-	color: #555;
-}
-.leftandmaintable tr > .left > .LaM_tabs > ul > li.active > a {
-	background: #eee;
-	padding-bottom: 11px !important;
-}
-
-.leftandmaintable tr > .left > .LaM_tabs > ul > li > a.create {
-	padding-left: 22px;
+.leftandmaintable tr > .left a.create {
+	position: absolute;
+	top: 0.75em;
+	right: 0.5em;
+	height: 1.5em;
+	width: 1.5em;
 	background-image: url(../../../images/icons/modernui/halfdark/24x24/appbar.add.png);
-	background-repeat: no-repeat;
-	background-position: left center;
+}
+
+.leftandmaintable tr > .left a.create:hover {
+	background-image: url(../../../images/icons/modernui/dark/24x24/appbar.add.png);
 }
 
 .leftandmaintable tr > .left .classtree .treesearch input {
 	border-radius: 0;
 	margin: 0;
 	border: 0;
-	padding: 5px;
-	width: 280px;
-	padding-right: 20px;
-	border-bottom: 1px solid #cfcfcf !important;
+	padding: 0.69em;
+	width: 100%;
+	padding-right: 1.25em;
+	border-bottom: 1px solid #ccc;
 	background: #eee;
+	height: 2.82em;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 }
+
 .leftandmaintable tr > .left .create ul, ul.create {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 	padding-top: 1px;
 }
-.create li:hover,.create li.active {
-	background: url(images/tree_hover.png) repeat-x;
+.leftandmaintable tr .main ul.create.list-view {
+	margin-top: 0.75em;
 }
-.create li a {
-	display: block;
-}
-.create .node span {
-	background-repeat: no-repeat;
-	background-image: url(../../../images/icons/fatcow16/file.png);
-	background-position: 4px 4px;
-	color: 222;
-	text-decoration: none;
-	padding: 4px 6px 4px 23px;
-	display: block;
-}
-.create li:hover .node span, .create li.active .node span {
-	color: #fff;
-	font-weight: bold;
-}
-.create .node {
-	text-decoration: none !important;
-}
-.leftandmaintable tr > .left .classtree .treesearch input:focus {
-	border: 0;
-}
-.leftandmaintable tr > .left {
-	overflow: hidden;
+.leftandmaintable tr .main ul.create.list-view li:first-child a {
+	border-top: 0;
+	padding-top: 1.063em;
 }
 .leftandmaintable tr > .left > .LaM_tabs > .tree > .classtree > .treewrapper {
 	overflow: auto;
     -webkit-overflow-scrolling: touch;
 	background: #eee;
-	-webkit-box-shadow: inset 0 0 5px #ccc;
-	padding-bottom: 15px;
-}
-.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	background: #eee;
-}
-.leftandmaintable tr > .left > .LaM_tabs > .tree > .legend > div {
-	padding: 10px;
+	padding-bottom: 1em;
 }
 .leftandmaintable tr > .left .classtree .treewrapper > ul > li {
 	padding-left: 0;
 }
-
-.legend h2 {
-	margin: 0;
-	margin-bottom: 7px;
+ul.list-view.create {
+	margin-left: -0.75em;
+	margin-right: -0.75em;
 }
-.legend div span {
-	background-image: none !important;
+ul.list-view.create li a {
+	padding-left: 3em;
 }
 
-.loading span { background-image: url(../../../images/16x16/ajax-loader.gif) !important; }
+ul.list-view.create li a img {
+	top: 1.13em;
+	left: 1.5em;
+}
 
-.create li a {
-	color: #555;
+
+.pageinfo {
+	float: right; 
+	
+	> .version {
+		display: block;
+		float: left;
+	} 
+	
+	.state {
+		float: left;
+		margin-left: 0.6em;
+		
+		> div {
+			float: left;
+			padding: 0.5em 1em;
+			color: #aaa;
+			
+			display: none;
+		}
+		
+		.publish.active {
+			color: #24acb8;
+			display: block;
+		}
+
+		.draft.active {
+			color: #da097a;
+			display: block;
+		}
+
+	}
+	
+	.preview {
+		margin: 0;
+	}
+
+}
+
+
+@media only screen and (min-width: 35em) {
+	.leftandmaintable.left-active tr > .main {
+		display: table-cell;
+	}
+}
+
+@media only screen and (min-width: 45em) {
+	.leftandmaintable tr > .main > .inner {
+		overflow: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+	
+	.leftandmaintable tr > .main {
+		overflow: auto;
+	}
+	
+	.leftandmaintable tr > .main > .inner > form > .fields {
+		overflow: auto;
+	}
+	
+	.pageinfo .state > div {
+		display: block;
+	}
 }
 
 @media only screen and (min-width: 900px) {
@@ -249,6 +312,13 @@
 	.leftandmaintable tr > .main .leftbar_toggle {
 		display: none;
 	}
+	
+	.leftandmaintable tr > .main > .inner .headBar .pageType, .leftandmaintable tr > .main > .inner .headBar .pageType span {
+		max-width: 100%;
+	}
+	 .leftandmaintable tr > .main > .inner .headBar .pageType span {
+		 display: inline;
+	 }
 }
 
 /* here goes some retina-stuff */

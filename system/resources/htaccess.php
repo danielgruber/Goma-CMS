@@ -2,8 +2,8 @@
 /**
  * Configuration File for Apache Webservers
  *@link http://goma-cms.org
- *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
- *@Copyright (C) 2009 - 2013  Goma-Team
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
  * last modified: 03.02.2013
  */
 
@@ -17,11 +17,29 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} !^/system/application.php
 RewriteRule (.*) system/application.php [QSA]
 	
+<IfModule mod_expires.c>
+	ExpiresActive On
+	ExpiresByType image/jpg "access 1 year"
+	ExpiresByType image/jpeg "access 1 year"
+	ExpiresByType image/gif "access 1 year"
+	ExpiresByType image/png "access 1 year"
+	ExpiresByType text/css "access 1 month"
+	ExpiresByType application/pdf "access 1 month"
+	ExpiresByType text/x-javascript "access 1 month"
+	ExpiresByType application/x-shockwave-flash "access 1 month"
+	ExpiresByType image/x-icon "access 1 year"
+	ExpiresDefault "access 2 days"
+</IfModule>
 	
 <IfModule mod_headers.c>
-	<FilesMatch ".(jpg|jpeg|png|gif|swf|js|css)$">
-		Header set Cache-Control "max-age=86400, public"
+	<FilesMatch ".(jpg|jpeg|png|gif)$">
+		Header set Cache-Control "max-age=31536000, public"
 	</FilesMatch>
+	<FilesMatch ".(js|css|swf|pdf|ico)$">
+		Header set Cache-Control "max-age=2678400, public"
+	</FilesMatch>
+	
+	Header set Connection keep-alive
 </IfModule>
 
 <IfModule mod_headers.c>

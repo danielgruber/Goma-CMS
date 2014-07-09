@@ -2,15 +2,15 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 -  2013 Goma-Team
-  * last modified: 10.02.2013
-  * $Version 1.0.1
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@Copyright (C) 2009 -  2014 Goma-Team
+  * last modified: 17.03.2014
+  * $Version 1.0.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionProvider, TableField_URLHandler {
+class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHandler {
 	
 	/**
 	 * provides HTML-fragments
@@ -22,14 +22,13 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 			return;
 		}
 		
-		$action = new TableField_FormAction($tableField, "addbtn", lang("add_record"), "addbtn_redirect");
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(
-				"pagination-footer-right" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/addButton.html")
+				"pagination-footer-right" => $view->customise(array("link" => $tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/addButton.html")
 			);
 		} else {
-			return array("footer" => $view->customise(array("field" => $action->field()))->renderWith("form/tableField/addButtonWithFooter.html"));
+			return array("footer" => $view->customise(array("link" => $tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/addButtonWithFooter.html"));
 		}
 	}
 	
@@ -47,25 +46,6 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 		);
 	}
 	
-	/**
-	 * provide some actions of this tablefield
-	 *
-	 *@name getActions
-	 *@access public
-	*/
-	public function getActions($tableField) {
-		return array("addbtn_redirect");
-	}
-	
-	/**
-	 * handles the actions
-	*/
-	public function handleAction($tableField, $actionName, $arguments, $data) {
-		if($actionName == "addbtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/addbtn" . URLEND . "?redirect=" . urlencode(getRedirect()));
-		}
-		return false;
-	}
 	
 	/**
 	 * edit-action
@@ -74,11 +54,10 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_ActionP
 	 *@access public
 	*/
 	public function add($tableField, $request) {
-		$class = $tableField->getData()->dataClass;
-		$obj = new $class;
+		$obj = $tableField->getData();
 		$tableField->form()->controller->request->post_params = $_POST;
 		$content = $obj->controller($tableField->form()->controller)->form("add");
-		
+
 		Core::setTitle(lang("add_record"));
 		
 		$controller = $tableField->form()->controller;

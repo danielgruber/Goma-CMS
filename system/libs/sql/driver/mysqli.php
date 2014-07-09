@@ -2,9 +2,9 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 11.03.2013
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 15.09.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -86,7 +86,7 @@ class mysqliDriver extends object implements SQLDriver
 					return true;
 				} else {
 					if($test = new MySQLi($dbhost, $dbuser, $dbpass)) {
-						if($test->query("CREATE DATABASE " . $dbdb))
+						if($test->query("CREATE DATABASE " . $dbdb . " DEFAULT COLLATE = utf8_general_ci"))
 							return true;
 					}
 					return false;
@@ -116,6 +116,7 @@ class mysqliDriver extends object implements SQLDriver
 		 * some debug-operations
 		*/
 		public function runDebug($sql) {
+			SQL::$track = false;
 			if($this->errno() == 1054) {
 				// match out table
 				if(preg_match('/from\s+([a-zA-Z0-9_\-]+)/i', $sql, $matches)) {
@@ -131,6 +132,7 @@ class mysqliDriver extends object implements SQLDriver
 					}
 				}
 			}
+			SQL::$track = true;
 		}
 		
 		/**
@@ -221,11 +223,11 @@ class mysqliDriver extends object implements SQLDriver
 		{
 				if(is_array($str))
 				{
-						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Array is not allowed as given value for escape_string. Expected string.");
 				}
 				if(is_object($str))
 				{
-						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Object is not allowed as given value for escape_string. Expected string.");
 				}
 				
 				return $this->_db->real_escape_string((string) $str);
@@ -238,11 +240,11 @@ class mysqliDriver extends object implements SQLDriver
 		{
 				if(is_array($str))
 				{
-						throwError(6, 'PHP-Error', 'Array is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Array is not allowed as given value for escape_string. Expected string.");
 				}
 				if(is_object($str))
 				{
-						throwError(6, 'PHP-Error', 'Object is not allowed as given value for escape_string. Expected string.');
+					throw new LogicException("Object is not allowed as given value for escape_string. Expected string.");
 				}
 				
 				return $this->_db->real_escape_string((string) $str);
@@ -364,7 +366,7 @@ class mysqliDriver extends object implements SQLDriver
 						return true;
 				} else
 				{
-						throwErrorByID(3);
+						throw new MySQLException();
 				}
 		}
 		/**
@@ -385,7 +387,7 @@ class mysqliDriver extends object implements SQLDriver
 						return true;
 				} else
 				{
-						throwErrorByID(3);
+						throw new MySQLException();
 				}
 		}
 		
@@ -546,6 +548,7 @@ class mysqliDriver extends object implements SQLDriver
 				// sort sql, so first drop and then add
 				$removeindexsql = "";
 				$addindexsql = "";
+
 				
 				// check indexes
 				foreach($indexes as $key => $data) {
@@ -556,7 +559,7 @@ class mysqliDriver extends object implements SQLDriver
 						$name = $data["name"];
 						$ifields = $data["fields"];
 						$type = $data["type"];
-					} else if(_ereg("\(", $data)) {
+					} else if(preg_match("/\(/", $data)) {
 						$name = $key;
 						$allowed_indexes[$name] = true;
 						if(isset($currentindexes[$key])) {
@@ -630,14 +633,14 @@ class mysqliDriver extends object implements SQLDriver
 							$updates = substr($updates, 0, -1);
 						}
 						if(!SQL::Query($updates)) {
-							throwError(3,'SQL-Error', "SQL-Query ".$updates." failed");
+							throw new MySQLException();
 						}
 					}
 					
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else
-					throwError(3,'SQL-Error', "SQL-Query ".$editsql." failed");
+					throw new MySQLException();
 				
 				
 			} else {
@@ -690,14 +693,14 @@ class mysqliDriver extends object implements SQLDriver
 					
 					$sql .= ''.$type.' '.$name.' ('.implode(',', $ifields).')';
 				}
-				$sql .= ") DEFAULT CHARACTER SET 'utf8'";
+				$sql .= ") DEFAULT CHARACTER SET 'utf8' COLLATE utf8_general_ci";
 				$log .= $sql . "\n";
 				
 				if(sql::query($sql)) {
 					ClassInfo::$database[$table] = $fields;
 					return $log;
 				} else {
-					throwErrorByID(3);
+					throw new MySQLException();
 				}
 			}
 		}
@@ -767,7 +770,11 @@ class mysqliDriver extends object implements SQLDriver
 														(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 													)
 													{	
-															$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+															if(isset($data["ignore"]) && $data["ignore"])
+																$sql = "UPDATE IGNORE ".DB_PREFIX.$table_name." SET ";
+															else
+																$sql = "UPDATE ".DB_PREFIX.$table_name." SET ";
+																
 															$i = 0;
 															foreach($data["fields"] as $field => $value)
 															{
@@ -802,7 +809,7 @@ class mysqliDriver extends object implements SQLDriver
 																	// everything is fine
 															} else
 															{
-																	throwErrorById(3);
+																	throw new MySQLException();
 															}
 													}
 											}
@@ -816,7 +823,11 @@ class mysqliDriver extends object implements SQLDriver
 												(ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
 											)
 											{
-													$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
+													if(isset($data["ignore"]) && $data["ignore"])
+														$sql = 'INSERT IGNORE INTO '.DB_PREFIX.$table_name.' ';
+													else
+														$sql = 'INSERT INTO '.DB_PREFIX.$table_name.' ';
+													
 													$fields = ' (';
 													$values = ' VALUES (';
 													
@@ -887,7 +898,7 @@ class mysqliDriver extends object implements SQLDriver
 															// everything is fine
 													} else
 													{
-															throwErrorById(3);
+															throw new MySQLException();
 													}
 											}
 									}
@@ -910,7 +921,7 @@ class mysqliDriver extends object implements SQLDriver
 													if(sql::query($sql)) {
 															// everything is fine
 													} else {
-															throwErrorById(3);
+															throw new MySQLException();
 													}
 											}
 									}

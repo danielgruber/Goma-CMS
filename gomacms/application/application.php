@@ -2,10 +2,10 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 09.12.2012
-  * $Version 1.1.4
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 11.04.2013
+  * $Version 1.1.7
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -34,6 +34,26 @@ settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
 
+if(settingsController::get("useSSL") == 1) {
+	// generate BASE_URI
+	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+	$port = $_SERVER["SERVER_PORT"];
+	if ($http == "http" && $port == 80) {
+		$port = "";
+	} else if ($http == "https" && $port == 443) {
+		$port = "";
+	} else {
+		$port = ":" . $port;
+	}
+
+	if($http == "http" && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
+		header("Location: https://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
+		exit;
+	} else if(isset($_GET["forceNoSSL"])) {
+		$_SESSION["forceNoSSL"] = true;
+	}
+}
+
 Resources::$gzip = settingsController::get("gzip");
 RegisterExtension::$enabled = settingsController::get("register_enabled");
 RegisterExtension::$validateMail = settingsController::get("register_email");
@@ -41,10 +61,26 @@ RegisterExtension::$registerCode = settingsController::get("register");
 Core::setCMSVar("ptitle", settingsController::get("titel"));
 Core::setCMSVar("title", settingsController::get("titel"));
 Core::setTheme(settingsController::Get("stpl"));
-Core::setHeader("keywords", settingsController::Get("meta_keywords"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
-Core::setHeader("copyright", date("Y", NOW) . " - " . settingsController::get("titel"));
+
+i18n::loadTPLLang(Core::getTheme());
+
+if(settingsController::get("favicon")) {
+	Core::$favicon = "./favicon.ico";
+}
+
+if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
+	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
+}
+
+if(settingsController::get("google_site_verification")) {
+	$code = settingsController::get("google_site_verification");
+	if(preg_match('/\<meta[^\>]+content\=\"([a-zA-Z0-9_\-]+)\"\s+\/\>/', $code, $matches)) {
+		$code = $matches[1];
+	}
+    Core::setHeader("google-site-verification", convert::raw2xml($code));
+}
 
 date_default_timezone_set(Core::GetCMSVar("TIMEZONE"));
 

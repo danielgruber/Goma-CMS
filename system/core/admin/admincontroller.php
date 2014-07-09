@@ -1,15 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.03.2013
-  * $Version 1.4.7
-*/   
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * The base controller for the admin-panel.
+ *
+ * @package     Goma\Core\Admin
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class adminController extends Controller
 {
 		/**
@@ -17,7 +17,7 @@ class adminController extends Controller
 		 *
 		 *@name title
 		*/
-		public static $title;
+		static $title;
 		
 		/**
 		 * object of current admin-view
@@ -70,7 +70,7 @@ class adminController extends Controller
 		 *@name activeController
 		 *@access public
 		*/
-		public static function activeController() {
+		static function activeController() {
 			return (self::$activeController) ? self::$activeController : new adminController;
 		}
 		
@@ -79,6 +79,8 @@ class adminController extends Controller
 		*/
 		public function __construct()
 		{
+				
+				
 				Resources::addData("goma.ENV.is_backend = true;");
 				defined("IS_BACKEND") OR define("IS_BACKEND", true);
 				Core::setHeader("robots", "noindex, nofollow");
@@ -95,6 +97,8 @@ class adminController extends Controller
 			if(isset(ClassInfo::$appENV["app"]["enableAdmin"]) && !ClassInfo::$appENV["app"]["enableAdmin"]) {
 				HTTPResponse::redirect(BASE_URI);
 			}
+			
+			Resources::$lessVars = "admin.less";
 			
 			return parent::handleRequest($request, $subController);
 		}
@@ -113,6 +117,8 @@ class adminController extends Controller
 			
 			if(classinfo::exists($class)) {
 				$c = new $class;
+				
+				Core::$favicon = ClassInfo::getClassIcon($class);
 				
 				if(Permission::check($c->rights))
 				{
@@ -166,14 +172,31 @@ class adminController extends Controller
 		 *
 		 *@name flushLog
 		*/
-		public function flushLog($count = 30) {
+		public function flushLog($count = 40) {
+			
+			$count = $this->getParam("count") ? $this->getParam("count") : $count;
+			
 			if(Permission::check("superadmin")) {
 				
+				
+				session_write_close();
 				// we delete all logs that are older than 30 days
 				Core::CleanUpLog($count);
 				
-				AddContent::addSuccess(lang("flush_log_success"));
-				$this->redirectBack();
+				if(!Core::is_ajax()) {
+					
+					AddContent::addSuccess(lang("flush_log_success"));
+					$this->redirectBack();
+					exit;
+					
+				} else {
+					HTTPResponse::setHeader("content-type", "text/x-json");
+					HTTPResponse::sendHeader();
+					
+					Notification::notify($this->class, lang("flush_log_success"), null, "PushNotification");
+					echo json_encode(1);
+					exit;
+				}
 			}
 			
 			$this->template = "admin/index_not_permitted.html";
@@ -188,6 +211,13 @@ class adminController extends Controller
 			if(!Permission::check("ADMIN") && Core::is_ajax()) {
 				Resources::addJS("location.reload();");
 			}
+			
+			if(Permission::check("ADMIN")) {
+				$data = $this->helpData();
+				$data["#help-button a"] = lang("HELP.HELP");
+				Resources::addJS("addHelp(".json_encode($data).");");
+			}
+			
 			if(!Core::is_ajax()) {
 				if(!_eregi('</html', $content)) {
 					if(!Permission::check("ADMIN")) {
@@ -272,7 +302,7 @@ class adminController extends Controller
 		 *@access public
 		*/
 		public function contentClass() {
-			return $this->class;
+			return $this->classname;
 		}
 		
 		/**
@@ -284,8 +314,33 @@ class adminController extends Controller
 		public function historyURL() {
 			return "admin/history";
 		}
+		
+		/**
+		 * help-texts.
+		*/
+		public function helpData() {
+			return array(
+				"#navi-toggle span" => array(
+					"text" 		=> lang("HELP.SHOW-MENU")
+				),
+				"#history"			=> array(
+					"text"		=> lang("HELP.HISTORY"),
+					"position"	=> "left"
+				)
+			);
+		}
 }
 
+/**
+ * The base model for the admin-panel.
+ *
+ * @package     Goma\Core\Admin
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.5
+ */
 class admin extends ViewAccessableData implements PermProvider
 {
 		/**
@@ -325,11 +380,11 @@ class admin extends ViewAccessableData implements PermProvider
 		public function TooManyLogs() {
 			if(file_exists(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log")) {
 				$count = count(scandir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log"));
-				if($count > 60) {
-					$this->controller()->flushLog(60);
+				if($count > 45) {
+					return $count;
 				}
 				
-				return ($count > 30);
+				return false;
 			}
 			
 			return false;
@@ -392,20 +447,6 @@ class admin extends ViewAccessableData implements PermProvider
 		}
 		
 		/**
-		 * Statistics
-		 *
-		 *@name statistics
-		 *@access public
-		*/
-		public function statistics($month = true, $page = 1) {
-			if($month) {
-				return livecounterController::statisticsByMonth(10, $page);
-			} else {
-				return livecounterController::statisticsByDay(10, 1, $page);
-			}
-		}
-		
-		/**
 		 * gets data fpr available points
 		 *@name this
 		 *@access public
@@ -420,14 +461,16 @@ class admin extends ViewAccessableData implements PermProvider
 						if($class->text) {
 								if(right($class->rights) && $class->visible())
 								{
-										if(adminController::activeController()->class == $child)
+										if(adminController::activeController()->classname == $child)
 											$active = true;
 										else
 											$active = false;
+										
 										$data->push(array(	'text' 	=> parse_lang($class->text), 
-															'uname' => substr($class->class, 0, -5),
+															'uname' => substr($class->classname, 0, -5),
 															'sort'	=> $class->sort,
-															"active"=> $active));
+															"active"=> $active,
+															"icon"	=> ClassInfo::getClassIcon($class->classname)));
 								}
 						}
 				}

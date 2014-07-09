@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.03.2013
-  * $Version 2.6.7
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 15.09.2013
+  * $Version 2.7.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -91,7 +91,7 @@ class GFS extends Object {
 	 *@name endOfContentPos
 	 *@access public
 	*/
-	 protected $endOfContentPos = 0;
+	protected $endOfContentPos = 0;
 	 
 	/**
 	 * files
@@ -117,13 +117,6 @@ class GFS extends Object {
 	 *@access protected
 	*/
 	protected $oldDBSize;
-	
-	/**
-	 * error on opening
-	 *
-	 *@name error
-	*/
-	public $error = 0;
 	
 	/**
 	 * if this archive is opened as readonly
@@ -176,12 +169,11 @@ class GFS extends Object {
 		$this->file = $filename;
 		if(is_dir($this->file)) {
 			$this->valid = false;
-			$this->error = 8;
-			return false;
+			throw new LogicException("GFS-File is a Folder.");
 		}
 		
-		$filesize = @filesize($this->file);
 		if(file_exists($this->file)) {
+			$filesize = filesize($this->file);
 			$this->file = realpath($this->file);
 			if($flag == GFS_READONLY) {
 				$this->pointer = @fopen($this->file, "r");
@@ -212,25 +204,19 @@ class GFS extends Object {
 							$this->valid = true;
 							$this->version = $version;
 						} else {
-							$this->error = 6;
-							log_error("Could not open GFS ".$filename.". Version not supported.");
 							$this->valid = false;
-							return false;
+							throw new GFSVersionException("Could not open GFS ".$filename.". Version is not supported.");
 						}
 						
 						if(version_compare($version, self::VERSION, ">")) {
-							$this->error = 6;
-							log_error("Could not open GFS ".$filename.". Version not supported.");
 							$this->valid = false;
-							return false;
+							throw new GFSVersionException("Could not open GFS ".$filename.". Version is not supported.");
 						}
 						
 						$this->setPosition(6 + strlen($version));
 						if(fread($this->pointer, 2) != "\n\n") {
-							$this->error = 2;
-							log_error("Could not open GFS ".$filename.". Malformed file.");
 							$this->valid = false;
-							return false;
+							throw new GFSFileException("Could not open GFS ".$filename.". Malformed file at Start.");
 						}
 						
 						// check if this is a signed archive
@@ -247,9 +233,8 @@ class GFS extends Object {
 								// reset filesize
 								$filesize = $filesize - 8 - strlen((string)$certSize) - $certSize;
 							} else {
-								$this->error = 7;
 								$this->valid = false;
-								return false;
+								throw new GFSFileException("Could not open signed GFS ".$filename.". Malformed file at signing.");
 							}
 						}
 						
@@ -271,21 +256,16 @@ class GFS extends Object {
 								if($data !== false) {
 									$this->db = $data;
 								} else {
-									log_error("Could not open GFS ".$filename.". Could not decode json-Database.");
-									$this->error = 5;
 									$this->valid = false;
-									return false;
+									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode JSON-DB.");
 								}
 							} else {
 								$data = unserialize($db);
 								if($data !== false) {
 									$this->db = $data;
 								} else {
-									echo $data;
-									log_error("Could not open GFS ".$filename.". Could not decode serialize-Database.");
 									$this->valid = false;
-									$this->error = 5;
-									return false;
+									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode Serialized DB.");
 								}
 							}
 							
@@ -296,26 +276,20 @@ class GFS extends Object {
 							$this->setPosition();
 							$this->valid = true;
 						} else {
-							log_error("Could not open GFS ".$filename.". Damaged database.");
 							$this->valid = false;
-							$this->error = 4;
-							return false;
+							throw new GFSFileException("Could not open GFS ".$filename.". Malformed DataBase.");
 						}
 					} else {
-						log_error("Could not open GFS ".$filename.". Malformed version number.");
 						$this->valid = false;
-						$this->error = 3;
-						return false;
+						throw new GFSVersionException("Could not open GFS ".$filename.". Malformed Version-Number,");
 					}
 				} else {
-					log_error("Could not open GFS ".$filename.". Malformed file.");
 					$this->valid = false;
-					$this->error = 2;
-					return false;
+					throw new GFSFileException("Could not open GFS ".$filename.". Malformed File.");
 				}
 			} else {
 				$this->valid = false;
-				$this->error = 1;
+				throw new LogicException("Could not open GFS " . $filename . ". FileSystem returns an error.");
 			}
 		} else {
 			$this->pointer = fopen($filename, "wb+");
@@ -377,7 +351,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							$this->addDir($currpath);
 						}
@@ -458,7 +432,7 @@ class GFS extends Object {
 		$path = $this->parsePath($path);
 				
 		if(basename($file) == basename($this->file) || in_array($path,$not_add_if_dir)) 
-				return true;
+			return true;
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
@@ -565,7 +539,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							return -4;
 						}
@@ -614,7 +588,7 @@ class GFS extends Object {
 					if(count($pathparts) == $i) {
 						// do nothing
 					} else {
-						$currpath = $part . "/";
+						$currpath = $currpath . "/" . $part;
 						if(!$this->exists($currpath)) {
 							$this->addDir($currpath);
 						}
@@ -657,7 +631,10 @@ class GFS extends Object {
 	 *@param string - file
 	*/
 	public function getFileType($file) {
-		return substr($file, strrpos($file, ".") + 1);
+		if(strpos($file, ".") !== false)
+			return substr($file, strrpos($file, ".") + 1);
+		
+		return null;
 	}
 	
 	/**
@@ -1041,15 +1018,13 @@ class GFS extends Object {
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path])) {
-			if($this->db[$path]["size"] == 0) {
-				return "";
-			}
+			
 			// get position of file
 			if(isset($this->db[$path]["startChunk"])) {
 				$offset = $this->db[$path]["startChunk"];
 			} else if(isset($this->db[$path]["contents"]) || $this->db[$path]["contents"] === null) {
 				if($pointer = @fopen($aim, "w")) {
-					fwrite($pointer, $this->db[$path]["contents"]);
+					fwrite($pointer, (string) $this->db[$path]["contents"]);
 					fclose($pointer);
 					chmod($aim, 0777);
 					unset($pointer);
@@ -1345,7 +1320,7 @@ class GFS_Package_installer extends GFS {
 		$tempfolder = ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
 		
 		
-		$f = @disk_free_space("/");
+		/*$f = @disk_free_space("/");
 		if($f !== null && $f !== "" && $f !== false) {
 			// check for disk-quote
 			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
@@ -1356,7 +1331,7 @@ class GFS_Package_installer extends GFS {
 				header("HTTP/1.1 500 Server Error");
 				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
 			}
-		}
+		}*/
 		
 		// write files
 		$this->status = "Writing files...";
@@ -1402,7 +1377,7 @@ class GFS_Package_installer extends GFS {
 			}
 			$this->current = basename($path);
 			
-			// maximum 0.5 second
+			// maximum 2.0 second
 			if(microtime(true) - $start > 2.0) {
 				$i++;
 				$count++;
@@ -1535,11 +1510,11 @@ class GFS_Package_installer extends GFS {
 	*/
 	public static function wasUnpacked($file = null) {
 		if(isset($file)) {
-			$file = realpath($file);
-			if(isset($_GET["unpack"]))
-				return in_array($file, $_GET["unpack"]);
-			else
-				return false;
+			$file = str_replace('\\\\', '\\', realpath($file));
+			$file = str_replace('\\', '/', realpath($file));
+			$unpack = isset($_GET["unpack"]) ? str_replace('\\', '/', str_replace('\\\\', '\\', $_GET["unpack"])) : array();
+			
+			return in_array($file, $unpack);
 		} else {
 			if(isset($_GET["unpack"]))
 				return true;
@@ -1573,10 +1548,11 @@ class GFS_Package_installer extends GFS {
 		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/requesthandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
+		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
+		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
 		// includes
 		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
@@ -1592,7 +1568,8 @@ class GFS_Package_installer extends GFS {
 		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
-		$code .= '$gfs = new GFS_Package_Installer('.var_export($this->file, true).');';
+		$code .= 'if(!class_exists("Convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
+		$code .= 'try { $gfs = new GFS_Package_Installer('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; }';
 		$code .= '$gfs->unpack('.var_export($destination, true).');';
 		FileSystem::write(ROOT . $file, $code);
 		return $file;
@@ -1703,7 +1680,7 @@ class GFS_Package_Creator extends GFS {
 			$this->fileIndex = $index;
 		}
 		
-		$f = @disk_free_space("/");
+		/*$f = @disk_free_space("/");
 		if($f !== null && $f !== "" && $f !== false) {
 			// check for disk-quote
 			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
@@ -1714,7 +1691,7 @@ class GFS_Package_Creator extends GFS {
 				header("HTTP/1.1 500 Server Error");
 				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
 			}
-		}
+		}*/
 		
 		// Adding files...
 		$this->status = "Adding files...";
@@ -1743,8 +1720,8 @@ class GFS_Package_Creator extends GFS {
 		
 		// iterate through the index
 		while($i < count($this->fileIndex)){
-			// maximum of 1.0 seconds
-			if(microtime(true) - $start < 1.0) {
+			// maximum of 2.0 seconds
+			if(microtime(true) - $start < 2.0) {
 				if(!$this->exists($paths[$i])) {
 					$this->addFromFile($realfiles[$i], $paths[$i]);
 				}
@@ -1803,7 +1780,7 @@ class GFS_Package_Creator extends GFS {
 		}
 	}
 	
-	 /**
+	/**
 	 * if a specific file was packed
 	 *
 	 *@name wasPacked
@@ -1811,9 +1788,13 @@ class GFS_Package_Creator extends GFS {
 	*/
 	public static function wasPacked($file = null) {
 		if(isset($file)) {
+			$file = str_replace('\\\\', '\\', realpath($file));
+			$file = str_replace('\\', '/', realpath($file));
+			$pack = isset($_GET["pack"]) ? str_replace('\\', '/', str_replace('\\\\', '\\', $_GET["pack"])) : array();
+			
 			if(isset($_GET["pack"])) {
 				$file = realpath($file);
-				return in_array($file, $_GET["pack"]);
+				return in_array($file, $pack);
 			} else {
 				return false;
 			}
@@ -1850,10 +1831,11 @@ class GFS_Package_Creator extends GFS {
 		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
 		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/requesthandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
+		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
 		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
 		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
+		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
 		// includes
 		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
 		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
@@ -1869,7 +1851,8 @@ class GFS_Package_Creator extends GFS {
 		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
 		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
 		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
-		$code .= '$gfs = new GFS_Package_Creator('.var_export($this->file, true).');';
+		$code .= 'if(!class_exists("convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
+		$code .= 'try { $gfs = new GFS_Package_Creator('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; }';
 		$code .= '$gfs->commit(__FILE__, '.var_export($index, true).');';
 		FileSystem::write(ROOT . $file, $code);
 		return $file;
@@ -1916,4 +1899,45 @@ class GFS_Package_Creator extends GFS {
 		echo $template->display("/system/templates/GFSUnpacker.html");
 		exit;
 	}
+}
+
+/**
+ * EXCEPTIONS
+*/
+class GFSVersionException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 41, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+}
+
+class GFSFileException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 42, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class GFSDBException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 43, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
 }

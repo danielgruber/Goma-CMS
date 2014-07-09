@@ -3,9 +3,9 @@
   *
   *@package goma css framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 03.12.2012
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 02.09.2013
 */
 
 
@@ -13,50 +13,43 @@
  * default-pages-style
 */
 .pages a, .pages span.black {
-	padding: 4px;
+	padding: 0.25em;
 }
 
 #login_page .left {
-	float: left;
-	padding: 10px;
-	width: 250px;
+	padding: 0.5em;
 }
 #login_page .right {
-	margin-left: 280px;
-	border-left: 1px solid #eee;
-	padding: 0 10px;
+	padding: 1em 0.5em;
 }
 
-.login_form > label {
-	font-weight: 8pt;
-	display: block;
-	font-weight: bold;
+.login_form {
+	padding: 0.25em 0;
 }
-
 .login_form input[type=text], .login_form input[type=password] {
 	width: 90%;
+	margin-bottom: 0.5em;
 }
 
-.login_form > ._actions {
-	padding-top: 5px;
+.login_form > ._actions div {
+	padding: 0.25em 0;
 }
 .login_form > ._actions a {
 	display: block;
-	margin: 5px 4px;
+	margin: 0.25em;
 }
 .login_form > ._actions div a {
 	float: right;
-	margin: 13px 20px;
-	color: #777;
+	margin: 0.75em 1.5em;
 }
 
 /* lang-select */
 #langSelect {
-	padding: 10px;
+	padding: 0.5em;
 }
 #langSelect .back {
 	float: right;
-	margin-top: 14px;
+	margin-top: 10.25em;
 }
 #langSelect .selectBox {
 	margin: -8px;
@@ -67,31 +60,30 @@
 	padding: 0;
 }
 #langSelect ul li {
-	margin: 5px;
-	float: left;
+	margin: 0.25em;
+	display: inline-block;
 }
 #langSelect ul li a {
 	display: block;
 	text-decoration: none;
-	color: #555;
-	padding: 5px;
+	padding: 0.25em;
 }
 #langSelect ul li a img {
 	margin-top: -1px;
 }
 #langSelect ul li a:hover, #langSelect ul li.active a {
-	background: #eee;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+	color: #da097a;
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+	border-radius: 0.25em;
 }
 
 .icon.arrow_left {
-	height: 10px;
-	width: 8px;
+	height: 0.5em;
+	width: 0.5em;
 	background: url(../images/arrow_left.png) no-repeat;
 	display: inline-block;
-	margin: 0 5px;
+	margin: 0 0.25em;
 }
 
 /* js */
@@ -110,7 +102,7 @@
 .actions .submitbutton
 {
 	display: inline;
-	margin: 4px;
+	margin: 0.25em;
 }
 
 /* styles for a-tags as buttons most of the time */
@@ -127,31 +119,25 @@ a.button {
 }
 
 /* some styles for notifications */
-.notice {
-    background: #fae98c url(../../../images/icons/fatcow16/bullet_error.png) no-repeat 2px center;
-    border: 1px solid #d7c143;
-    padding: 10px;
-    padding-left: 25px;
-    margin:10px 0px;
-    color: #222;
+.error {
+	background: lighten(@system-red, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-red;
+	padding: 1em;
 }
 
 .success {
-    text-align:left;
-    padding:10px;
-    border: 1px solid #8fb865;
-    color: #222;
-    margin:10px 0px;
-    background: #afe37b url(../../../images/icons/fatcow16/success.png) no-repeat 5px center;
-    padding-left: 30px;
+	background: lighten(@system-green, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-green;
+	padding: 1em;
 }
 
-.error {
-   	background: #ffbdaf;
-	border: 1px solid #d53f3f;
-	padding: 10px;
-	margin: 10px 0px;
-	color: #252525;
+.notice {
+	background: lighten(@system-blue, 40%);
+	border: 0;
+	border-bottom: 1px solid @system-blue;
+	padding: 1em;
 }
 
 .error a {
@@ -159,33 +145,30 @@ a.button {
 }
 
 .info_box {
-	padding: 10px;
-	margin: 10px 0px;
+	padding: 0.5em;
+	margin: 0.5em 0px;
 	border: 1px solid #6cd2ff;
 	background: #bfebff;
 	color: #222;
 }
 
 
-/* retina support */
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (   min--moz-device-pixel-ratio: 2),
-only screen and (     -o-min-device-pixel-ratio: 2/1) {  
-	.success {
-		background-image: url(../../../images/icons/fatcow16/success@2x.png);
-		background-size: 16px 16px;
-	}
-	
-	.notice {
-		background-image: url(../../../images/icons/fatcow16/bullet_error@2x.png);
-		background-size: 16px 16px;
-	}
-}
-
 #page_wrapperpage li h4 {
 	margin: 0;
 }
 .confirmDescription {
-	padding: 10px;
+	padding: 0.5em;
+}
+
+@media only screen and (min-width: 30em) {
+	#login_page .left {
+		float: left;
+		padding: 0.5em;
+		width: 15em;
+	}
+	#login_page .right {
+		margin-left: 17.5em;
+		border-left: 1px solid #eee;
+		padding: 0 0.5em;
+	}
 }

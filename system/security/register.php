@@ -1,15 +1,22 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 16.08.2012
-  * $Version 1.2.1
-*/
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined('IN_GOMA') OR die();
 
+/**
+ * extends the user-class with a registration-form.
+ *
+ * @package		Goma\Security\Users
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		2.0
+ */
 class RegisterExtension extends ControllerExtension
 {
 		
@@ -56,7 +63,7 @@ class RegisterExtension extends ControllerExtension
 		 *
 		 *@name extra_methods
 		*/
-		public static $extra_methods = array("register");
+		public static $extra_methods = array("register", "doRegister");
 		
 		/**
 		 * add custom method to handle the action
@@ -79,7 +86,7 @@ class RegisterExtension extends ControllerExtension
 				} else if(isset($_GET["activate"])) {
 					$data = DataObject::get("user", array("code" => $_GET["activate"]));
 					
-					if($data->_count() > 0 && $data->status != 2) {
+					if($data->count() > 0 && $data->status != 2) {
 						$data->status = 1; // activation
 						$data->code = randomString(10); // new code
 						if($data->write(false, true)) {
@@ -98,10 +105,11 @@ class RegisterExtension extends ControllerExtension
 					
 				// great, let's show a form
 				} else {
-					$this->model_inst = new user();
-					return $this->form(false, false, array(), false, "doregister");
+					$user = new user();
+					return $user->controller($this->getOwner())->form(false, false, array(), false, "doregister");
 				}
 		}
+		
 		/**
 		 * registers the user
 		 * we don't use register, because of constructor
@@ -114,6 +122,7 @@ class RegisterExtension extends ControllerExtension
 				if(self::$validateMail) {
 					$data["status"] = 0;
 					$data["code"] = randomString(10);
+					
 					// send out mail
 					$email = "";
 					$email .= lang("hello") . " ".text::protect($data["nickname"])."<br />\n<br />\n";
@@ -125,13 +134,13 @@ class RegisterExtension extends ControllerExtension
 					if(!$mail->sendHTML($data["email"], lang("register"), $email)) {
 						throwError(6, 'Server-Error', 'Could not send out mail.');
 					}
-					if($this->save($data))			
+					if($this->getOwner()->save($data))			
 						return '<div class="success">' . lang('register_ok_activate', "User successful created. Please visit your e-mail-provider to check out the e-mail we sent to you.") . '</div>';		
 					else
 						throwError(6, 'Server-Error', 'Could not save data.');
 
 				} else {
-					if($this->save($data))			
+					if($this->getOwner()->save($data))			
 						return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		
 					else
 						throwError(6, 'Server-Error', 'Could not save data.');

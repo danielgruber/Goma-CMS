@@ -3,10 +3,15 @@
 	<head>
 		<base href="{BASE_URI}" />
 		<title>503 -  Temporary Unavailable</title>
-		<link rel="stylesheet" href="system/templates/css/default.css" />
-		<link rel="stylesheet" href="system/templates/css/goma_default.css" />
-		<link rel="stylesheet" href="system/templates/admin/style.css" />
+		
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/css/default.css" />
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/css/goma_default.css" />
+		<link rel="stylesheet" href="//goma-cms.org/less.php?file=system/templates/admin/style-front.css" />
+		
 		<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+		
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		
 		<script type="text/javascript">
 			// <![CDATA[
 				setTimeout(function(){
@@ -15,19 +20,37 @@
 			// ]]>
 		</script>
 	</head>
-	<body id="wrapper_logout">
-		<!--<div id="wrapper_logout">-->
-			
-			<div class="wrapper_inner">
-				<a href="http://goma-cms.org" target="_blank"><img id="logo" src="system/templates/admin/images/logo.png" alt="logo" /></a>
-				<div class="header">
-					<h1>Goma Framework</h1>
-				</div>
-				<div class="content">
-					<h3>503 - Temporary Unavailable</h3>
-					<p>This Site is temporarily not available. Please <a href="">try again</a>.</p>
+	<body>
+		<div id="document">
+			<div class="logo_wrapper">
+				<div class="content_wrapper">
+					<div class="beside_logo">
+						
+					</div>
+					<a href=""><img id="logo" src="//goma-cms.org/system/templates/admin/images/logo.png" data-retina="//goma-cms.org/system/templates/admin/images/logo@2x.png" alt="logo" /></a>
 				</div>
 			</div>
-		<!--</div>-->
+			
+			<div id="wrapper" class="content_wrapper">
+				<div class="header">
+					<div class="content_wrapper">
+						<h1>Goma</h1>
+					</div>
+				</div>
+				<div class="content">
+					<div class="content_wrapper">
+						<h3>503 - Temporary Unavailable</h3>
+						<p>This Site is temporarily not available. Please <a href="">try again</a>.</p>
+					</div>
+				</div>
+			</div>
+			
+			<div class="footer-spacer"></div>
+			<div class="footer">
+				<div class="content_wrapper">
+					<div class="branding" style="text-align: center;float: none;">Powered by <a href="http://goma-cms.org">Goma</a></div>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

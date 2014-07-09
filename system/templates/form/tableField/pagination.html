@@ -1,9 +1,9 @@
 <tr class="tablefield_pagination">
 	<th colspan="$columnCount">
 		<div class="pages">	
-			<strong>{$_lang_page}</strong>
+			<span class="title">{$_lang_page}</span>
 			<% CONTROL this() %>
-				$this.field
+				<span class="page">$this.field</span>
 			<% ENDCONTROL %>
 		</div>
 		<div class="actions">

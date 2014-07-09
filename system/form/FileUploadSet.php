@@ -1,15 +1,14 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 20.03.2013
-  * $Version 1.1.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * A file upload set.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.1.9
+ */
 class FileUploadSet extends FormField {
 	/**
 	 * url-handlers
@@ -212,8 +211,8 @@ class FileUploadSet extends FormField {
 			
 		if($this->allowed_file_types == "*" || preg_match('/\.('.implode("|", $this->allowed_file_types).')$/i', $_SERVER["HTTP_X_FILE_NAME"])) {
 			
-			if(Core::$phpInputFile) {
-				$tmp_name = Core::$phpInputFile;
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
 				
 				
 				if(filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {

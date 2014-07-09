@@ -1,18 +1,18 @@
-<?php
-/**
-  * inspiration by Silverstripe 3.0 GridField
-  * http://silverstripe.org
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version - 1.0
- */
- 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined('IN_GOMA') OR die(); 
 
+/**
+ * Customisable field to edit data in a table.
+ *
+ * Inspiration by Silverstripe 3.0 GridField
+ * http://silverstripe.org
+ *
+ * @package     Goma\Form\TableField
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1
+ */
 class tableField extends FormField {
 	/**
 	 * configuration of this field
@@ -199,7 +199,7 @@ class tableField extends FormField {
 		if(Object::method_exists($record, $fieldName)) {
 			return $record->$fieldName();
 		} else {
-			return $record->$fieldName;
+			return $record->getTemplateVar($fieldName);
 		}
 	}
 	
@@ -254,7 +254,7 @@ class tableField extends FormField {
 				if(is_array($_attr)) {
 					$attr = array_merge($attr, $_attr);
 				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->class . "::getColumnAttributes");
+					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnAttributes");
 				}
 			}
 			return $attr;
@@ -282,7 +282,7 @@ class tableField extends FormField {
 				if(is_array($_metadata)) {
 					$metadata = array_merge($metadata, $_metadata);
 				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->class . "::getColumnMetaData");
+					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnMetaData");
 				}
 			}
 			return $metadata;
@@ -318,6 +318,13 @@ class tableField extends FormField {
 		$container = $this->container;
 		
 		$columns = $this->getColumns();
+		
+		// first init all
+		foreach($this->getComponents() as $item) {
+ 			if(Object::method_exists($item, "Init")) {
+				$data = $item->Init($this);
+			}
+		}
 		
 		$data = $this->getData();
 		foreach($this->getComponents() as $item) {

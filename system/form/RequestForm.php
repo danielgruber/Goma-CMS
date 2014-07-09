@@ -2,10 +2,10 @@
 /**
   *@package goma form framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 24.12.2012
-  * $Version 1.4.2
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 04.04.2014
+  * $Version 1.4.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -59,6 +59,11 @@ class RequestForm extends Object {
 	 *@var null - string
 	*/
 	public $redirect;
+	
+	/**
+	 * cause we are acting like a controller, we need also the current request.
+	*/
+	public $request;
 	
 	/**
 	 * constructing the form
@@ -130,13 +135,13 @@ class RequestForm extends Object {
 		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), $redirect, $this->dialog->getcloseJS() . "return false;");
 			if(isset($_GET["dropdownDialog"]))
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit");
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit", array("green"));
 			else
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajax", "submit");
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajax", "submit", array("green"));
 			
 		} else {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), getredirect(true));
-			$submit = new FormAction("okay", $this->btnokay);
+			$submit = new FormAction("okay", $this->btnokay, null, array("green"));
 		}
 			
 		// add field to identify current submit

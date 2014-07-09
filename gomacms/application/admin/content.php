@@ -1,14 +1,15 @@
-<?php
-/**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.12.2012
-  * $Version 2.0.7
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+/**
+ * Admin-Panel for @link pages.
+ *
+ * @package     Goma-CMS\Pages
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0.10
+ */
 
 class contentAdmin extends LeftAndMain
 {
@@ -46,7 +47,9 @@ class contentAdmin extends LeftAndMain
 	 *
 	 *@name models
 	*/
-	public $models = array("pages");		
+	public $models = array("pages");	
+	
+	static $icon = "templates/images/content.png";	
 	
 	public $sort = 990;
 	
@@ -65,7 +68,7 @@ class contentAdmin extends LeftAndMain
 	*/
 	public $colors = array(
 		"withmainbar"	=> array(
-			"color"	=> "#036",
+			"color"	=> "#24ACB8",
 			"name"	=> "{\$_lang_mainbar}" 
 		),
 		"nomainbar" 	=> array(
@@ -116,7 +119,7 @@ class contentAdmin extends LeftAndMain
 	*/
 	public function redirectback($param = null, $value = null)
 	{
-			if($this->getParam(0) == "del" || $this->request->getParam(1) == "add")
+			if($this->getParam(0) == "del" || $this->getParam(1,false) == "add")
 			{
 					HTTPresponse::redirect(ROOT_PATH . 'admin/content' . URLEND);
 			} else
@@ -128,9 +131,10 @@ class contentAdmin extends LeftAndMain
 	/**
 	 * init JavaScript-Files
 	*/
-	public function Init() {
+	public function Init($request = null) {
+		Resources::$lessVars = "tint-blue.less";
 		Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
-		return parent::Init();
+		return parent::Init($request);
 	}
 	
 	/**
@@ -160,7 +164,7 @@ class contentAdmin extends LeftAndMain
 	public function revert_changes() {
 		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1)) {
 			if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
-				$data = DataObject::get_one($this->modelInst()->class, array("id" => $this->model_inst->id));
+				$data = DataObject::get_one($this->modelInst()->classname, array("id" => $this->model_inst->id));
 				if($data) {
 					$data->write(false, false, 2, true);
 					if(Core::is_ajax()) {
@@ -179,6 +183,109 @@ class contentAdmin extends LeftAndMain
 			}
 		}
 	}
+	
+	/**
+	 * add-form
+	 *
+	 *@name cms_add
+	 *@access public
+	*/
+	public function cms_add() {	
+		
+		define("LAM_CMS_ADD", 1);
+		
+		if($this->getParam("model")) {
+			if(count($this->models) > 1) {
+				foreach($this->models as $_model) {
+					$_model = trim(strtolower($_model));
+					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+						$type = $this->getParam("model");
+						$model = new $type;
+						break;
+					}
+				}
+			} else {
+				$models = array_values($this->models);
+				$_model = trim(strtolower($models[0]));
+				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
+					$type = $this->getParam("model");
+					$model = new $type;
+				}
+			}
+		} else {
+			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+		
+			$model = new ViewAccessableData();
+			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
+		}
+		
+		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
+			$model->queryVersion = "state";
+		}
+		
+		$allowed_parents = $model->allowed_parents();
+		
+		$this->selectModel($model, true);
+		
+		// render head-bar
+		$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$model->classname.' pageType"><img src="'.ClassInfo::getClassIcon($model->classname).'" alt="" /><span>';
+
+		$html .= convert::raw2text(ClassInfo::getClassTitle($model->classname));
+		
+		// end of title in head-bar
+		$html .= ' </span></span></div>';
+		
+		$form = new Form($this, "add_page");
+		
+		if(isset($_GET["parentid"]) && $_GET["parentid"] != 0) {
+			$form->setResult(array(
+				"parenttype"	=> "subpage",
+				"parentid"		=> $_GET["parentid"]
+			));
+		} else {
+			$form->setResult(array(
+				"parenttype"	=> "root",
+				"parentid"		=> 0
+			));
+
+		}
+		
+		$form->add(new HTMLField('headbar', $html));
+		$form->add($title = new textField('title', lang("title_page", "title of the page")));
+		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+				"root" => lang("no_parentpage", "Root Page"),
+				"subpage" => array(
+					lang("subpage","sub page"),
+					"parent"
+				)
+			)));
+			
+		
+		if(!$this->modelInst()->can("insert")) {
+			$parenttype->disableOption("root");
+		}
+		
+		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
+		
+		$parentDropdown->info_field = "url";
+		
+		$form->add(new HiddenField("class_name", $model->classname));
+		
+		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
+		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");
+		$form->addValidator(new FormValidator(array($model, "validatePageFileName")), "filename");
+		
+		// default submission
+		$form->setSubmission("submit_form_generate");	
+			
+		$form->addValidator(new DataValidator($model), "datavalidator");
+		
+		//if($model->can("Write"))
+			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate", null, array("green")));
+		
+		return $form->render();
+	}
+	
 	
 	/**
 	 * unpublishes the current version
@@ -205,9 +312,7 @@ class contentAdmin extends LeftAndMain
 		}
 		if(Core::is_ajax()) {
 			$response = new AjaxResponse();
-			$dialog = new Dialog(lang("less_rights"), lang("error", "error"));
-			$dialog->close(3);
-			$response->exec($dialog);
+			$response->exec('alert('.var_export(lang("less_rights"), true).');');
 			$this->removeResume();
 			HTTPResponse::setBody($response->render());
 			HTTPResponse::output();
@@ -218,5 +323,126 @@ class contentAdmin extends LeftAndMain
 			$this->redirectBack();
 			exit;
 		}
+	}
+	
+	/**
+	 * generates the context-menu.
+	*/
+	public function generateContextMenu($child) {
+		if(!$child->model || $child->model->can("write")) {
+			return array_merge(array(array(
+				"icon"		=> "images/icons/goma16/page_new.png",
+				"label"		=> lang("SUBPAGE_CREATE"),
+				"ajaxhref"	=> $this->originalNamespace . "/add" . URLEND . "?parentid=" . $child->recordid
+			),
+			"hr"), parent::generateContextMenu($child));
+		}
+		
+		return parent::generateContextMenu($child);
+			
+	}
+	
+	/**
+	 * generates mainbar-title and path for newly generated page.
+	*/
+	public function submit_form_generate($data) {
+		$data["mainbartitle"] = $data["title"];
+		$value = $data["title"];
+		$value = trim($value);
+		$value = strtolower($value);
+		
+		// special chars
+		$value = str_replace("ä", "ae", $value);
+		$value = str_replace("ö", "oe", $value);
+		$value = str_replace("ü", "ue", $value);
+		$value = str_replace("ß", "ss", $value);
+		$value = str_replace("ù", "u", $value);
+		$value = str_replace("û", "u", $value);
+		$value = str_replace("ú", "u", $value);
+		
+		$value = str_replace(" ",  "-", $value);
+		// normal chars
+		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+		$value = str_replace('--', '-', $value);
+		
+		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
+		$i = 1;
+		$current = $value;
+		while(DataObject::count("pages", array("parentid" => $parentid, "path" => $current)) > 0) {
+			$i++;
+			$current = $value . "-" . $i;
+		}
+		
+		$data["path"] = $current;
+		return $this->submit_form($data);
+	}
+	
+	/**
+	 * saves data for editing a site via ajax
+	 *
+	 *@name ajaxSave
+	 *@access public
+	 *@param array - data
+	 *@param object - response
+	*/
+	public function ajaxSaveGenerate($data, $response) {
+		$data["mainbartitle"] = $data["title"];
+		$value = $data["title"];
+		$value = trim($value);
+		$value = strtolower($value);
+		
+		// special chars
+		$value = str_replace("ä", "ae", $value);
+		$value = str_replace("ö", "oe", $value);
+		$value = str_replace("ü", "ue", $value);
+		$value = str_replace("ß", "ss", $value);
+		$value = str_replace("ù", "u", $value);
+		$value = str_replace("û", "u", $value);
+		$value = str_replace("ú", "u", $value);
+		
+		$value = str_replace(" ",  "-", $value);
+		// normal chars
+		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
+		$value = str_replace('--', '-', $value);
+		
+		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
+		$i = 1;
+		$current = $value;
+		$object = DataObject::get("pages", array("parentid" => $parentid, "path" => $current));
+		$object->setVersion("state");
+		while($object->count() > 0) {
+			$i++;
+			$current = $value . "-" . $i;
+			$object->filter(array("parentid" => $parentid, "path" => $current));
+		}
+		
+		$data["path"] = $current;
+		return $this->ajaxSave($data, $response);
+	}
+	
+	/**
+	 * help-texts.
+	*/
+	public function helpData() {
+		return array(
+			"#treenode_leftandmain_treerenderer_page_0_addButton a"=> array(
+				"text"		=> lang("HELP.ADD-NEW-PAGE"),
+				"position"	=> "right"
+			),
+			".hitarea:first a span"		=> array(
+				"text"		=> lang("HELP.HIERARCHY_OPEN"),
+				"position"	=> "bottom"
+			),
+			".treewrapper:first" 	=> array(
+				"text"		=> lang("HELP.PAGES_SORT"),
+				"position"	=> "fixed",
+				"autoHide"	=> false,
+				"bottom"	=> "1em",
+				"left"		=> "0.5em"
+			),
+			"#visit_webpage"		=> array(
+				"text"		=> lang("PREVIEW")
+			)
+		);
 	}
 }

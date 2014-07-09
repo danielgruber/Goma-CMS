@@ -2,10 +2,10 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 06.02.2013
-  * $Version 1.2
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 26.03.2014
+  * $Version 1.3.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -33,7 +33,11 @@ class Boxes extends DataObject implements Notifier {
 		"border"	=> "switch",
 		"sort"		=> "int(3)",
 		"seiteid"	=> "varchar(50)",
-		"width"		=> "varchar(5)"
+		"width"		=> "varchar(5)",
+		"fullsized"	=> "switch",
+		"usebgcolor"=> "switch",
+		"color"		=> "varchar(200)",
+		"cssclass"	=> "varchar(200)"
 	);
 	
 	/**
@@ -63,7 +67,7 @@ class Boxes extends DataObject implements Notifier {
 		$insertAfter = (isset($_GET["insertafter"])) ? ++$_GET["insertafter"] : 1000;
 		$form->add(new Hiddenfield("sort", $insertAfter));
 		$form->add(new HiddenField("seiteid", $this->seiteid));
-		$form->add(new Select("class_name", lang("boxtype", "boxtype"),$this->getBoxTypes()));
+		$form->add(new Select("class_name", lang("BOXTYPE", "boxtype"), $this->getBoxTypes()));
 		$form->add(new Hiddenfield("width", "auto"));
 	}
 	
@@ -72,10 +76,13 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function getActions(&$form) {
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
+		
+		$lang = ($this->ID == 0) ? lang("CREATE_BOX", "Create box") : lang("SAVE_BOX", "Save box");
+		
 		if(Core::is_ajax()) {
-			$form->addAction(new AjaxSubmitButton("submit", lang("save"), "ajaxSave", "publish", array("green")));
+			$form->addAction(new AjaxSubmitButton("submit", $lang, "ajaxSave", "publish", array("green")));
 		} else {
-			$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
+			$form->addAction(new FormAction("submit", $lang, "publish", array("green")));
 		}
 	}
 	
@@ -102,7 +109,9 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function getWidth() {
 		if($this->fieldGet("width") == "auto") {
-			return "100";
+			return "100%";
+		} else if(preg_match('/^[0-9\s]+$/', $this->fieldGet("width"))) {
+			return $this->fieldGet("width") . "px";
 		} else {
 			return $this->fieldGet("width");
 		}
@@ -115,7 +124,32 @@ class Boxes extends DataObject implements Notifier {
 	 *@access public
 	*/
 	public function getborder_class() {
-		return ($this->fieldGet("border")) ? "box_with_border" : "";
+		$class = ($this->fieldGet("border")) ? "box_with_border " : "";
+		if($this->fullsized) {
+			$class .= "fullsized";
+		}
+		
+		$class .= " " . $this->cssclass;
+		
+		return $class;
+	}
+	
+	/**
+	 * returns color when activated
+	*/
+	public function getColor() {
+		return ($this->usebgcolor) ? $this->fieldGet("color") : "";
+	}
+	
+	/**
+	 * returns background-image.
+	*/
+	public function getBG() {
+		if($this->background) {
+			return 'url('.$this->background()->raw().')';
+		}
+		
+		return '';
 	}
 	
 	/**
@@ -125,7 +159,7 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	public function canWrite($row) {
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canWrite($data)) {
+		if($data && $data->can("Write")) {
 			return true;
 		}
 		
@@ -140,7 +174,7 @@ class Boxes extends DataObject implements Notifier {
 	public function canDelete($row = null)
 	{
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canDelete($data)) {
+		if($data && $data->can("Delete")) {
 			return true;
 		}
 		
@@ -155,7 +189,7 @@ class Boxes extends DataObject implements Notifier {
 	public function canInsert($row = null)
 	{	
 		$data = DataObject::get_by_id("pages", $row->seiteid);
-		if($data && $data->canInsert($data)) {
+		if($data && $data->can("Insert")) {
 			return true;
 		}
 		
@@ -216,7 +250,7 @@ class BoxesController extends FrontedController {
 	public function canEdit() {
 
 		$data = DataObject::get_by_id("pages", $this->getParam("pid"));
-		if($data && $data->canWrite($data)) {
+		if($data && $data->can("Write")) {
 			return true;
 		}
 		
@@ -230,10 +264,10 @@ class BoxesController extends FrontedController {
 	 *@access public
 	 *@param string - id
 	*/
-	public static function renderBoxes($id)
+	public static function renderBoxes($id, $count = null)
 	{
 			$data = DataObject::get("boxes", array("seiteid" => $id));
-			return $data->controller()->render($id);
+			return $data->controller()->render($id, $count);
 	}
 	
 	/**
@@ -257,6 +291,7 @@ class BoxesController extends FrontedController {
 		$boxes = new Boxes(array(
 			"seiteid" => $this->getParam("pid")
 		));
+		
 		return $this->form("add", $boxes);
 	}
 	
@@ -274,6 +309,7 @@ class BoxesController extends FrontedController {
 				return true;
 			}
 		}
+		
 		HTTPResponse::sendHeader();
 		exit;
 	}
@@ -291,6 +327,7 @@ class BoxesController extends FrontedController {
 				$data->write();
 			}
 		}
+		
 		HTTPResponse::sendHeader();
 		exit;
 	}
@@ -301,12 +338,13 @@ class BoxesController extends FrontedController {
 	 *@name render
 	 *@access public
 	*/
-	final public function render($pid = null) {
+	final public function render($pid = null, $count = null) {
 		if(isset($pid)) {
 			$data = DataObject::get("boxes", array("seiteid" => $pid));
 			$this->model_inst = $data;
 		}
-		return $this->modelInst()->customise(array("pageid" => $pid))->renderWith("boxes/boxes.html");
+		
+		return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
 	}
 	
 	/**
@@ -375,7 +413,9 @@ class Box extends Boxes
 		 * don't use from parent-class
 		 * there would be much tables, which we don't need
 		*/
-		static $has_one = array();
+		static $has_one = array(
+			"background"	=> "ImageUploads"
+		);
 		
 		/**
 		 * don't use from parent-class
@@ -399,11 +439,31 @@ class Box extends Boxes
 		public function getForm(&$form)
 		{
 			$form->add(new HiddenField("seiteid", $this->seiteid));
-			$form->add(new TextField("title", lang("box_title")));
+			
+			$form->add(new TabSet("tabs", array(
+				new Tab("content", array(),  lang("content")),
+				new Tab("settings", array(),  lang("settings"))
+			)));
+			$form->add(new TextField("title", lang("box_title")), null, "content");
 			if($this->RecordClass == "box") {
-				$form->add(new HTMLEditor("text", lang("content"), null, null, $this->width . "px"));
+				if($this->fullsized) {
+					$width = "";
+				} else if(strpos($this->width, "%") === false) {
+					$width = $this->width;
+				} else {
+					$width = "";
+				}
+				
+				$form->add(new HTMLEditor("text", lang("content"), null, null, $width), null, "content");
+				$form->add(new ImageUpload("background", lang("bgimage")), null, "settings");
 			}
-			$form->add(new AutoFormField("border", lang("border")));
+			
+			$form->add(new AutoFormField("border", lang("border")), null, "settings");
+			$form->add(new AutoFormField("fullsized", lang("fullwidth")), null, "settings");
+			$form->add(new AutoFormField("usebgcolor", lang("color")), null, "settings");
+			$form->add(new ColorPicker("color", lang("color")), null, "settings");
+			$form->add(new TextField("cssclass", lang("cssclass")), null, "settings");
+			$form->add(new TextField("width", lang("width")), null, "settings");
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		
@@ -443,8 +503,8 @@ class BoxesTplExtension extends Extension {
 		"boxes"
 	);
 	
-	public function boxes($name) {
-		return BoxesController::renderBoxes($name);
+	public function boxes($name, $count = null) {
+		return BoxesController::renderBoxes($name, $count);
 	}
 }
 
@@ -463,6 +523,40 @@ class boxpage extends Page
 		public static $icon = "images/icons/fatcow-icons/16x16/layout_content.png";
 		
 		/**
+		 * gets a object of this record with id and versionid set to 0
+		 *
+		 *@name duplicate
+		 *@access public
+		*/
+		public function duplicate() {
+			$new = parent::duplicate();
+			
+			$new->boxes_seite_id = $this->id;
+			
+			return $new;
+		}
+		
+		/**
+		 * will be called after write.
+		 * duplicate boxes here.
+		 *
+		 * @name onAfterWrite
+		 * @access public
+		*/
+		public function onAfterWrite()
+		{
+
+			if($this->boxes_seite_id && $this->id != $this->boxes_seite_id) {
+				$data = DataObject::get("boxes", array("seiteid" => $this->boxes_seite_id));
+				
+				foreach($data as $record) {
+					$new = $record->duplicate();
+					$new->seiteid = $this->id;
+					$new->write(true, true);
+				}
+			}
+		}
+		/**
 		 * we render boxes if it is already created
 		*/
 		public function getForm(&$form)
@@ -471,12 +565,12 @@ class boxpage extends Page
 				
 				if($this->path != "")
 				{
-						$boxes = boxesController::renderBoxes($this->id, false, true);
+						$boxes = boxesController::renderBoxes($this->id);
 				} else
 				{
 						$boxes = "";
 				}
-				$form->add(new HTMLField("boxes", $boxes . '<div style="clear: both;"></div>'),0, "content");
+				$form->add(new HTMLField("boxes", $boxes . '<div style="clear: both;"></div>'), null, "content");
 		}
 		
 		/**
@@ -506,7 +600,7 @@ class boxPageController extends PageController
 		public function frontedBar() {
 			$arr = parent::frontedBar();
 			
-			if($this->modelInst()->canWrite($this->modelInst())) {
+			if($this->modelInst()->can("Write")) {
 			
 				if(isset($_SESSION["adminAsUser"])) {
 					$arr[] = array(

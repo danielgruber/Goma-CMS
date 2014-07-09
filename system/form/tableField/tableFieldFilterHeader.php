@@ -4,15 +4,20 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 01.11.2012
-  * $Version - 1.0
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 12.08.2013
+  * $Version - 1.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider, TableField_ColumnProvider {
+	/**
+	 * here are some special filters defined if TableFieldDataColumns casts some values to other values.
+	*/
+	public $valueCasting = array();
+	
 	/**
 	 * provides HTML-fragments
 	 *
@@ -48,7 +53,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 				$f->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 				
 				if($value != "") {
-					$raction = new TableField_FormAction($tableField, "resetFields" . $columnField, lang("form_tablefield.reset"), "resetFields", null);
+					$raction = new TableField_FormAction($tableField, "resetFields" . str_replace(".", "_", $columnField), lang("form_tablefield.reset"), "resetFields", null);
 					$raction->addExtraClass("tablefield-button-resetFields");
 					$raction->addExtraClass("no-change-track");
 					
@@ -81,7 +86,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 
 			$fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
 		}
-
+		
 		return array(
 			'header' => $forTemplate->customise(array("fields" => $fields))->renderWith("form/tableField/filterHeader.html")
 		);
@@ -110,7 +115,24 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 		$filterArguments = $state->columns->toArray();
 		foreach($filterArguments as $columnName => $value ) {
 			if($data->canFilterBy($columnName) && $value) {
-				$data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
+				if(isset($this->valueCasting[$columnName])) {
+					$values = array();
+					foreach($this->valueCasting[$columnName] as $key => $orgValue) {
+						if(preg_match('/'.preg_quote($value, "/").'/i', $key)) {
+							$values[] = $orgValue;
+						}
+					}
+					
+					if($values && count($values) > 0) {
+						$data->AddFilter(array($columnName => $values));	
+					} else if($values) {
+						$data->addFilter(array($columnName => array("LIKE", "%" . $values[0] . "%")));
+					} else {
+						$data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
+					}
+				} else {
+					$data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
+				}
 			}
 		}
 		return $data;
@@ -123,14 +145,17 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 *@access public
 	*/
 	public function getActions($tableField) {
+		
+		
 		return array("filter", "reset", "resetFields", "toggleFilterVisibility");
 	}
 	
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		$state = $tableField->state->tableFieldFilterHeader;
+		
 		if($actionName === 'filter') {
 			if(isset($data['filter'])){
-				foreach($data['filter'] as $key => $filter ){
+				foreach($data['filter'] as $key => $filter ) {
 					$state->columns->$key = $filter;
 				}
 			}
@@ -201,5 +226,18 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	*/
 	public function getColumnContent($tableField, $record, $columnName) {
 		return null;
+	}
+	
+	/**
+	 * adds casted field-values.
+	 *
+	 * @param	string $field field
+	 * @param	array $values values
+	*/
+	public function addCastedValues($field, $values) {
+		if(!isset($this->valueCasting[$field]))
+			$this->valueCasting[$field] = $values;
+		else
+			$this->valueCasting[$field] = array_merge($this->valueCasting[$field], $values);
 	}
 }

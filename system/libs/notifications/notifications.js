@@ -1,10 +1,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.03.2013
-  * $Version 1.0
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 09.06.2013
+  * $Version 1.0.1
 */
 
 goma.ui.Notifications = {
@@ -19,11 +19,12 @@ goma.ui.Notifications = {
 	 *@access public
 	*/
 	Init: function() {
-		if($(".notificationRoot").length == 1) {
-			$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
-		} else {
-			goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
-		}
+		if($("#notificationsHolder").length == 0)
+			if($(".notificationRoot").length == 1) {
+				$(".notificationRoot").append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+			} else {
+				goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
+			}
 	},
 	
 	/**
@@ -73,6 +74,9 @@ goma.ui.Notifications = {
 	 *@access public
 	*/
 	makeVisible: function(notification, durationClose) {
+		if($("#notifications").length == 0)
+			goma.ui.Notifications.Init();
+		
 		var n = notification;
 		n.node.css("display", "none");
 		n.node.prependTo($("#notifications"));
@@ -102,4 +106,16 @@ goma.ui.Notifications = {
 
 $(function(){
 	goma.ui.Notifications.Init();
+	console.log && console.log("init");
+	if(window.uniqueID && goma.Pusher) {
+		
+		var c = goma.Pusher.subscribe("private-" + window.uniqueID, function(){
+			this.bind("notification", function(data){
+				goma.ui.Notifications.notify(data[0], data[1], data[2], data[3]);
+			});
+		});
+		
+		return true;
+	};
+
 });

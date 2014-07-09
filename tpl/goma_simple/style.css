@@ -85,8 +85,8 @@ html, body {
 	color: #52abff;
 }
 #header #navi ul li a.active {
-	padding-bottom: 2.49em;
-	margin-bottom: -2.45em;
+	padding-bottom: 2.55em;
+	margin-bottom: -2.5em;
 	background: url(images/arrow_navi.png) no-repeat bottom center;
 	color: #52abff;
 }
@@ -173,7 +173,6 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 }
 
 input[type=button], input[type=submit], input[type=reset], button, .button {
-	font-size: 0.9em;
 	font-family: Arial !important;
 	line-height: 18px;
 	padding: 0.40em 0.75em;
@@ -252,16 +251,16 @@ select {
 	font-size: 10pt;
 }
 
+.form_field {
+	padding: 10px 0;
+}
 .form_field > .info_field {
-	margin-left: 260px;
+	margin-left: 0;
 	color: #666;
 	font-size: 10pt;
 	padding: 2px;
 }
 
-.login_form > ._actions div a {
-	margin-top: 8px;
-}
 
 #login_page .right {
 	border-left-color: #eee;

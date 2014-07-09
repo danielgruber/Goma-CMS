@@ -2,9 +2,9 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 02.05.2013
   * $Version 1.1.2
 */
 
@@ -41,13 +41,13 @@ class contact extends Page
 		 *@access public
 		 *@param object - FORM
 		*/
-		public function getForm(&$form)
+		public function getForm(Form &$form)
 		{
 				parent::getForm($form);
 				
-				$form->add($email = new TextField('email',  lang("email")),0, "content");
+				$form->add($email = new TextField('email',  lang("email")), null, "content");
 				//$form->add(new AutoFormField("requireemailfield", lang("requireEmailField", "email is required")), 0, "content");
-				$form->add(new HTMLEditor('data', lang("text")),0, "content");
+				$form->add(new HTMLEditor('data', lang("text")), null, "content");
 				
 				$email->info = lang("email_info", "e-mail-info");
 		}
@@ -95,7 +95,7 @@ class contactController extends PageController
 		*/
 		public function send($data)
 		{
-				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
+				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, $data["email"]);
 				$message = lang("contact_introduction", "Dear Site Owner,<br /><br />\nThe following data was submitted with the contact form:<br /><br />\n\n");
 				$message .= "<table width=\"100%\">
 								<tr>
@@ -103,7 +103,7 @@ class contactController extends PageController
 										".lang("name")."
 									</td>
 									<td>
-										".convert::raw2text($data["name"])."
+										".convert::raw2xml($data["name"])."
 									</td>
 								</tr>
 								<tr>
@@ -111,7 +111,7 @@ class contactController extends PageController
 										".lang("subject")."
 									</td>
 									<td>
-										".convert::raw2text($data["subject"])."
+										".convert::raw2xml($data["subject"])."
 									</td>
 								</tr>
 								<tr>
@@ -119,7 +119,7 @@ class contactController extends PageController
 										".lang("email")."
 									</td>
 									<td>
-										".convert::raw2text($data["email"])."
+										".convert::raw2xml($data["email"])."
 									</td>
 								</tr>
 								<tr>
@@ -127,7 +127,7 @@ class contactController extends PageController
 										".lang("text")."
 									</td>
 									<td>
-										".convert::raw2text($data["text"])."
+										".convert::raw2xmlLines($data["text"])."
 									</td>
 								</tr>
 							</table>

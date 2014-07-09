@@ -2,8 +2,8 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified:  28.12.2012
   * $Version 2.1
 */
@@ -119,7 +119,7 @@ class siteController extends Controller
                 
                 if(SITE_MODE == STATUS_MAINTANANCE && !Permission::check("ADMIN"))
                 {
-                		HTTPResponse::setResHeader(503);
+                		//HTTPResponse::setResHeader(503);
                 		$data = new ViewAccessAbleData();
                 		HTTPResponse::output($data->customise()->renderWith("page_maintenance.html"));
                 		exit;

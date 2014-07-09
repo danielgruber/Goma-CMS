@@ -1,0 +1,25 @@
+<% IF admin() %>
+	<% INCLUDE_CSS "../css/frontendbar.css" %>
+	<div id="frontedbar_spacer"></div>
+	<div id="frontedbar">
+		<div id="frontedbar_inner">
+			<div>
+				<a href="{BASE_SCRIPT}admin{URLEND}" title="{$_lang_administration}"><% lang("manage_website", "manage website") %></a>
+			</div>
+			<% IF $frontedbar %>
+				<% CONTROL frontedbar() %>
+					<div>
+						<% IF $frontedbar.attr_title %>
+							<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="{$frontedbar.attr_title.text()}">{$frontedbar.title}</a>
+						<% ELSE %>
+							<a href="{$frontedbar.url}" class="{$frontedbar.class}" title="$frontedbar.title.text()">{$frontedbar.title}</a>
+						<% END %>
+					</div>
+				<% ENDCONTROL %>
+			<% END %>
+			
+			<div class="endclear"></div>
+		</div>
+	</div>
+	<div style="clear: both"></div>
+<% END %>

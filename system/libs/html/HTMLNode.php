@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 26.12.2012
   * $Version 1.3.2
 */
@@ -472,9 +472,9 @@ class HTMLNode extends Object
 										continue;
 								}
 								
-								if(_ereg('^([a-zA-Z0-9\-_]+):(.*)$', $item, $match))
+								if(_ereg('^\s*([a-zA-Z0-9\-_]+)\s*:\s*(.*)$', trim($item), $match))
 								{
-										$this->css[$match[1]] = $match[2];
+										$this->css[$match[1]] = trim($match[2]);
 								}
 						}
 				}

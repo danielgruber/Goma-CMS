@@ -2,200 +2,265 @@
   *@package goma framework
   *@subpacke css
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 25.03.2013
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 08.06.2013
 */
 
 /* basics */
 
 .tablefield-fieldset {
 	padding: 0 !important;
-}
-.tablefield-table {
-	width: 100%;
-	border: 1px solid #bbb;
-	border-spacing: 0;
-}
-.tablefield-table fieldset {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
-.tablefield-table fieldset legend {
-	display: none;
-}
-.tablefield-table fieldset .form_field {
-	margin: 0 !important;
-	padding: 0 !important;
-}
+	max-width: 100%;
+	overflow: auto;
+	border-bottom: 0;
+	
+	.tablefield-table {
+		width: 100%;
+		border-spacing: 0;
+		margin: 1em 0 !important;
+		
+		.button {
+			border: 0 !important;
+			font-weight: bold;
+		}
+		
+		fieldset {
+			margin: 0 !important;
+			padding: 0 !important;
+			border: 0 !important;
+			
+			legend {
+				display: none;
+			}
+			
+			.form_field {
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+		}
+		
+		.filter-header {
+			
+			.button {
+			    background-color: transparent !important;
+			    border: 0 !important;
+			}
+			
+			
+			td {
+				border-bottom: 0.125em solid @system-tint;
+				filter: none;
+				-ms-filter: none;
+				
+				fieldset {
+					position: relative;
+					
+					.tablefield-button-filter, .tablefield-button-reset, .tablefield-button-resetFields {
+						input {
+							color: transparent !important;
+							font-size: 0;
+							height: 26px;
+							width: 26px;
+							background:  #eee url(images/loope.png) no-repeat 4px 4px;
+							filter: none;
+							-ms-filter: none;
+							border: 1px solid #c0c0c0;
+						}
+					}
+					
+					.tablefield-button-reset input, .tablefield-button-resetFields input {
+						background-image: url(images/delete.png);
+					}
+					
+					.tablefield-button-resetFields {
+						position: absolute;
+						right: 0.31em;
+						top: 0.18em;
+					}
+				}
+				
+				fieldset.sortActionsWithField {
+					input[type=text] {
+						padding-right: 3.5em;
+					}
+					
+					span {
+						position: absolute;
+						right: 0;
+						top: 0;
+					}
+					
+					span.tablefield-button-filter input {
+						-webkit-border-top-left-radius: 0;
+						-webkit-border-bottom-left-radius: 0;
+						-moz-border-radius-topleft: 0;
+						-moz-border-radius-bottomleft: 0;
+						border-top-left-radius: 0;
+						border-bottom-left-radius: 0;
+					}
+					
+					span.tablefield-button-reset {
+						right: 26px;
+					}
+					
+					span.tablefield-button-reset input {
+						-webkit-border-top-right-radius: 0;
+						-webkit-border-bottom-right-radius: 0;
+						-moz-border-radius-topright: 0;
+						-moz-border-radius-bottomright: 0;
+						border-top-right-radius: 0;
+						border-bottom-right-radius: 0;
+					}
+				}
+				
+				.form_field {
+					padding: 0;
+					margin: 0;
+					
+					label {
+						display: none;
+					}
+					
+					input[type=text] {
+						width: 99% !important;
+						margin: .25em .125em;
+						padding: .25em .5em;
+						background: #fff;
+						border: 1px solid #ddd;
+						min-width: 0 !important;
+						
+						border-radius: 0;
+						-webkit-border-radius: 0;
+					}
+				}
 
-/* headers */
-.tablefield-table thead tr td, .tablefield_pagination th {
-	background: -moz-linear-gradient(#eee, #ccc);
-	background: -ms-linear-gradient(#eee, #ccc);
-	background: -o-linear-gradient(#eee, #ccc);
-	background: -webkit-linear-gradient(#eee 0%, #ccc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc'); /* IE6 & IE7 */  
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc')"; /* IE8+ */
-	background: linear-gradient(#eee, #ccc); /* the standard */ 
-}
+			} /* end td */
+			
+		} /* end .filter-header */
+		
+		.tablefield-edit-link, .tablefield-add-link {
+			padding: .25em .5em;
+			padding-bottom: 0;
+			display: inline-block;
+			text-decoration: none;
+			
+			img {
+				padding-top: .5em;
+			}
+		}
+		
+		.tablefield-add-link {
+			font-weight: bold;
+		}
+		
+	} /* end .tablefield-table */
+} /* end .tablefield-fieldset */
 
-/* filter-header */
-.tablefield-table .filter-header td {
-	border-bottom: 1px solid #c5c5c5;
-	background: #ddd;
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .filter-header td fieldset {
-	position: relative;
-}
-.tablefield-table .filter-header .form_field {
-	margin: 0;
-	padding: 0;
-}
-.tablefield-table .filter-header .form_field label {
-	display: none;
-}
-.tablefield-table .filter-header .form_field input[type=text] {
-	width: 99% !important;
-	margin: 3px;
-	padding: 4px 8px;
-	background: #fff;
-	border: 1px solid #c0c0c0;
-	min-width: 0 !important;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input  {
-	color: transparent !important;
-	font-size: 0;
-	height: 26px;
-	width: 26px;
-	background:  #eee url(images/loope.png) no-repeat 4px 4px;
-	filter: none;
-	-ms-filter: none;
-	border: 1px solid #c0c0c0;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
-	background-image: url(images/delete.png);
-}
-.tablefield-table .filter-header td fieldset {
-	position: relative;
-}
-.tablefield-table .filter-header td fieldset .tablefield-button-resetFields {
-	position: absolute;
-	right: -1px;
-	top: -2px;
-}
 
-/**
- * arrange buttons
-*/
-.tablefield-table .filter-header td fieldset.sortActionsWithField input[type=text] {
-	padding-right: 60px;
-}
-.tablefield-table .filter-header td fieldset.sortActionsWithField span {
-	position: absolute;
-	right: 0;
-	top: -2px;
-}
-.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-filter input {
-	-webkit-border-top-left-radius: 0;
-	-webkit-border-bottom-left-radius: 0;
-	-moz-border-radius-topleft: 0;
-	-moz-border-radius-bottomleft: 0;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-}
-.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-reset {
-	right: 26px;
-}
-.tablefield-table .filter-header td fieldset.sortActionsWithField span.tablefield-button-reset input {
-	-webkit-border-top-right-radius: 0;
-	-webkit-border-bottom-right-radius: 0;
-	-moz-border-radius-topright: 0;
-	-moz-border-radius-bottomright: 0;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-}
 
 .tablefield-table .sortable-header {
+	.form_field {
+		border: 0 !important;
+	}
 	
-}
-.tablefield-table .sortable-header .form_field {
-	border: 0 !important;
-}
-.tablefield-table .sortable-header .tablefield-button-filter input {
-	font-size: 0;
-	height: 26px;
-	width: 50px;
-	background:  transparent url(images/loope_switch.png) no-repeat 4px 4px;
-	filter: none;
-	-ms-filter: none;
-	margin: 4px 10px;
-	border: 0;
-}
-.tablefield-table .sortable-header td {
-	font-weight: bold;
-	padding: 12px;
-	border-bottom: 1px solid #bbb;
-	border-right: 1px solid #bbb;
-	border-top: 1px solid #eee;
-	padding: 0;
-	margin: 0;
-}
-.tablefield-table .sortable-header td:last-child {
-	border-right: 0;
+	.tablefield-button-filter {
+		padding: 0.25em !important;
+		display: inline-block;
+		
+		input {
+			font-size: 0;
+			height: 26px;
+			width: 50px;
+			background:  transparent url(images/loope_switch.png) no-repeat 4px 4px;
+			filter: none;
+			-ms-filter: none;
+			margin: 0.25em 0.5em;
+			border: 0;
+			display: block;
+		}
+	}
+	
+	td {
+		font-weight: bold;
+		padding: 0.75em;
+		border-bottom: 1px solid @system-tint;
+		padding: 0;
+		margin: 0;
+		
+		input.button:hover {
+			color: darken(@color-action, 15%) !important;
+		}
+		
+		.form_field {
+			padding: 0;
+			margin: 0;
+		}
+		
+		.tablefield-sortable {
+			input {
+				color: #000;
+				font-weight: bold;
+				text-shadow: none;
+				font-family: Arial;
+				font-size: 11pt;
+				text-align: left;
+				
+				display: block;
+				
+				float: none;
+				width: 100%;
+				
+				margin: 0;
+				
+				padding: 0.75em;
+				padding-right: 1.75em;
+				
+				outline: none;
+				border: 0;
+				
+				background: none;
+				background: url(images/tablefield/arrows.png) no-repeat right center;
+				filter: none;
+				-ms-filter: none;
+			}
+		}
+		
+		.tablefield-sortable.tablefield-sorted-asc {
+			input {
+				background-image: url(images/tablefield/arrow_asc.png);
+				filter: none;
+				-ms-filter: none;
+			}
+		}
+		
+		.tablefield-sortable.tablefield-sorted-desc {
+			input {
+				background-image: url(images/tablefield/arrow_desc.png);
+				filter: none;
+				-ms-filter: none;
+			}
+		}
+		
+		.non-sortable {
+			padding: 0.5em;
+			font-size: 11pt;
+			color: #333;
+		}
+
+		
+	} /* end td */
+	
+	td:last-child {
+		border-right: 0;
+	}
+		
 }
 
-.tablefield-table .sortable-header td .form_field {
-	padding: 0;
-	margin: 0;
-}
-.tablefield-table .sortable-header td .tablefield-sortable input {
-	color: #000;
-	font-weight: bold;
-	display: block;
-	margin: 0;
-	border: 0;
-	text-shadow: none;
-	outline: none;
-	font-family: Arial;
-	font-size: 11pt;
-	float: none;
-	width: 100%;
-	text-align: left;
-	padding: 12px;
-	padding-right: 24px;
-	background: none;
-	background: url(images/tablefield/arrows.png) no-repeat right center;
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .sortable-header td .tablefield-sortable input:hover {
-	background-image: url(images/tablefield/arrows_highlight.png);
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .sortable-header td .tablefield-sortable.tablefield-sorted-asc input {
-	background-image: url(images/tablefield/arrow_asc.png);
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .sortable-header td .tablefield-sortable.tablefield-sorted-desc input {
-	background-image: url(images/tablefield/arrow_desc.png);
-	filter: none;
-	-ms-filter: none;
-}
-.tablefield-table .sortable-header td .non-sortable {
-	padding: 8px;
-	font-size: 11pt;
-	color: #333;
-}
 
 .tablefield-table .toolbar_header h2 {
 	text-align: left;
-	margin: 5px;
+	margin: 0.25em;
 	color: #555
 }
 .tablefield-table .toolbar_header th {
@@ -209,7 +274,7 @@
 }
 
 .tablefield-table .tablefield-items .tablefield-item td {
-	padding: 5px;
+	padding: 0.25em;
 }
 .tablefield-table .tablefield-items .odd {
 	background: #fff;
@@ -223,43 +288,92 @@
 	font-size: 0.9em;
 }
 .tablefield-table .tablefield-no-items td {
-	padding: 10px !important;
+	padding: 0.75em !important;
 	color: #999;
 	font-style: italic;
 	text-align: center;
 }
-.tablefield-table .tablefield-editbutton input, .tablefield-table .tablefield-deletebutton input {
-	border: 0;
-	background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
-	filter: none;
-	-ms-filter: none;
-	color: transparent !important;
-	font-size: 0;
-	width: 16px;
-	height: 16px;
-	padding: 0;
-	margin: 0;
+.tablefield-table .tablefield-editbutton, .tablefield-table .tablefield-deletebutton {
+	margin-top: -0.25em;
+	display: inline-block;
+	
+	input {
+		border: 0;
+		background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
+		filter: none;
+		-ms-filter: none;
+		color: transparent !important;
+		font-size: 0;
+		width: 16px;
+		height: 16px;
+		padding: 0;
+		margin: 0;
+	}
 }
+
 .tablefield-table .tablefield-deletebutton input {
 	background-image: url(../../../images/icons/fatcow16/delete.png);
 }
 
 .tablefield_pagination th {
-	padding: 10px;
+	padding: 0.75em;
 	border-top: 1px solid #ccc;
 	font-weight: normal;
+	
+	> div {
+		padding: 0.125em;
+	}
+
+	
+	div.pages {
+		float: left;
+		
+		input {
+			margin: -0.375em -1px;
+			padding: 0.25em 0.5em;
+		}
+		
+		span.page {
+			font-weight: bold;
+		}
+	}
+	
+	div.actions {
+		float: right;
+		margin: -0.5em;
+		padding: 0;
+	}
+
 }
-.tablefield_pagination th .pages {
-	float: left;
+
+
+
+
+.tablefield-table .actionLink {
+	margin: 0.25em;
 }
-.tablefield_pagination th .pages input {
-	margin: -6px -1px;
-	padding: 5px 10px;
+.tablefield-table .form_field {
+	border-bottom: 0;
 }
-.tablefield_pagination th .actions {
-	float: right;
-	margin: -8px;
+
+.tablefield-table tbody tr.checked.even {
+	background: #ddd;
 }
+.tablefield-table tbody tr.checked.odd {
+	background: #cfcfcf;
+}
+.tablefield-table tbody tr.checked:hover {
+	background: #c0c0c0 !important;
+}
+
+@media print {
+	.tablefield-table .col-buttons {
+		display: none;
+	}
+	.tablefield-table .sortable-header td .tablefield-sortable input {
+		background: none;
+	}
+};
 
 /* here goes some retina-stuff */
 @media

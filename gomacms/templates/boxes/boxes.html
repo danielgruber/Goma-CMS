@@ -1,5 +1,5 @@
 <% INCLUDE_CSS "boxes.css" %>
-<% IF permission("BOXES") AND NOT adminAsUser() %>
+<% IF can("write") AND NOT adminAsUser() %>
 	<% GLOAD("sortable") %>
 	<% GLOAD("resizable") %>
 	<% GLOAD("dropdownDialog") %>
@@ -10,6 +10,7 @@
 					gloader.load("notifications");
 					var img = new Image;
 					img.src = "images/icons/fatcow16/bullet_error@2x.png";
+					
 					$("#boxes_new_$pageid .box_new").resizable({
 						autoHide: true,
 						handles: 'e',
@@ -27,6 +28,7 @@
 							ui.element.css('height','auto');
 						}
 					});
+					
 					$("#boxes_new_$pageid").sortable({
 						opacity: 0.6,
 						handle: '.adminhead',
@@ -34,6 +36,7 @@
 						placeholder: 'placeholder',
 						revert: true,
 						tolerance: 'pointer',
+						cancel: "a, img, .actions",
 						start: function(event, ui) {
 							$(".placeholder").css({'width' : ui.item.width(), 'height': ui.item.height()});
 							$(".placeholder").attr("class", ui.item.attr("class") + " placeholder");
@@ -59,33 +62,39 @@
 	</script>
 <% END %>
 
+<% CACHED("boxes", $pageid, this.max("last_modified"), adminAsUser(), $_cms_user) %>
+
+
 <div class="boxes_new" id="boxes_new_$pageid">
 	<% IF $this %>
 		<% CONTROL this() AS $box %>
-			<% IF permission("BOXES") AND NOT adminAsUser() AND $box.title %>
-				<div class="box_new adminview {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
-			<% ELSE IF permission("BOXES") AND NOT adminAsUser() %>
-				<div class="box_new adminview {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+			<% IF $box.can("write") AND NOT adminAsUser() AND $box.title %>
+				<div class="box_new adminview {$box.class_name} box_with_title $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
+			<% ELSE IF $box.can("write") AND NOT adminAsUser() %>
+				<div class="box_new adminview {$box.class_name} $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% ELSE IF $box.title %>
-				<div class="box_new {$box.class_name} box_with_title $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new {$box.class_name} box_with_title $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% ELSE %>
-				<div class="box_new {$box.class_name} $box.border_class" style="width: {$box.width}px;" id="box_new_{$box.id}">
+				<div class="box_new {$box.class_name} $box.border_class" style="width: {$box.width};background-color: $box.color;background-image: $box.bg" id="box_new_{$box.id}">
 			<% END %>
-				<% IF permission("BOXES") AND NOT adminAsUser() %>
+				<% IF $box.can("write") AND NOT adminAsUser() %>
 					<div class="adminhead">
-						<div class="actions">
+						
+					</div>
+					<div class="actions">
+						<% IF NOT $boxlimit OR $this.count() < $boxlimit %>
 							<a href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter={$box.sort}&redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_new_box}" class="dropdownDialog">
 								<img src="images/16x16/add.png" alt="{$_lang_new_box}" />
 							</a>
-							
-							<a href="{BASE_SCRIPT}boxes_new/$pageid/edit/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_edit_box}" class="dropdownDialog noAutoHide">
-								<img src="images/16x16/edit.png" alt="{$_lang_edit_box}" />
-							</a>
-							
-							<a class="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/delete/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_del_box}">
-								<img src="images/16x16/del.png" alt="{$_lang_del_box}" />
-							</a>
-						</div>
+						<% END %>
+						
+						<a href="{BASE_SCRIPT}boxes_new/$pageid/edit/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_edit_box}" class="dropdownDialog noAutoHide">
+							<img src="images/16x16/edit.png" alt="{$_lang_edit_box}" />
+						</a>
+						
+						<a class="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/delete/{$box.id}?redirect=$_SERVER_REDIRECT.URL()" title="{$_lang_del_box}">
+							<img src="images/16x16/del.png" alt="{$_lang_del_box}" />
+						</a>
 					</div>
 				<% END %>
 				
@@ -101,11 +110,15 @@
 			</div>
 		<% ENDCONTROL %>
 	<% ELSE %>
-		<% IF permission("BOXES") AND NOT adminAsUser()  %>
-			<div class="no_box">
-				<a rel="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter=1">{$_lang_new_box}</a>
-			</div>
+		<% IF can("write") AND NOT adminAsUser()  %>
+			<% IF NOT $boxlimit OR $this.count() < $boxlimit %>
+				<div class="no_box">
+					<a rel="dropdownDialog" href="{BASE_SCRIPT}boxes_new/$pageid/add?insertafter=1">{$_lang_new_box}</a>
+				</div>
+			<% END %>
 		<% END %>
 	<% END %>
 	<div class="clear"></div>
 </div>
+
+<% ENDCACHED %>

@@ -3,9 +3,9 @@
   *@todo comments
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.03.2012
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 01.09.2013
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -13,7 +13,13 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 class lost_passwordExtension extends ControllerExtension
 {
 
-	
+		/**
+		 * add url-handler
+		*/
+		public $url_handlers = array(
+			"lost_password"	=> "lost_password"
+		);
+		
 		/**
 		 * add action
 		*/
@@ -22,7 +28,7 @@ class lost_passwordExtension extends ControllerExtension
 		/**
 		 * register method
 		*/
-		public static $extra_methods = array("lost_password");
+		static $extra_methods = array("lost_password");
 		
 		/**
 		 * renders the action
@@ -46,20 +52,23 @@ class lost_passwordExtension extends ControllerExtension
 								}							
 								$data = DataObject::_get("user", array("code" => $code), array("id"));
 								$pwdform = new Form($this, "editpwd", array(
-									new HTMLField("heading","<h1>".lang("lost_password", "lost password")."</h1>"),
+									new HTMLField("heading","<h3>".lang("lost_password", "lost password")."</h3>"),
 									new HiddenField("id", $data["id"]),
-									new PasswordField("password",$GLOBALS["lang"]["new_password"]),
-									new PasswordField("repeat", $GLOBALS["lang"]["repeat"])
+									new PasswordField("password",lang("NEW_PASSWORD")),
+									new PasswordField("repeat", lang("REPEAT"))
 								));
 								$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
 								$pwdform->addAction(new FormAction("update", lang("save", "save"),"pwdsave"));
+								
+								
+								
 								return $pwdform->render();
 						}
 				}
 				
 				
 				$form = new Form($this, "lost_password", array(
-					new HTMLField("heading","<h1>".lang("lost_password", "lost password")."</h1>"),
+					new HTMLField("heading","<h3>".lang("lost_password", "lost password")."</h3>"),
 					new TextField("email", lang("lp_email_or_user", "E-Mail or Username"))
 				), array(
 					new FormAction("lp_submit", lang("lp_submit", "Send"))
@@ -68,6 +77,7 @@ class lost_passwordExtension extends ControllerExtension
 				$form->addValidator(new FormValidator(array($this,"validate"), array($this, "Validate")), "validate");
 				return $form->render();
 		}
+		
 		/**
 		 * validates the password
 		 *@name validatepwd
@@ -134,16 +144,16 @@ class lost_passwordExtension extends ControllerExtension
 				$email = $data["email"];
 				
 				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
-				$text = lang("hello", "Hello")." ".convert::raw2text($data["nickname"]).",
-				<br /><br />
-				".lang("lp_text")."<br />
-				<a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."</a> 
-				<br />
-				".lang("lp_deny") . "<br />
-				<a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&amp;deny=1\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&deny=1</a> 
+				$text = "<p>" . lang("hello", "Hello")." ".convert::raw2xml($data["title"])."!</p>
+				
+				<p>".lang("lp_text")."</p>
+				<p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."</a></p>
+				<p>
+				".lang("lp_deny") . "</p>
+				<p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&amp;deny=1\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&deny=1</a> </p>
 
-				<br /><br />
-				".lang("lp_mfg", "Kind Regards")."";
+				<br />
+				<p>".lang("lp_mfg", "Kind Regards")."</p>";
 				
 				if($mail->sendHTML($email, lang("lost_password"), $text))
 				{
@@ -157,3 +167,4 @@ class lost_passwordExtension extends ControllerExtension
 }
 
 Object::extend("ProfileController", "lost_passwordExtension");
+Object::extend("AdminController", "lost_passwordExtension");

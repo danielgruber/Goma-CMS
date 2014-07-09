@@ -1,71 +1,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 22.05.2012
 */
-
-
-.bluebox_wrapper
-{
-    z-index: 900;
-}
-.bluebox_container
-{
-    display: none;
-}
-.bluebox_border
-{
-    background-image: url(images/border.png);
-}
-.bluebox_title
-{
-    border: 1px solid #3a5899;
-    background-color: #6c82B4;
-    color: #ffffff;
-    font-weight: bold;
-    padding:5px;
-    cursor: move;
-	min-height: 16px
-}
-.bluebox_inner {
-    background-color: #ffffff;
-    position: relative;
-}
-.bluebox_loading
-{
-    padding: 10px;
-    display: none;
-}
-.bluebox_content
-{
-    padding:5px;
-}
-.bluebox_close
-{
-    position: absolute;
-    right: 0px;
-    top:0px;
-    color: #afafaf;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 6px;
-}
-.bluebox_data {
-    position: relative;
-}
-.bluebox_content .actions {
-    background: #f5f5f5;
-    margin: -5px;
-    padding: 5px;
-    margin-top: 5px;
-}
-
-body > .bluebox_wrapper {
-        position: absolute; 
-}
-
 /* dropdownDialog */
 .dropdownDialog {
 	
@@ -77,7 +16,10 @@ body > .bluebox_wrapper {
 	-webkit-box-shadow: 1px 2px 10px rgba(0,0,0,0.3);
 	box-shadow: 1px 2px 10px rgba(0,0,0,0.3);
 	-webkit-border-radius: 5px;
-	border-radius: 5px;
+	border-radius: 0.5em;
+	
+	border: 1px solid #ccc;
+	background: #fff;
 }
 .dropdownDialog > div > .content > div {
 	min-height: 20px;
@@ -121,21 +63,24 @@ body > .bluebox_wrapper {
 	position: absolute;
 	left: 50%;
 	margin-left: -15px;
-	z-index: 801;
+	z-index: 850;
 	border-color: transparent transparent #999 transparent;
  	border-style: solid;
  	border-width: 14px;
  	margin-top: -14px;
+ 	
 }
 .dropdownDialog > div.position_top > .triangle > div {
 	position: absolute;
 	left: 50%;
 	margin-left: -14px;
-	z-index: 801;
+	z-index: 850;
 	border-color: transparent transparent #fff transparent;
  	border-style: solid;
  	border-width: 14px;
  	margin-top: -13px;
+ 	
+ 	z-index: 850;
 }
 .dropdownDialog > div.position_top > .triangle.triangle_position_left {
 	left: 10px;
@@ -149,8 +94,6 @@ body > .bluebox_wrapper {
 .dropdownDialog > div.position_top > .content {
 	z-index: 799;
 	margin-top: 14px;
-	border: 1px solid #999;
-	background: #fff;
 }
 
 /* position bottom */
@@ -166,7 +109,7 @@ body > .bluebox_wrapper {
 	position: absolute;
 	left: 50%;
 	margin-left: -15px;
-	z-index: 801;
+	z-index: 850;
 	bottom: 0;
 	border-color: #999 transparent transparent transparent;
  	border-style: solid;
@@ -178,7 +121,7 @@ body > .bluebox_wrapper {
 	left: 50%;
 	bottom: 0;
 	margin-left: -14px;
-	z-index: 801;
+	z-index: 850;
 	border-color: #fff transparent transparent transparent;
  	border-style: solid;
  	border-width: 14px;
@@ -198,8 +141,6 @@ body > .bluebox_wrapper {
 	z-index: 799;
 	margin-top: 0;
 	margin-bottom: 12px;
-	border: 1px solid #999;
-	background: #fff;
 }
 
 /*
@@ -230,6 +171,8 @@ body > .bluebox_wrapper {
 	left: 0px;
 	margin-top: -14px;
 	
+	z-index: 850;
+	
 	border-color: transparent #fff transparent transparent;
  	border-style: solid;
  	border-width: 14px;
@@ -239,8 +182,6 @@ body > .bluebox_wrapper {
 .dropdownDialog > div.position_right > .content {
 	z-index: 799;
 	margin-left: 12px;
-	border: 1px solid #999;
-	background: #fff;
 }
 
 /* left */
@@ -268,6 +209,8 @@ body > .bluebox_wrapper {
 	right: 0px;
 	margin-top: -14px;
 	
+	z-index: 850;
+	
 	border-color: transparent transparent transparent #fff;
  	border-style: solid;
  	border-width: 14px;
@@ -277,6 +220,85 @@ body > .bluebox_wrapper {
 .dropdownDialog > div.position_left > .content {
 	z-index: 799;
 	margin-right: 12px;
-	border: 1px solid #999;
-	background: #fff;
+}
+
+@color-yellow: @system-yellow;
+@color-brown: #b34f00;
+
+.help-box {
+	z-index: 999;
+	.wrapper {
+		
+		position: relative;
+		
+		.arrow {
+			border: 1em solid @color-yellow;
+			position: absolute;
+			display: none;
+		}
+		
+		.content {
+			background: @color-yellow;
+			padding: 0.75em;
+			color: @color-brown;
+		}
+	}
+	
+	pointer-events:none;
+	opacity: 0.9;
+}
+
+.help-box.position-bottom {
+		
+	padding-top: 1em;
+	
+	.arrow {
+		border-color: transparent transparent @color-yellow  transparent;
+		left: 50%;
+		margin-left: -1em;
+		top: -2em;
+		display: block;
+	}
+}
+
+.help-box.position-top {
+	padding-bottom: 1em;
+	
+	.arrow {
+		border-color: @color-yellow transparent transparent transparent;
+		border-bottom-width: 0;
+		
+		bottom: -1em;
+		left: 50%;
+		margin-left: -1em;
+		display: block;
+	}
+}
+
+.help-box.position-left { 
+	padding-right: 1em;
+	
+	.arrow {
+		border-color: transparent transparent transparent @color-yellow;
+		border-right-width: 0;
+		
+		right: -1em;
+		top: 50%;
+		margin-top: -1em;
+		display: block;
+	}
+}
+
+.help-box.position-right {
+	padding-left: 1em;
+	
+	.arrow {
+		border-color: transparent @color-yellow transparent transparent;
+		border-left-width: 0;
+		
+		left: -1em;
+		top: 50%;
+		margin-top: -1em;
+		display: block;
+	}
 }

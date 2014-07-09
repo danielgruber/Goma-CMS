@@ -4,8 +4,8 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 31.01.2013
   * $Version 2.1.8
 */
@@ -13,19 +13,6 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::addSaveVar("Permission","providedPermissions");
-
-/**
- * Permission-provider
-*/
-interface PermissionProvider
-{
-		public function providePermissions();
-}
-
-interface PermProvider {
-	public function providePerms();
-}
-
 
 class Permission extends DataObject
 {
@@ -181,7 +168,9 @@ class Permission extends DataObject
 		 * checks if the user has the given permission 
 		 *
 		 *@name check
-		 *@param string - permission
+		 *@access public
+		 *@param r string - permission
+		 *@return bool
 		*/
 		public static function check($r)
 		{
@@ -205,7 +194,7 @@ class Permission extends DataObject
 							self::$perm_cache[$r] = $data->hasPermission();
 							$data->forModel = "permission";
 							if($data->type != "groups") {
-								$data->write(false, true, 2);
+								$data->write(false, true, 2, false, false);
 							}
 							return self::$perm_cache[$r];
 						} else {
@@ -215,7 +204,7 @@ class Permission extends DataObject
 									$perm = clone $data;
 									$perm->consolidate();
 									$perm->id = 0;
-									$perm->parentid = $data->id;
+									$perm->parentid = 0;
 									$perm->name = $r;
 									$data->forModel = "permission";
 									self::$perm_cache[$r] = $perm->hasPermission();
@@ -229,7 +218,7 @@ class Permission extends DataObject
 								$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
 							
 							self::$perm_cache[$r] = $perm->hasPermission();
-							$perm->write(true, true, 2);
+							$perm->write(true, true, 2, false, false);
 							return self::$perm_cache[$r];
 						}
 					} else {
@@ -259,11 +248,11 @@ class Permission extends DataObject
 							$perm = clone $data;
 							$perm->consolidate();
 							$perm->id = 0;
-							$perm->parentid = $data->id;
+							$perm->parentid = 0;
 							$perm->name = $r;
 							$data->forModel = "permission";
 							self::$perm_cache[$r] = $perm->hasPermission();
-							$perm->write(true, true, 2);
+							$perm->write(true, true, 2, false, false);
 							return self::$perm_cache[$r];
 						}
 					}
@@ -272,7 +261,7 @@ class Permission extends DataObject
 					if(isset(self::$providedPermissions[$r]["default"]["type"]))
 						$perm->setType(self::$providedPermissions[$r]["default"]["type"]);
 					
-					$perm->write(true, true, 2);
+					$perm->write(true, true, 2, false, false);
 					
 					return $perm;
 				}
@@ -398,7 +387,7 @@ class Permission extends DataObject
 		*/
 		public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writtenIDs, $writeExtraFields) {
 			$env = $dataset->getRelationENV();
-			foreach($writtenIDs as $id) {
+			foreach($writtenIDs as $id => $bool) {
 				if($data = DataObject::get_one("Permission", array("versionid" => $id))) {
 					foreach($data->getAllChildVersionIDs() as $vid) {
 						$manipulation["insert"]["fields"][$vid] = array(
@@ -408,6 +397,8 @@ class Permission extends DataObject
 					} 
 				}
 			}
+			
+			//logging(print_r($manipulation, true));
 		}
 		
 		/**
@@ -543,19 +534,19 @@ class Permission extends DataObject
 		
 		// DEPRECATED API!
 		public function inheritor() {
-			Core::deprecate("2.0.1", "inheritor is deprecated, use parent instead");
+			Core::deprecate("2.1", "inheritor is deprecated, use parent instead");
 			return $this->parent;
 		}
 		public function inheritorid() {
-			Core::deprecate("2.0.1", "inheritorid is deprecated, use parentid instead");
+			Core::deprecate("2.1", "inheritorid is deprecated, use parentid instead");
 			return $this->parentid;
 		}
 		public function setinheritor($parent) {
-			Core::deprecate("2.0.1", "inheritor is deprecated, use parent instead");
+			Core::deprecate("2.1", "inheritor is deprecated, use parent instead");
 			$this->setField("parent", $parent);
 		}
 		public function setinheritorid($parentid) {
-			Core::deprecate("2.0.1", "inheritorid is deprecated, use parentid instead");
+			Core::deprecate("2.1", "inheritorid is deprecated, use parentid instead");
 			$this->setField("parentid", $parentid);
 		}
 

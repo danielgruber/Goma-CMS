@@ -1,16 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.02.2013
-  * $Version 2.3.2
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-class FormField extends RequestHandler
+ * a basic class for every form-field in a form.
+ *
+ * @package		Goma\Form-Framework
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 	2.3.2
+ */
+class FormField extends RequestHandler implements ArrayAccess
 {
 		/**
 		 * secret key for this form field
@@ -108,6 +107,13 @@ class FormField extends RequestHandler
 		public $disabled = false;
 		
 		/**
+		 * title of the field.
+		 *
+		 *@name title
+		*/
+		public $title;
+		
+		/**
 		 * defines if this field should use the full width or not
 		 * this is good, for example for textarea or something else to get correct position of info and label-area
 		 *
@@ -141,8 +147,7 @@ class FormField extends RequestHandler
 						$this->form()->fields[$name] = $this;
 						if(is_a($this->parent, "form"))
 						{
-								$this->parent->showFields[$name] = $this;
-								$this->parent->fieldSort[$name] = count($this->parent->fieldSort);
+								$this->parent->fieldList->add($this);
 								
 						} else
 						{
@@ -155,7 +160,7 @@ class FormField extends RequestHandler
 				$this->input = $this->createNode();
 				
 				$this->container = new HTMLNode("div",array(
-					"class"	=> "form_field ". $this->class ." form_field_".$name.""
+					"class"	=> "form_field ". $this->classname ." form_field_".$name.""
 				));
 				
 				if($this->fullSizedField)
@@ -187,7 +192,7 @@ class FormField extends RequestHandler
 		*/
 		public function setValue()
 		{
-			if($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->class, "__toString"))))
+			if($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->classname, "__toString"))))
 				$this->input->val($this->value);
 		}
 		
@@ -209,6 +214,8 @@ class FormField extends RequestHandler
 					array("for"	=> $this->ID()),
 					$this->title
 				));
+				
+				$this->input->placeholder = $this->title;
 				
 				$this->container->append($this->input);
 				
@@ -341,7 +348,7 @@ class FormField extends RequestHandler
 		*/
 		public function ID()
 		{
-			return "form_field_" .  $this->class . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
+			return "form_field_" .  $this->classname . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
 		}
 		
 		/**
@@ -387,7 +394,7 @@ class FormField extends RequestHandler
 						return $data;
 				} else {
 						$debug = debug_backtrace(false);
-						throwError(6,'PHP-Error', 'No Form for Field '.$this->class.' in '.$debug[0]["file"].' on line '.$debug[0]["line"].'');
+						throwError(6,'PHP-Error', 'No Form for Field '.$this->classname.' in '.$debug[0]["file"].' on line '.$debug[0]["line"].'');
 				}
 		}
 		
@@ -432,12 +439,54 @@ class FormField extends RequestHandler
 		*/
 		public function __get($name) {
 			if(strtolower($name) == "state") {
-				return $this->form()->state->{$this->class . $this->name};
+				return $this->form()->state->{$this->classname . $this->name};
 			} else if(isset($this->$name)) {
 				return $this->$name;
 			} else {
-				throwError(6, "Unknown Attribute", "\$" . $name . " is not defined in ".$this->class." with name ".$this->name.".");
+				throw new LogicException("\$" . $name . " is not defined in ".$this->classname." with name ".$this->name.".");
 			}
+		}
+		
+		/**
+		 * unsets an attribute.
+		 *
+		 * @param 	string $offset
+		 */
+		public function offsetUnset($offset) {
+			if(isset($this->$offset))
+				unset($this->$offset);
+		}
+		
+		/**
+		 * returns whether an attribute is set.
+		 *
+		 * @param 	string $offset
+		 * @return	boolean
+		 */
+		public function offsetExists($offset) {
+			return property_exists($this, $offset);
+		}
+		
+		
+		/**
+		 * returns the value of an attribute.
+		 *
+		 * @param 	string $offset
+		 * @return	boolean
+		 */
+		public function offsetGet($offset) {
+			return property_exists($this, $offset) ? $this->$offset : null;
+		}
+		
+		/**
+		 * sets the value of an attribute.
+		 *
+		 * @param 	string $offset
+		 * @param	mixed $value
+		 * @return	boolean
+		 */
+		public function offsetSet($offset, $value) {
+			$this->$offset = $value;
 		}
 		
 		/**

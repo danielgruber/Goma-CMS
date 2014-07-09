@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 19.03.2013
-  * $Version 1.4.9
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 31.08.2013
+  * $Version 1.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -29,10 +29,11 @@ class systemController extends Controller {
 		"switchView",
 		"getLang/\$lang"		=> "getLang",
 		"ck_uploader"			=> "ckeditor_upload",
-		"ck_imageuploader"		=> "ckeditor_imageupload"
+		"ck_imageuploader"		=> "ckeditor_imageupload",
+		"indexSearch/\$max"		=> "indexSearch"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload");
+	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload", "indexSearch");
 	
 	/**
 	 * disables the mobile version
@@ -102,8 +103,8 @@ class systemController extends Controller {
 			$output = $GLOBALS["lang"];
 		} else {
 			if(is_array($lang) && count($lang) > 0) {
-				
 				foreach($lang as $value) {
+					$value = strtoupper($value);
 					if(isset($GLOBALS["lang"][$value])) {
 						$output[$value] = $GLOBALS["lang"][$value];
 					} else {
@@ -112,6 +113,7 @@ class systemController extends Controller {
 					}
 				}
 			} else if(is_string($lang)) {
+				$lang = strtoupper($lang);
 				if(isset($GLOBALS["lang"][$lang])) {
 						$output[$lang] = $GLOBALS["lang"][$lang];
 					} else {
@@ -208,6 +210,23 @@ class systemController extends Controller {
 		);
 		$allowed_size = 100 * 1024 * 1024;
 		
+		
+		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
+
+				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
+					$_FILES["upload"] = array(
+						"name" => $_SERVER["HTTP_X_FILE_NAME"],
+						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
+						"error" => 0,
+						"tmp_name" => $tmp_name
+					);
+				}
+				
+			}
+		}
+		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
 				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
@@ -219,7 +238,8 @@ class systemController extends Controller {
 					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
 					if($_FILES["upload"]["size"] <= $allowed_size) {
 						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
-							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path.'", "");</script>';
+							echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path.'\', "");</script>';
+							exit;
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}
@@ -259,6 +279,22 @@ class systemController extends Controller {
 		);
 		$allowed_size = 20 * 1024 * 1024;
 		
+		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
+			if(Core::phpInputFile()) {
+				$tmp_name = Core::phpInputFile();
+
+				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
+					$_FILES["upload"] = array(
+						"name" => $_SERVER["HTTP_X_FILE_NAME"],
+						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
+						"error" => 0,
+						"tmp_name" => $tmp_name
+					);
+				}
+				
+			}
+		}
+		
 		if(isset($_FILES["upload"])) {
 			if($_FILES["upload"]["error"] == 0) {
 				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
@@ -278,8 +314,9 @@ class systemController extends Controller {
 								$add = "";
 							}
 							
-							return '<script type="text/javascript">'.$add.'
-							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'", "");</script>';
+							echo '<script type="text/javascript">'.$add.'
+							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'\', "");</script>';
+							exit;
 						} else {
 							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 						}
@@ -296,5 +333,42 @@ class systemController extends Controller {
 		} else {
 			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
 		}
+	}
+	
+	/**
+	 * indexes some records for search.
+	*/
+	public function indexSearch() {
+		if(!Permission::check("ADMIN"))
+			return false;
+		
+		session_write_close();
+		$maximum = $this->getParam("max") ? $this->getParam("max") : 10;
+		$manipulation = array();
+		foreach(ClassInfo::getChildren("DataObject") as $class) {
+			
+			
+			if (in_array("searchindex", Object::$extensions[$class])) {
+				$notIndexed = DataObject::get($class, "indexversion = 0 OR indexversion < '".SearchIndex::VERSION."'", array(), $max);
+				foreach($notIndexed as $record) {
+					if(microtime(true) - EXEC_START_TIME > 2.0)
+						return true;
+					
+					SearchIndex::indexRecord($record);
+					$manipulation[] = array(
+							"command"		=> "update",
+							"table_name"	=> $record->table(),
+							"id"			=> $record->versionid,
+							array(
+								"indexversion"	=> SearchIndex::VERSION
+							)
+						);
+				}
+				
+				SQL::manipulate($manipulation);
+			}
+		}
+		
+		return 1;
 	}
 }

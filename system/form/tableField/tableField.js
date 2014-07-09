@@ -1,13 +1,12 @@
 /**
-  * inspiration by Silverstripe 3.0 GridField
-  * http://silverstripe.org
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 25.11.2012
-  * $Version - 1.0
+ * TableField JavaScript, which handles some basic User-Actions.
+ *
+ * @package     Goma\Form-Framework\TableField
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1.1
  */
 (function($){
 	$(function(){
@@ -15,6 +14,29 @@
 		    if(event.keyCode == 13){
 		        $(this).parents("form").submit();
 		    }
+		});
+		
+		$(".tablefield-item td").each(function(){
+			if(!$(this).hasClass("col-checkboxes") && !$(this).hasClass("col-buttons")) {
+				$(this).on("click touchend", function(){
+					if($(this).parent().find(".col-checkboxes").length == 1) {
+						if($(this).parent().find(".col-checkboxes input").prop("checked")) {
+							$(this).parent().find(".col-checkboxes input").prop("checked", false);
+						} else {
+							$(this).parent().find(".col-checkboxes input").prop("checked", true);
+						}
+						$(this).parent().find(".col-checkboxes input").change();
+					}
+				});
+			} else {
+				$(this).find("input").change(function(){
+					if($(this).prop("checked")) {
+						$(this).parent().parent().addClass("checked");
+					} else {
+						$(this).parent().parent().removeClass("checked");
+					}
+				});
+			}
 		});
 	});
 })(jQuery);

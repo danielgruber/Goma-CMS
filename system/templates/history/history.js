@@ -1,12 +1,13 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012 Goma-Team
-  * last modified: 25.11.2012
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 07.04.2013
 */
 (function($, w){
-	w.bindHistory = function(div) {
+	w.bindHistory = function(div, filter) {
+		var f = filter;
 		/**
 		 * loads new elements based on the older-button
 		*/
@@ -21,6 +22,7 @@
 			// load data from server
 			$.ajax({
 				url: older.attr("href"),
+				silence: true,
 				success: function(html) {
 					
 					// prase data
@@ -64,6 +66,7 @@
 						}
 						history.find(".event:gt("+evLength+")").on("mouseover.history", func);
 						history.find(".event:gt("+evLength+")").on("touchmove.history", func);
+						
 						history.on("scoll.history", func);
 					}
 				}
@@ -89,6 +92,10 @@
 				history.find(".event:gt("+evLength+")").on("mouseover.history", func);
 				history.find(".event:gt("+evLength+")").on("touchmove.history", func);
 				history.on("scoll.history", func);
+				
+				if(history.find(".older").is(":visible")) {
+					func();
+				}
 			}
 		});
 		
@@ -96,5 +103,26 @@
 		div.find(".older").click(function(){
 			return load($(this));
 		});
+		
+		if(div.find("a.newer").length == 0) {
+			goma.Pusher.subscribe("presence-goma", function(){
+				this.bind("history-update", function(data) {
+					if(data.rendering && (!f || !data.class_name || in_array(data.class_name, f))) {
+						div.prepend(data.rendering);
+						div.find(".event.first").removeClass("first");
+						div.find(".event:first-child").addClass("first").css("display", "none").slideDown("fast");
+					}
+				});
+			});
+			
+		}
+		
+		function in_array(item,arr) {
+			for(p=0;p<arr.length;p++)
+				if (item == arr[p]) 
+					return true;
+					
+			return false;
+		}
 	};
 })(jQuery, window);

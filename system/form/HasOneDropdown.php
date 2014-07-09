@@ -1,15 +1,17 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see "license.txt"
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 21.03.2013
-  * $Version 1.2.2
-*/
-
-defined("IN_GOMA") OR die("<!-- restricted access -->"); // silence is golden ;)
-
+ * This is a simple searchable dropdown, which can be used to select has-one-relations.
+ *
+ * It supports has-one-realtions of DataObjects and just supports single-select.
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.4
+ */
 class HasOneDropdown extends SingleSelectDropDown
 {
 		/**
@@ -18,7 +20,7 @@ class HasOneDropdown extends SingleSelectDropDown
 		 *@name relation
 		 *@access public
 		*/
-		public $realtion;
+		public $relation;
 		
 		/**
 		 * field to show in dropdown
@@ -45,6 +47,13 @@ class HasOneDropdown extends SingleSelectDropDown
 		public $info_field;
 		
 		/**
+		 * base model for queriing DataBase.
+		 *
+		 *@name model
+		*/
+		protected $model;
+		
+		/**
 		 *@param string - name
 		 *@param string - title
 		 *@param array - options
@@ -58,6 +67,20 @@ class HasOneDropdown extends SingleSelectDropDown
 				$this->showfield = $showfield;
 				$this->where = $where;
 				$this->dbname = $name . "id";
+		}
+		
+		/**
+		 * sets the base-model for queriing DB.
+		*/
+		public function setModel(DataObjectSet $model) {
+			$this->model = $model;
+		}
+		
+		/**
+		 * returns the model.
+		*/
+		public function getModel() {
+			return $this->model;
 		}
 		
 		/**
@@ -78,6 +101,9 @@ class HasOneDropdown extends SingleSelectDropDown
 				
 				if(isset($has_one[$this->relation]) && is_object($has_one[$this->relation])) {
 					$this->_object = $has_one[$this->relation];
+					
+					
+					
 					$this->value = isset(call_user_func_array(array($this->form()->result, $this->relation), array())->id) ? call_user_func_array(array($this->form()->result, $this->relation), array())->id : null;
 					$this->input->value = $this->value;
 				} else {
@@ -90,10 +116,13 @@ class HasOneDropdown extends SingleSelectDropDown
 						
 					if(isset($has_one[$this->relation])) {
 						$this->_object = $has_one[$this->relation];
+						
+						
+
 						$this->value = isset(call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id) ? call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id : null;
 						$this->input->value = $this->value;
 					} else {
-						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__, 500, false);
+						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form->name}.");
 					}
 				}
 			} else {
@@ -103,6 +132,7 @@ class HasOneDropdown extends SingleSelectDropDown
 					
 				if(is_object($this->form()->result) && isset($has_one[$this->relation])) {
 					$this->_object = $has_one[$this->relation];
+					
 				} else {
 				
 					// get has-one from controller
@@ -113,20 +143,25 @@ class HasOneDropdown extends SingleSelectDropDown
 						
 					if(isset($has_one[$this->relation])) {
 						$this->_object = $has_one[$this->relation];
+						
+
 					} else {
-						throwError(6, "PHP-Error", "".$this->relation." doesn't exist in this form-model in ".__FILE__." on line ".__LINE__, 500, false);
+						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form->name}.");
 					}
 				}
 			}
+			
+			if(!isset($this->model))
+				$this->model = DataObject::get($this->_object);
 		}
 		
 		/**
-		 * renders the data in the input
+		 * generates the values displayed in the field, if not dropped down.
 		 *
-		 *@name renderInput
-		 *@access public
+		 * @access protected
+		 * @return array values
 		*/
-		public function renderInput() {
+		protected function getInput() {
 			$data = DataObject::get($this->_object, array("id" => $this->value));
 			
 			if($this->form()->useStateData) {
@@ -134,9 +169,9 @@ class HasOneDropdown extends SingleSelectDropDown
 			}
 			
 			if($data && $data->count() > 0) {
-				return $data[$this->showfield];
+				return array($data->id => $data[$this->showfield]);
 			} else {
-				return lang("form_dropdown_nothing_select", "Nothing Selected");
+				return array();
 			}
 		}
 		
@@ -149,7 +184,8 @@ class HasOneDropdown extends SingleSelectDropDown
 		*/
 		public function getDataFromModel($p = 1) {
 			
-			$data = DataObject::get($this->_object, $this->where);
+			$data = clone $this->model;
+			$data->filter($this->where);
 			$data->activatePagination($p);
 			
 			if($this->form()->useStateData) {
@@ -172,10 +208,11 @@ class HasOneDropdown extends SingleSelectDropDown
 			$left = ($p > 1);
 			
 			$right = (ceil($data->count() / 10) > $p);
-			
+			$pageInfo = $data->getPageInfo();
 			unset($data);
 			
-			return array("data" => $arr, "left" => $left, "right" => $right);
+			
+			return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
 		}
 		
 		/**
@@ -185,7 +222,9 @@ class HasOneDropdown extends SingleSelectDropDown
 		 *@param numeric - page
 		*/
 		public function searchDataFromModel($p = 1, $search = "") {
-			$data = DataObject::search_object($this->_object, array($search),$this->where);
+			$data = clone $this->model;
+			$data->filter($this->where);
+			$data->search($search);
 			$data->activatePagination($p);
 			
 			if($this->form()->useStateData) {
@@ -206,8 +245,11 @@ class HasOneDropdown extends SingleSelectDropDown
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);
+			
+			$pageInfo = $data->getPageInfo();
 			unset($data);
-			return array("data" => $arr, "left" => $left, "right" => $right);
+			
+			return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
 		}
 	
 		/**
@@ -217,7 +259,7 @@ class HasOneDropdown extends SingleSelectDropDown
 		 *@param value
 		*/
 		public function validate($id) {
-			if($this->class == "hasonedropdown") {
+			if($this->classname == "hasonedropdown") {
 				if(DataObject::count($this->_object, array("id" => $id)) > 0) {
 					return true;
 				} else {

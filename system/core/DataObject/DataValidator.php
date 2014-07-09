@@ -3,8 +3,8 @@
   * this class is a form-validator, used for dataobject's validation
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 23.01.2013
 */
 
@@ -49,7 +49,7 @@ class DataValidator extends FormValidator
 				
 				foreach($this->form->result as $field => $data)
 				{
-						if(Object::method_exists($this->data->class, "validate" . $field))
+						if(Object::method_exists($this->data->classname, "validate" . $field))
 						{
 								$method = "validate" . $field;
 								$str = $this->data->$method($_data);

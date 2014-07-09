@@ -2,9 +2,9 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 17.01.2013
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 04.04.2013
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -73,8 +73,8 @@ class Page extends pages
 	{
 		parent::getForm($form);
 		// HACK HACK HACK!
-		if($this->class == "page" || $this->class == "wrapperpage")
-				$form->add(new HTMLeditor('data','', null, "400px"), 0, "content");
+		if($this->classname == "page" || $this->classname == "wrapperpage")
+				$form->add(new HTMLeditor('data','', null, "400px"), null, "content");
 	}				
 }
 

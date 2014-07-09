@@ -4,7 +4,7 @@
 	(function($){
 		$(function(){
 			var scrolls = {relevant: 0, all: 0};
-			bindHistory($("#{$id}"));
+			bindHistory($("#{$id}"), $filter);
 			$(".historyoptions li a").click(function(){
 				
 				var history = $(this).parent().parent().parent().next();
@@ -33,7 +33,7 @@
 	})(jQuery);
 </script>
 <% activatePagination($_GET_page, 10) %>
-<div class="historyoptions">
+<!--<div class="historyoptions">
 	<ul>
 		<li>
 			<a href="#relevant" class="active" name="relevant">{$_lang_h_relevant}</a>
@@ -42,36 +42,14 @@
 			<a href="#all" name="all">{$_lang_h_all}</a>
 		</li>
 	</ul>
-</div>
-<div id="$id" class="history scrollable relevant">
+</div>-->
+<div id="$id" class="history scrollable all">
 	<% IF isPageBefore() %>
 		<a href="<% addParamToURL($_SERVER_REAL_REQUEST_URI, "page", PageBefore()) %>" class="newer">{$_lang_newer}</a>
 	<% END %>
 	<% IF $this %>
 		<% CONTROL this() %>
-			<% IF $this.canSeeEvent %>
-				<% IF $this.first %>
-					<div class="event first $this.EventClass">
-				<% ELSE %>
-					<div class="event $this.EventClass">
-				<% END %>
-					<img src="$this.icon" data-retina="$this.retinaIcon" alt="" />
-					<div class="date">$this.created.ago(false)</div>
-					<p>$this.content</p>
-					
-					<div class="version">
-						<% IF $this.isversioned AND $namespace %>
-								<a rel="dropdownDialog[left]" href="$namespace/restoreVersion/{$this.dbobject}/{$this.oldversionid}{URLEND}?redirect={$this.editurl.url()}" class="button">{$_lang_restore}</a>
-						<% END %>
-						
-						<% IF $this.compared AND $namespace AND DEV_MODE %>
-							<a rel="dropdownDialog[left]" href="$namespace/compareVersion/{$this.dbobject}/{$this.oldversionid}/{$this.newversionid}{URLEND}?redirect={$_SERVER_REDIRECT.url()}" class="button">{$_lang_compare}</a>
-						<% END %>
-					</div>
-					
-					<div class="clear"></div>
-				</div>
-			<% END %>
+			<% INCLUDE("event.html", $this) %>
 		<% ENDCONTROL %>
 	<% ELSE %>
 		<div class="no_entries">

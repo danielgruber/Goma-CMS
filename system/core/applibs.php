@@ -1,122 +1,129 @@
 <?php
-/** >
- /*****************************************************************
- * Goma - Open Source Content Management System
- * if you see this text, please install PHP 5.3 or higher        *
- *****************************************************************
- *@package goma framework
- *@subpackage framework loader
- *@link http://goma-cms.org
- *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
- *@Copyright (C) 2009 - 2013  Goma-Team
- * last modified: 17.03.2013
- * $Version 1.0.1
-*/
- 
-defined("IN_GOMA") OR die("");
+/**
+ * This file provides necessary functions for Goma.
+ *
+ * @package Goma\System\Core
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ *
+ * @version 1.0.4
+ */
+
+defined("IN_GOMA") OR die();
 
 /**
- * this loads a lang file in the languages-directory
- *@name loadlang
- *@param string - name of the file
- *@param string - subdirectory
- *@return null
+ * Load a language file from /languages.
+ *
+ * @param string $name Filename
+ * @param string $directory Subdirectory
+ *
+ * @return void
  */
-function loadlang($name = "lang", $dir = "") {
-	i18n::addLang($dir . '/' . $name);
+function loadlang($name = "lang", $directory = "") {
+	i18n::addLang($directory . '/' . $name);
 }
 
 /**
- * generates a random string
- *@name randomString
- *@param numeric - length of the string
- *@param bool - if numbers are allowed
- *@return string
+ * Generates a random string.
+ *
+ * @param int $length Length of the string.
+ * @param boolean $numeric Are numbers allowed?
+ *
+ * @return string
  */
-function randomString($len, $numeric = true) {
+function randomString($length, $numeric = true) {
 	$possible = "ABCDEFGHJKLMNPRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
-	if ($numeric === true) {
+	if($numeric === true) {
 		$possible .= "123456789";
 	}
 	$s = "";
-	for ($i = 0; $i < $len; $i++) {
+	for($i = 0; $i < $length; $i++) {
 		$s .= $possible{mt_rand(0, strlen($possible) - 1)};
 	}
 	return $s;
 }
 
 /**
- * language
- *@name l
- *@access public
- *@param string - name
- *@param string - default
+ * Looks up for a localized version of a string.
+ *
+ * @param string $name Name identifier for the string.
+ * @param string $default Default value for non existent localized strings.
+ *
+ * @return string Localized string or $default
  */
-function lang($name, $default = "")
-{
-	$lang = isset($GLOBALS["lang"][$name]) ? $GLOBALS["lang"][$name] : $default;
-    if(!strpos($lang, ">\n") && !strpos($lang, "</")) {
-        return nl2br($lang);
-    } else {
-        return $lang;
-    }
+function lang($name, $default = "") {
+	$name = strtoupper($name);
+	if(isset($GLOBALS["lang"][$name])) {
+		$lang = $GLOBALS["lang"][$name];
+	} else if($default) {
+		$lang = $default;
+	} else {
+		$lang = $name;
+	}
+
+	if(!strpos($lang, ">\n") && !strpos($lang, "</")) {
+		return nl2br($lang);
+	} else {
+		return $lang;
+	}
 }
 
 /**
- * right management
+ * Checks if a group has a right.
+ *
+ * @param string $name Name identifier of the right.
+ * @param string $group Name identifier of the group.
+ *
+ * @return boolean
  */
-
-/**
- * checks if a group have the rights
- *@name advrights
- *@param string - name of the rights
- *@param string - name of group
- *@return bool
- */
-function advrights($name, $rang) {
-	return Permission::advrights($name, $rang);
+function advrights($right, $group) {
+	return Permission::advrights($right, $group);
 }
 
 /**
- * checks rights
- *@name right
- *@param string - right
+ * Checks if the current user has a right.
+ *
+ * @param string $right Name identifier of the right.
+ *
+ * @return boolean
  */
-function right($r) {
-	return Permission::check($r);
+function right($right) {
+	return Permission::check($right);
 }
 
 /**
+ * Merges arrays recursive.
+ *
  * Merges any number of arrays / parameters recursively, replacing
  * entries with string keys with values from latter arrays.
  * If the entry or the next value to be assigned is an array, then it
  * automagically treats both arguments as an array.
  * Numeric entries are appended, not replaced, but only if they are
- * unique
+ * unique.
  *
- * calling: result = array_merge_recursive_distinct(a1, a2, ... aN)
+ * @author mark dot roduner at gmail dot com
+ * @link http://php.net/manual/de/function.array-merge-recursive.php
  *
- * thanks to mark dot roduner at gmail dot com
- *
- *@link http://php.net/manual/de/function.array-merge-recursive.php
+ * @return array
  **/
 function array_merge_recursive_distinct() {
 	$arrays = func_get_args();
 	$base = array_shift($arrays);
-	if (!is_array($base))
+	if(!is_array($base))
 		$base = empty($base) ? array() : array($base);
-	foreach ($arrays as $append) {
-		if (!is_array($append))
+	foreach($arrays as $append) {
+		if(!is_array($append))
 			$append = array($append);
-		foreach ($append as $key => $value) {
-			if (!array_key_exists($key, $base) and !is_numeric($key)) {
+		foreach($append as $key => $value) {
+			if(!array_key_exists($key, $base) and !is_numeric($key)) {
 				$base[$key] = $append[$key];
 				continue;
 			}
-			if (is_array($value) or is_array($base[$key])) {
+			if(is_array($value) or is_array($base[$key])) {
 				$base[$key] = array_merge_recursive_distinct($base[$key], $append[$key]);
-			} else if (is_numeric($key)) {
-				if (!in_array($value, $base))
+			} else if(is_numeric($key)) {
+				if(!in_array($value, $base))
 					$base[] = $value;
 			} else {
 				$base[$key] = $value;
@@ -127,14 +134,20 @@ function array_merge_recursive_distinct() {
 }
 
 /**
- * if you want to store very much data in the session, session will slow down page dramatically, so we store just a key and then store it external in a file
- *@name session_store
- *@access public
- *@param string - key
- *@param data
+ * Stores session data in a file.
+ *
+ * Because storing many data in a session is slow, the data is stored in a file.
+ * This data can be accessed with an ID, that is stored in the session instead.
+ *
+ * @see session_restore() to restore data from a session.
+ *
+ * @param string $key Data identification key
+ * @param mixed $data The data, that has to be stored.
+ *
+ * @return bool Success
  */
 function session_store($key, $data) {
-	if (isset($_SESSION["store"][$key]))
+	if(isset($_SESSION["store"][$key]))
 		$random = $_SESSION["store"][$key];
 	else
 		$random = randomString(10);
@@ -146,15 +159,20 @@ function session_store($key, $data) {
 }
 
 /**
- * gets data from session-store
+ * Accesses session data.
  *
- *@name session_restore
- *@access public
- *@param string - key
+ * Because storing many data in a session is slow, the data is stored in a file.
+ * This data can be accessed with an ID, that is stored in the session instead.
+ *
+ * @see session_restore() to store data in a session.
+ *
+ * @param string $key Data identification key
+ *
+ * @return mixed Data on success, otherwise false.
  */
 function session_restore($key) {
-	if (isset($_SESSION["store"][$key]))
-		if (file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
+	if(isset($_SESSION["store"][$key]))
+		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
 			return unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"));
 		else
 			return false;
@@ -163,15 +181,15 @@ function session_restore($key) {
 }
 
 /**
- * checks if a store exists
+ * Checks for a key, if he is linked with session data.
  *
- *@name session_store_exists
- *@access public
- *@param string - key
+ * @param string $key Data identification key
+ *
+ * @return boolean
  */
 function session_store_exists($key) {
-	if (isset($_SESSION["store"][$key]))
-		if (file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
+	if(isset($_SESSION["store"][$key]))
+		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
 			return true;
 		else
 			return false;
@@ -180,9 +198,11 @@ function session_store_exists($key) {
 }
 
 /**
- * checks session-store by storeid
+ * Checks for an ID, if it is linked with session data.
  *
- *@name session_restore_byID
+ * @param string $id Data identification ID
+ *
+ * @return boolean
  */
 function session_store_exists_byID($id) {
 	$id = basename($id);
@@ -190,13 +210,15 @@ function session_store_exists_byID($id) {
 }
 
 /**
- * gets session-store by storeid
+ * Accesses session data by ID.
  *
- *@name session_store_exists_byID
+ * @param string $id Data identification ID
+ *
+ * @return mixed Data on success, otherwise false.
  */
 function session_restore_byID($id) {
 	$id = basename($id);
-	if (file_exists(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma")) {
+	if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma")) {
 		return unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma"));
 	} else {
 		return false;
@@ -204,12 +226,15 @@ function session_restore_byID($id) {
 }
 
 /**
- * bind's a session key to the id
+ * Binds a session data key to an ID.
  *
- *@name bindSessionKeyToID
+ * @param string $id Data identification ID
+ * @param string $key Data identification key
+ *
+ * @return boolean
  */
 function bindSessionKeyToID($id, $key) {
-	if (session_store_exists_byID($id)) {
+	if(session_store_exists_byID($id)) {
 		$_SESSION["store"][$key] = $id;
 		return true;
 	} else {
@@ -218,83 +243,69 @@ function bindSessionKeyToID($id, $key) {
 }
 
 /**
- * gets the id for the session-store
+ * Gets the linked ID from a session data key.
  *
- *@name getStoreID
+ * @param string $key Data identification key
+ *
+ * @return mixed ID on success, otherwise false.
  */
 function getStoreID($key) {
-	if (isset($_SESSION["store"][$key]))
+	if(isset($_SESSION["store"][$key]))
 		return $_SESSION["store"][$key];
 	else
 		return false;
 }
 
 /**
- * returns a redirect-uri for inserting into and uri or elsewhere
+ * Gets the redirect.
  *
- *@name getRedirect
- *@access public
+ * @param boolean $parentDir Get only the name of the parent directory in the
+ * url.
+ *
+ * @return string
  */
-function getRedirect($parentDir = false) {
-	if (Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
+function getRedirect($parentDir = false, $controller = null) {
+	// AJAX Request
+	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
 		return htmlentities($_SERVER["HTTP_X_REFERER"], ENT_COMPAT, "UTF-8", false);
 	}
-	if ($parentDir) {
-		if (isset($_GET["redirect"])) {
+
+	if($parentDir) {
+
+		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
-			/*} else if(isset($_POST["redirect"])) {
-			 return $_POST["redirect"];
-			 */
+		} else if(isset($controller)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
+		} else if(isset(Core::$requestController)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . Core::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
 		} else {
-			if (URLEND == "/") {
+			// TODO What is with redirect from other sites with other URLEND?
+			if(URLEND == "/") {
 				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
 				return htmlentities(substr($uri, 0, strrpos($uri, "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			} else {
 				return htmlentities(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			}
+
 		}
+
 	} else {
-		if (isset($_GET["redirect"])) {
+
+		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
-			/*} else if(isset($_POST["redirect"])) {
-			 return $_POST["redirect"];
-			 */
+		} else if(isset($controller)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
+		} else if(isset(Core::$requestController)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . Core::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
 		} else {
 			return htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, "UTF-8", false);
 		}
-	}
-}
 
-function getRedirection($parentDir = true) {
-	if ($parentDir) {
-		if (isset($_GET["redirect"])) {
-			return convert::raw2text($_GET["redirect"]);
-		} else if (isset($_POST["redirect"])) {
-			return convert::raw2text($_POST["redirect"]);
-		} else {
-			if (URLEND == "/") {
-				$uri = substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/"));
-				return convert::raw2text(substr($uri, 0, strrpos($uri, "/")) . URLEND);
-			} else {
-				return convert::raw2text(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND);
-			}
-		}
-	} else {
-		if (isset($_GET["redirect"])) {
-			return convert::raw2text($_GET["redirect"]);
-		} else if (isset($_POST["redirect"])) {
-			return convert::raw2text($_POST["redirect"]);
-		} else {
-			return BASE_URI . BASE_SCRIPT;
-		}
 	}
 }
 
 /**
- * generates a translated date
- *
- *@name goma_date
- *@access public
+ * generates a translated date.
  */
 function goma_date($format, $date = NOW) {
 
@@ -306,28 +317,66 @@ function goma_date($format, $date = NOW) {
 	return $str;
 }
 
+/**
+ * Places a file in the application folder, that indicates Goma, that this
+ * project is unavailable.
+ *
+ * @see makeProjectAvailable() to enable projects.
+ * @see isProjectUnavailable() to check, if a project is disabled.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function makeProjectUnavailable($project = APPLICATION) {
-	if (!file_put_contents(ROOT . "503." . md5(basename($project)) . ".goma", $_SERVER["REMOTE_ADDR"])) {
+	if(!file_put_contents(ROOT . "503." . md5(basename($project)) . ".goma", $_SERVER["REMOTE_ADDR"])) {
 		die("Could not make project unavailable.");
 	}
 	chmod(ROOT . "503." . md5(basename($project)) . ".goma", 0777);
 }
 
+/**
+ * Removes the project unavailable file, that indicates Goma, that this project
+ * is unavailable.
+ *
+ * @see makeProjectUnavailable() to disable projects.
+ * @see isProjectUnavailable() to check, if a project is disabled.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function makeProjectAvailable($project = APPLICATION) {
-	if (file_exists(ROOT . "503." . md5(basename($project)) . ".goma")) {
+	if(file_exists(ROOT . "503." . md5(basename($project)) . ".goma")) {
 		@unlink(ROOT . "503." . md5(basename($project)) . ".goma");
 	}
 }
 
+/**
+ * Checks, if a project is unavailable.
+ *
+ * @see makeProjectUnavailable() to disable projects.
+ * @see makeProjectAvailable() to enable projects.
+ *
+ * @param string $project Name of the project, default is the current
+ * application.
+ *
+ * @return void
+ */
 function isProjectUnavailable($project = APPLICATION) {
 	return (file_exists(ROOT . "503." . md5(basename($project)) . ".goma") && filemtime(ROOT . "503." . md5(basename($project)) . ".goma") > NOW - 10);
 }
 
 /**
- * rewrites the Application-Configuration
+ * Writes the system configuration.
  *
- *@name writeSystemConfig
- *@access public
+ * @see writeProjectConfig() to write the config for a project.
+ *
+ * @param array[] $data An array with configuration variables.
+ *
+ * @return void
  */
 function writeSystemConfig($data = array()) {
 
@@ -344,25 +393,25 @@ function writeSystemConfig($data = array()) {
 	$slowQuery = 50;
 	$SSLpublicKey = null;
 	$SSLprivateKey = null;
-	
-	if (file_exists(ROOT . "_config.php"))
+
+	if(file_exists(ROOT . "_config.php"))
 		include (ROOT . "_config.php");
 
-	foreach ($data as $key => $val) {
-		if (isset($$key))
+	foreach($data as $key => $val) {
+		if(isset($$key))
 			$$key = $val;
 	}
 
 	$contents = file_get_contents(FRAMEWORK_ROOT . "core/samples/config_main.sample.php");
 	preg_match_all('/\{([a-zA-Z0-9_]+)\}/Usi', $contents, $matches);
-	foreach ($matches[1] as $name) {
-		if (isset($$name))
+	foreach($matches[1] as $name) {
+		if(isset($$name))
 			$contents = str_replace('{' . $name . '}', var_export($$name, true), $contents);
 		else
 			$contents = str_replace('{' . $name . '}', var_export("", true), $contents);
 	}
 
-	if (@file_put_contents(ROOT . "_config.php", $contents)) {
+	if(@file_put_contents(ROOT . "_config.php", $contents)) {
 		@chmod(ROOT . "_config.php", 0644);
 		return true;
 	} else
@@ -370,13 +419,12 @@ function writeSystemConfig($data = array()) {
 }
 
 /**
- * gets the SSL-public Key
+ * Returns the SSL public key of the installation.
  *
- *@name getPublicKey
- *@access public
+ * @return string SSL public key
  */
 function getSSLPublicKey() {
-	if (!file_exists(ROOT . "_config.php")) {
+	if(!file_exists(ROOT . "_config.php")) {
 		writeSystemConfig();
 	}
 
@@ -386,13 +434,12 @@ function getSSLPublicKey() {
 }
 
 /**
- * gets the SSL-private Key
+ * Returns the SSL private key of the installation.
  *
- *@name getPublicKey
- *@access public
+ * @return string SSL private key
  */
 function getSSLPrivateKey() {
-	if (!file_exists(ROOT . "_config.php")) {
+	if(!file_exists(ROOT . "_config.php")) {
 		writeSystemConfig();
 	}
 
@@ -402,41 +449,57 @@ function getSSLPrivateKey() {
 }
 
 /**
- * rewrites the project-config
+ * Writes the config of a project.
  *
- *@name writeProjectConfig
- *@access public
+ * @see writeSystemConfig() to write the system config.
+ *
+ * @param array[] $data An array with configuration variables.
+ * @param string $project Name of the project, default is CURRENT_PROJECT.
+ *
+ * @return void
  */
 function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 
 	$config = $project . "/config.php";
 
-	if (file_exists($config)) {
+	if(file_exists($config)) {
 		// get current data
 		include ($config);
 		$defaults = (array)$domaininfo;
 	} else {
-		$defaults = array("status" => 1, "date_format" => "d.m.Y - H:i", "timezone" => DEFAULT_TIMEZONE, "lang" => DEFAULT_LANG);
+		$defaults = array(
+			"status" => 1,
+			"date_format_date" => "d.m.Y",
+			"date_format_time"	=> " H:i",
+			"timezone" => DEFAULT_TIMEZONE,
+			"lang" => DEFAULT_LANG
+		);
 	}
 
 	$new = array_merge($defaults, $data);
 	$info = array();
 	$info["status"] = $new["status"];
-	$info["date_format"] = $new["date_format"];
+	
+	if(isset($new["date_format_date"]))
+		$info["date_format_date"] = $new["date_format_date"];
+		
+	if(isset( $new["date_format_time"]))
+		$info["date_format_time"] = $new["date_format_time"];
+	
 	$info["timezone"] = $new["timezone"];
 	$info["lang"] = $new["lang"];
 
-	if (isset($new["db"]))
+	if(isset($new["db"]))
 		$info["db"] = $new["db"];
 
-	if (defined("SQL_DRIVER_OVERRIDE") && !isset($info["sql_driver"])) {
+	if(defined("SQL_DRIVER_OVERRIDE") && !isset($info["sql_driver"])) {
 		$info["sql_driver"] = SQL_DRIVER_OVERRIDE;
 	}
 
 	$config_content = file_get_contents(FRAMEWORK_ROOT . "core/samples/config_locale.sample.php");
 	$config_content = str_replace('{info}', var_export($info, true), $config_content);
 	$config_content = str_replace('{folder}', $project, $config_content);
-	if (@file_put_contents($config, $config_content)) {
+	if(@file_put_contents($config, $config_content)) {
 		@chmod($config, 0644);
 		return true;
 	} else {
@@ -445,13 +508,12 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 }
 
 /**
- * gets the private Key
+ * Gets the private key of the installation.
  *
- *@name getPrivateKey
- *@access public
+ * @return string 15 chars private key
  */
 function getPrivateKey() {
-	if (!file_exists(ROOT . "_config.php")) {
+	if(!file_exists(ROOT . "_config.php")) {
 		writeSystemConfig();
 	}
 
@@ -460,10 +522,7 @@ function getPrivateKey() {
 	return $privateKey;
 }
 
-/**
- * project-management
- *
- */
+/******************** project management ********************/
 
 /**
  * sets a project-folder in the project-stack
@@ -472,21 +531,22 @@ function getPrivateKey() {
  *@access public
  */
 function setProject($project, $domain = null) {
-	if (file_exists(ROOT . "_config.php")) {
+	if(file_exists(ROOT . "_config.php")) {
 		include (ROOT . "_config.php");
 	} else {
 		$apps = array();
 	}
 
 	$app = array("directory" => $project);
-	if (isset($domain)) {
+	if(isset($domain)) {
 		$app["domain"] = $domain;
 	}
 
 	// first check existing
-	foreach ($apps as $key => $data) {
-		if ($data["directory"] == $app["directory"]) {
-			if (!isset($app["domain"]) ||  (isset($data["domain"]) && $data["domain"] == $app["domain"])) {
+	foreach($apps as $key => $data) {
+		if($data["directory"] == $app["directory"]) {
+			if(!isset($app["domain"]) || (isset($data["domain"]) && $data["domain"] == $app["domain"])) {
+
 				return true;
 			} else {
 				$apps[$key]["domain"] = $app["domain"];
@@ -506,14 +566,14 @@ function setProject($project, $domain = null) {
  *@access public
  */
 function removeProject($project) {
-	if (file_exists(ROOT . "_config.php")) {
+	if(file_exists(ROOT . "_config.php")) {
 		include (ROOT . "_config.php");
 	} else {
 		return true;
 	}
 
-	foreach ($apps as $key => $data) {
-		if ($data["directory"] == $project) {
+	foreach($apps as $key => $data) {
+		if($data["directory"] == $project) {
 			unset($apps[$key]);
 		}
 	}
@@ -533,10 +593,10 @@ function addProject($project, $domain = null) {
  */
 function str2int($string, $concat = true) {
 	$length = strlen($string);
-	for ($i = 0, $int = '', $concat_flag = true; $i < $length; $i++) {
-		if (is_numeric($string[$i]) && $concat_flag) {
+	for($i = 0, $int = '', $concat_flag = true; $i < $length; $i++) {
+		if(is_numeric($string[$i]) && $concat_flag) {
 			$int .= $string[$i];
-		} elseif (!$concat && $concat_flag && strlen($int) > 0) {
+		} else if(!$concat && $concat_flag && strlen($int) > 0) {
 			$concat_flag = false;
 		}
 	}
@@ -552,8 +612,12 @@ function str2int($string, $concat = true) {
  *@return string - the parsed string
  */
 function parse_lang($str, $arr = array()) {
-	return preg_replace('/\{\$_lang_(.*)\}/Usie', "''.var_lang('\\1').''", $str);
+	return preg_replace_callback('/\{\$_lang_(.*)\}/Usi', "var_lang_callback", $str);
 	// find lang vars
+}
+
+function var_lang_callback($data) {
+	return var_lang($data[1]);
 }
 
 /**
@@ -564,9 +628,13 @@ function parse_lang($str, $arr = array()) {
  *@return string - the parsed string
  */
 function var_lang($str, $replace = array()) {
-	$language = lang($str, "");
+	if(!is_string($str))
+		throw new LogicException("first argument of var_lang must be string.");
+	
+	$language = lang($str, $str);
 	preg_match_all('/%(.*)%/', $language, $regs);
-	foreach ($regs[1] as $key => $value) {
+	foreach($regs[1] as $key => $value) {
+
 		$re = $replace[$value];
 		$language = preg_replace("/%" . preg_quote($value, '/') . "%/", $re, $language);
 	}
@@ -581,7 +649,7 @@ function var_lang($str, $replace = array()) {
  *@params: view php manual of ereg
  */
 function _ereg($pattern, $needed, &$reg = "") {
-	if (is_array($needed)) {
+	if(is_array($needed)) {
 		return false;
 	}
 	return preg_match('/' . str_replace('/', '\\/', $pattern) . '/', $needed, $reg);
@@ -626,7 +694,7 @@ function escapejson($str) {
  *@param string - title
  */
 function showsite($content, $title) {
-	if ($title) {
+	if($title) {
 		Core::setTitle($title);
 	}
 
@@ -641,60 +709,60 @@ function showsite($content, $title) {
  */
 function goma_version_compare($v1, $v2, $operator = null) {
 	// first split version
-	if (strpos($v1, "-") !== false) {
+	if(strpos($v1, "-") !== false) {
 		$version1 = substr($v1, 0, strpos($v1, "-"));
 		$build1 = substr($v1, strpos($v1, "-") + 1);
 	} else {
 		$version1 = $v1;
 	}
 
-	if (strpos($v2, "-") !== false) {
+	if(strpos($v2, "-") !== false) {
 		$version2 = substr($v2, 0, strpos($v2, "-"));
 		$build2 = substr($v2, strpos($v2, "-") + 1);
 	} else {
 		$version2 = $v2;
 	}
 
-	if (!isset($build1) || !isset($build2)) {
+	if(!isset($build1) || !isset($build2)) {
 		return version_compare($version1, $version2, $operator);
 	}
 
-	if (isset($operator)) {
+	if(isset($operator)) {
 		switch($operator) {
-			case "gt" :
-			case ">" :
+			case "gt":
+			case ">":
 				return version_compare($build1, $build2, ">");
 				break;
-			case "lt" :
-			case "<" :
+			case "lt":
+			case "<":
 				return version_compare($build1, $build2, "<");
 				break;
-			case "eq" :
-			case "=" :
-			case "==" :
-				if (version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
+			case "eq":
+			case "=":
+			case "==":
+				if(version_compare($version1, $version2, "==") && version_compare($build1, $build2, "==")) {
 					return true;
 				}
 				return false;
 				break;
-			case ">=" :
-			case "ge" :
+			case ">=":
+			case "ge":
 				return version_compare($build1, $build2, ">=");
 				break;
-			case "<=" :
-			case "le" :
+			case "<=":
+			case "le":
 				return version_compare($build1, $build2, "<=");
 				break;
-			case "!=" :
-			case "<>" :
-			case "ne" :
+			case "!=":
+			case "<>":
+			case "ne":
 				return version_compare($build1, $build2, "<>");
 				break;
 		}
 	} else {
-		if (version_compare($build1, $build2, ">")) {
+		if(version_compare($build1, $build2, ">")) {
 			return 1;
-		} else if (version_compare($build1, $build2, "==")) {
+		} else if(version_compare($build1, $build2, "==")) {
 			return 0;
 		} else {
 			return -1;
@@ -711,12 +779,14 @@ function goma_version_compare($v1, $v2, $operator = null) {
 
 function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	switch ($errno) {
-		case E_ERROR :
-		case E_CORE_ERROR :
-		case E_COMPILE_ERROR :
-		case E_PARSE :
-		case E_USER_ERROR :
-		case E_RECOVERABLE_ERROR :
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_PARSE:
+		case E_USER_ERROR:
+		case E_RECOVERABLE_ERROR:
+			HTTPResponse::setResHeader(500);
+			HTTPResponse::sendHeader();
 			log_error("PHP-USER-Error: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
 			$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 			$content = str_replace('{BASE_URI}', BASE_URI, $content);
@@ -728,30 +798,32 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 			exit ;
 			break;
 
-		case E_WARNING :
-		case E_CORE_WARNING :
-		case E_COMPILE_WARNING :
-		case E_USER_WARNING :
-			if (strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			if(strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
 				log_error("PHP-USER-Warning: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
-				if (DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest")) {
+				if(DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest")) {
 					echo "<b>WARNING:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
 				}
 			}
 			break;
-		case E_USER_NOTICE :
-		case E_NOTICE :
-		case E_USER_NOTICE :
-			if (strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
-				logging("Notice: [$errno] $errstr");
-				if (DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"))
+		case E_USER_NOTICE:
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			if(strpos($errstr, "chmod") === false && strpos($errstr, "unlink") === false) {
+				logging("Notice: [$errno] $errstr in $errfile on line $errline");
+				if(DEV_MODE && !isset($_GET["ajax"]) && (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"))
 					echo "<b>NOTICE:</b> [$errno] $errstr in $errfile on line $errline<br />\n";
 			}
 			break;
-		case E_STRICT :
+		case E_STRICT:
 			// nothing
 			break;
-		default :
+		default:
+			HTTPResponse::setResHeader(500);
+			HTTPResponse::sendHeader();
 			log_error("PHP-Error: " . $errno . " " . $errstr . " in " . $errfile . " on line " . $errline . ".");
 			$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 			$content = str_replace('{BASE_URI}', BASE_URI, $content);
@@ -767,6 +839,36 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	return true;
 }
 
+function Goma_ExceptionHandler($exception) {
+	log_exception($exception);
+
+	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
+	$content = str_replace('{BASE_URI}', BASE_URI, $content);
+	$content = str_replace('{$errcode}', $exception->getCode(), $content);
+	$content = str_replace('{$errname}', get_class($exception), $content);
+	$content = str_replace('{$errdetails}', $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">" . $exception->getTraceAsString() . "</textarea>", $content);
+	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
+
+	if(Object::method_exists($exception, "http_status")) {
+		HTTPResponse::setResHeader($exception->http_status());
+	} else {
+		HTTPResponse::setResHeader(500);
+	}
+	HTTPResponse::sendHeader();
+
+	echo $content;
+	exit ;
+}
+
+
+function log_exception(Exception $exception) {
+	$message = get_class($exception) . " " . $exception->getCode() . ":\n\n" . $exception->getMessage() . "\n\n Backtrace: " . $exception->getTraceAsString();
+	log_error($message);
+	
+	$debugMsg = "URL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n" . $message;
+	debug_log($debugMsg);
+}
+
 //!Logging
 
 /**
@@ -779,30 +881,30 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
  *@param string - error-string
  */
 function log_error($string) {
-	if (PROFILE)
+	if(PROFILE)
 		Profiler::mark("log_error");
 	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/");
-	if (isset($GLOBALS["error_logfile"])) {
+	if(isset($GLOBALS["error_logfile"])) {
 		$file = $GLOBALS["error_logfile"];
 	} else {
 		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/" . date("m-d-y"));
 		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/error/" . date("m-d-y") . "/";
 		$file = $folder . "1.log";
 		$i = 1;
-		while (file_exists($folder . $i . ".log") && filesize($file) > 10000) {
+		while(file_exists($folder . $i . ".log") && filesize($file) > 10000) {
 			$i++;
 			$file = $folder . $i . ".log";
 		}
 		$GLOBALS["error_logfile"] = $file;
 	}
 	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if (!file_exists($file)) {
+	if(!file_exists($file)) {
 		FileSystem::write($file, date($date_format) . ': ' . $string . "\n\n", null, 0777);
 	} else {
 		FileSystem::write($file, date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
 	}
 
-	if (PROFILE)
+	if(PROFILE)
 		Profiler::unmark("log_error");
 }
 
@@ -814,31 +916,31 @@ function log_error($string) {
  *@param string - log-string
  */
 function logging($string) {
-	if (PROFILE)
+	if(PROFILE)
 		Profiler::mark("logging");
 
 	FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/");
 	$date_format = (defined("DATE_FORMAT")) ? DATE_FORMAT : "Y-m-d H:i:s";
-	if (isset($GLOBALS["log_logfile"])) {
+	if(isset($GLOBALS["log_logfile"])) {
 		$file = $GLOBALS["log_logfile"];
 	} else {
 		FileSystem::requireFolder(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/" . date("m-d-y"));
 		$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/log/" . date("m-d-y") . "/";
 		$file = $folder . "1.log";
 		$i = 1;
-		while (file_exists($folder . $i . ".log") && filesize($file) > 10000) {
+		while(file_exists($folder . $i . ".log") && filesize($file) > 10000) {
 			$i++;
 			$file = $folder . $i . ".log";
 		}
 		$GLOBALS["log_logfile"] = $file;
 	}
-	if (!file_exists($file)) {
+	if(!file_exists($file)) {
 		FileSystem::write($file, date($date_format) . ': ' . $string . "\n\n", null, 0777);
 	} else {
 		FileSystem::write($file, date($date_format) . ': ' . $string . "\n\n", FILE_APPEND, 0777);
 	}
 
-	if (PROFILE)
+	if(PROFILE)
 		Profiler::unmark("logging");
 }
 
@@ -858,7 +960,7 @@ function debug_log($data) {
 	$folder = ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/debug/" . date("m-d-y") . "/" . date("H_i_s");
 	$file = $folder . "-1.log";
 	$i = 1;
-	while (file_exists($folder . "-" . $i . ".log")) {
+	while(file_exists($folder . "-" . $i . ".log")) {
 		$i++;
 		$file = $folder . "-" . $i . ".log";
 	}
@@ -867,15 +969,28 @@ function debug_log($data) {
 }
 
 /**
+ * checks for available retina-file on file-path.
+ *
+ * @param file
+*/
+function RetinaPath($file) {
+	$retinaPath = substr($file, 0, strrpos($file, ".")) . "@2x." . substr($file, strpos($file, ".") + 1);
+	if(file_exists($retinaPath))
+		return $retinaPath;
+	
+	return $file;
+}
+
+/**
  * Writes the server configuration file
  *@name writeServerConfig
  *@access public
  */
 function writeServerConfig() {
-	if (strpos($_SERVER["SERVER_SOFTWARE"], "Apache") !== false) {
+	if(strpos($_SERVER["SERVER_SOFTWARE"], "Apache") !== false) {
 		$file = "htaccess";
 		$toFile = ".htaccess";
-	} else if (strpos($_SERVER["SERVER_SOFTWARE"], "IIS") !== false) {
+	} else if(strpos($_SERVER["SERVER_SOFTWARE"], "IIS") !== false) {
 		$file = "web.config";
 		$toFile = "web.config";
 	} else {
@@ -884,7 +999,95 @@ function writeServerConfig() {
 
 	require (ROOT . "system/resources/" . $file . ".php");
 
-	if (!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
+
+	if(!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
 		die("Could not write " . $file);
 	}
+}
+
+class SQLException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 3, Exception $previous = null) {
+		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
+		$m = $sqlerr . "\n" . $m;
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class MySQLException extends SQLException {
+}
+
+class SecurityException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 1, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class PermissionException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 5, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class PHPException extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 6, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class DBConnectError extends MySQLException {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 4, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+}
+
+class ServiceUnavailable extends Exception {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = 7, Exception $previous = null) {
+		if(version_compare(phpversion(), "5.3.0", "<"))
+			parent::__construct($m, $code, $previous);
+		else
+			parent::__construct($m, $code);
+	}
+
+	public function http_status() {
+		return 503;
+	}
+
 }

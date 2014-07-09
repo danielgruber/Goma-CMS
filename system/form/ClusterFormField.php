@@ -1,15 +1,14 @@
 <?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 15.11.2012
-  * $Version - 1.0.4
- */
- 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined("IN_GOMA") OR die();
 
+/**
+ * A cluster form field.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.0.5
+ */
 class ClusterFormField extends FormField {
 	/**
 	 * fields of this cluster
@@ -75,6 +74,11 @@ class ClusterFormField extends FormField {
 	public $post;
 	
 	/**
+	 * state
+	*/
+	public $state;
+	
+	/**
 	 * constructing
 	 *
 	 *@name __construct
@@ -90,7 +94,6 @@ class ClusterFormField extends FormField {
 			$field->overridePostName = $this->name . "_" . $field->name;
 			$this->sort = 1 + count($this->items);
 			$this->items[] = $field;
-			$field->setForm($this);
 		}
 		
 		$this->result =& $this->value;
@@ -163,7 +166,8 @@ class ClusterFormField extends FormField {
 		// get content
 		usort($this->items, array($this, "sort"));
 		foreach($this->items as $item) {
-			if(isset($this->fields[$item->name]) && !isset($this->renderedFields[$item->name])) {
+			if($this->isFieldToRender($item->name)) {
+				$this->registerRendered($item->name);
 				$subContainer->append($item->field());
 			}
 		}
@@ -255,7 +259,7 @@ class ClusterFormField extends FormField {
 		$this->url =& $form->url;
 		$this->controller =& $form->controller;
 		$this->post =& $form->post;
-		$this->state = $this->orgForm()->state->{$this->class . $this->name};
+		$this->state = $this->orgForm()->state->{$this->classname . $this->name};
 		
 		foreach($this->items as $field)
 			$field->setForm($this);
@@ -342,9 +346,9 @@ class ClusterFormField extends FormField {
 	public function ID()
 	{
 		if(Core::is_ajax()) {
-			return "form_field_" .  $this->class . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name . "_ajax";
+			return "form_field_" .  $this->classname . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name . "_ajax";
 		} else {
-			return "form_field_" .  $this->class . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name;
+			return "form_field_" .  $this->classname . "_" . md5($this->orgForm()->name . $this->title) . "_" . $this->name;
 		}
 	}
 	
@@ -358,7 +362,7 @@ class ClusterFormField extends FormField {
 		$this->result = array();
 		foreach($this->fields as $field) {
 
-			$this->result[$field->name] = $field->result();
+			$this->result[$field->dbname] = $field->result();
 		}
 	
 		return $this->result;
@@ -398,7 +402,10 @@ class ClusterFormField extends FormField {
 	 *@param object - field
 	*/
 	public function registerField($name, $field) {
-		$this->fields[$name] = $field;
+		if($name == $this->name) {
+			return false;
+		}
+		$this->fields[strtolower($name)] = $field;
 		$field->overridePostName = $this->name . "_" . $name;
 	}
 	
@@ -409,7 +416,7 @@ class ClusterFormField extends FormField {
 	 *@access public
 	*/
 	public function unRegister($name) {
-		unset($this->fields[$name]);
+		unset($this->fields[strtolower($name)]);
 	}
 	
 	/**
@@ -420,20 +427,32 @@ class ClusterFormField extends FormField {
 	 *@param string - name
 	*/
 	public function getField($offset) {
-		if(isset($this->fields[$offset])) 
-			return $this->fields[$offset];
+		if(isset($this->fields[strtolower($offset)])) 
+			return $this->fields[strtolower($offset)];
 		
 		return false;
 	}
-	
+
 	/**
-	 * __get
+	 * returns if a field exists in this form
 	 *
-	 *@name __get
+	 *@name isField
 	 *@access public
 	*/
-	public function __get($offset) {
-		return $this->getField($offset);
+	public function isField($name)
+	{
+			return (isset($this->fields[strtolower($name)]));
+	}
+	
+	/**
+	 * returns if a field exists and wasn't rendered in this form
+	 *
+	 *@name isField
+	 *@access public
+	*/
+	public function isFieldToRender($name)
+	{
+			return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
 	}
 	
 	/**
@@ -444,7 +463,7 @@ class ClusterFormField extends FormField {
 	 *@param string - name
 	*/
 	public function registerRendered($name) {
-		$this->renderedFields[$name] = true;
+		$this->renderedFields[strtolower($name)] = true;
 	}
 	
 	/**
@@ -455,7 +474,47 @@ class ClusterFormField extends FormField {
 	 *@param string - name
 	*/
 	public function unregisterRendered($name) {
-		unset($this->renderedFields[$name]);
+		unset($this->renderedFields[strtolower($name)]);
 	}
+	
+	//!Overloading
+	/**
+	 * Overloading
+	*/
+	
+	/**
+	 * returns a field in this form by name
+	 * it's not relevant how deep the field is in this form if the field is *not* within a ClusterFormField
+	 *
+	 *@name __get
+	 *@access public
+	*/
+	public function __get($offset)
+	{
+		return $this->getField($offset);
+	}
+	
+	/**
+	 * currently set doesn't do anything
+	 *
+	 *@name __set
+	 *@access public
+	*/
+	public function __set($offset, $value)
+	{
+			// currently there is no option to overload a form with fields
+	}
+	
+	/**
+	 * returns if a field exists in this form
+	 *
+	 *@name __isset
+	 *@access public
+	*/
+	public function __isset($offset)
+	{
+			return $this->isField($offset);
+	}
+
 		
 }

@@ -1,15 +1,13 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 05.03.2013
-  * $Version 1.5.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Base class for _every_ Goma SoftType-Handler.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\Framework
+ * @version	1.5.12
+ */
 abstract class g_SoftwareType {
 	/**
 	 * file-name of the current file
@@ -517,7 +515,7 @@ abstract class g_SoftwareType {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
 		
-		if(strpos(@file_get_contents("http://goma-cms.org"), "<html")) {
+		if(strpos(@file_get_contents("https://goma-cms.org"), "<html")) {
 			self::$gomaAvailable = true;
 			return true;
 		} else {
@@ -539,12 +537,13 @@ abstract class g_SoftwareType {
 			return false;
 		}
 		
-		$url = "http://goma-cms.org/apps/api/v1/json/app/" . $name;
+		$url = "https://goma-cms.org/apps/api/v1/json/app/" . $name;
 		
 		if(isset($version)) {
 			$url .= "/" . $version;
 		}
 		
+		$url .= "/";
 		$url .= "?framework=" . urlencode(GOMA_VERSION . "-" . BUILD_VERSION);
 		$url .= "&current=".urlencode($currVersion);
 		$url .= "&base_uri=" . urlencode(BASE_URI);
@@ -647,10 +646,15 @@ abstract class g_SoftwareType {
 }
 
 /**
- * represents the framework
+ * The Software-Handler for Framework-files. The type of the file is "framework".
  *
- *@name G_FrameworkSoftwareType
-*/
+ * See the topic about info.plist for more information about types.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\Framework
+ * @version	1.5.12
+ */
 class G_FrameworkSoftwareType extends G_SoftwareType {
 	/**
 	 * type is "framework"
@@ -1004,10 +1008,15 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 }
 
 /**
- * represents the installed application
+ * The Software-Handler for Goma-Apps. The type of the file is "backup".
  *
- *@name G_AppSoftwareType
-*/
+ * See the topic about info.plist for more information about types.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\Framework
+ * @version	1.5.12
+ */
 class G_AppSoftwareType extends G_SoftwareType {
 	/**
 	 * type is backup
@@ -1026,7 +1035,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 	public function saveFormData($data) {
 		$_data = $data["installData"];
 		
-		
 		if(!is_array($_data["postflightCode"])) {
 			$_data["postflightCode"] = array($_data["postflightCode"]);
 		}
@@ -1035,15 +1043,23 @@ class G_AppSoftwareType extends G_SoftwareType {
 			$_data["postflightCode"][] = "<?php removeProject(".var_export(PROJECT_LOAD_DIRECTORY, true).");";
 		}
 		
+		if(isset($data["type"]) && $data["type"] == "copyconfig") {
+			$data["folder"] = APPLICATION;
+		}
+		
 		$_data["installFolders"]["destination"] = ROOT . $data["folder"];
 		
-		$info["db"] = array(
-			"user"	=> $data["dbuser"],
-			"db"	=> $data["dbname"],
-			"pass"	=> $data["dbpwd"],
-			"host"	=> $data["dbhost"],
-			"prefix"=> $data["tableprefix"]
-		);
+		$info = array();
+		
+		if(!isset($data["type"]) || $data["type"] != "copyconfig") {
+			$info["db"] = array(
+				"user"	=> $data["dbuser"],
+				"db"	=> $data["dbname"],
+				"pass"	=> $data["dbpwd"],
+				"host"	=> $data["dbhost"],
+				"prefix"=> $data["tableprefix"]
+			);
+		}
 		
 		$domain = isset($data["domain"]) ? $data["domain"] : null;
 		
@@ -1052,6 +1068,13 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		// write version file
 		$_data["postflightCode"][] = '<?php FileSystem::write('.var_export($data["folder"] . "/version.php", true).', "<?php \$version = '.var_export($_data["version"], true).';");';
+		
+		// templates
+		$_data["postflightCode"][] = '<?php $dir = "'.$data["installFolders"]["source"].'/../templates"; if(file_exists($dir)) foreach(scandir($dir) as $tpl) {
+			if(file_exists($dir . "/" . $tpl . "/info.plist")) {
+				FileSystem::move($dir . "/" . $tpl, ROOT . "tpl/" . $tpl);
+			}
+		}';
 		
 		return $_data;
 	}
@@ -1455,6 +1478,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 		if(!isset($info["version"]))
 			return false;
 		
+		$data["version"] = $info["version"];
+		
 		// check if we have a full backup
 		if($info["backuptype"] != "full") {
 			$data["installable"] = false;
@@ -1473,6 +1498,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
 		
 		FileSystem::requireDir($dir);
+		
+		
 		
 		// check if we use install-method
 		if($forceCompleteRestore || $appInfo["name"] != ClassInfo::$appENV["app"]["name"] || !file_exists(ROOT . APPLICATION . "/config.php")) {
@@ -1507,17 +1534,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 				$default = "myproject";
 			} else {
 				$default = null;
-			}
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				if(file_exists(ROOT . DOMAIN_LOAD_DIRECTORY)) {
-					@rename(ROOT . DOMAIN_LOAD_DIRECTORY, ROOT . DOMAIN_LOAD_DIRECTORY . time());
-				}
-				
-				if(DOMAIN_LOAD_DIRECTORY != "mysite") {
-					$default = DOMAIN_LOAD_DIRECTORY;
-					$disableDir = true;
-				}
 			}
 			
 			// get information for config.php
@@ -1558,7 +1574,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 			$data["installType"] = "install";
 			
 			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database");'
+				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database"); copy('.var_export(ROOT . APPLICATION . "/config.php", true).', '.var_export($dir . "/backup/config.php", true).');'
 			);
 			
 			$data["postflightCode"] = array(
@@ -1585,17 +1601,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 				$default = "myproject";
 			} else {
 				$default = null;
-			}
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				if(file_exists(ROOT . DOMAIN_LOAD_DIRECTORY)) {
-					@rename(ROOT . DOMAIN_LOAD_DIRECTORY, ROOT . DOMAIN_LOAD_DIRECTORY . time());
-				}
-				
-				if(DOMAIN_LOAD_DIRECTORY != "mysite") {
-					$default = DOMAIN_LOAD_DIRECTORY;
-					$disableDir = true;
-				}
 			}
 			
 			// get information for config.php
@@ -1651,7 +1656,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		$tables = ClassInfo::Tables("user");
 		$tables = array_merge($tables, ClassInfo::Tables("history"));
-		$tables = array_merge($tables, ClassInfo::Tables("permission"));
+		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
 				$tables = array_merge($tables, ClassInfo::Tables($model));
@@ -1768,10 +1773,15 @@ class G_AppSoftwareType extends G_SoftwareType {
 
 
 /**
- * represents the installed expansions
+ * The Software-Handler for Extensions. The type of the file is "expansion".
  *
- *@name G_ExpansionSoftwareType
-*/
+ * See the topic about info.plist for more information about types.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\Framework
+ * @version	1.5.12
+ */
 class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * type is backup

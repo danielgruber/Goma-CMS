@@ -2,27 +2,13 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 12.12.2012
   * $Version 1.0
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-interface Notifier {
-	/**
-	 * returns information about notification-settings of this class
-	 * these are:
-	 * - title
-	 * - icon
-	 * this API may extended with notification settings later
-	 * 
-	 *@name NotifySettings
-	 *@access public
-	*/
-	public static function NotifySettings();
-}
 
 class Notification extends Object {
 	/**
@@ -38,6 +24,8 @@ class Notification extends Object {
 	public static function notify($class, $text = "", $title = null, $type = null) {
 		if(!isset($type))
 			$type = "notification";
+		
+		$type = strtolower($type);
 		
 		gloader::load("notifications");
 		Resources::add("notifications.css", "css");
@@ -57,6 +45,8 @@ class Notification extends Object {
 		
 		if($type == "notification") {
 			Resources::addJS("$(function(){ goma.ui.Notifications.notify(".var_export($class, true).",".var_export(parse_lang($title), true).", ".var_export($icon, true).", ".var_export($text, true)."); });");
+		} else if($type == "pushnotification" && PushController::$pusher) {
+			PushController::triggerToUser("notification", array($class, parse_lang($title), $icon, $text));
 		} else {
 			// other types are unsupported right now
 			throwError(6, "PHP-Error", "Unsupported notification type " . $type);

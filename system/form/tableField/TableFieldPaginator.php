@@ -4,8 +4,8 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 31.08.2012
   * $Version - 1.0
  */
@@ -53,7 +53,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 				$action = new TableField_FormAction($tableField, "setPage" . $data["page"], $data["page"], "setPage", array("page" => $data["page"]));
 				$view->push(array("field" => $action->field()));
 			} else {
-				$view->push(array("field" => $data["page"]));
+				$view->push(array("field" => '<span class="active-page">' . $data["page"] . '</span>'));
 			}
 		}
 		

@@ -2,17 +2,17 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
-  * last modified: 26.05.2012
-  * $Version 2.1
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 15.09.2012
+  * $Version 2.1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 loadlang('backup');
 
-class InstallController extends RequestHandler {
+class InstallController extends Controller {
 	/**
 	 * url_handlers
 	*/
@@ -172,7 +172,7 @@ class InstallController extends RequestHandler {
 		$files = scandir(APP_FOLDER . "data/restores/");
 		foreach($files as $file) {
 			if(preg_match('/\.gfs$/i', $file)) {
-				$backups[] = $file;
+				$backups[$file] = $file;
 			}
 		}
 		
@@ -182,7 +182,7 @@ class InstallController extends RequestHandler {
 		$form = new Form($this, "selectRestore", array(
 			new Select("backup", lang("install.backup"), $backups)
 		), array(
-			new FormAction("submit", lang("install.restore"))
+			new FormAction("submit", lang("install.restore"), "submitSelectRestore")
 		));
 		
 		$form->setSubmission("submitSelectRestore");
@@ -215,12 +215,6 @@ class InstallController extends RequestHandler {
 			
 		if(file_exists(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")))) {
 			$gfs = new GFS(APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
-			if(!$gfs->valid) {
-				if($gfs->error == 1) {
-					return lang("file_perm_error") . " (<strong>installer/data/restores/" . text::protect(basename($this->getParam("restore"))) ."</strong>)";
-				}
-				return "Package corrupded.";
-			}
 			$data = $gfs->parsePlist("info.plist");
 			$t = G_SoftwareType::getByType($data["type"], APP_FOLDER . "data/restores/" . basename($this->getParam("restore")));
 			
@@ -342,5 +336,25 @@ class InstallController extends RequestHandler {
 		} else {
 			return "file not found";
 		}
+	}
+	
+	/**
+	 * returns an array of the wiki-article and youtube-video for this controller
+	 *
+	 *@name helpArticle
+	 *@access public
+	*/
+	public function helpArticle() {
+		
+		if($this->getParam("action") == "installapp")
+			if(isset($_SESSION["install"]))
+				return array("yt" => "QcIBX3Rh0RA#t=03m40s");
+			else
+				return array("yt" => "QcIBX3Rh0RA#t=03m18s");
+		
+		if($this->getParam("action") == "install")
+			return array("yt" => "QcIBX3Rh0RA#t=03m12s");
+		
+		return array("yt" => "QcIBX3Rh0RA#t=03m08s");
 	}
 }

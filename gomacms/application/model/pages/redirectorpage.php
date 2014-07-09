@@ -2,10 +2,10 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.0.3
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 04.04.2013
+  * $Version 1.0.4
 */ 
 
 defined("IN_GOMA") OR die("");
@@ -31,7 +31,7 @@ class redirector extends Page
 		public function getForm(&$form)
 		{
 				parent::getForm($form);
-				$form->add(new textField('data', $GLOBALS['lang']['url']),0, "content");
+				$form->add(new textField('data', lang("URL")), null, "content");
 				
 				$form->addValidator(new requiredFields(array("data")), "requireURL");
 		}

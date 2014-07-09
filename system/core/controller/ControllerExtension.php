@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 19.02.2012
 */
 
@@ -55,7 +55,7 @@ abstract class ControllerExtension extends Controller implements ExtensionModel
 				{
 						throwError(20,'PHP-Error', '$object isn\'t a object in '.__FILE__.' on line '.__LINE__.'');
 				}
-				if(class_exists($object->class))
+				if(class_exists($object->classname))
 				{
 						$this->owner = $object;
 				} else

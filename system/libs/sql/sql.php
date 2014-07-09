@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.02.2013
-  * $Version 2.2.3
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 12.08.2013
+  * $Version 2.2.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,6 +32,11 @@ class SQL extends object
 		 *@use: count queries
 		**/
 		static $queries = 0;
+		
+		/**
+		 * with this var you can freeze error-reporting.
+		*/
+		static $track = true;
 		
 		/**
 		 * factory - selects the sql-driver
@@ -138,7 +143,7 @@ class SQL extends object
 				//echo $sql . "\n";
 				//logging($_sql);
 				
-				if($track)
+				if($track && self::$track)
 					self::$last_query = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql);
 				
 				if(PROFILE) Profiler::mark("sql::query");
@@ -155,7 +160,7 @@ class SQL extends object
 				}
 			
 				
-				if(!$result && $track) {
+				if(!$result && $track && self::$track) {
 					self::$error = self::$driver->error();
 					self::$errno = self::$driver->errno();
 				}
@@ -461,8 +466,9 @@ class SQL extends object
 		 *@param array - where
 		 *@param bool - if to include the WHERE
 		 *@param array - to set field tables if you have various multi-table-fields
+		 *@param array - coliding fields
 		*/
-		static function extractToWhere($where, $includeWhere = true, $DBFields = array()) {
+		static function extractToWhere($where, $includeWhere = true, $DBFields = array(), $colidingFields = array()) {
 			// WHERE
 			$sql = "";
 			if(is_array($where) && count($where) > 0) {
@@ -487,46 +493,72 @@ class SQL extends object
 						}
 					}
 					
+					// patch for sub-queries
 					$a = 0;
 					$field = trim($field);
 					if(_ereg('^[0-9]+$', $field)) {
 						if(is_array($value)) {
-							$sql .= " ( ".self::extractToWhere($value, false, $DBFields)." ) ";
+							$sql .= " ( ".self::extractToWhere($value, false, $DBFields, $colidingFields)." ) ";
 						} else if(is_string($value)) {
 							$sql .= " ( " . $value . " ) ";
 						}
 						continue;
 					}
 					
-					
-					
+					// patch for coliding fields
+					if(!isset($DBFields[$field]) && isset($colidingFields[$field]) && count($colidingFields[$field]) > 0) {
+						$sql .= " ( ";
+						
+						$b = 0;
+						
+						foreach($DBFields[$field] as $alias) {
+							if($b == 0)
+								$b++;
+							else
+								$sql .= " OR ";
+							$sql .= "(".$alias.".".$field." IS NOT NULL AND ";
+							$sql .= self::parseValue($alias . "." . $field, $value);
+							$sql .= ")";
+						}
+						$sql .= " ) ";
+						continue;
+					}
 						
 					
 					if(isset($DBFields[$field])) {
 						$field = $DBFields[$field] . "." . $field;
 					}
 					
-					if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<")) {
-						if($value[0] == "LIKE") {
-							$sql .= ' '.convert::raw2sql($field).' '.(defined("SQL_LIKE") ? SQL_LIKE : "LIKE").' "'.convert::raw2sql($value[1]).'"';
-						} else {
-							$sql .= ' '.convert::raw2sql($field).' '.$value[0].' "'.convert::raw2sql($value[1]).'"';
-						}
-						
-					} else if(is_array($value)) {
-						$sql .= ' '.convert::raw2sql($field).' IN ("'.implode('","', array_map(array("convert", "raw2sql"), $value)).'")';
-					} else {
-						$sql .= ' '.convert::raw2sql($field).' = "'.convert::raw2sql($value).'"';
-					}
-					$sql .= "";
+					
+					$sql .= self::parseValue($field, $value);
 				}
 			} else if(is_string($where)) {
 				if($includeWhere)
 					$sql .= " WHERE ";
 				
-				$sql .= $this->where;
+				$sql .= $where;
 			}
 			return $sql;
+		}
+		
+		/**
+		 * returns the part of parsing value attribute
+		 *
+		 *@name parseValue
+		*/
+		static function parseValue($field, $value) {
+			if(is_array($value) && count($value) == 2 && isset($value[1], $value[0]) && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "!=" || $value[0] == "<" || $value[0] == ">=" || $value[0] == "<=" || $value[0] == "<>")) {
+				if($value[0] == "LIKE") {
+					return ' '.convert::raw2sql($field).' '.(defined("SQL_LIKE") ? SQL_LIKE : "LIKE").' "'.convert::raw2sql($value[1]).'"';
+				} else {
+					return ' '.convert::raw2sql($field).' '.$value[0].' "'.convert::raw2sql($value[1]).'"';
+				}
+				
+			} else if(is_array($value)) {
+				return ' '.convert::raw2sql($field).' IN ("'.implode('","', array_map(array("convert", "raw2sql"), $value)).'")';
+			} else {
+				return ' '.convert::raw2sql($field).' = "'.convert::raw2sql($value).'"';
+			}
 		}
 }
 

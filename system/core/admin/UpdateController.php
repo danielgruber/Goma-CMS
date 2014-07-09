@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 18.12.2012
   * $Version 2.2.2
 */   
@@ -40,16 +40,20 @@ class UpdateController extends adminController {
 	*/
 	public function index() {
 		$view = new ViewAccessableData();
-		G_SoftwareType::forceLiveDB();
-		$updates = G_SoftwareType::listUpdatePackages();
-		foreach($updates as $name => $data) {
-			$data["secret"] = randomString(20);
-			if(!isset($data["AppStore"])) {
-				$_SESSION["updates"][$data["file"]] = $data["secret"];
-			} else {
-				$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+		if(isset($_GET["noJS"])) {
+			G_SoftwareType::forceLiveDB();
+			$updates = G_SoftwareType::listUpdatePackages();
+			foreach($updates as $name => $data) {
+				$data["secret"] = randomString(20);
+				if(!isset($data["AppStore"])) {
+					$_SESSION["updates"][$data["file"]] = $data["secret"];
+				} else {
+					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+				}
+				$updates[$name] = $data;
 			}
-			$updates[$name] = $data;
+		} else {
+			$updates = array();
 		}
 		
 		$updates = new DataSet($updates);

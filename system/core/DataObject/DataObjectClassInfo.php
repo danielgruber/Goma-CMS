@@ -1,14 +1,13 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.01.2013
-  * $Version 4.1.2
-*/
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined('IN_GOMA') OR die(); 
 
+
+/**
+  * @package    goma framework
+  * @link       http://goma-cms.org
+  * @license:   LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author     Goma-Team
+  * @version 4.1.4
+*/
 class DataObjectClassInfo extends Extension
 {
 		/**
@@ -33,10 +32,10 @@ class DataObjectClassInfo extends Extension
 						$has_many = $c->GenerateHas_Many();
 						
 						// generate table_name
-						if(ClassInfo::hasStatic($c->class, "table")) {
-							$table_name = ClassInfo::getStatic($c->class, "table");
+						if(ClassInfo::hasStatic($c->classname, "table")) {
+							$table_name = ClassInfo::getStatic($c->classname, "table");
 						} else if(isset($c->table_name)) {
-							Core::deprecate("2.0", "Class ".$this->class." uses old table_name-Attribute, use static \$table instead.");
+							Core::deprecate("2.0", "Class ".$this->classname." uses old table_name-Attribute, use static \$table instead.");
 							$table_name = $c->table_name;
 						} else {
 							$table_name = $c->prefix . $class;
@@ -49,7 +48,7 @@ class DataObjectClassInfo extends Extension
 						
 						$searchable_fields = Object::hasStatic($class, "search_fields") ? Object::getStatic($class, "search_fields") : array();
 						if(isset($class->searchable_fields)) {
-							Core::deprecate("2.0", "Class ".$this->class." uses old searchable_fields-Attribute, use static \$search_fields instead.");
+							Core::deprecate("2.0", "Class ".$this->classname." uses old searchable_fields-Attribute, use static \$search_fields instead.");
 							$searchable_fields = array_merge($searchable_fields, $class->searchable_fields);
 						}
 						
@@ -65,15 +64,17 @@ class DataObjectClassInfo extends Extension
 								{
 										$fields = $value["fields"];
 										$indexes[$key]["fields"] = array();
-										$fields = explode(",", $fields);
+										if(!is_array($fields))
+											$fields = explode(",", $fields);
+											
 										$maxlength = $length = floor(333 / count($fields));
 										$fields_ordered = array();
-										
+			
 										foreach($fields as $field)
 										{
 												if(isset($db_fields[$field]))
 												{
-													if(_ereg('\(\s*([0-9]+)\s*\)', $db_fields[$field], $matches))
+													if(preg_match('/\(\s*([0-9]+)\s*\)/Us', $db_fields[$field], $matches))
 													{
 														
 														$fields_ordered[$field] = $matches[1] - 1;
@@ -97,16 +98,16 @@ class DataObjectClassInfo extends Extension
 													$maxlength = floor($indexlength / (count($fields) - $i));
 													$indexlength -= $length;
 													$indexes[$key]["fields"][] = $field;
-												} else if(_eregi('enum', $db_fields[$field])) {
+												} else if(preg_match('/enum/i', $db_fields[$field])) {
 													$indexes[$key]["fields"][] = $field;
 												} else {
 													$length = $maxlength;
 													// support for ASC/DESC
 													if(_eregi("(ASC|DESC)", $field, $matches)) {
 														$field = preg_replace("/(ASC|DESC)/i", "", $field);
-														$indexes[$key]["fields"][] = $field . "(".$length.") ".$matches[1]."";
+														$indexes[$key]["fields"][] = $field . " (".$length.") ".$matches[1]."";
 													} else {
-														$indexes[$key]["fields"][] = $field . "(".$length.")";
+														$indexes[$key]["fields"][] = $field . " (".$length.")";
 													}
 													unset($matches);
 												}
@@ -152,12 +153,14 @@ class DataObjectClassInfo extends Extension
 						// many-many
 						foreach($many_many as $key => $_class) {
 							$table = ClassInfo::$class_info[$class]["many_many_tables"][$key]["table"];
-							$many_many_tables_belongs = Object::instance($_class)->generateManyManyTables();
-							
-							foreach($many_many_tables_belongs as $data) {
-								if($data["table"] == $table) {
-									continue 2;
-								}
+							if(!ClassInfo::isAbstract($_class)) {
+    							$many_many_tables_belongs = Object::instance($_class)->generateManyManyTables();
+    							
+    							foreach($many_many_tables_belongs as $data) {
+    								if($data["table"] == $table) {
+    									continue 2;
+    								}
+    							}
 							}
 							
 							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$key] = array(

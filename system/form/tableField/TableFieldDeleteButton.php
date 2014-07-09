@@ -2,7 +2,7 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
   * last modified: 10.02.2013
   * $Version 1.0
@@ -105,7 +105,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 	*/
 	public function handleAction($tableField, $actionName, $arguments, $data) {
 		if($actionName == "deletebtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
+			HTTPResponse::redirect($tableField->externalURL() . "/deletebtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]));
 		}
 		return false;
 	}

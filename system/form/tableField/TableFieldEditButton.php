@@ -5,15 +5,15 @@
   *
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 10.02.2013
   * $Version - 1.0.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler, TableField_ActionProvider {
+class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler {
 	
 	/**
 	 * Add a column 'Actions'
@@ -73,12 +73,8 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			return;
 		}
 		
-		$action = new TableField_FormAction($tableField, "editbtn_" . $record->ID, lang("edit"), "editbtn_redirect", array("id" => $record->ID));
-		$action->addExtraClass("tablefield-editbutton");
-		
 		$data = new ViewAccessableData();
-		$data->link = $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode(getRedirect());
-		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/editButton.html");
+		return $data->customise(array("link" => $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/editButton.html");
 	}
 	
 	/**
@@ -93,26 +89,6 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 		return array(
 			'editbtn/$id' => "edit"
 		);
-	}
-	
-	/**
-	 * provide some actions of this tablefield
-	 *
-	 *@name getActions
-	 *@access public
-	*/
-	public function getActions($tableField) {
-		return array("editbtn_redirect");
-	}
-	
-	/**
-	 * handles the actions
-	*/
-	public function handleAction($tableField, $actionName, $arguments, $data) {
-		if($actionName == "editbtn_redirect") {
-			HTTPResponse::redirect($tableField->externalURL() . "/editbtn/" . $arguments["id"] . URLEND . "?redirect=" . urlencode(getRedirect()));
-		}
-		return false;
 	}
 	
 	/**

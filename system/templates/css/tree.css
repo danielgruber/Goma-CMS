@@ -1,140 +1,154 @@
 /**
   *@package goma
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2011  Goma-Team
-  * last modified: 10.12.2011
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 06.10.2013
 */
 
-.tree {
-	margin: 0;
-	padding: 0;
+.goma-tree, .goma-tree ul {
 	list-style: none;
-	overflow: hidden;
-	background: #eee;
-}
-.tree ul {
-	margin: 0;
-	list-style: none;
-	padding-left: 0px;
-	background-image: none;
-}
-.tree > li {
-	padding: 0 !important;
-}
-
-
-/* fix for IE6 */
-* html .hitarea {
-	display: inline;
-	float:none;
-	background: transparent;
-}
-
-
-.tree li { 
 	margin: 0;
 	padding: 0;
-	padding-left: 15px;
 }
-
-.tree li .a > .b > a {
-	color: #222;
-	display: block;
-}
-.tree li .a > .b > a span {
-	line-height: 18px;
-}
-.tree li .a > .b > a :hover {
-	text-decoration: none;
-}
-
-
-.tree li.collapsed > ul {
-	display: none;
-}
-.tree li.expanded > ul {
-	display: block;
-}
-
-.tree li div {
-	width: 9px;
-	height: 9px;
-	display: block;
-	position: absolute;
-	left: 4px;
-	top: 4px;
-	background: #ffffff;
-}
-.tree li div  a
-{
-	width: 9px;
-	height: 9px;
-	display: block;
-}
-
-.tree .a {
-	display: block;
-	margin: 0;
-	padding: 0;
-	margin-left: -300px;
-	padding-left: 300px;
-	height: 23px;
-	overflow: hidden;
-}
-
-.tree .a:hover {
-	background: url(../admin/images/tree_hover.png) repeat-x #555;
-	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
-}
-.tree .a:hover * {
-	color: #fff;
-}
-.tree .marked {
-	background: url(../admin/images/tree_hover.png) repeat-x;
-	color: #fff;
-	font-weight: bold;
-	text-shadow: -1px -1px 0px #666;
-}
-.tree .marked * {
-	color: #fff;
-}
-
-.tree .b {
-	padding: 4px;
-	position: relative;
+.goma-tree {
+	margin-left: -1em;
 	
+	 -webkit-user-select: none;
+       -moz-user-select: -moz-none;
+        -ms-user-select: none;
+            user-select: none;
 }
-.hitarea {
-	background: transparent !important;
+.goma-tree li {
+	position: relative;
+	margin-left: 1em;
 }
-.hitarea a {
-	margin: -4px -6px -9px -6px;
-	padding: 4px 9px 9px 6px;
-	background-position: 6px 6px !important;
+.goma-tree li .tree-wrapper {
+	display: block;
+	margin-left: -10em;
+	padding-left: 10em;
 }
-.tree li.collapsed > .a > .b > div > a {
-	background: transparent url(../admin/images/pfeil_close.png) no-repeat;
+.goma-tree li .tree-wrapper.node-area {
+	padding-left: 11.75em;
 }
-.tree li.expanded  > .a > .b > div > a { 
-	background: transparent url(../admin/images/pfeil.png) no-repeat;
+.goma-tree li .node-area {
+	padding: 0.25em;
+	padding-left: 2.5em;
+	display: block;
+	color: #000;
+	font-weight: normal;
+	text-decoration: none;
+	text-overflow: ellipsis;
+	
+	position: relative;
 }
-.tree li.collapsed > .marked > .b > div > a, .tree li.collapsed > .a:hover > .b > div > a {
-	background-image: url(../admin/images/pfeil_active_close.png);
+.goma-tree li.hidden > span > a > span.text-holder {
+	color: #555;
 }
-.tree li.expanded > .marked > .b > div > a, .tree li.expanded > .a:hover > .b > div > a {
-	background-image: url(../admin/images/pfeil_active.png);
+.goma-tree li.action .node-area {
+	color: #333;
+	font-style: italic
+}
+.goma-tree li .node-area .text-holder {
+	padding: 0.25em;
+	display: inline-block;
+}
+.goma-tree .tree_wrapper:hover, .goma-tree li.active > span, .goma-tree li > span:hover, .goma-tree li.marked > span, .goma-tree li > span.context-menu-active {
+	background: #ddd;
+}
+.goma-tree li .node-area .img-holder img {
+	padding-right: 0.25em;
+	margin-top: -0.063em;
+	height: 1em;
+	width: 1em;
+	position: absolute;
+	left: 1.5em;
+	top: 0.75em;
+}
+.goma-tree li .node-area .tree-bubbles {
+	float: right;
+	font-size: 0.75em;
+	height: 100%;
+	display: inline-block;
+	margin: 0.167em;
+}
+.goma-tree li .node-area .tree-bubbles span {
+	line-height: 1em;
+	padding: 0.5em;
+	margin: 0 0.167em;
+	display: inline-block;
+	
+	background: #008ed4;
+	color: #fff;
+	
+	-webkit-border-radius: 0.25em;
+	-moz-border-radius: 0.25em;
+	border-radius: 0.25em;
+}
+.goma-tree li .node-area .tree-bubbles span.yellow {
+	background: #f7ff7f;
+	color: #8c891a;
 }
 
-.tree .b { background: none; }
-.tree li.collapsable > .a > .b, .tree li.expandable > .a > .b { background-position: 0 -176px; }
-
-.tree li.last > .a > .b { background-position: 0 -1766px }
-.tree li.last > ul {
-	background-image: none;
+.goma-tree li .node-area .tree-bubbles span.orange {
+	background: #f0ad4e;
+	color: #80551b;
 }
-.tree a.page span { background-image: url(../../../images/icons/fatcow-icons/16x16/file.png); }
-.tree a span { text-transform: capitalize;  background-repeat: no-repeat; background-position: 0 0; }
-.tree .b, .tree .b a span { padding-left: 18px; display: block; } 
+.goma-tree li .node-area .tree-bubbles span.green {
+	background: #24ACB8;
+	color: #fff;
+}
+.goma-tree li .node-area .tree-bubbles span.grey {
+	background: #999;
+	color: #000;
+}
+.goma-tree li .node-area .tree-bubbles span.red {
+	background: #da097a;
+	color: #fff;
+}
+.goma-tree li .node-area .tree-bubbles span.purple {
+	background: #f79eff;
+	color: #a600ff;
+}
+
+.goma-tree li .hitarea {
+	position: absolute;
+	left: 0;
+	top: 0;
+	cursor: pointer;
+	padding: 0;
+	height: 0;
+	width: 0;
+	
+	z-index: 900;
+	
+	user-select: none;
+}
+.goma-tree li .hitarea a {
+	display: inline-block;
+}
+
+.goma-tree li.collapsed > .hitarea a span {
+	border-width: 0.375em 0.375em 0.375em 0.75em;
+	border-style: solid;
+	border-color: transparent transparent transparent #444;
+	display: inline-block;
+}
+.goma-tree li.collapsed > .hitarea a {
+	padding: 0.5em;
+}
+.goma-tree li.collapsed > .hitarea:hover a span {
+	border-left-color: #777;
+}
+.goma-tree li.expanded > .hitarea a span {
+	border-width: 0.75em 0.375em 0.375em 0.375em;
+	border-style: solid;
+	border-color:  #444 transparent transparent transparent;
+	display: inline-block;
+}
+.goma-tree li.expanded > .hitarea:hover a span {
+	border-top-color: #777;
+}
+.goma-tree li.expanded > .hitarea a {
+	padding: 0.69em 0.5em 0.19em 0.5em;
+}

@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 22.07.2012
   * $Version 1.0.1
 */
@@ -27,7 +27,7 @@ class ControllerClassInfo extends Extension {
 				
 				$allowed_actions = array();
 				foreach($c->callExtending("allowed_actions") as $actions) {
-					$allowed_actions = array_merge($allowed_actions, $actions);
+					$allowed_actions = array_merge($actions, $allowed_actions);
 					unset($actions);
 				}
 				if(count($allowed_actions) > 0) {
@@ -38,7 +38,7 @@ class ControllerClassInfo extends Extension {
 				
 				$url_handlers = array();
 				foreach($c->callExtending("url_handlers") as $handlers) {
-					$url_handlers = array_merge($url_handlers, $handlers);
+					$url_handlers = array_merge($handlers, $url_handlers);
 					unset($handlers);
 				}
 				

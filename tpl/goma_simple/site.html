@@ -14,8 +14,9 @@
 		</style>
 	</head>
 	<body>
-		<div id="document">
-			<% INCLUDE "frontedbar.html" %>
+		<div id="document" itemscope itemtype="http://schema.org/WebPage">
+			<meta itemprop="name" content="<% title() %>" />
+			<% INCLUDE "frontendbar.html" %>
 			<!--<div id="topline"><div></div></div>-->
 			
 			<div id="header">
@@ -45,13 +46,15 @@
 						<input type="image" src="tpl/{$_cms_tpl}/images/loope.png" value="{$_lang_search.search}" />
 					</form>
 					<h3><a href="./">{$_cms_title}</a></h3>
-					<div id="navi">
+					<div id="navi" itemscope itemtype="http://schema.org/SiteNavigationElemente">
 						<ul>
-							<% CONTROL mainbar(1) %>
-								<li>
-									<a href="{$mainbar.url}" class="{$mainbar.LinkClass}">$mainbar.mainbartitle.text()</a>
-								</li>
-							<% ENDCONTROL %>	
+							<% CACHED("mainbar", mainbar(1).max("last_modified")) %>
+								<% CONTROL mainbar(1) %>
+									<li>
+										<a href="{$mainbar.url}" class="{$mainbar.LinkClass}">$mainbar.mainbartitle.text()</a>
+									</li>
+								<% ENDCONTROL %>
+							<% ENDCACHED %>
 						</ul>
 					</div>
 					<div class="clear"></div>
@@ -61,17 +64,16 @@
 			
 			
 			<div id="content">
-				<div class="content_wrapper">
+				<div class="content_wrapper" itemprop="mainContentOfPage">
 					
-					
-					<div id="breadcrumb">
-						<div>
-							{$_lang_you_are_here}: <a href="./">{$_lang_homepage} </a>
+					<% IF NOT is_homepage() %>
+						<div id="breadcrumb" itemprop="breadcrumb">
+							<a href="./">{$_lang_homepage} </a>
 							<% CONTROL breadcrumbs() AS $breadcrumb %>
 								{BREADCRUMB_SEPERATOR} <a href="{$breadcrumb.link}">{$breadcrumb.title}</a>
 							<% ENDCONTROL %>
 						</div>
-					</div>
+					<% END %>
 					
 					
 					$addcontent
@@ -91,7 +93,7 @@
 				</div>
 			</div>
 			
-			<div id="footer">
+			<div id="footer" itemscope itemtype="http://schema.org/WPFooter">
 				<div class="content_wrapper">
 					<div class="branding">
 						Powered by <a target="_blank" href="http://goma-cms.org">Goma</a>

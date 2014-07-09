@@ -1,21 +1,18 @@
 <?php
-/** >
- /*****************************************************************
- * Goma - Open Source Content Management System
- * if you see this text, please install PHP 5.3 or higher        *
- *****************************************************************
- *@package goma framework
- *@subpackage framework loader
- *@link http://goma-cms.org
- *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
- *@Copyright (C) 2009 - 2013  Goma-Team
- * last modified: 06.03.2013
- * $Version 2.6.8
+/*
+ * Main file of Goma-CMS.
+ * 
+ * @package Goma\System
+ * 
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * 
+ * @version 2.6.8
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 
-/**
+/*
  * first check if we use a good version ;)
  *
  * PHP 5.2 is necessary
@@ -55,7 +52,6 @@ if (isset($_REQUEST["profile"]) || defined("PROFILE")) {
 	require_once (dirname(__FILE__) . '/core/profiler.php');
 	Profiler::init();
 	defined("PROFILE") OR define("PROFILE", true);
-	Profiler::mark("init");
 } else {
 	define("PROFILE", false);
 }
@@ -107,33 +103,33 @@ define('TIME', DATE);
 define("NOW", DATE);
 
 /**
- * status-constans for config.php
+ * status-constants for config.php
  */
 define('STATUS_ACTIVE', 1);
 define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("BUILD_VERSION", "074");
-define("GOMA_VERSION", "2.0b6");
+define("GOMA_VERSION", "2.0b10");
+define("BUILD_VERSION", "089");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
 
 chdir(ROOT);
 
-$f = @disk_free_space("/");
-if($f !== null && $f !== "" && $f !== false) {
-	// check for disk-quote
-	$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-	define("GOMA_FREE_SPACE", $free);
-	if($free / 1024 / 1024 < 10) {
-		header("HTTP/1.1 500 Server Error");
-		die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-	}
-} else {
-	define("GOMA_FREE_SPACE", 100000000000);
-}
+/*$f = @disk_free_space("/");
+ if($f !== null && $f !== "" && $f !== false) {
+ // check for disk-quote
+ $free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
+ define("GOMA_FREE_SPACE", $free);
+ if($free / 1024 / 1024 < 10) {
+ header("HTTP/1.1 500 Server Error");
+ die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
+ }
+ } else {*/
+define("GOMA_FREE_SPACE", 100000000000);
+//}
 
 // require data
 
@@ -145,7 +141,7 @@ require_once (FRAMEWORK_ROOT . 'core/applibs.php');
 require_once (FRAMEWORK_ROOT . 'core/Object.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassManifest.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassInfo.php');
-require_once (FRAMEWORK_ROOT . 'core/requesthandler.php');
+require_once (FRAMEWORK_ROOT . 'core/controller/RequestHandler.php');
 require_once (FRAMEWORK_ROOT . 'libs/file/FileSystem.php');
 require_once (FRAMEWORK_ROOT . 'libs/template/tpl.php');
 require_once (FRAMEWORK_ROOT . 'libs/http/httpresponse.php');
@@ -154,9 +150,13 @@ require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
 if (PROFILE)
 	Profiler::unmark("core_requires");
+	
+	
 
 // set error-handler
 set_error_handler("Goma_ErrorHandler");
+
+set_exception_handler("Goma_ExceptionHandler");
 
 if (file_exists(ROOT . '_config.php')) {
 
@@ -215,7 +215,8 @@ if (file_exists(ROOT . '_config.php')) {
 			if (isset($data['domain'])) {
 				if (_eregi($data['domain'] . '$', $_SERVER['SERVER_NAME'])) {
 					$application = $data["directory"];
-					define("DOMAIN_LOAD_DIRECTORY", $data["domain"]);
+					define("DOMAIN_LOAD_DIRECTORY", $data["directory"]);
+
 					break;
 				}
 			}
@@ -249,22 +250,19 @@ date_default_timezone_set(DEFAULT_TIMEZONE);
 
 parseUrl();
 
-if (PROFILE)
-	Profiler::unmark("init");
-
 if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
 	writeServerConfig();
 }
 
 // some hacks for changes in .htaccess
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 404")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 ".ROOT_PATH."system/application.php", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 404 " . ROOT_PATH . "system/application.php", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
 }
 
 if (file_exists(ROOT . ".htaccess") && !strpos(file_get_contents(".htaccess"), "ErrorDocument 500")) {
-	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 ".ROOT_PATH."system/templates/framework/500.html", FILE_APPEND)) {
+	if (!file_put_contents(ROOT . ".htaccess", "\nErrorDocument 500 " . ROOT_PATH . "system/templates/framework/500.html", FILE_APPEND)) {
 		die("Could not write .htaccess");
 	}
 }
@@ -321,9 +319,6 @@ function loadFramework() {
 	}
 
 	if (PROFILE)
-		Profiler::mark("loadFramework");
-
-	if (PROFILE)
 		Profiler::mark("Manifest");
 
 	ClassInfo::loadfile();
@@ -334,11 +329,7 @@ function loadFramework() {
 	// set some object-specific vars
 	ClassInfo::setSaveVars("core");
 	ClassInfo::setSaveVars("object");
-
-	if (PROFILE)
-		Profiler::unmark("loadFramework");
-
-	// let's init Core
+		
 	Core::Init();
 }
 
@@ -377,8 +368,13 @@ function loadApplication($directory) {
 				}
 				define('DB_PREFIX', $GLOBALS["dbprefix"]);
 			}
-
-			define('DATE_FORMAT', $domaininfo['date_format']);
+			
+			$domaininfo['date_format_date'] = isset($domaininfo['date_format_date']) ? $domaininfo['date_format_date'] : "d.m.Y";
+			$domaininfo['date_format_time'] = isset($domaininfo['date_format_time']) ? $domaininfo['date_format_time'] : "H:i";
+			
+			define('DATE_FORMAT', $domaininfo['date_format_date'] . " - " . $domaininfo['date_format_time']);
+			define('DATE_FORMAT_DATE', $domaininfo['date_format_date']);
+			define('DATE_FORMAT_TIME', $domaininfo['date_format_time']);
 			define("SITE_MODE", $domaininfo["status"]);
 			define("PROJECT_LANG", $domaininfo["lang"]);
 
@@ -389,7 +385,7 @@ function loadApplication($directory) {
 				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver"]);
 			}
 
-		} else {
+		} else {			
 			define("DATE_FORMAT", "d.m.Y - H:i");
 			Core::setCMSVar("TIMEZONE", DEFAULT_TIMEZONE);
 		}
@@ -507,5 +503,10 @@ function parseUrl() {
 
 	$url = str_replace('//', '/', $url);
 
+	if(isset($_SERVER["REDIRECT_STATUS"]) && $_SERVER["REDIRECT_STATUS"] == 404 && MOD_REWRITE == true && !preg_match('/nginx/i', $_SERVER["SERVER_SOFTWARE"])) {
+		header("Location: " . BASE_URI . "index.php/" . $url);
+		exit;
+	}
+	
 	define("URL", $url);
 }

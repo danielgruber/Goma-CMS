@@ -1,8 +1,8 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 06.12.2012
   * $Version 1.2.1
 */
@@ -11,7 +11,9 @@ if(window.top != window) {
 	top.location.href = location.href;
 }
 
-function pages_pushPreviewURL(publish, state, usePublish) {
+//preloadLang(["view_site", "view_page"]);
+
+function pages_pushPreviewURL(publish, state, usePublish, title) {
 	if(publish !== false) {
 		$("#visit_webpage").attr("href", publish);	
 	} else {
@@ -31,13 +33,24 @@ function pages_pushPreviewURL(publish, state, usePublish) {
 		show_preview(publish, state, usePublish);
 		return false;	
 	});
+	
+	if(typeof title != "undefined") {
+		$("#visit_webpage .flex").html(lang("view_page").replace("%s", '<span class="page">' + title + "</span>"));
+	} else {
+		$("#visit_webpage .flex").html(lang("preview_site"));
+	}
 }
 
 function pages_unbindPreviewURL() {
 	$("#visit_webpage").unbind("click");
 	$("#visit_webpage").attr("href", ROOT_PATH);
 	$("#visit_webpage").removeClass("preview");
+	$("#visit_webpage .flex").html(lang("preview_website"));
 }
+
+$(function(){
+	goma.ui.bindUnloadEvent(goma.ui.getMainContent(), pages_unbindPreviewURL);
+})
 
 function show_preview(publish, state, usePublish) {
 	$("body").append('<div id="preview"></div>');
@@ -54,18 +67,12 @@ function show_preview(publish, state, usePublish) {
 		left: 0,
 		width: "100%",
 		height: "100%",
-		zIndex: 900
+		zIndex: 975
 	});
 	
 	$("#preview").html('<iframe src="'+state+'" frameBorder="0" name="previewFrame" id="previewFrame" width="100%"></iframe><div id="bottomBarWrapper"><div id="bottomBar"></div></div>');
-	
-	$("#bottomBarWrapper").css({
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		width: "100%",
-	});
-	$("#bottomBar").html('<a class="edit flatButton" href="#">&laquo; '+lang("edit")+'</a>&nbsp;<a href="'+state+'" target="_blank" class="new_window">'+lang("open_in_new_tab")+'</a><div class="previewLinks"><a href="'+publish+'" target="previewFrame" class="flatButton previewLink publish">'+lang("published_site")+'</a><a href="'+state+'" target="previewFrame" class="flatButton previewLink state active">'+lang("draft")+'</a></div><div class="clear"></div>');
+
+	$("#bottomBar").html('<a class="edit flatButton" href="#"><i class="fa fa-angle-left fa-2x"></i> '+lang("edit")+'</a><a href="'+state+'" target="_blank" class="new_window">'+lang("open_in_new_tab")+' <i class="fa fa-angle-right fa-2x"></i></a><div class="previewLinks"><a href="'+state+'" target="previewFrame" class="flatButton previewLink state active">'+lang("draft")+'</a><a href="'+publish+'" target="previewFrame" class="flatButton previewLink publish">'+lang("published_site")+'</a></div><div class="clear"></div>');
 	
 	$("#bottomBar .state, #bottomBar .publish").click(function(){
 		$("#bottomBar .state, #bottomBar .publish").removeClass("active");
@@ -76,9 +83,7 @@ function show_preview(publish, state, usePublish) {
 	
 	
 	if(publish === false) {
-		$("#bottomBar .publish").unbind("click");
-		$("#bottomBar .publish").removeAttr("href");
-		$("#bottomBar .publish").fadeTo(0, 0.4);
+		$("#bottomBar .publish").remove();
 	} else
 	if(typeof usePublish != "undefined" && usePublish === true) {
 		$("#bottomBar .publish").click();
@@ -128,6 +133,7 @@ function show_preview(publish, state, usePublish) {
 	});
 	
 	var current = state;
+	var current2 = publish;
 	var changeCount = -1;
 	$("#previewFrame").get(0).onload = function() {
 		interval = setInterval(function(){
@@ -143,10 +149,10 @@ function show_preview(publish, state, usePublish) {
 				return false;
 			}
 			
-			if(current != $("#previewFrame").get(0).contentWindow.location.href) {
+			if(current != $("#previewFrame").get(0).contentWindow.location.href && current2 != $("#previewFrame").get(0).contentWindow.location.href) {
 				current = $("#previewFrame").get(0).contentWindow.location.href;
 				changeCount++;
-				if(changeCount > 0) {
+				if(changeCount > 0 && current.match(/^http\:\/\//)) {
 					location.href = current;
 					$("#preview .edit").click();
 				}
@@ -154,4 +160,6 @@ function show_preview(publish, state, usePublish) {
 			
 		}, 500);
 	}
+	
+	return false;
 }

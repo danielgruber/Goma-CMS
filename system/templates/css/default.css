@@ -8,9 +8,24 @@
   * last modified: 17.09.2013
 */
 
-* {
-	margin: 0;
-	padding: 0;
+td, th {
+    padding: 0.5em;
+}
+table {
+    margin: 0.5em 0;
+}
+table[border="1"], table[border="1"] td, table[border="1"] th {
+    border: 1px solid #aaa;
+    border-collapse:collapse;
+}
+table[border="1"] tr:first-child td, table[border="1"] tr:first-child th {
+    background: #ddd;
+}
+table[border="1"] tr:nth-child(2n+1) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #eee;
+}
+table[border="1"] tr:nth-child(2n) td, table[border="1"] tr:nth-child(2n+1) th {
+    background: #fff;
 }
 
 td, th {
@@ -44,12 +59,6 @@ body, html {
 	min-height: 100%;
 }
 
-/* box-sizing */
-html, body, html * {    
-    box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-}
 
 * {
 	line-height: 1.25em;
@@ -145,14 +154,17 @@ dfn {
 /* SELECTION */
 
 ::-moz-selection { 
-	background: #a1d7ff; 
+	background: @selection-color;
+	color: #fff;
 	text-shadow: none; 
+	color: #fff;
 }
 ::selection { 
-	background: #a1d7ff; 
+	background: @selection-color;
+	color: #fff;
 	text-shadow: none; 
+	color: #fff;
 }
-
 /* Form */
 /**
  * Correct margin displayed oddly in IE 6/7.
@@ -235,6 +247,7 @@ input[type="checkbox"], input[type="radio"] {
 .clear
 {
 	clear: both;
+	float: none !important;
 }
 
 /* placeholders */
@@ -281,4 +294,14 @@ html[xmlns] .clearfix {
  
 * html .clearfix {
 	height: 1%;
+}
+
+body.fileupload-drag {
+	background: #eee;
+}
+
+body.fileupload-drag-over {
+	background: #eee;
+	-webkit-box-shadow: inset 0 0 0.5em #ccc;
+	box-shadow: inset 0 0 0.5em #ccc;
 }

@@ -2,8 +2,8 @@
 /**y
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 02.04.2012
   * $Version 1.3
 */
@@ -64,7 +64,7 @@ class ProfileController extends FrontedController {
 	public function index($id = null) {
 		$id = ($id == null) ? $this->getParam("id") : $id;
 		if(!$id && !member::login()) {
-			HTTPResponse::redirect(BASE_URI . "profile/login/?redirect=".urlencode(ROOT_PATH . BASE_SCRIPT . "profile/")."");
+			HTTPResponse::redirect(BASE_URI);
 			exit;
 		}
 		
@@ -112,16 +112,15 @@ class ProfileController extends FrontedController {
 			member::doLogout();
 		// if a user goes to login and is logged in, we redirect him home
 		} else if(member::login()) {
-			HTTPResponse::redirect(getRedirection(true));
+			HTTPResponse::redirect(getRedirect(true));
 		}
-			
 			
 		// if no login and pwd and username isset, we login
 		if(isset($_POST['user'], $_POST['pwd']))
 		{
 				if(member::doLogin($_POST['user'], $_POST['pwd']))
 				{
-						HTTPResponse::redirect(getRedirection(true));
+						HTTPResponse::redirect(getRedirect(true));
 				}
 		}
 		
@@ -151,6 +150,6 @@ class ProfileController extends FrontedController {
 				member::doLogout();
 			}
 							
-			HTTPResponse::redirect(getRedirection(true));
+			HTTPResponse::redirect(getRedirect(true));
 	}
 }

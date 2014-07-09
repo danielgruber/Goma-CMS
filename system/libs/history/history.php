@@ -2,10 +2,10 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 27.02.2013
-  * $Version 1.0.6
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
+  * last modified: 12.04.2013
+  * $Version 1.0.8
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -82,7 +82,7 @@ class History extends DataObject {
 		
 		// if it's an object, get the class-name from the object
 		if(is_object($class))
-			$class = $class->class;
+			$class = $class->classname;
 		
 		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))
@@ -117,7 +117,11 @@ class History extends DataObject {
 		));
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
-		return $record->write(true, true, 2, true, false);
+		$return = $record->write(true, true, 2, true, false);
+		if(PushController::$pusher && in_array($record->dbobject, History::supportHistoryView())) {
+			PushController::trigger("history-update", array("rendering" => $record->renderWith("history/event.html")));
+		}
+		return $return;
 	}
 	
 	/**
@@ -377,15 +381,29 @@ class History extends DataObject {
 		$data = $this->HistoryData();
 		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
 	}
-}
-
-interface HistoryData {
+	
 	/**
-	 * returns text what to show about the event
+	 * clean up DB
 	 *
-	 *@name generateHistoryData
-	 *@access public
-	 *@return array("icon" => ..., "text" => ...)
+	 *@name cleanUpDB
+	 *@åccess public
 	*/
-	public static function generateHistoryData($record);
+	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
+		parent::cleanUpDB();
+		
+		$id = null;
+		$sql = "SELECT id FROM ".DB_PREFIX.$this->classname." WHERE last_modified < " . (NOW - 90 * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
+		if ($result = SQL::Query($sql)) {
+			if($row = SQL::fetch_object($result)) {
+				$id = $row->id;
+			}
+		}
+		
+		// delete
+		$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
+		$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE publishedid < ".$id."";
+		
+		SQL::Query($sqlDeleteData);
+		SQL::Query($sqlDeleteState);
+	}
 }

@@ -3,8 +3,8 @@
   *@todo comments
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 17.12.2012
 */
 
@@ -39,17 +39,14 @@ class SearchController extends FrontedController
         }
 }
 
-class SearchPageExtension extends DataObjectExtension
+class SearchPageExtension extends DataObjectExtension implements argumentsSearchQuery
 {
-        public function argumentSearchSQL($query, $search)
+        public function argumentSearchSQL($query, $search, $version, $filter, $sort, $limit, $join, $forceClasses)
         {
-                $_query = Object::instance("boxes")->buildSearchQuery(array("seiteid"));
-                
-                // override default fields, because goma loads as default id, class_name, autorid and last_modfied
-                $_query->fields = array("seiteid" => "seiteid");               
+                $_query = Object::instance("boxes")->buildSearchQuery($search);
                 
                 // now generate query and new addWhere
-                $query->addFilter(array("OR", "pages.id IN ( ".$_query->build() ." )" ));                
+                $query->addFilter(array("OR", "pages.id IN ( ".$_query->build("seiteid") ." )" ));                
                 
                 return $query;
         }

@@ -8,77 +8,16 @@
 	<tr>
 		<td class="td left">
 			<div class="LaM_tabs">
-				<ul class="tabArea">
-					<% IF NOT  $addmode %>
-						<li class="active">
-					<% ELSE %>
-						<li>
-					<% END %>
-						<a class="tree" href="{$adminuri}">
-							<% lang("tree", "Tree") %>
-						</a>
-					</li>
-				<% IF  $addmode %>
-						<li class="active">
-					<% ELSE %>
-						<li>
-					<% END %>
-						<a class="create" href="{$adminuri}add/">
-							<% lang("Create", "Create") %>
-						</a>
-					</li>
-				</ul>
-				<% IF NOT  $addmode %>
-					<div class="create" style="display: none;">
-				<% ELSE %>
-					<div class="create">
-				<% END %>
-					<ul class="create">
-						<% CONTROL types() %>
-							<% IF $types.value == $activeAdd %>
-								<li class="active">
-							<% ELSE %>
-								<li>
-							<% END %>
-								<a href="{$adminuri}add/{$types.value.url()}{URLEND}" class="node {$types.value}">
-									<span>$types.title.text()</span>
-								</a>
-							</li>
-						<% ENDCONTROL %>
-					</ul>
-				</div>
-				<% IF NOT  $addmode %>
-					<div class="tree">
-				<% ELSE %>
-					<div class="tree" style="display: none;">
-				<% END %>
+				<div class="tree" style="display: none;">
 					<div class="classtree">
 						<div class="treesearch">
 							<form method="get" action="">
 								<input type="text" placeholder="{$_lang_search}" name="searchtree" value="{$searchtree}" />
+								<a class="create ui-ajax" href="{$adminuri}add/" title="{$_lang_Create}"></a>
 							</form>
 						</div>
 						<div class="treewrapper">
 							$SITETREE
-						</div>
-					</div>
-					<div class="legend">
-						<div>
-							<h2>{$_lang_legend}</h2>
-							<% CONTROL legend() %>
-								<div class="{$legend.class} legendpoint">
-									<span>
-										<% IF $legend.checkbox AND $legend.checked %> 
-											<input name="$legend.class" type="checkbox" checked="checked" /> 
-										<% ELSE IF $legend.checkbox %> 
-											<input name="$legend.class" type="checkbox" /> 
-										<% ELSE %> 
-											<input name="$legend.class" type="checkbox" checked="checked" disabled="disabled" />
-										<% END %>
-										{$legend.title}
-									</span>
-								</div>
-							<% ENDCONTROL %>
 						</div>
 					</div>
 				</div>
@@ -87,7 +26,13 @@
 		<td class="td main">
 			<a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /> {$_lang_toggle_sidebar}</a>
 			<div class="inner">
-				$CONTENT
+				<% IF $CONTENT %>
+					$CONTENT
+				<% ELSE %>
+					<div class="no_item">
+						<span>{$_lang_no_item_selected}</span>
+					</div>
+				<% END %>
 			</div>
 		</td>
 	</tr>

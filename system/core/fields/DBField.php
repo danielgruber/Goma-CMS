@@ -1,15 +1,11 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
-  * last modified: 24.03.2013
-  * $Version 1.4.5
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Base-Interface for all DB-Fields.
+ *
+ * @package		Goma\Core\Model
+ * @version		1.5
+ */
 interface DataBaseField {
 	/**
 	 * constructor
@@ -173,6 +169,7 @@ class DBField extends Object implements DataBaseField
 			$this->args = $args;
 			parent::__construct();
 	}
+	
 	/**
 	 * sets the value
 	 *@name setvalue
@@ -271,7 +268,7 @@ class DBField extends Object implements DataBaseField
 	 *@name uppercase
 	 *@access public
 	*/ 
-	public function LowerrCase()
+	public function LowerCase()
 	{
 			return strtolower($this->value);
 	}
@@ -371,9 +368,13 @@ class DBField extends Object implements DataBaseField
 	public function __call($name, $args) {
 		if(DEV_MODE) {
 			$trace = debug_backtrace();
-			log_error('Warning: Call to undefined method ' . $this->class . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+			if(isset($trace[0]['file']))
+				log_error('Warning: Call to undefined method ' . $this->classname . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+			else
+				log_error('Warning: Call to undefined method ' . $this->classname . '::' . $name);
+			
 			if(DEV_MODE)
-		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->class . '::' . $name . '</div>');
+		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->classname . '::' . $name . '</div>');
 		}
 		return $this->__toString();
 	}
@@ -476,7 +477,10 @@ class DBField extends Object implements DataBaseField
 			$args = array();
 		}
 		
-		return call_user_func_array(array($this, $var), $args);
+		if(Object::method_exists($this, $var))
+			return call_user_func_array(array($this, $var), $args);
+		
+		return null;
 	}
 	
 	/**
@@ -634,7 +638,7 @@ class Varchar extends DBField
 		 *@name date
 		 *@access public
 		*/
-		public function date($format =	DATE_FORMAT)
+		public function date($format = DATE_FORMAT)
 		{	
 			return goma_date($format, $this->value);
 		}
@@ -720,8 +724,9 @@ class CheckBoxSQLField extends DBField {
 	static public function getFieldType($args = array()) {
 		return 'enum("0","1")';
 	}
+	
 	/**
-	 * generatesa a numeric field
+	 * generatesa a switch.
 	 *@name formfield
 	 *@access public
 	 *@param string - title
@@ -781,80 +786,48 @@ class TimeZone extends DBField {
 	}
 }
 
-class DateSQLField extends DBField {
-	
+/**
+ * timezone-field
+*/
+class BoolDBField extends DBField {
+
 	/**
-	 * gets the field-type
-	 *
-	 *@name getFieldType
-	 *@access public
+	 * converts every type of value into bool.
 	*/
-	static public function getFieldType($args = array()) {
-		return "int(30)";
+	public function __construct($name, $value, $args = array())
+	{
+		if(strtolower($value) == strtolower(lang("no")) || strtolower($value) == "no") {
+			$value = false;
+		}
+		
+		$value = (bool) $value;
+		
+		parent::__construct($name, $value, $args);
 	}
-	
+
 	/**
 	 * default convert
 	*/
 	public function forTemplate() {
-		if(isset($this->args[0]))
-			return $this->date($this->args[0]);
-		else
-			return $this->date();
-	}
-	
-	/**
-	 * converts this with date
-	 *@name date
-	 *@access public
-	*/
-	public function date($format =	DATE_FORMAT)
-	{	
-		return goma_date($format, $this->value);
-	}
-	
-	/**
-	 * returns date as ago
-	 *
-	 *@name ago
-	 *@access public
-	*/
-	public function ago($fullSentence = true) {
-		if(NOW - $this->value < 60) {
-			return '<span title="'.$this->forTemplate().'" class="ago-date">' . sprintf(lang("ago.seconds", "about %d seconds ago"), round(NOW - $this->value)) . '</span>';
-		} else if(NOW - $this->value < 90) {
-			return '<span title="'.$this->forTemplate().'" class="ago-date">' . lang("ago.minute", "about one minute ago") . '</span>';
+		if($this->value) {
+			return lang("yes");
 		} else {
-			$diff = NOW - $this->value;
-			$diff = $diff / 60;
-			if($diff < 60) {
-				return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.minutes", "%d minutes ago"), round($diff)) . '</span>';
-			} else {
-				$diff = round($diff / 60);
-				if($diff == 1) {
-					return '<span title="'.$this->forTemplate().'">' . lang("ago.hour", "about one hour ago") . '</span>';
-				} else {
-					if($diff < 24) {
-						return '<span title="'.$this->forTemplate().'">' . sprintf(lang("ago.hours", "%d hours ago"), round($diff)) . '</span>';
-					} else {
-						$diff = $diff / 24;
-						$diffRound = round($diff, 1);
-						if($diff <= 1.1) {
-							return '<span title="'.$this->forTemplate().'">' . lang("ago.day", "about one day ago") . '</span>';
-						} else if($diff <= 7) {
-							$pre = ($fullSentence) ? lang("version_at") . " " : "";
-							return '<span title="'.$this->forTemplate().'">' . $pre . sprintf(lang("ago.weekday", "%s at %s"), $this->date("l"), $this->date("H:i")) . '</span>';
-						} else {
-							if($fullSentence)
-								return lang("version_at") . " " . $this->forTemplate();
-							else
-								return $this->forTemplate();
-						}
-					}
-				}
-			}
+			return lang("no");
 		}
 	}
+	
+	/**
+	 * generatesa a switch.
+	 *
+	 *@name formfield
+	 *@access public
+	 *@param string - title
+	*/
+	public function formfield($title = null)
+	{
+		return new Checkbox($this->name, $title, $this->value);
+	}
+	
 }
 
 class HTMLText extends Varchar {
@@ -881,6 +854,29 @@ class HTMLText extends Varchar {
 	}
 	
 	/**
+	 * returns width and height for given style property
+	 *
+	 *@name matchSizes
+	 *@access public
+	*/
+	public function matchSizes($style) {
+		$data = array();
+		if(preg_match('/(;|\s+|\")width\s*:\s*([0-9]+)(px)/i', $style, $sizes)) {
+			$data["width"] = $sizes[2];
+		} else if(preg_match('/(\s+|")width\="([0-9]+)"/i', $style, $sizes)) {
+			$data["width"] = $sizes[2];
+		}
+		
+		if(preg_match('/(;|\s+|\")height\s*:\s*([0-9]+)(px)/i', $style, $sizes)) {
+			$data["height"] = $sizes[2];
+		} else if(preg_match('/(\s+|")height\="([0-9]+)"/i', $style, $sizes)) {
+			$data["height"] = $sizes[2];
+		}
+		
+		return $data;
+	}
+	
+	/**
 	 * for template
 	 *
 	 *@name forTemplate
@@ -896,65 +892,74 @@ class HTMLText extends Varchar {
 			// match if may be upload
 			if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
 				
-				// match for size
-				if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
-					// sizes
-					$$sizes[1] = $sizes[2];
-					$$sizes[4] = $sizes[5];
+				if($sizes = $this->matchSizes($matches[0][$k])) {
 					
-				} else if(preg_match('/style\="[^"]*[\s*?|;?](width|height)\s*:\s*([0-9]+)(px)[^"]*"/Ui', $matches[0][$k], $sizes)) {
-				
-					$$sizes[1] = $sizes[2];
-					
-				} else {
-					continue;
-				}
-				
-				$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
-		
-				if($data->count() == 0) {
-					return false;
-				}
-				
-				if(isset($width, $height) && $data->width && $data->height) {
-					
-					if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
-												
-						$url = "./" . $data->path . '/orgSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($width * 2 < $data->width && $height * 2 < $data->height) {
-							$retinaURL = "./" . $data->path . '/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
-						}
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					if(isset($sizes["width"])) {
+						$width = $sizes["width"];
 					}
-				} else if(isset($width)) {
-					if($data->width > $width && $data->width < 4000) {
-						$url =  "./" . $data->path . '/orgSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($width * 2 < $data->width) {
-							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
-						}
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					
+					if(isset($sizes["height"])) {
+						$height = $sizes["height"];
 					}
-				} else {
-					if($data->height > $height && $data->height < 4000) {
-						$url = "./" . $data->path . '/orgSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
-						// retina
-						if($height * 2 < $data->height) {
-							$retinaURL =  "./" . $data->path . '/orgSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-						} else {
-							$retinaURL = "./" . $data->path;
+					
+					$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+			
+					if($data->count() == 0) {
+						continue;
+					}
+					
+					if(isset($width, $height) && $data->width && $data->height) {
+						
+						if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+													
+							$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($width * 2 < $data->width && $height * 2 < $data->height) {
+								$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
 						}
-						$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+					} else if(isset($width)) {
+						if($data->width > $width && $data->width < 4000) {
+							$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($width * 2 < $data->width) {
+								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						}
+					} else {
+						if($data->height > $height && $data->height < 4000) {
+							$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+							// retina
+							if($height * 2 < $data->height) {
+								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+							} else {
+								$retinaURL = "./" . $data->path;
+							}
+							
+							$data->manageURL($url);
+							$data->manageURL($retinaURL);
+							
+							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						}
 					}
 				}
 			}
 		}
 		
-		return $value;
+		return (string) $value;
 	}
 }

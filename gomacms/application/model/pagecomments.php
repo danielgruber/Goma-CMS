@@ -2,8 +2,8 @@
 /**
   *@package goma cms
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2013  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 17.01.2013
   * $Version 1.1.6
 */
@@ -15,9 +15,8 @@ loadlang('comments');
 class PageComments extends DataObject
 {
 
-		static $db = array('name' 		=> 'varchar(200)',
-								  'text'        => 'text',
-								  'timestamp'   => 'int(200)');
+		static $db = array(	'name' 			=> 'varchar(200)',
+							'text'        	=> 'text');
 								  
 		/**
 		 * has-one-relation to page
@@ -33,7 +32,7 @@ class PageComments extends DataObject
 		 *@name default_sort
 		 *@access public
 		*/
-		static $default_sort = "timestamp DESC";
+		static $default_sort = "created DESC";
 		
 		/**
 		 * indexes for faster look-ups
@@ -67,7 +66,7 @@ class PageComments extends DataObject
 				{
 						$form->add(new TextField("name", lang("name", "Name")));
 				}
-				$form->add(new TimeField("timestamp"));
+				
 				$form->add(new BBCodeEditor("text", lang("text", "text"), null, null, null, array("showAlign" => false)));
 				if(!member::login())
 					$form->add(new Captcha("captcha"));
@@ -88,6 +87,21 @@ class PageComments extends DataObject
 				
 				$form->addAction(new CancelButton("cancel", lang("cancel", "cancel")));
 				$form->addAction(new FormAction("save", lang("save", "save"), null, array("green")));
+		}
+		
+		public function timestamp() {
+			return $this->created();
+		}
+		
+		
+		/**
+		 * returns the representation of this record
+		 *
+		 *@name generateResprensentation
+		 *@access public
+		*/
+		public function generateRepresentation($link = false) {
+			return lang("CO_COMMENT") . " " . lang("CO_OF") . ' '.convert::raw2text($this->name).' '.lang("CO_ON").' '.$this->created()->date().'';
 		}
 }
 

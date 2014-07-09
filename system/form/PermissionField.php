@@ -2,8 +2,8 @@
 /**
   *@package goma framework
   *@link http://goma-cms.org
-  *@license: http://www.gnu.org/licenses/gpl-3.0.html see 'license.txt'
-  *@Copyright (C) 2009 - 2012  Goma-Team
+  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *@author Goma-Team
   * last modified: 09.12.2012
   * $Version - 1.1.3
  */
@@ -177,9 +177,9 @@ class PermissionField extends ClusterFormField {
 			$this->value->parentid = 0;
 			$this->value->parent = null;
 			// now remodify it by the given fields
-			foreach($this->fields as $key => $val) {
+			foreach($this->fields as $val) {
 				if($result = $val->result()) {
-					$this->value->$key = $result;
+					$this->value->{$val->dbname} = $result;
 				}
 			}
 		}
