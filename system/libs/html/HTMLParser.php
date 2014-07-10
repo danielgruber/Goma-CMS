@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.3.3
+ * @version     2.3.4
  */
 class HTMLParser extends Object
 {
@@ -130,7 +130,7 @@ class HTMLParser extends Object
 								}
 						}
 						
-						if(substr($lowerhref, 0, strlen(BASE_SCRIPT)) == strtolower(BASE_SCRIPT) || substr($lowerhref, 0, 2) == "./")
+						if(substr($lowerhref, 0, strlen(BASE_SCRIPT)) == strtolower(BASE_SCRIPT) || substr($lowerhref, 0, strlen(ROOT_PATH . BASE_SCRIPT)) == strtolower(ROOT_PATH . BASE_SCRIPT) || substr($lowerhref, 0, 2) == "./")
 						{
 						
 						} else
