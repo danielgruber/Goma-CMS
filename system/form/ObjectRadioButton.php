@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 26.11.2012
-  * $Version 2.0.3
+  * last modified: 11.04.2014
+  * $Version 2.0.5
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -35,8 +35,8 @@ class ObjectRadioButton extends RadioButton
 		 *@name renderOption
 		 *@access public
 		*/
-		public function renderOption($name, $value, $title, $checked = null, $disabled = null, $field = null) { 
-			$node = parent::renderOption($name, $value, $title, $checked, $disabled);
+		public function renderOption($postname, $value, $title, $checked = null, $disabled = null, $field = null) { 
+			$node = parent::renderOption($postname, $value, $title, $checked, $disabled);
 			
 			$children = $node->children();
 			$input = $children[0];
@@ -47,7 +47,7 @@ class ObjectRadioButton extends RadioButton
 			
 			if(isset($field)) {
 				if(!is_object($field)) {
-					throwError(6, "Invalid Error", "Field for Option " . $name . " seems not to be existing.");
+					throw new LogicException("Error in ObjectRadioButton '".$value."': Field for Option '".$value."' does not exist or is null.");
 				}
 				$node->append(new HTMLNode('div', array(
 					"id" 	=> "displaycontainer_" . $id,
