@@ -4,21 +4,21 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 06.04.2012
+  * last modified: 21.07.2014
 */
 
-.hidableFieldSet {
+fieldset.hidableFieldSet {
 	margin: 0;
-	padding: 0 20px !important;
+	padding: 0 1.25em !important;
 	
 	border-bottom: 1px solid #e0e0e0;
 }
 
-.hidableFieldSet > label {
+fieldset.hidableFieldSet > label {
 	width: auto;
 	display: block;
-	margin: 0 -20px;
-	padding: 10px;
+	margin: 0 -1.25em;
+	padding: .625em;
 	float: none;
 	background: #fff;
 	font-weight: normal;
@@ -26,21 +26,21 @@
 	cursor: pointer;
 	
 	background: url(../admin/images/pfeil_close.png) no-repeat 5px center;
-	padding-left: 19px;
+	padding-left: 1.25em;
 	
 }
 
-.hidableFieldSet > div:last-child {
+fieldset.hidableFieldSet > div:last-child {
 	margin-bottom: -1px;
 }
 
-.hidableFieldSet:hover {
+fieldset.hidableFieldSet:hover {
 	background: #eee;
 }
-.hidableFieldSet.opened {
+fieldset.hidableFieldSet.opened {
 	background: #fff;
 }
 
-.hidableFieldSet > label.open {
+fieldset.hidableFieldSet > label.open {
 	background-image: url(../admin/images/pfeil.png);
 }

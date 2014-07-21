@@ -16,7 +16,7 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.2.3
+ * @version		1.2.4
  */
 class userController extends Controller
 {
@@ -360,7 +360,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		*/
 		public function _validateuser($obj)
 		{
-				if($obj->form->result["password"] == $obj->form->result["repeat"])
+				if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
 				{
 						// check if username is unique
 						if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
