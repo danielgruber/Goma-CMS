@@ -404,8 +404,10 @@ class Resources extends Object {
 	    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
 	    		}
 	    		
-	    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
+	    		if((!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) && $cacher->getData() !== false) {
 	    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($cacher->getData()).');'));
+	    		} else if(!file_exists(ROOT . $file)) {
+	    			FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
 	    		}
 	    		
 	    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
