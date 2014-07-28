@@ -10,7 +10,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.4
+ * @version     1.4.1
  */
 class HasOneDropdown extends SingleSelectDropDown
 {
@@ -165,7 +165,9 @@ class HasOneDropdown extends SingleSelectDropDown
 			$data = DataObject::get($this->_object, array("id" => $this->value));
 			
 			if($this->form()->useStateData) {
-				$data->setVersion("state");
+				$data->setVersion(DataObject::VERSION_STATE);
+			} else {
+				$data->setVersion(DataObject::VERSION_PUBLISHED);
 			}
 			
 			if($data && $data->count() > 0) {
