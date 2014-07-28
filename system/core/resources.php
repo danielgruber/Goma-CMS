@@ -843,9 +843,10 @@ class Resources extends Object {
 		}
 		
 		if (defined("CLASS_INFO_LOADED")) {
-			if (!strpos($file, "../") && preg_match('/\.(js|css|html)$/i', $file) && substr($file, 0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH || substr($file, 0, strlen(APPLICATION_TPL_PATH)) == APPLICATION_TPL_PATH) {
+			if (!strpos($file, "../") && preg_match('/\.(js|css|html)$/i', $file) && (substr($file, 0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH || substr($file, 0, strlen(APPLICATION_TPL_PATH)) == APPLICATION_TPL_PATH)) {
 	 		   return isset(ClassInfo::$class_info["resources"]["files"][$file]);
   	 		 }
+  	 		return file_exists($file);
   	 	} else {
   	 		logging("CLASS_INFO not loaded for file ".$file.". using filesystem. -> poor performance");
   	 	}
