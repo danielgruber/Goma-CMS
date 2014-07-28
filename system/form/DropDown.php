@@ -100,6 +100,8 @@ class DropDown extends FormField {
 
 		parent::__construct($name, $title, $value, $parent);
 		$this->options = $options;
+
+		Resources::add("font-awsome/font-awesome.css", "css", "tpl");
 	}
 
 	/**

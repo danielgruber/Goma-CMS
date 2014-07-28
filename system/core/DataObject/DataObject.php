@@ -13,10 +13,13 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.23
+ * @version     4.7.24
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
+	const VERSION_STATE = "state";
+	const VERSION_PUBLISHED = "published";
+	const VERSION_GROUP = "group";
 
 	/**
 	 * default sorting 
@@ -103,7 +106,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name queryVersion
 	 *@access public
 	*/
-	public $queryVersion = "published";
+	public $queryVersion = DataObject::VERSION_PUBLISHED;
 	
 	/**
 	 * view-cache
@@ -2591,8 +2594,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
 		$set->setRelationENV($name, $inverse . "id");
 
-		if ($this->queryVersion == "state") {
-			$set->setVersion("state");
+		if ($this->queryVersion == DataObject::VERSION_STATE) {
+			$set->setVersion(DataObject::VERSION_STATE);
 		}
 		
 		$this->viewcache[$cache] = $set;
@@ -2640,8 +2643,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			
 			$response = DataObject::get($has_one[$name], $filter);
 			
-			if ($this->queryVersion == "state") {
-				$response->setVersion("state");
+			if ($this->queryVersion == DataObject::VERSION_STATE) {
+				$response->setVersion(DataObject::VERSION_STATE);
 			}
 			
 			if (($this->viewcache[$cache] = $response->first(false))) {
@@ -2703,10 +2706,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit);
 			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 			
-			if ($this->queryVersion == "state") {
-				$instance->setVersion("state");
+			if ($this->queryVersion == DataObject::VERSION_STATE) {
+				$instance->setVersion(DataObject::VERSION_STATE);
 			} else {
-				$instance->setVersion("published");
+				$instance->setVersion(DataObject::VERSION_PUBLISHED);
 			}
 			
 			$this->viewcache[$cache] =& $instance;
@@ -2720,14 +2723,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$baseClass = ClassInfo::$class_info[$this->classname]["baseclass"];
 		$baseTable = ClassInfo::$class_info[$baseClass]["table"];
 		
-		$where[$data["field"]] = $this["versionid"];
+		$where[$data["table"] . "." . $data["field"]] = $this["versionid"];
 		
 		$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit, array(
 			' INNER JOIN '.DB_PREFIX . $data["table"].' AS '.$data["table"].' ON '.$data["table"].'.'. $data["extfield"] . ' = '.$table.'.id ' // Join other Table with many-many-table
 		));
 		$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
-		if ($this->queryVersion == "state") {
-			$instance->setVersion("state");
+		if ($this->queryVersion == DataObject::VERSION_STATE) {
+			$instance->setVersion(DataObject::VERSION_STATE);
 		}
 		
 		$this->viewcache[$cache] = $instance;
@@ -3037,7 +3040,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				}
 				
 				if (isset($_GET[$baseClass . "_state"]) && $this->_canVersion($version)) {
-					$version = "state";
+					$version =DataObject::VERSION_STATE;
 				}
 			}
 			
@@ -3057,13 +3060,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (isset(ClassInfo::$database[$baseTable . "_state"])) {
 				if ($version !== false) {
 					// if we get as normal, so just published records
-					if ($version === null || $version == "published") {
+					if ($version === null || $version == DataObject::VERSION_PUBLISHED) {
 						$query->data["includedVersionTable"] = true;
 						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.publishedid = ".$baseTable.".id AND ".$baseTable."_state.id = ".$baseTable.".recordid");
 						$query->db_fields["id"] = $baseTable . "_state";
 					
 					// if we use state mode
-					} else if ($version == "state") {
+					} else if ($version == DataObject::VERSION_STATE) {
 						$query->data["includedVersionTable"] = true;
 						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.stateid = ".$baseTable.".id AND ".$baseTable."_state.id = ".$baseTable.".recordid");
 						$query->db_fields["id"] = $baseTable . "_state";
@@ -3085,7 +3088,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 						$query->innerJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
 						
 					// if we just get all, but we group
-					} else if ($version == "group") {
+					} else if ($version == DataObject::VERSION_GROUP) {
 						$query->addFilter($baseTable.'.id IN (
 							SELECT max(where_'.$baseTable.'.id) FROM '.DB_PREFIX . $baseTable.' AS where_'.$baseTable.' WHERE where_'.$baseTable.'.recordid = '.$baseTable.'.recordid GROUP BY where_'.$baseTable.'.recordid
 						)');

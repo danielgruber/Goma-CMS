@@ -7,14 +7,31 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 10.02.2013
-  * $Version - 1.0.1
+  * last modified: 25.07.2014
+  * $Version - 1.1
  */
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler {
 	
+	/**
+ 	 * constructor.
+	*/
+	public function __construct($title = null, $requirePerm = null) {
+		if(!isset($requirePerm)) {
+			$requirePerm = "write";
+		}
+
+		if(!isset($title)) {
+			$title = lang("edit");
+		}
+
+		$this->title = $title;
+
+		$this->requirePerm = $requirePerm;
+	}
+
 	/**
 	 * Add a column 'Actions'
 	 * 
@@ -69,12 +86,17 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 * @return string - the HTML for the column 
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
-		if(!$record->can("Write")){
-			return;
+		if($this->requirePerm) {
+			if(is_callable($this->requirePerm)) {
+				if(!call_user_func_array($this->requirePerm, array($tableField, $record)))
+					return;
+			} else if(!$record->can($this->requirePerm)){
+				return;
+			}
 		}
 		
 		$data = new ViewAccessableData();
-		return $data->customise(array("link" => $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/editButton.html");
+		return $data->customise(array("title" => $this->title, "link" => $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/editButton.html");
 	}
 	
 	/**
@@ -101,7 +123,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 		$data = clone $tableField->getData();
 		$data->filter(array("id" => $request->getParam("id")));
 		if($data->Count() > 0) {
-			$title = lang("edit");
+			$title = $this->title;
 			if($data->title) {
 				$title = $data->title;
 			} else if($data->name) {
