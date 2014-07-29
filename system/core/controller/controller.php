@@ -646,7 +646,7 @@ class Controller extends RequestHandler
 						$model[$key] = $value;
 				}
 				
-				if($model->write($forceInsert, $forceWrite, $priority))
+				if($model->writeToDB($forceInsert, $forceWrite, $priority))
 				{
 						$this->callExtending("onAfterSave", $model, $priority);
 						$this->model_inst = $model;
