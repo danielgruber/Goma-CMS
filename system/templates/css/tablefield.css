@@ -189,7 +189,7 @@
 		margin: 0;
 		
 		input.button:hover {
-			color: darken(@color-action, 15%) !important;
+			color: darken(@system-tint, 10%) !important;
 		}
 		
 		.form_field {
