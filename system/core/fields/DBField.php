@@ -4,7 +4,7 @@
  * Base-Interface for all DB-Fields.
  *
  * @package		Goma\Core\Model
- * @version		1.5
+ * @version		1.5.1
  */
 interface DataBaseField {
 	/**
@@ -712,6 +712,29 @@ class intSQLField extends Varchar
 		{
 				return new NumberField($this->name, $title);
 		}
+}
+
+class decimalSQLField extends intSQLField
+{
+		/**
+		 * generatesa a numeric field
+		 *@name formfield
+		 *@access public
+		 *@param string - title
+		*/
+		public function formfield($title = null)
+		{
+				return new NumberField($this->name, $title);
+		}
+
+		/**
+		 * for db.
+		*/
+		public function forDB() {
+			return str_replace(',','.',$this->value);
+		}
+		
+		
 }
 
 class CheckBoxSQLField extends DBField {
