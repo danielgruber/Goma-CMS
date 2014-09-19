@@ -202,9 +202,6 @@ class HomePageController extends SiteController
 				if($redirect) {
 					$query = preg_replace('/\&?r\='.preg_quote($_GET["r"]).'/','',$_SERVER["QUERY_STRING"]);
 					HTTPResponse::redirect($redirect->url . "?" . $query);
-				} else
-				{
-					HTTPResponse::Redirect(ROOT_PATH);
 				}
 			}
 			
