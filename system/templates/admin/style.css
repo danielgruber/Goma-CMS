@@ -63,7 +63,7 @@ h1, h2, h3 {
 	font-weight: 200;
 }
 
-.adminPanel table, .adminPanel td {
+div.adminPanel table, div.adminPanel td {
     margin: 0;
     padding: 0;
 }

@@ -96,16 +96,21 @@
 	background: #eee;
 	border-bottom: 0.063em solid #ccc;
 	padding: 0.375em;
+	padding-bottom: .2em;
 	line-height: 1em;
 	
 	.pageType {
-		padding: 0.33em 0.375em;
+		padding: 0.3em 0.375em;
 		max-width: 35%;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		display: inline-block;
 		line-height: 1em;
 		
+		img {
+			margin-top: -.75em;
+		}
+
 		span {
 			padding: 0 0.25em;
 			font-size: 1.125em;
@@ -114,10 +119,7 @@
 			max-width: 65%;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			
-			img {
-				margin-top: -.25em;
-			}
+		
 
 		}
 	}
@@ -127,14 +129,13 @@
 		border: 0;
 		margin-top: -0.375em;
 		margin-bottom: -0.375em;
-		margin-left: -0.25em;
+		margin-left: -0.375em;
 		margin-right: 0.5em;
 		border-right: 1px solid #ccc;
 		
 		img {
-			height: 2.875em;
-			width: 2.8
-			75em;
+			height: 2.75em;
+			width: 2.75em;
 		}
 	}
 }
@@ -316,9 +317,6 @@ ul.list-view.create li a img {
 	.leftandmaintable tr > .main > .inner .headBar .pageType, .leftandmaintable tr > .main > .inner .headBar .pageType span {
 		max-width: 100%;
 	}
-	 .leftandmaintable tr > .main > .inner .headBar .pageType span {
-		 display: inline;
-	 }
 }
 
 /* here goes some retina-stuff */
