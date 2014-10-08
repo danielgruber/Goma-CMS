@@ -96,7 +96,7 @@ class mysqliDriver extends object implements SQLDriver
 		 *@access public
 		 *@use: run a query
 		**/
-		public function query($sql, $unbuffered = false)
+		public function query($sql, $unbuffered = false, $debug = true)
 		{
 				if(!$this->_db->ping()) {
 					$this->__construct();
@@ -105,9 +105,12 @@ class mysqliDriver extends object implements SQLDriver
 				if($result = $this->_db->query($sql))
 					return $result;
 				else {
-					$trace = debug_backtrace();
-					log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
-					$this->runDebug($sql);
+					if($debug) {
+						$trace = debug_backtrace();
+						log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
+						$this->runDebug($sql);
+					}
+
 					return false;
 				}
 		}
@@ -305,7 +308,7 @@ class mysqliDriver extends object implements SQLDriver
 						
 				
 				$sql = "SHOW COLUMNS FROM ".$prefix.$table."";
-				if($result = sql::query($sql, false, $track))
+				if($result = sql::query($sql, false, $track, false))
 				{
 						$fields = array();
 						while($row = $this->fetch_object($result))
@@ -452,7 +455,7 @@ class mysqliDriver extends object implements SQLDriver
 					
 			
 			$sql = "SHOW COLUMNS FROM ".$prefix.$table;
-			if($result = sql::query($sql, false, $track))
+			if($result = sql::query($sql, false, $track, false))
 			{
 				$fields = array();
 				while($row = $this->fetch_object($result))

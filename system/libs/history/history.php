@@ -399,11 +399,13 @@ class History extends DataObject {
 			}
 		}
 		
-		// delete
-		$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
-		$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE publishedid < ".$id."";
-		
-		SQL::Query($sqlDeleteData);
-		SQL::Query($sqlDeleteState);
+		if($id) {
+			// delete
+			$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
+			$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE publishedid < ".$id."";
+			
+			SQL::Query($sqlDeleteData);
+			SQL::Query($sqlDeleteState);
+		}
 	}
 }

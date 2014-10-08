@@ -70,7 +70,7 @@ class pgsqlDriver extends object implements SQLDriver
 
 	
 	
-	public  function query($sql, $unbuffered = false)
+	public  function query($sql, $unbuffered = false, $debug = true)
 	{
 		// some parse rules for postgresql
 		
@@ -80,8 +80,10 @@ class pgsqlDriver extends object implements SQLDriver
 		if($result = pg_query($sql))
 			return $result;
 		else {
-			$trace = debug_backtrace();
-			log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
+			if($debug) {
+				$trace = debug_backtrace();
+				log_error('SQL-Error in Statement: '.$sql.' in '.$trace[1]["file"].' on line '.$trace[1]["line"].'.');
+			}
 			return false;
 		}
 	}

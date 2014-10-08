@@ -136,7 +136,7 @@ class SQL extends object
 		 *@access public
 		 *@use: run a query
 		**/
-		static function query($sql, $unbuffered = false, $track = true) {
+		static function query($sql, $unbuffered = false, $track = true, $debug = true) {
 				$start = microtime(true);
 				
 				$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
@@ -148,7 +148,7 @@ class SQL extends object
 				
 				if(PROFILE) Profiler::mark("sql::query");
 				self::$queries++; // count queries and make it 1 more
-				$result = self::$driver->query($sql, $unbuffered);
+				$result = self::$driver->query($sql, $unbuffered, $debug);
 				if(PROFILE) Profiler::unmark("sql::query");
 				
 				
@@ -590,7 +590,7 @@ interface SQLDriver
 		 *@param string - query
 		 *@param bool - if unbuffered
 		*/
-		public function query($sql, $unbuffered = false);
+		public function query($sql, $unbuffered = false, $debug = true);
 		/**
 		 * the following functions are simly sql-functions
 		*/

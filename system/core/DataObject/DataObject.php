@@ -4309,13 +4309,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$recordids = array();
 			$ids = array();
 			// first recordids
-			$sql = "SELECT * FROM ".DB_PREFIX.$this->classname."_state";
+			$sql = "SELECT * FROM ".DB_PREFIX.$this->baseTable."_state";
 			if ($result = SQL::Query($sql)) {
 				while($row = SQL::fetch_object($result)) {
 					$recordids[$row->id] = $row->id;
 					$ids[$row->publishedid] = $row->publishedid;
 					$ids[$row->stateid] = $row->stateid;
 				}
+			} else {
+				throw new MySQLException();
 			}
 			
 			$deleteids = array();
@@ -4328,6 +4330,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				while($row = SQL::fetch_object($result)) {
 					$deleteids[] = $row->id;
 				}
+			} else {
+				throw new MySQLException();
 			}
 			
 			$log .= 'Checking for old versions of '.$this->classname."\n";
