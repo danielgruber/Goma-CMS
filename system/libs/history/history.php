@@ -402,7 +402,7 @@ class History extends DataObject {
 		if($id) {
 			// delete
 			$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
-			$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE publishedid < ".$id."";
+			$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->baseTable."_state WHERE publishedid < ".$id."";
 			
 			SQL::Query($sqlDeleteData);
 			SQL::Query($sqlDeleteState);
