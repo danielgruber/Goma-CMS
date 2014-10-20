@@ -1037,37 +1037,37 @@ form h2 {
 
 /* update */
 
-.updateInfo {
+body .updateInfo {
 	border-spacing: 0;
 	width: 600px;
 }
-.updateInfo td {
+body .updateInfo td {
 	padding: 1em 0.7em;
 	text-align: center;
 }
-.updateInfo .first td {
+body .updateInfo .first td {
 	border-top: 0;
 }
-.updateInfo .value {
+body .updateInfo .value {
 
 }
-.updateInfo .left {
+body .updateInfo .left {
 	background: #eee;
 	border-right: 0.063em solid #ddd;
 	font-weight: bold;
 	width: 250px;
 }
 
-.updateActions {
+body .updateActions {
 	width: 600px;
 	padding: 10px;
 	text-align: center;
 }
-.updateActions a {
+body .updateActions a {
 	margin: auto;
 }
 
-.updateInfo .changelog_scroll {
+body .updateInfo .changelog_scroll {
 	height: 200px;
 	overflow: auto;
 	margin: -10px;
