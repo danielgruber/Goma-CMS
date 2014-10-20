@@ -448,6 +448,10 @@ class tpl extends Object
 				preg_match_all("/<%(.*)%>/Usi", $tpl, $percent);
 				foreach($percent[1] as $key => $data)
 				{
+					if(strtolower(trim($data)) == "ignore_vars" || strtolower(trim($data)) == "end_ignore_vars") {
+						continue;
+					}
+
 					$data = preg_replace_callback('/([a-zA-Z0-9_\.]+)\(/si', array("tpl", "functions"), $data);
 					
 					$data = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("tpl", "convert_vars"), $data);
@@ -463,14 +467,22 @@ class tpl extends Object
 					unset($data);
 				}
 				unset($percent);
-				
-								
-				
-				
+
+				$ignores = array();	
+				preg_match_all("/<%\s*IGNORE_VARS\s*%>(.*)<%\s*END_IGNORE_VARS\s*%>/si", $tpl, $matches);
+				foreach($matches[1] as $key => $val) {
+					$ignores[$key] = $val;
+					$tpl = str_replace($matches[0][$key], "ignore______that_____" . $key, $tpl);
+				}
+
 				// normal vars
 				$tpl = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("tpl", "convert_vars_echo"), $tpl);
 				$tpl = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)}?/si', array("tpl", "vars"), $tpl);		
 				
+				foreach($ignores as $key => $val) {
+					$tpl = str_replace("ignore______that_____" . $key, $val, $tpl);
+				}
+
 				foreach($percents as $key => $data)
 				{
 						$tpl = str_replace('<%' . $key . '%>', '<%' . $data . '%>', $tpl);
