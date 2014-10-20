@@ -72,7 +72,6 @@ class i18n extends Object {
 		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
 			$host = "." . $host;
 
-
 		// check lang selection
 		Core::$lang = self::AutoSelectLang($language);
 		$_SESSION["lang"] = Core::$lang;
@@ -189,10 +188,27 @@ class i18n extends Object {
 			}
 		}
 
+		uksort($data, array("i18n", "sortByCurrent"));
+
 		if(PROFILE)
 			Profiler::unmark("i18n::listLangs");
 		
+		
+		
 		return $data;
+	}
+
+	/**
+	 * helper for sort
+	*/
+	static function sortByCurrent($a, $b) {
+		if($a == Core::$lang) {
+			return -1;
+		} else if($b == Core::$lang) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 
 	/**

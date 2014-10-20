@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 26.03.2014
-  * $Version 3.6.3
+  * last modified: 25.08.2014
+  * $Version 3.6.4
 */   
  
  
@@ -301,6 +301,8 @@ class tpl extends Object
 				}
 		}
 		
+		private static $cacheCache = array();
+
 		/**
 		 * build all files needed for a template
 		 *
@@ -313,11 +315,16 @@ class tpl extends Object
 		public static function buildFilesForTemplate($template, $tmpname) {
 			if(PROFILE) Profiler::mark("tpl::buildFilesForTemplate");
 			
+			if(isset(self::$cacheCache[$tmpname])) {
+				if(PROFILE) Profiler::unmark("tpl::buildFilesForTemplate");
+				return self::$cacheCache[$tmpname]->filename();
+			}
+
 			// caching
 			$t = filemtime($tmpname);
-			
-			
+
 			$cacher = new tplcacher($tmpname, $t);
+			self::$cacheCache[$tmpname] = $cacher;
 			if($cacher->checkvalid() === true)
 			{
 					if(PROFILE) Profiler::unmark("tpl::buildFilesForTemplate");

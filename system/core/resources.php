@@ -404,8 +404,10 @@ class Resources extends Object {
 	    			$cacher = new Cacher("lang_" . Core::$lang . count(i18n::$languagefiles));
 	    		}
 	    		
-	    		if(!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) {
+	    		if((!file_exists(ROOT . $file) || filemtime(ROOT . $file) < $cacher->created) && $cacher->getData() !== false) {
 	    		    FileSystem::write($file, self::getEncodedString('setLang('.json_encode($cacher->getData()).');'));
+	    		} else if(!file_exists(ROOT . $file)) {
+	    			FileSystem::write($file, self::getEncodedString('setLang('.json_encode($GLOBALS["lang"]).');'));
 	    		}
 	    		
 	    		$html .= "			<script type=\"text/javascript\" src=\"".ROOT_PATH . $file."?".filemtime(ROOT . $file)."\"></script>\n";
@@ -843,9 +845,10 @@ class Resources extends Object {
 		}
 		
 		if (defined("CLASS_INFO_LOADED")) {
-			if (!strpos($file, "../") && preg_match('/\.(js|css|html)$/i', $file) && substr($file, 0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH || substr($file, 0, strlen(APPLICATION_TPL_PATH)) == APPLICATION_TPL_PATH) {
+			if (!strpos($file, "../") && preg_match('/\.(js|css|html)$/i', $file) && (substr($file, 0, strlen(SYSTEM_TPL_PATH)) == SYSTEM_TPL_PATH || substr($file, 0, strlen(APPLICATION_TPL_PATH)) == APPLICATION_TPL_PATH)) {
 	 		   return isset(ClassInfo::$class_info["resources"]["files"][$file]);
   	 		 }
+  	 		return file_exists($file);
   	 	} else {
   	 		logging("CLASS_INFO not loaded for file ".$file.". using filesystem. -> poor performance");
   	 	}

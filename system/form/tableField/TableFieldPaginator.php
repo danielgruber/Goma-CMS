@@ -53,15 +53,19 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 				$action = new TableField_FormAction($tableField, "setPage" . $data["page"], $data["page"], "setPage", array("page" => $data["page"]));
 				$view->push(array("field" => $action->field()));
 			} else {
-				$view->push(array("field" => '<span class="active-page">' . $data["page"] . '</span>'));
+				if($data["page"] == "...") {
+					$view->push(array("field" => '<span class="left-out-pages">' . $data["page"] . '</span>'));
+				} else {
+					$view->push(array("field" => '<span class="active-page">' . $data["page"] . '</span>'));
+				}
 			}
 		}
 		
 		$showStart = $page * $this->perPage - $this->perPage + 1;
 		$showEnd = $page * $this->perPage;
 		if($showEnd > $whole) {
-			$showEnd = $whole;
-		}
+			$showEnd = $whole; 
+	}
 		
 		return array(
 			"footer" => $view->customise(array("ColumnCount" => $tableField->getColumnCount(), "showStart" => $showStart, "showEnd" => $showEnd, "whole" => $whole))->renderWith("form/tableField/pagination.html")

@@ -10,7 +10,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.3
+ * @version     1.3.1
  */
 class ManyManyDropDown extends MultiSelectDropDown
 {		
@@ -151,7 +151,9 @@ class ManyManyDropDown extends MultiSelectDropDown
 			$data = DataObject::get($this->_object, array("versionid" => $this->dataset));
 			
 			if($this->form()->useStateData) {
-				$data->setVersion("state");
+				$data->setVersion(DataObject::VERSION_STATE);
+			} else {
+				$data->setVersion(DataObject::VERSION_PUBLISHED);
 			}
 			
 			if($data && $data->count() > 0) {

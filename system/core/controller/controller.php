@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.2.7
+ * @version		2.2.8
  */
 class Controller extends RequestHandler
 {		
@@ -313,8 +313,7 @@ class Controller extends RequestHandler
 					return $this->modelInst()->customise($this->tplVars)->renderWith($this->template);
 				}
 			} else {
-				$trace = @debug_backtrace();
-				throwError(6, "Logical Exception", "No Template for Controller ".$this->classname." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
+				throw new LogicException("No Template for Controller ".$this->classname . ". Please define \$template to activate the index-method.");
 			}
 		}
 		
@@ -434,8 +433,7 @@ class Controller extends RequestHandler
 			}
 			
 			if(!Object::method_exists($model, "generateForm")) {
-				$trace = @debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-				throwError(6, "Logical Exception", "No Method generateForm for Model ".get_class($model)." in ".$trace[0]["file"]." on line ".$trace[0]["line"].".");
+				throw new LogicException("No Method generateForm for Model ".get_class($model));
 			}
 			
 			// add the right controller
@@ -598,10 +596,8 @@ class Controller extends RequestHandler
 			if($model = $this->save($data) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
-			} else
-			{
-				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-				throwError(6, 'Server-Error', 'Could not save data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			} else {
+				throw new Exception("Could not save data");
 			}
 		}
 		
@@ -618,10 +614,8 @@ class Controller extends RequestHandler
 			if($model = $this->save($data) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
-			} else
-			{
-				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-				throwError(6, 'Server-Error', 'Could not save data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			} else {
+				throw new Exception("Could not save data");
 			}
 		}
 		
@@ -652,7 +646,7 @@ class Controller extends RequestHandler
 						$model[$key] = $value;
 				}
 				
-				if($model->write($forceInsert, $forceWrite, $priority))
+				if($model->writeToDB($forceInsert, $forceWrite, $priority))
 				{
 						$this->callExtending("onAfterSave", $model, $priority);
 						$this->model_inst = $model;
@@ -678,10 +672,8 @@ class Controller extends RequestHandler
 			if($model = $this->save($data, 2) !== false)
 			{
 				return $this->actionComplete("publish_success", $model);
-			} else
-			{
-				$debug = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 1);
-				throwError(6, 'Server-Error', 'Could not publish data in '.$debug[0]["file"].' on line '.$debug[0]["line"].'.');
+			} else {
+				throw new Exception("Could not publish data");
 			}
 		}
 		

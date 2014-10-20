@@ -747,7 +747,7 @@ class ClassInfo extends Object {
 			// first framework!
 			self::checkForUpgradeScripts(ROOT . "system", GOMA_VERSION . "-" . BUILD_VERSION);
 
-			// second application!
+			// second, application!
 			self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
 
 			if(isset(self::$appENV["expansion"])) {

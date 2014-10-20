@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.6
+ * @version 2.3.4
  */
 class Form extends object {
 	/**
@@ -809,14 +809,13 @@ class Form extends object {
 	 *@access public
 	 */
 	public function addValidator($validator, $name) {
-		
 		if(is_string($validator) && is_object($name)) {
 			$_name = $validator;
 			$validator = $name;
 			$name = $_name;
 			unset($_name);
 		}
-	
+
 		if(is_object($validator) && isset($name)) {
 			$this->validators[$name] = $validator;
 			$validator->setForm($this);

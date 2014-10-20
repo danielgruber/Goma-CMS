@@ -2291,7 +2291,11 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 	 *
 	 *@name push
 	*/
-	public function push(DataObject $record, $write = false) {
+	public function push($record, $write = false) {
+		if(!$record instanceof DataObject) {
+			throw new InvalidArgumentException("Argument 1 of ManyMany_DataObjectSet must be instance of DataObject.");
+		}
+
 		$return = parent::push($record);
 		if($write) {
 			$record->write(false, true);

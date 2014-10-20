@@ -4,13 +4,29 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@Copyright (C) 2009 - 2013 Goma-Team
-  * last modified: 10.02.2013
-  * $Version 1.0
+  * last modified: 25.07.2014
+  * $Version 1.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_ActionProvider, TableField_URLHandler {
+	/**
+ 	 * constructor.
+	*/
+	public function __construct($title = null, $requirePerm = null) {
+		if(!isset($requirePerm)) {
+			$requirePerm = "delete";
+		}
+
+		if(!isset($title)) {
+			$title = lang("delete");
+		}
+
+		$this->title = $title;
+		$this->requirePerm = $requirePerm;
+	}
+
 	/**
 	 * Add a column 'Actions'
 	 * 
@@ -65,11 +81,16 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 	 * @return string - the HTML for the column 
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
-		if(!$record->can("Delete")){
-			return;
+		if($this->requirePerm) {
+			if(is_callable($this->requirePerm)) {
+				if(!call_user_func_array($this->requirePerm, array($tableField, $record)))
+					return;
+			} else if(!$record->can($this->requirePerm)){
+				return;
+			}
 		}
 		
-		$action = new TableField_FormAction($tableField, "deletebtn_" . $record->ID, lang("delete"), "deletebtn_redirect", array("id" => $record->ID));
+		$action = new TableField_FormAction($tableField, "deletebtn_" . $record->ID, $this->title, "deletebtn_redirect", array("id" => $record->ID));
 		$action->addExtraClass("tablefield-deletebutton");
 		
 		$data = new ViewAccessableData();
@@ -120,7 +141,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 		$data = clone $tableField->getData();
 		$data->filter(array("id" => $request->getParam("id")));
 		if($data->Count() > 0) {
-			$title = $data->ID . " " . lang("delete");
+			$title = $data->ID . " " . $this->title;
 			if($data->title) {
 				$title = $data->title;
 			} else if($data->name) {

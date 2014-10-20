@@ -176,6 +176,7 @@ class DropDown extends FormField {
 
 		Resources::add("dropdown.css");
 		Resources::add("system/form/dropdown.js", "js", "tpl");
+		Resources::add("font-awsome/font-awesome.css", "css", "tpl");
 
 		$this->widget = new HTMLNode("div", array(
 			"class" => "dropdown_widget",
