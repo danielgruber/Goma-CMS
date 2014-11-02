@@ -260,7 +260,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				$form->addValidator(new FormValidator(array($this, '_validateuser')), "validate_user");
 				
 				$form->addAction(new CancelButton("cancel", lang("cancel")));
-				$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
+				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 		}
 		
 		/**
@@ -277,7 +277,9 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				
 				// if a user is not activated by mail, admin should have a option to activate him manually
 				if($this->status == 0) {
-					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
+					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("not_unlocked_by_mail", "Not activated by mail yet."),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
+				} else if($this->status == 3) {
+					$status = new radiobutton("status", lang("ACCESS", "Access"), array(3 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
 				} else {
 					$status = new radiobutton("status", lang("ACCESS", "Access"), array(1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
 				}
@@ -956,9 +958,14 @@ class Member extends Object {
 					
 					return true;
 				} else if($data->status == 0) {
-					addcontent::addError(lang("login_not_unlocked"));
+					$add = "";
+					if(ClassInfo::exists("registerExtension")) {
+						$add = ' <a href="profile/register/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
+					}
+					addcontent::addError(lang("login_not_unlocked") . $add);
 					return false;
 				} else {
+
 					addcontent::addError(lang("login_locked"));
 					return false;
 				}

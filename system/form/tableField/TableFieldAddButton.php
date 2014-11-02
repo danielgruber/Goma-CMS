@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@Copyright (C) 2009 -  2014 Goma-Team
-  * last modified: 17.03.2014
-  * $Version 1.0.2
+  * last modified: 02.11.2014
+  * $Version 1.0.3
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -56,7 +56,10 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 	public function add($tableField, $request) {
 		$obj = $tableField->getData();
 		$tableField->form()->controller->request->post_params = $_POST;
-		$content = $obj->controller($tableField->form()->controller)->form("add");
+
+		$submit = $tableField->form()->useStateData ? "submit_form" : "publish";
+
+		$content = $obj->controller($tableField->form()->controller)->form("add", null, array(), false, $submit);
 
 		Core::setTitle(lang("add_record"));
 		

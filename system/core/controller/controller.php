@@ -746,6 +746,10 @@ class Controller extends RequestHandler
 		*/
 		public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null) {
 			
+			if(is_object($description) && Object::method_exists($description, "generateRepresentation")) {
+				$description = $description->generateRepresentation(true);
+			}
+
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
 			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->classname), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);

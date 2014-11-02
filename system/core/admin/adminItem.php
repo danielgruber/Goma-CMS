@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 09.01.2013
-  * $Version 2.3.1
+  * last modified: 02.11.2013
+  * $Version 2.3.2
 */   
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -342,7 +342,9 @@ class adminItem extends AdminController implements PermProvider {
 			$model->queryVersion = "state";
 		}
 		
-		return $this->selectModel($model)->form();
+		$submit = DataObject::Versioned($model->class) ? "publish" : null;
+
+		return $this->selectModel($model)->form(null, null, array(), false, $submit);
 	}
 	/**
 	 * alias for cms_add

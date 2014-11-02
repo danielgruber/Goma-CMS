@@ -15,7 +15,7 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		2.0
+ * @version		2.2
  */
 class RegisterExtension extends ControllerExtension
 {
@@ -47,6 +47,18 @@ class RegisterExtension extends ControllerExtension
 		 *@access public
 		*/
 		public static $registerCode;
+
+		/**
+		 * set to true when a new user must be validated by the administrator.
+		*/
+		public static $mustBeValidated = false;
+
+		/**
+		 * email to notify when a user registers that should be validated.
+		 * also allowed is an array or commma-seperated value.
+		 * if set to 0, every user with the permission to validate can validate users.
+		*/
+		public static $validationMail = null;
 		
 		/**
 		 * add custom actions
@@ -55,7 +67,7 @@ class RegisterExtension extends ControllerExtension
 		 *@access public
 		*/
 		public $allowed_actions = array(
-			"register"
+			"register", "resendActivation"
 		);
 		
 		/**
@@ -63,7 +75,7 @@ class RegisterExtension extends ControllerExtension
 		 *
 		 *@name extra_methods
 		*/
-		public static $extra_methods = array("register", "doRegister");
+		public static $extra_methods = array("register", "doRegister", "resendActivation");
 		
 		/**
 		 * add custom method to handle the action
@@ -73,43 +85,97 @@ class RegisterExtension extends ControllerExtension
 		*/
 		public function register()
 		{
-				// define title of this page
-				Core::setTitle(lang("register"));
-				Core::addBreadCrumb(lang("register"), "profile/register/");
+			// define title of this page
+			Core::setTitle(lang("register"));
+			Core::addBreadCrumb(lang("register"), "profile/register/");
+			
+			// check if logged in
+			if(member::login()) {
+				HTTPResponse::Redirect(BASE_URI);
+				exit;
 				
-				// check if logged in
-				if(member::login()) {
-					HTTPResponse::Redirect(BASE_URI);
-					exit;
-					
-				// check if link from e-mail
-				} else if(isset($_GET["activate"])) {
-					$data = DataObject::get("user", array("code" => $_GET["activate"]));
-					
-					if($data->count() > 0 && $data->status != 2) {
-						$data->status = 1; // activation
-						$data->code = randomString(10); // new code
-						if($data->write(false, true)) {
-							return '<div class="success">'.lang("register_ok").'</div>';
-						} else {
-							throwError(6, 'Server-Error', 'Could not save data.');
-						}
-					} else {
-						// pssst ;)
+			// check if link from e-mail
+			} else if(isset($_GET["activate"])) {
+				$data = DataObject::get("user", array("code" => $_GET["activate"]));
+				
+				if($data->count() > 0 && $data->status != 2) {
+					$data->status = 1; // activation
+					$data->code = randomString(10); // new code
+					if($data->write(false, true)) {
 						return '<div class="success">'.lang("register_ok").'</div>';
+					} else {
+						throwError(6, 'Server-Error', 'Could not save data.');
 					}
-				
-				// check if registering is not available on this page
-				} else if(!self::$enabled) {
-					return "<div class=\"notice\">" . lang("register_disabled", "You cannot register on this site!") . "</div>";
-					
-				// great, let's show a form
 				} else {
-					$user = new user();
-					return $user->controller($this->getOwner())->form(false, false, array(), false, "doregister");
+					// pssst ;)
+					return '<div class="success">'.lang("register_ok").'</div>';
 				}
+			
+			// check if registering is not available on this page
+			} else if(!self::$enabled) {
+				return "<div class=\"notice\">" . lang("register_disabled", "You cannot register on this site!") . "</div>";
+				
+			// great, let's show a form
+			} else {
+				$user = new user();
+				return $user->controller($this->getOwner())->form(false, false, array(), false, "doregister");
+			}
+		}
+
+		/**
+		 * resends the activation mail.
+		*/
+		public function resendActivation() {
+			if($this->getParam("email")) {
+				if($data = DataObject::get_one("user", array("email" => $this->getParam("email")))) {
+					$this->sendMail($data);
+					return lang("register_resend");
+				} else {
+					return "";
+				}
+			} else {
+				$this->redirectBack();
+			}
 		}
 		
+		/**
+		 * sends activation mail.
+		*/
+		public function sendMail($data) {
+			$email = "";
+			$email .= lang("hello") . " ".convert::raw2text($data["nickname"])."<br />\n<br />\n";
+			$email .= lang("thanks_for_register") . "<br />\n<br />\n";
+			$email .= lang("account_activate") . "<br />\n";
+			$email .= '<a target="_blank" href="'. BASE_URI . BASE_SCRIPT . "profile/register/?activate=" . $data["code"] .'">' . BASE_URI . BASE_SCRIPT . "profile/register/?activate=" . $data["code"] . "</a><br />\n<br />\n";
+			$email .= lang("register_greetings");
+			$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+			if(!$mail->sendHTML($data["email"], lang("register"), $email)) {
+				throw new Exception("Could not send mail.");
+			}
+
+			return true;
+		}
+		
+		/**
+		 * sends activation mail.
+		*/
+		public function sendMailToAdmins($data) {
+			// first step: get emails that we want to send to.
+
+			if(self::validationMail == null) {
+				// get from permissions
+				$emails = "";
+			} else {
+				if(is_array(self::validationMail)) {
+					$emails = implode(",", self::$validateMail);
+				} else {
+					$emails = self::$validateMail;
+				}
+			}
+
+			return true;
+		}
+
 		/**
 		 * registers the user
 		 * we don't use register, because of constructor
@@ -119,32 +185,24 @@ class RegisterExtension extends ControllerExtension
 		*/
 		public function doregister($data)
 		{
-				if(self::$validateMail) {
-					$data["status"] = 0;
-					$data["code"] = randomString(10);
-					
-					// send out mail
-					$email = "";
-					$email .= lang("hello") . " ".text::protect($data["nickname"])."<br />\n<br />\n";
-					$email .= lang("thanks_for_register") . "<br />\n<br />\n";
-					$email .= lang("account_activate") . "<br />\n";
-					$email .= '<a target="_blank" href="'. BASE_URI . BASE_SCRIPT . "profile/register/?activate=" . $data["code"] .'">' . BASE_URI . BASE_SCRIPT . "profile/register/?activate=" . $data["code"] . "</a><br />\n<br />\n";
-					$email .= lang("register_greetings");
-					$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
-					if(!$mail->sendHTML($data["email"], lang("register"), $email)) {
-						throwError(6, 'Server-Error', 'Could not send out mail.');
-					}
-					if($this->getOwner()->save($data))			
-						return '<div class="success">' . lang('register_ok_activate', "User successful created. Please visit your e-mail-provider to check out the e-mail we sent to you.") . '</div>';		
-					else
-						throwError(6, 'Server-Error', 'Could not save data.');
+			if(self::$validateMail) {
+				$data["status"] = 0;
+				$data["code"] = randomString(10);
+				
+				// send mail
+				$this->sendMail($data);
 
-				} else {
-					if($this->getOwner()->save($data))			
-						return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		
-					else
-						throwError(6, 'Server-Error', 'Could not save data.');
+				if($this->getOwner()->save($data))	{		
+					return '<div class="success">' . lang('register_ok_activate', "User successful created. Please visit your e-mail-provider to check out the e-mail we sent to you.") . '</div>';		
 				}
+
+			} else if(self::$mustBeValidated) {
+
+			} else {
+				if($this->getOwner()->save($data)) {	
+					return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		
+				}
+			}
 		}
 }
 

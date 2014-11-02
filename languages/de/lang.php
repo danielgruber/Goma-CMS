@@ -194,8 +194,14 @@ $lang = array(
 	"noscript"                                      => "Bitte aktivieren Sie JavaScript, um diese Funktion zu nutzen!",
 	"checked"                                       => "Ausgew&auml;hlte",
 	/* edit tue 3.11.09 11:10 */
-	'login_locked'                                  => "Der Benutzeraccount wurde gesperrt!",
-	"login_not_unlocked"							=> "Der Benutzeraccount wurde noch nicht aktiviert!",
+	"user_locked"									=> "Der Benutzeraccount wurde gesperrt.",
+	"user_lock_q"									=> "Wollen Sie den Benutzeraccount sperren?",
+	"user_unlocked"									=> "Der Benutzeraccount wurde entsperrt.",
+	"user_unlock_q"									=> "Wollen Sie den Benutzeraccount entsperren?",
+	"user_unlock_mail_attention"					=> "Die E-Mail-Adresse wurde noch nicht verifiziert.",
+	'login_locked'                                  => "Der Benutzeraccount wurde gesperrt.",
+	"login_not_unlocked_by_mail"					=> "Der Benutzeraccount wurde noch nicht via E-Mail aktiviert.",
+	"login_not_unlocked"							=> "Der Benutzeraccount wurde noch nicht aktiviert.",
 	"not_unlocked"									=> "Noch nicht aktiviert",
 	"SITE_CURRENT_MAINTENANCE"                      => "Diese Seite befindet sich gerade im Wartungsmodus! Bitte kommen Sie sp&auml;ter wieder!",
 	"SITE_MAINTENANCE"                              => "Wartungsmodus aktiv",
@@ -272,6 +278,8 @@ $lang = array(
 	'db_update_info'								=> "Goma generiert dadurch die Datenbank neu, das bedeutete nicht installiere Module werden installiert.",
 	'online'										=> "Online",
 	'offline'										=> "Offline",
+	'lock'											=> "sperren",
+	'unlock'										=> "entsperren",
 	'locked'										=> 'Gesperrt',
 	'not_locked'									=> "Nicht gesperrt",
 	'edit_rights_groups'							=> "Wer darf diesen Datensatz bearbeiten?",
@@ -345,6 +353,7 @@ $lang = array(
 	"description_info"								=> "Die Beschreibung wird von Suchmaschinen benutzt, um den Inhalt Ihrer Seite für Nutzer klarer zu machen.",
 	"register_enabled_info"							=> "Ermöglicht es Gästen sich zu registrieren",
 	"register_require_email_info"					=> "Es wird bei der Registrierung eine Bestätigungs-E-Mail gesendet, um die E-Mail-Adresse zu validieren.",
+	"register_requre_acitvation"					=> "Ihr Account wurde erfolgreich registriert. Ein Administrator muss ihn nun nur noch aktivieren.",
 	"sitestatus_info"								=> "Wenn sich die Seite im Wartungsmodus befindet, kann Sie nur von Mitgliedern angezeigt werden, die auch die Administration aufrufen können. Sie können diese Funktion z.B. verwenden, wenn Sie Wartungsarbeiten durchführen.",
 	
 	/* users and groups */
@@ -363,6 +372,8 @@ $lang = array(
 	"account_activate"								=> "Um Ihren Account zu aktivieren, kopiren Sie bitte auf folgenden Link in die Adress-Zeile Ihres Browsers:",
 	"register_greetings"							=> "Beste Grüße<br /><br />Das Team",
 	"register_ok_activate"							=> "Der Benutzer wurde erfolgreich registriert. Bitte sehen Sie in Ihrem E-Mail-Postfach nach, um den Benutzer zu aktivieren.",
+	"register_resend"								=> "Die Aktivierungs-E-mail wurde erfolgreich erneut gesendet.",
+	"register_resend_title"							=> "Aktivierungs-E-Mail erneut senden",
 	"register_ok"                                  	=> "Der Benutzer wurde erfolgreich aktiviert! Sie k&ouml;nnen sich jetzt anmelden!",
 	"register_not_found"							=> "Es wurde kein Benutzer mit solchen Angaben gefunden.",
 	/* boxes */

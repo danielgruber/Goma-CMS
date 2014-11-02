@@ -351,6 +351,10 @@
 
 .tablefield-table .actionLink {
 	margin: 0.25em;
+
+	img {
+		padding-top: .375em;
+	}
 }
 .tablefield-table .form_field {
 	border-bottom: 0;

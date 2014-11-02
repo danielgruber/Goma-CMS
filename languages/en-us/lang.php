@@ -193,7 +193,13 @@ $lang = array(
 	"noscript"                                      => "Please activate JavaScript to use this function!",
 	"checked"                                       => "Selected",
 	/* edit tue 3.11.09 11:10 */
+	"user_lock_q"									=> "Do you want to lock the account?",
+	"user_locked"									=> "The account has been locked.",
+	"user_unlock_q"									=> "Do you want to reactivate the account?",
+	"user_unlock_mail_attention"					=> "The email-adresse hasn't been verified, yet.",
+	"user_unlocked"									=> "The account has been unlocked.",
 	'login_locked'                                  => "The account is disabled by admin.",
+	"login_not_unlocked_by_mail"					=> "The account wasn't activated by mail right now.",
 	"login_not_unlocked"							=> "The account wasn't activated right now.",
 	"not_unlocked"									=> "Not yet activated",
 	"SITE_CURRENT_MAINTENANCE"                      => "This site is currently under maintenance. Please come back later.",
@@ -274,6 +280,8 @@ $lang = array(
 	'offline'										=> "Offline",
 	'locked'										=> 'Locked',
 	'not_locked'									=> "Unlocked",
+	'lock'											=> "lock",
+	'unlock'										=> "unlock",
 	'edit_rights_groups'							=> "Who can edit this data?",
 	"disabled"										=> "Disabled",
 	"active"										=> "Active",
@@ -349,6 +357,7 @@ $lang = array(
 	"livecounter_info"								=> "The Realtime-Visitor-Counter let you know how many visitors are exactly in this moment on your website, but it needs more performance.",
 	"register_enabled_info"							=> "Visitors can register on your site.",
 	"register_require_email_info"					=> "Send out validation-emails to validate email-adresse.",
+	"register_requre_acitvation"					=> "You're account was registered successfully. An administrator needs to activate it.",
 	"sitestatus_info"								=> "If site is under maintenance, only admins can view the site.",
 	
 	/* users and groups */
@@ -367,6 +376,8 @@ $lang = array(
 	"account_activate"								=> "to activate your account, please click on the following link:",
 	"register_greetings"							=> "Best Regards<br /><br />The team",
 	"register_ok_activate"							=> "The user was successfully created. Please visit your email-inbox to activate the account.",
+	"register_resend"								=> "The activation-mail was successfully resent.",
+	"register_resend_title"							=> "Resend Mail",
 	"register_ok"                                  	=> "The user was successfully activated. you can login now!",
 	"register_not_found"							=> "There is no user with such information.",
 	/* boxes */

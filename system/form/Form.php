@@ -637,6 +637,7 @@ class Form extends object {
 			}
 		}
 
+
 		if($valid !== true) {
 			$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
 			$this->form->append($errors);
