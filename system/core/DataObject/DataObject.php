@@ -864,9 +864,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@param bool - if to force publishing also when not permitted (default: false)
 	 *@param bool - whether to track in history (default: true)
 	 *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
+	 *@param bool - whether to not getting the fields 'created' and 'autorid' from the old version
 	 *@return bool
 	*/
-	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
+	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
 	{
 		
 		if (!defined("CLASS_INFO_LOADED")) {
@@ -938,8 +939,20 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$command = "update";
 				$newdata = array_merge($data->ToArray(), $this->data);
 				$this->data = $data->ToArray();
-				$newdata["created"] = $data["created"]; // force
-				$newdata["autorid"] = $data["autorid"];
+				
+				if(!$overrideCreated) {
+					$newdata["created"] = $data["created"]; // force
+					$newdata["autorid"] = $data["autorid"];
+				} else {
+					if(!isset($newdata["created"])) {
+						$newdata["created"] = $data["created"]; // force
+					}
+						
+					if(!isset($newdata["autorid"])) {
+						$newdata["autorid"] = $data["autorid"];
+					}
+				}
+				
 				$oldid = $data->versionid;
 				
 				// copy many-many-relations
