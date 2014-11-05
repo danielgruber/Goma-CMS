@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.4
+ * @version 2.3.5
  */
 class Form extends object {
 	/**
@@ -637,7 +637,6 @@ class Form extends object {
 			}
 		}
 
-
 		if($valid !== true) {
 			$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
 			$this->form->append($errors);
@@ -655,13 +654,23 @@ class Form extends object {
 
 		session_store("form_state_" . $this->name, $this->state->ToArray());
 
-		return call_user_func_array(array(
-			$this->controller,
-			$submission
-		), array(
-			$result,
-			$this
-		));
+		if(is_callable($submission)) {
+			return call_user_func_array($submission, array(
+				$result,
+				$this,
+				$this->controller
+			));
+		} else {
+	
+			return call_user_func_array(array(
+				$this->controller,
+				$submission
+			), array(
+				$result,
+				$this,
+				$this->controller
+			));
+		}
 	}
 
 	//! Manipulate the form
