@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.2.8
+ * @version		2.2.9
  */
 class Controller extends RequestHandler
 {		
@@ -591,9 +591,9 @@ class Controller extends RequestHandler
 		 * @access 	public
 		 * @param 	array $data
 		*/
-		public function safe($data)
+		public function safe($data, $form = null, $controller = null, $overrideCreated = false)
 		{
-			if($model = $this->save($data) !== false)
+			if($model = $this->save($data, 1, false, false, $overrideCreated) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
 			} else {
@@ -610,8 +610,8 @@ class Controller extends RequestHandler
 		 * @access 	public
 		 * @param 	array $data
 		*/
-		public function submit_form($data) {
-			if($model = $this->save($data) !== false)
+		public function submit_form($data, $form = null, $controller = null, $overrideCreated = false) {
+			if($model = $this->save($data, 1, false, false, $overrideCreated) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
 			} else {
@@ -630,32 +630,33 @@ class Controller extends RequestHandler
 		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
 		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
-		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false)
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false)
 		{
-				$this->callExtending("onBeforeSave", $data, $priority);
-				
-				$model = $this->modelInst()->_clone();
-				
-				if(is_object($data) && is_subclass_of($data, "ViewaccessableData"))
-				{
-						$data = $data->ToArray();
-				}
-				
-				foreach($data as $key => $value)
-				{
-						$model[$key] = $value;
-				}
-				
-				if($model->writeToDB($forceInsert, $forceWrite, $priority))
-				{
-						$this->callExtending("onAfterSave", $model, $priority);
-						$this->model_inst = $model;
-						$model->controller = clone $this;
-						return $model;
-				} else
-				{
-						return false;
-				}
+		
+			$this->callExtending("onBeforeSave", $data, $priority);
+			
+			$model = $this->modelInst()->_clone();
+			
+			if(is_object($data) && is_subclass_of($data, "ViewaccessableData"))
+			{
+					$data = $data->ToArray();
+			}
+			
+			foreach($data as $key => $value)
+			{
+					$model[$key] = $value;
+			}
+			
+			if($model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated))
+			{
+					$this->callExtending("onAfterSave", $model, $priority);
+					$this->model_inst = $model;
+					$model->controller = clone $this;
+					return $model;
+			} else
+			{
+					return false;
+			}
 		}
 		
 		/**
@@ -667,9 +668,9 @@ class Controller extends RequestHandler
 		 * @access 	public
 		 * @param 	array $data
 		*/
-		public function publish($data)
+		public function publish($data, $form = null, $controller = null, $overrideCreated = false)
 		{	
-			if($model = $this->save($data, 2) !== false)
+			if($model = $this->save($data, 2, false, false, $overrideCreated) !== false)
 			{
 				return $this->actionComplete("publish_success", $model);
 			} else {
@@ -746,10 +747,6 @@ class Controller extends RequestHandler
 		*/
 		public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null) {
 			
-			if(is_object($description) && Object::method_exists($description, "generateRepresentation")) {
-				$description = $description->generateRepresentation(true);
-			}
-
 			$form = new RequestForm(array(
 				new HTMLField("confirm", '<div class="text">'. $title . '</div>')
 			), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->classname), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);

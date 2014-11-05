@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.6
+ * @version     2.2.8
  */
  
 class LeftAndMain extends AdminItem {
@@ -267,8 +267,8 @@ class LeftAndMain extends AdminItem {
 	 *@param array - data
 	 *@param object - response
 	*/
-	public function ajaxSave($data, $response) {
-		if($model = $this->save($data)) {
+	public function ajaxSave($data, $response, $form = null, $controller = null, $overrideCreated = false) {
+		if($model = $this->save($data, 1, false, false, $overrideCreated)) {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
@@ -317,9 +317,9 @@ class LeftAndMain extends AdminItem {
 	 *@param array - data
 	 *@param object - response
 	*/
-	public function ajaxPublish($data, $response) {
+	public function ajaxPublish($data, $response, $form, $controller = null, $overrideCreated = false) {
 		
-		if($model = $this->save($data, 2)) {
+		if($model = $this->save($data, 2, false, false, $overrideCreated)) {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			

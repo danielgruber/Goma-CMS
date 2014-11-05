@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.24
+ * @version     4.7.25
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -870,6 +870,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
 	{
 		
+		
 		if (!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
 		}
@@ -940,7 +941,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$newdata = array_merge($data->ToArray(), $this->data);
 				$this->data = $data->ToArray();
 				
-				if(!$overrideCreated) {
+				if(!$overrideCreated) {
 					$newdata["created"] = $data["created"]; // force
 					$newdata["autorid"] = $data["autorid"];
 				} else {

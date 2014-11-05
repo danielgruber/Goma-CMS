@@ -16,7 +16,7 @@ defined("IN_GOMA") OR die();
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Form
- * @version	2.1.7
+ * @version	2.1.8
  */
 class AjaxSubmitButton extends FormAction {
 	/**
@@ -98,6 +98,8 @@ class AjaxSubmitButton extends FormAction {
 								
 								var eventb = jQuery.Event("ajaxresponded");
 								$("#' . $this->form()->id() . '").trigger(eventb);
+								
+								goma.ui.updateFlexBoxes();
 							},
 							success: function(script, textStatus, jqXHR) {
 								
@@ -110,7 +112,7 @@ class AjaxSubmitButton extends FormAction {
     								var r = method.call($("#' . $this->form()->id() . '").get(0));
     								
     								$("#' . $this->form()->id() . '").gForm().setLeaveCheck(false);
-    								
+
     								goma.ui.updateFlexBoxes();
     								
     								return r;
@@ -119,6 +121,8 @@ class AjaxSubmitButton extends FormAction {
 							error: function(jqXHR, textStatus, errorThrown)
 							{
 								alert("There was an error while submitting your data, please check your Internet Connection or send an E-Mail to the administrator");
+								
+								goma.ui.updateFlexBoxes();
 							}
 						});
 						return false;
@@ -229,15 +233,26 @@ class AjaxSubmitButton extends FormAction {
 		foreach($this->form()->dataHandlers as $callback) {
 			$result = call_user_func_array($callback, array($result));
 		}
+		
+		if(is_callable($submission)) {
+			return call_user_func_array($submission, array(
+				$result,
+				$response,
+				$this,
+				$this->form()->controller
+			));
+		} else {
 
-		return call_user_func_array(array(
-			$form->controller,
-			$submission
-		), array(
-			$result,
-			$response,
-			$form
-		));
+			return call_user_func_array(array(
+				$form->controller,
+				$submission
+			), array(
+				$result,
+				$response,
+				$form,
+				$this->form()->controller
+			));
+		}
 	}
 
 	/**
