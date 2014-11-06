@@ -140,6 +140,7 @@ class SQL extends object
 				$start = microtime(true);
 				
 				$_sql = str_replace(array("\n","\r\n", "\r", "\n\r", "\t"),' ',$sql) . "\n\n\n\n";
+
 				//echo $sql . "\n";
 				//logging($_sql);
 				
@@ -496,7 +497,7 @@ class SQL extends object
 					// patch for sub-queries
 					$a = 0;
 					$field = trim($field);
-					if(_ereg('^[0-9]+$', $field)) {
+					if(preg_match('/^[0-9]+$/', $field)) {
 						if(is_array($value)) {
 							$sql .= " ( ".self::extractToWhere($value, false, $DBFields, $colidingFields)." ) ";
 						} else if(is_string($value)) {

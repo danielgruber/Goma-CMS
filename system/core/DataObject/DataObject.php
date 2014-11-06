@@ -3122,9 +3122,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$has_one = $this->hasOne();
 			
 			// some specific addons for relations
-			if (is_array($filter))
+			if (is_array($query->filter))
 			{
-					foreach($filter as $key => $value)
+					foreach($query->filter as $key => $value)
 					{
 							// many-many
 							if (isset(ClassInfo::$class_info[$this->classname]["many_many"][$key]) || isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"][$key]))
@@ -3155,12 +3155,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 																		AS 
 																			'.$objectTable.' 
 																		ON 
-																			'.$table.'.'.$objectTable . 'id = '.$objectTable.'.id 
+																			'.$table.'.'. $data["extfield"] . ' = '.$objectTable.'.id 
 																		 '; // join other table with many-many-table
 											}
 											foreach($value as $field => $val)
 											{
-													$filter[$objectTable . '.' . $field] = $val;
+													$query->filter[$objectTable . '.' . $field] = $val;
+													$d = true;
 											}
 											
 											$query->removeFilter($key);
@@ -3254,8 +3255,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			unset($baseClass, $baseTable, $sort, $filter);
 			
 			if (PROFILE) Profiler::unmark("DataObject::buildQuery");
-			
-			
+
 			return $query;
 	}
 	

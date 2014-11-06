@@ -3,69 +3,14 @@
 	<head>
 		<title>{$subject}</title>
 		<base href="{BASE_URI}" />
-		<style type="text/css">
-				body, html {
-					line-height: 16pt; 
-				}
-				
-				h1, h2 {
-					line-height: 28pt; 
-				}
-				
-				h3, h4 {
-					line-height: 22pt; 
-				}
-	            a {
-	                color: #4180f5;
-	            	text-decoration: none;
-	            }
-	            a:hover {
-	            	text-decoration: underline;
-	            }
-	            
-	            #mail_wrapper {
-	                max-width: 800px;
-	                margin: auto;
-	                padding: 50px 10px;
-	            }
-	            
-	            #mail_wrapper .header {
-		            padding: 10px;
-	            }
-	            #mail_wrapper .header h1 a, #mail_wrapper .header a {
-	                font-size: 18pt;
-	                line-height: 22pt;
-	                color: #555;
-	                text-decoration: none;
-	                margin: 0;
-	            }
-	            #mail_wrapper .content {
-	                background: #fff;
-	                padding: 15px;
-	                -webkit-border-radius: 5px;
-	                border-radius: 5px;
-	                -moz-border-radius: 5px;
-	            }
-	            #mail_wrapper .footer {
-	            	padding: 10px;
-	                font-size: 10pt;
-	                color: #777;
-	                text-align: right;
-	            }
-	            #mail_wrapper .footer a img {
-	                height: 20px;
-	                width: 64px;
-	                margin-top: -3px;
-	            }
-		</style>
 	</head>
-	<body style="font-family: Arial; font-size: 12pt; padding: 0; margin: 0; background: #ddd; color: #222">
+	<body style="font-family: Arial; font-size: 12pt; padding: 0; margin: 0; background: #fff; color: #222; line-height: 1.5em;">
 		<div id="mail_wrapper" style="padding: 50 10px; margin: auto; max-width: 800px;">
 			<div class="wrapper_inner">
 				<div class="header" style="padding: 10px;">
-					<h1 style="font-size:18pt;line-height: 22pt;margin: 0;"><a style="color: #555;font-size: 18pt;text-decoration:none;" href="{BASE_URI}">$_cms_ptitle</a></h1>
+					<h1 style="font-size:18pt;line-height: 2em;margin: 0;font-weight: 200;"><a style="color: #555;font-size: 18pt;text-decoration:none;" href="{BASE_URI}">$_cms_ptitle</a></h1>
 				</div>
-				<div class="content" style="background: #fff;padding: 15px;-webkit-border-radius: 5px;border-radius: 5px;-moz-border-radius: 5px;">
+				<div class="content" style="background: #fff;padding: 15px;-webkit-border-radius: 5px;border-radius: 5px;-moz-border-radius: 5px;border: 1px solid #bbb;">
 					{$message}
 				</div>
                 <div class="footer" style="padding: 10px;text-align:right;color: #777;font-size: 10pt;">

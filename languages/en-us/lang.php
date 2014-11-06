@@ -246,6 +246,13 @@ $lang = array(
 	"lp_know_password"								=> "You know your password.",
 	"lp_deny"										=> "Click to the follwing link, if you didn't initiate this request.",
 	"lp_deny_okay"									=> "The request was successfully deleted!",
+
+
+	"user_needs_activation"							=> "A new user has been registered and needs to be activated.",
+	"user_activate"									=> "Activate user",
+	"user_activate_confirm"							=> "Do you want to activate the user?",
+	"user_activated_subject"						=> "Account activated",
+	"user_activated"								=> "Congradulations! Your account was activated by an admin.",
 	/*admin nitices*/
 	'maintenance'									=> "Site is under maintenance.",
 	'pagetree'										=> "Sitetree",
@@ -378,6 +385,7 @@ $lang = array(
 	"register_ok_activate"							=> "The user was successfully created. Please visit your email-inbox to activate the account.",
 	"register_resend"								=> "The activation-mail was successfully resent.",
 	"register_resend_title"							=> "Resend Mail",
+	"register_wait_for_activation"					=> "The account was successfully registered. Please wait until an administrator activated it. You'll receive an email then.",
 	"register_ok"                                  	=> "The user was successfully activated. you can login now!",
 	"register_not_found"							=> "There is no user with such information.",
 	/* boxes */

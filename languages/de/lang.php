@@ -247,6 +247,12 @@ $lang = array(
 	"lp_know_password"								=> "Sie wissen Ihr Passwort, sonst w&auml;ren Sie nicht eingeloggt.",
 	"lp_deny"										=> "Rufen Sie folgende Adresse auf, wenn Sie dieses Verfahren nicht iniziert haben.",
 	"lp_deny_okay"									=> "Verfahren erfolgreich abgebrochen!",
+
+	"user_needs_activation"							=> "Es hat sich ein neuer Nutzer angemeldet, der freigegeben werden muss.",
+	"user_activate"									=> "Benutzer freigeben",
+	"user_activate_confirm"							=> "Wollen Sie den Benutzer freigeben?",
+	"user_activated_subject"						=> "Benutzer freigegeben",
+	"user_activated"								=> "Herzlichen Glückwunsch! Ihr Benutzer wurde von einem Administrator freigegeben.",
 	/*admin nitices*/
 	'maintenance'									=> "Der Wartungsmodus ist aktiv.",
 	'pagetree'										=> "Seitenbaum",
@@ -375,6 +381,7 @@ $lang = array(
 	"register_resend"								=> "Die Aktivierungs-E-mail wurde erfolgreich erneut gesendet.",
 	"register_resend_title"							=> "Aktivierungs-E-Mail erneut senden",
 	"register_ok"                                  	=> "Der Benutzer wurde erfolgreich aktiviert! Sie k&ouml;nnen sich jetzt anmelden!",
+	"register_wait_for_activation"					=> "Der Benutzer wurde erfolgreich registriert. Bitte warten Sie, bis er von einem Administrator freigegeben wurde. Sie werden per E-Mail benachrichtigt.",
 	"register_not_found"							=> "Es wurde kein Benutzer mit solchen Angaben gefunden.",
 	/* boxes */
 	"login_myaccount"								=> "Login / Mein Account",

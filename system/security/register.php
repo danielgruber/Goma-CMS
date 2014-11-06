@@ -15,7 +15,7 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		2.2
+ * @version		2.3
  */
 class RegisterExtension extends ControllerExtension
 {
@@ -67,7 +67,7 @@ class RegisterExtension extends ControllerExtension
 		 *@access public
 		*/
 		public $allowed_actions = array(
-			"register", "resendActivation"
+			"register", "resendActivation", "activate"
 		);
 		
 		/**
@@ -75,7 +75,7 @@ class RegisterExtension extends ControllerExtension
 		 *
 		 *@name extra_methods
 		*/
-		public static $extra_methods = array("register", "doRegister", "resendActivation");
+		public static $extra_methods = array("register", "doRegister", "resendActivation", "activate");
 		
 		/**
 		 * add custom method to handle the action
@@ -99,12 +99,23 @@ class RegisterExtension extends ControllerExtension
 				$data = DataObject::get("user", array("code" => $_GET["activate"]));
 				
 				if($data->count() > 0 && $data->status != 2) {
-					$data->status = 1; // activation
 					$data->code = randomString(10); // new code
-					if($data->write(false, true)) {
-						return '<div class="success">'.lang("register_ok").'</div>';
+					if(self::$mustBeValidated) {
+						$data->status = 3; // activation
+						$this->sendMailToAdmins($data);
 					} else {
-						throwError(6, 'Server-Error', 'Could not save data.');
+						$data->status = 1; // activation
+					}
+					
+					
+					if($data->write(false, true)) {
+						if(self::$mustBeValidated) {
+							return '<div class="success">'.lang("register_requre_acitvation").'</div>';
+						} else {
+							return '<div class="success">'.lang("register_ok").'</div>';
+						}
+					} else {
+						throw new Exception("Could not save data");
 					}
 				} else {
 					// pssst ;)
@@ -159,12 +170,21 @@ class RegisterExtension extends ControllerExtension
 		/**
 		 * sends activation mail.
 		*/
-		public function sendMailToAdmins($data) {
+		public function sendMailToAdmins($user) {
 			// first step: get emails that we want to send to.
 
-			if(self::validationMail == null) {
+			if(self::$validationMail == null) {
 				// get from permissions
 				$emails = "";
+
+				// get group ids that have the permission USERS_MANAGE
+				$data = DataObject::get("group", array("permissions" => array("name" => "USERS_MANAGE")));
+				$groupids = $data->fieldToArray("id");
+
+				$users = DataObject::get("user", array("groups" => array("id" => $groupids)));
+				
+				$emails = implode(",", $users->fieldToArray("email"));
+
 			} else {
 				if(is_array(self::validationMail)) {
 					$emails = implode(",", self::$validateMail);
@@ -173,7 +193,54 @@ class RegisterExtension extends ControllerExtension
 				}
 			}
 
+			if(!is_object($user)) {
+				$user = new User($user);
+			}
+
+			$view = $user 	->customise(array("activateLink" => BASE_URI . BASE_SCRIPT . "profile/activate" . URLEND . "?activate=" . $user["code"]))
+							->renderWith("mail/activate_account_admin.html");
+
+			$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+			if(!$mail->sendHTML($emails, lang("user_activate"), $view)) {
+				throw new Exception("Could not send mail.");
+			}
+
 			return true;
+		}
+
+		/**
+		 * activation method for admins.
+		*/
+		public function activate() {
+			if(!Permission::check("USERS_MANAGE")) {
+				member::redirectToLogin();
+			}
+
+			if(isset($_GET["activate"]) && $data = DataObject::get_one("user", array("code" => $_GET["activate"]))) {
+				if($this->getOwner()->confirm(lang("user_activate_confirm"), lang("yes"), null, $data->generateRepresentation(true))) {
+					$data->status = 1;
+					$data->code = randomString(10);
+
+					$view = $data 	->customise()
+									->renderWith("mail/account_activated.html");
+
+					$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+					if(!$mail->sendHTML($data->email, lang("user_activate_subject"), $view)) {
+						throw new Exception("Could not send mail.");
+					}
+
+					if($data->write(false, true)) {
+						AddContent::addSuccess(lang("user_activated_subject"));
+						$this->getOwner()->redirectBack();
+					} else {
+						throw new Exception("Could not save data.");
+					}
+				}
+			} else {
+				$this->getOwner()->redirectBack();
+			}
+
+			
 		}
 
 		/**
@@ -198,6 +265,14 @@ class RegisterExtension extends ControllerExtension
 
 			} else if(self::$mustBeValidated) {
 
+				$data["status"] = 3;
+				$data["code"] = randomString(10);
+				// send mail
+				$this->sendMailToAdmins($data);
+
+				if($this->getOwner()->save($data))	{		
+					return '<div class="success">' . lang('register_wait_for_activation', "The account was sucessfully registered, but an administrator needs to activate it. You'll be notified by email.") . '</div>';		
+				}
 			} else {
 				if($this->getOwner()->save($data)) {	
 					return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		

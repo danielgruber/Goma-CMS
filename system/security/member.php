@@ -1004,9 +1004,14 @@ class Member extends Object {
 	public function require_login() {
 		if(!self::login()) {
 			AddContent::addNotice(lang("require_login"));
-			HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
+			self::redirectToLogin();
 		}
 		return true;
+	}
+
+	public function redirectToLogin() {
+		HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
+		exit;
 	}
 	
 	/**
