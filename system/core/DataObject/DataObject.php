@@ -3160,8 +3160,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 											}
 											foreach($value as $field => $val)
 											{
-													$query->filter[$objectTable . '.' . $field] = $val;
-													$d = true;
+												if($field == "id") {
+													$field = "recordid";
+												}
+												
+												if($field == "versionid") {
+													$field = "id";
+												}
+												$query->filter[$objectTable . '.' . $field] = $val;
 											}
 											
 											$query->removeFilter($key);

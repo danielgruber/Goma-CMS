@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 02.04.2012
-  * $Version 1.3
+  * last modified: 07.11.2014
+  * $Version 1.4
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -21,6 +21,7 @@ class ProfileController extends FrontedController {
 	 *@access public
 	*/
 	public $allowed_actions = array("edit", "login", "logout", "switchlang");
+	
 	/**
 	 * profile actions
 	 *
@@ -28,6 +29,7 @@ class ProfileController extends FrontedController {
 	 *@access public
 	*/
 	public $profile_actions;
+	
 	/**
 	 * tabs
 	 *
@@ -35,6 +37,12 @@ class ProfileController extends FrontedController {
 	 *@access public
 	*/
 	public $tabs;
+	
+	/**
+	 * define right model.	
+	*/
+	public $model = "user";
+	
 	/**
 	 * shows the edit-screen
 	 *
@@ -55,6 +63,7 @@ class ProfileController extends FrontedController {
 		$userdata = DataObject::get("user", array("id" => member::$id))->first();
 		return '<h1>'.lang("edit_profile").'</h1>' . $userdata->controller()->edit();
 	}
+	
 	/**
 	 * default screen
 	 *

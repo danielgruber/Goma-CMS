@@ -277,7 +277,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				
 				// if a user is not activated by mail, admin should have a option to activate him manually
 				if($this->status == 0) {
-					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("not_unlocked_by_mail", "Not activated by mail yet."),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
+					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("login_not_unlocked_by_mail", "Not activated by mail yet."),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
 				} else if($this->status == 3) {
 					$status = new radiobutton("status", lang("ACCESS", "Access"), array(3 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
 				} else {
@@ -960,7 +960,7 @@ class Member extends Object {
 				} else if($data->status == 0) {
 					$add = "";
 					if(ClassInfo::exists("registerExtension")) {
-						$add = ' <a href="profile/register/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
+						$add = ' <a href="profile/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
 					}
 					addcontent::addError(lang("login_not_unlocked") . $add);
 					return false;

@@ -137,10 +137,11 @@ class RegisterExtension extends ControllerExtension
 		 * resends the activation mail.
 		*/
 		public function resendActivation() {
-			if($this->getParam("email")) {
-				if($data = DataObject::get_one("user", array("email" => $this->getParam("email")))) {
+			if($this->getParam("email") && !member::login()) {
+				$data = DataObject::get_one("user", array("email" => $this->getParam("email")));
+				if($data && $data->status != 1) {
 					$this->sendMail($data);
-					return lang("register_resend");
+					return '<div class="success">' . lang("register_resend") . '</div>';
 				} else {
 					return "";
 				}
@@ -153,6 +154,7 @@ class RegisterExtension extends ControllerExtension
 		 * sends activation mail.
 		*/
 		public function sendMail($data) {
+			
 			$email = "";
 			$email .= lang("hello") . " ".convert::raw2text($data["nickname"])."<br />\n<br />\n";
 			$email .= lang("thanks_for_register") . "<br />\n<br />\n";
@@ -259,7 +261,7 @@ class RegisterExtension extends ControllerExtension
 				// send mail
 				$this->sendMail($data);
 
-				if($this->getOwner()->save($data))	{		
+				if($model = $this->getOwner()->save($data, 2, true, true)) {	
 					return '<div class="success">' . lang('register_ok_activate', "User successful created. Please visit your e-mail-provider to check out the e-mail we sent to you.") . '</div>';		
 				}
 
@@ -270,11 +272,11 @@ class RegisterExtension extends ControllerExtension
 				// send mail
 				$this->sendMailToAdmins($data);
 
-				if($this->getOwner()->save($data))	{		
+				if($this->getOwner()->save($data, 2, true, true))	{		
 					return '<div class="success">' . lang('register_wait_for_activation', "The account was sucessfully registered, but an administrator needs to activate it. You'll be notified by email.") . '</div>';		
 				}
 			} else {
-				if($this->getOwner()->save($data)) {	
+				if($this->getOwner()->save($data, 2, true, true)) {	
 					return '<div class="success">' . lang('register_ok', "Ready to login! Thanks for using this Site!") . '</div>';		
 				}
 			}
