@@ -227,7 +227,7 @@ class RegisterExtension extends ControllerExtension
 									->renderWith("mail/account_activated.html");
 
 					$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
-					if(!$mail->sendHTML($data->email, lang("user_activate_subject"), $view)) {
+					if(!$mail->sendHTML($data->email, lang("user_activated_subject"), $view)) {
 						throw new Exception("Could not send mail.");
 					}
 

@@ -44,6 +44,7 @@ gloader::addLoadAble("uidialog", "system/libs/javascript/ui/dialog.js", array(
 	"resizable",
 	"draggable"
 ));
+gloader::addLoadAble("hammer", "system/libs/javascript/hammer.js");
 gloader::addLoadAble("slider", "system/libs/javascript/ui/slider.js");
 gloader::addLoadAble("tabs", "system/libs/javascript/ui/tabs.js");
 gloader::addLoadAble("gtabs", "system/libs/tabs/tabs.js");
