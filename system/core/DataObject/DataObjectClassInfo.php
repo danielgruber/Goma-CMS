@@ -6,7 +6,7 @@
   * @link       http://goma-cms.org
   * @license:   LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   * @author     Goma-Team
-  * @version 4.1.4
+  * @version 	4.1.6
 */
 class DataObjectClassInfo extends Extension
 {
@@ -163,7 +163,8 @@ class DataObjectClassInfo extends Extension
     							}
 							}
 							
-							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$key] = array(
+							
+							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$table] = array(
 								"table" 	=> $table,
 								"field"		=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["extfield"],
 								"extfield"	=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["field"]

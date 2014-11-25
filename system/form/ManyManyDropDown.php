@@ -10,7 +10,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.3.1
+ * @version     1.4
  */
 class ManyManyDropDown extends MultiSelectDropDown
 {		
@@ -20,7 +20,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 		 *@name relation
 		 *@access public
 		*/
-		public $realtion;
+		public $relation;
 		
 		/**
 		 * field to show in dropdown
@@ -37,6 +37,14 @@ class ManyManyDropDown extends MultiSelectDropDown
 		 *@access public
 		*/
 		public $where;
+		
+		/**
+		 * info-field
+		 *
+		 *@name info_field
+		 *@access public
+		*/
+		public $info_field;
 		
 		/**
 		 * base-model for querying DataBase.
@@ -185,6 +193,11 @@ class ManyManyDropDown extends MultiSelectDropDown
 			$arr = array();
 			foreach($data as $record) {
 				$arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
+				if(isset($this->info_field)) {
+					if(isset($record[$this->info_field])) {
+						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+					}
+				}
 			}			
 			$left = ($p > 1);
 			
@@ -211,6 +224,11 @@ class ManyManyDropDown extends MultiSelectDropDown
 			$arr = array();
 			foreach($data as $record) {
 				$arr[] = array("key" => $record["versionid"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
+				if(isset($this->info_field)) {
+					if(isset($record[$this->info_field])) {
+						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+					}
+				}
 			}			
 			$left = ($p > 1);
 			$right = (ceil($data->count() / 10) > $p);
