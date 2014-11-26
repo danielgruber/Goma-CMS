@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.9
+ * @version     2.2.10
  */
 
 
@@ -367,7 +367,13 @@ var LaM_type_timeout;
 	w.LoadTreeItem = function (id) {
 		var $this = $("li[data-nodeid="+id+"] > span > a.node-area");
 		if($this.length == 0 && $("li[data-recordid="+id+"] > span > a.node-area").length == 0) {
+			var thenum = id.replace( /^\D+/g, ''); // replace all leading non-digits with nothing
+			if(thenum != id) {
+				return LoadTreeItem(thenum);
+			}
+
 			return false;
+			
 		}
 		
 		if($this.length == 0) {

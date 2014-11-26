@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version	2.1.4
+ * @version	2.1.5
  */
 
 // goma-framework
@@ -186,7 +186,7 @@ if (goma.ui === undefined) {
 			    	if (/WebKit/i.test(navigator.userAgent)) {	
 			    		setInterval(function () {
 			    			/loaded|complete/.test(document.readyState) && RetinaReplace();
-						}, 10);
+						}, 100);
 					}
 			}
 			
