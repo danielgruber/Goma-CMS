@@ -19,6 +19,13 @@
 						<div class="treewrapper">
 							$SITETREE
 						</div>
+						<% IF $TREEOPTIONS %>
+							<div class="tree-options">
+								<form method="get" id="tree-options-form" action="">
+									$TREEOPTIONS
+								</form>
+							</div>
+						<% END %>
 					</div>
 				</div>
 			</div>

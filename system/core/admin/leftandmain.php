@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.8
+ * @version     2.2.6
  */
  
 class LeftAndMain extends AdminItem {
@@ -62,13 +62,6 @@ class LeftAndMain extends AdminItem {
 	public $marked = 0;
 	
 	/**
-	 * just one time in the request resume should be called
-	 *
-	 *@name resumeNum
-	*/
-	static public $resumeNum = 0;
-	
-	/**
 	 * sort-field
 	 *
 	 *@name sort_field
@@ -89,16 +82,6 @@ class LeftAndMain extends AdminItem {
 	*/
 	public function getRootNode() {
 		return parse_lang($this->root_node);
-	}
-	
-	/**
-	 * removes Resume-Cache
-	 *
-	 *@name removeResume
-	 *@access public
-	*/
-	public function removeResume() {
-		unset($_SESSION["goma_resume_".$this->classname.""]);
 	}
 	
 	/**
@@ -147,7 +130,7 @@ class LeftAndMain extends AdminItem {
 		if(defined("LAM_CMS_ADD"))
 			$this->ModelInst()->addmode = 1;
 		
-		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode()))->renderWith($this->baseTemplate);
+		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode(), "TREEOPTIONS" => $this->generateTreeOptions()))->renderWith($this->baseTemplate);
 		
 		$_SESSION[$this->classname . "_LaM_marked"] = $this->marked;
 		
@@ -155,6 +138,32 @@ class LeftAndMain extends AdminItem {
 		return parent::serve($output);
 	}
 	
+	/**
+	 * generates a set of options as HTML, that can be used to have more than just a search
+	 * to customise the tree. For example a multilingual-plugin should add a select-option
+	 * to filter by language.	
+	*/
+	public function generateTreeOptions() {
+		$tree_class = $this->tree_class;
+		if($tree_class == "") {
+			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
+		}
+		
+		$html = new HTMLNode("div");
+		
+		if(Object::method_exists($tree_class, "generateTreeOptions")) {
+			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html));
+		}
+		
+		$t = new $tree_class;
+		$t->callExtending("generateTreeOptions", $html);
+		
+		if($html->children()) {
+			return $html->render();
+		}
+		
+		return "";
+	}
 	
 	/**
 	 * generates the tree-links.
@@ -209,7 +218,33 @@ class LeftAndMain extends AdminItem {
 			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
 		
-		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, array("version" => "state", "search" => $search)));
+		$options = array("version" => "state", "search" => $search, "filter" => array());
+			
+		// give the tree-class the ability to modify the options.
+		if(Object::method_exists($tree_class, "argumentTree")) {
+			$newParams = call_user_func_array(array($tree_class, "argumentTree"), array($this, $options));
+			if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
+				$options = $newParams;
+			}
+			unset($newParams);
+		}
+		
+		// iterate through extensions to give them the ability to change the options.
+		$t = new $tree_class;
+		foreach($t->getextensions() as $ext)
+		{
+			if (ClassInfo::hasInterface($ext, "TreeArgumenter")) {
+				$newParams = $t->getinstance($ext)->argumentTree($this, $options);
+				if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
+					$options = $newParams;
+				}
+				unset($newParams);
+			}
+		}
+		unset($t);
+		
+		// generate tree
+		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, $options));
 		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace, $this);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));
@@ -267,8 +302,8 @@ class LeftAndMain extends AdminItem {
 	 *@param array - data
 	 *@param object - response
 	*/
-	public function ajaxSave($data, $response, $form = null, $controller = null, $overrideCreated = false) {
-		if($model = $this->save($data, 1, false, false, $overrideCreated)) {
+	public function ajaxSave($data, $response) {
+		if($model = $this->save($data)) {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
 			
@@ -317,9 +352,9 @@ class LeftAndMain extends AdminItem {
 	 *@param array - data
 	 *@param object - response
 	*/
-	public function ajaxPublish($data, $response, $form, $controller = null, $overrideCreated = false) {
+	public function ajaxPublish($data, $response) {
 		
-		if($model = $this->save($data, 2, false, false, $overrideCreated)) {
+		if($model = $this->save($data, 2)) {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			

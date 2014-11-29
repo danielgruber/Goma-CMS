@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.3
+ * @version		2.3.1
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -829,7 +829,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *@name offsetSet
 	 */
 	public function offsetSet($offset, $value) {
-
+	
 		return $this->__set($offset, $value);
 	}
 
@@ -855,23 +855,31 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @param 	mixed $value value
 	 */
 	public function setOffset($var, $value) {
-		$var = trim(strtolower($var));
-		
-		if($value instanceof DBField) {
-			$value = $value->raw();
-			$this->extendedCasting[$var] = $value->classname;
-		}
-		
-		if(is_array($this->data)) {
-			// first unset, so the new value is last value of data stack
-			unset($this->data[$var]);
-			if(isset($this->data[$var]) && $this->data[$var] == $value) {
-				return;
+		if($var === null) {
+			if(is_array($this->data)) {
+				array_push($this->data, $value);
+			} else {
+				$this->data = array($value);
+			}
+		} else {
+			$var = trim(strtolower($var));
+			
+			if($value instanceof DBField) {
+				$value = $value->raw();
+				$this->extendedCasting[$var] = $value->classname;
 			}
 			
-			$this->data[$var] = $value;
-		} else {
-			$this->data = array($var => $value);
+			if(is_array($this->data)) {
+				// first unset, so the new value is last value of data stack
+				unset($this->data[$var]);
+				if(isset($this->data[$var]) && $this->data[$var] == $value) {
+					return;
+				}
+				
+				$this->data[$var] = $value;
+			} else {
+				$this->data = array($var => $value);
+			}
 		}
 		
 		$this->changed = true;

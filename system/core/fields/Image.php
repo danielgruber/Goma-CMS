@@ -4,7 +4,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 30.03.2013
+ * last modified: 26.11.2014
  */
 
 // silence is golden ;)
@@ -43,7 +43,7 @@ class ImageSQLField extends DBField {
 	 *@param string - additional css code
 	 */
 	public function setWidth($width, $absolute = false, $html = "", $style = "") {
-		if (_ereg("^[0-9]+$", $width)) {
+		if (preg_match("/^[0-9]+$/", $width)) {
 			$url = 'images/resampled/' . $width . '/' . $this -> value;
 			if ($absolute) {
 				$url = BASE_URI . BASE_SCRIPT . $url;
@@ -71,7 +71,7 @@ class ImageSQLField extends DBField {
 	 *@param string - additional css code
 	 */
 	public function setHeight($height, $absolute = false, $html = "", $style = "") {
-		if (_ereg("^[0-9]+$", $height)) {
+		if (preg_match("/^[0-9]+$/", $height)) {
 			$url = 'images/resampled/x/' . $height . '/' . $this -> value;
 			if ($absolute) {
 				$url = BASE_URI . BASE_SCRIPT . $url;
@@ -100,7 +100,7 @@ class ImageSQLField extends DBField {
 	 *@param string - additional css code
 	 */
 	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
-		if (_ereg("^[0-9]+$", $width) && _ereg("^[0-9]+$", $height)) {
+		if (preg_match("/^[0-9]+$/", $width) && preg_match("/^[0-9]+$/", $height)) {
 			$url = 'images/resampled/' . $width . '/' . $height . '/' . $this -> value;
 			if ($absolute)
 				$url = BASE_URI . BASE_SCRIPT . $url;

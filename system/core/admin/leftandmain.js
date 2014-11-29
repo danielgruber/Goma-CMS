@@ -6,7 +6,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.10
+ * @version     2.2.9
  */
 
 
@@ -15,6 +15,9 @@ var LaM_type_timeout;
 
 (function($, w){
 	$(function(){
+		
+		var oForm = $("#tree-options-form");
+		
 		// first modify out view-controller in javascript.
 		goma.ui.setMainContent($("table.leftandmaintable td.main > .inner"));
 		
@@ -35,6 +38,16 @@ var LaM_type_timeout;
 		$(".treesearch form input[type=text]").change(function(){
 			updateWithSearch($(this).parent());
 			return false;
+		});
+		
+		oForm.submit(function(){
+			
+			updateWithSearch($(".treesearch form"), null, true);
+			return false;
+		});
+		
+		oForm.find("input,select,textarea").change(function(){
+			oForm.submit();
 		});
 		
 		setTimeout(updateSidebarToggle, 50);
@@ -214,6 +227,8 @@ var LaM_type_timeout;
 	var active_val = "";
 	function updateWithSearch($this, callback, force, notblur, openid) {
 		
+		var oForm = $("#tree-options-form");
+		
 		var fn = callback;
 		var value = $this.find("input[type=text]").val();
 		if(value == lang("search", "Search...")) {
@@ -245,8 +260,12 @@ var LaM_type_timeout;
 			else
 				params = "";
 				
+			
+				
 			$.ajax({
 				url: BASE_SCRIPT + adminURI + "/updateTree/" + params,
+				type: "post",
+				data: oForm.serialize(),
 				success: function(html, code, jqXHR) {
 					
 					renderResponseTo(html, treewrapper, jqXHR).done(function(){
@@ -267,6 +286,8 @@ var LaM_type_timeout;
 			// if search
 			$.ajax({
 				url: BASE_SCRIPT + adminURI + "/updateTree/" + escape(value),
+				type: "post",
+				data: oForm.serialize(),
 				success: function(html, code, jqXHR) {
 					renderResponseTo(html, $this.parents(".classtree").find(".treewrapper"), jqXHR).done(function(){
 						tree_bind($this.parents(".classtree").find(".treewrapper").find(".goma-tree"));
@@ -367,13 +388,7 @@ var LaM_type_timeout;
 	w.LoadTreeItem = function (id) {
 		var $this = $("li[data-nodeid="+id+"] > span > a.node-area");
 		if($this.length == 0 && $("li[data-recordid="+id+"] > span > a.node-area").length == 0) {
-			var thenum = id.replace( /^\D+/g, ''); // replace all leading non-digits with nothing
-			if(thenum != id) {
-				return LoadTreeItem(thenum);
-			}
-
 			return false;
-			
 		}
 		
 		if($this.length == 0) {
