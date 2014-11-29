@@ -110,8 +110,8 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("GOMA_VERSION", "2.0b10");
-define("BUILD_VERSION", "091");
+define("GOMA_VERSION", "2.0b11");
+define("BUILD_VERSION", "092");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
