@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6.4
+ * @version     2.6.5
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -1297,7 +1297,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 				
 				// get allowed children for this page
 				$allowed = ClassInfo::getStatic($child, "allow_children");
-				if(count($allowed) > 0) {
+				if(is_array($allowed) && count($allowed) > 0) {
 					foreach($allowed as $allow) {
 						$allow = strtolower($allow);
 						
@@ -1318,7 +1318,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 			
 			// now filter
 			$allow_parents = ClassInfo::getStatic($this->classname, "allow_parent");
-			if(count($allow_parents) > 0) {
+			if(is_array($allow_parents) && count($allow_parents) > 0) {
 				foreach($allowed_parents as $parent) {
 					
 					// set found to false
