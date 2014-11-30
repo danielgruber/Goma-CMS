@@ -4,7 +4,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\JS-Framework
- * @version	2.1.5
+ * @version	2.1.6
  */
 
 // goma-framework
@@ -331,7 +331,8 @@ if (goma.ui === undefined) {
 						goma.ui.setProgress(50);
 					}
 					
-					goma.ui.renderResponse(r, a, node, undefined, false, true).done(deferred.resolve).done( function() {
+					goma.ui.renderResponse(r, a, node, undefined, false, true).done( function() {
+						deferred.resolve(r,c,a);
 						node.removeClass("loading");
 						if (goma.ui.progress !== undefined) {
 							goma.ui.setProgress(100);
