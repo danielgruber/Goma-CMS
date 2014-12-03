@@ -152,11 +152,11 @@ class LeftAndMain extends AdminItem {
 		$html = new HTMLNode("div");
 		
 		if(Object::method_exists($tree_class, "generateTreeOptions")) {
-			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html));
+			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html, $this));
 		}
 		
 		$t = new $tree_class;
-		$t->callExtending("generateTreeOptions", $html);
+		$t->callExtending("generateTreeOptions", $html, $this);
 		
 		if($html->children()) {
 			return $html->render();
