@@ -299,13 +299,11 @@ class contentAdmin extends LeftAndMain
 				$response = new AjaxResponse();
 				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
 				$response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" .$this->modelInst()->id."'); });");
-				$this->removeResume();
 				HTTPResponse::setBody($response->render());
 				HTTPResponse::output();
 				exit;
 			} else {
 				AddContent::addSuccess(lang("unpublish_success", "The site was successfully unpublished."));
-				$this->removeResume();
 				$this->redirectBack();
 				exit;
 			}
@@ -313,13 +311,11 @@ class contentAdmin extends LeftAndMain
 		if(Core::is_ajax()) {
 			$response = new AjaxResponse();
 			$response->exec('alert('.var_export(lang("less_rights"), true).');');
-			$this->removeResume();
 			HTTPResponse::setBody($response->render());
 			HTTPResponse::output();
 			exit;
 		} else {
 			AddContent::addError(lang("less_rights"));
-			$this->removeResume();
 			$this->redirectBack();
 			exit;
 		}
