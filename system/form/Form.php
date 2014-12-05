@@ -346,8 +346,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function render() {
-	
-		if($this->controller->request) {
+		if($this->controller && isset($this->controller->request)) {
 			$params = array_values($this->controller->request->params);
 			
 			// just watch out for external-form.
