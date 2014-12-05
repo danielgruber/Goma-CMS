@@ -3200,7 +3200,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 							if (strpos($key, ".") !== false) {
 								if (isset($has_one[strtolower(substr($key, 0, strpos($key, ".")))])) {
 									$has_oneField = substr($key, strpos($key, ".") + 1);
-									$hasOnes[strtolower(substr($key, 0, strpos($key, ".")))][$has_oneField] = $value;
+									$hasOnes[strtolower(substr($key, 0, strpos($key, ".")))][$has_oneField] = $value;
 									$query->removeFilter($key);
 								}
 							}
@@ -3212,7 +3212,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				foreach($hasOnes as $key => $fields) {
 					$c = $has_one[$key];
 					$table = ClassInfo::$class_info[$c]["table"];
-					
+					$hoBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$c]["baseclass"]]["table"]);
+
 					foreach($fields as $field => $val) {
 						$fields[$table . "." . $field] = $val;
 						unset($fields[$field]);
@@ -3225,11 +3226,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 												ON  
 												 '.$table.'.recordid = '.$this->Table().'.'.$key.'id AND ('.SQL::ExtractToWhere($fields, false).')';
 					$query->from[] = ' INNER JOIN 
-													'.DB_PREFIX . $baseTable.'_state 
+													'.DB_PREFIX . $hoBaseTable.'_state 
 												AS 
-													'.$baseTable.'_state 
+													'.$hoBaseTable.'_state 
 												ON  
-												 '.$baseTable.'_state.publishedid = '.$table.'.id';
+												 '.$hoBaseTable.'_state.publishedid = '.$table.'.id';
 				}
 			}
 			
