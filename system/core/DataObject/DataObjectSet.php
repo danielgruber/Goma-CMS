@@ -1249,6 +1249,27 @@ class DataObjectSet extends DataSet {
 		}
 	}
 	
+	/**
+	 * gets the maximum value of given field in this set + returns a count of all fields in this set as a comma-seperated-string.
+	 * this is for use in caching.
+	 *
+	 *@name maxCount
+	 *@access public
+	 *@param string $field
+	*/
+	public function MaxCount($field) {
+		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
+			$field = $this->dataobject->table() . "." . $field;
+		}
+		
+		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max, count(*) AS count', $this->filter, array(), $this->limit, $this->join, $this->search);
+		
+		if(isset($data[0]["max"])) {	
+			return $data[0]["max"]  . "," . $data[0]["count"];
+		} else {
+			return null;
+		}
+	}
 	
 	/**
 	 * gets the minimum value of given field in this set.

@@ -250,6 +250,8 @@ class contentAdmin extends LeftAndMain
 
 		}
 		
+		$form->useStateData = true;
+
 		$form->add(new HTMLField('headbar', $html));
 		$form->add($title = new textField('title', lang("title_page", "title of the page")));
 		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
