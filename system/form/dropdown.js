@@ -4,7 +4,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.0
+ * @version 1.0.1
  */
 var DropDown = function(id, url, multiple) {
 	this.url = url;
@@ -270,9 +270,9 @@ DropDown.prototype = {
 							content += "<li>";
 							
 							if(this.value[val.key] || this.value[val.key] === 0)
-								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span>"+val.value+"</span></a>";
+								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
 							else
-								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span>"+val.value+"</span></a>";
+								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
 								
 							if(typeof val.smallText == "string") {
 								content += "<span class=\"record_info\">"+val.smallText+"</span>";
