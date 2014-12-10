@@ -201,7 +201,7 @@ class Core extends object {
 
 		HTTPResponse::setHeader("x-base-uri", BASE_URI);
 		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
-		
+        
 		if(isset($_GET["debug"])) {
 			Resources::enableDebug();
 		}

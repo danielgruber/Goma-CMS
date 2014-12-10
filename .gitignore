@@ -52,3 +52,6 @@ tpl/
 
 #sublime
 *.sublime-workspace
+
+.idea
+.idea/*
