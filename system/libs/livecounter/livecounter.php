@@ -16,7 +16,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.6
+ * @version     2.2.7
  */
 class livecounter extends DataObject
 {
@@ -90,6 +90,8 @@ class livecounter extends DataObject
 		*/
 		static public $alreadyRun = false;
 		
+		static $userCounted = null;
+		
 		/**
 		 * allow writing
 		*/
@@ -125,6 +127,7 @@ class livecounter extends DataObject
 				$user_identifier = session_id();
 			}
 			
+			self::$userCounted = $_SESSION["user_counted"];
 	
 			// just rewirte cookie
 			setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
@@ -132,6 +135,9 @@ class livecounter extends DataObject
 			
 			register_shutdown_function(array("livecounter", "onBeforeShutdown"));
 			
+			self::$userCounted = $_SESSION["user_counted"];
+			
+			$_SESSION["user_counted"] = TIME;
 		}
 		
 		/**
@@ -165,7 +171,7 @@ class livecounter extends DataObject
 			/**
 			 * for users without enabled cookies, this works!
 			*/
-			if(!isset($_SESSION["user_counted"]) && !isset($_COOKIE["goma_sessid"]) && !isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			if(!isset(self::$userCounted) && !isset($_COOKIE["goma_sessid"]) && !isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $_SERVER["HTTP_USER_AGENT"], "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 				// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 				Security::registerAttacker($_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"]);
 				$user_identifier = $ip;
@@ -175,12 +181,12 @@ class livecounter extends DataObject
 			/**
 			 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index.
 			*/
-			if(isset($_SESSION["user_counted"])) {
-				$data = DataObject::get_one("livecounter", array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
+			if(isset(self::$userCounted)) {
+				$data = DataObject::get_one("livecounter", array("phpsessid" => $user_identifier, "last_modified" => self::$userCounted));
 				if($data && date("d", $data->created) == date("d", NOW)) {
-					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => $_SESSION["user_counted"]));
+					DataObject::update("livecounter", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("phpsessid" => $user_identifier, "last_modified" => self::$userCounted));
 					// we set last update to next know the last update and better use database-index
-					$_SESSION["user_counted"] = TIME;
+					logging("läuft");
 					
 					return true;
 				}
@@ -223,7 +229,6 @@ class livecounter extends DataObject
 					// set cookie
 					setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
 					setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
-					$_SESSION["user_counted"] = TIME;
 					return true;
 				}
 			}
@@ -246,10 +251,7 @@ class livecounter extends DataObject
 				$data->recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $_COOKIE["goma_lifeid"])) > 0);
 				$data->write(true, true);
 			}
-			
-			// we set last update to next know the last update and better use database-index
-			$_SESSION["user_counted"] = TIME;
-			
+
 			return true;
 		}
 		

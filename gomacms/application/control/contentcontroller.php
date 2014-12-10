@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.1.1
+ * @version     2.1.2
  */
 class contentController extends FrontedController
 {
@@ -40,6 +40,10 @@ class contentController extends FrontedController
 		public $url_handlers = array(
 			'$Action//$id/$otherid' => '$Action'
 		);
+		
+		static $activeNodes = array();
+
+		static $enableBacktracking = true;
 		
 		/**
 		 * register meta-tags
@@ -107,6 +111,8 @@ class contentController extends FrontedController
 					}
 				}
 			}
+			
+			array_push(self::$activeNodes, $this->modelInst()->id);
 			
 			// check for sub-page
 			if($action != "")
@@ -184,7 +190,7 @@ class contentController extends FrontedController
 			
 			if(PROFILE) Profiler::mark("contentController checkupload");
 
-			if(is_a(Core::$requestController, "contentController")) {
+			if(self::$enableBacktracking && is_a(Core::$requestController, "contentController")) {
 				
 				$contentmd5 = md5($content);
 				$cache = new Cacher("uploadTracking_" . $contentmd5);
@@ -273,17 +279,19 @@ class UploadsPageBacktraceController extends ControllerExtension {
 	 *@name onBeforeHandleAction
 	*/
 	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-		$data = $this->getOwner()->modelInst()->linkingPages();
-		$data->setVersion(false);
-		if($data->Count() > 0) {
-			foreach($data as $page) {
-				if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
-					return true;
+		if(contentController::$enableBacktracking) {
+			$data = $this->getOwner()->modelInst()->linkingPages();
+			$data->setVersion(false);
+			if($data->Count() > 0) {
+				foreach($data as $page) {
+					if($page->isPublished() || $page->can("Write", $page) || $page->can("Publish", $page)) {
+						return true;
+					}
 				}
+				
+				$handleWithMethod = false;
+				$content = false;
 			}
-			
-			$handleWithMethod = false;
-			$content = false;
 		}
 	}
 }

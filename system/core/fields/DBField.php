@@ -4,7 +4,7 @@
  * Base-Interface for all DB-Fields.
  *
  * @package		Goma\Core\Model
- * @version		1.5.1
+ * @version		1.5.2
  */
 interface DataBaseField {
 	/**
@@ -925,58 +925,73 @@ class HTMLText extends Varchar {
 						$height = $sizes["height"];
 					}
 					
-					$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
-			
-					if($data->count() == 0) {
-						continue;
-					}
-					
-					if(isset($width, $height) && $data->width && $data->height) {
-						
-						if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
-													
-							$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
-							// retina
-							if($width * 2 < $data->width && $height * 2 < $data->height) {
-								$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-							} else {
-								$retinaURL = "./" . $data->path;
-							}
-							
-							$data->manageURL($url);
-							$data->manageURL($retinaURL);
-							
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
-						}
-					} else if(isset($width)) {
-						if($data->width > $width && $data->width < 4000) {
-							$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
-							// retina
-							if($width * 2 < $data->width) {
-								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
-							} else {
-								$retinaURL = "./" . $data->path;
-							}
-							
-							$data->manageURL($url);
-							$data->manageURL($retinaURL);
-							
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
-						}
+					$cache = new Cacher("upload_" . $m . $width . "_" . $height);
+					if($cache->checkValid()) {
+						$value = str_replace($m, $cache->getData(), $value);
 					} else {
-						if($data->height > $height && $data->height < 4000) {
-							$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
-							// retina
-							if($height * 2 < $data->height) {
-								$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-							} else {
-								$retinaURL = "./" . $data->path;
+						
+						$data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+				
+						if($data->count() == 0) {
+							continue;
+						}
+						
+						if(isset($width, $height) && $data->width && $data->height) {
+							
+							if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+														
+								$url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
+								// retina
+								if($width * 2 < $data->width && $height * 2 < $data->height) {
+									$retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+								} else {
+									$retinaURL = "./" . $data->path;
+								}
+								
+								$data->manageURL($url);
+								$data->manageURL($retinaURL);
+								
+								$replace = $url . '" data-retina="' . $retinaURL;
+								$cache->write($replace, 86400);
+								
+								$value = str_replace($m, $replace, $value);
 							}
-							
-							$data->manageURL($url);
-							$data->manageURL($retinaURL);
-							
-							$value = str_replace($m, $url . '" data-retina="' . $retinaURL, $value);
+						} else if(isset($width)) {
+							if($data->width > $width && $data->width < 4000) {
+								$url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
+								// retina
+								if($width * 2 < $data->width) {
+									$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
+								} else {
+									$retinaURL = "./" . $data->path;
+								}
+								
+								$data->manageURL($url);
+								$data->manageURL($retinaURL);
+								
+								$replace = $url . '" data-retina="' . $retinaURL;
+								$cache->write($replace, 86400);
+								
+								$value = str_replace($m, $replace, $value);
+							}
+						} else {
+							if($data->height > $height && $data->height < 4000) {
+								$url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
+								// retina
+								if($height * 2 < $data->height) {
+									$retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
+								} else {
+									$retinaURL = "./" . $data->path;
+								}
+								
+								$data->manageURL($url);
+								$data->manageURL($retinaURL);
+								
+								$replace = $url . '" data-retina="' . $retinaURL;
+								$cache->write($replace, 86400);
+								
+								$value = str_replace($m, $replace, $value);
+							}
 						}
 					}
 				}
