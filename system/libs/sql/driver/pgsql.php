@@ -960,6 +960,16 @@ class pgsqlDriver extends object implements SQLDriver
 						);
 	}
 	
+	/**
+		 * storage engines.
+	*/
+	public function listStorageEngines() {
+		return array();
+	}
+
+	public function setStorageEngine($table, $engine) {
+		return false;
+	}
 	
 	// parse function for mysql <-> pgsql type compatibility
 	

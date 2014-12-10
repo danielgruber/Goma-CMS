@@ -939,6 +939,37 @@ class mysqliDriver extends object implements SQLDriver
 				if(PROFILE) Profiler::unmark("MySQLi::writeManipulation");
 				return true;
 		}
+
+		/**
+ 		 * storage engines.
+		*/
+		public function listStorageEngines() {
+			$sql = "SHOW ENGINES";
+			if($result = self::query($sql)) {
+				$data = array();
+				while($row = self::fetch_assoc($result)) {
+					if(strtolower($row["Support"]) != "NO") {
+						$data[$row["Engine"]] = strtolower($row["Engine"]);
+					}
+				}
+
+				return $data;
+			}
+
+			return array();
+		}
+
+		public function setStorageEngine($table, $engine) {
+
+			$sql = "ALTER TABLE ".$table." ENGINE = ".$engine."";
+			if(self::query($sql)) {
+				return true;
+			} else {
+				echo $sql;
+				exit;
+				return falsE;
+			}
+		}
 		
 		/**
 		 * sets the charset to utf-8

@@ -3,13 +3,14 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Framework
- * @version 2.0.5
+ * @version 2.0.6 
  */
 
 Core::addRules(array(
 	"dev" 						=> "dev",
 	'admin//$item' 				=> "adminController",
 	'api/stats' 				=> "StatController",
+	"system/livecounter"		=> "liveCounterController",
 	'system/ajax//link/$id' 	=> 'ajaxlink',
 	'system/ajax//popup/$id' 	=> 'ajaxlink',
 	"api/v1//\$ClassName!" 		=> "RestfulServer",

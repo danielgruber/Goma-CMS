@@ -458,6 +458,13 @@ class SQL extends object
 		static function setDefaultSort($table, $field, $type = "ASC", $prefix = false) {
 			return self::$driver->setDefaultSort($table, $field, $type, $prefix);
 		}
+
+		public function listStorageEngines() {
+			return self::$driver->listStorageEngines();
+		}
+		public function setStorageEngine($table, $engine) {
+			return self::$driver->setStorageEngine($table, $engine);
+		}
 		
 		/**
 		 * extract to where
@@ -638,7 +645,13 @@ interface SQLDriver
 		public function dropIndex($table, $name, $db_prefix = null);
 		public function getIndexes($table, $db_prefix = null);
 		public function writeManipulation($manipulation);
-		
+
+		/**
+ 		 * storage engines.
+		*/
+		public function listStorageEngines();
+		public function setStorageEngine($table, $engine);
+
 		public function setCharsetUTF8();
 		
 }

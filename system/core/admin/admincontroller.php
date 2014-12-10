@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5
+ * @version     1.5.1
  */
 class adminController extends Controller
 {
@@ -180,6 +180,7 @@ class adminController extends Controller
 				
 				
 				session_write_close();
+				ignore_user_abort(true);
 				// we delete all logs that are older than 30 days
 				Core::CleanUpLog($count);
 				

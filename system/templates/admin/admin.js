@@ -51,7 +51,7 @@ $(function() {
 		return false;
 	});
 	
-	if(getCookie("help") == 2) {
+	if(getCookie("help") != 1) {
 		$("#help-button").removeClass("active");
 		hideHelp();
 	} else {

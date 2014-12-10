@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.25
+ * @version     4.7.26
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -120,6 +120,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 * DEPRECATED API
 	*/
 	public $versioned;
+
+	/**
+	 * storage engine.
+	*/
+	static $engine;
 	
 	//!Global Static Methods
 	/**
@@ -4190,6 +4195,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			);
 		}
 		
+		$engine = self::getStatic($this->classname, "engine");
+		if($engine) {
+
+			$engines = array_map("strtolower", SQL::listStorageEngines());
+
+			if(in_array(strtolower($engine), $engines)) {
+				SQL::setStorageEngine($prefix . $this->baseTable . "_state", $engine);
+				SQL::setStorageEngine($prefix . $this->table(), $engine);
+			}
+		}
+
 		// create many-many-tables
 		if (isset(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"])) {
 			foreach(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"] as $key => $data) {
@@ -4240,7 +4256,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		if (isset(ClassInfo::$database[$this->Table()][$field])) {
 			SQL::setDefaultSort($this->Table(), $field, $type);
 		}
-		
+
 		$this->callExtending("buildDB", $prefix, $log);
 		
 		$this->preserveDefaults($prefix, $log);
