@@ -90,7 +90,7 @@ class livecounter extends DataObject
 	/**
 	 * bot-list
 	*/
-	public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown)";
+	public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib)";
 	
 	/**
 	 * counts how much users are online
@@ -145,9 +145,8 @@ class livecounter extends DataObject
 
 		$_SESSION["user_counted"] = TIME;
 		// just rewirte cookie
-		setCookie('goma_sessid',$user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
-		setCookie('goma_lifeid',$user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
-		
+		self::setGomaCookies($user_identifier, $host);
+				
 		//self::onBeforeShutdownUsingLife();
 		register_shutdown_function(array("livecounter", "onBeforeShutdownUsingLife"));
 		
@@ -224,20 +223,20 @@ class livecounter extends DataObject
 			if($data && date("d", $data->created) == date("d", NOW)) {
 				DataObject::update("livecounter_live", array("hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
 				// we set last update to next know the last update and better use database-index				
-				$end = microtime(true);
+				/*$end = microtime(true);
 				$diff = $end - $start;
-				logging("time fast: " . $diff . "/" . $user_identifier);
+				logging("time fast: " . $diff . "/" . $user_identifier);*/
 
 				return true;
 			} else if($data) {
 
 				self::generateLiveCounterSession($userAgent, $user_identifier, $userid, 1);
-				self::setGomaCookies($user_identifier, $host);
 				
 				
-				$end = microtime(true);
+				
+				/*$end = microtime(true);
 				$diff = $end - $start;
-				logging("time fast regenerate: " . $diff . "/" . $user_identifier);
+				logging("time fast regenerate: " . $diff . "/" . $user_identifier);*/
 				return;
 			}
 		}
@@ -272,11 +271,11 @@ class livecounter extends DataObject
 				// free memory
 				unset($data);
 				// set cookie
-				self::setGomaCookies($user_identifier, $host);
 				
-				$end = microtime(true);
+				
+				/*$end = microtime(true);
 				$diff = $end - $start;
-				logging("time cookie: " . $diff . "/" . $user_identifier);
+				logging("time cookie: " . $diff . "/" . $user_identifier);*/
 
 				
 				return true;
@@ -300,11 +299,11 @@ class livecounter extends DataObject
 			self::generateLiveCounterSession($userAgent, $user_identifier, $userid, $recurring);
 		}
 
-		self::setGomaCookies($user_identifier, $host);
 		
-		$end = microtime(true);
+		
+		/*$end = microtime(true);
 		$diff = $end - $start;
-		logging("time session: " . $diff . "/" . $user_identifier);
+		logging("time session: " . $diff . "/" . $user_identifier);*/
 
 	}
 
