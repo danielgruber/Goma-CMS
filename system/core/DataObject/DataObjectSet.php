@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.4
+ * @version     1.5.5
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1461,6 +1461,11 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function limit($limit) {
+		
+		if((is_string($limit) && preg_match('/^[0-9]+$/', $limit)) || is_int($limit)) {
+			$limit = array((int) $limit);
+		}
+		
 		if(!isset($limit) || count($limit) == 0)
 			return $this;
 		
@@ -1478,6 +1483,7 @@ class DataObjectSet extends DataSet {
 		} else {
 			return $this;
 		}
+
 		$this->purgeData();
 		return $this;
 	}
@@ -2190,14 +2196,19 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		
 		if(count($this->data) > 0) {
 			
+			$updateLastModifiedIDs = array();
 			// write all records
 			foreach($this as $record) {
 				
 				// check if object and writable
 				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
 					// write
-					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
-						return false;
+					if($record->hasChanged()) {
+						if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
+							return false;
+						}
+					} else {
+						$updateLastModifiedIDs[] = $record->versionid;
 					}
 					
 					$writtenIDs[$record->versionid] = true;
@@ -2210,6 +2221,10 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 						}
 					}
 				}
+			}
+			
+			if($updateLastModifiedIDs) {
+				DataObject::update($this->dataobject->class, array("last_modified" => NOW), array("id" => $updateLastModifiedIDs));
 			}
 		} else {
 			

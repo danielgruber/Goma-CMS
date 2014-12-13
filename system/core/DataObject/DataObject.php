@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.26
+ * @version     4.7.27
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -293,7 +293,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				throwError(6, "Table not found", "Table or model '" . $name . "' does not exist.");
 			}
 			
-			if (!isset($data["last_modfied"]) && !$silent)
+			if (!isset($data["last_modified"]) && !$silent)
 			{
 					$data["last_modified"] = NOW;
 			}

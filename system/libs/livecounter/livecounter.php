@@ -169,8 +169,6 @@ class livecounter extends DataObject
 	public static function onBeforeShutdownUsingLife() {
 		session_write_close();
 		
-		ob_end_flush();
-		
 		if(function_exists("fastcgi_finish_request")) {
 			fastcgi_finish_request();
 		}

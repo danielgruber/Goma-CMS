@@ -296,6 +296,7 @@
 .tablefield-table .tablefield-editbutton, .tablefield-table .tablefield-deletebutton {
 	margin-top: -0.25em;
 	display: inline-block;
+	vertical-align: bottom;
 	
 	input {
 		border: 0;

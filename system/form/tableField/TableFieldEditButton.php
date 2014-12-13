@@ -130,7 +130,9 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 				$title = $data->name;
 			}
 			Core::setTitle($title);
-			$tableField->form()->controller->request->post_params = $_POST;
+			if($tableField->form()->controller->request)
+				$tableField->form()->controller->request->post_params = $_POST;
+			
 			$content = $data->first()->controller($tableField->form()->controller)->edit();
 		} else {
 			$tableField->Form()->redirectToForm();

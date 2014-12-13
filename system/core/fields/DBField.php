@@ -4,7 +4,7 @@
  * Base-Interface for all DB-Fields.
  *
  * @package		Goma\Core\Model
- * @version		1.5.2
+ * @version		1.5.4
  */
 interface DataBaseField {
 	/**
@@ -925,7 +925,11 @@ class HTMLText extends Varchar {
 						$height = $sizes["height"];
 					}
 					
-					$cache = new Cacher("upload_" . $m . $width . "_" . $height);
+					$w = isset($width) ? $width : 0;
+					$h = isset($height) ? $height : 0;
+					
+					$cache = new Cacher(md5("upload_" . $m . $w . "_" . $h));
+	
 					if($cache->checkValid()) {
 						$value = str_replace($m, $cache->getData(), $value);
 					} else {
@@ -955,6 +959,8 @@ class HTMLText extends Varchar {
 								$cache->write($replace, 86400);
 								
 								$value = str_replace($m, $replace, $value);
+							} else {
+								$cache->write($m, 86400);
 							}
 						} else if(isset($width)) {
 							if($data->width > $width && $data->width < 4000) {
@@ -973,6 +979,8 @@ class HTMLText extends Varchar {
 								$cache->write($replace, 86400);
 								
 								$value = str_replace($m, $replace, $value);
+							} else {
+								$cache->write($m, 86400);
 							}
 						} else {
 							if($data->height > $height && $data->height < 4000) {
@@ -991,6 +999,8 @@ class HTMLText extends Varchar {
 								$cache->write($replace, 86400);
 								
 								$value = str_replace($m, $replace, $value);
+							} else {
+								$cache->write($m, 86400);
 							}
 						}
 					}

@@ -6,8 +6,8 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@contains classes: tpl, tplcacher, tplcaller
   *@author Goma-Team
-  * last modified: 25.08.2014
-  * $Version 3.6.4
+  * last modified: 23.23.2014
+  * $Version 3.6.5
 */   
  
  
@@ -516,6 +516,7 @@ class tpl extends Object
 				
 				$tpl = preg_replace('/<%\s*echo\s+(.*)\s*%>/Usi', '<?php echo \\1; ?>', $tpl);
 				$tpl = preg_replace('/<%\s*print\s+(.*)\s*%>/Usi', '<?php print \\1; ?>', $tpl);
+				$tpl = preg_replace('/<%\s*config\s+(.*)\s*%>/Usi', '<?php \\1; ?>', $tpl);
 				
 				$controlCount = 0;
 				

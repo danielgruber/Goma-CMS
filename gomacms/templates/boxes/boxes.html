@@ -61,10 +61,6 @@
 		// ]]>
 	</script>
 <% END %>
-
-<% CACHED("boxes", $pageid, this.max("last_modified"), adminAsUser(), $_cms_user) %>
-
-
 <div class="boxes_new" id="boxes_new_$pageid">
 	<% IF $this %>
 		<% CONTROL this() AS $box %>
@@ -120,5 +116,3 @@
 	<% END %>
 	<div class="clear"></div>
 </div>
-
-<% ENDCACHED %>
