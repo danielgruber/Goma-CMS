@@ -12,7 +12,7 @@ defined("IN_GOMA") OR die();
  * This class is the basic class for each controller of Goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
  *
  * @package     Goma\System\Core
- * @version     2.2.7
+ * @version     2.2.8
  */
 class RequestHandler extends Object {
 	/**
@@ -128,29 +128,29 @@ class RequestHandler extends Object {
 	 *@name handleRequest
 	 */
 	public function handleRequest($request, $subController = false) {
+
 		if ($this -> classname == "") {
 			throwError(6, 'PHP-Error', 'Class ' . get_class($this) . ' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
 		}
 
 		$this -> subController = $subController;
 		$this -> Init($request);
-
 		$class = $this -> classname;
 
 		$content = null;
 
-	        $this -> callExtending("onBeforeHandleRequest", $request, $subController, $content);
-	
-	        if($content !== null) {
-	            return $content;
-	        }
+        $this -> callExtending("onBeforeHandleRequest", $request, $subController, $content);
+
+        if($content !== null) {
+            return $content;
+        }
 
 		while ($class != "object") {
 			if (empty($class)) {
 				break;
 			}
 
-			if (classinfo::isAbstract($class)) {
+			if (ClassInfo::isAbstract($class)) {
 				$class = get_parent_class($class);
 				continue;
 			}

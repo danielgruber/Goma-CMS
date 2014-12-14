@@ -391,6 +391,10 @@ class BoxesController extends FrontedController {
 			return $response->render();
 		}
 	}
+
+	public function isCacheable() {
+		return false;
+	}
 }
 
 
@@ -470,6 +474,13 @@ class Box extends Boxes
 		public function getContent()
 		{
 				return $this->text()->forTemplate();
+		}
+
+		public function isCacheable() {
+			if($this->class == "box") 
+				return true;
+
+			return false;
 		}
 }
 /**

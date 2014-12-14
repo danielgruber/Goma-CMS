@@ -12,7 +12,7 @@ defined("IN_GOMA") OR die();
  * Requests are represented by this class.
  *
  * @package		Goma\System\Core
- * @version		2.0.1
+ * @version		2.0.2
  */
 class Request extends Object {
 	/**
@@ -297,12 +297,14 @@ class Request extends Object {
 	 */
 	public function shift($count) {
 		for ($i = 0; $i < $count; $i++) {
-			if ($this -> shiftedPart == "") {
-				$this -> shiftedPart .= array_shift($this -> url_parts);
-			} else {
-				$this -> shiftedPart .= "/" . array_shift($this -> url_parts);
+			$url = array_shift($this -> url_parts);
+			if($url) {
+				if ($this -> shiftedPart == "") {
+					$this -> shiftedPart .= $url;
+				} else {
+					$this -> shiftedPart .= "/" . $url;
+				}
 			}
-
 		}
 	}
 

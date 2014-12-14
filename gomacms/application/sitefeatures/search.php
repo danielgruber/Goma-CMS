@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 17.12.2012
+  * last modified: 12.12.2014
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -46,7 +46,7 @@ class SearchPageExtension extends DataObjectExtension implements argumentsSearch
                 $_query = Object::instance("boxes")->buildSearchQuery($search);
                 
                 // now generate query and new addWhere
-                $query->addFilter(array("OR", "pages.id IN ( ".$_query->build("seiteid") ." )" ));                
+                $query->addFilter(array("OR", "pages_state.id IN ( ".$_query->build("seiteid") ." )" ));                
                 
                 return $query;
         }

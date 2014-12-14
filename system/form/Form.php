@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.5
+ * @version 2.3.6
  */
 class Form extends object {
 	/**
@@ -1010,11 +1010,14 @@ class Form extends object {
 	 *@access public
 	 */
 	public function externalURL() {
-		/*if(isset($this->controller->request)) {
-			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/" . $this->name;
-		} else {*/
+		if(isset($this->controller->request)) {
+			// stay in context
+			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/form/" . $this->name;
+		} else if($this->controller->urlNamespace) {
+			return ROOT_PATH . BASE_SCRIPT . $this->controller->urlNamespace . "/forms/form/" . $this->name;
+		} else {
 			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
-		//}
+		}
 	}
 
 	/**
@@ -1074,6 +1077,7 @@ class ExternalFormController extends RequestHandler {
 	 *@param Request
 	 */
 	public function handleRequest($request, $subController = false) {
+
 		$this->request = $request;
 		$this->subController = $subController;
 
@@ -1092,12 +1096,14 @@ class ExternalFormController extends RequestHandler {
 	 *@param name - field
 	 */
 	public function FieldExtAction($form, $field) {
-
+		$field = strtolower($field);
+		
 		if(session_store_exists("form_" . strtolower($form))) {
 			$f = session_restore("form_" . strtolower($form));
 			if(isset($f->$field)) {
-
+				
 				$data = $f->$field->handleRequest($this->request);
+
 
 				session_store("form_" . strtolower($form), $f);
 				return $data;
@@ -1108,6 +1114,32 @@ class ExternalFormController extends RequestHandler {
 		return false;
 	}
 
+}
+
+class FormRequestExtension extends Extension {
+	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
+		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
+			$handleWithMethod = false;
+
+			$externalForm = new ExternalFormController();
+
+			$request = $this->getOwner()->request;
+			if($arguments = $request->match('$form!/$field!', true)) {
+				$content = $externalForm->handleRequest($request);
+				if(!$content) {
+					$content = $this->getOwner()->index();
+				}
+			} else {
+				$content = $this->getOwner()->index();
+			}
+		}
+	}
+
+	public function extendHasAction( $action, &$hasAction) {
+		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
+			$hasAction = true;
+		}
+	}
 }
 
 class FormState extends Object {
@@ -1150,4 +1182,5 @@ class FormState extends Object {
 
 }
 
+Object::extend("RequestHandler", "FormRequestExtension");
 Core::addRules(array('system/forms/$form!/$field!' => "ExternalFormController"), 50);
