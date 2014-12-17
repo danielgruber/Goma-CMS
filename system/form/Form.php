@@ -1013,7 +1013,7 @@ class Form extends object {
 		if(isset($this->controller->request)) {
 			// stay in context
 			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/form/" . $this->name;
-		} else if($this->controller->urlNamespace) {
+		} else if(isset($this->controller->urlNamespace) && $this->controller->urlNamespace) {
 			return ROOT_PATH . BASE_SCRIPT . $this->controller->urlNamespace . "/forms/form/" . $this->name;
 		} else {
 			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;

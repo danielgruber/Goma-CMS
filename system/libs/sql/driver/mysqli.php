@@ -31,6 +31,10 @@ class mysqliDriver extends object implements SQLDriver
 		 *@use for the mysql connetion
 		**/
 		public $_db;
+
+		public $version;
+		public $engines;
+		public $tableStatuses;
 		
 		/**
 		 *@access public
@@ -639,6 +643,21 @@ class mysqliDriver extends object implements SQLDriver
 							throw new MySQLException();
 						}
 					}
+
+					if($version = $this->getServerVersion()) {
+						$engines = $this->listStorageEngines();
+						$tableStatuses = $this->listStorageEnginesByTable();
+
+						if(version_compare($version, "5.6", ">=") && isset($engines["innodb"])) {
+							if($tableStatuses[strtolower($prefix . $table)]["Engine"] != "InnoDB") {
+								$this->setStorageEngine($prefix . $table, "InnoDB");
+							}
+						} else if(isset($engines["myisam"])) {
+							if($tableStatuses[strtolower($prefix . $table)]["Engine"] != "MyISAM") {
+								$this->setStorageEngine($prefix . $table, "MyISAM");
+							}
+						}
+					}
 					
 					ClassInfo::$database[$table] = $fields;
 					return $log;
@@ -701,6 +720,17 @@ class mysqliDriver extends object implements SQLDriver
 				
 				if(sql::query($sql)) {
 					ClassInfo::$database[$table] = $fields;
+
+					if($version = $this->getServerVersion()) {
+						$engines = $this->listStorageEngines();
+
+						if(version_compare($version, "5.6", ">=") && isset($engines["innodb"])) {
+							$this->setStorageEngine($prefix . $table, "InnoDB");
+						} else if(isset($engines["myisam"])) {
+							$this->setStorageEngine($prefix . $table, "MyISAM");
+						}
+					}
+
 					return $log;
 				} else {
 					throw new MySQLException();
@@ -944,15 +974,21 @@ class mysqliDriver extends object implements SQLDriver
  		 * storage engines.
 		*/
 		public function listStorageEngines() {
+
+			if($this->engines) {
+				return $this->engines;
+			}
+
 			$sql = "SHOW ENGINES";
 			if($result = self::query($sql)) {
 				$data = array();
 				while($row = self::fetch_assoc($result)) {
 					if(strtolower($row["Support"]) != "NO") {
-						$data[$row["Engine"]] = strtolower($row["Engine"]);
+						$data[strtolower($row["Engine"])] = strtolower($row["Engine"]);
 					}
 				}
 
+				$this->engines = $data;
 				return $data;
 			}
 
@@ -965,10 +1001,43 @@ class mysqliDriver extends object implements SQLDriver
 			if(self::query($sql)) {
 				return true;
 			} else {
-				echo $sql;
-				exit;
-				return falsE;
+				return false;
 			}
+		}
+
+		public function getServerVersion() {
+			if($this->version) {
+				return $this->version;
+			}
+
+			$sql = "SHOW VARIABLES LIKE 'version'";
+			if($result = $this->Query($sql)) {
+ 				if($row = $this->fetch_assoc($result)) {
+ 					$this->version = $row["Value"];
+ 					return $this->version;
+ 				}
+			}
+
+			return false;
+		}
+
+		public function listStorageEnginesByTable() {
+			if($this->tableStatuses) {
+				return $this->tableStatuses;
+			}
+
+			$data = array();
+			$sql = "SHOW TABLE STATUS";
+			if($result = $this->query($sql)) {
+				while($row = $this->fetch_assoc($result)) {
+					$data[strtolower($row["Name"])] = $row;
+				}
+
+				$this->tableStatuses = $data;
+				return $data;
+			}
+
+			return false;
 		}
 		
 		/**

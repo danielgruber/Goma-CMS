@@ -67,9 +67,6 @@ class livecounter extends DataObject
 		"editorid"		=> false,
         "phpsessid"		=> "INDEX"
 	);
-
-	static $engine = "MyISAM";
-	
 	
 	/**
 	 * a regexp to use to intentify browsers, which support cookies
@@ -646,8 +643,6 @@ class liveCounter_live extends DataObject {
 	 * disable history for this DataObject, because it would be a big lag of performance
 	*/
 	static $history = false;
-	
-	static $engine = "MyISAM";
 
 	/**
 	 * database-fields
