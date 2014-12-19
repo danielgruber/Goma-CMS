@@ -657,7 +657,7 @@ class Controller extends RequestHandler
 			foreach($data as $key => $value) {
 				$model[$key] = $value;
 			}
-			
+
 			if(PROFILE) Profiler::unmark("Controller::save prepare");
 
 			if($model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated)) {

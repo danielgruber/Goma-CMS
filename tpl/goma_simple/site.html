@@ -48,7 +48,7 @@
 					<h3><a href="./">{$_cms_title}</a></h3>
 					<div id="navi" itemscope itemtype="http://schema.org/SiteNavigationElemente">
 						<ul>
-							<% CACHED("mainbar", mainbar(1).max("last_modified")) %>
+							<% CACHED("mainbar", mainbar(1).maxCount("last_modified")) %>
 								<% CONTROL mainbar(1) %>
 									<li>
 										<a href="{$mainbar.url}" class="{$mainbar.LinkClass}">$mainbar.mainbartitle.text()</a>

@@ -302,7 +302,7 @@ class LeftAndMain extends AdminItem {
 	 *@param array - data
 	 *@param object - response
 	*/
-	public function ajaxSave($data, $response, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
+	public function ajaxSave($data, $response, $form = null, $controller = null, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
 		if($model = $this->save($data, 1, $forceInsert, $forceWrite, $overrideCreated)) {
 			// notify the user
 			Notification::notify($model->classname, lang("SUCCESSFUL_SAVED", "The data was successfully written!"), lang("SAVED"));
