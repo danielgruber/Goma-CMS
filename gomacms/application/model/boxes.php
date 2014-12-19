@@ -343,8 +343,29 @@ class BoxesController extends FrontedController {
 			$data = DataObject::get("boxes", array("seiteid" => $pid));
 			$this->model_inst = $data;
 		}
-		
-		return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
+
+		$cacher = new Cacher("boxes2_" . $pid . "_" . Core::adminAsUser() . "_" . member::$id . "_" . $this->modelInst()->maxCount("last_modified"));
+		if($cacher->checkValid()) {
+			return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
+		} else {
+
+			$cacheable = true;
+
+			foreach($this->modelInst() as $record) {
+				if(!$record->isCacheable()) {
+					$cacheable = false;
+					break;
+				}
+			}
+
+			$output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
+
+			if($cacheable) {
+				$cacher->write($output, 86400);
+			}
+
+			return $output;
+		}
 	}
 	
 	/**
