@@ -24,6 +24,8 @@ class settingsAdmin extends adminItem
 		
 		static $icon = "templates/images/settings.png";
 		
+		static $less_vars = "tint-blue.less";
+		
 		/**
 		 * history-url
 		 *
@@ -40,7 +42,6 @@ class settingsAdmin extends adminItem
 		 *@name Form
 		*/
 		public function Form() {
-			Resources::$lessVars = "tint-blue.less";
 
 			$data = DataObject::get("newsettings", array("id" => 1))->first();
 			return parent::Form(null, $data);

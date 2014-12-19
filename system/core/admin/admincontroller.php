@@ -64,6 +64,8 @@ class adminController extends Controller
 			"BASEURI"	=> BASE_URI
 		);
 		
+		static $less_vars = "admin.less";
+
 		/**
 		 * returns current controller
 		 *
@@ -97,8 +99,6 @@ class adminController extends Controller
 			if(isset(ClassInfo::$appENV["app"]["enableAdmin"]) && !ClassInfo::$appENV["app"]["enableAdmin"]) {
 				HTTPResponse::redirect(BASE_URI);
 			}
-			
-			Resources::$lessVars = "admin.less";
 			
 			return parent::handleRequest($request, $subController);
 		}

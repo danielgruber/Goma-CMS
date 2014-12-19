@@ -92,6 +92,8 @@ class contentAdmin extends LeftAndMain
 	 *@name sort_field
 	*/
 	protected $sort_field = "sort";
+
+	static $less_vars = "tint-blue.less";
 	
 	/**
 	 * returns the URL for the View Website-Button
@@ -132,7 +134,6 @@ class contentAdmin extends LeftAndMain
 	 * init JavaScript-Files
 	*/
 	public function Init($request = null) {
-		Resources::$lessVars = "tint-blue.less";
 		Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
 		return parent::Init($request);
 	}

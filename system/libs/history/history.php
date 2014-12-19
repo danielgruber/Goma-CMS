@@ -80,6 +80,8 @@ class History extends DataObject {
 	*/
 	public static function push($class, $oldrecord, $newrecord, $recordid, $action, $changed = null) {
 		
+		if(PROFILE) Profiler::mark("history::push");
+
 		// if it's an object, get the class-name from the object
 		if(is_object($class))
 			$class = $class->classname;
@@ -115,11 +117,15 @@ class History extends DataObject {
 			"changed"		=> $c,
 			"cc"			=> $cc
 		));
+
+
 		
 		// insert data, we force to insert and to write, so override permission-system ;)
 		$return = $record->write(true, true, 2, true, false);
+
+		if(PROFILE) Profiler::unmark("history::push");
 		if(PushController::$pusher && in_array($record->dbobject, History::supportHistoryView())) {
-			PushController::trigger("history-update", array("rendering" => $record->renderWith("history/event.html")));
+			//PushController::trigger("history-update", array("rendering" => $record->renderWith("history/event.html")));
 		}
 		return $return;
 	}

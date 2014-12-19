@@ -76,6 +76,7 @@ class Profiler {
 	 *@param name
 	 */
 	public static function mark($name) {
+
 		if(!PROFILE) {
 			return false;
 		}
@@ -93,15 +94,20 @@ class Profiler {
 		}
 
 		if(isset(self::inst()->marks[$name]["start"])) {
-			$time = microtime(true) - self::inst()->marks[$name]["start"]["time"];
-			self::inst()->times[$name] += $time;
-			$memory = memory_get_usage() - self::inst()->marks[$name]["start"]["memory"];
-			self::inst()->memories[$name] += $memory;
+			self::unmark($name);
+			$remark = true;
 		}
 
 		$data = array("time" => microtime(true), "memory" => memory_get_usage(), "type" => "mark", "name" => $name);
 
 		self::inst()->marks[$name]["start"] = $data;
+		if(isset($remark)) {
+			if(isset(self::inst()->marks[$name]["remark"])) {
+				self::inst()->marks[$name]["remark"]++;
+			} else {
+				self::inst()->marks[$name]["remark"] = 1;
+			}
+		}
 
 		$t = microtime(true) - $start;
 		self::inst()->profile_time += $t;
@@ -112,6 +118,7 @@ class Profiler {
 	 *@param name
 	 */
 	public static function unmark($name, $newname = null) {
+
 		if(!PROFILE) {
 			return false;
 		}
@@ -156,7 +163,11 @@ class Profiler {
 		 self::inst()->marks[$name][] = $data;
 
 		 self::inst()->steps[] = $data;*/
-		unset(self::inst()->marks[$name]["start"]);
+		if(!isset(self::inst()->marks[$name]["remark"]) || self::inst()->marks[$name]["remark"] == 0)
+			unset(self::inst()->marks[$name]["start"]);
+		else if(isset(self::inst()->marks[$name]["remark"])) {
+			self::inst()->marks[$name]["remark"]--;
+		}
 
 		$t = microtime(true) - $start;
 		self::inst()->profile_time += $t;

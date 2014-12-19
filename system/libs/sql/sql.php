@@ -167,7 +167,20 @@ class SQL extends object
 				}
 				return $result;
 		}
-		
+
+		/**
+		 * in CGI ends send to client and runs query.
+		 *
+		 *@access public
+		 *@use: run a query
+		**/
+		static function queryAfterDie($sql, $unbuffered = false, $track = true, $debug = true) {
+			if(function_exists("fastcgi_finish_request")) {
+				fastcgi_finish_request();
+			}
+			return self::query($sql, $unbuffered, $track, $debug);
+		}
+
 		/*
 		 *@access public
 		 *@use: show counter

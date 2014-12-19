@@ -873,9 +873,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@return bool
 	*/
 	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
-	{
-		
-		
+	{	
 		if (!defined("CLASS_INFO_LOADED")) {
 			throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
 		}
@@ -893,7 +891,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		}
 		
 		if (PROFILE) Profiler::mark("DataObject::write");
-		
+		if (PROFILE) Profiler::mark("DataObject::write prepare");
+
 		// if we insert, we don't have an ID
 		if ($forceInsert) {
 			$this->consolidate();
@@ -937,8 +936,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				// check rights
 				if (!$forceWrite)
 					if (!$this->can("Write", $this))
-						if ($snap_priority != 2 || !$this->can("Publish", $this))
+						if ($snap_priority != 2 || !$this->can("Publish", $this)) {
+							if (PROFILE) Profiler::unmark("DataObject::write");
 							throw new PermissionException("You don't have the Permission to write or publish objects of type ".$this->class.".");
+						}
 				
 				$this->onBeforeWrite();
 				
@@ -980,8 +981,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
 				// check rights
 				if (!$forceInsert)
-					if (!$this->can("Insert", $this->data))
+					if (!$this->can("Insert", $this->data)) {
+						if (PROFILE) Profiler::unmark("DataObject::write");
 						throw new PermissionException("You don't have the Permission to create objects of type ".$this->class.".");
+					}
 				
 				$this->onBeforeWrite();
 				
@@ -1010,6 +1013,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		// find out if we should write data
 		if ($command != "insert" && !$forceWrite) {
 			if (!$this->checkForChange($snap_priority, $newdata, $changed)) {
+				if (PROFILE) Profiler::unmark("DataObject::write");
+
 				return true;
 			}
 		}
@@ -1055,7 +1060,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				}
 					
 			} else {
-				if (PROFILE) Profiler::unmark("DataObject::writeRecord");
+				if (PROFILE) Profiler::unmark("DataObject::write");
 				throw new SQLException();
 			}
 		}
@@ -1236,6 +1241,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 							}
 							$i++;
 						} else {
+							if (PROFILE) Profiler::unmark("DataObject::write");
 							throw new Exception("Many-Many-Array for relationship '" . $name . "' corrupted.");
 						}
 					}
@@ -1274,7 +1280,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					}
 					if ($key === false)
 					{
-							throw new LogicException("Could not find relation for ".$name."ids.");
+						if (PROFILE) Profiler::unmark("DataObject::write");
+						throw new LogicException("Could not find relation for ".$name."ids.");
 					}
 					
 					$this->data[$name]->setRelationENV($name, $key . "id", $this->ID);
@@ -1364,10 +1371,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
 		self::$datacache[$this->baseClass] = array();
 
+
+
 		// fire manipulation to DataBase
 		if (SQL::manipulate($manipulation)) {
 			
 			if ($this->versionid == 0) {
+				if (PROFILE) Profiler::unmark("DataObject::write");
 				throw new LogicException("There's is not versionid defined.");
 			}
 			
@@ -4412,7 +4422,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				if(isset(ClassInfo::$class_info[$data["object"]]["baseclass"])) {
 					$extBaseTable = ClassInfo::ClassTable(ClassInfo::$class_info[$data["object"]]["baseclass"]);
 					$sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $data["extfield"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
-					register_shutdown_function(array("sql", "query"), $sql);
+					register_shutdown_function(array("sql", "queryAfterDie"), $sql);
 				}
 				
 				self::$cleanUp[$data["table"]] = true;

@@ -35,6 +35,8 @@ class groupAdmin extends adminItem {
 	
 	static $icon = "system/templates/admin/images/group.png";
 	
+	static $less_vars = "tint-brown.less";
+
 	/**
 	 * history-url
 	 *
@@ -45,13 +47,11 @@ class groupAdmin extends adminItem {
 		return "admin/history/group";
 	}
 	
-	
+
 	/**
 	 * logic
 	*/
 	public function index() {
-		
-		Resources::$lessVars = "tint-brown.less";
 		
 		$config = TableFieldConfig_Editable::create();
 		$config->getComponentByType("TableFieldDataColumns")->setDisplayFields(array(

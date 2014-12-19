@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.2.9
+ * @version		2.3
  */
 class Controller extends RequestHandler
 {		
@@ -119,6 +119,11 @@ class Controller extends RequestHandler
 		 *@access public
 		*/
 		public $areaData = array();
+
+		/**
+		 * design-specific vars.
+		*/
+		static $less_vars = null;
 		
 		/**
 		 * inits the controller:
@@ -269,6 +274,10 @@ class Controller extends RequestHandler
 		{
 				$this->areaData = array();
 				
+				if(ClassInfo::getStatic($this->class, "less_vars")) {
+					Resources::$lessVars = ClassInfo::getStatic($this->class, "less_vars");
+				}
+
 				$data = $this->__output(parent::handleRequest($request, $subController));
 				
 				if($this->helpArticle()) {
@@ -280,6 +289,7 @@ class Controller extends RequestHandler
 					HTTPResponse::output();
 					exit;
 				}
+				
 				
 				return $data;
 		}
@@ -630,32 +640,41 @@ class Controller extends RequestHandler
 		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
 		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
-		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false)
-		{
-		
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
+			
+			if(PROFILE) Profiler::mark("Controller::save");
+
+			if(PROFILE) Profiler::mark("Controller::save prepare");
+
 			$this->callExtending("onBeforeSave", $data, $priority);
 			
 			$model = $this->modelInst()->_clone();
 			
-			if(is_object($data) && is_subclass_of($data, "ViewaccessableData"))
-			{
-					$data = $data->ToArray();
+			if(is_object($data) && is_subclass_of($data, "ViewaccessableData")) {
+				$data = $data->ToArray();
 			}
 			
-			foreach($data as $key => $value)
-			{
-					$model[$key] = $value;
+			foreach($data as $key => $value) {
+				$model[$key] = $value;
 			}
 			
-			if($model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated))
-			{
-					$this->callExtending("onAfterSave", $model, $priority);
-					$this->model_inst = $model;
-					$model->controller = clone $this;
-					return $model;
-			} else
-			{
-					return false;
+			if(PROFILE) Profiler::unmark("Controller::save prepare");
+
+			if($model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated)) {
+
+				if(PROFILE) Profiler::mark("Controller::save postproduction");
+
+				$this->callExtending("onAfterSave", $model, $priority);
+				$this->model_inst = $model;
+				$model->controller = clone $this;
+
+				if(PROFILE) Profiler::unmark("Controller::save postproduction");
+
+				if(PROFILE) Profiler::unmark("Controller::save");
+				return $model;
+			} else {
+				if(PROFILE) Profiler::unmark("Controller::save");
+				return false;
 			}
 		}
 		
@@ -719,21 +738,22 @@ class Controller extends RequestHandler
 		*/
 		public function redirectback($param = null, $value = null)
 		{
-				if(isset($_GET["redirect"]))
-				{
-						$redirect = $_GET["redirect"];
-				} else if(isset($_POST["redirect"]))
-				{
-						$redirect = $_POST["redirect"];
-				} else 
-				{
-						$redirect = BASE_URI . BASE_SCRIPT . $this->originalNamespace;
-				}
+
+			if(isset($_GET["redirect"]))
+			{
+				$redirect = $_GET["redirect"];
+			} else if(isset($_POST["redirect"]))
+			{
+				$redirect = $_POST["redirect"];
+			} else 
+			{
+				$redirect = BASE_URI . BASE_SCRIPT . $this->originalNamespace;
+			}
+			
+			if(isset($param) && isset($value))
+				$redirect = TPLCaller::addParamToURL($redirect, $param, $value);
 				
-				if(isset($param) && isset($value))
-					$redirect = TPLCaller::addParamToURL($redirect, $param, $value);
-					
-				HTTPResponse::redirect($redirect);
+			HTTPResponse::redirect($redirect);
 		}
 		
 		/**

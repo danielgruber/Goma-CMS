@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.3.6
+ * @version 2.4
  */
 class Form extends object {
 	/**

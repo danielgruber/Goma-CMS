@@ -371,7 +371,7 @@ $lang = array(
 	"submit"										=> "Absenden",
 	
 	/* contact-form */
-	"contact_introduction"							=> "Sehr geehrter Seiten-Betreiber, <br /><br /> Die Folgenden Daten wurden &uuml;ber das Goma-Kontakt-Formulat abgesendet:",
+	"contact_introduction"							=> "Sehr geehrter Seiten-Betreiber, <br /><br /> Die Folgenden Daten wurden &uuml;ber das Goma-Kontakt-Formular abgesendet:",
 	"contact_greetings"								=> "Beste Gr&uuml;&szlig;e<br /><br />Goma-Auto-Messenger",
 	// register e-mail
 	"thanks_for_register"							=> "Vielen Dank, dass Sie sich auf unserer Seite registriert haben.",
