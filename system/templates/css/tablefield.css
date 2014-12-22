@@ -4,7 +4,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 08.06.2013
+  * last modified: 22.12.2014
 */
 
 /* basics */
@@ -334,6 +334,10 @@
 		
 		span.page {
 			font-weight: bold;
+		}
+
+		span.active-page {
+			padding: 0.25em 0.5em;
 		}
 	}
 	

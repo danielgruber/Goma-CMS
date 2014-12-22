@@ -11,9 +11,9 @@
 	<key>author</key>
 	<string>Goma Team</string>
 	<key>version</key>
-	<string>2.0b12</string>
+	<string>2.0RC1</string>
 	<key>build</key>
-	<string>071</string>
+	<string>072</string>
 	<key>requireFrameworkVersion</key>
 	<string>2.0b11-092</string>
 	<key>icon</key>

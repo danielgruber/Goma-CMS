@@ -97,7 +97,13 @@ class ExternalForm extends FormField {
 		}
 		$form->add(new HTMLField("head", "<h1>" . convert::raw2text($this->extTitle) . "</h1>"), 1);
 		$form->addAction(new LinkAction("cancel", lang("cancel"), $this->form()->url));
-		$fronted = new FrontedController();
+
+		if($this->Form()->controller && Object::method_exists($this->Form()->controller, "serve")) {
+			$fronted = $this->Form()->controller;
+		} else {
+			$fronted = new FrontedController();
+		}
+
 		return $fronted->serve($form->render());
 	}
 

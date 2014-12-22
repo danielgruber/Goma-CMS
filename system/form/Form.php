@@ -1010,11 +1010,8 @@ class Form extends object {
 	 *@access public
 	 */
 	public function externalURL() {
-		if(isset($this->controller->request)) {
-			// stay in context
-			return ROOT_PATH . BASE_SCRIPT . $this->controller->request->shiftedPart . "/forms/form/" . $this->name;
-		} else if(isset($this->controller->urlNamespace) && $this->controller->urlNamespace) {
-			return ROOT_PATH . BASE_SCRIPT . $this->controller->urlNamespace . "/forms/form/" . $this->name;
+		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
+			return ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
 		} else {
 			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
 		}
@@ -1100,6 +1097,7 @@ class ExternalFormController extends RequestHandler {
 		
 		if(session_store_exists("form_" . strtolower($form))) {
 			$f = session_restore("form_" . strtolower($form));
+
 			if(isset($f->$field)) {
 				
 				$data = $f->$field->handleRequest($this->request);
@@ -1124,6 +1122,7 @@ class FormRequestExtension extends Extension {
 			$externalForm = new ExternalFormController();
 
 			$request = $this->getOwner()->request;
+
 			if($arguments = $request->match('$form!/$field!', true)) {
 				$content = $externalForm->handleRequest($request);
 				if(!$content) {

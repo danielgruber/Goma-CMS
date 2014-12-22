@@ -26,7 +26,7 @@
 	cursor: pointer;
 	
 	background: url(../admin/images/pfeil_close.png) no-repeat 5px center;
-	padding-left: 19px;
+	padding-left: 20px !important;
 	
 }
 
