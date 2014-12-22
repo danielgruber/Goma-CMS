@@ -1093,12 +1093,12 @@ if (window.loader === undefined) {
 				$(".windowzindex").parent().css('z-index', 900);
 				$(this).parent().css("z-index", 901);
 			});
-			
-			// html5 placeholder
-			$("input").each(
-				function () {
-					if (($(this).attr("type") == "text" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
-						if (!Modernizr.input.placeholder) {
+			if (!Modernizr.input.placeholder) {
+				// html5 placeholder
+				$("input").each(
+					function () {
+						if (($(this).attr("type") == "text" || $(this).attr("type") == "search") && ($(this).val()=="" || $(this).val() == $(this).attr("placeholder")) && $(this).attr("placeholder")!="") {
+						
 							$(this).val($(this).attr("placeholder"));
 							$(this).css("color", "#999");
 							
@@ -1115,10 +1115,11 @@ if (window.loader === undefined) {
 									
 								}
 							});
+							
 						}
 					}
-				}
-			);
+				);
+			};
 			
 			// scroll fix
 			$(document).on("click", "a", function () {
