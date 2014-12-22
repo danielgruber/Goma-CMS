@@ -371,6 +371,9 @@ div.adminPanel table, div.adminPanel td {
 	.user {
 		float: right;
 		
+		margin-top: .12em;
+		margin-right: .375em;
+
 		position: relative;
 		
 		img {
