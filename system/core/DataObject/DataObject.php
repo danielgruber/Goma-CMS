@@ -2809,7 +2809,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if(isset($sort[$name]) && $sort[$name]) {
 				$sort = $sort[$name];
 			} else {
-				$sort = $table . ".id ASC";
+				$sort = $data["table"] . ".id ASC";
 			}
 		}
 
