@@ -29,12 +29,16 @@ DropDown.prototype = {
 	init: function() {
 		var that = this,
 			currentSearch = "";
+
+		this.inSort = false;
 			
 		this.widget.disableSelection();
 		this.widget.find(" > .field").css("cursor", "pointer");
 		
-		this.widget.find(" > .field").click(function(){ 
-			that.toggleDropDown();
+		this.widget.find(" > .field").click(function(){
+			if(!that.inSort) {
+				that.toggleDropDown();
+			}
 			return false;
 		});
 		
@@ -116,14 +120,16 @@ DropDown.prototype = {
 		
 		// register on label
 		this.widget.parent().parent().find(" > label").click(function(){
-			that.showDropDown();
+			if(!that.inSort) {
+				that.showDropDown();
+			}
 			return false;
 		});
 		
 		goma.ui.bindESCAction($("body"), function() {
 			that.hideDropDown();
 		});
-		
+
 		this.bindFieldEvents();
 	},
 	/**
@@ -352,6 +358,9 @@ DropDown.prototype = {
 				revert: true,
 				tolerance: 'pointer',
 				containment: "parent",
+				start: function(event, ui) {
+					$this.inSort = true;
+				},
 				update: function(event, ui) {
 					var data  = $(this).sortable("serialize", {key: "sorted[]"});
 					// save order
@@ -362,6 +371,11 @@ DropDown.prototype = {
 						dataType: "html"
 					});
 				},
+				stop: function() {
+					setTimeout(function(){
+						$this.inSort = false;
+					}, 33);
+				}
 			});
 		} else {
 			this.widget.find(" > .field > .value-holder").removeClass("sortable");
