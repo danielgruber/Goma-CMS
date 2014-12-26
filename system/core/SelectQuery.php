@@ -189,7 +189,7 @@ class SelectQuery extends Object {
 				$field = $field[0];
 			}
 		} else {
-			if(_eregi('^(.*)\s*(asc|desc)$', $field, $matches)) {
+			if(preg_match('/^(.*)\s*(asc|desc)$/i', $field, $matches)) {
 				$field = $matches[1];
 				$type = $matches[2];
 				unset($matches);

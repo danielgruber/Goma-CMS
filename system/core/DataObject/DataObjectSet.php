@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.5
+ * @version     1.5.6
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -52,6 +52,13 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	 *@name protected_customised
 	*/
 	protected $protected_customised = array();
+	
+	/**
+	 * current sort field
+	 *
+	 *@access protected
+	*/
+	protected $sortField;
 	
 	/**
 	 * construction
@@ -119,14 +126,6 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 		Core::Deprecate(2.0, "".$this->classname."::Count");
 		return $this->Count();
 	}
-	
-	
-	/**
-	 * current sort field
-	 *
-	 *@access protected
-	*/
-	protected $sortField;
 	
 	/**
 	 * resorts the data
@@ -1028,6 +1027,12 @@ class DataObjectSet extends DataSet {
 	public $controller = "";
 	
 	/**
+	 * sort by ids.
+	*/
+	protected $sortByIds = null;
+	protected $idField = null;
+
+	/**
 	 * constructor
 	 *
 	 *@name __construct
@@ -1153,14 +1158,44 @@ class DataObjectSet extends DataSet {
 				$count++;
 				unset($record);
 			}
+
 			$this->dataCache = $this->dataCache + $data;
 			
+			if($this->sortByIds) {
+				$data = $this->sortByIds($data, $this->sortByIds, $this->idField);
+			}
+
 			if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
 			return $data;
 		} else {
+
+			if($this->sortByIds) {
+				$data = $this->sortByIds($data, $this->sortByIds, $this->idField);
+			}
+
 			if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
 			return $data;
 		}
+	}
+
+	public function sortByIds($data, $ids, $idField) {
+		$newData = array();
+		foreach($ids as $id) {
+			foreach($data as $k => $r) {
+				if(is_object($r) && $r[$idField] == $id) {
+					$newData[$k] = $r;
+					$data[$k] = null;
+					break;
+				}
+			}
+		}
+
+		foreach($data as $k => $v) {
+			if($v !== null) {
+				$newData[$k] = $v;
+			}
+		}
+		return $newData;
 	}
 	
 	/**
@@ -1524,7 +1559,23 @@ class DataObjectSet extends DataSet {
 	 *@param string - column
 	 *@param string - optional - type
 	*/
-	public function sort($column, $type = "ASC") {
+	public function sort($column, $type = "") {
+		if(is_array($column)) {
+			$this->sortByIds = $column;
+			$this->sort = null;
+
+			if($type && strtolower($type) != "asc") {
+				$this->idField = $type;
+			} else {
+				$this->idField = "id";
+			}
+
+			return $this;
+		}
+
+		$this->sortByIds = null;
+		$this->idField = null;
+
 		if(!isset($column))
 			return $this;
 		

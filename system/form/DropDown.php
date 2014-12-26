@@ -10,7 +10,7 @@
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author Goma-Team
  *
- * @version 1.5.1
+ * @version 1.6
  */
 class DropDown extends FormField {
 	/**
@@ -34,7 +34,8 @@ class DropDown extends FormField {
 		"getData",
 		"checkValue",
 		"uncheckValue",
-		"nojs"
+		"nojs",
+		"saveSort"
 	);
 
 	/**
@@ -83,6 +84,11 @@ class DropDown extends FormField {
 	 * @access protected
 	 */
 	protected $multiselect = false;
+	
+	/**
+	 * sortable relationships.	
+	*/
+	public $sortable = false;
 
 	/**
 	 * Constructor.
@@ -243,7 +249,7 @@ class DropDown extends FormField {
 		if($data) {
 			$node = new HTMLNode("span", array("class" => "value-holder"));
 			foreach($data as $id => $value) {
-				$node->append(new HTMLNode("span", array("class" => "value"), array(
+				$node->append(new HTMLNode("span", array("class" => "value", "id" => $this->name . "_" . $id), array(
 					new HTMLNode("span", array("class" => "value-title"), convert::raw2text($value)),
 					new HTMLNode("a", array(
 						"class" => "value-remove",
@@ -315,8 +321,13 @@ class DropDown extends FormField {
 		session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		$this->callExtending("beforeField");
 
-		if(!$this->disabled)
-			Resources::addJS("$(function(){ var _" . md5("dropdown_" . $this->ID()) . " = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . "); });");
+		if($this->sortable) {
+			gloader::load("sortable");
+		}
+
+		if(!$this->disabled) {
+			Resources::addJS("$(function(){ var _" . md5("dropdown_" . $this->ID()) . " = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
+		}
 
 		if($this->disabled) {
 			$this->field->disabled = "disabled";
@@ -523,6 +534,21 @@ class DropDown extends FormField {
 
 		// left and right is pagination (left arrow and right)
 		return json_encode($return);
+	}
+	
+	/**
+	 * saves sort.	
+	*/
+	public function saveSort() {
+		$newSet = array();
+		if(isset($_POST["sorted"])) {
+			foreach($_POST["sorted"] as $id) {
+				$newSet[] = $id;
+			}
+		} 
+		$this->dataset = $newSet;
+		session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+		return "ok";
 	}
 
 	/**

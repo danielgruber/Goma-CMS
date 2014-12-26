@@ -10,7 +10,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.4
+ * @version     1.5
  */
 class ManyManyDropDown extends MultiSelectDropDown
 {		
@@ -52,6 +52,11 @@ class ManyManyDropDown extends MultiSelectDropDown
 		 * @name model
 		*/
 		protected $model;
+
+		/**
+		 * info about relationship.
+		*/
+		protected $relationInfo;
 		
 		/**
 		 *@param string - name
@@ -97,22 +102,22 @@ class ManyManyDropDown extends MultiSelectDropDown
 				
 				if(is_object($this->form()->result)) {
 					// get relations from result
-					$many_many = $this->form()->result->ManyMany();
-					$belongs_many_many = $this->form()->result->BelongsManyMany();
+					$many_many_tables = $this->form()->result->ManyManyTables();
 				}
 				
-				if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
+				if(isset($many_many_tables[$this->relation])) {
 					
-					$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
+					$this->_object = $many_many_tables[$this->relation]["object"];
 					$this->dataset = call_user_func_array(array($this->form()->result, $this->relation), array())->FieldToArray("versionid");
+					$this->relationInfo = $many_many_tables[$this->relation];
 				} else if(is_object($this->form()->controller)) {
 					// get relations from model of form-controller
-					$many_many = $this->form()->controller->modelInst()->ManyMany();
-					$belongs_many_many = $this->form()->controller->modelInst()->BelongsManyMany();
+					$many_many_tables = $this->form()->controller->modelInst()->ManyManyTables();
 					
-					if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
-						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
+					if(isset($many_many_tables[$this->relation])) {
+						$this->_object = $many_many_tables[$this->relation]["object"];
 						$this->dataset = call_user_func_array(array($this->form()->controller->modelInst(), $this->relation), array())->FieldToArray("versionid");
+						$this->relationInfo = $many_many_tables[$this->relation];
 					} else {
 						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 					}
@@ -122,21 +127,21 @@ class ManyManyDropDown extends MultiSelectDropDown
 			} else {
 				if(is_object($this->form()->result)) {
 					// get relations from result
-					$many_many = $this->form()->result->ManyMany();
-					$belongs_many_many = $this->form()->result->BelongsManyMany();
+					$many_many_tables = $this->form()->result->ManyManyTables();
 				}
 				
-				if((isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation]))) {
-					$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
+				if(isset($many_many_tables[$this->relation])) {
+					
+					$this->_object = $many_many_tables[$this->relation]["object"];
+					$this->relationInfo = $many_many_tables[$this->relation];
 				} else if(is_object($this->form()->controller)) {
 					
 					// get relations from model of form-controller
-					$many_many = $this->form()->controller->modelInst()->ManyMany();
-					$belongs_many_many = $this->form()->controller->modelInst()->BelongsManyMany();
+					$many_many_tables = $this->form()->controller->modelInst()->ManyManyTables();
 					
-					if(isset($many_many[$this->relation]) || isset($belongs_many_many[$this->relation])) {
-						$this->_object = (isset($many_many[$this->relation])) ? $many_many[$this->relation] : $belongs_many_many[$this->relation];
-						
+					if(isset($many_many_tables[$this->relation])) {
+						$this->_object = $many_many_tables[$this->relation]["object"];
+						$this->relationInfo = $many_many_tables[$this->relation];
 					} else {
 						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
 					}
@@ -156,6 +161,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 		 * @return array values
 		*/
 		protected function getInput() {
+
 			$data = DataObject::get($this->_object, array("versionid" => $this->dataset));
 			
 			if($this->form()->useStateData) {
@@ -169,7 +175,13 @@ class ManyManyDropDown extends MultiSelectDropDown
 				foreach($data as $record) {
 					$return[$record->versionid] = convert::raw2text($record[$this->showfield]);
 				}
-				return $return;
+
+				$dataReturn = array();
+				foreach($this->dataset as $id) {
+					$dataReturn[$id] = $return[$id];
+				}
+
+				return $dataReturn;
 			} else {
 				return array();
 			}
@@ -237,7 +249,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 		
 		public function result() {
 			$result = parent::result();
-			
+
 			return $result;
 		}
 }

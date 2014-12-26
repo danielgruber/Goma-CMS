@@ -195,7 +195,7 @@ class HomePageController extends SiteController
 		*/
 		public function index() {
 			
-			define("HOMEPAGE", true);
+			defined("HOMEPAGE") OR define("HOMEPAGE", true);
 			
 			if(isset($_GET["r"])) {
 				$redirect = DataObject::get_one("pages", array("id" => $_GET["r"]));

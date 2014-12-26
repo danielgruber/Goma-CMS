@@ -4,9 +4,9 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.0.1
+ * @version 1.1
  */
-var DropDown = function(id, url, multiple) {
+var DropDown = function(id, url, multiple, sortable) {
 	this.url = url;
 	this.multiple = multiple;
 	this.widget = $("#" + id + "_widget");
@@ -14,8 +14,9 @@ var DropDown = function(id, url, multiple) {
 	this.page = 1;
 	this.search = "";
 	this.timeout = "";
-	this.init();
+	this.sortable = !!sortable;
 	this.id = id;
+	this.init();
 	return this;
 };
 
@@ -134,6 +135,7 @@ DropDown.prototype = {
 	setField: function(content) {
 		this.widget.find(" > .field").html(content);
 		this.bindFieldEvents();
+		this.updateDropdownPosition();
 	},
 	
 	/**
@@ -157,7 +159,7 @@ DropDown.prototype = {
 			
 			this.widget.find(" > .field").addClass("active");
 			// set correct position
-			this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
+			this.updateDropdownPosition();
 			
 			var fieldhtml = this.widget.find(" > .field").html();
 			//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
@@ -174,8 +176,14 @@ DropDown.prototype = {
 				var width = $this.widget.find(" > .field").outerWidth(false) - ($this.widget.find(" > .dropdown").outerWidth(false) - $this.widget.find(" > .dropdown").width());
 				$this.widget.find(" > .dropdown").css({ width: width});
 				$this.widget.find(" > .dropdown .search").focus();
+
+				$this.updateDropdownPosition();
 			});
 		}
+	},
+
+	updateDropdownPosition: function() {
+		this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 	},
 	
 	/**
@@ -244,7 +252,7 @@ DropDown.prototype = {
 				success: function(data) {
 					
 					if(!data || data == "")
-						that.setContent("No data given, Your Session might be timed out.");
+						that.setContent("No data given, Your Session might have timed out.");
 						
 					if(data.right) {
 						that.widget.find(".dropdown > .header > .pagination > span > .right").removeClass("disabled");
@@ -335,6 +343,31 @@ DropDown.prototype = {
 			$this.uncheck($(this).attr("data-id"));
 			return false;
 		});
+
+		if(this.sortable) {
+			console.log && console.log("init sortable");
+			this.widget.find(" > .field > .value-holder").addClass("sortable");
+			this.widget.find(" > .field > .value-holder").sortable({
+				opacity: 0.75,
+				revert: true,
+				tolerance: 'pointer',
+				containment: "parent",
+				update: function(event, ui) {
+					var data  = $(this).sortable("serialize", {key: "sorted[]"});
+					// save order
+					$.ajax({
+						url: $this.url + "/saveSort/",
+						data: data,
+						type: "post",
+						dataType: "html"
+					});
+				},
+			});
+		} else {
+			this.widget.find(" > .field > .value-holder").removeClass("sortable");
+		}
+
+
 	},
 	
 	/**

@@ -304,8 +304,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				$form->email->info = lang("email_correct_info");
 				$form->nickname->disable();
 				$form->addValidator(new RequiredFields(array("nickname", "groupid", "email")), "requirefields");
-				
-				
+
 				// group selection for admin
 				if($this["id"] == member::$id || !Permission::check("USERS_MANAGE"))
 				{

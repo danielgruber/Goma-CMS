@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.27
+ * @version     4.7.28
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -125,6 +125,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 * storage engine.
 	*/
 	static $engine;
+
+	/**
+	 * sort of many-many-tables.
+	*/
+	static $many_many_sort = array();
 	
 	//!Global Static Methods
 	/**
@@ -1664,6 +1669,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 							} else if ($command == "insert" && isset($this->defaults[$field])) {
 								$arr[$field] = $this->defaults[$field];
 							}
+							
+							if(isset($arr[$field]) && $arr[$field] === false) {
+								$arr[$field] = "0";
+							}
 						}
 					}
 					
@@ -2446,7 +2455,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			{
 					throw new LogicException("Many-Many-Relationship " . $relname . " does not exist or hasn't been created, yet.");
 			}
-			
+
+			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			if(isset($sort[$relname]) && $sort[$relname]) {
+				$sort = $sort[$relname];
+			} else {
+				$sort = $table . ".id ASC";
+			}
 			
 			$object = $data["object"];
 			$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
@@ -2468,6 +2483,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"];
 			}
 			
+			$query->sort($sort);
+
 			$query->execute();			
 			$arr = array();
 			while($row = $query->fetch_assoc())
@@ -2537,6 +2554,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			 * )
 			*/
 			
+			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			if(isset($sort[$relname]) && $sort[$relname]) {
+				$sort = $sort[$relname];
+			} else {
+				$sort = $table . ".id ASC";
+			}
+
+
+
 			if (isset($many_many_tables[$relname]))
 			{
 					$table = $many_many_tables[$relname]["table"]; // relation-table
@@ -2546,8 +2572,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					return false;
 			}
 
+			$object = $data["object"];
+			$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+			
+			if(isset($many_many[$relname])) {
+				$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
+			} else {
+				$extTable = ClassInfo::$class_info[$belongs_many_many[$relname]]["table"];
+			}
+			
+
 			$query = new SelectQuery($table, array("*"), array($data["field"] => $this["versionid"]));	
 			
+			if ($extTable && $sameObject) {
+				// filter for not existing records
+				$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"] . ' AND '.$extTable.'.recordid != "'.$this["id"].'"';
+			} else if($extTable) {
+				// filter for not existing records
+				$query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .' ON ' . $extTable . '.id = '.$table.'.' . $data["extfield"];
+			}
+			
+			$query->sort($sort);
+
 			$query->execute();			
 			$arr = array();
 			$i = 0;
@@ -2735,6 +2781,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit);
 			$instance->setRelationEnv($name, $data["extfield"], $data["table"], $data["field"], $this->data["versionid"], isset($data["extraFields"]) ? $data["extraFields"] : array());
 			
+			if(!$sort) {
+				$instance->sort($this->data[$name . $ids], "versionid");
+			}
+
 			if ($this->queryVersion == DataObject::VERSION_STATE) {
 				$instance->setVersion(DataObject::VERSION_STATE);
 			} else {
@@ -2754,6 +2804,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		$where[$data["table"] . "." . $data["field"]] = $this["versionid"];
 		
+		if(!isset($sort) || !$sort) {
+			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			if(isset($sort[$name]) && $sort[$name]) {
+				$sort = $sort[$name];
+			} else {
+				$sort = $table . ".id ASC";
+			}
+		}
+
 		$instance = new ManyMany_DataObjectSet($object, $where, $sort, $limit, array(
 			' INNER JOIN '.DB_PREFIX . $data["table"].' AS '.$data["table"].' ON '.$data["table"].'.'. $data["extfield"] . ' = '.$table.'.id ' // Join other Table with many-many-table
 		));
