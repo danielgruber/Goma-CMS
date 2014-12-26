@@ -1,19 +1,18 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.09.2013
-  * $Version 1.5.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined('IN_GOMA') OR die();
 
 defined("UPLOAD_DIR") OR die('Constant UPLOAD_DIR not defined, Please define UPLOAD_DIR to proceed.');
 
 loadlang("files");
 
+/**
+  *	@package 	goma framework
+  *	@link 		http://goma-cms.org
+  *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  *	@author 	Goma-Team
+  * @Version 	1.5.10
+  *
+  * last modified: 26.12.2014
+*/
 class Uploads extends DataObject {
 	/**
 	 * max-filesize for md5
@@ -613,10 +612,23 @@ class ImageUploads extends Uploads {
 	public function __toString() {
 		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->filename)) {
 			$file = $this->raw().'/index'.substr($this->filename, strrpos($this->filename, "."));
-			if(!file_exists($file)) {
-				FileSystem::requireDir(dirname($file));
-				FileSystem::write($file . ".permit", 1);
+
+			
+			if(substr($file, 0, strlen("index.php/")) != "index.php/") {
+				if(!file_exists($file)) {
+					FileSystem::requireDir(dirname($file));
+					FileSystem::write($file . ".permit", 1);
+				}
+			} else {
+				if(file_exists(substr($file, strlen("index.php/")))) {
+					$file = substr($file, strlen("index.php/"));
+				} else {
+					FileSystem::requireDir(substr(dirname($file), strlen("index.php/")));
+					FileSystem::write(substr(dirname($file), strlen("index.php/")) . ".permit", 1);
+				}
 			}
+			
+			
 			
 			return '<img src="'.$file.'" height="'.$this->height.'" width="'.$this->width.'" alt="'.$this->filename.'" />';
 		} else
