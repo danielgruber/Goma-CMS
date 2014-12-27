@@ -2553,13 +2553,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			 * "field"	=> "myclassid"
 			 * )
 			*/
-			
-			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
-			if(isset($sort[$relname]) && $sort[$relname]) {
-				$sort = $sort[$relname];
-			} else {
-				$sort = $table . ".id ASC";
-			}
 
 
 
@@ -2570,6 +2563,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			} else
 			{
 					return false;
+			}
+			
+			
+			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			if(isset($sort[$relname]) && $sort[$relname]) {
+				$sort = $sort[$relname];
+			} else {
+				$sort = $data["table"] . ".id ASC";
 			}
 
 			$object = $data["object"];
