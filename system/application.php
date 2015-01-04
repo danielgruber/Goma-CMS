@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * 
- * @version 2.6.8
+ * @version 2.6.9
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -15,10 +15,10 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 /*
  * first check if we use a good version ;)
  *
- * PHP 5.2 is necessary
+ * PHP 5.3 is necessary
  */
 
-if (version_compare(phpversion(), "5.2.0", "<")) {
+if (version_compare(phpversion(), "5.3.0", "<")) {
 	header("HTTP/1.1 500 Server Error");
 	echo file_get_contents(dirname(__FILE__) . "/templates/framework/php5.html");
 	die();

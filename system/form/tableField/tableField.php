@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.1
+ * @version     1.1.1
  */
 class tableField extends FormField {
 	/**
@@ -538,6 +538,14 @@ class tableField extends FormField {
 			}
 		}
 		throwError(6, "Not Found", "Can't handle action '$actionName'");
+	}
+
+	public function __wakeup() {
+		parent::__wakeup();
+		
+		if(is_object($this->data)) {
+			$this->data->__wakeup();
+		}
 	}
 }
 

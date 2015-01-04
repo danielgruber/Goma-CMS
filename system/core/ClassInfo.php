@@ -117,7 +117,7 @@ class ClassInfo extends Object {
 	 */
 	public static function getChildren($class) {
 
-		$class = strtolower($class);
+		$class = ClassManifest::resolveClassName($class);
 		if(isset(self::$class_info[$class]["child"]))
 			return self::$class_info[$class]["child"];
 
@@ -134,7 +134,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function getInterfaces($class) {
-		$class = strtolower($class);
+		$class = ClassManifest::resolveClassName($class);
+		
 		return isset(self::$class_info[$class]["interfaces"]) ? self::$class_info[$class]["interfaces"] : array();
 	}
 
@@ -150,7 +151,7 @@ class ClassInfo extends Object {
 		} else {
 			$class = strtolower($class);
 		}
-		$interface = strtolower($interface);
+		$interface = ClassManifest::resolveClassName($interface);
 		return isset(self::$class_info[$class]["interfaces"]) ? in_array($interface, self::$class_info[$class]["interfaces"]) : false;
 	}
 
@@ -159,7 +160,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function getParentClass($class) {
-		$class = strtolower($class);
+		$class = ClassManifest::resolveClassName($class);
+
 		return isset(self::$class_info[$class]["parent"]) ? self::$class_info[$class]["parent"] : false;
 	}
 
@@ -167,6 +169,8 @@ class ClassInfo extends Object {
 	 * gets a table_name for a given class
 	 */
 	public static function classTable($class) {
+		$class = ClassManifest::resolveClassName($class);
+
 		return isset(classinfo::$class_info[$class]["table"]) ? classinfo::$class_info[$class]["table"] : false;
 	}
 
@@ -184,6 +188,8 @@ class ClassInfo extends Object {
 	 *@return bool
 	 */
 	public static function exists($class) {
+		$class = ClassManifest::resolveClassName($class);
+
 		return isset(self::$class_info[strtolower($class)]);
 	}
 
@@ -193,6 +199,8 @@ class ClassInfo extends Object {
 	 *@param name - var-name
 	 */
 	public static function addSaveVar($class, $name) {
+		$class = ClassManifest::resolveClassName($class);
+
 		self::$save_vars[strtolower($class)][] = $name;
 	}
 
@@ -203,6 +211,8 @@ class ClassInfo extends Object {
 	 *@return array
 	 */
 	public static function getSaveVars($class) {
+		$class = ClassManifest::resolveClassName($class);
+
 		if(isset(self::$save_vars[strtolower($class)])) {
 			return self::$save_vars[strtolower($class)];
 		}
@@ -217,7 +227,7 @@ class ClassInfo extends Object {
 			Profiler::mark("ClassInfo::setSaveVars");
 
 		if(count(self::$class_info) > 0) {
-			$class = strtolower($class);
+			$class = ClassManifest::resolveClassName($class);
 
 			if(!defined('GENERATE_CLASS_INFO') && !isset(self::$set_save_vars[$class])) {
 				foreach(self::getSaveVars($class) as $var) {
@@ -243,7 +253,7 @@ class ClassInfo extends Object {
 	 * checks if class is abstract
 	 */
 	public static function isAbstract($class) {
-		$class = strtolower($class);
+		$class = ClassManifest::resolveClassName($class);
 		if(isset(self::$class_info[$class]["abstract"]))
 			return self::$class_info[$class]["abstract"];
 		else
@@ -255,6 +265,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function get_parent_class($class) {
+		$class = ClassManifest::resolveClassName($class);
+
 		if(isset(self::$class_info[$class]["parent"])) {
 			return self::$class_info[$class]["parent"];
 		} else {
@@ -267,7 +279,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function getInfo($class) {
-		$class = trim(strtolower($class));
+		$class = ClassManifest::resolveClassName($class);
+
 		if(isset(self::$class_info[$class])) {
 			return self::$class_info[$class];
 		} else {
@@ -280,7 +293,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function Tables($class) {
-		$class = trim(strtolower($class));
+		$class = ClassManifest::resolveClassName($class);
+
 		if(!isset(self::$class_info[$class]["baseclass"]))
 			return array();
 

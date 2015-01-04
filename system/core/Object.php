@@ -14,7 +14,7 @@ interface ExtensionModel {
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Framework
- * @version 3.3
+ * @version 3.4
  */
 abstract class Object {
 
@@ -174,6 +174,7 @@ abstract class Object {
 	public static function createMethod($class, $method, $code, $temp = false) {
 		$method = strtolower($method);
 		$class = strtolower($class);
+
 		if($temp) {
 			self::$temp_extra_methods[$class][$method] = create_function('$obj', $code);
 		} else if(!Object::method_exists($class, $method)) {
@@ -194,6 +195,7 @@ abstract class Object {
 	public static function linkMethod($class, $method, $realfunc, $temp = false) {
 		$method = strtolower($method);
 		$class = strtolower($class);
+
 		if($temp) {
 			self::$temp_extra_methods[$class][$method] = $realfunc;
 		} else if(!Object::method_exists($class, $method)) {
@@ -219,6 +221,8 @@ abstract class Object {
 		if(is_object($class)) {
 			$object = $class;
 			$class = strtolower(get_class($class));
+		} else {
+			$object = null;
 		}
 
 		$class = strtolower(trim($class));
@@ -235,22 +239,17 @@ abstract class Object {
 		if(isset(self::$method_cache[$class . "::" . $method])) {
 
 			// object-case
-			if(!self::$method_cache[$class . "::" . $method] && isset($object)) {
-				if(method_exists($class, "__cancall") && $object->__canCall($method)) {
-					unset($class, $method);
-					if(PROFILE)
-						Profiler::unmark("Object::method_exists");
-					return true;
-				}
+			if(!self::$method_cache[$class . "::" . $method] && self::checkForObjectMethod($object, $method)) {
+				unset($class, $method);
+				if(PROFILE)
+					Profiler::unmark("Object::method_exists");
+				return true;
 			}
 
 			if(PROFILE)
 				Profiler::unmark("Object::method_exists");
 			return self::$method_cache[$class . "::" . $method];
 		}
-
-		if(version_compare(phpversion(), "5.3", "<") && !isset(ClassManifest::$loaded[$class]))
-			ClassManifest::load($class);
 
 		// check native
 		if(method_exists($class, $method) && is_callable(array($class, $method))) {
@@ -271,7 +270,7 @@ abstract class Object {
 		}
 
 		// check on object
-		if(isset($object) && method_exists($class, "__cancall") && $object->__canCall($method)) {
+		if(self::checkForObjectMethod($object, $method)) {
 			unset($class, $method);
 			if(PROFILE)
 				Profiler::unmark("Object::method_exists");
@@ -282,19 +281,10 @@ abstract class Object {
 		if(PROFILE)
 			Profiler::mark("Object::method_exists after");
 
-		$c = $class;
-		while($c = ClassInfo::get_parent_class($c)) {
-			if(isset(self::$extra_methods[$c][$method])) {
-				// cache result for current class
-				self::$method_cache[$class . "::" . $method] = true;
-				unset($c, $method, $class);
-				if(PROFILE) {
-					Profiler::unmark("Object::method_exists after");
-					Profiler::unmark("Object::method_exists");
-				}
-
-				return true;
-			}
+		if(self::checkForExtraMethodsRecursive($class, $method)) {
+			Profiler::unmark("Object::method_exists after");
+			Profiler::unmark("Object::method_exists");
+			return true;
 		}
 
 		self::$method_cache[$class . "::" . $method] = false;
@@ -306,6 +296,27 @@ abstract class Object {
 		}
 
 		return false;
+	}
+
+	public static function checkForObjectMethod($o, $m) {
+		if(is_object($o) && method_exists($o, "__cancall")) {
+			return $o->__canCall($m);
+		} else {
+			return false;
+		}
+	}
+
+	public static function checkForExtraMethodsRecursive($c, $m) {
+		if(isset(self::$extra_methods[$c][$m])) {
+			// cache result for ckass
+			self::$method_cache[$c . "::" . $m] = true;
+		} else if($c = ClassInfo::get_parent_class($c)) {
+			self::$method_cache[$c . "::" . $m] = self::checkForExtraMethodsRecursive($c, $m);
+		} else {
+			self::$method_cache[$c . "::" . $m] = false;
+		}
+
+		return self::$method_cache[$c . "::" . $m];
 	}
 
 	/**
@@ -418,6 +429,12 @@ abstract class Object {
 		if(isset(ClassInfo::$class_info[$this->classname]["inExpansion"]))
 			$this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];
 
+		;
+
+		$this->initStatics();
+	}
+	
+	public function initStatics() {
 		if(!isset(ClassInfo::$set_save_vars[$this->classname])) {
 			ClassInfo::setSaveVars($this->classname);
 			$this->defineStatics();
@@ -710,5 +727,9 @@ abstract class Object {
 	public function ClassIcon() {
 		return ClassInfo::getClassIcon($this->classname);
 	} 
+	
+	public function __wakeup() {
+		$this->initStatics();
+	}
 
 }

@@ -172,10 +172,15 @@ function session_store($key, $data) {
  */
 function session_restore($key) {
 	if(isset($_SESSION["store"][$key]))
-		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
-			return unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"));
-		else
+		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma")) {
+			$d = unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"));
+			if(is_object($d)) {
+				$d->__wakeup();
+			}
+			return $d;
+		} else {
 			return false;
+		}
 	else
 		return false;
 }

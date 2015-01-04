@@ -36,55 +36,54 @@ class RequiredFields extends FormValidator
 		*/
 		public function validate()
 		{
-				// get data
-				$valid = true;
-				$err = "";
-				$missing = array();
-				foreach($this->data as $field)
+			// get data
+			$valid = true;
+			$err = "";
+			$missing = array();
+			foreach($this->data as $field)
+			{
+				if(isset($this->form->fields[$field]))
 				{
-						if(isset($this->form->fields[$field]))
+					$fieldName = $this->form->fields[$field]->dbname;
+					$f = $this->form->fields[$field];
+					if(!isset($this->form->result[$fieldName]) || empty($this->form->result[$fieldName]) || (is_object($this->form->result[$fieldName]) && is_a($this->form->result[$fieldName], "ViewAccessableData") && !$this->form->result[$fieldName]->bool()))
+					{
+						$valid = false;
+						$missing[] = $f->title;
+					} else {
+						// own validation
+						$v = $this->form->fields[$field]->validate($this->form->result[$fieldName]);
+						if($v !== true)
 						{
-								$fieldName = $this->form->fields[$field]->dbname;
-								$f = $this->form->fields[$field];
-								if(!isset($this->form->result[$fieldName]) || empty($this->form->result[$fieldName]) || (is_object($this->form->result[$fieldName]) && is_a($this->form->result[$fieldName], "ViewAccessableData") && !$this->form->result[$fieldName]->bool()))
-								{
-										$valid = false;
-										$missing[] = $f->title;
-								} else
-								{
-										// own validation
-										$v = $this->form->fields[$field]->validate($this->form->result[$fieldName]);
-										if($v !== true)
-										{
-												$valid = false;
-												$err .= $v;
-												$missing[] = $f->title;
-										}
-								}
+							$valid = false;
+							$err .= $v;
+							$missing[] = $f->title;
 						}
+					}
 				}
-				
-				// create response for it
-				if($valid === true)
+			}
+			
+			// create response for it
+			if($valid === true)
+			{
+					return true;
+			} else
+			{
+				$text = lang("form_required_fields", "Please fill out the oligatory fields");
+				$i = 0;
+				foreach($missing as $value)
 				{
-						return true;
-				} else
-				{
-						$text = lang("form_required_fields", "Please fill out the oligatory fields");
-						$i = 0;
-						foreach($missing as $value)
-						{
-								if($i == 0)
-								{
-										$i = 1;
-								} else
-								{
-										$text .= ", ";
-								}
-								$text .= ' \'' . $value . '\'';
-						}
-						return $err . $text;
+					if($i == 0)
+					{
+						$i = 1;
+					} else
+					{
+						$text .= ", ";
+					}
+					$text .= ' \'' . $value . '\'';
 				}
+				return $err . $text;
+			}
 		}
 		/**
 		 * javascript for client-side validation

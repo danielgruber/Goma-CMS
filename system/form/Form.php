@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.4
+ * @version 2.4.1
  */
 class Form extends object {
 	/**
@@ -37,6 +37,7 @@ class Form extends object {
 
 	/**
 	 * all available fields in this form
+	 *
 	 *@name fields
 	 *@access public
 	 *@var array
@@ -230,16 +231,7 @@ class Form extends object {
 		else
 			$this->state = new FormState();
 
-		// if we restore form
-		if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
-			$data = session_restore("form_" . strtolower($this->name));
-			$this->useStateData = $data->useStateData;
-			$this->result = $data->result;
-			$this->post = $data->post;
-			$this->state = $data->state;
-			$this->restorer = $data;
-			unset($_SESSION["form_restore_" . $this->name]);
-		}
+		$this->checkForRestore();
 
 		//$this->showFields = array();
 		$this->fieldList = new ArrayList();
@@ -272,6 +264,19 @@ class Form extends object {
 
 		if(PROFILE)
 			Profiler::unmark("form::__construct");
+	}
+
+	public function checkForRestore() {
+		// if we restore form
+		if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
+			$data = session_restore("form_" . strtolower($this->name));
+			$this->useStateData = $data->useStateData;
+			$this->result = $data->result;
+			$this->post = $data->post;
+			$this->state = $data->state;
+			$this->restorer = $data;
+			unset($_SESSION["form_restore_" . $this->name]);
+		}
 	}
 
 	/**
@@ -1055,6 +1060,35 @@ class Form extends object {
 	 */
 	public function name() {
 		return $this->name;
+	}
+
+	public function __wakeup() {
+		parent::__wakeup();
+		
+		foreach($this->fields as $f) {
+			if(is_object($f)) {
+				$f->__wakeup();
+			}
+		}
+		
+		foreach($this->actions as $f) {
+			if(is_object($f)) {
+				$f->__wakeup();
+			}
+			
+		}
+		
+		foreach($this->validators as $v) {
+			if(is_object($f)) {
+				$v->__wakeup();
+			}
+		}
+		
+		if($this->controller) {
+			if(is_object($controller)) {
+				$this->controller->__wakeup();
+			}
+		}
 	}
 
 }

@@ -124,6 +124,21 @@ class ClassManifest {
 		}
 	}
 
+	public static function resolveClassName($class) {
+
+		$class = trim(strtolower($class));
+
+		if(substr($class, -1) == "\\") {
+			$class = substr($class, 0, -1);
+		}
+
+		if(substr($class, 0, 1) == "\\") {
+			$class = substr($class, 1);
+		}
+
+		return $class;
+	}
+
 	/**
 	 * Generates the class-manifest for a given directory.
 	 *
@@ -213,46 +228,32 @@ class ClassManifest {
 			if($file != "." && $file != "..") {
 				if(is_dir($dir . "/" . $file)) {
 					self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
-				} else if(_eregi('\.php$', $file)) {
+				} else if(_eregi('\.php$', $file) && $file != "ClassManifest.php") {
 					$contents = file_get_contents($dir . "/" . $file);
 
-					// check for old APIs
-					//!Deprecation for 2.1
-					if(!preg_match('/class (DataObject|SelectQuery|Viewaccessabledata)/i', $contents)) {
-						preg_match_all('/(static\s+)?public\s+\$(has_one|has_many|many_many|belongs_many_many|db_fields|defaults|casting|indexes|searchable_fields)\s/i', $contents, $matches);
-						if(count($matches[2]) > 0) {
-							foreach($matches[2] as $k => $name) {
-								if($matches[1][$k] != "static") {
-									// translate name-changes
-									if($name == "db_fields")
-										$name = "db";
-
-									if($name == "defaults")
-										$name = "default";
-
-									if($name == "indexes")
-										$name = "index";
-
-									if($name == "searchable_fields")
-										$name = "search_fields";
-
-									// switch to static
-									$contents = str_replace($matches[0][$k], 'static $' . $name . " ", $contents);
-								}
-							}
-
-							if(!FileSystem::write($dir . "/" . $file, $contents)) {
-								throwError(6, "File-System Error", "Could not write $dir/$file, cause of trouble with your old used syntax.");
-							}
-						}
-					}
-
+					// remove everyting that is not php
 					$contents = preg_replace('/\/\*(.*)\*\//Usi', '', $contents);
 					$contents = preg_replace('/\?\>(.*)\<?php/Usi', '', $contents);
 
-					preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9_]+)(\s+extends\s+([a-zA-Z0-9_]+))?(\s+implements\s+([a-zA-Z0-9_,\s]+))?\s+\{/Usi', $contents, $parts);
+					$namespace = "";
+
+					if(preg_match("/namespace\s+([a-zA-Z0-9\\\\\s_]+)\;/Usi", $contents, $matches)) {
+						$namespace = strtolower($matches[1]);
+						if(substr($namespace, -1) == "\\") {
+							$namespace = substr($namespace, 0, -1);
+						}
+
+						if(substr($namespace, 0, 1) == "\\") {
+							$namespace = substr($namespace, 1);
+						}
+
+						$namespace .= "\\";
+					}
+
+					preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z0-9\\\\_]+))?(\s+implements\s+([a-zA-Z0-9\\\\_,\s]+?))?\s+\{/Usi', $contents, $parts);
 					foreach($parts[2] as $key => $class) {
-						$class = trim(strtolower($class));
+
+						$class = self::resolveClassName($namespace . trim($class));
 
 						if(isset($classes[$class]) && $classes[$class] != $dir . "/" . $file && file_exists($classes[$class])) {
 							if(filemtime($classes[$class]) > filemtime($dir . "/" . $file)) {
@@ -286,7 +287,7 @@ class ClassManifest {
 							$class_info[$class] = array();
 
 						if($parts[4][$key]) {
-							$class_info[$class]["parent"] = trim(strtolower($parts[4][$key]));
+							$class_info[$class]["parent"] = self::resolveClassName($parts[4][$key]);
 							if($class_info[$class]["parent"] == $class) {
 								throwError(6, "Class-Definition-Error", "Class '" . $class . "' can not extend itself in " . $dir . "/" . $file . ".");
 							}
@@ -294,7 +295,7 @@ class ClassManifest {
 
 						if($parts[6][$key]) {
 							$interfaces = explode(",", $parts[6][$key]);
-							$class_info[$class]["interfaces"] = array_map("strtolower", array_map("trim", $interfaces));
+							$class_info[$class]["interfaces"] = array_map(array("ClassManifest", "resolveClassName"), $interfaces);
 						}
 
 						if($parts[1][$key]) {
@@ -303,9 +304,9 @@ class ClassManifest {
 					}
 
 					// index interfaces too
-					preg_match_all('/interface\s+([a-zA-Z0-9_]+)(\s+extends\s+([a-zA-Z0-9_]+))?\s+\{/Usi', $contents, $parts);
+					preg_match_all('/interface\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z\\\\0-9_]+))?\s+\{/Usi', $contents, $parts);
 					foreach($parts[1] as $key => $class) {
-						$class = trim(strtolower($class));
+						$class = self::resolveClassName($namespace . trim($class));
 
 						if(isset($classes[$class]) && $classes[$class] != $dir . "/" . $file && file_exists($classes[$class])) {
 							if(filemtime($classes[$class]) > filemtime($dir . "/" . $file)) {
@@ -339,7 +340,7 @@ class ClassManifest {
 							$class_info[$class] = array();
 
 						if($parts[3][$key]) {
-							$class_info[$class]["parent"] = strtolower($parts[3][$key]);
+							$class_info[$class]["parent"] = self::resolveClassName($parts[3][$key]);
 							if($class_info[$class]["parent"] == $class) {
 								throwError(6, "Interface-Definition-Error", "Interface '" . $class . "' can not extend itself in " . $dir . "/" . $file . ".");
 							}

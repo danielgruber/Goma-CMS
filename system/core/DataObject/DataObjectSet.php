@@ -234,6 +234,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 			array_push($this->dataCache, $item);
 		else
 			$this->dataCache = array($item);
+		
 			
 		$this->reRenderSet();
 		return true;
@@ -1072,7 +1073,7 @@ class DataObjectSet extends DataSet {
 	public function setData($data = array()) {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
-		$this->count = count($this->data);
+		$this->count = null;
 		$this->reRenderSet();
 	}
 	
@@ -1665,6 +1666,10 @@ class DataObjectSet extends DataSet {
 		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record[$key]))
 				$record[$key] = $value;
+		}
+		
+		if($this->count !== null) {
+			$this->count++;
 		}
 		
 		$return = parent::push($record);
