@@ -12,7 +12,7 @@ defined("IN_GOMA") OR die();
  * This class is the basic class for each controller of Goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
  *
  * @package     Goma\System\Core
- * @version     2.2.8
+ * @version     2.2.9
  */
 class RequestHandler extends Object {
 	/**
@@ -172,8 +172,6 @@ class RequestHandler extends Object {
 					if (!$this -> hasAction($action)) {
 						$action = "index";
 					}
-
-					$this -> request -> params["action"] = $action;
 
 					$data = $this -> handleAction($action);
 					array_pop(Core::$controller);

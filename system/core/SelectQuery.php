@@ -89,6 +89,15 @@ class SelectQuery extends Object {
 	 */
 	public $db_fields = array();
 
+	static $aliases = array("group" => "_group");
+
+	public static function getAlias($c) {
+		if(isset(self::$aliases[$c])) {
+			return self::$aliases[$c];
+		}
+		return $c;
+	}
+
 	/**
 	 * __construct
 	 *@name __consturct
@@ -111,7 +120,11 @@ class SelectQuery extends Object {
 	 *@param string
 	 */
 	public function from($str) {
-		$this->from[str_replace(array('`', '"'), '', $str)] = DB_PREFIX . $str . ' AS ' . $str . '';
+		if(self::getAlias($str) != $str) {
+			$this->from[str_replace(array('`', '"'), '', self::getAlias($str))] = array("table" => $str, "statement" => DB_PREFIX . $str . ' AS _' . $str . '');
+		} else {
+			$this->from[str_replace(array('`', '"'), '', $str)] = DB_PREFIX . $str . ' AS ' . $str . '';
+		}
 		return $this;
 	}
 
@@ -289,7 +302,8 @@ class SelectQuery extends Object {
 	 *@param string - alias: for joining the same table more than one time
 	 */
 	public function outerJoin($table, $statement, $alias = "") {
-		$alias = ($alias == "") ? $table : $alias;
+		$this->getAliasAndStatement($table, $statement, $alias);
+
 		$this->from[$alias] = array("table" => $table, "statement" => " OUTER JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
 		return $this;
 	}
@@ -301,7 +315,8 @@ class SelectQuery extends Object {
 	 *@param string - statement after the ON
 	 */
 	public function innerJoin($table, $statement, $alias = "") {
-		$alias = ($alias == "") ? $table : $alias;
+		$this->getAliasAndStatement($table, $statement, $alias);
+
 		$this->from[$alias] = array("table" => $table, "statement" => " INNER JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
 		return $this;
 	}
@@ -313,7 +328,7 @@ class SelectQuery extends Object {
 	 *@param string - statement after the ON
 	 */
 	public function leftJoin($table, $statement, $alias = "") {
-		$alias = ($alias == "") ? $table : $alias;
+		$this->getAliasAndStatement($table, $statement, $alias);
 		$this->from[$alias] = array("table" => $table, "statement" => " LEFT JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
 		return $this;
 	}
@@ -325,9 +340,35 @@ class SelectQuery extends Object {
 	 *@param string - statement after the ON
 	 */
 	public function rightJoin($table, $statement, $alias = "") {
-		$alias = ($alias == "") ? $table : $alias;
+		$this->getAliasAndStatement($table, $statement, $alias);
 		$this->from[$alias] = array("table" => $table, "statement" => " RIGHT JOIN " . DB_PREFIX . $table . " AS " . $alias . " ON " . $statement . " ");
 		return $this;
+	}
+
+	public function getAliasAndStatement(&$table, &$statement, &$alias) {
+		$alias = ($alias == "") ? self::getAlias($table) : $alias;
+
+		if($alias != $table) {
+			$statement = str_replace($table . ".", $alias . ".", $statement);
+		}
+
+		$statement = $this->replaceAliasInStatement($statement);
+
+	}
+
+	public function replaceAliasInStatement($statement) {
+		foreach($this->from as $a => $data) {
+			if(is_array($data)) {
+				$statement = str_replace(" " . $data["table"] . ".", " " . $a . ".", $statement);
+			}
+		}
+
+		foreach(self::$aliases as $k => $v) {
+			$statement = str_replace(" " . $k . ".", " " . $v . ".", $statement);
+			$statement = str_replace("AS " . $k . " ", "AS " . $v . " ", $statement);
+		}
+
+		return $statement;
 	}
 
 	/**
@@ -363,8 +404,17 @@ class SelectQuery extends Object {
 			$DBFields = self::$new_field_cache[$from]["dbfields"];
 		} else {
 			$DBFields = $this->db_fields;
+
+			foreach($DBFields as $k => $v) {
+				if(!strpos($v, ".")) {
+					$DBFields[$k] = self::getAlias($v);
+				} else {
+					$DBFields[$k] = $this->replaceAliasInStatement(" " . $v);
+				}
+			}
+
 			$predefinedFields = $DBFields;
-			$colidingFields = $this->db_fields;
+			$colidingFields = $DBFields;
 
 			foreach($this->from as $alias => $statement) {
 				if(is_array($statement)) {
@@ -383,7 +433,7 @@ class SelectQuery extends Object {
 							//$colidingFields[$field] = $predefinedFields[$field];
 						} else {
 							if(!isset($colidingFields[$field]))
-								$colidingFields[$field] = array($DBFields[$field]);
+								$colidingFields[$field] = array(self::getAlias($DBFields[$field]));
 							$colidingFields[$field][] = $alias;
 						}
 					}
@@ -454,7 +504,7 @@ class SelectQuery extends Object {
 				} else {
 					if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
 						$alias = $field;
-						$field = $DBFields[$field] . "." . $field;
+						$field = self::getAlias($DBFields[$field]) . "." . $field;
 					} else if(isset($colidingFields[$field])) {
 
 						continue;
@@ -481,6 +531,17 @@ class SelectQuery extends Object {
 
 		// validate from
 		foreach($from as $alias => $data) {
+			if(preg_match('/^[0-9]+$/', $alias)) {
+				if(is_array($data)) {
+					$table = $data["table"];
+					$data = $data["statement"];
+					$from[$alias] = $this->replaceAliasInStatement($data);
+				} else {
+					$table = $alias;
+					$from[$alias] = $this->replaceAliasInStatement($from[$alias]);
+				}
+				continue;
+			}
 			if(is_array($data)) {
 				$table = $data["table"];
 				$data = $data["statement"];
@@ -489,7 +550,7 @@ class SelectQuery extends Object {
 				$table = $alias;
 			}
 
-			if(is_string($table) && !preg_match('/^[0-9]+$/', $table)) {
+			if(is_string($table)) {
 				if(!isset(ClassInfo::$database[$table])) {
 					throw new SQLException("Table " . $table . " does not exist!");
 				}
@@ -601,14 +662,14 @@ class SelectQuery extends Object {
 					if(strpos($tables, ".")) {
 						$colidingSQL .= $tables;
 					} else {
-						$colidingSQL .= $tables . "." . $field . " AS " . $field . " ";
+						$colidingSQL .= self::getAlias($tables) . "." . $field . " AS " . $field . " ";
 					}
 					continue;
 				}
 
 				$colidingSQL .= " CASE ";
 				foreach($tables as $table) {
-					$colidingSQL .= " WHEN " . $table . "." . $field . " IS NOT NULL THEN " . $table . "." . $field . " ";
+					$colidingSQL .= " WHEN " . self::getAlias($table) . "." . $field . " IS NOT NULL THEN " . self::getAlias($table) . "." . $field . " ";
 				}
 				$colidingSQL .= " ELSE NULL END AS " . $field . "";
 			}

@@ -79,7 +79,7 @@ class Group extends DataObject implements HistoryData, PermProvider
 		 *@name table_name
 		 *@access public
 		*/
-		public $table_name = "groups";
+		static $table = "groups";
 		
 		/**
 		 * generates the form to create a new group

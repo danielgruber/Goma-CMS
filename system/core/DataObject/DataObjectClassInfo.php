@@ -6,7 +6,7 @@
   * @link       http://goma-cms.org
   * @license:   LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   * @author     Goma-Team
-  * @version 	4.1.6
+  * @version 	4.1.7
 */
 class DataObjectClassInfo extends Extension
 {
@@ -34,11 +34,8 @@ class DataObjectClassInfo extends Extension
 						// generate table_name
 						if(ClassInfo::hasStatic($c->classname, "table")) {
 							$table_name = ClassInfo::getStatic($c->classname, "table");
-						} else if(isset($c->table_name)) {
-							Core::deprecate("2.0", "Class ".$this->classname." uses old table_name-Attribute, use static \$table instead.");
-							$table_name = $c->table_name;
 						} else {
-							$table_name = $c->prefix . $class;
+							$table_name = $c->prefix . str_replace("\\", "_", $class);
 						}
 						
 						

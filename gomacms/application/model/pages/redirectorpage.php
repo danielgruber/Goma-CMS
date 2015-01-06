@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 04.04.2013
-  * $Version 1.0.4
+  * last modified: 05.01.2015
+  * $Version 1.1
 */ 
 
 defined("IN_GOMA") OR die("");
@@ -48,7 +48,21 @@ class redirector extends Page
 class redirectorController extends PageController
 {
 	public function index() {
-		HTTPResponse::redirect($this->modelInst()->data["data"], true);
+		$url = $this->modelInst()->data["data"];
+		
+		if(substr($url, -1) == "/") {
+			$url = substr($url, 0, -1);
+		}
+		
+		if($this->getParam("action")) {
+			$url .= "/" . $this->getParam("action");
+		}
+		
+		if($this->request->remaining()) {
+			$url .= "/" . $this->request->remaining() . URLEND;
+		}
+		
+		HTTPResponse::redirect($url . URLEND, true);
 	}
 }
 

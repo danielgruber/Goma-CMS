@@ -338,9 +338,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$limit = "";
 				}
 			}
+
+			$alias = SelectQuery::getAlias($table_name);
 			
 			$sql = "UPDATE
-						".DB_PREFIX . $table_name." AS ".$table_name."
+						".DB_PREFIX . $table_name." AS ".$alias."
 					SET 
 						".$updates."
 					".$where."
