@@ -65,7 +65,7 @@ class HTMLParser extends Object
 							$html = str_replace('</body>', "\n" . resources::get(false, true) . "\n	</body>", $html);
 						}
 					} else {
-						if(strpos('<base',$html)) {
+						if(strpos($html, "<base")) {
 							$html = '<meta charset="utf-8" />' . resources::get() . $html;
 						} else {
 							$html = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title><base href="'.BASE_URI.'" />' . "\n".resources::get(true, false) . "\n</head><body>" . $html . "\n".resources::get(false, true)."</body></html>";

@@ -338,9 +338,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$limit = "";
 				}
 			}
-
-			$alias = SelectQuery::getAlias($table_name);
 			
+			$alias = SelectQuery::getAlias($table_name);
 			$sql = "UPDATE
 						".DB_PREFIX . $table_name." AS ".$alias."
 					SET 
@@ -2459,8 +2458,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 
 			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
-			if(isset($sort[$relname]) && $sort[$relname]) {
-				$sort = $sort[$relname];
+			if(isset($sorts[$relname]) && $sorts[$relname]) {
+				$sort = $sorts[$relname];
 			} else {
 				$sort = $table . ".id ASC";
 			}
@@ -2569,8 +2568,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			
 			
 			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
-			if(isset($sort[$relname]) && $sort[$relname]) {
-				$sort = $sort[$relname];
+			if(isset($sorts[$relname]) && $sorts[$relname]) {
+				$sort = $sorts[$relname];
 			} else {
 				$sort = $data["table"] . ".id ASC";
 			}
@@ -2809,8 +2808,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		if(!isset($sort) || !$sort) {
 			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
-			if(isset($sort[$name]) && $sort[$name]) {
-				$sort = $sort[$name];
+			if(isset($sorts[$name]) && $sorts[$name]) {
+				$sort = $sorts[$name];
 			} else {
 				$sort = $data["table"] . ".id ASC";
 			}

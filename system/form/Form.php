@@ -1085,7 +1085,7 @@ class Form extends object {
 		}
 		
 		if($this->controller) {
-			if(is_object($controller)) {
+			if(is_object($this->controller)) {
 				$this->controller->__wakeup();
 			}
 		}

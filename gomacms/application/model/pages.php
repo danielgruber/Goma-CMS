@@ -524,12 +524,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		public function Read_Permission() {
 			$args = func_get_args();
 			array_unshift($args, "read_permission");
-			
-			if($data = call_user_func_array(array($this, "getHasOne"), $args)) {
+		
+			// 1 cant be true	
+			if($this->permissionid != 1 && $data = call_user_func_array(array($this, "getHasOne"), $args)) {
 				return $data;
 			} else if(!$this->isPublished() && $this->wasPublished()) {
 				if($data = DataObject::Get_one("Permission", array(), array(), array(
-					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.read_permissionid = permission.id AND pages.id = '".$this->publishedid."'"
+					'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.read_permissionid = permission.id AND pages.id = '".$this->publishedid."' AND permission.id != 1"
 				))) {
 					return $data;
 				}
@@ -560,14 +561,24 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 					$perm->parentid = 0;
 				} else if($this->parent) {
 					$perm->parentid = $this->parent->read_permission->id;
+					
+					// that shouldn't be the case.
+					$this->checkForMatchingIDs($perm, $this->parent->read_permission);
 				}
 			} else if($this->id == 0 && $this->parentid != 0) {
 				$perm->parentid = $this->parent->read_permission->id;
+				$this->checkForMatchingIDs($perm, $this->parent->read_permission);
 			}
 			$perm->name = "";
 			$this->setField("Read_Permission", $perm);
 			
 			$this->viewcache = array();
+		}
+		
+		public function checkForMatchingIDs($perm, $parent) {
+			if($parent->id == $perm->id) {
+				$perm->id = 0;
+			}
 		}
 		
 		//!Events
