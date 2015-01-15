@@ -47,7 +47,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							'title' 			=> 'varchar(200)',
 							'data' 				=> 'HTMLtext',
 							'sort'				=> 'int(8)',
-							'search'			=> 'int(1)',
+							'include_in_search'	=> 'int(1)',
 							'meta_description'	=> 'varchar(200)');
 		
 		/**
@@ -126,10 +126,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		/**
 		 * defaults
 		*/
-		static $default = array(	"parenttype" 	=> "root", 
-									"search" 		=> 1,
-									"mainbar"		=> 1,
-									"sort"			=> 10000);
+		static $default = array(	"parenttype" 		=> "root", 
+									"include_in_search" => 1,
+									"mainbar"			=> 1,
+									"sort"				=> 10000);
 		
 		/**
 		 * icon
@@ -763,7 +763,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 							$wtitle = new TextField("googletitle", lang("window_title")),
 							new checkbox('mainbar', lang("menupoint_add", "Show in menus")),
 							new HTMLField(''),
-							new checkbox('search', lang("show_in_search", "show in search?")),		
+							new checkbox('include_in_search', lang("show_in_search", "show in search?")),		
 							$filename = new textField('filename', lang("path"))
 						), lang("settings", "settings")),
 						$rightstab = new Tab('rightstab', array(

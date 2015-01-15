@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.28
+ * @version     4.7.29
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -4543,12 +4543,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			unset($key, $value);
 		}
 		
-		
+		// fields of extensions
 		foreach($this->LocalcallExtending("DBFields") as $dbfields) {
 			$fields = array_merge($fields, $dbfields);
 			unset($dbfields);
 		}
 		
+		// if parents, include parents.
 		$parent = get_parent_class($this);
 		if ($parents === true && $parent != "DataObject") {
 			$fields = array_merge(Object::instance($parent)->generateDBFields(true), $fields);
@@ -4557,9 +4558,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		if ($fields)
 			$fields = array_merge($this->DefaultSQLFields(strtolower(get_class($this))), $fields);
 		
+		// validate fields.
+		$this->validateDBFields($fields);
+		
 		return $fields;
 	}
 	
+	public function validateDBFields($fields) {
+		
+		
+		
+		foreach($fields as $name => $type) {
+			if(in_array($name, ViewAccessableData::$notViewableMethods)) {
+				throw new DBFieldNotValidException($this->class . "." . $name);
+			}
+		}
+	}
+
 	/**
 	 * gets has_one
 	 *
@@ -4929,6 +4944,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	}
 }
 
+class DBFieldNotValidException extends Exception {
+	public function __construct($field) {
+		parent::__construct("DB-Field-Name is not valid: " . $field);
+	}
+}
 
 /**
  * extension base class

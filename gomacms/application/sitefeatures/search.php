@@ -5,7 +5,7 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 12.12.2014
+  * last modified: 15.01.2015
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -32,7 +32,7 @@ class SearchController extends FrontedController
                 } else
                 {
                 		Core::setTitle(convert::raw2text($word) . " - " . lang("search.search"));
-                        $data = DataObject::search_object("pages", array($word), array("search" => 1));
+                        $data = DataObject::search_object("pages", array($word), array("include_in_search" => 1));
                         $data->activatePagination(isset($_GET["pa"]) ? $_GET["pa"] : null);
                         return $data->customise(array(), array("word" => convert::raw2text($word)))->renderWith("pages/search.html");
                 }
