@@ -25,7 +25,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.8
+ * @version     2.2.9
  */
 class livecounter extends DataObject
 {
@@ -90,6 +90,11 @@ class livecounter extends DataObject
 	public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib)";
 	
 	/**
+	 * some bots use the referer.
+	*/
+	public static $bot_referer_list = "(baidu|semalt|anticrawler\.org)";
+
+	/**
 	 * counts how much users are online
 	*/
 	static private $useronline = 0;
@@ -120,23 +125,13 @@ class livecounter extends DataObject
 			return true;
 		}
 		
-		$userAgent = $_SERVER['HTTP_USER_AGENT'] ? $_SERVER['HTTP_USER_AGENT'] : "unknown";
-		
 		self::$alreadyRun = true;
 		
 		// set correct host, avoid problems with localhost
-		$host = $_SERVER["HTTP_HOST"];
-		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
-			$host = "." . $host;
+		$host = self::getHost();
 	
 		// user identifier
-		if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $userAgent) || preg_match("/" . self::$no_cookie_support . "/i", $userAgent)  || preg_match("/" . self::$bot_list . "/i", $userAgent))) || $userAgent == "" || $userAgent == "-") {
-			$user_identifier = md5($userAgent . $_SERVER["REMOTE_ADDR"]);
-		} else if(isset($_COOKIE['goma_sessid'])) {
-			$user_identifier = $_COOKIE['goma_sessid'];
-		} else {
-			$user_identifier = session_id();
-		}
+		$user_identifier = self::getUserIdentifier();
 		
 		self::$userCounted = isset($_SESSION["user_counted"]) ? $_SESSION["user_counted"] : null;
 
@@ -147,6 +142,17 @@ class livecounter extends DataObject
 		//self::onBeforeShutdownUsingLife();
 		register_shutdown_function(array("livecounter", "onBeforeShutdownUsingLife"));
 		
+		self::checkForMigrationScript();
+	}
+
+	public static function getUserAgent() {
+		return $_SERVER['HTTP_USER_AGENT'] ? $_SERVER['HTTP_USER_AGENT'] : "unknown";
+	}
+
+	public static function checkForMigrationScript() {
+
+		$userAgent = self::getUserAgent();
+
 		if(!preg_match("/" . self::$no_cookie_support . "/i", $userAgent)  && !preg_match("/" . self::$bot_list . "/i", $userAgent)) {
 			
 			$cacher = new Cacher("cron_for_migratev2");
@@ -163,28 +169,9 @@ class livecounter extends DataObject
 		}
 	}
 
-	public static function onBeforeShutdownUsingLife() {
-		session_write_close();
-		
-		if(function_exists("fastcgi_finish_request")) {
-			fastcgi_finish_request();
-		}
+	public static function getUserIdentifier() {
 
-		$start = microtime(true);
-
-		$userAgent = $_SERVER['HTTP_USER_AGENT'] ? $_SERVER['HTTP_USER_AGENT'] : "unknown";
-
-		// first get userid
-		$userid = member::$id;
-		
-		if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"]) || substr($_SERVER["REQUEST_URI"], 0, strlen(ROOT_PATH . "null")) == ROOT_PATH . "null") {
-			return false;
-		}
-
-		// set correct host, avoid problems with localhost
-		$host = $_SERVER["HTTP_HOST"];
-		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
-			$host = "." . $host;
+		$userAgent = self::getUserAgent();
 
 		// user identifier
 		if((!isset($_COOKIE['goma_sessid']) && (!preg_match("/" . self::$cookie_support . "/i", $userAgent) || preg_match("/" . self::$no_cookie_support . "/i", $userAgent)  || preg_match("/" . self::$bot_list . "/i", $userAgent))) || $userAgent == "" || $_SERVER['HTTP_USER_AGENT'] == "-") {
@@ -195,20 +182,68 @@ class livecounter extends DataObject
 			$user_identifier = session_id();
 		}
 
+		return $user_identifier;
+	}
+
+	public static function getHost() {
+		// set correct host, avoid problems with localhost
+		$host = $_SERVER["HTTP_HOST"];
+		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
+			$host = "." . $host;
+
+		return $host;
+	}
+
+	public static function checkForAttacks() {
 		/**
 		 * for users without enabled cookies, this works!
 		*/
 		if(	!isset(self::$userCounted) && 
 			!isset($_COOKIE["goma_sessid"]) && 
 			!isset($_COOKIE["goma_lifeid"]) && 
-			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $userAgent, "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => self::getUserAgent();, "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 
 
 			// this could be a ddos-attack or hacking-attack, we should notify the system administrator
-			Security::registerAttacker($_SERVER["REMOTE_ADDR"], $userAgent);
+			Security::registerAttacker($_SERVER["REMOTE_ADDR"], self::getUserAgent(););
 			$user_identifier = $_SERVER["REMOTE_ADDR"];
 			AddContent::addNotice("Please activate Cookies in your Browser.");
 		}
+	}
+
+	public static function userId() {
+		return member::$id;
+	}
+
+	public static function isBot($userAgent, $referer) {
+
+		if(!isset($referer)) {
+			$referer = "";
+		}
+
+		return preg_match("/" . self::$bot_list . "/i", $userAgent) || preg_match('/'.self::$bot_referer_list.'/i', $referer);
+	}
+
+	public static function onBeforeShutdownUsingLife() {
+		session_write_close();
+		
+		if(function_exists("fastcgi_finish_request")) {
+			fastcgi_finish_request();
+		}
+
+		$start = microtime(true);
+
+		$userAgent = self::getUserAgent();
+		
+		if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"]) || substr($_SERVER["REQUEST_URI"], 0, strlen(ROOT_PATH . "null")) == ROOT_PATH . "null") {
+			return false;
+		}
+
+		$host = self::getHost();
+
+		$user_identifier = self::getUserIdentifier();
+
+		self::checkForAttacks();
 
 		/**
 		 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index.
@@ -217,21 +252,12 @@ class livecounter extends DataObject
 			$data = DataObject::get_one("livecounter_live", array("phpsessid" => $user_identifier, "last_modified" => self::$userCounted));
 			if($data && date("d", $data->created) == date("d", NOW)) {
 				DataObject::update("livecounter_live", array("hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
-				// we set last update to next know the last update and better use database-index				
-				/*$end = microtime(true);
-				$diff = $end - $start;
-				logging("time fast: " . $diff . "/" . $user_identifier);*/
 
 				return true;
 			} else if($data) {
 
-				self::generateLiveCounterSession($userAgent, $user_identifier, $userid, 1);
+				self::generateLiveCounterSession($userAgent, $user_identifier, self::userId(), 1);
 				
-				
-				
-				/*$end = microtime(true);
-				$diff = $end - $start;
-				logging("time fast regenerate: " . $diff . "/" . $user_identifier);*/
 				return;
 			}
 		}
@@ -260,19 +286,12 @@ class livecounter extends DataObject
 					DataObject::update("livecounter", array("hitcount" => $data->hitcount, "phpsessid" => $data->phpsessid, "last_modified" => $data->last_modified), array("recordid" => $lt));
 					$data->remove(true);
 				
-					self::generateLiveCounterSession($userAgent, $user_identifier, $userid, 1);
+					self::generateLiveCounterSession($userAgent, $user_identifier, self::userId(), 1);
 				}
 				
 				// free memory
 				unset($data);
-				// set cookie
-				
-				
-				/*$end = microtime(true);
-				$diff = $end - $start;
-				logging("time cookie: " . $diff . "/" . $user_identifier);*/
 
-				
 				return true;
 			}
 		}
@@ -282,7 +301,7 @@ class livecounter extends DataObject
 		*/
 		$data = DataObject::get_one("livecounter_live", array("phpsessid" => $user_identifier, "last_modified" => array(">", $timeout)));
 		if($data && date("d", $data->created) == date("d", NOW)) {
-			DataObject::update("livecounter_live", array("user" => $userid, "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
+			DataObject::update("livecounter_live", array("user" => self::userId(), "hitcount" => $data->hitcount + 1), array("id" => $data->versionid));
 		} else {
 			if($data) {
 				$lt = $data->longtermid;
@@ -291,7 +310,7 @@ class livecounter extends DataObject
 			}
 
 			$recurring = (isset($_COOKIE["goma_lifeid"]) && DataObject::count("livecounter", array("phpsessid" => $_COOKIE["goma_lifeid"])) > 0);
-			self::generateLiveCounterSession($userAgent, $user_identifier, $userid, $recurring);
+			self::generateLiveCounterSession($userAgent, $user_identifier, self::userId(), $recurring);
 		}
 
 		
@@ -308,13 +327,16 @@ class livecounter extends DataObject
 	}
 
 	public static function generateLiveCounterSession($userAgent, $user_identifier, $userid, $recurring) {
+
+		$referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
+
 		$data = new LiveCounter();
 		$data->user = $userid;
 		$data->phpsessid = $user_identifier;
 		$data->browser = $userAgent;
-		$data->referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : "";
+		$data->referer = $referer;
 		$data->ip = md5($_SERVER["REMOTE_ADDR"]);
-		$data->isbot = preg_match("/" . self::$bot_list . "/i", $userAgent);
+		$data->isbot = self::isBot($userAgent, $referer);
 		$data->hitcount = 1;
 		$data->recurring = 1;
 
