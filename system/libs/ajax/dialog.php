@@ -121,7 +121,7 @@ class Dialog extends AjaxResponse
 					}
 					$array["closeButton"] = $this->closeButton;
 					
-					HTTPResponse::output("(" . json_encode($array) . ")");
+					HTTPResponse::output(json_encode($array));
 					exit;
 				} else {
 					return 'gloader.load("dialog");

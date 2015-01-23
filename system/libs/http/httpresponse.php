@@ -150,7 +150,7 @@ class HTTPresponse extends object
 						$html = new htmlparser();
 						$body = $html->parseHTML($body);
 						
-				} else if((isset(self::$headers["content-type"]) && _eregi("json",self::$headers["content-type"])) && is_array($body))
+				} else if((isset(self::$headers["content-type"]) && preg_match("/json/",self::$headers["content-type"])) && is_array($body))
    				{
    					$body = json_encode($body);
    				}				

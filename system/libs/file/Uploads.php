@@ -9,9 +9,9 @@ loadlang("files");
   *	@link 		http://goma-cms.org
   *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *	@author 	Goma-Team
-  * @Version 	1.5.10
+  * @Version 	1.5.11
   *
-  * last modified: 26.12.2014
+  * last modified: 23.01.2015
 */
 class Uploads extends DataObject {
 	/**
@@ -730,6 +730,15 @@ class ImageUploads extends Uploads {
 		return $file;
 	}
 	
+	public function checkForBase($file) {
+		$fileWithoutBase = substr($file, strlen("index.php/"));
+		if(file_exists($fileWithoutBase)) {
+			$file = $fileWithoutBase;
+		}
+		
+		return $file;
+	}
+	
 	/**
 	 * sets the height
 	 *
@@ -749,18 +758,14 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
-			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$file = BASE_URI . $file;
+
+			$fileRetina = BASE_URI . $fileRetina;
+
 		}
 		
 		return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -784,33 +789,15 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
-		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
-			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
-		}
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
 		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
+
 				
 		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
@@ -833,19 +820,15 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
+		
 		
 		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
@@ -868,19 +851,17 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path .'/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
+		
+		
+		
 		
 		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
 	}
@@ -903,18 +884,13 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
 		
 		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -938,18 +914,14 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
+
 		}
 		
 		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -973,18 +945,14 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path .'/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
+
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
 		
 		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -1008,18 +976,13 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/noCropSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
 		
 		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -1043,18 +1006,13 @@ class ImageUploads extends Uploads {
 		$fileRetina = $this->path . "/noCropSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
 		$this->manageURL($fileRetina);
 		
+		$file = $this->checkForBase($file);
+		$fileRetina = $this->checkForBase($fileRetina);
+		
 		if($absolute) {
-			if(file_exists($file)) {
-				$file = BASE_URI . $file;
-			} else {
-				$file = BASE_URI . BASE_SCRIPT . $file;
-			}
+			$file = BASE_URI . $file;
 			
-			if(file_exists($fileRetina)) {
-				$fileRetina = BASE_URI . $fileRetina;
-			} else {
-				$fileRetina = BASE_URI . BASE_SCRIPT . $fileRetina;
-			}
+			$fileRetina = BASE_URI . $fileRetina;
 		}
 		
 		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
