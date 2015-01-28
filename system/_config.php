@@ -32,6 +32,7 @@ Core::addRules(array('' => "HomePageController"), 1);
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));
 gloader::addLoadAble("draggable", "system/libs/javascript/ui/draggable.js");
+gloader::addLoadAble("pageslider", "system/libs/javascript/slider.js");
 gloader::addLoadAble("dropable", "system/libs/javascript/ui/droppable.js");
 gloader::addLoadAble("sortable", "system/libs/javascript/ui/sortable.js");
 gloader::addLoadAble("selectable", "system/libs/javascript/ui/selectable.js");

@@ -25,7 +25,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.9
+ * @version     2.2.10
  */
 class livecounter extends DataObject
 {
@@ -87,7 +87,7 @@ class livecounter extends DataObject
 	/**
 	 * bot-list
 	*/
-	public static $bot_list = "(googlebot|msnbot|CareerBot|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib)";
+	public static $bot_list = "(googlebot|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib)";
 	
 	/**
 	 * some bots use the referer.
@@ -201,11 +201,11 @@ class livecounter extends DataObject
 		if(	!isset(self::$userCounted) && 
 			!isset($_COOKIE["goma_sessid"]) && 
 			!isset($_COOKIE["goma_lifeid"]) && 
-			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => self::getUserAgent();, "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => self::getUserAgent(), "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 
 
 			// this could be a ddos-attack or hacking-attack, we should notify the system administrator
-			Security::registerAttacker($_SERVER["REMOTE_ADDR"], self::getUserAgent(););
+			Security::registerAttacker($_SERVER["REMOTE_ADDR"], self::getUserAgent());
 			$user_identifier = $_SERVER["REMOTE_ADDR"];
 			AddContent::addNotice("Please activate Cookies in your Browser.");
 		}
