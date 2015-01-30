@@ -15,6 +15,8 @@
 		this.element = $(element);
 		
 		this.init();
+
+		return this;
 		
 	};
 	

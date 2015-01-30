@@ -1005,6 +1005,8 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			)
 		);
 	}
+
+	public function __wakeup(){}
 }
 
 /**

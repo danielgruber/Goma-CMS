@@ -25,7 +25,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.10
+ * @version     2.2.11
  */
 class livecounter extends DataObject
 {
@@ -235,7 +235,7 @@ class livecounter extends DataObject
 
 		$userAgent = self::getUserAgent();
 		
-		if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"]) || substr($_SERVER["REQUEST_URI"], 0, strlen(ROOT_PATH . "null")) == ROOT_PATH . "null") {
+		if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"]) || substr($_SERVER["REQUEST_URI"], 0, strlen(ROOT_PATH . "null")) == ROOT_PATH . "null" || URL == "null") {
 			return false;
 		}
 

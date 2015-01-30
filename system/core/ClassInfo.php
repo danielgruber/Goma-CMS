@@ -14,7 +14,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * This class provides information about other classes.
  *
  * @package		Goma\System\Core
- * @version		3.7.1
+ * @version		3.7.2
  */
 class ClassInfo extends Object {
 	/**
@@ -199,7 +199,8 @@ class ClassInfo extends Object {
 	 *@param name - var-name
 	 */
 	public static function addSaveVar($class, $name) {
-		$class = ClassManifest::resolveClassName($class);
+		if(class_exists("ClassManifest"))
+			$class = ClassManifest::resolveClassName($class);
 
 		self::$save_vars[strtolower($class)][] = $name;
 	}
