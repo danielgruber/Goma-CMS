@@ -16,7 +16,7 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.2.4
+ * @version		1.2.5
  */
 class userController extends Controller
 {
@@ -60,6 +60,22 @@ class userController extends Controller
 		}
 		
 		return parent::actionComplete($action, $record);
+	}
+
+	/**
+	 * in the end this function is called to do last modifications
+	 *
+	 *@name serve
+	 *@access public
+	 *@param string - content
+	 */
+	public function serve($content) {
+		if(class_exists("FrontedController")) {
+			$c = new FrontedController();
+			return $c->serve($content);
+		}
+		
+		return $content;
 	}
 }
 

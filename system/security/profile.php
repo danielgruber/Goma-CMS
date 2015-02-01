@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 07.11.2014
-  * $Version 1.4
+  * last modified: 01.02.2015
+  * $Version 1.4.1
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -61,7 +61,9 @@ class ProfileController extends FrontedController {
 		Core::setTitle(lang("edit_profile"));
 		
 		$userdata = DataObject::get("user", array("id" => member::$id))->first();
-		return '<h1>'.lang("edit_profile").'</h1>' . $userdata->controller()->edit();
+		$c = $userdata->controller();
+
+		return '<h1>'.lang("edit_profile").'</h1>' . $c->edit();
 	}
 	
 	/**
