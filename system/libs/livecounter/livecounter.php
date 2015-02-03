@@ -25,7 +25,7 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.11
+ * @version     2.2.12
  */
 class livecounter extends DataObject
 {
@@ -194,20 +194,23 @@ class livecounter extends DataObject
 		return $host;
 	}
 
-	public static function checkForAttacks() {
+	public static function checkForAttacks($user_identifier) {
 		/**
 		 * for users without enabled cookies, this works!
 		*/
 		if(	!isset(self::$userCounted) && 
 			!isset($_COOKIE["goma_sessid"]) && 
 			!isset($_COOKIE["goma_lifeid"]) && 
-			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => self::getUserAgent(), "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
+			DataObject::count("livecounter_live", array("ip" => md5($_SERVER["REMOTE_ADDR"]), "browser" => $user_identifier, "last_modified" => array(">", NOW - 60 * 60 * 1))) > 10) {
 
 
 			// this could be a ddos-attack or hacking-attack, we should notify the system administrator
 			Security::registerAttacker($_SERVER["REMOTE_ADDR"], self::getUserAgent());
-			$user_identifier = $_SERVER["REMOTE_ADDR"];
 			AddContent::addNotice("Please activate Cookies in your Browser.");
+
+			return $_SERVER["REMOTE_ADDR"];
+		} else {
+			return $user_identifier;
 		}
 	}
 
@@ -243,7 +246,7 @@ class livecounter extends DataObject
 
 		$user_identifier = self::getUserIdentifier();
 
-		self::checkForAttacks();
+		$user_identifier = self::checkForAttacks($user_identifier);
 
 		/**
 		 * there's a mode that live-counter updates record by exact date, it's better, because the database can better use it's index.
