@@ -58,6 +58,9 @@ class FileSystem extends Object {
 		}
 	}
 	
+	/**
+	 * get mode from safe-mode.
+	*/
 	public static function getMode($mode = null) {
 		if($mode === null) {
 			$mode = (!self::$safe_mode) ? 0777 : 0755;
@@ -583,7 +586,7 @@ class FileSystem extends Object {
 		}
 
 		foreach($folders as $folder) {
-			self::chmod($folder, self::getMode());
+			self::chmod($folder, self::getMode(), false);
 		}
 		
 		chmod(ROOT, self::getMode());

@@ -84,7 +84,7 @@ class PermissionChecker {
 		if(self::isValidPermission($mode) || $mode === false) {
 			$this->permissionMode = $mode;
 		} else {
-			throw InvalidArgumentException("Mode must be a valid Unix-Filemode or false.");
+			throw new InvalidArgumentException("Mode must be a valid Unix-Filemode or false. '$mode' given.");
 		}
 	}
 
@@ -113,6 +113,6 @@ class PermissionChecker {
 	 * validates if a permisssion-flag is valid.
 	*/
 	public static function isValidPermission($mode) {
-		return preg_match('/^0[0-7]{3}$/', $mode);
+		return (boolean) preg_match('/^(1|0)?[0-7]{1,3}+$/', sprintf("%o", $mode));
 	}
 }
