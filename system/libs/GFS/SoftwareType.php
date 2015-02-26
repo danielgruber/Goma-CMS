@@ -672,6 +672,11 @@ abstract class g_SoftwareType {
 		if($data["fileindex"] != $files) {
 			$data = array("fileindex" => array(), "packages" => array());
 			$data["fileindex"] = $files;
+
+			/*
+	  		 * iterate through all files and analyze them for the ability to being a package.
+	  		 * it will also remove files that are packages, but newer packages were found.
+			*/
 			foreach($files as $file) {
 				if(preg_match('/\.gfs$/i', $file)) {
 					

@@ -14,7 +14,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * This class provides information about other classes.
  *
  * @package		Goma\System\Core
- * @version		3.7.2
+ * @version		3.7.3
  */
 class ClassInfo extends Object {
 	/**
@@ -494,90 +494,22 @@ class ClassInfo extends Object {
 			defined("GENERATE_CLASS_INFO") OR define('GENERATE_CLASS_INFO', true);
 			logging('Regenerating Class-Info');
 
-			// FIRST WE'VE GOT SOME ESSENTIELL CHECKS
-
-			include_once("./system/core/CoreLibs/PermissionChecker.php");
-			$permissionChecker = new PermissionChecker();
-			$permissionChecker->addFolders(array(
-				"./",
-				"system/temp/",
-				APP_FOLDER . "temp/",
-				APP_FOLDER . LOG_FOLDER,
-				APP_FOLDER . "code/",
-				APP_FOLDER . "uploaded/",
-				"./tpl/",
-				"./system/installer/data/apps"
-			));
-
-
-			$info = $permissionChecker->tryWrite();
-			$permissionsValid = !$info;
-			$permissionsFalse = "";
-			if($info) {
-				foreach($info as $f) {
-					$permissionsFalse = '<li>' . $f . '</li>';
-				}
-			}
-
-			if(!file_exists(ROOT . "system/temp/autoloader_exclude")) {
-				@file_put_contents(ROOT . "system/temp/autoloader_exclude", 1);
-			}
-
-			if(!file_exists(APP_FOLDER . "temp/autoloader_exclude")) {
-				@file_put_contents(APP_FOLDER . "temp/autoloader_exclude", 1);
-			}
-
-			require_once(FRAMEWORK_ROOT . "/libs/GFS/SoftwareType.php");
-			$errors = g_SoftwareType::buildPackageIndex();
-			if($errors) {
-				foreach($errors as $f) {
-					$permissionsFalse = '<li>' . $f . '</li>';
-				}
-			}
-
-
-			if($permissionsValid === false) {
+			// check for permissions
+			$permissionInfo = self::checkPermissionsAndBuild();
+			if($permissionInfo !== true) {
 				$data = file_get_contents(FRAMEWORK_ROOT . "templates/framework/permission_fail.html");
 				$data = str_replace('{BASE_URI}', BASE_URI, $data);
-				$data = str_replace('{$permission_errors}', $permissionsFalse, $data);
+				$data = str_replace('{$permission_errors}', $permissionInfo, $data);
 				header("content-type: text/html;charset=UTF-8");
 				header("X-Powered-By: Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
 				echo $data;
-				exit ;
+				exit;
 			}
-
-			unset($permissionValid, $permissionFalse);
 
 			// some global tests for the framework to run
-			if(function_exists("gd_info")) {
-				$data = gd_info();
-				if(preg_match('/2/', $data["GD Version"])) {
-					// okay
-					unset($data);
-				} else {
-					$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
-					$error = str_replace('{$error}', /*'You need to have GD-Library 2 installed.'*/'Sie benötigen GD-Library 2, um Goma auszuführen.', $error);
-					$error = str_replace('{BASE_URI}', BASE_URI, $error);
-					header("HTTP/1.1 500 Server Error");
-					echo $error;
-					exit ;
-				}
-			} else {
-				$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
-				$error = str_replace('{$error}', 'You need to have a installed GD-Library 2.', $error);
-				$error = str_replace('{BASE_URI}', BASE_URI, $error);
-				header("HTTP/1.1 500 Server Error");
-				echo $error;
-				exit ;
-			}
-
-			if(!class_exists("reflectionClass")) {
-				$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
-				$error = str_replace('{$error}', 'You need to have the Reflection-API installed.', $error);
-				$error = str_replace('{BASE_URI}', BASE_URI, $error);
-				header("HTTP/1.1 500 Server Error");
-				echo $error;
-				exit ;
+			$dependencies = self::checkForSoftwareDependencies();
+			if($dependencies !== true) {
+				self::raiseSoftwareError($dependencies);
 			}
 
 			// END TESTS
@@ -918,7 +850,102 @@ class ClassInfo extends Object {
 			}
 		}
 	}
+
+	/**
+	 * checks for permissions and rebuilds package-index.
+	 *
+	 * @name 	checkPermissionsAndBuild
+	*/
+	public static function checkPermissionsAndBuild() {
+
+		include_once("./system/core/CoreLibs/PermissionChecker.php");
+		$permissionChecker = new PermissionChecker();
+		$permissionChecker->addFolders(array(
+			"./",
+			"system/temp/",
+			APP_FOLDER . "temp/",
+			APP_FOLDER . LOG_FOLDER,
+			APP_FOLDER . "code/",
+			APP_FOLDER . "uploaded/",
+			"./tpl/",
+			"./system/installer/data/apps"
+		));
+
+		// check for basic file permissions
+		$info = $permissionChecker->tryWrite();
+		$permissionsFalse = array();
+		if($info) {
+			$permissionsFalse = array_merge($permissionsFalse, $info);
+		}
+
+		// add autoloder-exclude files in temp-folders.
+		if(!file_exists(ROOT . "system/temp/autoloader_exclude")) {
+			@file_put_contents(ROOT . "system/temp/autoloader_exclude", 1);
+		}
+
+		if(!file_exists(APP_FOLDER . "temp/autoloader_exclude")) {
+			@file_put_contents(APP_FOLDER . "temp/autoloader_exclude", 1);
+		}
+
+		// rebuild package-index and get Permission-Errors from there.
+		require_once(FRAMEWORK_ROOT . "/libs/GFS/SoftwareType.php");
+		$errors = g_SoftwareType::buildPackageIndex();
+		if($errors) {
+			$permissionFalse = array_merge($permissionFalse, $errors);
+		}
+
+		$permissionsFalseString = "";
+		foreach($permissionFalse as $f) {
+			$permissionsFalseString = '<li>' . $f . '</li>';
+		}
+
+		// okay, we have some permission-errors.
+		if($permissionsFalseString != "") {
+			return $permissionsFalseString;
+		}
+
+		return true;
+	}
 	
+	/**
+	 * checks for basic dependencies and returns string if error has happended.
+	*/
+	public static function checkForSoftwareDependencies() {
+		// some global tests for the framework to run
+		if(function_exists("gd_info")) {
+			$data = gd_info();
+			if(preg_match('/2/', $data["GD Version"])) {
+				// okay
+				unset($data);
+			} else {
+				return 'You need to have GD-Library 2 installed.';
+			}
+		} else {
+			return 'You need to have GD-Library 2 installed.';
+		}
+
+		if(!class_exists("reflectionClass")) {
+			return 'You need to have the Reflection-API installed.';
+		}
+
+		return true;
+	}
+
+	/**
+	 * raises an software error with given error-string.
+	 *
+	 * @name 	raiseSoftwareError
+	 * @param 	string error
+	*/
+	public static function raiseSoftwareError($err) {
+		$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
+		$error = str_replace('{$error}', $err, $error);
+		$error = str_replace('{BASE_URI}', BASE_URI, $error);
+		header("HTTP/1.1 500 Server Error");
+		echo $error;
+		exit;
+	} 
+
 	/**
 	 * adds interface to list.
 	*/
