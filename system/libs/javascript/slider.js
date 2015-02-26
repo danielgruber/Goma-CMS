@@ -15,7 +15,7 @@
 		this.element = $(element);
 		
 		this.init();
-
+		
 		return this;
 		
 	};
@@ -83,7 +83,7 @@
 			var $this = this;
 			
 			$(window).resize(this.updateSliderSize.bind(this));
-		
+			
 			$(window).focus(function() {
 			    $this.window_focus = true;
 			})

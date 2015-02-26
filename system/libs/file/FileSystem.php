@@ -1,23 +1,47 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.06.2012
-  * $Version 1.6.2
+ * File-System class to map all FileSystem calls with Goma-Specific updates.
+ *
+ * @package	goma framework
+ * @link 	http://goma-cms.org
+ * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 1.7
+ *
+ * last modified: 24.02.2015
 */
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+define("LANGUAGE_ROOT", ROOT . "/languages/");
 
 class FileSystem extends Object {
 	/**
 	 * this is the last file which causes an error
 	 *
-	 *@name errFile
-	 *@access public
+	 * @name errFile
+	 * @access public
 	*/
 	protected static $errFile;
+
+	/**
+	 * safe-mode.
+	 * When enabled all files and folders are created with 0755.
+	 * When disabled all files and folders are created with 0777.
+	 * you can call applySafeMode() to update all existing files.
+	 *
+	 * @param boolean
+	*/
+	public static $safe_mode = false;
+
+	/**
+	 * folders on which safe-mode is applied.
+	 *
+	 * applySafeModeFolders
+	*/
+	public static $applySafeModeFolders = array(
+		FRAMEWORK_ROOT,
+		APP_FOLDER,
+		LANGUAGE_ROOT
+	);
 	
 	/**
 	 * this is the last file which causes an error
@@ -34,13 +58,24 @@ class FileSystem extends Object {
 		}
 	}
 	
+	public static function getMode($mode = null) {
+		if($mode === null) {
+			$mode = (!self::$safe_mode) ? 0777 : 0755;
+		}
+
+		return $mode;
+	}
+
 	/**
-	 * creates a directory and forces chmod 0777 or given mode
+	 * creates a directory and forces chmod safe-mode-specific or given mode
 	 *
 	 *@name mkdir
 	 *@access public
 	*/
-	public static function requireDir($dir, $mode = 0777, $throwOnFail = true) {
+	public static function requireDir($dir, $mode = null, $throwOnFail = true) {
+
+		$mode = self::getMode($mode);
+
 		clearstatcache();
 		if(!file_exists($dir)) {
 			if(mkdir($dir, $mode, true)) {
@@ -68,7 +103,7 @@ class FileSystem extends Object {
 	 *@name requireFolder
 	 *@access public
 	*/
-	public static function requireFolder($dir, $mode = 0777) {
+	public static function requireFolder($dir, $mode = null) {
 		return self::requireDir($dir, $mode);
 	}
 	
@@ -82,8 +117,7 @@ class FileSystem extends Object {
 		if(!file_exists($file)) {
 			if($handle = @fopen($file, "w")) {
 				fclose($handle);
-				if(!IN_SAFE_MODE)
-					chmod($file, 0777);
+				chmod($file, self::getMode());
 				return true;
 			} else {
 				self::$errFile = $file;
@@ -100,16 +134,9 @@ class FileSystem extends Object {
 	 *@name writeFileContents
 	 *@access public
 	*/
-	public static function writeFileContents($file, $content, $modifier = null,$mode = null) {
-		if(IN_SAFE_MODE) {
-			return @file_put_contents($file, $content, $modifier);
-		}
-		
+	public static function writeFileContents($file, $content, $modifier = null,$mode = null) {	
 		if(@file_put_contents($file, $content, $modifier)) {
-			if(!isset($mode))
-				$mode = 0777;
-			
-			@chmod($file, $mode);
+			@chmod($file, self::getMode($mode));
 			return true;
 		} else {
 			return false;
@@ -545,5 +572,35 @@ class FileSystem extends Object {
 			$index[] = $dir;
 		}
 		
+	}
+
+	/**
+	 * apply-safe-mode.
+	*/
+	public static function applySafeMode($folders = null, $configFiles = null) {
+		if($folders === null) {
+			$folders = self::$applySafeModeFolders;
+		}
+
+		foreach($folders as $folder) {
+			self::chmod($folder, self::getMode());
+		}
+		
+		chmod(ROOT, self::getMode());
+
+		// reset config files
+		if(self::$safe_mode) {
+			$configFiles = $configFiles || array(ROOT . "_config.php", APP_FOLDER . "config.php");
+			foreach($configFiles as $file) {
+				self::chmod($folder, 0644);
+			}
+		}
+	}
+
+	/**
+	 * generate code for external system to preserve state of safe-mode.
+	*/
+	public static function codeForExternalSystem() {
+		return 'FileSystem::$safe_mode = '.var_export(FileSystem::$safe_mode, true).';';
 	}
 }

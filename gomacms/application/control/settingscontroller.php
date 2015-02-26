@@ -167,21 +167,22 @@ class Newsettings extends DataObject implements HistoryData {
 		$general->add(new langselect('lang',lang("lang"),PROJECT_LANG));
 		$general->add(new select("timezone",lang("timezone"), ArrayLib::key_value(i18n::$timezones) ,Core::getCMSVar("TIMEZONE")));
 		$general->add($date_format = new Select("date_format_date", lang("date_format"), $this->generateDate(), DATE_FORMAT_DATE));
-		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));			
+		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));
 						
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => lang("SITE_ACTIVE"), STATUS_MAINTANANCE => lang("SITE_MAINTENANCE")), SITE_MODE));
 		if(STATUS_DISABLED)
 			$status->disable();
+
+		$tabs->add(new Tab("security", array(
+			$safe_mode = new Checkbox("safe_mode", lang("safe_mode"), FileSystem::$safe_mode)
+		),lang("security")));
+
+		$safe_mode->info = lang("safe_mode_info");
 			
 		$status->info = lang("sitestatus_info");
-		//$general->add();
-		foreach(ClassInfo::getChildren("newsettings") as $child) {
-			$tabs->add($currenttab = new Tab($child, array(),parse_lang(Object::instance($child)->tab)));
-			$inst = new $child($this->data);
-			// sync data
-			$inst->getFormFromDB($currenttab);
-		}
-		
+
+		$this->generateSubClassForm($form);
+
 		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
 		if($http == "http" && $this->useSSL != 1) {
 			$form->useSSL->disable();
@@ -191,6 +192,21 @@ class Newsettings extends DataObject implements HistoryData {
 		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 	}
 	
+	/**
+	 * generates form for subClasses.
+	 *
+	 * @name 	generateSubClassForm
+	*/
+	public function generateSubClassForm(&$form) {
+		$tabs = $form->tabs;
+		foreach(ClassInfo::getChildren("newsettings") as $child) {
+			$tabs->add($currenttab = new Tab($child, array(),parse_lang(Object::instance($child)->tab)));
+			$inst = new $child($this->data);
+			// sync data
+			$inst->getFormFromDB($currenttab);
+		}
+	}
+
 	/**
 	 * generates date-formats
 	 *

@@ -219,6 +219,15 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function getFile($path) {
+
+		$cropPrepends = array("Uploads/", "./Uploads/", ROOT_PATH . "Uploads/", BASE_SCRIPT . "Uploads/", ROOT_PATH . BASE_SCRIPT . "Uploads/");
+		
+		foreach($cropPrepends as $crop) {
+			if(substr($path, 0, strlen($crop)) == $crop) {
+				$path = substr($path, strlen($crop));
+			} 
+		}
+		
 		$cacher = new Cacher("file_" . $path);
 		if($cacher->checkValid()) {
 			$data = $cacher->getData();

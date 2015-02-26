@@ -4,7 +4,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 	09.06.2013
+ * @version 	10.02.2015
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -272,6 +272,8 @@ $lang = array(
 	'mainbar'										=> "Mit Men&uuml;punkt",
 	'just_content_page'								=> "Standard-Seite",
 	'PAGETYPE'										=> "Seitentyp",
+	"box_linktype"									=> "Link in der Kopfzeile",
+	"no_link"										=> "Kein Link",
 	"BOXTYPE"										=> "Box-Typ",
 	"CREATE_BOX"									=> "Box erstellen",
 	"SAVE_BOX"										=> "Box speichern",
@@ -640,5 +642,9 @@ $lang = array(
 	"HELP.HISTORY"				=> "In der Änderungshistorie sehen Sie, was in letzter Zeit auf der Seite geändert wurde.",
 	"HELP.HIERARCHY_OPEN"		=> "Klicken, um Baum auszuklappen.",
 	"HELP.PAGES_SORT"			=> "Ziehen, um Seiten umzusortieren.",
-	"HELP.HELP"					=> "Hilfe ein/ausblenden"
+	"HELP.HELP"					=> "Hilfe ein/ausblenden",
+
+	"security"					=> "Sicherheit",
+	"safe_mode"					=> "Sicherer Dateisystemmodus",
+	"safe_mode_info"			=> "Wenn der sichere Modus aktiviert ist, behält Goma die Rechte an allen Dateien. Sie können dann nicht über FTP auf die Dateien schreibend zugreifen. Dies wird für Produktivsysteme empfohlen."
 );

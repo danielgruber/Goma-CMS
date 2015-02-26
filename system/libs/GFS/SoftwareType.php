@@ -1,12 +1,14 @@
 <?php defined("IN_GOMA") OR die();
 
+define("DEFAULT_PACKAGE_FOLDER", FRAMEWORK_ROOT . "installer/data/apps");
+
 /**
  * Base class for _every_ Goma SoftType-Handler.
  *
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.5.12
+ * @version	1.7
  */
 abstract class g_SoftwareType {
 	/**
@@ -32,6 +34,11 @@ abstract class g_SoftwareType {
 	 *@access protected
 	*/
 	protected static $gomaAvailable;
+
+	/**
+	 * folder for Packages.
+	*/
+	public static $package_folder = DEFAULT_PACKAGE_FOLDER;
 	
 	/**
 	 * default __construct
@@ -354,12 +361,12 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function forceLiveDB() {
-		if(!file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
+		if(!file_exists(self::$package_folder . "/.index-db")) {
 			ClassInfo::delete();
 			ClassInfo::loadFile();
 		} else {
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
-			if($data["fileindex"] != scandir(FRAMEWORK_ROOT . "installer/data/apps/")) {
+			$data = unserialize(file_get_contents(self::$package_folder . "/.index-db"));
+			if($data["fileindex"] != scandir(self::$package_folder)) {
 				ClassInfo::delete();
 				ClassInfo::loadFile();
 			}
@@ -373,42 +380,23 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listUpdatePackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
-			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
+		if(file_exists(self::$package_folder . "/.index-db")) {
+			$dir = self::$package_folder . "/";
+			$data = unserialize(file_get_contents(self::$package_folder . "/.index-db"));
 			
 			$updates = array();
 			
+			// build up update-information.
 			foreach($data["packages"] as $type => $apps) {
 				foreach($apps as $version => $_data) {
 					if(isset($_data["file"])) {
-						$appdata = self::getByType($type, $dir . $_data["file"])->getPackageInfo();
-						$appdata["file"] = $dir . $_data["file"];
-						$appdata["plist_type"] = $type;
-						if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && goma_version_compare($appdata["version"], $appdata["installed_version"], ">")) {
-							if(isset($updates[$type])) {
-								if(goma_version_compare($updates[$type]["version"], $version, "<")) {
-									$updates[$type] = $appdata;
-								}
-							} else {
-								$updates[$type] = $appdata;
-							}
-						}
+						self::buildPackageInfo($type, $dir, $_data, $version, $updates);
 					} else {
 						foreach($_data as $app => $__data) {
 							if(isset($__data["file"])) {
-								$appdata = self::getByType($type, $dir . $__data["file"])->getPackageInfo();
-								$appdata["file"] = $dir . $__data["file"];
-								$appdata["plist_type"] = $type;
-								if($appdata && isset($appdata["installType"]) && $appdata["installType"] == "update" && (!isset($appdata["installable"]) || $appdata["installable"]) && goma_version_compare($appdata["version"], $appdata["installed_version"], ">")) {
-									if(isset($updates[$app])) {
-										if(goma_version_compare($updates[$version]["version"], $version, "<")) {
-											$updates[$version] = $appdata;
-										}
-									} else {
-										$updates[$version] = $appdata;
-									}
-								}
+
+								self::buildPackageInfo($type, $dir, $__data, $version, $updates);
+
 							}
 						}
 					}
@@ -417,53 +405,16 @@ abstract class g_SoftwareType {
 			
 			
 			// app
-			$app = ClassInfo::$appENV["app"]["name"];
-			if($data = self::getAppStoreInfo($app, null, ClassInfo::appVersion())) {
-				$data["installed_version"] = ClassInfo::appVersion();
-				$data["appinfo"]["autor"] = $data["autor"];
-				$data["AppStore"] = $data["download"];
-				
-				if(isset($updates[$app])) {
-					if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
-						$updates[$app] = $data;
-					}
-				} else if(goma_version_compare($data["version"], ClassInfo::appVersion(), ">")) {
-					$updates[$app] = $data;
-				}
-			}
-			
+			self::checkForUpdatePackage(ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), $updates);
+
 			// framework
-			$app = ClassInfo::$appENV["framework"]["name"];
-			if($data = self::getAppStoreInfo($app, null, GOMA_VERSION . "-" . BUILD_VERSION)) {
-				$data["installed_version"] = GOMA_VERSION . "-" . BUILD_VERSION;
-				$data["appinfo"]["autor"] = $data["autor"];
-				$data["AppStore"] = $data["download"];
-				
-				if(isset($updates[$app])) {
-					if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
-						$updates[$app] = $data;
-					}
-				} else if(goma_version_compare($data["version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-					$updates[$app] = $data;
-				}
-			}
+			self::checkForUpdatePackage(ClassInfo::$appENV["framework"]["name"], GOMA_VERSION . "-" . BUILD_VERSION, $updates);
 		
+			// extensions
 			if(isset(ClassInfo::$appENV["expansion"]) && ClassInfo::$appENV["expansion"]) {
 				// expansions
 				foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-					if($data = self::getAppStoreInfo($app, null, ClassInfo::expVersion($app))) {
-						$data["installed_version"] = ClassInfo::expVersion($app);
-						$data["appinfo"]["autor"] = $data["autor"];
-						$data["AppStore"] = $data["download"];
-						
-						if(isset($updates[$app])) {
-							if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
-								$updates[$app] = $data;
-							}
-						} else if(goma_version_compare($data["version"], ClassInfo::expVersion($app), ">")) {
-							$updates[$app] = $data;
-						}
-					}
+					self::checkForUpdatePackage($app, ClassInfo::expVersion($app), $updates);
 				}
 			}
 			
@@ -596,1590 +547,261 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function listInstallPackages() {
-		if(file_exists(FRAMEWORK_ROOT . "installer/data/apps/.index-db")) {
-			$dir = FRAMEWORK_ROOT . "installer/data/apps/";
-			$data = unserialize(file_get_contents(FRAMEWORK_ROOT . "installer/data/apps/.index-db"));
+		if(file_exists(self::$package_folder . "/.index-db")) {
+			$dir = self::$package_folder . "/";
+			$data = unserialize(file_get_contents(self::$package_folder . "/.index-db"));
 			
-			$updates = array();
+			$packages = array();
 			
 			foreach($data["packages"] as $type => $apps) {
 				foreach($apps as $version => $_data) {
 					if(isset($_data["file"])) {
-						$appdata = self::getByType($type, $dir . $_data["file"])->getPackageInfo();
-						$appdata["file"] = $dir . $_data["file"];
-						$appdata["plist_type"] = $type;
-						if($appdata && (!isset($appdata["installType"]) || $appdata["installType"] != "update") && (!isset($appdata["installable"]) || $appdata["installable"])) {
-							if(isset($updates[$type])) {
-								if(goma_version_compare($updates[$type]["version"], $version, "<")) {
-									$updates[$type] = $appdata;
-								}
-							} else {
-								$updates[$type] = $appdata;
-							}
-						}
+
+						self::buildPackageInfo($type, $dir, $_data, $version, $packages, false);
 					} else {
 						foreach($_data as $app => $__data) {
 							if(isset($__data["file"])) {
-								$appdata = self::getByType($type, $dir . $__data["file"])->getPackageInfo();
-								$appdata["file"] = $dir . $__data["file"];
-								$appdata["plist_type"] = $type;
-								if($appdata && (!isset($appdata["installType"]) || $appdata["installType"] != "update") && (!isset($appdata["installable"]) || $appdata["installable"])) {
-									if(isset($updates[$app])) {
-										if(goma_version_compare($updates[$version]["version"], $version, "<")) {
-											$updates[$version] = $appdata;
-										}
-									} else {
-										$updates[$version] = $appdata;
-									}
-								}
+								self::buildPackageInfo($type, $dir, $__data, $version, $packages, false);
 							}
 						}
 					}
 				}
 			}
 			
-			return $updates;
+			return $packages;
 		} else {
 			return array();
 		}
 	}
-}
 
-/**
- * The Software-Handler for Framework-files. The type of the file is "framework".
- *
- * See the topic about info.plist for more information about types.
- *
- * @author	Goma-Team
- * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @package	Goma\Framework
- * @version	1.5.12
- */
-class G_FrameworkSoftwareType extends G_SoftwareType {
 	/**
-	 * type is "framework"
+	 * builds information about a package from data.
+	 * it puts it into $updates-array if version is newer.
 	 *
-	 *@name type
-	 *@access public
+	 * @name 	buildPackageInfo
 	*/
-	public static $type = "framework";
-	
-	/**
-	 * installs the framework
-	 * in this case we always upgrade the framework
-	 *
-	 *@name getInstallInfo
-	 *@access public
-	*/
-	public function getInstallInfo($forceInstall = false) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("data/system/info.plist");
-		
-		$data = array("filename" => basename($this->file), "installType" => "update");
-		if(isset($info["type"]) && $info["type"] == "framework") {
-			
-			$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
-			
-			FileSystem::requireDir($dir);
-			
-			$data["type"] = lang("update_framework");
-			$data["version"] = $info["version"];
-			$data["installed"] = GOMA_VERSION . "-" . BUILD_VERSION;
-			
-			if(!goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
-				$data["installable"] = false;
-				$data["error"] = lang("update_version_error");
-				return $data;
-			}
-			
-			/*if(isset($appInfo["required_version"]) && goma_version_compare($appInfo["requiredVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-				$data["installable"] = false;
-				$data["error"] = lang("update_version_newer_required") . " <strong>".$appInfo["requiredVersion"]."</strong>";
-				return $data;
-			}*/
-			
-			if(!isset($info["isDistro"])) {
-				return false;
-			}
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			// now check permissions
-			$db = array_keys($gfs->getDB());
-			$db = array_filter($db, create_function('$val', 'return substr($val, 0, '.strlen('data/').') == "data/";'));
-			
-			$db = array_map(create_function('$val', 'return substr($val, 5);'), $db);
-			if(!FileSystem::checkMovePermsByList($db, ROOT)) {
-				$data["error"] = lang("permission_error") . '('.convert::raw2text(FileSystem::errFile()).')';
-				$data["installable"] = false;
-				return $data;
-			}
-			
-			$data["installable"] = true;
-			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); }'
-			);
-			
-			/*if($gfs->exists(".preflight")) {
-				$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-				$data["preflight"][] = $dir . "/.preflight";
-			}
-			
-			if($gfs->exists(".postflight")) {
-				$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-				$data["postflight"][] = $dir . "/.postflight";
-			}*/
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/data/",
-				"destination"	=> ROOT
-			);
-			
-			// don't recheck permissions
-			$data["permCheck"] = false;
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			/*if($gfs->exists(".getinstallinfo")) {
-				$file = FRAMEWORK_ROOT . "temp/" . md5($this->file . ".installInfo") . ".php";
-				$gfs->writeToFileSystem(".getinstallinfo", $file);
-				include($file);
-				@unlink($file);
-			}*/
-			
-			return $data;
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * gets package info
-	 *
-	 *@name getPackageInfo
-	 *@access public
-	*/
-	public function getPackageInfo() {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("data/system/info.plist");
-		
-		if(!$appInfo)
-			return false;
-		
-		$data = array("filename" => basename($this->file), "installType" => "update","version" => $info["version"]);
-		
-		$data["type"] = lang("update_framework");
-		$data["title"] = "Goma " . $data["type"];
-		
-		$data["installed_version"] = GOMA_VERSION . "-" . BUILD_VERSION;
-		
-		$temp = "system/temp/" . basename($appInfo["icon"]) . "-" . md5($appInfo["name"]) . substr($appInfo["icon"], strrpos($appInfo["icon"], "."));
-		$gfs->writeToFileSystem("data/system/" . $appInfo["icon"], $temp);
-		$data["icon"] = $temp;
-		
-		$data["appInfo"] = $appInfo;
-		
-		if(isset($info["changelog"]))
-			$data["changelog"] = $info["changelog"];
-		
-		if(isset($info["type"]) && $info["type"] == "framework") {
-			if(!goma_version_compare(GOMA_VERSION . "-" . BUILD_VERSION, $info["version"], "<=")) {
-				$data["installable"] = false;
-				$data["error"] = lang("update_version_error");
-				return $data;
-			}
-			
-			return $data;
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * sets the package info:
-	 * version
-	 * changelog
-	 * icon
-	*/
-	public function setPackageInfo($data) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("data/system/info.plist");
-		
-		if(isset($data["version"])) {
-			$info["version"] = $data["version"];
-			if(isset($appInfo["build"])) {
-				if(strpos($data["version"], "-")) {
-					$build = substr($data["version"], strrpos($data["version"], "-") + 1);
-					$version = substr($data["version"], 0, strrpos($data["version"], "-"));
-					$appInfo["build"] = $build;
-					$appInfo["version"] = $version;
-				} else {
-					$appInfo["version"] = $data["version"];
+	protected static function buildPackageInfo($type, $dir, $data, $version, &$packages, $shouldUpdate = true) {
+		$appdata = self::getByType($type, $dir . $data["file"])->getPackageInfo();
+		$appdata["file"] = $dir . $data["file"];
+		$appdata["plist_type"] = $type;
+		if($appdata // data exists
+			&& self::isValidPackageType($appData, $shouldUpdate))
+		{
+
+			if(isset($updates[$app])) {
+				if(goma_version_compare($updates[$version]["version"], $version, "<")) {
+					$updates[$version] = $appdata;
 				}
 			} else {
-				$appInfo["version"] = $data["version"];
-			}	
-		}
-		
-		if(isset($data["changelog"])) {
-			$info["changelog"] = $data["changelog"];
-		}
-		
-		if(isset($data["icon"])) {
-			$newExt = substr($data["icon"], strrpos($data["icon"], ".") + 1);
-			if(substr($appInfo["icon"], strrpos($appInfo["icon"], ".") + 1) == $newExt) {
-				$gfs->write("data/system/" . $appInfo["icon"], file_get_contents($data["icon"]));
-			} else {
-				$gfs->write("data/system/" . $appInfo["icon"] . $newExt , file_get_contents($data["icon"]));
-				$appInfo["icon"] = $appInfo["icon"] . $newExt;
+				$updates[$version] = $appdata;
 			}
 		}
-		
-		$gfs->writePlist("info.plist", $info);
-		$gfs->writePlist("data/system/info.plist", $appInfo);
-		
-		return true;
-	}
-	
-	/**
-	 * restores the framework
-	 *
-	 *@name getRestoreInfo
-	 *@access public
-	*/
-	public function getRestoreInfo($forceCompleteRestore = false) {
-		return false;
-	}
-	
-	/**
-	 * generates a distro
-	 *
-	 *@name backup
-	 *@access public
-	*/
-	public static function backup($file, $name, $changelog = null) {
-		$frameworkplist = new CFPropertyList(FRAMEWORK_ROOT . "info.plist");
-		$frameworkenv = $frameworkplist->toArray();
-
-		// if we are currently building the file, don't delete
-		if(!GFS_Package_Creator::wasPacked($file)) {
-			if(file_exists($file)) {
-				@unlink($file);
-			}
-		}
-		
-		$gfs = new GFS_Package_Creator($file);
-
-		$plist = new CFPropertyList();
-		$plist->add($dict = new CFDictionary());
-		$dict->add("type", new CFString("framework"));
-		$dict->add("version", new CFString(GOMA_VERSION . "-" . BUILD_VERSION));
-		$dict->add("created", new CFDate(NOW));
-		$dict->add("isDistro", new CFString("1"));
-		$dict->add("name", new CFString(ClassInfo::$appENV["framework"]["name"]));
-		
-		if(isset($changelog)) {
-			$dict->add("changelog", new CFString($changelog));
-		}
-		
-		$gfs->write("info.plist", $plist->toXML());
-		
-		
-		if(!GFS_Package_Creator::wasPacked($file)) {
-			$gfs->setAutoCommit(false);
-			$gfs->add(FRAMEWORK_ROOT, "/data/system/", array("temp", LOG_FOLDER, "/installer/data", "version.php"));
-			$gfs->add(ROOT . "images/", "/data/images/", array("resampled"));
-			$gfs->add(ROOT . "languages/", "/data/languages/");
-			$gfs->commit();
-		}	
-		
-		// add some files
-		$gfs->addFromFile(ROOT . "index.php", "/data/index.php");
-		//$gfs->addFromFile(ROOT . ".htaccess", "/data/.htaccess");
-		$gfs->close();
-		
-		return true;
-	}
-	
-	/**
-	 * returns the current framework-version with gfs
-	 *
-	 *@name generateDistroFileName
-	 *@access public
-	*/
-	public static function generateDistroFileName($name) {
-		return "framework." . GOMA_VERSION . "-" . BUILD_VERSION . ".gfs";
-	}
-	
-	/**
-	 * builds a framework
-	 *
-	 *@name buildDistro
-	 *@access public
-	*/
-	public static function buildDistro($file, $name) {
-		if(isset($_SESSION["finalizeFrameworkDistro"]))
-			return self::finalizeDistro($_SESSION["finalizeFrameworkDistro"]);
-		
-		if(file_exists($file))
-			@unlink($file);
-		
-		$form = new Form(new G_FrameworkSoftwareType(null), "buildDistro", array(
-			new HiddenField("file", $file),
-			new HTMLField("title", "<h1>".lang("update_framework")."</h1><h3>".lang("distro_build")."</h3>"),
-			$version = new TextField("version", lang("version"), GOMA_VERSION . "-" . BUILD_VERSION),
-			new Textarea("changelog", lang("distro_changelog")),
-			
-			/*new HidableFieldSet("advanced", array(
-				new Textarea("preflight", lang("install_option_preflight")),
-				new Textarea("postflight", lang("install_option_postflight")),
-				new Textarea("script_info", lang("install_option_getinfo"))
-			), lang("install_advanced_options", "advanced install-options"))*/
-		), array(
-			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
-		));
-		
-		$version->disable();
-		
-		return $form->render();
-	}
-	
-	/**
-	 * finalizes the build
-	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
-	public function finalizeDistro($data) {
-		$_SESSION["finalizeFrameworkDistro"] = $data;
-		
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], "framework", $changelog);
-		
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-		
-		$gfs->close();
-		
-		unset($_SESSION["finalizeFrameworkDistro"]);
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
-	
-	/**
-	 * lists installed software
-	 *
-	 *@name listSoftware
-	 *@access public
-	*/
-	public static function listSoftware() {
-		return array(
-			"framework"	=> array(
-				"title" 		=> "Goma " . lang("update_framework", "framework"),
-				"version"		=> GOMA_VERSION . "-" . BUILD_VERSION,
-				"icon"			=> "system/" . ClassInfo::$appENV["framework"]["icon"],
-				"canDisable"	=> false
-			)
-		);
 	}
 
-	public function __wakeup(){}
-}
+	/**
+	 * implements correct ifs for update and install-packages.
+	 *
+	 * @name isValidPackageType
+	*/
+	protected static function isValidPackageType($appData, $shouldUpdate) {
 
-/**
- * The Software-Handler for Goma-Apps. The type of the file is "backup".
- *
- * See the topic about info.plist for more information about types.
- *
- * @author	Goma-Team
- * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @package	Goma\Framework
- * @version	1.5.12
- */
-class G_AppSoftwareType extends G_SoftwareType {
-	/**
-	 * type is backup
-	 *
-	 *@name type
-	 *@access public
-	*/
-	public static $type = "backup";
-	
-	/**
-	 * stores the data from the form in $formResult
-	 *
-	 *@name saveFormData
-	 *@access public
-	*/
-	public function saveFormData($data) {
-		$_data = $data["installData"];
-		
-		if(!is_array($_data["postflightCode"])) {
-			$_data["postflightCode"] = array($_data["postflightCode"]);
-		}
-		
-		if(defined("PROJECT_LOAD_DIRECTORY") && PROJECT_LOAD_DIRECTORY != $data["folder"]) {
-			$_data["postflightCode"][] = "<?php removeProject(".var_export(PROJECT_LOAD_DIRECTORY, true).");";
-		}
-		
-		if(isset($data["type"]) && $data["type"] == "copyconfig") {
-			$data["folder"] = APPLICATION;
-		}
-		
-		$_data["installFolders"]["destination"] = ROOT . $data["folder"];
-		
-		$info = array();
-		
-		if(!isset($data["type"]) || $data["type"] != "copyconfig") {
-			$info["db"] = array(
-				"user"	=> $data["dbuser"],
-				"db"	=> $data["dbname"],
-				"pass"	=> $data["dbpwd"],
-				"host"	=> $data["dbhost"],
-				"prefix"=> $data["tableprefix"]
-			);
-		}
-		
-		$domain = isset($data["domain"]) ? $data["domain"] : null;
-		
-		// write config
-		$_data["postflightCode"][] = '<?php writeProjectConfig('.var_export($info, true).', '.var_export($data["folder"], true).'); setProject('.var_export($data["folder"], true).', '.var_export($domain, true).');';
-		
-		// write version file
-		$_data["postflightCode"][] = '<?php FileSystem::write('.var_export($data["folder"] . "/version.php", true).', "<?php \$version = '.var_export($_data["version"], true).';");';
-		
-		// templates
-		$_data["postflightCode"][] = '<?php $dir = "'.$data["installFolders"]["source"].'/../templates"; if(file_exists($dir)) foreach(scandir($dir) as $tpl) {
-			if(file_exists($dir . "/" . $tpl . "/info.plist")) {
-				FileSystem::move($dir . "/" . $tpl, ROOT . "tpl/" . $tpl);
-			}
-		}';
-		
-		return $_data;
-	}
-	
-	/**
-	 * validates the installation
-	 *
-	 *@name validateInstall
-	*/
-	public function validateInstall($obj) {
-		$result = $obj->form->result;
-		$notAllowedFolders = array(
-			"dev", "admin", "pm", "system"
-		);
-		if(file_exists(ROOT . $result["folder"]) || in_array($result["folder"], $notAllowedFolders) || !preg_match('/^[a-z0-9_]+$/', $result["folder"])) {
-			return lang("install.folder_error");
-		}
-		
-		if(isset($result["dbuser"])) {
-			if(!SQL::test(SQL_DRIVER, $result["dbuser"], $result["dbname"], $result["dbpwd"], $result["dbhost"])) {
-				return lang("install.sql_error");
-			}
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * installs the framework
-	 *
-	 *@name getInstallInfo
-	 *@access public
-	*/
-	public function getInstallInfo($forceInstall = false) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("backup/info.plist");
-		
-		$data = array("filename" => basename($this->file), "type" => lang("update_app"));
-		
-		if(!isset($info["version"]))
+		if(isset($appdata["installable"]) && !$appdata["installable"]) {
 			return false;
-		
-		// check if we have a full backup
-		if($info["backuptype"] != "full") {
-			$data["installable"] = false;
-			
-			return $data;
 		}
-		
-		// check if we have the correct framework-version
-		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-			$data["error"] = lang("update_frameworkError");
-			$data["installable"] = false;
-			
-			return $data;
+
+		if($shouldUpdate) {
+			return isset($appdata["installType"]) && $appdata["installType"] == "update" // valid type;
+					&& goma_version_compare($appdata["version"], $appdata["installed_version"], ">"); // valid version
 		}
-		
-		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
-		
-		FileSystem::requireDir($dir);
-		
-		/*
-		if($gfs->exists(".preflight")) {
-			$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-			$data["preflight"][] = $dir . "/.preflight";
-		}
-		
-		if($gfs->exists(".postflight")) {
-			$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-			$data["postflight"][] = $dir . "/.postflight";
-		}*/
-		
-		$data["version"] = $info["version"];
-		
-		// check if we use install-method
-		if($forceInstall || $appInfo["name"] != ClassInfo::$appENV["app"]["name"]) {
-			// make install
-			$data["installType"] = "install";
+
+		return !isset($appdata["installType"]) || $appdata["installType"] != "update";
+	}
+
+	/**
+	 * checks in the Web for Updates for this App.
+	 *
+	 * @name 	checkForUpdatePackage
+	*/
+	protected static function checkForUpdatePackage($app, $version, &$updates) {
+		if($data = self::getAppStoreInfo($app, null, $version)) {
+			$data["installed_version"] = $version;
+			$data["appinfo"]["autor"] = $data["autor"];
+			$data["AppStore"] = $data["download"];
 			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database");'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/backup/"
-			);
-			
-			$data["installable"] = true;
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			// find a good folder-name
-			if( defined("PROJECT_LOAD_DIRECTORY") && !file_exists(ROOT . PROJECT_LOAD_DIRECTORY)) {
-				$default = PROJECT_LOAD_DIRECTORY;
-			} else if(!file_exists(ROOT . "mysite")) {
-				$default = "mysite";
-			} else if(!file_exists(ROOT . "myproject")) {
-				$default = "myproject";
-			} else {
-				$default = null;
-			}
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				if(file_exists(ROOT . DOMAIN_LOAD_DIRECTORY)) {
-					@rename(ROOT . DOMAIN_LOAD_DIRECTORY, ROOT . DOMAIN_LOAD_DIRECTORY . time());
+			if(isset($updates[$app])) {
+				if(goma_version_compare($updates[$app]["version"], $data["version"], "<=")) {
+					$updates[$app] = $data;
 				}
-				
-				if(DOMAIN_LOAD_DIRECTORY != "mysite") {
-					$default = DOMAIN_LOAD_DIRECTORY;
-					$disableDir = true;
-				}
+			} else if(goma_version_compare($data["version"], ClassInfo::appVersion(), ">")) {
+				$updates[$app] = $data;
 			}
-			
-			// get information for config.php
-			$form = new Form($this, "installinfos", array(
-				$folder = new TextField("folder", lang("install.folder"), $default),
-				$host = new TextField("dbhost", lang("install.db_host"), "localhost"),
-				new TextField("dbuser", lang("install.db_user")),
-				new PasswordField("dbpwd", lang("install.db_password")),
-				new TextField("dbname", lang("install.db_name")),
-				$tableprefix = new TextField("tableprefix", lang("install.table_prefix"), "".$appInfo["name"]."_"),
-				new HiddenField("installData", $data)
-			), array(
-				new FormAction("submit", lang("install.install"), "saveFormData")
-			));
-			
-			$apps = ListApplications();
-			if(defined("DOMAIN_LOAD_DIRECTORY") || (count($apps) > 0 && $apps[0]["directory"] != PROJECT_LOAD_DIRECTORY)) {
-				$form->add(new TextField("domain", lang("domain")));
-			}
-			
-			if(isset($disableDir)) {
-				$folder->disable();
-			}
-			
-			$form->addValidator(new RequiredFields(array("folder", "dbhost", "dbuser", "dbname")), "fields");
-			$form->addValidator(new FormValidator(array($this, "validateInstall")), "validateInstall");
-			
-			$host->info = lang("install.db_host_info");
-			$folder->info = lang("install.folder_info");
-			
-			if($info["DB_PREFIX"] != "{!#PREFIX}") {
-				$tableprefix->value = $info["DB_PREFIX"];
-				$tableprefix->disable();
-			}
-			
-			return $form->render();
-			
-		} else {
-			// update installed software
-			$data["installType"] = "update";
-			$data["installed"] = ClassInfo::AppVersion();
-			
-			/*if(isset($appInfo["require_version"]) && goma_version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
-				$data["error"] = lang("update_version_newer_required") . " " . $appInfo["require_version"];
-				$data["installable"] = false;
-				
-				return $data;
-			}*/
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			$db = array_keys($gfs->getDB());
-			
-			$db = array_filter($db, create_function('$val', 'return substr($val, 0, '.strlen('backup/').') == "backup/";'));
-			
-			$db = array_map(create_function('$val', 'return substr($val, 7);'), $db);
-			
-			if(!FileSystem::checkMovePermsByList($db, ROOT . CURRENT_PROJECT . "/")) {
-				$data["error"] = lang("permission_error");
-				$data["installable"] = false;
-				return $data;
-			}
-			
-			$data["permCheck"] = true;
-			
-			$data["installable"] = true;
-			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); }'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/backup/",
-				"destination"	=> ROOT . CURRENT_PROJECT . "/"
-			);
-			
-			/*if($gfs->exists(".getinstallinfo")) {
-				$file = FRAMEWORK_ROOT . "temp/" . md5($this->file . ".installInfo") . ".php";
-				$gfs->writeToFileSystem(".getinstallinfo", $file);
-				include($file);
-				@unlink($file);
-			}*/
-			
-			return $data;
 		}
 	}
-	
+
 	/**
-	 * gets package info
-	 *
-	 *@name getPackageInfo
-	 *@access public
+	 * gets current index data or an array with fileindex and packages as empty arrays.
 	*/
-	public function getPackageInfo() {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("backup/info.plist");
-		
-		if(!$appInfo)
-			return false;
-		
-		$data = array("filename" => basename($this->file), "type" => lang("update_app"));
-		
-		if(isset($appInfo["icon"])) {
-			$temp = "system/temp/" . basename($appInfo["icon"]) . "-" . md5($appInfo["name"]) . substr($appInfo["icon"], strrpos($appInfo["icon"], "."));
-			$gfs->writeToFileSystem("backup/" . $appInfo["icon"], $temp);
-			$data["icon"] = $temp;
-		}
-		
-		if(isset($info["changelog"]))
-			$data["changelog"] = $info["changelog"];
-		
-		$data["appInfo"] = $appInfo;
-		
-		// check if we have a full backup
-		if($info["backuptype"] != "full") {
-			$data["installable"] = false;
-			
-			return $data;
-		}
-		
-		// check if we have the correct framework-version
-		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-			$data["error"] = lang("update_frameworkError");
-			$data["installable"] = false;
-			
-			return $data;
-		}
-		$data["framework_version"] = $info["framework_version"];
-		
-		// check if we use install-method
-		if($appInfo["name"] != ClassInfo::$appENV["app"]["name"]) {
-		
+	public static function getIndexData() {
+		if(file_exists($appFolder . "/.index-db")) {
+			$data = @unserialize(file_get_contents($appFolder . "/.index-db"));
+			if($data == null) {
+				$data = array("fileindex" => array(), "packages" => array());
+			}
 		} else {
-			$data["installType"] = "update";
-			$data["installed_version"] = ClassInfo::AppVersion();
+			$data = array("fileindex" => array(), "packages" => array());
 		}
-		
-		if(isset($appInfo["title"]))
-			$data["title"] = $appInfo["title"];
-		else
-			$data["title"] = ClassInfo::$appENV["app"]["name"];
-		
-		$data["version"] = $info["version"];
-		
+
 		return $data;
 	}
-	
-	/**
-	 * sets the package info:
-	 * version
-	 * changelog
-	 * icon
-	 * title
-	 * required framework-version: framework_version
-	*/
-	public function setPackageInfo($data) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("backup/info.plist");
-		
-		if(isset($data["version"])) {
-			$info["version"] = $data["version"];
-			if(isset($appInfo["build"])) {
-				if(strpos($data["version"], "-")) {
-					$build = substr($data["version"], strrpos($data["version"], "-") + 1);
-					$version = substr($data["version"], 0, strrpos($data["version"], "-"));
-					$appInfo["build"] = $build;
-					$appInfo["version"] = $version;
-				} else {
-					$appInfo["version"] = $data["version"];
-				}
-			} else {
-				$appInfo["version"] = $data["version"];
-			}	
-		}
-		
-		if(isset($data["changelog"])) {
-			$info["changelog"] = $data["changelog"];
-		}
-		
-		if(isset($data["icon"])) {
-			$newExt = substr($data["icon"], strrpos($data["icon"], ".") + 1);
-			if(substr($appInfo["icon"], strrpos($appInfo["icon"], ".") + 1) == $newExt) {
-				$gfs->write("backup/" . $appInfo["icon"], file_get_contents($data["icon"]));
-			} else {
-				$gfs->write("backup/" . $appInfo["icon"] . $newExt , file_get_contents($data["icon"]));
-				$appInfo["icon"] = $appInfo["icon"] . $newExt;
-			}
-		}
-		
-		if(isset($data["title"])) {
-			$appInfo["title"] = $data["title"];
-		}
-		
-		if(isset($data["framework_version"]))
-			$info["framework_version"] = $data["framework_version"];
-		
-		$gfs->writePlist("info.plist", $info);
-		$gfs->writePlist("backup/info.plist", $appInfo);
-		
-		return true;
-	}
-	
-	/**
-	 * stores the data from the form in $formResult for getRestoreInfo if we make a restore within a application
-	 *
-	 *@name saveRFormData
-	 *@access public
-	*/
-	public function saveRFormData($data) {
-		$_data = $data["installData"];
-		
-		if($_data["type"] == "copyconfig") {
-			if(!is_array($_data["postflightCode"])) {
-				$_data["postflightCode"] = array($_data["postflightCode"]);
-			}
-			
-			$_data["installFolders"]["destination"] = ROOT . APPLICATION;
-			
-			$file = ROOT . md5(APPLICATION . "config" . time());
-			
-			$_data["preflightCode"][] = '<?php @copy(' . var_export(ROOT . APPLICATION . "/config.php", true) . ', '.var_export($file, true) . '); FileSystem::rmdir('.var_export(ROOT . APPLICATION, true).');';
-			
-			$_data["postflightCode"][] = '<?php  rename('.var_export($file, true).', '.var_export(ROOT . APPLICATION, true).');';
 
-		} else {
-		
-			if(!is_array($_data["postflightCode"])) {
-				$_data["postflightCode"] = array($_data["postflightCode"]);
-			}
-			
-			$_data["installFolders"]["destination"] = ROOT . $data["folder"];
-			
-			$info["db"] = array(
-				"user"	=> $data["dbuser"],
-				"db"	=> $data["dbname"],
-				"pass"	=> $data["dbpwd"],
-				"host"	=> $data["dbhost"],
-				"prefix"=> $data["tableprefix"]
-			);
-			
-			$domain = isset($data["domain"]) ? $data["domain"] : null;
-			
-			$_data["postflightCode"][] = '<?php writeProjectConfig('.var_export($info, true).', '.var_export($data["folder"], true).'); setProject('.var_export($data["folder"], true).', '.var_export($domain, true).');';
-		}
-		
-		return $_data;
-	}
-	
 	/**
-	 * validates the restore
-	 *
-	 *@name validateInstall
+	 * builds .index.db and returns problematic files.
 	*/
-	public function validateRestore($obj) {
-		$result = $obj->form->result;
-		if($result["type"] != "copyconfig") {
-			return $this->validateInstall($obj);
-		} else {
-			return true;
-		}
-	}
+	public static function buildPackageIndex() {
 
-	
-	/**
-	 * restores the framework
-	 *
-	 *@name getRestoreInfo
-	 *@access public
-	*/
-	public function getRestoreInfo($forceCompleteRestore = false) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("backup/info.plist");
-		
-		$data = array("filename" => basename($this->file), "type" => lang("update_app"));
-		
-		if(!isset($info["version"]))
-			return false;
-		
-		$data["version"] = $info["version"];
-		
-		// check if we have a full backup
-		if($info["backuptype"] != "full") {
-			$data["installable"] = false;
-			
-			return $data;
-		}
-		
-		// check if we have the correct framework-version
-		if(goma_version_compare($info["framework_version"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-			$data["error"] = lang("update_frameworkError");
-			$data["installable"] = false;
-			
-			return $data;
-		}
-		
-		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
-		
-		FileSystem::requireDir($dir);
-		
-		
-		
-		// check if we use install-method
-		if($forceCompleteRestore || $appInfo["name"] != ClassInfo::$appENV["app"]["name"] || !file_exists(ROOT . APPLICATION . "/config.php")) {
-			// make install
-			$data["installType"] = "install";
-			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database");'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/backup/"
-			);
-			
-			$data["installable"] = true;
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			// find a good folder-name
-			if( defined("APPLICATION") && !file_exists(ROOT . APPLICATION)) {
-				$default = APPLICATION;
-			} else if( defined("PROJECT_LOAD_DIRECTORY") && !file_exists(ROOT . PROJECT_LOAD_DIRECTORY)) {
-				$default = PROJECT_LOAD_DIRECTORY;
-			} else if(!file_exists(ROOT . "mysite")) {
-				$default = "mysite";
-			} else if(!file_exists(ROOT . "myproject")) {
-				$default = "myproject";
-			} else {
-				$default = null;
-			}
-			
-			// get information for config.php
-			$form = new Form($this, "installinfos", array(
-				$folder = new TextField("folder", lang("install.folder"), $default),
-				$host = new TextField("dbhost", lang("install.db_host"), "localhost"),
-				new TextField("dbuser", lang("install.db_user")),
-				new PasswordField("dbpwd", lang("install.db_password")),
-				new TextField("dbname", lang("install.db_name")),
-				$tableprefix = new TextField("tableprefix", lang("install.table_prefix"), "".$appInfo["name"]."_"),
-				new HiddenField("installData", $data)
-			), array(
-				new FormAction("submit", lang("restore"), "saveFormData")
-			));
-			
-			if(defined("DOMAIN_LOAD_DIRECTORY")) {
-				$form->add(new TextField("domain", lang("domain")));
-			}
-			
-			if(isset($disableDir)) {
-				$folder->disable();
-			}
-			
-			$form->addValidator(new RequiredFields(array("folder", "dbhost", "dbuser", "dbname")), "fields");
-			$form->addValidator(new FormValidator(array($this, "validateInstall")), "validateResotre");
-			
-			$host->info = lang("install.db_host_info");
-			$folder->info = lang("install.folder_info");
-			
-			if($info["DB_PREFIX"] != "{!#PREFIX}") {
-				$tableprefix->value = $info["DB_PREFIX"];
-				$tableprefix->disable();
-			}
-			
-			return $form->render();
-		} else {
-			// make install
-			$data["installType"] = "install";
-			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); } $dbgfs = new GFS('.var_export($dir, true).' . "/database.sgfs"); $dbgfs->unpack('.var_export($dir . "/backup/" . getPrivateKey() . "-install/",true) .', "/database"); copy('.var_export(ROOT . APPLICATION . "/config.php", true).', '.var_export($dir . "/backup/config.php", true).');'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/backup/"
-			);
-			
-			$data["installable"] = true;
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			// find a good folder-name
-			if( defined("APPLICATION") && !file_exists(ROOT . APPLICATION)) {
-				$default = APPLICATION;
-			} else if( defined("PROJECT_LOAD_DIRECTORY") && !file_exists(ROOT . PROJECT_LOAD_DIRECTORY)) {
-				$default = PROJECT_LOAD_DIRECTORY;
-			} else if(!file_exists(ROOT . "mysite")) {
-				$default = "mysite";
-			} else if(!file_exists(ROOT . "myproject")) {
-				$default = "myproject";
-			} else {
-				$default = null;
-			}
-			
-			// get information for config.php
-			$form = new Form($this, "installinfos", array(
-				new HTMLField("head", '<div style="padding: 0 5px;"><h3>'.lang("restore").': '.convert::raw2text(basename($this->file)).'</h3></div>'),
-				new ObjectRadioButton("type", lang("restoreType"), array(
-					"copyconfig"	=> lang("restore_currentapp"),
-					"new"			=> array(
-						lang("restore_newapp"),
-						"newconfig"
-					)
-				), "copyconfig"),
-				new FieldSet("newconfig", array(
-					$folder = new TextField("folder", lang("install.folder"), $default),
-					$host = new TextField("dbhost", lang("install.db_host"), "localhost"),
-					new TextField("dbuser", lang("install.db_user")),
-					new PasswordField("dbpwd", lang("install.db_password")),
-					new TextField("dbname", lang("install.db_name")),
-					$tableprefix = new TextField("tableprefix", lang("install.table_prefix"), "".$appInfo["name"]."_"),
-					new HiddenField("installData", $data),
-					new TextField("domain", lang("domain"))
-				))
-			), array(
-				new FormAction("submit", lang("restore"), "saveFormData")
-			));
-			
-			if(isset($disableDir)) {
-				$folder->disable();
-			}
-			
-			$form->addValidator(new RequiredFields(array("type")), "fields");
-			$form->addValidator(new FormValidator(array($this, "validateRestore")), "validateRestore");
-			
-			$host->info = lang("install.db_host_info");
-			$folder->info = lang("install.folder_info");
-			
-			if($info["DB_PREFIX"] != "{!#PREFIX}") {
-				$tableprefix->value = $info["DB_PREFIX"];
-				$tableprefix->disable();
-			}
-			
-			return $form->render();
-		}
-	}
-	
-	/**
-	 * generates a distro
-	 *
-	 *@name backup
-	 *@access public
-	*/
-	public static function backup($file, $name, $changelog = null) {
-		
-		$tables = ClassInfo::Tables("user");
-		$tables = array_merge($tables, ClassInfo::Tables("history"));
-		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
-		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
-			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
-				$tables = array_merge($tables, ClassInfo::Tables($model));
-			}
-		}
-		
-		$excludeFiles = isset(ClassInfo::$appENV["app"]["excludeFiles"]) ? ClassInfo::$appENV["app"]["excludeFiles"] : array();
-		
-		Backup::generateBackup($file, $excludeFiles, $tables, '{!#PREFIX}', !isset($_GET["dontIncludeTPL"]), ClassInfo::$appENV["app"]["requireFrameworkVersion"], $changelog);
-		
-		return true;
-	}
-	
-	/**
-	 * returns the current framework-version with gfs
-	 *
-	 *@name generateDistroFileName
-	 *@access public
-	*/
-	public static function generateDistroFileName($name) {
-		return ClassInfo::$appENV["app"]["name"] . "." . ClassInfo::appVersion() . ".gfs";
-	}
-	
-	/**
-	 * building the distro
-	*/
-	public static function buildDistro($file, $name) {
-		if(isset($_SESSION["finalizeCMSDistro"]))
-			return self::finalizeDistro($_SESSION["finalizeCMSDistro"]);
-		
-		if(file_exists($file))
-			@unlink($file);
-		
-		$title = isset(ClassInfo::$appENV["app"]["title"]) ? ClassInfo::$appENV["app"]["title"] : ClassInfo::$appENV["app"]["name"];
-		
-		$form = new Form(new G_AppSoftwareType(null), "buildDistro", array(
-			new HiddenField("file", $file),
-			new HTMLField("title", "<h1>".convert::raw2text($title)."</h1><h3>".lang("distro_build")."</h3>"),
-			$version = new TextField("version", lang("version"), ClassInfo::appVersion()),
-			new Textarea("changelog", lang("distro_changelog")),
-			
-			/*new HidableFieldSet("advanced", array(
-				new Textarea("preflight", lang("install_option_preflight")),
-				new Textarea("postflight", lang("install_option_postflight")),
-				new Textarea("script_info", lang("install_option_getinfo"))
-			), lang("install_advanced_options", "advanced install-options"))*/
-		), array(
-			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
-		));
-		
-		$version->disable();
-		
-		return $form->render();
-	}
-	
-	/**
-	 * finalizes the build
-	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
-	public function finalizeDistro($data) {
-		$_SESSION["finalizeCMSDistro"] = $data;
-		
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], null, $changelog);
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-		
-		$gfs->close();
-		
-		unset($_SESSION["finalizeCMSDistro"]);
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
-	
-	/**
-	 * lists installed software
-	 *
-	 *@name listSoftware
-	 *@access public
-	*/
-	public static function listSoftware() {
-		$data = array(
-			ClassInfo::$appENV["app"]["name"]	=> array(
-				"title" 		=> ClassInfo::$appENV["app"]["title"],
-				"version"		=> ClassInfo::appVersion(),
-				"canDisable"	=> false
-			)
-		);
-		if(isset(ClassInfo::$appENV["app"]["icon"]) && ClassInfo::$appENV["app"]["icon"]) {
-			$data[ClassInfo::$appENV["app"]["name"]]["icon"] = APPLICATION . "/" . ClassInfo::$appENV["app"]["icon"];
-		}
-		
-		return $data;
-	}
-}
+		// load dependencies
+		require_once (FRAMEWORK_ROOT . "/libs/GFS/gfs.php");
+		require_once (FRAMEWORK_ROOT . "/libs/thirdparty/plist/CFPropertyList.php");
 
+		$appFolder = self::$package_folder;
+		$files = scandir($appFolder);
+		$data = self::getIndexData();
 
-/**
- * The Software-Handler for Extensions. The type of the file is "expansion".
- *
- * See the topic about info.plist for more information about types.
- *
- * @author	Goma-Team
- * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @package	Goma\Framework
- * @version	1.5.12
- */
-class G_ExpansionSoftwareType extends G_SoftwareType {
-	/**
-	 * type is backup
-	 *
-	 *@name type
-	 *@access public
-	*/
-	public static $type = "expansion";
-	
-	/**
-	 * installs the framework
-	 *
-	 *@name getInstallInfo
-	 *@access public
-	*/
-	public function getInstallInfo($forceInstall = false) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("contents/info.plist");
-		
-		
-		$data = array("filename" => basename($this->file), "type" => lang("update_expansion"));
-		
-		if(!isset($info["version"]))
-			return false;
-		
-		// check if we have the correct framework-version
-		if(isset($appInfo["requireFrameworkVersion"]) && goma_version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-			$data["error"] = lang("update_frameworkError");
-			$data["installable"] = false;
-			
-			return $data;
-		}
-		
-		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
-		
-		FileSystem::requireDir($dir);
-		
-		/*if($gfs->exists(".preflight")) {
-			$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-			$data["preflight"][] = $dir . "/.preflight";
-		}
-		
-		if($gfs->exists(".postflight")) {
-			$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-			$data["postflight"][] = $dir . "/.postflight";
-		}*/
-		
-		$data["version"] = $info["version"];
-		
-		if($forceInstall || !isset(ClassInfo::$appENV["expansion"][$appInfo["name"]])) {
-			// let's install it
-			// update installed software
-			$data["installType"] = "install";
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-				
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); }'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			// write version file
-			$_data["postflightCode"][] = '<?php FileSystem::write($data["installfolders"]["destination"] . "/version.php", "<?php $version = '.var_export($data["version"], true).';");';
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/contents/"
-			);
-			
-			return $data;
-		} else {
-			// update installed software
-			$data["installType"] = "update";
-			$data["installed"] = ClassInfo::ExpVersion($appInfo["name"]);
-			
-			/*if(isset($appInfo["require_version"]) && goma_version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
-				$data["error"] = lang("update_version_newer_required") . " " . $appInfo["require_version"];
-				$data["installable"] = false;
-				
-				return $data;
-			}*/
-			
-			if(isset($info["changelog"]))
-				$data["changelog"] = $info["changelog"];
-			
-			$db = array_keys($gfs->getDB());
-			
-			$db = array_filter($db, create_function('$val', 'return substr($val, 0, '.strlen('contents/').') == "contents/";'));
-			
-			$db = array_map(create_function('$val', 'return substr($val, 9);'), $db);
-			
-			if(!FileSystem::checkMovePermsByList($db, ClassInfo::getExpansionFolder($appInfo["name"]))) {
-				$data["error"] = lang("permission_error");
-				$data["installable"] = false;
-				return $data;
-			}
-			
-			$data["permCheck"] = true;
-			
-			$data["installable"] = true;
-			
-			$data["preflightCode"] = array(
-				'<?php if(!GFS_Package_Installer::wasUnpacked('.var_export($this->file, true).') || !is_dir('.var_export($dir, true).')) { $gfs = new GFS_Package_installer('.var_export($this->file, true).');$gfs->unpack('.var_export($dir, true).'); }'
-			);
-			
-			$data["postflightCode"] = array(
-				'<?php FileSystem::Delete('.var_export($dir, true).');'
-			);
-			
-			$data["installFolders"] = array(
-				"source"		=> $dir . "/contents/",
-				"destination"	=> ClassInfo::getExpansionFolder($appInfo["name"])
-			);
-			
-			/*if($gfs->exists(".getinstallinfo")) {
-				$file = FRAMEWORK_ROOT . "temp/" . md5($this->file . ".installInfo") . ".php";
-				$gfs->writeToFileSystem(".getinstallinfo", $file);
-				include($file);
-				@unlink($file);
-			}*/
-			
-			return $data;
-		}
-	}
-	
-	/**
-	 * restores the framework
-	 *
-	 *@name getRestoreInfo
-	 *@access public
-	*/
-	public function getRestoreInfo($forceCompleteRestore = false) {
-		return false;
-	}
-	
-	/**
-	 * generates a distro
-	 *
-	 *@name backup
-	 *@access public
-	*/
-	public static function backup($file, $name, $changelog = null) {
-		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
-			return false;
-		}
-		
-		$folder = ClassInfo::getExpansionFolder($name);
-		
-		if(!GFS_Package_Creator::wasPacked($file)) {
-			if(file_exists($file)) {
-				@unlink($file);
-			}
-		}
-		
-		$gfs = new GFS_Package_Creator($file);
-		
-		if(!GFS_Package_Creator::wasPacked($file)) {
-			$gfs->add($folder, "/contents/", "", array("version.php"));
-		}
-		
-		$plist = new CFPropertyList();
-		$plist->add($dict = new CFDictionary());
-		$dict->add("type", new CFString("expansion"));
-		$dict->add("name", new CFString($name));
-		$dict->add("version", new CFString(ClassInfo::expVersion($name)));
-		$dict->add("created", new CFDate(NOW));
-		$dict->add("isDistro", new CFString("1"));
-		$dict->add("changelog", new CFString($changelog));
-		
-		$gfs->write("info.plist", $plist->toXML());
-		$gfs->close();
-		
-		
-		return true;
-	}
-	
-	/**
-	 * returns the current framework-version with gfs
-	 *
-	 *@name generateDistroFileName
-	 *@access public
-	*/
-	public static function generateDistroFileName($name) {
-		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
-			return false;
-		}
-		return $name . "." . ClassInfo::expVersion($name) . ".gfs";
-	}
-	
-	/**
-	 * building the distro
-	*/
-	public static function buildDistro($file, $name) {
-		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
-			return false;
-		}
-		
-		$title = isset(ClassInfo::$appENV["expansion"][$name]["title"]) ? ClassInfo::$appENV["expansion"][$name]["title"] : ClassInfo::$appENV["expansion"][$name]["name"];
-		
-		$form = new Form(new G_ExpansionSoftwareType(null), "buildDistro", array(
-			new HiddenField("file", $file),
-			new HiddenField("expName", $name),
-			new HTMLField("title", "<h1>".convert::raw2text($title)."</h1><h3>".lang("distro_build")."</h3>"),
-			$version = new TextField("version", lang("version"), ClassInfo::expVersion($name)),
-			new Textarea("changelog", lang("distro_changelog")),
-			
-			/*new HidableFieldSet("advanced", array(
-				new Textarea("preflight", lang("install_option_preflight")),
-				new Textarea("postflight", lang("install_option_postflight")),
-				new Textarea("script_info", lang("install_option_getinfo"))
-			), lang("install_advanced_options", "advanced install-options"))*/
-		), array(
-			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
-		));
-		
-		$version->disable();
-		
-		return $form->render();
-	}
-	
-	/**
-	 * finalizes the build
-	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
-	public function finalizeDistro($data) {
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], $data["expName"], $changelog);
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-		
-		$gfs->close();
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
-	
-	/**
-	 * lists installed software
-	 *
-	 *@name listSoftware
-	 *@access public
-	*/
-	public static function listSoftware() {
-		$arr = array();
-		// generate for expansions
-		if(isset(ClassInfo::$appENV["expansion"])) {
-			foreach(ClassInfo::$appENV["expansion"] as $name => $data) {
-				if(isset($data["build"]))
-					$data["version"] = $data["version"] . "-" . $data["build"];
-				else
-					$data["version"] = $data["version"];
+		$errors = array();
+
+		if($data["fileindex"] != $files) {
+			$data = array("fileindex" => array(), "packages" => array());
+			$data["fileindex"] = $files;
+			foreach($files as $file) {
+				if(preg_match('/\.gfs$/i', $file)) {
 					
-				if(isset($data["icon"]) && $data["icon"])
-					$data["icon"] = ClassInfo::getExpansionFolder($name) . "/" . $data["icon"];
-				
-				if(!isset($data["title"]))
-					$data["title"] = $name;
-				
-				$data["canDisable"] = true;
-				
-				$arr[$name] = $data;
-			}
-		}
-		
-		return $arr;
-	}
-	
-	/**
-	 * gets package info
-	 *
-	 *@name getPackageInfo
-	 *@access public
-	*/
-	public function getPackageInfo() {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("contents/info.plist");
-		
-		$data = array("filename" => basename($this->file), "type" => lang("update_expansion"));
-		
-		if(isset($appInfo["icon"])) {
-			$temp = "system/temp/" . basename($appInfo["icon"]) . "-" . md5($appInfo["name"]) . substr($appInfo["icon"], strrpos($appInfo["icon"], "."));
-			$gfs->writeToFileSystem("contents/" . $appInfo["icon"], $temp);
-			$data["icon"] = $temp;
-		}
-		
-		$data["appInfo"] = $appInfo;
-		
-		if(isset($info["changelog"]))
-			$data["changelog"] = $info["changelog"];
-		
-		if(!isset($info["version"]))
-			return false;
-		
-		
-		// check if we have the correct framework-version
-		if(isset($appInfo["requireFrameworkVersion"])) {
-			if(goma_version_compare($appInfo["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-				$data["error"] = lang("update_frameworkError");
-				$data["installable"] = false;
-				
-				return $data;
-			}
-			$data["framework_version"] = $appInfo["requireFrameworkVersion"];
-		}
-		
-		// check if we use install-method
-		if(isset(ClassInfo::$appENV["expansion"][$appInfo["name"]])) {
-			$data["installType"] = "update";
-			$data["installed_version"] = ClassInfo::ExpVersion($appInfo["name"]);
-		}
-		
-		if(isset(ClassInfo::$appENV["expansion"][$appInfo["name"]]["title"]))
-			$data["title"] = ClassInfo::$appENV["expansion"][$appInfo["name"]];
-		else
-			$data["title"] = $appInfo["name"];
-		
-		$data["version"] = $info["version"];
-		
-		return $data;
-	}
-	
-	/**
-	 * sets the package info:
-	 * version
-	 * changelog
-	 * icon
-	 * title
-	 * required framework-version: framework_version
-	*/
-	public function setPackageInfo($data) {
-		$gfs = new GFS($this->file);
-		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("backup/info.plist");
-		
-		if(isset($data["version"])) {
-			$info["version"] = $data["version"];
-			if(isset($appInfo["build"])) {
-				if(strpos($data["version"], "-")) {
-					$build = substr($data["version"], strrpos($data["version"], "-") + 1);
-					$version = substr($data["version"], 0, strrpos($data["version"], "-"));
-					$appInfo["build"] = $build;
-					$appInfo["version"] = $version;
-				} else {
-					$appInfo["version"] = $data["version"];
+					// check where to find information about the plist. its faster to get information from cached file.
+					if (file_exists($appFolder . "/" . $file . ".plist")) {
+						$info = self::getFromPlistOrGFS($appFolder . "/" . $file . ".plist", $appFolder . "/" . $file, "info.plist", true);
+
+						if($info === false) {
+							$errors[] = $appFolder . "/" . $file;
+						}
+
+						continue;
+					} else {
+						$info = self::getPlistFromGFS($appFolder . "/" . $file, "info.plist");
+					}
+
+					if($info === false) {
+						$errors[] = $appFolder . "/" . $file;
+						continue;
+					}
+
+					// this is important to know which file is meant by package record.
+					$info["file"] = $file;
+
+					self::fillPackageArray($data["packages"], $info, $appFolder . "/" . $file, $appFolder . "/" . $file . ".plist");
+					
 				}
-			} else {
-				$appInfo["version"] = $data["version"];
-			}	
-		}
-		
-		if(isset($data["changelog"])) {
-			$info["changelog"] = $data["changelog"];
-		}
-		
-		if(isset($data["icon"])) {
-			$newExt = substr($data["icon"], strrpos($data["icon"], ".") + 1);
-			if(substr($appInfo["icon"], strrpos($appInfo["icon"], ".") + 1) == $newExt) {
-				$gfs->write("backup/" . $appInfo["icon"], file_get_contents($data["icon"]));
-			} else {
-				$gfs->write("backup/" . $appInfo["icon"] . $newExt , file_get_contents($data["icon"]));
-				$appInfo["icon"] = $appInfo["icon"] . $newExt;
+			}
+
+			if($permissionsValid) {
+				FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
 			}
 		}
-		
-		if(isset($data["title"])) {
-			$appInfo["title"] = $data["title"];
-		}
-		
-		if(isset($data["framework_version"]))
-			$appInfo["requireFrameworkVersion"] = $data["framework_version"];
-		
-		$gfs->writePlist("info.plist", $info);
-		$gfs->writePlist("backup/info.plist", $appInfo);
-		
-		return true;
 	}
+
+	/**
+	 *  fills packages array with information from plist.
+	 *
+	 * @param 	data packages-array
+	 * @param 	info plist
+	 * @param 	gfs
+	 * @param 	plist
+	*/
+	public static function fillPackageArray(&$data, $info, $gfs, $plist) {
+
+		// check requirements for package first
+		if(isset($info["type"], $info["version"])) {
+			if(isset($info["name"])) {
+				if(isset($data[$info["type"]][$info["name"]])) {
+
+					foreach($data[$info["type"]][$info["name"]] as $v => $d) {
+
+						// delete file which was found and has older version
+						if(goma_version_compare($v, $info["version"], "<")) {
+							@unlink($appFolder . "/" . $d["file"]);
+							@unlink($appFolder . "/" . $d["file"] . ".plist");
+							unset($data[$info["type"]][$info["name"]][$v]);
+							$data[$info["type"]][$info["name"]][$info["version"]] = $info;
+
+							
+						} else {
+
+							// delete this file cause a newer version was found.
+							@unlink($gfs);
+							@unlink($plist);
+						}
+					}
+				} else {
+
+					// no version found until now, so its properbly the newest
+					$data[$info["type"]][$info["name"]][$info["version"]] = $info;
+				}
+			}
+		}
+	}
+
+	/**
+	 * gets data from a plist or plist in GFS-Archive.
+	 *
+	 * @param 	string path to plist
+	 * @param 	string path to gfs
+	 * @param 	string path in GFS to plist
+	 * @param 	boolean delete plist when not readable
+	*/
+	public static function getFromPlistOrGFS($plist, $gfs, $file, $deletePlist = false) {
+		if(filemtime($plist) > filemtime($gfs) && $info = self::getPlistFromPlist($plist)) {
+			return $info;
+		}
+
+		if($deletePlist) {
+			@unlink($plist);
+		}
+
+		return self::getPlistFromGFS($gfs, $file);
+
+	}
+
+	/**
+	 * gets array from plist.
+	*/
+	public static function getPlistFromPlist($plist) {
+
+		if(!file_exists($plist)) {
+			return false;
+		}
+
+		$plist = new CFPropertyList();
+		try {
+			$plist -> parse(file_get_contents($plist));
+			$info = $plist -> toArray();
+
+			return $info;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * gets plist-information from plist in GFS.
+	*/
+	public static function getPlistFromGFS($gfs, $file) {
+		try {
+			$gfs = new GFS($gfs);
+			$info = $gfs->parsePlist($file);
+
+			return $info;
+		} catch(Exception $e) {
+			return false;
+		}
+	}
+
+	public function __wakeup() {}
 }

@@ -1,6 +1,4 @@
-<?php
-
-defined("IN_GOMA") OR die();
+<?php defined("IN_GOMA") OR die();
 
 /**
  * This class generates the class manifest.
@@ -29,7 +27,7 @@ class ClassManifest {
 	/**
 	 * List of classes, that are already loaded.
 	 */
-	public static $loaded = array("classinfo" => true, "core" => true, "object" => true, "sql" => true, "requesthandler" => true, "dev" => true, "tplcaller" => true, "tplcacher" => true);
+	public static $loaded = array("classinfo" => true, "core" => true, "object" => true, "sql" => true, "requesthandler" => true, "tplcaller" => true, "tplcacher" => true);
 
 	/**
 	 * List of class aliases.

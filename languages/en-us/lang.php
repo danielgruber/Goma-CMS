@@ -4,7 +4,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 	09.06.2013
+ * @version 	10.02.2015
  */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -159,7 +159,6 @@ $lang = array(
 	"open_in"                                      	=> "Open in",
 	"same_window"                                  	=> "Same window",
 	"new_window"                                   	=> "New window",
-	"url"                                          	=> "URL",
 	/* MAINBAR END SITES START */
 	"rename"                                       	=> "Rename",
 	'site'											=> "Page",
@@ -272,6 +271,9 @@ $lang = array(
 	'mainbar'										=> "With menupoint",
 	'just_content_page'								=> "Default-Page",
 	'PAGETYPE'										=> "Pagetype",
+	"box_linktype"									=> "link in header",
+	"url"											=> "URL",
+	"no_link"										=> "No link",
 	"BOXTYPE"										=> "Boxtype",
 	"CREATE_BOX"									=> "Create box",
 	"EDIT_BOX"										=> "Edit box",
@@ -644,5 +646,10 @@ $lang = array(
 	"HELP.HISTORY"				=> "The history is about what has changed last time on your website.",
 	"HELP.HIERARCHY_OPEN"		=> "Click to expand tree.",
 	"HELP.PAGES_SORT"			=> "Drag to reorder pages.",
-	"HELP.HELP"					=> "Toggle help-bubbles"
+	"HELP.HELP"					=> "Toggle help-bubbles",
+
+
+	"security"					=> "Security",
+	"safe_mode"					=> "Safe filesystem-mode",
+	"safe_mode_info"			=> "When safe mode is enabled, Goma owns all files. You can't access them writable via FTP then. This is recommended for productive systems."
 );

@@ -60,11 +60,17 @@ RegisterExtension::$validateMail = settingsController::get("register_email");
 RegisterExtension::$registerCode = settingsController::get("register");
 Core::setCMSVar("ptitle", settingsController::get("titel"));
 Core::setCMSVar("title", settingsController::get("titel"));
-Core::setTheme(settingsController::Get("stpl"));
 Core::setHeader("description", settingsController::Get("meta_description"));
 Core::setHeader("robots", "index,follow");
 
+$tpl = isset($_GET["settpl"]) ? $_GET["settpl"] : settingsController::Get("stpl");
+Core::setTheme($tpl);
 i18n::loadTPLLang(Core::getTheme());
+
+// check for permission for actions run at the top
+if(isset($_GET["settpl"]) && !Permission::check("SETTINGS_ADMIN")) {
+	throw new PermissionException("You are not allowed to change the template at runtime.");
+}
 
 if(settingsController::get("favicon")) {
 	Core::$favicon = "./favicon.ico";

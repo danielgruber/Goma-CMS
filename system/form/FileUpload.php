@@ -1,20 +1,19 @@
-<?php
-defined("IN_GOMA") OR die();
+<?php defined("IN_GOMA") OR die();
 
 /**
- * An upload form.
+ * a simple Upload form-field which supports Ajax-Upload + normal Framed upload.
  *
- * @author Goma-Team
+ * @author 	Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.1.9
+ * @version 1.2
  */
 class FileUpload extends FormField {
 	/**
-	 * url-handlers
+	 * url-handlers. used for controller.
 	 *
-	 *@name url_handlers
-	 *@access public
+	 * @name 	url_handlers
+	 * @access 	public
 	 */
 	public $url_handlers = array(
 		"ajaxUpload" => "ajaxUpload",
@@ -22,19 +21,20 @@ class FileUpload extends FormField {
 	);
 
 	/**
-	 * actions
+	 * used for controller.
 	 *
-	 *@name allowed_actions
-	 *@access public
+	 * @name 	allowed_actions
+	 * @access 	public
 	 */
 	public $allowed_actions = array(
 		"ajaxUpload",
 		"frameUpload"
 	);
 	/**
-	 * all allowed file-extensions
-	 *@name allowed_file_types
-	 *@access public
+	 * all allowed file-extensions for this field.
+	 *
+	 * @name 	allowed_file_types
+	 * @access 	public
 	 */
 	public $allowed_file_types = array(
 		"jpg",
@@ -56,7 +56,7 @@ class FileUpload extends FormField {
 
 	/**
 	 * max filesize
-	 *@name max_filesize
+	 * @name 	max_filesize
 	 */
 	public $max_filesize = 5242880;
 	// 5m = 2097152 = 1024 * 1024 * 2
@@ -64,8 +64,8 @@ class FileUpload extends FormField {
 	/**
 	 * collection
 	 *
-	 *@name collection
-	 *@access public
+	 * @name 	collection
+	 * @access 	public
 	 */
 	public $collection = "FormUpload";
 
@@ -77,21 +77,21 @@ class FileUpload extends FormField {
 	/**
 	 * container on the left
 	 *
-	 *@name leftContainer
-	 *@access public
+	 * @name 	leftContainer
+	 * @access 	public
 	 */
 	public $leftContainer;
 
 	/**
 	 * this field needs to have the full width
 	 *
-	 *@name fullSizedField
+	 * @name fullSizedField
 	 */
 	protected $fullSizedField = true;
 
 	/**
-	 *@name __construct
-	 *@access public
+	 * @name 	__construct
+	 * @access 	public
 	 */
 	public function __construct($name = null, $title = null, $file_types = null, $value = "", $collection = null, &$form = null) {
 		parent::__construct($name, $title, $value, $form);
@@ -105,8 +105,8 @@ class FileUpload extends FormField {
 	/**
 	 * renders the base-structure of the field
 	 *
-	 *@name renderAfterSetForm
-	 *@access public
+	 * @name 	renderAfterSetForm
+	 * @access 	public
 	 */
 	public function renderAfterSetForm() {
 		parent::renderAfterSetForm();
@@ -144,8 +144,8 @@ class FileUpload extends FormField {
 	/**
 	 * gets the current value
 	 *
-	 *@name getValue
-	 *@access public
+	 * @name 	getValue
+	 * @access 	public
 	 */
 	public function getValue() {
 		parent::getValue();
@@ -188,8 +188,8 @@ class FileUpload extends FormField {
 	/**
 	 * ajax upload
 	 *
-	 *@name ajaxUpload
-	 *@access public
+	 * @name 	ajaxUpload
+	 * @access 	public
 	 */
 	public function ajaxUpload() {
 		if(!isset($_SERVER["HTTP_X_FILE_NAME"]))
@@ -199,24 +199,17 @@ class FileUpload extends FormField {
 			if(Core::phpInputFile()) {
 				$tmp_name = Core::phpInputFile();
 
+				// filesize problem, file has not been uploaded completly or is corrupted.
 				if(filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
-					HTTPResponse::setHeader("Content-Type", "text/x-json");
-					HTTPResponse::sendHeader();
-					echo json_encode(array(
-						"status" => 0,
-						"errstring" => lang("files.upload_failure")
-					));
-					exit ;
+					$this->sendFailureJSON();
 				}
 			} else {
-				HTTPResponse::setHeader("Content-Type", "text/x-json");
-				HTTPResponse::sendHeader();
-				echo json_encode(array(
-					"status" => 0,
-					"errstring" => lang("files.upload_failure")
-				));
-				exit ;
+
+				// no file given
+				$this->sendFailureJSON();
 			}
+
+			// prepare upload-information
 			$upload = array(
 				"name" => $_SERVER["HTTP_X_FILE_NAME"],
 				"size" => $_SERVER["HTTP_X_FILE_SIZE"],
@@ -227,6 +220,7 @@ class FileUpload extends FormField {
 			// clean up
 			if(isset($tmp_name))
 				@unlink($tmp_name);
+
 			if(is_object($response)) {
 				HTTPResponse::setHeader("Content-Type", "text/x-json");
 				HTTPResponse::sendHeader();
@@ -238,10 +232,6 @@ class FileUpload extends FormField {
 					"id" => $response->id,
 					"icon" => $response->getIcon()
 				);
-				/*if(!$this->link) {
-				 unset($filedata["realpath"]);
-				 unset($filedata["path"]);
-				 }*/
 
 				echo json_encode(array(
 					"status" => 1,
@@ -249,31 +239,42 @@ class FileUpload extends FormField {
 				));
 				exit ;
 			} else if(is_string($response)) {
-				HTTPResponse::setHeader("Content-Type", "text/x-json");
-				HTTPResponse::sendHeader();
-				echo json_encode(array(
-					"status" => 0,
-					"errstring" => $response
-				));
-				exit ;
+
+				// we got an string error, so send it via JSON.
+				$this->sendFailureJSON($response);
 			} else {
-				HTTPResponse::setHeader("Content-Type", "text/x-json");
-				HTTPResponse::sendHeader();
-				echo json_encode(array(
-					"status" => 0,
-					"errstring" => lang("files.upload_failure")
-				));
-				exit ;
+				$this->sendFailureJSON();
 			}
 		} else {
-			HTTPResponse::setHeader("Content-Type", "text/x-json");
-			HTTPResponse::sendHeader();
-			echo json_encode(array(
-				"status" => 0,
-				"errstring" => lang("files.filetype_failure", "The filetype isn't allowed.")
-			));
-			exit ;
+			$this->sendFailureJSON(lang("files.filetype_failure", "The filetype isn't allowed."));
 		}
+	}
+
+	/**
+	 * sends error with optional status-message in JSON-Format and sets JSON-Header.
+	*/
+	public function sendFailureJSON($error = null) {
+		
+
+		HTTPResponse::setHeader("Content-Type", "text/x-json");
+		
+		$this->printFailureJSON($error);
+	}
+
+	/**
+	 * prints failure as JSON without JSON-Header.
+	*/
+	public function printFailureJSON($error = null) {
+
+		HTTPResponse::sendHeader();
+
+		$error = $error || lang("files.upload_failure");
+
+		echo json_encode(array(
+			"status" => 0,
+			"errstring" => $error
+		));
+		exit;
 	}
 
 	/**
@@ -295,10 +296,6 @@ class FileUpload extends FormField {
 					"path" => $response->path,
 					"id" => $response->id
 				);
-				/*if(!$this->link) {
-				 unset($filedata["realpath"]);
-				 unset($filedata["path"]);
-				 }*/
 
 				echo json_encode(array(
 					"status" => 1,
@@ -306,27 +303,12 @@ class FileUpload extends FormField {
 				));
 				exit ;
 			} else if(is_string($response)) {
-				HTTPResponse::sendHeader();
-				echo json_encode(array(
-					"status" => 0,
-					"errstring" => $response
-				));
-				exit ;
+				$this->printFailureJSON($response);
 			} else {
-				HTTPResponse::sendHeader();
-				echo json_encode(array(
-					"status" => 0,
-					"errstring" => lang("files.upload_failure")
-				));
-				exit ;
+				$this->printFailureJSON();
 			}
 		} else {
-			HTTPResponse::sendHeader();
-			echo json_encode(array(
-				"status" => 0,
-				"errstring" => lang("files.upload_failure")
-			));
-			exit ;
+			$this->printFailureJSON();
 		}
 	}
 
@@ -375,9 +357,9 @@ class FileUpload extends FormField {
 		$this->container->append($this->leftContainer);
 
 		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode('div', array("class" => "no-js-fallback"), array(
-				new HTMLNode('h3', array(), lang("files.replace")),
-				$this->input
-			))));
+			new HTMLNode('h3', array(), lang("files.replace")),
+			$this->input
+		))));
 
 		if($this->value->realfile)
 			$nojs->append(new HTMLNode('div', array("class" => "delete"), array(

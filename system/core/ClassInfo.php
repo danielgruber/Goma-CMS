@@ -496,27 +496,26 @@ class ClassInfo extends Object {
 
 			// FIRST WE'VE GOT SOME ESSENTIELL CHECKS
 
-			$permissionsValid = true;
-			$permissionsFalse = "";
-			@chmod(ROOT, 0777);
-			// make some filesystem checks
-			if(@fopen(ROOT . "write.test", "w")) {
-				@unlink(ROOT . "write.test");
-			} else {
-				$permissionsValid = false;
-				$permissionsFalse .= '<li>./</li>';
-			}
+			include_once("./system/core/CoreLibs/PermissionChecker.php");
+			$permissionChecker = new PermissionChecker();
+			$permissionChecker->addFolders(array(
+				"./",
+				"system/temp/",
+				APP_FOLDER . "temp/",
+				APP_FOLDER . LOG_FOLDER,
+				APP_FOLDER . "code/",
+				APP_FOLDER . "uploaded/",
+				"./tpl/",
+				"./system/installer/data/apps"
+			));
 
-			@chmod(ROOT . "system/temp/", 0777);
-			if(!is_dir(ROOT . "system/temp/")) {
-				mkdir(ROOT . "system/temp/", 0777, true);
-				@chmod(ROOT . "system/temp/", 0777);
-			} else {
-				if(@fopen(ROOT . "system/temp/write.test", "w")) {
-					@unlink(ROOT . "system/temp/write.test");
-				} else {
-					$permissionsValid = false;
-					$permissionsFalse .= '<li>./system/temp/</li>';
+
+			$info = $permissionChecker->tryWrite();
+			$permissionsValid = !$info;
+			$permissionsFalse = "";
+			if($info) {
+				foreach($info as $f) {
+					$permissionsFalse = '<li>' . $f . '</li>';;
 				}
 			}
 
@@ -524,154 +523,13 @@ class ClassInfo extends Object {
 				@file_put_contents(ROOT . "system/temp/autoloader_exclude", 1);
 			}
 
-			@chmod(APP_FOLDER . "temp/", 0777);
-			if(!is_dir(APP_FOLDER . "temp/")) {
-				mkdir(APP_FOLDER . "temp/", 0777, true);
-				@chmod(APP_FOLDER . "temp/", 0777);
-			} else {
-				if(fopen(APP_FOLDER . "temp/write.test", "w")) {
-					@unlink(APP_FOLDER . "temp/write.test");
-				} else {
-					$permissionsValid = false;
-					$permissionsFalse .= '<li>./' . APPLICATION . '/temp/</li>';
-				}
-			}
-
 			if(!file_exists(APP_FOLDER . "temp/autoloader_exclude")) {
 				@file_put_contents(APP_FOLDER . "temp/autoloader_exclude", 1);
 			}
 
-			if(!is_dir(APP_FOLDER . LOG_FOLDER)) {
-				mkdir(APP_FOLDER . LOG_FOLDER, 0777, true);
-				@chmod(APP_FOLDER . LOG_FOLDER, 0777);
-			} else {
-				@chmod(APP_FOLDER . LOG_FOLDER, 0777);
-				if(@fopen(APP_FOLDER . LOG_FOLDER . "/write.test", "w")) {
-					@unlink(APP_FOLDER . LOG_FOLDER . "/write.test");
-				} else {
-					$permissionsValid = false;
-					$permissionsFalse .= '<li>./' . APPLICATION . '/' . LOG_FOLDER . '/</li>';
-				}
-			}
+			require_once(FRAMEWORK_ROOT . "/libs/GFS/SoftwareType.php");
+			g_SoftwareType::buildPackageIndex();
 
-			if(!is_dir(APP_FOLDER . "code/")) {
-				mkdir(APP_FOLDER . "code/", 0777, true);
-				@chmod(APP_FOLDER . "code/", 0777);
-			}
-
-			if(file_exists(APP_FOLDER . "uploaded/")) {
-				@chmod(APP_FOLDER . "uploaded/", 0777);
-				if(@fopen(APP_FOLDER . "uploaded/write.test", "w")) {
-					@unlink(APP_FOLDER . "uploaded/write.test");
-				} else {
-					$permissionsValid = false;
-					$permissionsFalse .= '<li>./' . APPLICATION . '/uploaded/</li>';
-				}
-
-			}
-
-			@chmod(ROOT . "tpl/", 0777);
-			if(@fopen(ROOT . "tpl/write.test", "w")) {
-				@unlink(ROOT . "tpl/write.test");
-			} else {
-				$permissionsValid = false;
-				$permissionsFalse .= '<li>./tpl/</li>';
-			}
-
-			$appFolder = ROOT . "system/installer/data/apps";
-			@chmod($appFolder, 0777);
-			if(@fopen($appFolder . "/write.test", "w")) {
-				@unlink($appFolder . "/write.test");
-
-				$files = scandir($appFolder);
-				if(file_exists($appFolder . "/.index-db") && $data = @unserialize(file_get_contents($appFolder . "/.index-db"))) {
-					;
-				} else {
-					$data = array("fileindex" => array(), "packages" => array());
-				}
-				if($data["fileindex"] != $files) {
-					$data = array("fileindex" => array(), "packages" => array());
-					$data["fileindex"] = $files;
-					foreach($files as $file) {
-						if(preg_match('/\.gfs$/i', $file)) {
-
-							require_once (FRAMEWORK_ROOT . "/libs/GFS/gfs.php");
-							require_once (FRAMEWORK_ROOT . "/libs/thirdparty/plist/CFPropertyList.php");
-							
-							if (file_exists($appFolder . "/" . $file . ".plist") && filemtime($appFolder . "/" . $file . ".plist") >= filemtime($appFolder . "/" . $file)) {
-								$plist = new CFPropertyList();
-								try {
-									$plist -> parse(file_get_contents($appFolder . "/" . $file . ".plist"));
-									$info = $plist -> toArray();
-								} catch (Exception $e) {
-									@unlink($appFolder . "/" . $file . ".plist");
-									header("Location: " . $_SERVER["REQUEST_URI"]);
-									exit;
-								}
-
-								$info["file"] = $file;
-								if(isset($info["type"], $info["version"])) {
-									if(isset($info["name"])) {
-										if(isset($data["packages"][$info["type"]][$info["name"]])) {
-											foreach($data["packages"][$info["type"]][$info["name"]] as $v => $d) {
-												if(goma_version_compare($v, $info["version"], "<")) {
-													@unlink($appFolder . "/" . $d["file"]);
-													@unlink($appFolder . "/" . $d["file"] . ".plist");
-													unset($data["packages"][$info["type"]][$info["name"]][$v]);
-													$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
-												} else {
-													@unlink($appFolder . "/" . $file);
-													@unlink($appFolder . "/" . $file . ".plist");
-												}
-											}
-										} else {
-											$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
-										}
-									}
-								}
-							} else {
-								try {
-									$gfs = new GFS($appFolder . "/" . $file);
-									$info = $gfs->parsePlist("info.plist");
-
-									$info["file"] = $file;
-									if(isset($info["type"], $info["version"])) {
-										if(isset($data["packages"][$info["type"]][$info["name"]])) {
-											foreach($data["packages"][$info["type"]][$info["name"]] as $v => $d) {
-												if(goma_version_compare($v, $info["version"], "<")) {
-													@unlink($appFolder . "/" . $d["file"]);
-													unset($data["packages"][$info["type"]][$info["name"]][$v]);
-													$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
-												} else {
-													@unlink($appFolder . "/" . $file);
-												}
-											}
-										} else {
-											$data["packages"][$info["type"]][$info["name"]][$info["version"]] = $info;
-										}
-									}
-
-									$gfs->writeToFileSystem("info.plist", $appFolder . "/" . $file . ".plist");
-								} catch(Exception $e) {
-									if(strtolower(get_class($e)) == "logicexception") {
-										$permissionsValid = false;
-										$permissionsFalse .= '<li>./system/installer/data/apps/' . $file . ': '.$e->getMessage().'</li>';
-									}
-								}
-							}
-						}
-					}
-
-					if($permissionsValid) {
-						FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
-					}
-				}
-
-				unset($files, $data);
-			} else {
-				$permissionsValid = false;
-				$permissionsFalse .= '<li>./system/installer/data/apps/</li>';
-			}
 
 			if($permissionsValid === false) {
 				$data = file_get_contents(FRAMEWORK_ROOT . "templates/framework/permission_fail.html");

@@ -1,4 +1,4 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
  * This file provides necessary functions for Goma.
  *
@@ -9,8 +9,6 @@
  *
  * @version 1.0.4
  */
-
-defined("IN_GOMA") OR die();
 
 /**
  * Load a language file from /languages.
@@ -174,7 +172,7 @@ function session_restore($key) {
 	if(isset($_SESSION["store"][$key]))
 		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma")) {
 			$d = unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"));
-			if(is_object($d)) {
+			if(is_object($d) && method_exists($d, "__wakeup")) {
 				$d->__wakeup();
 			}
 			return $d;
@@ -477,7 +475,8 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 			"date_format_date" => "d.m.Y",
 			"date_format_time"	=> " H:i",
 			"timezone" => DEFAULT_TIMEZONE,
-			"lang" => DEFAULT_LANG
+			"lang" => DEFAULT_LANG,
+			"safe_mode"	=> false
 		);
 	}
 
@@ -493,6 +492,8 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	
 	$info["timezone"] = $new["timezone"];
 	$info["lang"] = $new["lang"];
+
+	$info["safe_mode"] = (bool)(isset($new["safe_mode"]) ? $new["safe_mode"] : false);
 
 	if(isset($new["db"]))
 		$info["db"] = $new["db"];

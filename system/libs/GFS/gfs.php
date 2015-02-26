@@ -1,18 +1,17 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 15.09.2013
-  * $Version 2.7.1
-*/
+<?php defined("IN_GOMA") OR die();
 
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+/**
+ * Base-Class for GFS Archive-Managment.
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package		Goma\Framework
+ * @version		2.7.2
+ */
 
 define("GFS_DIR_TYPE", "goma_dir");
 defined("NOW") OR define("NOW", time());
-define("FILESIZE_SAVE_IN_DB", 3072);
+define("FILESIZE_SAVE_IN_DB", 50);
 // be careful with json, it's not binary-safe
 define("GFS_DB_TYPE", "serialize");
 
@@ -37,6 +36,13 @@ class GFS extends Object {
 	 *@access public
 	*/
 	const VERSION = "2.6";
+
+	/**
+	 * contains whether PHP supports Open-SSL or not.
+	 *
+	 *@name openssl_problems
+	*/
+	static $openssl_problems = false;
 	
 	/**
 	 * version of the GFS-Library the opeded file was created with
@@ -150,23 +156,22 @@ class GFS extends Object {
 	 *@access private
 	*/
 	private $certValidCache;
-	
+
 	/**
-	 * contains whether problem is with openssl
-	 *
-	 *@name openssl_problems
+	 * file-permissions for files that should be written.
 	*/
-	static $openssl_problems = false;
+	private $writeMode = 0777;
 	
 	/**
 	 *@name __construct
 	 *@access public
 	 *@param filename
 	*/
-	public function __construct($filename, $flag = null) {
+	public function __construct($filename, $flag = null, $writeMode = 0777) {
 		parent::__construct();
 		
 		$this->file = $filename;
+		$this->writeMode = $writeMode;
 		if(is_dir($this->file)) {
 			$this->valid = false;
 			throw new LogicException("GFS-File is a Folder.");
@@ -260,7 +265,11 @@ class GFS extends Object {
 									throw new GFSDBException("Could not open GFS ".$filename.". Failed to decode JSON-DB.");
 								}
 							} else {
-								$data = unserialize($db);
+								try {
+									$data = unserialize($db);
+								} catch(Exception $e) {
+									var_dump($db);
+								}
 								if($data !== false) {
 									$this->db = $data;
 								} else {
@@ -305,6 +314,13 @@ class GFS extends Object {
 	}
 	
 	/**
+	 * sets the write-mode.
+	*/
+	public function setWriteMode($mode) {
+		$this->writeMode = $mode;
+	}
+
+	/**
 	 * sets the Position of the pointer
 	 *
 	 *@name setPosition
@@ -317,7 +333,7 @@ class GFS extends Object {
 	/**
 	 * adds a file
 	 *
-	 *@name addFromFile
+	 *@name addFromFile
 	 *@access public
 	 *@param string - file
 	 *@param string - path in container
@@ -415,7 +431,7 @@ class GFS extends Object {
 	/**
 	 * adds a file without writing db
 	 *
-	 *@name addFromFileHelper
+	 *@name addFromFileHelper
 	 *@access protected
 	 *@param string - file
 	 *@param string - path in container
@@ -1026,7 +1042,7 @@ class GFS extends Object {
 				if($pointer = @fopen($aim, "w")) {
 					fwrite($pointer, (string) $this->db[$path]["contents"]);
 					fclose($pointer);
-					chmod($aim, 0777);
+					@chmod($aim, $this->writeMode);
 					unset($pointer);
 					return true;
 				} else {
@@ -1037,19 +1053,10 @@ class GFS extends Object {
 			}
 			$this->setPosition($offset);
 			if($pointer = @fopen($aim . ".tmp", "w")) {
-				$currentchunk = $offset;
-				while($currentchunk - $offset < $this->db[$path]["size"]) {
-					if($this->db[$path]["size"] - ($currentchunk - $offset) < 500000) {
-						$readsize = $this->db[$path]["size"] - ($currentchunk - $offset);
-					} else {
-						$readsize = 500000;
-					}
-					fwrite($pointer, fread($this->pointer, $readsize));
-					$currentchunk += 500000;
-				}
+				$this->readChunked($pointer, $offset, $offset + $this->db[$path]["size"]);
 				fclose($pointer);
-				unset($pointer, $readsize);
-				@chmod($aim, 0777);
+
+				@chmod($aim, $this->writeMode);
 				if("GFS" . md5_file($aim . ".tmp") == $this->db[$path]["checksum"]) {
 					if(file_exists($aim)) @unlink($aim);
 					return rename($aim . ".tmp", $aim);
@@ -1062,6 +1069,23 @@ class GFS extends Object {
 		} else {
 			return -4;
 		}
+	}
+
+	/**
+	 * reads data chunked from this archived and writes it to a pointer.
+	*/
+	public function readChunked($pointer, $start, $end, $chunkSize = 50000) {
+		$currentchunk = $start;
+		while($currentchunk < $end) {
+			if($end - $currentchunk < 500000) {
+				$readsize = $end - $currentchunk;
+			} else {
+				$readsize = 500000;
+			}
+			fwrite($pointer, fread($this->pointer, $readsize));
+			$currentchunk += 500000;
+		}
+		return true;
 	}
 	
 	/**
@@ -1259,7 +1283,7 @@ class GFS extends Object {
 		
 		if(isset($this->pointer)) {
 			@fclose($this->pointer);
-			@chmod($this->file, 0777);
+			@chmod($this->file, $this->writeMode);
 		}
 		unset($this->db, $this->pointer);
 		$this->valid = false;
@@ -1275,630 +1299,6 @@ class GFS extends Object {
 		$this->close();
 	}
 	
-}
-
-class GFS_Package_installer extends GFS {
-	public $status;
-	public $current;
-	public $progress;
-	public $remaining;
-	
-	/**
-	 * already unpacked files
-	 *
-	 *@name unpacked
-	*/
-	public static $unpacked = array();
-	
-	/**
-	 * construct with read-only
-	 *
-	 *@name __construct
-	 *@access public
-	*/
-	public function __construct($filename) {
-		parent::__construct($filename, GFS_READONLY);
-	}
-	
-	/**
-	 * unpack
-	 *
-	 *@name unpack
-	 *@access public
-	 *@param string - directory to which we unpack
-	*/
-	public function unpack($destination, $path = "") {
-		if($path != "") {	
-			//! TODO: Support Subfolders!
-			throwError(6, "Wrong-Argument-Error", "GFS_Package_Installer doesn't support subfolders.");
-		}
-		if(!$this->valid) {
-			return false;
-		}
-		
-		// first we write everything to a temporary folder
-		$tempfolder = ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
-		
-		
-		/*$f = @disk_free_space("/");
-		if($f !== null && $f !== "" && $f !== false) {
-			// check for disk-quote
-			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-			define("GOMA_FREE_SPACE", $free);
-			if($free / 1024 / 1024 < 5) {
-				// free space
-				FileSystem::delete($tempfolder);
-				header("HTTP/1.1 500 Server Error");
-				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-			}
-		}*/
-		
-		// write files
-		$this->status = "Writing files...";
-		$this->current = "";
-		
-		// we get time, if it is over 2, we reload ;)
-		$start = microtime(true);
-		$number = count($this->db);
-		if(file_exists($tempfolder . "/.gfsprogess")) {
-			
-			$data = file_get_contents($tempfolder . "/.gfsprogess");
-			if(preg_match('/^[0-9]+$/i', $data)) {
-				$i = $data;
-				$count = 1;
-			} else {
-				$data = unserialize($data);
-				$i = $data["i"];
-				$count = $data["count"];
-			}
-			
-		} else {
-  	 		FileSystem::requireDir($tempfolder);
-			$i = 0;
-			$count = 1;
-		}
-		
-		$db = array_values($this->db);
-		$paths = array_keys($this->db);
-		
-		// let's go
-		while($i < count($db)) {
-			
-			$path = $paths[$i];
-			$data = $db[$i];
-			if($data["type"] == GFS_DIR_TYPE) {
-				FileSystem::requireDir($tempfolder . "/" . $path);
-			} else {
-				if(!file_exists($tempfolder . "/" . $path)) {
-					FileSystem::RequireDir(substr($tempfolder . "/" . $path, 0, strrpos($tempfolder . "/" . $path, "/")));
-					$this->writeToFileSystem($path, $tempfolder . "/" . $path);
-					@chmod($tempfolder . "/" . $path, 0777);
-				}
-			}
-			$this->current = basename($path);
-			
-			// maximum 2.0 second
-			if(microtime(true) - $start > 2.0) {
-				$i++;
-				$count++;
-				file_put_contents($tempfolder . "/.gfsprogess", serialize(array("i" => $i, "count" => $count)));
-				$this->progress = ($i / count($this->db) * 100) * 0.7;
-				$perhit = $i / $count;
-				$remaining = round((round((count($this->db) - $i) / $perhit * 3) + 3) * 1.42);
-				if($remaining > 60) {
-					$remaining = round($remaining / 60);
-					if($remaining > 60) {
-						$remaining = round($remaining / 60);
-						$this->remaining = "More than ".$remaining." hours remaining";
-					} else {
-						$this->remaining = "More than ".$remaining." minutes remaining";
-					}
-				} else {
-					$this->remaining = "More than ".$remaining." seconds remaining";
-				}
-				if(defined("IN_GFS_EXTERNAL")) {
-					$this->showUI();
-				} else {
-					$file = $this->buildFile($destination);
-					$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&unpack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?unpack[]=".urlencode($this->file)."";
-					if(count(self::$unpacked)) {
-						foreach(self::$unpacked as $file) {
-							$uri .= "&unpack[]=" . urlencode($file);
-						}
-					}
-					$this->showUI($file . "?redirect=" . urlencode($uri));
-				}
-			}
-			$i++;
-			unset($data, $path);
-		}
-		
-		// now move all files
-		if(file_exists($tempfolder . "/.gfsrprogess")) {
-			
-			$data = file_get_contents($tempfolder . "/.gfsrprogess");
-			if(preg_match('/^[0-9]+$/i', $data)) {
-				$i = $data;
-				$count = 1;
-			} else {
-				$data = unserialize($data);
-				$i = $data["i"];
-				$count = $data["count"];
-			}
-			
-		} else {
-			$i = 0;
-			$count = 1;
-		}
-		
-		// let's go
-		while($i < count($db)) {
-			$path = $paths[$i];
-			$data = $db[$i];
-			if($data["type"] == GFS_DIR_TYPE) {
-					FileSystem::requireDir($destination . "/" . $path);
-			} else {
-				FileSystem::requireDir(substr($destination . "/" . $path, 0, strrpos($destination . "/" . $path, "/")));
-				// helps in some cases ;)
-				@unlink($destination . "/" . $path);
-				if(@rename($tempfolder . "/" . $path, $destination . "/" . $path))
-					chmod($destination . "/" . $path, 0777);
-			
-			}
-			
-			$this->status = "Renaming files...";
-			$this->current = basename($path);
-			
-			// maximum of 0.5 seconds
-			if(microtime(true) - $start > 2.0) {
-				$i++;
-				$count++;
-				file_put_contents($tempfolder . "/.gfsrprogess", serialize(array("i" => $i, "count" => $count)));
-				$this->progress = 70 + ($i / count($this->db) * 100) * 0.3;
-				$perhit = $i / $count;
-				$remaining = round((round((count($this->db) - $i) / $perhit * 3) + 3) * 0.40);
-				if($remaining > 60) {
-					$remaining = round($remaining / 60);
-					if($remaining > 60) {
-						$remaining = round($remaining / 60);
-						$this->remaining = "More than ".$remaining." hours remaining";
-					} else {
-						$this->remaining = "More than ".$remaining." minutes remaining";
-					}
-				} else {
-					$this->remaining = "More than ".$remaining." seconds remaining";
-				}
-				if(defined("IN_GFS_EXTERNAL")) {
-					$this->showUI();
-				} else {
-					$file = $this->buildFile($destination);
-					
-					$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&unpack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?unpack[]=".urlencode($this->file)."";
-					if(count(self::$unpacked)) {
-						foreach(self::$unpacked as $file) {
-							$uri .= "&unpack[]=" . urlencode($file);
-						}
-					}
-					$this->showUI($file . "?redirect=" . urlencode($uri));
-				}
-				
-			}
-			$i++;
-			unset($data, $path);
-		}
-		
-		self::$unpacked[] = $this->file;
-		
-		// clean up
-		
-		FileSystem::delete($tempfolder);
-		
-		if(defined("IN_GFS_EXTERNAL")) {
-			if(isset($_GET["redirect"]))
-				header("Location:" . $_GET["redirect"]);
-			exit; 
-		}
-		return true;
-		
-	}
-	
-	/**
-	 * if a specific file was unpacked
-	 *
-	 *@name wasUnpacked
-	 *@access public
-	*/
-	public static function wasUnpacked($file = null) {
-		if(isset($file)) {
-			$file = str_replace('\\\\', '\\', realpath($file));
-			$file = str_replace('\\', '/', realpath($file));
-			$unpack = isset($_GET["unpack"]) ? str_replace('\\', '/', str_replace('\\\\', '\\', $_GET["unpack"])) : array();
-			
-			return in_array($file, $unpack);
-		} else {
-			if(isset($_GET["unpack"]))
-				return true;
-			else
-				return false;
-		}
-	}
-	
-	/**
-	 * builds the Code for the external file
-	 *
-	 *@name buildFile
-	 *@access public
-	*/
-	public function buildFile($destination) {
-		$file = CACHE_DIRECTORY . "gfs.unpack." . md5($this->file) . ".php";
-		$code = '<?php define("TIME", time()); define("NOW", TIME); define("IN_GOMA", true); define("PROFILE", false); define("CACHE_DIRECTORY", '.var_export(CACHE_DIRECTORY, true).'); define("ROOT", '.var_export(ROOT, true).'); define("ROOT_PATH", '.var_export(ROOT_PATH, true).');  define("BASE_URI", '.var_export(BASE_URI, true).'); define("FRAMEWORK_ROOT", ROOT . "system/"); define("IN_GFS_EXTERNAL", true); chdir(ROOT); error_reporting(E_ALL); defined("INSTALL") OR define("INSTALL", true); define("DEV_MODE", '.var_export(DEV_MODE, true).'); define("EXEC_START_TIME", microtime(true)); define("LOG_FOLDER", '.var_export(LOG_FOLDER, true).'); ';
-		
-		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
-		
-		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
-		
-		// copy some files
-		copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
-		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
-		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
-		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
-		copy(FRAMEWORK_ROOT . "libs/GFS/gfs.php", ROOT . CACHE_DIRECTORY . "gfs.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/file/FileSystem.php", ROOT . CACHE_DIRECTORY . "filesystem.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/template/tpl.php", ROOT . CACHE_DIRECTORY . "tpl.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
-		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
-		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
-		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
-		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
-		// includes
-		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
-		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
-		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
-		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';
-		$code .= 'if(!class_exists("RequestHandler")) include_once(ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");';
-		$code .= 'if(!class_exists("Core")) include_once(ROOT . CACHE_DIRECTORY . "core.gfs.php");';
-		$code .= 'if(!class_exists("viewaccessabledata")) include_once(ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");';
-		$code .= 'if(!class_exists("GFS")) include_once(ROOT . CACHE_DIRECTORY . "gfs.gfs.php");';
-		$code .= 'if(!class_exists("FileSystem")) include_once(ROOT . CACHE_DIRECTORY . "filesystem.gfs.php");';
-		$code .= 'if(!class_exists("tpl")) include_once(ROOT . CACHE_DIRECTORY . "tpl.gfs.php");';
-		$code .= 'if(!class_exists("template")) include_once(ROOT . CACHE_DIRECTORY . "template.gfs.php");';
-		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
-		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
-		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
-		$code .= 'if(!class_exists("Convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
-		$code .= 'try { $gfs = new GFS_Package_Installer('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; }';
-		$code .= '$gfs->unpack('.var_export($destination, true).');';
-		FileSystem::write(ROOT . $file, $code);
-		return $file;
- 
-	}
-	
-	/**
-	 * shows the ui
-	 *
-	 *@name showUI
-	 *@access public
-	*/
-	public function showUI($file = "",$reload = true) {
-		if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)
-		
-		$template = new Template;
-		$template->assign("destination", $file);
-		$template->assign("reload", $reload);
-		$template->assign("archive", basename($this->file));
-		$template->assign("progress", $this->progress);
-		$template->assign("status", $this->status);
-		$template->assign("current", $this->current);
-		$template->assign("remaining", $this->remaining);
-		echo $template->display("/system/templates/GFSUnpacker.html");
-		exit;
-	}
-}
-
-class GFS_Package_Creator extends GFS {
-	public $status;
-	public $current;
-	public $progress;
-	public $remaining;
-	
-	// packed files for evantually later reload
-	static public $packed = array();
-	
-	/**
-	 * defines if we commit changes after adding files
-	 *
-	 *@name autoCommit
-	 *@access public
-	*/
-	public $autoCommit = true;
-	
-	/**
-	 * index of files of the next operation
-	 *
-	 *@name fileIndex
-	 *@access protected
-	*/
-	protected $fileIndex = array();
-	
-	/**
-	 * construct with read-only
-	 *
-	 *@name __construct
-	 *@access public
-	*/
-	public function __construct($filename) {
-		parent::__construct($filename, GFS_READWRITE);
-	}
-	
-	/**
-	 * adds a folder
-	 *
-	 *@name add
-	 *@access public
-	 *@param string - directory which we add
-	 *@param string - path to which we write
-	 *@param array - subfolder, we want to exclude
-	*/
-	public function add($file, $path = "", $excludeList = array()){
-	
-		
-		
-		// create index
-		
-		$this->indexHelper($file, $this->fileIndex, $path, $excludeList);
-		
-		if($this->autoCommit) {
-			$this->commit();
-		}
-		
-		return true;
-		
-	}
-	
-	/**
-	 * sets the value of auto-commit
-	 *
-	 *@name setAutoCommit
-	 *@access public
-	 *@param bool
-	*/
-	public function setAutoCommit($commit) {
-		$this->autoCommit = $commit;
-	}
-	
-	/**
-	 * commits the changes
-	 *
-	 *@name commit
-	 *@access public
-	*/
-	public function commit($inFile = null, $index = null) {
-		if(isset($index)) {
-			$this->fileIndex = $index;
-		}
-		
-		/*$f = @disk_free_space("/");
-		if($f !== null && $f !== "" && $f !== false) {
-			// check for disk-quote
-			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-			define("GOMA_FREE_SPACE", $free);
-			if($free / 1024 / 1024 < 20) {
-				// free space
-				@unlink($this->file);
-				header("HTTP/1.1 500 Server Error");
-				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-			}
-		}*/
-		
-		// Adding files...
-		$this->status = "Adding files...";
-		$this->current = "";
-		
-		// for reloading early enough
-		$start = microtime(true);
-		if($start - EXEC_START_TIME > 5) {
-			$start += 0.9;
-		}
-		
-		// create index-progress-file
-		if($this->exists("/gfsprogress" . count($this->fileIndex))) {
-			$data = $this->getFileContents("/gfsprogress" . count($this->fileIndex));
-			$data = unserialize($data);
-			$i = $data["i"];
-			$count = $data["count"];
-		} else {
-			$count = 1;
-			$i = 0;
-			$this->addFile("/gfsprogress" . count($this->fileIndex), serialize(array("i" => $i, "count" => $count)));
-		}
-		
-		$realfiles = array_keys($this->fileIndex);
-		$paths = array_values($this->fileIndex);
-		
-		// iterate through the index
-		while($i < count($this->fileIndex)){
-			// maximum of 2.0 seconds
-			if(microtime(true) - $start < 2.0) {
-				if(!$this->exists($paths[$i])) {
-					$this->addFromFile($realfiles[$i], $paths[$i]);
-				}
-			} else {
-				$count++;
-				$this->write("/gfsprogress" . count($this->fileIndex), serialize(array("i" => $i, "count" => $count)));
-				$this->close();
-				$this->progress = ($i / count($this->fileIndex) * 100);
-				$perhit = $i / $count;
-				$remaining = (round((count($index) - $i) / $perhit * 3) + 3);
-				$this->current = $paths[$i];
-				if($remaining > 60) {
-					$remaining = round($remaining / 60);
-					if($remaining > 60) {
-						$remaining = round($remaining / 60);
-						$this->remaining = "More than ".$remaining." hours remaining";
-					} else {
-						$this->remaining = "More than ".$remaining." minutes remaining";
-					}
-				} else {
-					$this->remaining = "More than ".$remaining." seconds remaining";
-				}
-				
-				if(!isset($inFile)) {
-					// build the external file and redirect-uri
-					$file = $this->buildFile($this->fileIndex);
-					$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&pack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?pack[]=".urlencode($this->file)."";
-					if(count(self::$packed)) {
-						foreach(self::$packed as $file) {
-							$uri .= "&pack[]=" . urlencode($file);
-						}
-					}
-					$this->showUI($file . "?redirect=" . urlencode($uri));
-				} else {
-					// if we are in the external file
-				 $this->showUI();	
-			}
-			}
-			$i++;
-		}
-		
-		self::$packed[$this->file] = $this->file;
-		$this->unlink("/gfsprogress" . count($this->fileIndex));
-		$this->fileIndex = array();
-		
-		// if we are in the external file
-		if(isset($inFile)) {
-			@unlink($inFile);
-			if(isset($_GET["redirect"])) {
-				header("Location:" . $_GET["redirect"]);
-				exit;
-			} else {
-				header("Location:" . ROOT_PATH);
-				exit;
-			}
-		}
-	}
-	
-	/**
-	 * if a specific file was packed
-	 *
-	 *@name wasPacked
-	 *@access public
-	*/
-	public static function wasPacked($file = null) {
-		if(isset($file)) {
-			$file = str_replace('\\\\', '\\', realpath($file));
-			$file = str_replace('\\', '/', realpath($file));
-			$pack = isset($_GET["pack"]) ? str_replace('\\', '/', str_replace('\\\\', '\\', $_GET["pack"])) : array();
-			
-			if(isset($_GET["pack"])) {
-				$file = realpath($file);
-				return in_array($file, $pack);
-			} else {
-				return false;
-			}
-		} else {
-			if(isset($_GET["pack"]))
-				return true;
-			else
-				return false;
-		}
-	}
-	
-	/**
-	 * builds the Code for the external file
-	 *
-	 *@name buildFile
-	 *@access public
-	*/
-	public function buildFile($index) {
-		$file = CACHE_DIRECTORY . "gfs." . md5($this->file) . ".php";
-		$code = '<?php define("TIME", time()); define("NOW", TIME); define("IN_GOMA", true); define("PROFILE", false); define("CACHE_DIRECTORY", '.var_export(CACHE_DIRECTORY, true).'); define("ROOT", '.var_export(ROOT, true).'); define("ROOT_PATH", '.var_export(ROOT_PATH, true).');  define("BASE_URI", '.var_export(BASE_URI, true).'); define("FRAMEWORK_ROOT", ROOT . "system/"); define("IN_GFS_EXTERNAL", true); chdir(ROOT); error_reporting(E_ALL); defined("INSTALL") OR define("INSTALL", true); define("DEV_MODE", '.var_export(DEV_MODE, true).'); define("EXEC_START_TIME", microtime(true)); define("LOG_FOLDER", '.var_export(LOG_FOLDER, true).'); ';
-		
-		$code .= 'define("CURRENT_PROJECT", '.var_export(CURRENT_PROJECT, true).'); define("APPLICATION", CURRENT_PROJECT); define("STATUS_ACTIVE", '.var_export(STATUS_ACTIVE, true).'); define("IN_SAFE_MODE", '.var_export(IN_SAFE_MODE, true).'); define("SYSTEM_TPL_PATH", '.var_export(SYSTEM_TPL_PATH, true).'); define("APPLICATION_TPL_PATH", '.var_export(APPLICATION_TPL_PATH, true).');';
-		
-		$code .= 'date_default_timezone_set('.var_export(DEFAULT_TIMEZONE, true).');';
-		
-  	 	// copy some files
-  	 	copy(FRAMEWORK_ROOT . "core/applibs.php", ROOT . CACHE_DIRECTORY . "gfs.applibs.php");
-		copy(FRAMEWORK_ROOT . "core/Object.php", ROOT . CACHE_DIRECTORY . "gfs.Object.php");
-		copy(FRAMEWORK_ROOT . "core/ClassInfo.php", ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");
-		copy(FRAMEWORK_ROOT . "core/ClassManifest.php", ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");
-		copy(FRAMEWORK_ROOT . "libs/GFS/gfs.php", ROOT . CACHE_DIRECTORY . "gfs.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/file/FileSystem.php", ROOT . CACHE_DIRECTORY . "filesystem.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/template/tpl.php", ROOT . CACHE_DIRECTORY . "tpl.gfs.php");
-		copy(FRAMEWORK_ROOT . "libs/template/template.php", ROOT . CACHE_DIRECTORY . "template.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/viewaccessabledata.php", ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/Core.php", ROOT . CACHE_DIRECTORY . "core.gfs.php");
-		copy(FRAMEWORK_ROOT . "core/controller/RequestHandler.php", ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");
-		copy(FRAMEWORK_ROOT . 'libs/http/httpresponse.php', ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");
-		copy(FRAMEWORK_ROOT . 'libs/array/arraylib.php', ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");
-		copy(FRAMEWORK_ROOT . 'core/fields/DBField.php', ROOT . CACHE_DIRECTORY . "field.gfs.php");
-		copy(FRAMEWORK_ROOT . 'core/convert.php', ROOT . CACHE_DIRECTORY . "convert.gfs.php");
-		// includes
-		$code .= 'include_once(ROOT . CACHE_DIRECTORY . "gfs.applibs.php");';
-		$code .= 'if(!class_exists("Object")) include_once(ROOT . CACHE_DIRECTORY . "gfs.Object.php");';
-		$code .= 'if(!class_exists("ClassInfo")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassInfo.php");';
-		$code .= 'if(!class_exists("ClassManifest")) include_once(ROOT . CACHE_DIRECTORY . "gfs.ClassManifest.php");';
-		$code .= 'if(!class_exists("RequestHandler")) include_once(ROOT . CACHE_DIRECTORY . "requesthandler.gfs.php");';
-		$code .= 'if(!class_exists("Core")) include_once(ROOT . CACHE_DIRECTORY . "core.gfs.php");';
-		$code .= 'if(!class_exists("viewaccessabledata")) include_once(ROOT . CACHE_DIRECTORY . "viewaccess.gfs.php");';
-		$code .= 'if(!class_exists("GFS")) include_once(ROOT . CACHE_DIRECTORY . "gfs.gfs.php");';
-		$code .= 'if(!class_exists("FileSystem")) include_once(ROOT . CACHE_DIRECTORY . "filesystem.gfs.php");';
-		$code .= 'if(!class_exists("tpl")) include_once(ROOT . CACHE_DIRECTORY . "tpl.gfs.php");';
-		$code .= 'if(!class_exists("template")) include_once(ROOT . CACHE_DIRECTORY . "template.gfs.php");';
-		$code .= 'if(!class_exists("httpresponse")) include_once(ROOT . CACHE_DIRECTORY . "httpresponse.gfs.php");';
-		$code .= 'if(!class_exists("arraylib")) include_once(ROOT . CACHE_DIRECTORY . "arraylib.gfs.php");';
-		$code .= 'if(!class_exists("DBField")) include_once(ROOT . CACHE_DIRECTORY . "field.gfs.php");';
-		$code .= 'if(!class_exists("convert")) include_once(ROOT . CACHE_DIRECTORY . "convert.gfs.php");';
-		$code .= 'try { $gfs = new GFS_Package_Creator('.var_export($this->file, true).'); } catch(Exception $e) { echo "<script type=\"text/javascript\">setTimeout(location.reload, 1000);</script> An Error occurred. Please <a href=\"\">Reload</a>"; exit; }';
-		$code .= '$gfs->commit(__FILE__, '.var_export($index, true).');';
-		FileSystem::write(ROOT . $file, $code);
-		return $file;
-
-	}
-	
-	/**
-	 * creates the index
-	 *
-	 *@name indexHelper
-	 *@access public
-	*/ 
-	public function indexHelper($folder, &$index, $path, $excludeList = array(), $internalPath = "") {
-		foreach(scandir($folder) as $file) {
-			if($file != "." && $file != "..") {
-				if(in_array($file, $excludeList) || in_array($internalPath . "/" . $file, $excludeList)) {
-					continue;
-				}
-				if(is_dir($folder . "/" . $file)) {
-					$this->indexHelper($folder . "/" . $file, $index, $path . "/" . $file, $excludeList, $internalPath . "/" . $file);
-				} else {
-					$index[$folder . "/" . $file] = $path . "/" . $file;
-				}
-			}
-		}
-	}
-	/**
-	 * shows the ui
-	 *
-	 *@name showUI
-	 *@access public
-	*/
-	public function showUI($file = null, $reload = true) {
-		if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)
-		
-		$template = new Template;
-		$template->assign("destination", $file);
-		$template->assign("reload", $reload);
-		$template->assign("archive", basename($this->file));
-		$template->assign("progress", $this->progress);
-		$template->assign("status", $this->status);
-		$template->assign("current", $this->current);
-		$template->assign("remaining", $this->remaining);
-		echo $template->display("/system/templates/GFSUnpacker.html");
-		exit;
-	}
 }
 
 /**

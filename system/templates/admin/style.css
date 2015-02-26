@@ -9,8 +9,8 @@
 @color-text: #222;
 @color-headlines: #555;
 @color-light: #888;
-@color-grey: darken(#fff, 15%);
-@color-darkgrey: #555;
+@color-grey: hsl(185, 3%, 92%);
+@color-darkgrey: hsl(185, 13%, 35%);
 @color-tint: @system-tint;
 
 @color-action: @system-action;
@@ -28,7 +28,7 @@
 @container-width-small: 18em;
 
 body, html {
-    color: #222;
+    color: hsl(185, 10%, 15%);
     font-family: "Helvetica Neue", Arial, Verdana;
 	font-size: 1em;
 	line-height: 1.25em;
@@ -95,7 +95,7 @@ div.adminPanel table, div.adminPanel td {
 
 #adminPanel #head {
 	position: fixed;
-	background: #eee;
+	background: @color-grey;
 	top: 0;
 	left: 0;
 	width: 100%;
@@ -104,7 +104,7 @@ div.adminPanel table, div.adminPanel td {
 	opacity: 0.95;
 	
 	padding-top: 0.25em;
-	border-top: 0.25em solid #666;
+	border-top: 0.25em solid @color-darkgrey;
 	
 	
 	#navi-toggle {
@@ -112,7 +112,7 @@ div.adminPanel table, div.adminPanel td {
 		position: relative;
 		display: inline-block;
 		z-index: 510;
-		background: #eee;
+		background: @color-grey;
 		padding-right: .5em;
 		
 		img {
@@ -147,7 +147,7 @@ div.adminPanel table, div.adminPanel td {
 		width: 100%;
 		
 		display: none;
-		background: #eee;
+		background: @color-grey;
 		
 		border: 1px solid #ccc;
 		
@@ -210,7 +210,7 @@ div.adminPanel table, div.adminPanel td {
 						width: 3.875em;
 						display: block;
 						margin: 0 auto;
-						background: #eee;
+						background: @color-grey;
 						border: 1px solid #ccc;
 						
 						border-radius: 0.5em;
@@ -307,7 +307,7 @@ div.adminPanel table, div.adminPanel td {
 					padding: @space-normal 0;
 					width: 10em;
 					
-					background: #eee;
+					background: @color-grey;
 					border: 1px solid #ccc;
 					
 					li {
@@ -775,7 +775,7 @@ textarea, input[type=text], input[type=password] {
 	-webkit-border-radius: 0.1875em;
 	border-radius: 0.1875em;
 	margin: 0.2em;
-    background: #eee;
+    background: @color-grey;
     border: 0.063em solid #ccc;
     
     :focus {
@@ -838,7 +838,7 @@ form h2 {
 	padding: 0.4em 0.6em;
 }
 .tableview thead {
-	background: #eee;
+	background: @color-grey;
 	font-weight: bold;
 	color: #333;
 }
@@ -924,7 +924,7 @@ form h2 {
 	width: 1.25em;
 	padding: 0.31em;
 	margin: 0;
-	background: #eee;
+	background: @color-grey;
 	border: 0.063em solid #ccc;
 	-webkit-border-bottom-right-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
@@ -990,7 +990,7 @@ form h2 {
 	width: 100%;
 }
 #preview #bottomBar {
-	background: #eee;
+	background: @color-grey;
 }
 #preview #bottomBar .previewLinks {
 	margin-left: 3em;
@@ -1055,7 +1055,7 @@ body .updateInfo .value {
 
 }
 body .updateInfo .left {
-	background: #eee;
+	background: @color-grey;
 	border-right: 0.063em solid #ddd;
 	font-weight: bold;
 	width: 250px;
@@ -1190,7 +1190,7 @@ ul.list-view li:last-child a, ul.list-view li.last a {
 	border-bottom: 0.063em solid #ddd;
 }
 ul.list-view li a:hover, ul.list-view li a.loading {
-	background-color: #eee;
+	background-color: @color-grey;
 }
 ul.list-view li a img {
 	position: absolute;
@@ -1249,7 +1249,7 @@ ul.list-view li a img {
 			height: auto;
 			
 			#navigation {
-				background: #eee;
+				background: @color-grey;
 				border-bottom: 1px solid #ccc;
 				border-top: 1px solid #ccc;
 				display: none;

@@ -1,14 +1,13 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
+  * @package 	goma framework
+  * @link 		http://goma-cms.org
+  * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author 	Goma-Team
+  *	@Version 	2.2.2
+  *
   * last modified: 18.12.2012
-  * $Version 2.2.2
-*/   
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+*/
 
 class UpdateController extends adminController {
 	/**
@@ -186,7 +185,7 @@ class UpdateController extends adminController {
 				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
 				exit;
 			}
-			
+
 			$data = G_SoftwareType::getInstallInfos($file);
 			
 			if(is_string($data))

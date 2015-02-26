@@ -108,7 +108,13 @@
 					
 					<% IF $box.title %>
 						<div class="header">
+							<% IF $box.linkURL == "" %>
 							<span class="title">$box.title</span>
+							<% ELSE %>
+								<a href="$box.linkURL" %>
+									<span class="title">$box.title</span>
+								</a>
+							<% END %>
 						</div>
 					<% END %>
 					

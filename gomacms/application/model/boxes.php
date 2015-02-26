@@ -4,8 +4,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 26.03.2014
-  * $Version 1.3.1
+  * last modified: 10.02.2015
+  * $Version 1.3.2
 */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
@@ -37,7 +37,9 @@ class Boxes extends DataObject implements Notifier {
 		"fullsized"	=> "switch",
 		"usebgcolor"=> "switch",
 		"color"		=> "varchar(200)",
-		"cssclass"	=> "varchar(200)"
+		"cssclass"	=> "varchar(200)",
+		"linktype"	=> "varchar(200)",
+		"link"		=> "varchar(300)"
 	);
 	
 	/**
@@ -53,6 +55,13 @@ class Boxes extends DataObject implements Notifier {
 	*/
 	static $index = array(
 		"view"	=> array("type"	=> "INDEX", "fields" => "seiteid,sort", "name"	=> "_show")
+	);
+
+	/**
+	 * has-one.
+	*/
+	static $has_one = array(
+		"linkpage"	=> "pages"
 	);
 	
 	/**
@@ -209,6 +218,23 @@ class Boxes extends DataObject implements Notifier {
 	public static function NotifySettings() {
 		return array("title" => lang("boxes"), "icon" => "images/icons/fatcow16/layout_content@2x.png");
 	}
+
+	/**
+	 * returns a link or nothing when no link given.
+	*/
+	public function linkURL() {
+		if($this->linkType == "url") {
+			if(!preg_match('/^http(s)?\:\/\//i', $this->fieldGet("link")) && trim($this->fieldGet("link")) != "") {
+				return "http://" . $this->fieldGet("link");
+			}
+			
+			return $this->fieldGet("link");
+		} else if($this->linkType == "page") {
+			return BASE_SCRIPT . $this->linkpage->url;
+		} else {
+			return "";
+		}
+	}
 		
 	
 }
@@ -335,8 +361,8 @@ class BoxesController extends FrontedController {
 	/**
 	 * renders boxes
 	 *
-	 *@name render
-	 *@access public
+	 * @name 	render
+	 * @access 	public
 	*/
 	final public function render($pid = null, $count = null) {
 		if(isset($pid)) {
@@ -349,23 +375,27 @@ class BoxesController extends FrontedController {
 			return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
 		} else {
 
-			$cacheable = true;
-
-			foreach($this->modelInst() as $record) {
-				if(!$record->isCacheable()) {
-					$cacheable = false;
-					break;
-				}
-			}
-
 			$output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
 
-			if($cacheable) {
+			if($this->checkCachable()) {
 				$cacher->write($output, 86400);
 			}
 
 			return $output;
 		}
+	}
+
+	/**
+	 * checks if the current set of boxes is cachable.
+	*/
+	public function checkCachable() {
+		foreach($this->modelInst() as $record) {
+			if(!$record->isCacheable()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 	
 	/**
@@ -489,6 +519,16 @@ class Box extends Boxes
 			$form->add(new ColorPicker("color", lang("color")), null, "settings");
 			$form->add(new TextField("cssclass", lang("cssclass")), null, "settings");
 			$form->add(new TextField("width", lang("width")), null, "settings");
+
+			$form->add(new ObjectRadioButton("linktype", lang("box_linktype"), array(
+				""		=> lang("no_link"),
+				"url"	=> array(lang("URL"), "link"),
+				"page"	=> array(lang("page"), "linkpage")
+			)), null, "settings");
+			$form->add(new TextField("link", lang("url")), null, "settings");
+			$form->add(new HasOneDropdown("linkpage", lang("page")), null, "settings");
+
+			// used to have big enough boxes for editing.
 			$form->add(new HTMLField("spacer", '<div style="width: 600px;">&nbsp;</div>'));
 		}
 		
@@ -569,11 +609,10 @@ class boxpage extends Page
 		}
 		
 		/**
-		 * will be called after write.
-		 * duplicate boxes here.
+		 * duplicates boxes when a page was duplicated.
 		 *
-		 * @name onAfterWrite
-		 * @access public
+		 * @name 	onAfterWrite
+		 * @access 	public
 		*/
 		public function onAfterWrite()
 		{
@@ -614,6 +653,7 @@ class boxpage extends Page
 		}
 
 }
+
 class boxPageController extends PageController
 {
 		/**

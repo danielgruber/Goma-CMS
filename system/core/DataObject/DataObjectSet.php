@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.6
+ * @version     1.5.7
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -2280,7 +2280,7 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 			}
 			
 			if($updateLastModifiedIDs) {
-				DataObject::update($this->dataobject->class, array("last_modified" => NOW), array("id" => $updateLastModifiedIDs));
+				DataObject::update($this->dataobject->baseclass, array("last_modified" => NOW), array("id" => $updateLastModifiedIDs));
 			}
 		} else {
 			
