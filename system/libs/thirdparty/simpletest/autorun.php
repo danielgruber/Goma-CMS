@@ -17,7 +17,8 @@ require_once dirname(__FILE__) . '/default_reporter.php';
 
 $GLOBALS['SIMPLETEST_AUTORUNNER_INITIAL_CLASSES'] = get_declared_classes();
 $GLOBALS['SIMPLETEST_AUTORUNNER_INITIAL_PATH'] = getcwd();
-register_shutdown_function('simpletest_autorun');
+
+register_shutdown_function("simpletest_autorun");
 
 /**
  *    Exit handler to run all recent test cases and exit system if in CLI
@@ -41,12 +42,20 @@ function simpletest_autorun() {
  *                         there were no failures, null if tests are
  *                         already running
  */
-function run_local_tests() {
+function run_local_tests($candidates = null) {
     try {
         if (tests_have_run()) {
             return;
         }
-        $candidates = capture_new_classes();
+
+        if(!isset($candidates)) {
+            if(isset($GLOBALS["SIMPLETEST_CANDIDATES"])) {
+                $candidates = $GLOBALS["SIMPLETEST_CANDIDATES"];
+            } else {
+                $candidates = capture_new_classes();
+            }
+        }
+
         $loader = new SimpleFileLoader();
         $suite = $loader->createSuiteFromClasses(
                 basename(initial_file()),

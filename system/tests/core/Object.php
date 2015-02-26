@@ -10,15 +10,20 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class ObjectTest  extends UnitTestCase implements TestAble {
+class ObjectTest extends GomaUnitTest implements TestAble {
 	
+	public $name = "Object";
+
 	/**
-	 * constructs the object
+	 * setup test
 	*/
-	public function __construct() {
+	public function setUp() {
 		$this->o = new TestObject();
-		
-		parent::__construct();
+		$this->dummyMethod = new DummyMethodTest();
+	}
+
+	public function tearDown() {
+		unset($this->o);
 	}
 	
 	/**
@@ -77,6 +82,40 @@ class ObjectTest  extends UnitTestCase implements TestAble {
 	public function testcallExtending() {
 		$this->assertEqual($this->o->callExtending("callExtends"), array("works"));
 	}
+
+	public function testDummyMethodTest() {
+		$this->assertEqual($this->dummyMethod->ownMethod(), "blah");
+		$this->assertEqual($this->dummyMethod->__call("ownMethod", array()), "blah");
+		$this->assertEqual($this->dummyMethod->__call("OWNMETHOD", array()), "blah");
+		$this->assertEqual($this->dummyMethod->__call("myDynamicMethod", array()), "It works");
+		$this->assertEqual($this->dummyMethod->myDynamicMethod(), "It works");
+
+		$this->assertFalse(Object::method_exists($this->dummyMethod->classname, "myDynamicMethod"));
+	}
+}
+
+class DummyMethodTest extends Object {
+	public function ownMethod() {
+		return "blah";
+	}
+
+	public function __cancall($method) {
+		if($method == "myDynamicMethod") {
+			return true;
+		}
+
+		return false;
+	}
+
+	public function __call($method, $args) {
+		if($method == "myDynamicMethod") {
+			return "It works";
+		}
+
+		return parent::__call($method, $args);
+	}
+
+
 }
 
 class TestObject extends Object {

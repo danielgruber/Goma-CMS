@@ -1,16 +1,12 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
-  * Test Classes
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.04.13
-  * $Version 1.0
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+ * Controller for handling test-classes.
+ *
+ * @package		Goma\Test
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 
 class GomaTestController extends RequestHandler {
 	/**
@@ -21,12 +17,48 @@ class GomaTestController extends RequestHandler {
 		
 		require_once(ROOT . "system/libs/thirdparty/simpletest/autorun.php");
 		
+		$areas = $this->getAreas();
+		$candidates = array();
+
 		foreach(ClassInfo::$files as $class => $file) {
 			if(ClassInfo::hasInterface($class, "Testable")) {
 				ClassManifest::load($class);
+
+				if(!$areas || $this->shouldLoadArea(Object::getStatic($class, "area"), $areas)) {
+					$candidates[] = $class;
+				}
 			}
 		}
 		
+		$GLOBALS["SIMPLETEST_CANDIDATES"] = $candidates;
+
 		exit;
 	}
+
+	/**
+	 * checks if area is in areas.
+	*/
+	public function shouldLoadArea($area, $areas) {
+		return in_array(strtolower($area), $areas);
+	}
+
+	/**
+	 * gets all areas given.
+	*/
+	public function getAreas() {
+		
+		if(isset($_GET["area"])) {
+			if(is_array($_GET["area"])) {
+				return array_map("strtolower", $_GET["area"]);
+			} else {
+				return array(strtolower($_GET["area"]));
+			}
+		}
+
+		return array();
+	}
 }
+
+Core::addRules(array(
+	"dev/unit-test" => "GomaTestController"
+), 50);

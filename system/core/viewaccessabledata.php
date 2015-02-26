@@ -298,7 +298,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * to cutomise this data with own data for loops
+	 * to customise this data with own special data which is not part of the model, but needed in view.
+	 *
 	 *@param array - data for loops
 	 *@param array - replacement-data
 	 */
@@ -310,6 +311,18 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		$this->customised = array_merge($this->customised, $loops);
 
 		return $this;
+	}
+
+	/**
+	 * returns a customised object.
+	 *
+	 * @name 	customisedObject
+	 * @param 	array - data
+	*/
+	public function customisedObject($data) {
+		$new = clone $this;
+		$new->customised = array_merge($new->customised, $data);
+		return $new;
 	}
 
 	/**

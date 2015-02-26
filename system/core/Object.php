@@ -14,7 +14,7 @@ interface ExtensionModel {
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Framework
- * @version 3.4
+ * @version 3.5
  */
 abstract class Object {
 
@@ -67,6 +67,11 @@ abstract class Object {
 	 * Indicates if the constructor has already been axecuted.
 	 */
 	private static $loaded;
+
+	/**
+	 * const defines that method only exists on object.
+	*/
+	const METHOD_ON_OBJECT_FOUND = 2;
 
 	/**
 	 * Gets the value of $class::$$var.
@@ -214,8 +219,9 @@ abstract class Object {
 	 * @return boolean
 	 */
 	public static function method_exists($class, $method) {
-		if(PROFILE)
+		if(PROFILE) {
 			Profiler::mark("Object::method_exists");
+		}
 
 		// Gets class name if $class is an object.
 		if(is_object($class)) {
@@ -225,80 +231,73 @@ abstract class Object {
 			$object = null;
 		}
 
+		// trim and bring to lowercase.
 		$class = strtolower(trim($class));
 		$method = strtolower(trim($method));
 
-		// Class or method are null?
-		if(empty($class) || empty($method)) {
-			unset($class, $method);
-			if(PROFILE)
-				Profiler::unmark("Object::method_exists");
-			return false;
+		// last checks
+		if($class == "" || $method == "") {
+			throw new InvalidArgumentException("Class and method must be a valid string.");
 		}
 
-		if(isset(self::$method_cache[$class . "::" . $method])) {
-
-			// object-case
-			if(!self::$method_cache[$class . "::" . $method] && self::checkForObjectMethod($object, $method)) {
-				unset($class, $method);
-				if(PROFILE)
-					Profiler::unmark("Object::method_exists");
-				return true;
+		if($res = self::method_exists_on_object($class, $method, $object) || self::check_for_extra_methods_recursive($class, $method)) {
+			
+			// we hold a method-cache to react to queries faster after first check.
+			if(!isset(self::$method_cache[$class . "::" . $method]) && $res != self::METHOD_ON_OBJECT_FOUND) {
+				self::$method_cache[$class . "::" . $method] = true;
 			}
 
-			if(PROFILE)
-				Profiler::unmark("Object::method_exists");
-			return self::$method_cache[$class . "::" . $method];
-		}
-
-		// check native
-		if(method_exists($class, $method) && is_callable(array($class, $method))) {
-			self::$method_cache[$class . "::" . $method] = true;
-			unset($class, $method);
-			if(PROFILE)
-				Profiler::unmark("Object::method_exists");
-			return true;
-		}
-
-		// check in DB
-		if(isset(self::$extra_methods[$class][$method]) || isset(self::$temp_extra_methods[$class][$method])) {
-			self::$method_cache[$class . "::" . $method] = true;
-			unset($class, $method);
-			if(PROFILE)
-				Profiler::unmark("Object::method_exists");
-			return true;
-		}
-
-		// check on object
-		if(self::checkForObjectMethod($object, $method)) {
-			unset($class, $method);
-			if(PROFILE)
-				Profiler::unmark("Object::method_exists");
-			return true;
-		}
-
-		// check parents
-		if(PROFILE)
-			Profiler::mark("Object::method_exists after");
-
-		if(self::checkForExtraMethodsRecursive($class, $method)) {
-			Profiler::unmark("Object::method_exists after");
-			Profiler::unmark("Object::method_exists");
 			return true;
 		}
 
 		self::$method_cache[$class . "::" . $method] = false;
 
-		unset($c, $method, $class);
 		if(PROFILE) {
-			Profiler::unmark("Object::method_exists after");
 			Profiler::unmark("Object::method_exists");
 		}
 
 		return false;
 	}
 
-	public static function checkForObjectMethod($o, $m) {
+	/**
+	 * searches for method and returns true or false when exists or not.
+	 * it won't search recusrivly upwards. arguments must be trimmed and lowercase.
+	*/
+	protected static function method_exists_on_object($class, $method, $object = null) {
+		
+		if(isset(self::$method_cache[$class . "::" . $method])) {
+			// object-case
+			// if we think as of method-cache that the method does not exist, but we have an instance
+			// then we check also if it might exist on object only.
+			if(!self::$method_cache[$class . "::" . $method] && self::check_for_object_method($object, $method)) {
+				return self::METHOD_ON_OBJECT_FOUND;
+			}
+
+			return self::$method_cache[$class . "::" . $method];
+		}
+
+		// check native
+		if(method_exists($class, $method) && is_callable(array($class, $method))) {
+			return true;
+		}
+
+		// check in DB
+		if(isset(self::$extra_methods[$class][$method]) || isset(self::$temp_extra_methods[$class][$method])) {
+			return true;
+		}
+
+		// check on object
+		if(self::check_for_object_method($object, $method)) {
+			return self::METHOD_ON_OBJECT_FOUND;
+		}
+
+		return false;
+	}
+
+	/**
+	 * calls __cancall when object is given.
+	*/
+	protected static function check_for_object_method($o, $m) {
 		if(is_object($o) && method_exists($o, "__cancall")) {
 			return $o->__canCall($m);
 		} else {
@@ -306,12 +305,15 @@ abstract class Object {
 		}
 	}
 
-	public static function checkForExtraMethodsRecursive($c, $m) {
+	/**
+	 * checks recursivly upwards if extra-method was given.
+	*/
+	protected static function check_for_extra_methods_recursive($c, $m) {
 		if(isset(self::$extra_methods[$c][$m])) {
-			// cache result for ckass
+			// cache result for class
 			self::$method_cache[$c . "::" . $m] = true;
 		} else if($c = ClassInfo::get_parent_class($c)) {
-			self::$method_cache[$c . "::" . $m] = self::checkForExtraMethodsRecursive($c, $m);
+			self::$method_cache[$c . "::" . $m] = self::check_for_extra_methods_recursive($c, $m);
 		} else {
 			self::$method_cache[$c . "::" . $m] = false;
 		}
@@ -332,6 +334,8 @@ abstract class Object {
 			$obj = strtolower($obj);
 			$ext = strtolower($ext);
 			$arguments = "";
+
+			// check for arguments given to extensions.
 			if(preg_match('/^([a-zA-Z0-9_\-]+)\((.*)\)$/', $ext, $exts)) {
 				$ext = $exts[0];
 				$arguments = $exts[1];
@@ -386,7 +390,7 @@ abstract class Object {
 			}
 
 			if(ClassInfo::isAbstract($class)) {
-				throw new LogicException("Cannot initiate empty Class");
+				throw new LogicException("Cannot initiate abstract Class");
 			}
 
 			// generate Class
@@ -394,7 +398,7 @@ abstract class Object {
 				self::$cache_singleton_classes[$class] = new $class;
 				$class = clone self::$cache_singleton_classes[$class];
 			} else {
-				throw new LogicException("Cannot initiate empty Class");
+				throw new LogicException("Cannot initiate unknown class");
 			}
 		}
 
@@ -434,6 +438,9 @@ abstract class Object {
 		$this->initStatics();
 	}
 	
+	/**
+	 * defines statics.
+	*/
 	public function initStatics() {
 		if(!isset(ClassInfo::$set_save_vars[$this->classname])) {
 			ClassInfo::setSaveVars($this->classname);
@@ -463,8 +470,6 @@ abstract class Object {
 	 * @return mixed The return of the function.
 	 */
 	public function __call($name, $args) {
-		if($name == "bool")
-			return true;
 
 		$name = trim(strtolower($name));
 
@@ -499,7 +504,7 @@ abstract class Object {
 			}
 		}
 
-		throw new BadMethodCallException("Call to undefined method ' . $this->classname . '::' . $name . '");
+		throw new BadMethodCallException("Call to undefined method '" . get_class($this) . "::" . $name . "'");
 	}
 
 	/**
@@ -730,6 +735,13 @@ abstract class Object {
 	
 	public function __wakeup() {
 		$this->initStatics();
+	}
+
+	/**
+	 * bool.
+	*/
+	public function bool() {
+		return true;
 	}
 
 }

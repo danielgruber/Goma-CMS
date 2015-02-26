@@ -1,4 +1,4 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
  * @package		Goma\Core
  *
@@ -6,7 +6,6 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-defined("IN_GOMA") OR die();
 
 define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
 

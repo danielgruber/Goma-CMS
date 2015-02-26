@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class ViewAccessableDataTest extends UnitTestCase implements TestAble {
+class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 	
 	/**
 	 * checks for data
@@ -26,6 +26,28 @@ class ViewAccessableDataTest extends UnitTestCase implements TestAble {
 	public function testCheckNoData() {
 		$view = new viewaccessableData();
 		$this->assertFalse($view->bool());
+	}
+
+	/**
+	 * test customise.
+	*/
+	public function testCustomise() {
+		$data = new ViewAccessableData(array("blah" => "blub"));
+		$this->assertEqual($data->blah, "blub");
+		$this->assertEqual($data->blah_cust, null);
+		$this->assertEqual($data->blub, null);
+
+		// customise this
+		$customised = $data->customise(array("blah_cust" => "test"));
+		$this->assertEqual($data->blah_cust, "test");
+		$this->assertEqual($customised->blah_cust, "test");
+		$this->assertEqual($customised->blub, null);
+
+		$newCustomised = $data->customisedObject(array("blub" => "blah"));
+		$this->assertEqual($data->blah_cust, "test");
+		$this->assertEqual($data->blub, null);
+		$this->assertEqual($newCustomised->blah_cust, "test");
+		$this->assertEqual($newCustomised->blub, "blah");
 	}
 	
 	/**

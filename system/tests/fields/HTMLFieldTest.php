@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class HTMLFieldTest extends UnitTestCase implements TestAble {
+class HTMLFieldTest extends GomaUnitTest implements TestAble {
 	/**
 	 * tests size-matching
 	 *
