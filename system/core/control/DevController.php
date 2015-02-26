@@ -5,7 +5,7 @@
  * building versions
  *
  * @package		Goma\Core
- * @version		2.0
+ * @version		2.1.1
  */
 class Dev extends RequestHandler {
 	/**
@@ -13,22 +13,24 @@ class Dev extends RequestHandler {
 	 */
 	public static $title = "Creating new Database";
 
-	public $url_handlers = array(	"build" => "builddev", 
-									"rebuildcaches" => "rebuild", 
-									"flush" => "flush", 
+	public $url_handlers = array(	"build" 						=> "builddev", 
+									"rebuildcaches" 				=> "rebuild", 
+									"flush" 						=> "flush", 
 									"buildDistro/\$name!/\$subname" => "buildAppDistro", 
-									"buildDistro" => "buildDistro", 
-									"cleanUpVersions" => "cleanUpVersions", 
-									"setChmod777" => "setChmod777", 
+									"buildDistro" 					=> "buildDistro", 
+									"cleanUpVersions" 				=> "cleanUpVersions", 
+									"setChmod777" 					=> "setChmod777",
+									"setPermissionsSafeMode"		=> "setPermissionsSafeMode",
 									"test" => "test");
 
 	public $allowed_actions = array("builddev", 
 									"rebuild", 
 									"flush", 
-									"buildDistro" 		=> "->isDev", 
-									"buildAppDistro" 	=> "->isDev", 
-									"buildExpDistro" 	=> "->isDev", 
-									"cleanUpVersions" 	=> "->isDev", 
+									"buildDistro" 				=> "->isDev", 
+									"buildAppDistro" 			=> "->isDev", 
+									"buildExpDistro" 			=> "->isDev", 
+									"cleanUpVersions" 			=> "->isDev", 
+									"setPermissionsSafeMode"	=> "->isDev",
 									"setChmod777", 
 									"test");
 
@@ -342,6 +344,23 @@ class Dev extends RequestHandler {
 		}
 
 		return '<h3>DB-Cleanup</h3>' . $log;
+	}
+
+	/**
+ 	 * safe-mode.
+	*/
+	public function setPermissionsSafeMode() {
+
+		if(isset($_GET["safemode"])) {
+			if($_GET["safemode"] == 1 || $_GET["safemode"] == 0) {
+				FileSystem::$safe_mode = (boolean) $_GET["safemode"];
+				writeProjectConfig(array("safe_mode" => (boolean) $_GET["safemode"]));
+			}
+		}
+
+		FileSystem::applySafeMode();
+
+		return "OK";
 	}
 
 	/**

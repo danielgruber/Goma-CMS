@@ -642,8 +642,8 @@ abstract class g_SoftwareType {
 	 * gets current index data or an array with fileindex and packages as empty arrays.
 	*/
 	public static function getIndexData() {
-		if(file_exists($appFolder . "/.index-db")) {
-			$data = @unserialize(file_get_contents($appFolder . "/.index-db"));
+		if(file_exists(self::$package_folder . "/.index-db")) {
+			$data = @unserialize(file_get_contents(self::$package_folder . "/.index-db"));
 			if($data == null) {
 				$data = array("fileindex" => array(), "packages" => array());
 			}
@@ -701,10 +701,12 @@ abstract class g_SoftwareType {
 				}
 			}
 
-			if($permissionsValid) {
+			if(!$errors) {
 				FileSystem::write(ROOT . "system/installer/data/apps/.index-db", serialize($data));
 			}
 		}
+
+		return $errors;
 	}
 
 	/**

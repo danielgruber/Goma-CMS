@@ -515,7 +515,7 @@ class ClassInfo extends Object {
 			$permissionsFalse = "";
 			if($info) {
 				foreach($info as $f) {
-					$permissionsFalse = '<li>' . $f . '</li>';;
+					$permissionsFalse = '<li>' . $f . '</li>';
 				}
 			}
 
@@ -528,7 +528,12 @@ class ClassInfo extends Object {
 			}
 
 			require_once(FRAMEWORK_ROOT . "/libs/GFS/SoftwareType.php");
-			g_SoftwareType::buildPackageIndex();
+			$errors = g_SoftwareType::buildPackageIndex();
+			if($errors) {
+				foreach($errors as $f) {
+					$permissionsFalse = '<li>' . $f . '</li>';
+				}
+			}
 
 
 			if($permissionsValid === false) {

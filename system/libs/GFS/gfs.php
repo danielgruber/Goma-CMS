@@ -160,7 +160,7 @@ class GFS extends Object {
 	/**
 	 * file-permissions for files that should be written.
 	*/
-	private $writeMode = 0777;
+	protected $writeMode = 0777;
 	
 	/**
 	 *@name __construct
