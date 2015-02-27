@@ -183,9 +183,9 @@ class Controller extends RequestHandler
 		/**
 	 	 * sets the model.
 		*/
-		public function setModelInst(ViewAccessableData $model, $name = null) {
+		public function setModelInst(ViewAccessableData $model, $name = false) {
 			$this->model_inst = $model;
-			$this->model = isset($name) ? $name : $model->classname;
+			$this->model = ($name !== false) ? $name : $model->classname;
 
 			$model->controller = $this;
 		}
@@ -459,10 +459,10 @@ class Controller extends RequestHandler
 			// add the right controller
 			$controller = clone $this;
 			$model->controller($controller);
-			
+
 			$form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null);
 			$form->setSubmission($submission);
-			
+
 			// we add where to the form
 			foreach($this->where as $key => $value)
 			{

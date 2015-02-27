@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		1.1
+ * @version		1.1.1
  */
 
 define("__APPLIB_FILE", FRAMEWORK_ROOT . "core/applibs.php");
@@ -98,7 +98,7 @@ class GomaSeperatedEnvironment {
 	public function build($userCode) {
 		$file = CACHE_DIRECTORY . "ext." . randomString(10) . ".php";
 
-		$code .= $this->buildCode() . $userCode;
+		$code = $this->buildCode() . $userCode;
 
 		FileSystem::write(ROOT . $file, $code);
 		return $file;

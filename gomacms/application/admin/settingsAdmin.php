@@ -53,6 +53,7 @@ class settingsAdmin extends adminItem
 	 *@name submit_form
 	*/
 	public function submit_form($data, $form, $model = null) {
+
 		if(isset($data["lang"], $data["status"], $data["timezone"], $data["date_format_date"])) {
 			if(!file_exists(ROOT . LANGUAGE_DIRECTORY . $data["lang"])) {
 				throwError(6, "Invalid-Error", "Selected language not existing!");
@@ -70,8 +71,9 @@ class settingsAdmin extends adminItem
 				register_shutdown_function(array("settingsAdmin", "upgradeSafeMode"));
 			}
 		} else {
-			throwError(6, "Invalid-Error", "Too less keys in data to write settings.");
+			throw new LogicException("settingsAdmin::submit_form needs at least lang, status, timezone and date_format_date.");
 		}
+		
 		parent::safe($data, $form, $model);
 	}
 	

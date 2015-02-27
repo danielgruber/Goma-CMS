@@ -269,8 +269,9 @@ class adminItem extends AdminController implements PermProvider {
 		$model->controller = $controller;
 		return $model;
 	}
+
 	/**
-	 * we provide all methods from the controllerInst too
+	 * we provide all methods of the model-controller, too
 	 *
 	 * @name 	__call
 	 * @access 	public
@@ -285,7 +286,7 @@ class adminItem extends AdminController implements PermProvider {
 	}
 
 	/**
-	 * we provide all methods of the controller, too
+	 * we provide all methods of the model-controller, too
 	 * method_exists-overloading-api of @see Object
 	 *
 	 * @name 	__cancall
@@ -380,12 +381,18 @@ class adminItem extends AdminController implements PermProvider {
 
 		if(!isset($this->controllerInst)) {
 
+			// preserve controller
+			$controller = $this->modelInst()->controller;
+
 			// try to get controller from default model. at the moment adminItem is the controller.
 			$this->model_inst->controller = Object::instance($this->model())->controller;
 			if($c = $this->model_inst->controller()) {
 
 				// set Model-Inst.
-				$c->setModelInst($this->model_inst, null);
+				$c->setModelInst(clone $this->model_inst, null);
+
+				// adminItem should be always the owner of its own model-inst.
+				$this->model_inst->controller = $controller;
 				$this->controllerInst = $c;
 			} else {
 				return false;
