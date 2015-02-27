@@ -3742,8 +3742,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	{
 			if (isset($controller)) {
 				$this->controller = clone $controller;
-				$this->controller->model_inst = $this;
-				$this->controller->model = $this->classname;
+				$this->controller->setModelInst($this);
 				$this->controller->request = null;
 				return $this->controller;
 			}
@@ -3758,19 +3757,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if ($this->controller != "")
 			{
 					$this->controller = new $this->controller;
-					$this->controller->model_inst = $this;
-					$this->controller->model = $this->classname;
+					$this->controller->setModelInst($this);
 					return $this->controller;
 			} else {
 				
 				if (ClassInfo::exists($this->classname . "controller"))
 				{
 						$c = $this->classname . "controller";
-						$this->controller = new $c;
-						$this->controller->model_inst = $this;
-						$this->controller->model = $this->classname;
+						$this->controller = new $c();
+						$this->controller->setModelInst($this);
 						return $this->controller;
 				} else {
+
+					// find existing controller in parent classes.
 					if (ClassInfo::getParentClass($this->classname) != "dataobject") {
 						$parent = $this->classname;
 						while(($parent = ClassInfo::getParentClass($parent)) != "dataobject") {
@@ -3779,9 +3778,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 							
 							if (ClassInfo::exists($parent . "controller")) {
 								$c = $parent . "controller";
-								$this->controller = new $c;
-								$this->controller->model_inst = $this;
-								$this->controller->model = $this->classname;
+								$this->controller = new $c();
+								$this->controller->setModelInst($this);
 								return $this->controller;
 							}
 						}

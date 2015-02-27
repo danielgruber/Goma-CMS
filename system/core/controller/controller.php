@@ -181,6 +181,16 @@ class Controller extends RequestHandler
 		}
 		
 		/**
+	 	 * sets the model.
+		*/
+		public function setModelInst(ViewAccessableData $model, $name = null) {
+			$this->model_inst = $model;
+			$this->model = isset($name) ? $name : $model->classname;
+
+			$model->controller = $this;
+		}
+
+		/**
 		 * returns the model-object
 		 *
 		 *@name modelInst

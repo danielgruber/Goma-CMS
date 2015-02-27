@@ -1743,8 +1743,7 @@ class DataObjectSet extends DataSet {
 		
 		if(isset($controller)) {
 			$this->controller = clone $controller;
-			$this->controller->model_inst = $this;
-			$this->controller->model = $this->dataobject->classname;
+			$this->controller->setModelInst($this, $this->dataobject->classname);
 			return $this->controller;
 		}
 		
@@ -1757,35 +1756,15 @@ class DataObjectSet extends DataSet {
 		
 		if($this->controller != "")
 		{
-				$this->controller = new $this->controller;
-				$this->controller->model_inst = $this;
-				$this->controller->model = null;
+				$this->controller = new $this->controller();
+				$this->controller->setModelInst($this, $this->dataobject->classname);
 				return $this->controller;
 		} else {
 			
-			if(ClassInfo::exists($this->dataobject->classname . "controller"))
-			{
-					$c = $this->dataobject->classname . "controller";
-					$this->controller = new $c;
-					$this->controller->model_inst = $this;
-					$this->controller->model = null;
-					return $this->controller;
-			} else {
-				if(ClassInfo::getParentClass($this->dataobject->classname) != "dataobject") {
-					$parent = $this->dataobject->classname;
-					while(($parent = ClassInfo::getParentClass($parent)) != "dataobject") {
-						if(!$parent)
-							return false;
-						
-						if(ClassInfo::exists($parent . "controller")) {
-							$c = $parent . "controller";
-							$this->controller = new $c;
-							$this->controller->model_inst = $this;
-							$this->controller->model = null;
-							return $this->controller;
-						}
-					}
-				}
+			$controller = $this->dataobject->controller();
+			if($controller) {
+				$controller->setModelInst($this, $this->dataobject->classname);
+				return $controller;
 			}
 		}
 		return false;

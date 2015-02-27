@@ -1,18 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 02.11.2013
-  * $Version 2.3.2
-*/   
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-
-/**
- * new AdminItem
+ * base-class for every "tab" which is visible in the admin-panel.
+ *
+ * @package 	goma framework
+ * @link 		http://goma-cms.org
+ * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 		Goma-Team
+ * @version 	2.4
+ *
+ * last modified: 27.02.2015
 */
 class adminItem extends AdminController implements PermProvider {
 	/**
@@ -276,8 +272,8 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * we provide all methods from the controllerInst too
 	 *
-	 *@name __call
-	 *@access public
+	 * @name 	__call
+	 * @access 	public
 	*/
 	public function __call($name, $args) {
 		
@@ -287,18 +283,20 @@ class adminItem extends AdminController implements PermProvider {
 		}
 		return parent::__call($name, $args);
 	}
+
 	/**
-	 * we provide all methods from the controllerInst too
-	 * method_exists-overloading-api
+	 * we provide all methods of the controller, too
+	 * method_exists-overloading-api of @see Object
 	 *
-	 *@name __cancall
-	 *@access public
+	 * @name 	__cancall
+	 * @access 	public
+	 * @param 	string method-name
 	*/
 	public function __cancall($name) {
 		if($c = $this->getControllerInst()) {
 			return Object::method_exists($c, $name);
 		} else {
-			return false;
+			throw new LogicException("Every AdminItem requires a model with controller.");
 		}
 	}
 	
@@ -379,17 +377,15 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function getControllerInst() {
-		
-		if(!$this->controllerInst) {
-			$controller = $this->modelInst()->controller;
 
-			$this->model_inst->controller = Object::instance($this->model())->controller();
-			$c = $this->model_inst->controller();
-			if($c) {
-				$c->model_inst = $this->model_inst;
-				$c->model = null;
-				$this->model_inst->controller = $controller;
-				unset($controller);
+		if(!isset($this->controllerInst)) {
+
+			// try to get controller from default model. at the moment adminItem is the controller.
+			$this->model_inst->controller = Object::instance($this->model())->controller;
+			if($c = $this->model_inst->controller()) {
+
+				// set Model-Inst.
+				$c->setModelInst($this->model_inst, null);
 				$this->controllerInst = $c;
 			} else {
 				return false;
