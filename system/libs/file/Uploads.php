@@ -9,9 +9,9 @@ loadlang("files");
   *	@link 		http://goma-cms.org
   *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *	@author 	Goma-Team
-  * @Version 	1.5.11
+  * @Version 	1.5.12
   *
-  * last modified: 23.01.2015
+  * last modified: 26.01.2015
 */
 class Uploads extends DataObject {
 	/**
@@ -85,98 +85,34 @@ class Uploads extends DataObject {
 			return false;
 		}
 		
-		if(!isset($deletable))
+		if(!isset($deletable)) {
 			$deletable = false;
-		
-		if(!is_object($collectionPath)) {
-			if(defined("SQL_LOADUP")) {
-				// determine id of collection
-				$collectionTree = explode(".", $collectionPath);
-				foreach($collectionTree as $collection) {
-					$data = DataObject::get_one("Uploads", array("filename" => $collection, "type" => "collection"));
-					if($data) {
-						$id = $data->id;
-					} else {
-						$collection = new Uploads(array("filename" => $collection, "type" => "collection", "collectionid" => isset($id) ? $id : 0));
-						$collection->write(false, true);
-						$id = $collection->id;
-					}
-				}	
-			} else {
-				$id = 0;
-			}
-		} else {
-			$collection = $collectionPath;
-			$collectionPath = $collection->hash();
-			$id = $collection->id;
 		}
 		
-		if(!isset($id)) {
-			return false;
+		// get collection info
+		$collection = self::getCollection($collectionPath);
+
+		// we need a collection, without SQL-DB this does not work, 
+		// but you can always create Uploads-Object by your own.
+		if($collection === null) {
+			throw new LogicException("Collection must be set. A Database-Connection is required for Uploads::addFile.");
 		}
-		
+		$collectionPath = $collection->hash();
 		
 		// determine file-position
 		FileSystem::requireFolder(UPLOAD_DIR . "/" . md5($collectionPath));
 		
-		if(filesize($realfile) < self::FILESIZE_MD5) {
-			$md5 = md5_file($realfile);
-			$object = DataObject::get("Uploads", array("md5" => $md5));
-			if($object->Count() > 0 && file_exists($object->realfile) && md5_file($object->realfile) == $md5) {
-				$file = clone $object->first();
-				$file->collectionid = $id;
-				$file->path = strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename;
-			} else {
-				// check if md5 is old
-				if($object->Count() > 0 && file_exists($object->realfile) && md5_file($object->realfile) != $md5) {
-					$object->md5 = md5_file($object->realfile);
-					$object->write(false, true);
-				}
-				$file = new Uploads(array(
-					"filename" 		=> $filename,
-					"type"			=> "file",
-					"realfile"		=> UPLOAD_DIR . "/" . md5($collectionPath) . "/" . randomString(8) . $filename,
-					"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename,
-					"collectionid" 	=> $id,
-					"deletable"		=> $deletable,
-					"md5"			=> md5_file($realfile)
-				));
-			}
-		} else {
-			$file = new Uploads(array(
-				"filename" 		=> $filename,
-				"type"			=> "file",
-				"realfile"		=> UPLOAD_DIR . "/" . md5($collectionPath) . "/" . randomString(8) . $filename,
-				"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collectionPath)) . "/" . randomString(6) . "/" . $filename,
-				"collectionid" 	=> $id,
-				"deletable"		=> $deletable
-			));
-		}
+		// generate instance of file.
+		$file = self::getFileInstance($realfile, $collection, $filename, $deletable);
 		
-		// make it a valid class-name
-		if(isset($class_name)) {
-			$class_name = trim(strtolower($class_name));
-		}
-		
-		// guess class-name
-		$guessed_class_name = self::guessFileClass($filename);
-		if(!isset($class_name)) {
-			$class_name = $guessed_class_name;
-		} else if(is_subclass_of($guessed_class_name, $class_name)) {
-			$class_name = $guessed_class_name;
-		}
-		
-		// now reinit the file-object
-		$file = $file->getClassAs($class_name);
+		// now reinit the file-object with maybe guessed class-name.
+		$file = $file->getClassAs(self::getFileClass($class_name, $filename));
 		
 		if(copy($realfile, $file->realfile)) {
-			if(!defined("SQL_LOADUP")) {
-				$file->path = $file->realfile;
-				return $file;
-			}
-			
-			if($deletable)
+
+			if($deletable) {
 				$file->forceDeletable = true;
+			}
 			
 			if($file->write(true, true)) {
 				return $file;
@@ -186,6 +122,154 @@ class Uploads extends DataObject {
 		}
 		
 		return false;
+	}
+
+	/**
+	 * get file class by class or filename.
+	 *
+	 * @name 	getFileClass
+	*/
+	public static function getFileClass($class_name, $filename) {
+		// make it a valid class-name
+		if(isset($class_name)) {
+			$class_name = trim(strtolower($class_name));
+		}
+		
+		// guess class-name
+		$guessed_class_name = self::guessFileClass($filename);
+
+		// if we dont have a given class-name, use guessed one.
+		if(!isset($class_name)) {
+			$class_name = $guessed_class_name;
+
+		// if guessed classname is a specialisation of class-name, use guessed one.
+		} else if(is_subclass_of($guessed_class_name, $class_name)) {
+			$class_name = $guessed_class_name;
+		}
+
+		return $class_name;
+	}
+
+	/**
+	 * guesses the file-class
+	 *
+	 *@name guessFileClass
+	 *@access public
+	*/
+	public static function guessFileClass($filename) {
+		$ext = strtolower(substr($filename, strrpos($filename, ".") + 1));
+		foreach(ClassInfo::getChildren("Uploads") as $child) {
+			if(in_array($ext,ClassInfo::getStatic($child, "file_extensions"))) {
+				return $child;
+			}
+		}
+		
+		return "Uploads";
+	}
+
+	/**
+	 * builds an instance of file.
+	 * it checks if file with md5 already exists and creates it if required.
+	 *
+	 * @param 	string realfile
+	 * @param 	string collection
+	 * @param 	string filename
+	 * @param 	boolean if file is auto-deletable or not
+	*/
+	public static function getFileInstance($realfile, $collection, $filename, $deletable) {
+		
+		// check for already existing file.
+		if(filesize($realfile) < self::FILESIZE_MD5) {
+			$md5 = md5_file($realfile);
+			$object = DataObject::get("Uploads", array("md5" => $md5));
+			if($object->Count() > 0 && file_exists($object->realfile)) {
+				if(md5_file($object->realfile) == $md5) {
+
+					// we found the same file, just create a new DB-Entry, cause we 
+					// don't track where db-entry is used. one db entry is for one
+					// connection to another model.
+					$file = clone $object->first();
+					$file->collectionid = $collection->id;
+					$file->path = strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collection->hash())) . "/" . randomString(6) . "/" . $filename;
+					$file->filename = $filename;
+
+					return $file;
+				} else {
+
+					// maybe file of object has changed and md5 is not valid anymore
+					// so rewrite md5-hash of object
+					$object->md5 = md5_file($object->realfile);
+					$object->write(false, true);
+				}
+			}
+		}
+
+		// generate Uploads-Object.
+		return new Uploads(array(
+			"filename" 		=> $filename,
+			"type"			=> "file",
+			"realfile"		=> UPLOAD_DIR . "/" . md5($collection->hash()) . "/" . randomString(8) . $filename,
+			"path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collection->hash())) . "/" . randomString(6) . "/" . $filename,
+			"collectionid" 	=> $collection->id,
+			"deletable"		=> $deletable,
+			"md5"			=> isset($md5) ? $md5 : null
+		));
+	}
+
+	/**
+	 * returns object of file-collection by given collection-data. (string or object)
+	 *
+	 * @name 	getCollection
+	 * @param 	mixed 		collection as string or object
+	 * @param 	boolean		use cache to cache results.
+	 * @return 	Uploads 	null if SQL not loaded up, else object of type Uploads
+	*/
+	public static function getCollection($collectionPath, $useCache = true) {
+		if(!is_object($collectionPath)) {
+			if(defined("SQL_LOADUP")) {
+
+				$cacher = new Cacher("uploads_collection_" . $collectionPath);
+				if($cacher->checkValid()) {
+					return DataObject::get_by_id("Uploads", $cacher->getData());
+				} else {
+
+					$collection = self::generateCollectionTree($collectionPath);
+
+					$cacher->write($collection->id, 86400);
+				}
+			} else {
+				return null;
+			}
+		} else {
+			$collection = $collectionPath;
+		}
+
+		return $collection;
+	}
+
+	/**
+	 * checks if collection-tree exists and gets last generated or found location.
+	 *
+	 * @name 	generateCollectionTree
+	 * @param 	string collectionPath
+	 * @return 	Uploads
+	*/
+	public static function generateCollectionTree($collectionPath) {
+		// determine id of collection
+		$collectionTree = explode(".", $collectionPath);
+
+		// check for each level of collection if it is existing.
+		foreach($collectionTree as $collection) {
+			$data = DataObject::get_one("Uploads", array("filename" => $collection, "type" => "collection"));
+			if($data) {
+				$collection = $data;
+			} else {
+				$collection = new Uploads(array("filename" => $collection, "type" => "collection", "collectionid" => isset($id) ? $id : 0));
+				$collection->write(false, true);
+			}
+		}
+
+		return $collection;
 	}
 	
 	/**
@@ -208,7 +292,6 @@ class Uploads extends DataObject {
 		$cacher = new Cacher("file_" . $this->fieldGet("realfile"));
 		$cacher->delete();
 		
-		
 		parent::onAfterRemove();
 	}
 	
@@ -220,14 +303,10 @@ class Uploads extends DataObject {
 	*/
 	public function getFile($path) {
 
-		$cropPrepends = array("Uploads/", "./Uploads/", ROOT_PATH . "Uploads/", BASE_SCRIPT . "Uploads/", ROOT_PATH . BASE_SCRIPT . "Uploads/");
-		
-		foreach($cropPrepends as $crop) {
-			if(substr($path, 0, strlen($crop)) == $crop) {
-				$path = substr($path, strlen($crop));
-			} 
+		if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
+			$path = $match[1] . "/" . $match[2] . "/" . $match[3];
 		}
-		
+
 		$cacher = new Cacher("file_" . $path);
 		if($cacher->checkValid()) {
 			$data = $cacher->getData();
@@ -243,23 +322,6 @@ class Uploads extends DataObject {
 				return false;
 			}
 		}
-	}
-	
-	/**
-	 * guesses the file-class
-	 *
-	 *@name guessFileClass
-	 *@access public
-	*/
-	public static function guessFileClass($filename) {
-		$ext = strtolower(substr($filename, strrpos($filename, ".") + 1));
-		foreach(ClassInfo::getChildren("Uploads") as $child) {
-			if(in_array($ext,ClassInfo::getStatic($child, "file_extensions"))) {
-				return $child;
-			}
-		}
-		
-		return "Uploads";
 	}
 	
 	/**
@@ -527,1109 +589,5 @@ class Uploads extends DataObject {
 		$check = true;
 		$this->callExtendig("checkPermission", $check);
 		return $check;
-	}
-}
-
-
-class UploadsController extends Controller {
-	/**
-	 * index
-	 *
-	 *@name index
-	 *@access public
-	*/
-	public function index() {
-		if($this->modelInst()->checkPermission()) {
-			if(preg_match('/\.(pdf)$/i', $this->modelInst()->filename)) {
-				HTTPResponse::setHeader("content-type", "application/pdf");
-				HTTPResponse::sendHeader();
-				readfile($this->modelInst()->realfile);
-				exit;
-			}
-			FileSystem::sendFile($this->modelInst()->realfile, $this->modelInst()->filename);
-		}
-	}
-	
-	/**
-	 * checks for the permission to do anything
-	 *
-	 *@name checkPermission
-	*/
-	public function checkPermission($action) {
-		return (parent::checkPermission($action) && $this->modelInst()->checkPermission());
-	}
-}
-
-
-class ImageUploads extends Uploads {
-	/**
-	 * add some db-fields
-	 * inherits fields from Uploads
-	 *
-	 *@name db
-	 *@access public
-	*/
-	static $db = array(
-		"width"				=> "int(5)",
-		"height"			=> "int(5)",
-		"thumbLeft"			=> "int(3)",
-		"thumbTop"			=> "int(3)",
-		"thumbWidth"		=> "int(3)",
-		"thumbHeight"		=> "int(3)"
-	);
-	
-	/**
-	 * extensions in this files are by default handled by this class
-	 *
-	 *@name file_extensions
-	 *@access public
-	*/
-	static $file_extensions = array(
-		"png",
-		"jpeg",
-		"jpg",
-		"gif",
-		"bmp"
-	);
-	
-	/**
-	 * some defaults
-	*/
-	static $default = array(
-		"thumbLeft"		=> 0,
-		"thumbTop"		=> 0,
-		"thumbWidth"	=> 100,
-		"thumbHeight"	=> 100
-	);
-	
-	/**
-	 * returns the raw-path
-	 *
-	 *@name raw
-	 *@access public
-	*/
-	public function raw() {
-		return $this->path;
-	}
-	
-	/**
-	 * to string
-	 *
-	 *@name __toString
-	 *@access public
-	*/
-	public function __toString() {
-		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->filename)) {
-			$file = $this->raw().'/index'.substr($this->filename, strrpos($this->filename, "."));
-
-			
-			if(substr($file, 0, strlen("index.php/")) != "index.php/") {
-				if(!file_exists($file)) {
-					FileSystem::requireDir(dirname($file));
-					FileSystem::write($file . ".permit", 1);
-				}
-			} else {
-				if(file_exists(substr($file, strlen("index.php/")))) {
-					$file = substr($file, strlen("index.php/"));
-				} else {
-					FileSystem::requireDir(substr(dirname($file), strlen("index.php/")));
-					FileSystem::write(substr(dirname($file), strlen("index.php/")) . ".permit", 1);
-				}
-			}
-			
-			
-			
-			return '<img src="'.$file.'" height="'.$this->height.'" width="'.$this->width.'" alt="'.$this->filename.'" />';
-		} else
-			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
-	}
-	
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 *@name getIcon
-	 *@access public
-	 *@param int - size; support for 16, 32, 64 and 128
-	*/
-	public function getIcon($size = 128, $retina = false) {
-		$ext = substr($this->filename, strrpos($this->filename, "."));
-		switch($size) {
-			case 16:
-				if($this->width > 15) {
-					if($retina && $this->width > 31) {
-						$icon = $this->path . "/setWidth/32" . $ext;
-					} else {
-						$icon = $this->path . "/setWidth/16" . $ext;
-					}
-				} else {
-					if($retina) {
-						return "images/icons/goma16/image@2x.png";
-					}
-					return "images/icons/goma16/image.png";
-				}
-			break;
-			case 32:
-				if($this->width > 31) {	
-					if($retina && $this->width > 63) {
-						$icon = $this->path . "/setWidth/64" . $ext;
-					} else {
-						$icon = $this->path . "/setWidth/32" . $ext;
-					}
-				} else {
-					if($retina) {
-						return "images/icons/goma32/image@2x.png";
-					}
-					return "images/icons/goma32/image.png";
-				}
-			break;
-			case 64:
-				if($this->width > 63) {
-					if($retina && $this->width > 127) {
-						$icon = $this->path . "/setWidth/128" . $ext;
-					} else {
-						$icon = $this->path . "/setWidth/64" . $ext;
-					}
-				} else {
-					if($retina) {
-						return "images/icons/goma64/image@2x.png";
-					}
-					return "images/icons/goma64/image.png";
-				}
-			break;
-			case 128:
-				if($this->width > 127) {
-					if($retina && $this->width > 255) {
-						$icon = $this->path . "/setWidth/256" . $ext;
-					} else {
-						$icon = $this->path . "/setWidth/128" . $ext;
-					}
-				} else {
-					return "images/icons/goma/128x128/image.png";
-				}
-			break;
-		}
-		
-		if(isset($icon)) {
-			$this->manageURL($icon);
-			return $icon;
-		}
-		
-		return "images/icons/goma/128x128/image.png";
-	}
-	
-	/**
-	 * authenticates a specific url and removes cache-files if necessary
-	 *
-	 *@name manageURL
-	*/
-	public function manageURL($file) {
-		if(substr($file, 0, strlen("index.php")) == "index.php") {
-			$file = substr($file, strlen("index.php/"));
-		}
-		
-		if(substr($file, 0, strlen("./index.php")) == "./index.php") {
-			$file = substr($file, strlen("./index.php/"));
-		}
-		
-		FileSystem::requireDir(dirname($file));
-		FileSystem::write($file . ".permit", 1);
-		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
-			@unlink($file);
-		}
-		return $file;
-	}
-	
-	public function checkForBase($file) {
-		$fileWithoutBase = substr($file, strlen("index.php/"));
-		if(file_exists($fileWithoutBase)) {
-			$file = $fileWithoutBase;
-		}
-		
-		return $file;
-	}
-	
-	/**
-	 * sets the height
-	 *
-	 *@name setHeight
-	 *@access public
-	*/
-	public function setHeight($height, $absolute = false, $html = "", $style = "") {
-	    if(!$this->path)
-	        return "";
-	        
-	       
-		// normal URL Cache
-		$file = $this->path . "/setHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/setHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-
-			$fileRetina = BASE_URI . $fileRetina;
-
-		}
-		
-		return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the width
-	 *
-	 *@name setWidth
-	 *@access public
-	*/
-	public function setWidth($width, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path . "/setWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/setWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-
-				
-		return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the Size
-	 *
-	 *@name setSize
-	 *@access public
-	*/
-	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path .'/setSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path .'/setSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		
-		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the size on the original,  so not the thumbnail we saved
-	 *
-	 *@name orgSetSize
-	 *@access public
-	*/
-	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path .'/orgSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);		
-		
-		// retina
-		$fileRetina = $this->path .'/orgSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		
-		
-		
-		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the width on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetWidth
-	 *@access public
-	*/
-	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path . "/orgSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/orgSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the height on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetHeight
-	 *@access public
-	*/
-	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path . "/orgSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/orgSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-
-		}
-		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the size on the original,  so not the thumbnail we saved
-	 *
-	 *@name noCropSetSize
-	 *@access public
-	*/
-	public function noCropSetSize($width, $height, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path .'/noCropSetSize/'.$width.'/'.$height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path .'/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the width on the original, so not the thumbnail we saved
-	 *
-	 *@name noCropSetWidth
-	 *@access public
-	*/
-	public function noCropSetWidth($width, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path . "/noCropSetWidth/" . $width . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/noCropSetWidth/" . ($width * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" width="'.$width.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * sets the height on the original, so not the thumbnail we saved
-	 *
-	 *@name noCropSetHeight
-	 *@access public
-	*/
-	public function noCropSetHeight($height, $absolute = false, $html = "", $style = "") {
-	     if(!$this->path)
-	        return "";
-	        
-		// normal URL Cache
-		$file = $this->path . "/noCropSetHeight/" . $height . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($file);
-		
-		// retina
-		$fileRetina = $this->path . "/noCropSetHeight/" . ($height * 2) . substr($this->filename, strrpos($this->filename, "."));
-		$this->manageURL($fileRetina);
-		
-		$file = $this->checkForBase($file);
-		$fileRetina = $this->checkForBase($fileRetina);
-		
-		if($absolute) {
-			$file = BASE_URI . $file;
-			
-			$fileRetina = BASE_URI . $fileRetina;
-		}
-		
-		return '<img src="' . $file . '" data-retina="' . $fileRetina . '" height="'.$height.'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
-	}
-	
-	/**
-	 * returns width
-	 *
-	 *@name width
-	 *@access public
-	*/
-	public function width() {
-		if(preg_match('/^[0-9]+$/', $this->fieldGET("width")) && $this->fieldGET("width") != 0) {
-			return $this->fieldGet("width");
-		}
-		
-		$image = new RootImage($this->realfile);
-		$this->setField("width", $image->width);
-		$this->write(false, true);
-		return $image->width;
-	}
-	
-	/**
-	 * returns height
-	 *
-	 *@name height
-	 *@access public
-	*/
-	public function height() {
-		if(preg_match('/^[0-9]+$/', $this->fieldGET("height"))  && $this->fieldGET("height") != 0) {
-			return $this->fieldGet("height");
-		}
-		
-		$image = new RootImage($this->realfile);
-		$this->setField("height", $image->height);
-		$this->write(false, true);
-		return $image->height;
-	}
-
-}
-
-class ImageUploadsController extends UploadsController {
-	/**
-	 * handlers
-	 *
-	 *@name handlers
-	 *@access public
-	*/
-	public $url_handlers = array(
-		"setWidth/\$width" 					=> "setWidth",
-		"setHeight/\$height"				=> "setHeight",
-		"setSize/\$width/\$height"			=> "setSize",
-		"orgSetWidth/\$width" 				=> "orgSetWidth",
-		"orgSetHeight/\$height"				=> "orgSetHeight",
-		"orgSetSize/\$width/\$height"		=> "orgSetSize",
-		"noCropSetWidth/\$width" 			=> "noCropSetWidth",
-		"noCropSetHeight/\$height"			=> "noCropSetHeight",
-		"noCropSetSize/\$width/\$height"	=> "noCropSetSize"
-	);
-	
-	/**
-	 * allowed actions
-	*/
-	
-	public $allowed_actions = array(
-		"setWidth",
-		"setHeight",
-		"setSize",
-		"orgSetSize",
-		"orgSetWidth",
-		"orgSetHeight",
-		"noCropSetSize",
-		"noCropSetWidth",
-		"nocropSetHeight"
-	);
-	/**
-	 * sends the image to the browser
-	 *
-	 *@name index
-	 *@access public
-	*/
-	public function index() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
-			
-			// generate
-			$image = new RootImage($this->modelInst()->realfile);
-			
-			// write to cache
-			if(preg_match('/index\.(jpg|jpeg|png|bmp|gif)$/', URL)) {
-				FileSystem::requireDir($cacheDir);
-				$image->toFile(ROOT . URL);
-			}
-			
-			// output
-			$image->output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the width
-	 *
-	 *@name setWidth
-	 *@access public
-	*/
-	public function setWidth() {
-
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			$width = (int) $this->getParam("width");
-			
-			$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			// create
-			$image = new RootImage($this->modelInst()->realfile);
-			
-			$img = $image->createThumb($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-			try {
-				// write to cache
-				FileSystem::requireDir($cacheDir);
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the height
-	 *
-	 *@name setHeight
-	 *@access public
-	*/
-	public function setHeight() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			$height = (int) $this->getParam("height");
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the size
-	 *
-	 *@name setSize
-	 *@access public
-	*/
-	public function setSize() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			$height = (int) $this->getParam("height");
-			$width = (int) $this->getParam("width");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the size on the original 
-	 *
-	 *@name orgSetSize
-	 *@åccess public
-	*/
-	public function orgSetSize() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-
-			$height = (int) $this->getParam("height");
-			$width = (int) $this->getParam("width");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb($width, $height, 0, 0, 100, 100);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the width on the original 
-	 *
-	 *@name orgSetWidth
-	 *@åccess public
-	*/
-	public function orgSetWidth() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-
-			$width = (int) $this->getParam("width");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb($width, null, 0, 0, 100, 100);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the height on the original
-	 *
-	 *@name orgSetHeight
-	 *@access public
-	*/
-	public function orgSetHeight() {	
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			$height = (int) $this->getParam("height");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb(null, $height, 0, 0, 100, 100);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the size on the original 
-	 *
-	 *@name noCropSetSize
-	 *@åccess public
-	*/
-	public function noCropSetSize() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			$height = (int) $this->getParam("height");
-			$width = (int) $this->getParam("width");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->resize($width, $height, true);
-			
-			// write to cache
-			try {
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the width on the original 
-	 *
-	 *@name orgSetWidth
-	 *@åccess public
-	*/
-	public function noCropSetWidth() {
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			$width = (int) $this->getParam("width");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb($width, null, 0, 0, 100, 100);
-			
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-	
-	/**
-	 * sets the height on the original
-	 *
-	 *@name noCropSetHeight
-	 *@access public
-	*/
-	public function noCropSetHeight() {	
-		if(preg_match('/\.(jpg|jpeg|png|gif|bmp)/i', $this->modelInst()->filename)) {
-			
-			if(!file_exists(ROOT . URL . ".permit"))
-				return false;
-			
-			$height = (int) $this->getParam("height");
-			
-			// create image
-			$image = new RootImage($this->modelInst()->realfile);
-			$img = $image->createThumb(null, $height, 0, 0, 100, 100);
-			try {
-				// write to cache
-				FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
-				$img->toFile(ROOT . URL);
-			} catch(Exception $e) {
-				log_exception($e);
-			}
-			
-			// output
-			$img->Output();
-		}
-		
-		exit;
-	}
-}
-
-class UploadController extends Controller {
-	/**
-	 * handler
-	 *
-	 *@name url_handlers
-	 *@access public
-	*/
-	public $url_handlers = array(
-		"\$collection/\$hash/\$filename" => "handleFile"
-	);
-	
-	/**
-	 * allow action
-	 *
-	 *@name allowed_actions
-	 *@access public
-	*/
-	public $allowed_actions = array(
-		"handleFile"
-	);
-	
-	/**
-	 * index
-	*/
-	public function index() {
-		return false;
-	}
-	
-	/**
-	 * handles a file
-	 *
-	 *@name handleFile
-	 *@access public
-	*/
-	public function handleFile() {
-		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
-		
-		if($data->count() == 0) {
-			return false;
-		}
-		
-		if(!file_exists($data->first()->realfile)) {
-			$data->first()->remove(true);
-			return false;
-		}
-		
-		session_write_close();
-		
-		return $data->first()->controller()->handleRequest($this->request);
-	}	
-}
-
-class GravatarImageHandler extends ImageUploads {
-	
-	/**
-	 * add db-fields for email
-	 *
-	 *@name db
-	*/
-	static $db = array(
-		"email"	=> "varchar(200)"
-	);
-	
-	/**
-	 * Get either a Gravatar URL or complete image tag for a specified email address.
-	 *
-	 * @param string $email The email address
-	 * @param string $s Size in pixels, defaults to 80px [ 1 - 2048 ]
-	 * @param string $d Default imageset to use [ 404 | mm | identicon | monsterid | wavatar ]
-	 * @param string $r Maximum rating (inclusive) [ g | pg | r | x ]
-	 * @param boole $img True to return a complete IMG tag False for just the URL
-	 * @param array $atts Optional, additional key/value attributes to include in the IMG tag
-	 * @return String containing either just a URL or a complete image tag
-	 * @source http://gravatar.com/site/implement/images/php/
-	 */
-	function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array(), $html = "", $style = "" ) {
-		if(isset($_SERVER["HTTPS"])) {
-			$url = 'https://secure.gravatar.com/avatar/';	
-		} else {
-			$url = 'http://www.gravatar.com/avatar/';
-		}
-		$url .= md5( strtolower( trim( $email ) ) );
-		$urlRetina = $url;
-		
-		$url .= "?s=$s&d=$d&r=$r&.jpg";
-		$sR = $s * 2;
-		$urlRetina .= "?s=$sR&d=$d&r=$r&.jpg";
-		
-		if ( $img ) {
-			$url = '<img src="' . $url . '" data-retina="'.$urlRetina.'"';
-			foreach ( $atts as $key => $val )
-				$url .= ' ' . $key . '="' . $val . '"';
-			$url .= ' style="'.$style.'" '.$html.' />';
-		}
-		return $url;
-	}
-	
-	/**
-	 * returns the raw-path
-	 *
-	 *@name raw
-	 *@access public
-	*/
-	public function raw() {
-		return self::get_gravatar($this->email, 500);
-	}
-	/**
-	 * to string
-	 *
-	 *@name __toString
-	 *@access public
-	*/
-	public function __toString() {
-		return '<img src="'.$this->raw().'" alt="'.$this->filename.'" />';
-	}
-	
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 *@name getIcon
-	 *@access public
-	 *@param int - size; support for 16, 32, 64 and 128
-	*/
-	public function getIcon($size = 128, $retina = false) {
-		if($retina) {
-			$size = $size * 2;
-		}
-		
-		return self::get_gravatar($this->email, $size);
-	}
-	
-	/**
-	 * sets the height
-	 *
-	 *@name setHeight
-	 *@access public
-	*/
-	public function setHeight($height, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $height, "mm", "g", true, array("height" => $height), $html, $style);
-	}
-	
-	/**
-	 * sets the width
-	 *
-	 *@name setWidth
-	 *@access public
-	*/
-	public function setWidth($width, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array("width" => $width), $html, $style);
-	}
-	
-	/**
-	 * sets the Size
-	 *
-	 *@name setSize
-	 *@access public
-	*/
-	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array("height" => $height, "width" => $width), $html, $style);
-	}
-	
-	/**
-	 * sets the size on the original,  so not the thumbnail we saved
-	 *
-	 *@name orgSetSize
-	 *@access public
-	*/
-	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
-	}
-	
-	/**
-	 * sets the width on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetWidth
-	 *@access public
-	*/
-	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
-	}
-	
-	/**
-	 * sets the height on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetHeight
-	 *@access public
-	*/
-	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
-		return self::get_gravatar($this->email, $height, "mm", "g", true, array(), $html, $style);
-	}
-	
-	/**
-	 * returns width
-	 *
-	 *@name width
-	 *@access public
-	*/
-	public function width() {
-		return 500;
-	}
-	
-	/**
-	 * returns height
-	 *
-	 *@name height
-	 *@access public
-	*/
-	public function height() {
-		return 500;
 	}
 }

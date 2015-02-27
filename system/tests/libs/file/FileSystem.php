@@ -48,8 +48,27 @@ class FileSystemTest extends GomaUnitTest {
 
 		$this->assertTrue(file_exists($this->dir . "/blah/blub/test.txt"));
 
+		// test copy
+		FileSystem::copy($this->dir . "/blah", $this->dir . "/copyofblah");
+		$this->assertTrue(file_exists($this->dir . "/copyofblah/blub/test.txt"));
+
 		FileSystem::delete($this->dir);
 
 		$this->assertFalse(file_exists($this->dir));
+	}
+
+	public function testFileSize() {
+
+		$sizes = array(
+			1000 	=> "1000B",
+			10000 	=> "9.8K",
+			20000	=> "19.5K",
+			2097152	=> "2M"
+		);
+
+		foreach($sizes as $size => $nice) {
+			$this->assertEqual(FileSystem::filesize_nice($size), $nice, "FileSize-Nice: $size should be printed as $nice, but is ".FileSystem::filesize_nice($size));
+		}
+		
 	}
 }
