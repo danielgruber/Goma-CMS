@@ -155,6 +155,7 @@ class adminItem extends AdminController implements PermProvider {
 		
 		if(count($this->models) == 1)
 		{
+
 			$m = arraylib::first($this->models);
 			if(!is_object($this->model_inst))
 				$this->model_inst = $this->decorateModel(DataObject::get($m, $this->where), array(), $this);
@@ -294,7 +295,11 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function __cancall($name) {
-		return Object::method_exists($this->getControllerInst(), $name);
+		if($c = $this->getControllerInst()) {
+			return Object::method_exists($c, $name);
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -374,10 +379,13 @@ class adminItem extends AdminController implements PermProvider {
 	 *@access public
 	*/
 	public function getControllerInst() {
-		if(!isset($this->controllerInst)) {
+		
+		if(!$this->controllerInst) {
 			$controller = $this->modelInst()->controller;
-			$this->model_inst->controller = Object::instance($this->model())->controller;
-			if($c = $this->model_inst->controller()) {
+
+			$this->model_inst->controller = Object::instance($this->model())->controller();
+			$c = $this->model_inst->controller();
+			if($c) {
 				$c->model_inst = $this->model_inst;
 				$c->model = null;
 				$this->model_inst->controller = $controller;

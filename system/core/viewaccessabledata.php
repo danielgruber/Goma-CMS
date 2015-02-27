@@ -48,14 +48,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @acccess public
 	 * @var array
 	 */
-	public $data = array();
+	protected $data = array();
 
 	/**
 	 * contains the original data at object-generation.
 	 *
 	 * @access public
 	 */
-	public $original = array();
+	protected $original = array();
 
 	/**
 	 * customised data for template via ViewAccessableData::customise.
@@ -63,7 +63,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @access protected
 	 * @var array
 	 */
-	public $customised = array();
+	protected $customised = array();
 
 	/**
 	 * dataset-position when this object is in a specific dataset.
@@ -77,7 +77,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 * @access public
 	 */
-	public $changed = false;
+	protected $changed = false;
 
 	/**
 	 * dataset in which this Object is.
@@ -99,7 +99,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 * @access public
 	 */
-	public $defaults;
+	protected $defaults;
 
 	/**
 	 * server-vars. This is for internal usage.
@@ -323,6 +323,30 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		$new = clone $this;
 		$new->customised = array_merge($new->customised, $data);
 		return $new;
+	}
+
+	/**
+	 * returns customisation.
+	*/
+	public function getCustomisation() {
+		return $this->customised;
+	}
+
+	/**
+	 * removes customisation on this object.
+	*/
+	public function removeCustomisation() {
+		$this->customised = array();
+		return $this;
+	}
+
+	/**
+	 * removes customisation on an clone of this object and returns it.
+	*/
+	public function getObjectWithoutCustomisation() {
+		$data = clone $this;
+		$data->customised = array();
+		return $data;
 	}
 
 	/**
@@ -625,74 +649,115 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
 	 * gets the offset
 	 *
-	 *@param string - name
-	 *@param array - args
+	 * @param 	string - name
+	 * @param 	array - args
 	 */
 	public function getOffset($name, $args = array()) {
 
 		if(PROFILE)
 			Profiler::mark("ViewAccessableData::getOffset");
 
+		$name = trim($name);
+
+		$data = $this->getOffsetData($name, $args);
+		if($data === null) {
+			if(PROFILE)
+				Profiler::unmark("ViewAccessableData::getOffset");
+
+			return null;
+		}
+
+		if(PROFILE)
+			Profiler::unmark("ViewAccessableData::getOffset");
+
+		$return = $this->executeCasting($this->tryCasting($name), $data);
+
+		return $return;
+	}
+
+	/**
+	 * if try-casting is set to true it will try casting data, else it returns it blank.
+	 *
+	 * @name 	executeCasting
+	 * @param 	boolean - shouldcast
+	 * @param 	mixed data
+	*/
+	protected function executeCasting($shouldCast, $data) {
+		if(!$shouldCast) {
+			return $data;
+		}
+
+		if(is_array($data) && isset($data["casting"], $data["value"])) {
+			return DBField::getObjectByCasting($data["casting"], $lowername, $data["value"]);
+		}
+
+		if(is_array($data)) {
+			return new ViewAccessableData($data);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * give a boolean if we should just return the data without trying to cast it.
+	 *
+	 * @name 	tryCasting
+	 * @param 	string $name
+	*/
+	protected function tryCasting($name) {
+		$lowername = strtolower($name);
+		if($lowername == "baseclass") {
+			return false;
+		}
+
+		if(isset($this->customised[$lowername])) {
+			return true;
+		} 
+
+		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * gets data for offset.
+	 *
+	 * @name 	getOffsetData
+	 * @param 	name
+	 * @param 	args
+	*/
+	protected function getOffsetData($name, $args) {
 		$lowername = strtolower($name);
 
 		if($lowername == "baseclass") {
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::getOffset", "ViewAccessableData::getOffset baseclass ");
 			return $this->baseClass();
 		}
 
 		if(isset($this->customised[$lowername])) {
-			$data = $this->customised[$lowername];
+			return $this->customised[$lowername];
 			// methods
-		} else if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::getOffset", "ViewAccessableData::getOffset call " . $name);
+		} 
+
+		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 			return parent::__call($name, $args);
-		} else
+		}
 
 		// methods
 		if($this->isOffsetMethod($lowername)) {
-			$data = call_user_func_array(array($this, "get" . $name), $args);
-		} else
-
-		// data
+			return call_user_func_array(array($this, "get" . $name), $args);
+		}
 
 		if(isset($this->data[$lowername])) {
-			$data = $this->data[$lowername];
-		} else if($this->isServer($name, $lowername)) {
-			$data = $this->serverGet($name, $lowername);
+			return $this->data[$lowername];
+		} 
+
+		if($this->isServer($name, $lowername)) {
+			return $this->serverGet($name, $lowername);
 		}
 
-		if(isset($data)) {
-			if(is_array($data) && isset($data["casting"], $data["value"])) {
-				$data = DBField::getObjectByCasting($data["casting"], $lowername, $data["value"]);
-			}
-
-			if(is_array($data))
-				$data = new ViewAccessableData($data);
-
-			unset($lowername, $name);
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::getOffset");
-
-			return $data;
-		} else {
-			unset($lowername, $name);
-			/*if(DEV_MODE) {
-			 $trace = debug_backtrace();
-			 if(isset($trace[1]['file']))
-			 logging('Warning: Call to undefined method ' . $this->class . '::' . $name . '
-			in '.$trace[1]['file'].' on line '.$trace[1]['line']);
-			 else {
-			 logging('Warning: Call to undefined method ' . $this->class . '::' . $name .
-			'');
-			 }
-
-			 }*/
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::getOffset");
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -787,42 +852,49 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 	//!Attribute-Object-Generation
 	/**
-	 * forces making an object of the given data
+	 * generates an object from given data.
 	 *
+	 * @name 	makeObject
+	 * @param 	string key or name of object
+	 * @param 	mixed data
 	 */
 	public function makeObject($name, $data) {
 		if(PROFILE)
 			Profiler::mark("ViewAccessableData::makeObject");
 
+		$object = $this->makeObjectHelper($name, $data);
+
+		if(PROFILE)
+			Profiler::unmark("ViewAccessableData::makeObject");
+
+		return $object;
+	}
+
+	protected function makeObjectHelper($name, $data) {
+
 		// if is already an object
 		if(is_object($data)) {
-
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::makeObject");
 			return $data;
 
-			// if is array, get as array-object
+
+		// if is array, get as array-object
 		} else if(is_array($data)) {
 			$object = new ViewAccessAbleData($data);
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::makeObject");
+
 			return $object;
 
-			// default object
+		// default object for server-vars
 		} else if($this->isServer($name, strtolower($name))) {
 			$object = DBField::getObjectByCasting("varchar", $name, $data);
-
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::makeObject");
 			return $object;
 		} else {
+
+			// check for casting or use default-casting.
 			$casting = $this->casting();
 			$caste = isset($casting[$name]) ? $casting[$name] : ClassInfo::getStatic($this->classname, "default_casting");
 			unset($casting);
 			$object = DBField::getObjectByCasting($caste, $name, $data);
 
-			if(PROFILE)
-				Profiler::unmark("ViewAccessableData::makeObject");
 			return $object;
 		}
 	}

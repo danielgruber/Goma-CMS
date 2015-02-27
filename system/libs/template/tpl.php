@@ -534,7 +534,7 @@ class tpl extends Object
 	}
 	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
 		foreach($value as $data_loop) {
-			$data->customised["\\5"] = $data_loop;
+			$data->customise(array("\\5" => $data_loop));
 			if(is_object($data_loop)) 
 				$caller->callers[strtolower("\\5")] = new tplCaller($data_loop); 
 			else  
@@ -555,7 +555,7 @@ class tpl extends Object
 	}
 	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
 		foreach($value as $data_loop) {
-			$data->customised[strtolower("\\3")] = $data_loop; 
+			$data->customise(array("\\3" => $data_loop));
 			if(is_object($data_loop)) 
 				$caller->callers[strtolower("\\3")] = new tplCaller($data_loop); 
 			else  
@@ -577,7 +577,7 @@ class tpl extends Object
 	}
 	if(is_array($value) || (is_object($value) && $value instanceof Traversable))
 		foreach($value as $data_loop) {
-			$data->customised[strtolower("\\2")] = $data_loop;
+			$data->customise(array("\\2" => $data_loop));
 			if(is_object($data_loop)) 
 				$caller->callers[strtolower("\\2")] = new tplCaller($data_loop); 
 			else  

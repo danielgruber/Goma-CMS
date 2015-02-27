@@ -96,4 +96,49 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$view = new ViewAccessableData($data);
 		$this->assertIsA($view->doObject("data"), "DBField");
 	}
+
+	/**
+	 * tests getOffset
+	*/
+	public function testGetOffset() {
+		$data = array("blub" => 1, "blah" => "blub", "data" => "test");
+		$view = new ViewAccessableData($data);
+
+		$this->assertEqual($view->blub, 1);
+		$this->assertEqual($view->data, "test");
+		$this->assertEqual($view->blah, "blub");
+		$this->assertEqual($view->getOffset("blah"), "blub");
+
+		$cust = array("haha" => 1, "blub" => 3);
+		$view->customise($cust);
+		$this->assertEqual($view->blub, 3);
+		$this->assertEqual($view->haha, 1);
+		$this->assertEqual($view->getCustomisation(), $cust);
+
+		$c = $view->getObjectWithoutCustomisation();
+		$this->assertEqual($c->blub, 1);
+		$this->assertEqual($view->blub, 3);
+
+		$testClass = new TestViewClassMethod(array("blub" => 2));
+		$this->assertEqual($testClass->blub, 2);
+		$this->assertEqual($testClass->myLittleValue, "val");
+		$this->assertEqual($testClass->myLittleTest, "val");
+		$this->assertEqual($testClass->myLittleValue(), "val");
+		$this->assertIsA($testClass->myLittleTest(), "DBField");
+		$this->assertEqual($testClass->__call("myLittleValue", array()), "val");
+		$this->assertTrue(Object::method_exists($testClass,"myLittleValue"));
+		$this->assertTrue(Object::method_exists($testClass,"myLittleTest"));
+		$this->assertFalse(Object::method_exists($testClass->classname,"myLittleTest"));
+		$this->assertEqual($testClass->getMyLittleTest, "val");
+	}
+}
+
+class TestViewClassMethod extends ViewAccessableData {
+	public function myLittleValue() {
+		return "val";
+	}
+
+	public function getMyLittleTest() {
+		return "val";
+	}
 }
