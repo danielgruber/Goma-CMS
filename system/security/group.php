@@ -238,8 +238,3 @@ class Group extends DataObject implements HistoryData, PermProvider
 		}
 		
 }
-
-/**
- * needed by framework
-*/
-class groupController extends Controller { }

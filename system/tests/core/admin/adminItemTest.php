@@ -24,8 +24,14 @@ class AdminItemTest extends GomaUnitTest implements TestAble {
 	 * setup.
 	*/
 	public function setUp() {
+
+		// we have admin-items, that manage models with controller...
 		$this->item = new AdminItem();
 		$this->item->models = array("Uploads");
+
+		// ... and without
+		$this->itemWithoutController = new AdminItem();
+		$this->itemWithoutController->models = array("Group");
 	}
 
 	/**
@@ -46,5 +52,12 @@ class AdminItemTest extends GomaUnitTest implements TestAble {
 
 		// check if we can call controller functions
 		$this->assertTrue($this->item->__cancall("handlerequest"));
+		$this->assertTrue($this->item->__cancall("form"));
+		$this->assertFalse($this->item->__cancall("myverystupidneverexistingfunction"));
+
+		// checks for adminitems without controller
+		$this->assertEqual($this->itemWithoutController->model(), "group");
+		$this->assertFalse($this->itemWithoutController->getControllerInst());
+		$this->assertFalse($this->itemWithoutController->__cancall("handlerequest"));
 	}
 }

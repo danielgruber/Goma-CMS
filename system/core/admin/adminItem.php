@@ -297,7 +297,7 @@ class adminItem extends AdminController implements PermProvider {
 		if($c = $this->getControllerInst()) {
 			return Object::method_exists($c, $name);
 		} else {
-			throw new LogicException("Every AdminItem requires a model with controller.");
+			return false;
 		}
 	}
 	
