@@ -411,7 +411,7 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function hash() {
-		if(empty($this->realfile)) {
+		if($this->realfile == "") {
 			$this->realfile = md5($this->identifier);
 		}
 		
@@ -426,7 +426,7 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function identifier() {
-		if($this->collection()) {
+		if($this->collection) {
 			return $this->collection()->identifier() . "." . $this->filename;
 		} else {
 			return $this->filename;

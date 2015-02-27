@@ -4,7 +4,7 @@
  * Base-Interface for all DB-Fields.
  *
  * @package		Goma\Core\Model
- * @version		1.5.4
+ * @version		1.5.5
  */
 interface DataBaseField {
 	/**
@@ -366,6 +366,16 @@ class DBField extends Object implements DataBaseField
 	 *@access public
 	*/
 	public function __call($name, $args) {
+
+		if(defined("IN_UNIT_TEST")) {
+			$trace = debug_backtrace();
+			if(isset($trace[0]['file'])) {
+				throw new LogicException('Call to undefined method ' . $this->classname . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+			} else {
+				throw new LogicException('Call to undefined method ' . $this->classname . '::' . $name);
+			}
+		}
+
 		if(DEV_MODE) {
 			$trace = debug_backtrace();
 			if(isset($trace[0]['file']))
@@ -374,8 +384,10 @@ class DBField extends Object implements DataBaseField
 				log_error('Warning: Call to undefined method ' . $this->classname . '::' . $name);
 			
 			if(DEV_MODE)
-		    		AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->classname . '::' . $name . '</div>');
-		}
+		    	AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->classname . '::' . $name . '</div>');
+		} 
+
+
 		return $this->__toString();
 	}
 	

@@ -42,7 +42,7 @@ class UploadsTest extends GomaUnitTest {
 	}
 
 	public function tearDown() {
-		
+		@unlink($this->testTextFile);
 	}
 
 	public function testAddExistsAndRemove() {
@@ -97,6 +97,22 @@ class UploadsTest extends GomaUnitTest {
 
 	}
 
+	public function testNoDBInterface() {
+		$f = new Uploads(array(
+			"filename" 		=> "test.txt",
+			"type"			=> "file",
+			"realfile"		=> $this->testTextFile,
+			"path"			=> "",
+			"collectionid" 	=> 0,
+			"deletable"		=> true,
+			"md5"			=> null
+		));
+
+		$this->assertTrue(file_exists($f->realfile));
+		$this->assertFalse($f->collection);
+		$this->assertEqual($f->hash(), $f->realfile, "hash()-method should return md5 of filename.");
+	}
+
 	public function textFileTests() {
 		$textfilename = basename($this->testTextFile);
 		$textfile = Uploads::addFile(basename($this->testTextFile), $this->testTextFile, "FormUpload");
@@ -109,6 +125,8 @@ class UploadsTest extends GomaUnitTest {
 
 		$this->textfile = $textfile;
 	}
+
+
 
 	public function match($path, $file) {
 		$match = Uploads::getFile($path);

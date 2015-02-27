@@ -15,6 +15,8 @@ class GomaTestController extends RequestHandler {
 	public function handleRequest() {
 		restore_error_handler();
 		
+		define("IN_UNIT_TEST", true);
+
 		require_once(ROOT . "system/libs/thirdparty/simpletest/autorun.php");
 		
 		$areas = $this->getAreas();
