@@ -8,7 +8,7 @@
   * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *	@author 	Goma-Team
   *
-  * last modified: 12.02.2015
+  * last modified: 28.02.2015
 */
 class langSelect extends Select
 {
@@ -43,6 +43,8 @@ class langSelect extends Select
 		if($this->includeFirstOption) {
 			if(is_array($this->includeFirstOption)) {
 				$options[$this->includeFirstOption[0]] = $this->includeFirstOption[1];
+			} else if($this->includeFirstOption === true) {
+				$options[""] = lang("all");
 			} else {
 				$options[$this->includeFirstOption] = $this->includeFirstOption;
 			}

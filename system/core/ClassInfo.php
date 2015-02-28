@@ -890,11 +890,11 @@ class ClassInfo extends Object {
 		require_once(FRAMEWORK_ROOT . "/libs/GFS/SoftwareType.php");
 		$errors = g_SoftwareType::buildPackageIndex();
 		if($errors) {
-			$permissionFalse = array_merge($permissionFalse, $errors);
+			$permissionsFalse = array_merge($permissionsFalse, $errors);
 		}
 
 		$permissionsFalseString = "";
-		foreach($permissionFalse as $f) {
+		foreach($permissionsFalse as $f) {
 			$permissionsFalseString = '<li>' . $f . '</li>';
 		}
 
