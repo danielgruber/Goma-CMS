@@ -182,13 +182,18 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * returns if this is the first entry or not
 	 */
 	public function first() {
-		return ($this->dataSetPosition == 0);
+		return ($this->dataSetPosition === 0);
 	}
 
 	/**
 	 * returns if this is the last entry or not
 	 */
 	public function last() {
+
+		if(!isset($this->dataset)) {
+			return false;
+		}
+
 		return ($this->dataSetPosition + 1 == $this->dataset->count());
 	}
 

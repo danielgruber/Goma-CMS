@@ -101,13 +101,38 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 	 * tests getOffset
 	*/
 	public function testGetOffset() {
-		$data = array("blub" => 1, "blah" => "blub", "data" => "test");
+		$htmlText = "<p>test</p>";
+		$data = array("blub" => 1, "blah" => "blub", "data" => "test", "html" => $htmlText, "htmltext" => $htmlText);
+		ViewAccessableData::$casting["htmltext"] = "varchar";
 		$view = new ViewAccessableData($data);
 
 		$this->assertEqual($view->blub, 1);
 		$this->assertEqual($view->data, "test");
 		$this->assertEqual($view->blah, "blub");
 		$this->assertEqual($view->getOffset("blah"), "blub");
+		$this->assertEqual($view->blah()->raw(), "blub");
+		$this->assertEqual($view->blah()->text(), "blub");
+
+		$this->assertEqual($view->html, $htmlText);
+		$this->assertEqual($view->html()->raw(), $htmlText);
+		$this->assertEqual($view->html()->text(), convert::raw2text($htmlText));
+		$this->assertEqual((string) $view->html(), $htmlText);
+		$this->assertEqual($view->html()->forTemplate(), $htmlText);
+		$this->assertEqual($view->getTemplateVar("HTml"), $htmlText);
+
+		// some checks for automatic XSS-Prevention of Varchar
+		$this->assertEqual($view->htmltext()->forTemplate(), convert::raw2text($htmlText));
+		$this->assertEqual($view->getTemplateVar("HTMLTExt"), convert::raw2text($htmlText));
+		$this->assertEqual($view->htmltext()->raw(), $htmlText);
+		$this->assertEqual((string) $view->htmltext(), convert::raw2text($htmlText));
+
+		// this is not last viewmodel of dataobjectset.
+		$this->assertFalse($view->last());
+		$this->assertEqual($view->this(), $view);
+
+		$this->assertEqual($view->_server_request_uri, $_SERVER["REQUEST_URI"]);
+
+		$this->assertEqual($view->getOffset("BLAh"), "blub");
 
 		$cust = array("haha" => 1, "blub" => 3);
 		$view->customise($cust);
