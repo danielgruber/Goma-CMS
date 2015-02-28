@@ -158,12 +158,14 @@
 						
 						<a id="navi-toggle" href="javascript:;">
 							<img src="system/templates/admin/images/logo.png" alt="logo" />
-							<% IF $title %>
-								<span class="title">$Title</span>
-							<% ELSE %>
-								<span class="title">{$_lang_overview}</span>
-							<% END %>
-							<i class="fa fa-angle-down fa-3x"></i>
+							<span class="text">
+								<% IF $title %>
+									<span class="title">$Title</span>
+								<% ELSE %>
+									<span class="title">{$_lang_overview}</span>
+								<% END %>
+								<i class="fa fa-angle-down fa-3x"></i>
+							</span>
 						</a>
 
 						<div class="clear"></div>

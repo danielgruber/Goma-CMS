@@ -3,7 +3,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 09.07.2014
+ * last modified: 28.02.2015
  */
 
 @color-text: #222;
@@ -114,6 +114,7 @@ div.adminPanel table, div.adminPanel td {
 		z-index: 510;
 		background: @color-grey;
 		padding-right: .5em;
+		width: 100%;
 		
 		img {
 			height: 1.5em;
@@ -121,7 +122,7 @@ div.adminPanel table, div.adminPanel td {
 			float: left;
 		}
 		
-		span {
+		span.title {
 			font-size: 1.375em;
 			line-height: 1em;
 			font-weight: 300;
@@ -129,8 +130,24 @@ div.adminPanel table, div.adminPanel td {
 			color: @color-action;
 			
 			display: inline-block;
-			padding: 0.5em 0.25em;
+			padding: 0.44em 0.25em;
 			margin: 0;
+
+			word-wrap: no-wrap;
+			height: 1em;
+			line-height: 1.25em;
+
+			text-overflow: ellipsis;
+		}
+
+		span.text {
+
+			position: absolute;
+			left: 6em;
+			right: 4em;
+
+			height: 2.5em;
+			overflow: hidden;
 		}
 		
 		:hover {
@@ -154,7 +171,7 @@ div.adminPanel table, div.adminPanel td {
 		position: absolute;
 		left: 0;
 		z-index: 500;
-		top: 3.125em;
+		top: 2.875em;
 		
 		#navigation {
 			list-style: none;
@@ -369,12 +386,15 @@ div.adminPanel table, div.adminPanel td {
 	}
 	
 	.user {
-		float: right;
 		
 		margin-top: .12em;
 		margin-right: .375em;
 
-		position: relative;
+		position: absolute;
+
+		right: .125em;
+		top: .125em;
+		z-index: 525;
 		
 		img {
 			height: 2.25em;
@@ -389,6 +409,7 @@ div.adminPanel table, div.adminPanel td {
 		border-bottom: 0.063em solid #ccc;
 		padding: 0.063em;
 		height: 2.75em;
+		position: relative;
 	}
 	
 	
@@ -1236,11 +1257,15 @@ ul.list-view li a img {
 	
 	#adminPanel #head.show-dropdown .dropdown #sidebar_head {
 		position: absolute;
-		top: -0.125em;
+		top: -0.375em;
 	}
 	
 	#adminPanel #head {
 		
+		#head_inner #navi-toggle .text {
+			right: 37em;
+		}
+
 		.dropdown {
 			border: 0;
 			background: transparent;
@@ -1261,7 +1286,7 @@ ul.list-view li a img {
 
 				
 				position: absolute;
-				top: 50px;
+				top: 2.875em;
 				left: 0;
 				width: 100%;
 			}
@@ -1271,7 +1296,7 @@ ul.list-view li a img {
 				top: 0.125em;
 				right: 0em;
 				
-				z-index: 505;
+				z-index: 515;
 				
 				border-bottom: 0;
 				

@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.6.5
+ * @version     2.6.6
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier
@@ -320,20 +320,21 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function getContent()
 		{
-				return $this->data()->forTemplate();
+			return $this->data()->forTemplate();
 		}
 		
 		/**
-		 * checks if this site is active in mainbar
-		 *@name getActive
-		 *@access public
+		 * checks if this site is active in mainbar.
+		 *
+		 * @name 	getActive
+		 * @access 	public
 		*/
-		public function getActive()
-		{
-				if(in_array($this->fieldGet("id"), contentController::$activeids))
-						return true;
-				else
-						return false;
+		public function getActive() {
+			if(in_array($this->fieldGet("id"), contentController::$activeids)) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 		
 		/**
@@ -638,42 +639,42 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 		*/
 		public function validatePageType($obj)
 		{
-				$data = $obj->form->result;
-				$classname = strtolower($data["class_name"]);
-				$parentid = $data["parentid"];
+			$data = $obj->form->result;
+			$classname = strtolower($data["class_name"]);
+			$parentid = $data["parentid"];
+			
+			if($data["parenttype"] == "subpage" && $data["parentid"] == null)
+				return lang("form_required_fields", "Please fill out the oligatory fields") . ' \'' . lang("parentpage", "Parent Page"). '\'';;
+			
+			if($data["parenttype"] == "root")
+			{
+				$pclassname = "pages";
+			} else
+			{
+				if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
+					return lang("error_page_self", "You can't suborder a page under itself!");
+				}
 				
-				if($data["parenttype"] == "subpage" && $data["parentid"] == null)
-						return lang("form_required_fields", "Please fill out the oligatory fields") . ' \'' . lang("parentpage", "Parent Page"). '\'';;
-				
-				if($data["parenttype"] == "root")
-				{
-						$pclassname = "pages";
-				} else
-				{
-						if(isset($data["recordid"]) && $data["parentid"] == $data["recordid"]) {
+				$d = DataObject::get_versioned("pages", "state", array("id" => $parentid));
+				if(isset($data["recordid"])) {
+					$temp = $d;
+					// validate if we subordered under subtree
+					while($temp->parent) {
+						if($temp->id == $data["recordid"]) {
 							return lang("error_page_self", "You can't suborder a page under itself!");
 						}
-						
-						$d = DataObject::get("pages", array("id" => $parentid));
-						if(isset($data["recordid"])) {
-							$temp = $d;
-							// validate if we subordered under subtree
-							while($temp->parent) {
-								if($temp->id == $data["recordid"]) {
-									return lang("error_page_self", "You can't suborder a page under itself!");
-								}
-								$temp = $temp->parent;
-							}
-						}
-						
-						$pclassname = strtolower($d["class_name"]);
-				}
-
-				if(in_array($pclassname, $this->allowed_parents())) {
-					return true;
+						$temp = $temp->parent;
+					}
 				}
 				
-				return lang("form_bad_pagetype");
+				$pclassname = strtolower($d["class_name"]);
+			}
+
+			if(in_array($pclassname, $this->allowed_parents())) {
+				return true;
+			}
+			
+			return lang("form_bad_pagetype");
 		}
 				
 		/**

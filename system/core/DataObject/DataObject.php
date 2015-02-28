@@ -1920,8 +1920,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name remove
 	 *@access public
 	 *@param bool - force delete
-	 *@param bool - if cancel on error, or resume
 	 *@param bool - if force to delete versions, too
+ 	 *@param bool - if we put this action into history.
 	*/
 	public function remove($force = false, $forceAll = false, $history = true)
 	{
