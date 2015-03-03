@@ -810,5 +810,43 @@ abstract class g_SoftwareType {
 		}
 	}
 
+	/**
+	 * checks move permissions for installation from GFS.
+	*/
+	public static function checkMovePerms($gfs, $folder, $destination) {
+		
+		$filemover = self::getFileMover($gfs, $folder, $destination);
+		$errors = $filemover->checkValid(false, true);
+
+		// look to all errors and decide which is a real problem.
+		$realerrors = array();
+		foreach($errors as $file) {
+			if(file_exists($destination. "/" . $file) && is_dir($destination . "/" . $file) && $gfs->isDir($folder . $file)) {
+				continue;
+			}
+
+			if(file_exists($destination . "/" . $file) && $gfs->getMd5($folder . $file) == md5_file($destination . "/" . $file)) {
+				continue;
+			}
+
+			$realerrors[] = $file;
+		}
+
+		return $realerrors;
+	}
+
+	/**
+	 * generates the file-mover from gfs, folder and destination.
+	*/	
+	public static function getFileMover($gfs, $folder, $destination) {
+		$files = array_keys($gfs->getDB());
+		
+		$files = array_filter($files, create_function('$val', 'return substr($val, 0, '.strlen($folder).') == '.var_export($folder, true).';'));
+		
+		$files = array_map(create_function('$val', 'return substr($val, '.var_export(strlen($folder), true).');'), $files);
+		
+		return new FileMover($files, null, $destination);
+	}
+
 	public function __wakeup() {}
 }

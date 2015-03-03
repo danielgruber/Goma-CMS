@@ -8,7 +8,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.5.12
+ * @version	1.5.13
  */
 class G_FrameworkSoftwareType extends G_SoftwareType {
 	/**
@@ -61,13 +61,10 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			if(isset($info["changelog"]))
 				$data["changelog"] = $info["changelog"];
 			
-			// now check permissions
-			$db = array_keys($gfs->getDB());
-			$db = array_filter($db, create_function('$val', 'return substr($val, 0, '.strlen('data/').') == "data/";'));
-			
-			$db = array_map(create_function('$val', 'return substr($val, 5);'), $db);
-			if(!FileSystem::checkMovePermsByList($db, ROOT)) {
-				$data["error"] = lang("permission_error") . '('.convert::raw2text(FileSystem::errFile()).')';
+			$errors = self::checkMovePerms($gfs, "data/", ROOT);
+
+			if($errors) {
+				$data["error"] = lang("permission_error") . '('.implode(",", $errors).')';
 				$data["installable"] = false;
 				return $data;
 			}
@@ -111,6 +108,10 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		} else {
 			return false;
 		}
+	}
+
+	public function checkMovePermissions() {
+
 	}
 	
 	/**

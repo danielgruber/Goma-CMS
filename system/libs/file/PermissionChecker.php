@@ -44,13 +44,7 @@ class PermissionChecker {
 		foreach($this->folders as $folder) {
 			if(file_exists($folder)) {
 
-				if($this->permissionMode !== false) {
-					@chmod($folder, $this->permissionMode);
-				}
-
-				if(@fopen($folder . "/write.test", "w")) {
-					@unlink($folder . "/write.test");
-				} else {
+				if(!self::checkWriteable($folder, $this->permissionMode)) {
 					$error[] = $folder;
 				}
 
@@ -107,6 +101,33 @@ class PermissionChecker {
 	*/
 	public function getFolders() {
 		return $this->folders;
+	}
+
+	/**
+	 * checks if a specified folder is writable.
+	 * the folder must exist.
+	 *
+	 * @name 	checkWriteable
+	*/
+	public static function checkWriteable($folder, $permissionMode = false) {
+		if(!file_exists($folder)) {
+			throw new LogicException("Folder must exist for PermissionChecker::checkWritable.");
+		}
+
+		if($permissionMode !== false) {
+			if(self::isValidPermission($permissionMode)) {
+				@chmod($folder, $permissionMode);
+			} else {
+				throw new InvalidArgumentException("Mode must be a valid Unix-Filemode or false. '$mode' given.");
+			}
+		}
+
+		if(@fopen($folder . "/write.test", "w")) {
+			@unlink($folder . "/write.test");
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

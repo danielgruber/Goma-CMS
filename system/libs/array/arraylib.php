@@ -1,28 +1,43 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 31.08.2011
-  * $Version 2.0.0 - 002
+ * some basic functions that are used for arrays.
+ *
+ * @package	goma framework
+ * @link 	http://goma-cms.org
+ * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 1.3
+ *
+ * last modified: 02.03.2015
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
-class ArrayLib extends Object
+class ArrayLib
 {
 		/**
-		 * merge
-		 *@name merge
-		 *@param array1
-		 *@param array2
-		 *@return array
+		 * merges two array.
+		 *
+		 * @name 	merge
+		 * @param 	array1
+		 * @param 	array2
+		 * @return 	array
 		*/
 		public static function merge(array $array1, array $array2)
 		{
 				return array_merge($array1,$array2);
 		}
+
+		/**
+	 	 * merges two arrays as sets, so every value will only exist once.
+	 	 * keys will be removed. does not support objects or arrays in arrays.
+	 	 *
+	 	 * @name 	mergeSets
+	 	 * @param 	array - set 1
+	 	 * @param 	array - set 2
+	 	 * @return 	array
+		*/
+		public static function mergeSets(array $set1, array $set2) {
+			return array_values(self::key_value(self::merge($set1, $set2)));
+		}
+
 		/**
 		 * gets the first value of an array
 		 *@name first
@@ -62,46 +77,52 @@ class ArrayLib extends Object
 				return false;
 		}
 		/**
-		 * sets key and value from value
-		 *@name key_value
-		 *@access public
-		 *@param array
+		 * sets key and value to value.
+		 *
+		 * @name 	key_value
+		 * @access 	public
+		 * @param 	array
 		*/
 		public static function key_value($arr)
 		{
-				$array = array();
-				if($arr)
+			$array = array();
+
+			if($arr)
+			{
+				foreach($arr as $value)
 				{
-						foreach($arr as $value)
-						{
-								if(is_array($value)) {
-									$value = arraylib::first($value);
-								}
-								$array[$value] = $value;
-						}
+					if(is_array($value)) {
+						// arrays in arrays are unsupported in this funtion.
+						throw new LogicException("ArrayLib::key_value does not support arrays in arrays.");
+					} else {
+						$array[$value] = $value;
+					}
 				}
-				return $array;
+			}
+			return $array;
 		}
 		/**
 		 * sets key and value from value where key is numeric
-		 *@name key_value_for_id
-		 *@access public
-		 *@param array
+		 *
+		 * @name 	key_value_for_id
+		 * @access 	public
+		 * @param 	array
 		*/
 		public static function key_value_for_id($arr)
 		{
-				$array = array();
-				if($arr)
+			$array = array();
+			if($arr)
+			{
+				foreach($arr as $key => $value)
 				{
-						foreach($arr as $key => $value)
-						{
-								if(_ereg('^[0-9]+$', $key))
-										$array[$value] = $value;
-								else
-										$array[$key] = $value;
-						}
+					if(_ereg('^[0-9]+$', $key)) {
+						$array[$value] = $value;
+					} else {
+						$array[$key] = $value;
+					}
 				}
-				return $array;
+			}
+			return $array;
 		}
 		/**
 		 * array_map for keys

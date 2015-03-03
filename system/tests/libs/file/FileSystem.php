@@ -52,6 +52,13 @@ class FileSystemTest extends GomaUnitTest {
 		FileSystem::copy($this->dir . "/blah", $this->dir . "/copyofblah");
 		$this->assertTrue(file_exists($this->dir . "/copyofblah/blub/test.txt"));
 
+		// test move
+		FileSystem::move($this->dir . "/copyofblah", $this->dir . "/movedblah");
+		$this->assertFalse(file_exists($this->dir . "/copyofblah/blub/test.txt"));
+		$this->assertTrue(file_exists($this->dir . "/movedblah/blub/test.txt"));
+
+		FileSystem::delete($this->dir . "/copyofblah");
+		FileSystem::delete($this->dir . "/movedblah");
 		FileSystem::delete($this->dir);
 
 		$this->assertFalse(file_exists($this->dir));

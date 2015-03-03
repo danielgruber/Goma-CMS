@@ -6,12 +6,15 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.7
+ * @version 1.7.1
  *
- * last modified: 24.02.2015
+ * last modified: 03.03.2015
 */
 
 define("LANGUAGE_ROOT", ROOT . "/languages/");
+define("IMAGE_ROOT", ROOT . "/images/");
+define("UPLOADS_ROOT", ROOT . "/uploads/");
+define("HTACCESS_FILE", ROOT . ".htaccess");
 
 class FileSystem extends Object {
 	/**
@@ -40,7 +43,10 @@ class FileSystem extends Object {
 	public static $applySafeModeFolders = array(
 		FRAMEWORK_ROOT,
 		APP_FOLDER,
-		LANGUAGE_ROOT
+		LANGUAGE_ROOT,
+		IMAGE_ROOT,
+		UPLOADS_ROOT,
+		HTACCESS_FILE
 	);
 	
 	/**
@@ -166,6 +172,11 @@ class FileSystem extends Object {
 	 *@param bool - if to break and return false on fail
 	*/
 	public static function chmod($file, $mode, $breakOnFail = true) {
+
+		if(function_exists("get_current_user")) {
+			@chown($file, get_current_user());
+		}
+
 		if(is_dir($file)) {
 			if(!@chmod($file, $mode) && $breakOnFail) {
 				self::$errFile = $file;
@@ -218,7 +229,7 @@ class FileSystem extends Object {
 	*/
 	public static function copy($source, $destination, $mode = null, $breakOnFail = true) {
 		if(!$source || !$destination) {
-			throwError(6, "PHP-Error", "Source and Destination are required for FileSystem::copy.");
+			throw new InvalidArgumentException("Source and Destination are required for FileSystem::copy.");
 		}
 		
 		if(is_dir($source)) {
@@ -264,7 +275,7 @@ class FileSystem extends Object {
 	*/
 	public static function move($source, $destination, $breakOnFail = true, $useLog = false) {
 		if(!$source || !$destination) {
-			throwError(6, "PHP-Error", "Source and Destination are required for FileSystem::move.");
+			throw new InvalidArgumentException("Source and Destination are required for FileSystem::move.");
 		}
 		
 		if(is_dir($source)) {
@@ -475,12 +486,12 @@ class FileSystem extends Object {
 	}
 	
 	/**
-	 * checks if we could copy/move and overwrite files from directory 1 in directory 2
+	 * checks if we could copy/move and overwrite files from directory 1 in directory 2.
 	 *
-	 *@name checkMovePerms
-	 *@access public
-	 *@param string - directory 1
-	 *@param string - directory 2
+	 * @name 	checkMovePerms
+	 * @access 	public
+	 * @param 	string - directory 1
+	 * @param 	string - directory 2
 	*/
 	public static function checkMovePerms($source, $dest) {
 		if(!file_exists($dest) || !file_exists($source) || !is_writable($dest)) {
@@ -516,10 +527,10 @@ class FileSystem extends Object {
 	/**
 	 * checks if we could copy/move and overwrite given files
 	 *
-	 *@name checkMovePermsByList
-	 *@access public
-	 *@param array - filelist
-	 *@param string - destination
+	 * @name 	checkMovePermsByList
+	 * @access 	public
+	 * @param 	array - filelist
+	 * @param 	string - destination
 	*/
 	public static function checkMovePermsByList($list, $dest) {
 		if(!file_exists($dest) || !is_writable($dest)) {
@@ -537,17 +548,40 @@ class FileSystem extends Object {
 					$_file = substr($_file, 0, strrpos($_file, "/"));
 				}
 				
-				if(!is_writable($dest . "/" . $_file)) {
+				if(!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $_file)) {
 					self::$errFile = $dest . "/" . $_file;
 					return false;
 				}
 				
-			} elseif (!is_writable($dest . "/" . $file)) {
+			} else if (!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $file)) {
 				self::$errFile = $dest . "/" . $file;
 				return false; 
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * finds the first existing file in a path. it iterates upwards, so
+	 * it first checks test/blah/blub.txt, then test/blah, and so on.
+	 *
+	 * @param 	getNearestFileInPath
+	 * @return  string|false
+	*/
+	public function getNearestFileInPath($path, $root = "./") {
+		if(file_exists($root . $path)) {
+			return $path;
+		}
+
+		$file = substr($path, 0, strrpos($path, "/"));
+		while(!file_exists($root . $file)) {
+			if(!strpos($file, "/")) {
+				return false;
+			}
+			$file = substr($file, 0, strrpos($file, "/"));
+		}
+
+		return $file;
 	}
 	
 	/**
@@ -586,7 +620,9 @@ class FileSystem extends Object {
 		}
 
 		foreach($folders as $folder) {
-			self::chmod($folder, self::getMode(), false);
+			if(file_exists($file)) {
+				self::chmod($folder, self::getMode(), false);	
+			}
 		}
 		
 		chmod(ROOT, self::getMode());

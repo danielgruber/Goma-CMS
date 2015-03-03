@@ -857,16 +857,15 @@ class ClassInfo extends Object {
 	*/
 	public static function checkPermissionsAndBuild() {
 
-		include_once("./system/core/CoreLibs/PermissionChecker.php");
+
+		include_once("./system/libs/file/PermissionChecker.php");
 		$permissionChecker = new PermissionChecker();
 		$permissionChecker->addFolders(array(
-			"./",
 			"system/temp/",
 			APP_FOLDER . "temp/",
 			APP_FOLDER . LOG_FOLDER,
 			APP_FOLDER . "code/",
 			APP_FOLDER . "uploaded/",
-			"./tpl/",
 			"./system/installer/data/apps"
 		));
 
@@ -876,6 +875,7 @@ class ClassInfo extends Object {
 		if($info) {
 			$permissionsFalse = array_merge($permissionsFalse, $info);
 		}
+		
 
 		// add autoloder-exclude files in temp-folders.
 		if(!file_exists(ROOT . "system/temp/autoloader_exclude")) {

@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		2.7.2
+ * @version		2.7.3
  */
 
 define("GFS_DIR_TYPE", "goma_dir");
@@ -350,8 +350,9 @@ class GFS extends Object {
 		// parse path
 		$path = $this->parsePath($path);
 		
-		if(realpath($file) == $this->file || in_array($path,$not_add_if_dir)) 
-				return true;
+		if(realpath($file) == $this->file || in_array($path, $not_add_if_dir)) {
+			return true;
+		}
 		
 		if(!file_exists($file)) {
 			return -4;
@@ -594,28 +595,14 @@ class GFS extends Object {
 		// parse path
 		$path = $this->parsePath($path);
 		
-		// check if you can create the path
+		// check if file is already existing.
 		if(!isset($this->db[$path])) {
-			if(strpos($path, "/")) {
-				$pathparts = preg_split("/\//",$path, -1, PREG_SPLIT_NO_EMPTY);
-				$i = 1;
-				$currpath = "";
-				foreach($pathparts as $part) {
-					if(count($pathparts) == $i) {
-						// do nothing
-					} else {
-						$currpath = $currpath . "/" . $part;
-						if(!$this->exists($currpath)) {
-							$this->addDir($currpath);
-						}
-					}
-					$i++;
-				}
-				
-			}
+			$this->createPath($path);
 		} else {
-			return -1;
+			throw new LogicException("File $path already exists in GFS.");
 		}
+
+
 		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
 			$this->db[$path] = array(
 				"type"	 			=> $this->getFileType($path),
@@ -637,6 +624,32 @@ class GFS extends Object {
 		}
 		return $this->updateDB();
 
+	}
+
+	/**
+	 * create all folders until the given file-path.
+	 *
+	 * @name createPath
+	*/
+	protected function createPath($path) {
+
+		// parse path
+		$path = $this->parsePath($path);
+
+		if(strpos($path, "/")) {
+			$pathparts = preg_split("/\//",$path, -1, PREG_SPLIT_NO_EMPTY);
+			$i = 1;
+			$currpath = "";
+			foreach($pathparts as $part) {
+				if(count($pathparts) != $i) {
+					$currpath = $currpath . "/" . $part;
+					if(!$this->exists($currpath)) {
+						$this->addDir($currpath);
+					}
+				}
+				$i++;
+			}
+		}
 	}
 	
 	/**
@@ -708,6 +721,48 @@ class GFS extends Object {
 		
 		return isset($this->db[$path]) ? $this->db[$path] : -4;
 	}
+
+	/**
+	 * returns if file exists.
+	*/
+	public function exists($path) {
+		if($this->valid === false)
+			return false;
+		
+		$path = $this->parsePath($path);
+		
+		return isset($this->db[$path]) ? true : false;
+	}
+
+	/**
+	 * returns if file is folder.
+	*/
+	public function isDir($path) {
+		if($this->valid === false)
+			return false;
+		
+		$path = $this->parsePath($path);
+		
+		return (isset($this->db[$path]) && $this->db[$path]["type"] == GFS_DIR_TYPE) ? true : false;
+	}
+
+	/**
+	 * returns md5-hash of file.
+	*/
+	public function getMd5($path) {
+		if($this->valid === false)
+			return false;
+		
+		$path = $this->parsePath($path);
+		
+		if(isset($this->db[$path]) && isset($this->db[$path]["checksum"])) {
+			return substr($this->db[$path]["checksum"], 3);
+		} else if(isset($this->db[$path]["contents"])) {
+			return md5($this->db[$path]["contents"]);
+		} else {
+			return false;
+		}
+	}
 	
 	/**
 	 * returns the complete database
@@ -717,22 +772,6 @@ class GFS extends Object {
 	*/
 	public function getDB() {
 		return $this->db;
-	}
-	
-	/**
-	 * checks if file exists
-	 *
-	 *@name exists
-	 *@access public
-	*/
-	public function exists($realfile) {
-		if($this->valid === false)
-			return false;
-		
-		// parse path
-		$file = $this->parsePath($realfile);
-		
-		return isset($this->db[$file]);
 	}
 	
 	/**

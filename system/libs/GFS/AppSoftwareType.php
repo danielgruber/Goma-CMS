@@ -8,7 +8,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.5.12
+ * @version	1.5.13
  */
 class G_AppSoftwareType extends G_SoftwareType {
 	/**
@@ -237,18 +237,14 @@ class G_AppSoftwareType extends G_SoftwareType {
 			if(isset($info["changelog"]))
 				$data["changelog"] = $info["changelog"];
 			
-			$db = array_keys($gfs->getDB());
-			
-			$db = array_filter($db, create_function('$val', 'return substr($val, 0, '.strlen('backup/').') == "backup/";'));
-			
-			$db = array_map(create_function('$val', 'return substr($val, 7);'), $db);
-			
-			if(!FileSystem::checkMovePermsByList($db, ROOT . CURRENT_PROJECT . "/")) {
-				$data["error"] = lang("permission_error");
+			$errors = self::checkMovePerms($gfs, "backup/", ROOT . CURRENT_PROJECT . "/");
+
+			if($errors) {
+				$data["error"] = lang("permission_error") . '('.implode(",", $errors).')';
 				$data["installable"] = false;
 				return $data;
 			}
-			
+
 			$data["permCheck"] = true;
 			
 			$data["installable"] = true;
