@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		2.7.3
+ * @version		2.8
  */
 
 define("GFS_DIR_TYPE", "goma_dir");
@@ -36,6 +36,17 @@ class GFS extends Object {
 	 *@access public
 	*/
 	const VERSION = "2.6";
+
+	/**
+	 * list of errors.
+	 * all errors are int under 0.
+	*/
+	const FILE_NOT_FOUND = -4;
+	const ARCHIVE_READONLY = -5;
+	const FILE_CONTENT_NOT_VALID = -3;
+	const REALFILE_PERMISSION_ERROR = -6;
+	const FILE_ALREADY_EXISTS = -1;
+	const REALFILE_NOT_FOUND = -10;
 
 	/**
 	 * contains whether PHP supports Open-SSL or not.
@@ -163,9 +174,11 @@ class GFS extends Object {
 	protected $writeMode = 0777;
 	
 	/**
-	 *@name __construct
-	 *@access public
-	 *@param filename
+	 * opens GFS-Archive. It throws some exceptions when something fails.
+	 *
+	 * @name 	__construct
+	 * @access 	public
+	 * @param 	filename
 	*/
 	public function __construct($filename, $flag = null, $writeMode = 0777) {
 		parent::__construct();
@@ -321,32 +334,41 @@ class GFS extends Object {
 	}
 
 	/**
-	 * sets the Position of the pointer
+	 * sets the Position of the pointer.
 	 *
-	 *@name setPosition
+	 * @name 	setPosition
 	*/
 	public function setPosition($position = null) {
-		if($position !== null) $this->position = $position;
+		if($position !== null) {
+			$this->position = $position;
+		}
+
 		fseek($this->pointer, $this->position);
 	}
 	
 	/**
-	 * adds a file
+	 * adds a file.
 	 *
-	 *@name addFromFile
-	 *@access public
-	 *@param string - file
-	 *@param string - path in container
+	 * @name 	addFromFile
+	 * @access 	public
+	 * @param 	string - file
+	 * @param 	string - path in container
 	*/
 	public function addFromFile($file, $path, $not_add_if_dir = array()) {
 		
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
-		
+
+		// check if is dir.
+		if(is_dir($file)) {
+			$r = $this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
+			$this->updateDB();
+			return $r;
+		}
+
 		// parse path
 		$path = $this->parsePath($path);
 		
@@ -355,33 +377,78 @@ class GFS extends Object {
 		}
 		
 		if(!file_exists($file)) {
-			return -4;
+			return self::REALFILE_NOT_FOUND;
 		}
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
-			if(strpos($path, "/")) {
-				$pathparts = preg_split("/\//",$path, -1, PREG_SPLIT_NO_EMPTY);
-				$i = 1;
-				$currpath = "";
-				foreach($pathparts as $part) {
-					if(count($pathparts) == $i) {
-						// do nothing
-					} else {
-						$currpath = $currpath . "/" . $part;
-						if(!$this->exists($currpath)) {
-							$this->addDir($currpath);
-						}
-					}
-					$i++;
-				}
-				unset($pathparts, $i, $currpath);
-			}
+			$this->createPath($path);
 		} else {
-			return -1;
+			return self::FILE_ALREADY_EXISTS;
 		}
 		
+		// check if file exists and add it.
 		if(is_file($file)) {
+			$s = $this->addFileToArchiveWithoutChecks($file, $path);
+			if($s === true) {
+				return $this->updateDB();
+			}
+			
+			return $s;
+		} else {
+			return self::REALFILE_NOT_FOUND;
+		}
+	}
+	
+	/**
+	 * adds a file without call updateDB. it updates the local copy of db in $this->db.
+	 *
+	 * @name 	addFromFileHelper
+	 * @access 	protected
+	 * @param 	string - file
+	 * @param 	string - path in container
+	*/
+	protected function addFromFileHelper($file, $path, $not_add_if_dir = array()) {
+		
+		$this->checkValidOrThrow();
+		
+		if($this->readonly) {
+			return self::ARCHIVE_READONLY;
+		}
+
+		// check if is dir.
+		if(is_dir($file)) {
+			return $this->addDirectoryAndFiles($file, $path, $not_add_if_dir);
+		}
+
+		// parse path
+		$path = $this->parsePath($path);
+				
+		if(basename($file) == basename($this->file) || in_array($path,$not_add_if_dir)) { 
+			return true;
+		}
+		
+		// check if you can create the path
+		if(!isset($this->db[$path])) {
+			$this->createPath($path);
+		} else {
+			return self::FILE_ALREADY_EXISTS;
+		}
+		
+		if(file_exists($file)) {
+			return $this->addFileToArchiveWithoutChecks($file, $path);
+		} else {
+			return self::REALFILE_NOT_FOUND;
+		}
+	}
+
+	/**
+	 * adds an file to archive.
+	 *
+	 * @name addFileToArchiveWithoutChecks
+	*/
+	protected function addFileToArchiveWithoutChecks($file, $path) {
+		if(file_exists($file)) {
 			if(filesize($file) > FILESIZE_SAVE_IN_DB) {
 				$this->setPosition($this->endOfContentPos);
 				// read and save memory
@@ -402,7 +469,7 @@ class GFS extends Object {
 					);
 					$this->endOfContentPos += filesize($file);
 				} else {
-					return false;
+					return self::REALFILE_PERMISSION_ERROR;
 				}
 			} else {
 				$this->db[$path] = array(
@@ -412,119 +479,77 @@ class GFS extends Object {
 					"contents"			=> file_get_contents($file)
 				);
 			}
-			return $this->updateDB();
-		} else if(is_dir($file)) {
-			$this->db[$path] = array(
-				"type"	 		=> GFS_DIR_TYPE,
-				"lastModfied"	=> filemtime($file)
-			);
-			foreach(scandir($file) as $_file) {
-				if($_file != "." && $_file != "..") {
-					$this->addFromFileHelper($file . "/" . $_file, $path . "/" . $_file, $not_add_if_dir);
-				}
-			}
-			return $this->updateDB();
 		} else {
-			return -4;
+			return self::REALFILE_NOT_FOUND;
 		}
-	}
-	
-	/**
-	 * adds a file without writing db
-	 *
-	 *@name addFromFileHelper
-	 *@access protected
-	 *@param string - file
-	 *@param string - path in container
-	*/
-	protected function addFromFileHelper($file, $path, $not_add_if_dir = array()) {
-		
-		if(!$this->valid)
-			return false;
-		
-		if($this->readonly) {
-			return -5;
-		}
-		// parse path
-		$path = $this->parsePath($path);
-				
-		if(basename($file) == basename($this->file) || in_array($path,$not_add_if_dir)) 
-			return true;
-		
-		// check if you can create the path
-		if(!isset($this->db[$path])) {
-			if(strpos($path, "/")) {
-				$pathparts = preg_split("/\//",$path, -1, PREG_SPLIT_NO_EMPTY);
-				$i = 1;
-				$currpath = "";
-				foreach($pathparts as $part) {
-					if(count($pathparts) == $i) {
-						// do nothing
-					} else {
-						$currpath = $currpath . "/" . $part;
-						if(!$this->exists($currpath)) {
-							$this->addDir($currpath);
-						}
-					}
-					$i++;
-				}
-				unset($pathparts, $i, $currpath);
-				
-			}
-		} else {
-			return -1;
-		}
-		
-		
-		
-		if(is_file($file)) {
 
-			if(filesize($file) > FILESIZE_SAVE_IN_DB) {
-				$this->setPosition($this->endOfContentPos);
-				// read and save memory
-				if($filehandle = @fopen($file, "r")) {
-					while (!feof($filehandle)) {
-						fwrite($this->pointer, fgets($filehandle));
-					}
-					fclose($filehandle);
-					unset($filehandle);
-					$this->db[$path] = array(
-						"type"	 			=> $this->getFileType($file),
-						"size"	 			=> filesize($file),
-						"lastModfied"		=> filemtime($file),
-						"checksum"			=> "GFS" . md5_file($file),
-						"startChunk"		=> $this->endOfContentPos
-					);
-					$this->endOfContentPos += filesize($file);
-				} else {
-					return false;
-				}
-			} else {
-				$this->db[$path] = array(
-					"type"	 			=> $this->getFileType($file),
-					"size"	 			=> filesize($file),
-					"lastModfied"		=> filemtime($file),
-					"contents"			=> file_get_contents($file)
-				);
-			}
-			unset($file, $path);
-			return true;
-		} else if(is_dir($file)) {
+		return true;
+	}
+
+	/**
+	 * adds content to archive.
+	 *
+	 * @name addContentToArchiveWithoutChecks
+	*/
+	protected function addContentToArchiveWithoutChecks($content, $path, $lastModfied = null) {
+
+		if(!isset($lastModfied)) {
+			$lastModfied = time();
+		}
+
+		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
+			$this->setPosition($this->endOfContentPos);
+			// write and save memory
+			fwrite($this->pointer, $content);
+			unset($content);
+
+			$this->db[$path] = array(
+				"type"	 			=> $this->getFileType($path),
+				"size"	 			=> strlen($content),
+				"lastModfied"		=> $lastModfied,
+				"checksum"			=> "GFS" . md5($content),
+				"startChunk"		=> $this->endOfContentPos
+			);
+			$this->endOfContentPos += strlen($content);
+		} else {
+			$this->db[$path] = array(
+				"type"	 			=> $this->getFileType($path),
+				"size"	 			=> strlen($content),
+				"lastModfied"		=> $lastModfied,
+				"contents"			=> $content
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * adds all files of a directory.
+	*/
+	public function addDirectoryAndFiles($file, $path, $not_add_if_dir = array()) {
+
+		$path = $this->parsePath($path);
+
+		// create folder.
+		if(!isset($this->db[$path])) {
+
+			// create sub-path.
+			$this->createPath($path);
+
 			$this->db[$path] = array(
 				"type"	 			=> GFS_DIR_TYPE,
-				"lastModfied"		=> filemtime($file),
-				"size"				=> 0
+				"lastModfied"		=> filemtime($file)
 			);
-			foreach(scandir($file) as $_file) {
-				if($_file != "." && $_file != "..") {
-					$this->addFromFileHelper($file . "/" . $_file, $path . "/" . $_file, $not_add_if_dir);
-				}
-			}
-			unset($file, $path);
-			return true;
-		} else {
-			return -4;
+
 		}
+
+		foreach(scandir($file) as $_file) {
+			if($_file != "." && $_file != "..") {
+				$this->addFromFileHelper($file . "/" . $_file, $path . "/" . $_file, $not_add_if_dir);
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -536,11 +561,10 @@ class GFS extends Object {
 	*/
 	public function addDir($path) {
 		
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		// parse path
 		$path = $this->parsePath($path);
@@ -548,25 +572,9 @@ class GFS extends Object {
 		
 		// check if you can create the path
 		if(!isset($this->db[$path])) {
-			if(strpos($path, "/")) {
-				$pathparts = preg_split("/\//",$path, -1, PREG_SPLIT_NO_EMPTY);
-				$i = 1;
-				$currpath = "";
-				foreach($pathparts as $part) {
-					if(count($pathparts) == $i) {
-						// do nothing
-					} else {
-						$currpath = $currpath . "/" . $part;
-						if(!$this->exists($currpath)) {
-							return -4;
-						}
-					}
-					$i++;
-				}
-				
-			}
+			$this->createPath($path);
 		} else {
-			return -1;
+			return self::FILE_NOT_FOUND;
 		}
 		
 		$this->db[$path] = array(
@@ -584,12 +592,11 @@ class GFS extends Object {
 	 *@param string - path
 	 *@param string - content
 	*/
-	public function addFile($path, $content) {
-		if($this->valid === false)
-			return false;
+	public function addFile($path, $content, $lastModfied = null) {
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		// parse path
@@ -599,31 +606,16 @@ class GFS extends Object {
 		if(!isset($this->db[$path])) {
 			$this->createPath($path);
 		} else {
-			throw new LogicException("File $path already exists in GFS.");
+			return self::FILE_ALREADY_EXISTS;
 		}
 
+		$s = $this->addContentToArchiveWithoutChecks($content, $path, $lastModfied);
 
-		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
-			$this->db[$path] = array(
-				"type"	 			=> $this->getFileType($path),
-				"size"	 			=> strlen($content),
-				"lastModfied"		=> time(),
-				"checksum"			=> "GFS" . md5($content),
-				"startChunk"		=> $this->endOfContentPos
-			);
-			$this->setPosition($this->endOfContentPos);
-			fwrite($this->pointer, $content);
-			$this->endOfContentPos += strlen($content);
-		} else {
-			$this->db[$path] = array(
-				"type"	 			=> $this->getFileType($path),
-				"size"	 			=> strlen($content),
-				"lastModfied"		=> time(),
-				"contents"			=> $content
-			);
+		if($s === true) {
+			return $this->updateDB();
 		}
-		return $this->updateDB();
-
+		
+		return $s;
 	}
 
 	/**
@@ -674,9 +666,8 @@ class GFS extends Object {
 	 *@param string - path
 	*/
 	public function getFileContents($path) {
-		if($this->valid === false)
-			return false;
-		
+		$this->checkValidOrThrow();
+
 		// parse path
 		$path = $this->parsePath($path);
 		
@@ -699,35 +690,33 @@ class GFS extends Object {
 			if("GFS" . md5($content) == $this->db[$path]["checksum"]) {
 				return $content;
 			} else {
-				return -3;
+				return self::FILE_CONTENT_NOT_VALID;
 			}
 		} else {
-			return -4;
+			return self::FILE_NOT_FOUND;
 		}
 	}
 	
 	/**
 	 * getDBInfo
 	 *
-	 *@name getDBInfo
+	 *@name getDBInfo
 	 *@access public
 	 *@param string - path
 	*/
 	public function getDBInfo($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		$path = $this->parsePath($path);
 		
-		return isset($this->db[$path]) ? $this->db[$path] : -4;
+		return isset($this->db[$path]) ? $this->db[$path] : self::FILE_NOT_FOUND;
 	}
 
 	/**
 	 * returns if file exists.
 	*/
 	public function exists($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		$path = $this->parsePath($path);
 		
@@ -738,8 +727,7 @@ class GFS extends Object {
 	 * returns if file is folder.
 	*/
 	public function isDir($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		$path = $this->parsePath($path);
 		
@@ -750,8 +738,7 @@ class GFS extends Object {
 	 * returns md5-hash of file.
 	*/
 	public function getMd5($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		$path = $this->parsePath($path);
 		
@@ -781,8 +768,7 @@ class GFS extends Object {
 	 *@access public
 	*/
 	public function scanDir($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		// parse path
 		$path = $this->parsePath($path);
@@ -795,7 +781,7 @@ class GFS extends Object {
 			}
 			return array_map("basename", array_filter(array_keys($this->db), create_function("\$val", "return preg_match('/^".preg_quote($path, "/")."([^\/]+)$/', \$val);")));
 		} else {
-			return -4;
+			return self::FILE_NOT_FOUND;
 		}
 	}
 	
@@ -808,11 +794,10 @@ class GFS extends Object {
 	 *@param string - path
 	*/
 	public function unlink($path) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		// parse path
@@ -827,7 +812,7 @@ class GFS extends Object {
 				return $this->updateDB();
 			}
 		} else {
-			return -4;
+			return self::FILE_NOT_FOUND;
 		}
 	}
 	
@@ -839,11 +824,10 @@ class GFS extends Object {
 	 *@param string - path
 	*/
 	public function rmdir($path) {
-		if($this->valid === false)
-			return false;
-		
+		$this->checkValidOrThrow();
+
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		$path = $this->parsePath($path);
@@ -874,50 +858,15 @@ class GFS extends Object {
 	 *@param string - path
 	*/
 	public function filemTime($path) {
-		if(!$this->valid) {
-			return false;
-		}
+		$this->checkValidOrThrow();
 		
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path]["last_modfied"])) {
 			return $this->db[$path]["last_modfied"];
 		} else {
-			return -4;
+			return self::FILE_NOT_FOUND;
 		}
-	}
-	
-	/**
-	 * writes the database
-	 *
-	 *@name UpdateDB
-	 *@access public
-	*/
-	public function updateDB() {
-		if(PROFILE) Profiler::mark("updateDB");
-		if($this->valid === false) {
-			return false;
-		}
-		if($this->readonly)
-			return false;
-			
-		
-		$this->setPosition($this->endOfContentPos);
-		if(GFS_DB_TYPE == "serialize")
-  	 		$db = serialize($this->db);
-  	 	else
-  	 		$db = json_encode($this->db);
-  	 	
-		if($this->oldDBSize > strlen($db)) {
-			$db = str_repeat("\n", $this->oldDBSize - strlen($db)) . $db;
-		}
-		fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db));
-		$this->oldDBSize = strlen($db);
-		$this->certValidCache = null;
-		$this->certificate = null;
-		unset($db);
-		if(PROFILE) Profiler::unmark("updateDB");
-		return true;
 	}
 	
 	/**
@@ -927,11 +876,10 @@ class GFS extends Object {
 	 *@access public
 	*/
 	public function rename($path, $new) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		$path = $this->parsePath($path);
@@ -959,11 +907,11 @@ class GFS extends Object {
 					unset($this->db[$path]);
 					return $this->updateDB();
 				} else {
-					return -1;
+					return self::FILE_ALREADY_EXISTS;
 				}
 			}
 		} else {
-			return -4;
+			return self::FILE_NOT_FOUND;
 		}
 	}
 	
@@ -975,11 +923,10 @@ class GFS extends Object {
 	 *@param string - path
 	*/
 	public function touch($path, $time = NOW) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		$path = $this->parsePath($path);
@@ -991,7 +938,7 @@ class GFS extends Object {
 			unset($path);
 			return $this->updateDB();
 		} else {
-			return -4;
+			return $this->addFile($path, "", $time);
 		}
 	}
 	
@@ -1005,11 +952,10 @@ class GFS extends Object {
 	**/
 	public function write($path, $text)
 	{
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		$path = $this->parsePath($path);
@@ -1051,8 +997,9 @@ class GFS extends Object {
 				unset($file, $fileinfo);
 			}
 			return true;
-		} else 
-			return -4;
+		} else {
+			return self::FILE_NOT_FOUND;
+		}
 	}
 	
 	/**
@@ -1065,9 +1012,7 @@ class GFS extends Object {
 	 *@param string - destination file
 	*/
 	public function writeToFileSystem($path, $aim) {
-		if($this->valid === false) {
-			return false;
-		}
+		$this->checkValidOrThrow();
 		
 		// parse path
 		$path = $this->parsePath($path);
@@ -1085,7 +1030,7 @@ class GFS extends Object {
 					unset($pointer);
 					return true;
 				} else {
-					return -3;
+					return self::REALFILE_PERMISSION_ERROR;
 				}
 			} else {
 				return false;
@@ -1101,7 +1046,7 @@ class GFS extends Object {
 					return rename($aim . ".tmp", $aim);
 				} else {
 					@unlink($aim . ".tmp");
-					return -3;
+					return self::REALFILE_PERMISSION_ERROR;
 				}
 			}
 			
@@ -1151,11 +1096,10 @@ class GFS extends Object {
 	 *@access public
 	*/
 	public function writePlist($file, $data) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
-			return -5;
+			return self::ARCHIVE_READONLY;
 		}
 		
 		$plist = new CFPropertyList();
@@ -1213,7 +1157,38 @@ class GFS extends Object {
 		
 		return $path;
 	}
-	
+		
+	/**
+	 * writes the database
+	 *
+	 *@name UpdateDB
+	 *@access public
+	*/
+	public function updateDB() {
+		if(PROFILE) Profiler::mark("updateDB");
+		$this->checkValidOrThrow();
+		if($this->readonly)
+			return false;
+			
+		
+		$this->setPosition($this->endOfContentPos);
+		if(GFS_DB_TYPE == "serialize")
+  	 		$db = serialize($this->db);
+  	 	else
+  	 		$db = json_encode($this->db);
+  	 	
+		if($this->oldDBSize > strlen($db)) {
+			$db = str_repeat("\n", $this->oldDBSize - strlen($db)) . $db;
+		}
+		fwrite($this->pointer, "\n\n" . $db . "\n" . strlen($db));
+		$this->oldDBSize = strlen($db);
+		$this->certValidCache = null;
+		$this->certificate = null;
+		unset($db);
+		if(PROFILE) Profiler::unmark("updateDB");
+		return true;
+	}
+
 	/**
 	 * returns if this archive is signed
 	 *
@@ -1221,8 +1196,7 @@ class GFS extends Object {
 	 *@access public
 	*/
 	public function isSigned($publicKey) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
 		if(isset($this->certValidCache)) {
 			return $this->certValidCache;
@@ -1267,11 +1241,11 @@ class GFS extends Object {
 	 *@param string - privateKey
 	*/
 	public function sign($privateKey) {
-		if($this->valid === false)
-			return false;
+		$this->checkValidOrThrow();
 		
-		if($this->readonly)
-			return false;
+		if($this->readonly) {
+			return self::ARCHIVE_READONLY;
+		}
 		
 		$this->certificate = null;
 		$this->private = $privateKey;
@@ -1287,6 +1261,11 @@ class GFS extends Object {
 	 *@access public
 	*/
 	public function close() {
+
+		if($this->valid === false) {
+			return false;
+		}
+
 		if(!$this->readonly) {
 			$this->updateDB();
 		}
@@ -1328,6 +1307,17 @@ class GFS extends Object {
 		$this->valid = false;
 	}
 	
+	/**
+	 * checks if valid and when not throws exception.
+	*/
+	protected function checkValidOrThrow() {
+		if($this->valid === false) {
+			throw new LogicException("GFS-Archive ".$this->file." corrupted.");
+		}
+
+		return true;
+	}
+
 	/**
 	 * destruct
 	 *

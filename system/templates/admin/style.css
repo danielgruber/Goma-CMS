@@ -155,6 +155,11 @@ div.adminPanel table, div.adminPanel td {
 				color: darken(@color-action, 15%);
 			}
 		}
+
+		i {
+			line-height: 1em;
+			vertical-align: top;
+		}
 	}
 	
 	.dropdown {
