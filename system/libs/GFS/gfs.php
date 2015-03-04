@@ -463,7 +463,7 @@ class GFS extends Object {
 					$this->db[$path] = array(
 						"type"	 			=> $this->getFileType($file),
 						"size"	 			=> filesize($file),
-						"lastModfied"		=> filemtime($file),
+						"lastModified"		=> filemtime($file),
 						"checksum"			=> "GFS" . md5_file($file),
 						"startChunk"		=> $this->endOfContentPos
 					);
@@ -475,7 +475,7 @@ class GFS extends Object {
 				$this->db[$path] = array(
 					"type"	 			=> $this->getFileType($file),
 					"size"	 			=> filesize($file),
-					"lastModfied"		=> filemtime($file),
+					"lastModified"		=> filemtime($file),
 					"contents"			=> file_get_contents($file)
 				);
 			}
@@ -491,22 +491,21 @@ class GFS extends Object {
 	 *
 	 * @name addContentToArchiveWithoutChecks
 	*/
-	protected function addContentToArchiveWithoutChecks($content, $path, $lastModfied = null) {
+	protected function addContentToArchiveWithoutChecks($content, $path, $lastModified = null) {
 
-		if(!isset($lastModfied)) {
-			$lastModfied = time();
+		if(!isset($lastModified)) {
+			$lastModified = time();
 		}
 
 		if(strlen($content) > FILESIZE_SAVE_IN_DB) {
 			$this->setPosition($this->endOfContentPos);
 			// write and save memory
 			fwrite($this->pointer, $content);
-			unset($content);
 
 			$this->db[$path] = array(
 				"type"	 			=> $this->getFileType($path),
 				"size"	 			=> strlen($content),
-				"lastModfied"		=> $lastModfied,
+				"lastModified"		=> $lastModified,
 				"checksum"			=> "GFS" . md5($content),
 				"startChunk"		=> $this->endOfContentPos
 			);
@@ -515,7 +514,7 @@ class GFS extends Object {
 			$this->db[$path] = array(
 				"type"	 			=> $this->getFileType($path),
 				"size"	 			=> strlen($content),
-				"lastModfied"		=> $lastModfied,
+				"lastModified"		=> $lastModified,
 				"contents"			=> $content
 			);
 		}
@@ -538,7 +537,7 @@ class GFS extends Object {
 
 			$this->db[$path] = array(
 				"type"	 			=> GFS_DIR_TYPE,
-				"lastModfied"		=> filemtime($file)
+				"lastModified"		=> filemtime($file)
 			);
 
 		}
@@ -579,11 +578,61 @@ class GFS extends Object {
 		
 		$this->db[$path] = array(
 			"type"  	 	=> GFS_DIR_TYPE,
-			"lastModfied"	=> TIME
+			"lastModified"	=> TIME
 		);
 		return $this->updateDB();
 	}
 	
+	/**
+	 * returns filesize of given file.
+	 *
+	 * @param 	string path
+	*/
+	public function getFileSize($path) {
+		$this->checkValidOrThrow();
+
+		// parse path
+		$path = $this->parsePath($path);
+
+		if(isset($this->db[$path])) {
+			if(isset($this->db[$path]["size"])) {
+				return $this->db[$path]["size"];
+			} else {
+
+				// folders have size 0.
+				return 0;
+			}
+
+		} else {
+			return false::FILE_NOT_FOUND;
+		}
+	}
+
+	/**
+	 * returns when a file was last modified.
+	 *
+	 * @param 	string path
+	*/
+	public function getLastModified($path) {
+		$this->checkValidOrThrow();
+
+		// parse path
+		$path = $this->parsePath($path);
+
+		if(isset($this->db[$path])) {
+			if(isset($this->db[$path]["lastModified"])) {
+				return $this->db[$path]["lastModified"];
+			} else if(isset($this->db[$path]["lastModfied"])) {
+				return $this->db[$path]["lastModfied"];
+			} else {
+				throw new LogicException("Every file-entry needs last modified.");
+			}
+
+		} else {
+			return false::FILE_NOT_FOUND;
+		}
+	}
+
 	/**
 	 * adds a file
 	 *
@@ -592,7 +641,7 @@ class GFS extends Object {
 	 *@param string - path
 	 *@param string - content
 	*/
-	public function addFile($path, $content, $lastModfied = null) {
+	public function addFile($path, $content, $lastModified = null) {
 		$this->checkValidOrThrow();
 		
 		if($this->readonly) {
@@ -609,7 +658,7 @@ class GFS extends Object {
 			return self::FILE_ALREADY_EXISTS;
 		}
 
-		$s = $this->addContentToArchiveWithoutChecks($content, $path, $lastModfied);
+		$s = $this->addContentToArchiveWithoutChecks($content, $path, $lastModified);
 
 		if($s === true) {
 			return $this->updateDB();
@@ -932,8 +981,8 @@ class GFS extends Object {
 		$path = $this->parsePath($path);
 		
 		if(isset($this->db[$path])) {
-			if($this->db[$path][$type] != GFS_DIR_TYPE) {
-				$this->db[$path]["last_modified"] = $time;
+			if($this->db[$path]["type"] != GFS_DIR_TYPE) {
+				$this->db[$path]["lastModified"] = $time;
 			}
 			unset($path);
 			return $this->updateDB();

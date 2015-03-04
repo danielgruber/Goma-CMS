@@ -8,7 +8,7 @@ define("DEFAULT_PACKAGE_FOLDER", FRAMEWORK_ROOT . "installer/data/apps");
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.7
+ * @version	1.7.1
  */
 abstract class g_SoftwareType {
 	/**
@@ -282,9 +282,7 @@ abstract class g_SoftwareType {
 					
 					if(isset($data["installfolders"]["destination"][$key])) {
 						$log .= "Moving {$folder} to ".$data["installfolders"]["destination"][$key]."\n";
-						if(($return = FileSystem::moveLogged($folder, $data["installfolders"]["destination"][$key])) === false) {
-							throwError(6, 'PHP-Error', "Could not move files of Update. Failed in file " . FileSystem::errFile());
-						}
+						$log .= FileSystem::moveLogged($folder, $data["installfolders"]["destination"][$key], false);
 						
 						$log .= $return;
 						$log .= "\n\n";

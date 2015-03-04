@@ -74,6 +74,9 @@ class GFSTest extends GomaUnitTest {
 		file_put_contents(FRAMEWORK_ROOT . "temp/testmd5big.txt", randomString(1024));
 		$gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5big.txt", "blah/t2.txt");
 		$gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5.txt", "blub/t2.txt");
+		$gfs->addFile("test/test.txt", "Hello World");
+		$gfs->addFile("test/testbig.txt", $random = randomString(1024));
+
 
 		$this->assertEqual($gfs->getFileContents("blah/t2.txt"), file_get_contents(FRAMEWORK_ROOT . "temp/testmd5big.txt"));
 		$this->assertEqual($gfs->getFileContents("blub/t2.txt"), file_get_contents(FRAMEWORK_ROOT . "temp/testmd5.txt"));
@@ -81,6 +84,17 @@ class GFSTest extends GomaUnitTest {
 		$this->assertEqual($gfs->getFileContents("test/myfile.txt"), GFS::FILE_NOT_FOUND);
 		$this->assertEqual($gfs->touch("test/myfile.txt"), true);
 		$this->assertEqual($gfs->getFileContents("test/myfile.txt"), "");
+		$this->assertEqual($gfs->getFileContents("test/test.txt"), "Hello World");
+		$this->assertEqual($gfs->getFileContents("test/testbig.txt"), $random);
+		$this->assertEqual($gfs->getFileSize("test/testbig.txt"), 1024);
+		$this->assertEqual($gfs->getLastModified("test/testbig.txt"), time());
+
+		$gfs->touch("test/testbig.txt", NOW - 2014);
+		$this->assertEqual($gfs->getLastModified("test/testbig.txt"), NOW - 2014);
+
+		$gfs->writeToFileSystem("test/testbig.txt", FRAMEWORK_ROOT . "temp/testcbig.txt");
+		$this->assertTrue(file_exists(FRAMEWORK_ROOT . "temp/testcbig.txt"));
+		$this->assertEqual(file_get_contents(FRAMEWORK_ROOT . "temp/testcbig.txt"), $random);		
 
 		$this->assertEqual($gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5doesnotexist.txt", "test/myfile.txt"), GFS::REALFILE_NOT_FOUND);
 		$this->assertEqual($gfs->addFromFile(FRAMEWORK_ROOT . "temp/testmd5.txt", "test/myfile.txt"), GFS::FILE_ALREADY_EXISTS);
