@@ -82,7 +82,7 @@ class settingsAdmin extends adminItem
 	*/
 	public static function upgradeSafeMode() {
 		session_write_close();
-		FileSystem::applySafeMode();
+		FileSystem::applySafeMode(null, null, true);
 	}
 
 	/**

@@ -358,7 +358,7 @@ class Dev extends RequestHandler {
 			}
 		}
 
-		FileSystem::applySafeMode();
+		FileSystem::applySafeMode(null, null, true);
 
 		return "OK";
 	}

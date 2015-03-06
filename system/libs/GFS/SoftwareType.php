@@ -336,6 +336,8 @@ abstract class g_SoftwareType {
 			}
 			
 			$log .= "POSTFLIGHT OK.\n";
+
+			FileSystem::applySafeMode();
 			
 			// save log
 			FileSystem::RequireDir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/install/");

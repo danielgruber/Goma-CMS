@@ -6,9 +6,9 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.7.1
+ * @version 1.7.2
  *
- * last modified: 03.03.2015
+ * last modified: 06.03.2015
 */
 
 define("LANGUAGE_ROOT", ROOT . "/languages/");
@@ -165,34 +165,41 @@ class FileSystem extends Object {
 	/**
 	 * sets chmod recursivly
 	 *
-	 *@name chmod
-	 *@access public
-	 *@param string - path
-	 *@param int - mode
-	 *@param bool - if to break and return false on fail
+	 * @name 	chmod
+	 * @access 	public
+	 * @param 	string - path
+	 * @param 	int - mode
+	 * @param 	bool - if to break and return false on fail
+	 * @param 	bool - if try to own all files, that we can set perm-mode easy
 	*/
-	public static function chmod($file, $mode, $breakOnFail = true) {
+	public static function chmod($file, $mode, $breakOnFail = true, $tryOwn = false) {
+		
 
-		if(function_exists("get_current_user")) {
-			@chown($file, get_current_user());
+		$r = @chmod($file, $mode);
+
+		// maybe try to own this file.
+		if($tryOwn && fileowner($file) != getmyuid()) {
+			if(self::tryOwn($file)) {
+				$r = @chmod($file, $mode);
+			}
 		}
 
-		if(is_dir($file)) {
-			if(!@chmod($file, $mode) && $breakOnFail) {
-				self::$errFile = $file;
-				return false;
-			}	
-			
+		if(!$r) {
+			self::$errFile = $file;
+		}
+
+		if(is_dir($file) && ($r || !$breakOnFail)) {
 			foreach(scandir($file) as $_file) {
-				if($_file != "." && $_file != "..")
-					if(!self::chmod($file . "/" . $_file, $mode, $breakOnFail) && $breakOnFail) {
+				if($_file != "." && $_file != "..") {
+					if(!self::chmod($file . "/" . $_file, $mode, $breakOnFail, $tryOwn) && $breakOnFail) {
 						return false;
 					}
+				}
 			}
-			return true;
-		} else {
-			return @chmod($file, $mode);
 		}
+
+		return $r;
+		
 	}
 	
 	/**
@@ -265,13 +272,14 @@ class FileSystem extends Object {
 	}
 	
 	/**
-	 * moves recursivly
+	 * moves files recursivly. it preserves the old folder-structure, 
+	 * cause it will just require all folders and move all files.
 	 *
-	 *@name move
-	 *@access public
-	 *@param string - source
-	 *@param string - destination
-	 *@param bool - if to break and return false on fail
+	 * @name 	move
+	 * @access 	public
+	 * @param 	string - source
+	 * @param 	string - destination
+	 * @param 	bool - if to break and return false on fail
 	*/
 	public static function move($source, $destination, $breakOnFail = true, $useLog = false) {
 		if(!$source || !$destination) {
@@ -285,7 +293,7 @@ class FileSystem extends Object {
 			
 			foreach(scandir($source) as $file) {
 				if($file != "." && $file != "..") {
-					if(!self::move($source . "/" . $file, $destination . "/" . $file, $breakOnFail) && $breakOnFail) {
+					if(!rename($source . "/" . $file, $destination . "/" . $file) && $breakOnFail) {
 						return false;
 					}
 				}
@@ -309,12 +317,12 @@ class FileSystem extends Object {
 	/**
 	 * moves recursivly with logging
 	 *
-	 *@name moveLogged
-	 *@access public
-	 *@param string - source
-	 *@param string - destination
-	 *@param bool - if to break and return false on fail
-	 *@param internal variable - for the log
+	 * @name 	moveLogged
+	 * @access 	public
+	 * @param 	string - source
+	 * @param 	string - destination
+	 * @param 	bool - if to break and return false on fail
+	 * @param 	internal variable - for the log
 	*/
 	public static function moveLogged($source, $destination, $breakOnFail = true, $useLog = false) {
 		$log = "#: ";
@@ -357,6 +365,38 @@ class FileSystem extends Object {
 				return false;
 			}
 		}
+	}
+
+	/**
+	 * moves all files by rename within a folder.
+	 * 
+	 * @name 	moveFolderContents
+	 * @param 	string source-folder
+	 * @param 	string destination-folder
+	 * @param 	boolean if to return an array of errors or a boolean
+	 * @return 	boolean|array
+	*/
+	public static function moveFolderContents($source, $destination, $giveErrors = false) {
+		if(!is_dir($source)) {
+			return array($source);
+		}
+
+		FileSystem::requireDir($destination);
+
+		$errors = array();
+		foreach(scandir($source) as $file) {
+			if($file != "." && $file != "..") {
+				if(!@rename($source . "/" . $file, $destination . "/" . $file)) {
+					$errors[] = $source . "/" . $file;
+				}
+			}
+		}
+
+		if($giveErrors) {
+			return $errors;
+		}
+
+		return (count($errors) == 0);
 	}
 	
 	/**
@@ -614,14 +654,14 @@ class FileSystem extends Object {
 	/**
 	 * apply-safe-mode.
 	*/
-	public static function applySafeMode($folders = null, $configFiles = null) {
+	public static function applySafeMode($folders = null, $configFiles = null, $tryOwn = false) {
 		if($folders === null) {
 			$folders = self::$applySafeModeFolders;
 		}
 
 		foreach($folders as $folder) {
-			if(file_exists($file)) {
-				self::chmod($folder, self::getMode(), false);	
+			if(file_exists($folder)) {
+				self::chmod($folder, self::getMode(), false, $tryOwn);	
 			}
 		}
 		
@@ -641,5 +681,71 @@ class FileSystem extends Object {
 	*/
 	public static function codeForExternalSystem() {
 		return 'FileSystem::$safe_mode = '.var_export(FileSystem::$safe_mode, true).';';
+	}
+
+	/**
+	 * tries to own files.
+	*/
+	protected static function tryOwn($file) {
+		if(file_exists($file)) {
+			if(!function_exists("get_current_user") || (get_current_user() != fileowner($file))) {
+				if(is_file($file)) {
+					return self::tryOwnFileByCopy($file); 
+				} else {
+					return self::tryOwnFolderByCopy($file);
+				}
+			} else {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * trys to own a file by making a copy of it and deleting the old copy.
+	*/
+	protected static function tryOwnFileByCopy($file) {
+		$newName = $file . "_new";
+		while(file_exists($newName)) {
+			$newName .= "_2";
+		}
+
+		if(copy($file, $newName)) {
+			if(@unlink($file)) {
+				return rename($newName, $file);
+			}
+
+			unlink($newName);
+		}
+			
+		return false;
+	}
+
+	/**
+	 * trys to own a folder by making a copy of it and deleting the old copy.
+	 * for folders its important that all files are moved in the new folder.
+	*/
+	protected static function tryOwnFolderByCopy($file) {
+
+		while(substr($file, -1) == "/") {
+			$file = substr($file, 0, -1);
+		}
+
+		$newName = $file . "_new";
+		while(file_exists($newName)) {
+			$newName .= "_2";
+		}
+
+		FileSystem::requireDir($newName);
+
+		if(self::moveFolderContents($file, $newName) && rmdir($file)) {
+			return rename($newName, $file);
+		} else {
+			self::moveFolderContents($newName, $file);
+
+			rmdir($newName);
+			return false;
+		}
 	}
 }

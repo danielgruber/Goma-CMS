@@ -64,6 +64,23 @@ class FileSystemTest extends GomaUnitTest {
 		$this->assertFalse(file_exists($this->dir));
 	}
 
+	public function testMoveSubfolders() {
+		FileSystem::requireDir($this->dir . "/movetest", 0755);
+		FileSystem::requireDir($this->dir . "/movetest/test", 0755);
+		FileSystem::requireDir($this->dir . "/movetest/test/blub", 0755);
+		touch($this->dir . "/movetest/test/blub/test.txt");
+
+		$this->assertTrue(file_exists($this->dir . "/movetest/test/blub/test.txt"));
+		FileSystem::moveFolderContents($this->dir . "/movetest", $this->dir . "/movetest2");
+		$this->assertTrue(file_exists($this->dir . "/movetest"));
+		$this->assertTrue(file_exists($this->dir . "/movetest2"));
+		$this->assertTrue(file_exists($this->dir . "/movetest2/test/blub/test.txt"));
+		$this->assertFalse(file_exists($this->dir . "/movetest/test/blub/test.txt"));
+
+		FileSystem::delete($this->dir . "/movetest2");
+		FileSystem::delete($this->dir . "/movetest");
+	}
+
 	public function testFileSize() {
 
 		$sizes = array(
