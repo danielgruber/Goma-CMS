@@ -671,7 +671,7 @@ class FileSystem extends Object {
 		if(self::$safe_mode) {
 			$configFiles = $configFiles || array(ROOT . "_config.php", APP_FOLDER . "config.php");
 			foreach($configFiles as $file) {
-				self::chmod($folder, 0644);
+				self::chmod($file, 0600);
 			}
 		}
 	}

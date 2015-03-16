@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * 
- * @version 2.6.10
+ * @version 2.6.11
  */
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
@@ -395,22 +395,15 @@ function loadApplication($directory) {
 		ClassManifest::$directories[] = $directory . "/code/";
 		ClassManifest::$directories[] = $directory . "/application/";
 
-		if (file_exists(ROOT . "503." . md5(basename($directory)) . ".goma")) {
-			if (filemtime(ROOT . "503." . md5(basename($directory)) . ".goma") > NOW - 10) {
-				$allowed_ip = @file_get_contents(ROOT . "503." . md5(basename($directory)) . ".goma");
-				if ($_SERVER["REMOTE_ADDR"] != $allowed_ip) {
-					$content = file_get_contents(ROOT . "system/templates/framework/503.html");
-					$content = str_replace('{BASE_URI}', BASE_URI, $content);
-					header('HTTP/1.1 503 Service Temporarily Unavailable');
-					header('Status: 503 Service Temporarily Unavailable');
-					header('Retry-After: 10');
-					die($content);
-				}
-			} else {
-				@unlink(ROOT . "503." . md5(basename($directory)) . ".goma");
-			}
-
+		if(isProjectUnavailableForIP($_SERVER["REMOTE_ADDR"], basename($directory))) {
+			$content = file_get_contents(ROOT . "system/templates/framework/503.html");
+			$content = str_replace('{BASE_URI}', BASE_URI, $content);
+			header('HTTP/1.1 503 Service Temporarily Unavailable');
+			header('Status: 503 Service Temporarily Unavailable');
+			header('Retry-After: 10');
+			die($content);
 		}
+
 		require (ROOT . $directory . "/application/application.php");
 	} else {
 		define("PROJECT_LOAD_DIRECTORY", $directory);

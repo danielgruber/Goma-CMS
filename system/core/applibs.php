@@ -7,7 +7,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version 1.0.4
+ * @version 1.0.5
  */
 
 /**
@@ -332,11 +332,12 @@ function goma_date($format, $date = NOW) {
  *
  * @return void
  */
-function makeProjectUnavailable($project = APPLICATION) {
-	if(!file_put_contents(ROOT . "503." . md5(basename($project)) . ".goma", $_SERVER["REMOTE_ADDR"])) {
+function makeProjectUnavailable($project = APPLICATION, $ip = null) {
+	$ip = isset($ip) ? $ip : $_SERVER["REMOTE_ADDR"];
+	if(!file_put_contents(ROOT . $project . "/503.goma", $ip)) {
 		die("Could not make project unavailable.");
 	}
-	chmod(ROOT . "503." . md5(basename($project)) . ".goma", 0777);
+	chmod(ROOT . $project . "/503.goma", 0777);
 }
 
 /**
@@ -352,8 +353,8 @@ function makeProjectUnavailable($project = APPLICATION) {
  * @return void
  */
 function makeProjectAvailable($project = APPLICATION) {
-	if(file_exists(ROOT . "503." . md5(basename($project)) . ".goma")) {
-		@unlink(ROOT . "503." . md5(basename($project)) . ".goma");
+	if(file_exists(ROOT . $project . "/503.goma")) {
+		@unlink(ROOT . $project . "/503.goma");
 	}
 }
 
@@ -369,8 +370,13 @@ function makeProjectAvailable($project = APPLICATION) {
  * @return void
  */
 function isProjectUnavailable($project = APPLICATION) {
-	return (file_exists(ROOT . "503." . md5(basename($project)) . ".goma") && filemtime(ROOT . "503." . md5(basename($project)) . ".goma") > NOW - 10);
+	return (file_exists(ROOT . $project . "/503.goma") && filemtime(ROOT . $project . "/503.goma") > NOW - 10);
 }
+
+function isProjectUnavailableForIP($ip, $project = APPLICATION) {
+	return isProjectUnavailable() && file_get_contents(ROOT . $project . "/503.goma") != $ip;
+}
+
 
 /**
  * Writes the system configuration.
