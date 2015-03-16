@@ -54,6 +54,16 @@ class FileMoverTest extends GomaUnitTest {
 		}
 	}
 
+	public function testCheckValidWhenParentNotExists() {
+
+		// check if test can execute and does not have side effects
+		$this->assertFalse(file_exists($this->dir2 . "/testWritable/blah/test.txt"));
+		$this->assertTrue(file_exists($this->dir2 . "/testWritable"));
+
+		$filemover = new FileMover(array("blah/test.txt"), null, ROOT . $this->dir2 . "/testWritable");
+		$this->assertTrue($filemover->checkValid());
+	}
+
 	public function testCheckValid() {
 
 		$this->assertTrue(file_exists($this->dir2 . "/testNotWritable/test.txt"));

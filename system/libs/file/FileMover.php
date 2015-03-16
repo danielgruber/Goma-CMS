@@ -6,9 +6,9 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.0
+ * @version 1.0.1
  *
- * last modified: 02.03.2015
+ * last modified: 16.03.2015
 */
 class FileMover {
 	/**
@@ -350,17 +350,22 @@ class FileMover {
 	 * @param 	string - optional root, which is prepended to path.
 	 * @return 	string - folder without root
 	*/
-	public static function findFirstExistingFolderForPath($path, $root = "./") {
+	public static function findFirstExistingFolderForPath($path, $root = "") {
 		if(file_exists($root . $path)) {
 			return $path;
 		}
 
 		$file = substr($path, 0, strrpos($path, "/"));
 		while(!file_exists($root . $file)) {
-			if(!strpos($file, "/")) {
+			if($file == "") {
 				return false;
 			}
-			$file = substr($file, 0, strrpos($file, "/"));
+
+			if(strpos($file, "/") === false) {
+				$file = "";
+			} else {
+				$file = substr($file, 0, strrpos($file, "/"));
+			}
 		}
 
 		return $file;

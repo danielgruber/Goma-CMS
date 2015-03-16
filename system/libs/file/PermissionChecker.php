@@ -122,6 +122,8 @@ class PermissionChecker {
 			}
 		}
 
+		
+
 		if(@fopen($folder . "/write.test", "w")) {
 			@unlink($folder . "/write.test");
 			return true;
