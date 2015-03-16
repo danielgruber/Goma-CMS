@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.3
+ * @version		2.3.1
  */
 class Controller extends RequestHandler
 {		
@@ -650,7 +650,7 @@ class Controller extends RequestHandler
 		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
 		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
-		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false) {
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null) {
 			
 			if(PROFILE) Profiler::mark("Controller::save");
 
@@ -658,15 +658,7 @@ class Controller extends RequestHandler
 
 			$this->callExtending("onBeforeSave", $data, $priority);
 			
-			$model = $this->modelInst()->_clone();
-			
-			if(is_object($data) && is_subclass_of($data, "ViewaccessableData")) {
-				$data = $data->ToArray();
-			}
-			
-			foreach($data as $key => $value) {
-				$model[$key] = $value;
-			}
+			$model = $this->getSafableModel($data, $givenModel);
 
 			if(PROFILE) Profiler::unmark("Controller::save prepare");
 
@@ -675,8 +667,11 @@ class Controller extends RequestHandler
 				if(PROFILE) Profiler::mark("Controller::save postproduction");
 
 				$this->callExtending("onAfterSave", $model, $priority);
-				$this->model_inst = $model;
-				$model->controller = clone $this;
+
+				if(!isset($givenModel)) {
+					$this->model_inst = $model;
+					$model->controller = clone $this;
+				}
 
 				if(PROFILE) Profiler::unmark("Controller::save postproduction");
 
@@ -686,6 +681,27 @@ class Controller extends RequestHandler
 				if(PROFILE) Profiler::unmark("Controller::save");
 				return false;
 			}
+		}
+
+		/**
+	   	 * returns a model which is writable with given data and optional given model.
+	   	 * if no model was given, an instance of the controlled model is generated.
+	   	 *
+	   	 * @param 	Data or Object of Data
+	   	 * @param 	Object Model
+		*/
+		public function getSafableModel($data, ViewAccessableData $givenModel = null) {
+			$model = isset($givenModel) ? $givenModel->_clone() : $this->modelInst()->_clone();
+			
+			if(is_object($data) && is_subclass_of($data, "ViewaccessableData")) {
+				$data = $data->ToArray();
+			}
+			
+			foreach($data as $key => $value) {
+				$model->$key = $value;
+			}
+
+			return $model;
 		}
 		
 		/**
