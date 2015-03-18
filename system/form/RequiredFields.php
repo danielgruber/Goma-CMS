@@ -94,9 +94,9 @@ class RequiredFields extends FormValidator
 		public function JS()
 		{
 				$js = '$(function(){ ';
-					$js .= 'if($("#form_'.$this->form->name.'").length > 0)
+					$js .= 'if($("#form_'.$this->form->name().'").length > 0)
 							{
-								$("#form_'.$this->form->name.'").bind("formsubmit", function()
+								$("#form_'.$this->form->name().'").bind("formsubmit", function()
 								{
 									var require_lang = "<div class=\"err\" style=\"color: #ff0000;\">'.lang("form_required_field").'</div>";
 									

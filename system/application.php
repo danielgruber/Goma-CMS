@@ -315,7 +315,7 @@ function loadFramework() {
 			FileSystem::delete(ROOT . $directory . "/" . getPrivateKey() . "-install/");
 		}
 	} else {
-		throwError(6, "PHP-Error", "Calling loadFramework without defined CURRENT_PROJECT is illegal.");
+		throw new Exception("Calling loadFramework() without defined CURRENT_PROJECT is illegal.");
 	}
 
 	if (PROFILE)

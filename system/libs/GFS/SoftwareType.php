@@ -431,7 +431,7 @@ abstract class g_SoftwareType {
 	 *@name listUpdatablePackages
 	 *@access public
 	*/
-	public function listUpdatablePackages() {
+	public static function listUpdatablePackages() {
 		$apps = array();
 		$apps[ClassInfo::$appENV["framework"]["name"]] = array(
 			"name" 		=> ClassInfo::$appENV["framework"]["name"],

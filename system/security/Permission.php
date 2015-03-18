@@ -237,7 +237,7 @@ class Permission extends DataObject
 		 *@name forceExisting
 		 *@return Permission
 		*/
-		public function forceExisting($r) {
+		public static function forceExisting($r) {
 			$r = strtolower(trim($r));
 			if(isset(self::$providedPermissions[$r])) { 
 				if($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {

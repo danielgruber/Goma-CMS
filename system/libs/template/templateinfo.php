@@ -20,7 +20,7 @@ class templateInfo extends object
 	 * @return plist object
 	 * */
 	
-	public function get_plist_contents($template)
+	public static function get_plist_contents($template)
 	{
 		$path = ROOT . "tpl/";
 		$plist_path = $template . "/info.plist";
@@ -35,7 +35,7 @@ class templateInfo extends object
 	 * @return array - [key] = string
 	 * */
 	
-	public function parse_plist($file)
+	public static function parse_plist($file)
 	{
 		if(file_exists($file))
 		{
@@ -60,7 +60,7 @@ class templateInfo extends object
 	 * @return string - value of the key (empty string if not available)
 	 * */
 	
-	public function get_key($template, $key)
+	public static function get_key($template, $key)
 	{
 		$content = self::get_plist_contents($template);
 		
@@ -80,7 +80,7 @@ class templateInfo extends object
 	 * @return array - numbered array with all available templates
 	 * */
 			
-	public function get_available_templates($app, $versionCMS, $versionFramework)
+	public static function get_available_templates($app, $versionCMS, $versionFramework)
 	{
 		$tpl = self::getTemplates();
 		$availTpl = array();
@@ -106,7 +106,7 @@ class templateInfo extends object
 	 *@name getTemplates
 	 *@access public
 	*/
-	public function getTemplates() 
+	public static function getTemplates() 
 	{
 		$path = "tpl/";
 		$tpl = array();

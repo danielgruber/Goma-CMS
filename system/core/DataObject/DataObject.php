@@ -4572,7 +4572,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
 
 			// hack to not break current Goma-CMS Build
-			if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
+			if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
 				throw new DBFieldNotValidException($this->class . "." . $name);
 			}
 		}
