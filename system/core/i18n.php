@@ -56,6 +56,17 @@ class i18n extends Object {
 	public static $time_formats = array("H:i", "g:i a", "g.i a", "H.i");
 
 	/**
+	 * returns name for cache for language.
+	*/
+	public static function getLangCacheName() {
+		if(isset(ClassInfo::$appENV["expansion"])) {
+			return "lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]);
+		} else {
+			return "lang_" . Core::$lang . count(i18n::$languagefiles);
+		}
+	}
+
+	/**
 	 * inits i18n
 	 *
 	 *@param string - to init special lang
@@ -80,12 +91,7 @@ class i18n extends Object {
 		global $lang;
 		$lang = array();
 
-		// cache lang in registriy for faster access
-		if(isset(ClassInfo::$appENV["expansion"])) {
-			$cacher = new Cacher("lang_" . Core::$lang . count(self::$languagefiles) . count(ClassInfo::$appENV["expansion"]));
-		} else {
-			$cacher = new Cacher("lang_" . Core::$lang . count(self::$languagefiles));
-		}
+		$cacher = new Cacher(self::getLangCacheName());
 		if($cacher->checkvalid()) {
 			$lang = $cacher->getData();
 		} else {
