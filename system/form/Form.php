@@ -24,7 +24,7 @@ class Form extends object {
 	 *@access protected
 	 *@var string
 	 */
-	public $name;
+	protected $name;
 
 	/**
 	 * you can use data-handlers, to edit data before it is given to the
@@ -351,7 +351,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function render() {
-		if($this->controller && is_a($this->controller->request, "Request")) {
+		if($this->controller && isset($this->controller->request) && is_a($this->controller->request, "Request")) {
 			$params = array_values($this->controller->request->params);
 			
 			// just watch out for external-form.
@@ -419,7 +419,7 @@ class Form extends object {
 
 		//$this->saveToSession();
 
-		$this->form->action = ($this->action != "") ? $this->action : $this->url;
+		$this->form->action = $this->url;
 
 		$this->form->append('<input type="submit" name="default_submit" value="" class="default_submit" style="position: absolute;bottom: 0px;right: 0px;height: 0px !important;width:0px !important;background: transparent;color: transparent;border: none;-webkit-box-shadow: none;box-shadow:none;-moz-box-shadow:none;outline: 0;padding: 0;margin:0;" />');
 
@@ -880,11 +880,12 @@ class Form extends object {
 	/**
 	 * gets the field by the given name
 	 *
-	 *@name getField
-	 *@access public
-	 *@param string - name
+	 * @name 	getField
+	 * @access 	public
+	 * @param 	string - name
 	 */
 	public function getField($name) {
+
 		return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : false;
 	}
 

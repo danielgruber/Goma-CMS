@@ -14,7 +14,7 @@ class FormField extends RequestHandler implements ArrayAccess
 		/**
 		 * secret key for this form field
 		 *
-		 *@name randomKey
+		 *@name randomKey
 		 *@access public
 		*/
 		public $randomKey = "";
@@ -348,7 +348,7 @@ class FormField extends RequestHandler implements ArrayAccess
 		*/
 		public function ID()
 		{
-			return "form_field_" .  $this->classname . "_" . md5($this->form()->name . $this->title) . "_" . $this->name;
+			return "form_field_" .  $this->classname . "_" . md5($this->form()->name() . $this->title) . "_" . $this->name;
 		}
 		
 		/**

@@ -10,6 +10,15 @@
 
 class LangSelectTest extends GomaUnitTest implements TestAble {
 	/**
+	 * area
+	*/
+	static $area = "Form";
+
+	/**
+	 * internal name.
+	*/
+	public $name = "LangSelectFormField";
+	/**
 	 * tests langselect
 	*/
 	public function testLangSelect() {
