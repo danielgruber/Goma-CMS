@@ -6,8 +6,8 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 10.04.2014
-  * $Version 2.0.7
+  * last modified: 18.03.2015
+  * $Version 2.0.8
 */
 
 var AjaxUpload = function(DropZone, options) {
@@ -156,12 +156,14 @@ AjaxUpload.prototype = {
 	/**
 	 * always called regardless of an error
 	*/
+	always: function(time, index, upload) {
 		
 	},
 	
 	/**
 	 * if succeeded
 	*/
+	done: function(response, index, upload) {
 	
 	},
 
@@ -170,6 +172,7 @@ AjaxUpload.prototype = {
 		
 	},
 	
+	fail: function(status, response, index, upload) {
 		
 	},
 	
@@ -278,6 +281,7 @@ AjaxUpload.prototype = {
 	 *
 	 *@name _complete
 	*/
+	_complete: function(event, upload, fileIndex, upload) {
 		var now = new Date().getTime();
 		var timeDiff = now - upload.downloadStartTime;
 		
@@ -288,6 +292,7 @@ AjaxUpload.prototype = {
 		this.queue[fileIndex].loaded = true;
 		
 		this.loading = false;
+		this.always(timeDiff, fileIndex, upload);
 	},
 	
 	/**
@@ -330,8 +335,16 @@ AjaxUpload.prototype = {
 	 *@name _success
 	 *@param response
 	*/
+	_success: function(response, fileIndex, upload) {
+		this.done(response, fileIndex, upload);
 	},
 
+	/**
+	 * called when failed.
+	*/
+	_fail: function(status, response, fileIndex, upload) {
+		this.fail(status, response, fileIndex, upload);
+	}
 	
 	/**
 	 * transfer methods
@@ -428,8 +441,15 @@ AjaxUpload.prototype = {
 		
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState == 4) {
+				$this._complete(event, this, this.upload.fileIndex, this.upload);
 			}
 			
+    		if (xhr.readyState == 4 && xhr.responseText != "" && xhr.status == 200) {
+      		  	$this._success(xhr.responseText, this.upload.fileIndex, this.upload);
+   			}
+
+   			if(xhr.readyState == 4 && xhr.status != 200) {
+   				$this._fail(xhr.status, xhr.responseText, this.upload.fileIndex, this.upload);
    			}
 		};
 		
