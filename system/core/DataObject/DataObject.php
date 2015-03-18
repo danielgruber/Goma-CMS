@@ -2218,14 +2218,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@param bool - edit-form
 	 *@param bool - disabled
 	*/
-	public function generateForm($name = null, $edit = false, $disabled = false, $request = null) {
+	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null) {
 		
 		// if name is not set, we generate a name from this model
 		if (!isset($name)) {
 			$name = $this->classname . "_" . $this->versionid . "_" . $this->id;
 		}
+
+		$controller = isset($controller) ? $controller : $this->controller;
 		
-		$form = new Form($this->controller(), $name, array(), array(), array(), $request, $this);
+		$form = new Form($controller, $name, array(), array(), array(), $request, $this);
 		
 		// default submission
 		$form->setSubmission("submit_form");	

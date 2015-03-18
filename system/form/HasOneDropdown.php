@@ -96,30 +96,30 @@ class HasOneDropdown extends SingleSelectDropDown
 			if(!isset($this->value)) {
 				
 				// get has-one from result
-				if(is_object($this->form()->result))
+				if(is_object($this->form()->result)) {
 					$has_one = $this->form()->result->hasOne();
+				}
 				
 				if(isset($has_one[$this->relation]) && is_object($has_one[$this->relation])) {
 					$this->_object = $has_one[$this->relation];
-					
-					
 					
 					$this->value = isset(call_user_func_array(array($this->form()->result, $this->relation), array())->id) ? call_user_func_array(array($this->form()->result, $this->relation), array())->id : null;
 					$this->input->value = $this->value;
 				} else {
 					
-					// get has-one from controller
-					if(is_object($this->form()->controller))
-						$has_one = $this->form()->controller->model_inst->hasOne();
-					else
+					// get has-one from model
+					if(is_object($this->form()->model)) {
+						$has_one = $this->form()->model->hasOne();
+					} else {
 						$has_one = null;
-						
+					}
+
 					if(isset($has_one[$this->relation])) {
 						$this->_object = $has_one[$this->relation];
 						
 						
 
-						$this->value = isset(call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id) ? call_user_func_array(array($this->form()->controller->model_inst, $this->relation), array())->id : null;
+						$this->value = isset(call_user_func_array(array($this->form()->model, $this->relation), array())->id) ? call_user_func_array(array($this->form()->model, $this->relation), array())->id : null;
 						$this->input->value = $this->value;
 					} else {
 						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form->name}.");
@@ -127,17 +127,18 @@ class HasOneDropdown extends SingleSelectDropDown
 				}
 			} else {
 				// get has-one from result
-				if(is_object($this->form()->result))
+				if(is_object($this->form()->result)) {
 					$has_one = $this->form()->result->hasOne();
+				}
 					
 				if(is_object($this->form()->result) && isset($has_one[$this->relation])) {
 					$this->_object = $has_one[$this->relation];
 					
 				} else {
 				
-					// get has-one from controller
-					if(is_object($this->form()->controller))
-						$has_one = $this->form()->controller->model_inst->hasOne();
+					// get has-one from model
+					if(is_object($this->form()->model))
+						$has_one = $this->form()->model->hasOne();
 					else
 						$has_one = null;
 						

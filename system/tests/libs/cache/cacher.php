@@ -20,6 +20,10 @@ class CacheTest extends GomaUnitTest {
 	*/
 	public $name = "Cacher";
 
+	public function setUp() {
+		Core::deletecache();
+	}
+
 	public function tearDown() {
 		$cacher = new Cacher("testNotExisting");
 		$cacher->delete();
@@ -39,6 +43,9 @@ class CacheTest extends GomaUnitTest {
 			$this->caseCache("testException", new StdClass(), 10);
 			$this->caseCache("testNumber", 1234, 10);
 			$this->caseCache("testNotExisting", "blub", 10, false);
+
+			$this->caseCache("test1second", "blu", 0, true);
+			$this->caseCache("test1second", "blu", 0, true);
 
 			$this->caseCache("testProblemWithSeconds", "blub", 0, false);
 

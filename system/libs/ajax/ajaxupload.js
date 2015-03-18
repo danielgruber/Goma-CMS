@@ -344,7 +344,7 @@ AjaxUpload.prototype = {
 	*/
 	_fail: function(status, response, fileIndex, upload) {
 		this.fail(status, response, fileIndex, upload);
-	}
+	},
 	
 	/**
 	 * transfer methods

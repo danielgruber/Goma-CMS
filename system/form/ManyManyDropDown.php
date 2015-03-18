@@ -110,13 +110,13 @@ class ManyManyDropDown extends MultiSelectDropDown
 					$this->_object = $many_many_tables[$this->relation]["object"];
 					$this->dataset = call_user_func_array(array($this->form()->result, $this->relation), array())->FieldToArray("versionid");
 					$this->relationInfo = $many_many_tables[$this->relation];
-				} else if(is_object($this->form()->controller)) {
+				} else if(is_object($this->form()->model)) {
 					// get relations from model of form-controller
-					$many_many_tables = $this->form()->controller->modelInst()->ManyManyTables();
+					$many_many_tables = $this->form()->model->ManyManyTables();
 					
 					if(isset($many_many_tables[$this->relation])) {
 						$this->_object = $many_many_tables[$this->relation]["object"];
-						$this->dataset = call_user_func_array(array($this->form()->controller->modelInst(), $this->relation), array())->FieldToArray("versionid");
+						$this->dataset = call_user_func_array(array($this->form()->model, $this->relation), array())->FieldToArray("versionid");
 						$this->relationInfo = $many_many_tables[$this->relation];
 					} else {
 						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
@@ -134,10 +134,10 @@ class ManyManyDropDown extends MultiSelectDropDown
 					
 					$this->_object = $many_many_tables[$this->relation]["object"];
 					$this->relationInfo = $many_many_tables[$this->relation];
-				} else if(is_object($this->form()->controller)) {
+				} else if(is_object($this->form()->model)) {
 					
 					// get relations from model of form-controller
-					$many_many_tables = $this->form()->controller->modelInst()->ManyManyTables();
+					$many_many_tables = $this->form()->model->ManyManyTables();
 					
 					if(isset($many_many_tables[$this->relation])) {
 						$this->_object = $many_many_tables[$this->relation]["object"];

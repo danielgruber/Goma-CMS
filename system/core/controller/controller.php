@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.3.1
+ * @version		2.3.2
  */
 class Controller extends RequestHandler
 {		
@@ -457,10 +457,7 @@ class Controller extends RequestHandler
 			}
 			
 			// add the right controller
-			$controller = clone $this;
-			$model->controller($controller);
-
-			$form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null);
+			$form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null, $this);
 			$form->setSubmission($submission);
 
 			// we add where to the form
@@ -613,7 +610,8 @@ class Controller extends RequestHandler
 		*/
 		public function safe($data, $form = null, $controller = null, $overrideCreated = false)
 		{
-			if($model = $this->save($data, 1, false, false, $overrideCreated) !== false)
+			$givenModel = isset($form) ? $form->model : null;
+			if($model = $this->save($data, 1, false, false, $overrideCreated, $givenModel) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
 			} else {
@@ -631,7 +629,9 @@ class Controller extends RequestHandler
 		 * @param 	array $data
 		*/
 		public function submit_form($data, $form = null, $controller = null, $overrideCreated = false) {
-			if($model = $this->save($data, 1, false, false, $overrideCreated) !== false)
+			
+			$givenModel = isset($form) ? $form->model : null;
+			if($model = $this->save($data, 1, false, false, $overrideCreated, $givenModel) !== false)
 			{
 				return $this->actionComplete("save_success", $model);
 			} else {
@@ -715,7 +715,8 @@ class Controller extends RequestHandler
 		*/
 		public function publish($data, $form = null, $controller = null, $overrideCreated = false)
 		{	
-			if($model = $this->save($data, 2, false, false, $overrideCreated) !== false)
+			$givenModel = isset($form) ? $form->model : null;
+			if($model = $this->save($data, 2, false, false, $overrideCreated, $givenModel) !== false)
 			{
 				return $this->actionComplete("publish_success", $model);
 			} else {

@@ -37,7 +37,7 @@ class AutoFormField extends FormField {
 		if(is_object($this->form()->result))
 			$this->field = $this->form()->result->doObject($this->name)->formField($this->title);
 		else
-			$this->field = $this->form()->controller->modelInst()->doObject($this->name)->formField($this->name);
+			$this->field = $this->form()->model->doObject($this->name)->formField($this->name);
 
 		$this->field->setForm($form);
 	}
