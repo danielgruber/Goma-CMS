@@ -6,7 +6,7 @@
 */
 
 /**
- * every class which should search with relevance should extend this controller.
+ * every class which that should search with relevance should extend this controller.
  *
  * @author 	Goma-Team
  * @version 	1.0

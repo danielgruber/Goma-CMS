@@ -10,6 +10,15 @@
 
 
 class ArrayLibTest extends GomaUnitTest {
+	/**
+	 * area
+	*/
+	static $area = "Array";
+
+	/**
+	 * internal name.
+	*/
+	public $name = "ArrayLib";
 
 	/**
 	 * tests merge-function.
