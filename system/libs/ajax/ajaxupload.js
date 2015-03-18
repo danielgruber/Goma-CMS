@@ -156,14 +156,12 @@ AjaxUpload.prototype = {
 	/**
 	 * always called regardless of an error
 	*/
-	always: function(time, index) {
 		
 	},
 	
 	/**
 	 * if succeeded
 	*/
-	done: function(response, index) {
 	
 	},
 
@@ -172,7 +170,6 @@ AjaxUpload.prototype = {
 		
 	},
 	
-	fail: function(index) {
 		
 	},
 	
@@ -281,7 +278,6 @@ AjaxUpload.prototype = {
 	 *
 	 *@name _complete
 	*/
-	_complete: function(event, upload, fileIndex) {
 		var now = new Date().getTime();
 		var timeDiff = now - upload.downloadStartTime;
 		
@@ -292,7 +288,6 @@ AjaxUpload.prototype = {
 		this.queue[fileIndex].loaded = true;
 		
 		this.loading = false;
-		this.always(timeDiff, fileIndex);
 	},
 	
 	/**
@@ -335,9 +330,8 @@ AjaxUpload.prototype = {
 	 *@name _success
 	 *@param response
 	*/
-	_success: function(response, fileIndex) {
-		this.done(response, fileIndex);
 	},
+
 	
 	/**
 	 * transfer methods
@@ -434,11 +428,8 @@ AjaxUpload.prototype = {
 		
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState == 4) {
-				$this._complete(event, this, this.upload.fileIndex);
 			}
 			
-    		if (xhr.readyState == 4 && xhr.responseText != "") {
-      		  	$this._success(xhr.responseText, this.upload.fileIndex);
    			}
 		};
 		
