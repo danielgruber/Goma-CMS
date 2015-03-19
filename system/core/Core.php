@@ -518,8 +518,9 @@ class Core extends object {
 
 		// empty framework cache
 		foreach(scandir(ROOT . "system/temp/") as $file) {
-			if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && !file_exists($dir . $file . "/.dontremove") && $file != "autoloader_exclude")
+			if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && (!is_dir($dir . $file) || !file_exists($dir . $file . "/.dontremove")) && $file != "autoloader_exclude") {
 				FileSystem::delete(ROOT . "system/temp/" . $file);
+			}
 		}
 
 		FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
