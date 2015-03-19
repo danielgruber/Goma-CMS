@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author    	Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Controller
- * @version		2.3.2
+ * @version		2.3.3
  */
 class Controller extends RequestHandler
 {		
@@ -650,7 +650,7 @@ class Controller extends RequestHandler
 		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
 		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
-		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null) {
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, ViewaccessableData $givenModel = null) {
 			
 			if(PROFILE) Profiler::mark("Controller::save");
 
