@@ -650,7 +650,7 @@ class Controller extends RequestHandler
 		 * @param 	boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
 		 * @param 	boolean $forceWrite forces the database to write without involving permissions
 		*/
-		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, ViewaccessableData $givenModel = null) {
+		public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null) {
 			
 			if(PROFILE) Profiler::mark("Controller::save");
 

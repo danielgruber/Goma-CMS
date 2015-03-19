@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.7
+ * @version     1.5.8
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 	/**
@@ -1896,20 +1896,22 @@ class DataObjectSet extends DataSet {
 	 *@param bool - edit-form
 	 *@param bool - disabled
 	*/
-	public function generateForm($name = null, $edit = false, $disabled = false) {
+	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null) {
 		
 		// if name is not set, we generate a name from this model
 		if(!isset($name)) {
 			$name = $this->dataobject->classname . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
 		}
 		
-		$form = new Form($this->controller(), $name);
+		$controller = isset($controller) ? $controller : $this->controller;
+
+		$form = new Form($this->controller(), $name, array(), array(), array(), $request, $this->dataobject);
 		if($disabled)
 			$form->disable();
 			
 		// default submission
 		$form->setSubmission("submit_form");	
-			
+		
 		$form->addValidator(new DataValidator($this->dataobject), "datavalidator");
 		
 		$form->setResult(clone $this->dataobject);
