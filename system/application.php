@@ -193,6 +193,7 @@ if (file_exists(ROOT . '_config.php')) {
 		error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 	} else {
 		error_reporting(E_ERROR | E_WARNING | E_PARSE);
+		ClassManifest::addUnitTest();
 	}
 
 	// END define vars

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>type</key>
+	<string>template</string>
+	<key>author</key>
+	<string>Daniel Gruber</string>
+	<key>version</key>
+	<string>1.0</string>
+	<key>requireApp</key>
+	<string>gomacms</string>
+	<key>requireAppVersion</key>
+	<string>2.0.0-026</string>
+	<key>requireFrameworkVersion</key>
+	<string>2.0-066</string>
+	<key>screenshot</key>
+	<string>images/screenshot.png</string>
+</dict>
+</plist>

@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		3.3.2
+ * @version		3.3.3
  */
 class ClassManifest {
 	/**
@@ -32,7 +32,7 @@ class ClassManifest {
 	/**
 	 * List of class aliases.
 	 */
-	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "unittestcase" => "Object", "testsuite" => "Object");
+	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "testsuite" => "Object");
 
 	/**
 	 * Loads a class.
@@ -380,6 +380,12 @@ class ClassManifest {
 		}
 	}
 
+	public static function addUnitTest () {
+
+			self::$class_alias["unittestcase"] = "object";
+		
+	}
+
 }
 
 // fallback
@@ -408,5 +414,4 @@ if(!function_exists("class_alias")) {
 	function class_alias($org, $alias) {
 		eval("class " . $org . " extends " . $alias . " {}");
 	}
-
 }
