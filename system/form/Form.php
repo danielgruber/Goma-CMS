@@ -203,7 +203,7 @@ class Form extends object {
 		gloader::load("modernizr");
 
 		if(!is_object($controller)) {
-			throwError(6, 'Invalid Argument', 'Controller ' . $controller . ' is no object in ' . __FILE__ . ' on line ' . __LINE__ . '');
+			throw new InvalidArgumentException('Controller "' . $controller . '" is no object');
 		}
 
 		$this->controller = $controller;

@@ -2212,13 +2212,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	/**
 	 * generates a form
 	 *
-	 *@name form
-	 *@access public
-	 *@param string - name
-	 *@param bool - edit-form
-	 *@param bool - disabled
+	 * @name 	form
+	 * @access 	public
+	 * @param 	string  	name
+	 * @param  	bool  		edit-form or normal form. this changes if getForm() or getEditForm() get called.
+	 * @param 	bool  		disabled-state by default
+	 * @param 	Request 	Request-Object
+	 * @param 	controller 	Controller
 	*/
-	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null) {
+	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 		
 		// if name is not set, we generate a name from this model
 		if (!isset($name)) {
@@ -2230,7 +2232,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$form = new Form($controller, $name, array(), array(), array(), $request, $this);
 		
 		// default submission
-		$form->setSubmission("submit_form");	
+		$form->setSubmission(isset($submission) ? $submission : "submit_form");	
 			
 		$form->addValidator(new DataValidator($this), "datavalidator");
 		
@@ -3313,10 +3315,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			// sort
-			if (!empty($sort))			
+			if (!empty($sort)) {		
 				$query->sort($sort);
-			else
+			} else {
 				$query->sort(self::getStatic($this->classname, "default_sort"));
+			}
+			
 			
 			
 			// limiting

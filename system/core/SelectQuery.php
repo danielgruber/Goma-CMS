@@ -9,7 +9,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.0.5
+ * @version     2.0.7
  */
 
 class SelectQuery extends Object {
@@ -190,8 +190,16 @@ class SelectQuery extends Object {
 	 *@param string - type, default: ASC
 	 */
 	public function sort($field, $type = "ASC", $order = 0) {
+		
+		$collate = null;
+		
 		if(is_array($field)) {
 			if(isset($field["field"], $field["type"])) {
+				
+				if(isset($field["collate"])) {
+					$collate = $field["collate"];
+				}
+				
 				$type = $field["type"];
 				$field = $field["field"];
 			} else {
@@ -223,7 +231,7 @@ class SelectQuery extends Object {
 		while(isset($this->orderby[$order])) {
 			$order++;
 		}
-		$this->orderby[$order] = array($field, $type);
+		$this->orderby[$order] = array($field, $type, $collate);
 
 		return $this;
 	}
@@ -576,14 +584,18 @@ class SelectQuery extends Object {
 			$sql .= " ORDER BY ";
 			$i = 0;
 			foreach($this->orderby as $data) {
-				if($i == 0)
+				if($i == 0) {
 					$i++;
-				else
-					$sql .= ",";
-				if(isset($DBFields[$data[0]])) {
-					$sql .= $DBFields[$data[0]] . "." . $data[0] . " " . $data[1];
 				} else {
-					$sql .= $data[0] . " " . $data[1];
+					$sql .= ",";
+				}
+
+				$collate = isset($data[2]) ? " COLLATE " . $data[2] : "";
+
+				if(isset($DBFields[$data[0]])) {
+					$sql .= $DBFields[$data[0]] . "." . $data[0] . $collate . " " . $data[1];
+				} else {
+					$sql .= $data[0] . $collate . " " . $data[1];
 				}
 			}
 		}

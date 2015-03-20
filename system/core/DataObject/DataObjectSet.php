@@ -1896,7 +1896,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - edit-form
 	 *@param bool - disabled
 	*/
-	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null) {
+	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 		
 		// if name is not set, we generate a name from this model
 		if(!isset($name)) {
@@ -1905,12 +1905,12 @@ class DataObjectSet extends DataSet {
 		
 		$controller = isset($controller) ? $controller : $this->controller;
 
-		$form = new Form($this->controller(), $name, array(), array(), array(), $request, $this->dataobject);
+		$form = new Form($controller, $name, array(), array(), array(), $request, $this->dataobject);
 		if($disabled)
 			$form->disable();
 			
 		// default submission
-		$form->setSubmission("submit_form");	
+		$form->setSubmission(isset($submission) ? $submission : "submit_form");
 		
 		$form->addValidator(new DataValidator($this->dataobject), "datavalidator");
 		

@@ -10,6 +10,16 @@
 
 class HTMLFieldTest extends GomaUnitTest implements TestAble {
 	/**
+	 * area
+	*/
+	static $area = "HTML";
+
+	/**
+	 * internal name.
+	*/
+	public $name = "HTMLField";
+
+	/**
 	 * tests size-matching
 	 *
 	 *@name testSizeMatching
