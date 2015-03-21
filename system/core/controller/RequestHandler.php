@@ -12,7 +12,7 @@ defined("IN_GOMA") OR die();
  * This class is the basic class for each controller of Goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
  *
  * @package     Goma\System\Core
- * @version     2.2.9
+ * @version     2.3
  */
 class RequestHandler extends Object {
 	/**
@@ -113,7 +113,7 @@ class RequestHandler extends Object {
 				$this -> namespace = $this -> request -> shiftedPart;
 			}
 		} else {
-			throwError(6, "No-Request-Error", "Object of type " . $this -> classname . " has no request");
+			throw new InvalidArgumentException("RequestHandler" . $this -> classname . " has no request-instance.");
 		}
 
 		if (!isset($this -> subController) || !$this -> subController) {
@@ -130,7 +130,7 @@ class RequestHandler extends Object {
 	public function handleRequest($request, $subController = false) {
 
 		if ($this -> classname == "") {
-			throwError(6, 'PHP-Error', 'Class ' . get_class($this) . ' has no class_name. Please make sure you ran <code>parent::__construct();</code> ');
+			throw new LogicException('Class ' . get_class($this) . ' has no class_name. Please make sure you call <code>parent::__construct();</code> ');
 		}
 
 		$this -> subController = $subController;
@@ -167,7 +167,7 @@ class RequestHandler extends Object {
 						}
 					}
 
-					$action = str_replace('-', '_', strtolower($action));
+					$action = str_replace('-', '_', $action);
 
 					if (!$this -> hasAction($action)) {
 						$action = "index";
@@ -276,69 +276,89 @@ class RequestHandler extends Object {
 			Profiler::mark("RequestHandler::checkPermission");
 
 		$class = $this;
-		while ($class -> classname != "object") {
-			if (in_array($action, $class -> allowed_actions)) {
-				if (PROFILE)
-					Profiler::unmark("RequestHandler::checkPermission");
-				return true;
-			} else if (isset($class -> allowed_actions[$action])) {
-				$data = $class -> allowed_actions[$action];
-				if (is_bool($data)) {
+		$actionLower = strtolower($action);
+
+		while (isset($class) && $class->classname != "object") {
+			
+			if(Object::method_exists($class, "checkPermissionsOnClass")) {
+
+				// check class
+				$r = $class->checkPermissionsOnClass($action);
+
+				// if we have an result which is a boolean.
+				if (is_bool($r)) {
 					if (PROFILE)
 						Profiler::unmark("RequestHandler::checkPermission");
-					return $data;
-				} else if (substr($data, 0, 2) == "->") {
-					$func = substr($data, 2);
-					if (Object::method_exists($this, $func)) {
-						if (PROFILE)
-							Profiler::unmark("RequestHandler::checkPermission");
-						return $this -> $func();
-					} else {
-						if (PROFILE)
-							Profiler::unmark("RequestHandler::checkPermission");
-						return false;
-					}
-				} else if ($data == "admins") {
-					return (member::$groupType == 2);
-				} else if ($data == "users") {
-					return (member::$groupType == 1);
-				} else {
-					if (PROFILE)
-						Profiler::unmark("RequestHandler::checkPermission");
-					return Permission::check($data);
+
+					return $r;
 				}
-			}
 
-			if (get_parent_class($class) == "Object") {
-				if (PROFILE)
-					Profiler::unmark("RequestHandler::checkPermission");
-				return false;
+				// check for parent class
+				if (!ClassInfo::isAbstract(get_parent_class($class))) {
+					$class = Object::instance(get_parent_class($class));
+				} else {
+					$class = null;
+				}
+			} else {
+				$class = null;
 			}
-
-			if (!classinfo::isAbstract(get_parent_class($class)))
-				$class = Object::instance(get_parent_class($class));
-			else
-				break;
 		}
+
 		if (PROFILE)
 			Profiler::unmark("RequestHandler::checkPermission");
 		return false;
 	}
 
 	/**
+	 * checks permissions on this class.
+	 *
+	 * @return 	null when no definition was found or a boolean when definition was found.
+	*/
+	protected function checkPermissionsOnClass($action) {
+		$actionLower = strtolower($action);
+
+		if (in_array($actionLower, $this->allowed_actions)) {
+				return true;
+		} else if (isset($this->allowed_actions[$actionLower])) {
+			$data = $this->allowed_actions[$actionLower];
+
+			// advanced options for Action.
+			if (is_bool($data)) {
+				return $data;
+			} else if (substr($data, 0, 2) == "->") {
+				$func = substr($data, 2);
+				if (Object::method_exists($this, $func)) {
+					return $this->$func();
+				} else {
+					return false;
+				}
+			} else if ($data == "admins") {
+				return (member::$groupType == 2);
+			} else if ($data == "users") {
+				return (member::$groupType == 1);
+			} else {
+				return Permission::check($data);
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * default Action
-	 *@name index
-	 *@access public
+	 *
+	 * @name 	index
+	 * @access 	public
 	 */
 	public function index() {
 		return "";
 	}
 
 	/**
-	 * some developers don't want to use $this->request->getParam, because it's too long, so we have a simpler way
-	 * gets a param from the request
-	 *@name getParam
-	 *@access public
+	 * simple way for $this->request->getParam which also supports get and post.
+	 *
+	 * @name 	getParam
+	 * @access 	public
 	 */
 	public function getParam($param, $useall = true) {
 		if (isset($this -> request) && is_a($this -> request, "request")) {
