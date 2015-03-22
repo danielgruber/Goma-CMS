@@ -8,7 +8,7 @@ define("DEFAULT_PACKAGE_FOLDER", FRAMEWORK_ROOT . "installer/data/apps");
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.7.1
+ * @version	1.7.2
  */
 abstract class g_SoftwareType {
 	/**
@@ -146,16 +146,17 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	public static function getByType($type, $file) {
-		if($type == "app")
+		if(strtolower($type) == "app") {
 			$type = "backup";
+		}
 		
 		foreach(ClassInfo::getChildren("G_SoftwareType") as $child) {
-			if(ClassInfo::getStatic($child, "type") == $type) {
+			if(strtolower(ClassInfo::getStatic($child, "type")) == strtolower($type)) {
 				return new $child($file);
 			}
 		}
 		
-		throwError(6, "PHP-Error", "Could not find Softwaretype '".convert::raw2text($type)."'.");
+		throw new LogicException("Could not find SoftwareType '".convert::raw2text($type)."'.");
 	}
 	
 	/**
@@ -388,14 +389,14 @@ abstract class g_SoftwareType {
 			
 			// build up update-information.
 			foreach($data["packages"] as $type => $apps) {
-				foreach($apps as $version => $_data) {
-					if(isset($_data["file"])) {
-						self::buildPackageInfo($type, $dir, $_data, $version, $updates);
+				foreach($apps as $version => $appInfo) {
+					if(isset($appInfo["file"])) {
+						self::buildPackageInfo($type, $dir, $appInfo, $version, $updates);
 					} else {
-						foreach($_data as $app => $__data) {
-							if(isset($__data["file"])) {
+						foreach($appInfo as $app => $versionInfo) {
+							if(isset($versionInfo["file"])) {
 
-								self::buildPackageInfo($type, $dir, $__data, $version, $updates);
+								self::buildPackageInfo($type, $dir, $versionInfo, $version, $updates);
 
 							}
 						}
@@ -554,20 +555,20 @@ abstract class g_SoftwareType {
 			$packages = array();
 			
 			foreach($data["packages"] as $type => $apps) {
-				foreach($apps as $version => $_data) {
-					if(isset($_data["file"])) {
+				foreach($apps as $version => $appInfo) {
+					if(isset($appInfo["file"])) {
 
-						self::buildPackageInfo($type, $dir, $_data, $version, $packages, false);
+						self::buildPackageInfo($version, $type, $dir, $appInfo, $version, $packages, false);
 					} else {
-						foreach($_data as $app => $__data) {
-							if(isset($__data["file"])) {
-								self::buildPackageInfo($type, $dir, $__data, $version, $packages, false);
+						foreach($appInfo as $app => $versionInfo) {
+							if(isset($versionInfo["file"])) {
+								self::buildPackageInfo($app, $type, $dir, $versionInfo, $version, $packages, false);
 							}
 						}
 					}
 				}
 			}
-			
+
 			return $packages;
 		} else {
 			return array();
@@ -580,20 +581,20 @@ abstract class g_SoftwareType {
 	 *
 	 * @name 	buildPackageInfo
 	*/
-	protected static function buildPackageInfo($type, $dir, $data, $version, &$packages, $shouldUpdate = true) {
+	protected static function buildPackageInfo($app, $type, $dir, $data, $version, &$packages, $shouldUpdate = true) {
 		$appdata = self::getByType($type, $dir . $data["file"])->getPackageInfo();
 		$appdata["file"] = $dir . $data["file"];
 		$appdata["plist_type"] = $type;
 		if($appdata // data exists
-			&& self::isValidPackageType($appData, $shouldUpdate))
+			&& self::isValidPackageType($appdata, $shouldUpdate))
 		{
 
-			if(isset($updates[$app])) {
-				if(goma_version_compare($updates[$version]["version"], $version, "<")) {
-					$updates[$version] = $appdata;
+			if(isset($packages[$app])) {
+				if(goma_version_compare($packages[$version]["version"], $version, "<")) {
+					$packages[$version] = $appdata;
 				}
 			} else {
-				$updates[$version] = $appdata;
+				$packages[$version] = $appdata;
 			}
 		}
 	}
@@ -846,6 +847,13 @@ abstract class g_SoftwareType {
 		$files = array_map(create_function('$val', 'return substr($val, '.var_export(strlen($folder), true).');'), $files);
 		
 		return new FileMover($files, null, $destination);
+	}
+
+	/**
+	 * returns file of this class.
+	*/
+	public function getFile() {
+		return $this->file;
 	}
 
 	public function __wakeup() {}
