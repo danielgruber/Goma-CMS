@@ -53,6 +53,12 @@ class MailTests extends GomaUnitTest {
 		$this->unitCheckForEvents("noreply@goma-cms.org", "daniel@ibpg.eu<Daniel Gruber>,test@ibpg.eu", "test", "bub");
 	}
 
+	/**
+	 * @param string $sender
+	 * @param string $address
+	 * @param string $subject
+	 * @param string $body
+	 */
 	public function unitCheckForEvents($sender, $address, $subject, $body) {
 		$mail = new Mail($sender);
 		$mail->address = $address;
