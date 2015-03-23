@@ -483,64 +483,65 @@ class HTMLNode extends Object
 		/**
 		 * renders the attributes
 		 *
-		 *@name renderAttributes
-		 *@access protected
+		 * @name 	renderAttributes
+		 * @access 	protected
 		*/
 		protected function renderAttributes()
 		{
-				$attr = "";
-				if($this->css)
+			$attr = " ";
+			if($this->css)
+			{
+				$style = "";
+				foreach($this->css as $key => $value)
 				{
-						$style = "";
-						foreach($this->css as $key => $value)
-						{
-								$style .= "".$key.":".$value.";";
-						}
-						$this->attr["style"] = $style;
+					$style .= "".$key.":".$value.";";
 				}
-				foreach($this->attr as $name => $value)
+				$this->attr["style"] = $style;
+			}
+			foreach($this->attr as $name => $value)
+			{
+				if(preg_match('/^[0-9]+$/', $name))
 				{
-						if(_ereg('^[0-9]+$', $name))
-						{
-								$attr .= " ".$value."=\"".$value."\" ";
-						} else
-						{
-								$attr .= " ".$name."=\"".$value."\" ";
-						}
+					$attr .= $value."=\"".$value."\" ";
+				} else
+				{
+					$attr .= $name."=\"".$value."\" ";
 				}
-				return $attr;
+			}
+			return $attr;
 		}
 		
 		/**
 		  * renders the object as html
 		  *
-		  *@name render
-		  *@access public
-		  *@param optional - whitespace, if you want to have code, which is more readable
+		  * @name 	render
+		  * @access public
+		  * @param 	optional - whitespace, if you want to have code, which is more readable
 		*/
 		public function render($whitespace = null)
 		{
-				// first render the content
-				if($whitespace !== null && !in_array($this->tag, self::$inline_tags))
-						$content = $this->html(null, $whitespace . "         ");
-				else
-						$content = $this->html();
-				
-				if(!in_array($this->tag, self::$non_closing_tags))
-				{
-						if($whitespace !== null && !in_array($this->tag, self::$inline_tags)) // we don't want any \n for inline tags
-								return "\n" . $whitespace . "<" . $this->tag.$this->renderAttributes().">\n".$content."\n".$whitespace."</".$this->tag.">";
-						else if($whitespace !== null) // but we want whitespace for them
-								return "\n" . $whitespace . "<" . $this->tag.$this->renderAttributes().">".$content."</".$this->tag.">";
-						else
-								return "<".$this->tag.$this->renderAttributes().">".$content."</".$this->tag.">";
-				} else
-				{
-						if($whitespace)
-								return "\n" . $whitespace . "<".$this->tag.$this->renderAttributes()." />\n";
-						else
-								return "<".$this->tag.$this->renderAttributes()." />";
+			// first render the content
+			if($whitespace !== null && !in_array($this->tag, self::$inline_tags)) {
+				$content = $this->html(null, $whitespace . "         ");
+			} else {
+				$content = $this->html();
+			}
+			
+			if(!in_array($this->tag, self::$non_closing_tags)) {
+				if($whitespace !== null && !in_array($this->tag, self::$inline_tags)) { // we don't want any \n for inline tags
+					return "\n" . $whitespace . "<" . $this->tag.$this->renderAttributes().">\n".$content."\n".$whitespace."</".$this->tag.">";
+				} else if($whitespace !== null) { // but we want whitespace for them
+					return "\n" . $whitespace . "<" . $this->tag.$this->renderAttributes().">".$content."</".$this->tag.">";
+				} else {
+					return "<".$this->tag.$this->renderAttributes().">".$content."</".$this->tag.">";
 				}
+			} else {
+				if($whitespace) {
+					return "\n" . $whitespace . "<".$this->tag.$this->renderAttributes()."/>\n";
+				} else {
+					return "<".$this->tag.$this->renderAttributes()."/>";
+				}
+			}
 		}
 		
 		/**
@@ -551,7 +552,7 @@ class HTMLNode extends Object
 		*/
 		public function getTag()
 		{
-				return $this->tag;
+			return $this->tag;
 		}
 		
 		/**
@@ -563,7 +564,7 @@ class HTMLNode extends Object
 		*/
 		public function setTag($tag)
 		{
-				$this->tag = $tag;
+			$this->tag = trim(strtolower($tag));
 		}
 		
 		/**
@@ -572,24 +573,24 @@ class HTMLNode extends Object
 		
 		public function __get($name)
 		{
-				return isset($this->attr[$name]) ? $this->attr[$name] : null;
+			return isset($this->attr[$name]) ? $this->attr[$name] : null;
 		}
 		
 		public function __set($name, $value)
 		{
-				$this->attr[$name] = $value;
-				return true;
+			$this->attr[$name] = $value;
+			return true;
 		}
 		
 		public function __unset($name)
 		{
-				if(isset($this->attr[$name]))
-						unset($this->attr[$name]);
+			if(isset($this->attr[$name]))
+				unset($this->attr[$name]);
 		}
 		
 		public function __isset($name)
 		{
-				return isset($this->attr[$name]);
+			return isset($this->attr[$name]);
 		}
 		
 		/**
@@ -599,7 +600,7 @@ class HTMLNode extends Object
 		*/
 		public function __toString()
 		{
-				return $this->render();
+			return $this->render();
 		}
 		
 		/**

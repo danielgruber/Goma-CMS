@@ -538,7 +538,7 @@ class Box extends Boxes
 		}
 
 		public function isCacheable() {
-			if($this->class == "box") 
+			if($this->classname == "box") 
 				return true;
 
 			return false;

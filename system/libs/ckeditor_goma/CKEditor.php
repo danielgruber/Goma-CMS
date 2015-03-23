@@ -65,7 +65,7 @@ class GomaCKEditor extends GomaEditor {
 	 * @param	array $params list of some params like width css baseUri lang
 	*/
 	public function generateEditor($name, $type, $text, $params = array()) {
-		$id = $this->class . "_" . $name;
+		$id = $this->classname . "_" . $name;
 		$width = isset($params["width"]) ? $params["width"] : "";
 		
 		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_1/";');

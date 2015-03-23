@@ -22,15 +22,17 @@ class HTMLParser extends Object
 
 
 	/**
-	 * parses HTML-code
-	 *@name parseHTML
-	 *@return string
+	 * parses HTML-code for links and scripts to get all inline scripts
+	 * into files and all links working.
+	 *
+	 * @name 	parseHTML
+	 * @return 	string
 	*/
-	static function parseHTML($html)
+	static function parseHTML($html, $parseLinksAndScripts = true)
 	{
 		if(PROFILE) Profiler::mark("HTMLParser::parseHTML");
 		
-		if(!HTTPResponse::$disabledparsing)
+		if($parseLinksAndScripts)
 		{
 			$html = self::findScripts($html);
 			$html = self::process_links($html);
@@ -103,18 +105,20 @@ class HTMLParser extends Object
 	}
 	
 	/**
-	  * processes links for non-mod-rewrite
-	  *@name process_links
-	  *@access public
-	  *@param string - html
+	  * processes links to work also on servers where Mod Rewrite is not enabled.
+	  * it adds the BASE_SCRIPT before all links. BASE_SCRIPT normally contains index.php/.
+	  *
+	  * @name 	process_links
+	  * @access public
+	  * @param 	string - html
 	*/
-	public static function process_links($html)
+	public static function process_links($html, $base = BASE_SCRIPT, $root = ROOT_PATH)
 	{
 			if(PROFILE) Profiler::mark("HTMLParser::process_links");
 			preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $html, $links);
 			foreach($links[2] as $key => $href)
 			{
-				$newlink = self::parseLink($href, '<a'.$links[1][$key].'href=', $links[3][$key].'>');
+				$newlink = self::parseLink($href, '<a'.$links[1][$key].'href=', $links[3][$key].'>', $base, $root);
 				
 				if($newlink) {
 					$html = str_replace($links[0][$key], $newlink, $html);
@@ -124,7 +128,7 @@ class HTMLParser extends Object
 			preg_match_all('/<iframe([^>]+)src="([^">]+)"([^>]*)>/Usi', $html, $frames);
 			foreach($frames[2] as $key => $href)
 			{
-				$newlink = self::parseLink($href, '<iframe'.$frames[1][$key].'src=', $frames[3][$key].'>');
+				$newlink = self::parseLink($href, '<iframe'.$frames[1][$key].'src=', $frames[3][$key].'>', $base, $root);
 				
 				if($newlink) {
 					$html = str_replace($frames[0][$key], $newlink, $html);
@@ -149,8 +153,12 @@ class HTMLParser extends Object
 	/**
 	 * parses an url and generates a new string with the link, some code before, then some maybe 
 	 * generated attributes and some code after.
+	 *
+	 * @param 	href link
+	 * @param 	HTML before link
+	 * @param 	HTML after link
 	*/
-	public static function parseLink($href, $beforeHref, $afterHref) {
+	public static function parseLink($href, $beforeHref, $afterHref, $base = BASE_SCRIPT, $root = ROOT_PATH) {
 		$attrs = "";
 		$lowerhref = strtolower($href);
 
@@ -164,14 +172,14 @@ class HTMLParser extends Object
 		// check anchor
 		if(substr($lowerhref, 0, 1) == "#")
 		{		
-			$attrs = ' data-anchor="'.substr($href, 1).'"';
+			$attrs = 'data-anchor="'.substr($href, 1).'"';
 			$href = URL . URLEND . $href;
 		}
 
 		// check ROOT_PATH
-		if(substr($lowerhref, 0, strlen(ROOT_PATH)) == strtolower(ROOT_PATH))
+		if(substr($lowerhref, 0, strlen($root)) == strtolower($root))
 		{
-			$href = substr($href, strlen(ROOT_PATH));
+			$href = substr($href, strlen($root));
 		}
 		
 		// check for existing files.
@@ -183,19 +191,22 @@ class HTMLParser extends Object
 			}
 		}
 		
-		if(substr($lowerhref, 0, strlen(BASE_SCRIPT)) != strtolower(BASE_SCRIPT) && substr($lowerhref, 0, strlen(ROOT_PATH . BASE_SCRIPT)) != strtolower(ROOT_PATH . BASE_SCRIPT) && substr($lowerhref, 0, 2) != "./")
+		if(	substr($lowerhref, 0, strlen($base)) != strtolower($base) && 
+			substr($lowerhref, 0, strlen($root . $base)) != strtolower($root . $base) && 
+			substr($lowerhref, 0, 2) != "./")
 		{
-			$href = BASE_SCRIPT . $href;
+			$href = $base . $href;
 		}
 		
-		$newlink = $beforeHref . '"'.$href.'" '.$attrs.' '.$afterHref;
+		$newlink = $beforeHref . trim('"'.$href.'" '.$attrs).$afterHref;
 		return $newlink;
 	}
 	
 	/**
-	 * jshandler
-	 *@name jsFile
-	 *@return string
+	 * jshandler.
+	 *
+	 * @name 	jsFile
+	 * @return 	string
 	*/
 	static function jsFile($file)
 	{
@@ -203,9 +214,10 @@ class HTMLParser extends Object
 	}
 	
 	/**
-	 * jshandler
-	 *@name js
-	 *@return string
+	 * jshandler.
+	 *
+	 * @name 	js
+	 * @return 	string
 	*/
 	static function js($js)
 	{
@@ -214,29 +226,30 @@ class HTMLParser extends Object
 	
 	/**
 	 * csshandler
-	 *@name css
-	 *@return string
+	 *
+	 * @name 	css
+	 * @return 	string
 	*/
 	static function css($css)
 	{
-			$name = "hash." . md5($css) . ".css";
-			$file = ROOT_PATH . "js/cache/" . $name;
-			if(file_exists($_SERVER['DOCUMENT_ROOT'] . $file))
+		$name = "hash." . md5($css) . ".css";
+		$file = CACHE_DIRECTORY . "/" . $name;
+		if(file_exists($file))
+		{
+			return '<link rel="stylesheet" href="'.$file.'" type="text/css" />';
+		} else
+		{
+			if($h = fopen($file, 'w'))
 			{
-					return '<link rel="stylesheet" href="'.$file.'" type="text/css" />';
+				fwrite($h, $css);
+				fclose($h);
+				return '<link rel="stylesheet" href="'.$file.'" type="text/css" />';
 			} else
 			{
-					if($h = fopen($_SERVER['DOCUMENT_ROOT'] . $file, 'w'))
-					{
-							fwrite($h, $css);
-							fclose($h);
-							return '<link rel="stylesheet" href="'.$file.'" type="text/css" />';
-					} else
-					{
-							fclose($h);
-							return "";
-					}
+				fclose($h);
+				return "";
 			}
+		}
 	}
 	
 	/**

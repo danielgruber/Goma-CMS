@@ -1,13 +1,11 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
   *@package goma cms
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 09.01.2013
+  * last modified: 23.03.2015
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 loadlang('st');
 
@@ -58,29 +56,29 @@ class statistics extends box
 		public function getContent()
 		{
 				$output = "<table>";
-				$c = new livecounterController();
+
 				if($this->today == 1)
 				{
-						$count = $c->countUsersByLast(NOW - 60 * 60 * 24);
+						$count = LiveCounter::countUsersByLast(NOW - 60 * 60 * 24);
 						$num = sprintf("%05d",$count);
 						$output .= "<tr><td>".$GLOBALS['lang']['st_today'].": </td><td>".$num."</td></tr>";
 				}
 				
 				if($this->last2 == 1)
 				{
-						$count = $c->countUsersByLast(NOW - 7200);
+						$count = LiveCounter::countUsersByLast(NOW - 7200);
 						$num = sprintf("%05d",$count);
 						$output .= "<tr><td>".$GLOBALS['lang']['st_2 hours ago'].": </td><td>".$num."</td></tr>";
 				}
 				if($this->last30d == 1)
 				{
-						$count = $c->countUsersByLast(NOW - 60 * 60 * 24 * 30);
+						$count = LiveCounter::countUsersByLast(NOW - 60 * 60 * 24 * 30);
 						$num = sprintf("%05d",$count);
 						$output .= "<tr><td>".$GLOBALS['lang']['st_last 30 days'].": </td><td>".$num."</td></tr>";
 				}
 				if($this->whole == 1)
 				{
-						$count = $c->countUsersByLast(0);
+						$count = LiveCounter::countUsersByLast(0);
 						$num = sprintf("%05d",$count);
 						$output .= "<tr><td>".$GLOBALS['lang']['st_whole'].": </td><td>".$num."</td></tr>";
 				}
@@ -88,7 +86,7 @@ class statistics extends box
 				$output .= "</table>";
 				if(settingsController::get("livecounter") && $this->online == 1)
 				{
-						$on = livecounterController::countUsersOnline();
+						$on = LiveCounter::countUsersOnline();
 						if($on == 1) {
 							$text = lang("visitor_online_1", "We've got one visitor online");
 						} else {

@@ -360,7 +360,7 @@ class livecounter extends DataObject
 	 *@param int - userid
 	 *@access public
 	*/
-	public function checkUserOnline($userid)
+	public static function checkUserOnline($userid)
 	{
 			
 			$last = TIME - 300;
@@ -384,7 +384,7 @@ class livecounter extends DataObject
 	 *@name countUsersOnline
 	 *@access public
 	*/
-	public function countUsersOnline()
+	public static function countUsersOnline()
 	{
 			if(self::$useronline != 0)
 			{
@@ -402,19 +402,19 @@ class livecounter extends DataObject
 	 *@access public
 	 *@param timestamp
 	*/
-	public function countUsersByLast($last)
+	public static function countUsersByLast($last)
 	{
 
-			return DataObject::count("livecounter", array("last_modified" => array(">", $last), "isbot" => 0));
+		return DataObject::count("livecounter", array("last_modified" => array(">", $last), "isbot" => 0));
 	}
 	
 	/**
 	 * counts user since and before..
 	*/
-	public function countUsersByLastFirst($last, $first)
+	public static function countUsersByLastFirst($last, $first)
 	{
 
-			return DataObject::count("livecounter", ' last_modified > "'.convert::raw2sql($last).'" AND last_modified < "'.convert::raw2sql($first).'" AND isbot = 0');
+		return DataObject::count("livecounter", ' last_modified > "'.convert::raw2sql($last).'" AND last_modified < "'.convert::raw2sql($first).'" AND isbot = 0');
 	}
 	
 	/**

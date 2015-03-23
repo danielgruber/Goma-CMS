@@ -129,7 +129,7 @@ class TreeRenderer extends Object {
 			$html .= $this->renderSubChildren($this->tree, $parentID);
 			
 			if($includeUL)
-				return '<ul class="goma-tree '.$this->class.'">'.$html.'</ul>';
+				return '<ul class="goma-tree '.$this->classname.'">'.$html.'</ul>';
 				
 			return $html;
 		} else {
@@ -159,7 +159,7 @@ class TreeRenderer extends Object {
 	*/
 	protected function renderChild(TreeNode $child) {
 		
-		$node = new HTMLNode("li", array("id" => "treenode_" . $this->class . "_" . $child->nodeid, "class" => "tree-node"));
+		$node = new HTMLNode("li", array("id" => "treenode_" . $this->classname . "_" . $child->nodeid, "class" => "tree-node"));
 		$node->append($wrapper = new HTMLNode("span", array("class" => "tree-wrapper ")));
 		
 		$node->attr("data-nodeid", $child->nodeid);

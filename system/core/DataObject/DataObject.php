@@ -1751,7 +1751,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					$data = $many_many_tables[$relation];
 					
 					$object = $data["object"];
-					$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+					$sameObject = ($object == $this->classname || is_subclass_of($this->classname, $object) || is_subclass_of($object, $this->class));
 			} else
 			{
 					throw new LogicException("Many-Many-Relationship ".$relation." does not exist on DataObject ".$this->class.".");
@@ -2461,7 +2461,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					throw new LogicException("Many-Many-Relationship " . $relname . " does not exist or hasn't been created, yet.");
 			}
 
-			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$relname]) && $sorts[$relname]) {
 				$sort = $sorts[$relname];
 			} else {
@@ -2469,7 +2469,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			$object = $data["object"];
-			$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+			$sameObject = ($object == $this->classname || is_subclass_of($this->classname, $object) || is_subclass_of($object, $this->class));
 			
 			if(isset($many_many[$relname])) {
 				$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
@@ -2571,7 +2571,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 			
 			
-			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$relname]) && $sorts[$relname]) {
 				$sort = $sorts[$relname];
 			} else {
@@ -2579,7 +2579,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 
 			$object = $data["object"];
-			$sameObject = ($object == $this->class || is_subclass_of($this->class, $object) || is_subclass_of($object, $this->class));
+			$sameObject = ($object == $this->classname || is_subclass_of($this->classname, $object) || is_subclass_of($object, $this->class));
 			
 			if(isset($many_many[$relname])) {
 				$extTable = ClassInfo::$class_info[$many_many[$relname]]["table"];
@@ -2811,7 +2811,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$where[$data["table"] . "." . $data["field"]] = $this["versionid"];
 		
 		if(!isset($sort) || !$sort) {
-			$sorts = ArrayLib::map_key(self::getStatic($this->class, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$name]) && $sorts[$name]) {
 				$sort = $sorts[$name];
 			} else {
@@ -4577,7 +4577,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
 			// hack to not break current Goma-CMS Build
 			if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
-				throw new DBFieldNotValidException($this->class . "." . $name);
+				throw new DBFieldNotValidException($this->classname . "." . $name);
 			}
 		}
 	}
@@ -4706,7 +4706,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (isset($this->many_many_extra_fields[$key])) {
 				$extraFields = $this->many_many_extra_fields[$key];
 			} else if (self::isStatic($this->classname, "many_many_extra_fields")) {
-				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->class, "many_many_extra_fields"));
+				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->classname, "many_many_extra_fields"));
 				if (isset($extraFields[$key]))
 					$extraFields = $extraFields[$key];
 				else
@@ -4824,7 +4824,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					if (isset($inst->many_many_extra_fields[$relation])) {
 						$extraFields = $this->many_many_extra_fields[$key];
 					} else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
-						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->class, "many_many_extra_fields"));
+						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->classname, "many_many_extra_fields"));
 						if (isset($extraFields[$relation]))
 							$extraFields = $extraFields[$relation];
 						else
