@@ -229,8 +229,8 @@ class Uploads extends DataObject {
 			if(defined("SQL_LOADUP")) {
 
 				$cacher = new Cacher("uploads_collection_" . $collectionPath);
-				if($cacher->checkValid()) {
-					return DataObject::get_by_id("Uploads", $cacher->getData());
+				if($cacher->checkValid() && $r = DataObject::get_by_id("Uploads", $cacher->getData())) {
+					return $r;
 				} else {
 
 					$collection = self::generateCollectionTree($collectionPath);

@@ -146,6 +146,7 @@ require_once (FRAMEWORK_ROOT . 'libs/file/FileSystem.php');
 require_once (FRAMEWORK_ROOT . 'libs/template/tpl.php');
 require_once (FRAMEWORK_ROOT . 'libs/http/httpresponse.php');
 require_once (FRAMEWORK_ROOT . 'core/Core.php');
+require_once (FRAMEWORK_ROOT . 'core/CoreLibs/CacheManager.php');
 require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
 if (PROFILE)
@@ -322,6 +323,7 @@ function loadFramework() {
 	if (PROFILE)
 		Profiler::mark("Manifest");
 
+	Core::InitCache();
 	ClassInfo::loadfile();
 
 	if (PROFILE)

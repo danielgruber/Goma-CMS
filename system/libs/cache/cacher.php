@@ -8,9 +8,9 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.3.1
+ * @version 1.3.2
  *
- * last modified: 18.03.2015
+ * last modified: 23.03.2015
 */
 class Cacher {
 	/**
@@ -65,15 +65,14 @@ class Cacher {
 	public $name;
 	
 	/**
-	 * don't set from external
-	 * directory
+	 * default CacheManager which is used for this Cacher.
 	 *
 	 * @name dir
 	 * @access public
 	 * @use to save the directory
 	 * @var sting
 	*/
-	static $dir = CACHE_DIRECTORY;
+	static $manager;
 	
 	/**
 	 * current data
@@ -147,39 +146,36 @@ class Cacher {
 	 * @use to init an cacher
 	*/
 	public function __construct($name, $important = false) {
-		
+
 		if(PROFILE) Profiler::mark("cacher");
 
 		if(!$important) {
-			$this->filename = self::$dir . 'cache.' . urlencode($name) . ".php";
+			$this->filename = 'cache.' . urlencode($name) . ".php";
 		} else {
-			$this->filename = self::$dir . 'cache.' . urlencode($name) . ".cache";
+			$this->filename = 'cache.' . urlencode($name) . ".cache";
 		}
 
 		$this->name = $name;
-		if(isset($_GET['flush']) && !$important) {
-			$this->active = false;
-		} else {
 
-			if(self::dataInPHPInstance($name)) {
-				$this->created = self::getCreatedFromInstance($name);
-			} else { // file-cache is triggered when not in internal cache.
+		if(self::dataInPHPInstance($name)) {
+			$this->created = self::getCreatedFromInstance($name);
+		} else { // file-cache is triggered when not in internal cache.
 
-				if(file_exists($this->filename)) {
+			if(self::$manager->exists($this->filename)) {
 
-					// file exists
-					include($this->filename);
+				// file exists
+				include(self::$manager->dir() . $this->filename);
 
-					
-					$time = isset($time) ? $time : 0;
+				
+				$time = isset($time) ? $time : 0;
 
-					if($time >= time()) {
-						$this->data = (isset($data)) ? $data : null;
-						$this->created = isset($data) ? $time : null;
-					}
+				if($time >= time()) {
+					$this->data = (isset($data)) ? $data : null;
+					$this->created = isset($data) ? $time : null;
 				}
 			}
 		}
+		
 		
 		if(PROFILE) Profiler::unmark("cacher");
 	}
@@ -254,7 +250,7 @@ class Cacher {
 		self::clearInstanceCache($this->name);
 		$this->data = null;
 		$this->privateData = null;
-		return @unlink ($this->filename);
+		return self::$manager->rm ($this->filename);
 	}
 	
 	/**
@@ -286,12 +282,12 @@ class Cacher {
 			
 			// build the file
 			$d = '<?php 
-			defined(\'IN_GOMA\') OR die(\'<!-- restricted access -->\'); // silence is golden ;) 
+			defined(\'IN_GOMA\') OR die(" ");
 			$time = '.$time.'; 
 			$data = '.var_export($data, true). ';';
 			
 			// write the file
-			if(FileSystem::write($this->filename, $d, LOCK_EX, 0773)) {
+			if(self::$manager->put($this->filename, $d)) {
 				if(PROFILE) Profiler::unmark("cacher_write");
 				return true;
 			} else {
@@ -302,3 +298,5 @@ class Cacher {
 		}
 	}
 }
+
+Cacher::$manager = Core::$cacheManagerApplication;

@@ -118,6 +118,12 @@ class Core extends object {
 	public static $favicon;
 	
 	/**
+	 * cache-managers.
+	*/
+	public static $cacheManagerFramework;
+	public static $cacheManagerApplication;
+
+	/**
 	 * inits the core
 	 *
 	 */
@@ -149,27 +155,6 @@ class Core extends object {
 
 		if(PROFILE)
 			Profiler::mark("Core::Init");
-
-		
-		// delete-cache-support
-		if(isset($_GET['flush'])) {
-			if(PROFILE)
-				Profiler::mark("delete_cache");
-
-			if(Permission::check("ADMIN")) {
-				logging('Deleting FULL Cache');
-				self::deletecache(true);
-				// delete files in cache
-			} else {
-				logging("Deleting Cache");
-				self::deletecache();
-				// delete some files in cache
-			}
-
-			if(PROFILE)
-				Profiler::unmark("delete_cache");
-		}
-
 		
 		Object::instance("Core")->callExtending("construct");
 		self::callHook("init");
@@ -177,7 +162,47 @@ class Core extends object {
 		if(PROFILE)
 			Profiler::unmark("Core::Init");
 	}
+
+	/**
+	 * inits cache-managers.
+	*/
+	public static function initCache($shouldFlush = false) {
+		self::$cacheManagerApplication = new CacheManager(ROOT . APPLICATION . "/temp");
+		self::$cacheManagerFramework = new CacheManager(ROOT . "system/temp");
+
+		// check for flush from dev
+		if($shouldFlush) {
+			if(Permission::check("ADMIN")) {
+				self::deleteCache(true);
+			} else {
+				self::deleteCache(false);
+			}
+		}
+	}
 	
+	/**
+	 * delete-cache.
+	*/
+	public static function deleteCache($force = false) {
+
+		if(PROFILE) Profiler::mark("delete_cache");
+
+		if($force) {
+			logging('Deleting FULL Cache');
+			
+			self::$cacheManagerApplication->deleteCache(0, true);
+			self::$cacheManagerFramework->deleteCache(600, true);
+
+			FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
+		} else if(self::$cacheManagerApplication->shouldDeleteCache()) {
+			logging("Deleting Cache");
+
+			self::$cacheManagerApplication->deleteCache();
+		}
+
+		if(PROFILE) Profiler::unmark("delete_cache");
+	}
+
 	/**
 	 * inits framework-resources.
 	*/
@@ -271,8 +296,10 @@ class Core extends object {
 	 */
 	public static function addToHook($name, $callback) {
 		// check for existance
-		if(!isset(self::$hooks[strtolower($name)]) || !in_array($callback, self::$hooks[strtolower($name)]))
+		if(!isset(self::$hooks[strtolower($name)]) || !in_array($callback, self::$hooks[strtolower($name)])) {
 			self::$hooks[strtolower($name)][] = $callback;
+		}
+			
 	}
 
 	/**
@@ -477,60 +504,6 @@ class Core extends object {
 		self::setHeader("generator", "Goma " . GOMA_VERSION . " with " . ClassInfo::$appENV["app"]["name"], false);
 
 		return self::$header;
-	}
-
-	/**
-	 * detetes the cache
-	 *@use to delete the cache
-	 */
-	public static function deletecache($all = false) {
-		$dir = ROOT . CACHE_DIRECTORY;
-
-		if(!$all && file_exists($dir . "/deletecache") && filemtime($dir . "/deletecache") > NOW - 60 * 5)
-			return true;
-
-		clearstatcache();
-
-		foreach(scandir($dir) as $file) {
-			if((substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) || $file == "autoloader_exclude" || $file == "deletecache")
-				continue;
-
-			// session store
-			if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
-				if(file_exists($dir . $file) && filemtime($dir . $file) < NOW - 3600) {
-					@unlink($dir . $file);
-				}
-				continue;
-			}
-
-			if($all) {
-				if($file != "." && $file != "..") {
-					if(!is_dir($dir . $file) || !file_exists($dir . $file . "/.dontremove")) {
-						FileSystem::Delete($dir . $file);
-					}
-				}
-			} else {
-				if(preg_match('/\.php$/i', $file) && is_file($dir . $file)) {
-					unlink($dir . $file);
-				}
-			}
-		}
-
-		// empty framework cache
-		foreach(scandir(ROOT . "system/temp/") as $file) {
-			if($file != "." && $file != ".." && filemtime(ROOT . "system/temp/" . $file) + 600 < NOW && (!is_dir($dir . $file) || !file_exists($dir . $file . "/.dontremove")) && $file != "autoloader_exclude") {
-				FileSystem::delete(ROOT . "system/temp/" . $file);
-			}
-		}
-
-		FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
-
-		Core::callHook("deletecache", $all);
-
-		clearstatcache();
-
-		FileSystem::Write($dir . "/deletecache", 1);
-
 	}
 
 	/**
