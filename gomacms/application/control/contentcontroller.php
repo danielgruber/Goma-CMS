@@ -150,8 +150,9 @@ class contentController extends FrontedController
 		*/
 		public function validatePassword($obj, $passwords) {
 			foreach($passwords as $password) {
-				if($obj->form->result["prompt_text"] == $password)
-					return true;
+				if($obj->form->result["prompt_text"] == $password) {
+									return true;
+				}
 			}
 			return lang("captcha_wrong", "The Code was wrong.");
 			
@@ -247,8 +248,9 @@ class contentController extends FrontedController
 							return true;
 						} else {
 							Core::$requestController->modelInst()->UploadTracking()->setData(array());
-							foreach($uploadObjects as $upload)
-								Core::$requestController->modelInst()->UploadTracking()->push($upload);
+							foreach($uploadObjects as $upload) {
+															Core::$requestController->modelInst()->UploadTracking()->push($upload);
+							}
 							
 							Core::$requestController->modelInst()->UploadTracking()->write(false, true);
 							$cacher->write(1, 14 * 86400);
