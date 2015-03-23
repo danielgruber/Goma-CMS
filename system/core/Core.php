@@ -292,8 +292,6 @@ class Core extends object {
 	/**
 	 * adds a callback to a hook
 	 *
-	 *@param string - name of the hook
-	 *@param callback
 	 * @param string $name
 	 * @param Closure $callback
 	 */
@@ -308,8 +306,8 @@ class Core extends object {
 	/**
 	 * calls all callbacks for a hook
 	 *
-	 *@param string - name of the hook
-	 *@param array - params
+	 * @param 		string 	name of the hook
+	 * @params.. 	mixed 	additional params up to 7
 	 */
 	public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
 		if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
@@ -324,12 +322,13 @@ class Core extends object {
 	/**
 	 * registers an CMS-Var-Callback
 	 *
-	 *@param callback
-	 *@param int - priority
+	 * @param 	Closure
+	 * @param 	int 		priority
 	 */
 	public function addCMSVarCallback($callback, $prio = 10) {
-		if(is_callable($callback))
+		if(is_callable($callback)) {
 			self::$cmsVarCallbacks[$prio][] = $callback;
+		}
 	}
 
 	/**
