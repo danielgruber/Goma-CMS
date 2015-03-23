@@ -128,11 +128,11 @@ class Newsettings extends DataObject implements HistoryData {
 	*/
 	public function getFieldInfo() {
 		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
-		if($http == "https")
-			return  array(
+		if($http == "https") {
+					return  array(
 				"useSSL"			=> lang("useSSL_info")
 			);
-		else {
+		} else {
 			$port = $_SERVER["SERVER_PORT"];
 			if ($http == "http" && $port == 80) {
 				$port = "";
@@ -170,8 +170,9 @@ class Newsettings extends DataObject implements HistoryData {
 		$general->add($date_format = new Select("date_format_time", lang("time_format"), $this->generateTIME(), DATE_FORMAT_TIME));
 						
 		$general->add($status = new select('status',lang("site_status"),array(STATUS_ACTIVE => lang("SITE_ACTIVE"), STATUS_MAINTANANCE => lang("SITE_MAINTENANCE")), SITE_MODE));
-		if(STATUS_DISABLED)
-			$status->disable();
+		if(STATUS_DISABLED) {
+					$status->disable();
+		}
 
 		$tabs->add(new Tab("security", array(
 			$safe_mode = new Checkbox("safe_mode", lang("safe_mode"), FileSystem::$safe_mode)
