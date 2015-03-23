@@ -184,11 +184,11 @@ class Mail
 		 *
 		 * @name 	sendHTML
 		 * @access 	public
-		 * @param 	string - addresse
-		 * @param 	string - subject
-		 * @param 	string - message
+		 * @param 	string 	addresse
+		 * @param 	string 	subject
+		 * @param 	string 	message
 		*/
-		public function sendHTML($adresse,$subject,$message)
+		public function sendHTML($adresse, $subject, $message)
 		{
 				$this->html = true;
 				$template = new Template();

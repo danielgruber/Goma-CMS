@@ -171,19 +171,25 @@ class ImageUploads extends Uploads {
 	 *@name manageURL
 	*/
 	public function manageURL($file) {
-		if(substr($file, 0, strlen("index.php")) == "index.php") {
-			$file = substr($file, strlen("index.php/"));
-		}
-		
-		if(substr($file, 0, strlen("./index.php")) == "./index.php") {
-			$file = substr($file, strlen("./index.php/"));
-		}
-		
+		$file = $this->removePrefix($file, "index.php/");
+		$file = $this->removePrefix($file, "./index.php/");
+
 		FileSystem::requireDir(dirname($file));
 		FileSystem::write($file . ".permit", 1);
 		if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
 			@unlink($file);
 		}
+		return $file;
+	}
+
+	/**
+	 * remove prefixes from a path.
+	*/
+	protected function removePrefix($file, $prefix) {
+		if(substr($file, 0, strlen($prefix)) == $prefix) {
+			return substr($file, strlen($prefix));
+		}
+
 		return $file;
 	}
 	
