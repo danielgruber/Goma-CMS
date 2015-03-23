@@ -234,6 +234,7 @@ class Core extends object {
 
 	/**
 	 * returns the data of php://input as a file.
+	* @return string
 	*/
 	public static function phpInputFile() {
 		if(isset(self::$phpInputFile)) {
@@ -293,6 +294,8 @@ class Core extends object {
 	 *
 	 *@param string - name of the hook
 	 *@param callback
+	 * @param string $name
+	 * @param Closure $callback
 	 */
 	public static function addToHook($name, $callback) {
 		// check for existance
@@ -426,6 +429,7 @@ class Core extends object {
 	/**
 	 * sets a header-field
 	 *
+	 * @param string $name
 	 */
 	public static function setHeader($name, $value, $overwrite = true) {
 		if($overwrite || !isset(self::$header[strtolower($name)]))
@@ -563,6 +567,7 @@ class Core extends object {
 	/**
 	 * returns current active url
 	 *
+	 * @return string
 	 */
 	public static function activeURL() {
 		if(Core::is_ajax()) {

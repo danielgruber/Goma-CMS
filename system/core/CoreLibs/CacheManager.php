@@ -30,6 +30,7 @@ class CacheManager {
 
 	/**
 	 * constructor.
+	* @param string $dir
 	*/
 	public function __construct($dir) {
 		$this->cacheDirectory = $this->addSlashToEnd($dir);
@@ -71,6 +72,8 @@ class CacheManager {
 
 	/**
 	 * puts a file in cache with given contents.
+	* @param string $file
+	* @param string $content
 	*/
 	public function put($file, $content, $mode = 0600) {
 		return FileSystem::writeFileContents($this->cacheDirectory . $file, $content, LOCK_EX, $mode);
@@ -89,6 +92,7 @@ class CacheManager {
 
 	/**
  	 * returns if a file exists.
+	* @param string $file
 	*/
 	public function exists($file) {
 		return file_exists($this->cacheDirectory . $file);
@@ -96,6 +100,7 @@ class CacheManager {
 
 	/**
 	 * returns file-contents of a file or null if not exists.
+	* @param string $file
 	*/
 	public function contents($file) {
 		if(file_exists($this->cacheDirectory . $file)) {
@@ -134,6 +139,7 @@ class CacheManager {
 
 	/**
 	 * returns if the folder should be removed.
+	* @param boolean $forceFolders
 	*/
 	public function shouldDeleteCacheFolder($file, $forceFolders) {
 		if(file_exists($this->cacheDirectory . $file . "/.dontremove") && !$forceFolders) {
