@@ -12,9 +12,17 @@ defined("IN_GOMA") OR die();
  * This class is the basic class for each controller of Goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
  *
  * @package     Goma\System\Core
- * @version     2.3
+ * @version     2.3.1
  */
 class RequestHandler extends Object {
+
+	/**
+	 * defines if this is a sub-controller.
+	 *
+	 * @access public
+	*/
+	public $subController;
+
 	/**
 	 * current depth of request-handlers
 	 */
@@ -22,55 +30,55 @@ class RequestHandler extends Object {
 
 	/**
 	 * url-handlers
-	 *@name url_handlers
-	 *@access public
+	 * @name 	url_handlers
+	 * @access 	public
 	 */
 	public $url_handlers = array('$Action' => '$Action');
 
 	/**
 	 * defines whether shift on success or not
 	 *
-	 *@name shiftOnSuccess
-	 *@access protected
+	 * @name 	shiftOnSuccess
+	 * @access 	protected
 	 */
 	protected $shiftOnSuccess = true;
 
 	/**
 	 * requests, key is name of the request and value the function for it
 	 *
-	 *@name allowed_actions
-	 *@access public
-	 *@var array
+	 * @name 	allowed_actions
+	 * @access 	public
+	 * @var 	array
 	 */
 	public $allowed_actions = array();
 
 	/**
 	 * the url base-path of this controller
 	 *
-	 *@name namespace
-	 *@access public
+	 * @name 	namespace
+	 * @access 	public
 	 */
 	public $namespace;
 
 	/**
 	 * original namespace, so always from first controller
 	 *
-	 *@name originalNamespace
+	 * @name 	originalNamespace
 	 */
 	public $originalNamespace;
 
 	/**
 	 * the current request
 	 *
-	 *@name request
+	 * @name 	request
 	 */
 	public $request;
 
 	/**
 	 * sets vars
 	 *
-	 *@name __construct
-	 *@access public
+	 * @name 	__construct
+	 * @access 	public
 	 */
 	public function __construct() {
 		parent::__construct();

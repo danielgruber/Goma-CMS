@@ -63,7 +63,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			
 			$errors = self::checkMovePerms($gfs, "data/", ROOT);
 
-			if($errors) {
+			if(!empty($errors)) {
 				$data["error"] = lang("permission_error") . '('.implode(",", $errors).')';
 				$data["installable"] = false;
 				return $data;

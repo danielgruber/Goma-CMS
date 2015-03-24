@@ -722,7 +722,7 @@ class Member extends Object {
 	 *@name id
 	 *@access public
 	*/
-	static $id;
+	public static $id;
 	
 	/**
 	 * nickname of the user logged in
@@ -730,7 +730,7 @@ class Member extends Object {
 	 *@name nickname
 	 *@access public
 	*/
-	static $nickname;
+	public static $nickname;
 	
 	/**
 	 * this var reflects the status of the highest group in which the user is
@@ -739,7 +739,7 @@ class Member extends Object {
 	 *@access public
 	 *@var enum(0,1,2)
 	*/
-	static $groupType = 0;
+	public static $groupType = 0;
 	
 	/**
 	 * set of groups of this user
@@ -747,7 +747,7 @@ class Member extends Object {
 	 *@name groups
 	 *@access public
 	*/
-	static $groups = array();
+	public static $groups = array();
 	
 	/**
 	 * default-admin
@@ -755,7 +755,7 @@ class Member extends Object {
 	 *@name default_admin
 	 *@access public
 	*/
-	static $default_admin;
+	public static $default_admin;
 	
 	/**
 	 * object of logged in user
@@ -763,7 +763,7 @@ class Member extends Object {
 	 *@name loggedIn
 	 *@access public
 	*/
-	static $loggedIn;
+	public static $loggedIn;
 	
 	/**
 	 * checks for default admin and basic groups
