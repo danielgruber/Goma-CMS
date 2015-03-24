@@ -380,7 +380,7 @@ class ClassInfo extends Object {
 			if($forceAbsolute) {
 				return realpath($folder) . "/";
 			} else {
-				return $this->makePathRelative($folder);
+				return self::makePathRelative($folder);
 			}
 		} else {
 			return null;
@@ -499,7 +499,7 @@ class ClassInfo extends Object {
 	 */
 	public static function findFileRelative($file, $class) {
 		if($path = self::findFile($file, $class)) {
-			return $this->makePathRelative($path);
+			return self::makePathRelative($path);
 		} else {
 			return false;
 		}
