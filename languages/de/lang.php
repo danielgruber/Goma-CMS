@@ -646,5 +646,20 @@ $lang = array(
 
 	"security"					=> "Sicherheit",
 	"safe_mode"					=> "Sicherer Dateisystemmodus",
-	"safe_mode_info"			=> "Wenn der sichere Modus aktiviert ist, behält Goma die Rechte an allen Dateien. Sie können dann nicht über FTP auf die Dateien schreibend zugreifen. Dies wird für Produktivsysteme empfohlen."
+	"safe_mode_info"			=> "Wenn der sichere Modus aktiviert ist, behält Goma die Rechte an allen Dateien. Sie können dann nicht über FTP auf die Dateien schreibend zugreifen. Dies wird für Produktivsysteme empfohlen.",
+
+
+	"mail"						=> "E-Mail",
+	"use_smtp"					=> "SMTP benutzen",
+	"smtp_host"					=> "Hostname",
+	"smtp_auth"					=> "Server benötigt Authentifizierung",
+	"smtp_user"					=> "Benutzername",
+	"smtp_pwd"					=> "Passwort",
+	"smtp_secure"				=> "Verschlüsselung",
+	"smtp_port"					=> "Port",
+	"smtp_connect_failure"		=> "Die SMTP-Verbindung konnte nicht überprüft werden.",
+	"smtp_from"					=> "Absender-E-Mail (optional)",
+	"validating_smtp"			=> "Validiere SMTP-Einstellungen...",
+	"validating_submit"			=> "Es wird funktionieren, trotzdem sichern.",
+	"smtp_status"				=> "SMTP-Verbindung"
 );

@@ -1,0 +1,15 @@
+<% INCLUDE_CSS "mailSettings.css" %>
+
+<div class="mailsettings-wrapper">
+	<div class="fixed">
+		<h3><% lang("smtp_status", "Status of SMTP") %> <span class="status"></span></h3>
+		<div class="loading">
+			<p><img src="images/16x16/loading.gif" alt="{$_lang_loading}" /> {$_lang_validating_smtp}</p>
+		</div>
+		<div class="response"></div>
+		<p class="submit"><a class="submit" href="#">{$_lang_validating_submit}</a></p>
+	</div>
+	<div class="spacer">
+
+	</div>
+</div>

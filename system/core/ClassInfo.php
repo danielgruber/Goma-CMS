@@ -579,6 +579,8 @@ class ClassInfo extends Object {
 
 			if(file_exists($file) && (filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist"))) {
 				if(!preg_match("/^dev/i", URL)) {
+
+					ClassManifest::tryToInclude("Dev", 'system/Core/control/DevController.php');
 					Dev::redirectToDev();
 				}
 			}
@@ -1078,7 +1080,7 @@ class ClassInfo extends Object {
 	 */
 	public static function checkForUpgradeScripts($folder, $current_version) {
 
-		ClassManifest::tryToInclude("softwareupgrademanager", 'system/Core/CoreLibs/SoftwareUpgradeManager.php');
+		ClassManifest::tryToInclude("softwareupgrademanager", 'system/core/CoreLibs/SoftwareUpgradeManager.php');
 
 		if(SoftwareUpgradeManager::checkForUpgradeScripts($folder, $current_version)) {
 

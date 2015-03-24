@@ -104,7 +104,7 @@ class GFS_Package_installer extends GFS {
 				if(!file_exists($tempfolder . "/" . $path)) {
 					FileSystem::RequireDir(substr($tempfolder . "/" . $path, 0, strrpos($tempfolder . "/" . $path, "/")));
 					$this->writeToFileSystem($path, $tempfolder . "/" . $path);
-					@chmod($tempfolder . "/" . $path, $this->writeMode);
+					@chmod($tempfolder . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
 				}
 			}
 			$this->current = basename($path);
@@ -174,7 +174,7 @@ class GFS_Package_installer extends GFS {
 				// helps in some cases ;)
 				@unlink($destination . "/" . $path);
 				if(@rename($tempfolder . "/" . $path, $destination . "/" . $path))
-					chmod($destination . "/" . $path, $this->writeMode);
+					chmod($destination . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
 			
 			}
 			

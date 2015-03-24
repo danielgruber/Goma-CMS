@@ -22,7 +22,8 @@ Core::addRules(array(
 	"gloader" 					=> "Gloader",
 	"system/help" 				=> "HelpController",
 	"pusher" 					=> "PushController",
-	"treecallback"				=> "TreeCallbackUrl"
+	"treecallback"				=> "TreeCallbackUrl",
+	"system/smtp"				=> "SMTPConnector"
 ), 10);
 
 Core::addRules(array("system" => "SystemController", ), 9);

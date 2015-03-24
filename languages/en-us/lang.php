@@ -651,5 +651,19 @@ $lang = array(
 
 	"security"					=> "Security",
 	"safe_mode"					=> "Safe filesystem-mode",
-	"safe_mode_info"			=> "When safe mode is enabled, Goma owns all files. You can't access them writable via FTP then. This is recommended for productive systems."
+	"safe_mode_info"			=> "When safe mode is enabled, Goma owns all files. You can't access them writable via FTP then. This is recommended for productive systems.",
+
+	"mail"						=> "Mail",
+	"use_smtp"					=> "Use Smtp",
+	"smtp_host"					=> "Hostname",
+	"smtp_auth"					=> "Host needs authentification",
+	"smtp_user"					=> "Username",
+	"smtp_pwd"					=> "Password",
+	"smtp_secure"				=> "Encryption",
+	"smtp_port"					=> "Port",
+	"smtp_connect_failure"		=> "The connection to the SMTP-Server could not be established.",
+	"smtp_from"					=> "Send-mail (optional)",
+	"validating_smtp"			=> "Validating SMTP-Settings...",
+	"validating_submit"			=> "I know it works, just save.",
+	"smtp_status"				=> "SMTP-Connection"
 );

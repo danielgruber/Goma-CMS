@@ -52,4 +52,9 @@ class ExceptionManager {
 	 * called when expansion with name wasnt found, but data were requested.
 	*/
 	const EXPANSION_NOT_FOUND = -15;
+
+	/**
+ 	 * email invalid.
+	*/
+	const EMAIL_INVALID = -20;
 }

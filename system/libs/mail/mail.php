@@ -107,7 +107,12 @@ class Mail
 			
 			$mail = $this->prepareMail();
 
-			return $mail->send();
+			session_write_close();
+			$r = $mail->send();
+
+			session_start();
+
+			return $r;
 		}
 
 		/**
@@ -122,7 +127,6 @@ class Mail
 
 			Core::CallHook("mail_prepareMailer", $this, $mail);
 
-
 			if(!empty($this->senderemail)) {
 				$mail->From = $this->senderemail;
 
@@ -131,29 +135,19 @@ class Mail
 				}
 			}
 
-			if($this->html) {
-				$mail->isHTML(true);
-			} else {
-				$mail->isHTML(false);
-			}
+			$mail->isHTML(!!$this->html);
 			
 			$mail->Subject = $this->subject;
 			$mail->Body = $this->body;
 			
-			if(trim($this->address) == "") {
-				throw new InvalidArgumentException("You need at least one recipent in your list of receivers.");
-			}
-
 			foreach($this->parseAddress($this->address) as $addAddr) {
 				if(is_array($addAddr)) {
 					$mail->addAddress($addAddr[0], $addAddr[1]);
-				} else {
-					$mail->addAddress($addAddr);
 				}
 			} 
 
 			Core::callHook("mail_prepareSend", $this, $mail);
-
+			
 			return $mail;
 		}
 
@@ -165,18 +159,26 @@ class Mail
 			$mails = array();
 
 			foreach($parts as $part) {
-				if(strpos($part, "@") === false) {
-					throw new InvalidArgumentException("Address $part is not valid.");
-				}
-
-				if(preg_match('/\^(.+)<(.*)\>$/', $part, $matches)) {
-					$mails[] = array(trim($matches[1]), trim($matches[2]));
-				} else {
-					$mails[] = $part;
-				}
+				$mails[] = self::parseSingleAddress($part);
 			}
 
 			return $mails;
+		}
+
+		/**
+	 	 * parses name for E-Mail-Address.
+		*/
+		public static function parseSingleAddress($address) {
+
+			if(strpos($address, "@") === false) {
+				throw new InvalidArgumentException("Address $address is not valid.", ExceptionManager::EMAIL_INVALID);
+			}
+
+			if(preg_match('/\^(.+)<(.*)\>$/', $address, $matches)) {
+				return array(trim($matches[1]), trim($matches[2]));
+			} else {
+				return array($address, $address);
+			}
 		}
 
 		/**

@@ -77,4 +77,34 @@ class MailTests extends GomaUnitTest {
 		$this->assertEqual($mailer->Subject, $subject);
 		$this->assertEqual($mailer->Body, $body);
 	}
+
+	/**
+	 * test exception.
+	*/
+	public function testException() {
+		try {
+			$mail = new Mail("noreply@test.de");
+			$mail->address = "";
+
+			$mail->prepareMail();
+			$this->fail("InvalidArgumentException expected");
+		} catch(InvalidArgumentException $e) {
+			$this->assertEqual($e->getCode(), ExceptionManager::EMAIL_INVALID);
+		}
+	}
+
+	/**
+	 * test exception.
+	*/
+	public function testExceptionMultiAddr() {
+		try {
+			$mail = new Mail("noreply@test.de");
+			$mail->address = "daniel@ibpg.eu, danielibpg.eu";
+
+			$mail->prepareMail();
+			$this->fail("InvalidArgumentException expected");
+		} catch(InvalidArgumentException $e) {
+			$this->assertEqual($e->getCode(), ExceptionManager::EMAIL_INVALID);
+		}
+	}
 }
