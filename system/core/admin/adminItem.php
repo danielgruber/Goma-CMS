@@ -176,7 +176,7 @@ class adminItem extends AdminController implements PermProvider {
 			return $this->model_inst;
 				
 		} else {
-			throwError(6, 'PHP-Error', "No Model for Admin-Module ".$this->classname."");
+			throw new LogicException("No Model for Admin-Module ".$this->classname);
 		}
 	}
 	

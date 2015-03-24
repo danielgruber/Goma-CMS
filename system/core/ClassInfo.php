@@ -13,7 +13,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * This class provides information about other classes.
  *
  * @package		Goma\System\Core
- * @version		3.7.3
+ * @version		3.8
  */
 class ClassInfo extends Object {
 	/**
@@ -145,11 +145,8 @@ class ClassInfo extends Object {
 	 *@param string - interface
 	 */
 	public static function hasInterface($class, $interface) {
-		if(is_object($class)) {
-			$class = $class->classname;
-		} else {
-			$class = strtolower($class);
-		}
+		$class = ClassManifest::resolveClassName($class);
+
 		$interface = ClassManifest::resolveClassName($interface);
 		return isset(self::$class_info[$class]["interfaces"]) ? in_array($interface, self::$class_info[$class]["interfaces"]) : false;
 	}
@@ -234,8 +231,9 @@ class ClassInfo extends Object {
 					if(isset(self::$class_info[$class][$var])) {
 						self::setStatic($class, $var, self::$class_info[$class][$var]);
 					}
-					unset($var);
 				}
+
+				unset($var);
 			}
 
 			if(ClassInfo::hasInterface($class, "saveVarSetter") && Object::method_exists($class, "__setSaveVars")) {
@@ -254,10 +252,11 @@ class ClassInfo extends Object {
 	 */
 	public static function isAbstract($class) {
 		$class = ClassManifest::resolveClassName($class);
-		if(isset(self::$class_info[$class]["abstract"]))
+		if(isset(self::$class_info[$class]["abstract"])) {
 			return self::$class_info[$class]["abstract"];
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -289,8 +288,12 @@ class ClassInfo extends Object {
 	}
 
 	/**
-	 * returns a list of database-tables of the dataobject without prefixes
-	 *
+	 * returns a list of database-tables that can be referred to the DataObject.
+	 * TODO: Move to Model.
+	 * 
+	 * @name 	Tables
+	 * @param 	string class
+	 * @return 	array
 	 */
 	public static function Tables($class) {
 		$class = ClassManifest::resolveClassName($class);
@@ -299,56 +302,79 @@ class ClassInfo extends Object {
 			return array();
 
 		if(self::$class_info[$class]["baseclass"] == $class) {
-			$tables = array();
-			if(!isset(self::$class_info[$class]["table"]) || empty(self::$class_info[$class]["table"]))
-				return array();
-
-			$tables[self::$class_info[$class]["table"]] = self::$class_info[$class]["table"];
-			$tables[$class . "_state"] = $class . "_state";
-
-			if(isset(self::$class_info[$class]["many_many_tables"]) && self::$class_info[$class]["many_many_tables"]) {
-				foreach(self::$class_info[$class]["many_many_tables"] as $data) {
-					$tables[$data["table"]] = $data["table"];
-				}
-			}
-
-			foreach(self::getChildren($class) as $_class) {
-				if(isset(self::$class_info[$_class]["table"]) && self::$class_info[$_class]["table"])
-					$tables[self::$class_info[$_class]["table"]] = self::$class_info[$_class]["table"];
-
-				if(isset(self::$class_info[$_class]["many_many_tables"]) && self::$class_info[$_class]["many_many_tables"]) {
-					foreach(self::$class_info[$_class]["many_many_tables"] as $data) {
-						$tables[$data["table"]] = $data["table"];
-					}
-				}
-			}
-
-			return $tables;
+			return self::TablesBaseClass($class);
 		} else {
-			return self::Tables(self::$class_info[$class]["baseclass"]);
+			return self::TablesBaseClass(self::$class_info[$class]["baseclass"]);
 		}
 	}
 
 	/**
-	 * returns the base-folder of a expansion or class
+	 * gets all referred database-tables for a given baseclass.
+	 * this method does not check for Base-Class.
 	 *
-	 *@param string - extension or class-name
-	 *@param bool - if force to use as class-name
-	 */
-	public static function getExpansionFolder($name, $forceClass = false, $forceAbsolute = false) {
-		if(is_object($name)) {
-			if(!$forceClass && isset($name->inExpansion) && isset(self::$appENV["expansion"][strtolower($name->inExpansion)])) {
-				$name = $name->inExpansion;
-			} else {
-				$name = $name->classname;
+	 * @param 	string baseclass
+	 * @return 	array
+	*/
+	protected static function TablesBaseClass($class) {
+
+		if(!isset(self::$class_info[$class]["table"]) || empty(self::$class_info[$class]["table"])) {
+			return array();
+		}
+
+		$tables = array();
+
+		$tables[$class . "_state"] = $class . "_state";
+
+		$tables = self::fillTableArray($class, $tables);
+
+		foreach(self::getChildren($class) as $subclass) {
+			$tables = self::fillTableArray($subclass, $tables);
+		}
+
+		return $tables;
+	}
+
+	/**
+	 * fills an array with key and value the same for tables for given class.
+	 *
+	 * @param 	string 	class
+	 * @param 	array 	tables
+	 * @return 	array
+	*/
+	protected static function fillTableArray($class, $tables) {
+		if(isset(self::$class_info[$class]["table"])) {
+			$table = self::$class_info[$class]["table"];
+
+			if($table) {
+				$tables[$table] = $table;
+			}
+		}
+				
+		if(isset(self::$class_info[$class]["many_many_tables"]) && self::$class_info[$class]["many_many_tables"]) {
+			foreach(self::$class_info[$class]["many_many_tables"] as $data) {
+				$tables[$data["table"]] = $data["table"];
 			}
 		}
 
-		if(!$forceClass && isset(self::$appENV["expansion"][strtolower($name)])) {
-			$folder = self::$appENV["expansion"][strtolower($name)]["folder"];
-		} else if(isset(self::$class_info[strtolower($name)]["inExpansion"])) {
-			$folder = self::$appENV["expansion"][self::$class_info[strtolower($name)]["inExpansion"]]["folder"];
+		return $tables;
+
+	}
+
+	/**
+	 * returns the base-folder of a expansion or class.
+	 *
+	 * @param 	string 	extension or class-name
+	 * @param 	bool 	if force to use as class-name
+	 * @param 	bool 	if force to be absolute path.
+	 */
+	public static function getExpansionFolder($name, $forceClass = false, $forceAbsolute = false) {
+		$name = self::getExpansionName($name);
+		if(!isset($name)) {
+			return null;
 		}
+
+		$data = self::getExpansionData($name);
+		$folder = $data["folder"];
 
 		if(isset($folder) && !$forceAbsolute) {
 			if(substr($folder, 0, strlen(ROOT)) == ROOT) {
@@ -361,6 +387,37 @@ class ClassInfo extends Object {
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * determines expansion name by classname or expansion-name.
+	 *
+	 * @param 	string name
+	 * @return 	string|null
+	*/
+	public static function getExpansionName($name) {
+		if(is_object($name)) {
+			if(isset($name->inExpansion) && self::getExpansionData($name->inExpansion)) {
+				return $name->inExpansion;
+			} else if($name->classname && isset(ClassInfo::$class_info[$name->classname]["inExpansion"])) {
+				$name = ClassInfo::$class_info[$name->classname]["inExpansion"];
+				return self::getExpansionData($name) ? $name : null;
+			} else {
+				return null;
+			}
+		}
+
+		return self::getExpansionData($name) ? $name : null;
+	}
+
+	/**
+	 * returns data if expansion with given name exists, else null.
+	 *
+	 * @param 	string name
+	 * @return 	array|null
+	*/
+	public static function getExpansionData($name) {
+		return isset(self::$appENV["expansion"][strtolower($name)]) ? self::$appENV["expansion"][strtolower($name)] : null;
 	}
 
 	/**
@@ -396,14 +453,13 @@ class ClassInfo extends Object {
 	 *@param string - class
 	 */
 	public static function findFile($file, $class) {
+
+		$class = ClassManifest::resolveClassName($class);
+
 		if($folder = self::getExpansionFolder($class)) {
 			if(file_exists($folder . "/" . $file)) {
 				return $folder . "/" . $file;
 			}
-		}
-
-		if(is_object($class)) {
-			$class = $class->classname;
 		}
 
 		if(isset(self::$files[$class])) {
@@ -416,10 +472,11 @@ class ClassInfo extends Object {
 			return APPLICATION . "/" . $file;
 		}
 
-		if(file_exists($file) && !is_dir($file))
+		if(file_exists($file) && !is_dir($file)) {
 			return $file;
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -429,10 +486,11 @@ class ClassInfo extends Object {
 	 *@param string - class
 	 */
 	public static function findFileAbsolute($file, $class) {
-		if($path = self::findFile($file, $class))
+		if($path = self::findFile($file, $class)) {
 			return realpath($path);
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -728,7 +786,7 @@ class ClassInfo extends Object {
 			}
 
 			if(!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, $php)) {
-				throwError("8", 'Could not write in cache-directory', 'Could not write ' . $file . '');
+				throw new ClassInfoWriteError('Could not write ClassInfo. Could not write ' . $file, ExceptionManager::CLASSINFO_WRITE_ERROR);
 			}
 
 			if(function_exists("apc_store")) {
@@ -845,7 +903,7 @@ class ClassInfo extends Object {
 
 		if(isset(self::$appENV["app"]["requireFrameworkVersion"])) {
 			if(goma_version_compare(self::$appENV["app"]["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")) {
-				throwError(7, 'Application-Error', "Application does not support this version of the goma-framework, please update the framework to <strong>" . self::$appENV["app"]["requireFrameworkVersion"] . "</strong>. <br />Framework-Version: <strong>" . GOMA_VERSION . "-" . BUILD_VERSION . "</strong>");
+				throw new LogicException("Application does not support this version of the goma-framework, please update the framework to <strong>" . self::$appENV["app"]["requireFrameworkVersion"] . "</strong>. <br />Framework-Version: <strong>" . GOMA_VERSION . "-" . BUILD_VERSION . "</strong>",ExceptionManager::APPLICATION_FRAMEWORK_VERSION_MISMATCH);
 			}
 		}
 	}
@@ -1013,52 +1071,25 @@ class ClassInfo extends Object {
 	 *@param version
 	 */
 	public static function checkForUpgradeScripts($folder, $current_version) {
-		if(file_exists($folder . "/version.php")) {
-			include ($folder . "/version.php");
-		} else {
-			$version = 0;
-		}
 
-		if(goma_version_compare($current_version, $version, ">")) {
-			// run upgrade-scripts
-			if(is_dir($folder . "/upgrade")) {
-				$files = scandir($folder . "/upgrade");
-				$versions = array();
-				foreach($files as $file) {
-					if(is_file($folder . "/upgrade/" . $file) && preg_match('/\.php$/i', $file)) {
-						if(goma_version_compare(substr($file, 0, -4), $version, ">") && goma_version_compare(substr($file, 0, -4), $current_version, "<=")) {
-							$versions[] = substr($file, 0, -4);
-						}
-					}
-				}
-				usort($versions, "goma_version_compare");
-				foreach($versions as $v) {
-					if(!FileSystem::write($folder . "/version.php", '<?php $version = ' . var_export($v, true) . ';')) {
-						throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
-					}
-					include ($folder . "/upgrade/" . $v . ".php");
-				}
-				if(!FileSystem::write($folder . "/version.php", '<?php $version = ' . var_export($current_version, true) . ';')) {
-					throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
-				}
-				ClassInfo::delete();
+		ClassManifest::tryToInclude("softwareupgrademanager", 'system/Core/CoreLibs/SoftwareUpgradeManager.php');
 
-				$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
-				$port = $_SERVER["SERVER_PORT"];
-				if($http == "http" && $port == 80) {
-					$port = "";
-				} else if($http == "https" && $port == 443) {
-					$port = "";
-				} else {
-					$port = ":" . $port;
-				}
-				header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
-				exit ;
+		if(SoftwareUpgradeManager::checkForUpgradeScripts($folder, $current_version)) {
+
+			// after upgrade reload.
+			ClassInfo::delete();
+
+			$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
+			$port = $_SERVER["SERVER_PORT"];
+			if($http == "http" && $port == 80) {
+				$port = "";
+			} else if($http == "https" && $port == 443) {
+				$port = "";
+			} else {
+				$port = ":" . $port;
 			}
-
-			if(!FileSystem::write($folder . "/version.php", '<?php $version = ' . var_export($current_version, true) . ';')) {
-				throwError("6", "FileSystem-Error", "Could not write file " . $folder . "/version.php. Please set file-permissions to 0777!");
-			}
+			header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
+			exit;
 		}
 	}
 
@@ -1066,22 +1097,28 @@ class ClassInfo extends Object {
 	 * deletes the file
 	 */
 	public static function delete() {
-		if(file_exists(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE))
-			if(!@unlink(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE))
-				throwError("8", 'Could not write in cache-directory', 'Could not delete ' . CACHE_DIRECTORY . CLASS_INFO_DATAFILE . '');
+		if(file_exists(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE)) {
+			if(!@unlink(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE)) {
+				throw new ClassInfoWriteError( 'Could not delete ' . CACHE_DIRECTORY . CLASS_INFO_DATAFILE . '.', ExceptionManager::CLASSINFO_WRITE_ERROR);
+			}
+		}
 
-		if(function_exists("apc_delete"))
+		if(function_exists("apc_delete")) {
 			apc_delete(CLASS_INFO_DATAFILE);
+		}
 
 		return true;
 	}
 
 	/**
 	 * gets dataclasses for a given dataobject
-	 *@param string
+	 *
+	 * @param 	string
+	 * @return 	array
 	 */
-	public static function dataclasses($class) {
+	public static function DataClasses($class) {
 		if(isset(self::$class_info[$class]["dataclasses"])) {
+
 			$dataclasses = array();
 			foreach(self::$class_info[$class]["dataclasses"] as $c) {
 				if(isset(self::$class_info[$c]["table"]) && self::$class_info[$c]["table"] !== false) {
@@ -1091,7 +1128,7 @@ class ClassInfo extends Object {
 
 			return $dataclasses;
 		} else {
-			return false;
+			return array();
 		}
 	}
 
@@ -1145,6 +1182,15 @@ class ClassInfo extends Object {
 		self::$tables[$table] = $object;
 	}
 
+}
+
+class ClassInfoWriteError extends LogicException {
+	/**
+	 * constructor.
+	*/
+	public function __construct($msg, $code = ExceptionManager::CLASSINFO_WRITE_ERROR, $e = null) {
+		parent::__construct($msg, $code, $e);
+	}
 }
 
 ClassInfo::addSaveVar("Object", "extensions");

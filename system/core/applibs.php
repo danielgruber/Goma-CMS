@@ -423,8 +423,9 @@ function writeSystemConfig($data = array()) {
 	if(@file_put_contents(ROOT . "_config.php", $contents)) {
 		@chmod(ROOT . "_config.php", 0644);
 		return true;
-	} else
-		throwError(6, 'PHP-Error', "Could not write System-Config. Please apply Permissions 0777 to /_config.php");
+	} else {
+		throw new LogicException("Could not write System-Config. Please apply Permissions 0777 to /_config.php");
+	}
 }
 
 /**
@@ -1021,7 +1022,7 @@ class SQLException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 3, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
 		if(version_compare(phpversion(), "5.3.0", "<"))
@@ -1039,7 +1040,7 @@ class SecurityException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 1, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::SECURITY_ERROR, Exception $previous = null) {
 		if(version_compare(phpversion(), "5.3.0", "<"))
 			parent::__construct($m, $code, $previous);
 		else
@@ -1052,7 +1053,7 @@ class PermissionException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 5, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::PERMISSION_ERROR, Exception $previous = null) {
 		if(version_compare(phpversion(), "5.3.0", "<"))
 			parent::__construct($m, $code, $previous);
 		else
@@ -1065,7 +1066,7 @@ class PHPException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 6, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::PHP_ERROR, Exception $previous = null) {
 		if(version_compare(phpversion(), "5.3.0", "<"))
 			parent::__construct($m, $code, $previous);
 		else

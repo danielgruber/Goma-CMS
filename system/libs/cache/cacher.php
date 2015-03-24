@@ -12,6 +12,7 @@
  *
  * last modified: 23.03.2015
 */
+
 class Cacher {
 	/**
 	 * this var declares, whether cache is using cache-file or not
@@ -72,7 +73,7 @@ class Cacher {
 	 * @use to save the directory
 	 * @var sting
 	*/
-	static $manager;
+	public static $manager;
 	
 	/**
 	 * current data

@@ -149,6 +149,7 @@ require_once (FRAMEWORK_ROOT . 'core/Core.php');
 require_once (FRAMEWORK_ROOT . 'core/CoreLibs/CacheManager.php');
 require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
+
 if (PROFILE)
 	Profiler::unmark("core_requires");
 	

@@ -15,7 +15,7 @@ ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
  * Goma Core.
  *
  * @package		Goma\Core
- * @version		3.3.36
+ * @version		3.4
  */
 class Core extends object {
 	/**
@@ -147,7 +147,6 @@ class Core extends object {
 			
 		// init language-support
 		require_once (FRAMEWORK_ROOT . "core/i18n.php");
-		ClassManifest::$loaded["i18n"] = true;
 		i18n::Init();	
 		
 		if(defined("SQL_LOADUP"))
@@ -234,7 +233,7 @@ class Core extends object {
 
 	/**
 	 * returns the data of php://input as a file.
-	* @return string
+	 * @return string|false
 	*/
 	public static function phpInputFile() {
 		if(isset(self::$phpInputFile)) {
@@ -536,8 +535,9 @@ class Core extends object {
 	 *
 	 */
 	public static function cleanUpInput() {
-		if(isset(self::$phpInputFile) && file_exists(self::$phpInputFile))
+		if(isset(self::$phpInputFile) && file_exists(self::$phpInputFile)) {
 			@unlink(self::$phpInputFile);
+		}
 	}
 
 	/**

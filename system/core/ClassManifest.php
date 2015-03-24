@@ -25,11 +25,6 @@ class ClassManifest {
 	static public $directories = array('system');
 
 	/**
-	 * List of classes, that are already loaded.
-	 */
-	public static $loaded = array("classinfo" => true, "core" => true, "object" => true, "sql" => true, "requesthandler" => true, "tplcaller" => true, "tplcacher" => true);
-
-	/**
 	 * List of class aliases.
 	 */
 	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "testsuite" => "Object");
@@ -44,43 +39,19 @@ class ClassManifest {
 	public static function load($class) {
 
 
-		$class = strtolower(trim($class));
+		$class = self::resolveClassName($class);
 		
+		// check if already loaded
+		if(class_exists($class, false) || interface_exists($class, false)) {
+			return;
+		}
+
 		if(PROFILE)
 			Profiler::mark("Manifest::load " );
 		
-		if(isset(ClassInfo::$interfaces[$class]) && !interface_exists($class, false)) {
-			if(ClassInfo::$interfaces[$class]) {
-				eval('interface '.$class.' extends '.ClassInfo::$interfaces[$class].' {}');
-			} else {
-				eval('interface '.$class.' {}');
-			}
-			if(PROFILE)
-				Profiler::unmark("Manifest::load " );
-			return true;
-		}
-
-		if(!isset(self::$loaded[$class])) {
-			if(isset(ClassInfo::$files[$class])) {
-				if(!
-				include_once (ClassInfo::$files[$class])) {
-					ClassInfo::Delete();
-					throwError(9, 'FileSystem-Error', "Could not include " . ClassInfo::$files[$class] . ". ClassInfo seems to be old. Please reload!");
-				}
-				self::registerLoaded(ClassInfo::$files[$class]);
-			} else if(isset(self::$class_alias[$class])) {
-				if(DEV_MODE) {
-					// we log this, because it's not good, aliases are just for deprecation
-					logging("Making alias " . self::$class_alias[$class] . " of " . $class . "");
-				}
-
-				// make a alias
-				class_alias(self::$class_alias[$class], $class);
-			}
-		}
+		self::loadInterface($class) || self::loadClass($class) || self::generateAlias($class);
 		
 		if(class_exists("Core", false)) {
-			
 			Core::callHook("loadedClass", $class);
 			Core::callHook("loadedClass" . $class);
 		}
@@ -90,16 +61,62 @@ class ClassManifest {
 	}
 
 	/**
-	 * Registers a loaded file.
+	 * loads interface.
+	*/
+	protected static function loadInterface($class) {
+		if(isset(ClassInfo::$interfaces[$class]) && !interface_exists($class, false)) {
+			if(ClassInfo::$interfaces[$class]) {
+				eval('interface '.$class.' extends '.ClassInfo::$interfaces[$class].' {}');
+			} else {
+				eval('interface '.$class.' {}');
+			}
+			
+			return true;
+		}
+	}
+
+	/**
+	 * loads class.
+	*/
+	protected static function loadClass($class) {
+		if(isset(ClassInfo::$files[$class])) {
+			if(!self::tryToInclude($class, ClassInfo::$files[$class])) {
+				ClassInfo::Delete();
+				throwError(9, 'FileSystem-Error', "Could not include " . ClassInfo::$files[$class] . ". ClassInfo seems to be old. Please reload!");
+			}
+			self::setSaveVars(ClassInfo::$files[$class]);
+
+			return true;
+		}
+	}
+
+	/**
+	 * generates alias.
+	*/
+	protected static function generateAlias($class) {
+		if(isset(self::$class_alias[$class])) {
+			if(DEV_MODE) {
+				// we log this, because it's not good, aliases are just for deprecation
+				logging("Making alias " . self::$class_alias[$class] . " of " . $class . "");
+			}
+
+			// make a alias
+			class_alias(self::$class_alias[$class], $class);
+
+			return true;
+		}
+	}
+
+	/**
+	 * sets safe-vars for all classes in the file.
 	 *
 	 * @param	string $file Filename
 	 *
 	 * @return	boolean
 	 */
-	public static function registerLoaded($file) {
+	public static function setSaveVars($file) {
 		if(count($keys = array_keys(ClassInfo::$files, $file)) > 0) {
 			foreach($keys as $class) {
-				self::$loaded[$class] = true;
 				ClassInfo::setSaveVars($class);
 			}
 		}
@@ -123,6 +140,10 @@ class ClassManifest {
 	}
 
 	public static function resolveClassName($class) {
+
+		if(is_object($class)) {
+			$class = get_class($class);
+		}
 
 		$class = trim(strtolower($class));
 
@@ -355,6 +376,20 @@ class ClassManifest {
 					self::addPreload($dir . "/" . $file);
 				}
 			}
+		}
+	}
+
+	/**
+	 * tries to include a file.
+	*/
+	public function tryToInclude($class, $file) {
+
+		$class = str_replace("\\", "_", self::resolveClassName($class));
+
+		if(!defined("INCLUDE_" . $class)) {
+			$r = include($file);
+			define("INCLUDE_" . $class, 1);
+			return $r;
 		}
 	}
 

@@ -274,16 +274,20 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		// generate for expansions
 		if(isset(ClassInfo::$appENV["expansion"])) {
 			foreach(ClassInfo::$appENV["expansion"] as $name => $data) {
-				if(isset($data["build"]))
+				if(isset($data["build"])) {
 					$data["version"] = $data["version"] . "-" . $data["build"];
-				else
+				} else {
 					$data["version"] = $data["version"];
+				}
 					
-				if(isset($data["icon"]) && $data["icon"])
+				if(isset($data["icon"]) && $data["icon"]) {
 					$data["icon"] = ClassInfo::getExpansionFolder($name) . "/" . $data["icon"];
+				}
+					
 				
-				if(!isset($data["title"]))
+				if(!isset($data["title"])) {
 					$data["title"] = $name;
+				}
 				
 				$data["canDisable"] = true;
 				

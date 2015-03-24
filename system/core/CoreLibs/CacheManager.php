@@ -39,6 +39,23 @@ class CacheManager {
 	}
 
 	/**
+	 * inits cache.
+	*/
+	protected function init() {
+		try {
+			FileSystem::requireDir($this->cacheDirectory);
+
+			if(!file_exists($this->cacheDirectory . "autoloader_exclude")) {
+				if(!file_put_contents($this->cacheDirectory . "autoloader_exclude", "")) {
+					throw new LogicException("Cache-Directory must exist or creatable", ExceptionManager::ERR_CACHE_NOT_INITED);
+				}
+			}
+		} catch(Exception $e) {
+			throw new LogicException("Cache-Directory must exist or creatable. " . $this->cacheDirectory, ExceptionManager::ERR_CACHE_NOT_INITED, $e);
+		}
+	}
+
+	/**
 	 * returns when the cache has been cleared last time.
 	*/
 	public function lastClearingTime() {
@@ -124,7 +141,7 @@ class CacheManager {
 				// folders
 				if(is_dir($this->cacheDirectory . $file) && $this->shouldDeleteCacheFolder($file, $forceDeleteFolders)) {
 					$this->rm($file);
-				} else if($this->shouldDeleteCache($file, $minLifeTime)) { // files
+				} else if($this->shouldDeleteCacheFile($file, $minLifeTime)) { // files
 					$this->rm($file);
 				}
 			}
@@ -168,7 +185,7 @@ class CacheManager {
 
 		// lifetime for sessions is 1 hour.
 		if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
-			if(filemtime($dir . $file) > NOW - 3600) {
+			if(filemtime($this->cacheDirectory . $file) > NOW - 3600) {
 				return false;
 			}
 		}
@@ -184,8 +201,6 @@ class CacheManager {
 		return $return;
 	}
 
-
-
 	/**
  	 * cache-directory should end with /.
 	*/
@@ -195,22 +210,5 @@ class CacheManager {
 		}
 
 		return $dir;
-	}
-
-	/**
-	 * inits cache.
-	*/
-	protected function init() {
-		try {
-			FileSystem::requireDir($this->cacheDirectory);
-
-			if(!file_exists($this->cacheDirectory . "autoloader_exclude")) {
-				if(!file_put_contents($this->cacheDirectory . "autoloader_exclude", "")) {
-					throw new LogicException("Cache-Directory must exist or creatable", ExceptionManager::ERR_CACHE_NOT_INITED);
-				}
-			}
-		} catch(Exception $e) {
-			throw new LogicException("Cache-Directory must exist or creatable", ExceptionManager::ERR_CACHE_NOT_INITED, $e);
-		}
 	}
 }
