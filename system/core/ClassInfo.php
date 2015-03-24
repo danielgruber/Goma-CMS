@@ -379,10 +379,8 @@ class ClassInfo extends Object {
 		if(isset($folder)) {
 			if($forceAbsolute) {
 				return realpath($folder) . "/";
-			} else if(substr($folder, 0, strlen(ROOT)) == ROOT) {
-				return substr($folder, strlen(ROOT));
 			} else {
-				return $folder;
+				return $this->makePathRelative($folder);
 			}
 		} else {
 			return null;
@@ -501,13 +499,21 @@ class ClassInfo extends Object {
 	 */
 	public static function findFileRelative($file, $class) {
 		if($path = self::findFile($file, $class)) {
-			if(substr($path, 0, strlen(ROOT)) == ROOT) {
-				return substr($path, strlen(ROOT));
-			} else {
-				return $path;
-			}
-		} else
+			return $this->makePathRelative($path);
+		} else {
 			return false;
+		}
+	}
+
+	/**
+ 	 * makes a path relative.
+	*/
+	protected function makePathRelative($path) {
+		if(substr($path, 0, strlen(ROOT)) == ROOT) {
+			return substr($path, strlen(ROOT));
+		} else {
+			return $path;
+		}
 	}
 
 	/**

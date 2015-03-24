@@ -96,12 +96,7 @@ class Newsettings extends DataObject implements HistoryData {
 		if($http == "https") {
 			return lang("useSSL_info");
 		} else {
-			$port = ":" . $_SERVER["SERVER_PORT"];
-			if(($http == "http" && $port == 80) || ($http == "https" && $port == 443)) {
-				$port = "";
-			}
-
-			$url = 'https://' . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"];
+			$url = 'https://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
 			return str_replace('$link', $url, lang("useSSL_unsupported"));
 		}
 	}
