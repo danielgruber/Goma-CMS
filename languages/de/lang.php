@@ -660,6 +660,6 @@ $lang = array(
 	"smtp_connect_failure"		=> "Die SMTP-Verbindung konnte nicht überprüft werden.",
 	"smtp_from"					=> "Absender-E-Mail (optional)",
 	"validating_smtp"			=> "Validiere SMTP-Einstellungen...",
-	"validating_submit"			=> "Es wird funktionieren, trotzdem sichern.",
+	"validating_submit"			=> "Es wird funktionieren, jetzt sichern.",
 	"smtp_status"				=> "SMTP-Verbindung"
 );

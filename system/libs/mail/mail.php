@@ -142,7 +142,11 @@ class Mail
 			
 			foreach($this->parseAddress($this->address) as $addAddr) {
 				if(is_array($addAddr)) {
-					$mail->addAddress($addAddr[0], $addAddr[1]);
+					if($addAddr[0] == $addAddr[1]) {	
+						$mail->addAddress($addAddr[0]);
+					} else {
+						$mail->addAddress($addAddr[0], $addAddr[1]);
+					}
 				}
 			} 
 

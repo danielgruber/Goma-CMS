@@ -1291,7 +1291,7 @@ class PHPMailer
         if (is_null($this->smtp)) {
             $this->smtp = $this->getSMTPInstance();
         }
-
+        
         // Already connected?
         if ($this->smtp->connected()) {
             return true;
