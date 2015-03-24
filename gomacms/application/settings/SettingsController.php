@@ -11,7 +11,7 @@
 
 Core::addToHook("loadedClassRegisterExtension", array("settingsController", "setRegisterVars"));
 
-class SettingsController {
+class SettingsController extends Controller {
 	/**
 	 * this is a cache of the dataobject of settings
 	 *

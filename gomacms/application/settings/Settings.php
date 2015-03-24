@@ -58,6 +58,8 @@ class Newsettings extends DataObject implements HistoryData {
 		"register_email"	=> "{\$_lang_register_require_email_info}"
 	);
 
+	public $controller = "SettingsController";
+
 	/**
 	 * returns the titles for the fields for automatic form generation
 	 *
