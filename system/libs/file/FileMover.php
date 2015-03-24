@@ -274,16 +274,7 @@ class FileMover {
 	*/
 	protected function move($source, $dest) {
 		if(is_dir($source)) {
-			if(is_dir($dest)) {
-				return true;
-			} else if(!file_exists($dest)) {
-				FileSystem::requireDir($dest);
-
-				// try to remove, but its not required.
-				@rmdir($source);
-			} else {
-				return false;
-			}
+			return $this->checkForDirectoryMoving($dest);
 		}
 
 		if(file_exists($source)) {
@@ -299,8 +290,26 @@ class FileMover {
 			} else {
 				// create folder
 				self::requireFolderForFile($dest);
-				@rename($source, $dest);
+				return @rename($source, $dest);
 			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * checks for directory-moving.
+	*/
+	protected function checkForDirectoryMoving($dest) {
+		if(is_dir($dest)) {
+			return true;
+		} 
+
+		if(!file_exists($dest)) {
+			FileSystem::requireDir($dest);
+			return true;
+		} else {
+			return false;
 		}
 	}
 

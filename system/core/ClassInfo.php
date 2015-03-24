@@ -376,16 +376,16 @@ class ClassInfo extends Object {
 		$data = self::getExpansionData($name);
 		$folder = $data["folder"];
 
-		if(isset($folder) && !$forceAbsolute) {
-			if(substr($folder, 0, strlen(ROOT)) == ROOT) {
+		if(isset($folder)) {
+			if($forceAbsolute) {
+				return realpath($folder) . "/";
+			} else if(substr($folder, 0, strlen(ROOT)) == ROOT) {
 				return substr($folder, strlen(ROOT));
 			} else {
 				return $folder;
 			}
-		} else if(isset($folder)) {
-			return realpath($folder) . "/";
 		} else {
-			return false;
+			return null;
 		}
 	}
 
@@ -1080,13 +1080,9 @@ class ClassInfo extends Object {
 			ClassInfo::delete();
 
 			$http = (isset($_SERVER["HTTPS"])) ? "https" : "http";
-			$port = $_SERVER["SERVER_PORT"];
-			if($http == "http" && $port == 80) {
+			$port = ":" . $_SERVER["SERVER_PORT"];
+			if(($http == "http" && $port == 80) || ($http == "https" && $port == 443)) {
 				$port = "";
-			} else if($http == "https" && $port == 443) {
-				$port = "";
-			} else {
-				$port = ":" . $port;
 			}
 			header("Location: " . $http . "://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
 			exit;

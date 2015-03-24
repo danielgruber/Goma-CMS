@@ -698,7 +698,7 @@ abstract class Object {
 			$exp = isset(ClassInfo::$class_info[$this->classname]["inExpansion"]) ? ClassInfo::$class_info[$this->classname]["inExpansion"] : null;
 		}
 		if(isset(ClassInfo::$appENV["expansion"][$exp])) {
-			$extFolder = ClassInfo::getExpansionFolder($exp, false, $forceAbsolute);
+			$extFolder = ClassInfo::getExpansionFolder($exp, $forceAbsolute);
 			return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
 		}
 
