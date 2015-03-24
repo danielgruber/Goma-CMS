@@ -367,7 +367,7 @@ class ClassInfo extends Object {
 	 * @param 	bool 	if force to use as class-name
 	 * @param 	bool 	if force to be absolute path.
 	 */
-	public static function getExpansionFolder($name, $forceClass = false, $forceAbsolute = false) {
+	public static function getExpansionFolder($name, $forceAbsolute = false) {
 		$name = self::getExpansionName($name);
 		if(!isset($name)) {
 			return null;

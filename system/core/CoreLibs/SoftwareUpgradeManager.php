@@ -24,7 +24,7 @@ class SoftwareUpgradeManager {
 		if(goma_version_compare($current_version, $version, ">")) {
 			// run upgrade-scripts
 			if(is_dir($folder . "/upgrade")) {
-				$versions = self::getPendingScripts($folder);
+				$versions = self::getPendingScripts($version, $current_version, $folder);
 
 				if(!empty($versions)) {
 					self::runScripts($folder, $versions);
@@ -52,7 +52,7 @@ class SoftwareUpgradeManager {
 	 * @param 	string folder
 	 * @return 	array
 	*/
-	public static function getPendingScripts($folder) {
+	public static function getPendingScripts($version, $current_version, $folder) {
 		if(is_dir($folder . "/upgrade")) {
 
 			$files = scandir($folder . "/upgrade");
