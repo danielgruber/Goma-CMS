@@ -60,10 +60,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
 	 * customised data for template via ViewAccessableData::customise.
 	 *
-	 * @access protected
+	 * @access public
 	 * @var array
 	 */
-	protected $customised = array();
+	public $customised = array();
 
 	/**
 	 * dataset-position when this object is in a specific dataset.
