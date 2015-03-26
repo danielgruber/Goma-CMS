@@ -405,6 +405,10 @@ class ClassInfo extends Object {
 			}
 		}
 
+		if(isset(ClassInfo::$class_info[$name]["inExpansion"]) && self::getExpansionData(ClassInfo::$class_info[$name]["inExpansion"])) {
+			return ClassInfo::$class_info[$name]["inExpansion"];
+		}
+
 		return self::getExpansionData($name) ? $name : null;
 	}
 
