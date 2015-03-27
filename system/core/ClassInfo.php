@@ -397,11 +397,8 @@ class ClassInfo extends Object {
 		if(is_object($name)) {
 			if(isset($name->inExpansion) && self::getExpansionData($name->inExpansion)) {
 				return $name->inExpansion;
-			} else if($name->classname && isset(ClassInfo::$class_info[$name->classname]["inExpansion"])) {
-				$name = ClassInfo::$class_info[$name->classname]["inExpansion"];
-				return self::getExpansionData($name) ? $name : null;
 			} else {
-				return null;
+				$name = ClassManifest::resolveClassName($name);
 			}
 		}
 
