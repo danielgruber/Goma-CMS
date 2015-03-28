@@ -1,709 +1,5 @@
-<?php
-/**
- * @package		Goma\Security\Users
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- *
-*/
+<?php defined('IN_GOMA') OR die();
 
-defined('IN_GOMA') OR die();
-
-/**
- * handles some user-specific actions.
- *
- * @package		Goma\Security\Users
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.2.5
- */
-class userController extends Controller
-{
-	/**
-	 * gets userdata
-	 *@name getuserdata
-	 *@param id - userid
-	 *@return array
-	*/
-	public function getuserdata($id)
-	{
-		return DataObject::get_one($this, array('id' => $id));
-	}
-	
-	/**
-	 * saves the user-pwd
-	 *@access public
-	 *@name savepwd
-	*/
-	public function pwdsave($result)
-	{
-		AddContent::add('<div class="success">'.lang("edit_password_ok", "The password were successfully changed!").'</div>');
-		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
-		$this->redirectback();
-	}
-	
-	/**
-	 * this is the method, which is called when a action was completed successfully or not.
-	 *
-	 * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
-	 *
-	 * @param 	string $action the action called
-	 * @param	object $record optional: record if available
-	 * @access 	public
-	*/
-	public function actionComplete($action, $record = null) {
-		if($action == "publish_success") {
-			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-			$this->redirectback();
-			return true;
-		}
-		
-		return parent::actionComplete($action, $record);
-	}
-
-	/**
-	 * in the end this function is called to do last modifications
-	 *
-	 *@name serve
-	 *@access public
-	 *@param string - content
-	 */
-	public function serve($content) {
-		if(class_exists("FrontedController")) {
-			$c = new FrontedController();
-			return $c->serve($content);
-		}
-		
-		return $content;
-	}
-}
-
-/**
- * Base-Model of every User.
- *
- * @package		Goma\Security\Users
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.3
- */
-class User extends DataObject implements HistoryData, PermProvider, Notifier
-{
-		/**
-		 * the name of this dataobject
-		 *
-		 *@name name
-		 *@access public
-		*/
-		public static $cname = '{$_lang_user}';
-		
-		/**
-		 * the database fields of a user
-		 *
-		 *@name db
-		 *@access public
-		*/
-		static $db = array(	'nickname'		=> 'varchar(200)',
-							'name'			=> 'varchar(200)',
-							'email'			=> 'varchar(200)',
-							'password'		=> 'varchar(1000)',
-							'signatur'		=> 'text',
-							'status'		=> 'int(2)',
-							'phpsess'		=> 'varchar(200)',
-							"code"			=> "varchar(200)",
-							"timezone"		=> "timezone",
-							"custom_lang"	=> "varchar(10)");
-		
-		
-		/**
-		 * we add an index to username and password, because of logins
-		 *
-		 *@name index
-		 *@access public
-		*/
-		static $index = array(
-			"login"	=> array("type"	=> "INDEX", "fields" => 'nickname, password')
-		);
-		
-		/**
-		 * fields which are searchable
-		 *
-		 *@name search_fields
-		 *@access public
-		*/
-		static $search_fields = array(
-			"nickname", "name", "email", "signatur"
-		);
-		
-		/**
-		 * the table is users not user
-		 *
-		 *@name table
-		 *@access public
-		*/
-		static $table = "users";
-		
-		/**
-		 * use versions here
-		 *
-		 *@name versions
-		*/
-		static $versions = true;
-		
-		/**
-		 * every user has one group and an avatar-picture, which is reflected in this relation
-		 *
-		 *@name has_one
-		 *@access public
-		*/
-		static $has_one = array("avatar" => "Uploads"); 
-		
-		/**
-		 * every user has additional groups
-		 *
-		 *@name many_many
-		 *@access public
-		*/
-		static $many_many = array("groups" => "group");
-		
-		/**
-		 * sort by name
-		*/
-		static $default_sort = array("name", "ASC");
-		
-		/**
-		 * users are activated by default
-		 *
-		 *@name defaults
-		 *@access public
-		*/
-		static $default = array(
-				'status'	=> '1'
-		);
-		
-		public $insertRights = 1;
-		
-		/**
-		 * gets all groups if a object
-		 *
-		 *@name getAllGroups
-		 *@access public 
-		*/
-		public function getAllGroups() {
-			$groups = $this->groups();
-			$groups->add($this->group());
-			return $groups;
-		}
-		
-		/**
-		 * returns true if you can write
-		 *
-		 *@name canWrite
-		 *@access public
-		*/
-		
-		public function canWrite($data = null)
-		{
-			if($data["id"] == member::$id)
-				return true;
-			
-			return Permission::check("USERS_MANAGE");
-		}
-		
-		/**
-		 * returns true if you can write
-		 *
-		 *@name canDelete
-		 *@access public
-		*/
-		
-		public function canDelete($data = null)
-		{
-			return Permission::check("USERS_MANAGE");
-		}
-		
-		/**
-		 * returns true if the current user can insert a record
-		 *
-		 *@name canInsert
-		 *@access public
-		*/
-		public function canInsert($data = null)
-		{
-			return true;
-		}
-		
-		/**
-		 * forms
-		*/
-		public function getForm(&$form)
-		{
-				// add default tab
-				$form->add(new TabSet("tabs", array(
-					$general = new Tab("general",array(
-							new TextField("nickname", lang("USERNAME")),
-							new TextField("name", lang("NAME")),
-							$mail = new TextField("email", lang("EMAIL")),
-							new PasswordField("password", lang("PASSWORD"), ""),
-							new PasswordField("repeat", lang("REPEAT"), ""),
-							new langSelect("custom_lang", lang("lang"), Core::$lang)
-						), lang("GENERAL"))
-				)));
-				
-				$mail->info = lang("email_correct_info");
-				
-				if(Permission::check("USERS_MANAGE"))
-				{
-					$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"), null, "general");
-				}
-				
-				if(!member::login())
-				{
-						$code = RegisterExtension::$registerCode;
-						if($code != "")
-						{
-								$general->add(new TextField("code", lang("register_code", "Code")));
-								$form->addValidator(new FormValidator(array($this, '_validatecode')), "validatecode");
-						}
-				}
-				if(Permission::check("USERS_MANAGE"))
-				{
-					$form->addValidator(new RequiredFields(array("nickname", "password", "groups", "repeat", "email")), "required_users");
-				} else {
-					$form->addValidator(new RequiredFields(array("nickname", "password", "repeat", "email")), "required_users");
-				}
-				$form->addValidator(new FormValidator(array($this, '_validateuser')), "validate_user");
-				
-				$form->addAction(new CancelButton("cancel", lang("cancel")));
-				$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
-		}
-		
-		/**
-		 * gets the edit-form for profile-edit or admin-edit
-		 *
-		 *@name getEditForm
-		 *@access public
-		 *@param object - form
-		*/
-		public function getEditForm(&$form)
-		{
-				
-				unset($form->result["password"]);
-				
-				// if a user is not activated by mail, admin should have a option to activate him manually
-				if($this->status == 0) {
-					$status = new radiobutton("status", lang("ACCESS", "Access"), array(0 => lang("login_not_unlocked_by_mail", "Not activated by mail yet."),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
-				} else if($this->status == 3) {
-					$status = new radiobutton("status", lang("ACCESS", "Access"), array(3 => lang("not_unlocked", "Not activated yet"),1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
-				} else {
-					$status = new radiobutton("status", lang("ACCESS", "Access"), array(1 => lang("not_locked", "Unlocked"), 2 => lang("locked", "Locked")));
-				}
-			
-				$form->add(new TabSet("tabs", array(
-					new Tab("general",array(
-							new TextField("nickname", lang("username")),
-							new TextField("name",  lang("name", "name")),
-							new TextField("email", lang("email", "email")),
-							new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
-							$status,
-							$this->doObject("timezone")->formfield(lang("timezone")),
-							new LangSelect("custom_lang", lang("lang")),
-							// password management in external window
-							new ExternalForm("passwort", lang("password", "password"), lang("edit_password", "change password"), '**********', array($this, "pwdform")),
-							new ImageUpload("avatar", lang("pic", "image")),
-							new TextArea("signatur", lang("signatur", "signature"), null, "100px")
-							
-						), lang("general"))			
-				)));
-				
-				$form->email->info = lang("email_correct_info");
-				$form->nickname->disable();
-				$form->addValidator(new RequiredFields(array("nickname", "groupid", "email")), "requirefields");
-
-				// group selection for admin
-				if($this["id"] == member::$id || !Permission::check("USERS_MANAGE"))
-				{
-					$form->remove("groups");
-					$form->remove("status");
-				}
-				
-				// generate actions
-				if(right("USERS_MANAGE") && defined("IS_BACKEND"))
-				{
-						$form->addAction(new HTMLAction("delete", '<a href="'.ROOT_PATH.'admin/usergroup/model/user/'.$this->id.'/delete'.URLEND.'?redirect='.urlencode(ROOT_PATH . "admin/usergroup/").'" rel="ajaxfy" class="button red">'.lang("delete", "Delete").'</a>'));
-				}
-				
-				$form->addAction(new CancelButton("cancel", lang("cancel")));
-				$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
-		}
-		
-		/**
-		 * form for password-edit
-		 *
-		 *@name pwdform
-		*/
-		public function pwdform($id = null)
-		{
-				if(!isset($id))
-					$id = $this->id;
-				
-				if(Permission::check("USERS_MANAGE") && $id != member::$id) {
-					$pwdform = new Form($this->controller(), "editpwd", array(
-						new HiddenField("id", $id),
-						new PasswordField("password",lang("NEW_PASSWORD")),
-						new PasswordField("repeat", lang("REPEAT"))
-					));
-					$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
-				} else {
-					$pwdform = new Form($this->controller(), "editpwd", array(
-						new HiddenField("id", $id),
-						new PasswordField("oldpwd", lang("OLD_PASSWORD")),
-						new PasswordField("password",lang("NEW_PASSWORD")),
-						new PasswordField("repeat", lang("REPEAT"))
-					));
-					$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
-					$pwdform->addAction(new FormAction("submit", lang("save", "save"),"pwdsave"));
-				}
-				return $pwdform;
-		}
-		
-		/**
-		 * validates an new user
-		 *
-		 *@name validateuser
-		 *@access public
-		*/
-		public function _validateuser($obj)
-		{
-				if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
-				{
-						// check if username is unique
-						if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
-						{
-								return lang("register_username_bad", "The username is already taken.");
-						}
-						return true;
-				} else
-				{
-						return lang("passwords_not_match");
-				}
-		}
-		
-		/**
-		 * nickname is always lowercase
-		 *
-		 *@name onbeforewrite
-		*/
-		public function onBeforeWrite() {
-			parent::onBeforeWrite();
-			
-			$this->nickname = strtolower($this->nickname);
-		}
-		
-		/**
-		 * sets the password with md5
-		 *
-		 *@name setpassword
-		 *@access public
-		*/
-		public function setpassword($value)
-		{
-				$this->setField("password", Hash::getHashFromDefaultFunction($value));
-				return true;
-		}
-		
-		/**
-		 * valdiates code
-		 *
-		 *@name validatecode
-		 *@access public
-		 *@param string - value
-		 *@return true|string
-		*/
-		public function _validateCode($obj)
-		{
-				$value = $obj->form->result["code"];
-				if(is_array($value)) {
-					return true;
-				}
-				if(!defined("IS_BACKEND")) {
-						$code = RegisterExtension::$registerCode;
-						if($code != "")
-								return ($code == $value) ? true : lang("register_code_wrong", "The Code was wrong!");
-						else
-								return true;
-				}
-				return true;
-		}
-		
-		/**
-		 * password should not be visible
-		 *
-		 *@name getpassword
-		 *@access public
-		*/
-		public function getpassword() {
-				return "";
-		}
-		
-		/**
-		 * validates the pwd
-		 *
-		 *@name validatepwd
-		 *@access public		 
-		*/
-		public function validatepwd($obj) {
-			if(isset($obj->form->result["oldpwd"]))
-			{
-				$data = DataObject::get_one("user", array("id" => $obj->form->result["id"]));
-				if($data) {
-					// export data
-					$data = $data->ToArray();
-					$pwd = $data["password"];
-					
-					// check old password
-					if(Hash::checkHashMatches($obj->form->result["oldpwd"], $pwd))
-					{
-						if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
-						{
-							if($obj->form->result["password"] == $obj->form->result["repeat"])
-							{
-								return true;
-							} else
-							{
-								return lang("passwords_not_match");
-							}
-						} else {
-							return lang("passwords_not_match");
-						}
-					} else {
-						return lang("password_wrong");
-					}
-				} else {
-					return lang("error");
-				}
-			} else
-			{
-				return lang("password_wrong");
-			}
-		}
-		
-		/**
-		 * validates the pwd if you're an admin and set the password
-		 *
-		 *@name admin_validatepwd
-		 *@access public		 
-		*/
-		public function admin_validatepwd($obj) {
-			if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
-			{
-				if($obj->form->result["password"] == $obj->form->result["repeat"])
-				{
-					return true;
-				} else
-				{
-					return lang("passwords_not_match");
-				}
-			} else {
-				return lang("passwords_not_match");
-			}
-		}
-		
-		/**
-		 * returns the title of the person
-		 *
-		 *@name title
-		 *@access public
-		*/
-		public function title() {
-			if($this->fieldGet("name")) {
-				return $this->fieldGet("name");
-			}
-			
-			return $this->nickname;
-		}
-		
-		/**
-		 * returns the representation of this record
-		 *
-		 *@name generateResprensentation
-		 *@access public
-		*/
-		public function generateRepresentation($link = false) {
-			$title = $this->title;
-			
-			$title = $this->image()->setSize(20, 20) . " " . $title;
-			
-			if($link)
-				$title = '<a href="member/'.$this->id.'" target="_blank">' . $title . '</a>';
-			
-			return $title;
-		}
-		
-		/**
-		 * performs a login
-		 *
-		 *@name performLogin
-		 *@access public
-		*/
-		public function performLogin() {
-			if($this->custom_lang != Core::$lang && $this->custom_lang) {
-				i18n::Init($this->custom_lang);
-			}
-			
-			// now write login to database
-			$this->code = randomString(20);
-			
-			$this->callExtending("performLogin");
-			
-			$this->write(false, true);
-		}
-		
-		/**
-		 * performs a logout
-		 *
-		 *@name performLogout
-		 *@access public
-		*/
-		public function performLogout() {
-			$this->callExtending("performLogout");
-			
-			if($this->wasChanged()) {
-				$this->write(false, true);
-			}
-		}
-		
-		/**
-		 * returns text what to show about the event
-		 *
-		 *@name generateHistoryData
-		 *@access public
-		*/
-		public static function generateHistoryData($record) {
-			if(!$record->newversion()) {
-				return false;
-			}
-			
-			$relevant = true;
-			if(!$record->autor)
-				$relevant = false;
-			
-			switch($record->action) {
-				case "update":
-				case "publish":
-					if($record->oldversion() && $record->newversion() && $record->oldversion()->phpsess != $record->newversion()->phpsess) {
-						$icon = "images/icons/fatcow16/user_go.png";
-						$lang = lang("h_user_login");
-						$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
-						$relevant = false;
-					} else {
-						if($record->autorid == $record->newversion()->id) {
-							$lang = lang("h_profile_update", '$user updated the own profile');
-						} else {
-							$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
-						}
-						$icon = "images/icons/fatcow16/user_edit.png";
-					}
-				break;
-				case "insert":
-					$lang = lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
-					$icon = "images/icons/fatcow16/user_add.png";
-				break;
-				case "remove":
-					$lang = lang("h_user_remove", '$user removed the user $euser');
-					$icon = "images/icons/fatcow16/user_delete.png";
-				break;
-				default:
-					$lang = "Unknowen event " . $record->action;
-					$icon = "images/icons/fatcow16/user_edit.png";
-			}
-			$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
-			$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
-			
-			return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
-		}
-		
-		/**
-		 * returns a comma-seperated list of all groups
-		 *
-		 *@name getGroupList
-		 *@access public
-		*/
-		public function getGroupList() {
-			$str = "";
-			$i = 0;
-			foreach($this->groups() as $group) {
-				if($i == 0) {
-					$i++;
-				} else {
-					$str .= ", ";
-				}
-				$str .= Convert::raw2text($group->name);
-			}
-			return $str;
-		}
-		
-		/**
-		 * provides some permissions
-		 *
-		 *@name providePerms
-		 *@access public
-		*/
-		public function providePerms() {
-			return array(
-				"USERS_MANAGE"	=> array(
-					"title"		=> '{$_lang_administration}: {$_lang_user}',
-					"default"	=> array(
-						"type"	 	=> "admins",
-						"inherit"	=> "superadmin"
-					),
-					"category"	=> "superadmin"
-				)
-			);
-		}
-		
-		/**
-		 * gets the avatar
-		 *
-		 *@name getImage
-		 *@access public
-		*/
-		public function getImage() {
-			if($this->avatar) {
-				if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classnamename != "gravatarimagehandler") || $this->avatar->classnamename == "gravatarimagehandler") {
-					$this->avatarid = 0;
-					$this->write(false, true, 2, false, false);
-					return new GravatarImageHandler(array("email" => $this->email));
-				}
-				return $this->avatar;
-			} else {
-				return new GravatarImageHandler(array("email" => $this->email));
-			}
-		}
-		
-	/**
-	 * returns information about notification-settings of this class
-	 * these are:
-	 * - title
-	 * - icon
-	 * this API may extended with notification settings later
-	 * 
-	 *@name NotifySettings
-	 *@access public
-	*/
-	public static function NotifySettings() {
-		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
-	}
-	
-	/**
-	 * unique identifier of this user.
-	*/
-	public function uniqueID() {
-		return md5($this->id . "_" . $this->nickname . "_" . $this->password . "_" . $this->last_modified);
-	}
-}
 
 /**
  * Wrapper-Class to reflect some data of the logged-in user.
@@ -713,7 +9,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version		1.3
+ * @version		1.4
  */
 class Member extends Object {
 	/**
@@ -811,8 +107,9 @@ class Member extends Object {
 	/**
 	 * checks the login and writes the types
 	 *
-	 *@name checkLogin
-	 *@access public
+	 * @name 	Init
+	 * @access 	public
+	 * @return 	boolean	true if logged in
 	*/
 	static function Init() {
 		if(PROFILE) Profiler::mark("member::Init");
@@ -822,83 +119,114 @@ class Member extends Object {
 		
 		self::checkDefaults();
 		
+		if($data = self::getUserObject()) {
+			if($data["timezone"]) {
+				Core::setCMSVar("TIMEZONE", $data["timezone"]);
+				date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
+			}
+			
+			self::$id = $data->id;
+			self::$nickname = $data->nickname;
+			
+			self::forceGroups($data);
+			
+			self::$groupType = self::$groups->first()->type;
+			
+			// every group has at least the type 1, 0 is just for guests
+			if(self::$groupType == 0) {
+				self::$groupType = 1;
+				self::$groups->first()->type = 1;
+				self::$groups->first()->write(false, true, 2, false, false);
+			}
+			
+			self::$loggedIn = $data;
+			if(PROFILE) Profiler::unmark("member::Init");
+			return true;
+		} else {
+			if(PROFILE) Profiler::unmark("member::Init");
+			return false;
+		}
+	}
+
+	/**
+	 * looks for logged in user and validates session.
+	*/
+	public static function getUserObject() {
 		if(isset($_SESSION["g_userlogin"])) {
 			if($data = DataObject::get_one("user", array("id" => $_SESSION["g_userlogin"]))) {
 				$currsess = session_id();
 
-				if($data['phpsess'] != $currsess)
+				if($data['phpsess'] == $currsess)
 				{
+					return $data;
+				} else {
 					self::doLogout();
-					if(PROFILE) Profiler::unmark("member::Init");
-					return false;
 				}
-				
-				if($data["timezone"]) {
-					Core::setCMSVar("TIMEZONE", $data["timezone"]);
-					date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
-				}
-				
-				self::$id = $data->id;
-				self::$nickname = $data->nickname;
-				
-				
-				self::$groups = $data->groups(null, "type DESC");
-				
-				// if no group is set, set default group user
-				if(self::$groups->forceData()->Count() == 0) {
-					$group = DataObject::get_one("group", array("usergroup" => 1));
-					if(!$group) {
-					
-						$groupCount = DataObject::count("group", array("type" => 1));
-						
-						if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
-							$group = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-							$group->write(true, true, 2, false, false);
-						} else {
-							foreach(DataObject::get("group", array("type" => 1)) as $_group) {
-								if($_group->permissions()->count() == 0) {
-									$_group->usergroup = 1;
-									$_group->write(false, true, 2, true, false);
-									$group = $_group;
-									break;
-								}
-							}
-							
-							if(!isset($group)) {
-								$group = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-								$group->write(true, true, 2, false, false);
-							}
-						}
-					}
-					
-					self::$groups->add($group);
-					self::$groups->write(false, true, 2, false, false);
-				}
-				
-				self::$groupType = self::$groups->first()->type;
-				
-				// every group has at least the type 1, 0 is just for guests
-				if(self::$groupType == 0) {
-					self::$groupType = 1;
-					self::$groups->first()->type = 1;
-					self::$groups->first()->write(false, true, 2, false, false);
-				}
-				
-				self::$loggedIn = $data;
-				if(PROFILE) Profiler::unmark("member::Init");
-				return true;
-			} else {
-				self::doLogout();
-				if(PROFILE) Profiler::unmark("member::Init");
-				return false;
 			}
 		}
 	}
-	
+
 	/**
-	 * old method
+	 * forces groups to be existing or creates them.
+	 *
+	 * @param 	DataObject of Type User
 	*/
-	static function checkLogin() {}
+	public static function forceGroups($data) {
+
+		self::$groups = $data->groups(null, "type DESC");
+
+		// if no group is set, set default group user
+		if(self::$groups->forceData()->Count() == 0) {
+
+			$group = self::getDefaultGroup();
+			
+			self::$groups->add($group);
+			self::$groups->write(false, true, 2, false, false);
+		}
+	}
+
+	/**
+	 * returns a group which any user can be assigned safetly to based on permissions.
+	 *
+	 * @name 	getDefaultGroup
+	 * @return 	Group
+	*/
+	public static function getDefaultGroup() {
+		// check for default user group			
+		$defaultGroup = DataObject::get_one("group", array("usergroup" => 1));
+		if(!$defaultGroup) {
+	
+			// check if any group exists, which a user can be safely asigned to without giving him admin permission
+			$groupCount = DataObject::count("group", array("type" => 1));
+
+			// validate group and permissions
+			if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
+
+				// create new
+				$defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
+				$defaultGroup->write(true, true, 2, false, false);
+			} else {
+
+				// iterate trough all groups with type 1 and set default group to the first one without permissions
+				foreach(DataObject::get("group", array("type" => 1)) as $defaultGroup) {
+					if($defaultGroup->permissions()->count() == 0) {
+						$defaultGroup->usergroup = 1;
+						$defaultGroup->write(false, true, 2, true, false);
+						break;
+					} else {
+						unset($defaultGroup);
+					}
+				}
+				
+				if(!isset($defaultGroup)) {
+					$defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
+					$defaultGroup->write(true, true, 2, false, false);
+				}
+			}
+		}
+
+		return $defaultGroup;
+	}
 	
 	/**
 	 * returns the groupids of the groups of the user
@@ -947,16 +275,48 @@ class Member extends Object {
 	
 	/**
 	 * login an user with the params
-	 * if the params are incorrect, it returns false
+	 * if the params are incorrect, it returns false.
 	 *
-	 *@name doLogin
-	 *@access public
-	 *@param string - nickname
-	 *@param string - password
-	 *@return bool
+	 * @name 	doLogin
+	 * @access 	public
+	 * @param 	string - nickname
+	 * @param 	string - password
+	 *@ return 	bool
 	*/
 	static function doLogin($user, $pwd)
 	{
+		self::checkDefaults();
+
+		try {
+			self::checkLogin($user, $pwd);
+
+			return true;
+		} catch(LoginInvalidException $e) {
+
+			// credentials wrong
+			logging("Login with wrong Username/Password with IP: ".$_SERVER["REMOTE_ADDR"].""); // just for security
+			AddContent::addError(lang("wrong_login"));
+		} catch(LoginUserLockedException $e) {
+
+			// user is locked
+			AddContent::addError(lang("login_locked"));
+		} catch(LoginUserMustUnlockException $e) {
+
+			// user must activate account
+			$add = "";
+			if(ClassInfo::exists("registerExtension")) {
+				$add = ' <a href="profile/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
+			}
+			AddContent::addError(lang("login_not_unlocked") . $add);
+		}
+
+		return false;
+	}
+
+	/**
+	 * performs a login and throws an exception if login cannot be validates.
+	*/
+	public static function checkLogin($user, $pwd) {
 		self::checkDefaults();
 
 		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
@@ -973,26 +333,15 @@ class Member extends Object {
 					
 					return true;
 				} else if($data->status == 0) {
-					$add = "";
-					if(ClassInfo::exists("registerExtension")) {
-						$add = ' <a href="profile/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
-					}
-					addcontent::addError(lang("login_not_unlocked") . $add);
-					return false;
+					throw new LoginUserMustUnlockException();
 				} else {
-
-					addcontent::addError(lang("login_locked"));
-					return false;
+					throw new LoginUserLockedException();
 				}
 			} else {
-				logging("Login with wrong Username/Password with IP: ".$_SERVER["REMOTE_ADDR"].""); // just for security
-				AddContent::addError(lang("wrong_login"));
-				return false;
+				throw new LoginInvalidException();
 			}
 		} else {
-			logging("Login with wrong Username/Password with IP: ".$_SERVER["REMOTE_ADDR"].""); // just for security
-			AddContent::addError(lang("wrong_login"));
-			return false;
+			throw new LoginInvalidException();
 		}
 	}
 	
@@ -1044,5 +393,32 @@ class Member extends Object {
 				return $_SESSION["uniqueID"];
 			}
 		}
+	}
+}
+
+class LoginInvalidException extends LogicException {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = ExceptionManager::LOGIN_INVALID, Exception $previous = null) {
+		parent::__construct($m, $code, $previous);
+	}
+}
+
+class LoginUserLockedException extends LogicException {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_LOCKED, Exception $previous = null) {
+		parent::__construct($m, $code, $previous);
+	}
+}
+
+class LoginUserMustUnlockException extends LogicException {
+	/**
+	 * constructor.
+	 */
+	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_MUST_UNLOCK, Exception $previous = null) {
+		parent::__construct($m, $code, $previous);
 	}
 }

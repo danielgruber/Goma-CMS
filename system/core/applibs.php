@@ -1025,10 +1025,7 @@ class SQLException extends Exception {
 	public function __construct($m = "", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 }
@@ -1041,10 +1038,7 @@ class SecurityException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = ExceptionManager::SECURITY_ERROR, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 }
@@ -1054,10 +1048,7 @@ class PermissionException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = ExceptionManager::PERMISSION_ERROR, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 }
@@ -1067,10 +1058,7 @@ class PHPException extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = ExceptionManager::PHP_ERROR, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 }
@@ -1080,10 +1068,7 @@ class DBConnectError extends MySQLException {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 4, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 }
@@ -1093,10 +1078,7 @@ class ServiceUnavailable extends Exception {
 	 * constructor.
 	 */
 	public function __construct($m = "", $code = 7, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+		parent::__construct($m, $code, $previous);
 	}
 
 	public function http_status() {

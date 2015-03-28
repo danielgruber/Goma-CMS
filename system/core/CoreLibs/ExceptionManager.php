@@ -57,4 +57,19 @@ class ExceptionManager {
  	 * email invalid.
 	*/
 	const EMAIL_INVALID = -20;
+
+	/*
+	 * login invalid.
+	*/
+	const LOGIN_INVALID = -16;
+
+	/**
+	 * user locked.
+	*/
+	const LOGIN_USER_LOCKED = -17;
+
+	/**
+	 * user not unlocked yet.
+	*/
+	const LOGIN_USER_MUST_UNLOCK = -18;
 }
