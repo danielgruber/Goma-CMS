@@ -18,7 +18,7 @@ class MemberTest extends GomaUnitTest {
 	/**
 	 * internal name.
 	*/
-	public $name = "Memer";
+	public $name = "Member";
 
 	/**
 	 * tests exceptions.

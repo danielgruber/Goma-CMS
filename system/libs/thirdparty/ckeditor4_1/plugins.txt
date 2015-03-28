@@ -1,3 +1,0 @@
-CKEditor 4.1 + 
-
--imagepaste http://ckeditor.com/forums/Plugins/ImagePaste-plugin-for-Firefox

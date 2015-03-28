@@ -53,7 +53,7 @@ class GomaCKEditor extends GomaEditor {
      * extra javascript-code for html.
     */
     static $htmlJS = '
-		CKEDITOR.config.extraPlugins = "autogrow,stylesheetparser,tableresize,scayt,imagepaste";
+		CKEDITOR.config.extraPlugins = "imagepaste";
 		CKEDITOR.config.autoGrow_onStartup = true;';
 	
 	/**
@@ -68,8 +68,9 @@ class GomaCKEditor extends GomaEditor {
 		$id = $this->classname . "_" . $name;
 		$width = isset($params["width"]) ? $params["width"] : "";
 		
-		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_1/";');
-		Resources::add("system/libs/thirdparty/ckeditor4_1/ckeditor.js", "js");
+		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_4/";');
+		Resources::add("system/libs/thirdparty/ckeditor4_4/ckeditor.js", "js");
+		Resources::add("system/libs/ajax/ajaxupload.js", "js");
 		if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 		Resources::add("ckeditor_goma.css", "css");
 		

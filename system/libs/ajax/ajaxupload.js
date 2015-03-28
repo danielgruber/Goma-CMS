@@ -285,8 +285,10 @@ AjaxUpload.prototype = {
 		var now = new Date().getTime();
 		var timeDiff = now - upload.downloadStartTime;
 		
-		this.browse.removeAttr("disabled");
-		this.placeBrowseHandler();
+		if(this.browse) {
+			this.browse.removeAttr("disabled");
+			this.placeBrowseHandler();
+		}
 		
 		this.queue[fileIndex].loading = false;
 		this.queue[fileIndex].loaded = true;
@@ -395,8 +397,9 @@ AjaxUpload.prototype = {
 			};
 			
 			this.loading = true;
-			if(!this.multiple)
+			if(!this.multiple) {
 				this.hideBrowseHandler();
+			}
 		}
 		
 		this.processQueue();
