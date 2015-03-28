@@ -38,26 +38,32 @@ class ClassManifest {
 	 */
 	public static function load($class) {
 
-
 		$class = self::resolveClassName($class);
-		
-		// check if already loaded
-		if(class_exists($class, false) || interface_exists($class, false)) {
-			return;
-		}
 
 		if(PROFILE)
-			Profiler::mark("Manifest::load " );
+			Profiler::mark("Manifest::load");
 		
 		self::loadInterface($class) || self::loadClass($class) || self::generateAlias($class);
 		
-		if(class_exists("Core", false)) {
-			Core::callHook("loadedClass", $class);
-			Core::callHook("loadedClass" . $class);
+		if(class_exists('Core', false)) {
+			Core::callHook('loadedClass', $class);
+			Core::callHook('loadedClass' . $class);
 		}
 		
 		if(PROFILE)
-			Profiler::unmark("Manifest::load ");
+			Profiler::unmark("Manifest::load");
+	}
+
+	/**
+	 * tries to include a file.
+	*/
+	public function tryToInclude($class, $file) {
+
+		$class = self::resolveClassName($class);
+
+		if(!class_exists($class, false)) {
+			include($file);
+		}
 	}
 
 	/**
@@ -80,9 +86,9 @@ class ClassManifest {
 	*/
 	protected static function loadClass($class) {
 		if(isset(ClassInfo::$files[$class])) {
-			if(!self::tryToInclude($class, ClassInfo::$files[$class])) {
+			if(!include(ClassInfo::$files[$class])) {
 				ClassInfo::Delete();
-				throwError(9, 'FileSystem-Error', "Could not include " . ClassInfo::$files[$class] . ". ClassInfo seems to be old. Please reload!");
+				throw new LogicException("Could not include " . ClassInfo::$files[$class] . ". ClassInfo seems to be old.");
 			}
 			self::setSaveVars(ClassInfo::$files[$class]);
 
@@ -380,20 +386,6 @@ class ClassManifest {
 	}
 
 	/**
-	 * tries to include a file.
-	*/
-	public function tryToInclude($class, $file) {
-
-		$class = str_replace("\\", "_", self::resolveClassName($class));
-
-		if(!defined("INCLUDE_" . $class)) {
-			$r = include($file);
-			define("INCLUDE_" . $class, 1);
-			return $r;
-		}
-	}
-
-	/**
 	 * Add file for preload array.
 	 *
 	 * @param string $file Filename
@@ -411,7 +403,9 @@ class ClassManifest {
 	 */
 	public static function include_all() {
 		foreach(ClassInfo::$files as $class => $file) {
-			self::load($class);
+			if(!class_exists($class, false) && !interface_exists($class, false)) {
+				self::load($class);
+			}
 		}
 	}
 
