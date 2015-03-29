@@ -197,7 +197,7 @@ class ClassManifest {
 		if(file_exists($dir . '/contents/info.plist')) {
 			$data = self::getPropertyList($dir . '/contents/info.plist');
 
-            self::generateExtensionData($data, $env);
+            self::generateExtensionData($data, $dir, $class_info, $env);
 		}
 
 		foreach(scandir($dir) as $file) {
@@ -351,7 +351,7 @@ class ClassManifest {
      * @param array data
      * @param array environment
      */
-    public static function generateExtensionData($data, &$env) {
+    public static function generateExtensionData($data, $dir, &$class_info, &$env) {
         // check if we have required data
         if(isset($data["name"], $data["type"], $data["loadCode"], $data["version"]) && ($data["type"] == "expansion" || $data["type"] == "extension")) {
             $data["folder"] = $dir . "/contents/";

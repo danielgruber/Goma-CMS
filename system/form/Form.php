@@ -954,6 +954,18 @@ class Form extends object {
 		unset($this->renderedFields[strtolower($name)]);
 	}
 
+    /**
+     * unregisters a field.
+     *
+     * @param string name
+     * @return void
+     */
+    public function unregisterField($name) {
+        if(isset($this->fields[$name])) {
+            unset($this->fields[$name]);
+        }
+    }
+
 	//!Overloading
 	/**
 	 * Overloading
