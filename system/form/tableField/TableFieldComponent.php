@@ -24,7 +24,9 @@ interface TableField_HTMLProvider extends TableFieldComponent {
 	/**
 	 * provides HTML-fragments
 	 *
-	 *@name provideFragments
+	 * @name provideFragments
+     * @param TableField $tableField
+     * @return string
 	*/
 	public function provideFragments($tableField);
 }

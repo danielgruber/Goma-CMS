@@ -516,41 +516,56 @@ class tableField extends FormField {
 		}
 		
 		foreach($this->getComponents() as $component) {
-			if(!($component instanceof TableField_URLHandler)) {
-				continue;
-			}
-			
-			$urlHandlers = $component->getURLHandlers($this);
-			
-			if($urlHandlers) foreach($urlHandlers as $rule => $action) {
-				if($params = $request->match($rule, true)) {
-					// Actions can reference URL parameters, eg, '$Action/$ID/$OtherID' => '$Action',
-					if($action[0] == '$') $action = $params[substr(strtolower($action),1)];
-					if($action = $this->validateMethodName($component, $action)) {
-						return $component->$action($this, $request);
-					}
-				}
-			}
+            $action = $this->getActionFromComponent($component, $request);
+            if($action) {
+                $content = $this->executeAction($component, $action);
+                if($content) {
+                    return $content;
+                }
+            }
 		}
 		
 		return parent::handleRequest($request, $subController);
 	}
 
     /**
-     * checks if access for method is available and gives back maybe updates method-name.
+     * gets url handlers from component and trys to get an action.
+     * returns false when no action was found.
+     *
+     * @param   Object $component
+     * @param   Request $request
+     * @return  string|false
+     */
+    public function getActionFromComponent($component, $request) {
+        if($component instanceof TableField_URLHandler) {
+
+            $urlHandlers = $component->getURLHandlers($this);
+
+            if ($urlHandlers) foreach ($urlHandlers as $rule => $action) {
+                if ($params = $request->match($rule, true)) {
+                    // Actions can reference URL parameters, eg, '$Action/$ID/$OtherID' => '$Action',
+                    if ($action[0] == '$') $action = $params[substr(strtolower($action), 1)];
+                    return $action;
+                }
+            }
+        }
+    }
+
+    /**
+     * checks if access for method is available and gives return of method back if calable.
      *
      * @param   object component
      * @param   string $action
      * @return  string
      */
-    public function validateMethodName($component, $action) {
+    public function executeAction($component, $action) {
         if(!method_exists($component, 'checkAccessAction') || $component->checkAccessAction($action)) {
             if(!$action) {
-               return 'index';
-            } else if(!is_string($action)) {
-                throw new LogicException( 'Non-string method name: ' . var_export($action, true));
+               return $component->index();
+            } else if(is_string($action)) {
+                return $component->$action;
             } else {
-                return $action;
+                throw new LogicException( 'Non-string method name: ' . var_export($action, true));
             }
         }
 
