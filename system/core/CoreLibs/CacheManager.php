@@ -7,208 +7,216 @@
  */
 
 class CacheManager {
-	/**
-	 * minimum cache lifetime when clear is not forced.
-	*/
-	const MIN_CACHE_LIFETIME = 300;
-	/**
-	 * cache-directory.
-	*/
-	protected $cacheDirectory;
+    /**
+     * minimum cache lifetime when clear is not forced.
+     */
+    const MIN_CACHE_LIFETIME = 300;
+    /**
+     * cache-directory.
+     */
+    protected $cacheDirectory;
 
-	/**
-	 * if cache has been deleted last time.
-	*/
-	protected $hasBeenDeletedInSession;
+    /**
+     * if cache has been deleted last time.
+     */
+    protected $hasBeenDeletedInSession;
 
-	/**
-	 * simple list of files that should be preserved.
-	*/
-	public static $preservedFiles = array(
-		"deletecache", "autoloader_exclude"
-	);
+    /**
+     * simple list of files that should be preserved.
+     */
+    public static $preservedFiles = array(
+        "deletecache", "autoloader_exclude"
+    );
 
-	/**
-	 * constructor.
-	* @param string $dir
-	*/
-	public function __construct($dir) {
-		$this->cacheDirectory = $this->addSlashToEnd($dir);
-		$this->hasBeenDeletedInSession = false;
-		$this->init();
-	}
+    /**
+     * constructor.
+     * @param string $dir
+     */
+    public function __construct($dir) {
+        $this->cacheDirectory = $this->addSlashToEnd($dir);
+        $this->hasBeenDeletedInSession = false;
+        $this->init();
+    }
 
-	/**
-	 * inits cache.
-	*/
-	protected function init() {
-		try {
-			FileSystem::requireDir($this->cacheDirectory);
+    /**
+     * inits cache.
+     */
+    protected function init() {
+        try {
+            FileSystem::requireDir($this->cacheDirectory);
 
-			if(!file_exists($this->cacheDirectory . "autoloader_exclude")) {
-				if(!file_put_contents($this->cacheDirectory . "autoloader_exclude", "")) {
-					throw new LogicException("Cache-Directory must exist or creatable", ExceptionManager::ERR_CACHE_NOT_INITED);
-				}
-			}
-		} catch(Exception $e) {
-			throw new LogicException("Cache-Directory must exist or creatable. " . $this->cacheDirectory, ExceptionManager::ERR_CACHE_NOT_INITED, $e);
-		}
-	}
+            if(!file_exists($this->cacheDirectory . "autoloader_exclude")) {
+                if(file_put_contents($this->cacheDirectory . "autoloader_exclude", "") === false) {
+                    $this->throwInitException();
+                }
+            }
+        } catch(Exception $e) {
+            $this->throwInitException($e);
+        }
+    }
 
-	/**
-	 * returns when the cache has been cleared last time.
-	*/
-	public function lastClearingTime() {
-		if(!file_exists($this->cacheDirectory . "age")) {
-			return time();
-		}
+    /**
+     * throws exception that cache directory is not creatable.
+     */
+    protected function throwInitException($e = null) {
+        include_once("system/core/CoreLibs/ExceptionManager.php");
+        throw new LogicException("Cache-Directory must exist or creatable. " . $this->cacheDirectory, ExceptionManager::ERR_CACHE_NOT_INITED, $e);
+    }
 
-		return file_get_contents($this->cacheDirectory . "age");
-	}
+    /**
+     * returns when the cache has been cleared last time.
+     */
+    public function lastClearingTime() {
+        if(!file_exists($this->cacheDirectory . "age")) {
+            return time();
+        }
 
-	/**
-	 * returns if cache should be deleted by time.
-	*/
-	public function shouldDeleteCache() {
-		return ($this->lastClearingTime() < time() - self::MIN_CACHE_LIFETIME) && !$this->hasBeenDeletedInSession;
-	}
+        return file_get_contents($this->cacheDirectory . "age");
+    }
 
-	/**
-	 * returns whether cache was deleted in this session.
-	*/
-	public function cacheHasBeenDeleted() {
-		return $this->hasBeenDeletedInSession;
-	}
+    /**
+     * returns if cache should be deleted by time.
+     */
+    public function shouldDeleteCache() {
+        return ($this->lastClearingTime() < time() - self::MIN_CACHE_LIFETIME) && !$this->hasBeenDeletedInSession;
+    }
 
-	/**
-	 * returns cache-directory.
-	*/
-	public function dir() {
-		return $this->cacheDirectory;
-	}
+    /**
+     * returns whether cache was deleted in this session.
+     */
+    public function cacheHasBeenDeleted() {
+        return $this->hasBeenDeletedInSession;
+    }
 
-	/**
-	 * puts a file in cache with given contents.
-	* @param string $file
-	* @param string $content
-	*/
-	public function put($file, $content, $mode = 0600) {
-		return FileSystem::writeFileContents($this->cacheDirectory . $file, $content, LOCK_EX, $mode);
-	}
+    /**
+     * returns cache-directory.
+     */
+    public function dir() {
+        return $this->cacheDirectory;
+    }
 
-	/**
-	 * removes a file from cache.
-	*/
-	public function rm($file) {
-		if(file_exists($this->cacheDirectory . $file)) {
-			return FileSystem::Delete($this->cacheDirectory . $file);
-		}
+    /**
+     * puts a file in cache with given contents.
+     * @param string $file
+     * @param string $content
+     */
+    public function put($file, $content, $mode = 0600) {
+        return FileSystem::writeFileContents($this->cacheDirectory . $file, $content, LOCK_EX, $mode);
+    }
 
-		return false;
-	}
+    /**
+     * removes a file from cache.
+     */
+    public function rm($file) {
+        if(file_exists($this->cacheDirectory . $file)) {
+            return FileSystem::Delete($this->cacheDirectory . $file);
+        }
 
-	/**
- 	 * returns if a file exists.
-	* @param string $file
-	*/
-	public function exists($file) {
-		return file_exists($this->cacheDirectory . $file);
-	}
+        return false;
+    }
 
-	/**
-	 * returns file-contents of a file or null if not exists.
-	* @param string $file
-	*/
-	public function contents($file) {
-		if(file_exists($this->cacheDirectory . $file)) {
-			return file_get_contents($this->cacheDirectory . $file);
-		}
+    /**
+     * returns if a file exists.
+     * @param string $file
+     */
+    public function exists($file) {
+        return file_exists($this->cacheDirectory . $file);
+    }
 
-		return null;
-	}
+    /**
+     * returns file-contents of a file or null if not exists.
+     * @param string $file
+     */
+    public function contents($file) {
+        if(file_exists($this->cacheDirectory . $file)) {
+            return file_get_contents($this->cacheDirectory . $file);
+        }
 
-	/**
-	 * deletes the cache.
-	 * 
-	 * @param 	int minimum lifetime for all elements
-	 * @param 	boolean force delete folders also when they contain a .dontremove file.
-	*/
-	public function deleteCache($minLifeTime = 0, $forceDeleteFolders = false) {
-		clearstatcache();
+        return null;
+    }
 
-		foreach(scandir($this->cacheDirectory) as $file) {
-			if($file != "." && $file != "..") {
-				// folders
-				if(is_dir($this->cacheDirectory . $file) && $this->shouldDeleteCacheFolder($file, $forceDeleteFolders)) {
-					$this->rm($file);
-				} else if($this->shouldDeleteCacheFile($file, $minLifeTime)) { // files
-					$this->rm($file);
-				}
-			}
-		}
+    /**
+     * deletes the cache.
+     *
+     * @param 	int minimum lifetime for all elements
+     * @param 	boolean force delete folders also when they contain a .dontremove file.
+     */
+    public function deleteCache($minLifeTime = 0, $forceDeleteFolders = false) {
+        clearstatcache();
 
-		FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
+        foreach(scandir($this->cacheDirectory) as $file) {
+            if($file != "." && $file != "..") {
+                // folders
+                if(is_dir($this->cacheDirectory . $file) && $this->shouldDeleteCacheFolder($file, $forceDeleteFolders)) {
+                    $this->rm($file);
+                } else if($this->shouldDeleteCacheFile($file, $minLifeTime)) { // files
+                    $this->rm($file);
+                }
+            }
+        }
 
-		clearstatcache();
+        FileSystem::Delete(ROOT . APPLICATION . "/uploads/d05257d352046561b5bfa2650322d82d");
 
-		FileSystem::Write($this->cacheDirectory . "deletecache", time());
-	}
+        clearstatcache();
 
-	/**
-	 * returns if the folder should be removed.
-	* @param boolean $forceFolders
-	*/
-	public function shouldDeleteCacheFolder($file, $forceFolders) {
-		if(file_exists($this->cacheDirectory . $file . "/.dontremove") && !$forceFolders) {
-			return false;
-		}
+        FileSystem::Write($this->cacheDirectory . "deletecache", time());
+    }
 
-		$return = true;
-		Core::callHook("shouldDeleteCacheFolder", $file, $forceFolders, $this, $return);
+    /**
+     * returns if the folder should be removed.
+     * @param boolean $forceFolders
+     */
+    public function shouldDeleteCacheFolder($file, $forceFolders) {
+        if(file_exists($this->cacheDirectory . $file . "/.dontremove") && !$forceFolders) {
+            return false;
+        }
 
-		return $return;
-	}
+        $return = true;
+        Core::callHook("shouldDeleteCacheFolder", $file, $forceFolders, $this, $return);
 
-	/**
-	 * returns if you should delete a file.
-	*/
-	public function shouldDeleteCacheFile($file, $minLifeTime) {
+        return $return;
+    }
 
-		if(in_array($file, self::$preservedFiles)) {
-			return false;
-		}
+    /**
+     * returns if you should delete a file.
+     */
+    public function shouldDeleteCacheFile($file, $minLifeTime) {
 
-		// lifetime for GFS-Files is 2 hours cause it is used for upgrade.
-		if(substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) {
-			return false;
-		}
+        if(in_array($file, self::$preservedFiles)) {
+            return false;
+        }
 
-		// lifetime for sessions is 1 hour.
-		if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
-			if(filemtime($this->cacheDirectory . $file) > NOW - 3600) {
-				return false;
-			}
-		}
+        // lifetime for GFS-Files is 2 hours cause it is used for upgrade.
+        if(substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) {
+            return false;
+        }
 
-		// check for lifetime for all files.
-		if($minLifeTime == 0 || filemtime($this->cacheDirectory . $file) > time() + $minLifeTime) {
-			return false;
-		}					
+        // lifetime for sessions is 1 hour.
+        if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
+            if(filemtime($this->cacheDirectory . $file) > NOW - 3600) {
+                return false;
+            }
+        }
 
-		$return = true;
-		Core::callHook("shouldDeleteCacheFile", $file, $minLifeTime, $this, $return);
+        // check for lifetime for all files.
+        if($minLifeTime == 0 || filemtime($this->cacheDirectory . $file) > time() + $minLifeTime) {
+            return false;
+        }
 
-		return $return;
-	}
+        $return = true;
+        Core::callHook("shouldDeleteCacheFile", $file, $minLifeTime, $this, $return);
 
-	/**
- 	 * cache-directory should end with /.
-	*/
-	protected function addSlashToEnd($dir) {
-		if(substr($dir, -1) != "/") {
-			return $dir . "/";
-		}
+        return $return;
+    }
 
-		return $dir;
-	}
+    /**
+     * cache-directory should end with /.
+     */
+    protected function addSlashToEnd($dir) {
+        if(substr($dir, -1) != "/") {
+            return $dir . "/";
+        }
+
+        return $dir;
+    }
 }
