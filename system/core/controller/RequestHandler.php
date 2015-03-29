@@ -113,12 +113,12 @@ class RequestHandler extends Object {
 			$this -> request = $request;
 
 		if (isset($this -> request)) {
-			if (!isset($this -> namespace)) {
-				$this -> namespace = $this -> request -> shiftedPart;
-				$this -> originalNamespace = $this -> namespace;
+			if (!isset($this->namespace)) {
+				$this->namespace = $this->request->shiftedPart;
+				$this->originalNamespace = $this->namespace;
 			} else {
-				$this -> originalNamespace = $this -> namespace;
-				$this -> namespace = $this -> request -> shiftedPart;
+				$this->originalNamespace = $this->namespace;
+				$this->namespace = $this -> request->shiftedPart;
 			}
 		} else {
 			throw new InvalidArgumentException("RequestHandler" . $this -> classname . " has no request-instance.");
@@ -195,19 +195,20 @@ class RequestHandler extends Object {
 	/**
 	 * in the end this function is called to do last modifications
 	 *
-	 *@name serve
-	 *@access public
-	 *@param string - content
+	 * @param   string content
+     * @return  string
 	 */
 	public function serve($content) {
 		return $content;
 	}
 
-	/**
-	 * checks if this class has a given action
-	 *@name hasAction
-	 *@access public
-	 */
+    /**
+     * checks if this class has a given action.
+     * it also checks for permissions.
+     *
+     * @param   string $action
+     * @return  bool
+     */
 	public function hasAction($action) {
 		$hasAction = true;
 		if (!Object::method_exists($this, $action) || !$this -> checkPermission($action)) {
@@ -220,11 +221,13 @@ class RequestHandler extends Object {
 		return $hasAction;
 	}
 
-	/**
-	 * handles the action
-	 *@name handleAction
-	 *@access public
-	 */
+    /**
+     * handles the action.
+     *
+     * @name    handleAction
+     * @access  public
+     * @return  mixed|null|false
+     */
 	public function handleAction($action) {
 		$handleWithMethod = true;
 		$content = null;

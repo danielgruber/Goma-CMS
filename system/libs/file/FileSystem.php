@@ -1,4 +1,4 @@
-<?php defined("IN_GOMA") OR die();
+<?php defined('IN_GOMA') OR die();
 /**
  * File-System class to map all FileSystem calls with Goma-Specific updates.
  *
@@ -11,10 +11,10 @@
  * last modified: 06.03.2015
 */
 
-define("LANGUAGE_ROOT", ROOT . "/languages/");
-define("IMAGE_ROOT", ROOT . "/images/");
-define("UPLOADS_ROOT", ROOT . "/uploads/");
-define("HTACCESS_FILE", ROOT . ".htaccess");
+define('LANGUAGE_ROOT', ROOT . '/languages/');
+define('IMAGE_ROOT', ROOT . '/images/');
+define('UPLOADS_ROOT', ROOT . '/uploads/');
+define('HTACCESS_FILE', ROOT . '.htaccess');
 
 class FileSystem extends Object {
 	/**

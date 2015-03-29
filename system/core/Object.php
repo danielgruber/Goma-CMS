@@ -159,7 +159,7 @@ abstract class Object {
 			if(!empty($func)) {
 				return call_user_func_array(array($class, $func), array($class));
 			} else {
-				throw new LogicException("Invalid name of variable $var for $class");
+				throw new LogicException("Invalid name of method $func for $class");
 			}
 		} else {
 			throw new LogicException("Invalid name of class $class");
@@ -367,13 +367,14 @@ abstract class Object {
 	public static function instance($class) {
 
 		if(is_object($class)) {
-			return clone $class;
+            return clone $class;
 		}
 
 		$class = strtolower($class);
 
-		if(PROFILE)
-			Profiler::mark("Object::instance");
+		if(PROFILE) {
+            Profiler::mark('Object::instance');
+        }
 
 		/* --- */
 

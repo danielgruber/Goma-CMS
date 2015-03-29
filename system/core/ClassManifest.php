@@ -145,7 +145,11 @@ class ClassManifest {
 		}
 	}
 
-	public static function resolveClassName($class) {
+    /**
+     * @param $class
+     * @return string
+     */
+    public static function resolveClassName($class) {
 
 		if(is_object($class)) {
 			$class = get_class($class);
@@ -179,74 +183,21 @@ class ClassManifest {
 			return false;
 		}
 
-		if(file_exists($dir . "/autoloader_exclude"))
-			return false;
+		if(file_exists($dir . "/autoloader_exclude")) {
+            return false;
+        }
 
-		if(!DEV_MODE && file_exists($dir . "/autoloader_non_dev_exclude"))
-			return false;
+		if(!DEV_MODE && file_exists($dir . "/autoloader_non_dev_exclude")) {
+            return false;
+        }
 
 		$dir = realpath($dir);
 
 		// Extension-Layer
-		if(file_exists($dir . "/contents/info.plist")) {
-			require_once (ROOT . "system/libs/thirdparty/plist/CFPropertyList.php");
-			$plist = new CFPropertyList($dir . "/contents/info.plist");
-			$data = $plist->ToArray();
+		if(file_exists($dir . '/contents/info.plist')) {
+			$data = self::getPropertyList($dir . '/contents/info.plist');
 
-			// check if we have required data
-			if(isset($data["name"], $data["type"], $data["loadCode"], $data["version"]) && ($data["type"] == "expansion" || $data["type"] == "extension")) {
-				$data["folder"] = $dir . "/contents/";
-
-				// test compatiblity
-				if(!isset($data["requiredPHPVersion"]) || version_compare($data["requiredPHPVersion"], phpversion(), "<=")) {
-					if(!isset($data["requireFrameworkVersion"]) || goma_version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
-						if(!isset($data["requireApp"]) || $data["requireApp"] == ClassInfo::$appENV["app"]["name"]) {
-							if(!isset($data["requireAppVersion"]) || !isset($data["requireApp"]) || goma_version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "<=")) {
-
-								// compatible!!
-
-								if(file_exists($dir . "/contents/.g_" . APPLICATION . ".disabled")) {
-									return false;
-								}
-
-								// let's remove some data to avoid saving too much data
-								unset($data["requireFrameworkVersion"], $data["requireApp"], $data["requireAppVersion"]);
-
-								// register in environment
-								$env["expansion"][strtolower($data["name"])] = $data;
-								if(is_array($data["loadCode"])) {
-									$_classes = array();
-									foreach($data["loadCode"] as $ldir) {
-										self::generate_class_manifest($dir . "/contents/" . $ldir, $_classes, $class_info, $env);
-									}
-									foreach($_classes as $_class => $file) {
-										$class_info[$_class]["inExpansion"] = strtolower($data["name"]);
-										$classes[$_class] = $file;
-									}
-									$env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
-									unset($_classes);
-								} else {
-									$_classes = array();
-									self::generate_class_manifest($dir . "/contents/" . $data["loadCode"], $_classes, $class_info, $env);
-									foreach($_classes as $_class => $file) {
-										$class_info[$_class]["inExpansion"] = strtolower($data["name"]);
-										$classes[$_class] = $file;
-									}
-									$env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
-									unset($_classes);
-								}
-								return true;
-							} else {
-								return false;
-							}
-						} else {
-							return false;
-						}
-					} else {
-						return false;
-					}
-				}
-			}
+            self::generateExtensionData($data, $env);
 		}
 
 		foreach(scandir($dir) as $file) {
@@ -384,6 +335,78 @@ class ClassManifest {
 			}
 		}
 	}
+
+    /**
+     * returns array of data from PropertiyList.
+     */
+    public static function getPropertyList($file) {
+        self::tryToInclude('CFPropertyList', 'system/libs/thirdparty/plist/CFPropertyList.php');
+        $plist = new CFPropertyList($file);
+        return $plist->ToArray();
+    }
+
+    /**
+     * generates data for extension.
+     *
+     * @param array data
+     * @param array environment
+     */
+    public static function generateExtensionData($data, &$env) {
+        // check if we have required data
+        if(isset($data["name"], $data["type"], $data["loadCode"], $data["version"]) && ($data["type"] == "expansion" || $data["type"] == "extension")) {
+            $data["folder"] = $dir . "/contents/";
+
+            // test compatiblity
+            if(!isset($data["requiredPHPVersion"]) || version_compare($data["requiredPHPVersion"], phpversion(), "<=")) {
+                if(!isset($data["requireFrameworkVersion"]) || goma_version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
+                    if(!isset($data["requireApp"]) || $data["requireApp"] == ClassInfo::$appENV["app"]["name"]) {
+                        if(!isset($data["requireAppVersion"]) || !isset($data["requireApp"]) || goma_version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "<=")) {
+
+                            // compatible!!
+
+                            if(file_exists($dir . "/contents/.g_" . APPLICATION . ".disabled")) {
+                                return false;
+                            }
+
+                            // let's remove some data to avoid saving too much data
+                            unset($data["requireFrameworkVersion"], $data["requireApp"], $data["requireAppVersion"]);
+
+                            // register in environment
+                            $env["expansion"][strtolower($data["name"])] = $data;
+                            if(is_array($data["loadCode"])) {
+                                $_classes = array();
+                                foreach($data["loadCode"] as $ldir) {
+                                    self::generate_class_manifest($dir . "/contents/" . $ldir, $_classes, $class_info, $env);
+                                }
+                                foreach($_classes as $_class => $file) {
+                                    $class_info[$_class]["inExpansion"] = strtolower($data["name"]);
+                                    $classes[$_class] = $file;
+                                }
+                                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
+                                unset($_classes);
+                            } else {
+                                $_classes = array();
+                                self::generate_class_manifest($dir . "/contents/" . $data["loadCode"], $_classes, $class_info, $env);
+                                foreach($_classes as $_class => $file) {
+                                    $class_info[$_class]["inExpansion"] = strtolower($data["name"]);
+                                    $classes[$_class] = $file;
+                                }
+                                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
+                                unset($_classes);
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+    }
 
 	/**
 	 * Add file for preload array.

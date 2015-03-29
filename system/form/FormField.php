@@ -375,8 +375,7 @@ class FormField extends RequestHandler implements ArrayAccess
 		/**
 		 * returns the post-name
 		 *
-		 *@name PostName
-		 *@access public
+         * @return string
 		*/
 		public function PostName() {
 			return isset($this->overridePostName) ? $this->overridePostName : $this->name;
@@ -384,8 +383,8 @@ class FormField extends RequestHandler implements ArrayAccess
 		
 		/**
 		 * returns the current real form-object
-		 *@name form
-		 *@access public
+         *
+         * @return Form
 		*/
 		public function &form()
 		{
