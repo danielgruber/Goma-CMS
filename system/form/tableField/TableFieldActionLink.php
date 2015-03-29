@@ -48,7 +48,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	 *
 	 * @return array
 	 */
-	public function getColumnAttributes($tableField, $record, $columnName) {
+	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array('class' => 'col-buttons');
 	}
 	

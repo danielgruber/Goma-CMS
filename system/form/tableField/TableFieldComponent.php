@@ -26,7 +26,7 @@ interface TableField_HTMLProvider extends TableFieldComponent {
 	 *
 	 * @name provideFragments
      * @param TableField $tableField
-     * @return string
+     * @return array
 	*/
 	public function provideFragments($tableField);
 }
@@ -72,7 +72,7 @@ interface TableField_ColumnProvider extends TableFieldComponent {
 	 *@name getColumnAttributes
 	 *@access public
 	*/
-	public function getColumnAttributes($tableField, $record, $columnName);
+	public function getColumnAttributes($tableField, $columnName, $record);
 	
 	/**
 	 * returns the meta-data of the given column for all records

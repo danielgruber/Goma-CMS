@@ -194,7 +194,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 	 * @param string $columnName
 	 * @return array
 	 */
-	public function getColumnAttributes($tableField, $record, $columnName) {
+	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array('class' => 'col-buttons');
 	}
 	

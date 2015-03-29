@@ -7,6 +7,7 @@
  * http://silverstripe.org
  *
  * @package     Goma\Form\TableField
+ * @property 	state set of objects
  *
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
@@ -53,13 +54,6 @@ class tableField extends FormField {
 	 *@access protected
 	*/
 	protected $customDataFields = array();
-
-    /**
-     * state of TableField.
-     *
-     * @property string|null
-     */
-    public $state;
 	
 	/**
 	 * constructor
@@ -275,12 +269,12 @@ class tableField extends FormField {
         $arr = array();
 
         foreach($this->columnDispatch[$column] as $handler) {
-            $generated = call_user_func_array(array($handler, $method), array($this, $record, $column));
+            $generated = call_user_func_array(array($handler, $method), array($this, $column, $record));
 
             if(is_array($generated)) {
                 $arr = array_merge($arr, $generated);
             } else {
-                throw new LogicException( 'Handler should give Array at ' . $handler->classname . '::getColumnAttributes');
+                throw new LogicException( 'Handler should give Array at ' . get_class($handler) . '::getColumnAttributes');
             }
         }
         return $arr;
@@ -517,9 +511,9 @@ class tableField extends FormField {
 		
 		foreach($this->getComponents() as $component) {
             $action = $this->getActionFromComponent($component, $request);
-            if($action) {
+            if($action !== false) {
                 $content = $this->executeAction($component, $action);
-                if($content) {
+                if($content !== false) {
                     return $content;
                 }
             }
@@ -549,6 +543,8 @@ class tableField extends FormField {
                 }
             }
         }
+
+        return false;
     }
 
     /**

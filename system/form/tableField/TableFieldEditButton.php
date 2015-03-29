@@ -51,7 +51,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	 * @param string $columnName
 	 * @return array
 	 */
-	public function getColumnAttributes($tableField, $record, $columnName) {
+	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array('class' => 'col-buttons');
 	}
 	

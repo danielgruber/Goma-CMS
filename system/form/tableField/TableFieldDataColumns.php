@@ -164,7 +164,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider {
 	 *@name getColumnAttributes
 	 *@access public
 	*/
-	public function getColumnAttributes($tableField, $record, $columnName) {
+	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array("class" => "col-" . preg_replace('/[^\w]/', '-', $columnName));
 	}
 	
