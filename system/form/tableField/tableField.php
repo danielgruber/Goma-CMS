@@ -1,4 +1,4 @@
-<?php defined('IN_GOMA') OR die(); 
+<?php defined('IN_GOMA') OR die();
 
 /**
  * Customisable field to edit data in a table.
@@ -53,6 +53,13 @@ class tableField extends FormField {
 	 *@access protected
 	*/
 	protected $customDataFields = array();
+
+    /**
+     * state of TableField.
+     *
+     * @property string|null
+     */
+    public $state;
 	
 	/**
 	 * constructor
@@ -107,12 +114,13 @@ class tableField extends FormField {
 	public function getData() {
 		return $this->data;
 	}
-	
-	/**
-	 * sets the data
-	 *
-	 *@param DataObjectSet
-	*/
+
+    /**
+     * sets the data
+     *
+     * @param DatatSet $data
+     * @return $this
+     */
 	public function setData(DataSet $data) {
 		$this->data = $data;
 		return $this;
@@ -140,13 +148,14 @@ class tableField extends FormField {
 	public function setModel($model = null) {
 		$this->modelClass = $model;
 	}
-	
-	/**
-	 * builds the column-dispatch
-	 *
-	 *@name buildColumnDispatch
-	 *@access public
-	*/
+
+    /**
+     * builds the column-dispatch
+     *
+     * @name buildColumnDispatch
+     * @access public
+     * @return $this
+     */
 	public function buildColumnDispatch() {
 		$this->columnDispatch = array();
 		foreach($this->getComponents() as $comp) {
@@ -158,13 +167,14 @@ class tableField extends FormField {
 		}
 		return $this;
 	}
-	
-	/**
-	 * gets all columns
-	 *
-	 *@name getColumns
-	 *@access public
-	*/
+
+    /**
+     * gets all columns
+     *
+     * @name getColumns
+     * @access public
+     * @return array
+     */
 	public function getColumns() {
 		$columns = array();
 		foreach($this->getComponents() as $comp) {
@@ -183,11 +193,15 @@ class tableField extends FormField {
 		if($this->customDataFields) $this->customDataFields = array_merge($this->customDataFields, $fields);
 		else $this->customDataFields = $fields;		
 	}
-	
-	/**
-	 * Get the value of a named field  on the given record.
-	 * Use of this method ensures that any special rules around the data for this tablefield are followed.
-	 */
+
+    /**
+     * Get the value of a named field  on the given record.
+     * Use of this method ensures that any special rules around the data for this tablefield are followed.
+     *
+     * @param   object $record
+     * @param   string $fieldName
+     * @return  string
+     */
 	public function getDataFieldValue($record, $fieldName) {
 		// Custom callbacks
 		if(isset($this->customDataFields[$fieldName])) {
@@ -202,114 +216,121 @@ class tableField extends FormField {
 			return $record->getTemplateVar($fieldName);
 		}
 	}
-	
-	/**
-	 * Cast a arbitrary value with the help of a castingDefintion
-	 * 
-	 * @param $value 
-	 * @param $castingDefinition
-	 */
+
+    /**
+     * Cast a arbitrary value with the help of a castingDefintion
+     *
+     * @param $value
+     * @param $castingDefinition
+     *
+     * @return mixed
+     */
 	public function getCastedValue($value, $castingDefinition) {
 		return DBField::convertByCasting($castingDefinition, "blob", $value);
-	}	
-	
-	/**
-	 * gets the column-content
-	 *
-	 *@name getColumnContent
-	 *@access public
-	*/
+	}
+
+    /**
+     * gets the column-content
+     *
+     * @name    getColumnContent
+     * @access  public
+     * @param   object
+     * @param   string
+     * @return  string
+     */
 	public function getColumnContent($record, $column) {
-		if(!$this->columnDispatch) {
-			$this->buildColumnDispatch();
-		}
-		
-		if(!empty($this->columnDispatch[$column])) {
-			$content = "";
-			foreach($this->columnDispatch[$column] as $handler) {
-				$content .= $handler->getColumnContent($this, $record, $column);
-			}
-			return $content;
-		} else {
-			throwErro(6, "Invalid-Exception", "Bad Column " . $column);
-		}
+        $this->columExistsOrThrow($column);
+
+        $content = "";
+        foreach($this->columnDispatch[$column] as $handler) {
+            $content .= $handler->getColumnContent($this, $record, $column);
+        }
+        return $content;
 	}
-	
-	/**
-	 * gets the column-meta-data
-	 *
-	 *@name getColumnAttributes
-	 *@access public
-	*/
+
+    /**
+     * gets the column-meta-data
+     *
+     * @name    getColumnAttributes
+     * @access  public
+     * @param   Object record
+     * @param   string column
+     * @return  array
+     */
 	public function getColumnAttributes($record, $column) {
-		if(!$this->columnDispatch) {
-			$this->buildColumnDispatch();
-		}
-		
-		if(!empty($this->columnDispatch[$column])) {
-			$attr = array();
-			foreach($this->columnDispatch[$column] as $handler) {
-				$_attr = $handler->getColumnAttributes($this, $record, $column);
-				
-				if(is_array($_attr)) {
-					$attr = array_merge($attr, $_attr);
-				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnAttributes");
-				}
-			}
-			return $attr;
-		} else {
-			throwErro(6, "Invalid-Exception", "Bad Column " . $column);
-		}
+        return $this->generateArrayData("getColumnAttributes", $column, $record);
 	}
-	
-	/**
-	 * gets the column-meta-data
-	 *
-	 *@name getColumnMetaData
-	 *@access public
-	*/
+
+    /**
+     * builds array data with given method.
+     *
+     * @param   string method
+     * @param   string column
+     * @param   object record
+     * @return  array
+     */
+    public function generateArrayData($method, $column, $record) {
+        $this->columExistsOrThrow($column);
+
+        $arr = array();
+
+        foreach($this->columnDispatch[$column] as $handler) {
+            $generated = call_user_func_array(array($handler, $method), array($this, $record, $column));
+
+            if(is_array($generated)) {
+                $arr = array_merge($arr, $generated);
+            } else {
+                throw new LogicException( 'Handler should give Array at ' . $handler->classname . '::getColumnAttributes');
+            }
+        }
+        return $arr;
+    }
+
+    /**
+     * checks if a column exists and throws an exception when not.
+     * it also builds columns dispath.
+     */
+    public function columExistsOrThrow($column) {
+        if(!$this->columnDispatch) {
+            $this->buildColumnDispatch();
+        }
+
+        if(!empty($this->columnDispatch[$column])) {
+            return true;
+        } else {
+            throw new LogicException('Bad Column ' . $column);
+        }
+    }
+
+    /**
+     * gets the column-meta-data
+     *
+     * @name    getColumnMetaData
+     * @access  public
+     * @param   string
+     * @return  array
+     */
 	public function getColumnMetaData($column) {
-		if(!$this->columnDispatch) {
-			$this->buildColumnDispatch();
-		}
-		
-		if(!empty($this->columnDispatch[$column])) {
-			$metadata = array();
-			foreach($this->columnDispatch[$column] as $handler) {
-				$_metadata = $handler->getColumnMetaData($this, $column);
-				
-				if(is_array($_metadata)) {
-					$metadata = array_merge($metadata, $_metadata);
-				} else {
-					throwErro(6, "Logic-Exception", "Handler should give back Array at " . $handler->classname . "::getColumnMetaData");
-				}
-			}
-			return $metadata;
-		} else {
-			throwError(6, "Invalid-Exception", "Bad Column " . $column);
-		}
+        return $this->generateArrayData("getColumnMetaData", $column, null);
 	}
-	
-	/**
-	 * gets the column-count
-	 *
-	 *@name getColumnCount
-	 *@access public
-	*/
+
+    /**
+     * gets the column-count
+     *
+     * @return int
+     */
 	public function getColumnCount() {
 		if(!$this->columnDispatch) {
 			$this->buildColumnDispatch();
 		}
 		return count($this->columnDispatch);
 	}
-	
-	/**
-	 * renders the field
-	 *
-	 *@name field
-	 *@access public
-	*/
+
+    /**
+     * renders the field
+     *
+     * @return HTMLNode|string
+     */
 	public function field() {
 		
 		Resources::add("tablefield.css");
@@ -322,7 +343,7 @@ class tableField extends FormField {
 		// first init all
 		foreach($this->getComponents() as $item) {
  			if(Object::method_exists($item, "Init")) {
-				$data = $item->Init($this);
+				$item->Init($this);
 			}
 		}
 		
@@ -345,7 +366,8 @@ class tableField extends FormField {
 		// get fragments
 		foreach($this->getComponents() as $item) {			
 			if($item instanceof TableField_HTMLProvider) {
-				$fragments = $item->provideFragments($this);
+                /** @var array $item */
+                $fragments = $item->provideFragments($this);
 				if($fragments) foreach($fragments as $k => $v) {
 					$k = strtolower($k);
 					if(!isset($content[$k])) $content[$k] = "";
@@ -472,12 +494,15 @@ class tableField extends FormField {
 				$content['after']
 			);
 	}
-	
-	/**
-	 * Custom request handler that will check component handlers before proceeding to the default implementation.
-	 * 
-	 * @todo There is too much code copied from RequestHandler here.
-	 */
+
+    /**
+     * Custom request handler that will check component handlers before proceeding to the default implementation.
+     *
+     * @todo There is too much code copied from RequestHandler here.
+     * @param   Request $request
+     * @param   bool $subController
+     * @return  false|mixed|null
+     */
 	function handleRequest($request, $subController = false) {
 
 		$this->request = $request;
@@ -501,13 +526,7 @@ class tableField extends FormField {
 				if($params = $request->match($rule, true)) {
 					// Actions can reference URL parameters, eg, '$Action/$ID/$OtherID' => '$Action',
 					if($action[0] == '$') $action = $params[substr(strtolower($action),1)];
-					if(!method_exists($component, 'checkAccessAction') || $component->checkAccessAction($action)) {
-						if(!$action) {
-							$action = "index";
-						} else if(!is_string($action)) {
-							throwError(6, "Logical Exception", "Non-string method name: " . var_export($action, true));
-						}
-
+					if($action = $this->validateMethodName($component, $action)) {
 						return $component->$action($this, $request);
 					}
 				}
@@ -516,6 +535,27 @@ class tableField extends FormField {
 		
 		return parent::handleRequest($request, $subController);
 	}
+
+    /**
+     * checks if access for method is available and gives back maybe updates method-name.
+     *
+     * @param   object component
+     * @param   string $action
+     * @return  string
+     */
+    public function validateMethodName($component, $action) {
+        if(!method_exists($component, 'checkAccessAction') || $component->checkAccessAction($action)) {
+            if(!$action) {
+               return 'index';
+            } else if(!is_string($action)) {
+                throw new LogicException( 'Non-string method name: ' . var_export($action, true));
+            } else {
+                return $action;
+            }
+        }
+
+        return false;
+    }
 	
 	/**
 	 * Pass an action on the first TableField_ActionProvider that matches the $actionName
@@ -540,7 +580,10 @@ class tableField extends FormField {
 		throwError(6, "Not Found", "Can't handle action '$actionName'");
 	}
 
-	public function __wakeup() {
+    /**
+     * used for deserialization of objects in goma.
+     */
+    public function __wakeup() {
 		parent::__wakeup();
 		
 		if(is_object($this->data)) {
@@ -553,10 +596,10 @@ class TableField_FormAction extends FormAction {
 	/**
 	 *
 	 * @param TableField $tableField
-	 * @param type $name
-	 * @param type $label
-	 * @param type $actionName
-	 * @param type $args 
+	 * @param string $name
+	 * @param string $title
+	 * @param string $actionName
+	 * @param array $args
 	 */
 	public function __construct($tableField = null, $name = null, $title = null, $actionName = null, $args = null) {
 		if(!is_object($tableField))
@@ -568,13 +611,15 @@ class TableField_FormAction extends FormAction {
 		
 		$this->setForm($tableField->Form());
 	}
-	
-	/**
-	 * returns false, because a tableField-action never triggers the form to submit
-	 * but we hook into
-	 *
-	 *@name canSubmit
-	*/
+
+    /**
+     * returns false, because a tableField-action never triggers the form to submit
+     * but we hook into
+     *
+     * @name canSubmit
+     * @param array data
+     * @return bool
+     */
 	public function canSubmit($data) {
 		$this->tableField->form()->activateRestore();
 		$this->tableField->_handleAction($this->actionName, $this->args, $data);
