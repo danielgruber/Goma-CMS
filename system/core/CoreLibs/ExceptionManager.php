@@ -72,4 +72,14 @@ class ExceptionManager {
 	 * user not unlocked yet.
 	*/
 	const LOGIN_USER_MUST_UNLOCK = -18;
+
+    /**
+     * store connection failed.
+     */
+    const STORE_CONNECTION_FAIL = -31;
+
+    /**
+     * 503
+     */
+    const SERVICE_UNAVAILABLE = -503;
 }

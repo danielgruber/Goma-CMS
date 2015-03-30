@@ -192,7 +192,7 @@ class Core extends object {
 			self::$cacheManagerApplication->deleteCache(0, true);
 			self::$cacheManagerFramework->deleteCache(600, true);
 
-			FileSystem::Delete(ROOT . APPLICATION . "/uploads/e47ddedf1c2bd2d0006eae2d2eee39b4");
+            g_SoftwareType::cleanUpUpdates();
 		} else if(self::$cacheManagerApplication->shouldDeleteCache()) {
 			logging("Deleting Cache");
 

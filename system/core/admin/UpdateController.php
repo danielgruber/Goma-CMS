@@ -4,9 +4,9 @@
   * @link 		http://goma-cms.org
   * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   * @author 	Goma-Team
-  *	@Version 	2.2.2
+  *	@Version 	2.3
   *
-  * last modified: 18.12.2012
+  * last modified: 30.13.2015
 */
 
 class UpdateController extends adminController {
@@ -22,196 +22,233 @@ class UpdateController extends adminController {
 		"upload",
 		"showPackageInfo"
 	);
-	
-	/**
-	 * title in view of this controller
-	 *
-	 *@name title
-	 *@access public
-	*/
+
+    /**
+     * title in view of this controller
+     *
+     * @return string
+     */
 	public function title() {
 		return lang("update");
 	}
-	
-	/**
-	 *@name index
-	 *@access public
-	*/
+
+    /**
+     * default index action. Shows Update-Page.
+     *
+     * @return mixed|string
+     */
 	public function index() {
 		$view = new ViewAccessableData();
-		if(isset($_GET["noJS"])) {
-			G_SoftwareType::forceLiveDB();
-			$updates = G_SoftwareType::listUpdatePackages();
-			foreach($updates as $name => $data) {
-				$data["secret"] = randomString(20);
-				if(!isset($data["AppStore"])) {
-					$_SESSION["updates"][$data["file"]] = $data["secret"];
-				} else {
-					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
-				}
-				$updates[$name] = $data;
-			}
-		} else {
-			$updates = array();
-		}
-		
-		$updates = new DataSet($updates);
-		$storeAvailable = G_SoftwareType::isStoreAvailable();
+
+		$updates = isset($_GET["noJS"]) ? new DataSet($this->generateUpdatePackages()) : new DataSet(array());
 		$updatables = G_SoftwareType::listUpdatablePackages();
 		
-		$view->customise(array("updates" => $updates, "BASEURI" => BASE_URI, "storeAvailable" => $storeAvailable, "updatables" => new DataSet($updatables), "updatables_json" => json_encode($updatables)));
+		$view->customise(array( "updates" => $updates,
+                                "BASEURI" => BASE_URI,
+                                "storeAvailable" => G_SoftwareType::isStoreAvailable(),
+                                "updatables" => new DataSet($updatables),
+                                "updatables_json" => json_encode($updatables)));
 		
 		return $view->renderWith("admin/update.html");
 	}
-	
-	/**
-	 * shows info about a given package
-	 *
-	 *@name showPackageInfo
-	 *@access public
-	*/
-	public function showPackageInfo() {
-		if($id = $this->getParam("id")) {
-			$_SESSION["AppStore_updates"] = isset($_SESSION["AppStore_updates"]) ? $_SESSION["AppStore_updates"] : array();
-			$_SESSION["updates"] = isset($_SESSION["updates"]) ? $_SESSION["updates"] : array();
-			
-			if(!in_array($this->getParam("id"), $_SESSION["updates"]) && !in_array($this->getParam("id"), $_SESSION["AppStore_updates"])) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-				exit;
-			}
-			
-			if(in_array($this->getParam("id"), $_SESSION["AppStore_updates"])) {
-				$url = array_search($this->getParam("id"), $_SESSION["AppStore_updates"]);
-				$folder = ROOT . "system/installer/data/apps";
-				if(G_SoftwareType::isStoreAvailable()) {
-					if($handle = @fopen($url, "r")) {
-						file_put_contents($folder . "/" . basename($url), $handle);
-						@chmod($folder . "/" . basename($url), 0777);
-						$file = $folder . "/" . basename($url);
-						$_SESSION["updates"][$file] = $id;
-					} else {
-						return "Could not read from Server!";
-					}
-				} else {
-					return '<div class="error">'.lang("update_connection_failed").'</div>';
-				}
-			} else {	
-				$file = array_search($this->getParam("id"), $_SESSION["updates"]);
-			}
 
-			if(!preg_match('/\.gfs$/i', $file)) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-				exit;
-			}
-			
-			$data = G_SoftwareType::getInstallInfos($file);
-			
-			if(is_string($data))
-				return $data;
-			else if(is_array($data)) {
-				$inst = new ViewAccessableData($data);
-				$inst->filename = basename($file);
-				$inst->fileid = convert::raw2text($id);
-				
-				session_store("update_" . $inst->fileid, $inst);
-				
-				return $inst->renderWith("admin/updateInfo.html");
-			}
-			
-			AddContent::addError(lang("install_invalid_file", "The file you uploaded isn't a valid installer-package."));
-			
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-			exit;
-			
-			
+    /**
+     * generates update-packages.
+     *
+     * @return DataSet
+     */
+    public function generateUpdatePackages() {
+        G_SoftwareType::forceLiveDB();
+        $updates = G_SoftwareType::listUpdatePackages();
+        foreach($updates as $name => $data) {
+            $data["secret"] = randomString(20);
+            if(!isset($data["AppStore"])) {
+                $_SESSION["updates"][$data["file"]] = $data["secret"];
+            } else {
+                $_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
+            }
+            $updates[$name] = $data;
+        }
+        return $updates;
+    }
+
+
+    /**
+     * shows the information of the update-file with the given id. Mostly this is used when uploading files.
+     *
+     *@name showInfo
+     *@access public
+     */
+    public function showInfo() {
+        if($id = $this->getParam("id")) {
+            if(!($fileObj = DataObject::get_one("Uploads", array("id" => $id)))) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            $file = $fileObj->realfile;
+
+            if(!preg_match('/\.gfs$/i', $file)) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            return $this->showFileInfoForFile($file);
+
+        } else {
+            HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+            exit;
+        }
+    }
+
+
+    /**
+     * shows info about a given package. Packages are either files which can be downloaded
+     * or are in the folder defined in G_SoftwareTyp::$package_folder.
+     *
+     * @name showPackageInfo
+     * @access public
+     * @return mixed
+     */
+	public function showPackageInfo() {
+		if($this->getParam("id")) {
+            try {
+                $file = $this->getFilePackage($this->getParam("id"));
+            } catch(Exception $e) {
+                return $e->getMessage();
+            }
+
+
+			return $this->showFileInfoForFile($file);
 		} else {
 			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
 			exit;
 		}
 	}
+
+    /**
+     * returns update-info page or redirects for given Update-File.
+     *
+     * @param string $file
+     * @return string
+     */
+    protected function showFileInfoForFile($file) {
+        if($file === null || !preg_match('/\.gfs$/i', $file)) {
+            HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+            exit;
+        }
+
+        $data = G_SoftwareType::getInstallInfos($file);
+
+        if(is_string($data)) {
+            return $data;
+        } else if(is_array($data)) {
+            $inst = new ViewAccessableData($data);
+            $inst->filename = basename($file);
+            $inst->fileid = convert::raw2text($this->getParam("id"));
+
+            session_store("update_" . $inst->fileid, $inst);
+
+            return $inst->renderWith("admin/updateInfo.html");
+        }
+
+        AddContent::addError(lang("install_invalid_file", "The file you uploaded isn't a valid installer-package."));
+
+        HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+        exit;
+    }
+
+    /**
+     * gets filename of package by given id.
+     *
+     * @param $id
+     * @throws StoreConnectionError
+     * @return string
+     */
+    protected function getFilePackage($id) {
+        $_SESSION["AppStore_updates"] = isset($_SESSION["AppStore_updates"]) ? $_SESSION["AppStore_updates"] : array();
+        $_SESSION["updates"] = isset($_SESSION["updates"]) ? $_SESSION["updates"] : array();
+
+        // check for files, which can be downloaded from the internet.
+        if(in_array($id, $_SESSION["AppStore_updates"])) {
+
+            // search for download-url.
+            $url = array_search($id, $_SESSION["AppStore_updates"]);
+
+            if(G_SoftwareType::isStoreAvailable()) {
+                if($handle = @fopen($url, "r")) {
+
+                    $file = G_SoftwareType::$package_folder . "/" . basename($url);
+
+                    file_put_contents($file, $handle, LOCK_EX);
+
+                    $_SESSION["updates"][$file] = $id;
+
+                    return $file;
+                } else {
+                    throw new StoreConnectionError("Could not open socket.");
+                }
+            } else {
+                throw new StoreConnectionError("Store is not available. Maybe you disabled remote connections?");
+            }
+
+        // check for local updates.
+        } else if(in_array($id, $_SESSION["updates"])) {
+            return array_search($id, $_SESSION["updates"]);
+        } else {
+            return null; // no update found.
+        }
+    }
 	
 	/**
-	 * index of this
+	 * shows a form for uploading a file.
 	 *
 	 *@name index
 	 *@access public
 	*/
 	public function upload() {
+
+        // show upload-button and a download-button. User can down and reupload file now.
+        $form = new Form($this, "update", array(
+            $file = new FileUpload("file", lang("update_file_upload"), array("gfs"), null, "updates")
+        ), array(
+            new FormAction("submit", lang("submit"), "checkUpdate")
+        ));
+
+        // check if we have a possible download.
 		if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
-			$filename = ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs";
-			if(file_put_contents(ROOT . CACHE_DIRECTORY . md5(basename($_GET["download"])) . ".gfs", @file_get_contents($_GET["download"]))) {
-				if($model = Uploads::addFile(basename($_GET["download"]), $filename, "updates")) {
-					HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
-					exit;
-				}
+
+            if($model = $this->tryToDownload($_GET["download"])) {
+				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
+				exit;
 			}
-			
-			$form = new Form($this, "update", array(
-				new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'),
-				$file = new FileUpload("file", lang("update_file_upload"), array("gfs"), null, "updates")
-			), array(
-				new FormAction("submit", lang("submit"), "checkUpdate")
-			));
-		} else {
-			$form = new Form($this, "update", array(
-				new InfoField("file_info", lang("update_file_info")),
-				$file = new FileUpload("file", lang("update_file"), array("gfs"), null, "updates")
-			), array(
-				new FormAction("submit", lang("submit"), "checkUpdate")
-			));
+
+            $form->add(new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'), 0);
 		}
 		
 		$file->max_filesize = -1;
 		$form->addValidator(new RequiredFields(array("file")), "valid");
 		return $form->render();
 	}
-	
-	/**
-	 * shows the information of the file with the given id
-	 *
-	 *@name showInfo
-	 *@access public
-	*/
-	public function showInfo() {
-		if($id = $this->getParam("id")) {
-			if(!($fileObj = DataObject::get_one("Uploads", array("id" => $id)))) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
-			
-			$file = $fileObj->realfile;
-			
-			if(!preg_match('/\.gfs$/i', $file)) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
 
-			$data = G_SoftwareType::getInstallInfos($file);
-			
-			if(is_string($data))
-				return $data;
-			else if(is_array($data)) {
-				$inst = new ViewAccessableData($data);
-				$inst->filename = $fileObj->filename;
-				$inst->fileid = $fileObj->id;
-				
-				session_store("update_" . $inst->fileid, $inst);
-				
-				return $inst->renderWith("admin/updateInfo.html");
-			}
-			
-			AddContent::addError(lang("install_invalid_file", "The file you uploaded isn't a valid installer-package."));
-			
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-			exit;
-			
-			
-		} else {
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-			exit;
-		}
-	}
-	
+    /**
+     * tries to download a file from goma-server and returns model if succeeded.
+     *
+     * @param   string url
+     * @return  Uploads|null
+     */
+    protected function tryToDownload($url) {
+        // try to download the file, else just show Download-Button and user must zpload.
+        $filename = ROOT . CACHE_DIRECTORY . md5(basename($url)) . ".gfs";
+        if(file_put_contents(ROOT . CACHE_DIRECTORY . md5(basename($url)) . ".gfs", @file_get_contents($url))) {
+            if($model = Uploads::addFile(basename($url), $filename, "updates")) {
+                return $model;
+            }
+        }
+
+        return null;
+    }
+
 	/**
 	 * validates the update
 	 *

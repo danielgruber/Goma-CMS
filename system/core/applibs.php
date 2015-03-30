@@ -1067,7 +1067,7 @@ class DBConnectError extends MySQLException {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 4, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 
@@ -1077,7 +1077,7 @@ class ServiceUnavailable extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = 7, Exception $previous = null) {
+	public function __construct($m = "", $code = ExceptionManager::SERVICE_UNAVAILABLE, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 

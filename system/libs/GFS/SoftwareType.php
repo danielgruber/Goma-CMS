@@ -138,6 +138,43 @@ abstract class g_SoftwareType {
 	public static function enable($name) {
 	
 	}
+
+    /**
+     * cleanup for Uploaded Updates.
+     *
+     * @return void
+     */
+    public static function cleanUpUpdates() {
+        FileSystem::Delete(ROOT . APPLICATION . "/uploads/e47ddedf1c2bd2d0006eae2d2eee39b4");
+
+        $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
+        if($query->execute()) {
+            $manipulation["uploads"] = array(
+                "table" 	=> "uploads",
+                "command"	=> "delete",
+                "where"		=> array(
+                    "recordid" => array()
+                )
+            );
+
+            $manipulation["uploads_state"] = array(
+                "table" 	=> "uploads",
+                "command"	=> "delete",
+                "where"		=> array(
+                    "id" => array()
+                )
+            );
+
+            while($row = $query->fetch_assoc()) {
+                $manipulation["uploads"]["where"]["recordid"][] = $row["recordid"];
+                $manipulation["uploads_state"]["where"]["id"][] = $row["recordid"];
+            }
+
+            SQL::Manipulate($manipulation);
+        } else {
+            throw new SQLException();
+        }
+    }
 	
 	/**
 	 * gets the correct class by type
@@ -284,8 +321,7 @@ abstract class g_SoftwareType {
 					if(isset($data["installfolders"]["destination"][$key])) {
 						$log .= "Moving {$folder} to ".$data["installfolders"]["destination"][$key]."\n";
 						$log .= FileSystem::moveLogged($folder, $data["installfolders"]["destination"][$key], false);
-						
-						$log .= $return;
+
 						$log .= "\n\n";
 					}
 				}
@@ -396,7 +432,7 @@ abstract class g_SoftwareType {
 						foreach($appInfo as $app => $versionInfo) {
 							if(isset($versionInfo["file"])) {
 
-								self::buildPackageInfo($type, $dir, $versionInfo, $version, $updates);
+								self::buildPackageInfo($app, $type, $dir, $versionInfo, $version, $updates);
 
 							}
 						}
@@ -555,12 +591,12 @@ abstract class g_SoftwareType {
 			$packages = array();
 			
 			foreach($data["packages"] as $type => $apps) {
-				foreach($apps as $version => $appInfo) {
+				foreach($apps as $app => $appInfo) {
 					if(isset($appInfo["file"])) {
 
-						self::buildPackageInfo($version, $type, $dir, $appInfo, $version, $packages, false);
+						self::buildPackageInfo($app, $type, $dir, $appInfo, $appInfo["version"], $packages, false);
 					} else {
-						foreach($appInfo as $app => $versionInfo) {
+						foreach($appInfo as $version => $versionInfo) {
 							if(isset($versionInfo["file"])) {
 								self::buildPackageInfo($app, $type, $dir, $versionInfo, $version, $packages, false);
 							}
@@ -590,11 +626,11 @@ abstract class g_SoftwareType {
 		{
 
 			if(isset($packages[$app])) {
-				if(goma_version_compare($packages[$version]["version"], $version, "<")) {
-					$packages[$version] = $appdata;
+				if(goma_version_compare($packages[$app]["version"], $version, "<")) {
+					$packages[$app] = $appdata;
 				}
 			} else {
-				$packages[$version] = $appdata;
+				$packages[$app] = $appdata;
 			}
 		}
 	}
@@ -857,4 +893,13 @@ abstract class g_SoftwareType {
 	}
 
 	public function __wakeup() {}
+}
+
+class StoreConnectionException extends Exception {
+    /**
+     * constructor.
+     */
+    public function __construct($m = "", $code = ExceptionManager::STORE_CONNECTION_FAIL, Exception $previous = null) {
+        parent::__construct($m, $code, $previous);
+    }
 }
