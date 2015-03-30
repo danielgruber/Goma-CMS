@@ -227,7 +227,7 @@ class Cacher {
 		if(PROFILE) Profiler::mark("cacher");
 
 		if(isset($this->privateData)) {
-			return $this->privateData;
+			$data = $this->privateData;
 		} else if(self::dataInPHPInstance($this->name)) {
 			$data = self::getDataFromInstance($this->name);
 		} else if(isset($this->data)) {

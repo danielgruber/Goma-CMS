@@ -199,7 +199,7 @@ class CacheManager {
         }
 
         // check for lifetime for all files.
-        if(filemtime($this->cacheDirectory . $file) > time() + $minLifeTime) {
+        if($minLifeTime == 0 || filemtime($this->cacheDirectory . $file) > time() + $minLifeTime) {
             return false;
         }
 

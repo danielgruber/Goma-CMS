@@ -303,7 +303,7 @@ class Core extends object {
 		if(isset(self::$hooks[strtolower($name)]) && is_array(self::$hooks[strtolower($name)])) {
 			foreach(self::$hooks[strtolower($name)] as $callback) {
 				if(is_callable($callback)) {
-					call_user_func_array($callback, array($p1, $p2, $p3, $p4, $p5, $p6, $p7));
+					call_user_func_array($callback, array(&$p1, &$p2, &$p3, &$p4, &$p5, &$p6, &$p7));
 				}
 			}
 		}
