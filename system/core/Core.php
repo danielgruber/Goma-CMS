@@ -165,18 +165,9 @@ class Core extends object {
 	/**
 	 * inits cache-managers.
 	*/
-	public static function initCache($shouldFlush = false) {
+	public static function initCache() {
 		self::$cacheManagerApplication = new CacheManager(ROOT . APPLICATION . "/temp");
 		self::$cacheManagerFramework = new CacheManager(ROOT . "system/temp");
-
-		// check for flush from dev
-		if($shouldFlush) {
-			if(Permission::check("ADMIN")) {
-				self::deleteCache(true);
-			} else {
-				self::deleteCache(false);
-			}
-		}
 	}
 	
 	/**
@@ -188,7 +179,7 @@ class Core extends object {
 
 		if($force) {
 			logging('Deleting FULL Cache');
-			
+
 			self::$cacheManagerApplication->deleteCache(0, true);
 			self::$cacheManagerFramework->deleteCache(600, true);
 

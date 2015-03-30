@@ -2586,8 +2586,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		
 		// get all config
 		$has_many = $this->hasMany();
-		$many_many = $this->ManyMany();
-		$belongs_many_many = $this->BelongsManyMany();
 		$many_many_tables = $this->ManyManyTables();
 		
 		if (isset($has_many[$relname])) {
@@ -2612,7 +2610,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				} else {
 					return array();
 				}
-		} else if (isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
+		} else if (isset($many_many_tables[$relname])) {
 			if (isset($this->data[$relname . "_data"])) {
                 return $this->data[$relname . "_data"];
             }

@@ -240,13 +240,18 @@ class adminController extends Controller
 		*/
 		public function index()
 		{
-				if(isset($_GET["flush"])) {
-					AddContent::addSuccess(lang("cache_deleted"));
-				}
+
 				
-				if(Permission::check("ADMIN"))
-					return parent::index();
-				else {
+				if(Permission::check("ADMIN")) {
+
+                    if(isset($_GET["flush"])) {
+                        Core::deleteCache(true);
+
+                        AddContent::addSuccess(lang("cache_deleted"));
+                    }
+
+                    return parent::index();
+                } else {
 					$this->template = "admin/index_not_permitted.html";
 					return parent::index();
 				}
@@ -508,26 +513,6 @@ class admin extends ViewAccessableData implements PermProvider
 		*/
 		public function Software($number = 7) {
 			return G_SoftwareType::listAllSoftware();
-		}
-		
-		/**
-		 * lists local updates
-		 *
-		 *@name getUpdates
-		*/			
-		public function getUpdates() {
-			$updates = G_SoftwareType::listUpdatePackages();
-			foreach($updates as $name => $data) {
-				$data["secret"] = randomString(20);
-				if(!isset($data["AppStore"])) {
-					$_SESSION["updates"][$data["file"]] = $data["secret"];
-				} else {
-					$_SESSION["AppStore_updates"][$data["AppStore"]] = $data["secret"];
-				}
-				$updates[$name] = $data;
-			}
-			
-			return new DataSet($updates);
 		}
 		
 		/**
