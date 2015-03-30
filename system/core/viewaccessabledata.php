@@ -156,11 +156,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			$this->original = $this->data;
 		}
 
-		if(isset(ClassInfo::$class_info[$this->classname]["defaults"])) {
-			$this->defaults = array_merge((array)$this->defaults, (array)ClassInfo::$class_info[$this->classname]["defaults"]);
-		} else {
-			$this->defaults = array();
-		}
+        $this->defaults = $this->defaults();
 
 		if(!isset(self::$server)) {
 			self::$server = ArrayLib::map_key($_SERVER, "strtolower");
@@ -975,7 +971,27 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		$this->changed = true;
 	}
 
-	/**
+    /**
+     * gets default value for key.
+     *
+     * @param string field
+     * @return string|null
+     */
+    protected function getDefaultValue($field) {
+        $defaults = $this->defaults();
+
+
+        if(isset($defaults[$field])) {
+            return $defaults[$field];
+        }
+
+        if(isset($defaults[strtolower($field)])) {
+            return $defaults[strtolower($field)];
+        }
+    }
+
+
+    /**
 	 * sets the value of a given field.
 	 */
 	public function setField($name, $value) {
@@ -1017,7 +1033,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function defaults() {
-		return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : self::getStatic($this->classname, "casting");
+		return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : (array) self::getStatic($this->classname, "default");
 	}
 
 	/**

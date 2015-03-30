@@ -88,11 +88,6 @@ class UpdateController extends adminController {
 
             $file = $fileObj->realfile;
 
-            if(!preg_match('/\.gfs$/i', $file)) {
-                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-                exit;
-            }
-
             return $this->showFileInfoForFile($file);
 
         } else {
