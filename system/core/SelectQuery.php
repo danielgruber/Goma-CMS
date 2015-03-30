@@ -559,7 +559,7 @@ class SelectQuery extends Object {
 			}
 
 			if(is_string($table)) {
-				if(!isset(ClassInfo::$database[$table])) {
+				if(ClassInfo::$database[$table] && !isset(ClassInfo::$database[$table])) {
 					throw new SQLException("Table " . $table . " does not exist!");
 				}
 			}
