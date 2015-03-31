@@ -1,4 +1,5 @@
 <?php defined("IN_GOMA") OR die();
+
 /**
  * Base-Model of every User.
  *
@@ -6,7 +7,11 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.3
+ * @version		1.3.1
+ *
+ * @property string nickname
+ * @property string code
+ * @property int code_has_sent
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
@@ -32,6 +37,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 						'status'		=> 'int(2)',
 						'phpsess'		=> 'varchar(200)',
 						"code"			=> "varchar(200)",
+                        "code_has_sent" => "Switch",
 						"timezone"		=> "timezone",
 						"custom_lang"	=> "varchar(10)");
 	
@@ -261,61 +267,56 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * form for password-edit
 	 *
-	 *@name pwdform
+     * @return Form
 	*/
 	public function pwdform($id = null)
 	{
 		if(!isset($id)) {
 			$id = $this->id;
 		}
-		
+
+        $pwdform = new Form($this->controller(), "editpwd", array(
+            new HiddenField("id", $id),
+            new PasswordField("password",lang("NEW_PASSWORD")),
+            new PasswordField("repeat", lang("REPEAT"))
+        ));
+
+        // check if user needs to give old password or permissions are enough to not adding old one.
 		if(Permission::check("USERS_MANAGE") && $id != member::$id) {
-			$pwdform = new Form($this->controller(), "editpwd", array(
-				new HiddenField("id", $id),
-				new PasswordField("password",lang("NEW_PASSWORD")),
-				new PasswordField("repeat", lang("REPEAT"))
-			));
-			$pwdform->addValidator(new FormValidator(array($this, "admin_validatepwd")), "pwdvalidator");
-			$pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
+			$pwdform->addValidator(new FormValidator(array("User", "validateNewAndRepeatPwd")), "pwdvalidator");
 		} else {
-			$pwdform = new Form($this->controller(), "editpwd", array(
-				new HiddenField("id", $id),
-				new PasswordField("oldpwd", lang("OLD_PASSWORD")),
-				new PasswordField("password",lang("NEW_PASSWORD")),
-				new PasswordField("repeat", lang("REPEAT"))
-			));
+			$pwdform->add(new PasswordField("oldpwd", lang("OLD_PASSWORD")), 0);
 			$pwdform->addValidator(new FormValidator(array($this, "validatepwd")), "pwdvalidator");
-			$pwdform->addAction(new FormAction("submit", lang("save", "save"),"pwdsave"));
 		}
+
+        $pwdform->addAction(new FormAction("submit", lang("save", "save"), "pwdsave"));
+
 		return $pwdform;
 	}
-	
-	/**
-	 * validates an new user
-	 *
-	 *@name validateuser
-	 *@access public
-	*/
+
+    /**
+     * validates an new user
+     *
+     * @return bool|string
+     */
 	public function _validateuser($obj)
 	{
-			if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
-			{
-					// check if username is unique
-					if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
-					{
-							return lang("register_username_bad", "The username is already taken.");
-					}
-					return true;
-			} else
-			{
-					return lang("passwords_not_match");
-			}
+        if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
+        {
+            // check if username is unique
+            if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
+            {
+                return lang("register_username_bad", "The username is already taken.");
+            }
+            return true;
+        } else
+        {
+            return lang("passwords_not_match");
+        }
 	}
 	
 	/**
 	 * nickname is always lowercase
-	 *
-	 *@name onbeforewrite
 	*/
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
@@ -325,21 +326,15 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	
 	/**
 	 * sets the password with md5
-	 *
-	 *@name setpassword
-	 *@access public
 	*/
 	public function setpassword($value)
 	{
 		$this->setField("password", Hash::getHashFromDefaultFunction($value));
-		return true;
 	}
 	
 	/**
 	 * valdiates code for form.
 	 *
-	 *@name validatecode
-	 *@access public
 	 *@param string - value
 	 *@return true|string
 	*/
@@ -363,8 +358,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * password should not be visible
 	 *
-	 *@name getpassword
-	 *@access public
+     * @return string
 	*/
 	public function getpassword() {
 			return "";
@@ -373,8 +367,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
     /**
      * validates new and old passwords and returns error string when error happened.
      *
-     * @name validatepwd
-     * @access public
      * @return string
      */
 	public function validatepwd($obj) {
@@ -389,7 +381,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				// check old password
 				if(Hash::checkHashMatches($obj->form->result["oldpwd"], $pwd))
 				{
-					return $this->admin_validatepwd($obj);
+					return self::validateNewAndRepeatPwd($obj);
 				} else {
 					return lang("password_wrong");
 				}
@@ -403,13 +395,11 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	}
 
     /**
-     * validates the pwd if you're an admin and set the password
+     * validates new password and repeat matches.
      *
-     * @name admin_validatepwd
-     * @access public
      * @return bool|string
      */
-	public function admin_validatepwd($obj) {
+	public static function validateNewAndRepeatPwd($obj) {
 		if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
 		{
 			if($obj->form->result["password"] == $obj->form->result["repeat"])
@@ -427,8 +417,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * returns the title of the person
 	 *
-	 *@name title
-	 *@access public
+     * @return string
 	*/
 	public function title() {
 		if($this->fieldGet("name")) {
@@ -467,12 +456,32 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		}
 		
 		// now write login to database
-		$this->code = randomString(20);
-		
+        if($this->code_has_sent == 1) {
+            $this->generateCode();
+        }
+
 		$this->callExtending("performLogin");
-		
-		$this->write(false, true);
+
+        if($this->wasChanged()) {
+            $this->write(false, true);
+        }
 	}
+
+    /**
+     * regenerates and gives back code.
+     *
+     * @param bool if you want to send the code to a user
+     * @param bool if write Entity.
+     * @return string
+     */
+    public function generateCode($send = false, $write = false) {
+        $this->code = randomString(20);
+        $this->code_has_sent = (int) $send;
+
+        if($write) {
+            $this->write(false, true);
+        }
+    }
 	
 	/**
 	 * performs a logout
@@ -574,7 +583,9 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return bool
      */
     protected static function isLoginInHistory($record) {
-        return $record->action != "insert" && ($record->oldversion() && $record->newversion() && $record->oldversion()->phpsess != $record->newversion()->phpsess);
+        return $record->action != "insert" &&
+                ($record->oldversion() && $record->newversion() &&
+                    ($record->oldversion()->phpsess != $record->newversion()->phpsess || $record->oldversion()->code != $record->newversion()->code));
     }
 
     /**
