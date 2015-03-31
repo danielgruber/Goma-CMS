@@ -14,6 +14,11 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 ClassInfo::addSaveVar("Permission","providedPermissions");
 
+/**
+ * @property int parentid
+ * @property string forModel
+ * @property int id
+ */
 class Permission extends DataObject
 {
 		/**
