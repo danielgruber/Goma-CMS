@@ -331,12 +331,12 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	*/
 	public function setpassword($value)
 	{
-			$this->setField("password", Hash::getHashFromDefaultFunction($value));
-			return true;
+		$this->setField("password", Hash::getHashFromDefaultFunction($value));
+		return true;
 	}
 	
 	/**
-	 * valdiates code
+	 * valdiates code for form.
 	 *
 	 *@name validatecode
 	 *@access public
@@ -345,18 +345,19 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	*/
 	public function _validateCode($obj)
 	{
-			$value = $obj->form->result["code"];
-			if(is_array($value)) {
-				return true;
-			}
-			if(!defined("IS_BACKEND")) {
-					$code = RegisterExtension::$registerCode;
-					if($code != "")
-							return ($code == $value) ? true : lang("register_code_wrong", "The Code was wrong!");
-					else
-							return true;
-			}
-			return true;
+        $value = $obj->form->result["code"];
+        if(!is_string($value)) {
+            return true;
+        }
+
+        if(!defined("IS_BACKEND")) {
+            $code = RegisterExtension::$registerCode;
+            if($code != "" && $code != $value) {
+                return lang("register_code_wrong", "The Code was wrong!");
+            }
+        }
+
+        return true;
 	}
 	
 	/**
@@ -368,13 +369,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	public function getpassword() {
 			return "";
 	}
-	
-	/**
-	 * validates the pwd
-	 *
-	 *@name validatepwd
-	 *@access public		 
-	*/
+
+    /**
+     * validates new and old passwords and returns error string when error happened.
+     *
+     * @name validatepwd
+     * @access public
+     * @return string
+     */
 	public function validatepwd($obj) {
 		if(isset($obj->form->result["oldpwd"]))
 		{
@@ -387,18 +389,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				// check old password
 				if(Hash::checkHashMatches($obj->form->result["oldpwd"], $pwd))
 				{
-					if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
-					{
-						if($obj->form->result["password"] == $obj->form->result["repeat"])
-						{
-							return true;
-						} else
-						{
-							return lang("passwords_not_match");
-						}
-					} else {
-						return lang("passwords_not_match");
-					}
+					return $this->admin_validatepwd($obj);
 				} else {
 					return lang("password_wrong");
 				}
@@ -410,13 +401,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			return lang("password_wrong");
 		}
 	}
-	
-	/**
-	 * validates the pwd if you're an admin and set the password
-	 *
-	 *@name admin_validatepwd
-	 *@access public		 
-	*/
+
+    /**
+     * validates the pwd if you're an admin and set the password
+     *
+     * @name admin_validatepwd
+     * @access public
+     * @return bool|string
+     */
 	public function admin_validatepwd($obj) {
 		if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
 		{
@@ -495,63 +487,103 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			$this->write(false, true);
 		}
 	}
-	
-	/**
-	 * returns text what to show about the event
-	 *
-	 *@name generateHistoryData
-	 *@access public
-	*/
+
+    /**
+     * returns text what to show about the event
+     *
+     * @name generateHistoryData
+     * @access public
+     * @param Histroy $record
+     * @return array|bool
+     */
 	public static function generateHistoryData($record) {
 		if(!$record->newversion()) {
 			return false;
 		}
-		
-		$relevant = true;
-		if(!$record->autor)
-			$relevant = false;
-		
-		switch($record->action) {
-			case "update":
-			case "publish":
-				if($record->oldversion() && $record->newversion() && $record->oldversion()->phpsess != $record->newversion()->phpsess) {
-					$icon = "images/icons/fatcow16/user_go.png";
-					$lang = lang("h_user_login");
-					$lang = str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', $lang);
-					$relevant = false;
-				} else {
-					if($record->autorid == $record->newversion()->id) {
-						$lang = lang("h_profile_update", '$user updated the own profile');
-					} else {
-						$lang = lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
-					}
-					$icon = "images/icons/fatcow16/user_edit.png";
-				}
-			break;
-			case "insert":
-				$lang = lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
-				$icon = "images/icons/fatcow16/user_add.png";
-			break;
-			case "remove":
-				$lang = lang("h_user_remove", '$user removed the user $euser');
-				$icon = "images/icons/fatcow16/user_delete.png";
-			break;
-			default:
-				$lang = "Unknowen event " . $record->action;
-				$icon = "images/icons/fatcow16/user_edit.png";
-		}
+
+        $lang = self::getHistoryLang($record);
 		$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
 		$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 		
-		return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
+		return array(   "icon" => self::getHistoryIcon($record),
+                        "text" => $lang,
+                        "relevant" => ($record->autor && !self::isLoginInHistory($record)));
 	}
-	
-	/**
-	 * returns a comma-seperated list of all groups
-	 *
-	 *@name getGroupList
-	 *@access public
-	*/
+
+    /**
+     * returns language-string for current event.
+     *
+     * @param History $record
+     * @return string
+     */
+    public static function getHistoryLang($record) {
+        switch($record->action) {
+            case "update":
+            case "publish":
+
+                // check for login
+                if(self::isLoginInHistory($record)) {
+                    return str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', lang("h_user_login"));
+                } else {
+
+                    // check if user changed his profile on its own
+                    if($record->autorid == $record->newversion()->id) {
+                       return lang("h_profile_update", '$user updated the own profile');
+                    } else {
+
+                        // admin changed profile
+                        return lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+                    }
+                }
+                break;
+            case "insert":
+                return lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
+                break;
+            case "remove":
+                return lang("h_user_remove", '$user removed the user $euser');
+                break;
+            default:
+                return "Unknowen event " . $record->action;
+        }
+    }
+
+    /**
+     * returns icon for history-record.
+     *
+     * @param History record
+     * @return string path
+     */
+    public static function getHistoryIcon($record) {
+        // check for user login.
+        if(self::isLoginInHistory($record)) {
+            return "images/icons/fatcow16/user_go.png";
+        }
+
+        $icon = array(
+            "insert" => "images/icons/fatcow16/user_add.png",
+            "remove" => "images/icons/fatcow16/user_delete.png",
+        );
+
+        return isset($icon[$record->action]) ? $icon[$record->action] : "images/icons/fatcow16/user_edit.png";
+    }
+
+    /**
+     * returns true when history-entry can be seen as login.
+     *
+     * @param History record
+     * @return bool
+     */
+    protected static function isLoginInHistory($record) {
+        return $record->action != "insert" && ($record->oldversion() && $record->newversion() && $record->oldversion()->phpsess != $record->newversion()->phpsess);
+    }
+
+    /**
+     * returns a comma-seperated list of all groups
+     *
+     * @name getGroupList
+     * @access public
+     * @return string
+     */
 	public function getGroupList() {
 		$str = "";
 		$i = 0;
@@ -565,13 +597,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		}
 		return $str;
 	}
-	
-	/**
-	 * provides some permissions
-	 *
-	 *@name providePerms
-	 *@access public
-	*/
+
+    /**
+     * provides some permissions
+     *
+     * @name providePerms
+     * @access public
+     * @return array
+     */
 	public function providePerms() {
 		return array(
 			"USERS_MANAGE"	=> array(
@@ -603,17 +636,18 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			return new GravatarImageHandler(array("email" => $this->email));
 		}
 	}
-		
-	/**
-	 * returns information about notification-settings of this class
-	 * these are:
-	 * - title
-	 * - icon
-	 * this API may extended with notification settings later
-	 * 
-	 *@name NotifySettings
-	 *@access public
-	*/
+
+    /**
+     * returns information about notification-settings of this class
+     * these are:
+     * - title
+     * - icon
+     * this API may extended with notification settings later
+     *
+     * @name NotifySettings
+     * @access public
+     * @return array
+     */
 	public static function NotifySettings() {
 		return array("title" => lang("user"), "icon" => "images/icons/fatcow16/user@2x.png");
 	}

@@ -2043,12 +2043,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	}
 	
 	//!Current Data-State
-	/**
-	 * returns if this version of the record is published
-	 *
-	 *@name isPublished
-	 *@access public
-	*/
+    /**
+     * returns if this version of the record is published
+     *
+     * @name isPublished
+     * @access public
+     * @return bool
+     */
 	public function isPublished() {
 		
 		if (isset($this->data["publishedid"])) {
@@ -2073,15 +2074,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 		}
 	}
-	
-	/**
-	 * returns if original version of the record is published
-	 *
-	 *@name isrOrgPublished
-	 *@access public
-	*/
+
+    /**
+     * returns if original version of the record is published
+     *
+     * @name isrOrgPublished
+     * @access public
+     * @return bool
+     */
 	public function isOrgPublished() {
-		
 		if (isset($this->original["publishedid"])) {
 			return ($this->original["publishedid"] != 0 && $this->original["versionid"] == $this->original["publishedid"]);
 		} else {

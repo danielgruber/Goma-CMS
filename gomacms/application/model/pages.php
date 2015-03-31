@@ -404,11 +404,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      * @param 	string name of permission
      * @param 	string default global permission
      * @param 	string default superglobal permission group type
-     * @param 	bool if old data can have global group type all
+     * @param 	bool if there can be searched for data which is currently published.
      * @param 	array args for getHasOne
      * @return 	Permission
      */
-    protected function getPermission($name, $default, $type = "admins", $historicCanBeAll = false, $args = array()) {
+    protected function getPermission($name, $default, $type = "admins", $currentCanBeAll = false, $args = array()) {
         array_unshift($args, $name);
 
 
@@ -416,21 +416,20 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         $dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
         if($dataHasOne && $dataHasOne->type != "all") {
             return $dataHasOne;
-        } else if(!$this->isPublished() && $this->wasPublished()) {
-
-            // search for historic data
-            $dataHistoric = DataObject::Get_one("Permission", array(), array(), array(
+        } else if(!$this->isPublished()) {
+            // search for active data, which is currently assigned in the published version of this object.
+            $dataCurrent = DataObject::Get_one("Permission", array(), array(), array(
                 'INNER JOIN ' . DB_PREFIX . "pages AS pages ON pages.".$name."id = permission.id AND pages.id = '".$this->publishedid."'"
             ));
-            if($dataHistoric  && ($historicCanBeAll || $dataHistoric->type != "all")) {
-                return $dataHistoric;
+            if($dataCurrent  && ($currentCanBeAll || $dataCurrent->type != "all")) {
+                return $dataCurrent;
             }
         }
 
         //logging("edit:" . print_r($this->data, true) . print_r(debug_backtrace(), true));
 
         // create new permission-object for record.
-        $perm = $this->createPermissionObject($name, $default, $type, $historicCanBeAll);
+        $perm = $this->createPermissionObject($name, $default, $type, $currentCanBeAll);
 
         // add permission and write if ID is not 0
         $this->addPermission($perm, $name, $this->ID != 0, false);
@@ -465,15 +464,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      * @param 	string name of permission on Pages
      * @param	string name of global permission
      * @param	string type type of global default permission
-     * @param   bool it searches on parent and there it can be important if it restores a historic permission.
+     * @param   bool it searches on parent and there it can be important if it gets a permission from currently published object.
      * @return	Permission
      */
-    protected function createPermissionObject($name, $default, $type, $historicCanBeAll = false) {
+    protected function createPermissionObject($name, $default, $type, $currentCanBeAll = false) {
         $perm = new Permission(array("type" => $type));
         $perm->forModel = "pages";
 
         if($this->parent) {
-            $perm->parentid = $this->parent->getPermission($name, $default, $type, $historicCanBeAll)->id;
+            $perm->parentid = $this->parent->getPermission($name, $default, $type, $currentCanBeAll)->id;
         } else if($default) {
             $perm->parentid = Permission::forceExisting($default)->id;
         }
