@@ -10,6 +10,9 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
+/**
+ * @property string action
+ */
 class History extends DataObject {
 	/**
 	 * db-fields

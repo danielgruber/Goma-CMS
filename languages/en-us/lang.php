@@ -91,6 +91,7 @@ $lang = array(
 	/* ACCOUNT START */
 	"signatur"                                     	=> "Signature",
 	"passwords_not_match"                          	=> "The passwords don't match.",
+    "password_cannot_be_empty"                      => "You need to enter a password.",
 	"password_wrong"                               	=> "The password is wrong.",
 	"new_password"                                 	=> "New password",
 	"old_password"                                 	=> "Old Password",

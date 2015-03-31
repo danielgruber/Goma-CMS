@@ -1697,7 +1697,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
 
         if (isset($fields["last_modified"]) && $addLastModified) {
-            $arr["last_modified"] = NOW;
+            $arr["last_modified"] = time();
         }
 
         return $arr;

@@ -12,6 +12,9 @@
  * @property string nickname
  * @property string code
  * @property int code_has_sent
+ * @property Uploads avatar
+ * @property int status
+ * @property string password
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
@@ -121,13 +124,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$groups->add($this->group());
 		return $groups;
 	}
-	
-	/**
-	 * returns true if you can write
-	 *
-	 *@name canWrite
-	 *@access public
-	*/
+
+    /**
+     * returns true if you can write
+     *
+     * @name canWrite
+     * @access public
+     * @return bool
+     */
 	
 	public function canWrite($data = null)
 	{
@@ -136,25 +140,27 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		
 		return Permission::check("USERS_MANAGE");
 	}
-	
-	/**
-	 * returns true if you can write
-	 *
-	 *@name canDelete
-	 *@access public
-	*/
+
+    /**
+     * returns true if you can write
+     *
+     * @name canDelete
+     * @access public
+     * @return bool
+     */
 	
 	public function canDelete($data = null)
 	{
 		return Permission::check("USERS_MANAGE");
 	}
-	
-	/**
-	 * returns true if the current user can insert a record
-	 *
-	 *@name canInsert
-	 *@access public
-	*/
+
+    /**
+     * returns true if the current user can insert a record
+     *
+     * @name canInsert
+     * @access public
+     * @return bool
+     */
 	public function canInsert($data = null)
 	{
 		return true;
@@ -190,7 +196,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				if($code != "")
 				{
 						$general->add(new TextField("code", lang("register_code", "Code")));
-						$form->addValidator(new FormValidator(array($this, '_validatecode')), "validatecode");
+						$form->addValidator(new FormValidator(array("User", '_validatecode')), "validatecode");
 				}
 		}
 		if(Permission::check("USERS_MANAGE"))
@@ -333,12 +339,12 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	}
 	
 	/**
-	 * valdiates code for form.
+	 * validates code for form.
 	 *
 	 *@param string - value
 	 *@return true|string
 	*/
-	public function _validateCode($obj)
+	public static function _validateCode($obj)
 	{
         $value = $obj->form->result["code"];
         if(!is_string($value)) {
@@ -410,7 +416,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				return lang("passwords_not_match");
 			}
 		} else {
-			return lang("passwords_not_match");
+			return lang("password_cannot_be_empty");
 		}
 	}
 	
@@ -426,13 +432,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		
 		return $this->nickname;
 	}
-	
-	/**
-	 * returns the representation of this record
-	 *
-	 *@name generateResprensentation
-	 *@access public
-	*/
+
+    /**
+     * returns the representation of this record
+     *
+     * @name generateResprensentation
+     * @access public
+     * @return string
+     */
 	public function generateRepresentation($link = false) {
 		$title = $this->title;
 		
@@ -632,8 +639,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * gets the avatar
 	 *
-	 *@name getImage
-	 *@access public
+     * @return Uploads
 	*/
 	public function getImage() {
 		if($this->avatar) {

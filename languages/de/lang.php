@@ -89,7 +89,8 @@ $lang = array(
 	"code"                                         	=> "Code",
 	/* ACCOUNT START */
 	"signatur"                                     	=> "Signatur",
-	"passwords_not_match"                          	=> "Die Passw&ouml;rter stimmen nicht &uuml;berein!",
+	"passwords_not_match"                          	=> "Die Passwörter stimmen nicht überein!",
+    "password_cannot_be_empty"                      => "Das Passwort darf nicht leer sein.",
 	"password_wrong"                               	=> "Das Passwort ist falsch!",
 	"new_password"                                 	=> "Neues Passwort",
 	"old_password"                                 	=> "Altes Passwort",
