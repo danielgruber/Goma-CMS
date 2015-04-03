@@ -16,6 +16,8 @@
  * @property int status
  * @property string password
  * @property int avatarid
+
+ * @method DataObjectSet<Group> groups() groups($filter, $sort, $limit)
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
