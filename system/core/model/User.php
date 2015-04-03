@@ -461,7 +461,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	public function performLogin() {
 		if($this->custom_lang != Core::$lang && $this->custom_lang) {
 			i18n::Init($this->custom_lang);
-		
+		}
 		
 		// now write login to database
         if($this->code_has_sent == 1) {
