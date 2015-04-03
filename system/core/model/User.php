@@ -15,6 +15,7 @@
  * @property Uploads avatar
  * @property int status
  * @property string password
+ * @property int avatarid
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
@@ -460,7 +461,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	public function performLogin() {
 		if($this->custom_lang != Core::$lang && $this->custom_lang) {
 			i18n::Init($this->custom_lang);
-		}
+		
 		
 		// now write login to database
         if($this->code_has_sent == 1) {
@@ -643,7 +644,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	*/
 	public function getImage() {
 		if($this->avatar) {
-			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classnamename != "gravatarimagehandler") || $this->avatar->classnamename == "gravatarimagehandler") {
+			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classname != "gravatarimagehandler") || $this->avatar->classname == "gravatarimagehandler") {
 				$this->avatarid = 0;
 				$this->write(false, true, 2, false, false);
 				return new GravatarImageHandler(array("email" => $this->email));
