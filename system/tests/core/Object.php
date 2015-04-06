@@ -67,7 +67,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * extensions
 	*/
 	public function testGetExtensions() {
-		$this->assertEqual($this->o->getExtensions(), array("testobjectextension"));
+		$this->assertEqual($this->o->getExtensions(), array("testobjectextension", "testextensionwithargs"));
 	}
 	
 	/**
@@ -120,87 +120,24 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 2);
     }
 
-    public function testStaticVars()
-    {
-        $this->assertEqual(Object::getStatic("StaticTestClass", "b"), StaticTestClass::$b);
-
-        $r = randomString(2);
-        Object::setStatic("StaticTestClass", "b", $r);
-        $this->assertTrue(Object::hasStatic("StaticTestClass", "b"));
-        $this->assertFalse(Object::hasStatic("StaticTestClass", "c"));
-        $this->assertEqual(Object::getStatic("StaticTestClass", "b"), $r);
-        $this->assertEqual(Object::getStatic("StaticTestClass", "b"), StaticTestClass::$b);
+    public function testExtensionArguments() {
+        $this->unitExtensionArguments("TestObjectExtension('12aB', 34, true)", "testobjectextension", "'12aB', 34, true");
+        $this->unitExtensionArguments("TestObjectExtension", "testobjectextension", "");
+        $this->unitExtensionArguments("TestObjectExtension(array(123,456))", "testobjectextension", "array(123,456)");
     }
 
-    public function testSetStaticVarExceptions()
-    {
-        try {
-            Object::setStatic("StaticTestClass", "c", 3);
+    public function unitExtensionArguments($exp, $name, $args) {
+        $info = Object::getArgumentsFromExtend($exp);
 
-            $this->fail("Variable not exists, but setStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-        }
-
-        try {
-            Object::setStatic("StaticTestClassNotExisting", "c", 3);
-
-            $this->fail("Class not exists, but setStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-            $this->assertPattern("/Class/i", $e->getMessage());
-        }
-
-        try {
-            Object::setStatic("StaticTestClass", "", 3);
-
-            $this->fail("Variable empty, but setStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-            $this->assertPattern("/variable/i", $e->getMessage());
-        }
+        $this->assertEqual($info[0], $name, "Name $name expected %s");
+        $this->assertEqual($info[1], $args, "Arguments $args expected %s");
     }
 
-    public function testHasStaticVarExceptions()
-    {
-        try {
-            Object::hasStatic("StaticTestClassNotExisting", "c");
+    public function testExtensionWithArgs() {
+        $o = new TestObject();
 
-            $this->fail("Class not exists, but setStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-            $this->assertPattern("/Class/i", $e->getMessage());
-        }
-
-        try {
-            Object::hasStatic("StaticTestClass", "");
-
-            $this->fail("Variable empty, but setStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-            $this->assertPattern("/variable/i", $e->getMessage());
-        }
-    }
-
-    public function testStaticCalls() {
-        $this->assertEqual(Object::callStatic("StaticTestClass", "call"), StaticTestClass::call());
-
-        try {
-            Object::callStatic("StaticTestClass", "prot");
-
-            $this->fail("Method protected, but callStatic does not fire an Exception.");
-        } catch(Exception $e) {
-            $this->assertIsA($e, "BadMethodCallException");
-        }
-
-        try {
-            Object::callStatic("StaticTestClassNotExisting", "prot");
-            $this->fail("Class not exists, but callStatic does not fire an Exception.");
-
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-            $this->assertPattern("/Class/i", $e->getMessage());
-        }
+        $args = $o->getInstance("TestExtensionWithArgs")->args;
+        $this->assertEqual($args, array('a', 12, array(23)));
     }
 }
 
@@ -229,6 +166,16 @@ class DummyMethodTest extends Object {
 
 }
 
+class TestExtensionWithArgs extends Extension {
+    public $args;
+
+    public function __construct() {
+        parent::__construct();
+
+        $this->args = func_get_args();
+    }
+}
+
 class TestObject extends Object {
 	
 	
@@ -251,20 +198,8 @@ class TestObjectExtension extends Extension {
 	}
 }
 Object::extend("testObject", "TestObjectExtension");
+Object::extend("testObject", "TestExtensionWithArgs('a', 12, array(23))");
 
 function testObjectExtFunction() {
 	return "test";
-}
-
-class StaticTestClass {
-    public static $b = "a";
-    public static function call()
-    {
-        return 1;
-    }
-
-    protected static function prot()
-    {
-        return 2;
-    }
 }

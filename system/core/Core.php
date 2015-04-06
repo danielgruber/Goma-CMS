@@ -7,9 +7,9 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-ClassInfo::AddSaveVar("Core", "rules");
-ClassInfo::AddSaveVar("Core", "hooks");
-ClassInfo::AddSaveVar("Core", "cmsVarCallbacks");
+StaticsManager::AddSaveVar("Core", "rules");
+StaticsManager::AddSaveVar("Core", "hooks");
+StaticsManager::AddSaveVar("Core", "cmsVarCallbacks");
 
 /**
  * Goma Core.

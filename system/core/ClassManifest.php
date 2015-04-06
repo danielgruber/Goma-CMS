@@ -123,7 +123,7 @@ class ClassManifest {
 	public static function setSaveVars($file) {
 		if(count($keys = array_keys(ClassInfo::$files, $file)) > 0) {
 			foreach($keys as $class) {
-				ClassInfo::setSaveVars($class);
+				StaticsManager::setSaveVars($class);
 			}
 		}
 

@@ -15,7 +15,7 @@ interface ExtensionModel
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Framework
- * @version 3.5
+ * @version 3.6
  */
 abstract class Object
 {
@@ -35,7 +35,10 @@ abstract class Object
      */
     public static $temp_extra_methods = array();
 
-    public static $cache_extra_methods = array(), $extensions = array(), $ci_funcs = array(), $cache_singleton_classes = array();
+    public static   $cache_extra_methods = array(), // cache for extra-methods
+                    $extensions = array(),  // extensions of all classes
+                    $ci_funcs = array(),  // functions called when generating ClassInfo
+                    $cache_singleton_classes = array(); // cache for Singletons
 
     /**
      * protected vars
@@ -66,98 +69,10 @@ abstract class Object
     public $inExpansion;
 
     /**
-     * Indicates if the constructor has already been axecuted.
-     */
-    private static $loaded;
-
-    /**
      * const defines that method only exists on object.
      */
     const METHOD_ON_OBJECT_FOUND = 2;
 
-    /**
-     * validates if class and variable/method-names are valid.
-     * it throws an exception if not and returns correct class-name.
-     *
-     * @param string $class
-     * @param string $var
-     * @return string classname
-     */
-    protected static function validate_static_call($class, $var) {
-        $class = ClassInfo::find_class_name($class);
-
-        if(empty($var)) {
-            throw new LogicException("Invalid name of variable $var for $class");
-        }
-
-        return $class;
-    }
-
-    /**
-     * Gets the value of $class::$$var.
-     *
-     * @param string $class Name of the class.
-     * @param string $var Name of the variable.
-     *
-     * @return mixed Value of $var.
-     */
-    public static function getStatic($class, $var)
-    {
-        $class = self::validate_static_call($class, $var);
-        return eval('return isset(' . $class . '::$' . $var . ") ? " . $class . '::$' . $var . " : null;");
-    }
-
-    /**
-     * Checks, if $class::$$var is set.
-     *
-     * @param string $class Name of the class.
-     * @param string $var Name of the variable.
-     *
-     * @return boolean
-     */
-    public static function hasStatic($class, $var)
-    {
-        $class = self::validate_static_call($class, $var);
-        return eval('return isset(' . $class . '::$' . $var . ');');
-    }
-
-    /**
-     * Sets $value for $class::$$var.
-     *
-     * @param string $class Name of the class.
-     * @param string $var Name of the variable.
-     * @param mixed $value
-     *
-     * @return void
-     */
-    public static function setStatic($class, $var, $value)
-    {
-        $class = self::validate_static_call($class, $var);
-        return eval('
-        if(isset('.$class.'::$'.$var.'))
-            ' . $class . '::$' . $var . ' = ' . var_export($value, true) . ';
-        else
-            throw new LogicException("Could not set Variable '.$var.' on Class '.$class.'.");');
-    }
-
-    /**
-     * Calls $class::$$func.
-     *
-     * @param string $class Name of the class.
-     * @param string $func Name of the function.
-     *
-     * @return void
-     */
-    public static function callStatic($class, $func)
-    {
-        $class = self::validate_static_call($class, $func);
-
-        if(is_callable(array($class, $func))) {
-            return call_user_func_array(array($class, $func), array($class));
-        } else {
-            throw new BadMethodCallException('Call to unknown method ' . $class . '::' . $func);
-        }
-    }
 
     /**
      * Extends a class with a method.
@@ -345,29 +260,36 @@ abstract class Object
     {
         if (defined("GENERATE_CLASS_INFO")) {
             $obj = strtolower($obj);
-            $ext = strtolower($ext);
-            $arguments = "";
+            $info = self::getArgumentsFromExtend($ext);
+            $name = $info[0];
+            $arguments = $info[1];
 
-            // check for arguments given to extensions.
-            if (preg_match('/^([a-zA-Z0-9_\-]+)\((.*)\)$/', $ext, $exts)) {
-                $ext = $exts[0];
-                $arguments = $exts[1];
-            }
-            if (class_exists($ext)) {
-                if (ClassInfo::hasInterface($ext, "ExtensionModel")) {
-                    if (ClassInfo::getStatic($ext, 'extra_methods')) {
-                        foreach (classinfo::getStatic($ext, 'extra_methods') as $method) {
-                            self::$extra_methods[$obj][strtolower($method)] = array("EXT:" . $ext, $method);
-                        }
+            if (ClassInfo::hasInterface($name, "ExtensionModel")) {
+                if (StaticsManager::getStatic($name, 'extra_methods')) {
+                    foreach (StaticsManager::getStatic($name, 'extra_methods') as $method) {
+                        self::$extra_methods[$obj][strtolower($method)] = array("EXT:" . $name, $method);
                     }
-                    self::$extensions[$obj][$ext] = $arguments;
-                } else {
-                    throw new LogicException("Extension $ext isn't a Extension");
                 }
+                self::$extensions[$obj][$name] = $arguments;
             } else {
-                throw new LogicException("Extension $ext does not exist.");
+                throw new LogicException("Extension $name isn't a Extension");
             }
         }
+    }
+
+    /**
+     * get arguments from extend-call. it also checks if class exists.
+     *
+     * @param string extension
+     * @return array first parameter is extension-name, second arguments.
+     */
+    public static function getArgumentsFromExtend($ext) {
+        if (preg_match('/^([a-zA-Z0-9_\-]+)\((.*)\)$/', $ext, $exts)) {
+            return array(ClassInfo::find_class_name($exts[1]), $exts[2]);
+        }
+
+        return array(ClassInfo::find_class_name($ext), "");
+
     }
 
     /**
@@ -409,24 +331,7 @@ abstract class Object
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;
         }
 
-        $this->initStatics();
-    }
-
-    /**
-     * defines statics.
-     */
-    public function initStatics()
-    {
-        if (!isset(ClassInfo::$set_save_vars[$this->classname])) {
-            ClassInfo::setSaveVars($this->classname);
-            $s = true;
-        }
-
-        if((isset($s) || !isset(self::$loaded[$this->classname])) && self::method_exists($this->classname, "defineStatics")) {
-            $this->defineStatics();
-            self::$loaded[$this->classname] = true;
-
-        }
+        StaticsManager::setSaveVars($this);
     }
 
     /**
@@ -662,7 +567,7 @@ abstract class Object
      */
     static function buildClassInfo($class)
     {
-        foreach ((array)self::getStatic($class, "extend") as $ext) {
+        foreach ((array)StaticsManager::getStatic($class, "extend") as $ext) {
             Object::extend($class, $ext);
         }
     }

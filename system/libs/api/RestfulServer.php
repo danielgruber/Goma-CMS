@@ -14,7 +14,7 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 
-ClassInfo::AddSaveVar("RestfulServer", "api_accesses");
+StaticsManager::AddSaveVar("RestfulServer", "api_accesses");
 
 class RestfulServer extends RequestHandler
 {
@@ -98,7 +98,7 @@ class RestfulServer extends RequestHandler
 		public function handle()
 		{
 				$ClassName = $this->getParam("ClassName");
-				if((!ClassInfo::hasStatic($ClassName, "api_access") && !isset(self::$api_accesses[$ClassName])) || !is_subclass_of($ClassName, "DataObject"))
+				if((!StaticsManager::hasStatic($ClassName, "api_access") && !isset(self::$api_accesses[$ClassName])) || !is_subclass_of($ClassName, "DataObject"))
 				{
 						HTTPResponse::setResHeader(404);
 						HTTPResponse::sendHeader();
@@ -107,7 +107,7 @@ class RestfulServer extends RequestHandler
 				
 				$this->ClassName = $ClassName;
 				
-				$api_access = (ClassInfo::hasStatic($ClassName, "api_access")) ? ClassInfo::getStatic($ClassName, "api_access") : self::$api_accesses[$ClassName];
+				$api_access = (StaticsManager::hasStatic($ClassName, "api_access")) ? StaticsManager::getStatic($ClassName, "api_access") : self::$api_accesses[$ClassName];
 				if((!is_bool($api_access) || $api_access !== true) && !is_array($api_access))
 				{
 						HTTPResponse::setResHeader(403);

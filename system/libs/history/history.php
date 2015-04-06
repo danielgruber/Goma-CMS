@@ -98,7 +98,7 @@ class History extends DataObject {
 			$newrecord = $newrecord->versionid;
 		
 		// check if history is enabled on that dataobject
-		if(!ClassInfo::getStatic($class, "history")) {
+		if(!StaticsManager::getStatic($class, "history")) {
 			return false;
 		}
 		
@@ -145,7 +145,7 @@ class History extends DataObject {
 			
 		self::$supportHistoryView = array();
 		foreach(ClassInfo::getChildren("DataObject") as $child) {
-			if(ClassInfo::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData") && call_user_func_array(array($child, "canViewHistory"), array($child))) {
+			if(StaticsManager::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData") && call_user_func_array(array($child, "canViewHistory"), array($child))) {
 				self::$supportHistoryView[] = $child;
 			}
 		}

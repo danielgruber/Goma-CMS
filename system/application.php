@@ -139,6 +139,7 @@ if (PROFILE)
 // core
 require_once (FRAMEWORK_ROOT . 'core/applibs.php');
 require_once (FRAMEWORK_ROOT . 'core/Object.php');
+require_once (FRAMEWORK_ROOT . 'core/CoreLibs/StaticsManager.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassManifest.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassInfo.php');
 require_once (FRAMEWORK_ROOT . 'core/controller/RequestHandler.php');
@@ -331,8 +332,8 @@ function loadFramework() {
 		Profiler::unmark("Manifest");
 
 	// set some object-specific vars
-	ClassInfo::setSaveVars("core");
-	ClassInfo::setSaveVars("object");
+	StaticsManager::setSaveVars("core");
+	StaticsManager::setSaveVars("object");
 		
 	Core::Init();
 }

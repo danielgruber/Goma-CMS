@@ -159,7 +159,7 @@ class Uploads extends DataObject {
 	public static function guessFileClass($filename) {
 		$ext = strtolower(substr($filename, strrpos($filename, ".") + 1));
 		foreach(ClassInfo::getChildren("Uploads") as $child) {
-			if(in_array($ext,ClassInfo::getStatic($child, "file_extensions"))) {
+			if(in_array($ext, StaticsManager::getStatic($child, "file_extensions"))) {
 				return $child;
 			}
 		}

@@ -12,7 +12,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-ClassInfo::addSaveVar("Permission","providedPermissions");
+StaticsManager::addSaveVar("Permission", "providedPermissions");
 
 /**
  * @property int parentid

@@ -9,8 +9,8 @@
 defined("IN_GOMA") OR die();
 
 
-ClassInfo::AddSaveVar("Resources", "names");
-ClassInfo::AddSaveVar("Resources", "scanFolders");
+StaticsManager::AddSaveVar("Resources", "names");
+StaticsManager::AddSaveVar("Resources", "scanFolders");
 
 /**
  * This class manages all Resources like CSS and JS-Files in a Goma-Page.

@@ -128,7 +128,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @access public
 	 * @var array
 	 */
-	public static $notViewableMethods = array("getdata", "getform", "geteditform", "getwholedata", "set_many_many", "get_has_one", "get_many", "get", "setfield", "setwholedata", "write", "writerecord", "__construct", "method_exists", "callmethodbyrecord", "getmanymany", "gethasmany", "search", "where", "fields", "getoffset", "getversion", "_get", "getobject", "versioned");
+	public static $notViewableMethods = array("getdata", "get_versioned", "getform", "geteditform", "getwholedata", "set_many_many", "get_has_one", "get_many", "get", "setfield", "setwholedata", "write", "writerecord", "__construct", "method_exists", "callmethodbyrecord", "getmanymany", "gethasmany", "search", "where", "fields", "getoffset", "getversion", "_get", "getobject", "versioned");
 
 	/**
 	 * a list of methods can't be called as getters. this is for internal usage.
@@ -896,7 +896,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 			// check for casting or use default-casting.
 			$casting = $this->casting();
-			$caste = isset($casting[$name]) ? $casting[$name] : ClassInfo::getStatic($this->classname, "default_casting");
+			$caste = isset($casting[$name]) ? $casting[$name] : StaticsManager::getStatic($this->classname, "default_casting");
 			unset($casting);
 			$object = DBField::getObjectByCasting($caste, $name, $data);
 
@@ -1028,7 +1028,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function casting() {
-		$casting = isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : self::getStatic($this->classname, "casting");
+		$casting = isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : StaticsManager::getStatic($this->classname, "casting");
 		
 		return array_merge($casting, $this->extendedCasting);
 	}
@@ -1038,7 +1038,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function defaults() {
-		return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : (array) self::getStatic($this->classname, "default");
+		return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : (array)StaticsManager::getStatic($this->classname, "default");
 	}
 
 	/**
@@ -1046,7 +1046,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function generateCasting() {
-		$casting = self::getStatic($this->classname, "casting");
+		$casting = StaticsManager::getStatic($this->classname, "casting");
 		foreach($this->LocalcallExtending("casting") as $_casting) {
 			$casting = array_merge($casting, $_casting);
 			unset($_casting);
@@ -1066,8 +1066,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function generateDefaults() {
-		if(self::hasStatic($this->classname, "default")) {
-			$defaults = self::getStatic($this->classname, "default");
+		if(StaticsManager::hasStatic($this->classname, "default")) {
+			$defaults = StaticsManager::getStatic($this->classname, "default");
 		} else {
 			$defaults = array();
 		}

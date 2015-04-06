@@ -8,8 +8,8 @@
 
 defined("IN_GOMA") OR die();
 
-ClassInfo::addSaveVar("i18n", "languagefiles");
-ClassInfo::addSaveVar("i18n", "defaultLanguagefiles");
+StaticsManager::addSaveVar("i18n", "languagefiles");
+StaticsManager::addSaveVar("i18n", "defaultLanguagefiles");
 
 /**
  * Class for localization.
@@ -75,7 +75,7 @@ class i18n extends Object {
 
 		if(PROFILE)
 			Profiler::mark("i18n::Init");
-		ClassInfo::setSaveVars("i18n");
+		StaticsManager::setSaveVars("i18n");
 
 	
 		// set correct host, avoid problems with localhost

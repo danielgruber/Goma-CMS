@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-ClassInfo::addSaveVar("gLoader", "resources");
+StaticsManager::addSaveVar("gLoader", "resources");
 
 class gLoader extends Controller
 {

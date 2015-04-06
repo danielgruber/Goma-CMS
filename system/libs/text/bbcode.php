@@ -154,7 +154,7 @@ class BBcode extends TextTransformer
 						$text = str_replace('[noparse]'.$key.'[/noparse]', $value, $text);
 				}
 				
-				foreach(self::getStatic($this->classname, "smilies") as $code => $file) {
+				foreach(StaticsManager::getStatic($this->classname, "smilies") as $code => $file) {
 					$text = str_replace($code,'<img src="'.$file.'" alt="'.$code.'" />',$text);
 				}
 				

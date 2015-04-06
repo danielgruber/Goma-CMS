@@ -188,7 +188,7 @@ abstract class g_SoftwareType {
 		}
 		
 		foreach(ClassInfo::getChildren("G_SoftwareType") as $child) {
-			if(strtolower(ClassInfo::getStatic($child, "type")) == strtolower($type)) {
+			if(strtolower(StaticsManager::getStatic($child, "type")) == strtolower($type)) {
 				return new $child($file);
 			}
 		}
@@ -238,7 +238,7 @@ abstract class g_SoftwareType {
 				$info["type"] = "backup";
 			
 			foreach(ClassInfo::getChildren("G_SoftwareType") as $child) {
-				if(ClassInfo::getStatic($child, "type") == $info["type"]) {
+				if(StaticsManager::getStatic($child, "type") == $info["type"]) {
 					$inst = new $child($file);
 					
 					$data = $inst->getInstallInfo($forceInstall);

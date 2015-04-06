@@ -10,8 +10,8 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-ClassInfo::addSaveVar("Backup", "excludeList");
-ClassInfo::addSaveVar("Backup", "fileExcludeList");
+StaticsManager::addSaveVar("Backup", "excludeList");
+StaticsManager::addSaveVar("Backup", "fileExcludeList");
 
 class Backup extends Object {
 	/**
@@ -37,7 +37,7 @@ class Backup extends Object {
 	 *@access public
 	*/
 	public static function generateDBBackup($file, $prefix = DB_PREFIX, $excludeList = array()) {
-		$excludeList = array_merge(self::getStatic("Backup", "excludeList"), $excludeList);
+		$excludeList = array_merge(StaticsManager::getStatic("Backup", "excludeList"), $excludeList);
 		// force GFS
 		if(!preg_match('/\.sgfs$/i', $file))
 			$file .= ".sgfs";
@@ -279,7 +279,7 @@ class Backup extends Object {
 			self::$fileExcludeList[] = "/" . LOG_FOLDER;
 		}
 		
-		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(self::getStatic("Backup", "fileExcludeList"), $excludeList));
+		$backup->add(ROOT . APPLICATION, "/backup/", array_merge(StaticsManager::getStatic("Backup", "fileExcludeList"), $excludeList));
 		$backup->commit();
 		
 		$backup->close();
@@ -333,7 +333,7 @@ class Backup extends Object {
 		$dict->add("excludedFiles", $excludeListPlist);
 		
 		$td = new CFTypeDetector();  
-		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, self::getStatic("Backup", "excludeList")));
+		$excludeSQLListPlist = $td->toCFType(array_merge($excludeSQLList, StaticsManager::getStatic("Backup", "excludeList")));
 		$dict->add("excludedTables", $excludeSQLListPlist);
 		
 		$dict->add("DB_PREFIX", new CFString($SQLprefix));

@@ -143,7 +143,7 @@ class Controller extends RequestHandler
 						$this->template = $this->model() . ".html";
 				}
 				
-				if(ClassInfo::getStatic($this->classname, "live_counter")) {
+				if(StaticsManager::getStatic($this->classname, "live_counter")) {
 					// run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
 					
 					if(PROFILE) Profiler::mark("livecounter");		
@@ -284,8 +284,8 @@ class Controller extends RequestHandler
 		{
 				$this->areaData = array();
 				
-				if(ClassInfo::hasStatic($this->classname, "less_vars")) {
-					Resources::$lessVars = ClassInfo::getStatic($this->classname, "less_vars");
+				if(StaticsManager::hasStatic($this->classname, "less_vars")) {
+					Resources::$lessVars = StaticsManager::getStatic($this->classname, "less_vars");
 				}
 
 				$data = $this->__output(parent::handleRequest($request, $subController));
@@ -498,7 +498,7 @@ class Controller extends RequestHandler
 			if($this->countModelRecords() == 1 && (!$this->getParam("id") || !is_a($this->modelInst(), "DataObjectSet"))  && (!$this->getParam("id") || $this->ModelInst()->id == $this->getParam("id"))) {
 				if(!$this->modelInst()->can("Write"))
 				{
-					if(ClassInfo::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
+					if(StaticsManager::getStatic($this->classname, "showWithoutRight") || $this->modelInst()->showWithoutRight) {
 						$disabled = true;
 					} else {
 						return $this->actionComplete("less_rights");

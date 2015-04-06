@@ -375,8 +375,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     public function generateRepresentation($link = false) {
         $title = $this->title;
 
-        if(ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname)) {
-            $title = '<img src="'.ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
+        if(ClassInfo::findFile(StaticsManager::getStatic($this->classname, "icon"), $this->classname)) {
+            $title = '<img src="'.ClassInfo::findFile(StaticsManager::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
         }
 
         if($link)
@@ -1304,7 +1304,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
             foreach($allPages as $child) {
 
                 // get allowed children for this page
-                $allowed = ClassInfo::getStatic($child, "allow_children");
+                $allowed = StaticsManager::getStatic($child, "allow_children");
                 if(is_array($allowed) && count($allowed) > 0) {
                     foreach($allowed as $allow) {
                         $allow = strtolower($allow);
@@ -1325,7 +1325,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
             }
 
             // now filter
-            $allow_parents = ClassInfo::getStatic($this->classname, "allow_parent");
+            $allow_parents = StaticsManager::getStatic($this->classname, "allow_parent");
             if(is_array($allow_parents) && count($allow_parents) > 0) {
                 foreach($allowed_parents as $parent) {
 
@@ -1381,7 +1381,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *@param string - parent-class
      */
     public function checkCanChild($child, $parent) {
-        $children = ClassInfo::getStatic($parent, "allow_children");
+        $children = StaticsManager::getStatic($parent, "allow_children");
         if(count($children) > 0) {
             foreach($children as $allowed_child) {
                 if(is_a($child, $allowed_child))

@@ -165,8 +165,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name getVersioned
 	 *@access public
 	*/
-	public static function get_versioned($class,$version = "publish" , $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
-		$data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
+	public static function get_versioned($class, $version = "publish" , $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
+        $data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
 		if ($group !== false) {
 			return $data->groupBy($group);
 		}
@@ -450,23 +450,24 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *
 	 * @access protected
 	*/
-	protected function defineStatics() {
+	public function defineStatics() {
+
+		if ($has_many = $this->hasMany()) {
+
+            foreach ($has_many as $key => $val) {
+                Object::LinkMethod($this->classname, $key, array("this", "getHasMany"), true);
+                Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
+            }
+        }
 		
-		if ($has_many = $this->hasMany())
-			foreach($has_many as $key => $val) {
-				Object::LinkMethod($this->classname, $key, array("this", "getHasMany"), true);
-				Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-			}
-		
-		
-		if ($many_many = $this->ManyMany())
-			foreach($many_many as $key => $val) {
-				Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
-				Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-				Object::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
-				Object::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-			}
-		
+		if ($many_many = $this->ManyMany()) {
+            foreach ($many_many as $key => $val) {
+                Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
+                Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
+                Object::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
+                Object::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
+            }
+        }
 		
 		if ($belongs_many_many = $this->BelongsManyMany()) {
 			foreach($belongs_many_many as $key => $val) {
@@ -1430,7 +1431,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			$this->callExtending("onBeforeManipulate", $manipulation, $b = "write_state");
 			if (SQL::manipulate($manipulation)) {
 				
-				if (self::getStatic($this->classname, "history") && $history) {
+				if (StaticsManager::getStatic($this->classname, "history") && $history) {
 					if ($command == "insert" || !isset($changed)) {
 						$changed = $this->data;
 					}
@@ -1857,7 +1858,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "unpublish");
 		
 		if (SQL::manipulate($manipulation)) {
-			if (self::getStatic($this->classname, "history") && $history) {
+			if (StaticsManager::getStatic($this->classname, "history") && $history) {
 				History::push($this->classname, 0, $this->versionid, $this->id, "unpublish");
 			}
 			return true;
@@ -1897,7 +1898,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$this->callExtending("onBeforeManipulate", $manipulation, $b = "publish");
 		
 		if (SQL::manipulate($manipulation)) {
-			if (self::getStatic($this->classname, "history") && $history) {
+			if (StaticsManager::getStatic($this->classname, "history") && $history) {
 				History::push($this->classname, 0, $this->versionid, $this->id, "publish");
 			}
 			return true;
@@ -2014,7 +2015,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$this->onBeforeRemove($manipulation);
 		$this->callExtending("onBeforeRemove", $manipulation);
 		if (SQL::manipulate($manipulation)) {
-			if (self::getStatic($this->classname, "history") && $history) {
+			if (StaticsManager::getStatic($this->classname, "history") && $history) {
 				History::push($this->classname, 0, $this->versionid, $this->id, "remove");
 			}
 			$this->onAfterRemove($this);
@@ -2449,7 +2450,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $data = $this->getManyManyInfo($relname);
             $extTable = ClassInfo::$class_info[$data["object"]]["table"];
 
-			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$relname]) && $sorts[$relname]) {
 				$sort = $sorts[$relname];
 			} else {
@@ -2545,7 +2546,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $extTable = $data["exttable"];
 			
 			
-			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$relname]) && $sorts[$relname]) {
 				$sort = $sorts[$relname];
 			} else {
@@ -2759,7 +2760,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		$where[$data["table"] . "." . $data["field"]] = $this["versionid"];
 		
 		if(!isset($sort) || !$sort) {
-			$sorts = ArrayLib::map_key(self::getStatic($this->classname, "many_many_sort"), "strtolower");
+			$sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
 			if(isset($sorts[$name]) && $sorts[$name]) {
 				$sort = $sorts[$name];
 			} else {
@@ -2992,8 +2993,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				return null;
 		}
 		
-		if (ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname)) {
-			$title = '<img src="'.ClassInfo::findFile(self::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
+		if (ClassInfo::findFile(StaticsManager::getStatic($this->classname, "icon"), $this->classname)) {
+			$title = '<img src="'.ClassInfo::findFile(StaticsManager::getStatic($this->classname, "icon"), $this->classname).'" /> ' . $title;
 		}
 		
 		return $title;
@@ -3269,7 +3270,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (!empty($sort)) {		
 				$query->sort($sort);
 			} else {
-				$query->sort(self::getStatic($this->classname, "default_sort"));
+				$query->sort(StaticsManager::getStatic($this->classname, "default_sort"));
 			}
 			
 			
@@ -4129,7 +4130,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@name Versioned
 	*/
 	public static function Versioned($class) {
-		if (self::hasStatic($class, "versions") && self::getStatic($class, "versions") == true)
+		if (StaticsManager::hasStatic($class, "versions") && StaticsManager::getStatic($class, "versions") == true)
 			return true;
 		
 		if (Object::instance($class)->versioned == true)
@@ -4253,7 +4254,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			);
 		}
 		
-		$engine = self::getStatic($this->classname, "engine");
+		$engine = StaticsManager::getStatic($this->classname, "engine");
 		if($engine) {
 
 			$engines = array_map("strtolower", SQL::listStorageEngines());
@@ -4293,7 +4294,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 		}
 		
 		// sort of table
-		$sort = self::getStatic($this->classname, "default_sort");
+		$sort = StaticsManager::getStatic($this->classname, "default_sort");
 		
 		if (is_array($sort)) {
 			if (isset($sort["field"], $sort["type"])) {
@@ -4513,8 +4514,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	public function generateDBFields($parents = false) {
 		
 		$fields = array();
-		if (self::hasStatic($this->classname, "db")) {
-			$fields = (array) self::getStatic($this->classname, "db");
+		if (StaticsManager::hasStatic($this->classname, "db")) {
+			$fields = (array)StaticsManager::getStatic($this->classname, "db");
 		}
 		
 		if (isset($this->db_fields)) {
@@ -4572,7 +4573,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	*/
 	public function generateHas_one($parents = true) {
 		
-		$has_one = (array) self::getStatic($this->classname, "has_one");
+		$has_one = (array)StaticsManager::getStatic($this->classname, "has_one");
 		foreach($this->LocalcallExtending("Has_One") as $has_ones) {
 			$has_one = array_merge($has_one, $has_ones);
 			unset($has_ones);
@@ -4601,7 +4602,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	*/
 	public function generateHas_many() {
 		
-		$has_many = (array) self::getStatic($this->classname, "has_many");
+		$has_many = (array)StaticsManager::getStatic($this->classname, "has_many");
 		foreach($this->LocalcallExtending("Has_Many") as $has_manys) {
 			$has_many = array_merge($has_many, $has_manys);
 			unset($has_manys);
@@ -4623,7 +4624,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@access public
 	*/
 	public function generateMany_many($parents = true) {
-		$many_many = (array) self::getStatic($this->classname, "many_many");
+		$many_many = (array)StaticsManager::getStatic($this->classname, "many_many");
 		foreach($this->LocalcallExtending("many_many") as $many_manys) {
 			$many_many = array_merge($many_many, $many_manys);
 			unset($many_manys);
@@ -4652,7 +4653,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@access public
 	*/
 	public function generateBelongs_many_many($parents = true) {
-		$belongs_many_many = (array) self::getStatic($this->classname, "belongs_many_many");
+		$belongs_many_many = (array)StaticsManager::getStatic($this->classname, "belongs_many_many");
 		foreach($this->LocalcallExtending("belongs_many_many") as $belongs_many_manys) {
 			$belongs_many_many = array_merge($belongs_many_many, $belongs_many_manys);
 			unset($belongs_many_manys);
@@ -4689,7 +4690,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			if (isset($this->many_many_extra_fields[$key])) {
 				$extraFields = $this->many_many_extra_fields[$key];
 			} else if (self::isStatic($this->classname, "many_many_extra_fields")) {
-				$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($this->classname, "many_many_extra_fields"));
+				$extraFields = ArrayLib::map_key("strtolower", (array)StaticsManager::getStatic($this->classname, "many_many_extra_fields"));
 				if (isset($extraFields[$key]))
 					$extraFields = $extraFields[$key];
 				else
@@ -4807,7 +4808,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 					if (isset($inst->many_many_extra_fields[$relation])) {
 						$extraFields = $this->many_many_extra_fields[$key];
 					} else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
-						$extraFields = ArrayLib::map_key("strtolower", (array) self::getStatic($inst->classname, "many_many_extra_fields"));
+						$extraFields = ArrayLib::map_key("strtolower", (array)StaticsManager::getStatic($inst->classname, "many_many_extra_fields"));
 						if (isset($extraFields[$relation]))
 							$extraFields = $extraFields[$relation];
 						else
@@ -4868,8 +4869,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	public function generateIndexes() {
 		$indexes = array();
 		
-		if (self::hasStatic($this->classname, "index"))
-			$indexes = (array) self::getStatic($this->classname, "index");
+		if (StaticsManager::hasStatic($this->classname, "index"))
+			$indexes = (array)StaticsManager::getStatic($this->classname, "index");
 		
 		if (isset($this->indexes)) {
 			$indexes = $this->indexes;
@@ -4883,7 +4884,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 			}
 		}
 		
-		$searchable_fields = Object::hasStatic($this->classname, "search_fields") ? Object::getStatic($this->classname, "search_fields") : array();
+		$searchable_fields = StaticsManager::hasStatic($this->classname, "search_fields") ? StaticsManager::getStatic($this->classname, "search_fields") : array();
 		if (isset($this->searchable_fields))
 			$searchable_fields = array_merge($searchable_fields, $this->searchable_fields);
 		
@@ -4919,7 +4920,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 	 *@access public
 	*/
 	public function generateCasting() {
-		$casting = array_merge((array) self::getStatic($this->classname, "casting"), (array) $this->generateDBFields());
+		$casting = array_merge((array)StaticsManager::getStatic($this->classname, "casting"), (array) $this->generateDBFields());
 		foreach($this->LocalcallExtending("casting") as $_casting) {
 			$casting = array_merge($casting, $_casting);
 			unset($_casting);
@@ -4954,28 +4955,28 @@ abstract class DataObjectExtension extends Extension
 		 * gets DBFields
 		*/
 		public function DBFields() {
-			return (self::hasStatic($this->classname, "db")) ? self::getStatic($this->classname, "db") : (isset($this->db_fields) ? $this->db_fields : array());
+			return (StaticsManager::hasStatic($this->classname, "db")) ? StaticsManager::getStatic($this->classname, "db") : (isset($this->db_fields) ? $this->db_fields : array());
 		}
 		/**
 		 * gets has_one
 		*/ 
 		public function has_one() {
-			return (self::hasStatic($this->classname, "has_one")) ? self::getStatic($this->classname, "has_one") : (isset($this->has_one) ? $this->has_one : array());
+			return (StaticsManager::hasStatic($this->classname, "has_one")) ? StaticsManager::getStatic($this->classname, "has_one") : (isset($this->has_one) ? $this->has_one : array());
 		}
 		/**
 		 * gets has_many
 		*/ 
 		public function has_many() {
-			return (self::hasStatic($this->classname, "has_many")) ? self::getStatic($this->classname, "has_many") : (isset($this->has_many) ? $this->has_many : array());
+			return (StaticsManager::hasStatic($this->classname, "has_many")) ? StaticsManager::getStatic($this->classname, "has_many") : (isset($this->has_many) ? $this->has_many : array());
 		}
 		/**
 		 * many-many
 		*/
 		public function many_many() {
-			return (self::hasStatic($this->classname, "many_many")) ? self::getStatic($this->classname, "many_many") : (isset($this->many_many) ? $this->many_many : array());
+			return (StaticsManager::hasStatic($this->classname, "many_many")) ? StaticsManager::getStatic($this->classname, "many_many") : (isset($this->many_many) ? $this->many_many : array());
 		}
 		public function belongs_many_many() {
-			return (self::hasStatic($this->classname, "belongs_many_many")) ? self::getStatic($this->classname, "belongs_many_many") : (isset($this->belongs_many_many) ? $this->belongs_many_many : array());
+			return (StaticsManager::hasStatic($this->classname, "belongs_many_many")) ? StaticsManager::getStatic($this->classname, "belongs_many_many") : (isset($this->belongs_many_many) ? $this->belongs_many_many : array());
 		}
 		/**
 		 * defaults
@@ -4984,7 +4985,7 @@ abstract class DataObjectExtension extends Extension
 		 *@access public
 		*/
 		public function defaults() {
-			return (self::hasStatic($this->classname, "default")) ? self::getStatic($this->classname, "default") : (isset($this->defaults) ? $this->defaults : array());
+			return (StaticsManager::hasStatic($this->classname, "default")) ? StaticsManager::getStatic($this->classname, "default") : (isset($this->defaults) ? $this->defaults : array());
 		}
 		
 		/**

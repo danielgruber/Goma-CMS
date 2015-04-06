@@ -69,19 +69,8 @@ class ClassInfo extends Object {
 	 */
 	public static $files = array();
 
-	/**
-	 * array of classes, which we have already set SaveVars
-	 *
-	 */
-	public static $set_save_vars = array();
 
-	/**
-	 * this var saves for each class, which want to save vars in cache, the names
-	 *@var array
-	 */
-	public static $save_vars;
-
-	/**
+    /**
 	 * hooks for current execution which are executed when classinfo is generated
 	 *
 	 */
@@ -222,71 +211,14 @@ class ClassInfo extends Object {
         $class = ClassManifest::resolveClassName($class);
 
         if(!ClassInfo::exists($class) && !class_exists($class, false)) {
-            throw new LogicException("Cannot find unknown class");
+            throw new LogicException("Cannot find unknown class $class");
         }
 
         return $class;
     }
 
-	/**
-	 * adds a var to cache
-	 *@param class - class_name
-	 *@param name - var-name
-	 */
-	public static function addSaveVar($class, $name) {
-		if(class_exists("ClassManifest"))
-			$class = ClassManifest::resolveClassName($class);
 
-		self::$save_vars[strtolower($class)][] = $name;
-	}
-
-	/**
-	 * gets for a specific class the save_vars
-	 *@name getSaveVars
-	 *@param string - class-name
-	 *@return array
-	 */
-	public static function getSaveVars($class) {
-		$class = ClassManifest::resolveClassName($class);
-
-		if(isset(self::$save_vars[strtolower($class)])) {
-			return self::$save_vars[strtolower($class)];
-		}
-		return array();
-	}
-
-	/**
-	 * sets the save_vars
-	 */
-	public static function setSaveVars($class) {
-		if(PROFILE)
-			Profiler::mark("ClassInfo::setSaveVars");
-
-		if(count(self::$class_info) > 0) {
-			$class = ClassManifest::resolveClassName($class);
-
-			if(!defined('GENERATE_CLASS_INFO') && !isset(self::$set_save_vars[$class])) {
-				foreach(self::getSaveVars($class) as $var) {
-					if(isset(self::$class_info[$class][$var])) {
-						self::setStatic($class, $var, self::$class_info[$class][$var]);
-					}
-				}
-
-				unset($var);
-			}
-
-			if(ClassInfo::hasInterface($class, "saveVarSetter") && Object::method_exists($class, "__setSaveVars")) {
-				call_user_func_array(array($class, "__setSaveVars"), array($class));
-			}
-
-			self::$set_save_vars[$class] = true;
-		}
-
-		if(PROFILE)
-			Profiler::unmark("ClassInfo::setSaveVars");
-	}
-
-	/**
+    /**
 	 * checks if class is abstract
 	 */
 	public static function isAbstract($class) {
@@ -521,8 +453,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function getClassTitle($class) {
-		if(self::hasStatic($class, "cname")) {
-			return parse_lang(self::getStatic($class, "cname"));
+		if(StaticsManager::hasStatic($class, "cname")) {
+			return parse_lang(StaticsManager::getStatic($class, "cname"));
 		}
 
 		$c = new $class;
@@ -535,8 +467,8 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function getClassIcon($class) {
-		if(self::hasStatic($class, "icon")) {
-			return ClassInfo::findFileRelative(self::getStatic($class, "icon"), $class);
+		if(StaticsManager::hasStatic($class, "icon")) {
+			return ClassInfo::findFileRelative(StaticsManager::getStatic($class, "icon"), $class);
 		}
 
 		return null;
@@ -720,15 +652,15 @@ class ClassInfo extends Object {
 				// generates save-vars
 				if(class_exists($class) && is_subclass_of($class, "object") || $class == "object") {
 					// save vars
-					foreach(self::getSaveVars($class) as $value) {
-						self::$class_info[$class][$value] = self::getStatic($class, $value);
+					foreach(StaticsManager::getSaveVars($class) as $value) {
+						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
 						unset($value);
 					}
 
 					// ci-funcs
 					// that are own function, for generating class-info
-					foreach(ClassInfo::getStatic($class, "ci_funcs") as $name => $func) {
-						self::$class_info[$class][$name] = classinfo::callStatic($class, $func);
+					foreach(StaticsManager::getStatic($class, "ci_funcs") as $name => $func) {
+						self::$class_info[$class][$name] = StaticsManager::callStatic($class, $func);
 						unset($name, $func);
 					}
 				}
@@ -813,7 +745,7 @@ class ClassInfo extends Object {
 
 			Object::$cache_singleton_classes = array();
 			// object reset
-			self::$set_save_vars = array();
+			StaticsManager::$set_save_vars = array();
 			// class_info reset
 
 			// run hooks
@@ -1044,13 +976,13 @@ class ClassInfo extends Object {
 				// generates save-vars
 				if(class_exists($class) && is_subclass_of($class, "object") || $class == "object") {
 					// save vars
-					foreach(self::getSaveVars($class) as $value) {
-						self::$class_info[$class][$value] = self::getStatic($class, $value);
+					foreach(StaticsManager::getSaveVars($class) as $value) {
+						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
 					}
 					// ci-funcs
 					// that are own function, for generating class-info
-					foreach(ClassInfo::getStatic($class, "ci_funcs") as $name => $func) {
-						self::$class_info[$class][$name] = classinfo::callStatic($class, $func);
+					foreach(StaticsManager::getStatic($class, "ci_funcs") as $name => $func) {
+						self::$class_info[$class][$name] = StaticsManager::callStatic($class, $func);
 					}
 					
 					if(isset(self::$class_info[$class]["interfaces"])) {
@@ -1199,5 +1131,5 @@ class ClassInfoWriteError extends LogicException {
 	}
 }
 
-ClassInfo::addSaveVar("Object", "extensions");
-ClassInfo::addSaveVar("Object", "extra_methods");
+StaticsManager::addSaveVar("Object", "extensions");
+StaticsManager::addSaveVar("Object", "extra_methods");

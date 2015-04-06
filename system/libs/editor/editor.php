@@ -45,7 +45,7 @@ abstract class GomaEditor extends Object {
 			return Object::instance(self::$default[$type]);
 		
 		foreach(ClassInfo::getChildren("GomaEditor") as $class) {
-			$types = array_map((array) Object::getStatic($class, "types"), "strtolower");
+			$types = array_map((array)StaticsManager::getStatic($class, "types"), "strtolower");
 			if(in_array($type, $types)) {
 				return Object::instance($class);
 			}

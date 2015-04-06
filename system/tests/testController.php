@@ -26,7 +26,7 @@ class GomaTestController extends RequestHandler {
 			if(ClassInfo::hasInterface($class, "Testable")) {
 				ClassManifest::load($class);
 
-				if(!$areas || $this->shouldLoadArea(Object::getStatic($class, "area"), $areas)) {
+				if(!$areas || $this->shouldLoadArea(StaticsManager::getStatic($class, "area"), $areas)) {
 					$candidates[] = $class;
 				}
 			}
