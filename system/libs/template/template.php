@@ -44,7 +44,7 @@ class template extends object
 				
 				if(!$object)
 				{
-						$object = Object::singleton("ViewAccessAbleData");
+					$object = Object::instance("ViewAccessAbleData");
 				}
 				$this->object = $object;
 		}

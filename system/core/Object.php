@@ -85,7 +85,7 @@ abstract class Object
     protected static function validateStaticCall($class, $var) {
         $class = ClassManifest::resolveClassName($class);
 
-        if(empty($class)) {
+        if(empty($class) || (!ClassInfo::exists($class) && !class_exists($class, false))) {
             throw new LogicException("Invalid name of class $class");
         }
 
@@ -121,7 +121,7 @@ abstract class Object
     public static function hasStatic($class, $var)
     {
         $class = self::validateStaticCall($class, $var);
-        return eval('return isset(' . $class . '::\$' . $var . ');');
+        return eval('return isset(' . $class . '::$' . $var . ');');
     }
 
     /**
@@ -392,7 +392,7 @@ abstract class Object
 
         if (PROFILE) Profiler::unmark("Object::instance");
 
-        return self::$cache_singleton_classes[$class];
+        return clone self::$cache_singleton_classes[$class];
     }
 
     /**
@@ -419,18 +419,6 @@ abstract class Object
         }
 
         return $class;
-    }
-
-    /**
-     * Synonym for instance().
-     *
-     * @param string $class Name of the class.
-     *
-     * @return The singleton.
-     */
-    public static function singleton($class)
-    {
-        return self::instance($class);
     }
 
     /**
@@ -717,7 +705,7 @@ abstract class Object
         if (!isset($exp)) {
             $exp = isset(ClassInfo::$class_info[$this->classname]["inExpansion"]) ? ClassInfo::$class_info[$this->classname]["inExpansion"] : null;
         }
-        
+
         if (isset(ClassInfo::$appENV["expansion"][$exp])) {
             $extFolder = ClassInfo::getExpansionFolder($exp, $forceAbsolute);
             return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
