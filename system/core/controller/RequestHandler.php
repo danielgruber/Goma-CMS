@@ -6,7 +6,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-defined("IN_GOMA") OR die();
+defined('IN_GOMA') OR die();
 
 /**
  * This class is the basic class for each controller of Goma. It provides basic methods to handle requests and parsing URLs automatically and calling the correct Action.
@@ -85,8 +85,7 @@ class RequestHandler extends Object {
 
 		/* --- */
 
-		if (PROFILE)
-			Profiler::mark("RequestHandler::__construct");
+		if (PROFILE) Profiler::mark("RequestHandler::__construct");
 
 		$this->allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions));
 		$this->url_handlers = array_map("strtolower", $this->url_handlers);
@@ -97,8 +96,7 @@ class RequestHandler extends Object {
 		if (isset(ClassInfo::$class_info[$this -> classname]["url_handlers"]))
 			$this->url_handlers = array_merge(ClassInfo::$class_info[$this->classname]["url_handlers"], $this->url_handlers);
 
-		if (PROFILE)
-			Profiler::unmark("RequestHandler::__construct");
+		if (PROFILE) Profiler::unmark('RequestHandler::__construct');
 	}
 
 	/**
@@ -131,10 +129,12 @@ class RequestHandler extends Object {
 		$this -> requestHandlerKey = count(Core::$controller);
 	}
 
-	/**
-	 * handles requests
-	 *@name handleRequest
-	 */
+    /**
+     * handles requests
+     * @param Request
+     * @param bool defines if controller should be pushed to history and used for Serve.
+     * @return false|mixed|null|string
+     */
 	public function handleRequest($request, $subController = false) {
 
 		if ($this -> classname == "") {
@@ -145,6 +145,7 @@ class RequestHandler extends Object {
 		$this -> Init($request);
 		$class = $this -> classname;
 
+        // check for extensions
 		$content = null;
 
         $this -> callExtending("onBeforeHandleRequest", $request, $subController, $content);
@@ -153,44 +154,58 @@ class RequestHandler extends Object {
             return $content;
         }
 
-		while ($class != "object") {
-			if (empty($class)) {
-				break;
-			}
+        // search for action
+        $this->request = $request;
 
-			if (ClassInfo::isAbstract($class)) {
-				$class = get_parent_class($class);
-				continue;
-			}
+		while ($class != "object" && !empty($class) && !ClassInfo::isAbstract($class)) {
+            $handlers = Object::instance($class)->url_handlers;
+			foreach ($handlers as $pattern => $action) {
 
-			foreach (Object::instance($class)->url_handlers as $pattern => $action) {
-
-				if ($argument = $request -> match($pattern, $this -> shiftOnSuccess, $this -> classname)) {
-					$this -> request = $request;
-
-					if ($action{0} == "$") {
-						$action = substr($action, 1);
-						if ($this -> getParam($action, false)) {
-							$action = $this -> getParam($action, false);
-						}
-					}
-
-					$action = str_replace('-', '_', $action);
-
-					if (!$this -> hasAction($action)) {
-						$action = "index";
-					}
-
-					$data = $this -> handleAction($action);
-					array_pop(Core::$controller);
-					return $data;
-				}
+                if($data = $this->matchRuleWithResult($pattern, $action, $request)) {
+                    return $data;
+                }
 			}
 
 			$class = get_parent_class($class);
 		}
 		return $this -> handleAction("index");
 	}
+
+    /**
+     * matches a rule and returns result of action covered by the rule.
+     *
+     * @param string rule
+     * @param string action
+     * @param Request request optional
+     * @return string
+     */
+    public function matchRuleWithResult($rule, $action, $request = null) {
+        if(!isset($request)) {
+            $request = $this->request;
+        }
+
+        if ($argument = $request -> match($rule, $this -> shiftOnSuccess, $this -> classname)) {
+
+            if ($action{0} == "$") {
+                $action = substr($action, 1);
+                if ($this -> getParam($action, false)) {
+                    $action = $this -> getParam($action, false);
+                }
+            }
+
+            $action = str_replace('-', '_', $action);
+
+            if (!$this -> hasAction($action)) {
+                $action = "index";
+            }
+
+            $data = $this -> handleAction($action);
+            array_pop(Core::$controller);
+            return $data;
+        }
+
+        return null;
+    }
 
 	/**
 	 * in the end this function is called to do last modifications
@@ -355,42 +370,34 @@ class RequestHandler extends Object {
 		return null;
 	}
 
-	/**
-	 * default Action
-	 *
-	 * @name 	index
-	 * @access 	public
-	 */
+    /**
+     * default Action
+     *
+     * @return string
+     */
 	public function index() {
 		return "";
 	}
 
-	/**
-	 * simple way for $this->request->getParam which also supports get and post.
-	 *
-	 * @name 	getParam
-	 * @access 	public
-	 */
+    /**
+     * simple way for $this->request->getParam which also supports get and post.
+     *
+     * @param string $param
+     * @param bool|string filter, options: true|false|get|post
+     * @return mixed|null
+     */
 	public function getParam($param, $useall = true) {
 		if (isset($this -> request) && is_a($this -> request, "request")) {
 			return $this -> request -> getParam($param, $useall);
 		}
 
-		if (strtolower($useall) == "get") {
-			return isset($_GET[$param]) ? $_GET[$param] : null;
-		}
-
-		if (strtolower($useall) == "post") {
-			return isset($_POST[$param]) ? $_POST[$param] : null;
-		}
-		
 		if($useall === false) {
 			return null;
 		}
 		
-		if (isset($_GET[$param])) {
+		if (strtolower($useall) != "post" && isset($_GET[$param])) {
 			return $_GET[$param];
-		} else if (isset($_POST[$param])) {
+		} else if (strtolower($useall) != "get" && isset($_POST[$param])) {
 			return $_POST[$param];
 		} else {
 			return null;

@@ -22,7 +22,7 @@ abstract class Object {
 	 * caches
 	 */
 	static private $method_cache = array(), $cache_extensions = array();
-
+m
 	/**
 	 * Extension methods.
 	 */
@@ -237,6 +237,7 @@ abstract class Object {
 
 		// last checks
 		if($class == "" || $method == "") {
+            if(PROFILE) Profiler::unmark("Object::method_exists");
 			throw new InvalidArgumentException("Class and method must be a valid string.");
 		}
 
@@ -247,6 +248,7 @@ abstract class Object {
 				self::$method_cache[$class . "::" . $method] = true;
 			}
 
+            if(PROFILE) Profiler::unmark("Object::method_exists");
 			return true;
 		}
 
