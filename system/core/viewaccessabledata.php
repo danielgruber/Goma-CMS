@@ -395,12 +395,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return $this;
 	}
 
-	/**
-	 * renders a view with the data of this DataObject
-	 *@param string - template
-	 *@param array - areas
-	 *@param expansion-name of you want to use the expansion-path too
-	 */
+    /**
+     * renders a view with the data of this DataObject
+     * @param string - template
+     * @param array - areas
+     * @param expansion -name of you want to use the expansion-path too
+     * @return mixed
+     */
 	public function renderWith($view, $expansion = null) {
 		return tpl::render($view, array(), $this, $expansion);
 	}
@@ -612,6 +613,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		// third call
 		return $this->getOffset($offset);
 	}
+
+    /*public function __isset($offset) {
+        return $this->offsetExists($offset);
+    }*/
 
 	/**
 	 * new call method

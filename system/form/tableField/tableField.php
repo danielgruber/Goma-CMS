@@ -497,7 +497,7 @@ class tableField extends FormField {
      * @param   bool $subController
      * @return  false|mixed|null
      */
-	function handleRequest($request, $subController = false) {
+	public function handleRequest($request, $subController = false) {
 
 		$this->request = $request;
 		

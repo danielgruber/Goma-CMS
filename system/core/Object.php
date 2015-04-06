@@ -428,6 +428,7 @@ abstract class Object
     {
         // Set class name
         $this->classname = strtolower(get_class($this));
+        $this->class = $this->classname;
 
         if (isset(ClassInfo::$class_info[$this->classname]["inExpansion"])) {
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;

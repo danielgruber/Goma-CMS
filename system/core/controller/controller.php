@@ -284,8 +284,8 @@ class Controller extends RequestHandler
 		{
 				$this->areaData = array();
 				
-				if(ClassInfo::getStatic($this->class, "less_vars")) {
-					Resources::$lessVars = ClassInfo::getStatic($this->class, "less_vars");
+				if(ClassInfo::hasStatic($this->classname, "less_vars")) {
+					Resources::$lessVars = ClassInfo::getStatic($this->classname, "less_vars");
 				}
 
 				$data = $this->__output(parent::handleRequest($request, $subController));
