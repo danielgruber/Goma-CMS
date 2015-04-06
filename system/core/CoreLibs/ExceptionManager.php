@@ -43,6 +43,11 @@ class ExceptionManager {
 	*/
 	const CLASSINFO_WRITE_ERROR = -8;
 
+    /**
+     * class not found.
+     */
+    const CLASS_NOT_FOUND = -7;
+
 	/**
 	 * called when version.php cant be written.
 	*/

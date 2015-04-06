@@ -470,15 +470,16 @@ class DBField extends Object implements DataBaseField
 		
 		return $data;
 	}
-	
-	/**
-	 * gets a var for template
-	 *
-	 *@name getTemplateVar
-	*/
+
+    /**
+     * gets a var for template
+     *
+     * @name getTemplateVar
+     * @return string|null
+     */
 	public function getTemplateVar($var) {
 		if(strpos($var, ".")) {
-			throwError(6, "Invalid Argument Error", "Argument " . $var . " is not allowed in a DB-Field, because it's recursive.");
+            throw new InvalidArgumentException('Arguments with dots like "' . $var . '" are not allowed in a DB-Field, because it\'s recursive.');
 		}
 		
 		// check for args
@@ -489,9 +490,10 @@ class DBField extends Object implements DataBaseField
 			$args = array();
 		}
 		
-		if(Object::method_exists($this, $var))
-			return call_user_func_array(array($this, $var), $args);
-		
+		if(Object::method_exists($this, $var)) {
+            return call_user_func_array(array($this, $var), $args);
+        }
+
 		return null;
 	}
 	

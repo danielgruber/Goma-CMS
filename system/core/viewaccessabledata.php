@@ -298,28 +298,26 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return $this->ToArray($additional_fields);
 	}
 
-	/**
-	 * to customise this data with own special data which is not part of the model, but needed in view.
-	 *
-	 *@param array - data for loops
-	 *@param array - replacement-data
-	 */
-	public function customise($loops = array(), $loops_2 = array()) {
-		if(!empty($loops_2))
-			$loops = array_merge($loops, $loops_2);
-
+    /**
+     * to customise this data with own special data which is not part of the model, but needed in view.
+     *
+     * @param array - data for loops
+     * @return $this
+     */
+	public function customise($loops = array()) {
 		$loops = Arraylib::map_key($loops, "strtolower");
 		$this->customised = array_merge($this->customised, $loops);
 
 		return $this;
 	}
 
-	/**
-	 * returns a customised object.
-	 *
-	 * @name 	customisedObject
-	 * @param 	array - data
-	*/
+    /**
+     * returns a customised object.
+     *
+     * @name    customisedObject
+     * @param    array - data
+     * @return ViewAccessableData
+     */
 	public function customisedObject($data) {
 		$new = clone $this;
 		$new->customised = array_merge($new->customised, $data);
@@ -519,7 +517,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *@access public
 	 *@param string - name
 	 */
-	public function __cancall($name) {
+	public function __canCall($name) {
 		$name = trim($name);
 		$lowername = strtolower($name);
 
@@ -531,7 +529,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		} else
 
 		// server
-		if($this->isServer($name, $lowername)) {
+		if($this->isServerMethod($lowername)) {
 			return true;
 		} else
 		// data
@@ -543,19 +541,21 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return false;
 	}
 
-	/**
-	 * checks if the offset exists
-	 *@name offsetExists
-	 */
+    /**
+     * checks if the offset exists
+     * @name offsetExists
+     * @return bool
+     */
 	public function offsetExists($offset) {
 		// third call
-		return Object::method_exists($this, $offset);
+		return $this->__cancall($offset);
 	}
 
-	/**
-	 * is field
-	 *
-	 */
+    /**
+     * is field
+     * @param $name name of field
+     * @return bool
+     */
 	public function isField($name) {
 		$name = trim(strtolower($name));
 
@@ -570,21 +570,23 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return $this->__cancall($offset);
 	}
 
-	/**
-	 * checks if there is a method get + $name or $name
-	 *
-	 *@param string - name
-	 */
+    /**
+     * checks if there is a method get + $name or $name
+     *
+     * @param string - name
+     * @return bool
+     */
 	public function isOffsetMethod($name) {
 		return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->classname, "get" . $name));
 	}
 
-	/**
-	 * checks if Server-var exists
-	 *
-	 *@param string - offset
-	 */
-	public function isServer($offset, $lowerOffset) {
+    /**
+     * checks if Server-var exists
+     *
+     * @param string offset in lowercase
+     * @return bool
+     */
+	public function isServerMethod($lowerOffset) {
 
 		if(substr($lowerOffset, 0, 8) == "_server_") {
 			$key = substr($lowerOffset, 8);
@@ -614,9 +616,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return $this->getOffset($offset);
 	}
 
-    /*public function __isset($offset) {
-        return $this->offsetExists($offset);
-    }*/
+    public function __isset($offset) {
+        return $this->__cancall($offset);
+    }
 
 	/**
 	 * new call method
@@ -624,32 +626,36 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 */
 	public function __call($name, $args) {
 		$name = trim($name);
-		$lowername = strtolower($name);
 
-		return $this->makeObject($lowername, $this->getOffset($name, $args));
+		return $this->makeObject($name, $this->getOffset($name, $args));
 	}
 
-	/**
-	 * gets a given offset.
-	 *
-	 *@param string $offset offset
-	 */
+    /**
+     * gets a given offset.
+     *
+     * @param string $offset offset
+     * @return mixed
+     */
 	public function offsetGet($offset) {
 		return $this->__get($offset);
 	}
 
-	/**
-	 * data layer
-	 *
-	 */
+    /**
+     * data layer
+     * @param $name
+     * @return string
+     */
 	public function fieldGet($name) {
 		$name = trim(strtolower($name));
-		if(isset($this->data[$name]))
-			return $this->data[$name];
-		else if(isset($this->defaults[$name]))
-			return $this->defaults[$name];
-		else
-			return null;
+		if(isset($this->data[$name])) {
+            return $this->data[$name];
+        }
+
+        if(isset($this->defaults[$name])) {
+            return $this->defaults[$name];
+        }
+
+        return null;
 	}
 
 	/**
@@ -676,25 +682,24 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		if(PROFILE)
 			Profiler::unmark("ViewAccessableData::getOffset");
 
-		$return = $this->executeCasting($this->tryCasting($name), $data);
+        if($this->shouldCast($name)) {
+            $data = $this->executeCasting($name, $data);
+        }
 
-		return $return;
+		return $data;
 	}
 
-	/**
-	 * if try-casting is set to true it will try casting data, else it returns it blank.
-	 *
-	 * @name 	executeCasting
-	 * @param 	boolean - shouldcast
-	 * @param 	mixed data
-	*/
-	protected function executeCasting($shouldCast, $data) {
-		if(!$shouldCast) {
-			return $data;
-		}
-
+    /**
+     * if try-casting is set to true it will try casting data, else it returns it blank.
+     *
+     * @name    executeCasting
+     * @param    boolean - shouldcast
+     * @param    mixed data
+     * @return  DBField|ViewAccessableData
+     */
+	protected function executeCasting($name, $data) {
 		if(is_array($data) && isset($data["casting"], $data["value"])) {
-			return DBField::getObjectByCasting($data["casting"], $lowername, $data["value"]);
+			return DBField::getObjectByCasting($data["casting"], $name, $data["value"]);
 		}
 
 		if(is_array($data)) {
@@ -704,13 +709,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return $data;
 	}
 
-	/**
-	 * give a boolean if we should just return the data without trying to cast it.
-	 *
-	 * @name 	tryCasting
-	 * @param 	string $name
-	*/
-	protected function tryCasting($name) {
+    /**
+     * give a boolean if we should just return the data without trying to cast it.
+     *
+     * @name    tryCasting
+     * @param    string $name
+     * @return bool
+     */
+	protected function shouldCast($name) {
 		$lowername = strtolower($name);
 		if($lowername == "baseclass") {
 			return false;
@@ -727,13 +733,14 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return true;
 	}
 
-	/**
-	 * gets data for offset.
-	 *
-	 * @name 	getOffsetData
-	 * @param 	name
-	 * @param 	args
-	*/
+    /**
+     * gets data for offset.
+     *
+     * @name    getOffsetData
+     * @param    name
+     * @param    args
+     * @return  mixed
+     */
 	protected function getOffsetData($name, $args) {
 		$lowername = strtolower($name);
 
@@ -759,18 +766,19 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			return $this->data[$lowername];
 		} 
 
-		if($this->isServer($name, $lowername)) {
+		if($this->isServerMethod($lowername)) {
 			return $this->serverGet($name, $lowername);
 		}
 
 		return null;
 	}
 
-	/**
-	 * gets server-var
-	 *
-	 *@param string - offset
-	 */
+    /**
+     * gets server-var
+     *
+     * @param string - offset
+     * @return bool|string
+     */
 	public function ServerGet($offset, $loweroffset) {
 
 		if(substr($loweroffset, 0, 8) == "_server_") {
@@ -804,14 +812,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		}
 	}
 
-	/**
-	 * gets a var for template
-	 *
-	 *@name getTemplateVar
-	 */
+    /**
+     * gets a var for template
+     *
+     * @name getTemplateVar
+     * @return string
+     */
 	public function getTemplateVar($var) {
-		if(PROFILE)
-			Profiler::mark("ViewAccessableData::getTemplateVar");
 
 		if(strpos($var, ".")) {
 			$currentvar = substr($var, 0, strpos($var, "."));
@@ -826,44 +833,37 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		$casting = $this->casting();
 
+        // non recursive
 		if($remaining == "") {
 			if(is_object($data)) {
-				if(PROFILE)
-					Profiler::unmark("ViewAccessableData::getTemplateVar");
 				return $data->forTemplate();
 			} else if(isset($casting[$currentvar])) {
-				if(PROFILE)
-					Profiler::unmark("ViewAccessableData::getTemplateVar");
 				return $this->makeObject($currentvar, $data)->forTemplate();
 			} else {
-				if(PROFILE)
-					Profiler::unmark("ViewAccessableData::getTemplateVar");
 				return $data;
 			}
 		} else {
+
+            // recursive
 			if(is_object($data)) {
-				if(PROFILE)
-					Profiler::unmark("ViewAccessableData::getTemplateVar");
 				return $data->getTemplateVar($remaining);
 			} else if(isset($casting[$currentvar])) {
-				if(PROFILE)
-					Profiler::unmark("ViewAccessableData::getTemplateVar");
 				return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
 			} else {
-				log_error("Not-Recursive-Error: Argument " . $var . " wasn't found because it's not recursive.");
-				return null;
+				return $data;
 			}
 		}
 	}
 
 	//!Attribute-Object-Generation
-	/**
-	 * generates an object from given data.
-	 *
-	 * @name 	makeObject
-	 * @param 	string key or name of object
-	 * @param 	mixed data
-	 */
+    /**
+     * generates an object from given data.
+     *
+     * @name    makeObject
+     * @param    string key or name of object
+     * @param    mixed data
+     * @return   Object
+     */
 	public function makeObject($name, $data) {
 		if(PROFILE)
 			Profiler::mark("ViewAccessableData::makeObject");
@@ -882,7 +882,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		if(is_object($data)) {
 			return $data;
 
-
 		// if is array, get as array-object
 		} else if(is_array($data)) {
 			$object = new ViewAccessAbleData($data);
@@ -890,7 +889,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			return $object;
 
 		// default object for server-vars
-		} else if($this->isServer($name, strtolower($name))) {
+		} else if($this->isServerMethod(strtolower($name))) {
 			$object = DBField::getObjectByCasting("varchar", $name, $data);
 			return $object;
 		} else {
@@ -905,11 +904,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		}
 	}
 
-	/**
-	 * gets offset as object
-	 *@name doObject
-	 *@param string - name of offset
-	 */
+    /**
+     * gets offset as object
+     * @name doObject
+     * @param string - name of offset
+     * @return Object
+     */
 	public function doObject($offset) {
 		return $this->__call($offset, array());
 	}
@@ -1118,18 +1118,20 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 	 *@name owner
 	 */
 	protected $owner;
-	/**
-	 * sets the owner-class
-	 *@name setOwner
-	 */
+
+    /**
+     * sets the owner-class
+     * @name setOwner
+     * @return $this
+     */
 	public function setOwner($object) {
 		if(!is_object($object)) {
-			throwError(20, 'PHP-Error', '$object isn\'t a object in ' . __FILE__ . ' on line ' . __LINE__ . '');
+            throw new InvalidArgumentException('Object is not an object');
 		}
 		if(class_exists($object->classname)) {
 			$this->owner = $object;
 		} else {
-			throwError(20, 'PHP-Error', 'Class ' . $class . ' doesn\'t exist in context.');
+            throw new LogicException('Class ' . $class . ' not found.', ExpansionManager::CLASS_NOT_FOUND);
 		}
 
 		return $this;

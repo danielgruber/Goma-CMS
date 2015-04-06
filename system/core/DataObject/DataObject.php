@@ -4902,7 +4902,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 				}
 			}
 		}
-		
+
+
 		$db = $this->generateDBFields(false);
 		if (isset($db["last_modified"]))
 			$indexes["last_modified"] = "INDEX";
