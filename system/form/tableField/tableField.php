@@ -512,7 +512,7 @@ class tableField extends FormField {
 		foreach($this->getComponents() as $component) {
             $action = $this->getActionFromComponent($component, $request);
             if($action !== false) {
-                $content = $this->executeAction($component, $action);
+                $content = $this->executeAction($component, $action, $request);
                 if($content !== false) {
                     return $content;
                 }
@@ -554,12 +554,12 @@ class tableField extends FormField {
      * @param   string $action
      * @return  string
      */
-    public function executeAction($component, $action) {
+    public function executeAction($component, $action, $request) {
         if(!method_exists($component, 'checkAccessAction') || $component->checkAccessAction($action)) {
             if(!$action) {
-               return $component->index();
+               return $component->index($this, $request);
             } else if(is_string($action)) {
-                return $component->$action;
+                return $component->$action($this, $request);
             } else {
                 throw new LogicException( 'Non-string method name: ' . var_export($action, true));
             }

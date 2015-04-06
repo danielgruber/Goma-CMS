@@ -15,6 +15,9 @@
  * @property Uploads avatar
  * @property int status
  * @property string password
+ * @property int avatarid
+
+ * @method DataObjectSet<Group> groups() groups($filter, $sort, $limit)
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
@@ -643,7 +646,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	*/
 	public function getImage() {
 		if($this->avatar) {
-			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classnamename != "gravatarimagehandler") || $this->avatar->classnamename == "gravatarimagehandler") {
+			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classname != "gravatarimagehandler") || $this->avatar->classname == "gravatarimagehandler") {
 				$this->avatarid = 0;
 				$this->write(false, true, 2, false, false);
 				return new GravatarImageHandler(array("email" => $this->email));
