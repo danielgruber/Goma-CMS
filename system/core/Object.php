@@ -22,7 +22,7 @@ abstract class Object {
 	 * caches
 	 */
 	static private $method_cache = array(), $cache_extensions = array();
-m
+
 	/**
 	 * Extension methods.
 	 */
