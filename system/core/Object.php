@@ -219,9 +219,11 @@ abstract class Object {
 	 * @return boolean
 	 */
 	public static function method_exists($class, $method) {
-		if(PROFILE) {
-			Profiler::mark("Object::method_exists");
-		}
+
+
+        if(PROFILE) {
+            Profiler::mark("Object::method_exists");
+        }
 
 		// Gets class name if $class is an object.
 		if(is_object($class)) {
@@ -235,36 +237,33 @@ abstract class Object {
 		$class = strtolower(trim($class));
 		$method = strtolower(trim($method));
 
-		// last checks
-		if($class == "" || $method == "") {
-            if(PROFILE) Profiler::unmark("Object::method_exists");
-			throw new InvalidArgumentException("Class and method must be a valid string.");
-		}
+        // check for extra methods here
+        $res = self::method_exists_on_object($class, $method, $object);
+        if(!$res) {
+            // check on parents
+            $res = self::check_for_extra_methods_recursive($class, $method);
+        }
 
-		if($res = self::method_exists_on_object($class, $method, $object) || self::check_for_extra_methods_recursive($class, $method)) {
-			
-			// we hold a method-cache to react to queries faster after first check.
-			if(!isset(self::$method_cache[$class . "::" . $method]) && $res != self::METHOD_ON_OBJECT_FOUND) {
-				self::$method_cache[$class . "::" . $method] = true;
-			}
-
-            if(PROFILE) Profiler::unmark("Object::method_exists");
-			return true;
-		}
-
-		self::$method_cache[$class . "::" . $method] = false;
+        // we hold a method-cache to react to queries faster after first check.
+        if(!isset(self::$method_cache[$class . "::" . $method]) && $res != self::METHOD_ON_OBJECT_FOUND) {
+            self::$method_cache[$class . "::" . $method] = (bool) $res;
+        }
 
 		if(PROFILE) {
 			Profiler::unmark("Object::method_exists");
 		}
 
-		return false;
+		return (bool) $res;
 	}
 
-	/**
-	 * searches for method and returns true or false when exists or not.
-	 * it won't search recusrivly upwards. arguments must be trimmed and lowercase.
-	*/
+    /**
+     * searches for method and returns true or false when exists or not.
+     * it won't search recursively upwards. arguments must be trimmed and lowercase.
+     * @param classname $class
+     * @param method-name $method
+     * @param instance of classname for __cancall null $object
+     * @return int
+     */
 	protected static function method_exists_on_object($class, $method, $object = null) {
 		
 		if(isset(self::$method_cache[$class . "::" . $method])) {
@@ -280,12 +279,12 @@ abstract class Object {
 
 		// check native
 		if(method_exists($class, $method) && is_callable(array($class, $method))) {
-			return true;
+			return 1;
 		}
 
 		// check in DB
 		if(isset(self::$extra_methods[$class][$method]) || isset(self::$temp_extra_methods[$class][$method])) {
-			return true;
+			return 1;
 		}
 
 		// check on object
@@ -293,7 +292,7 @@ abstract class Object {
 			return self::METHOD_ON_OBJECT_FOUND;
 		}
 
-		return false;
+		return 0;
 	}
 
 	/**

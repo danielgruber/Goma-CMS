@@ -36,16 +36,17 @@ class SettingsController extends Controller {
 		}
 	}
 
-	/**
-	 * gets a value for settings-key.
-	 *
-	 * @name 	get
-	 * @access 	public
-	 * @param 	string - name
-	*/
+    /**
+     * gets a value for settings-key.
+     *
+     * @name    get
+     * @access    public
+     * @param    string - name
+     * @return mixed|null
+     */
 	public static function get($name)
 	{	
-		return isset(self::$settingsCache[$name]) ? self::$settingsCache[$name] : null;
+		return isset(self::$settingsCache->$name) ? self::$settingsCache->$name : null;
 	}
 	
 	/**

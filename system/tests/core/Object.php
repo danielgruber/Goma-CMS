@@ -93,6 +93,12 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 
 		$this->assertFalse(Object::method_exists($this->dummyMethod->classname, "myDynamicMethod"));
 	}
+
+    public function testEmptyMethod() {
+        $this->assertFalse(Object::method_exists("", ""));
+        $this->assertFalse(Object::method_exists("test", ""));
+        $this->assertFalse(Object::method_exists("", "test"));
+    }
 }
 
 class DummyMethodTest extends Object {
