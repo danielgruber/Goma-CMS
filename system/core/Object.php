@@ -84,7 +84,7 @@ abstract class Object
      * @return string classname
      */
     protected static function validate_static_call($class, $var) {
-        $class = self::class_exists($class);
+        $class = ClassInfo::find_class_name($class);
 
         if(empty($var)) {
             throw new LogicException("Invalid name of variable $var for $class");
@@ -382,7 +382,7 @@ abstract class Object
 
         if (PROFILE) Profiler::mark('Object::instance');
 
-        $class = self::class_can_be_created($class);
+        $class = ClassInfo::find_creatable_class($class);
         if (!isset(self::$cache_singleton_classes[$class])) {
             self::$cache_singleton_classes[$class] = new $class;
         }
@@ -390,41 +390,6 @@ abstract class Object
         if (PROFILE) Profiler::unmark("Object::instance");
 
         return clone self::$cache_singleton_classes[$class];
-    }
-
-    /**
-     * validates that a class can be created and returns classname if it can.
-     *
-     * @param string class
-     * @return string
-     * @throws LogicException
-     */
-    protected static function class_can_be_created($class) {
-        $class = self::class_exists($class);
-
-        if (ClassInfo::isAbstract($class)) {
-            throw new LogicException("Cannot initiate abstract Class");
-        }
-
-        return $class;
-    }
-
-    /**
-     * returns if class exists and is not empty.
-     * it returns correct class-name.
-     *
-     * @param string class
-     * @return string
-     * @throws LogicException
-     */
-    protected static function class_exists($class) {
-        $class = ClassManifest::resolveClassName($class);
-
-        if(!ClassInfo::exists($class) && !class_exists($class, false)) {
-            throw new LogicException("Cannot find unknown class");
-        }
-
-        return $class;
     }
 
     /**
@@ -448,22 +413,16 @@ abstract class Object
      */
     public function initStatics()
     {
-        if (!isset(ClassInfo::$set_save_vars[$this->classname])) {
-            ClassInfo::setSaveVars($this->classname);
-            $this->defineStatics();
-        } else if (!isset(self::$loaded[$this->classname])) {
-            $this->defineStatics();
+        if (!isset(self::$loaded[$this->classname])) {
+            if (!isset(ClassInfo::$set_save_vars[$this->classname])) {
+                ClassInfo::setSaveVars($this->classname);
+            }
+
+            if(self::method_exists($this->classname, "defineStatics")) {
+                $this->defineStatics();
+            }
             self::$loaded[$this->classname] = true;
         }
-    }
-
-    /**
-     * Defines some basic stuff, but it has already an object loaded. You can hook in
-     * here for subclasses.
-     */
-    protected function defineStatics()
-    {
-
     }
 
     /**
@@ -706,6 +665,7 @@ abstract class Object
      *
      * @name getResourceFolder
      * @access public
+     * @return null|string
      */
     public function getResourceFolder($forceAbsolute = false, $exp = null)
     {

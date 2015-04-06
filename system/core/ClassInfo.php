@@ -92,11 +92,12 @@ class ClassInfo extends Object {
 	*/
 	public static $interfaces = array();
 
-	/**
-	 * registers a hook on class info loaded
-	 *
-	 *@param mixed - callback
-	 */
+    /**
+     * registers a hook on class info loaded
+     *
+     * @param mixed - callback
+     * @return bool
+     */
 	public static function onClassInfoLoaded($call) {
 		if(!is_callable($call)) {
 			return false;
@@ -109,11 +110,12 @@ class ClassInfo extends Object {
 		return true;
 	}
 
-	/**
-	 * gets the childs of a class
-	 *
-	 *@param string - class_name
-	 */
+    /**
+     * gets the childs of a class
+     *
+     * @param string - class_name
+     * @return array
+     */
 	public static function getChildren($class) {
 
 		$class = ClassManifest::resolveClassName($class);
@@ -138,12 +140,13 @@ class ClassInfo extends Object {
 		return isset(self::$class_info[$class]["interfaces"]) ? self::$class_info[$class]["interfaces"] : array();
 	}
 
-	/**
-	 * checks if the class has the interface
-	 *
-	 *@param string - class
-	 *@param string - interface
-	 */
+    /**
+     * checks if the class has the interface
+     *
+     * @param string - class
+     * @param string - interface
+     * @return bool
+     */
 	public static function hasInterface($class, $interface) {
 		$class = ClassManifest::resolveClassName($class);
 
@@ -170,10 +173,11 @@ class ClassInfo extends Object {
 		return isset(classinfo::$class_info[$class]["table"]) ? classinfo::$class_info[$class]["table"] : false;
 	}
 
-	/**
-	 * gets db-fields of an table
-	 *@param string - table
-	 */
+    /**
+     * gets db-fields of an table
+     * @param string - table
+     * @return array
+     */
 	public static function getTableFields($table) {
 		return isset(self::$database[$table]) ? self::$database[$table] : array();
 	}
@@ -186,8 +190,43 @@ class ClassInfo extends Object {
 	public static function exists($class) {
 		$class = ClassManifest::resolveClassName($class);
 
-		return isset(self::$class_info[strtolower($class)]);
+		return (isset(self::$class_info[strtolower($class)]) || class_exists($class, false));
 	}
+
+    /**
+     * validates that a class can be created and returns classname if it can.
+     *
+     * @param string class
+     * @return string
+     * @throws LogicException
+     */
+    public static function find_creatable_class($class) {
+        $class = self::find_class_name($class);
+
+        if (self::isAbstract($class)) {
+            throw new LogicException("Cannot initiate abstract Class");
+        }
+
+        return $class;
+    }
+
+    /**
+     * returns if class exists and is not empty.
+     * it returns correct class-name.
+     *
+     * @param string class
+     * @return string
+     * @throws LogicException
+     */
+    public static function find_class_name($class) {
+        $class = ClassManifest::resolveClassName($class);
+
+        if(!ClassInfo::exists($class) && !class_exists($class, false)) {
+            throw new LogicException("Cannot find unknown class");
+        }
+
+        return $class;
+    }
 
 	/**
 	 * adds a var to cache
@@ -360,13 +399,14 @@ class ClassInfo extends Object {
 
 	}
 
-	/**
-	 * returns the base-folder of a expansion or class.
-	 *
-	 * @param 	string 	extension or class-name
-	 * @param 	bool 	if force to use as class-name
-	 * @param 	bool 	if force to be absolute path.
-	 */
+    /**
+     * returns the base-folder of a expansion or class.
+     *
+     * @param    string    extension or class-name
+     * @param    bool    if force to use as class-name
+     * @param    bool    if force to be absolute path.
+     * @return null|string
+     */
 	public static function getExpansionFolder($name, $forceAbsolute = false) {
 		$name = self::getExpansionName($name);
 		if(!isset($name)) {
