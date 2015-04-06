@@ -81,13 +81,10 @@ abstract class Object
      *
      * @param string $class
      * @param string $var
+     * @return string classname
      */
-    protected static function validateStaticCall($class, $var) {
-        $class = ClassManifest::resolveClassName($class);
-
-        if(empty($class) || (!ClassInfo::exists($class) && !class_exists($class, false))) {
-            throw new LogicException("Invalid name of class $class");
-        }
+    protected static function validate_static_call($class, $var) {
+        $class = self::class_exists($class);
 
         if(empty($var)) {
             throw new LogicException("Invalid name of variable $var for $class");
@@ -106,7 +103,7 @@ abstract class Object
      */
     public static function getStatic($class, $var)
     {
-        $class = self::validateStaticCall($class, $var);
+        $class = self::validate_static_call($class, $var);
         return eval('return isset(' . $class . '::$' . $var . ") ? " . $class . '::$' . $var . " : null;");
     }
 
@@ -120,7 +117,7 @@ abstract class Object
      */
     public static function hasStatic($class, $var)
     {
-        $class = self::validateStaticCall($class, $var);
+        $class = self::validate_static_call($class, $var);
         return eval('return isset(' . $class . '::$' . $var . ');');
     }
 
@@ -135,7 +132,7 @@ abstract class Object
      */
     public static function setStatic($class, $var, $value)
     {
-        $class = self::validateStaticCall($class, $var);
+        $class = self::validate_static_call($class, $var);
         return eval('
         if(isset('.$class.'::$'.$var.'))
             ' . $class . '::$' . $var . ' = ' . var_export($value, true) . ';
@@ -153,7 +150,7 @@ abstract class Object
      */
     public static function callStatic($class, $func)
     {
-        $class = self::validateStaticCall($class, $func);
+        $class = self::validate_static_call($class, $func);
 
         if(is_callable(array($class, $func))) {
             return call_user_func_array(array($class, $func), array($class));
@@ -385,7 +382,7 @@ abstract class Object
 
         if (PROFILE) Profiler::mark('Object::instance');
 
-        $class = self::classCanBeCreated($class);
+        $class = self::class_can_be_created($class);
         if (!isset(self::$cache_singleton_classes[$class])) {
             self::$cache_singleton_classes[$class] = new $class;
         }
@@ -398,24 +395,33 @@ abstract class Object
     /**
      * validates that a class can be created and returns classname if it can.
      *
-     * @param class
+     * @param string class
      * @return string
      * @throws LogicException
      */
-    protected static function classCanBeCreated($class) {
-        $class = ClassManifest::resolveClassName($class);
-
-        // error catching
-        if ($class == "") {
-            throw new LogicException("Cannot initiate empty Class");
-        }
+    protected static function class_can_be_created($class) {
+        $class = self::class_exists($class);
 
         if (ClassInfo::isAbstract($class)) {
             throw new LogicException("Cannot initiate abstract Class");
         }
 
+        return $class;
+    }
+
+    /**
+     * returns if class exists and is not empty.
+     * it returns correct class-name.
+     *
+     * @param string class
+     * @return string
+     * @throws LogicException
+     */
+    protected static function class_exists($class) {
+        $class = ClassManifest::resolveClassName($class);
+
         if(!ClassInfo::exists($class) && !class_exists($class, false)) {
-            throw new LogicException("Cannot initiate unknown class");
+            throw new LogicException("Cannot find unknown class");
         }
 
         return $class;
