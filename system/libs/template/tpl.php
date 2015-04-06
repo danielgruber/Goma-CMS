@@ -191,7 +191,7 @@ class tpl extends Object
 						}
 						
 						if(is_object($class) && $class->inExpansion) {
-							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ExpansionManager::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ExpansionManager::getExpansionFolder($class->inExpansion) . "views";
 							if(Resources::file_exists($viewpath . "/" . $name))
 							{
 								return $viewpath . "/" . $name;
@@ -201,7 +201,7 @@ class tpl extends Object
 						}
 						
 						if(isset($expansion)) {
-							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ExpansionManager::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ExpansionManager::getExpansionFolder($expansion) . "views";
 							if(Resources::file_exists($viewpath . "/" . $name))
 							{
 								return $viewpath . "/" . $name;
@@ -267,7 +267,7 @@ class tpl extends Object
 						}
 						
 						if(is_object($class) && $class->inExpansion) {
-							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ClassInfo::getExpansionFolder($class->inExpansion) . "views";
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"]) ? ExpansionManager::getExpansionFolder($class->inExpansion) . ClassInfo::$appENV["expansion"][$class->inExpansion]["viewFolder"] : ExpansionManager::getExpansionFolder($class->inExpansion) . "views";
 							if(file_exists($viewpath . "/" . $name))
 							{
 								return $viewpath . "/" . $name;
@@ -277,7 +277,7 @@ class tpl extends Object
 						}
 						
 						if(isset($expansion)) {
-							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ClassInfo::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ClassInfo::getExpansionFolder($expansion) . "views";
+							$viewpath = isset(ClassInfo::$appENV["expansion"][$expansion]["viewFolder"]) ? ExpansionManager::getExpansionFolder($expansion) . ClassInfo::$appENV["expansion"][$expansion]["viewFolder"] : ExpansionManager::getExpansionFolder($expansion) . "views";
 							if(file_exists($viewpath . "/" . $name))
 							{
 								return $viewpath . "/" . $name;
@@ -1138,7 +1138,7 @@ class tplCaller extends Object implements ArrayAccess
 			if(!isset(ClassInfo::$appENV["expansion"][$exp]))
 				return "";	
 			
-			$extFolder = ClassInfo::getExpansionFolder($exp, false);
+			$extFolder = ExpansionManager::getExpansionFolder($exp, false);
 		 	return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
 		}
 		

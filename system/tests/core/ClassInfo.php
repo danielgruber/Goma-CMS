@@ -32,7 +32,7 @@ class ClassInfoTests extends GomaUnitTest {
 			"folder" => $folder
 		);
 
-		$this->assertEqual(ClassInfo::getExpansionFolder($query), $expected, "Expansion Test $name %s");
+		$this->assertEqual(ExpansionManager::getExpansionFolder($query), $expected, "Expansion Test $name %s");
 
 		unset(ClassInfo::$appENV["expansion"][$name]);
 	}

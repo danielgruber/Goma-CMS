@@ -12,7 +12,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-gloader::addLoadAble("rating", ClassInfo::getExpansionFolder("gomacms_rating") . "classes/rating.js");
+gloader::addLoadAble("rating", ExpansionManager::getExpansionFolder("gomacms_rating") . "classes/rating.js");
 
 class Rating extends DataObject
 {

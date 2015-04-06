@@ -408,55 +408,7 @@ class ClassInfo extends Object {
      * @return null|string
      */
 	public static function getExpansionFolder($name, $forceAbsolute = false) {
-		$name = self::getExpansionName($name);
-		if(!isset($name)) {
-			return null;
-		}
-
-		$data = self::getExpansionData($name);
-		$folder = $data["folder"];
-
-		if(isset($folder)) {
-			if($forceAbsolute) {
-				return realpath($folder) . "/";
-			} else {
-				return self::makePathRelative($folder);
-			}
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * determines expansion name by classname or expansion-name.
-	 *
-	 * @param 	string name
-	 * @return 	string|null
-	*/
-	public static function getExpansionName($name) {
-		if(is_object($name)) {
-			if(isset($name->inExpansion) && self::getExpansionData($name->inExpansion)) {
-				return $name->inExpansion;
-			} else {
-				$name = ClassManifest::resolveClassName($name);
-			}
-		}
-
-		if(isset(ClassInfo::$class_info[$name]["inExpansion"]) && self::getExpansionData(ClassInfo::$class_info[$name]["inExpansion"])) {
-			return ClassInfo::$class_info[$name]["inExpansion"];
-		}
-
-		return self::getExpansionData($name) ? $name : null;
-	}
-
-	/**
-	 * returns data if expansion with given name exists, else null.
-	 *
-	 * @param 	string name
-	 * @return 	array|null
-	*/
-	public static function getExpansionData($name) {
-		return isset(self::$appENV["expansion"][strtolower($name)]) ? self::$appENV["expansion"][strtolower($name)] : null;
+		return ExpansionManager::getExpansionFolder($name, $forceAbsolute);
 	}
 
 	/**
@@ -464,38 +416,43 @@ class ClassInfo extends Object {
 	 *
 	 */
 	public static function appVersion() {
-		if(isset(self::$appENV["app"]["build"]))
-			return self::$appENV["app"]["version"] . "-" . self::$appENV["app"]["build"];
+		if(isset(self::$appENV["app"]["build"])) {
+            return self::$appENV["app"]["version"] . "-" . self::$appENV["app"]["build"];
+        }
 
 		return self::$appENV["app"]["version"];
 	}
 
-	/**
-	 * gets the full version of a installed expansion
-	 *
-	 *@param string - name of expansion
-	 */
+    /**
+     * gets the full version of a installed expansion
+     *
+     * @param string - name of expansion
+     * @return bool|string
+     */
 	public static function expVersion($name) {
-		if(!isset(self::$appENV["expansion"][$name]))
-			return false;
+		if(!isset(self::$appENV["expansion"][$name])) {
+            return false;
+        }
 
-		if(isset(self::$appENV["expansion"][$name]["build"]))
-			return self::$appENV["expansion"][$name]["version"] . "-" . self::$appENV["expansion"][$name]["build"];
+		if(isset(self::$appENV["expansion"][$name]["build"])) {
+            return self::$appENV["expansion"][$name]["version"] . "-" . self::$appENV["expansion"][$name]["build"];
+        }
 
 		return self::$appENV["expansion"][$name]["version"];
 	}
 
-	/**
-	 * finds a file belonging to a class
-	 *
-	 *@param string - file
-	 *@param string - class
-	 */
+    /**
+     * finds a file belonging to a class
+     *
+     * @param string - file
+     * @param string - class
+     * @return bool|string
+     */
 	public static function findFile($file, $class) {
 
 		$class = ClassManifest::resolveClassName($class);
 
-		if($folder = self::getExpansionFolder($class)) {
+		if($folder = ExpansionManager::getExpansionFolder($class)) {
 			if(file_exists($folder . "/" . $file)) {
 				return $folder . "/" . $file;
 			}
@@ -518,12 +475,13 @@ class ClassInfo extends Object {
 		}
 	}
 
-	/**
-	 * finds a file belonging to a class with absolute path
-	 *
-	 *@param string - file
-	 *@param string - class
-	 */
+    /**
+     * finds a file belonging to a class with absolute path
+     *
+     * @param string - file
+     * @param string - class
+     * @return bool|string
+     */
 	public static function findFileAbsolute($file, $class) {
 		if($path = self::findFile($file, $class)) {
 			return realpath($path);
@@ -532,12 +490,13 @@ class ClassInfo extends Object {
 		}
 	}
 
-	/**
-	 * finds a file belonging to a class with relative path
-	 *
-	 *@param string - file
-	 *@param string - class
-	 */
+    /**
+     * finds a file belonging to a class with relative path
+     *
+     * @param string - file
+     * @param string - class
+     * @return bool|string
+     */
 	public static function findFileRelative($file, $class) {
 		if($path = self::findFile($file, $class)) {
 			return self::makePathRelative($path);
@@ -549,7 +508,7 @@ class ClassInfo extends Object {
 	/**
  	 * makes a path relative.
 	*/
-	protected function makePathRelative($path) {
+	public static function makePathRelative($path) {
 		if(substr($path, 0, strlen(ROOT)) == ROOT) {
 			return substr($path, strlen(ROOT));
 		} else {
@@ -667,9 +626,10 @@ class ClassInfo extends Object {
 			self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
 
 			if(isset(self::$appENV["expansion"])) {
+                ClassManifest::tryToInclude("ExpansionManager", 'system/Core/CoreLibs/ExpansionManager.php');
 				// expansions
 				foreach(self::$appENV["expansion"] as $expansion => $data) {
-					self::checkForUpgradeScripts(self::getExpansionFolder($expansion), self::expVersion($expansion));
+					self::checkForUpgradeScripts(ExpansionManager::getExpansionFolder($expansion), self::expVersion($expansion));
 				}
 			}
 
@@ -764,9 +724,10 @@ class ClassInfo extends Object {
 						self::$class_info[$class][$value] = self::getStatic($class, $value);
 						unset($value);
 					}
+
 					// ci-funcs
 					// that are own function, for generating class-info
-					foreach(classinfo::getStatic($class, "ci_funcs") as $name => $func) {
+					foreach(ClassInfo::getStatic($class, "ci_funcs") as $name => $func) {
 						self::$class_info[$class][$name] = classinfo::callStatic($class, $func);
 						unset($name, $func);
 					}

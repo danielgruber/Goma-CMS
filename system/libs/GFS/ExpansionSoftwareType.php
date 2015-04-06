@@ -99,7 +99,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			if(isset($info["changelog"]))
 				$data["changelog"] = $info["changelog"];
 			
-			$errors = self::checkMovePerms($gfs, "contents/", ClassInfo::getExpansionFolder($appInfo["name"]));
+			$errors = self::checkMovePerms($gfs, "contents/", ExpansionManager::getExpansionFolder($appInfo["name"]));
 
 			if(!empty($errors)) {
 				$data["error"] = lang("permission_error") . '('.implode(",", $errors).')';
@@ -121,7 +121,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			
 			$data["installFolders"] = array(
 				"source"		=> $dir . "/contents/",
-				"destination"	=> ClassInfo::getExpansionFolder($appInfo["name"])
+				"destination"	=> ExpansionManager::getExpansionFolder($appInfo["name"])
 			);
 			
 			/*if($gfs->exists(".getinstallinfo")) {
@@ -156,7 +156,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			return false;
 		}
 		
-		$folder = ClassInfo::getExpansionFolder($name);
+		$folder = ExpansionManager::getExpansionFolder($name);
 		
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			if(file_exists($file)) {
@@ -281,7 +281,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 				}
 					
 				if(isset($data["icon"]) && $data["icon"]) {
-					$data["icon"] = ClassInfo::getExpansionFolder($name) . "/" . $data["icon"];
+					$data["icon"] = ExpansionManager::getExpansionFolder($name) . "/" . $data["icon"];
 				}
 					
 				
