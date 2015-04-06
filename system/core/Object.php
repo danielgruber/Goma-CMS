@@ -371,41 +371,32 @@ abstract class Object {
             return clone $class;
 		}
 
-		$class = strtolower($class);
+        if(PROFILE) Profiler::mark('Object::instance');
 
-		if(PROFILE) {
-            Profiler::mark('Object::instance');
+        $class = ClassManifest::resolveClassName($class);
+
+        // error catching
+        if($class == "") {
+            throw new LogicException("Cannot initiate empty Class");
+        }
+
+        if(ClassInfo::isAbstract($class)) {
+            throw new LogicException("Cannot initiate abstract Class");
         }
 
 		/* --- */
 
 		// caching
 		if(isset(self::$cache_singleton_classes[$class])) {
-			if(PROFILE)
-				Profiler::unmark("Object::instance");
 			$class = clone self::$cache_singleton_classes[$class];
-		} else {
+		} else if(ClassInfo::exists($class) || class_exists($class, false)) {
+            self::$cache_singleton_classes[$class] = new $class;
+            $class = clone self::$cache_singleton_classes[$class];
+        } else {
+            throw new LogicException("Cannot initiate unknown class");
+        }
 
-			// error catching
-			if($class == "") {
-				throw new LogicException("Cannot initiate empty Class");
-			}
-
-			if(ClassInfo::isAbstract($class)) {
-				throw new LogicException("Cannot initiate abstract Class");
-			}
-
-			// generate Class
-			if((defined("INSTALL") && class_exists($class)) || ClassInfo::exists($class)) {
-				self::$cache_singleton_classes[$class] = new $class;
-				$class = clone self::$cache_singleton_classes[$class];
-			} else {
-				throw new LogicException("Cannot initiate unknown class");
-			}
-		}
-
-		if(PROFILE)
-			Profiler::unmark("Object::instance");
+		if(PROFILE) Profiler::unmark("Object::instance");
 
 		return $class;
 	}

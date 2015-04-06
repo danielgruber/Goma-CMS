@@ -99,9 +99,31 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $this->assertFalse(Object::method_exists("test", ""));
         $this->assertFalse(Object::method_exists("", "test"));
     }
+
+
+    public function testInstance() {
+        $this->assertIsA(Object::instance("DummyMethodTest"), "DummyMethodTest");
+        $this->assertClone(Object::instance("DummyMethodTest"), Object::instance("DummyMethodTest"));
+
+        // check for cloning
+        $o = Object::instance("DummyMethodTest");
+        $o->b = 1;
+        $this->assertEqual(Object::instance($o)->b, 1);
+        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 1);
+
+        // check if these are clones
+        $second = Object::instance("DummyMethodTest");
+        $second->b = 2;
+        $this->assertEqual(Object::instance($o)->b, 1);
+        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 1);
+        $this->assertEqual(Object::instance($second)->b, 2);
+        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 2);
+    }
 }
 
 class DummyMethodTest extends Object {
+    public $b;
+
 	public function ownMethod() {
 		return "blah";
 	}
@@ -121,7 +143,6 @@ class DummyMethodTest extends Object {
 
 		return parent::__call($method, $args);
 	}
-
 
 }
 
