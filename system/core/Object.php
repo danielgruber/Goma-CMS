@@ -76,6 +76,27 @@ abstract class Object
     const METHOD_ON_OBJECT_FOUND = 2;
 
     /**
+     * validates if class and variable/method-names are valid.
+     * it throws an exception if not and returns correct class-name.
+     *
+     * @param string $class
+     * @param string $var
+     */
+    protected static function validateStaticCall($class, $var) {
+        $class = ClassManifest::resolveClassName($class);
+
+        if(empty($class)) {
+            throw new LogicException("Invalid name of class $class");
+        }
+
+        if(empty($var)) {
+            throw new LogicException("Invalid name of variable $var for $class");
+        }
+
+        return $class;
+    }
+
+    /**
      * Gets the value of $class::$$var.
      *
      * @param string $class Name of the class.
@@ -85,18 +106,8 @@ abstract class Object
      */
     public static function getStatic($class, $var)
     {
-        if (is_object($class))
-            $class = $class->classname;
-
-        if (!empty($class)) {
-            if (!empty($var)) {
-                return eval("return isset(" . $class . "::\$" . $var . ") ? " . $class . "::\$" . $var . " : null;");
-            } else {
-                throw new LogicException("Invalid name of variable $var for $class");
-            }
-        } else {
-            throw new LogicException("Invalid name of class $class");
-        }
+        $class = self::validateStaticCall($class, $var);
+        return eval('return isset(' . $class . '::$' . $var . ") ? " . $class . '::$' . $var . " : null;");
     }
 
     /**
@@ -109,18 +120,8 @@ abstract class Object
      */
     public static function hasStatic($class, $var)
     {
-        if (is_object($class))
-            $class = $class->classname;
-
-        if (!empty($class)) {
-            if (!empty($var)) {
-                return eval("return isset(" . $class . "::\$" . $var . ");");
-            } else {
-                throw new LogicException("Invalid name of variable $var for $class");
-            }
-        } else {
-            throw new LogicException("Invalid name of class $class");
-        }
+        $class = self::validateStaticCall($class, $var);
+        return eval('return isset(' . $class . '::\$' . $var . ');');
     }
 
     /**
@@ -134,18 +135,12 @@ abstract class Object
      */
     public static function setStatic($class, $var, $value)
     {
-        if (is_object($class))
-            $class = $class->classname;
-
-        if (!empty($class)) {
-            if (!empty($var)) {
-                return eval($class . "::\$" . $var . " = " . var_export($value, true) . ";");
-            } else {
-                throw new LogicException("Invalid name of variable $var for $class");
-            }
-        } else {
-            throw new LogicException("Invalid name of class $class");
-        }
+        $class = self::validateStaticCall($class, $var);
+        return eval('
+        if(isset('.$class.'::$'.$var.'))
+            ' . $class . '::$' . $var . ' = ' . var_export($value, true) . ';
+        else
+            throw new LogicException("Could not set Variable '.$var.' on Class '.$class.'.");');
     }
 
     /**
@@ -158,17 +153,12 @@ abstract class Object
      */
     public static function callStatic($class, $func)
     {
-        if (is_object($class))
-            $class = $class->classname;
+        $class = self::validateStaticCall($class, $func);
 
-        if (!empty($class)) {
-            if (!empty($func)) {
-                return call_user_func_array(array($class, $func), array($class));
-            } else {
-                throw new LogicException("Invalid name of method $func for $class");
-            }
+        if(is_callable(array($class, $func))) {
+            return call_user_func_array(array($class, $func), array($class));
         } else {
-            throw new LogicException("Invalid name of class $class");
+            throw new BadMethodCallException('Call to unknown method ' . $class . '::' . $func);
         }
     }
 
@@ -382,7 +372,7 @@ abstract class Object
     /**
      * Gets the singleton of a class.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      *
      * @return Object The singleton.
      */
@@ -395,6 +385,24 @@ abstract class Object
 
         if (PROFILE) Profiler::mark('Object::instance');
 
+        $class = self::classCanBeCreated($class);
+        if (!isset(self::$cache_singleton_classes[$class])) {
+            self::$cache_singleton_classes[$class] = new $class;
+        }
+
+        if (PROFILE) Profiler::unmark("Object::instance");
+
+        return self::$cache_singleton_classes[$class];
+    }
+
+    /**
+     * validates that a class can be created and returns classname if it can.
+     *
+     * @param class
+     * @return string
+     * @throws LogicException
+     */
+    protected static function classCanBeCreated($class) {
         $class = ClassManifest::resolveClassName($class);
 
         // error catching
@@ -406,19 +414,9 @@ abstract class Object
             throw new LogicException("Cannot initiate abstract Class");
         }
 
-        /* --- */
-
-        // caching
-        if (isset(self::$cache_singleton_classes[$class])) {
-            $class = clone self::$cache_singleton_classes[$class];
-        } else if (ClassInfo::exists($class) || class_exists($class, false)) {
-            self::$cache_singleton_classes[$class] = new $class;
-            $class = clone self::$cache_singleton_classes[$class];
-        } else {
+        if(!ClassInfo::exists($class) && !class_exists($class, false)) {
             throw new LogicException("Cannot initiate unknown class");
         }
-
-        if (PROFILE) Profiler::unmark("Object::instance");
 
         return $class;
     }
@@ -443,12 +441,9 @@ abstract class Object
         // Set class name
         $this->classname = strtolower(get_class($this));
 
-        // temporary until release
-        //@TODO: remove this
-        $this->class = strtolower(get_class($this));
-
-        if (isset(ClassInfo::$class_info[$this->classname]["inExpansion"]))
+        if (isset(ClassInfo::$class_info[$this->classname]["inExpansion"])) {
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;
+        }
 
         $this->initStatics();
     }
@@ -512,14 +507,11 @@ abstract class Object
         $c = $this->classname;
         while ($c = ClassInfo::GetParentClass($c)) {
             if (isset(self::$extra_methods[$c][$name])) {
-                $extra_method = self::$extra_methods[$c][$name];
 
                 // cache result
                 self::$cache_extra_methods[$this->classname][$name] = self::$extra_methods[$c][$name];
 
-                unset($c);
-
-                return $this->callExtraMethod($name, $extra_method, $args);
+                return $this->callExtraMethod($name, self::$extra_methods[$c][$name], $args);
             }
         }
 
@@ -725,6 +717,7 @@ abstract class Object
         if (!isset($exp)) {
             $exp = isset(ClassInfo::$class_info[$this->classname]["inExpansion"]) ? ClassInfo::$class_info[$this->classname]["inExpansion"] : null;
         }
+        
         if (isset(ClassInfo::$appENV["expansion"][$exp])) {
             $extFolder = ClassInfo::getExpansionFolder($exp, $forceAbsolute);
             return isset(ClassInfo::$appENV["expansion"][$exp]["resourceFolder"]) ? $extFolder . ClassInfo::$appENV["expansion"][$exp]["resourceFolder"] : $extFolder . "resources";
