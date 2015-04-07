@@ -574,7 +574,7 @@ abstract class Object
 
     public function __wakeup()
     {
-        $this->initStatics();
+        StaticsManager::setSaveVars($this);
     }
 
     /**

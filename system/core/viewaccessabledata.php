@@ -548,7 +548,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      */
 	public function offsetExists($offset) {
 		// third call
-		return $this->__cancall($offset);
+		return $this->__cancall($offset) || Object::method_exists($this->classname, $offset);
 	}
 
     /**
@@ -567,7 +567,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	final public function isOffset($offset) {
-		return $this->__cancall($offset);
+		return $this->__cancall($offset) || Object::method_exists($this->classname, $name);
 	}
 
     /**

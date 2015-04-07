@@ -123,14 +123,19 @@ class PermissionField extends ClusterFormField {
 	 *@access public
 	*/
 	public function getValue() {
-		
+
 		if(is_object($this->orgForm()->result)) {
 			$has_one = $this->orgForm()->result->hasOne();
+
 			if(isset($has_one[$this->name])) {
+
 				if(strtolower($has_one[$this->name]) == "permission" || is_subclass_of($has_one[$this->name], "permission")) {
 					$this->byRelation = true;
+
 					if(isset($this->orgForm()->result[$this->name]) && $this->orgForm()->result[$this->name]) {
 						$this->value = $this->orgForm()->result->doObject($this->name);
+
+                        return;
 					}
 				} else {
 					$this->byRelation = false;

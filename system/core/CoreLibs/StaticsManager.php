@@ -174,7 +174,7 @@ class StaticsManager {
      *
      * @param string $class name of class
      */
-    protected function setSaveVarsAndHook($class) {
+    protected static function setSaveVarsAndHook($class) {
         foreach (self::getSaveVars($class) as $var) {
             if (isset(ClassInfo::$class_info[$class][$var])) {
                 self::setStatic($class, $var, ClassInfo::$class_info[$class][$var]);

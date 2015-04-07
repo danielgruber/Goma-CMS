@@ -17,6 +17,7 @@ class GomaSeperatedEnvironment {
 	*/
 	protected $classes = array(
 		"Object",
+        "StaticsManager",
 		"ClassInfo",
 		"ClassManifest",
 		"RequestHandler",

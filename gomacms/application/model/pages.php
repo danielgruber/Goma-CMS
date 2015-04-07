@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.7
+ * @version     2.7.1
  *
  * @property null|Pages parent
  * @property string path
@@ -414,7 +414,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
         // search for normal data
         $dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);
-        if($dataHasOne && $dataHasOne->type != "all") {
+        if($dataHasOne && ($dataHasOne->type != "all" || $currentCanBeAll)) {
             return $dataHasOne;
         } else if(!$this->isPublished()) {
             // search for active data, which is currently assigned in the published version of this object.

@@ -99,7 +99,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 			parent::getValue();
 			
 			if(!isset($this->dataset)) {
-				
+
 				if(is_object($this->form()->result)) {
 					// get relations from result
 					$many_many_tables = $this->form()->result->ManyManyTables();
@@ -119,10 +119,10 @@ class ManyManyDropDown extends MultiSelectDropDown
 						$this->dataset = call_user_func_array(array($this->form()->model, $this->relation), array())->FieldToArray("versionid");
 						$this->relationInfo = $many_many_tables[$this->relation];
 					} else {
-						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
+						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->name}.");
 					}
 				} else {
-					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
+					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->name}.");
 				}
 			} else {
 				if(is_object($this->form()->result)) {
@@ -143,10 +143,10 @@ class ManyManyDropDown extends MultiSelectDropDown
 						$this->_object = $many_many_tables[$this->relation]["object"];
 						$this->relationInfo = $many_many_tables[$this->relation];
 					} else {
-						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
+						throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->name}.");
 					}
 				} else {
-					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form->name}.");
+					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->name}.");
 				}
 			}
 			

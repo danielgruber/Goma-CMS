@@ -56,7 +56,12 @@ class ClusterFormField extends FormField {
 	 *@access public
 	*/
 	public $result;
-	
+
+    /**
+     * model.
+     */
+    public $model;
+
 	/**
 	 * controller
 	 *
@@ -115,37 +120,41 @@ class ClusterFormField extends FormField {
 			
 		return false;
 	}
-	
-	/**
-	 * handles the action
-	 * we implement sub-namespaces for sub-items here
-	 *
-	 *@name handleAction
-	 *@access public
-	*/
+
+    /**
+     * handles the action
+     * we implement sub-namespaces for sub-items here
+     *
+     * @name handleAction
+     * @access public
+     * @return string|false
+     */
 	public function handleAction($action) {
-		if(isset($this->fields[$action]))
-			return $this->fields[$action]->handleRequest($this->request);
+		if(isset($this->fields[$action])) {
+            return $this->fields[$action]->handleRequest($this->request);
+        }
 			
 		return parent::handleAction($action);
 	}
-	
-	/**
-	 * returns the node
-	 *
-	 *@name createNode
-	 *@access public
-	*/
+
+    /**
+     * returns the node
+     *
+     * @name createNode
+     * @access public
+     * @return HTMLNode
+     */
 	public function createNode() {
 		return new HTMLNode("div");
 	}
-	
-	/**
-	 * renders the field
-	 *
-	 *@name field
-	 *@access public
-	*/
+
+    /**
+     * renders the field
+     *
+     * @name field
+     * @access public
+     * @return HTMLNode
+     */
 	public function field() {
 		
 		if(PROFILE) Profiler::mark("ClusterFormField::field");
@@ -247,22 +256,26 @@ class ClusterFormField extends FormField {
 	 *@name setForm
 	 *@access public
 	*/
-	public function setForm(&$form) {
+	public function setForm(Object &$form) {
+
 		parent::setForm($form);
 		
 		unset($this->fields[$this->name]);
 		$this->orgForm()->registerField($this->name, $this);
-		
-		while(!isset($form->url) && is_object($form))
-			$form = $form->form();
-		
+
+		while(!isset($form->url) && is_object($form)) {
+            $form = $form->form();
+        }
+
 		$this->url =& $form->url;
-		$this->controller =& $form->controller;
-		$this->post =& $form->post;
+        $this->model =& $this->orgForm()->model;
+        $this->controller =& $this->orgForm()->controller;
+		$this->post =& $this->orgForm()->post;
 		$this->state = $this->orgForm()->state->{$this->classname . $this->name};
-		
-		foreach($this->items as $field)
-			$field->setForm($this);
+
+		foreach($this->items as $field) {
+            $field->setForm($this);
+        }
 	}
 	
 	/**
@@ -272,13 +285,17 @@ class ClusterFormField extends FormField {
 	 *@access public
 	*/
 	public function getValue() {
-	
+
+
+
 		if(!$this->disabled && $this->POST && isset($this->orgForm()->post[$this->PostName()])) {
 			$this->value = $this->orgForm()->post[$this->PostName()];
 		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name]) && is_object($this->orgForm()->result)) {
 			$this->value = ($this->orgForm()->result->doObject($this->name)) ? $this->orgForm()->result->doObject($this->name)->raw() : null;
-		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name]))
-			$this->value = $this->orgForm()->result[$this->name];
+		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name])) {
+            $this->value = $this->orgForm()->result[$this->name];
+        }
+
 	}
 	
 	/**
