@@ -95,7 +95,7 @@ class StaticsManager {
      * @param string $class Name of the class.
      * @param string $func Name of the function.
      *
-     * @return void
+     * @return mixed return value of call
      */
     public static function callStatic($class, $func)
     {

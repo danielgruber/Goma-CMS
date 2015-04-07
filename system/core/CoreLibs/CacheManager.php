@@ -165,6 +165,7 @@ class CacheManager {
     /**
      * returns if the folder should be removed.
      * @param boolean $forceFolders
+     * @return bool
      */
     public function shouldDeleteCacheFolder($file, $forceFolders) {
         if(file_exists($this->cacheDirectory . $file . "/.dontremove") && !$forceFolders) {
@@ -179,15 +180,18 @@ class CacheManager {
 
     /**
      * returns if you should delete a file.
+     * @param string $file filename
+     * @param int $maxLifeTime maximum lifetime of files
+     * @return bool
      */
-    public function shouldDeleteCacheFile($file, $minLifeTime) {
+    public function shouldDeleteCacheFile($file, $maxLifeTime) {
 
         if(in_array($file, self::$preservedFiles)) {
             return false;
         }
 
         // lifetime for GFS-Files is 2 hours cause it is used for upgrade.
-        if(substr($file, 0, 3) == "gfs" && filemtime($dir . $file) > NOW - 7200) {
+        if(substr($file, 0, 3) == "gfs" && filemtime($this->dir() . $file) > NOW - 7200) {
             return false;
         }
 
@@ -199,12 +203,12 @@ class CacheManager {
         }
 
         // check for lifetime for all files.
-        if($minLifeTime == 0 || filemtime($this->cacheDirectory . $file) > time() + $minLifeTime) {
+        if($maxLifeTime != 0 && filemtime($this->cacheDirectory . $file) >= time() - $maxLifeTime) {
             return false;
         }
 
         $return = true;
-        Core::callHook("shouldDeleteCacheFile", $file, $minLifeTime, $this, $return);
+        Core::callHook("shouldDeleteCacheFile", $file, $maxLifeTime, $this, $return);
 
         return $return;
     }

@@ -369,8 +369,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * returns the representation of this record
      *
-     *@name generateResprensentation
-     *@access public
+     * @name generateResprensentation
+     * @access public
+     * @return string
      */
     public function generateRepresentation($link = false) {
         $title = $this->title;

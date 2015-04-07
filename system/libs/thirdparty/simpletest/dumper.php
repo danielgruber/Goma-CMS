@@ -140,7 +140,7 @@ class SimpleDumper {
      */
     protected function describeGenericDifference($first, $second) {
         return "as [" . $this->describeValue($first) .
-                "] does not match [" .
+                "] does not match expected value [" .
                 $this->describeValue($second) . "]";
     }
 

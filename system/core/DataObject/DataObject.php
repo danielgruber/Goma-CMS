@@ -868,21 +868,23 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * writes changed data and throws exceptions.
      *
-     *@name writeToDB
-     *@access public
-     *@param bool - to force insert (default: false)
-     *@param bool - to force write (default: false)
-     *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-     *@param bool - if to force publishing also when not permitted (default: false)
-     *@param bool - whether to track in history (default: true)
-     *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
-     *@param bool - whether to not getting the fields 'created' and 'autorid' from the old version
-     *@return bool
+     * @param bool $forceInsert
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @param bool $forcePublish
+     * @param bool $history
+     * @param bool $silent
+     * @param bool $overrideCreated
+     * @throws Exception
+     * @throws MySQLException
+     * @throws PermissionException
+     * @throws SQLException
+     * @return bool
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {
         if (!defined("CLASS_INFO_LOADED")) {
-            throwError(6, "Logical Exception", "Calling DataObject::write without loaded classinfo is not allowed.");
+            throw new LogicException("Calling DataObject::write without loaded classinfo is not allowed.");
         }
 
         // check if table in db and if not, create it
