@@ -148,16 +148,12 @@ class StaticsManager {
 
         $classname = ClassManifest::resolveClassName($class);
 
-        if (!isset(self::$set_save_vars[$classname])) {
-
-            if(!defined('GENERATE_CLASS_INFO')) {
-
+        if(!defined('GENERATE_CLASS_INFO')) {
+            if (!isset(self::$set_save_vars[$classname])) {
                 self::setSaveVarsAndHook($classname);
 
                 self::$set_save_vars[$classname] = true;
             }
-
-            unset($var);
         }
 
         if(defined('GENERATE_CLASS_INFO') || !isset(self::$hook_called[$classname])) {

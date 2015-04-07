@@ -219,42 +219,50 @@ class ClassInfo extends Object {
 
 
     /**
-	 * checks if class is abstract
-	 */
+     * checks if class is abstract
+     *
+     * @param string|object $class
+     * @return bool
+     */
 	public static function isAbstract($class) {
-		$class = ClassManifest::resolveClassName($class);
-		if(isset(self::$class_info[$class]["abstract"])) {
-			return self::$class_info[$class]["abstract"];
-		} else {
-			return false;
-		}
+        return self::getSpecificInfo($class, "abstract", false);
 	}
 
-	/**
-	 * gets the parent class of a given class
-	 *
-	 */
+    /**
+     * gets the parent class of a given class
+     *
+     * @param string|object $class
+     * @return string
+     */
 	public static function get_parent_class($class) {
-		$class = ClassManifest::resolveClassName($class);
-
-		if(isset(self::$class_info[$class]["parent"])) {
-			return self::$class_info[$class]["parent"];
-		} else {
-			return null;
-		}
+        return self::getSpecificInfo($class, "parent");
 	}
 
-	/**
-	 * gets info to a specific class
-	 *
-	 */
+    /**
+     * gets specific info from class.
+     *
+     * @param string $class
+     * @param string info
+     * @param string default
+     * @return mixed
+     */
+    public static function getSpecificInfo($class, $name, $default = null) {
+        $info = self::getInfo($class);
+        return isset($info[$name]) ? $info[$name] : $default;
+    }
+
+    /**
+     * gets info to a specific class
+     * @param string|object $class
+     * @return array|null
+     */
 	public static function getInfo($class) {
 		$class = ClassManifest::resolveClassName($class);
 
 		if(isset(self::$class_info[$class])) {
 			return self::$class_info[$class];
 		} else {
-			return false;
+			return null;
 		}
 	}
 
