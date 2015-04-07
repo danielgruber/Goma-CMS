@@ -94,13 +94,15 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		return true;
 	}
-	
-	/**
-	 * installs the framework
-	 *
-	 *@name getInstallInfo
-	 *@access public
-	*/
+
+    /**
+     * installs the framework
+     *
+     * @name getInstallInfo
+     * @access public
+     *
+     * @return array
+     */
 	public function getInstallInfo($forceInstall = false) {
 		$gfs = new GFS($this->file);
 		$info = $gfs->parsePlist("info.plist");
@@ -108,8 +110,9 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		$data = array("filename" => basename($this->file), "type" => lang("update_app"));
 		
-		if(!isset($info["version"]))
-			return false;
+		if(!isset($info["version"])) {
+            return false;
+        }
 		
 		// check if we have a full backup
 		if($info["backuptype"] != "full") {
@@ -129,17 +132,6 @@ class G_AppSoftwareType extends G_SoftwareType {
 		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
 		
 		FileSystem::requireDir($dir);
-		
-		/*
-		if($gfs->exists(".preflight")) {
-			$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-			$data["preflight"][] = $dir . "/.preflight";
-		}
-		
-		if($gfs->exists(".postflight")) {
-			$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-			$data["postflight"][] = $dir . "/.postflight";
-		}*/
 		
 		$data["version"] = $info["version"];
 		
@@ -317,18 +309,17 @@ class G_AppSoftwareType extends G_SoftwareType {
 		$data["framework_version"] = $info["framework_version"];
 		
 		// check if we use install-method
-		if($appInfo["name"] != ClassInfo::$appENV["app"]["name"]) {
-		
-		} else {
+		if($appInfo["name"] == ClassInfo::$appENV["app"]["name"]) {
 			$data["installType"] = "update";
 			$data["installed_version"] = ClassInfo::AppVersion();
 		}
 		
-		if(isset($appInfo["title"]))
-			$data["title"] = $appInfo["title"];
-		else
-			$data["title"] = ClassInfo::$appENV["app"]["name"];
-		
+		if(isset($appInfo["title"])) {
+            $data["title"] = $appInfo["title"];
+        } else {
+            $data["title"] = ClassInfo::$appENV["app"]["name"];
+        }
+
 		$data["version"] = $info["version"];
 		
 		return $data;

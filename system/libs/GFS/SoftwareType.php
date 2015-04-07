@@ -179,8 +179,10 @@ abstract class g_SoftwareType {
 	/**
 	 * gets the correct class by type
 	 *
-	 *@name getByType
-	 *@access public
+	 * @param string $type
+     * @param string $file
+     * @throws LogicException
+     * @return g_SoftwareType
 	*/
 	public static function getByType($type, $file) {
 		if(strtolower($type) == "app") {
@@ -195,13 +197,14 @@ abstract class g_SoftwareType {
 		
 		throw new LogicException("Could not find SoftwareType '".convert::raw2text($type)."'.");
 	}
-	
-	/**
-	 * lists all software of the whole system
-	 *
-	 *@name listAllSoftware
-	 *@access public
-	*/
+
+    /**
+     * lists all software of the whole system
+     *
+     * @name listAllSoftware
+     * @access public
+     * @return ViewAccessableData
+     */
 	final public static function listAllSoftware() {
 		$apps = array();
 		foreach(ClassInfo::getChildren("g_SoftwareType") as $child) {
@@ -217,13 +220,14 @@ abstract class g_SoftwareType {
 		
 		return new ViewAccessableData($apps);
 	}
-	
-	/**
-	 * gets install-infos about a GFS-file
-	 *
-	 *@name getInstallInfos
-	 *@access public
-	*/
+
+    /**
+     * gets install-infos about a GFS-file
+     *
+     * @name getInstallInfos
+     * @access public
+     * @return string|array
+     */
 	public static function getInstallInfos($file, $forceInstall = false, $forceUpdate = false) {
 		$gfs = new GFS($file);
 		
@@ -234,8 +238,9 @@ abstract class g_SoftwareType {
 		$info = $gfs->parsePlist("info.plist");
 		
 		if(isset($info["type"])) {	
-			if($info["type"] == "app")
-				$info["type"] = "backup";
+			if($info["type"] == "app") {
+                $info["type"] = "backup";
+            }
 			
 			foreach(ClassInfo::getChildren("G_SoftwareType") as $child) {
 				if(StaticsManager::getStatic($child, "type") == $info["type"]) {
@@ -260,13 +265,14 @@ abstract class g_SoftwareType {
 		
 		return lang("install_invalid_file");
 	}
-	
-	/**
-	 * installs with information
-	 *
-	 *@name install
-	 *@access public
-	*/
+
+    /**
+     * installs with information
+     *
+     * @name install
+     * @access public
+     * @return bool
+     */
 	public static function install($data) {
 		if(is_object($data)) {
 			$data = $data->ToArray();
@@ -380,8 +386,9 @@ abstract class g_SoftwareType {
 			FileSystem::RequireDir(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/install/");
 			file_put_contents(ROOT . CURRENT_PROJECT . "/" . LOG_FOLDER . "/install/" . date("m-d-y_H-i-s") . ".log", $log);
 			
-			if(isset($data["installType"]) && $data["installType"] == "update")
-				AddContent::addSuccess(lang("updateSuccess"));
+			if(isset($data["installType"]) && $data["installType"] == "update") {
+                AddContent::addSuccess(lang("updateSuccess"));
+            }
 			
 			Dev::RedirectToDev();
 			exit;
@@ -409,13 +416,14 @@ abstract class g_SoftwareType {
 			}
 		}
 	}
-	
-	/**
-	 * lists updateable software
-	 *
-	 *@name listUpdatePackages
-	 *@access public
-	*/
+
+    /**
+     * lists updateable software
+     *
+     * @name listUpdatePackages
+     * @access public
+     * @return array
+     */
 	public static function listUpdatePackages() {
 		if(file_exists(self::$package_folder . "/.index-db")) {
 			$dir = self::$package_folder . "/";
@@ -427,7 +435,7 @@ abstract class g_SoftwareType {
 			foreach($data["packages"] as $type => $apps) {
 				foreach($apps as $version => $appInfo) {
 					if(isset($appInfo["file"])) {
-						self::buildPackageInfo($type, $dir, $appInfo, $version, $updates);
+						self::buildPackageInfo($type, $dir, $appInfo, $appInfo, $version, $updates);
 					} else {
 						foreach($appInfo as $app => $versionInfo) {
 							if(isset($versionInfo["file"])) {
@@ -461,13 +469,14 @@ abstract class g_SoftwareType {
 			return array();
 		}
 	}
-	
-	/**
-	 * lists updatable packages
-	 *
-	 *@name listUpdatablePackages
-	 *@access public
-	*/
+
+    /**
+     * lists updatable packages
+     *
+     * @name listUpdatablePackages
+     * @access public
+     * @return array
+     */
 	public static function listUpdatablePackages() {
 		$apps = array();
 		$apps[ClassInfo::$appENV["framework"]["name"]] = array(
@@ -492,13 +501,14 @@ abstract class g_SoftwareType {
 		
 		return $apps;
 	}
-	
-	/**
-	 * isStoreAvailable
-	 *
-	 *@name isStoreAvailable
-	 *@access public
-	*/
+
+    /**
+     * isStoreAvailable
+     *
+     * @name isStoreAvailable
+     * @access public
+     * @return bool
+     */
 	public function isStoreAvailable() {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
@@ -511,18 +521,19 @@ abstract class g_SoftwareType {
 			return false;
 		}
 	}
-	
-	/**
-	 * gets a data of a app from the app-store-server
-	 *
-	 *@name getAppStoreInfo
-	 *@access public
-	*/
+
+    /**
+     * gets a data of a app from the app-store-server
+     *
+     * @name getAppStoreInfo
+     * @access public
+     * @return mixed
+     */
 	public function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
 		if(PROFILE) Profiler::mark("G_SoftwareType::getAppStoreInfo");
 		
 		if(!self::isStoreAvailable()) {
-			return false;
+			return null;
 		}
 		
 		$url = "https://goma-cms.org/apps/api/v1/json/app/" . $name;
@@ -548,7 +559,7 @@ abstract class g_SoftwareType {
 				
 				$data = json_decode($response, true);
 				if(!is_array($data)) {
-					return false;
+					return null;
 				}
 				$cacher->write($data, 3600 * 6);
 				
@@ -557,17 +568,18 @@ abstract class g_SoftwareType {
 				return $data;
 			} else {
 				if(PROFILE) Profiler::unmark("G_SoftwareType::getAppStoreInfo");
-				return false;
+				return null;
 			}
 		}
 	}
-	
-	/**
-	 * returns the public key of the app-store
-	 *
-	 *@name getAppStorePublic
-	 *@access public
-	*/
+
+    /**
+     * returns the public key of the app-store
+     *
+     * @name getAppStorePublic
+     * @access public
+     * @return string|bool
+     */
 	public function getAppStorePublic() {
 		if(file_exists(FRAMEWORK_ROOT . "libs/GFS/appStorePublic.php")) {
 			include(FRAMEWORK_ROOT . "libs/GFS/appStorePublic.php");
@@ -576,18 +588,19 @@ abstract class g_SoftwareType {
 		
 		return false;
 	}
-	
-	/**
-	 * lists installable software
-	 *
-	 *@name listInstallPackages
-	 *@access public
-	*/
+
+    /**
+     * lists installable software
+     *
+     * @name listInstallPackages
+     * @access public
+     * @return array
+     */
 	public static function listInstallPackages() {
 		if(file_exists(self::$package_folder . "/.index-db")) {
 			$dir = self::$package_folder . "/";
 			$data = unserialize(file_get_contents(self::$package_folder . "/.index-db"));
-			
+
 			$packages = array();
 			
 			foreach($data["packages"] as $type => $apps) {
@@ -611,18 +624,25 @@ abstract class g_SoftwareType {
 		}
 	}
 
-	/**
-	 * builds information about a package from data.
-	 * it puts it into $updates-array if version is newer.
-	 *
-	 * @name 	buildPackageInfo
-	*/
+    /**
+     * builds information about a package from data.
+     * it puts it into $updates-array if version is newer.
+     *
+     * @param string $app
+     * @param string $type
+     * @param string $dir
+     * @param array $data
+     * @param string $version
+     * @param array $packages
+     * @param bool $shouldUpdate
+     * @internal param $buildPackageInfo
+     */
 	protected static function buildPackageInfo($app, $type, $dir, $data, $version, &$packages, $shouldUpdate = true) {
 		$appdata = self::getByType($type, $dir . $data["file"])->getPackageInfo();
 		$appdata["file"] = $dir . $data["file"];
 		$appdata["plist_type"] = $type;
 		if($appdata // data exists
-			&& self::isValidPackageType($appdata, $shouldUpdate))
+			&& self::isValidPackageTypeAndVersion($appdata, $shouldUpdate))
 		{
 
 			if(isset($packages[$app])) {
@@ -635,12 +655,15 @@ abstract class g_SoftwareType {
 		}
 	}
 
-	/**
-	 * implements correct ifs for update and install-packages.
-	 *
-	 * @name isValidPackageType
-	*/
-	protected static function isValidPackageType($appData, $shouldUpdate) {
+    /**
+     * implements correct ifs for update and install-packages.
+     *
+     * @param array $appdata
+     * @param bool $shouldUpdate
+     * @return bool
+     * @internal param $isValidPackageType
+     */
+	public static function isValidPackageTypeAndVersion($appdata, $shouldUpdate) {
 
 		if(isset($appdata["installable"]) && !$appdata["installable"]) {
 			return false;
@@ -654,11 +677,14 @@ abstract class g_SoftwareType {
 		return !isset($appdata["installType"]) || $appdata["installType"] != "update";
 	}
 
-	/**
-	 * checks in the Web for Updates for this App.
-	 *
-	 * @name 	checkForUpdatePackage
-	*/
+    /**
+     * checks in the Web for Updates for this App.
+     *
+     * @param $app
+     * @param $version
+     * @param $updates
+     * @internal param $checkForUpdatePackage
+     */
 	protected static function checkForUpdatePackage($app, $version, &$updates) {
 		if($data = self::getAppStoreInfo($app, null, $version)) {
 			$data["installed_version"] = $version;
@@ -792,14 +818,15 @@ abstract class g_SoftwareType {
 		}
 	}
 
-	/**
-	 * gets data from a plist or plist in GFS-Archive.
-	 *
-	 * @param 	string path to plist
-	 * @param 	string path to gfs
-	 * @param 	string path in GFS to plist
-	 * @param 	boolean delete plist when not readable
-	*/
+    /**
+     * gets data from a plist or plist in GFS-Archive.
+     *
+     * @param    string path to plist
+     * @param    string path to gfs
+     * @param    string path in GFS to plist
+     * @param    boolean delete plist when not readable
+     * @return   array
+     */
 	public static function getFromPlistOrGFS($plist, $gfs, $file, $deletePlist = false) {
 		if(filemtime($plist) > filemtime($gfs) && $info = self::getPlistFromPlist($plist)) {
 			return $info;
@@ -833,9 +860,12 @@ abstract class g_SoftwareType {
 		}
 	}
 
-	/**
-	 * gets plist-information from plist in GFS.
-	*/
+    /**
+     * gets plist-information from plist in GFS.
+     * @param string $gfs filename of archive
+     * @param string $file file in archive
+     * @return array|bool
+     */
 	public static function getPlistFromGFS($gfs, $file) {
 		try {
 			$gfs = new GFS($gfs);

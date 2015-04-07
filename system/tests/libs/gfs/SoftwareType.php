@@ -54,11 +54,14 @@ class SoftwareTypeTest extends GomaUnitTest {
 		$this->assertNotNull($installList);
 
 		foreach($installList as $k => $v) {
+
+
+
 			$this->assertNotNull($v["filename"]);
 			$this->assertNotNull($v["file"]);
 			$this->assertNotNull($v["type"]);
 			$this->assertNotNull($v["plist_type"]);
-			$this->assertNotNull($v["installType"]);
+
 			$this->assertNotNull($v["appInfo"]);
 			$this->assertTrue(file_exists($v["file"]));
 
@@ -114,4 +117,32 @@ class SoftwareTypeTest extends GomaUnitTest {
 			}
 		}
 	}
+
+    public function testIsValidPackageType() {
+        $this->unitIsValidPackageType(array(), false, true);
+        $this->unitIsValidPackageType(array("installable" => false), false, false);
+
+        $data = array(
+            "installable"       => true,
+            "installType"       => "update",
+            "version"           => "1.0-010",
+            "installed_version" => "1.0-009"
+        );
+
+        $this->unitIsValidPackageType($data, false, false);
+        $this->unitIsValidPackageType($data, true, true);
+
+        $ndata = array(
+            "installable"       => true,
+            "version"           => "1.0-010",
+        );
+
+        $this->unitIsValidPackageType($ndata, false, true);
+        $this->unitIsValidPackageType($ndata, true, false);
+    }
+
+    public function unitIsValidPackageType($data, $shouldUpdate, $expected) {
+
+        $this->assertEqual(g_SoftwareType::isValidPackageTypeAndVersion($data, $shouldUpdate), $expected, "%s " . print_r($data, true) . " Update: [$shouldUpdate]");
+    }
 }
