@@ -78,6 +78,7 @@ class ImageUploadsController extends UploadsController {
 			
 			// generate
 			$image = new RootImage($this->modelInst()->realfile);
+            $image->filename = $this->modelInst()->filename;
 			
 			// write to cache
 			if(preg_match('/index\.(jpg|jpeg|png|bmp|gif)$/', URL)) {
