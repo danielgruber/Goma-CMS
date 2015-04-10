@@ -1,15 +1,13 @@
-<?php
+<?php defined('IN_GOMA') OR die();
 /**
- *@package goma framework
- *@link http://goma-cms.org
- *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- *@author Goma-Team
- ********
- * last modified: 08.04.2015
- * $Version: 2.2
+ * This class provides methods to resample images.
+ *
+ * @package	goma framework
+ * @link 	http://goma-cms.org
+ * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 1.0
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class GD extends Object
 {
@@ -71,7 +69,7 @@ class GD extends Object
     /**
      * this is the current gd-object.
      *
-     * @var object
+     * @var resource
      */
     public $gd;
 
@@ -89,15 +87,25 @@ class GD extends Object
     {
         parent::__construct();
 
-        if($image === null)
-            return true;
-
-        $this->pic = $image;
-        if(!file_exists($image))
-        {
-            return false;
+        if($image === null) {
+            return;
         }
 
+
+        $this->pic = $image;
+        if(!file_exists($image)) {
+            throw new LogicException("File for GD-Lib not found. " . $image);
+        }
+
+        $this->initWithImage($image);
+    }
+
+    /**
+     * inits this object with given image.
+     * it does not validate if image exists.
+     * @param string $image
+     */
+    protected function initWithImage($image) {
         $this->info = GetImageSize($image);
         $this->width = $this->info[0];
         $this->height = $this->info[1];
@@ -125,8 +133,8 @@ class GD extends Object
 
         } else
         {
-            $this->extension = false;
-            $this->content_type = false;
+            $this->extension = null;
+            $this->content_type = null;
         }
     }
 
@@ -135,7 +143,7 @@ class GD extends Object
      * @name gd
      * @access public
      * @param resource - opional - if new gd
-     * @return bool|object|resource
+     * @return resource
      */
     public function gd($gd = null)
     {
@@ -170,71 +178,33 @@ class GD extends Object
      * this function resizes an image to another size and let the relation height-width normal
      * @name resize
      * @access public
-     * @param numeric - new width
-     * @param numeric - height
-     * @param bool - automatic crop or skew
+     * @param int $width
+     * @param int $height
+     * @param bool $crop
      * @return bool|GD
      */
     public function resize($width, $height, $crop = true)
     {
         if($this->extension)
         {
-            // define vars
-            $src_width = $this->width;
-            $src_height = $this->height;
-            $dest_width = $width;
-            $dest_height = $height;
-            $src_x = 0;
-            $src_y = 0;
-            $dest_x = 0;
-            $dest_y = 0;
-            $img_width = $width;
-            $img_height = $height;
+            $old = $this->gd();
+            $newgd = clone $this;
 
             if($crop) {
-                $relation = $this->width / $this->height;
-
-                if($dest_height > $this->height)
-                {
-                    $dest_height = $this->height;
-                    $img_height = $dest_height;
-                }
-
-                $_width = round($dest_height * $relation);
-
-                if($_width > $width)
-                {
-                    $diff = round($_width - $width);
-                    $rel_width = $src_width / $_width;
-                    $src_x = round($diff / 2 * $rel_width);
-                    $src_width = round($width * $rel_width);
-
-                } else if($_width < $width)
-                {
-                    $diff = round($width - $_width);
-                    $dest_width = $_width;
-                    $dest_x = round($diff / 2);
-                }
-
-                if($dest_width > $this->width)
-                {
-                    $dest_width = $this->width;
-                    $img_width = $dest_width;
-                }
+                $tuple = $this->resizeCropped($old, $width, $height);
+                $new = $tuple->getFirst();
+                $newgd->width = $tuple->getSecond()->getWidth();
+                $newgd->height = $tuple->getSecond()->getHeight();
+            } else {
+                $new = $this->generateImage($width, $height, $this->extension);
+                $newgd->width = $width;
+                $newgd->height = $height;
+                // just resize
+                imagecopyresampled($new, $old, 0, 0, 0, 0, $width, $height, $this->width, $this->height);
             }
 
-            $old = $this->gd();
-            $new = $this->generateImage($img_width, $img_height, $this->extension);
-            imagecopyresampled($new, $old, $dest_x, $dest_y, $src_x, $src_y, $dest_width, $dest_height, $src_width, $src_height);
-
-            if(isset($this->pic)) {
-                $this->pic = null;
-                imagedestroy($this->gd);
-                $this->gd = null;
-            }
-
-            // now get new gd
-            $newgd = clone $this;
+            $this->destroy();
+            // now put resource
             $newgd->gd($new);
 
             return $newgd;
@@ -245,17 +215,142 @@ class GD extends Object
     }
 
     /**
+     * resizes cropped and returns new image
+     *
+     * @pram resource $gd
+     * @param int $width
+     * @param int $height
+     * @return resource
+     */
+    protected function resizeCropped($old, $width, $height) {
+        $imgSize = $this->getDestImageSize($this->width, $this->height, $width, $height);
+
+        $srcImageArea = $this->getSrcImageArea($this->width, $this->height, $imgSize);
+
+        $destImageArea = $this->getDestImageArea($srcImageArea->getSecond(), $imgSize);
+
+        $new = $this->generateImage($imgSize->getWidth(), $imgSize->getHeight(), $this->extension);
+
+        imagecopyresampled(
+            $new,
+            $old,
+
+            $destImageArea->getFirst()->getX(),
+            $destImageArea->getFirst()->getY(),
+            $srcImageArea->getFirst()->getX(),
+            $srcImageArea->getFirst()->getY(),
+
+            $destImageArea->getSecond()->getWidth(),
+            $destImageArea->getSecond()->getHeight(),
+            $srcImageArea->getSecond()->getWidth(),
+            $srcImageArea->getSecond()->getHeight());
+
+        return new Tuple($new, $imgSize);
+    }
+
+    /**
+     * returns destination image size.
+     *
+     * @param int $srcWidth
+     * @param int $srcHeight
+     * @param int $destWidth
+     * @param int $destHeight
+     * @return Size
+     */
+    protected function getDestImageSize($srcWidth, $srcHeight, $destWidth, $destHeight) {
+        if($destHeight > $srcHeight) {
+            $destHeight = $srcHeight;
+        }
+
+        if($destWidth > $srcWidth) {
+            $destWidth = $srcWidth;
+        }
+
+        return new Size($destWidth, $destHeight);
+    }
+
+    /**
+     * returns source image "area" where we get the image-data from.
+     * the first value of the tuple is the position and second is the size.
+     *
+     * @param int $srcWidth
+     * @param int $srcHeight
+     * @param Size $imageSize
+     * @return Tuple<Position,Size> information about the area where we get data from
+     */
+    protected function getSrcImageArea($srcWidth, $srcHeight, $imageSize) {
+        $size = new Size($srcWidth, $srcHeight);
+        $position = new Position(0, 0);
+
+        $relation = $srcWidth / $srcHeight;
+        if($relation > 1) {
+            $multiplier = $imageSize->getHeight() / $srcHeight;
+            $calculatedWidth = $srcWidth * $multiplier;
+
+            if($calculatedWidth > $imageSize->getWidth()) {
+
+                $getSrcWidth = round($srcWidth * $imageSize->getWidth() / $calculatedWidth);
+                $position = $position->updateX(round(($srcWidth - $getSrcWidth) / 2));
+                $size = $size->updateWidth($getSrcWidth);
+            }
+
+        } else {
+            $multiplier = $imageSize->getWidth() / $srcWidth;
+            $calculatedHeight = $srcHeight * $multiplier;
+
+            if($calculatedHeight > $imageSize->getHeight()) {
+
+                $getSrcHeight = round($srcHeight * $imageSize->getHeight() / $calculatedHeight);
+                $position = $position->updateY(round(($srcHeight - $getSrcHeight) / 2));
+                $size = $size->updateHeight($getSrcHeight);
+            }
+
+        }
+
+        return new Tuple($position, $size);
+    }
+
+    /**
+     * returns destination image "area" where we put the image-data to.
+     * the first value of the tuple is the position and second is the size.
+     *
+     * @param Size $srcArea
+     * @param Size $destSize
+     * @param Size $imageSize
+     * @return Tuple<Position,Size> information about the area where we put data to
+     */
+    protected function getDestImageArea($srcArea, $imageSize) {
+        $size = $imageSize->copy();
+        $position = new Position(0, 0);
+
+        $relation = $srcArea->getWidth() / $srcArea->getHeight();
+        if($relation > 1) {
+            $calculatedWidth = $imageSize->getHeight() * $srcArea->getWidth() / $srcArea->getHeight();
+
+            if($calculatedWidth < $imageSize->getWidth()) {
+                $position = $position->updateX(($imageSize->getWidth() - $calculatedWidth) / 2);
+                $size = $size->updateWidth($calculatedWidth);
+            }
+        } else {
+            $calculatedHeight = $imageSize->getHeight() * $srcArea->getHeight() / $srcArea->getWidth();
+            if($calculatedHeight < $imageSize->getHeight()) {
+                $position = $position->updateY(($imageSize->getHeight() - $calculatedHeight) / 2);
+                $size = $size->updateHeight($calculatedHeight);
+            }
+        }
+
+        return new Tuple($position, $size);
+    }
+
+    /**
      * resizes an image by its width
-     * @name resizeByWidth
-     * @access public
-     * @param numeric - new width
+     *
+     * @param  int $width
+     * @param bool $crop allow cropping
      * @return bool|GD
      */
     public function resizeByWidth($width, $crop = true)
     {
-        $new_width = 0;
-        $new_height = 0;
-
         $relation = $this->height / $this->width;
         $new_width = $width;
         $new_height = $new_width * $relation;
@@ -264,16 +359,13 @@ class GD extends Object
 
     /**
      * resizes an image by its height
-     * @name resizeByHeight
-     * @access public
-     * @param numeric - new height
+     *
+     * @param int $height new height
+     * @param bool allow cropping
      * @return bool|GD
      */
     public function resizeByHeight($height, $crop = true)
     {
-        $new_width = 0;
-        $new_height = 0;
-
         $relation = $this->width / $this->height;
         $new_height = $height;
         $new_width = round($new_height * $relation);
@@ -304,8 +396,7 @@ class GD extends Object
         if($cornerTop + $thumbHeight > 100) {
             $thumbHeight = 100 - $cornerTop;
         }
-        $maxWidth = round($this->width * $thumbWidth/100);
-        $maxHeight = round($this->height * $thumbHeight/100);
+
 
         // first define the src-points
         $cornerTop = round($this->height * $cornerTop / 100);
@@ -321,11 +412,6 @@ class GD extends Object
             $aspectRatioNew = $width / $height;
             // if this is true, we cut some pixels from top and bottom
             if($aspectRatioNew > $aspectRatio) {
-                if($width <= $resampledWidth || $forceSize)
-                    $multiplier = $width / $resampledWidth;
-                else
-                    $multiplier = 1;
-
                 $resampledWidth = $width;
                 $resampledHeight = round($resampledWidth / $aspectRatio);
                 $cornerTop = $cornerTop + ($resampledHeightSrc - $height * ($resampledHeightSrc / $resampledHeight)) / 2;
@@ -334,12 +420,6 @@ class GD extends Object
 
                 // else we cut some pixels from left and right
             } else {
-                if($height <= $resampledHeight || $forceSize) {
-                    $multiplier = $height / $resampledHeight;
-                } else {
-                    $multiplier = 1;
-                }
-
                 $resampledHeight = $height;
 
                 $resampledWidth = round($aspectRatio * $resampledHeight);
@@ -360,12 +440,6 @@ class GD extends Object
             $resampledHeight = round($resampledWidth / $aspectRatio);
             // we've got the width, so calculate the height
         } else if(isset($height)) {
-            if($height <= $resampledHeight || $forceSize) {
-                $multiplier = $height / $resampledHeight;
-            } else {
-                $multiplier = 1;
-            }
-
             $resampledHeight = $height;
             $resampledWidth = round($resampledHeight * $aspectRatio);
         } else {
@@ -376,8 +450,9 @@ class GD extends Object
         $new = $this->generateImage($resampledWidth, $resampledHeight, $this->extension);
 
         imagecopyresampled($new, $this->gd(), 0, 0, $cornerLeft, $cornerTop, $resampledWidth, $resampledHeight, $resampledWidthSrc, $resampledHeightSrc);
-        if(isset($this->pic))
-            $this->gd = null;
+        if(isset($this->pic)) {
+            $this->destroy();
+        }
 
         // now get new gd
         $newgd = clone $this;
@@ -424,85 +499,89 @@ class GD extends Object
 
     /**
      * rotates an image
-     *@name rotate
-     *@access public
-     *@param numeric - angle
+     *
+     * @name rotate
+     * @access public
+     * @param numeric - angle
+     * @return GD
      */
     public function rotate($angle)
     {
         $new = imagerotate($this->gd(), $angle, 0);
-        if(isset($this->pic))
-            $this->gd = null;
+        if(isset($this->pic)) {
+            $this->destroy();
+        }
         // now get new gd
         $newgd = clone $this;
         $newgd->gd($new);
 
-
         return $newgd;
     }
     /**
-     * saves the image into a file
-     *@name toFile
-     *@access public
-     *@param string - file
-     *@param numeric - quality
-     *@param string - extension
-     *@return string - file
+     * saves the image tp a file.
+     *
+     * @param string $file
+     * @param numeric $quality
+     * @param string $extension mode to use, for example as jpeg
+     * @param int $mode file-mode
+     * @return string filepath
      */
-    public function toFile($file, $quality = 70, $extension = null)
+    public function toFile($file, $quality = 70, $extension = null, $mode = 0777)
     {
         $supported = array("gif", "ico", "jpg", "jpeg", "png", "bmp");
 
-        if(!isset($extension) || !in_array(strtolower($extension), $supported))
+        if(!isset($extension) || !in_array(strtolower($extension), $supported)) {
             $extension = $this->extension;
+        }
 
+        if(!isset($extension)) {
+            return false;
+        }
+
+        if(!PermissionChecker::isValidPermission($mode)) {
+            $mode = 0777;
+        }
+
+        $this->exportToFile($extension, $file, $quality);
+        $this->pic = $file;
+
+        @chmod($file, $mode);
+
+        imagedestroy($this->gd);
+        unset($this->gd);
+
+        clearstatcache();
+        return $file;
+    }
+
+    /**
+     * exports gd to a file.
+     *
+     * @param string filename
+     * @param int quality
+     */
+    protected function exportToFile($extension, $file, $quality) {
         if($extension == "gif")
         {
             imagegif($this->gd(), $file, $quality);
-            $this->pic = $file;
-            @chmod($file, 0777);
-            imagedestroy($this->gd);
-            unset($this->gd);
-            clearstatcache();
-            return $file;
         } else if($extension == "jpg" || $extension == "jpeg")
         {
-            imagejpeg($this->gd(), $file, $quality);
-            $this->pic = $file;
-            @chmod($file, 0777);
-            imagedestroy($this->gd);
-            unset($this->gd);
-            clearstatcache();
-            return $file;
+            imageJPEG($this->gd(), $file, $quality);
         } else if($extension == "png")
         {
-
             imagealphablending($this->gd(), false);
             imagesavealpha($this->gd(), true);
             imagepng($this->gd(), $file, 9);
-
-            $this->pic = $file;
-            @chmod($file, 0777);
-            imagedestroy($this->gd);
-            unset($this->gd);
-            clearstatcache();
-            return $file;
         } else if($extension == "bmp") {
-
             ImageJPEG($this->gd(), $file, 100);
-            $this->pic = $file;
-            @chmod($file, 0777);
-            imagedestroy($this->gd);
-            unset($this->gd);
-            clearstatcache();
-            return $file;
         } else if($extension == "ico") {
             $this->toFile(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
+
             $ico = new PHP_ICO(ROOT . CACHE_DIRECTORY . "temp." . $this->extension, array($this->width, $this->height));
             $ico->save_ico($file);
-            return $file;
+
+            FileSystem::delete(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
         }
-        return false;
     }
 
     /**
@@ -543,6 +622,7 @@ class GD extends Object
             case "gif":
                 imagegif($this->gd(),null, $quality);
                 break;
+            case "jpeg":
             case "jpg":
             case "bmp":
                 imagejpeg($this->gd(),null, $quality);
@@ -685,6 +765,17 @@ class GD extends Object
         $ico->save_ico($file);
         return $file;
     }
+
+    /**
+     * destroys image to restore ram.
+     */
+    public function destroy() {
+        if(isset($this->gd)) {
+            imagedestroy($this->gd);
+            $this->gd = null;
+        }
+    }
+
 }
 
 /**

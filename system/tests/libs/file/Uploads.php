@@ -25,7 +25,7 @@ class UploadsTest extends GomaUnitTest {
 	 * setup.
 	*/
 	public function setUp() {
-		$this->testfile = "./system/tests/libs/file/IMG_2008.jpg";
+		$this->testfile = "./system/tests/resources/IMG_2008.jpg";
 		$this->filename = "uploads_testimg.jpg";
 
 		// force no old versions of file.
