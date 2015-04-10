@@ -343,6 +343,15 @@ class GD extends Object
     }
 
     /**
+     * returns relation between width and height.
+     *
+     * @return double
+     */
+    protected function getRelation() {
+        return $this->width / $this->height;
+    }
+
+    /**
      * resizes an image by its width
      *
      * @param  int $width
@@ -351,10 +360,8 @@ class GD extends Object
      */
     public function resizeByWidth($width, $crop = true)
     {
-        $relation = $this->height / $this->width;
-        $new_width = $width;
-        $new_height = $new_width * $relation;
-        return $this->resize($new_width, $new_height, $crop);
+        $new_height = round($width / $this->getRelation());
+        return $this->resize($width, $new_height, $crop);
     }
 
     /**
@@ -366,10 +373,8 @@ class GD extends Object
      */
     public function resizeByHeight($height, $crop = true)
     {
-        $relation = $this->width / $this->height;
-        $new_height = $height;
-        $new_width = round($new_height * $relation);
-        return $this->resize($new_width, $new_height, $crop);
+        $new_width = round($height * $this->getRelation());
+        return $this->resize($new_width, $height, $crop);
     }
 
 

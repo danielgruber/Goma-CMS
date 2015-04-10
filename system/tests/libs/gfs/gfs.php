@@ -87,7 +87,7 @@ class GFSTest extends GomaUnitTest {
 		$this->assertEqual($gfs->getFileContents("test/test.txt"), "Hello World");
 		$this->assertEqual($gfs->getFileContents("test/testbig.txt"), $random);
 		$this->assertEqual($gfs->getFileSize("test/testbig.txt"), 1024);
-		$this->assertEqual($gfs->getLastModified("test/testbig.txt"), time());
+		$this->assertWithinMargin($gfs->getLastModified("test/testbig.txt"), time(), 1);
 
 		$gfs->touch("test/testbig.txt", NOW - 2014);
 		$this->assertEqual($gfs->getLastModified("test/testbig.txt"), NOW - 2014);
