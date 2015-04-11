@@ -6,7 +6,7 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.0
+ * @version 1.1
  */
 
 class GD extends Object
@@ -22,42 +22,34 @@ class GD extends Object
      * @var string
      */
     protected $pic;
-    /**
-     * information about the image with GetImageSize.
-     *
-     * @var array
-     */
-    protected $information;
+
     /**
      * the current width of the picture
      *
      * @var int
      */
     public $width;
+
     /**
      * the current height of the picture
      *
      * @var int
      */
     public $height;
+
     /**
      * type of the image
      *
-     * @var int
+     * @var Array
      */
-    public $type;
+    protected $type;
+
     /**
      * content-type of the image
      *
      * @var string
      */
     public $content_type;
-    /**
-     * file-extension
-     *
-     * @var string
-     */
-    public $extension;
 
     /**
      * defines how long a file is valid in browser-cache.
@@ -81,6 +73,46 @@ class GD extends Object
     public $filename;
 
     /**
+     * file types supported.
+     */
+    public static $supported_types = array(
+        2 => array(
+            "type"          => 2,
+            "extension"     => "jpg,jpeg",
+            "create"        => "ImageCreateFromJPEG",
+            "content_type"  => "image/jpeg",
+            "output"        => "imagejpeg"
+        ),
+        3 => array(
+            "type"          => 3,
+            "extension"     => "png",
+            "create"        => "ImageCreateFromPNG",
+            "content_type"  => "image/png",
+            "output"        => array("GD", "imagepng"),
+            "generation"    => array("GD", "generatePNG")
+        ),
+        1 => array(
+            "type"          => 1,
+            "extension"     => "gif",
+            "create"        => "ImageCreateFromGIF",
+            "content_type"  => "image/gif",
+            "output"        => "imagegif"
+        ),
+        6 => array(
+            "type"          => 6,
+            "extension"     => "bmp",
+            "create"        => "ImageCreateFromBMP",
+            "content_type"  => "image/jpeg",
+            "output"        => "imagejpeg"
+        ),
+        array(
+            "extension"     => "ico",
+            "content_type"  => "image/x-icon",
+            "output"        => array("gd", "toICO")
+        ),
+    );
+
+    /**
      * @param null $image
      */
     public function __construct($image = null)
@@ -101,48 +133,44 @@ class GD extends Object
     }
 
     /**
+     * returns file-path.
+     *
+     * @return string $filePath
+     */
+    public function getFilePath() {
+        return $this->pic;
+    }
+
+    /**
+     * gets information about file-extension by filename.
+     */
+
+    /**
      * inits this object with given image.
      * it does not validate if image exists.
+     *
      * @param string $image
      */
     protected function initWithImage($image) {
-        $this->info = GetImageSize($image);
-        $this->width = $this->info[0];
-        $this->height = $this->info[1];
-        $this->type = $this->info[2];
+        if($this->info = GetImageSize($image)) {
+            $this->width = $this->info[0];
+            $this->height = $this->info[1];
+            $type = $this->info[2];
 
-        if($this->type == 1)
-        {
-            $this->content_type = "images/gif";
-            $this->extension = "gif";
-
-        } else if($this->type == 2)
-        {
-            $this->content_type = "image/jpeg";
-            $this->extension = "jpg";
-
-        } else if($this->type == 3)
-        {
-            $this->content_type = "image/png";
-            $this->extension = "png";
-
-        } else if($this->type == 6)
-        {
-            $this->content_type = "image/bmp";
-            $this->extension = "bmp";
-
-        } else
-        {
-            $this->extension = null;
-            $this->content_type = null;
+            if(isset(self::$supported_types[$type])) {
+                $this->type = self::$supported_types[$type];
+            } else {
+                throw new LogicException("GD-Lib does not support Type of image.");
+            }
+        } else {
+            throw new LogicException("Image $image seems to be malformed");
         }
     }
 
     /**
-     * holds the gd
-     * @name gd
-     * @access public
-     * @param resource - opional - if new gd
+     * computed property for the image-resource
+     *
+     * @param resource $gd optional to set a new gd
      * @return resource
      */
     public function gd($gd = null)
@@ -152,56 +180,51 @@ class GD extends Object
             $this->pic = null;
             $this->gd = $gd;
         }
+
         if(isset($this->gd))
         {
             return $this->gd;
         }
-        if($this->extension == "gif")
-        {
-            $this->gd = ImageCreateFromGIF($this->pic);
-            return $this->gd;
-        } else if($this->extension == "png")
-        {
-            $this->gd = ImageCreateFromPNG($this->pic);
-            return $this->gd;
-        } else if($this->extension == "jpg")
-        {
-            $this->gd = ImageCreateFromJPEG($this->pic);
-            return $this->gd;
-        } else if($this->extension == "bmp") {
-            $this->gd = ImageCreateFromBMP($this->pic);
-            return $this->gd;
+
+        if(isset($this->type["create"])) {
+            if(is_callable($this->type["create"])) {
+                $this->gd = call_user_func_array($this->type["create"], array($this->pic));
+                return $this->gd;
+            }
         }
+
+        return null;
     }
 
     /**
      * this function resizes an image to another size and let the relation height-width normal
+     *
      * @name resize
      * @access public
      * @param int $width
      * @param int $height
      * @param bool $crop
+     * @param Position $cropPosition position to start cropping
+     * @param Size $cropSize size for cropping
      * @return bool|GD
      */
-    public function resize($width, $height, $crop = true)
+    public function resize($width, $height, $crop = true, $cropPosition = null, $cropSize = null)
     {
-        if($this->extension)
+        if($this->type)
         {
             $old = $this->gd();
             $newgd = clone $this;
 
             if($crop) {
-                $tuple = $this->resizeCropped($old, $width, $height);
-                $new = $tuple->getFirst();
-                $newgd->width = $tuple->getSecond()->getWidth();
-                $newgd->height = $tuple->getSecond()->getHeight();
+                $new = $this->resizeCropped($old, $width, $height, $cropPosition, $cropSize);
             } else {
-                $new = $this->generateImage($width, $height, $this->extension);
-                $newgd->width = $width;
-                $newgd->height = $height;
+                $new = $this->generateImage($width, $height, $this->type);
                 // just resize
                 imagecopyresampled($new, $old, 0, 0, 0, 0, $width, $height, $this->width, $this->height);
             }
+
+            $newgd->width = imagesx($new);
+            $newgd->height = imagesy($new);
 
             $this->destroy();
             // now put resource
@@ -210,26 +233,29 @@ class GD extends Object
             return $newgd;
         } else
         {
-            return false;
+            return null;
         }
     }
 
     /**
      * resizes cropped and returns new image
      *
-     * @pram resource $gd
+     * @param $old
      * @param int $width
      * @param int $height
+     * @param Position $cropPosition position to start cropping
+     * @param Size $cropSize size for cropping
      * @return resource
+     * @internal param resource $gd
      */
-    protected function resizeCropped($old, $width, $height) {
+    protected function resizeCropped($old, $width, $height, $cropPosition = null, $cropSize = null) {
         $imgSize = $this->getDestImageSize($this->width, $this->height, $width, $height);
 
-        $srcImageArea = $this->getSrcImageArea($this->width, $this->height, $imgSize);
+        $srcImageArea = $this->getSrcImageArea($this->width, $this->height, $imgSize, $cropPosition, $cropSize);
 
         $destImageArea = $this->getDestImageArea($srcImageArea->getSecond(), $imgSize);
 
-        $new = $this->generateImage($imgSize->getWidth(), $imgSize->getHeight(), $this->extension);
+        $new = $this->generateImage($imgSize->getWidth(), $imgSize->getHeight(), $this->type);
 
         imagecopyresampled(
             $new,
@@ -245,7 +271,7 @@ class GD extends Object
             $srcImageArea->getSecond()->getWidth(),
             $srcImageArea->getSecond()->getHeight());
 
-        return new Tuple($new, $imgSize);
+        return $new;
     }
 
     /**
@@ -278,7 +304,7 @@ class GD extends Object
      * @param Size $imageSize
      * @return Tuple<Position,Size> information about the area where we get data from
      */
-    protected function getSrcImageArea($srcWidth, $srcHeight, $imageSize) {
+    protected function getSrcImageArea($srcWidth, $srcHeight, $imageSize, $cropPosition = null, $cropSize = null) {
         $size = new Size($srcWidth, $srcHeight);
         $position = new Position(0, 0);
 
@@ -289,9 +315,13 @@ class GD extends Object
 
             if($calculatedWidth > $imageSize->getWidth()) {
 
-                $getSrcWidth = round($srcWidth * $imageSize->getWidth() / $calculatedWidth);
-                $position = $position->updateX(round(($srcWidth - $getSrcWidth) / 2));
-                $size = $size->updateWidth($getSrcWidth);
+                $cropLeft = isset($cropPosition) ? $cropPosition->getX() : 50;
+                $cropWidth = isset($cropSize) ? $cropSize->getWidth() : 100;
+
+                $positionSizePair = $this->calculateCropSize($srcWidth, $calculatedWidth, $imageSize->getWidth(), $cropLeft, $cropWidth);
+
+                $position = $position->updateX($positionSizePair->getFirst());
+                $size = $size->updateWidth($positionSizePair->getSecond());
             }
 
         } else {
@@ -300,11 +330,39 @@ class GD extends Object
 
             if($calculatedHeight > $imageSize->getHeight()) {
 
-                $getSrcHeight = round($srcHeight * $imageSize->getHeight() / $calculatedHeight);
-                $position = $position->updateY(round(($srcHeight - $getSrcHeight) / 2));
-                $size = $size->updateHeight($getSrcHeight);
+                $cropTop = isset($cropPosition) ? $cropPosition->getY() : 50;
+                $cropHeight = isset($cropSize) ? $cropSize->getHeight() : 100;
+
+                $positionSizePair = $this->calculateCropSize($srcHeight, $calculatedHeight, $imageSize->getHeight(), $cropTop, $cropHeight);
+
+                $position = $position->updateY($positionSizePair->getFirst());
+                $size = $size->updateHeight($positionSizePair->getSecond());
             }
 
+        }
+
+        return new Tuple($position, $size);
+    }
+
+    /**
+     * returns smaller size when cropping is needed.
+     *
+     * @param int $srcSize size that source has
+     * @param int $calculatedSrcSize size that the source image would have if it is scaled like other dimension
+     * @param int $imageSize size that destination image should have
+     * @param int $cropPosition percentage where it will be cropped
+     * @param int $cropSize percentage on how big the crop will be
+     * @return Tuple<int, int>
+     */
+    protected function calculateCropSize($srcSize, $calculatedSrcSize, $imageSize, $cropPosition = 50, $cropSize = 100) {
+        $position = 0;
+        $size = $srcSize;
+        $multiplier = $calculatedSrcSize / $srcSize;
+
+        if($calculatedSrcSize > $imageSize) {
+            $size = round($imageSize / $multiplier * $cropSize / 100);
+
+            $position = round(($srcSize - $size) * $cropPosition / 100);
         }
 
         return new Tuple($position, $size);
@@ -320,6 +378,7 @@ class GD extends Object
      * @return Tuple<Position,Size> information about the area where we put data to
      */
     protected function getDestImageArea($srcArea, $imageSize) {
+        /** @var Size $size */
         $size = $imageSize->copy();
         $position = new Position(0, 0);
 
@@ -377,106 +436,15 @@ class GD extends Object
         return $this->resize($new_width, $height, $crop);
     }
 
-
-    /**
-     * we bring resizing to the next level
-     *
-     * V2 RESIZING
-     */
-
-    /**
-     * sets the size with given thumbareas
-     *
-     * @name createThumb
-     * @access public
-     * @return bool|GD
-     */
-    public function createThumb($width = null, $height = null, $cornerLeft, $cornerTop, $thumbWidth, $thumbHeight, $forceSize = false) {
-
-
-        if($cornerLeft + $thumbWidth > 100) {
-            $thumbWidth = 100 - $cornerLeft;
-        }
-
-        if($cornerTop + $thumbHeight > 100) {
-            $thumbHeight = 100 - $cornerTop;
-        }
-
-
-        // first define the src-points
-        $cornerTop = round($this->height * $cornerTop / 100);
-        $cornerLeft = round($this->width * $cornerLeft / 100);
-        $resampledWidth = $resampledWidthSrc = round($this->width * $thumbWidth / 100);
-        $resampledHeight = $resampledHeightSrc = round($this->height * $thumbHeight / 100);
-
-        // get the apect ratio
-        $aspectRatio = $resampledWidth / $resampledHeight;
-
-        // if both are set
-        if(isset($width, $height)) {
-            $aspectRatioNew = $width / $height;
-            // if this is true, we cut some pixels from top and bottom
-            if($aspectRatioNew > $aspectRatio) {
-                $resampledWidth = $width;
-                $resampledHeight = round($resampledWidth / $aspectRatio);
-                $cornerTop = $cornerTop + ($resampledHeightSrc - $height * ($resampledHeightSrc / $resampledHeight)) / 2;
-                $resampledHeightSrc = $height * ($resampledHeightSrc / $resampledHeight);
-                $resampledHeight = $height;
-
-                // else we cut some pixels from left and right
-            } else {
-                $resampledHeight = $height;
-
-                $resampledWidth = round($aspectRatio * $resampledHeight);
-                $cornerLeft = $cornerLeft + ($resampledWidthSrc - $width * ($resampledWidthSrc / $resampledWidth)) / 2;
-                $resampledWidthSrc = ($width / $resampledWidth) * $resampledWidthSrc;
-                $resampledWidth = $width;
-
-            }
-            // we've got the width, so just calculate height
-        } else if(isset($width)) {
-            if($width <= $resampledWidth || $forceSize)
-                $multiplier = $width / $resampledWidth;
-            else {
-                $multiplier = 1;
-            }
-
-            $resampledWidth = $width;
-            $resampledHeight = round($resampledWidth / $aspectRatio);
-            // we've got the width, so calculate the height
-        } else if(isset($height)) {
-            $resampledHeight = $height;
-            $resampledWidth = round($resampledHeight * $aspectRatio);
-        } else {
-            return false;
-        }
-
-        // now we resize
-        $new = $this->generateImage($resampledWidth, $resampledHeight, $this->extension);
-
-        imagecopyresampled($new, $this->gd(), 0, 0, $cornerLeft, $cornerTop, $resampledWidth, $resampledHeight, $resampledWidthSrc, $resampledHeightSrc);
-        if(isset($this->pic)) {
-            $this->destroy();
-        }
-
-        // now get new gd
-        $newgd = clone $this;
-        $newgd->gd($new);
-
-        return $newgd;
-    }
-
     /**
      * generates a new image and sets specific things for the current extensions
      *
-     * @name generateImage
-     * @access public
-     * @param int - width
-     * @param int - height
-     * @param string - extensions
+     * @param int $width
+     * @param int $height
+     * @param array $type
      * @return resource
      */
-    public static function generateImage($width, $height, $extension) {
+    protected function generateImage($width, $height, $type) {
         if(function_exists("imagecreatetruecolor"))
         {
             $image = imagecreatetruecolor($width, $height);
@@ -485,19 +453,30 @@ class GD extends Object
             $image = imagecreate($width, $height);
         }
 
-        if($extension == "png") {
-            // Turn off transparency blending (temporarily)
-            imagealphablending($image, false);
-
-            // Create a new transparent color for image
-            $color = imagecolorallocatealpha($image, 0, 0, 0, 127);
-
-            // Completely fill the background of the new image with allocated color.
-            imagefill($image, 0, 0, $color);
-
-            // Restore transparency blending
-            imagesavealpha($image, true);
+        if(isset($type["generation"])) {
+            $image = call_user_func_array($type["generation"], array($image));
         }
+
+        return $image;
+    }
+
+    /**
+     * generates png-image.
+     * @param Resource $image
+     * @return Resource
+     */
+    public static function generatePNG($image) {
+        // Turn off transparency blending (temporarily)
+        imagealphablending($image, false);
+
+        // Create a new transparent color for image
+        $color = imagecolorallocatealpha($image, 0, 0, 0, 127);
+
+        // Completely fill the background of the new image with allocated color.
+        imagefill($image, 0, 0, $color);
+
+        // Restore transparency blending
+        imagesavealpha($image, true);
 
         return $image;
     }
@@ -505,9 +484,7 @@ class GD extends Object
     /**
      * rotates an image
      *
-     * @name rotate
-     * @access public
-     * @param numeric - angle
+     * @param int $angle
      * @return GD
      */
     public function rotate($angle)
@@ -516,138 +493,156 @@ class GD extends Object
         if(isset($this->pic)) {
             $this->destroy();
         }
+
         // now get new gd
         $newgd = clone $this;
         $newgd->gd($new);
 
         return $newgd;
     }
+
     /**
      * saves the image tp a file.
      *
-     * @param string $file
-     * @param numeric $quality
-     * @param string $extension mode to use, for example as jpeg
+     * @param string $file path
+     * @param int $quality quality from 0 (worst) until 100 (best)
+     * @param array $type of image
      * @param int $mode file-mode
      * @return string filepath
      */
-    public function toFile($file, $quality = 70, $extension = null, $mode = 0777)
+    public function toFile($file, $quality = 70, $type = null, $mode = 0777)
     {
-        $supported = array("gif", "ico", "jpg", "jpeg", "png", "bmp");
-
-        if(!isset($extension) || !in_array(strtolower($extension), $supported)) {
-            $extension = $this->extension;
-        }
-
-        if(!isset($extension)) {
-            return false;
+        $type = $this->getType($type);
+        if(!isset($type["output"])) {
+            return null;
         }
 
         if(!PermissionChecker::isValidPermission($mode)) {
             $mode = 0777;
         }
 
-        $this->exportToFile($extension, $file, $quality);
+        call_user_func_array($type["output"], array($this->gd(), $file, $quality));
+
         $this->pic = $file;
 
         @chmod($file, $mode);
 
-        imagedestroy($this->gd);
-        unset($this->gd);
+        $this->destroy();
 
         clearstatcache();
         return $file;
     }
 
+
     /**
-     * exports gd to a file.
+     * explicit output for ico-files
      *
-     * @param string filename
-     * @param int quality
+     * @param string $file destination-file
+     * @param array $sizes icon sizes embedded
+     * @return string $file
      */
-    protected function exportToFile($extension, $file, $quality) {
-        if($extension == "gif")
-        {
-            imagegif($this->gd(), $file, $quality);
-        } else if($extension == "jpg" || $extension == "jpeg")
-        {
-            imageJPEG($this->gd(), $file, $quality);
-        } else if($extension == "png")
-        {
-            imagealphablending($this->gd(), false);
-            imagesavealpha($this->gd(), true);
-            imagepng($this->gd(), $file, 9);
-        } else if($extension == "bmp") {
-            ImageJPEG($this->gd(), $file, 100);
-        } else if($extension == "ico") {
-            $this->toFile(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
+    public function toIco($file, $sizes = array()) {
+        $ico = new PHP_ICO();
 
-            $ico = new PHP_ICO(ROOT . CACHE_DIRECTORY . "temp." . $this->extension, array($this->width, $this->height));
-            $ico->save_ico($file);
-
-            FileSystem::delete(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
+        if(isset($this->pic) && !isset($this->gd)) {
+            $ico->add_image($this->pic, $sizes);
+        } else {
+            $ico->add_image_resource($this->gd(), $sizes);
         }
+
+        if(!$ico->save_ico($file)) {
+            throw new LogicException("Could not convert Image to Icon.");
+        }
+
+        return $file;
     }
 
     /**
      * tries to send image to browser. it returns false if it failed, else it just terminates php-execution.
      *
      * @param int $quality
-     * @return bool
+     * @param array $type override type
      */
-    public function output($quality = 70)
+    public function output($quality = 70, $type = null)
     {
-
-        $this->setHTTPHeaders($this->getContentTypeForOutput($this->extension, $this->pic, $this->content_type));
+        $type = $this->getType($type);
+        if(isset($type["content_type"])) {
+            $this->setHTTPHeaders($type["content_type"]);
+        }
 
         HTTPResponse::sendHeader();
 
-        if(in_array($this->extension, array("png", "jpg", "gif", "bmp")))
+        if($this->pic != "" && file_exists($this->pic))
         {
-
-            if($this->pic != "" && file_exists($this->pic))
-            {
-                readfile($this->pic);
-            } else
-            {
-                $this->outputGd($quality);
-            }
-            if(PROFILE) Profiler::End();
-
-            exit;
+            readfile($this->pic);
+        } else if(isset($type["output"])) {
+            call_user_func_array($type["output"], array($this->gd(), null, $quality));
+        } else {
+            throw new LogicException("Type ".print_r($type, true) . " can not be sent to browser.");
         }
-        return false;
+
+        if(PROFILE) Profiler::End();
+
+        exit;
     }
 
     /**
-     * output file based on gd-function.
+     * output for png.
+     *
+     * @param resource $gd
+     * @param string $file
+     * @param int $quality
      */
-    public function outputGd($quality) {
-        switch($this->extension) {
-            case "gif":
-                imagegif($this->gd(),null, $quality);
-                break;
-            case "jpeg":
-            case "jpg":
-            case "bmp":
-                imagejpeg($this->gd(),null, $quality);
-                break;
-            case "png":
-                if($quality > 9 && $quality < 100)
-                {
-                    $quality = $quality / 10;
-                } else
-                {
-                    $quality = 7;
-                }
+    public static function imagePNG($gd, $file, $quality) {
+        if($quality > 9 && $quality < 100)
+        {
+            $quality = round(10 / $quality / 10);
+        } else
+        {
+            $quality = 7;
+        }
 
-                // set transparency
-                imagealphablending($this->gd(), false);
-                imagesavealpha($this->gd(), true);
+        // set transparency
+        imagealphablending($gd, false);
+        imagesavealpha($gd, true);
 
-                // output
-                imagepng($this->gd(),null, $quality);
-                break;
+        // output
+        imagepng($gd, $file, $quality);
+    }
+
+    /**
+     * output image as icon.
+     *
+     * @name imageIco
+     */
+    public static function imageICO($gd, $file) {
+        $ico = new PHP_ICO();
+        $ico->add_image_resource($gd);
+        $ico->save_ico($file);
+    }
+
+    /**
+     * checks if browser has picture cause of HTTP_IF_MODIFIED_SINCE or HTTP_IF_NONE_MATCH.
+     * it terminates execution when browser has picture.
+     * it also adds Cacheable-Headers and e-tag to headers.
+     *
+     * @param string $etag e-tag which should match HTTP_IF_NONE_MATCH
+     * @param int $mtime last modified
+     * @param int $expires how long is the period the file is valid?
+     */
+    public function checkAndSend304($etag, $mtime, $expires) {
+        HTTPResponse::setCachable(time() + $expires, $mtime, true);
+        HTTPResponse::addHeader("Etag", '"'.$etag.'"');
+
+        $modifiedHTTPHeader = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ?: null;
+        $noneMatchHTTPHeader = isset($_SERVER["HTTP_IF_NONE_MATCH"]) ?: null;
+        if($this->check304($etag, $mtime, $modifiedHTTPHeader, $noneMatchHTTPHeader)) {
+            HTTPResponse::setResHeader(304);
+            HTTPResponse::sendHeader();
+
+            if(PROFILE) Profiler::End();
+
+            exit;
         }
     }
 
@@ -683,60 +678,16 @@ class GD extends Object
     }
 
     /**
-     * returns content-type for output of given file extension/name.
-     *
-     * @param string extension
-     * @param string filepath
-     * @return string default mime type for this object
-     */
-    protected function getContentTypeForOutput($ext, $filename, $defaultType) {
-        if($this->extension == "bmp") {
-            return "image/jpeg";
-        } else {
-            return $defaultType;
-        }
-    }
-
-    /**
-     * checks if browser has picture cause of HTTP_IF_MODIFIED_SINCE or HTTP_IF_NONE_MATCH.
-     * it terminates execution when browser has picture.
-     * it also adds Cacheable-Headers and e-tag to headers.
-     *
-     * @param string $etag e-tag which should match HTTP_IF_NONE_MATCH
-     * @param int $mtime last modified
-     * @param int $expires how long is the period the file is valid?
-     */
-    public function checkAndSend304($etag, $mtime, $expires) {
-        HTTPResponse::setCachable(time() + $expires, $mtime, true);
-        HTTPResponse::addHeader("Etag", '"'.$etag.'"');
-
-        if($this->check304($etag, $mtime, $_SERVER['HTTP_IF_MODIFIED_SINCE'], $_SERVER["HTTP_IF_NONE_MATCH"])) {
-            $this->send304();
-        }
-    }
-
-    /**
-     * sends 304 and terminates execution.
-     */
-    public function send304() {
-        HTTPResponse::setResHeader(304);
-        HTTPResponse::sendHeader();
-
-        if(PROFILE) Profiler::End();
-
-        exit;
-    }
-
-    /**
      * defines HTTP-Headers for Caching.
      */
-    public function setHTTPHeaders($contentType) {
+    protected function setHTTPHeaders($contentType) {
         HTTPResponse::addHeader('Cache-Control','public, max-age=5511045');
         HTTPResponse::addHeader('content-type', $contentType);
 
         HTTPResponse::addHeader("pragma","Public");
 
-        $this->sendFilename(isset($this->filename) ? $this->filename : $this->pic);
+        $filename = isset($this->filename) ? $this->filename : $this->pic;
+        HTTPResponse::addHeader('content-disposition', "inline; filename='".basename($filename)."'");
 
         if(isset($this->pic) && $this->pic != "")
         {
@@ -749,26 +700,29 @@ class GD extends Object
     }
 
     /**
-     * sents filename to browser.
+     * returns the type of this image by given type.
+     *
+     * @param array|int|string type
+     * @return Array
      */
-    public function sendFilename($filename) {
-        if($filename) {
-            HTTPResponse::addHeader('content-disposition', "inline; filename='".basename($filename)."'");
+    protected function getType($type = null) {
+        if(isset($type)) {
+            if (isset($this->type[$type])) {
+                return $this->type[$type];
+            }
+
+            foreach ($this->type as $typeDefinition) {
+                if (strpos(strtolower($typeDefinition["extension"]), strtolower($type)) !== false) {
+                    return $typeDefinition;
+                }
+
+                if (strtolower($type) == strtolower($typeDefinition["content_type"])) {
+                    return $typeDefinition;
+                }
+            }
         }
 
-    }
-
-    /**
-     * explicit output for ico-files
-     *
-     *@name toIco
-     *@access public
-     */
-    public function toIco($file, $sizes = array()) {
-        $this->toFile(ROOT . CACHE_DIRECTORY . "temp." . $this->extension);
-        $ico = new PHP_ICO(ROOT . CACHE_DIRECTORY . "temp." . $this->extension, $sizes);
-        $ico->save_ico($file);
-        return $file;
+        return $this->type;
     }
 
     /**
@@ -780,6 +734,7 @@ class GD extends Object
             $this->gd = null;
         }
     }
+
 
 }
 

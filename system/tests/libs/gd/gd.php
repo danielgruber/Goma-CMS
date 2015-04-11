@@ -105,7 +105,7 @@ class GDTest extends GomaUnitTest
         $this->assertEqual($newgd->width, $expectedSize->getWidth());
         $this->assertEqual($newgd->height, $expectedSize->getHeight());
 
-        $file = ROOT . CACHE_DIRECTORY . "/test.img.gd.test." . $newgd->extension;
+        $file = ROOT . CACHE_DIRECTORY . "/test.img.gd.test." . basename($newgd->getFilePath());
         $newgd->toFile($file);
 
         $info = GetImageSize($file);

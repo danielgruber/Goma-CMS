@@ -10,11 +10,9 @@
   * last modified: 26.01.2015
 */
 class UploadsController extends Controller {
+    
 	/**
 	 * index
-	 *
-	 *@name index
-	 *@access public
 	*/
 	public function index() {
 		if($this->modelInst()->checkPermission()) {
@@ -27,12 +25,13 @@ class UploadsController extends Controller {
 			FileSystem::sendFile($this->modelInst()->realfile, $this->modelInst()->filename);
 		}
 	}
-	
-	/**
-	 * checks for the permission to do anything
-	 *
-	 *@name checkPermission
-	*/
+
+    /**
+     * checks for the permission to do anything
+     *
+     * @param string $action
+     * @return bool
+     */
 	public function checkPermission($action) {
 		return (parent::checkPermission($action) && $this->modelInst()->checkPermission());
 	}

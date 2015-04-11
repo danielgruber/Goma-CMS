@@ -80,36 +80,50 @@ class PHP_ICO {
 		
 		if ( false === ( $im = $this->_load_image_file( $file ) ) )
 			return false;
-		
-		
-		if ( empty( $sizes ) )
-			$sizes = array( imagesx( $im ), imagesy( $im ) );
-		
-		// If just a single size was passed, put it in array.
-		if ( ! is_array( $sizes[0] ) )
-			$sizes = array( $sizes );
-		
-		foreach ( (array) $sizes as $size ) {
-			list( $width, $height ) = $size;
-			
-			$new_im = imagecreatetruecolor( $width, $height );
-			
-			imagecolortransparent( $new_im, imagecolorallocatealpha( $new_im, 0, 0, 0, 127 ) );
-			imagealphablending( $new_im, false );
-			imagesavealpha( $new_im, true );
-			
-			$source_width = imagesx( $im );
-			$source_height = imagesy( $im );
-			
-			if ( false === imagecopyresampled( $new_im, $im, 0, 0, 0, 0, $width, $height, $source_width, $source_height ) )
-				continue;
-			
-			$this->_add_image_data( $new_im );
-		}
-		
-		return true;
+
+        $this->add_image_resource($im, $sizes);
 	}
-	
+
+    /**
+     * this function adds a source image to icon-file. it takes an resource as argument and generates all images in
+     * defined sizes.
+     *
+     * @param resource $img
+     * @param array $sizes Optional
+     * @return boolean
+     */
+    public function add_image_resource($im, $sizes = array()) {
+        if ( ! $this->_has_requirements )
+            return false;
+
+        if ( empty( $sizes ) )
+            $sizes = array( imagesx( $im ), imagesy( $im ) );
+
+        // If just a single size was passed, put it in array.
+        if ( ! is_array( $sizes[0] ) )
+            $sizes = array( $sizes );
+
+        foreach ( (array) $sizes as $size ) {
+            list( $width, $height ) = $size;
+
+            $new_im = imagecreatetruecolor( $width, $height );
+
+            imagecolortransparent( $new_im, imagecolorallocatealpha( $new_im, 0, 0, 0, 127 ) );
+            imagealphablending( $new_im, false );
+            imagesavealpha( $new_im, true );
+
+            $source_width = imagesx( $im );
+            $source_height = imagesy( $im );
+
+            if ( false === imagecopyresampled( $new_im, $im, 0, 0, 0, 0, $width, $height, $source_width, $source_height ) )
+                continue;
+
+            $this->_add_image_data( $new_im );
+        }
+
+        return true;
+    }
+
 	/**
 	 * Write the ICO file data to a file path.
 	 *

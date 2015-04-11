@@ -38,14 +38,16 @@ class UploadController extends Controller {
 	public function index() {
 		return false;
 	}
-	
-	/**
-	 * handles a file
-	 *
-	 *@name handleFile
-	 *@access public
-	*/
+
+    /**
+     * handles a file
+     *
+     * @name handleFile
+     * @access public
+     * @return mixed
+     */
 	public function handleFile() {
+
 		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
 		
 		if($data->count() == 0) {

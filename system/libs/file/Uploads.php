@@ -5,13 +5,21 @@ defined("UPLOAD_DIR") OR die('Constant UPLOAD_DIR not defined, Please define UPL
 loadlang("files");
 
 /**
-  *	@package 	goma framework
-  *	@link 		http://goma-cms.org
-  *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *	@author 	Goma-Team
-  * @Version 	1.5.12
-  *
-  * last modified: 26.01.2015
+ *
+ * @package 	goma framework
+ * @link 		http://goma-cms.org
+ * @license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	    Goma-Team
+ * @version 	1.5.12
+ *
+ * @property string realfile
+ * @property string filename
+ * @property string path
+ * @property string type
+ * @property string md5
+ * @property bool deletable
+ *
+ * last modified: 26.01.2015
 */
 class Uploads extends DataObject {
 	/**
@@ -37,9 +45,9 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	static $db = array(
-		"filename"	=> "varchar(100)",
+		"filename"	=> "varchar(300)",
 		"realfile"	=> "varchar(300)",
-		"path"		=> "varchar(200)",
+		"path"		=> "varchar(400)",
 		"type"		=> "enum('collection','file')",
 		"deletable"	=> "enum('0', '1')",
 		"md5"		=> "text"
@@ -124,11 +132,12 @@ class Uploads extends DataObject {
 		return false;
 	}
 
-	/**
-	 * get file class by class or filename.
-	 *
-	 * @name 	getFileClass
-	*/
+    /**
+     * get file class by class or filename.
+     *
+     * @name    getFileClass
+     * @return string
+     */
 	public static function getFileClass($class_name, $filename) {
 		// make it a valid class-name
 		if(isset($class_name)) {
@@ -150,12 +159,13 @@ class Uploads extends DataObject {
 		return $class_name;
 	}
 
-	/**
-	 * guesses the file-class
-	 *
-	 *@name guessFileClass
-	 *@access public
-	*/
+    /**
+     * guesses the file-class
+     *
+     * @name guessFileClass
+     * @access public
+     * @return string
+     */
 	public static function guessFileClass($filename) {
 		$ext = strtolower(substr($filename, strrpos($filename, ".") + 1));
 		foreach(ClassInfo::getChildren("Uploads") as $child) {
@@ -167,28 +177,29 @@ class Uploads extends DataObject {
 		return "Uploads";
 	}
 
-	/**
-	 * builds an instance of file.
-	 * it checks if file with md5 already exists and creates it if required.
-	 *
-	 * @param 	string realfile
-	 * @param 	string collection
-	 * @param 	string filename
-	 * @param 	boolean if file is auto-deletable or not
-	*/
+    /**
+     * builds an instance of file.
+     * it checks if file with md5 already exists and creates it if required.
+     *
+     * @param    string realfile
+     * @param    string collection
+     * @param    string filename
+     * @param    boolean if file is auto-deletable or not
+     * @return   Uploads
+     */
 	public static function getFileInstance($realfile, $collection, $filename, $deletable) {
 		
 		// check for already existing file.
 		if(filesize($realfile) < self::FILESIZE_MD5) {
 			$md5 = md5_file($realfile);
-			$object = DataObject::get("Uploads", array("md5" => $md5));
-			if($object->Count() > 0 && file_exists($object->realfile)) {
+			$object = DataObject::get_one("Uploads", array("md5" => $md5));
+			if($object && file_exists($object->realfile)) {
 				if(md5_file($object->realfile) == $md5) {
 
 					// we found the same file, just create a new DB-Entry, cause we 
 					// don't track where db-entry is used. one db entry is for one
 					// connection to another model.
-					$file = clone $object->first();
+					$file = clone $object;
 					$file->collectionid = $collection->id;
 					$file->path = strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collection->hash())) . "/" . randomString(6) . "/" . $filename;
 					$file->filename = $filename;
@@ -294,13 +305,14 @@ class Uploads extends DataObject {
 		
 		parent::onAfterRemove();
 	}
-	
-	/**
-	 * gets the object for the given file-path
-	 *
-	 *@name getFile
-	 *@access public
-	*/
+
+    /**
+     * gets the object for the given file-path
+     *
+     * @name getFile
+     * @access public
+     * @return Uploads|bool
+     */
 	public static function getFile($path) {
 
 		if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
@@ -331,14 +343,15 @@ class Uploads extends DataObject {
 	 *@access public
 	*/
 	public function onBeforeWrite() {
-		if(!$this->forceDeletable)
-			$this->deletable = true;
+		if(!$this->forceDeletable) {
+            $this->deletable = true;
+        }
 		
-		$cacher = new Cacher("file_" . $this->fieldGet("path"));
-		$cacher->delete();
+		$CacheForPath = new Cacher("file_" . $this->fieldGet("path"));
+		$CacheForPath->delete();
 		
-		$cacher = new Cacher("file_" . $this->fieldGet("realfile"));
-		$cacher->delete();
+		$CacheForRealfile = new Cacher("file_" . $this->fieldGet("realfile"));
+		$CacheForRealfile->delete();
 		
 	}
 	
@@ -346,7 +359,7 @@ class Uploads extends DataObject {
 	 * clean up DB
 	 *
 	 *@name cleanUpDB
-	 *@åccess public
+	 *@access public
 	*/
 	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
 		parent::cleanUpDB($prefix, $log);
@@ -363,13 +376,14 @@ class Uploads extends DataObject {
 			//$record->remove(true);
 		}
 	}
-	
-	/**
-	 * returns files in the collection
-	 *
-	 *@name getCollectionFiles
-	 *@access public
-	*/
+
+    /**
+     * returns files in the collection
+     *
+     * @name getCollectionFiles
+     * @access public
+     * @return DataObjectSet
+     */
 	public function getCollectionFiles() {
 		if($this->type == "file") {
 			return DataObject::get("Uploads", array("collectionid" => $this->collectionid));
@@ -377,14 +391,15 @@ class Uploads extends DataObject {
 			return DataObject::get("Uploads", array("collectionid" => $this->id));
 		}
 	}
-	
-	/**
-	 * gets a subcollection with given name
-	 *
-	 *@name getSubCollection
-	 *@access public
-	 *@param string - name
-	*/
+
+    /**
+     * gets a subcollection with given name
+     *
+     * @name getSubCollection
+     * @access public
+     * @param string - name
+     * @return Uploads
+     */
 	public function getSubCollection($name) {
 		if($this->type == "file") {
 			return $this->collection()->getSubCollection($name);
@@ -403,13 +418,14 @@ class Uploads extends DataObject {
 			}
 		}
 	}
-	
-	/**
-	 * generates unique path for this collection
-	 *
-	 *@name hash
-	 *@access public
-	*/
+
+    /**
+     * generates unique path for this collection
+     *
+     * @name hash
+     * @access public
+     * @return string
+     */
 	public function hash() {
 		if($this->realfile == "") {
 			$this->realfile = md5($this->identifier);
@@ -418,13 +434,14 @@ class Uploads extends DataObject {
 		$this->write(false, true);
 		return $this->realfile;
 	}
-	
-	/**
-	 * generates identifier for collection
-	 *
-	 *@name identifier
-	 *@access public
-	*/
+
+    /**
+     * generates identifier for collection
+     *
+     * @name identifier
+     * @access public
+     * @return string
+     */
 	public function identifier() {
 		if($this->collection) {
 			return $this->collection()->identifier() . "." . $this->filename;
@@ -432,13 +449,14 @@ class Uploads extends DataObject {
 			return $this->filename;
 		}
 	}
-	
-	/**
-	 * returns the raw-path
-	 *
-	 *@name raw
-	 *@access public
-	*/
+
+    /**
+     * returns the raw-path
+     *
+     * @name raw
+     * @access public
+     * @return string
+     */
 	public function raw() {
 		if($this->deletable) {
 			$this->deletable = true;
@@ -447,13 +465,14 @@ class Uploads extends DataObject {
 		
 		return $this->path;
 	}
-	
-	/**
-	 * returns the path
-	 *
-	 *@name getPath
-	 *@access public
-	*/
+
+    /**
+     * returns the path
+     *
+     * @name getPath
+     * @access public
+     * @return string
+     */
 	public function getPath(){
 		if(!$this->fieldGET("path") || $this->fieldGet("path") == "Uploads/" || $this->fieldGet("path") == "Uploads")
 			return $this->fieldGET("path");
@@ -482,13 +501,14 @@ class Uploads extends DataObject {
 			$this->setField("path", $path);
 		}
 	}
-	
-	/**
-	 * to string
-	 *
-	 *@name __toString
-	 *@access public
-	*/
+
+    /**
+     * to string
+     *
+     * @name __toString
+     * @access public
+     * @return null|string
+     */
 	public function __toString() {
 		if($this->bool()) {
 			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
@@ -496,14 +516,15 @@ class Uploads extends DataObject {
 			return null;
 		}
 	}
-	
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 *@name getIcon
-	 *@access public
-	 *@param int - size; support for 16, 32, 64 and 128
-	*/
+
+    /**
+     * returns the path to the icon of the file
+     *
+     * @name getIcon
+     * @access public
+     * @param int - size; support for 16, 32, 64 and 128
+     * @return string
+     */
 	public function getIcon($size = 128, $retina = false) {
 		switch($size) {
 			case 16:
@@ -555,23 +576,25 @@ class Uploads extends DataObject {
 			}
 		}
 	}
-	
-	/**
-	 * gets the file-size nice written
-	 *
-	 *@name filesize
-	 *@access public
-	*/
+
+    /**
+     * gets the file-size nice written
+     *
+     * @name filesize
+     * @access public
+     * @return string
+     */
 	public function filesize() {
 		return FileSystem::filesize_nice($this->realfile);
 	}
-	
-	/**
-	 * returns if this dataobject is valid
-	 *
-	 *@name bool
-	 *@access public
-	*/
+
+    /**
+     * returns if this dataobject is valid
+     *
+     * @name bool
+     * @access public
+     * @return bool
+     */
 	public function bool() {
 		if(parent::bool()) {
 			return ($this->realfile !== "" && is_file($this->realfile));
@@ -579,12 +602,13 @@ class Uploads extends DataObject {
 			return false;
 		}
 	}
-	
-	/**
-	 * checks for the permission to show this file
-	 *
-	 *@name checkPermission
-	*/
+
+    /**
+     * checks for the permission to show this file
+     *
+     * @name checkPermission
+     * @return bool
+     */
 	public function checkPermission() {
 		$check = true;
 		$this->callExtendig("checkPermission", $check);
