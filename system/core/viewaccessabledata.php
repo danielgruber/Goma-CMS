@@ -1107,7 +1107,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
  * @package		Goma\System\Core
  * @version		1.0
  */
-abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
+abstract class Extension extends Object implements ExtensionModel {
 
 	/**
 	 * extra_methods
@@ -1128,6 +1128,7 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 		if(!is_object($object)) {
             throw new InvalidArgumentException('Object is not an object');
 		}
+
 		if(class_exists($object->classname)) {
 			$this->owner = $object;
 		} else {

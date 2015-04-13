@@ -13,7 +13,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     4.7.29
+ * @version     4.7.30
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -4359,8 +4359,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * preserve Defaults
      *
-     *@name preserveDefaults
-     *@åccess public
+     * @name preserveDefaults
+     * @access public
+     * @return bool
      */
     public function preserveDefaults($prefix = DB_PREFIX, &$log) {
         $this->callExtending("preserveDefaults", $prefix);
@@ -4495,10 +4496,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets default SQL-Fields
      *
-     *@name getDefaultSQLFields
-     *@access public
+     * @param string $class name of class
+     * @return array
      */
-    public function DefaultSQLFields($class) {
+    public static function DefaultSQLFields($class) {
         if (strtolower(get_parent_class($class)) == "dataobject") {
             return array(
                 'id'			=> 'INT(10) AUTO_INCREMENT  PRIMARY KEY',
@@ -4511,444 +4512,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 'id'			=> 'INT(10) AUTO_INCREMENT  PRIMARY KEY'
             );
         }
-    }
-
-    /**
-     * gets all dbfields
-     *
-     *@name DBFields
-     *@access public
-     */
-    public function generateDBFields($parents = false) {
-
-        $fields = array();
-        if (StaticsManager::hasStatic($this->classname, "db")) {
-            $fields = (array)StaticsManager::getStatic($this->classname, "db");
-        }
-
-        if (isset($this->db_fields)) {
-            $fields = $this->db_fields;
-            Core::deprecate("2.0", "Class ".$this->classname." uses old db_fields-Attribute, use static \$db instead.");
-        }
-
-        // has-one-fields
-        foreach($this->generateHas_one(false) as $key => $value) {
-            if (!isset($fields[$key . "id"])) // patch if you want to edit field-type of has_one-field
-                $fields[$key . "id"] = "int(10)";
-
-            unset($key, $value);
-        }
-
-        // fields of extensions
-        foreach($this->LocalcallExtending("DBFields") as $dbfields) {
-            $fields = array_merge($fields, $dbfields);
-            unset($dbfields);
-        }
-
-        // if parents, include parents.
-        $parent = get_parent_class($this);
-        if ($parents === true && $parent != "DataObject") {
-            $fields = array_merge(Object::instance($parent)->generateDBFields(true), $fields);
-        }
-
-        if ($fields)
-            $fields = array_merge($this->DefaultSQLFields(strtolower(get_class($this))), $fields);
-
-        // validate fields.
-        $this->validateDBFields($fields);
-
-        return $fields;
-    }
-
-    public function validateDBFields($fields) {
-
-
-
-        foreach($fields as $name => $type) {
-
-
-            // hack to not break current Goma-CMS Build
-            if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
-                throw new DBFieldNotValidException($this->classname . "." . $name);
-            }
-        }
-    }
-
-    /**
-     * gets has_one
-     *
-     *@access public
-     */
-    public function generateHas_one($parents = true) {
-
-        $has_one = (array)StaticsManager::getStatic($this->classname, "has_one");
-        foreach($this->LocalcallExtending("Has_One") as $has_ones) {
-            $has_one = array_merge($has_one, $has_ones);
-            unset($has_ones);
-        }
-
-        $parent = strtolower(get_parent_class($this));
-        if ($parents === true && $parent != "dataobject") {
-            $has_one = array_merge(Object::instance($parent)->generateHas_one(), $has_one);
-        }
-
-        if ($parent == "dataobject") {
-            $has_one["autor"] = "user";
-            $has_one["editor"] = "user";
-        }
-
-        $has_one = array_map("strtolower", $has_one);
-        $has_one = ArrayLib::map_key("strtolower", $has_one);
-
-        return $has_one;
-    }
-
-    /**
-     * gets has_many
-     *
-     *@access public
-     */
-    public function generateHas_many() {
-
-        $has_many = (array)StaticsManager::getStatic($this->classname, "has_many");
-        foreach($this->LocalcallExtending("Has_Many") as $has_manys) {
-            $has_many = array_merge($has_many, $has_manys);
-            unset($has_manys);
-        }
-        $parent = get_parent_class($this);
-        if ($parent != "DataObject") {
-            $has_many = array_merge(Object::instance($parent)->generateHas_many(), $has_many);
-        }
-
-        $has_many = array_map("strtolower", $has_many);
-        $has_many = ArrayLib::map_key("strtolower", $has_many);
-        return $has_many;
-    }
-
-    /**
-     * gets many_many
-     *
-     *@name many_many
-     *@access public
-     */
-    public function generateMany_many($parents = true) {
-        $many_many = (array)StaticsManager::getStatic($this->classname, "many_many");
-        foreach($this->LocalcallExtending("many_many") as $many_manys) {
-            $many_many = array_merge($many_many, $many_manys);
-            unset($many_manys);
-        }
-        $parent = get_parent_class($this);
-        if ($parents === true && $parent != "DataObject") {
-            $many_many = array_merge(Object::instance($parent)->generateMany_many(), $many_many);
-        }
-
-        foreach($many_many as $k => $v) {
-            if(is_string($v)) {
-                $many_many[$k] = strtolower($v);
-            } else {
-                $many_many[$k]["class"] = strtolower($v["class"]);
-            }
-        }
-
-        $many_many = ArrayLib::map_key("strtolower", $many_many);
-        return $many_many;
-    }
-
-    /**
-     * gets belongs_many_many
-     *
-     *@name belongs_many_many
-     *@access public
-     */
-    public function generateBelongs_many_many($parents = true) {
-        $belongs_many_many = (array)StaticsManager::getStatic($this->classname, "belongs_many_many");
-        foreach($this->LocalcallExtending("belongs_many_many") as $belongs_many_manys) {
-            $belongs_many_many = array_merge($belongs_many_many, $belongs_many_manys);
-            unset($belongs_many_manys);
-        }
-        $parent = get_parent_class($this);
-        if ($parents === true && $parent != "DataObject") {
-            $belongs_many_many = array_merge(Object::instance($parent)->generateBelongs_Many_many(), $belongs_many_many);
-        }
-
-        foreach($belongs_many_many as $k => $v) {
-            if(is_string($v)) {
-                $belongs_many_many[$k] = strtolower($v);
-            } else {
-                $belongs_many_many[$k]["class"] = strtolower($v["class"]);
-            }
-        }
-
-        $belongs_many_many = ArrayLib::map_key("strtolower", $belongs_many_many);
-        return $belongs_many_many;
-    }
-
-    /**
-     * generates many-many tables
-     *
-     *@name generateManyManyTables
-     *@access public
-     */
-    public function generateManyManyTables() {
-        $tables = array();
-
-        // many-many
-        foreach($this->generateMany_many(false) as $key => $value) {
-            // generate extra-fields
-            if (isset($this->many_many_extra_fields[$key])) {
-                $extraFields = $this->many_many_extra_fields[$key];
-            } else if (self::isStatic($this->classname, "many_many_extra_fields")) {
-                $extraFields = ArrayLib::map_key("strtolower", (array)StaticsManager::getStatic($this->classname, "many_many_extra_fields"));
-                if (isset($extraFields[$key]))
-                    $extraFields = $extraFields[$key];
-                else
-                    $extraFields = array();
-            } else {
-                $extraFields = array();
-            }
-
-            $extendExtraFields = $this->localCallExtending("many_many_extra_fields");
-            if (isset($extendExtraFields[$key])) {
-                $extraFields = array_merge($extraFields, $extendExtraFields[$key]);
-            }
-
-            $value = ClassManifest::resolveClassName($value);
-
-            $table = "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value;
-            if (!SQL::getFieldsOfTable($table)) {
-                $table = "many_".strtolower(get_class($this))."_".  $key;
-            }
-
-            $object = $value;
-            if($value === strtolower(get_class($this))) {
-                $value = $value . "_" . $value;
-            }
-
-            $tables[$key] = array(
-                "table"			=> $table,
-                "field"			=> strtolower(get_class($this)) . "id",
-                "extfield"		=> $value . "id",
-                "object"		=> $object
-            );
-            if ($extraFields) {
-                $tables[$key]["extraFields"] = $extraFields;
-            }
-            unset($key, $value);
-        }
-
-        //# belongs-many-many
-        foreach($this->generateBelongs_Many_many(false) as $key => $value) {
-            $info = $this->getRelationInfoWithInverse($value);
-            $value = $info[0];
-            $relation = $info[1];
-
-            if (is_subclass_of($value, "DataObject")) {
-                $inst = Object::instance($value);
-                $relations = ArrayLib::map_key("strtolower", $inst->generateMany_Many());
-
-                $field = strtolower(get_class($this));
-
-                if (is_array($relations)) {
-                    if (isset($relation)) {
-                        $relation = strtolower($relation);
-
-                        if (isset($relations[$relation]) && ($relations[$relation] == $this->classname) || is_subclass_of($this->classname, $relations[$relation]) || $this->classname == $relations[$relation] || is_subclass_of($relations[$relation], $this->classname)) {
-                            // everything okay
-                        } else {
-                            throw new LogicException("Relation ".$relation." does not exist on ".$value.".");
-                        }
-                    } else {
-                        $relation = null;
-                        foreach($relations as $r => $d) {
-                            if(is_array($d) && $d["class"] == $this->classname) {
-                                $relation = $r;
-                                break;
-                            } else if(is_string($d) && $d == $this->classname) {
-                                $relation = $r;
-                                break;
-                            }
-                        }
-
-                        // search for inverse with parent class-names.
-                        if(!isset($relation)) {
-                            $c = $this->classname;
-                            while($c = ClassInfo::getParentClass($c))
-                            {
-                                foreach($relations as $r => $d) {
-                                    if(is_array($d) && $d["class"] == $c) {
-                                        $relation = $r;
-                                        $field = $c;
-                                        break 2;
-                                    } else if(is_string($d) && $d == $c) {
-                                        $relation = $r;
-                                        $field = $c;
-                                        break 2;
-                                    }
-                                }
-
-                            }
-                        }
-
-                        if(!isset($relation)) {
-                            throw new Exception("No inverse on ".$value." found.");
-                        }
-                    }
-                } else {
-                    throw new LogicException("Relation ".$relation." does not exist on ".$value.".");
-                }
-
-                // generate extra-fields
-                if (isset($inst->many_many_extra_fields[$relation])) {
-                    $extraFields = $this->many_many_extra_fields[$key];
-                } else if (self::isStatic($inst->classname, "many_many_extra_fields")) {
-                    $extraFields = ArrayLib::map_key("strtolower", (array)StaticsManager::getStatic($inst->classname, "many_many_extra_fields"));
-                    if (isset($extraFields[$relation]))
-                        $extraFields = $extraFields[$relation];
-                    else
-                        $extraFields = array();
-                } else {
-                    $extraFields = array();
-                }
-
-                $extendExtraFields = $inst->localCallExtending("many_many_extra_fields");
-                if (isset($extendExtraFields[$relation])) {
-                    $extraFields = array_merge($extraFields, $extendExtraFields);
-                }
-
-
-            } else {
-
-                throw new LogicException($value . " must be subclass of DataObject to be a handler for a many-many-relation.");
-            }
-
-            if ($relation) {
-                $table = "many_many_".$value."_".  $relation . '_' . strtolower(get_class($this));
-                if (!SQL::getFieldsOfTable($table))
-                    $table = "many_" . $value . "_" . $relation;
-
-                if($value === $field) {
-                    $field = $field . "_" . $field;
-                }
-
-                $tables[$key] = array(
-                    "table"			=> $table,
-                    "field"			=> $field . "id",
-                    "extfield"		=> $value . "id",
-                    "object"    	=> $value
-                );
-                if ($extraFields) {
-                    $tables[$key]["extraFields"] = $extraFields;
-                }
-                unset($key, $value);
-            }
-        }
-
-        $parent = get_parent_class($this);
-        if ($parent != "DataObject") {
-            $tables = array_merge(Object::instance($parent)->generateManyManyTables(), $tables);
-        }
-
-        return $tables;
-    }
-
-    /**
-     * returns information about the relationship.
-     *
-     * @param mixed $info
-     * @return array first value if class and second inverse
-     */
-    public function getRelationInfoWithInverse($value) {
-        $relation = null;
-        if (is_array($value)) {
-            if (isset($value["relation"]) && isset($value["class"])) {
-                $relation = $value["relation"];
-                $value = $value["class"];
-            } else if (isset($value["inverse"]) && isset($value["class"])) {
-                $relation = $value["inverse"];
-                $value = $value["class"];
-            } else {
-                $value = array_values($value);
-                $relation = @$value[1];
-                $value = $value[0];
-            }
-        }
-
-        return array(ClassInfo::find_class_name($value), $relation);
-    }
-
-    /**
-     * indexes
-     *
-     *@name generateIndexes
-     *@access public
-     */
-    public function generateIndexes() {
-        $indexes = array();
-
-        if (StaticsManager::hasStatic($this->classname, "index"))
-            $indexes = (array)StaticsManager::getStatic($this->classname, "index");
-
-        if (isset($this->indexes)) {
-            $indexes = $this->indexes;
-            Core::deprecate("2.0", "Class ".$this->classname." uses old indexes-Attribute, use static \$index instead.");
-        }
-
-        foreach($this->generateHas_one(false) as $key => $value) {
-            if (!isset($indexes[$key . "id"])) {
-                $indexes[$key . "id"] = "INDEX";
-                unset($key, $value);
-            }
-        }
-
-        $searchable_fields = StaticsManager::hasStatic($this->classname, "search_fields") ? StaticsManager::getStatic($this->classname, "search_fields") : array();
-        if (isset($this->searchable_fields))
-            $searchable_fields = array_merge($searchable_fields, $this->searchable_fields);
-
-
-        if ($searchable_fields)
-            // we add an index for fast searching
-            $indexes["searchable_fields"] = array("type" => "INDEX", "fields" => implode(",", $searchable_fields), "name" => "searchable_fields");
-
-        // validate
-        foreach($indexes as $name => $type) {
-            if (is_array($type)) {
-                if (isset($type["type"], $type["fields"])) {
-                    // okay
-                } else {
-                    throwError(6, "Invalid Index", "Index ".$name." in DataObject ".$this->classname." invalid. Type and Fields required!");
-                }
-            }
-        }
-
-
-        $db = $this->generateDBFields(false);
-        if (isset($db["last_modified"]))
-            $indexes["last_modified"] = "INDEX";
-
-        return $indexes;
-
-    }
-
-    /**
-     * generates casting
-     *
-     *@name generateCasting
-     *@access public
-     */
-    public function generateCasting() {
-        $casting = array_merge((array)StaticsManager::getStatic($this->classname, "casting"), (array) $this->generateDBFields());
-        foreach($this->LocalcallExtending("casting") as $_casting) {
-            $casting = array_merge($casting, $_casting);
-            unset($_casting);
-        }
-
-        $parent = get_parent_class($this);
-        if ($parent != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-            $casting = array_merge(Object::instance($parent)->generateCasting(), $casting);
-        }
-
-        $casting = ArrayLib::map_key("strtolower", $casting);
-        return $casting;
     }
 }
 
@@ -4967,66 +4530,77 @@ class DBFieldNotValidException extends Exception {
  */
 abstract class DataObjectExtension extends Extension
 {
+
     /**
-     * gets DBFields
+     * @return array
      */
-    public function DBFields() {
-        return (StaticsManager::hasStatic($this->classname, "db")) ? StaticsManager::getStatic($this->classname, "db") : (isset($this->db_fields) ? $this->db_fields : array());
-    }
-    /**
-     * gets has_one
-     */
-    public function has_one() {
-        return (StaticsManager::hasStatic($this->classname, "has_one")) ? StaticsManager::getStatic($this->classname, "has_one") : (isset($this->has_one) ? $this->has_one : array());
-    }
-    /**
-     * gets has_many
-     */
-    public function has_many() {
-        return (StaticsManager::hasStatic($this->classname, "has_many")) ? StaticsManager::getStatic($this->classname, "has_many") : (isset($this->has_many) ? $this->has_many : array());
-    }
-    /**
-     * many-many
-     */
-    public function many_many() {
-        return (StaticsManager::hasStatic($this->classname, "many_many")) ? StaticsManager::getStatic($this->classname, "many_many") : (isset($this->many_many) ? $this->many_many : array());
-    }
-    public function belongs_many_many() {
-        return (StaticsManager::hasStatic($this->classname, "belongs_many_many")) ? StaticsManager::getStatic($this->classname, "belongs_many_many") : (isset($this->belongs_many_many) ? $this->belongs_many_many : array());
-    }
-    /**
-     * defaults
-     *
-     *@name defaults
-     *@access public
-     */
-    public function defaults() {
-        return (StaticsManager::hasStatic($this->classname, "default")) ? StaticsManager::getStatic($this->classname, "default") : (isset($this->defaults) ? $this->defaults : array());
+    public static function DBFields() {
+        return isset(Static::$db) ? Static::$db : array();
     }
 
     /**
-     * own setOwner method with check if $object is a subclass of dataobject
-     *@name setOwner
-     *@access public
-     *@param object
+     * @return array
+     */
+    public static function has_one() {
+        return isset(Static::$has_one) ? Static::$has_one : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function has_many() {
+        return isset(Static::$has_many) ? Static::$has_many : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function many_many() {
+        return isset(Static::$many_many) ? Static::$many_many : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function belongs_many_many() {
+        return isset(Static::$belongs_many_many) ? Static::$belongs_many_many : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function defaults() {
+        return isset(Static::$default) ? Static::$default : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function index() {
+        return isset(Static::$index) ? Static::$index : array();
+    }
+
+    /**
+     * @return array
+     */
+    public static function many_many_extra_fields() {
+        return isset(Static::$many_many_extra_fields) ? Static::$many_many_extra_fields : array();
+    }
+
+    /**
+     * it does check if owner is a kind of DataObject.
+     *
+     * @param object
+     * @return $this
      */
     public function setOwner($object)
     {
-        if (!is_subclass_of($object, 'DataObject'))
+        if (is_a($object, "DataObject"))
         {
-            throwError(6, 'PHP-Error', '$object isn\'t subclass of dataobject in '.__FILE__.' on line '.__LINE__.'');
+            throw new InvalidArgumentException("Object must be subclass of DataObject, but is {$this->classname}.");
         }
+
         parent::setOwner($object);
         return $this;
-    }
-
-    /**
-     * defaults
-     *
-     *@name defaults
-     *@access public
-     */
-    public function generateDefaults() {
-        return array();
     }
 }

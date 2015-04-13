@@ -421,27 +421,38 @@ abstract class Object
      */
     public function getExtensions($recursive = true)
     {
-        if ($this->classname == "") {
-            $this->classname = strtolower(get_class($this));
-        }
+        return self::getExtensionsForClass($this->classname, $recursive);
+    }
+
+    /**
+     * returns extensions for a given class as static context.
+     *
+     * @param $class
+     * @param bool $recursive if to check for extensions from parents, too.
+     * @return array
+     */
+    public static function getExtensionsForClass($class, $recursive = true) {
+        $class = ClassManifest::resolveClassName($class);
 
         if ($recursive === true) {
-            if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
-                $this->buildExtCache();
+            if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$class])) {
+                self::buildExtCache($class);
             }
-            return array_keys(self::$cache_extensions[$this->classname]);
-        } else
-            return (isset(self::$extensions[$this->classname])) ? array_keys(self::$extensions[$this->classname]) : array();
+            return array_keys(self::$cache_extensions[$class]);
+        } else {
+            return (isset(self::$extensions[$class])) ? array_keys(self::$extensions[$class]) : array();
+        }
     }
 
     /**
      * Builds the extension cache.
      *
+     * @param $class
      * @return array[] Array with the extensions.
      */
-    private function buildExtCache()
+    private static function buildExtCache($class)
     {
-        $parent = $this->classname;
+        $parent = $class;
         $extensions = array();
         while ($parent !== false) {
             if (isset(self::$extensions[$parent])) {
@@ -450,7 +461,7 @@ abstract class Object
             $parent = ClassInfo::getParentClass($parent);
         }
 
-        self::$cache_extensions[$this->classname] = $extensions;
+        self::$cache_extensions[$class] = $extensions;
         return $extensions;
     }
 
