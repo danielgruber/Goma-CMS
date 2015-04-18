@@ -175,9 +175,9 @@ class ModelInfoGenerator {
         $key = trim(strtolower($key));
         $extraFields = self::get_many_many_extraFields($class, $key);
 
-        $table = "many_many_".strtolower(get_class($this))."_".  $key . '_' . $value;
+        $table = "many_many_".strtolower(trim($class))."_".  $key . '_' . $value;
         if (!SQL::getFieldsOfTable($table)) {
-            $table = "many_".strtolower(get_class($this))."_".  $key;
+            $table = "many_".strtolower(trim($class))."_".  $key;
         }
     }
 
