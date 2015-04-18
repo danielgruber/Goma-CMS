@@ -40,4 +40,106 @@ class HTMLFieldTest extends GomaUnitTest implements TestAble {
 
         $this->assertEqual(HTMLText::matchSizes('<img alt="" height="980" src="./Uploads/c6f796ae12b4667f6aa0f3ed6d812456/kGBRR3/bild_9469.jpg/index.jpg" width="1000" />'), array("width" => 1000, "height" => 980));
 	}
+
+    /**
+     * tests if generateResizeUrls returns correct results.
+     */
+    public function testGenerateResizeUrls() {
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(500, 500),
+            "./test/blub/noCropSetSize/500/500.jpg\" data-retina=\"./test/blub/noCropSetSize/1000/1000.jpg"
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2002, 1502),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(1000, 750),
+            "./test/blub/noCropSetSize/1000/750.jpg\" data-retina=\"./test/blub/noCropSetSize/2000/1500.jpg"
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(1000, 750),
+            "./test/blub/noCropSetSize/1000/750.jpg\" data-retina=\"./test/blub/file.jpg"
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(1000, 1000),
+            "./test/blub/noCropSetSize/1000/1000.jpg\" data-retina=\"./test/blub/file.jpg"
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(2000, 1500),
+            null
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(2000, 1000),
+            null
+        );
+
+        $this->unitGenerateResizeUrls(
+            new Size(2000, 1500),
+            "test/blub/file.jpg",
+            "noCropSetSize",
+            new Size(1000, 1500),
+            null
+        );
+    }
+
+    /**
+     * @param Size $imageSize
+     * @param string $path
+     * @param string $action
+     * @param Size $desiredSize
+     * @param string $expected
+     */
+    protected function unitGenerateResizeUrls($imageSize, $path, $action, $desiredSize, $expected) {
+        $upload = new DummyUploadsObject();
+        $upload->width = $imageSize->getWidth();
+        $upload->height = $imageSize->getHeight();
+        $upload->path = substr($path, 0, strrpos($path, "/"));
+        $upload->filename = basename($path);
+
+        $reflectionMethodResize = new ReflectionMethod('HTMLText', 'generateResizeUrls');
+        $reflectionMethodResize->setAccessible(true);
+
+        $text = new HTMLText("", "");
+
+        $this->assertEqual($reflectionMethodResize->invoke(
+            $text,
+            $upload,
+            $action,
+            $desiredSize->getHeight(),
+            $desiredSize->getWidth()
+        ), $expected, print_r($expected, true) . " %s");
+
+    }
+}
+
+class DummyUploadsObject {
+
+    public $width;
+    public $height;
+    public $filename;
+    public $path;
+
+    public function manageURL($url) {
+
+    }
 }

@@ -157,13 +157,14 @@ class HTMLText extends Varchar {
 
         if(isset($desiredWidth)) {
             if($desiredWidth < $uploadsObject->width) {
-                $url .= $desiredWidth . "/";
 
-                if($desiredWidth * 2 > $uploadsObject->width) {
+                if($desiredWidth * 2 < $uploadsObject->width) {
                     $retinaURL = $url . ($desiredWidth * 2) . "/";
                 } else {
                     $retinaURL = false;
                 }
+
+                $url .= $desiredWidth . "/";
             } else {
                 return null;
             }
@@ -173,17 +174,23 @@ class HTMLText extends Varchar {
             if($desiredHeight < $uploadsObject->height) {
                 $url .= $desiredHeight . "/";
 
-                if($desiredHeight * 2 > $uploadsObject->height) {
-
+                if($desiredHeight * 2 < $uploadsObject->height) {
                     if(!isset($retinaURL)) {
                         $retinaURL = $url . ($desiredHeight * 2) . "/";
                     } else if($retinaURL) {
                         $retinaURL = $retinaURL . ($desiredHeight * 2) . "/";
                     }
+                } else {
+                    $retinaURL = false;
                 }
             } else {
                 return null;
             }
+        }
+
+        if($retinaURL === false) {
+            $filename = $uploadsObject->filename;
+            $retinaURL = "./" . $uploadsObject->path . "/" . substr($filename, 0, strrpos($filename, "."));
         }
 
         $url = $this->manageUrl($url, $uploadsObject);
