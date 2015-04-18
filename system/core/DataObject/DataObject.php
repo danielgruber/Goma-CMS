@@ -4172,8 +4172,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * dev
      *
-     *@name buildDB
-     *@access public
+     * @param string $prefix optional
+     * @throws MySQLException
+     * @access public
+     * @return string
      */
     public function buildDB($prefix = DB_PREFIX) {
         $log = "";
@@ -4203,6 +4205,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             foreach($db_fields as $field => $type) {
                 if (isset($casting[strtolower($field)])) {
                     if ($casting[strtolower($field)] = DBField::parseCasting($casting[strtolower($field)])) {
+
                         $type = call_user_func_array(array($casting[strtolower($field)]["class"], "getFieldType"), (isset($casting[strtolower($field)]["args"])) ? $casting[strtolower($field)]["args"] : array());
                         if ($type != "")
                             $db_fields[$field] = $type;
