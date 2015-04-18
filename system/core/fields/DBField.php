@@ -283,8 +283,9 @@ class DBField extends Object implements IDataBaseField
     /**
      * calls
      *
-     *@name __call
-     *@access public
+     * @name __call
+     * @access public
+     * @return mixed|string
      */
     public function __call($name, $args) {
 

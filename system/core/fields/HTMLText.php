@@ -151,7 +151,7 @@ class HTMLText extends Varchar {
                 if($desiredHeight * 2 < $uploadsObject->height) {
                     if(!isset($retinaURL)) {
                         $retinaURL = $url . ($desiredHeight * 2) . "/";
-                    } else if($retinaURL) {
+                    } else if($retinaURL !== false) {
                         $retinaURL = $retinaURL . ($desiredHeight * 2) . "/";
                     }
                 } else {
