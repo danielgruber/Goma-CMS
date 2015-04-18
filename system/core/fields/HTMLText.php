@@ -35,12 +35,12 @@ class HTMLText extends Varchar {
     }
 
     /**
-     * returns width and height for given style property. it parses the HTML.
+     * returns width and height for given HTML. it parses the HTML.
      *
      * @param string $style contents of style-attribute
      * @return array
      */
-    public function matchSizes($style) {
+    public static function matchSizes($style) {
         $data = array();
         if(preg_match('/(;|\s+|\")width\s*:\s*([0-9]+)(px)/i', $style, $sizes)) {
             $data["width"] = $sizes[2];
@@ -69,12 +69,12 @@ class HTMLText extends Varchar {
 
         preg_match_all('/\<img[^\>]+src\="([^"]+)"[^\>]*>/Usi', $value, $matches);
 
-        foreach($matches[1] as $k => $m) {
+        foreach($matches[1] as $k => $machingSrcAttribute) {
 
             // match if may be upload
-            if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $m, $params)) {
+            if(preg_match('/^\.?\/?Uploads\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/([a-zA-Z0-9_\-\.]+)\/?(index\.[a-zA-Z0-9_]+)?$/Ui', $machingSrcAttribute, $params)) {
 
-                if($sizes = $this->matchSizes($matches[0][$k])) {
+                if($sizes = self::matchSizes($matches[0][$k])) {
 
                     if(isset($sizes["width"])) {
                         $width = $sizes["width"];
@@ -84,13 +84,13 @@ class HTMLText extends Varchar {
                         $height = $sizes["height"];
                     }
 
-                    $w = isset($width) ? $width : 0;
-                    $h = isset($height) ? $height : 0;
+                    $wString = isset($width) ? $width : 0;
+                    $hString = isset($height) ? $height : 0;
 
-                    $cache = new Cacher(md5("upload_" . $m . $w . "_" . $h));
+                    $cache = new Cacher(md5("upload_" . $machingSrcAttribute . $wString . "_" . $hString));
 
-                    if(false) { //$cache->checkValid()) {
-                        $value = str_replace($m, $cache->getData(), $value);
+                    if($cache->checkValid()) {
+                        $value = str_replace($machingSrcAttribute, $cache->getData(), $value);
                     } else {
 
                         $data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
@@ -101,12 +101,12 @@ class HTMLText extends Varchar {
 
                         if(isset($width, $height) && $data->width && $data->height) {
 
-                            if($replace = $this->generateResizeUrls($data, "noCropSetSize", $width, $width)) {
+                            if($replace = $this->generateResizeUrls($data, "noCropSetSize", $height, $width)) {
 
                                 $cache->write($replace, 86400);
-                                $value = str_replace($m, $replace, $value);
+                                $value = str_replace($machingSrcAttribute, $replace, $value);
                             } else {
-                                $cache->write($m, 86400);
+                                $cache->write($machingSrcAttribute, 86400);
                             }
 
                         } else if(isset($width)) {
@@ -114,9 +114,9 @@ class HTMLText extends Varchar {
                             if($replace = $this->generateResizeUrls($data, "noCropSetWidth", null, $width)) {
 
                                 $cache->write($replace, 86400);
-                                $value = str_replace($m, $replace, $value);
+                                $value = str_replace($machingSrcAttribute, $replace, $value);
                             } else {
-                                $cache->write($m, 86400);
+                                $cache->write($machingSrcAttribute, 86400);
                             }
 
                         } else {
@@ -124,9 +124,9 @@ class HTMLText extends Varchar {
                             if($replace = $this->generateResizeUrls($data, "noCropSetHeight", $height)) {
 
                                 $cache->write($replace, 86400);
-                                $value = str_replace($m, $replace, $value);
+                                $value = str_replace($machingSrcAttribute, $replace, $value);
                             } else {
-                                $cache->write($m, 86400);
+                                $cache->write($machingSrcAttribute, 86400);
                             }
                         }
                     }

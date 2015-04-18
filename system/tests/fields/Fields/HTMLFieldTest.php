@@ -37,5 +37,7 @@ class HTMLFieldTest extends GomaUnitTest implements TestAble {
 		
 		$this->assertEqual(HTMLText::matchSizes('<img src="" height="100" width="200" />'), array("height" => 100, "width" => 200));
 		$this->assertEqual(HTMLText::matchSizes('<img src=""height="100"width="200" />'), array("height" => 100, "width" => 200));
+
+        $this->assertEqual(HTMLText::matchSizes('<img alt="" height="980" src="./Uploads/c6f796ae12b4667f6aa0f3ed6d812456/kGBRR3/bild_9469.jpg/index.jpg" width="1000" />'), array("width" => 1000, "height" => 980));
 	}
 }
