@@ -7,9 +7,13 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @versio      2.0
+ * @version     2.0
  */
 class HTMLText extends Varchar {
+
+    const MAX_RESIZE_WIDTH = 4000;
+    const MAX_RESIZE_HEIGHT = 4000;
+
     /**
      * gets the SQL field-type
      *
@@ -85,7 +89,7 @@ class HTMLText extends Varchar {
 
                     $cache = new Cacher(md5("upload_" . $m . $w . "_" . $h));
 
-                    if($cache->checkValid()) {
+                    if(false) { //$cache->checkValid()) {
                         $value = str_replace($m, $cache->getData(), $value);
                     } else {
 
@@ -97,62 +101,29 @@ class HTMLText extends Varchar {
 
                         if(isset($width, $height) && $data->width && $data->height) {
 
-                            if($data->width > $width && $data->width < 4000 && $data->height > $height && $data->height < 4000) {
+                            if($replace = $this->generateResizeUrls($data, "noCropSetSize", $width, $width)) {
 
-                                $url = "./" . $data->path . '/noCropSetSize/'.$width.'/'.$height . substr($data->filename, strrpos($data->filename, "."));
-                                // retina
-                                if($width * 2 < $data->width && $height * 2 < $data->height) {
-                                    $retinaURL = "./" . $data->path . '/noCropSetSize/'.($width * 2).'/'.($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-                                } else {
-                                    $retinaURL = "./" . $data->path;
-                                }
-
-                                $data->manageURL($url);
-                                $data->manageURL($retinaURL);
-
-                                $replace = $url . '" data-retina="' . $retinaURL;
                                 $cache->write($replace, 86400);
-
                                 $value = str_replace($m, $replace, $value);
                             } else {
                                 $cache->write($m, 86400);
                             }
+
                         } else if(isset($width)) {
-                            if($data->width > $width && $data->width < 4000) {
-                                $url =  "./" . $data->path . '/noCropSetWidth/' . $width . substr($data->filename, strrpos($data->filename, "."));
-                                // retina
-                                if($width * 2 < $data->width) {
-                                    $retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($width * 2) . substr($data->filename, strrpos($data->filename, "."));
-                                } else {
-                                    $retinaURL = "./" . $data->path;
-                                }
 
-                                $data->manageURL($url);
-                                $data->manageURL($retinaURL);
+                            if($replace = $this->generateResizeUrls($data, "noCropSetWidth", null, $width)) {
 
-                                $replace = $url . '" data-retina="' . $retinaURL;
                                 $cache->write($replace, 86400);
-
                                 $value = str_replace($m, $replace, $value);
                             } else {
                                 $cache->write($m, 86400);
                             }
+
                         } else {
-                            if($data->height > $height && $data->height < 4000) {
-                                $url = "./" . $data->path . '/noCropSetHeight/' . $height . substr($data->filename, strrpos($data->filename, "."));
-                                // retina
-                                if($height * 2 < $data->height) {
-                                    $retinaURL =  "./" . $data->path . '/noCropSetWidth/' . ($height * 2) . substr($data->filename, strrpos($data->filename, "."));
-                                } else {
-                                    $retinaURL = "./" . $data->path;
-                                }
 
-                                $data->manageURL($url);
-                                $data->manageURL($retinaURL);
+                            if($replace = $this->generateResizeUrls($data, "noCropSetHeight", $height)) {
 
-                                $replace = $url . '" data-retina="' . $retinaURL;
                                 $cache->write($replace, 86400);
-
                                 $value = str_replace($m, $replace, $value);
                             } else {
                                 $cache->write($m, 86400);
@@ -167,7 +138,7 @@ class HTMLText extends Varchar {
     }
 
     /**
-     * creates the two urls with reized images and returns new HTML for replacement.
+     * creates the two urls with resized images and returns new HTML for replacement.
      *
      * @param ImageUploads $uploadsObject
      * @param string $action URL-Method
@@ -178,8 +149,14 @@ class HTMLText extends Varchar {
     protected function generateResizeUrls($uploadsObject, $action, $desiredHeight = null, $desiredWidth = null) {
         $url = "./" . $uploadsObject->path . '/'.$action.'/';
 
+        if($uploadsObject->width > self::MAX_RESIZE_WIDTH || $uploadsObject->height > self::MAX_RESIZE_HEIGHT) {
+            return null;
+        }
+
+        $retinaURL = null;
+
         if(isset($desiredWidth)) {
-            if($desiredWidth > $uploadsObject->width) {
+            if($desiredWidth < $uploadsObject->width) {
                 $url .= $desiredWidth . "/";
 
                 if($desiredWidth * 2 > $uploadsObject->width) {
@@ -193,7 +170,7 @@ class HTMLText extends Varchar {
         }
 
         if(isset($desiredHeight)) {
-            if($desiredHeight > $uploadsObject->height) {
+            if($desiredHeight < $uploadsObject->height) {
                 $url .= $desiredHeight . "/";
 
                 if($desiredHeight * 2 > $uploadsObject->height) {
@@ -209,12 +186,37 @@ class HTMLText extends Varchar {
             }
         }
 
+        $url = $this->manageUrl($url, $uploadsObject);
+        $retinaURL = $this->manageUrl($retinaURL, $uploadsObject);
 
-        $data->manageURL($url);
-        $data->manageURL($retinaURL);
+        $replace = $url;
 
-        $replace = $url . '" data-retina="' . $retinaURL;
+        if(isset($retinaURL)) {
+            $replace .= '" data-retina="' . $retinaURL;
+        }
 
         return $replace;
+    }
+
+    /**
+     * manages url.
+     *
+     * @param string url
+     * @param ImageUploads $uploadsObject
+     * @return url
+     */
+    protected function manageUrl($url, $uploadsObject) {
+        if($url) {
+            if(substr($url, -1) == "/") {
+                $url = substr($url, 0, -1);
+            }
+
+            $url .= substr($uploadsObject->filename, strrpos($uploadsObject->filename, "."));
+
+            $uploadsObject->manageURL($url);
+            return $url;
+        }
+
+        return null;
     }
 }
