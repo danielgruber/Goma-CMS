@@ -121,23 +121,45 @@ class HTMLText extends Varchar {
      * @return string
      */
     protected function generateResizeUrls($uploadsObject, $action, $desiredHeight = null, $desiredWidth = null) {
-        $url = "./" . $uploadsObject->path . '/'.$action.'/';
+        if($url = $this->generateResizeUrl($uploadsObject, $action, $desiredHeight, $desiredWidth)) {
+
+
+            $retinaUrlResized = $this->generateResizeUrl($uploadsObject, $action, $desiredHeight * 2, $desiredWidth * 2);
+
+            $filename = $uploadsObject->filename;
+            $retinaUrl = $retinaUrlResized ?:
+                $this->manageUrl("./" . $uploadsObject->path . "/" . substr($filename, 0, strrpos($filename, ".")), $uploadsObject);
+
+            if($retinaUrl != $url) {
+                return $url . '" data-retina="' . $retinaUrl;
+            }
+
+            return $url;
+        }
+
+        return null;
+    }
+
+    /**
+     * checks if it is good to create a resized image for given image and given dimensions.
+     *
+     * @param ImageUploads $uploadsObject
+     * @param string $action URL-Method
+     * @param int $desiredHeight
+     * @param int $desiredWidth
+     * @return string
+     */
+    protected function generateResizeUrl($uploadsObject, $action, $desiredHeight = null, $desiredWidth = null)
+    {
+
 
         if($uploadsObject->width > self::MAX_RESIZE_WIDTH || $uploadsObject->height > self::MAX_RESIZE_HEIGHT) {
             return null;
         }
 
-        $retinaURL = null;
-
+        $url = "./" . $uploadsObject->path . '/'.$action.'/';
         if(isset($desiredWidth)) {
             if($desiredWidth < $uploadsObject->width) {
-
-                if($desiredWidth * 2 < $uploadsObject->width) {
-                    $retinaURL = $url . ($desiredWidth * 2) . "/";
-                } else {
-                    $retinaURL = false;
-                }
-
                 $url .= $desiredWidth . "/";
             } else {
                 return null;
@@ -147,36 +169,14 @@ class HTMLText extends Varchar {
         if(isset($desiredHeight)) {
             if($desiredHeight < $uploadsObject->height) {
                 $url .= $desiredHeight . "/";
-
-                if($desiredHeight * 2 < $uploadsObject->height) {
-                    if(!isset($retinaURL)) {
-                        $retinaURL = $url . ($desiredHeight * 2) . "/";
-                    } else if($retinaURL !== false) {
-                        $retinaURL = $retinaURL . ($desiredHeight * 2) . "/";
-                    }
-                } else {
-                    $retinaURL = false;
-                }
             } else {
                 return null;
             }
         }
 
-        if($retinaURL === false) {
-            $filename = $uploadsObject->filename;
-            $retinaURL = "./" . $uploadsObject->path . "/" . substr($filename, 0, strrpos($filename, "."));
-        }
-
         $url = $this->manageUrl($url, $uploadsObject);
-        $retinaURL = $this->manageUrl($retinaURL, $uploadsObject);
 
-        $replace = $url;
-
-        if(isset($retinaURL)) {
-            $replace .= '" data-retina="' . $retinaURL;
-        }
-
-        return $replace;
+        return $url;
     }
 
     /**
