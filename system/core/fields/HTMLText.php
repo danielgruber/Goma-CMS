@@ -76,16 +76,12 @@ class HTMLText extends Varchar {
 
                 if($sizes = self::matchSizes($matches[0][$k])) {
 
-                    if(isset($sizes["width"])) {
-                        $width = $sizes["width"];
-                    }
+                    // generate information for resizing and caching of it
+                    $width = isset($sizes["width"]) ? $sizes["width"] : null;
+                    $height = isset($sizes["height"]) ? $sizes["height"] : null;
 
-                    if(isset($sizes["height"])) {
-                        $height = $sizes["height"];
-                    }
-
-                    $wString = isset($width) ? $width : 0;
-                    $hString = isset($height) ? $height : 0;
+                    $wString = $width ?: 0;
+                    $hString = $height ?: 0;
 
                     $cache = new Cacher(md5("upload_" . $machingSrcAttribute . $wString . "_" . $hString));
 
@@ -93,41 +89,19 @@ class HTMLText extends Varchar {
                         $value = str_replace($machingSrcAttribute, $cache->getData(), $value);
                     } else {
 
-                        $data = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
+                        $upload = DataObject::Get("Uploads", array("path" => $params[1] . "/" . $params[2] . "/" . $params[3]));
 
-                        if($data->count() == 0) {
+                        if($upload->count() == 0) {
                             continue;
                         }
 
-                        if(isset($width, $height) && $data->width && $data->height) {
+                        // generate new URLs for Resizing
+                        if($replace = $this->generateResizeUrls($upload, "noCropSetSize", $height, $width)) {
 
-                            if($replace = $this->generateResizeUrls($data, "noCropSetSize", $height, $width)) {
-
-                                $cache->write($replace, 86400);
-                                $value = str_replace($machingSrcAttribute, $replace, $value);
-                            } else {
-                                $cache->write($machingSrcAttribute, 86400);
-                            }
-
-                        } else if(isset($width)) {
-
-                            if($replace = $this->generateResizeUrls($data, "noCropSetWidth", null, $width)) {
-
-                                $cache->write($replace, 86400);
-                                $value = str_replace($machingSrcAttribute, $replace, $value);
-                            } else {
-                                $cache->write($machingSrcAttribute, 86400);
-                            }
-
+                            $cache->write($replace, 86400);
+                            $value = str_replace($machingSrcAttribute, $replace, $value);
                         } else {
-
-                            if($replace = $this->generateResizeUrls($data, "noCropSetHeight", $height)) {
-
-                                $cache->write($replace, 86400);
-                                $value = str_replace($machingSrcAttribute, $replace, $value);
-                            } else {
-                                $cache->write($machingSrcAttribute, 86400);
-                            }
+                            $cache->write($machingSrcAttribute, 86400);
                         }
                     }
                 }

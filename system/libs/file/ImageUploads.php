@@ -164,12 +164,13 @@ class ImageUploads extends Uploads {
 		
 		return "images/icons/goma/128x128/image.png";
 	}
-	
-	/**
-	 * authenticates a specific url and removes cache-files if necessary
-	 *
-	 *@name manageURL
-	*/
+
+    /**
+     * authenticates a specific url and removes cache-files if necessary
+     *
+     * @name manageURL
+     * @return string
+     */
 	public function manageURL($file) {
 		$file = $this->removePrefix($file, "index.php/");
 		$file = $this->removePrefix($file, "./index.php/");
