@@ -1,13 +1,17 @@
 <?php defined('IN_GOMA') OR die();
 
 /**
-  *	@package 	goma framework
-  *	@link 		http://goma-cms.org
-  *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *	@author 	Goma-Team
-  * @Version 	1.5
-  *
-  * last modified: 26.01.2015
+ *
+ * @package 	goma framework
+ * @link 		http://goma-cms.org
+ * @license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @Version 	1.5
+ *
+ * @property int width
+ * @property int height
+ *
+ * last modified: 26.01.2015
 */
 class ImageUploads extends Uploads {
 	/**
@@ -164,12 +168,13 @@ class ImageUploads extends Uploads {
 		
 		return "images/icons/goma/128x128/image.png";
 	}
-	
-	/**
-	 * authenticates a specific url and removes cache-files if necessary
-	 *
-	 *@name manageURL
-	*/
+
+    /**
+     * authenticates a specific url and removes cache-files if necessary
+     *
+     * @name manageURL
+     * @return string
+     */
 	public function manageURL($file) {
 		$file = $this->removePrefix($file, "index.php/");
 		$file = $this->removePrefix($file, "./index.php/");
