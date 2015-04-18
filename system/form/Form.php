@@ -181,6 +181,11 @@ class Form extends object {
 	 */
 	public $request;
 
+    /**
+     * managment for controller.
+     */
+    protected $controllerManager;
+
 	/**
 	 *@name __construct
 	 *@access public
@@ -207,6 +212,7 @@ class Form extends object {
 		}
 
 		$this->controller = $controller;
+        $this->controllerManager = new FormControllerConnection($controller);
 		$this->name = $name;
 		$this->secretKey = randomString(30);
 		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
@@ -345,31 +351,14 @@ class Form extends object {
 			$this->add(new HiddenField("redirect", getredirect()));
 	}
 
-	/**
-	 * renders the form
-	 *@name render
-	 *@access public
-	 */
+    /**
+     * renders the form
+     * @name render
+     * @access public
+     * @return mixed|string
+     */
 	public function render() {
-		if($this->controller && isset($this->controller->request) && is_a($this->controller->request, "Request")) {
-			$params = array_values($this->controller->request->params);
-			
-			// just watch out for external-form.
-			if(count($this->controller->request->url_parts) > 2 && strtolower($this->controller->request->url_parts[0]) == "forms" && strtolower($this->controller->request->url_parts[1]) == strtolower($this->name)) {
-				$request = $this->controller->request;
-				$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
-				$request->shift(3);
-				$externForm = new ExternalFormController();
-				Core::serve($externForm->handleRequest($request));
-			} else if(count($this->controller->request->url_parts) > 1 && strtolower($this->controller->request->url_parts[0]) == strtolower($this->name) && $params[count($params) - 1] == "forms") {
-				$request = $this->controller->request;
-				$request->params = array("form" => strtolower($request->url_parts[0]), "field" => strtolower($request->url_parts[1]));
-				$request->shift(2);
-				$externForm = new ExternalFormController();
-				Core::serve($externForm->handleRequest($request));
-			}
-		}
-	
+
 		Resources::add("form.css", "css");
 		if(isset($_POST["form_submit_" . $this->name()]) && session_store_exists("form_" . strtolower($this->name))) {
 			// check secret
@@ -1021,18 +1010,19 @@ class Form extends object {
 		session_store("form_" . strtolower($this->name), $this);
 	}
 
-	/**
-	 * external url of this form
-	 *
-	 *@name externalURL
-	 *@access public
-	 */
+    /**
+     * external url of this form
+     *
+     * @name externalURL
+     * @access public
+     * @return string
+     */
 	public function externalURL() {
-		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
-			return ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
-		} else {
-			return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
-		}
+		if($this->controllerManager->shouldUseNamespacing()) {
+            return ROOT_PATH . BASE_SCRIPT . $this->controller->originalNamespace . "/forms/form/" . $this->name;
+        }
+
+        return ROOT_PATH . BASE_SCRIPT . "system/forms/" . $this->name;
 	}
 
 	/**
@@ -1106,88 +1096,6 @@ class Form extends object {
 
 }
 
-/**
- * handler for externel urls
- *
- *@name ExternalForm
- *@parent RequestHandler
- */
-class ExternalFormController extends RequestHandler {
-	/**
-	 * handles the request
-	 *
-	 *@name handleRequest
-	 *@access public
-	 *@param Request
-	 */
-	public function handleRequest($request, $subController = false) {
-
-		$this->request = $request;
-		$this->subController = $subController;
-
-		$this->init();
-
-		$form = $request->getParam("form");
-		$field = $request->getParam("field");
-		return $this->FieldExtAction($form, $field);
-	}
-
-	/**
-	 * a external resource for a form
-	 *@name FieldExtAction
-	 *@access public
-	 *@param name - form
-	 *@param name - field
-	 */
-	public function FieldExtAction($form, $field) {
-		$field = strtolower($field);
-		
-		if(session_store_exists("form_" . strtolower($form))) {
-			$f = session_restore("form_" . strtolower($form));
-
-			if(isset($f->$field)) {
-				
-				$data = $f->$field->handleRequest($this->request);
-
-
-				session_store("form_" . strtolower($form), $f);
-				return $data;
-			}
-			return false;
-
-		}
-		return false;
-	}
-
-}
-
-class FormRequestExtension extends Extension {
-	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
-			$handleWithMethod = false;
-
-			$externalForm = new ExternalFormController();
-
-			$request = $this->getOwner()->request;
-
-			if($arguments = $request->match('$form!/$field!', true)) {
-				$content = $externalForm->handleRequest($request);
-				if(!$content) {
-					$content = $this->getOwner()->index();
-				}
-			} else {
-				$content = $this->getOwner()->index();
-			}
-		}
-	}
-
-	public function extendHasAction( $action, &$hasAction) {
-		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
-			$hasAction = true;
-		}
-	}
-}
-
 class FormState extends Object {
 	protected $data;
 
@@ -1228,5 +1136,4 @@ class FormState extends Object {
 
 }
 
-Object::extend("RequestHandler", "FormRequestExtension");
 Core::addRules(array('system/forms/$form!/$field!' => "ExternalFormController"), 50);

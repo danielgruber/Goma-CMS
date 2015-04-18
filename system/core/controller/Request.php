@@ -13,6 +13,8 @@ defined("IN_GOMA") OR die();
  *
  * @package		Goma\System\Core
  * @version		2.0.2
+ *
+ * @property string fakeRequest used by Form-Namespacing-Checker
  */
 class Request extends Object {
 	/**
