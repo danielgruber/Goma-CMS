@@ -895,14 +895,26 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		} else {
 
 			// check for casting or use default-casting.
-			$casting = $this->casting();
-			$caste = isset($casting[$name]) ? $casting[$name] : StaticsManager::getStatic($this->classname, "default_casting");
-			unset($casting);
-			$object = DBField::getObjectByCasting($caste, $name, $data);
+            $cast = $this->getCast($name);
+
+			$object = DBField::getObjectByCasting($cast, $name, $data);
 
 			return $object;
 		}
 	}
+
+    /**
+     * returns casting for given field.
+     *
+     * @param string $field
+     * @return string
+     */
+    protected function getCast($field) {
+        $casting = $this->casting();
+
+        $field = trim(strtolower($field));
+        return isset($casting[$field]) ? $casting[$field] : StaticsManager::getStatic($this->classname, "default_casting");
+    }
 
     /**
      * gets offset as object

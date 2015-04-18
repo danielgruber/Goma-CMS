@@ -322,9 +322,10 @@ class DBField extends Object implements IDataBaseField
     /**
      * parses casting-args and gives back the result
      *
-     *@name parseCasting
-     *@access public
-     *@param string - casting
+     * @name parseCasting
+     * @access public
+     * @param string - casting
+     * @return array|null
      */
     public static function parseCasting($casting) {
 
@@ -333,34 +334,15 @@ class DBField extends Object implements IDataBaseField
 
         if(PROFILE) Profiler::mark("DBField::parseCasting");
 
-        if(is_array($casting))
+        if(is_array($casting)) {
             return $casting;
-
-        if(preg_match('/\-\>([a-zA-Z0-9_]+)\s*$/Usi', $casting, $matches)) {
-            $method = $matches[1];
-            $casting = substr($casting, 0, 0 - strlen($method) - 2);
-            unset($matches);
         }
 
-        if(strpos($casting, "(")) {
+        $method = self::parseCastingString($casting, $name, $args);
 
-            $name = trim(substr($casting, 0, strpos($casting, "(")));
-            if(preg_match('/\(([^\(\)]+)\)?/', $casting, $matches)) {
-                $args = $matches[1];
-                $args = eval('return array('.$args.');');
-            } else {
-                $args = array();
-            }
-            unset($matches);
-        } else {
-            $args = array();
-            $name = trim($casting);
-        }
-
-
-        if(ClassInfo::exists($name) && ClassInfo::hasInterface($name, "DataBaseField")) {
+        if(ClassInfo::exists($name) && ClassInfo::hasInterface($name, "IDataBaseField")) {
             $valid = true;
-        } else if (ClassInfo::exists($name . "SQLField") && ClassInfo::hasInterface($name . "SQLField", "DataBaseField")) {
+        } else if (ClassInfo::exists($name . "SQLField") && ClassInfo::hasInterface($name . "SQLField", "IDataBaseField")) {
             $name = $name . "SQLField";
             $valid = true;
         }
@@ -375,8 +357,9 @@ class DBField extends Object implements IDataBaseField
             "class" => $name
         );
 
-        if(!empty($args))
+        if(!empty($args)) {
             $data["args"] = $args;
+        }
 
         if(ClassInfo::hasInterface($name, "DefaultConvert")) {
             $data["convert"] = true;
@@ -390,6 +373,40 @@ class DBField extends Object implements IDataBaseField
         if(PROFILE) Profiler::unmark("DBField::parseCasting");
 
         return $data;
+    }
+
+    /**
+     * parses casting and returns name of method or null if not set.
+     *
+     * @param string $casting
+     * @param string $name variable to fill name in
+     * @param array $args variable for args
+     * @return string
+     */
+    protected static function parseCastingString($casting, &$name, &$args) {
+        $method = null;
+        $args = array();
+
+        if(preg_match('/\-\>([a-zA-Z0-9_]+)\s*$/Usi', $casting, $matches)) {
+            $method = $matches[1];
+            $casting = substr($casting, 0, 0 - strlen($method) - 2);
+            unset($matches);
+        }
+
+        if(strpos($casting, "(")) {
+            $name = trim(substr($casting, 0, strpos($casting, "(")));
+            if(preg_match('/\(([^\(\)]+)\)?/', $casting, $matches)) {
+                $args = $matches[1];
+                $args = eval('return array('.$args.');');
+            }
+            unset($matches);
+        } else {
+            $name = trim($casting);
+        }
+
+        $name = ClassManifest::resolveClassName($name);
+
+        return $method;
     }
 
     /**
@@ -421,15 +438,16 @@ class DBField extends Object implements IDataBaseField
     /**
      * converts by casting
      *
-     *@name convertByCasting
-     *@access public
-     *@param string|array casting
-     *@param string - name
-     *@param mixed - value
+     * @name convertByCasting
+     * @access public
+     * @param string|array casting
+     * @param string - name
+     * @param mixed - value
+     * @return string
      */
     public static function convertByCasting($casting, $name, $value) {
         if(!is_string($name)) {
-            throwError(6, "Invalid Argument", "Second argument (\$name) of DBField::convertByCasting must be an string.");
+            throw new InvalidArgumentException("Second argument (\$name) of DBField::convertByCastingIfDefault must be an string.");
         }
         $casting = self::parseCasting($casting);
         if(isset($casting)) {
@@ -440,22 +458,23 @@ class DBField extends Object implements IDataBaseField
                 return $object->__toString();
             }
         } else {
-            throwError(6, "Logical Exception", "Invalid casting given to DBField::convertByCasting");
+            throw new InvalidArgumentException("Invalid casting-Array given to DBField::convertByCasting");
         }
     }
 
     /**
      * converts by casting if convertDefault
      *
-     *@name convertByCastingIfDefault
-     *@access public
-     *@param string|array casting
-     *@param string - name
-     *@param mixed - value
+     * @name convertByCastingIfDefault
+     * @access public
+     * @param string|array casting
+     * @param string - name
+     * @param mixed - value
+     * @return mixed
      */
     public static function convertByCastingIfDefault($casting, $name, $value) {
         if(!is_string($name)) {
-            throwError(6, "Invalid Argument", "Second argument (\$name) of DBField::convertByCastingIfDefault must be an string.");
+            throw new InvalidArgumentException("Second argument (\$name) of DBField::convertByCastingIfDefault must be an string.");
         }
         $casting = self::parseCasting($casting);
         if(isset($casting["convert"]) && $casting["convert"]) {
@@ -468,15 +487,16 @@ class DBField extends Object implements IDataBaseField
     /**
      * gets an object by casting
      *
-     *@name getObjectByCasting
-     *@access public
-     *@param string|array casting
-     *@param string - name
-     *@param mixed - value
+     * @name getObjectByCasting
+     * @access public
+     * @param string|array casting
+     * @param string - name
+     * @param mixed - value
+     * @return DBField
      */
     public static function getObjectByCasting($casting, $name, $value, $throwErrorOnFail = false) {
         if(!is_string($name)) {
-            throwError(6, "Invalid Argument", "Second argument (\$name) of DBField::getObjectByCasting must be an string.");
+            throw new InvalidArgumentException("Second argument (\$name) of DBField::convertByCastingIfDefault must be an string.");
         }
         $casting = self::parseCasting($casting);
         if(isset($casting)) {

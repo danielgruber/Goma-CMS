@@ -156,9 +156,25 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$this->assertFalse(Object::method_exists($testClass->classname,"myLittleTest"));
 		$this->assertEqual($testClass->getMyLittleTest, "val");
 	}
+
+    public function testGetCast() {
+        $reflectionMethodGetCast = new ReflectionMethod('ViewAccessableData', 'getCast');
+        $reflectionMethodGetCast->setAccessible(true);
+
+        $view = new TestViewClassMethod();
+
+        $this->assertEqual($view->getCast("test"), "Switch");
+        $this->assertEqual($view->getCast("TEST"), "Switch");
+        $this->assertEqual($view->getCast(" teSt "), "Switch");
+    }
 }
 
 class TestViewClassMethod extends ViewAccessableData {
+
+    static $casting = array(
+        "test" => "Switch"
+    );
+
 	public function myLittleValue() {
 		return "val";
 	}
