@@ -71,6 +71,7 @@ class RequestHandler extends Object {
 	 * the current request
 	 *
 	 * @name 	request
+     * @var     Request
 	 */
 	public $request;
 
