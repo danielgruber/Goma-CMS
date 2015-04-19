@@ -131,21 +131,22 @@ class ArrayLib
     /**
      * array_map for keys
      *
-     * @name map_key
-     * @access public
+     * @param callback|closure $callback
+     * @param array $array
+     * @param bool $unique
      * @return array
      */
-    public static function map_key($array, $callback)
+    public static function map_key($callback, $array, $unique = true)
     {
         if (!is_array($array)) {
-            throw new InvalidArgumentException("ArrayLib::map_key(array,callback) requires an array as first parameter.")
+            throw new InvalidArgumentException("ArrayLib::map_key(callback, array) requires an array as second parameter.");
         }
 
         $arr = array();
         foreach ($array as $key => $value) {
             $newKey = call_user_func_array($callback, array($key));
 
-            if (isset($arr[$newKey])) {
+            if (isset($arr[$newKey]) && $unique) {
                 throw new LogicException("ArrayLib::map_key. Keys must be unique after mapping.");
             }
             $arr[] = $value;

@@ -92,8 +92,8 @@ class SearchIndex extends DataObjectExtension {
 	/**
 	 * has-many-extension
 	*/
-	public function many_many() {
-		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
+	public static function many_many($class) {
+		if(strtolower(get_parent_class($class)) != "dataobject")
 			return array();
 			
 		return array(
@@ -104,8 +104,8 @@ class SearchIndex extends DataObjectExtension {
 	/**
 	 * extend the extra-fields.
 	*/
-	public function many_many_extra_fields() {
-		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
+	public static function many_many_extra_fields($class) {
+		if(strtolower(get_parent_class($class)) != "dataobject")
 			return array();
 			
 		return array(

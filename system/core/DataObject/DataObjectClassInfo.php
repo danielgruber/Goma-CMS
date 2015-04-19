@@ -21,38 +21,27 @@ class DataObjectClassInfo extends Extension
 				if(PROFILE) Profiler::mark("DataObjectClassInfo::generate");
 				if(class_exists($class) && class_exists("DataObject") && is_subclass_of($class, "DataObject"))
 				{
-						
-						// do nothing, so just get class
-						// first argument where
-						// second fields
-						// third, force do nothing
-						$c = Object::instance($class);
-							
-						$has_one = $c->GenerateHas_One();
-						$has_many = $c->GenerateHas_Many();
+						$classInstance = Object::instance($class);
+
+						$has_one = ModelInfoGenerator::generateHas_one($class);
+						$has_many = ModelInfoGenerator::generateHas_many($class);
 						
 						// generate table_name
-						if(StaticsManager::hasStatic($c->classname, "table")) {
-							$table_name = StaticsManager::getStatic($c->classname, "table");
+						if(StaticsManager::hasStatic($class, "table")) {
+							$table_name = StaticsManager::getStatic($class, "table");
 						} else {
-							$table_name = $c->prefix . str_replace("\\", "_", $class);
+							$table_name = $classInstance->prefix . str_replace("\\", "_", $class);
 						}
 						
 						
-						$many_many = $c->GenerateMany_Many();
-						$db_fields = $c->generateDBFields();
-						$belongs_many_many = $c->GenerateBelongs_Many_Many();
+						$many_many = ModelInfoGenerator::generateMany_many($class);
+						$db_fields = ModelInfoGenerator::generateDBFields($class);
+						$belongs_many_many = ModelInfoGenerator::generateBelongs_many_many($class);
 						
-						$searchable_fields = StaticsManager::hasStatic($class, "search_fields") ? StaticsManager::getStatic($class, "search_fields") : array();
-						if(isset($class->searchable_fields)) {
-							Core::deprecate("2.0", "Class ".$this->classname." uses old searchable_fields-Attribute, use static \$search_fields instead.");
-							$searchable_fields = array_merge($searchable_fields, $class->searchable_fields);
-						}
+						$searchable_fields = ModelInfoGenerator::generate_search_fields($class);
 						
-						$indexes = $c->generateIndexes();
-						
-						$many_many_tables = array();
-						
+						$indexes = ModelInfoGenerator::generateIndexes($class);
+
 						/* --- */
 						
 						foreach($indexes as $key => $value)
@@ -127,7 +116,7 @@ class DataObjectClassInfo extends Extension
 						/*
 						 * get SQL-Types, so objects for parsing special data in sql-fields
 						*/
-						if($casting = $c->generateCasting())
+						if($casting = $classInstance->generateCasting())
 							if(count($casting) > 0)
 								ClassInfo::$class_info[$class]["casting"] = $casting;
 					
@@ -136,22 +125,22 @@ class DataObjectClassInfo extends Extension
 						if(count($db_fields) > 0) ClassInfo::$class_info[$class]["db"] = $db_fields;
 						if(count($many_many) > 0) ClassInfo::$class_info[$class]["many_many"] = $many_many;
 						if(count($belongs_many_many) > 0) ClassInfo::$class_info[$class]["belongs_many_many"] = $belongs_many_many;
-						//ClassInfo::$class_info[$class]["prefix"] = $c->prefix;
+
 						if(count($searchable_fields) > 0) ClassInfo::$class_info[$class]["search"] = $searchable_fields;
 						if(count($indexes) > 0) ClassInfo::$class_info[$class]["index"] = $indexes;
-						//Classinfo::$class_info[$class]["iDBFields"] = arraylib::map_key($c->generateiDBFields(), "strtolower");
+
 						
 						
 						/* --- */
 						
 						
-						ClassInfo::$class_info[$class]["many_many_tables"] = $c->generateManyManyTables();
+						ClassInfo::$class_info[$class]["many_many_tables"] = ModelManyManyRelationShipInfo::generateManyManyTables($class);
 						
 						// many-many
-						foreach($many_many as $key => $_class) {
+						foreach($many_many as $key => $targetClass) {
 							$table = ClassInfo::$class_info[$class]["many_many_tables"][$key]["table"];
-							if(!ClassInfo::isAbstract($_class)) {
-    							$many_many_tables_belongs = Object::instance($_class)->generateManyManyTables();
+							if(!ClassInfo::isAbstract($targetClass)) {
+    							$many_many_tables_belongs = ModelManyManyRelationShipInfo::generateManyManyTables($targetClass);
     							
     							foreach($many_many_tables_belongs as $data) {
     								if($data["table"] == $table) {
@@ -161,7 +150,7 @@ class DataObjectClassInfo extends Extension
 							}
 							
 							
-							ClassInfo::$class_info[$_class]["belongs_many_many_extra"][$table] = array(
+							ClassInfo::$class_info[$targetClass]["belongs_many_many_extra"][$table] = array(
 								"table" 	=> $table,
 								"field"		=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["extfield"],
 								"extfield"	=> ClassInfo::$class_info[$class]["many_many_tables"][$key]["field"]
@@ -234,7 +223,7 @@ class DataObjectClassInfo extends Extension
 								
 								$_c = strtolower(get_parent_class($_c));												
 						}
-						unset($_c, $parent, $c);
+						unset($_c, $parent, $classInstance);
 				}
 		
 				if(class_exists($class) && class_exists("viewaccessabledata") && is_subclass_of($class, "viewaccessabledata") && !ClassInfo::isAbstract($class)) {

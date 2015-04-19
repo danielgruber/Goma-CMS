@@ -469,36 +469,36 @@ abstract class Object
      * gets an extension-instance
      *
      * @name getInstance
-     * @param string - name of extension
+     * @param string $extensionClassName of extension
      * @return Object
      */
-    public function getInstance($name)
+    public function getInstance($extensionClassName)
     {
-        $name = trim(strtolower($name));
+        $extensionClassName = trim(strtolower($extensionClassName));
 
         // cache for instances. No clone here, cause an instance can used and customised.
-        if (isset($this->ext_instances[$name])) {
-            return $this->ext_instances[$name];
+        if (isset($this->ext_instances[$extensionClassName])) {
+            return $this->ext_instances[$extensionClassName];
         }
 
         if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
-            $this->buildExtCache();
+            $this->buildExtCache($extensionClassName);
         }
 
         // create new instance
-        if (!isset(self::$extension_instances[$this->classname][$name]) || !is_object(self::$extension_instances[$this->classname][$name])) {
+        if (!isset(self::$extension_instances[$this->classname][$extensionClassName]) || !is_object(self::$extension_instances[$this->classname][$extensionClassName])) {
 
-            if (!isset(self::$cache_extensions[$this->classname][$name])) {
+            if (!isset(self::$cache_extensions[$this->classname][$extensionClassName])) {
                 return null;
             }
 
-            self::$extension_instances[$this->classname][$name] = clone eval("return new " . $name . "(" . self::$cache_extensions[$this->classname][$name] . ");");
+            self::$extension_instances[$this->classname][$extensionClassName] = clone eval("return new " . $extensionClassName . "(" . self::$cache_extensions[$this->classname][$extensionClassName] . ");");
         }
 
         // own instance
-        $this->ext_instances[$name] = clone self::$extension_instances[$this->classname][$name];
-        $this->ext_instances[$name]->setOwner($this);
-        return $this->ext_instances[$name];
+        $this->ext_instances[$extensionClassName] = clone self::$extension_instances[$this->classname][$extensionClassName];
+        $this->ext_instances[$extensionClassName]->setOwner($this);
+        return $this->ext_instances[$extensionClassName];
     }
 
     /**
