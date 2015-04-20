@@ -22,9 +22,6 @@ class ModelInfoGeneartorTest extends GomaUnitTest implements TestAble
 
 
     public function testManyManyExtraFieldGeneration() {
-        $reflection = new ReflectionMethod("ModelInfoGenerator", "get_many_many_extra_fields");
-        $reflection->setAccessible(true);
-
         $this->assertEqual(ModelInfoGenerator::get_many_many_extraFields("DummyModelForGenerator", "second"), array(
             "mayThird" => "int(10)",
             "mayFourth" => "int(5)"

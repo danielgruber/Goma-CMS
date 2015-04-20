@@ -82,9 +82,10 @@ abstract class DataObjectExtension extends Extension
      */
     public function setOwner($object)
     {
-        if (is_a($object, "DataObject"))
+        if (!is_a($object, 'DataObject'))
         {
-            throw new InvalidArgumentException("Object must be subclass of DataObject, but is {$this->classname}.");
+            $className = get_class($object);
+            throw new InvalidArgumentException("Object must be subclass of DataObject, but is {$className}.");
         }
 
         parent::setOwner($object);

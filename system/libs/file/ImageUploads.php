@@ -53,23 +53,25 @@ class ImageUploads extends Uploads {
 		"thumbWidth"	=> 100,
 		"thumbHeight"	=> 100
 	);
-	
-	/**
-	 * returns the raw-path
-	 *
-	 *@name raw
-	 *@access public
-	*/
+
+    /**
+     * returns the raw-path
+     *
+     * @name raw
+     * @access public
+     * @return string
+     */
 	public function raw() {
 		return $this->path;
 	}
-	
-	/**
-	 * to string
-	 *
-	 *@name __toString
-	 *@access public
-	*/
+
+    /**
+     * to string
+     *
+     * @name __toString
+     * @access public
+     * @return null|string
+     */
 	public function __toString() {
 		if(preg_match("/\.(jpg|jpeg|png|gif|bmp)$/i", $this->filename)) {
 			$file = $this->raw().'/index'.substr($this->filename, strrpos($this->filename, "."));
@@ -95,14 +97,14 @@ class ImageUploads extends Uploads {
 		} else
 			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
 	}
-	
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 *@name getIcon
-	 *@access public
-	 *@param int - size; support for 16, 32, 64 and 128
-	*/
+
+    /**
+     * returns the path to the icon of the file
+     *
+     * @param int $size
+     * @param bool $retina
+     * @return string
+     */
 	public function getIcon($size = 128, $retina = false) {
 		$ext = substr($this->filename, strrpos($this->filename, "."));
 		switch($size) {

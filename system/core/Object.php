@@ -394,18 +394,21 @@ abstract class Object
     {
         // first if it is a callback
         if (is_array($extra_method)) {
+
+            $method_callback = $extra_method;
             if (is_string($extra_method[0]) && substr($extra_method[0], 0, 4) == "EXT:") {
-                $extra_method[0] = $this->getInstance(substr($extra_method[0], 4));
+                $method_callback[0] = $this->getInstance(substr($method_callback[0], 4));
             } else if (is_string($extra_method[0]) && $extra_method[0] == "this") {
                 array_unshift($args, $method_name);
-                $extra_method[0] = $this;
+                $method_callback[0] = $this;
             }
 
-            if(!is_callable($extra_method)) {
-                throw new BadMethodCallException('Tried to call Extra-Method via '.print_r($extra_method, true).', but it is not callable.');
+            if(!is_callable($method_callback)) {
+                throw new BadMethodCallException('Tried to call Extra-Method ' . print_r($extra_method, true) .
+                    ' via '.print_r($method_callback, true).', but it is not callable.');
             }
 
-            return call_user_func_array($extra_method, $args);
+            return call_user_func_array($method_callback, $args);
         }
 
         array_unshift($args, $this);
@@ -482,7 +485,7 @@ abstract class Object
         }
 
         if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
-            $this->buildExtCache($extensionClassName);
+            self::buildExtCache($this->classname);
         }
 
         // create new instance

@@ -145,11 +145,10 @@ class ArrayLib
         $arr = array();
         foreach ($array as $key => $value) {
             $newKey = call_user_func_array($callback, array($key));
-
             if (isset($arr[$newKey]) && $unique) {
-                throw new LogicException("ArrayLib::map_key. Keys must be unique after mapping.");
+                throw new LogicException("ArrayLib::map_key. Keys must be unique after mapping. Key $newKey duplicated.");
             }
-            $arr[] = $value;
+            $arr[$newKey] = $value;
         }
         return $arr;
     }

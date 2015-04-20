@@ -1055,54 +1055,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * generates casting
-	 *
-	 */
-	public function generateCasting() {
-		$casting = StaticsManager::getStatic($this->classname, "casting");
-		foreach($this->LocalcallExtending("casting") as $_casting) {
-			$casting = array_merge($casting, $_casting);
-			unset($_casting);
-		}
-
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$casting = array_merge(Object::instance($parent)->generateCasting(), $casting);
-		}
-
-		$casting = ArrayLib::map_key("strtolower", $casting);
-		return $casting;
-	}
-
-	/**
-	 * defaults
-	 *
-	 */
-	public function generateDefaults() {
-		if(StaticsManager::hasStatic($this->classname, "default")) {
-			$defaults = StaticsManager::getStatic($this->classname, "default");
-		} else {
-			$defaults = array();
-		}
-
-		// get parents
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$defaults = array_merge(Object::instance($parent)->generateDefaults(), $defaults);
-		}
-
-		foreach($this->LocalcallExtending("defaults") as $defaultsext) {
-			$defaults = array_merge($defaults, $defaultsext);
-			unset($defaultsext);
-		}
-
-		// free memory
-		unset($parent);
-		$defaults = ArrayLib::map_key("strtolower", $defaults);
-		return $defaults;
-	}
-
-	/**
 	 * unsets a offset
 	 * in this object it do nothing
 	 *@name offsetUnset

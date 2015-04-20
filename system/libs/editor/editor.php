@@ -40,7 +40,7 @@ abstract class GomaEditor extends Object {
 	*/
 	public static function get($type) {
 		$type = strtolower($type);
-		self::$types = ArrayLib::map_key(self::$types, "strtolower");
+		self::$types = ArrayLib::map_key("strtolower", self::$types);
 		if(isset(self::$default[$type]) && ClassInfo::exists(self::$default[$type]))
 			return Object::instance(self::$default[$type]);
 		

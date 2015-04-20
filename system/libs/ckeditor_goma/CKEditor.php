@@ -77,7 +77,7 @@ class GomaCKEditor extends GomaEditor {
 		if($type == "html") {
 			
 			$config = self::$htmlConfig;
-			$params = ArrayLib::map_key($params, "strtolower");
+			$params = ArrayLib::map_key("strtolower", $params);
 			if(preg_match_all('/\$([a-zA-Z0-9_]+)/i', $config, $matches)) {
 				foreach($matches[1] as $k => $param) {
 					if(isset($params[strtolower($param)]))

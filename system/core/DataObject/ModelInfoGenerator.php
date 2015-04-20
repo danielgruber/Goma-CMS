@@ -28,7 +28,7 @@ class ModelInfoGenerator {
         // fields of extensions
         foreach(Object::getExtensionsForClass($class, false) as $extension) {
             if(Object::method_exists($extension, $extensionMethod)) {
-                if($extensionFields = call_user_func_array(array($extension, $extensionMethod), array())) {
+                if($extensionFields = call_user_func_array(array($extension, $extensionMethod), array($class))) {
                     $fields = array_merge($fields, (array) $extensionFields);
                 }
             }
@@ -36,11 +36,11 @@ class ModelInfoGenerator {
 
         // if parents, include parents.
         $parent = get_parent_class($class);
-        if ($useParents == true && $parent != "DataObject") {
+        if ($useParents == true && $parent != "DataObject" && $parent !== false) {
             $fields = array_merge(self::generate_combined_array($parent, $staticProp, $extensionMethod, true), $fields);
         }
 
-        $fields = ArrayLib::map_key("strtolower", $fields);
+        $fields = ArrayLib::map_key("strtolower", $fields, false);
 
         return $fields;
     }
@@ -78,6 +78,34 @@ class ModelInfoGenerator {
                 throw new DBFieldNotValidException($this->classname . "." . $name);
             }
         }
+    }
+
+    /**
+     * returns defaults
+     *
+     * @param string|object $class
+     * @param bool $parents
+     * @return array
+     */
+    public static function generateDefaults($class, $parents = true) {
+
+        $defaults = self::generate_combined_array($class, "default", "defaults", $parents);
+
+        return $defaults;
+    }
+
+    /**
+     * returns casting
+     *
+     * @param string|object $class
+     * @param bool $parents
+     * @return array
+     */
+    public static function generateCasting($class, $parents = true) {
+
+        $casting = self::generate_combined_array($class, "casting", "casting", $parents);
+
+        return $casting;
     }
 
     /**
@@ -203,24 +231,26 @@ class ModelInfoGenerator {
      * gets extra-fields for given class and key.
      *
      * @param string|object $class
-     * @param key of many-many-relationship
+     * @param string $name of many-many-relationship
      * @return array
      */
-    protected static function get_many_many_extraFields($class, $key) {
+    public static function get_many_many_extraFields($class, $name) {
 
+        $name = strtolower($name);
         $fields = array();
         if(StaticsManager::hasStatic($class, "many_many_extra_fields")) {
             $extraFields = ArrayLib::map_key("strtolower", (array)StaticsManager::getStatic($class, "many_many_extra_fields"));
-            if (isset($extraFields[$key])) {
-                $fields = $extraFields[$key];
+            if (isset($extraFields[$name])) {
+                $fields = $extraFields[$name];
             }
         }
 
         foreach(Object::getExtensionsForClass($class, false) as $extension) {
             if(Object::method_exists($extension, "many_many_extra_fields")) {
                 if($extensionFields = call_user_func_array(array($extension, "many_many_extra_fields"), array())) {
-                    if(isset($extensionFields[$key])) {
-                        $fields = array_merge($fields, $extensionFields[$key]);
+                    $extensionFields = ArrayLib::map_key("strtolower", $extensionFields);
+                    if(isset($extensionFields[$name])) {
+                        $fields = array_merge($fields, $extensionFields[$name]);
                     }
                 }
             }
@@ -268,17 +298,5 @@ class ModelInfoGenerator {
 
         return $indexes;
 
-    }
-
-    /**
-     * generates casting
-     *
-     * @param string|object $class
-     * @param bool $parents
-     * @return array
-     */
-    public function generateCasting($class, $parents = true) {
-
-        return self::generate_combined_array($class, "casting", "casting", $parents);
     }
 }

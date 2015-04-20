@@ -1182,7 +1182,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
                 if(isset($this->data[$name]) && is_array($this->data[$name])) {
 
-                    $info = $this->getRelationInfoWithInverse($table);
+                    $info = ModelManyManyRelationShipInfo::getRelationInfoWithInverse($table);
                     $table = $info[0];
 
                     $manipulation["insert_many_" . $table] = array(
@@ -2457,7 +2457,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $data = $this->getManyManyInfo($relname);
             $extTable = ClassInfo::$class_info[$data["object"]]["table"];
 
-            $sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
+            $sorts = ArrayLib::map_key("strtolower", StaticsManager::getStatic($this->classname, "many_many_sort"));
             if(isset($sorts[$relname]) && $sorts[$relname]) {
                 $sort = $sorts[$relname];
             } else {
@@ -2554,7 +2554,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $extTable = $data["exttable"];
 
 
-            $sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
+            $sorts = ArrayLib::map_key("strtolower", StaticsManager::getStatic($this->classname, "many_many_sort"));
             if(isset($sorts[$relname]) && $sorts[$relname]) {
                 $sort = $sorts[$relname];
             } else {
@@ -2768,7 +2768,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $where[$data["table"] . "." . $data["field"]] = $this["versionid"];
 
         if(!isset($sort) || !$sort) {
-            $sorts = ArrayLib::map_key(StaticsManager::getStatic($this->classname, "many_many_sort"), "strtolower");
+            $sorts = ArrayLib::map_key("strtolower", StaticsManager::getStatic($this->classname, "many_many_sort"));
             if(isset($sorts[$name]) && $sorts[$name]) {
                 $sort = $sorts[$name];
             } else {
@@ -4125,10 +4125,35 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-tables belonging to this
      *
-     *@name ManyManyTables
+     * @name ManyManyTables
+     * @return array
      */
     public function ManyManyTables() {
-        return (isset(ClassInfo::$class_info[$this->classname]["many_many_tables"]) ? ClassInfo::$class_info[$this->classname]["many_many_tables"] : array());
+        Core::Deprecate(2.0, "DataObject::ManyManyTables");
+        $relationShips = $this->ManyManyRelationships();
+
+        $info = array();
+        foreach($relationShips as $relationShip) {
+            /** @var ModelManyManyRelationShipInfo $relationShip */
+            $relationInfo = array();
+            $relationInfo['table'] = $relationShip->getTableName();
+            $relationInfo['extfield'] = $relationShip->getTargetField();
+            $relationInfo['field'] = $relationShip->getOwnerField();
+            $relationInfo['object'] = $relationShip->getTarget();
+
+            $info[$relationShip->getRelationShipName()] = $relationInfo;
+        }
+
+        return $info;
+    }
+
+    /**
+     * returns array of ModelManyManyRelationShipInfo Objects
+     *
+     * @return ManyManyRelationships
+     */
+    public function ManyManyRelationships() {
+        return DataObjectClassInfo::getManyManyRelationships($this->classname);
     }
 
 
@@ -4276,31 +4301,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
         }
 
-        // create many-many-tables
-        if (isset(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"])) {
-            foreach(ClassInfo::$class_info[$this->RecordClass]["many_many_tables"] as $key => $data) {
+        $relationships = DataObjectClassInfo::getManyManyRelationships($this->classname);
 
-                // generate fields with extraFields
-                $table = $data["table"];
-                $fields = array('id' => 'int(10) PRIMARY KEY auto_increment', $data["field"] => 'int(10)', $data["extfield"] => 'int(10)');
-                if (isset($data["extraFields"]))
-                    $fields = array_merge($fields, $data["extraFields"]);
+        if($relationships) {
+            foreach($relationships as $relationShip) {
+                /** @var ModelManyManyRelationShipInfo $relationShip */
+                $fields = $relationShip->getPlannedTableLayout();
+                $tableName = $relationShip->getTableName();
 
-                // require Table
-                $log .= SQL::requireTable($table, $fields, array(
-                    "dataindex_reverse"	=> array(
-                        "name" 		=> "dataindex_reverse",
-                        "fields"	=> array($data["extfield"], $data["field"]),
-                        "type"		=> "INDEX"
-                    ),
-
-                    "dataindexunique"	=> array(
-                        "name"		=> "dataindexunique",
-                        "type"		=> "UNIQUE",
-                        "fields"	=> array($data["field"], $data["extfield"])
-                    )
-                ), array(), $prefix);
-                ClassInfo::$database[$data["table"]] = $fields;
+                $log .= SQL::requireTable(
+                    $tableName,
+                    $fields,
+                    $relationShip->getIndexes(),
+                    array(),
+                    $prefix
+                );
+                ClassInfo::$database[$tableName] = $fields;
             }
         }
 
