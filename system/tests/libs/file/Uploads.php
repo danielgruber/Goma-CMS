@@ -95,14 +95,17 @@ class UploadsTest extends GomaUnitTest {
 		$img = Uploads::getFile($path);
 		$img->remove(true);
 
+        $textfile = Uploads::getFile($this->textfile->fieldGet("path"));
         if(isset($textfile)) {
-            $textfile = Uploads::getFile($this->textfile->fieldGet("path"));
+
             $textfile->remove(true);
+            $this->assertFalse(file_exists($textfile->realfile));
+
         }
 
 		$this->assertFalse($img->bool());
 		$this->assertFalse(file_exists($file->realfile));
-		$this->assertFalse(file_exists($textfile->realfile));
+
 
 	}
 

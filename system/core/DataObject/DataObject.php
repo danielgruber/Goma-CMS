@@ -505,16 +505,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * public function to make permission-calls
      *
-     *@name can
-     *@access public
-     *@param name(s) of permission
-     *@param optional - record
+     * @name can
+     * @access public
+     * @param string|array $permissions name(s) of permission
+     * @param DataObject $record optional
+     * @return bool
      */
     public function can($permissions, $record = null) {
 
         if ($this->classname != "permission") {
-            if (Permission::check("superadmin"))
+            if (Permission::check("superadmin")) {
                 return true;
+            }
         }
 
         if (!is_array($permissions)) {
@@ -539,8 +541,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             $this->callExtending("can" . $perm, $can, $r);
 
-            if ($can === true)
+            if ($can === true) {
                 return true;
+            }
         }
 
         return false;
@@ -2000,7 +2003,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 }
 
                 // clean-up-many-many
-                foreach($this->generateManyManyTables() as $data) {
+                foreach($this->ManyManyTables() as $data) {
                     $manipulation[$data["table"]] = array(
                         "table" 	=> $data["table"],
                         "command"	=> "delete",
@@ -2799,6 +2802,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     protected function getManyManyInfo($name) {
         // get config
         $many_many_tables = $this->ManyManyTables();
+
         if (!isset($many_many_tables[$name])) {
             throw new LogicException("Many-Many-Relation ".convert::raw2text($name)." does not exist!");
         }

@@ -236,9 +236,26 @@ class DataObjectClassInfo extends Extension
                 $info = ClassInfo::$class_info[$class]["many_many_relations"];
 
                 self::$relationShips[$class] = ModelManyManyRelationShipInfo::generateFromClassInfo($class, $info);
+
+                // get parent elements
+                $parentClass = ClassInfo::get_parent_class($class);
+                while($parentClass != null && !ClassInfo::isAbstract($parentClass)) {
+
+                    // get info for parent from class
+                    $parentClassInfo = isset( ClassInfo::$class_info[$class]["many_many_relations"]) ?
+                        ClassInfo::$class_info[$class]["many_many_relations"] : array();
+
+                    // get relationships for parent from class
+                    $parentInfo = ModelManyManyRelationShipInfo::generateFromClassInfo($parentClass, $parentClassInfo);
+                    self::$relationShips[$class] = array_merge($parentInfo, self::$relationShips[$class]);
+                    $parentClass = ClassInfo::get_parent_class($parentClass);
+                }
+
+                return self::$relationShips[$class];
             }
 
             return array();
+
         }
 
         return self::$relationShips[$class];

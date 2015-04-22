@@ -301,7 +301,7 @@ class ModelManyManyRelationShipInfo {
             $relationShip->tableName = $record["table"];
             $relationShip->target = $record["target"];
 
-            $relationShips[] = $relationShip;
+            $relationShips[$name] = $relationShip;
         }
 
         return $relationShips;
@@ -311,20 +311,29 @@ class ModelManyManyRelationShipInfo {
      * generates relationships from class.
      *
      * @param string $class
-     * @return array<ModelManyManyRelationShipInfo>
+     * @param bool $parents
+     * @return array <ModelManyManyRelationShipInfo>
      */
-    public static function generateFromClass($class) {
+    public static function generateFromClass($class, $parents = false) {
 
         $class = ClassManifest::resolveClassName($class);
 
         $relationShips = array();
 
-        foreach(ModelInfoGenerator::generateMany_many($class) as $name => $value) {
-            $relationShips[] = self::generateRelationShipInfo($class, $name, $value, false);
+        foreach(ModelInfoGenerator::generateMany_many($class, false) as $name => $value) {
+            $relationShips[$name] = self::generateRelationShipInfo($class, $name, $value, false);
         }
 
-        foreach(ModelInfoGenerator::generateBelongs_many_many($class) as $name => $value) {
-            $relationShips[] = self::generateRelationShipInfo($class, $name, $value, true);
+        foreach(ModelInfoGenerator::generateBelongs_many_many($class, false) as $name => $value) {
+            $relationShips[$name] = self::generateRelationShipInfo($class, $name, $value, true);
+        }
+
+        if($parents !== false) {
+            $parentClass = ClassInfo::get_parent_class($class);
+            while($parentClass != null && !ClassInfo::isAbstract($parentClass)) {
+                $relationShips = array_merge(self::generateFromClass($parentClass, true), $relationShips);
+                $parentClass = ClassInfo::get_parent_class($parentClass);
+            }
         }
 
         return $relationShips;
@@ -372,10 +381,14 @@ class ModelManyManyRelationShipInfo {
         $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0]) : ModelInfoGenerator::generateBelongs_many_many($info[0]);
 
         // if inverse is set in value of relationship, just validate inverse
-        if (isset($info[1]) && isset($relationships[$info[1]])) {
-            $relationInfo = $relationships[$info[1]];
-            if (self::isInverseValid($relationInfo, $relationName, $class)) {
-                return $info[1];
+        if (isset($info[1])) {
+            if(isset($relationships[$info[1]])) {
+                $relationInfo = $relationships[$info[1]];
+                if (self::isInverseValid($relationInfo, $relationName, $class)) {
+                    return $info[1];
+                }
+            } else {
+                throw new LogicException("Defined Inverse-Relationship {$info[1]} not found on class {$info[0]} defined in class $class relationship $relationName");
             }
         } else {
             // find relationship on other class

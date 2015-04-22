@@ -123,10 +123,8 @@ class Uploads extends DataObject {
 				$file->forceDeletable = true;
 			}
 			
-			if($file->write(true, true)) {
+			if($file->writeToDB(true, true)) {
 				return $file;
-			} else {
-				return null;
 			}
 		}
 		
