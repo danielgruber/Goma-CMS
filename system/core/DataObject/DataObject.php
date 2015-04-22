@@ -1642,10 +1642,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * it returns the data for the table of the given class
      * this is used for seperating data in write to correct tables
      *
-     *@name getFieldValues
-     *@access protected
-     *@param string - class or table-name
-     *@param string - command
+     * @param string $class class or table-name
+     * @param string $command command
+     * @param bool $silent default: false
+     * @return array
      */
     protected function getFieldValues($class, $command, $silent = false)
     {
@@ -1920,11 +1920,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * deletes the record
      *
-     *@name remove
-     *@access public
-     *@param bool - force delete
-     *@param bool - if force to delete versions, too
-     *@param bool - if we put this action into history.
+     * @param bool $force force delete
+     * @param bool $forceAll if force to delete versions, too
+     * @param bool $history if we put this action into history
+     * @return bool
+     * @throws MySQLException
+     * @throws SQLException
      */
     public function remove($force = false, $forceAll = false, $history = true)
     {
@@ -4233,6 +4234,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // get correct SQL-Types for Goma-Field-Types
             foreach($db_fields as $field => $type) {
                 if (isset($casting[strtolower($field)])) {
+
                     if ($casting[strtolower($field)] = DBField::parseCasting($casting[strtolower($field)])) {
 
                         $type = call_user_func_array(array($casting[strtolower($field)]["class"], "getFieldType"), (isset($casting[strtolower($field)]["args"])) ? $casting[strtolower($field)]["args"] : array());
