@@ -460,17 +460,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
         }
 
-        if ($many_many = $this->ManyMany()) {
-            foreach ($many_many as $key => $val) {
-                Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
-                Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-                Object::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
-                Object::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-            }
-        }
-
-        if ($belongs_many_many = $this->BelongsManyMany()) {
-            foreach($belongs_many_many as $key => $val) {
+        if ($many_many_relationships = $this->ManyManyRelationships()) {
+            foreach ($many_many_relationships as $key => $val) {
                 Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
                 Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
                 Object::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
@@ -975,14 +966,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 $oldid = $data->versionid;
 
                 // copy many-many-relations
-                foreach($this->ManyMany() as $name => $class) {
-                    if (!isset($newdata[$name . "ids"]) && !isset($newdata[$name])) {
-                        $newdata[$name] = $this->getRelationData($name);
-                    } else if (!isset($newdata[$name . "ids"]) && is_array($newdata[$name])) {
-                        unset($newdata[$name . "ids"]);
-                    }
-                }
-                foreach($this->BelongsManyMany() as $name => $class) {
+                foreach($this->ManyManyRelationships() as $name => $relationShip) {
                     if (!isset($newdata[$name . "ids"]) && !isset($newdata[$name])) {
                         $newdata[$name] = $this->getRelationData($name);
                     } else if (!isset($newdata[$name . "ids"]) && is_array($newdata[$name])) {
@@ -1103,19 +1087,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $many_many_tables = $this->ManyManyTables();
 
         // here the magic for many-many happens
-        if ($many_many = $this->ManyMany()) {
+        if ($many_many = $this->ManyManyRelationships()) {
             foreach($many_many as $key => $value) {
-                if (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
-                    $many_many_objects[$key] = $newdata[$key];
-                    $many_many_data[$key] = $value;
-                    unset($newdata[$key]);
-                }
-                unset($key, $value);
-            }
-        }
-
-        if ($belongs_many_many = $this->BelongsManyMany()) {
-            foreach($belongs_many_many as $key => $value) {
                 if (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
                     $many_many_objects[$key] = $newdata[$key];
                     $many_many_data[$key] = $value;
@@ -1176,33 +1149,26 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             unset($this->data[$key . "ids"]);
         }
 
-        $many_many = array_merge((array) $this->ManyMany(), (array) $this->BelongsManyMany());
+        $many_many = $this->ManyManyRelationships();
 
         // many-many
         if ($many_many) {
-            foreach($many_many as $name => $table)
+            /** @var ModelManyManyRelationshipInfo $relationShip */
+            foreach($many_many as $name => $relationShip)
             {
-
                 if(isset($this->data[$name]) && is_array($this->data[$name])) {
 
-                    $info = ModelManyManyRelationShipInfo::getRelationInfoWithInverse($table);
-                    $table = $info[0];
-
-                    $manipulation["insert_many_" . $table] = array(
+                    $target = $relationShip->getTarget();
+                    $manipulation["insert_many_" . $target] = array(
                         "command"	=> "insert",
-                        "table_name"=> $many_many_tables[$name]["table"],
-                        "fields"	=> array(
-
-                        ),
-                        "ignore"	=> true
+                        "table_name"=> $relationShip->getTableName(),
+                        "fields"    => array(),
+                        "ignore"    => true
                     );
 
                     // prefetch DataBase-Fields for external class.
-                    $o = new $table;
-                    $db = $o->DataBaseFields(true);
-
-                    unset($o);
-
+                    /** @var DataObject $target */
+                    $db = Object::instance($target)->DataBaseFields(true);
 
                     $i = 0;
                     foreach($this->data[$name] as $id => $extraFields) {
@@ -1211,7 +1177,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                             if(isset($extraFields["versionid"])) {
                                 $id = $extraFields["versionid"];
                             } else {
-                                $data = DataObject::get_by_id($table, $id);
+                                $data = DataObject::get_by_id($target, $id);
                                 if($data) {
                                     $id = $data->versionid;
                                 } else {
@@ -1220,7 +1186,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                             }
 
                             if($id == 0) {
-                                $object = new $table(array_merge($extraFields, array("id" => 0, "versionid" => 0)));
+                                $object = new $target(array_merge($extraFields, array("id" => 0, "versionid" => 0)));
                                 $object->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history);
                                 $id = $object->versionid;
 
@@ -1231,7 +1197,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                                 foreach($extraFields as $field => $v) {
                                     if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
                                         if(!isset($d)) {
-                                            $d = DataObject::get_one($table, array("versionid" => $id));
+                                            $d = DataObject::get_one($target, array("versionid" => $id));
                                         }
 
                                         $d[$field] = $v;
@@ -1244,7 +1210,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                                 }
                             }
 
-                            $manipulation["insert_many_" . $table]["fields"][$i] = array(
+                            $manipulation["insert_many_" . $target]["fields"][$i] = array(
                                 $many_many_tables[$name]["field"] 	=> $this->versionid,
                                 $many_many_tables[$name]["extfield"]=> $id
                             );
@@ -1253,7 +1219,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                             foreach($extraFields as $field => $val) {
 
                                 if(isset($many_many_tables[$name]["extraFields"][$field])) {
-                                    $manipulation["insert_many_" . $table]["fields"][$i][$field] = $val;
+                                    $manipulation["insert_many_" . $target]["fields"][$i][$field] = $val;
                                 }
                             }
                             $i++;
@@ -1265,15 +1231,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
                     unset($this->data[$name]);
                     unset($this->data[$name . "ids"]);
-                } else
-
-                    if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
-                    {
-                        $manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
-                    }
-
-
-
+                } else if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
+                {
+                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"]);
+                }
 
             }
         }
@@ -1466,7 +1427,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
                     if ($dataclasses = ClassInfo::DataClasses($baseClass))
                     {
-                        foreach($dataclasses as $class => $table)
+                        foreach(array_keys($dataclasses) as $class)
                         {
                             $manipulation[$class] = array(
                                 "command"	=> "delete",
@@ -1571,28 +1532,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
 
             // many-many
-            if (!$forceChange && $this->ManyMany())
-                foreach($this->ManyMany() as $name => $table)
-                {
-                    if ((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
-                    {
+            if (!$forceChange && $relationShips = $this->ManyManyRelationships()) {
+                foreach (array_keys($relationShips) as $name) {
+                    if ((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet"))) {
                         if ($includeAll) $changed[$name] = (isset($newdata[$name . "ids"])) ? $newdata[$name . "ids"] : $newdata[$name];
                         $forceChange = true;
                         break;
                     }
                 }
-
-            // many-many
-            if (!$forceChange && $this->BelongsManyMany())
-                foreach($this->BelongsManyMany() as $name => $table)
-                {
-                    if ((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")))
-                    {
-                        if ($includeAll) $changed[$name] = (isset($newdata[$name . "ids"])) ? $newdata[$name . "ids"] : $newdata[$name];
-                        $forceChange = true;
-                        break;
-                    }
-                }
+            }
 
             // has-many
             if (!$forceChange && $this->hasMany())
@@ -4319,7 +4267,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $relationships = DataObjectClassInfo::getManyManyRelationships($this->classname);
 
-        if($relationships) {
+        if(!empty($relationships)) {
             foreach($relationships as $relationShip) {
                 /** @var ModelManyManyRelationShipInfo $relationShip */
                 $fields = $relationShip->getPlannedTableLayout();

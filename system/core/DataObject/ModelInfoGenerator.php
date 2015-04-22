@@ -37,7 +37,7 @@ class ModelInfoGenerator {
 
         // if parents, include parents.
         $parent = get_parent_class($class);
-        if ($useParents == true && $parent != "DataObject" && $parent !== false) {
+        if ($useParents === true && $parent != "DataObject" && $parent !== false) {
             $fields = array_merge(self::generate_combined_array($parent, $staticProp, $extensionMethod, true), $fields);
         }
 
@@ -65,7 +65,7 @@ class ModelInfoGenerator {
             unset($key, $value);
         }
 
-        if ($fields && Object::method_exists($class, "DefaultSQLFields")) {
+        if (!empty($fields) && Object::method_exists($class, "DefaultSQLFields")) {
             $fields = array_merge(call_user_func_array(array($class, "DefaultSQLFields"), array($class)), $fields);
         }
 
@@ -214,25 +214,6 @@ class ModelInfoGenerator {
         }
 
         return $many_many;
-    }
-
-    /**
-     * generates many-many-data for given key and value pair.
-     * it also have to know if it is belonging or not.
-     *
-     * @param string $class
-     * @param $key
-     * @param $value
-     * @param bool $belonging
-     */
-    protected static function generate_many_many_tableinfo($class, $key, $value, $belonging = false) {
-        $key = trim(strtolower($key));
-        $extraFields = self::get_many_many_extraFields($class, $key);
-
-        $table = "many_many_".strtolower(trim($class))."_".  $key . '_' . $value;
-        if (!SQL::getFieldsOfTable($table)) {
-            $table = "many_".strtolower(trim($class))."_".  $key;
-        }
     }
 
 

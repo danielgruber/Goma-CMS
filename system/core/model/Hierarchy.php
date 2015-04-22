@@ -93,6 +93,9 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
      * @return array
      */
 	public function getAllParentIDs() {
+
+        $parentid = $this->getOwner()->parentid;
+
 		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("parentid"), array("id" => $this->getOwner()->versionid));
 
         $ids = $this->getArrayFromDB($query, "$parentid");
@@ -152,6 +155,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
      * @throws SQLException
      */
     protected function getArrayFromDB($query, $field) {
+        $ids = array();
         if($query->execute()) {
             while($row = $query->fetch_assoc()) {
                 $ids[] = $row[$field];
@@ -229,7 +233,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 	/**
 	 * generates some ClassInfo
 	 *
-	 *@name generateClassInfo
+	 *@name generateClassInfo$parentid
 	 *@access public
 	*/
 	public function generateClassInfo() {

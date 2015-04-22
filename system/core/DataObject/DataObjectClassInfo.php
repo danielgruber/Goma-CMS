@@ -125,7 +125,7 @@ class DataObjectClassInfo extends Extension
 
             $relationShips = ModelManyManyRelationShipInfo::generateFromClass($class);
 
-            if($relationShips) {
+            if(!empty($relationShips)) {
                 if(!isset(ClassInfo::$class_info[$class]["many_many_relations"])) {
                     ClassInfo::$class_info[$class]["many_many_relations"] = array();
                 }
