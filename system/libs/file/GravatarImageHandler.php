@@ -7,9 +7,9 @@
   *	@link 		http://goma-cms.org
   *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *	@author 	Goma-Team
-  * @Version 	1.5
+  * @Version 	1.5.1
   *
-  * last modified: 26.01.2015
+  * last modified: 20.04.2015
 */
 class GravatarImageHandler extends ImageUploads {
 	
@@ -82,14 +82,15 @@ class GravatarImageHandler extends ImageUploads {
 	public function __toString() {
 		return '<img src="'.$this->raw().'" alt="'.$this->filename.'" />';
 	}
-	
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 *@name getIcon
-	 *@access public
-	 *@param int - size; support for 16, 32, 64 and 128
-	*/
+
+    /**
+     * returns the path to the icon of the file
+     *
+     * @name getIcon
+     * @access public
+     * @param int - size; support for 16, 32, 64 and 128
+     * @return string
+     */
 	public function getIcon($size = 128, $retina = false) {
 		if($retina) {
 			$size = $size * 2;
@@ -97,83 +98,91 @@ class GravatarImageHandler extends ImageUploads {
 		
 		return self::get_gravatar($this->email, $size);
 	}
-	
-	/**
-	 * sets the height
-	 *
-	 *@name setHeight
-	 *@access public
-	*/
+
+    /**
+     * sets the height
+     *
+     * @name setHeight
+     * @access public
+     * @return string
+     */
 	public function setHeight($height, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $height, "mm", "g", true, array("height" => $height), $html, $style);
 	}
-	
-	/**
-	 * sets the width
-	 *
-	 *@name setWidth
-	 *@access public
-	*/
+
+    /**
+     * sets the width
+     *
+     * @name setWidth
+     * @access public
+     * @return string
+     */
 	public function setWidth($width, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $width, "mm", "g", true, array("width" => $width), $html, $style);
 	}
-	
-	/**
-	 * sets the Size
-	 *
-	 *@name setSize
-	 *@access public
-	*/
+
+    /**
+     * sets the Size
+     *
+     * @name setSize
+     * @access public
+     * @return string
+     */
 	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $width, "mm", "g", true, array("height" => $height, "width" => $width), $html, $style);
 	}
-	
-	/**
-	 * sets the size on the original,  so not the thumbnail we saved
-	 *
-	 *@name orgSetSize
-	 *@access public
-	*/
+
+    /**
+     * sets the size on the original,  so not the thumbnail we saved
+     *
+     * @name orgSetSize
+     * @access public
+     * @return string
+     */
 	public function orgSetSize($width, $height, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
 	}
-	
-	/**
-	 * sets the width on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetWidth
-	 *@access public
-	*/
+
+    /**
+     * sets the width on the original, so not the thumbnail we saved
+     *
+     * @name orgSetWidth
+     * @access public
+     * @return string
+     */
 	public function orgSetWidth($width, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $width, "mm", "g", true, array(), $html, $style);
 	}
-	
-	/**
-	 * sets the height on the original, so not the thumbnail we saved
-	 *
-	 *@name orgSetHeight
-	 *@access public
-	*/
+
+    /**
+     * sets the height on the original, so not the thumbnail we saved
+     *
+     * @name orgSetHeight
+     * @access public
+     * @return string
+     */
 	public function orgSetHeight($height, $absolute = false, $html = "", $style = "") {
 		return self::get_gravatar($this->email, $height, "mm", "g", true, array(), $html, $style);
 	}
-	
-	/**
-	 * returns width
-	 *
-	 *@name width
-	 *@access public
-	*/
+
+    /**
+     * returns width
+     *
+     * @name width
+     * @access public
+     * @return int
+     */
 	public function width() {
 		return 500;
 	}
-	
-	/**
-	 * returns height
-	 *
-	 *@name height
-	 *@access public
-	*/
+
+    /**
+     * returns height
+     *
+     * @name height
+     * @access public
+     * @return int
+     */
 	public function height() {
 		return 500;
 	}

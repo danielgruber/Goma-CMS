@@ -82,15 +82,16 @@ class Uploads extends DataObject {
 		)    
 	);
 
-	/**
-	 * adds a file to the upload-folder
-	 *
-	 *@name addFile
-	 *@access public
-	*/
+    /**
+     * adds a file to the upload-folder
+     *
+     * @name addFile
+     * @access public
+     * @return Uploads
+     */
 	public static function addFile($filename, $realfile, $collectionPath, $class_name = null, $deletable = null) {
 		if(!file_exists($realfile) || empty($collectionPath)) {
-			return false;
+			return null;
 		}
 		
 		if(!isset($deletable)) {
@@ -122,14 +123,12 @@ class Uploads extends DataObject {
 				$file->forceDeletable = true;
 			}
 			
-			if($file->write(true, true)) {
+			if($file->writeToDB(true, true)) {
 				return $file;
-			} else {
-				return false;
 			}
 		}
 		
-		return false;
+		return null;
 	}
 
     /**

@@ -1,18 +1,21 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 09.01.2013
-  * $Version 1.1.2
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined('IN_GOMA') OR die();
 
 defined("BACKUP_DIR") OR define("BACKUP_DIR", "backup");
 define("BACKUP_MODEL_BACKUP_DIR", CURRENT_PROJECT . "/" . BACKUP_DIR);
 
+/**
+ * Backupmodel creates and holds a database of backups.
+ *
+ * @package		Goma\Backup
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version		2.3.2
+ *
+ * @property int size
+ * @property int create_date
+ * @property string type
+ * @property string name filename
+ */
 class BackupModel extends DataObject {
 	/**
 	 * version
@@ -32,15 +35,21 @@ class BackupModel extends DataObject {
 	 *@access public
 	*/
 	static $db = array(
-		"name" 			=> "varchar(200)",
+        "name"          => "varchar(200)",
 		"create_date"	=> "varchar(200)",
-		"justSQL"		=> "int(1)",
 		"size"			=> "bigint(30)",
 		"type"			=> "varchar(40)"
 	);
 	
 	static $default_sort = "create_date DESC";
-	
+
+    /**
+     * returns if it is just SQL.
+     */
+    public function justSQL() {
+        return preg_match('/\.sgfs$/i', $this->name);
+    }
+
 	/**
 	 * syncs the path with the model
 	 *
@@ -49,7 +58,7 @@ class BackupModel extends DataObject {
 	*/
 	public static function syncFolder($force = false) {
 		FileSystem::requireDir(self::BACKUP_PATH);
-		
+
 		if($force || isset($_GET["flush"]) || !file_exists(self::BACKUP_PATH . "/syncStatus_" . self::VERSION) || filemtime(self::BACKUP_PATH) > filemtime(self::BACKUP_PATH . "/syncStatus_" . self::VERSION)) {
 			// we have to sync
 			
@@ -61,8 +70,9 @@ class BackupModel extends DataObject {
 			
 			// so clean-up first deleted files
 			foreach($data as $record) {
-				if(!in_array($record["name"], $files))
-					$record->delete();
+				if(!in_array($record["name"], $files)) {
+                    $record->delete();
+                }
 			}
 			
 			// now re-index
@@ -73,7 +83,6 @@ class BackupModel extends DataObject {
 					$info = $gfs->parsePlist("info.plist");
 					if(isset($info["created"])) {
 						$object->create_date = $info["created"];
-						$object->justSQL = preg_match('/\.sgfs$/i', $file);
 						$object->size = filesize(self::BACKUP_PATH . "/" . $file);
 						
 						if($info["backuptype"] == "SQLBackup") {
@@ -113,45 +122,49 @@ class BackupModel extends DataObject {
 	public static function forceSyncFolder() {
 		return self::syncFolder(true);
 	}
-	
-	/**
-	 * removes the file after remove
-	 *
-	 *@name onAfterRemove
-	 *@access public
-	*/
+
+    /**
+     * removes the file after remove
+     *
+     * @name onAfterRemove
+     * @access public
+     * @return void
+     */
 	public function onBeforeRemove() {
 		if(file_exists(self::BACKUP_PATH . "/" . $this->name)) {
 			@unlink(self::BACKUP_PATH . "/" . $this->name);
 		}
 	}
-	
-	/**
-	 * gets the size
-	 *
-	 *@name getSize
-	 *@access public
-	*/
+
+    /**
+     * gets the size
+     *
+     * @name getSize
+     * @access public
+     * @return string
+     */
 	public function getSize() {
 		return FileSystem::filesize_nice(self::BACKUP_PATH . "/" . $this->name);
 	}
-	
-	/**
-	 * gets the type
-	 *
-	 *@name getType
-	 *@access public
-	*/
+
+    /**
+     * gets the type
+     *
+     * @name getType
+     * @access public
+     * @return string
+     */
 	public function getType() {
 		return ($this->fieldGet("type") == "full") ? lang("backup_full") : lang("backup_db");
 	}
-	
-	/**
-	 * gets created date
-	 *
-	 *@name getCreate_Date
-	 *@access public
-	*/
+
+    /**
+     * gets created date
+     *
+     * @name getCreate_Date
+     * @access public
+     * @return string
+     */
 	public function getCreate_Date() {
 		$val = $this->fieldGet("create_date");
 		$obj = new Varchar("create_date", $val);

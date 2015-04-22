@@ -9,6 +9,7 @@
  */
 
 require_once("system/libs/thirdparty/simpletest/unit_tester.php");
+
 abstract class GomaUnitTest extends UnitTestCase implements TestAble {
 	/**
 	 * information about area.

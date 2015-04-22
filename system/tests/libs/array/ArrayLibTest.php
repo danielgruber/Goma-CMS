@@ -47,11 +47,21 @@ class ArrayLibTest extends GomaUnitTest {
 		$this->assertEqual(ArrayLib::firstkey($arr), "blah");
 		$this->assertEqual(ArrayLib::first($arr), "test");
 
-		$this->assertEqual(ArrayLib::map_key($arr, "strtoupper"), array("BLAH" => "test", "BLUB" => "1"));
+		$this->assertEqual(ArrayLib::map_key("strtoupper", $arr), array("BLAH" => "test", "BLUB" => "1"));
+
+        $arr[] = "test";
+        $this->assertEqual(ArrayLib::map_key("strtolower", $arr), array("blah" => "test", "blub" => "1", 0 => "test"));
 
 
 		$arr2 = ArrayLib::merge($arr, array(1,2,3, 3));
-		$this->assertEqual($arr2, array("blah" => "test", "blub" => "1",1,2,3,3));
-		$this->assertEqual(ArrayLib::key_value_for_id($arr2), array("blah" => "test", "blub" => "1", 1 => 1, 2 => 2, 3 => 3));
+		$this->assertEqual($arr2, array("blah" => "test", "blub" => "1","test",1,2,3,3));
+		$this->assertEqual(ArrayLib::key_value_for_id($arr2), array(
+            "blah" => "test",
+            "blub" => "1",
+            "test" => "test",
+            1 => 1,
+            2 => 2,
+            3 => 3)
+        );
 	}
 }

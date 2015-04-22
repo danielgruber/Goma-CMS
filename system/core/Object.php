@@ -394,18 +394,21 @@ abstract class Object
     {
         // first if it is a callback
         if (is_array($extra_method)) {
+
+            $method_callback = $extra_method;
             if (is_string($extra_method[0]) && substr($extra_method[0], 0, 4) == "EXT:") {
-                $extra_method[0] = $this->getInstance(substr($extra_method[0], 4));
+                $method_callback[0] = $this->getInstance(substr($method_callback[0], 4));
             } else if (is_string($extra_method[0]) && $extra_method[0] == "this") {
                 array_unshift($args, $method_name);
-                $extra_method[0] = $this;
+                $method_callback[0] = $this;
             }
 
-            if(!is_callable($extra_method)) {
-                throw new BadMethodCallException('Tried to call Extra-Method via '.print_r($extra_method, true).', but it is not callable.');
+            if(!is_callable($method_callback)) {
+                throw new BadMethodCallException('Tried to call Extra-Method ' . print_r($extra_method, true) .
+                    ' via '.print_r($method_callback, true).', but it is not callable.');
             }
 
-            return call_user_func_array($extra_method, $args);
+            return call_user_func_array($method_callback, $args);
         }
 
         array_unshift($args, $this);
@@ -421,27 +424,38 @@ abstract class Object
      */
     public function getExtensions($recursive = true)
     {
-        if ($this->classname == "") {
-            $this->classname = strtolower(get_class($this));
-        }
+        return self::getExtensionsForClass($this->classname, $recursive);
+    }
+
+    /**
+     * returns extensions for a given class as static context.
+     *
+     * @param $class
+     * @param bool $recursive if to check for extensions from parents, too.
+     * @return array
+     */
+    public static function getExtensionsForClass($class, $recursive = true) {
+        $class = ClassManifest::resolveClassName($class);
 
         if ($recursive === true) {
-            if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
-                $this->buildExtCache();
+            if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$class])) {
+                self::buildExtCache($class);
             }
-            return array_keys(self::$cache_extensions[$this->classname]);
-        } else
-            return (isset(self::$extensions[$this->classname])) ? array_keys(self::$extensions[$this->classname]) : array();
+            return array_keys(self::$cache_extensions[$class]);
+        } else {
+            return (isset(self::$extensions[$class])) ? array_keys(self::$extensions[$class]) : array();
+        }
     }
 
     /**
      * Builds the extension cache.
      *
+     * @param $class
      * @return array[] Array with the extensions.
      */
-    private function buildExtCache()
+    private static function buildExtCache($class)
     {
-        $parent = $this->classname;
+        $parent = $class;
         $extensions = array();
         while ($parent !== false) {
             if (isset(self::$extensions[$parent])) {
@@ -450,7 +464,7 @@ abstract class Object
             $parent = ClassInfo::getParentClass($parent);
         }
 
-        self::$cache_extensions[$this->classname] = $extensions;
+        self::$cache_extensions[$class] = $extensions;
         return $extensions;
     }
 
@@ -458,36 +472,36 @@ abstract class Object
      * gets an extension-instance
      *
      * @name getInstance
-     * @param string - name of extension
+     * @param string $extensionClassName of extension
      * @return Object
      */
-    public function getInstance($name)
+    public function getInstance($extensionClassName)
     {
-        $name = trim(strtolower($name));
+        $extensionClassName = trim(strtolower($extensionClassName));
 
         // cache for instances. No clone here, cause an instance can used and customised.
-        if (isset($this->ext_instances[$name])) {
-            return $this->ext_instances[$name];
+        if (isset($this->ext_instances[$extensionClassName])) {
+            return $this->ext_instances[$extensionClassName];
         }
 
         if (defined("GENERATE_CLASS_INFO") || !isset(self::$cache_extensions[$this->classname])) {
-            $this->buildExtCache();
+            self::buildExtCache($this->classname);
         }
 
         // create new instance
-        if (!isset(self::$extension_instances[$this->classname][$name]) || !is_object(self::$extension_instances[$this->classname][$name])) {
+        if (!isset(self::$extension_instances[$this->classname][$extensionClassName]) || !is_object(self::$extension_instances[$this->classname][$extensionClassName])) {
 
-            if (!isset(self::$cache_extensions[$this->classname][$name])) {
+            if (!isset(self::$cache_extensions[$this->classname][$extensionClassName])) {
                 return null;
             }
 
-            self::$extension_instances[$this->classname][$name] = clone eval("return new " . $name . "(" . self::$cache_extensions[$this->classname][$name] . ");");
+            self::$extension_instances[$this->classname][$extensionClassName] = clone eval("return new " . $extensionClassName . "(" . self::$cache_extensions[$this->classname][$extensionClassName] . ");");
         }
 
         // own instance
-        $this->ext_instances[$name] = clone self::$extension_instances[$this->classname][$name];
-        $this->ext_instances[$name]->setOwner($this);
-        return $this->ext_instances[$name];
+        $this->ext_instances[$extensionClassName] = clone self::$extension_instances[$this->classname][$extensionClassName];
+        $this->ext_instances[$extensionClassName]->setOwner($this);
+        return $this->ext_instances[$extensionClassName];
     }
 
     /**

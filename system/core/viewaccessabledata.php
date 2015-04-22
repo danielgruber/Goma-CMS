@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.3.1
+ * @version		2.3.2
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -159,9 +159,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
         $this->defaults = $this->defaults();
 
 		if(!isset(self::$server)) {
-			self::$server = ArrayLib::map_key($_SERVER, "strtolower");
-			self::$_get = ArrayLib::map_key($_GET, "strtolower");
-			self::$_post = ArrayLib::map_key($_POST, "strtolower");
+			self::$server = ArrayLib::map_key("strtolower", $_SERVER);
+			self::$_get = ArrayLib::map_key("strtolower", $_GET);
+			self::$_post = ArrayLib::map_key("strtolower", $_POST);
 		}
 	}
 
@@ -275,10 +275,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	//!APIs
-	/**
-	 * this function returns the current record as an array
-	 *@param array - extra fields, which are not in database
-	 */
+    /**
+     * this function returns the current record as an array
+     * @param array - extra fields, which are not in database
+     * @return array
+     */
 	public function ToArray($additional_fields = array()) {
 		if(empty($additional_fields))
 			return $this->data;
@@ -294,7 +295,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
 	 * to array if we need data for REST-API.
 	*/
-	public function ToRESTArray($addtional_fields = array()) {
+	public function ToRESTArray($additional_fields = array()) {
 		return $this->ToArray($additional_fields);
 	}
 
@@ -305,7 +306,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @return $this
      */
 	public function customise($loops = array()) {
-		$loops = Arraylib::map_key($loops, "strtolower");
+		$loops = Arraylib::map_key("strtolower", $loops);
 		$this->customised = array_merge($this->customised, $loops);
 
 		return $this;
@@ -1054,54 +1055,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	/**
-	 * generates casting
-	 *
-	 */
-	public function generateCasting() {
-		$casting = StaticsManager::getStatic($this->classname, "casting");
-		foreach($this->LocalcallExtending("casting") as $_casting) {
-			$casting = array_merge($casting, $_casting);
-			unset($_casting);
-		}
-
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$casting = array_merge(Object::instance($parent)->generateCasting(), $casting);
-		}
-
-		$casting = ArrayLib::map_key("strtolower", $casting);
-		return $casting;
-	}
-
-	/**
-	 * defaults
-	 *
-	 */
-	public function generateDefaults() {
-		if(StaticsManager::hasStatic($this->classname, "default")) {
-			$defaults = StaticsManager::getStatic($this->classname, "default");
-		} else {
-			$defaults = array();
-		}
-
-		// get parents
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$defaults = array_merge(Object::instance($parent)->generateDefaults(), $defaults);
-		}
-
-		foreach($this->LocalcallExtending("defaults") as $defaultsext) {
-			$defaults = array_merge($defaults, $defaultsext);
-			unset($defaultsext);
-		}
-
-		// free memory
-		unset($parent);
-		$defaults = ArrayLib::map_key($defaults, "strtolower");
-		return $defaults;
-	}
-
-	/**
 	 * unsets a offset
 	 * in this object it do nothing
 	 *@name offsetUnset
@@ -1119,7 +1072,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
  * @package		Goma\System\Core
  * @version		1.0
  */
-abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
+abstract class Extension extends Object implements ExtensionModel {
 
 	/**
 	 * extra_methods
@@ -1140,6 +1093,7 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 		if(!is_object($object)) {
             throw new InvalidArgumentException('Object is not an object');
 		}
+
 		if(class_exists($object->classname)) {
 			$this->owner = $object;
 		} else {

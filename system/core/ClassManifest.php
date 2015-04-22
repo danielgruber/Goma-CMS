@@ -57,7 +57,7 @@ class ClassManifest {
 	/**
 	 * tries to include a file.
 	*/
-	public function tryToInclude($class, $file) {
+	public static function tryToInclude($class, $file) {
 
 		$class = self::resolveClassName($class);
 
@@ -144,6 +144,13 @@ class ClassManifest {
 			self::generate_class_manifest($dir, $classes, $class_info, $env);
 		}
 	}
+
+    /**
+     * returns true of two classes can be treated as the same.
+     */
+    public static function isSameClass($class1, $class2) {
+        return (self::resolveClassName($class1) == self::resolveClassName($class2));
+    }
 
     /**
      * @param $class
@@ -433,9 +440,7 @@ class ClassManifest {
 	}
 
 	public static function addUnitTest () {
-
-			self::$class_alias["unittestcase"] = "object";
-		
+		self::$class_alias["unittestcase"] = "object";
 	}
 
 }

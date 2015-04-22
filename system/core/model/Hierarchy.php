@@ -1,14 +1,13 @@
 <?php
 /**
-  * every class having a tree-structure should use this as extension for better performance and good implementation of trees in PHP
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 08.06.2013
-  * $Version 1.0
-*/
+ * every class having a tree-structure should use this as extension for better performance and good implementation of trees in PHP
+ *
+ * @package		Goma\Model
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version     1.1
+ */
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
@@ -25,80 +24,90 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 	/**
 	 * has-one-extension
 	*/
-	public function has_one() {
-		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
+	public static function has_one($class) {
+		if(strtolower(get_parent_class($class)) != "dataobject")
 			return array();
 		
 		return array(
-			"parent" => $this->getOwner()->classname
+			"parent" => $class
 		);
 	}
 	
 	/**
 	 * has-many-extension
 	*/
-	public function has_many() {
-		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
+	public static function has_many($class) {
+		if(strtolower(get_parent_class($class)) != "dataobject")
 			return array();
 			
 		return array(
-			"Children" => $this->getOwner()->classname
+			"Children" => $class
 		);
 	}
-	
-	/**
-	 * gets all children and subchildren to a record
-	 *
-	 *@name AllChildren
-	*/
+
+    /**
+     * gets all children and subchildren to a record
+     *
+     * @param array|string|null $filter
+     * @param array|string|null $sort
+     * @param int|array|null $limit
+     * @return DataObjectSet
+     * @internal param $AllChildren
+     */
 	public function AllChildren($filter = null, $sort = null, $limit = null) {
 		return DataObject::get($this->getOwner()->classname, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
-	
-	/**
-	 * searches through all direct children of a record
-	 *
-	 *@name SearchChildren
-	*/
+
+    /**
+     * searches through all direct children of a record
+     *
+     * @param string|array $search
+     * @param array|string|null $filter
+     * @param array|string|null $sort
+     * @param int|array|null $limit
+     * @return DataObjectSet
+     * @internal param $SearchChildren
+     */
 	public function SearchChildren($search, $filter = null, $sort = null, $limit = null) {
-		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array("parentid" => $this->getOwner()->id)));
+		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array("parentid" => $this->getOwner()->id)), $sort, $limit);
 	}
-	
-	/**
-	 * searches through all children and subchildren to of record
-	 *
-	 *@name SearchAllChildren
-	*/
+
+    /**
+     * searches through all children and subchildren to of record
+     *
+     * @name SearchAllChildren
+     * @return DataObjectSet|DataSet
+     */
 	public function SearchAllChildren($search, $filter = null, $sort = null, $limit = null) {
 		return DataObject::search_object($this->getOwner()->classname, $search, array_merge((array) $filter, array($this->getOwner()->baseTable . "_tree.parentid" => $this->getOwner()->id)), $sort, $limit, array(
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.id = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
-	
-	/**
-	 * returns a list of all parentids to the top
-	 *
-	 *@name getAllParentIDs
-	*/ 
+
+    /**
+     * returns a list of all parentids to the top
+     *
+     * @name getAllParentIDs
+     * @return array
+     */
 	public function getAllParentIDs() {
 		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("parentid"), array("id" => $this->getOwner()->versionid));
-		if($query->execute()) {
-			$ids = array();
-			while($row = $query->fetch_object()) {
-				if($row->parentid != 0)
-					$ids[] = $row->parentid;
-			}
-		}
-		return $ids;
+
+        $ids = $this->getArrayFromDB($query, "$parentid");
+
+        return array_filter($ids, function($v){
+           return $v != 0;
+        });
 	}
-	
-	/**
-	 * returns a dataset of all parents
-	 *
-	 *@name getAllParents
-	*/ 
+
+    /**
+     * returns a dataset of all parents
+     *
+     * @name getAllParents
+     * @return DataObjectSet
+     */
 	public function getAllParents($filter = null, $sort = null, $limit = null) {
 		if(!isset($sort)) {
 			$sort = array("field" => $this->getOwner()->baseTable . "_tree.height", "type" => "DESC");
@@ -107,46 +116,51 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 			"INNER JOIN " . DB_PREFIX . $this->getOwner()->baseTable . "_tree AS " . $this->getOwner()->baseTable . "_tree ON " . $this->getOwner()->baseTable . "_tree.parentid = " . $this->getOwner()->baseTable . ".id"
 		));
 	}
-	
-	/**
-	 * gets all versionids of the children
-	 *
-	 *@name getAllChildVersionIDs
-	 *@access public
-	*/
+
+    /**
+     * gets all versionids of the children
+     *
+     * @name getAllChildVersionIDs
+     * @access public
+     * @return array
+     */
 	public function getAllChildVersionIDs() {
-		
-		$ids = array();
+
 		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("id"), array("parentid" => $this->getOwner()->id));
-		if($query->execute()) {
-			while($row = $query->fetch_object()) {
-				$ids[] = $row->id;
-			}
-			return $ids;
-		} else {
-			throwErrorByID(3);
-		}
+        return $this->getArrayFromDB($query, "id");
 	}
-	
-	/**
-	 * gets all ids of the children
-	 *
-	 *@name getAllChildVersionIDs
-	 *@access public
-	*/
+
+    /**
+     * gets all ids of the children
+     *
+     * @name getAllChildVersionIDs
+     * @access public
+     * @return array
+     */
 	public function getAllChildIDs() {
-		$ids = array();
 		$query = new SelectQuery($this->getOwner()->baseTable . "_tree", array("recordid"), array("parentid" => $this->getOwner()->id));
 		$query->innerJOIN($this->getOwner()->baseTable, $this->getOwner()->baseTable . ".id = " . $this->getOwner()->baseTable . "_tree.id");
-		if($query->execute()) {
-			while($row = $query->fetch_object()) {
-				$ids[] = $row->recordid;
-			}
-			return $ids;
-		} else {
-			throwErrorByID(3);
-		}
+		return $this->getArrayFromDB($query, "recordid");
 	}
+
+    /**
+     * builds an array of all fields with $fieldname.
+     *
+     * @param SelectQuery $query
+     * @param string $field
+     * @return array
+     * @throws SQLException
+     */
+    protected function getArrayFromDB($query, $field) {
+        if($query->execute()) {
+            while($row = $query->fetch_assoc()) {
+                $ids[] = $row[$field];
+            }
+            return $ids;
+        } else {
+            throw new SQLException();
+        }
+    }
 	
 	/**
 	 * //!extend APIs
@@ -159,8 +173,6 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 	*/
 	public function onBeforeManipulate(&$manipulation, $job) {
 		if($job == "write" && isset(ClassInfo::$database[$this->getOwner()->baseTable . "_tree"])) {
-			$parentid = $this->getOwner()->parentid;
-		
 			$manipulation["tree_table"] = array(
 				"command" 		=> "insert",
 				"table_name"	=> $this->getOwner()->baseTable . "_tree",
@@ -186,7 +198,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 			}
 			
 			if($height == 100) {
-				throwError(6, "Unsupported Hierarchy-Error", "Hierarchy only supports height up to 100. This object seems to have more than hundred parent nodes. <pre>".print_r($this->getOwner(), true)."</pre>");
+                throw new LogicException('Hierarchy only supports height up to 100. This object seems to have more than hundred parent nodes. <pre>'.print_r($this->getOwner(), true).'</pre>');
 			}
 			
 			$manipulation["tree_table"]["fields"][] = array("id" => $this->getOwner()->versionid, "parentid" => 0, "height" => 0);
@@ -230,22 +242,22 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 			);
 		}
 	}
-	
-	/**
-	 * build a seperate tree-table
-	 *
-	 *@name buidlDB
-	*/
+
+    /**
+     * build a seperate tree-table
+     *
+     * @param $prefix
+     * @param $log
+     * @return bool
+     * @throws SQLException
+     */
 	public function buildDB($prefix, &$log) {
 		
 		if(strtolower(get_parent_class($this->getOwner()->classname)) != "dataobject")
 			return true;
-		
-		if(!SQL::getFieldsOfTable($this->getOwner()->baseTable . "_tree")) {
-			// create and migrate
-			$migrate = true;
-		}
-		
+
+        $migrate = !SQL::getFieldsOfTable($this->getOwner()->baseTable . "_tree");
+
 		$log .= SQL::requireTable(	$this->getOwner()->baseTable . "_tree", 
 										array(	"id" 		=> "int(10)", 
 												"parentid" 	=> "int(10)",
@@ -263,7 +275,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 			"height"	=> "int(10)"
 		);
 		
-		if(isset($migrate)) {
+		if($migrate !== false) {
 			$sql = "SELECT recordid, parentid, id FROM " . $prefix . $this->getOwner()->baseTable . " ORDER BY id DESC";
 			$directParents = array();
 			$versions = array();
@@ -279,7 +291,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 					$i++;
 				}
 			} else {
-				throwErrorbyID(3);
+				throw new SQLException();
 			}
 			
 			if(count($directParents) > 0) {
