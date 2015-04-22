@@ -21,6 +21,7 @@ class ModelInfoGenerator {
         $class = ClassManifest::resolveClassName($class);
 
         $fields = array();
+
         if (StaticsManager::hasStatic($class, $staticProp)) {
             $fields = (array)StaticsManager::getStatic($class, $staticProp);
         }
@@ -64,18 +65,18 @@ class ModelInfoGenerator {
             unset($key, $value);
         }
 
-        if ($fields) {
+        if ($fields && Object::method_exists($class, "DefaultSQLFields")) {
             $fields = array_merge(call_user_func_array(array($class, "DefaultSQLFields"), array($class)), $fields);
         }
 
         return $fields;
     }
 
-    public static function validateDBFields($fields) {
+    public static function validateDBFields($class, $fields) {
         foreach($fields as $name => $type) {
             // hack to not break current Goma-CMS Build
             if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
-                throw new DBFieldNotValidException($this->classname . "." . $name);
+                throw new DBFieldNotValidException($class . "." . $name);
             }
         }
     }
@@ -173,14 +174,7 @@ class ModelInfoGenerator {
     public static function generateMany_many($class, $parents = true) {
         $many_many = self::generate_combined_array($class, "many_many", "belongs_many_many", $parents);
 
-        // put everything in lowercase
-        foreach($many_many as $k => $v) {
-            if(is_string($v)) {
-                $many_many[$k] = strtolower($v);
-            } else {
-                $many_many[$k]["class"] = strtolower($v["class"]);
-            }
-        }
+        $many_many = self::convertManyManyToLowerCase($many_many, $class);
 
         return $many_many;
     }
@@ -195,16 +189,31 @@ class ModelInfoGenerator {
     public static function generateBelongs_many_many($class, $parents = true) {
         $belongs_many_many = self::generate_combined_array($class, "belongs_many_many", "belongs_many_many", $parents);
 
-        // put values to lowercase
-        foreach($belongs_many_many as $k => $v) {
+        $belongs_many_many = self::convertManyManyToLowerCase($belongs_many_many, $class);
+
+        return $belongs_many_many;
+    }
+
+    /**
+     * converts many-many error to lower-case.
+     *
+     * @param array $many_many
+     * @param string $class for exception
+     * @return array
+     */
+    protected static function convertManyManyToLowerCase($many_many, $class) {
+        // put everything in lowercase
+        foreach($many_many as $k => $v) {
             if(is_string($v)) {
-                $belongs_many_many[$k] = strtolower($v);
+                $many_many[$k] = strtolower($v);
+            } else if(isset($many_many[$k]["class"])) {
+                $many_many[$k]["class"] = strtolower($v["class"]);
             } else {
-                $belongs_many_many[$k]["class"] = strtolower($v["class"]);
+                throw new LogicException("Information in Many-Many must be either array with key class or string. $k is $class wasn't.");
             }
         }
 
-        return $belongs_many_many;
+        return $many_many;
     }
 
     /**

@@ -4128,6 +4128,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
+     * returns casting-values
+     *
+     */
+    public function casting() {
+        $casting = parent::casting();
+
+        return array_merge($this->DataBaseFields(true), $casting);
+    }
+
+    /**
      * many-many-tables belonging to this
      *
      * @name ManyManyTables
