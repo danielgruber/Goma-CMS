@@ -2218,15 +2218,16 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		return $this;
 	}
 
-	/**
-	 * write to DB
-	 *
-	 *@name write
-	 *@access public
-	 *@param bool - to force insert
-	 *@param bool - to force write
-	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-	*/
+    /**
+     * write to DB
+     *
+     * @name write
+     * @access public
+     * @param bool - to force insert
+     * @param bool - to force write
+     * @param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+     * @return bool
+     */
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		$writeExtraFields = array();
@@ -2388,12 +2389,13 @@ class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
 		}
 		return $return;
 	}
-	
-	/**
-	 * removes the relation on writing
-	 *
-	 *@name removeRecord
-	*/
+
+    /**
+     * removes the relation on writing
+     *
+     * @name removeRecord
+     * @return record
+     */
 	public function removeRecord($record, $write = false) {
 		$record = parent::removeRecord($record);
 		if($write) {

@@ -203,7 +203,7 @@ class ClassInfo extends Object {
      * returns if class exists and is not empty.
      * it returns correct class-name.
      *
-     * @param string class
+     * @param string|object class
      * @return string
      * @throws LogicException
      */

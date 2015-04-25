@@ -398,23 +398,28 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * searches in a model
      *
-     *@name search_object
-     *@access public
-     *@param string - name
-     *@param array - words
-     *@param array - where
-     *@param array - fields
-     *@param array - orderby
+     * @name search_object
+     * @access public
+     * @param string|object $class
+     * @param array $search words to search
+     * @param array $filter filter query
+     * @param array $sort
+     * @param array $limits
+     * @param array $join
+     * @param bool $pagination
+     * @param bool $groupby
+     * @return DataObjectSet|DataSet
      */
     public static function search_object($class, $search = array(),$filter = array(), $sort = array(), $limits = array(), $join = array(), $pagination = false, $groupby = false)
     {
         $DataSet = new DataObjectSet($class, $filter, $sort, $limits, $join, $search);
 
         if ($pagination !== false) {
-            if (is_int($pagination))
+            if (is_int($pagination)) {
                 $DataSet->activatePagination($pagination);
-            else
-                $DataSet->activePagination();
+            } else {
+                $DataSet->activatePagination();
+            }
         }
 
         if ($groupby !== false) {
@@ -1211,8 +1216,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                             }
 
                             $manipulation["insert_many_" . $target]["fields"][$i] = array(
-                                $many_many_tables[$name]["field"] 	=> $this->versionid,
-                                $many_many_tables[$name]["extfield"]=> $id
+                                $relationShip->getOwnerField() 	=> $this->versionid,
+                                $relationShip->getTargetField()=> $id
                             );
 
 
@@ -2766,8 +2771,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * sets many-many-data
      *
-     *@name setManyMany
-     *@access public
+     * @name setManyMany
+     * @access public
+     * @return bool
      */
     public function setManyMany($name, $value) {
         $name = substr($name, 3);
@@ -2793,8 +2799,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * sets many-many-ids
      *
-     *@name setManyManyIDs
-     *@access public
+     * @name setManyManyIDs
+     * @access public
+     * @return bool|void
      */
     public function setManyManyIDs($name, $ids) {
 

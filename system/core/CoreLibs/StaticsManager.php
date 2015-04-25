@@ -27,7 +27,7 @@ class StaticsManager {
      * validates if class and variable/method-names are valid.
      * it throws an exception if not and returns correct class-name.
      *
-     * @param string $class
+     * @param string|object $class
      * @param string $var
      * @return string classname
      */
@@ -45,7 +45,7 @@ class StaticsManager {
     /**
      * Gets the value of $class::$$var.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      * @param string $var Name of the variable.
      *
      * @return mixed Value of $var.
