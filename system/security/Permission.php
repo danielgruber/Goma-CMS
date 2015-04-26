@@ -394,18 +394,23 @@ class Permission extends DataObject
     /**
      * on before manipulate many-many-relation
      *
-     * @name onBeforeManipulateManyMany
+     * @param array $manipulation
+     * @param ManyMany_DataObjectSet $dataset
+     * @param array $writtenIDs
+     * @param array $writeExtraFields
+     * @internal param $onBeforeManipulateManyMany
      * @access public
      */
-    public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writtenIDs, $writeExtraFields)
+    public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writeData)
     {
-        $env = $dataset->getRelationENV();
-        foreach ($writtenIDs as $id => $bool) {
+        $ownValue = $dataset->getRelationOwnValue();
+        $relationShip = $dataset->getRelationShip();
+        foreach ($writeData as $id => $bool) {
             if ($data = DataObject::get_one("Permission", array("versionid" => $id))) {
-                foreach ($data->getAllChildVersionIDs() as $vid) {
-                    $manipulation["insert"]["fields"][$vid] = array(
-                        $env["ownField"] => $env["ownValue"],
-                        $env["field"] => $vid
+                foreach ($data->getAllChildVersionIDs() as $childVersionId) {
+                    $manipulation["insert"]["fields"][$childVersionId] = array(
+                        $relationShip->getOwnerField() => $ownValue,
+                        $relationShip->getTargetField() => $childVersionId
                     );
                 }
             }

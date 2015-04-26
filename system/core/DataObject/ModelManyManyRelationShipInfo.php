@@ -157,6 +157,13 @@ class ModelManyManyRelationShipInfo {
         return $this->target . "_sort";
     }
 
+    /**
+     * @return string
+     */
+    public function getTargetTableName()
+    {
+        return isset(ClassInfo::$class_info[$this->target]["table"]) ? ClassInfo::$class_info[$this->target]["table"] : null;
+    }
 
     /**
      * generates table-name.

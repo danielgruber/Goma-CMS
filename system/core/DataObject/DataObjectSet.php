@@ -700,6 +700,8 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 					);
 				}
 			} else {
+
+                $lastDots = false;
 				for($i = 1; $i <= $pagecount; $i++) {
 					if($i < 3 || ($i > $currentpage - 3 && $i < $currentpage + 3) || $i > $pagecount - 3) {
 						$data[$i] = array(
@@ -1007,8 +1009,9 @@ class DataObjectSet extends DataSet {
 	/**
 	 * dataobject for this DataObjectSet
 	 *
-	 *@name dataobject
-	 *@access protected
+	 * @name dataobject
+	 * @access protected
+     * @var DataObject
 	*/
 	public $dataobject;
 	
@@ -1897,25 +1900,27 @@ class DataObjectSet extends DataSet {
 	 *@param bool - disabled
 	*/
 	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
-		
+
 		// if name is not set, we generate a name from this model
 		if(!isset($name)) {
 			$name = $this->dataobject->classname . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
 		}
-		
+
 		$controller = isset($controller) ? $controller : $this->controller;
 
 		$form = new Form($controller, $name, array(), array(), array(), $request, $this->dataobject);
 		if($disabled)
 			$form->disable();
-			
+
 		// default submission
 		$form->setSubmission(isset($submission) ? $submission : "submit_form");
-		
+
 		$form->addValidator(new DataValidator($this->dataobject), "datavalidator");
-		
-		$form->setResult(clone $this->dataobject);
-		
+
+        if(is_object($this->dataobject)) {
+            $form->setResult(clone $this->dataobject);
+        }
+
 		$form->add(new HiddenField("class_name", $this->dataobject->classname));
 		
 		foreach($this->defaults as $key => $value) {
@@ -1978,439 +1983,5 @@ class DataObjectSet extends DataSet {
 	}
 	public function everPublished() {
 		return $this->first()->everPublished();
-	}
-}
-
-/**
- * for has-many-relation
- *
- *@name HasMany_DataObjectSet
-*/
-class HasMany_DataObjectSet extends DataObjectSet {
-
-	/**
-	 * field for the relation according to this set, for example: pageid or groupid
-	 *
-	 *@name field
-	 *@access protected
-	*/
-	protected $field;
-	
-	/**
-	 * name of the relation
-	 *
-	 *@name relationName
-	 *@access protected
-	*/
-	protected $relationName;
-	
-	/**
-	 * sets the relation-props
-	 *
-	 *@name setRelationENV
-	 *@access public
-	 *@param string - name
-	 *@param string - field
-	*/
-	public function setRelationENV($name = null, $field = null, $id = null) {
-		if(isset($name)) 
-			$this->relationName = $name;
-		if(isset($field))
-			$this->field = $field;
-		
-		if(isset($id))
-			foreach($this as $record)
-				$record[$field] = $id;
-	}
-	
-	/**
-	 * get the relation-props
-	 *
-	 *@name getRelationENV
-	 *@access public
-	 *@return array
-	*/
-	public function getRelationENV() {
-		return array("name" => $this->name, "field" => $this->field);
-	}
-	
-	
-	/**
-	 * generates a form
-	 *
-	 *@name form
-	 *@access public
-	 *@param string - name
-	 *@param bool - edit-form
-	 *@param bool - disabled
-	*/
-	public function generateForm($name = null, $edit = false, $disabled = false) {
-		
-		if(isset($this[$this->field])) {
-			$this->dataobject[$this->field] = $this[$this->field];
-		} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
-			$this->dataobject[$this->field] = $this->filter[$this->field];
-		}
-		
-		$form = parent::generateForm($name, $edit, $disabled);
-		
-		if(isset($this[$this->field])) {
-			$form->add(new HiddenField($this->field, $this[$this->field]));
-		} else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
-			$form->add(new HiddenField($this->field, $this->filter[$this->field]));
-		}
-		return $form;
-	}
-	
-	/**
-	 * sets the has-one-relation when adding to has-many-set
-	 *
-	 *@name push
-	*/
-	public function push(DataObject $record, $write = false) {
-		if($this->classname == "hasmany_dataobjectset") {
-			if(isset($this[$this->field])) {
-				$record[$this->field] = $this[$this->field];
-			} else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
-				$record[$this->field] = $this->filter[$this->field];
-			}
-		}
-		
-		$return = parent::push($record);
-		if($write) {
-			$record->write(false, true);
-		}
-		return $return;
-	}
-	
-	/**
-	 * removes the relation on writing
-	 *
-	 *@name removeRecord
-	*/
-	public function removeRecord($record, $write = false) {
-		$record = parent::removeRecord($record);
-		if($write) {
-			$record[$this->field] = 0;
-			if(!$record->write()) {
-				throwError(6, "Permission-Error", "Could not remove Relation from Record ".$record->classname.": ".$record->ID."");
-			}
-		}
-		return $record;
-	}
-}
-
-/**
- * for many-many-relation
- *
- *@name ManyMany_DataObjectSet
- *@access public
-*/
-class ManyMany_DataObjectSet extends HasMany_DataObjectSet {
-	/**
-	 * relation-table
-	 *
-	 *@name relationTable
-	 *@access protected
-	*/
-	protected $relationTable;
-	
-	/**
-	 * external field, for many-many-relations only
-	 *
-	 *@name extField
-	 *@access protected
-	*/
-	protected $ownField;
-	
-	/**
-	 * value of $ownField
-	 *
-	 *@name ownValue
-	 *@access protected
-	*/
-	protected $ownValue;
-	
-	/**
-	 * extra-fields in this many-many-table
-	 *
-	 *@name extraFields
-	 *@access protected
-	*/
-	protected $extraFields = array();
-	
-	/**
-	 * sets the relation-props
-	 *
-	 *@name setRelationENV
-	 *@access public
-	 *@param string - name
-	 *@param string - field
-	 *@param string - table of relation
-	 *@param string - own field, not the field where to set the given IDs, the field where to store the current id
-	 *@param string - the value of the own field, so the id
-	*/
-	public function setRelationENV($name = null, $field = null, $table = null, $ownField = null, &$ownValue = null, $extraFields = array()) {
-		parent::setRelationENV($name, $field);
-		if(isset($table))
-			$this->relationTable = $table;
-		
-		if(isset($ownField))
-			$this->ownField = $ownField;
-			
-		if(isset($ownValue))
-			$this->ownValue = $ownValue;
-		
-		if(isset($extraFields) && is_array($extraFields))
-			$this->extraFields = $extraFields;
-		
-		if($this->extraFields && $this->ownValue != 0) {
-			// search second join
-			foreach((array) $this->join as $table => $data) {
-				if(strpos($data, $this->relationTable)) {
-					unset($this->join[$table]);
-				}
-			}
-			
-			$this->join[$this->relationTable] = " INNER JOIN " . DB_PREFIX . $this->relationTable . " AS " . $this->relationTable . " ON " . $this->relationTable . "." . $this->field . " = " . $this->dataobject->table() . ".id AND " . $this->relationTable . "." . $this->ownField . " = '" . $this->ownValue . "'";
-		}
-	}
-	
-	/**
-	 * get the relation-props
-	 *
-	 *@name getRelationENV
-	 *@access public
-	 *@return array
-	*/
-	public function getRelationENV() {
-		return array("name" => $this->name, "field" => $this->field, "relationTable" => $this->relationTable, "ownField" => $this->ownField, "ownValue" => $this->ownValue, "extraFields" => $this->extraFields);
-	}
-	
-	/**
-	 * converts the item to the right format
-	 *
-	 *@name getConverted
-	 *@access protected
-	 *@param various - data
-	*/
-	public function getConverted($item) {
-	 	$item = parent::getConverted($item);
-	 	
-	 	$item->extendedCasting = array_merge($item->extendedCasting, $this->extraFields);
-	 	
-	 	return $item;
-	}
-	
-	/**
-	 * sets the variable join
-	 *
-	 *@name join
-	 *@access public
-	*/
-	public function join($join) {
-		if(isset($join)) {
-			$this->join = $join;
-			if($this->extraFields)
-				$this->join[$this->relationTable] = "";
-			$this->purgeData();
-		}
-		return $this;
-	}
-
-    /**
-     * write to DB
-     *
-     * @name write
-     * @access public
-     * @param bool - to force insert
-     * @param bool - to force write
-     * @param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-     * @return bool
-     */
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
-		$writtenIDs = array();
-		$writeExtraFields = array();
-		
-		if(count($this->data) > 0) {
-			
-			$updateLastModifiedIDs = array();
-			// write all records
-			foreach($this as $record) {
-				
-				// check if object and writable
-				if((is_object($record) && !isset($writtenIDs[$record->versionid])) || $record->id == 0) {
-					// write
-					if($record->hasChanged()) {
-						if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
-							return false;
-						}
-					} else {
-						$updateLastModifiedIDs[] = $record->versionid;
-					}
-					
-					$writtenIDs[$record->versionid] = true;
-					$writeExtraFields[$record->versionid] = array();
-					
-					// add extra fields
-					foreach($this->extraFields as $field => $char) {
-						if(isset($record[$field])) {
-							$writeExtraFields[$record->versionid][$field] = $record[$field];
-						}
-					}
-				}
-			}
-			
-			if($updateLastModifiedIDs) {
-				DataObject::update($this->dataobject->baseclass, array("last_modified" => NOW), array("id" => $updateLastModifiedIDs));
-			}
-		} else {
-			
-			// if we don't have records the local dataobject could be changed an have to be written then
-			if(!$this->dataobject || !$this->dataobject->wasChanged()) {
-				return true;
-			}
-			$record = $this->dataobject;
-			if($record->write($forceInsert, $forceWrite, $snap_priority)) {
-				$writtenIDs[$record->versionid] = true;
-				$writeExtraFields[$record->versionid] = array();
-				
-				// add extra fields
-				foreach($this->extraFields as $field => $char) {
-					if(isset($record[$field])) {
-						$writeExtraFields[$record->versionid][$field] = $record[$field];
-					}
-				}
-			} else
-				return false;
-		}
-		
-		// check for existing entries
-		$query = new SelectQuery($this->relationTable, array("*"), array($this->ownField => $this->ownValue));
-		if($query->execute()) {
-			$existing = array();
-			$existingFields = array();
-			while($row = $query->fetch_object()) {
-				$existing[$row->id] = $row->{$this->field};
-				$existingFields[$row->{$this->field}] = array();
-				
-				// add extra fields, which exist
-				foreach($this->extraFields as $field => $char) {
-					$existingFields[$row->{$this->field}][$field] = $row->{$field};
-				}
-			}
-		} else {
-			throwErrorByID(5);
-		}
-		
-		$manipulation = array(
-			"insert" => array(
-				"command"	=> "insert",
-				"table_name"=> $this->relationTable,
-				"fields"	=> array(
-					
-				),
-				"ignore"	=> true
-			)
-		);
-		
-		$i = 0;
-		foreach(array_keys($writtenIDs) as $id) {
-			if(!in_array($id, $existing)) {
-				$manipulation["insert"]["fields"][$i] = array(
-					$this->ownField => $this->ownValue,
-					$this->field	=> $id
-				);
-				$manipulation["insert"]["fields"][$i] = array_merge($manipulation["insert"]["fields"][$i], $writeExtraFields[$id]);
-				$i++;
-			} else {
-				if($writeExtraFields[$id] != $existingFields[$id]) {
-					$manipulation[] = array(
-						"command"	=> "update",
-						"table_name"=> $this->relationTable,
-						"id"		=> array_search($id, $existing),
-						"fields"	=> $writeExtraFields[$id]
-					);
-				}
-				unset($existing[array_search($id, $existing)]);
-			}
-			
-		}
-		
-		if(count($existing) > 0) {
-			$manipulation["delete"] = array(
-				"command"	=> "delete",
-				"table_name"=> $this->relationTable,
-				"where"	=> array(
-					$this->field => array()
-				)
-			);
-				
-			foreach($existing as $remove) {
-				$manipulation["delete"]["where"][$this->field][] = $remove;
-			}
-		}
-		
-		$this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writtenIDs, $writeExtraFields);
-		$this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writtenIDs, $writeExtraFields);
-		if(SQL::manipulate($manipulation)) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * writes the many-many-relation immediatly if writing
-	 *
-	 *@name push
-	*/
-	public function push($record, $write = false) {
-		if(!$record instanceof DataObject) {
-			throw new InvalidArgumentException("Argument 1 of ManyMany_DataObjectSet must be instance of DataObject.");
-		}
-
-		$return = parent::push($record);
-		if($write) {
-			$record->write(false, true);
-			$manipulation = array(
-				array(
-					"command"	=> "insert",
-					"table_name"=> $this->relationTable,
-					"fields"	=> array(
-						array(
-							$this->ownField => $this->ownValue,
-							$this->field	=> $record->versionid
-						)
-					)
-				)
-			);
-			SQL::manipulate($manipulation);
-		}
-		return $return;
-	}
-
-    /**
-     * removes the relation on writing
-     *
-     * @name removeRecord
-     * @return record
-     */
-	public function removeRecord($record, $write = false) {
-		$record = parent::removeRecord($record);
-		if($write) {
-			$manipulation = array(
-				array(
-					"command"	=> "delete",
-					"table_name"=> $this->relationTable,
-					"where"		=> array(
-						$this->field 	=> $record->versionid,
-						$this->ownField => $this->ownValue
-					)
-				)
-			);
-			SQL::manipulate($manipulation);
-		}
-		return $record;
 	}
 }

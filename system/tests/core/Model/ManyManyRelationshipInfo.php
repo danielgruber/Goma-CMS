@@ -120,10 +120,17 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                 $this->assertEqual($relationShip->getTarget(), "manymanytestobject");
                 $this->assertEqual($relationShip->getExtraFields(), array());
                 $this->assertNotNull($relationShip->getOwnerSortField());
+
             } else if($name == "belongs") {
                 $this->assertEqual($relationShip->getBelongingName(), "mains");
                 $this->assertEqual($relationShip->getTarget(), strtolower("ManyManyRelationshipTestBelonging"));
             }
+
+            $this->assertNull($relationShip->getTargetTableName());
+
+            ClassInfo::$class_info[$relationShip->getTarget()]["table"] = $relationShip->getTarget() . "table";
+
+            $this->assertEqual($relationShip->getTargetTableName(), $relationShip->getTarget() . "table");
         }
     }
 }

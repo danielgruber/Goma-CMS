@@ -168,6 +168,9 @@ class mysqliDriver extends object implements SQLDriver
      **/
     public function fetch_object($result)
     {
+        if(!isset($result)) {
+            throw new LogicException("Result can't be null.");
+        }
         return $result->fetch_object();
     }
 
@@ -177,6 +180,9 @@ class mysqliDriver extends object implements SQLDriver
      */
     public function fetch_array($result)
     {
+        if(!isset($result)) {
+            throw new LogicException("Result can't be null.");
+        }
         return $result->fetch_array();
     }
 
@@ -186,6 +192,9 @@ class mysqliDriver extends object implements SQLDriver
      */
     public function fetch_assoc($result)
     {
+        if(!isset($result)) {
+            throw new LogicException("Result can't be null.");
+        }
         return $result->fetch_assoc();
     }
 
@@ -195,6 +204,9 @@ class mysqliDriver extends object implements SQLDriver
      */
     public function num_rows($result)
     {
+        if(!isset($result)) {
+            throw new LogicException("Result can't be null.");
+        }
         return $result->num_rows;
     }
 

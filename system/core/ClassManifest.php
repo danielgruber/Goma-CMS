@@ -147,6 +147,9 @@ class ClassManifest {
 
     /**
      * returns true of two classes can be treated as the same.
+     * @param string|object $class1
+     * @param string|object $class2
+     * @return bool
      */
     public static function isSameClass($class1, $class2) {
         return (self::resolveClassName($class1) == self::resolveClassName($class2));

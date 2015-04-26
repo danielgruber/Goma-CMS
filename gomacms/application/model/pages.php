@@ -131,7 +131,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * defaults
      */
-    static $default = array(	"parenttype" 		=> "root",
+    static $default = array(
+        "parenttype" 		=> "root",
         "include_in_search" => 1,
         "mainbar"			=> 1,
         "sort"				=> 10000);
