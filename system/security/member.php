@@ -227,36 +227,33 @@ class Member extends Object {
 
 		return $defaultGroup;
 	}
-	
-	/**
-	 * returns the groupids of the groups of the user
-	 *
-	 *@name groupids
-	 *@access public
-	*/
+
+    /**
+     * returns the groupids of the groups of the user
+     *
+     * @return array
+     */
 	static function groupIDs() {
 		if(is_array(self::$groups)) {
 			return self::$groups;
 		}
 		return self::$groups->fieldToArray("id");
 	}
-	
-	/**
-	 * returns if the user is logged in
-	 *
-	 *@name login
-	 *@access public
-	*/
+
+    /**
+     * returns if the user is logged in
+     *
+     * @return bool
+     */
 	static function login() {
 		return (self::$groupType > 0);
 	}
-	
-	/**
-	 * returns if the user is an admin
-	 *
-	 *@name admin
-	 *@access public
-	*/
+
+    /**
+     * returns if the user is an admin
+     *
+     * @return bool
+     */
 	public function admin() {
 		return (self::$groupType == 2);
 	}
@@ -358,13 +355,14 @@ class Member extends Object {
 		}
 		unset($_SESSION["g_userlogin"]);
 	}
-	
-	/**
-	 * require login
-	 *
-	 *@name require_Login
-	 *@access public
-	*/
+
+    /**
+     * require login
+     *
+     * @name require_Login
+     * @access public
+     * @return bool
+     */
 	public function require_login() {
 		if(!self::login()) {
 			AddContent::addNotice(lang("require_login"));

@@ -231,7 +231,7 @@ class DataObjectClassInfo extends Extension
     public static function getManyManyRelationships($class) {
         $class = ClassManifest::resolveClassName($class);
 
-        if(!isset(self::$relationShips[$class])) {
+        if(!isset(self::$relationShips[$class]) || defined("GENERATE_CLASS_INFO")) {
 
             $currentClass = $class;
             self::$relationShips[$class] = array();

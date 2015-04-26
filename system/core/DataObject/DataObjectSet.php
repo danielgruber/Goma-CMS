@@ -1049,7 +1049,11 @@ class DataObjectSet extends DataSet {
 			if(is_a($class, "DataObjectSet")) {
 				$class = $class->dataobject;
 			}
-			
+
+            if($class == "user" && defined("GENERATE_CLASS_INFO")) {
+                $c = Object::instance($class);
+            }
+
 			$this->dataobject = Object::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;
@@ -1714,10 +1718,11 @@ class DataObjectSet extends DataSet {
 	*/
 	public function getConverted($item) {
 		if(is_array($item)) {
-			if(isset($item["class_name"]) && ClassInfo::exists($item["class_name"]))
-				$object = new $item["class_name"]($item);
-			else
-				$object = new $this->dataobject->class ($item);
+			if(isset($item["class_name"]) && ClassInfo::exists($item["class_name"])) {
+                $object = new $item["class_name"]($item);
+            } else {
+                $object = new $this->dataobject->classname ($item);
+            }
 		} else {
 			$object = $item;
 		}

@@ -346,7 +346,7 @@ class adminItem extends AdminController implements PermProvider {
 			$model->queryVersion = "state";
 		}
 		
-		$submit = DataObject::Versioned($model->class) ? "publish" : null;
+		$submit = DataObject::Versioned($model->classname) ? "publish" : null;
 
 		return $this->selectModel($model)->form(null, null, array(), false, $submit);
 	}

@@ -927,7 +927,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             if ($forceInsert !== true && $forceWrite !== true) {
                 if (!$this->can("Insert", $this)) {
                     if ($snap_priority != 2 || !$this->can("Publish", $this)) {
-                        throw new PermissionException("You don't have the Permission to publish objects of type ".$this->class.".");
+                        throw new PermissionException("You don't have the Permission to publish objects of type ".$this->classname.".");
                     }
                 }
             }
@@ -948,7 +948,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                     if (!$this->can("Write", $this))
                         if ($snap_priority != 2 || !$this->can("Publish", $this)) {
                             if (PROFILE) Profiler::unmark("DataObject::write");
-                            throw new PermissionException("You don't have the Permission to write or publish objects of type ".$this->class.".");
+                            throw new PermissionException("You don't have the Permission to write or publish objects of type ".$this->classname.".");
                         }
 
                 $this->onBeforeWrite();
@@ -988,7 +988,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 if ($forceInsert !== true)
                     if (!$this->can("Insert", $this->data)) {
                         if (PROFILE) Profiler::unmark("DataObject::write");
-                        throw new PermissionException("You don't have the Permission to create objects of type ".$this->class.".");
+                        throw new PermissionException("You don't have the Permission to create objects of type ".$this->classname.".");
                     }
 
                 $this->onBeforeWrite();
@@ -1304,7 +1304,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                         if ($forceWrite !== true) {
                             if (!$this->can("Publish")) {
                                 if (PROFILE) Profiler::unmark("DataObject::write");
-                                throw new PermissionException("You don't have the Permission to publish objects of type ".$this->class.".");
+                                throw new PermissionException("You don't have the Permission to publish objects of type ".$this->classname.".");
                             }
                         }
                     }

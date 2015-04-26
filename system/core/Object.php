@@ -310,7 +310,7 @@ abstract class Object
 
         $class = ClassInfo::find_creatable_class($class);
         if (!isset(self::$cache_singleton_classes[$class])) {
-            self::$cache_singleton_classes[$class] = new $class;
+            self::$cache_singleton_classes[$class] = new $class();
         }
 
         if (PROFILE) Profiler::unmark("Object::instance");

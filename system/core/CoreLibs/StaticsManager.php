@@ -144,6 +144,7 @@ class StaticsManager {
      */
     public static function setSaveVars($class)
     {
+
         if (PROFILE)  Profiler::mark("ClassInfo::setSaveVars");
 
         $classname = ClassManifest::resolveClassName($class);

@@ -136,14 +136,19 @@ class FileSystem extends Object {
 			return -1;
 		}
 	}
-	
-	/**
-	 * writes file contentss
-	 *
-	 *@name writeFileContents
-	 *@access public
-	*/
-	public static function writeFileContents($file, $content, $modifier = null,$mode = null) {	
+
+    /**
+     * writes file contentss
+     *
+     * @param string $file
+     * @param string $content
+     * @param int $modifier
+     * @param int $mode permission of file
+     * @return bool
+     * @internal param $writeFileContents
+     * @access public
+     */
+	public static function writeFileContents($file, $content, $modifier = null, $mode = null) {
 		if(@file_put_contents($file, $content, $modifier)) {
 			@chmod($file, self::getMode($mode));
 			return true;
@@ -214,10 +219,11 @@ class FileSystem extends Object {
 	public static function delete($file, $breakOnFail = true) {
 		if(is_dir($file)) {
 			foreach(scandir($file) as $_file) {
-				if($_file != "." && $_file != "..")
-					if(!self::delete($file . "/" . $_file, $breakOnFail) && $breakOnFail) {
-						return false;
-					}
+				if($_file != "." && $_file != "..") {
+                    if (!self::delete($file . "/" . $_file, $breakOnFail) && $breakOnFail) {
+                        return false;
+                    }
+                }
 			}
 			return @rmdir($file);
 		} else {
@@ -291,17 +297,18 @@ class FileSystem extends Object {
             }
         }
     }
-	
-	/**
-	 * moves recursivly with logging
-	 *
-	 * @name 	moveLogged
-	 * @access 	public
-	 * @param 	string - source
-	 * @param 	string - destination
-	 * @param 	bool - if to break and return false on fail
-	 * @param 	internal variable - for the log
-	*/
+
+    /**
+     * moves recursivly with logging
+     *
+     * @name    moveLogged
+     * @access    public
+     * @param    string - source
+     * @param    string - destination
+     * @param    bool - if to break and return false on fail
+     * @param    internal variable - for the log
+     * @return bool|string
+     */
 	public static function moveLogged($source, $destination, $breakOnFail = true, $useLog = false) {
 		$log = "#: ";
 		

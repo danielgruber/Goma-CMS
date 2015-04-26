@@ -194,7 +194,7 @@ class adminController extends Controller
 					HTTPResponse::setHeader("content-type", "text/x-json");
 					HTTPResponse::sendHeader();
 					
-					Notification::notify($this->class, lang("flush_log_success"), null, "PushNotification");
+					Notification::notify($this->classname, lang("flush_log_success"), null, "PushNotification");
 					echo json_encode(1);
 					exit;
 				}
