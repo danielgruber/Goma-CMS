@@ -172,7 +172,7 @@ class ModelInfoGenerator {
      * @return array
      */
     public static function generateMany_many($class, $parents = true) {
-        $many_many = self::generate_combined_array($class, "many_many", "belongs_many_many", $parents);
+        $many_many = self::generate_combined_array($class, "many_many", "many_many", $parents);
 
         $many_many = self::convertManyManyToLowerCase($many_many, $class);
 

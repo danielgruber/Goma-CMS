@@ -339,18 +339,18 @@ class Permission extends DataObject
     public function onBeforeManipulate(&$manipulation, $job)
     {
         if ($this->id != 0 && $job == "write") {
-            $subversions = $this->getAllChildVersionIDs;
+            $subversions = $this->getAllChildVersionIDs();
 
             if (count($subversions) > 0) {
 
                 if ($this->type == "groups") {
-                    $many_many_tables = $this->ManyManyTables();
-                    $table = $many_many_tables["groups"]["table"];
+                    $relationShip = $this->getManyManyInfo("groups");
+                    $table = $relationShip->getTableName();
                     $manipulation["perm_groups_delete"] = array(
                         "table_name" => $table,
                         "command" => "delete",
                         "where" => array(
-                            $many_many_tables["groups"]["field"] => $subversions
+                            $relationShip->getOwnerField() => $subversions
                         )
                     );
 
@@ -360,16 +360,23 @@ class Permission extends DataObject
                         "fields" => array()
                     );
 
+
                     if ($this->groupsids && count($this->groupsids) > 0) {
+
+                        $i = 10000;
                         foreach ($subversions as $version) {
                             foreach ($this->groupsids as $groupid) {
                                 if (is_array($groupid)) {
                                     $groupid = $groupid["versionid"];
                                 }
+
                                 $manipulation["perm_groups_insert"]["fields"][] = array(
-                                    $many_many_tables["groups"]["field"] => $version,
-                                    $many_many_tables["groups"]["extfield"] => $groupid
+                                    $relationShip->getOwnerField() => $version,
+                                    $relationShip->getTargetField() => $groupid,
+                                    $relationShip->getOwnerSortField()  => $i,
+                                    $relationShip->getTargetSortField() => $i
                                 );
+                                $i++;
                             }
                         }
                     }
@@ -396,8 +403,7 @@ class Permission extends DataObject
      *
      * @param array $manipulation
      * @param ManyMany_DataObjectSet $dataset
-     * @param array $writtenIDs
-     * @param array $writeExtraFields
+     * @param array $writeData
      * @internal param $onBeforeManipulateManyMany
      * @access public
      */
@@ -405,13 +411,19 @@ class Permission extends DataObject
     {
         $ownValue = $dataset->getRelationOwnValue();
         $relationShip = $dataset->getRelationShip();
+
+        $i = 10000;
         foreach ($writeData as $id => $bool) {
             if ($data = DataObject::get_one("Permission", array("versionid" => $id))) {
                 foreach ($data->getAllChildVersionIDs() as $childVersionId) {
                     $manipulation["insert"]["fields"][$childVersionId] = array(
                         $relationShip->getOwnerField() => $ownValue,
-                        $relationShip->getTargetField() => $childVersionId
+                        $relationShip->getTargetField() => $childVersionId,
+                        $relationShip->getOwnerSortField()  => $i,
+                        $relationShip->getTargetSortField() => $i
                     );
+
+                    $i++;
                 }
             }
         }

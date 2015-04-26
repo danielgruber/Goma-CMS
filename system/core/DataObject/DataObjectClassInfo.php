@@ -232,34 +232,27 @@ class DataObjectClassInfo extends Extension
         $class = ClassManifest::resolveClassName($class);
 
         if(!isset(self::$relationShips[$class])) {
-            if(isset(ClassInfo::$class_info[$class]["many_many_relations"])) {
-                $info = ClassInfo::$class_info[$class]["many_many_relations"];
 
-                self::$relationShips[$class] = ModelManyManyRelationShipInfo::generateFromClassInfo($class, $info);
+            $currentClass = $class;
+            self::$relationShips[$class] = array();
 
-                // get parent elements
-                $parentClass = ClassInfo::get_parent_class($class);
-                while($parentClass != null && !ClassInfo::isAbstract($parentClass)) {
+            do {
+                $info = isset(ClassInfo::$class_info[$currentClass]["many_many_relations"]) ? ClassInfo::$class_info[$currentClass]["many_many_relations"] : array();
 
-                    // get info for parent from class
-                    $parentClassInfo = isset( ClassInfo::$class_info[$class]["many_many_relations"]) ?
-                        ClassInfo::$class_info[$class]["many_many_relations"] : array();
-
-                    // get relationships for parent from class
-                    $parentInfo = ModelManyManyRelationShipInfo::generateFromClassInfo($parentClass, $parentClassInfo);
-                    self::$relationShips[$class] = array_merge($parentInfo, self::$relationShips[$class]);
-                    $parentClass = ClassInfo::get_parent_class($parentClass);
+                if(!empty($info)) {
+                    $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($currentClass, $info);
+                } else {
+                    $relationShips = array();
                 }
 
-                return self::$relationShips[$class];
-            }
+                self::$relationShips[$class] = array_merge($relationShips, self::$relationShips[$class]);
 
-            return array();
+                $currentClass = ClassInfo::get_parent_class($currentClass);
 
+            } while($currentClass != null && !ClassInfo::isAbstract($currentClass));
         }
 
         return self::$relationShips[$class];
-
     }
 
 }

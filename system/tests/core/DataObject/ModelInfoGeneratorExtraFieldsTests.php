@@ -8,7 +8,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-class ModelInfoGeneartorTest extends GomaUnitTest implements TestAble
+class ModelInfoGeneratorExtraFieldsTest extends GomaUnitTest implements TestAble
 {
     /**
      * area

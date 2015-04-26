@@ -38,6 +38,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 		$this->caseFieldAccessable("surname", new TextField("surname", "name"));
 		$this->caseFieldAccessable("address1", new TextField("address1", "name"));
 		$this->caseFieldAccessable("_1", new TextField("_1", "name"));
+        $this->caseFieldAccessable("test", new TextField("test", "blub"));
 	}
 
 	/**

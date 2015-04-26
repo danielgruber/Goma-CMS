@@ -812,7 +812,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      *@name onBeforeManipulateManyMany
      */
-    public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writtenIDs, $writeExtraFields) {
+    public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writeData) {
 
     }
 
@@ -2711,14 +2711,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public function setManyMany($name, $value) {
         $name = substr($name, 3);
 
-        $data = $this->getManyManyInfo($name);
+        $relationShipInfo = $this->getManyManyInfo($name);
 
         if (is_object($value)) {
             if (is_a($value, "DataObjectSet")) {
 
                 $relationShip = $this->getManyManyInfo($name);
 
-                $instance = new ManyMany_DataObjectSet($data["object"]);
+                $instance = new ManyMany_DataObjectSet($relationShipInfo->getTarget());
                 $instance->setRelationEnv($relationShip, $this->versionid);
                 $instance->addMany($value);
                 $this->setField($name, $instance);

@@ -43,70 +43,80 @@ class ModelInfoGeneratorTests extends GomaUnitTest
 
     }
 
-    public function testDBGeneration() {
-        $this->unittestGeneration("db", array(
+    public function unitTestFieldGenerator($field, $method) {
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "blub" => "varchar(20)"
         ), array(
             "parent" => "int(10)"
-        ), "generateDBFields", false, "ModelInfoTestClass", array(
+        ), $method, false, "ModelInfoTestClass", array(
             "test" => "varchar(10)",
             "parent" => "int(10)"
         ));
 
-        $this->unittestGeneration("db", array(
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "blub" => "varchar(20)"
         ), array(
             "parent" => "int(10)"
-        ), "generateDBFields", true, "ModelInfoTestClass", array(
+        ), $method, true, "ModelInfoTestClass", array(
             "test" => "varchar(10)",
             "parent" => "int(10)"
         ));
 
-        $this->unittestGeneration("db", array(
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "blub" => "varchar(20)"
         ), array(
             "parent" => "int(10)"
-        ), "generateDBFields", true, "ModelInfoTestChildClass", array(
+        ), $method, true, "ModelInfoTestChildClass", array(
             "test" => "varchar(10)",
             "blub" => "varchar(20)",
             "parent" => "int(10)"
         ));
 
-        $this->unittestGeneration("db", array(
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "blub" => "varchar(20)"
         ), array(
             "parent" => "int(10)"
-        ), "generateDBFields", false, "ModelInfoTestChildClass", array(
+        ), $method, false, "ModelInfoTestChildClass", array(
             "blub" => "varchar(20)"
         ));
 
-        $this->unittestGeneration("db", array(
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "test" => "varchar(20)"
         ), array(
             "test" => "varchar(30)"
-        ), "generateDBFields", false, "ModelInfoTestChildClass", array(
+        ), $method, false, "ModelInfoTestChildClass", array(
             "test" => "varchar(20)"
         ));
 
-        $this->unittestGeneration("db", array(
+        $this->unittestGeneration($field, array(
             "test" => "varchar(10)"
         ), array(
             "test" => "varchar(20)"
         ), array(
             "test" => "varchar(30)"
-        ), "generateDBFields", false, "ModelInfoTestClass", array(
+        ), $method, false, "ModelInfoTestClass", array(
             "test" => "varchar(30)"
         ));
+    }
+
+    public function testFieldGeneration() {
+        $this->unitTestFieldGenerator("db", "generateDBFields");
+        $this->unitTestFieldGenerator("many_many", "generateMany_many");
+        $this->unitTestFieldGenerator("belongs_many_many", "generateBelongs_Many_Many");
+        $this->unitTestFieldGenerator("has_one", "generateHas_One");
+        $this->unitTestFieldGenerator("has_many", "generateHas_Many");
+        $this->unitTestFieldGenerator("search_fields", "generate_search_fields");
+        $this->unitTestFieldGenerator("default", "generateDefaults");
     }
 
     public function unittestGeneration($name, $base, $child, $extension, $method, $parents, $useClass, $expected) {
@@ -116,7 +126,7 @@ class ModelInfoGeneratorTests extends GomaUnitTest
 
         $info = call_user_func_array(array("ModelInfoGenerator", $method), array($useClass, $parents));
 
-        $this->assertEqual($info, $expected, "Test $useClass with parents: [$parents] Exptected " . print_r($expected, true) . ". %s");
+        $this->assertEqual($info, $expected, "Test $useClass with $method with parents: [$parents] Exptected " . print_r($expected, true) . ". %s");
     }
 }
 

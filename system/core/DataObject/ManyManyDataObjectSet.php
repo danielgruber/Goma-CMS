@@ -89,7 +89,9 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     public function getConverted($item) {
         $item = parent::getConverted($item);
 
-        $item->extendedCasting = array_merge($item->extendedCasting, $this->relationShip->getExtraFields());
+        if(isset($this->relationShip)) {
+            $item->extendedCasting = array_merge($item->extendedCasting, $this->relationShip->getExtraFields());
+        }
 
         return $item;
     }
@@ -169,12 +171,12 @@ class ManyMany_DataObjectSet extends DataObjectSet {
                     $updateLastModifiedIDs[] = $record->versionid;
                 }
 
-                $targetSortField = $this->relationShip->getTargetSortField();
+                $ownerSortField = $this->relationShip->getOwnerSortField();
                 $writeFields[$record->versionid] = array(
                     $this->relationShip->getOwnerField() => $this->ownValue,
-                    $this->relationShip->getOwnerSortField() => $sort,
+                    $this->relationShip->getTargetSortField() => $sort,
                     $this->relationShip->getTargetField() => $record->versionid,
-                    $targetSortField => isset($record->$targetSortField) ? $record->$targetSortField : 0
+                    $ownerSortField => isset($record->$ownerSortField) ? $record->$ownerSortField : 0
                 );
 
                 // add extra fields
@@ -281,9 +283,9 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             } else {
                 if($writeData[$id] != $existingFields[$id]) {
 
-                    if($writeData[$id][$this->relationShip->getTargetSortField()] == 0) {
-                        if(isset($existingFields[$id][$this->relationShip->getTargetSortField()])) {
-                            $writeData[$id][$this->relationShip->getTargetSortField()] = $existingFields[$id][$this->relationShip->getTargetSortField()];
+                    if($writeData[$id][$this->relationShip->getOwnerSortField()] == 0) {
+                        if(isset($existingFields[$id][$this->relationShip->getOwnerSortField()])) {
+                            $writeData[$id][$this->relationShip->getOwnerSortField()] = $existingFields[$id][$this->relationShip->getOwnerSortField()];
                         }
                     }
 
@@ -298,6 +300,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             unset($existingFields[$id]);
 
         }
+
 
         if(count($existingFields) > 0) {
 
