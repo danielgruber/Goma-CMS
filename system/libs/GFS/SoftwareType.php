@@ -142,37 +142,39 @@ abstract class g_SoftwareType {
     /**
      * cleanup for Uploaded Updates.
      *
-     * @return void
+     * @throws SQLException
      */
     public static function cleanUpUpdates() {
         FileSystem::Delete(ROOT . APPLICATION . "/uploads/e47ddedf1c2bd2d0006eae2d2eee39b4");
 
-        $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
-        if($query->execute()) {
-            $manipulation["uploads"] = array(
-                "table" 	=> "uploads",
-                "command"	=> "delete",
-                "where"		=> array(
-                    "recordid" => array()
-                )
-            );
+        if(defined("SQL_LOADUP")) {
+            $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
+            if ($query->execute()) {
+                $manipulation["uploads"] = array(
+                    "table" => "uploads",
+                    "command" => "delete",
+                    "where" => array(
+                        "recordid" => array()
+                    )
+                );
 
-            $manipulation["uploads_state"] = array(
-                "table" 	=> "uploads",
-                "command"	=> "delete",
-                "where"		=> array(
-                    "id" => array()
-                )
-            );
+                $manipulation["uploads_state"] = array(
+                    "table" => "uploads",
+                    "command" => "delete",
+                    "where" => array(
+                        "id" => array()
+                    )
+                );
 
-            while($row = $query->fetch_assoc()) {
-                $manipulation["uploads"]["where"]["recordid"][] = $row["recordid"];
-                $manipulation["uploads_state"]["where"]["id"][] = $row["recordid"];
+                while ($row = $query->fetch_assoc()) {
+                    $manipulation["uploads"]["where"]["recordid"][] = $row["recordid"];
+                    $manipulation["uploads_state"]["where"]["id"][] = $row["recordid"];
+                }
+
+                SQL::Manipulate($manipulation);
+            } else {
+                throw new SQLException();
             }
-
-            SQL::Manipulate($manipulation);
-        } else {
-            throw new SQLException();
         }
     }
 	

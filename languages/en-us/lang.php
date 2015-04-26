@@ -516,20 +516,7 @@ $lang = array(
 	"signed_true"									=> "This package was validated by the Goma-Team and is safe to install!",
 	"signed_false"									=> "This package wasn't validated by the Goma-Team! Installing is at own risk!",
 	"signed_false_ssl"								=> "The package could not be validated, because Open-SSL is not installed on this server. Please contact your Server-administrator or get help at the <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Page</a>.",
-	
-	/* install */
-	"install.folder"			=> "Install-Folder",
-	"install.folder_info"		=> "Goma created a folder on your server, where the files will be stored. The name of that directory should only contain lowercase letters.",
-	"install.db_user"			=> "Database-User",
-	"install.db_host"			=> "Database-Server",
-	"install.db_host_info"		=> "Mostly localhost",
-	"install.db_name"			=> "Database-Name",
-	"install.db_password"		=> "Database-Password",
-	"install.table_prefix"		=> "Table-prefix",
-	"install.folder_error"		=> "The folder already exists or is not valid.",
-	"install.sql_error"			=> "The Database-Server denied the query.",
-	"install.instal"			=> "install",
-	
+
 	/* date for ago */
 	
 	"ago.seconds"			=> "%d seconds ago",

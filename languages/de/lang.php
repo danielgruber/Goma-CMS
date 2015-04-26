@@ -514,20 +514,6 @@ $lang = array(
 	"signed_false"									=> "Dieses Paket wurde nicht vom Goma-Team geprüft. Die Installation erfolgt auf eigene Gefahr!",
 	"signed_false_ssl"								=> "Das Paket konnte nicht vom Goma-Team geprüft werden. Open-SSL ist nicht auf Ihrem Server installiert. Bitte kontaktieren Sie den Server-Administrator oder holen Sie sich Support auf der <a href=\"http://goma-cms.org\" target=\"_blank\">Goma-Seite</a>.",
 	
-	/* install */
-	"install.folder"		=> "Installationsverzeichnis",
-	"install.folder_info"	=> "Goma legt auf der Festplatte ihres Servers ein Verzeichnis mit diesem Namen an, um die Daten in dieses Verzeichnis zu schreiben",
-	"install.db_user"		=> "Datenbankbenutzer",
-	"install.db_host"		=> "Datenbankserver",
-	"install.db_host_info"	=> "Meist localhost",
-	"install.db_name"		=> "Datenbankname",
-	"install.db_password"	=> "Datenbankpasswort",
-	"install.table_prefix"	=> "Tabellen-Pr&auml;fix",
-	"install.folder_error"	=> "Der Ordner existiert bereits oder ist auf Liste der nicht erlaubten Ordnernamen.",
-	"install.sql_error"		=> "Die Datenbankeinstellungen scheinen nicht korrekt zu sein.",
-	
-	"install.install"		=> "Installieren",
-	
 	/* date for ago */
 	
 	"ago.seconds"			=> "vor %d Sekunden",

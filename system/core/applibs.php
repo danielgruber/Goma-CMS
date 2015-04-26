@@ -374,7 +374,7 @@ function isProjectUnavailable($project = APPLICATION) {
 }
 
 function isProjectUnavailableForIP($ip, $project = APPLICATION) {
-	return isProjectUnavailable() && file_get_contents(ROOT . $project . "/503.goma") != $ip;
+	return isProjectUnavailable($project) && file_get_contents(ROOT . $project . "/503.goma") != $ip;
 }
 
 
