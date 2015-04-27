@@ -3878,10 +3878,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 $db = array_merge($db, ClassInfo::$class_info[$this->baseClass]["db"]);
             }
 
-            if (ClassInfo::DataClasses($this->baseClass)) {
-                foreach (ClassInfo::DataClasses($this->baseClass) as $class) {
-                    if (isset(ClassInfo::$class_info[$class]["db"]))
-                        $db = array_merge($db, ClassInfo::$class_info[$class]["db"]);
+            if ($dataClasses = ClassInfo::DataClasses($this->baseClass)) {
+                foreach ($dataClasses as $dataClass => $table) {
+                    if (isset(ClassInfo::$class_info[$dataClass]["db"])) {
+                        $db = array_merge($db, ClassInfo::$class_info[$dataClass]["db"]);
+                    }
                 }
             }
 

@@ -71,8 +71,9 @@ class Varchar extends DBField
 
     /**
      * converts this with date
-     *@name date
-     *@access public
+     * @name date
+     * @access public
+     * @return string
      */
     public function date($format = DATE_FORMAT)
     {
@@ -82,7 +83,8 @@ class Varchar extends DBField
     /**
      * for template
      *
-     *@name forTemplate
+     * @name forTemplate
+     * @return string
      */
     public function forTemplate() {
         return $this->text();

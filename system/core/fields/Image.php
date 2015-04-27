@@ -11,12 +11,13 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->');
 
 class ImageSQLField extends DBField {
-	/**
-	 * gets the field-type
-	 *
-	 *@name getFieldType
-	 *@access public
-	 */
+    /**
+     * gets the field-type
+     *
+     * @name getFieldType
+     * @access public
+     * @return string
+     */
 	static public function getFieldType($args = array()) {
 		return "varchar(200)";
 	}
@@ -32,16 +33,17 @@ class ImageSQLField extends DBField {
 		return '<img src="' . $url . '" alt="' . $this -> value . '" style="' . $style . '" ' . $html . ' />';
 	}
 
-	/**
-	 * sets the width of the image
-	 *
-	 *@name setWidth
-	 *@access public
-	 *@param int - width of the image
-	 *@param boolean - absolute path to the image?
-	 *@param string - additional html code
-	 *@param string - additional css code
-	 */
+    /**
+     * sets the width of the image
+     *
+     * @name setWidth
+     * @access public
+     * @param int - width of the image
+     * @param boolean - absolute path to the image?
+     * @param string - additional html code
+     * @param string - additional css code
+     * @return string
+     */
 	public function setWidth($width, $absolute = false, $html = "", $style = "") {
 		if (preg_match("/^[0-9]+$/", $width)) {
 			$url = 'images/resampled/' . $width . '/' . $this -> value;
@@ -60,16 +62,17 @@ class ImageSQLField extends DBField {
 		}
 	}
 
-	/**
-	 * sets the height of the image
-	 *
-	 *@name setWidth
-	 *@access public
-	 *@param int - height of the image
-	 *@param boolean - absolute path to the image?
-	 *@param string - additional html code
-	 *@param string - additional css code
-	 */
+    /**
+     * sets the height of the image
+     *
+     * @name setWidth
+     * @access public
+     * @param int - height of the image
+     * @param boolean - absolute path to the image?
+     * @param string - additional html code
+     * @param string - additional css code
+     * @return string
+     */
 	public function setHeight($height, $absolute = false, $html = "", $style = "") {
 		if (preg_match("/^[0-9]+$/", $height)) {
 			$url = 'images/resampled/x/' . $height . '/' . $this -> value;
@@ -88,17 +91,18 @@ class ImageSQLField extends DBField {
 		}
 	}
 
-	/**
-	 * sets the size of the image
-	 *
-	 *@name setWidth
-	 *@access public
-	 *@param int - width of the image
-	 *@param int - height of the image
-	 *@param boolean - absolute path to the image?
-	 *@param string - additional html code
-	 *@param string - additional css code
-	 */
+    /**
+     * sets the size of the image
+     *
+     * @name setWidth
+     * @access public
+     * @param int - width of the image
+     * @param int - height of the image
+     * @param boolean - absolute path to the image?
+     * @param string - additional html code
+     * @param string - additional css code
+     * @return string
+     */
 	public function setSize($width, $height, $absolute = false, $html = "", $style = "") {
 		if (preg_match("/^[0-9]+$/", $width) && preg_match("/^[0-9]+$/", $height)) {
 			$url = 'images/resampled/' . $width . '/' . $height . '/' . $this -> value;

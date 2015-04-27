@@ -1787,13 +1787,18 @@ class DataObjectSet extends DataSet {
 	 *@access public
 	*/
 	public function __toString() {
-		if($controller = $this->controller()) {
-			if($controller->template != "")
-				return $controller->index();
-			else
-				return false;
-		}
-		return "controller not found";
+        try {
+            if($controller = $this->controller()) {
+                if($controller->template != "") {
+                    return $controller->index();
+                } else {
+                    return false;
+                }
+            }
+            return "controller not found";
+        } catch(Exception $e) {
+            Goma_ExceptionHandler($e);
+        }
 	}
 	
 	/**
