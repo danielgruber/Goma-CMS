@@ -427,7 +427,7 @@ class ModelManyManyRelationShipInfo {
         }
 
         if ($belonging) {
-            throw new LogicException("No Inverse relation found for Relationship for $relationName in class $class. We search in class " . $info[0], ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
+            throw new LogicException("No Inverse relationship for Relationship for $relationName found in class $class. Searched in class " . $info[0], ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
         } else {
             return null;
         }

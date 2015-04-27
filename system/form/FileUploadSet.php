@@ -1,5 +1,4 @@
-<?php
-defined("IN_GOMA") OR die();
+<?php defined("IN_GOMA") OR die();
 
 /**
  * A file upload set.
@@ -7,7 +6,7 @@ defined("IN_GOMA") OR die();
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.1.9
+ * @version 1.2
  */
 class FileUploadSet extends FormField
 {
@@ -244,16 +243,10 @@ class FileUploadSet extends FormField
 
 
                 if (filesize($tmp_name) != $_SERVER["HTTP_X_FILE_SIZE"]) {
-                    HTTPResponse::setHeader("Content-Type", "text/x-json");
-                    HTTPResponse::sendHeader();
-                    echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-                    exit;
+                    $this->sendJSONError(lang("files.upload_failure"));
                 }
             } else {
-                HTTPResponse::setHeader("Content-Type", "text/x-json");
-                HTTPResponse::sendHeader();
-                echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-                exit;
+                $this->sendJSONError(lang("files.upload_failure"));
             }
 
             $upload = array(
@@ -279,22 +272,29 @@ class FileUploadSet extends FormField
                 echo json_encode(array("status" => 1, "file" => $filedata));
                 exit;
             } else if (is_string($response)) {
-                HTTPResponse::setHeader("Content-Type", "text/x-json");
-                HTTPResponse::sendHeader();
-                echo json_encode(array("status" => 0, "errstring" => $response));
-                exit;
+                $this->sendJSONError($response);
             } else {
-                HTTPResponse::setHeader("Content-Type", "text/x-json");
-                HTTPResponse::sendHeader();
-                echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-                exit;
+                $this->sendJSONError(lang("files.upload_failure"));
             }
         } else {
-            HTTPResponse::setHeader("Content-Type", "text/x-json");
-            HTTPResponse::sendHeader();
-            echo json_encode(array("status" => 0, "errstring" => lang("files.filetype_failure", "The filetype isn't allowed.")));
-            exit;
+            $this->sendJSONError(lang("files.filetype_failure", "The filetype isn't allowed."));
         }
+    }
+
+    /**
+     * sends error to client.
+     *
+     * @param string $error
+     * @param bool $sendContentType
+     */
+    protected function sendJSONError($error, $sendContentType = true) {
+        if($sendContentType === true) {
+            HTTPResponse::setHeader("Content-Type", "text/x-json");
+        }
+
+        HTTPResponse::sendHeader();
+        echo json_encode(array("status" => 0, "errstring" => $error));
+        exit;
     }
 
     /**
@@ -332,19 +332,13 @@ class FileUploadSet extends FormField
                     echo json_encode(array("status" => 1, "file" => $filedata));
                     exit;
                 } else if (is_string($response)) {
-                    HTTPResponse::sendHeader();
-                    echo json_encode(array("status" => 0, "errstring" => $response));
-                    exit;
+                    $this->sendJSONError($response, false);
                 } else {
-                    HTTPResponse::sendHeader();
-                    echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-                    exit;
+                    $this->sendJSONError(lang("files.upload_failure"), false);
                 }
             }
         } else {
-            HTTPResponse::sendHeader();
-            echo json_encode(array("status" => 0, "errstring" => lang("files.upload_failure")));
-            exit;
+            $this->sendJSONError(lang("files.upload_failure"), false);
         }
     }
 
@@ -353,6 +347,7 @@ class FileUploadSet extends FormField
      *
      * @name removeFile
      * @access public
+     * @return bool
      */
     public function removeFile()
     {
@@ -371,6 +366,7 @@ class FileUploadSet extends FormField
      *
      * @name handleUpload
      * @access public
+     * @return bool|string
      */
     public function handleUpload($upload)
     {
@@ -662,11 +658,7 @@ class FileUploadSet extends FormField
             $this->key = $this->form()->post[$this->PostName() . "__key"];
         }
 
-        foreach ($this->value as $record) {
-            if (isset($this->form()->post[$this->PostName() . "__delete_" . $record["id"]])) {
-                $record->disconnect($this->value);
-            }
-        }
+        $this->checkForEvents();
 
         return $this->value;
     }
