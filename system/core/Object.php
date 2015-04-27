@@ -36,9 +36,9 @@ abstract class Object
     public static $temp_extra_methods = array();
 
     public static   $cache_extra_methods = array(), // cache for extra-methods
-                    $extensions = array(),  // extensions of all classes
-                    $ci_funcs = array(),  // functions called when generating ClassInfo
-                    $cache_singleton_classes = array(); // cache for Singletons
+        $extensions = array(),  // extensions of all classes
+        $ci_funcs = array(),  // functions called when generating ClassInfo
+        $cache_singleton_classes = array(); // cache for Singletons
 
     /**
      * protected vars
@@ -72,6 +72,11 @@ abstract class Object
      * const defines that method only exists on object.
      */
     const METHOD_ON_OBJECT_FOUND = 2;
+
+    /**
+     * returned when method wasn't found, but it has not been searched recusrively, yet.
+     */
+    const METHOD_NOT_FOUND_BUT_MAY_PARENT = 3;
 
 
     /**
@@ -150,7 +155,7 @@ abstract class Object
 
         // check for extra methods here
         $res = self::method_exists_on_object($class, $method, $object);
-        if (!$res) {
+        if ($res === self::METHOD_NOT_FOUND_BUT_MAY_PARENT) {
             // check on parents
             $res = self::check_for_extra_methods_recursive($class, $method);
         }
@@ -194,11 +199,11 @@ abstract class Object
         }
 
         // check on object
-        if (self::check_for_object_method($object, $method)) {
+        if (isset($object) && self::check_for_object_method($object, $method)) {
             return self::METHOD_ON_OBJECT_FOUND;
         }
 
-        return 0;
+        return self::METHOD_NOT_FOUND_BUT_MAY_PARENT;
     }
 
     /**
@@ -210,9 +215,9 @@ abstract class Object
      */
     protected static function method_exists_native_db($class, $method) {
         // check native
-        return ((method_exists($class, $method) && is_callable(array($class, $method))) ||
-                isset(self::$extra_methods[$class][$method]) ||
-                isset(self::$temp_extra_methods[$class][$method]));
+        return (is_callable(array($class, $method)) ||
+            isset(self::$extra_methods[$class][$method]) ||
+            isset(self::$temp_extra_methods[$class][$method]));
     }
 
     /**
