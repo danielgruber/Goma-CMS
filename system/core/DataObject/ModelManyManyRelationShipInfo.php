@@ -402,7 +402,11 @@ class ModelManyManyRelationShipInfo {
     public static function findInverseManyManyRelationship($relationName, $class, $info, $belonging = false)
     {
         $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0]) : ModelInfoGenerator::generateBelongs_many_many($info[0]);
-        $info[0] = strtolower($info[0]);
+        $info[0] = strtolower(trim($info[0]));
+        if(isset($info[1])) {
+            $info[1] = strtolower(trim($info[1]));
+        }
+
 
         // if inverse is set in value of relationship, just validate inverse
         if (isset($info[1])) {

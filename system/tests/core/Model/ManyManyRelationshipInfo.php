@@ -106,6 +106,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             "mains", "ManyManyRelationshipTestBelonging", array("ManyManyRelationshipTest", "belongs"), true,
             "belongs"
         );
+
+        $this->unitFindInverseManyManyRelationship(
+            " mains ", " ManyManyRelationshipTestBelonging ", array(" ManyManyRelationshipTest ", " belongs "), true,
+            "belongs"
+        );
     }
 
     protected function unitFindInverseManyManyRelationship($relationName, $class, $info, $belonging, $expected) {
@@ -136,6 +141,33 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             ClassInfo::$class_info[$relationShip->getTarget()]["table"] = $relationShip->getTarget() . "table";
 
             $this->assertEqual($relationShip->getTargetTableName(), $relationShip->getTarget() . "table");
+        }
+    }
+
+    /**
+     * tests inverted.
+     */
+    public function testInverted() {
+        $relationShips = ModelManyManyRelationShipInfo::generateFromClass(" ManyManyRelationshipTest");
+
+        /** @var ModelManyManyRelationShipInfo $relationShip */
+        foreach($relationShips as $name => $relationShip) {
+            $inverted = $relationShip->getInverted();
+
+            $this->assertEqual($inverted->isControlling(), !$relationShip->isControlling());
+            $this->assertEqual($inverted->getTarget(), $relationShip->getOwner());
+            $this->assertEqual($inverted->getOwner(), $relationShip->getTarget());
+
+            $this->assertEqual($inverted->getTargetField(), $relationShip->getOwnerField());
+            $this->assertEqual($inverted->getTargetSortField(), $relationShip->getOwnerSortField());
+
+            $this->assertEqual($inverted->getOwnerField(), $relationShip->getTargetField());
+            $this->assertEqual($inverted->getOwnerSortField(), $relationShip->getTargetSortField());
+
+            $this->assertEqual($inverted->getRelationShipName(), $relationShip->getBelongingName());
+            $this->assertEqual($inverted->getBelongingName(), $relationShip->getRelationShipName());
+
+            $this->assertNotIdentical($inverted, $relationShip);
         }
     }
 }
