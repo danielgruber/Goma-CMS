@@ -7,12 +7,13 @@
  * @version 2.0.1
  */
 var FileUploadSet = function(name, table, url) {
-	this.table = $(table);
-	this.url = url;
-	this.tbody = this.table.find("tbody");
-	this.name = name;
-	
-	
+    this.table = $(table);
+    this.url = url;
+    this.tbody = this.table.find("tbody");
+    this.name = name;
+    this.inSort = false;
+
+
 	// rebuild the no-js-code to a browse-button
 	this.table.find("thead .no-js").html('<div class="uploadBtn"><input type="button" class="button uploadbutton" value="'+lang("files.browse")+'" /></div>');
 	this.table.find("thead .no-js").removeClass("no-js");
@@ -44,6 +45,34 @@ var FileUploadSet = function(name, table, url) {
 		});
 		$(node).css("cursor", "pointer");
 	};
+
+    var bindSortable = function() {
+        $this.table.sortable({
+            opacity: 0.75,
+            revert: true,
+            items: 'tr:not(.uploading)',
+            tolerance: 'pointer',
+            containment: "parent",
+            start: function(event, ui) {
+                $this.inSort = true;
+            },
+            update: function(event, ui) {
+                var data  = $(this).sortable("serialize", {key: "sorted[]", attribute: "data-id"});
+                // save order
+                $.ajax({
+                    url: $this.url + "/saveSort/",
+                    data: data,
+                    type: "post",
+                    dataType: "html"
+                });
+            },
+            stop: function() {
+                setTimeout(function(){
+                    $this.inSort = false;
+                }, 33);
+            }
+        });
+    };
 	
 	// redraw
 	var redraw = function() {
@@ -65,6 +94,8 @@ var FileUploadSet = function(name, table, url) {
 	
 	lang("loading");
 	lang("waiting");
+
+    bindSortable();
 	
 	// register the uploader
 	this.uploader = new AjaxUpload(this.table, {
@@ -89,7 +120,7 @@ var FileUploadSet = function(name, table, url) {
 			
 			this.queue[fileIndex].tableid = id;
 			
-			$this.tbody.append('<tr class="'+color+'" id="'+id+'">\
+			$this.tbody.append('<tr class="'+color+' uploading" id="'+id+'" data-id="node_'+id+'">\
 				<td class="icon"></td>\
 				<td class="filename" title="'+lang("loading")+'"><span class="filename">'+upload.fileName+'</span><div class="progressbar"><div class="progress"></div><span>'+lang("waiting")+'</span></div></div></td>\
 				<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>\
@@ -162,6 +193,7 @@ var FileUploadSet = function(name, table, url) {
 				try {
 					var data = eval('('+html+');');
 					if(data.status == 0) {
+                        tablerow.removeClass("uploading");
 						tablerow.find(".filename").html('<div class="error">'+data.errstring+'</div>');
 						setTimeout(function(){
 							tablerow.fadeOut(300, function(){
@@ -179,8 +211,10 @@ var FileUploadSet = function(name, table, url) {
 								
 								// the current we can just update
 								if(i == 0) {
+                                    tablerow.removeClass("uploading");
 									tablerow.find(".filename").fadeTo(0, 0.0);
 									tablerow.attr("name", file.id);
+                                    tablerow.attr("data-id", "node_" + file.id);
 									tablerow.find(".icon").fadeTo(0, 0.0, function(){
 										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
 										tablerow.find(".filename").attr("title", file.name);
@@ -229,8 +263,10 @@ var FileUploadSet = function(name, table, url) {
 							$this.table.find("tr").removeClass("grey").removeClass("white");
 							$this.table.find("tr:even").addClass("grey");
 						} else {
+                            tablerow.removeClass("uploading");
 							tablerow.find(".filename").fadeTo(200, 0.0);
 							tablerow.attr("name", data.file.id);
+                            tablerow.attr("data-id", "node_" + data.file.id);
 							tablerow.find(".icon").fadeTo(200, 0.0, function(){
 								tablerow.find(".icon").html('<img src="'+data.file.icon16+'" alt="icon" />');
 								tablerow.find(".filename").attr("title", data.file.name);

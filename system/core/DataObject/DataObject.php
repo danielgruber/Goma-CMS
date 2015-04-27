@@ -2710,7 +2710,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @return ModelManyManyRelationShipInfo
      * @throws LogicException
      */
-    protected function getManyManyInfo($name, $class = null) {
+    public function getManyManyInfo($name, $class = null) {
         // get config
 
         if(is_string($class) && ClassInfo::exists($class)) {
