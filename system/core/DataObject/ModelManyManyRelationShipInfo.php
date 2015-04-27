@@ -286,6 +286,22 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
+     * returns inverted relation.
+     *
+     * @return ModelManyManyRelationShipInfo
+     */
+    public function getInverted() {
+        $inverted = clone $this;
+        $inverted->owner = $this->target;
+        $inverted->target = $this->owner;
+        $inverted->controlling = !$this->controlling;
+        $inverted->relationShipName = $this->belongingName;
+        $inverted->belongingName = $this->relationShipName;
+
+        return $inverted;
+    }
+
+    /**
      * generates objects of type ManyManyRelationShipInfo from ClassInfo.
      *
      * @param string $class
@@ -386,11 +402,12 @@ class ModelManyManyRelationShipInfo {
     public static function findInverseManyManyRelationship($relationName, $class, $info, $belonging = false)
     {
         $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0]) : ModelInfoGenerator::generateBelongs_many_many($info[0]);
+        $info[0] = strtolower($info[0]);
 
         // if inverse is set in value of relationship, just validate inverse
         if (isset($info[1])) {
             if(isset($relationships[$info[1]])) {
-                $relationInfo = $relationships[$info[1]];
+                $relationInfo = self::getRelationInfoWithInverse($relationships[$info[1]]);
                 if (self::isInverseValid($relationInfo, $relationName, $class)) {
                     return $info[1];
                 }
@@ -410,7 +427,7 @@ class ModelManyManyRelationShipInfo {
         }
 
         if ($belonging) {
-            throw new LogicException("No Inverse relation found for Relationship $relationName in class $class. We search in class " . $info[0], ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
+            throw new LogicException("No Inverse relation found for Relationship for $relationName in class $class. We search in class " . $info[0], ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
         } else {
             return null;
         }
@@ -426,8 +443,8 @@ class ModelManyManyRelationShipInfo {
      * @return bool
      */
     protected static function isInverseValid($relationInfo, $relationName, $class) {
-       return  (!isset($relationInfo[1]) || $relationInfo[1] == strtolower($relationName)) &&
-                (ClassManifest::isSameClass($relationInfo[0], $class) || is_subclass_of($class, $relationInfo[0]));
+        return  (!isset($relationInfo[1]) || $relationInfo[1] == strtolower($relationName)) &&
+        (ClassManifest::isSameClass($relationInfo[0], $class) || is_subclass_of($class, $relationInfo[0]));
     }
 
     /**
@@ -453,7 +470,7 @@ class ModelManyManyRelationShipInfo {
             }
         }
 
-        if(isset($relation)) {
+        if(is_string($relation)) {
             $relation = strtolower($relation);
         }
 

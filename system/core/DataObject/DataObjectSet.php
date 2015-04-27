@@ -1050,10 +1050,6 @@ class DataObjectSet extends DataSet {
 				$class = $class->dataobject;
 			}
 
-            if($class == "user" && defined("GENERATE_CLASS_INFO")) {
-                $c = Object::instance($class);
-            }
-
 			$this->dataobject = Object::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;

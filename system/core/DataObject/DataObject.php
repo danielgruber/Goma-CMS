@@ -1239,34 +1239,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         // add some manipulation to existing many-many-connection, which are not reflected with belongs_many_many
         if ($oldid != 0) {
-            $class = $this->classname;
-            while($class != "dataobject") {
-                if (isset(ClassInfo::$class_info[$class]["belongs_many_many_extra"])) {
-                    foreach(ClassInfo::$class_info[$class]["belongs_many_many_extra"] as $data) {
-                        if (isset(ClassInfo::$database[$data["table"]])) {
-                            $manipulation[$data["table"]] = array(
-                                "command" 		=> "insert",
-                                "table_name"	=> $data["table"],
-                                "fields"		=> array(
-
-                                )
-                            );
-
-                            // get data from table
-                            $query = new SelectQuery($data["table"], array($data["extfield"]), array($data["field"] => $oldid));
-                            if ($query->execute()) {
-                                while($result = $query->fetch_assoc()) {
-                                    $manipulation[$data["table"]]["fields"][] = array(
-                                        $data["field"] => $this->versionid,
-                                        $data["extfield"] => $result[$data["extfield"]]
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-                $class = ClassInfo::getParentClass($class);
-            }
+            $manipulation = $this->moveManyManyExtra($manipulation, $oldid);
         }
 
         self::$datacache[$this->baseClass] = array();
@@ -1615,6 +1588,46 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             return $data[$field];
         }
+    }
+
+    /**
+     * moves extra many-many-relations.
+     *
+     * @param array $manipulation
+     * @param int $oldId
+     * @return array
+     * @throws SQLException
+     */
+    protected function moveManyManyExtra($manipulation, $oldId) {
+        $currentClass = $this->classname;
+        while($currentClass != null && !ClassInfo::isAbstract($currentClass)) {
+            if (isset(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"])) {
+                foreach(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"] as $info) {
+
+                    $relationShip = $this->getManyManyInfo($info[1], $info[0])->getInverted();
+                    $existingData = $this->getManyManyRelationShipData($relationShip, null, $oldId);
+
+                    $manipulation[$relationShip->getTableName()] = array(
+                        "command"   => "insert",
+                        "table_name"=> $relationShip->getTableName(),
+                        "fields"    => array(
+
+                        )
+                    );
+                    foreach($existingData as $data) {
+                        $newRecord = $data;
+                        $newRecord[$relationShip->getOwnerField()] = $this->versionid;
+                        $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
+
+                        unset($newRecord["versionid"], $newRecord["relationShipId"]);
+                        $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
+                    }
+                }
+            }
+            $currentClass = ClassInfo::getParentClass($currentClass);
+        }
+
+        return $manipulation;
     }
 
     /**
@@ -2347,16 +2360,20 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @param ModelManyManyRelationShipInfo $relationShip
      * @param array$fields
+     * @param string $fieldInTable
+     * @param int $versionId
      * @return SelectQuery
      */
-    protected function getManyManyQuery($relationShip, $fields, $fieldInTable = null) {
+    protected function getManyManyQuery($relationShip, $fields, $fieldInTable = null, $versionId = null) {
         $extTable = $relationShip->getTargetTableName();
+
+        $versionId = isset($versionId) ? $versionId : $this->versionid;
 
         if(!isset($fieldInTable)) {
             $fieldInTable = $relationShip->getTargetField();
         }
 
-        $query = new SelectQuery($relationShip->getTableName(), $fields, array($relationShip->getOwnerField() => $this["versionid"]));
+        $query = new SelectQuery($relationShip->getTableName(), $fields, array($relationShip->getOwnerField() => $versionId));
 
         // just that some errros are not happening.
         if ($extTable && (
@@ -2447,11 +2464,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * queries database for existing Relationship-data for many-many-connections.
      *
      * @param ModelManyManyRelationShipInfo $relationShip
+     * @param string $fieldInTable
+     * @param int $versionId
      * @return array
      */
-    protected function getManyManyRelationShipData($relationShip, $fieldInTable = null) {
+    protected function getManyManyRelationShipData($relationShip, $fieldInTable = null, $versionId = null) {
 
-        $query = $this->getManyManyQuery($relationShip, array("*"), $fieldInTable);
+        $query = $this->getManyManyQuery($relationShip, array("*"), $fieldInTable, $versionId);
 
         $query->execute();
 
@@ -2676,7 +2695,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             if(isset($sorts[$name]) && $sorts[$name]) {
                 return $sorts[$name];
             } else {
-                return $relationShip->getTableName() . ".".$relationShip->getOwnerSortField()." ASC";
+                return $relationShip->getTableName() . ".".$relationShip->getOwnerSortField()." ASC , " .
+                $relationShip->getTableName() . ".id ASC";
             }
         }
 
@@ -2690,9 +2710,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @return ModelManyManyRelationShipInfo
      * @throws LogicException
      */
-    protected function getManyManyInfo($name) {
+    protected function getManyManyInfo($name, $class = null) {
         // get config
-        $many_many = $this->ManyManyRelationships();
+
+        if(is_string($class) && ClassInfo::exists($class)) {
+            $many_many = DataObjectClassInfo::getManyManyRelationships($class);
+        } else {
+            $many_many = $this->ManyManyRelationships();
+        }
+
 
         if (!isset($many_many[$name])) {
             throw new LogicException("Many-Many-Relation ".convert::raw2text($name)." does not exist!");

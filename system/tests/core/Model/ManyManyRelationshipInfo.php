@@ -101,6 +101,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             "tests", "ManyManyRelationshipTest", array("ManyManyTestObject"), false,
             null
         );
+
+        $this->unitFindInverseManyManyRelationship(
+            "mains", "ManyManyRelationshipTestBelonging", array("ManyManyRelationshipTest", "belongs"), true,
+            "belongs"
+        );
     }
 
     protected function unitFindInverseManyManyRelationship($relationName, $class, $info, $belonging, $expected) {
@@ -146,6 +151,6 @@ class ManyManyTestObject {}
 
 class ManyManyRelationshipTestBelonging {
     static $belongs_many_many = array(
-        "mains" => "ManyManyRelationshipTest"
+        "mains"     => "ManyManyRelationshipTest"
     );
 }
