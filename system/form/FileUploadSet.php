@@ -246,7 +246,7 @@ class FileUploadSet extends FormField
                     $this->sendJSONError(lang("files.upload_failure"));
                 }
             } else {
-                $this->sendJSONError(lang("files.upload_failure"));
+                return $this->sendJSONError(lang("files.upload_failure"));
             }
 
             $upload = array(
@@ -366,7 +366,7 @@ class FileUploadSet extends FormField
      *
      * @name handleUpload
      * @access public
-     * @return bool|string
+     * @return bool|string|array
      */
     public function handleUpload($upload)
     {
