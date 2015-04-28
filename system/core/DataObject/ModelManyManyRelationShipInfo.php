@@ -313,14 +313,22 @@ class ModelManyManyRelationShipInfo {
 
         $class = ClassManifest::resolveClassName($class);
 
+        if(!$class) {
+            throw new InvalidArgumentException("ModelManyManyRelationShipInfo required parameter class.");
+        }
+
         foreach($info as $name => $record) {
             $relationShip = new ModelManyManyRelationShipInfo();
             $relationShip->owner = $class;
 
+            if(!$name || !isset($record["target"]) || !$record["target"]) {
+                throw new LogicException("Relationship must have at least a name and a target. ");
+            }
+
             $relationShip->relationShipName = $name;
             $relationShip->belongingName = $record["belonging"];
             $relationShip->controlling = $record["isMain"];
-            $relationShip->extraFields = $record["ef"];
+            $relationShip->extraFields = isset($record["ef"]) ? $record["ef"] : array();
             $relationShip->tableName = $record["table"];
             $relationShip->target = $record["target"];
 

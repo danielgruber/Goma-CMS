@@ -170,9 +170,64 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         }
     }
 
+    /**
+     * tests if exception is correctly thrown.
+     */
+    public function testExceptionOnClassInfoGeneration() {
+        try {
+            ModelManyManyRelationShipInfo::generateFromClassInfo("test", array(
+                "" => array(
+                    "table"         => "",
+                    "ef"            => array(),
+                    "target"        => "test",
+                    "belonging"     => "",
+                    "isMain"        => ""
+                )
+            ));
+
+            $this->assertTrue(false);
+        } catch(Exception $e) {
+            $this->assertIsA($e, "LogicException");
+        }
+
+        try {
+            ModelManyManyRelationShipInfo::generateFromClassInfo("test", array(
+                "test" => array(
+                    "table"         => "",
+                    "ef"            => array(),
+                    "target"        => "",
+                    "belonging"     => "",
+                    "isMain"        => ""
+                )
+            ));
+            $this->assertTrue(false);
+        } catch(Exception $e) {
+            $this->assertIsA($e, "LogicException");
+        }
+
+        try {
+            ModelManyManyRelationShipInfo::generateFromClassInfo("", array(
+                "" => array(
+                    "table"         => "",
+                    "ef"            => array(),
+                    "target"        => "test",
+                    "belonging"     => "",
+                    "isMain"        => ""
+                )
+            ));
+            $this->assertTrue(false);
+        } catch(Exception $e) {
+            $this->assertIsA($e, "InvalidArgumentException");
+        }
+    }
+
+    /**
+     * tests if all properties are assigned correctly and accessable.
+     */
     public function testAssignMent() {
         $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true);
         $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false);
+        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false);
     }
 
     /**
@@ -201,7 +256,10 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         /** @var ModelManyManyRelationShipInfo $relation */
         $relation = $relationShips[$relationshipName];
         $this->assertEqual($relation->getTableName(), $table);
-        $this->assertEqual($relation->getExtraFields(), $extraFields);
+
+        if($extraFields == null) {
+            $this->assertEqual($relation->getExtraFields(), array());
+        }
         $this->assertEqual($relation->getTarget(), $target);
         $this->assertEqual($relation->getRelationShipName(), $relationshipName);
         $this->assertEqual($relation->getBelongingName(), $targetRelationName);
