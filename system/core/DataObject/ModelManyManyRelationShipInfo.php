@@ -402,19 +402,16 @@ class ModelManyManyRelationShipInfo {
     public static function findInverseManyManyRelationship($relationName, $class, $info, $belonging = false)
     {
         $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0]) : ModelInfoGenerator::generateBelongs_many_many($info[0]);
-        $info[0] = strtolower(trim($info[0]));
-        if(isset($info[1])) {
-            $info[1] = strtolower(trim($info[1]));
-        }
 
         // if inverse is set in value of relationship, just validate inverse
         if (isset($info[1])) {
-            if(isset($relationships[$info[1]])) {
-                if (self::isInverseValid($relationships[$info[1]], $relationName, $class)) {
-                    return $info[1];
+            $inverseName = strtolower(trim($info[1]));
+            if(isset($relationships[$inverseName])) {
+                if (self::isInverseValid($relationships[$inverseName], $relationName, $class)) {
+                    return $inverseName;
                 }
             } else {
-                throw new LogicException("Defined Inverse-Relationship {$info[1]} not found on class {$info[0]} defined in class $class relationship $relationName");
+                throw new LogicException("Defined Inverse-Relationship {$inverseName} not found on class {$info[0]} defined in class $class relationship $relationName");
             }
         } else {
             // find relationship on other class

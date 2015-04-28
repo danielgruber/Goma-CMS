@@ -33,23 +33,22 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * @param string $relationshipName
      * @param string $target
      * @param string $targetRelationName
-     * @param bool $belonging
+     * @param bool $controlling
      * @param bool $useOld
      * @param string $expected
      */
-    public function unitTestTableNameStyle($owner, $relationshipName, $target, $targetRelationName, $belonging, $useOld, $expected) {
+    public function unitTestTableNameStyle($owner, $relationshipName, $target, $targetRelationName, $controlling, $useOld, $expected) {
         $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($owner, array(
             $relationshipName => array(
                 "table"         => null,
                 "ef"            => array(),
                 "target"        => $target,
                 "belonging"     => $targetRelationName,
-                "isMain"        => $belonging
+                "isMain"        => $controlling
             )
         ));
 
         if($useOld) {
-
             $reflection = new ReflectionMethod("ModelManyManyRelationShipInfo", "getOldTableName");
             $reflection->setAccessible(true);
 
@@ -169,6 +168,44 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
 
             $this->assertNotIdentical($inverted, $relationShip);
         }
+    }
+
+    public function testAssignMent() {
+        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true);
+        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false);
+    }
+
+    /**
+     * test if everything is assigned correctly.
+     * @param string $owner
+     * @param string $table
+     * @param array $extraFields
+     * @param string $target
+     * @param string $targetRelationName
+     * @param string $relationshipName
+     * @param bool $controlling
+     */
+    public function unittestAssignMent($owner, $table, $extraFields, $target, $targetRelationName, $relationshipName, $controlling) {
+        $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($owner, array(
+            $relationshipName => array(
+                "table"         => $table,
+                "ef"            => $extraFields,
+                "target"        => $target,
+                "belonging"     => $targetRelationName,
+                "isMain"        => $controlling
+            )
+        ));
+
+        $this->assertIsA($relationShips[$relationshipName], "ModelManyManyRelationShipInfo");
+
+        /** @var ModelManyManyRelationShipInfo $relation */
+        $relation = $relationShips[$relationshipName];
+        $this->assertEqual($relation->getTableName(), $table);
+        $this->assertEqual($relation->getExtraFields(), $extraFields);
+        $this->assertEqual($relation->getTarget(), $target);
+        $this->assertEqual($relation->getRelationShipName(), $relationshipName);
+        $this->assertEqual($relation->getBelongingName(), $targetRelationName);
+        $this->assertEqual($relation->isControlling(), $controlling);
     }
 }
 
