@@ -28,4 +28,14 @@ abstract class GomaUnitTest extends UnitTestCase implements TestAble {
 
 		parent::__construct();
 	}
+
+    public function assertThrows($callback, $exceptionName) {
+        try {
+            call_user_func_array($callback, array());
+
+            $this->assertFalse(true, "Expected Exception $exceptionName, but no Exception were thrown.");
+        } catch(Exception $e) {
+            $this->assertIsA($e, $exceptionName);
+        }
+    }
 }

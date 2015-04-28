@@ -28,7 +28,11 @@ function simpletest_autorun() {
     if (tests_have_run()) {
         return;
     }
-    $result = run_local_tests();
+
+    if(!defined("TEST_RUNNED")) {
+        define("TEST_RUNNED", 1);
+        $result = run_local_tests();
+    }
     if (SimpleReporter::inCli()) {
         exit($result ? 0 : 1);
     }

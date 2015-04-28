@@ -76,25 +76,19 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             "mains"
         );
 
-        try {
+        $this->assertThrows(function() {
             $this->unitFindInverseManyManyRelationship(
                 "belongs", "ManyManyRelationshipTest", array("ManyManyRelationshipTestBelonging", "test"), false,
                 null
             );
-            $this->assertTrue(false);
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-        }
+        }, "LogicException");
 
-        try {
+        $this->assertThrows(function() {
             $this->unitFindInverseManyManyRelationship(
                 "mains", "ManyManyRelationshipTestBelonging", array("ManyManyRelationshipTest", "belonging"), true,
                 "belongs"
             );
-            $this->assertTrue(false);
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-        }
+        }, "LogicException");
 
         $this->unitFindInverseManyManyRelationship(
             "tests", "ManyManyRelationshipTest", array("ManyManyTestObject"), false,
@@ -174,38 +168,31 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * tests if exception is correctly thrown.
      */
     public function testExceptionOnClassInfoGeneration() {
-        try {
+        $this->assertThrows(function() {
             ModelManyManyRelationShipInfo::generateFromClassInfo("test", array(
                 "" => array(
-                    "table"         => "",
-                    "ef"            => array(),
-                    "target"        => "test",
-                    "belonging"     => "",
-                    "isMain"        => ""
+                    "table" => "",
+                    "ef" => array(),
+                    "target" => "test",
+                    "belonging" => "",
+                    "isMain" => ""
                 )
             ));
+        }, "LogicException");
 
-            $this->assertTrue(false);
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-        }
-
-        try {
+        $this->assertThrows(function() {
             ModelManyManyRelationShipInfo::generateFromClassInfo("test", array(
                 "test" => array(
-                    "table"         => "",
-                    "ef"            => array(),
-                    "target"        => "",
-                    "belonging"     => "",
-                    "isMain"        => ""
+                    "table" => "",
+                    "ef" => array(),
+                    "target" => "",
+                    "belonging" => "",
+                    "isMain" => ""
                 )
             ));
-            $this->assertTrue(false);
-        } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
-        }
+        }, "LogicException");
 
-        try {
+        $this->assertThrows(function(){
             ModelManyManyRelationShipInfo::generateFromClassInfo("", array(
                 "" => array(
                     "table"         => "",
@@ -215,10 +202,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "isMain"        => ""
                 )
             ));
-            $this->assertTrue(false);
-        } catch(Exception $e) {
-            $this->assertIsA($e, "InvalidArgumentException");
-        }
+        }, "LogicException");
     }
 
     /**
