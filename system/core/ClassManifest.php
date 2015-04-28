@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		3.3.3
+ * @version		3.3.4
  */
 class ClassManifest {
 	/**
@@ -146,13 +146,29 @@ class ClassManifest {
 	}
 
     /**
-     * returns true of two classes can be treated as the same.
+     * returns true if two classes can be treated as the same.
      * @param string|object $class1
      * @param string|object $class2
      * @return bool
      */
     public static function isSameClass($class1, $class2) {
         return (self::resolveClassName($class1) == self::resolveClassName($class2));
+    }
+
+    /**
+     * returns true if two classes can be treated as the same or are subclasses of each other.
+     *
+     * @param string|object $class1
+     * @param string|object $class2
+     * @return bool
+     */
+    public static function classesRelated($class1, $class2) {
+
+        // force strings
+        $class1 = self::resolveClassName($class1);
+        $class2 = self::resolveClassName($class2);
+
+        return self::isSameClass($class1, $class2) || is_subclass_of($class1, $class2) || is_subclass_of($class2, $class1);
     }
 
     /**

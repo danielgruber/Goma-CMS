@@ -7,7 +7,7 @@ defined("IN_GOMA") OR die();
  * @author        Goma-Team
  * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package        Goma\Controller
- * @version        2.3.4
+ * @version        2.3.5
  */
 class Controller extends RequestHandler
 {
@@ -702,12 +702,20 @@ class Controller extends RequestHandler
      * returns a model which is writable with given data and optional given model.
      * if no model was given, an instance of the controlled model is generated.
      *
-     * @param    Data or Object of Data
-     * @param    Object Model
+     * @param    array|object $data Data or Object of Data
+     * @param    ViewAccessableData $givenModel
+     * @return ViewAccessableData
      */
     public function getSafableModel($data, ViewAccessableData $givenModel = null)
     {
+
         $model = isset($givenModel) ? $givenModel->_clone() : $this->modelInst()->_clone();
+
+        if(isset($data["class_name"])) {
+            if(!ClassManifest::classesRelated($data["class_name"], $model)) {
+                $model = Object::instance($data["class_name"]);
+            }
+        }
 
         if (is_object($data) && is_subclass_of($data, "ViewaccessableData")) {
             $data = $data->ToArray();

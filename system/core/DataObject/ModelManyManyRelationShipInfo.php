@@ -166,6 +166,79 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
+     * @param string $owner
+     */
+    protected function setOwner($owner)
+    {
+        if($owner) {
+            $this->owner = $owner;
+        } else if(!$this->owner) {
+            throw new LogicException("ModelManyManyRelationShipInfo requires an owner. Owner can't be null.");
+        }
+    }
+
+    /**
+     * @param string $target
+     */
+    protected function setTarget($target)
+    {
+        if($target) {
+            $this->target = $target;
+        } else if(!$this->target) {
+            throw new LogicException("ModelManyManyRelationShipInfo requires a target. target can't be null.");
+        }
+    }
+
+    /**
+     * @param string $relationShipName
+     */
+    protected function setRelationShipName($relationShipName)
+    {
+        if($relationShipName) {
+            $this->relationShipName = $relationShipName;
+        } else if(!$this->relationShipName) {
+            throw new LogicException("ModelManyManyRelationShipInfo requires a relationship-name. name can't be null.");
+        }
+
+    }
+
+    /**
+     * @param string $belongingName
+     */
+    protected function setBelongingName($belongingName)
+    {
+        $this->belongingName = $belongingName;
+    }
+
+    /**
+     * @param string $tableName
+     */
+    protected function setTableName($tableName)
+    {
+        $this->tableName = $tableName;
+    }
+
+    /**
+     * @param array $extraFields
+     */
+    protected function setExtraFields($extraFields)
+    {
+        if($extraFields) {
+            $this->extraFields = (array) $extraFields;
+        } else if(!$this->extraFields) {
+            $this->extraFields = array();
+        }
+    }
+
+    /**
+     * @param boolean $controlling
+     */
+    protected function setControlling($controlling)
+    {
+        $this->controlling = $controlling;
+    }
+
+    /**
      * generates table-name.
      *
      * @return string
@@ -223,60 +296,6 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
-     * returns current table-layout for this relationship.
-     *
-     * @return array
-     */
-    public function getCurrentTableLayout() {
-        if(isset(ClassInfo::$database[$this->tableName])) {
-            return ClassInfo::$database[$this->tableName];
-        }
-
-        return null;
-    }
-
-    /**
-     * returns planned table layout for this relationship.
-     *
-     * @return array
-     */
-    public function getPlannedTableLayout() {
-        $fields = array(
-            "id"                        => "int(10) PRIMARY KEY auto_increment",
-            $this->getTargetField()     => "int(10)",
-            $this->getOwnerField()      => "int(10)",
-
-            // sort
-            $this->getOwnerSortField()  => "int(10)",
-            $this->getTargetSortField() => "int(10)"
-        );
-
-        return array_merge($fields, $this->extraFields);
-    }
-
-    /**
-     * returns indexes for this table-layout.
-     *
-     * @return array
-     */
-    public function getIndexes() {
-        return array(
-            "dataindex_reverse"	=> array(
-                "name" 		=> "dataindex_reverse",
-                "fields"	=> array($this->getOwnerField(), $this->getTargetField()),
-                "type"		=> "UNIQUE"
-            ),
-
-            "dataindexunique"	=> array(
-                "name"		=> "dataindexunique",
-                "type"		=> "UNIQUE",
-                "fields"	=> array($this->getTargetField(), $this->getOwnerField())
-            )
-        );
-    }
-
-
-    /**
      * gets key for ClassInfo-Array.
      *
      * @return string
@@ -313,24 +332,16 @@ class ModelManyManyRelationShipInfo {
 
         $class = ClassManifest::resolveClassName($class);
 
-        if(!$class) {
-            throw new InvalidArgumentException("ModelManyManyRelationShipInfo required parameter class.");
-        }
-
         foreach($info as $name => $record) {
             $relationShip = new ModelManyManyRelationShipInfo();
-            $relationShip->owner = $class;
+            $relationShip->setOwner($class);
 
-            if(!$name || !isset($record["target"]) || !$record["target"]) {
-                throw new LogicException("Relationship must have at least a name and a target. ");
-            }
-
-            $relationShip->relationShipName = $name;
-            $relationShip->belongingName = $record["belonging"];
-            $relationShip->controlling = $record["isMain"];
-            $relationShip->extraFields = isset($record["ef"]) ? $record["ef"] : array();
-            $relationShip->tableName = $record["table"];
-            $relationShip->target = $record["target"];
+            $relationShip->setRelationShipName($name);
+            $relationShip->setBelongingName($record["belonging"]);
+            $relationShip->setControlling($record["isMain"]);
+            $relationShip->setExtraFields($record["ef"]);
+            $relationShip->setTableName($record["table"]);
+            $relationShip->setTarget($record["target"]);
 
             $relationShips[$name] = $relationShip;
         }
@@ -483,6 +494,59 @@ class ModelManyManyRelationShipInfo {
         }
 
         return array(ClassInfo::find_class_name($value), $relation);
+    }
+
+    /**
+     * returns current table-layout for this relationship.
+     *
+     * @return array
+     */
+    public function getCurrentTableLayout() {
+        if(isset(ClassInfo::$database[$this->tableName])) {
+            return ClassInfo::$database[$this->tableName];
+        }
+
+        return null;
+    }
+
+    /**
+     * returns planned table layout for this relationship.
+     *
+     * @return array
+     */
+    public function getPlannedTableLayout() {
+        $fields = array(
+            "id"                        => "int(10) PRIMARY KEY auto_increment",
+            $this->getTargetField()     => "int(10)",
+            $this->getOwnerField()      => "int(10)",
+
+            // sort
+            $this->getOwnerSortField()  => "int(10)",
+            $this->getTargetSortField() => "int(10)"
+        );
+
+        return array_merge($fields, $this->extraFields);
+    }
+
+    /**
+     * returns indexes for this table-layout.
+     *
+     * @return array
+     */
+    public function getIndexes() {
+        return array(
+            "dataindex_reverse"	=> array(
+                "name" 		=> "dataindex_reverse",
+                "fields"	=> array($this->getOwnerField(), $this->getTargetField()),
+                "type"		=> "UNIQUE"
+            ),
+
+            "dataindexunique"	=> array(
+                "name"		=> "dataindexunique",
+                "type"		=> "UNIQUE",
+                "fields"	=> array($this->getTargetField(), $this->getOwnerField())
+            )
+        );
     }
 
 }

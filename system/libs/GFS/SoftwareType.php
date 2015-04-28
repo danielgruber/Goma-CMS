@@ -511,7 +511,7 @@ abstract class g_SoftwareType {
      * @access public
      * @return bool
      */
-	public function isStoreAvailable() {
+	public static function isStoreAvailable() {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
 		
@@ -531,7 +531,7 @@ abstract class g_SoftwareType {
      * @access public
      * @return mixed
      */
-	public function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
+	public static function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
 		if(PROFILE) Profiler::mark("G_SoftwareType::getAppStoreInfo");
 		
 		if(!self::isStoreAvailable()) {
