@@ -407,12 +407,10 @@ class ModelManyManyRelationShipInfo {
             $info[1] = strtolower(trim($info[1]));
         }
 
-
         // if inverse is set in value of relationship, just validate inverse
         if (isset($info[1])) {
             if(isset($relationships[$info[1]])) {
-                $relationInfo = self::getRelationInfoWithInverse($relationships[$info[1]]);
-                if (self::isInverseValid($relationInfo, $relationName, $class)) {
+                if (self::isInverseValid($relationships[$info[1]], $relationName, $class)) {
                     return $info[1];
                 }
             } else {
@@ -421,10 +419,8 @@ class ModelManyManyRelationShipInfo {
         } else {
             // find relationship on other class
             foreach ($relationships as $name => $relationValue) {
-                $relationInfo = self::getRelationInfoWithInverse($relationValue);
-
                 // validate relation
-                if (self::isInverseValid($relationInfo, $relationName, $class)) {
+                if (self::isInverseValid($relationValue, $relationName, $class)) {
                     return $name;
                 }
             }
@@ -441,12 +437,15 @@ class ModelManyManyRelationShipInfo {
     /**
      * returns true when inverse for relationship is valid.
      *
-     * @param array $relationInfo
+     * @param array|string $value
      * @param string $relationName
      * @param string $class
      * @return bool
      */
-    protected static function isInverseValid($relationInfo, $relationName, $class) {
+    protected static function isInverseValid($value, $relationName, $class) {
+
+        $relationInfo = self::getRelationInfoWithInverse($value);
+
         return  (!isset($relationInfo[1]) || $relationInfo[1] == strtolower($relationName)) &&
         (ClassManifest::isSameClass($relationInfo[0], $class) || is_subclass_of($class, $relationInfo[0]));
     }
