@@ -59,6 +59,13 @@ class ModelManyManyRelationShipInfo {
     protected $controlling;
 
     /**
+     * defines if this relationship is bidirectional.
+     *
+     * @var bool
+     */
+    protected $bidirectional;
+
+    /**
      * constructor.
      */
     protected function __construct() {
@@ -122,11 +129,23 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
+     * @return boolean
+     */
+    public function isBidirectional()
+    {
+        return $this->bidirectional;
+    }
+
+    /**
      * returns field which belongs to the owner.
      *
      * @return string
      */
     public function getOwnerField() {
+        if(!$this->controlling && ClassManifest::classesRelated($this->owner, $this->target)) {
+            return $this->owner . "_" . $this->owner . "id";
+        }
+
         return $this->owner . "id";
     }
 
@@ -136,6 +155,10 @@ class ModelManyManyRelationShipInfo {
      * @return string
      */
     public function getTargetField() {
+        if($this->controlling && ClassManifest::classesRelated($this->owner, $this->target)) {
+            return $this->target . "_" . $this->target . "id";
+        }
+
         return $this->target . "id";
     }
 
@@ -239,6 +262,14 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
+     * @param boolean $bidirectional
+     */
+    protected function setBidirectional($bidirectional)
+    {
+        $this->bidirectional = $bidirectional;
+    }
+
+    /**
      * generates table-name.
      *
      * @return string
@@ -291,7 +322,8 @@ class ModelManyManyRelationShipInfo {
             "ef"            => $this->extraFields,
             "target"        => $this->target,
             "belonging"     => $this->belongingName,
-            "isMain"        => $this->controlling
+            "isMain"        => $this->controlling,
+            "bidirectional" => $this->bidirectional
         );
     }
 
@@ -342,6 +374,7 @@ class ModelManyManyRelationShipInfo {
             $relationShip->setExtraFields($record["ef"]);
             $relationShip->setTableName($record["table"]);
             $relationShip->setTarget($record["target"]);
+            $relationShip->setBidirectional($record["bidirectional"]);
 
             $relationShips[$name] = $relationShip;
         }
@@ -405,6 +438,7 @@ class ModelManyManyRelationShipInfo {
         $relationShip->controlling = !$belonging;
 
         $relationShip->tableName = $relationShip->generateTableName();
+        $relationShip->bidirectional = $info[2];
 
         return $relationShip;
     }
@@ -474,26 +508,78 @@ class ModelManyManyRelationShipInfo {
      */
     public static function getRelationInfoWithInverse($value)
     {
-        $relation = null;
-        if (is_array($value)) {
-            if (isset($value["relation"]) && isset($value["class"])) {
-                $relation = $value["relation"];
-                $value = $value["class"];
-            } else if (isset($value["inverse"]) && isset($value["class"])) {
-                $relation = $value["inverse"];
-                $value = $value["class"];
+        return array(
+            ClassInfo::find_class_name(self::getRelationClass($value)),
+            self::getRelationInverse($value),
+            self::getRelationBidirectional($value)
+        );
+    }
+
+    /**
+     * returns if value defines relationship as bidirectional.
+     *
+     * @param array|string $value
+     * @return string
+     */
+    protected static function getRelationBidirectional($value) {
+        if(is_array($value)) {
+            if(isset($value["bidirectional"])) {
+                return $value["bidirectional"];
             } else {
-                $value = array_values($value);
-                $relation = isset($value[1]) ? $value[1] : null;
-                $value = $value[0];
+                $arr = array_values($value);
+                if(isset($arr[2]) && is_bool($arr[2])) {
+                    return $arr[2];
+                }
+
+                if(isset($arr[1]) && is_bool($arr[1])) {
+                    return $arr[1];
+                }
             }
         }
 
-        if(is_string($relation)) {
-            $relation = strtolower($relation);
+        return false;
+    }
+
+    /**
+     * returns inverse relationship name when set.
+     *
+     * @param array|string $value
+     * @return string
+     */
+    protected static function getRelationInverse($value) {
+        if(is_array($value)) {
+            if(isset($value["relation"])) {
+                return strtolower($value["relation"]);
+            } else if(isset($value["inverse"])) {
+                return strtolower($value["inverse"]);
+            } else if(count($value) == 2) {
+                $arr = array_values($value);
+                if(isset($arr[1]) && is_string($arr[1])) {
+                    return $arr[1];
+                }
+            }
         }
 
-        return array(ClassInfo::find_class_name($value), $relation);
+        return null;
+    }
+
+    /**
+     * gets info about class from array.
+     *
+     * @param array|string $value
+     * @return string
+     */
+    protected static function getRelationClass($value) {
+        if(is_array($value)) {
+            if(isset($value["class"])) {
+                return $value["class"];
+            }
+
+            $array = array_values($value);
+            return $array[0];
+        } else {
+            return $value;
+        }
     }
 
     /**
