@@ -1,0 +1,28 @@
+<h3>Creating new Database</h3>
+<div class="caches">
+    <% IF $rebuilt_caches %>
+    <img src="images/success.png"  alt="Success" />
+    <% ELSE %>
+    <img src="images/16x16/loading.gif"  alt="Loading..." />
+    <% END %>
+    <span>Rebuilding Caches...</span>
+</div>
+<div class="db">
+    <% IF $rebuilt_caches %>
+        <% IF $rebuilt_db %>
+            <img src="images/success.png"  alt="Success" /> Rebuilding Database...
+            $rebuilt_db
+        <% ELSE %>
+            <img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...
+        <% END %>
+    <% END %>
+</div>
+
+<% IF NOT $rebuilt_db %>
+    <script type="text/javascript">
+        setTimeout(function(){ location.href = "{ROOT_PATH}{BASE_SCRIPT}$url{URLEND}"; }, 500);
+    </script>
+
+    <noscript><div>Please click <a href="{ROOT_PATH}{BASE_SCRIPT}$url{URLEND}">here</a>.</div></noscript>
+    <p>If it doesn\'t reload within 15 seconds, please click <a href="{ROOT_PATH}{BASE_SCRIPT}$url{URLEND}">here</a></p>
+<% END %>

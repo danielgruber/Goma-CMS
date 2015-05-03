@@ -94,11 +94,12 @@ class Dev extends RequestHandler {
 		return DEV_MODE;
 	}
 
-	/**
-	 * the index site of the dev-mode
-	 *
-	 *@name index
-	 */
+    /**
+     * the index site of the dev-mode
+     *
+     * @name index
+     * @return string
+     */
 	public function index() {
 
 		// make 503
@@ -116,20 +117,15 @@ class Dev extends RequestHandler {
 			exit ;
 		}
 
-		return '<h3>Creating new Database</h3>
-			<script type="text/javascript">
-				setTimeout(function(){ location.href = "' . ROOT_PATH . BASE_SCRIPT . 'dev/rebuildcaches/"; }, 500);
-			</script>
-			
-			<img src="images/16x16/loading.gif" alt="Loading..." /> Rebuilding Caches... <br /><br />If it doesn\'t reload within 15 seconds, please click <a href="' . ROOT_PATH . 'dev/rebuildcaches">here</a>.
-			<noscript>Please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/rebuildcaches/">here</a>.</noscript>';
+        return $this->template("Dev/dev.html", array("url" => "dev/rebuildcaches"));
 	}
 
-	/**
-	 * this step regenerates the cache
-	 *
-	 *@name rebuild
-	 */
+    /**
+     * this step regenerates the cache
+     *
+     * @name rebuild
+     * @return string
+     */
 	public function rebuild() {
 		// 503
 		makeProjectUnavailable();
@@ -149,13 +145,7 @@ class Dev extends RequestHandler {
 			exit;
 		}
 
-		return '<h3>Creating new Database</h3>
-			<script type="text/javascript">
-				setTimeout(function(){ location.href = "' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev/"; }, 500);
-			</script>
-			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
-			<noscript>Please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev/">here</a>.<br /></noscript>
-			<div><img src="images/16x16/loading.gif"  alt="Loading..." /> Rebuilding Database...</div>If it doesn\'t reload within 15 seconds, please click <a href="' . ROOT_PATH . BASE_SCRIPT . 'dev/builddev">here</a>.';
+		return $this->template("Dev/dev.html", array("rebuilt_caches" => true, "url" => "dev/builddev"));
 	}
 
 	/**
@@ -168,11 +158,7 @@ class Dev extends RequestHandler {
 		// patch
 		Object::$cache_singleton_classes = array();
 
-		// show progress
-		$data = '<h3>Creating new Database</h3>
-			<div><img src="images/success.png" height="16" alt="Loading..." /> Rebuilding Caches...</div>
-			<div><img src="images/success.png" height="16" alt="Success" />  Rebuilding Database...</div>';
-
+        $data = "";
 		if(defined("SQL_LOADUP")) {
 			// remake db
 			foreach(classinfo::getChildren("dataobject") as $value) {
@@ -197,7 +183,7 @@ class Dev extends RequestHandler {
 
 		self::checkForRedirect();
 
-		return $data;
+		return $this->template("dev/dev.html", array("rebuilt_caches" => true, "rebuilt_db" => $data));
 	}
 
 	/**
@@ -332,10 +318,11 @@ class Dev extends RequestHandler {
 
 						foreach($tables as $table) {
 							$sql = "DELETE FROM " . DB_PREFIX . $table . " WHERE id IN('" . implode("','", $deleteids) . "')";
-							if(SQL::Query($sql))
-								$log .= '<div><img src="images/success.png" height="16" alt="Loading..." /> Delete versions of ' . $table . '</div>';
-							else
-								$log .= '<div><img src="images/16x16/del.png" height="16" alt="Loading..." /> Failed to delete versions of ' . $table . '</div>';
+							if(SQL::Query($sql)) {
+                                $log .= '<div><img src="images/success.png" height="16" alt="Loading..." /> Delete versions of ' . $table . '</div>';
+                            } else {
+                                $log .= '<div><img src="images/16x16/del.png" height="16" alt="Loading..." /> Failed to delete versions of ' . $table . '</div>';
+                            }
 						}
 					}
 
@@ -375,4 +362,11 @@ class Dev extends RequestHandler {
 		}
 	}
 
+    /**
+     * templating.
+     */
+    protected function template($name, $data = array()) {
+        $view = new ViewAccessableData();
+        return $view->customise($data)->renderWith($name);
+    }
 }

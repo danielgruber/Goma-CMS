@@ -137,7 +137,7 @@ $lang = array(
 	"register_code"                                	=> "Registration-code",
 	"title"                                        	=> "Title",
 	"title_page"									=> "Title of the page",
-	"window_title"									=> "title of the browser-window",
+	"window_title"									=> "Title of browser-window",
 	"window_title_info"								=> "Keep empty to use default title",
 	/* SETTINGS END TPL START */
 	"available_styles"                             	=> "Available designs",
@@ -398,7 +398,7 @@ $lang = array(
 	"notice_site_disabled"							=> "This page is disabled.",
 	"delete_selected"								=> "Delete Selected",
 	
-	"menupoint_add"									=> "Show in menus",
+	"menupoint_add"									=> "Show in navigation",
 	
 	"database"										=> "Database",
 	
@@ -508,7 +508,7 @@ $lang = array(
 	"gfs_invalid"									=> "The GFS-archive is damaged or not openable.",
 	
 	"inherit_from_parent"							=> "inherit from parent",
-	"hierarchy"										=> "hierarchy",
+	"hierarchy"										=> "Hierarchy",
 	
 	"full_admin_permissions"						=> "Full admin permissions",
 	"full_admin_permissions_info"					=> "Everything is allowed, also if some rights are disabled.",
