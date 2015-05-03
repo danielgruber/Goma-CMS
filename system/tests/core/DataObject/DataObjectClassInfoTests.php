@@ -69,7 +69,8 @@ class DataObjectClassInfoTest extends GomaUnitTest implements TestAble
                     "ef"            => array(),
                     "target"        => "target_" . $name,
                     "belonging"     => "target_relation_" . $name,
-                    "isMain"        => ($i % 2 == 0)
+                    "isMain"        => ($i % 2 == 0),
+                    "bidirectional" => false
                 );
                 $i++;
             }

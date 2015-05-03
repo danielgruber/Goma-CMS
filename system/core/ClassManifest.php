@@ -389,6 +389,7 @@ class ClassManifest {
             // let's remove some data to avoid saving too much data
             unset($data["requireFrameworkVersion"], $data["requireApp"], $data["requireAppVersion"]);
 
+            $data["folder"] = $dir . "/contents/";
             // register in environment
             $env["expansion"][strtolower($data["name"])] = $data;
 

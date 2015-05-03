@@ -26,6 +26,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
 
         $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, true, "many_many_target_targetName_test");
         $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, false, "many_target_targetName");
+
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, false, "many_test_testName");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, false, "many_test_testReverse");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, true, "many_many_test_testReverse_test");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, true, "many_many_test_testName_test");
     }
 
     /**
@@ -44,7 +49,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                 "ef"            => array(),
                 "target"        => $target,
                 "belonging"     => $targetRelationName,
-                "isMain"        => $controlling
+                "isMain"        => $controlling,
+                "bidirectional" => false
             )
         ));
 
@@ -160,6 +166,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             $this->assertEqual($inverted->getRelationShipName(), $relationShip->getBelongingName());
             $this->assertEqual($inverted->getBelongingName(), $relationShip->getRelationShipName());
 
+            $this->assertEqual($inverted->isBidirectional(), $relationShip->isBidirectional());
+
             $this->assertNotIdentical($inverted, $relationShip);
         }
     }
@@ -175,7 +183,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef" => array(),
                     "target" => "test",
                     "belonging" => "",
-                    "isMain" => ""
+                    "isMain" => "",
+                    "bidirectional" => false
                 )
             ));
         }, "LogicException");
@@ -187,7 +196,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef" => array(),
                     "target" => "",
                     "belonging" => "",
-                    "isMain" => ""
+                    "isMain" => "",
+                    "bidirectional" => false
                 )
             ));
         }, "LogicException");
@@ -199,7 +209,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef"            => array(),
                     "target"        => "test",
                     "belonging"     => "",
-                    "isMain"        => ""
+                    "isMain"        => "",
+                    "bidirectional" => false
                 )
             ));
         }, "LogicException");
@@ -209,9 +220,13 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * tests if all properties are assigned correctly and accessable.
      */
     public function testAssignMent() {
-        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true);
-        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false);
-        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false);
+        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true, false);
+        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false, false);
+        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false, false);
+
+        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true, true);
+        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false, true);
+        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false, true);
     }
 
     /**
@@ -224,14 +239,15 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * @param string $relationshipName
      * @param bool $controlling
      */
-    public function unittestAssignMent($owner, $table, $extraFields, $target, $targetRelationName, $relationshipName, $controlling) {
+    public function unittestAssignMent($owner, $table, $extraFields, $target, $targetRelationName, $relationshipName, $controlling, $biDirectional) {
         $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($owner, array(
             $relationshipName => array(
                 "table"         => $table,
                 "ef"            => $extraFields,
                 "target"        => $target,
                 "belonging"     => $targetRelationName,
-                "isMain"        => $controlling
+                "isMain"        => $controlling,
+                "bidirectional" => $biDirectional
             )
         ));
 
@@ -248,6 +264,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         $this->assertEqual($relation->getRelationShipName(), $relationshipName);
         $this->assertEqual($relation->getBelongingName(), $targetRelationName);
         $this->assertEqual($relation->isControlling(), $controlling);
+        $this->assertEqual($relation->isBidirectional(), $biDirectional);
     }
 }
 
