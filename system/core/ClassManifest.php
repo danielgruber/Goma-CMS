@@ -223,7 +223,8 @@ class ClassManifest {
 		if(file_exists($dir . '/contents/info.plist')) {
 			$data = self::getPropertyList($dir . '/contents/info.plist');
 
-            self::generateExtensionData($data, $dir, $class_info, $env);
+            self::generateExtensionData($data, $dir, $classes, $class_info, $env);
+            return;
 		}
 
 		foreach(scandir($dir) as $file) {
@@ -374,63 +375,113 @@ class ClassManifest {
     /**
      * generates data for extension.
      *
-     * @param array data
-     * @param array environment
+     * @param $data info about extension
+     * @param $dir directory
+     * @param $classes class-index
+     * @param $class_info classinfo-index
+     * @param $env environment info
+     * @return bool
      */
-    public static function generateExtensionData($data, $dir, &$class_info, &$env) {
-        // check if we have required data
-        if(isset($data["name"], $data["type"], $data["loadCode"], $data["version"]) && ($data["type"] == "expansion" || $data["type"] == "extension")) {
-            $data["folder"] = $dir . "/contents/";
+    public static function generateExtensionData($data, $dir, &$classes, &$class_info, &$env) {
+        // test compatiblity
+        if (self::isCompatibleAndNotDisabled($dir, $data)) {
 
-            // test compatiblity
-            if(!isset($data["requiredPHPVersion"]) || version_compare($data["requiredPHPVersion"], phpversion(), "<=")) {
-                if(!isset($data["requireFrameworkVersion"]) || goma_version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, "<=")) {
-                    if(!isset($data["requireApp"]) || $data["requireApp"] == ClassInfo::$appENV["app"]["name"]) {
-                        if(!isset($data["requireAppVersion"]) || !isset($data["requireApp"]) || goma_version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "<=")) {
+            // let's remove some data to avoid saving too much data
+            unset($data["requireFrameworkVersion"], $data["requireApp"], $data["requireAppVersion"]);
 
-                            // compatible!!
+            // register in environment
+            $env["expansion"][strtolower($data["name"])] = $data;
 
-                            if(file_exists($dir . "/contents/.g_" . APPLICATION . ".disabled")) {
-                                return false;
-                            }
-
-                            // let's remove some data to avoid saving too much data
-                            unset($data["requireFrameworkVersion"], $data["requireApp"], $data["requireAppVersion"]);
-
-                            // register in environment
-                            $env["expansion"][strtolower($data["name"])] = $data;
-                            if(is_array($data["loadCode"])) {
-                                $_classes = array();
-                                foreach($data["loadCode"] as $ldir) {
-                                    self::generate_class_manifest($dir . "/contents/" . $ldir, $_classes, $class_info, $env);
-                                }
-                                foreach($_classes as $_class => $file) {
-                                    $class_info[$_class]["inExpansion"] = strtolower($data["name"]);
-                                    $classes[$_class] = $file;
-                                }
-                                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
-                                unset($_classes);
-                            } else {
-                                $_classes = array();
-                                self::generate_class_manifest($dir . "/contents/" . $data["loadCode"], $_classes, $class_info, $env);
-                                foreach($_classes as $_class => $file) {
-                                    $class_info[$_class]["inExpansion"] = strtolower($data["name"]);
-                                    $classes[$_class] = $file;
-                                }
-                                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array_keys($_classes);
-                                unset($_classes);
-                            }
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
+            // load code
+            if (is_array($data["loadCode"])) {
+                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] = array();
+                foreach ($data["loadCode"] as $ldir) {
+                    $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] +=
+                        self::loadFolder($dir . "/contents/" . $ldir, $classes, $class_info, $data["name"]);
                 }
+            } else {
+                $env[strtolower($data["type"])][strtolower($data["name"])]["classes"] =
+                    self::loadFolder($dir . "/contents/" . $data["loadCode"], $classes, $class_info, $data["name"]);
             }
+
+            // load tests
+            if (isset($data["tests"]) && DEV_MODE) {
+                self::loadFolder($dir . "/contents/" . $data["tests"], $classes, $class_info, $data["name"]);
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * returns true when the extension is compatible and wasn't disabled.
+     *
+     * @param string $dir
+     * @param array $data
+     * @return bool
+     */
+    protected static function isCompatibleAndNotDisabled($dir, $data) {
+
+        // check for data
+        if(isset($data["name"], $data["type"], $data["loadCode"], $data["version"]) && ($data["type"] == "expansion" || $data["type"] == "extension")) {
+
+            // check PHP-Version
+            if (isset($data["requiredPHPVersion"]) && version_compare($data["requiredPHPVersion"], phpversion(), ">")) {
+                return false;
+            }
+
+            if (isset($data["requireFrameworkVersion"]) &&
+                goma_version_compare($data["requireFrameworkVersion"], GOMA_VERSION . "-" . BUILD_VERSION, ">")
+            ) {
+                return false;
+            }
+
+            if (isset($data["requireApp"]) && $data["requireApp"] != ClassInfo::$appENV["app"]["name"]) {
+                return false;
+            }
+
+            if (isset($data["requireAppVersion"]) &&
+                isset($data["requireApp"]) &&
+                goma_version_compare($data["requireAppVersion"], ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], ">")
+            ) {
+                return false;
+            }
+
+            if (file_exists($dir . "/contents/.g_" . APPLICATION . ".disabled")) {
+                return false;
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * loads code from given folder and defines inExpansion-Flag in classinfo for all classes.
+     *
+     * @param string $folder
+     * @param array $classes class-file-index
+     * @param array $class_info classinfo
+     * @param string $expansion
+     * @return array list of classes
+     */
+    protected static function loadFolder($folder, &$classes, &$class_info, $expansion = null) {
+        if(is_dir($folder)) {
+            $classesInFolder = array();
+            self::generate_class_manifest($folder, $classesInFolder, $class_info, $env);
+            foreach($classesInFolder as $class => $file) {
+                if(isset($expansion)) {
+                    $class_info[$class]["inExpansion"] = strtolower($expansion);
+                }
+                $classes[$class] = $file;
+            }
+
+            return array_keys($classesInFolder);
+        } else {
+            throw new LogicException("ClassManifest::loadFolder: $folder must exist and be a folder.");
         }
     }
 

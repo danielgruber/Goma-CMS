@@ -34,7 +34,7 @@ class GomaRestfulService extends RequestHandler {
         }
         $class = $this->getParam("ClassName");
         if(ClassInfo::exists($class) && ClassInfo::hasInterface($class, "IRestModel")) {
-            $object = call_user_func_array(array($class, "getRESTObject"), array());
+            $object = call_user_func_array(array($class, "getRESTObject"), array($this->request));
 
             if(!$object) {
                 HTTPResponse::setResHeader(404);
