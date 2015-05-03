@@ -277,7 +277,11 @@ div.adminPanel table, div.adminPanel td {
 				float: left;
 				margin: 0 @space-normal;
 			}
-			
+
+            div.help {
+                margin: .75em @space-normal;
+            }
+
 			.help {
 				margin-top: 0.64em;
 				
@@ -310,17 +314,18 @@ div.adminPanel table, div.adminPanel td {
 				position: relative;
 				
 				> a {
-					display: block;
-					padding: 0.75em;
-					padding-top: 0.56em;
-				}
-				
+                      display: block;
+                      padding: 0.75em;
+                      padding-top: 0.56em;
+                  }
+
 				> ul {
 					list-style: none;
 					position: absolute;
 					top: 2.82em;
 					left: -2em;
-					
+	                z-index: 960;
+
 					-webkit-overflow-scrolling: touch;
 					overflow: auto;
 					
