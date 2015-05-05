@@ -3878,15 +3878,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * It also embeds has-one-relations to this record.
      */
-    public function ToRESTArray($addtional_fields = array()) {
-        $data = parent::ToRestArray();
+    public function ToRESTArray($additional_fields = array(), $includeHasOne = false) {
+        $data = parent::ToRestArray($additional_fields);
+
         foreach($this->HasOne() as $name => $class) {
-            if ($this->$name) {
-                $data[$name] = $this->$name()->ToRestArray();
-            } else {
-                $data[$name] = array();
+            if($includeHasOne || isset($additional_fields[$name])) {
+                if ($this->$name && Object::method_exists($this->$name, "ToRestArray")) {
+                    $data[$name] = $this->$name()->ToRestArray();
+                }
             }
         }
+
         return $data;
     }
 

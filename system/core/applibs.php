@@ -334,7 +334,7 @@ function goma_date($format, $date = NOW) {
  */
 function makeProjectUnavailable($project = APPLICATION, $ip = null) {
 	$ip = isset($ip) ? $ip : $_SERVER["REMOTE_ADDR"];
-	if(!file_put_contents(ROOT . $project . "/503.goma", $ip)) {
+	if(!file_put_contents(ROOT . $project . "/503.goma", $ip, LOCK_EX)) {
 		die("Could not make project unavailable.");
 	}
 	chmod(ROOT . $project . "/503.goma", 0777);
@@ -420,7 +420,7 @@ function writeSystemConfig($data = array()) {
 			$contents = str_replace('{' . $name . '}', var_export("", true), $contents);
 	}
 
-	if(@file_put_contents(ROOT . "_config.php", $contents)) {
+	if(@file_put_contents(ROOT . "_config.php", $contents, LOCK_EX)) {
 		@chmod(ROOT . "_config.php", 0644);
 		return true;
 	} else {
@@ -512,7 +512,7 @@ function writeProjectConfig($data = array(), $project = CURRENT_PROJECT) {
 	$config_content = file_get_contents(FRAMEWORK_ROOT . "core/samples/config_locale.sample.php");
 	$config_content = str_replace('{info}', var_export($info, true), $config_content);
 	$config_content = str_replace('{folder}', $project, $config_content);
-	if(@file_put_contents($config, $config_content)) {
+	if(@file_put_contents($config, $config_content, LOCK_EX)) {
 		@chmod($config, 0644);
 		return true;
 	} else {
@@ -1013,7 +1013,7 @@ function writeServerConfig() {
 	require (ROOT . "system/resources/" . $file . ".php");
 
 
-	if(!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND)) {
+	if(!file_put_contents(ROOT . $toFile, $serverconfig, FILE_APPEND | LOCK_EX)) {
 		die("Could not write " . $file);
 	}
 }

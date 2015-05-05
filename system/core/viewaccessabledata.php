@@ -36,7 +36,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @access public
 	 */
 	static $casting = array();
-	
+
 	/**
 	 * extended casting.
 	*/
@@ -291,7 +291,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			return $data;
 		}
 	}
-	
+
 	/**
 	 * to array if we need data for REST-API.
 	*/
@@ -725,7 +725,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		if(isset($this->customised[$lowername])) {
 			return true;
-		} 
+		}
 
 		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 			return false;
@@ -752,7 +752,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		if(isset($this->customised[$lowername])) {
 			return $this->customised[$lowername];
 			// methods
-		} 
+		}
 
 		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 			return parent::__call($name, $args);
@@ -765,7 +765,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		if(isset($this->data[$lowername])) {
 			return $this->data[$lowername];
-		} 
+		}
 
 		if($this->isServerMethod($lowername)) {
 			return $this->serverGet($name, $lowername);
@@ -933,7 +933,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *@name offsetSet
 	 */
 	public function offsetSet($offset, $value) {
-	
+
 		return $this->__set($offset, $value);
 	}
 
@@ -967,25 +967,25 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			}
 		} else {
 			$var = trim(strtolower($var));
-			
+
 			if($value instanceof DBField) {
 				$value = $value->raw();
 				$this->extendedCasting[$var] = $value->classname;
 			}
-			
+
 			if(is_array($this->data)) {
 				// first unset, so the new value is last value of data stack
 				unset($this->data[$var]);
 				if(isset($this->data[$var]) && $this->data[$var] == $value) {
 					return;
 				}
-				
+
 				$this->data[$var] = $value;
 			} else {
 				$this->data = array($var => $value);
 			}
 		}
-		
+
 		$this->changed = true;
 	}
 
@@ -1042,7 +1042,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 */
 	public function casting() {
 		$casting = isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : StaticsManager::getStatic($this->classname, "casting");
-		
+
 		return array_merge($casting, $this->extendedCasting);
 	}
 
