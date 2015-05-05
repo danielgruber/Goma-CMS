@@ -57,21 +57,26 @@ class ModelInfoGenerator {
 
         $fields = self::generate_combined_array($class, "db", "DBFields", $parents);
 
-        foreach(self::generateHas_one($class, false) as $key => $value) {
-            if (!isset($fields[$key . "id"])) { // check if field already is existing.
-                $fields[$key . "id"] = "int(10)";
-            }
-
-            unset($key, $value);
-        }
+        $fields = array_merge(self::getHasOneArrayWithValue($class, "int(10)"), $fields);
 
         if (!empty($fields) && Object::method_exists($class, "DefaultSQLFields")) {
             $fields = array_merge(call_user_func_array(array($class, "DefaultSQLFields"), array($class)), $fields);
         }
 
+        if(DEV_MODE) {
+            self::validateDBFields($class, $fields);
+        }
+
         return $fields;
     }
 
+    /**
+     * validates db fields.
+     *
+     * @param $class
+     * @param $fields
+     * @throws DBFieldNotValidException
+     */
     public static function validateDBFields($class, $fields) {
         foreach($fields as $name => $type) {
             // hack to not break current Goma-CMS Build
@@ -121,7 +126,7 @@ class ModelInfoGenerator {
 
         $has_one = self::generate_combined_array($class, "has_one", "has_one", $parents);
 
-        if (ClassInfo::get_parent_class($class) == "dataobject") {
+        if (ClassInfo::get_parent_class($class) == null || ClassInfo::get_parent_class($class) == "dataobject") {
             $has_one["autor"] = "user";
             $has_one["editor"] = "user";
         }
@@ -129,6 +134,24 @@ class ModelInfoGenerator {
         $has_one = array_map("strtolower", $has_one);
 
         return $has_one;
+    }
+
+    /**
+     * returns has-one array with given value.
+     *
+     * @param string|object $class
+     * @param string $value
+     * @return array
+     */
+    protected static function getHasOneArrayWithValue($class, $value) {
+        $arr = array();
+        foreach(self::generateHas_one($class, false) as $name => $v) {
+            if (!isset($indexes[$name . "id"])) {
+                $arr[$name . "id"] = $value;
+            }
+        }
+
+        return $arr;
     }
 
     /**
@@ -259,12 +282,7 @@ class ModelInfoGenerator {
     public static function generateIndexes($class) {
         $indexes = self::generate_combined_array($class, "index", "index", false);
 
-        foreach(self::generateHas_one($class, false) as $key => $value) {
-            if (!isset($indexes[$key . "id"])) {
-                $indexes[$key . "id"] = "INDEX";
-                unset($key, $value);
-            }
-        }
+        $indexes = array_merge(self::getHasOneArrayWithValue($class, "INDEX"), $indexes);
 
         $searchable_fields = StaticsManager::getStatic($class, "search_fields");
         if ($searchable_fields) {
@@ -273,13 +291,7 @@ class ModelInfoGenerator {
         }
 
         // validate
-        foreach($indexes as $name => $type) {
-            if (is_array($type)) {
-                if (!isset($type["type"]) || !isset($type["fields"])) {
-                    throw new LogicException("Index $name in DataObject $class is invalid. Type and Fields are required.", ExceptionManager::INDEX_INVALID);
-                }
-            }
-        }
+        self::validateIndexes($indexes);
 
         $db = self::generateDBFields($class, false);
         if (isset($db["last_modified"])) {
@@ -287,6 +299,21 @@ class ModelInfoGenerator {
         }
 
         return $indexes;
+    }
 
+    /**
+     * validates indexes.
+     *
+     * @name validateIndexes
+     * @param indexes
+     */
+    protected static function validateIndexes($indexes) {
+        foreach($indexes as $name => $type) {
+            if (is_array($type)) {
+                if (!isset($type["type"]) || !isset($type["fields"])) {
+                    throw new LogicException("Index $name in DataObject $class is invalid. Type and Fields are required.", ExceptionManager::INDEX_INVALID);
+                }
+            }
+        }
     }
 }

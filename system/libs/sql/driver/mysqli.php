@@ -465,6 +465,7 @@ class mysqliDriver extends object implements SQLDriver
      * @param string - table
      * @param bool - if track query
      * @param string - prefix
+     * @return array|bool
      */
     public function showTableDetails($table, $track = true, $prefix = false)
     {
@@ -476,7 +477,7 @@ class mysqliDriver extends object implements SQLDriver
         if ($result = sql::query($sql, false, $track, false)) {
             $fields = array();
             while ($row = $this->fetch_object($result)) {
-                $fields[$row->Field] = array(
+                $fields[strtolower($row->Field)] = array(
                     "type" => $row->Type,
                     "key" => $row->Key,
                     "default" => $row->Default,
@@ -536,12 +537,16 @@ class mysqliDriver extends object implements SQLDriver
                         $log .= "Modify Field " . $name . " from " . $data[$name]["type"] . " to " . $type . "\n";
                     } else
 
-                        if (!_eregi('enum', $fields[$name])) {
+                        if (!preg_match('/enum/i', $fields[$name])) {
                             if (!isset($defaults[$name]) && $data[$name]["default"] != "") {
                                 $editsql .= " ALTER COLUMN " . $name . " DROP DEFAULT,";
                             }
 
-                            if (isset($defaults[$name]) && $data[$name]["default"] != $defaults[$name]) {
+                            if (isset($defaults[$name]) &&
+                                $data[$name]["default"] != $defaults[$name] &&
+                                strtolower($data[$name]["type"]) != "text" &&
+                                strtolower($data[$name]["type"]) != "blob"
+                            ) {
                                 $editsql .= " ALTER COLUMN " . $name . " SET DEFAULT \"" . addslashes($defaults[$name]) . "\",";
                             }
                         }
