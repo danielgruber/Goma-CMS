@@ -473,7 +473,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$this->callExtending("performLogin");
 
         if($this->wasChanged()) {
-            $this->write(false, true);
+            $this->writeToDB(false, true);
         }
 	}
 

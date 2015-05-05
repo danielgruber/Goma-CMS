@@ -67,7 +67,7 @@ class Member extends Object {
 	 *@name checkDefaults
 	 *@access public
 	*/
-	static function checkDefaults() {
+	public static function checkDefaults() {
 		
 		$cacher = new Cacher("groups-checkDefaults");
 		if($cacher->checkValid()) {
@@ -111,7 +111,7 @@ class Member extends Object {
 	 * @access 	public
 	 * @return 	boolean	true if logged in
 	*/
-	static function Init() {
+	public static function Init() {
 		if(PROFILE) Profiler::mark("member::Init");
 		if(isset(self::$id)) {
 			return true;
@@ -227,37 +227,34 @@ class Member extends Object {
 
 		return $defaultGroup;
 	}
-	
-	/**
-	 * returns the groupids of the groups of the user
-	 *
-	 *@name groupids
-	 *@access public
-	*/
-	static function groupIDs() {
+
+    /**
+     * returns the groupids of the groups of the user
+     *
+     * @return array
+     */
+	public static function groupIDs() {
 		if(is_array(self::$groups)) {
 			return self::$groups;
 		}
 		return self::$groups->fieldToArray("id");
 	}
-	
-	/**
-	 * returns if the user is logged in
-	 *
-	 *@name login
-	 *@access public
-	*/
-	static function login() {
+
+    /**
+     * returns if the user is logged in
+     *
+     * @return bool
+     */
+	public static function login() {
 		return (self::$groupType > 0);
 	}
-	
-	/**
-	 * returns if the user is an admin
-	 *
-	 *@name admin
-	 *@access public
-	*/
-	public function admin() {
+
+    /**
+     * returns if the user is an admin
+     *
+     * @return bool
+     */
+	public static function admin() {
 		return (self::$groupType == 2);
 	}
 	
@@ -270,7 +267,7 @@ class Member extends Object {
 	*/
 	static function right($name)
 	{
-			return right($name);
+		return right($name);
 	}
 	
 	/**
@@ -281,9 +278,9 @@ class Member extends Object {
 	 * @access 	public
 	 * @param 	string - nickname
 	 * @param 	string - password
-	 *@ return 	bool
+	 * @return 	bool
 	*/
-	static function doLogin($user, $pwd)
+	public static function doLogin($user, $pwd)
 	{
 		self::checkDefaults();
 
@@ -351,21 +348,22 @@ class Member extends Object {
 	 *@name doLogout
 	 *@access public
 	*/
-	public function doLogout() {
+	public static function doLogout() {
 		$data = DataObject::get_by_id("user", $_SESSION["g_userlogin"]);
 		if($data) {
 			$data->performLogout();
 		}
 		unset($_SESSION["g_userlogin"]);
 	}
-	
-	/**
-	 * require login
-	 *
-	 *@name require_Login
-	 *@access public
-	*/
-	public function require_login() {
+
+    /**
+     * require login
+     *
+     * @name require_Login
+     * @access public
+     * @return bool
+     */
+	public static function require_login() {
 		if(!self::login()) {
 			AddContent::addNotice(lang("require_login"));
 			self::redirectToLogin();
@@ -373,7 +371,7 @@ class Member extends Object {
 		return true;
 	}
 
-	public function redirectToLogin() {
+	public static function redirectToLogin() {
 		HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
 		exit;
 	}
@@ -381,7 +379,7 @@ class Member extends Object {
 	/**
 	 * unique identifier of this user.
 	*/
-	public function uniqueID() {
+	public static function uniqueID() {
 		if(isset($_SESSION["uniqueID"])) {
 			return $_SESSION["uniqueID"];
 		} else {

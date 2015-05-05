@@ -703,6 +703,13 @@ class Form extends object {
 		return $this->submission;
 	}
 
+    /**
+     * returns name.
+     */
+    public function getName() {
+        return $this->name;
+    }
+
 	/**
 	 * sets the default submission
 	 *@name setSubmission

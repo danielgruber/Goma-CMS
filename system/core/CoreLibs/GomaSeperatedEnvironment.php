@@ -28,7 +28,9 @@ class GomaSeperatedEnvironment {
 		"template", 
 		"httpresponse",
 		"ArrayLib",
+        "IDataBaseField",
 		"DBField",
+        "Varchar",
 		"Convert"
 	);
 

@@ -48,10 +48,39 @@ class MailTests extends GomaUnitTest {
 	 * checks for Events.
 	*/
 	public function testcheckEvents() {
-		$this->unitCheckForEvents("noreply@goma-cms.org", "daniel@ibpg.eu", "test", "bub");
-		$this->unitCheckForEvents("noreply@goma-cms.org", "daniel@ibpg.eu<Daniel Gruber>", "test", "bub");
-		$this->unitCheckForEvents("noreply@goma-cms.org", "daniel@ibpg.eu<Daniel Gruber>,test@ibpg.eu", "test", "bub");
+		$this->unitCheckForEvents("noreply@goma-cms.org", "test@ibpg.eu", "test", "bub");
+		$this->unitCheckForEvents("noreply@goma-cms.org", "test@ibpg.eu<Max Mustermann>", "test", "bub");
+		$this->unitCheckForEvents("noreply@goma-cms.org", "test@ibpg.eu<Max Mustermann>,test@ibpg.eu", "test", "bub");
 	}
+
+    /**
+     * tests for default sender.
+     */
+    public function testDefaultSender() {
+        $mail = new Mail();
+        $mail->address = "test@goma-cms.org";
+
+        $phpmailer = $mail->prepareMail();
+
+        $this->assertEqual($phpmailer->From, "noreply@" . $_SERVER["SERVER_NAME"]);
+        $this->assertEqual($phpmailer->FromName, "noreply@" . $_SERVER["SERVER_NAME"]);
+    }
+
+    /**
+     * tests parsing of addresses.
+     */
+    public function testAddressParsing() {
+        $this->unitTestAddressParsing("test@ibpg.eu", array("test@ibpg.eu", "test@ibpg.eu"));
+        $this->unitTestAddressParsing("test@ibpg.eu<Max Mustermann>", array("test@ibpg.eu", "Max Mustermann"));
+    }
+
+    /**
+     * @param string $address
+     * @param string $expected
+     */
+    public function unitTestAddressParsing($address, $expected) {
+        $this->assertEqual(Mail::parseSingleAddress($address), $expected);
+    }
 
 	/**
 	 * @param string $sender

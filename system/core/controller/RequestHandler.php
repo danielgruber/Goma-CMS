@@ -71,6 +71,7 @@ class RequestHandler extends Object {
 	 * the current request
 	 *
 	 * @name 	request
+     * @var     Request
 	 */
 	public $request;
 
@@ -87,7 +88,7 @@ class RequestHandler extends Object {
 
 		if (PROFILE) Profiler::mark("RequestHandler::__construct");
 
-		$this->allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions));
+		$this->allowed_actions = ArrayLib::map_key("strtolower", array_map("strtolower", $this -> allowed_actions), false);
 		$this->url_handlers = array_map("strtolower", $this->url_handlers);
 
 		if (isset(ClassInfo::$class_info[$this -> classname]["allowed_actions"]))

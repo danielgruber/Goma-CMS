@@ -142,37 +142,39 @@ abstract class g_SoftwareType {
     /**
      * cleanup for Uploaded Updates.
      *
-     * @return void
+     * @throws SQLException
      */
     public static function cleanUpUpdates() {
         FileSystem::Delete(ROOT . APPLICATION . "/uploads/e47ddedf1c2bd2d0006eae2d2eee39b4");
 
-        $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
-        if($query->execute()) {
-            $manipulation["uploads"] = array(
-                "table" 	=> "uploads",
-                "command"	=> "delete",
-                "where"		=> array(
-                    "recordid" => array()
-                )
-            );
+        if(defined("SQL_LOADUP")) {
+            $query = new SelectQuery("uploads", array("recordid"), array("realfile" => array("LIKE", "%/e47ddedf1c2bd2d0006eae2d2eee39b4/%")));
+            if ($query->execute()) {
+                $manipulation["uploads"] = array(
+                    "table" => "uploads",
+                    "command" => "delete",
+                    "where" => array(
+                        "recordid" => array()
+                    )
+                );
 
-            $manipulation["uploads_state"] = array(
-                "table" 	=> "uploads",
-                "command"	=> "delete",
-                "where"		=> array(
-                    "id" => array()
-                )
-            );
+                $manipulation["uploads_state"] = array(
+                    "table" => "uploads",
+                    "command" => "delete",
+                    "where" => array(
+                        "id" => array()
+                    )
+                );
 
-            while($row = $query->fetch_assoc()) {
-                $manipulation["uploads"]["where"]["recordid"][] = $row["recordid"];
-                $manipulation["uploads_state"]["where"]["id"][] = $row["recordid"];
+                while ($row = $query->fetch_assoc()) {
+                    $manipulation["uploads"]["where"]["recordid"][] = $row["recordid"];
+                    $manipulation["uploads_state"]["where"]["id"][] = $row["recordid"];
+                }
+
+                SQL::Manipulate($manipulation);
+            } else {
+                throw new SQLException();
             }
-
-            SQL::Manipulate($manipulation);
-        } else {
-            throw new SQLException();
         }
     }
 	
@@ -509,7 +511,7 @@ abstract class g_SoftwareType {
      * @access public
      * @return bool
      */
-	public function isStoreAvailable() {
+	public static function isStoreAvailable() {
 		if(isset(self::$gomaAvailable))
 			return self::$gomaAvailable;
 		
@@ -529,7 +531,7 @@ abstract class g_SoftwareType {
      * @access public
      * @return mixed
      */
-	public function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
+	public static function getAppStoreInfo($name, $version = null, $currVersion = 1.0) {
 		if(PROFILE) Profiler::mark("G_SoftwareType::getAppStoreInfo");
 		
 		if(!self::isStoreAvailable()) {

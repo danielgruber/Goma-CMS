@@ -27,7 +27,7 @@ class StaticsManager {
      * validates if class and variable/method-names are valid.
      * it throws an exception if not and returns correct class-name.
      *
-     * @param string $class
+     * @param string|object $class
      * @param string $var
      * @return string classname
      */
@@ -45,7 +45,7 @@ class StaticsManager {
     /**
      * Gets the value of $class::$$var.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      * @param string $var Name of the variable.
      *
      * @return mixed Value of $var.
@@ -59,7 +59,7 @@ class StaticsManager {
     /**
      * Checks, if $class::$$var is set.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      * @param string $var Name of the variable.
      *
      * @return boolean
@@ -73,7 +73,7 @@ class StaticsManager {
     /**
      * Sets $value for $class::$$var.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      * @param string $var Name of the variable.
      * @param mixed $value
      *
@@ -92,7 +92,7 @@ class StaticsManager {
     /**
      * Calls $class::$$func.
      *
-     * @param string $class Name of the class.
+     * @param string|object $class Name of the class.
      * @param string $func Name of the function.
      *
      * @return mixed return value of call
@@ -110,16 +110,16 @@ class StaticsManager {
 
     /**
      * adds a var to cache
-     *@param class - class_name
-     *@param name - var-name
+     * @param class|object $class
+     * @param string $variableName
      */
-    public static function addSaveVar($class, $name)
+    public static function addSaveVar($class, $variableName)
     {
         if (class_exists("ClassManifest")) {
             $class = ClassManifest::resolveClassName($class);
         }
 
-        self::$save_vars[$class][] = $name;
+        self::$save_vars[$class][] = $variableName;
     }
 
     /**
@@ -144,6 +144,7 @@ class StaticsManager {
      */
     public static function setSaveVars($class)
     {
+
         if (PROFILE)  Profiler::mark("ClassInfo::setSaveVars");
 
         $classname = ClassManifest::resolveClassName($class);

@@ -136,14 +136,19 @@ class FileSystem extends Object {
 			return -1;
 		}
 	}
-	
-	/**
-	 * writes file contentss
-	 *
-	 *@name writeFileContents
-	 *@access public
-	*/
-	public static function writeFileContents($file, $content, $modifier = null,$mode = null) {	
+
+    /**
+     * writes file contentss
+     *
+     * @param string $file
+     * @param string $content
+     * @param int $modifier
+     * @param int $mode permission of file
+     * @return bool
+     * @internal param $writeFileContents
+     * @access public
+     */
+	public static function writeFileContents($file, $content, $modifier = null, $mode = null) {
 		if(@file_put_contents($file, $content, $modifier)) {
 			@chmod($file, self::getMode($mode));
 			return true;
@@ -151,27 +156,27 @@ class FileSystem extends Object {
 			return false;
 		}
 	}
-	
-	/**
-	 * alias for writeFileContents
-	 *
-	 *@name write
-	 *@access public
-	*/
+
+    /**
+     * alias for writeFileContents
+     *
+     * @name write
+     * @access public
+     * @return bool
+     */
 	public static function write($file, $content, $modifier = null, $mode = null) {
 		return self::writeFileContents($file, $content, $modifier, $mode);
 	}
-	
-	/**
-	 * sets chmod recursivly
-	 *
-	 * @name 	chmod
-	 * @access 	public
-	 * @param 	string - path
-	 * @param 	int - mode
-	 * @param 	bool - if to break and return false on fail
-	 * @param 	bool - if try to own all files, that we can set perm-mode easy
-	*/
+
+    /**
+     * sets chmod recursively.
+     *
+     * @param    string $file path
+     * @param    int $mode
+     * @param    bool $breakOnFail if to break and return false on fail
+     * @param    bool $tryOwn if try to own all files, that we can set perm-mode easy
+     * @return bool
+     */
 	public static function chmod($file, $mode, $breakOnFail = true, $tryOwn = false) {
 		
 
@@ -201,134 +206,114 @@ class FileSystem extends Object {
 		return $r;
 		
 	}
-	
-	/**
-	 * removes recursivly
-	 *
-	 *@name delete
-	 *@access public
-	 *@param string - path
-	 *@param bool - if to break and return false on fail
-	*/
+
+    /**
+     * removes recursively
+     *
+     * @name delete
+     * @access public
+     * @param string $file path
+     * @param bool $breakOnFail if to break and return false on fail
+     * @return bool
+     */
 	public static function delete($file, $breakOnFail = true) {
 		if(is_dir($file)) {
 			foreach(scandir($file) as $_file) {
-				if($_file != "." && $_file != "..")
-					if(!self::delete($file . "/" . $_file, $breakOnFail) && $breakOnFail) {
-						return false;
-					}
+				if($_file != "." && $_file != "..") {
+                    if (!self::delete($file . "/" . $_file, $breakOnFail) && $breakOnFail) {
+                        return false;
+                    }
+                }
 			}
 			return @rmdir($file);
 		} else {
 			return @unlink($file);
 		}
 	}
-	
-	/**
-	 * copies recursivly
-	 *
-	 *@name copy
-	 *@access public
-	 *@param string - source
-	 *@param string - destination
-	 *@param null|int - mode, if you want to make a chmod to every destination file
-	 *@param bool - if to break and return false on fail
-	*/
-	public static function copy($source, $destination, $mode = null, $breakOnFail = true) {
-		if(!$source || !$destination) {
-			throw new InvalidArgumentException("Source and Destination are required for FileSystem::copy.");
-		}
-		
-		if(is_dir($source)) {
-			if(!self::requireDir($destination) && $breakOnFail){
-				return false;
-			}
-		
-			
-			foreach(scandir($source) as $file) {
-				if($file != "." && $file != "..") {
-					if(!self::copy($source . "/" . $file, $destination . "/" . $file, $mode, $breakOnFail) && $breakOnFail) {
-						return false;
-					}
-				}
-			}
-			return true;
-		} else {
-			if(file_exists($destination) && !@unlink($destination)) {
-				self::$errFile = $destination;
-				return false;
-			}
-			
-			if(copy($source, $destination)) {
-				if($mode !== null) {
-					chmod($destination, $mode);
-				}
-				return true;
-			} else {
-				self::$errFile = $source;
-				return false;
-			}
-		}
+
+    /**
+     * copies recursivly
+     *
+     * @param string $source
+     * @param string $destination
+     * @param bool $breakOnFail if to break and return false on fail
+     * @return bool
+     */
+	public static function copy($source, $destination, $breakOnFail = true) {
+		return self::executeFunction("copy", $source, $destination, $breakOnFail);
 	}
-	
-	/**
-	 * moves files recursivly. it preserves the old folder-structure, 
-	 * cause it will just require all folders and move all files.
-	 *
-	 * @name 	move
-	 * @access 	public
-	 * @param 	string - source
-	 * @param 	string - destination
-	 * @param 	bool - if to break and return false on fail
-	*/
-	public static function move($source, $destination, $breakOnFail = true, $useLog = false) {
-		if(!$source || !$destination) {
-			throw new InvalidArgumentException("Source and Destination are required for FileSystem::move.");
-		}
-		
-		if(is_dir($source)) {
-			if(!self::requireDir($destination) && $breakOnFail){
-				return false;
-			}
-			
-			foreach(scandir($source) as $file) {
-				if($file != "." && $file != "..") {
-					if(!rename($source . "/" . $file, $destination . "/" . $file) && $breakOnFail) {
-						return false;
-					}
-				}
-			}
-			return true;
-		} else {
-			if(file_exists($destination) && !@unlink($destination)) {
-				self::$errFile = $destination;
-				return false;
-			}
-			
-			if(rename($source, $destination)) {
-				return true;
-			} else {
-				self::$errFile = $source;
-				return false;
-			}
-		}
-	}
-	
-	/**
-	 * moves recursivly with logging
-	 *
-	 * @name 	moveLogged
-	 * @access 	public
-	 * @param 	string - source
-	 * @param 	string - destination
-	 * @param 	bool - if to break and return false on fail
-	 * @param 	internal variable - for the log
-	*/
+
+    /**
+     * moves files recursivly. it preserves the old folder-structure,
+     * cause it will just require all folders and move all files.
+     *
+     * @param    string $source
+     * @param    string $destination
+     * @param    bool $breakOnFail if to break and return false on fail
+     * @return bool
+     */
+    public static function move($source, $destination, $breakOnFail = true) {
+        return self::executeFunction("rename", $source, $destination, $breakOnFail);
+    }
+
+    /**
+     * executes given operation on files with source, destination and breakOnFail.
+     *
+     * @param callback $callback
+     * @param string $source
+     * @param string $destination
+     * @param bool $breakOnFail
+     * @return bool
+     */
+    protected static function executeFunction($callback, $source, $destination, $breakOnFail = true) {
+        if(!$source || !$destination) {
+            throw new InvalidArgumentException("Source and Destination are required for FileSystem::executeFunction.");
+        }
+
+        if(is_dir($source)) {
+            if(!self::requireDir($destination, null, false) && $breakOnFail){
+                return false;
+            }
+
+            foreach(scandir($source) as $file) {
+                if($file != "." && $file != "..") {
+                    if(!self::executeFunction($callback, $source . "/" . $file, $destination . "/" . $file, $breakOnFail) && $breakOnFail) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            if(file_exists($destination) && !@unlink($destination)) {
+                self::$errFile = $destination;
+                return false;
+            }
+
+            if(call_user_func_array($callback, array($source, $destination))) {
+                return true;
+            } else {
+                self::$errFile = $source;
+                return false;
+            }
+        }
+    }
+
+    /**
+     * moves recursivly with logging
+     *
+     * @name    moveLogged
+     * @access    public
+     * @param    string - source
+     * @param    string - destination
+     * @param    bool - if to break and return false on fail
+     * @param    internal variable - for the log
+     * @return bool|string
+     */
 	public static function moveLogged($source, $destination, $breakOnFail = true, $useLog = false) {
 		$log = "#: ";
 		
 		if(!$source || !$destination) {
-			throwError(6, "PHP-Error", "Source and Destination are required for FileSystem::moveLogged.");
+            throw new InvalidArgumentException("Source and Destination are required for FileSystem::moveLogged.");
 		}
 		
 		if(is_dir($source)) {
@@ -433,23 +418,23 @@ class FileSystem extends Object {
 		
 		return $size . $ext;
 	}
-	
-	/**
-	 * protects file-path
-	 *
-	 *@name protect
-	 *@access public
-	*/
+
+    /**
+     * protects file-path
+     *
+     * @return mixed
+     */
 	public static function protect($path) {
 		return str_replace("../", "", $path);
 	}
-	
-	/**
-	 * sends a file to browser in chunks, because of less RAM-Usage
-	 *
-	 *@name readfile_chunked
-	 *@access public
-	*/
+
+    /**
+     * sends a file to browser in chunks, because of less RAM-Usage
+     *
+     * @name readfile_chunked
+     * @access public
+     * @return bool
+     */
 	public static function readfile_chunked($filename) {
 		  
 	
@@ -490,15 +475,17 @@ class FileSystem extends Object {
 		}
 		return fclose($handle);
 	}
-	
-	/**
-	 * sends a specified file to the browser through the file-sender
-	 *
-	 *@name sendFile
-	 *@access public
-	 *@param string - file
-	*/
-	public function sendFile($file, $filename = null) {
+
+    /**
+     * sends a specified file to the browser through the file-sender
+     *
+     * @name sendFile
+     * @access public
+     * @param string $file
+     * @param string $filename
+     * @return bool
+     */
+	public static function sendFile($file, $filename = null) {
 		if(!file_exists($file))
 			return false;
 		
@@ -507,14 +494,15 @@ class FileSystem extends Object {
 		HTTPResponse::redirect(ROOT_PATH . "system/libs/file/Sender/FileSender.php?downloadID=" . $hash);
 		exit;
 	}
-	
-	/**
-	 * compares two files
-	 *
-	 *@name compare
-	 *@access public
-	*/
-	public function compare($file1, $file2) {
+
+    /**
+     * compares two files
+     *
+     * @name compare
+     * @access public
+     * @return bool
+     */
+	public static function compare($file1, $file2) {
 		$content1 = strtoupper(dechex(crc32(file_get_contents($file1))));
 		$content2 = strtoupper(dechex(crc32(file_get_contents($file2))));
 
@@ -524,15 +512,16 @@ class FileSystem extends Object {
 			return true;
 		}
 	}
-	
-	/**
-	 * checks if we could copy/move and overwrite files from directory 1 in directory 2.
-	 *
-	 * @name 	checkMovePerms
-	 * @access 	public
-	 * @param 	string - directory 1
-	 * @param 	string - directory 2
-	*/
+
+    /**
+     * checks if we could copy/move and overwrite files from directory 1 in directory 2.
+     *
+     * @name    checkMovePerms
+     * @access    public
+     * @param    string - directory 1
+     * @param    string - directory 2
+     * @return bool
+     */
 	public static function checkMovePerms($source, $dest) {
 		if(!file_exists($dest) || !file_exists($source) || !is_writable($dest)) {
 			if(!file_exists($source)) {
@@ -563,15 +552,16 @@ class FileSystem extends Object {
 		}
 		return true;
 	}
-	
-	/**
-	 * checks if we could copy/move and overwrite given files
-	 *
-	 * @name 	checkMovePermsByList
-	 * @access 	public
-	 * @param 	array - filelist
-	 * @param 	string - destination
-	*/
+
+    /**
+     * checks if we could copy/move and overwrite given files
+     *
+     * @name    checkMovePermsByList
+     * @access    public
+     * @param    array - filelist
+     * @param    string - destination
+     * @return bool
+     */
 	public static function checkMovePermsByList($list, $dest) {
 		if(!file_exists($dest) || !is_writable($dest)) {
 			self::$errFile = $dest;
@@ -579,24 +569,14 @@ class FileSystem extends Object {
 		}
 		
 		foreach($list as $file) {
-			if(!file_exists($dest . "/" . $file)) {
-				$_file = substr($file, 0, strrpos($file, "/"));
-				while(!file_exists($dest . "/ . $_file")) {
-					if(!strpos($_file, "/")) {
-						continue 2;
-					}
-					$_file = substr($_file, 0, strrpos($_file, "/"));
-				}
-				
-				if(!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $_file)) {
-					self::$errFile = $dest . "/" . $_file;
-					return false;
-				}
-				
-			} else if (!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $file)) {
-				self::$errFile = $dest . "/" . $file;
-				return false; 
-			}
+
+            $file = self::getNearestFileInPath($file, $dest . "/");
+            if($file !== false) {
+                if (!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $file)) {
+                    self::$errFile = $dest . "/" . $file;
+                    return false;
+                }
+            }
 		}
 		return true;
 	}
@@ -608,7 +588,7 @@ class FileSystem extends Object {
 	 * @param 	getNearestFileInPath
 	 * @return  string|false
 	*/
-	public function getNearestFileInPath($path, $root = "./") {
+	public static function getNearestFileInPath($path, $root = "./") {
 		if(file_exists($root . $path)) {
 			return $path;
 		}

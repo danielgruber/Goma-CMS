@@ -87,4 +87,19 @@ class ExceptionManager {
      * 503
      */
     const SERVICE_UNAVAILABLE = -503;
+
+    /**
+     * invalid indexes
+     */
+    const INDEX_INVALID = -60;
+
+    /**
+     * db field invalid.
+     */
+    const DB_FIELD_INVALID = -61;
+
+    /**
+     * no inverse found.
+     */
+    const RELATIONSHIP_INVERSE_REQUIRED = -62;
 }

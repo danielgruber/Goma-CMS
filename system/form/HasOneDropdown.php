@@ -122,7 +122,7 @@ class HasOneDropdown extends SingleSelectDropDown
 						$this->value = isset(call_user_func_array(array($this->form()->model, $this->relation), array())->id) ? call_user_func_array(array($this->form()->model, $this->relation), array())->id : null;
 						$this->input->value = $this->value;
 					} else {
-						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form()->name}.");
+						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form()->getName()}.");
 					}
 				}
 			} else {
@@ -147,7 +147,7 @@ class HasOneDropdown extends SingleSelectDropDown
 						
 
 					} else {
-						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form()->name}.");
+						throw new LogicException("{$this->relation} doesn't exist in the form {$this->form()->getName()}.");
 					}
 				}
 			}

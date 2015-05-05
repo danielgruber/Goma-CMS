@@ -31,8 +31,8 @@ class SoftwareTypeTest extends GomaUnitTest {
 			$this->assertNotNull($info["version"]);
 			$this->assertNotNull($info["canDisable"]);
 
-			if(isset($info["icon"])) {
-				$this->assertTrue(file_exists($info["icon"]), $info["icon"] . " Not found %s");
+			if(isset($info["icon"]) && $info["icon"]) {
+				$this->assertTrue(file_exists($info["icon"]), "Icon '" . $info["icon"] . "' Not found %s");
 			}
 		}
 	}

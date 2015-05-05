@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.3.1
+ * @version		2.3.2
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -36,7 +36,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @access public
 	 */
 	static $casting = array();
-	
+
 	/**
 	 * extended casting.
 	*/
@@ -159,9 +159,9 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
         $this->defaults = $this->defaults();
 
 		if(!isset(self::$server)) {
-			self::$server = ArrayLib::map_key($_SERVER, "strtolower");
-			self::$_get = ArrayLib::map_key($_GET, "strtolower");
-			self::$_post = ArrayLib::map_key($_POST, "strtolower");
+			self::$server = ArrayLib::map_key("strtolower", $_SERVER);
+			self::$_get = ArrayLib::map_key("strtolower", $_GET);
+			self::$_post = ArrayLib::map_key("strtolower", $_POST);
 		}
 	}
 
@@ -275,10 +275,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	}
 
 	//!APIs
-	/**
-	 * this function returns the current record as an array
-	 *@param array - extra fields, which are not in database
-	 */
+    /**
+     * this function returns the current record as an array
+     * @param array - extra fields, which are not in database
+     * @return array
+     */
 	public function ToArray($additional_fields = array()) {
 		if(empty($additional_fields))
 			return $this->data;
@@ -290,11 +291,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			return $data;
 		}
 	}
-	
+
 	/**
 	 * to array if we need data for REST-API.
 	*/
-	public function ToRESTArray($addtional_fields = array()) {
+	public function ToRESTArray($additional_fields = array()) {
 		return $this->ToArray($additional_fields);
 	}
 
@@ -305,7 +306,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @return $this
      */
 	public function customise($loops = array()) {
-		$loops = Arraylib::map_key($loops, "strtolower");
+		$loops = Arraylib::map_key("strtolower", $loops);
 		$this->customised = array_merge($this->customised, $loops);
 
 		return $this;
@@ -724,7 +725,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		if(isset($this->customised[$lowername])) {
 			return true;
-		} 
+		}
 
 		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 			return false;
@@ -751,7 +752,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		if(isset($this->customised[$lowername])) {
 			return $this->customised[$lowername];
 			// methods
-		} 
+		}
 
 		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
 			return parent::__call($name, $args);
@@ -764,7 +765,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		if(isset($this->data[$lowername])) {
 			return $this->data[$lowername];
-		} 
+		}
 
 		if($this->isServerMethod($lowername)) {
 			return $this->serverGet($name, $lowername);
@@ -895,14 +896,26 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		} else {
 
 			// check for casting or use default-casting.
-			$casting = $this->casting();
-			$caste = isset($casting[$name]) ? $casting[$name] : StaticsManager::getStatic($this->classname, "default_casting");
-			unset($casting);
-			$object = DBField::getObjectByCasting($caste, $name, $data);
+            $cast = $this->getCast($name);
+
+			$object = DBField::getObjectByCasting($cast, $name, $data);
 
 			return $object;
 		}
 	}
+
+    /**
+     * returns casting for given field.
+     *
+     * @param string $field
+     * @return string
+     */
+    protected function getCast($field) {
+        $casting = $this->casting();
+
+        $field = trim(strtolower($field));
+        return isset($casting[$field]) ? $casting[$field] : StaticsManager::getStatic($this->classname, "default_casting");
+    }
 
     /**
      * gets offset as object
@@ -920,7 +933,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *@name offsetSet
 	 */
 	public function offsetSet($offset, $value) {
-	
+
 		return $this->__set($offset, $value);
 	}
 
@@ -954,25 +967,25 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			}
 		} else {
 			$var = trim(strtolower($var));
-			
+
 			if($value instanceof DBField) {
 				$value = $value->raw();
 				$this->extendedCasting[$var] = $value->classname;
 			}
-			
+
 			if(is_array($this->data)) {
 				// first unset, so the new value is last value of data stack
 				unset($this->data[$var]);
 				if(isset($this->data[$var]) && $this->data[$var] == $value) {
 					return;
 				}
-				
+
 				$this->data[$var] = $value;
 			} else {
 				$this->data = array($var => $value);
 			}
 		}
-		
+
 		$this->changed = true;
 	}
 
@@ -1029,7 +1042,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 */
 	public function casting() {
 		$casting = isset(ClassInfo::$class_info[$this->classname]["casting"]) ? ClassInfo::$class_info[$this->classname]["casting"] : StaticsManager::getStatic($this->classname, "casting");
-		
+
 		return array_merge($casting, $this->extendedCasting);
 	}
 
@@ -1039,54 +1052,6 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 */
 	public function defaults() {
 		return isset(ClassInfo::$class_info[$this->classname]["defaults"]) ? ClassInfo::$class_info[$this->classname]["defaults"] : (array)StaticsManager::getStatic($this->classname, "default");
-	}
-
-	/**
-	 * generates casting
-	 *
-	 */
-	public function generateCasting() {
-		$casting = StaticsManager::getStatic($this->classname, "casting");
-		foreach($this->LocalcallExtending("casting") as $_casting) {
-			$casting = array_merge($casting, $_casting);
-			unset($_casting);
-		}
-
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$casting = array_merge(Object::instance($parent)->generateCasting(), $casting);
-		}
-
-		$casting = ArrayLib::map_key("strtolower", $casting);
-		return $casting;
-	}
-
-	/**
-	 * defaults
-	 *
-	 */
-	public function generateDefaults() {
-		if(StaticsManager::hasStatic($this->classname, "default")) {
-			$defaults = StaticsManager::getStatic($this->classname, "default");
-		} else {
-			$defaults = array();
-		}
-
-		// get parents
-		$parent = get_parent_class($this);
-		if(strtolower($parent) != "viewaccessabledata" && !ClassInfo::isAbstract($parent)) {
-			$defaults = array_merge(Object::instance($parent)->generateDefaults(), $defaults);
-		}
-
-		foreach($this->LocalcallExtending("defaults") as $defaultsext) {
-			$defaults = array_merge($defaults, $defaultsext);
-			unset($defaultsext);
-		}
-
-		// free memory
-		unset($parent);
-		$defaults = ArrayLib::map_key($defaults, "strtolower");
-		return $defaults;
 	}
 
 	/**
@@ -1107,7 +1072,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
  * @package		Goma\System\Core
  * @version		1.0
  */
-abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
+abstract class Extension extends Object implements ExtensionModel {
 
 	/**
 	 * extra_methods
@@ -1128,6 +1093,7 @@ abstract class Extension extends ViewAccessAbleData implements ExtensionModel {
 		if(!is_object($object)) {
             throw new InvalidArgumentException('Object is not an object');
 		}
+
 		if(class_exists($object->classname)) {
 			$this->owner = $object;
 		} else {

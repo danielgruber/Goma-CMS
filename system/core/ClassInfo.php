@@ -203,7 +203,7 @@ class ClassInfo extends Object {
      * returns if class exists and is not empty.
      * it returns correct class-name.
      *
-     * @param string class
+     * @param string|object class
      * @return string
      * @throws LogicException
      */
@@ -1066,9 +1066,9 @@ class ClassInfo extends Object {
 		if(isset(self::$class_info[$class]["dataclasses"])) {
 
 			$dataclasses = array();
-			foreach(self::$class_info[$class]["dataclasses"] as $c) {
-				if(isset(self::$class_info[$c]["table"]) && self::$class_info[$c]["table"] !== false) {
-					$dataclasses[$c] = self::$class_info[$c]["table"];
+			foreach(self::$class_info[$class]["dataclasses"] as $dataClass) {
+				if(isset(self::$class_info[$dataClass]["table"]) && self::$class_info[$dataClass]["table"] !== false) {
+					$dataclasses[$dataClass] = self::$class_info[$dataClass]["table"];
 				}
 			}
 
