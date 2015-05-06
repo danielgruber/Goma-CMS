@@ -263,22 +263,23 @@ class DataObjectSet extends DataSet {
 		return $newData;
 	}
 
-	/**
-	 * returns the first item
-	 *@name first
-	 *@access public
-	*/
+    /**
+     * returns the first item
+     * @name first
+     * @access public
+     * @return DataObject
+     */
 	public function first($forceObject = true)
 	{
-			$this->forceData();
+        $this->forceData();
 
-			if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
-				return $this->current(key($this->data));
-			} else if($forceObject) {
-				return $this->dataobject;
-			} else {
-				return false;
-			}
+        if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
+            return $this->current(key($this->data));
+        } else if($forceObject) {
+            return $this->dataobject;
+        } else {
+            return null;
+        }
 	}
 
 	/**
