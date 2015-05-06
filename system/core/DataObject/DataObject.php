@@ -17,6 +17,7 @@
  *
  * @property    int versionid
  * @property    int id
+ * @property    string baseTable
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -361,22 +362,21 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * gets one data
-     *@name get_one
-     *@access public
-     *@param string - name of data-class
-     *@param array - where
-     *@param array - fields
-     *@param array - orderby
-     *@param array - froms
+     * gets one record of data or null when no record was found.
+     *
+     * @param string $dataClass
+     * @param array $filter
+     * @param array $sort
+     * @param array $joins
+     * @return DataObject
      */
-    public static function get_one($name, $filter = array(), $sort = array(), $joins = array())
+    public static function get_one($dataClass, $filter = array(), $sort = array(), $joins = array())
     {
         if (PROFILE) Profiler::mark("DataObject::get_one");
 
-        $name = strtolower($name);
+        $dataClass = strtolower($dataClass);
 
-        $output = self::get($name, $filter, $sort, array(1))->first(false);
+        $output = self::get($dataClass, $filter, $sort, array(1), $joins)->first(false);
 
         if (PROFILE) Profiler::unmark("DataObject::get_one");
 
@@ -3756,11 +3756,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * this method consolidates all relation data in data
      *
-     *@name consolidate
-     *@access public
+     * @name consolidate
+     * @access public
+     * @return $this
      */
     public function consolidate() {
-        foreach($this->manyManyTables() as $name => $data) {
+        foreach($this->ManyManyRelationships() as $name => $data) {
             $this->getRelationIDs($name);
         }
         return $this;
