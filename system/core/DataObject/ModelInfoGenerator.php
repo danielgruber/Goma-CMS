@@ -126,7 +126,7 @@ class ModelInfoGenerator {
 
         $has_one = self::generate_combined_array($class, "has_one", "has_one", $parents);
 
-        if (ClassInfo::get_parent_class($class) == null || ClassInfo::get_parent_class($class) == "dataobject") {
+        if (ClassInfo::get_parent_class($class) == "dataobject") {
             $has_one["autor"] = "user";
             $has_one["editor"] = "user";
         }

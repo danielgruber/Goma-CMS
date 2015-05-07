@@ -435,7 +435,7 @@ class ModelWriter extends Object {
     protected function checkForChangeInRelationship($relationShips, $useIds = true, $useObject = null) {
         foreach ($relationShips as $name) {
 
-            if ($useIds && (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"])) {
+            if ($useIds && (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))) {
                 return true;
             }
 

@@ -117,6 +117,22 @@ class ModelInfoGeneratorTests extends GomaUnitTest
         $this->unitTestFieldGenerator("has_many", "generateHas_Many");
         $this->unitTestFieldGenerator("search_fields", "generate_search_fields");
         $this->unitTestFieldGenerator("default", "generateDefaults");
+
+    }
+
+    public function testAutorIdEditorId() {
+
+        ModelInfoTestDOTestClass::$has_one = array(
+            "test" => "ModelInfoTestClass"
+        );
+
+        $localInfo = call_user_func_array(array("ModelInfoGenerator", "generateHas_One"), array("ModelInfoTestDoTestClass", false));
+
+        $this->assertEqual($localInfo, array("test" => "modelinfotestclass", "autor" => "user", "editor" => "user"));
+
+        $parentInfo = call_user_func_array(array("ModelInfoGenerator", "generateHas_One"), array("ModelInfoTestDoTestClass", true));
+
+        $this->assertEqual($parentInfo, array("test" => "modelinfotestclass", "autor" => "user", "editor" => "user"));
     }
 
     public function unittestGeneration($name, $base, $child, $extension, $method, $parents, $useClass, $expected) {
@@ -164,6 +180,10 @@ class ModelInfoTestExtensionClass extends DataObjectExtension {
     public static $casting = array();
     public static $index = array();
     public static $search_fields = array();
+}
+
+class ModelInfoTestDOTestClass extends DataObject {
+    public static $has_one = array();
 }
 
 Object::extend("ModelInfoTestClass", "ModelInfoTestExtensionClass");
