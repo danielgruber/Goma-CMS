@@ -27,142 +27,87 @@ class ImageUploadsTest extends GomaUnitTest
      */
     public function testImageResizer() {
 
+        $this->unitTestResizeCase("SetSize", 500, 375);
+
+        /* org set size */
+
+        $this->unitTestResizeCase("OrgSetSize", 500, 375);
+
+        /* no crop set size */
+        $this->unitTestResizeCase("noCropSetSize", 500, 375);
+
+        /* set width */
+        $this->unitTestResizeCase("SetWidth", 500, null);
+
+        /* set height */
+        $this->unitTestResizeCase("SetHeight", null, 375);
+
+        /* org set width */
+        $this->unitTestResizeCase("OrgSetWidth", 500, null);
+
+        /* org set height */
+        $this->unitTestResizeCase("OrgSetHeight", null, 375);
+
+        /* no crop set width */
+        $this->unitTestResizeCase("NoCropSetWidth", 500, null);
+
+        /* no crop set height */
+        $this->unitTestResizeCase("NoCropSetHeight", null, 375);
+
+    }
+
+    /**
+     * unit test resizing for specific case.
+     */
+    protected function unitTestResizeCase($action, $width, $height) {
+
+        $args = array();
+        $html = "";
+        $url = "";
+        $urlRetina = "";
+        if(isset($width)) {
+            $args[] = $width;
+            $html .= 'width="'.$width.'"';
+            $url .= $width;
+            $urlRetina .= ($width * 2);
+            if(isset($height)) {
+                $html = " " . $html;
+                $url .= "/";
+                $urlRetina .= "/";
+            }
+        }
+
+        if(isset($height)) {
+            $args[] = $height;
+            $html = 'height="'.$height.'"' . $html;
+            $url .= $height;
+            $urlRetina .= ($height * 2);
+        }
+
+        $path = 'Uploads/test/img.jpg/'.$action.'/'.$url.'.jpg';
+        $retinaPath = 'Uploads/test/img.jpg/'.$action.'/'.$urlRetina.'.jpg';
+
         /* set size */
         $this->unitTestResizer(
             "test/img.jpg",
             new Size(1000, 750),
-            "setSize",
-            array(500, 375),
-            '<img src="Uploads/test/img.jpg/SetSize/500/375.jpg" height="375" width="500" data-retina="Uploads/test/img.jpg/SetSize/1000/750.jpg" alt="img.jpg" style=""  />');
+            $action,
+            $args,
+            '<img src="'.$path.'" '.$html.' data-retina="'.$retinaPath.'" alt="img.jpg" style=""  />');
 
+        $args[] = true;
         $this->unitTestResizer(
             "test/img.jpg",
             new Size(1000, 750),
-            "setSize",
-            array(500, 375, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetSize/500/375.jpg" height="375" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetSize/1000/750.jpg" alt="img.jpg" style=""  />');
+            $action,
+            $args,
+            '<img src="'.BASE_URI . BASE_SCRIPT. $path . '" '.$html.' data-retina="'.BASE_URI . BASE_SCRIPT.$retinaPath.'" alt="img.jpg" style=""  />');
 
-        /* org set size */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "orgSetSize",
-            array(500, 375, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetSize/500/375.jpg" height="375" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetSize/1000/750.jpg" alt="img.jpg" style=""  />');
+        $this->assertTrue(file_exists($path . '.permit'));
+        $this->assertTrue(file_exists($retinaPath . '.permit'));
 
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "orgSetSize",
-            array(500, 375),
-            '<img src="Uploads/test/img.jpg/OrgSetSize/500/375.jpg" height="375" width="500" data-retina="Uploads/test/img.jpg/OrgSetSize/1000/750.jpg" alt="img.jpg" style=""  />');
-
-        /* no crop set size */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "noCropSetSize",
-            array(500, 375, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/noCropSetSize/500/375.jpg" height="375" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/noCropSetSize/1000/750.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "noCropSetSize",
-            array(500, 375),
-            '<img src="Uploads/test/img.jpg/noCropSetSize/500/375.jpg" height="375" width="500" data-retina="Uploads/test/img.jpg/noCropSetSize/1000/750.jpg" alt="img.jpg" style=""  />');
-
-        /* set width */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "setWidth",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetWidth/500.jpg" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "setWidth",
-            array(500),
-            '<img src="Uploads/test/img.jpg/SetWidth/500.jpg" width="500" data-retina="Uploads/test/img.jpg/SetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        /* set height */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "setHeight",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetHeight/500.jpg" height="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/SetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "setHeight",
-            array(500),
-            '<img src="Uploads/test/img.jpg/SetHeight/500.jpg" height="500" data-retina="Uploads/test/img.jpg/SetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-        /* org set width */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "orgSetWidth",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetWidth/500.jpg" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "orgSetWidth",
-            array(500),
-            '<img src="Uploads/test/img.jpg/OrgSetWidth/500.jpg" width="500" data-retina="Uploads/test/img.jpg/OrgSetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        /* org set height */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "OrgSetHeight",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetHeight/500.jpg" height="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/OrgSetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "OrgSetHeight",
-            array(500),
-            '<img src="Uploads/test/img.jpg/OrgSetHeight/500.jpg" height="500" data-retina="Uploads/test/img.jpg/OrgSetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-        /* no crop set width */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "NoCropSetWidth",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/NoCropSetWidth/500.jpg" width="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/NoCropSetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "NoCropSetWidth",
-            array(500),
-            '<img src="Uploads/test/img.jpg/NoCropSetWidth/500.jpg" width="500" data-retina="Uploads/test/img.jpg/NoCropSetWidth/1000.jpg" alt="img.jpg" style=""  />');
-
-        /* no crop set height */
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "NoCropSetHeight",
-            array(500, true),
-            '<img src="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/NoCropSetHeight/500.jpg" height="500" data-retina="'.BASE_URI . BASE_SCRIPT.'Uploads/test/img.jpg/NoCropSetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-        $this->unitTestResizer(
-            "test/img.jpg",
-            new Size(1000, 750),
-            "NoCropSetHeight",
-            array(500),
-            '<img src="Uploads/test/img.jpg/NoCropSetHeight/500.jpg" height="500" data-retina="Uploads/test/img.jpg/NoCropSetHeight/1000.jpg" alt="img.jpg" style=""  />');
-
-
+        unlink($path . '.permit');
+        unlink($retinaPath . '.permit');
     }
 
     /**
