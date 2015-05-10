@@ -57,12 +57,18 @@ class GDTest extends GomaUnitTest
     }
 
     public function testGDResizeCalculation() {
-        $this->unitGDResizeCalculation(new Size(1000, 480), new Size(1000, 700), new Size(1000, 480), new Tuple(new Position(0,0), new Size(1000,480)), new Tuple(new Position(0,0), new Size(1000, 480)));
-        $this->unitGDResizeCalculation(new Size(1000, 480), new Size(700, 240), new Size(700, 240), new Tuple(new Position(0,0), new Size(1000,480)), new Tuple(new Position(100,0), new Size(500, 240)));
+        $this->unitGDResizeCalculation(new Size(1000, 480), new Size(1000, 700), new Size(1000, 700), new Tuple(new Position(157,0), new Size(686,480)), new Tuple(new Position(0,0), new Size(1000, 700)));
+        $this->unitGDResizeCalculation(new Size(1000, 480), new Size(1000, 700), new Size(1000, 700), new Tuple(new Position(157,0), new Size(686,480)), new Tuple(new Position(0,0), new Size(1000, 700)));
         $this->unitGDResizeCalculation(new Size(1000, 480), new Size(480, 480), new Size(480, 480), new Tuple(new Position(260,0), new Size(480,480)), new Tuple(new Position(0,0), new Size(480, 480)));
         $this->unitGDResizeCalculation(new Size(1000, 480), new Size(250, 250), new Size(250, 250), new Tuple(new Position(260,0), new Size(480,480)), new Tuple(new Position(0,0), new Size(250, 250)));
         $this->unitGDResizeCalculation(new Size(480, 1000), new Size(480, 480), new Size(480, 480), new Tuple(new Position(0,260), new Size(480,480)), new Tuple(new Position(0,0), new Size(480, 480)));
         $this->unitGDResizeCalculation(new Size(480, 1000), new Size(240, 240), new Size(240, 240), new Tuple(new Position(0,260), new Size(480,480)), new Tuple(new Position(0,0), new Size(240, 240)));
+
+        // unit tests from tufast
+        $this->unitGDResizeCalculation(new Size(1083, 723), new Size(492, 250), new Size(492, 250), new Tuple(new Position(0, 87), new Size(1083,550)), new Tuple(new Position(0,0), new Size(492, 250)));
+        $this->unitGDResizeCalculation(new Size(1083, 723), new Size(1968, 1000), new Size(1968, 1000), new Tuple(new Position(0, 87), new Size(1083,550)), new Tuple(new Position(0,0), new Size(1968, 1000)));
+
+        $this->unitGDResizeCalculation(new Size(1000, 1000), new Size(200, 240), new Size(200, 240), new Tuple(new Position(84, 0), new Size(833, 1000)), new Tuple(new Position(0,0), new Size(200, 240)));
 
     }
 

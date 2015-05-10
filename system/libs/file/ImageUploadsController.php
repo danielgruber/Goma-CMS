@@ -76,6 +76,10 @@ class ImageUploadsController extends UploadsController {
      * @return false
      */
 	public function index() {
+        if($this->getParam("height") || $this->getParam("width")) {
+            return false;
+        }
+
 		if(self::checkFilename($this->modelInst()->filename)) {
 			$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
 
