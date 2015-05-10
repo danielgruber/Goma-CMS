@@ -284,14 +284,6 @@ class GD extends Object
      * @return Size
      */
     protected function getDestImageSize($srcWidth, $srcHeight, $destWidth, $destHeight) {
-        if($destHeight > $srcHeight) {
-            $destHeight = $srcHeight;
-        }
-
-        if($destWidth > $srcWidth) {
-            $destWidth = $srcWidth;
-        }
-
         return new Size($destWidth, $destHeight);
     }
 
@@ -308,8 +300,9 @@ class GD extends Object
         $size = new Size($srcWidth, $srcHeight);
         $position = new Position(0, 0);
 
-        $relation = $srcWidth / $srcHeight;
-        if($relation > 1) {
+        $relation = ($srcWidth / $srcHeight);
+        $newRelation = $imageSize->getWidth() / $imageSize->getHeight();
+        if($relation - $newRelation > 0) {
             $multiplier = $imageSize->getHeight() / $srcHeight;
             $calculatedWidth = $srcWidth * $multiplier;
 
