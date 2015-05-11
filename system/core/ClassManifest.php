@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		3.3.4
+ * @version		3.4
  */
 class ClassManifest {
 	/**
@@ -194,56 +194,72 @@ class ClassManifest {
 		return $class;
 	}
 
-	/**
-	 * Generates the class-manifest for a given directory.
-	 *
-	 * @param	string &$classes
-	 * @param	string &class_info
-	 * @param	array[] &$env
-	 *
-	 * @return	boolean
-	 */
+    /**
+     * Generates the class-manifest for a given directory.
+     *
+     * @param string $dir
+     * @param array &$classes
+     * @param array $class_info
+     * @param array &$env
+     */
 	public static function generate_class_manifest($dir, &$classes, &$class_info, &$env) {
-		if(file_exists($dir . "/_exclude.php")) {
-			include_once ($dir . "/_exclude.php");
-			return false;
-		}
 
-		if(file_exists($dir . "/autoloader_exclude")) {
+        $dir = realpath($dir);
+
+        if (self::shouldBeScanned($dir, $classes, $class_info, $env)) {
+
+            foreach (scandir($dir) as $file) {
+                if ($file != "." && $file != "..") {
+                    if (is_dir($dir . "/" . $file)) {
+                        self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
+                    } else if (preg_match('/\.php$/i', $file) && $file != "ClassManifest.php") {
+                        self::parsePHPFile($dir . "/" . $file, $classes, $class_info, $env);
+                    }
+
+                    if ($file == "_config.php") {
+                        self::addPreload($dir . "/" . $file);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * checks if current folder should be scanned.
+     *
+     * returns true when should be and false when not.
+     */
+    protected static function shouldBeScanned($dir, &$classes, &$class_info, &$env) {
+        if(file_exists($dir . "/_exclude.php")) {
+            include_once ($dir . "/_exclude.php");
             return false;
         }
 
-		if(!DEV_MODE && file_exists($dir . "/autoloader_non_dev_exclude")) {
+        if(file_exists($dir . "/autoloader_exclude")) {
             return false;
         }
 
-		$dir = realpath($dir);
+        if(!DEV_MODE && file_exists($dir . "/autoloader_non_dev_exclude")) {
+            return false;
+        }
 
-		// Extension-Layer
-		if(file_exists($dir . '/contents/info.plist')) {
-			$data = self::getPropertyList($dir . '/contents/info.plist');
+        // Extension-Layer
+        if(file_exists($dir . '/contents/info.plist')) {
+            $data = self::getPropertyList($dir . '/contents/info.plist');
 
             self::generateExtensionData($data, $dir, $classes, $class_info, $env);
-            return;
-		}
+            return false;
+        }
 
-		foreach(scandir($dir) as $file) {
-			if($file != "." && $file != "..") {
-				if(is_dir($dir . "/" . $file)) {
-					self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
-				} else if(preg_match('/\.php$/i', $file) && $file != "ClassManifest.php") {
-					self::parsePHPFile($dir . "/" . $file, $classes, $class_info, $env);
-				}
-
-				if($file == "_config.php") {
-					self::addPreload($dir . "/" . $file);
-				}
-			}
-		}
-	}
+        return true;
+    }
 
     /**
      * parses PHP-file and fill classes-array.
+     * @param string $file
+     * @param array $classes
+     * @param array $class_info
+     * @param array $env
      */
     protected static function parsePHPFile($file, &$classes, &$class_info, &$env) {
         $contents = file_get_contents($file);
