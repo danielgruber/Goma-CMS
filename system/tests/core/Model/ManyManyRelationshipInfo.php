@@ -49,8 +49,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                 "ef"            => array(),
                 "target"        => $target,
                 "belonging"     => $targetRelationName,
-                "isMain"        => $controlling,
-                "bidirectional" => false
+                "isMain"        => $controlling
             )
         ));
 
@@ -166,8 +165,6 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             $this->assertEqual($inverted->getRelationShipName(), $relationShip->getBelongingName());
             $this->assertEqual($inverted->getBelongingName(), $relationShip->getRelationShipName());
 
-            $this->assertEqual($inverted->isBidirectional(), $relationShip->isBidirectional());
-
             $this->assertNotIdentical($inverted, $relationShip);
         }
     }
@@ -183,8 +180,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef" => array(),
                     "target" => "test",
                     "belonging" => "",
-                    "isMain" => "",
-                    "bidirectional" => false
+                    "isMain" => ""
                 )
             ));
         }, "LogicException");
@@ -196,8 +192,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef" => array(),
                     "target" => "",
                     "belonging" => "",
-                    "isMain" => "",
-                    "bidirectional" => false
+                    "isMain" => ""
                 )
             ));
         }, "LogicException");
@@ -209,8 +204,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "ef"            => array(),
                     "target"        => "test",
                     "belonging"     => "",
-                    "isMain"        => "",
-                    "bidirectional" => false
+                    "isMain"        => ""
                 )
             ));
         }, "LogicException");
@@ -223,10 +217,6 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true, false);
         $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false, false);
         $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false, false);
-
-        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true, true);
-        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false, true);
-        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false, true);
     }
 
     /**
@@ -239,15 +229,14 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * @param string $relationshipName
      * @param bool $controlling
      */
-    public function unittestAssignMent($owner, $table, $extraFields, $target, $targetRelationName, $relationshipName, $controlling, $biDirectional) {
+    public function unittestAssignMent($owner, $table, $extraFields, $target, $targetRelationName, $relationshipName, $controlling) {
         $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($owner, array(
             $relationshipName => array(
                 "table"         => $table,
                 "ef"            => $extraFields,
                 "target"        => $target,
                 "belonging"     => $targetRelationName,
-                "isMain"        => $controlling,
-                "bidirectional" => $biDirectional
+                "isMain"        => $controlling
             )
         ));
 
@@ -264,7 +253,6 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         $this->assertEqual($relation->getRelationShipName(), $relationshipName);
         $this->assertEqual($relation->getBelongingName(), $targetRelationName);
         $this->assertEqual($relation->isControlling(), $controlling);
-        $this->assertEqual($relation->isBidirectional(), $biDirectional);
     }
 }
 

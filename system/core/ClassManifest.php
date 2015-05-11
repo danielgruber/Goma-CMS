@@ -231,129 +231,8 @@ class ClassManifest {
 			if($file != "." && $file != "..") {
 				if(is_dir($dir . "/" . $file)) {
 					self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
-				} else if(_eregi('\.php$', $file) && $file != "ClassManifest.php") {
-					$contents = file_get_contents($dir . "/" . $file);
-
-					// remove everyting that is not php
-					$contents = preg_replace('/\/\*(.*)\*\//Usi', '', $contents);
-					$contents = preg_replace('/\?\>(.*)\<?php/Usi', '', $contents);
-
-					$namespace = "";
-
-					if(preg_match("/namespace\s+([a-zA-Z0-9\\\\\s_]+)\;/Usi", $contents, $matches)) {
-						$namespace = strtolower($matches[1]);
-						if(substr($namespace, -1) == "\\") {
-							$namespace = substr($namespace, 0, -1);
-						}
-
-						if(substr($namespace, 0, 1) == "\\") {
-							$namespace = substr($namespace, 1);
-						}
-
-						$namespace .= "\\";
-					}
-
-					preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z0-9\\\\_]+))?(\s+implements\s+([a-zA-Z0-9\\\\_,\s]+?))?\s+\{/Usi', $contents, $parts);
-					foreach($parts[2] as $key => $class) {
-
-						$class = self::resolveClassName($namespace . trim($class));
-
-						if(isset($classes[$class]) && $classes[$class] != $dir . "/" . $file && file_exists($classes[$class])) {
-							if(filemtime($classes[$class]) > filemtime($dir . "/" . $file)) {
-								if(count($parts[2]) == 1 && isset(ClassInfo::$appENV["app"]["allowDeleteOld"])) {
-									logging("Delete " . $dir . "/" . $file . ", because old Class!");
-									if(!DEV_MODE) {
-										// unlink file
-										// unlink file
-										FileSystem::requireDir(ROOT . "__oldclasses/" . $dir . "/");
-										rename($dir . "/" . $file, ROOT . "__oldclasses/" . $dir . "/" . $file);
-									}
-									continue;
-								} else {
-									unset($parts[2][$key]);
-									continue;
-								}
-							} else if(filemtime($classes[$class]) < filemtime($dir . "/" . $file)) {
-								if(count(array_keys($classes, $classes[$class])) == 1 && isset(ClassInfo::$appENV["app"]["allowDeleteOld"])) {
-									logging("Delete " . $classes[$class] . ", because old Class!");
-									if(!DEV_MODE) {
-										// unlink file
-										FileSystem::requireDir(ROOT . "__oldclasses/" . dirname($classes[$class]) . "/");
-										rename($classes[$class], ROOT . "__oldclasses/" . dirname($classes[$class]) . "/" . basename($classes[$class]));
-									}
-								}
-							}
-						}
-						$classes[$class] = $dir . "/" . $file;
-
-						if(!isset($class_info[$class]))
-							$class_info[$class] = array();
-
-						if($parts[4][$key]) {
-							$class_info[$class]["parent"] = self::resolveClassName($parts[4][$key]);
-							if($class_info[$class]["parent"] == $class) {
-								throwError(6, "Class-Definition-Error", "Class '" . $class . "' can not extend itself in " . $dir . "/" . $file . ".");
-							}
-						}
-
-						if($parts[6][$key]) {
-							$interfaces = explode(",", $parts[6][$key]);
-							$class_info[$class]["interfaces"] = array_map(array("ClassManifest", "resolveClassName"), $interfaces);
-						}
-
-						if($parts[1][$key]) {
-							$class_info[$class]["abstract"] = true;
-						}
-					}
-
-					// index interfaces too
-					preg_match_all('/interface\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z\\\\0-9_]+))?\s+\{/Usi', $contents, $parts);
-					foreach($parts[1] as $key => $class) {
-						$class = self::resolveClassName($namespace . trim($class));
-
-						if(isset($classes[$class]) && $classes[$class] != $dir . "/" . $file && file_exists($classes[$class])) {
-							if(filemtime($classes[$class]) > filemtime($dir . "/" . $file)) {
-								if(count($parts[2]) == 1 && isset(ClassInfo::$appENV["app"]["allowDeleteOld"])) {
-									logging("Delete " . $dir . "/" . $file . ", because old Class!");
-									if(!DEV_MODE) {
-										// unlink file
-										// unlink file
-										FileSystem::requireDir(ROOT . "__oldclasses/" . $dir . "/");
-										rename($dir . "/" . $file, ROOT . "__oldclasses/" . $dir . "/" . $file);
-									}
-									continue;
-								} else {
-									unset($parts[2][$key]);
-									continue;
-								}
-							} else if(filemtime($classes[$class]) < filemtime($dir . "/" . $file)) {
-								if(count(array_keys($classes, $classes[$class])) == 1 && isset(ClassInfo::$appENV["app"]["allowDeleteOld"])) {
-									logging("Delete " . $classes[$class] . ", because old Class!");
-									if(!DEV_MODE) {
-										// unlink file
-										FileSystem::requireDir(ROOT . "__oldclasses/" . dirname($classes[$class]) . "/");
-										rename($classes[$class], ROOT . "__oldclasses/" . dirname($classes[$class]) . "/" . basename($classes[$class]));
-									}
-								}
-							}
-						}
-						$classes[$class] = $dir . "/" . $file;
-
-						if(!isset($class_info[$class]))
-							$class_info[$class] = array();
-
-						if($parts[3][$key]) {
-							$class_info[$class]["parent"] = self::resolveClassName($parts[3][$key]);
-							if($class_info[$class]["parent"] == $class) {
-								throwError(6, "Interface-Definition-Error", "Interface '" . $class . "' can not extend itself in " . $dir . "/" . $file . ".");
-							}
-						}
-
-						$class_info[$class]["abstract"] = true;
-						$class_info[$class]["interface"] = true;
-					}
-
-					unset($contents, $parts, $key, $class);
+				} else if(preg_match('/\.php$/i', $file) && $file != "ClassManifest.php") {
+					self::parsePHPFile($dir . "/" . $file, $classes, $class_info, $env);
 				}
 
 				if($file == "_config.php") {
@@ -362,6 +241,142 @@ class ClassManifest {
 			}
 		}
 	}
+
+    /**
+     * parses PHP-file and fill classes-array.
+     */
+    protected static function parsePHPFile($file, &$classes, &$class_info, &$env) {
+        $contents = file_get_contents($file);
+
+        // remove everyting that is not php
+        $contents = preg_replace('/\/\*(.*)\*\//Usi', '', $contents);
+        $contents = preg_replace('/\?\>(.*)\<?php/Usi', '', $contents);
+
+        $namespace = self::getNamespace($contents);
+
+        preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z0-9\\\\_]+))?(\s+implements\s+([a-zA-Z0-9\\\\_,\s]+?))?\s+\{/Usi', $contents, $parts);
+        foreach($parts[2] as $key => $class) {
+
+            $class = self::resolveClassName($namespace . trim($class));
+
+            if(!self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)) {
+                if(count($parts[2]) == 1) {
+                    self::moveOldClass($file);
+                }
+
+                continue;
+            }
+
+            if($parts[6][$key]) {
+                $interfaces = explode(",", $parts[6][$key]);
+                $class_info[$class]["interfaces"] = array_map(array("ClassManifest", "resolveClassName"), $interfaces);
+            }
+
+            if($parts[1][$key]) {
+                $class_info[$class]["abstract"] = true;
+            }
+        }
+
+        // index interfaces too
+        preg_match_all('/interface\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z\\\\0-9_]+))?\s+\{/Usi', $contents, $parts);
+        foreach($parts[1] as $key => $class) {
+            $class = self::resolveClassName($namespace . trim($class));
+
+            if(!self::generateDefaultClassInfo($class, $file, $parts[3][$key], $classes, $class_info, true)) {
+                if(count($parts[2]) == 1) {
+                    self::moveOldClass($file);
+                }
+
+                continue;
+            }
+        }
+    }
+
+    /**
+     * generates default info for class.
+     *
+     * @param string $class resolved class-name
+     * @param string $file
+     * @param string $parent
+     * @param array $classes
+     * @param array $class_info
+     * @param bool $interface
+     * @return bool returns false when class is already in a better version existing.
+     */
+    protected static function generateDefaultClassInfo($class, $file, $parent, &$classes, &$class_info, $interface) {
+        if(isset($classes[$class]) && $classes[$class] != $file && file_exists($classes[$class])) {
+            if(filemtime($classes[$class]) > filemtime($file)) {
+                return false;
+            } else if(filemtime($classes[$class]) < filemtime($file)) {
+                if(count(array_keys($classes, $classes[$class])) == 1) {
+                    self::moveOldClass($classes[$class]);
+                }
+            }
+        }
+        $classes[$class] = $file;
+
+        if(!isset($class_info[$class])) {
+            $class_info[$class] = array();
+        }
+
+        if($parent) {
+            $class_info[$class]["parent"] = self::resolveClassName($parent);
+            if($class_info[$class]["parent"] == $class) {
+                if($interface) {
+                    throw new LogicException("Interface '" . $class . "' can not extend itself in " . $file . ".");
+                } else {
+                    throw new LogicException("Class '" . $class . "' can not extend itself in " . $file . ".");
+                }
+
+            }
+        }
+
+        if($interface) {
+            $class_info[$class]["abstract"] = true;
+            $class_info[$class]["interface"] = true;
+        }
+
+        return true;
+    }
+
+    /**
+     * returns namespace out of file-contents.
+     *
+     * @param string $contents
+     * @return string
+     */
+    protected static function getNamespace($contents) {
+        if(preg_match("/namespace\s+([a-zA-Z0-9\\\\\s_]+)\;/Usi", $contents, $matches)) {
+            $namespace = strtolower($matches[1]);
+            if(substr($namespace, -1) == "\\") {
+                $namespace = substr($namespace, 0, -1);
+            }
+
+            if(substr($namespace, 0, 1) == "\\") {
+                $namespace = substr($namespace, 1);
+            }
+
+            return $namespace . "\\";
+        }
+
+        return "";
+    }
+
+    /**
+     * moves an old class-file to another location when allowed.
+     *
+     * @param string $oldFile
+     */
+    protected static function moveOldClass($oldFile) {
+        if(isset(ClassInfo::$appENV["app"]["allowDeleteOld"]) && ClassInfo::$appENV["app"]["allowDeleteOld"]) {
+            logging("Delete " . $oldFile . ", because old Class!");
+            if(!DEV_MODE) {
+                // unlink file
+                FileSystem::requireDir(ROOT . "__oldclasses/" . substr($oldFile, 0, strrpos($oldFile, "/")));
+                rename($oldFile, ROOT . "__oldclasses/" . $oldFile);
+            }
+        }
+    }
 
     /**
      * returns array of data from PropertiyList.

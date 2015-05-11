@@ -59,13 +59,6 @@ class ModelManyManyRelationShipInfo {
     protected $controlling;
 
     /**
-     * defines if this relationship is bidirectional.
-     *
-     * @var bool
-     */
-    protected $bidirectional;
-
-    /**
      * constructor.
      */
     protected function __construct() {
@@ -129,11 +122,13 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
+     * a relationship is always bidirectional. this indicator means that you are using the same object.
+     *
      * @return boolean
      */
     public function isBidirectional()
     {
-        return $this->bidirectional;
+        return ClassManifest::classesRelated($this->owner, $this->target);
     }
 
     /**
@@ -262,14 +257,6 @@ class ModelManyManyRelationShipInfo {
     }
 
     /**
-     * @param boolean $bidirectional
-     */
-    protected function setBidirectional($bidirectional)
-    {
-        $this->bidirectional = $bidirectional;
-    }
-
-    /**
      * generates table-name.
      *
      * @return string
@@ -322,8 +309,7 @@ class ModelManyManyRelationShipInfo {
             "ef"            => $this->extraFields,
             "target"        => $this->target,
             "belonging"     => $this->belongingName,
-            "isMain"        => $this->controlling,
-            "bidirectional" => $this->bidirectional
+            "isMain"        => $this->controlling
         );
     }
 
@@ -374,7 +360,6 @@ class ModelManyManyRelationShipInfo {
             $relationShip->setExtraFields($record["ef"]);
             $relationShip->setTableName($record["table"]);
             $relationShip->setTarget($record["target"]);
-            $relationShip->setBidirectional($record["bidirectional"]);
 
             $relationShips[$name] = $relationShip;
         }
@@ -438,7 +423,6 @@ class ModelManyManyRelationShipInfo {
         $relationShip->controlling = !$belonging;
 
         $relationShip->tableName = $relationShip->generateTableName();
-        $relationShip->bidirectional = $info[2];
 
         return $relationShip;
     }
@@ -510,34 +494,8 @@ class ModelManyManyRelationShipInfo {
     {
         return array(
             ClassInfo::find_class_name(self::getRelationClass($value)),
-            self::getRelationInverse($value),
-            self::getRelationBidirectional($value)
+            self::getRelationInverse($value)
         );
-    }
-
-    /**
-     * returns if value defines relationship as bidirectional.
-     *
-     * @param array|string $value
-     * @return string
-     */
-    protected static function getRelationBidirectional($value) {
-        if(is_array($value)) {
-            if(isset($value["bidirectional"])) {
-                return $value["bidirectional"];
-            } else {
-                $arr = array_values($value);
-                if(isset($arr[2]) && is_bool($arr[2])) {
-                    return $arr[2];
-                }
-
-                if(isset($arr[1]) && is_bool($arr[1])) {
-                    return $arr[1];
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
