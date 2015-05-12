@@ -514,7 +514,11 @@ class GD extends Object
             $mode = 0777;
         }
 
-        call_user_func_array($type["output"], array($this->gd(), $file, $quality));
+        if($this->gd || !$this->pic) {
+            call_user_func_array($type["output"], array($this->gd(), $file, $quality));
+        } else {
+            copy($this->pic, $file);
+        }
 
         $this->pic = $file;
 

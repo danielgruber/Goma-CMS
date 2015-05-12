@@ -6,7 +6,7 @@
  *@link http://goma-cms.org
  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  *@author Goma-Team
- * last modified: 06.04.2015
+ * last modified: 13.05.2015
  * $Version 2.0.9
  */
 
@@ -14,14 +14,15 @@ var AjaxUpload = function(DropZone, options) {
     this.DropZone = $(DropZone);
     this.url = location.href;
     this.ajaxurl = location.href;
-    this["multiple"] = false;
+    this.multiple = false;
     this.id = randomString(10);
     this.max_size = -1;
     this.allowed_types = true;
 
-    for(i in options) {
-        if(options[i] !== undefined)
+    for(var i in options) {
+        if(options[i] !== undefined) {
             this[i] = options[i];
+        }
     }
     this.loading = false;
 
@@ -63,24 +64,13 @@ var AjaxUpload = function(DropZone, options) {
     }
 
     // browse-button for old-browser-fallback via iFrame
-    if(typeof this.browse != "undefined") {
+    if(typeof this.browse !== "undefined") {
         this.browse = $(this.browse);
-        // bind events to browse-button
-        this.browse.hover(function(){
-            if(!$this.loading) {
-                $this.browse.removeAttr("disabled");
-                $this.placeBrowseHandler();
-            } else {
-                $this.browse.attr("disabled", "disabled");
-                $this.hideBrowseHandler();
-            }
-        });
-
         this.placeBrowseHandler();
     }
 
     return this;
-}
+};
 
 AjaxUpload.prototype = {
     uploadRateRefreshTime: 500,
@@ -366,8 +356,9 @@ AjaxUpload.prototype = {
             }
         }
 
-        if(this.loading && !this.multiple)
+        if(this.loading && !this.multiple) {
             return false;
+        }
 
         var $this = this;
 
@@ -429,7 +420,8 @@ AjaxUpload.prototype = {
 
         // add listeners
         upload.addEventListener("progress", function(event){
-            if(currentStart = $this._progress(event, this)) {
+            var currentStart = $this._progress(event, this);
+            if(currentStart) {
                 this.startData = event.loaded;
                 this.currentStart = currentStart;
             }
@@ -443,15 +435,15 @@ AjaxUpload.prototype = {
         xhr.setRequestHeader("content-type", "application/octet-stream");
 
         xhr.onreadystatechange = function (event) {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
                 $this._complete(event, this, this.upload.fileIndex, this.upload);
             }
 
-            if (xhr.readyState == 4 && xhr.responseText != "" && xhr.status == 200) {
+            if (xhr.readyState === 4 && xhr.responseText !== "" && xhr.status === 200) {
                 $this._success(xhr.responseText, this.upload.fileIndex, this.upload);
             }
 
-            if(xhr.readyState == 4 && xhr.status != 200) {
+            if(xhr.readyState === 4 && xhr.status !== 200) {
                 $this._fail(xhr.status, xhr.responseText, this.upload.fileIndex, this.upload);
             }
         };
@@ -466,10 +458,10 @@ AjaxUpload.prototype = {
      *@access public
      */
     processQueue: function() {
-        for(i in this.queue) {
+        for(var i in this.queue) {
             if(!this.queue[i].loading && !this.queue[i].loaded) {
                 if(this.checkFileExt(this.queue[i].upload.fileName)) {
-                    if(this.max_size == -1 || typeof this.queue[i].upload.fileSize == "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
+                    if(this.max_size === -1 || typeof this.queue[i].upload.fileSize === "undefined" || this.queue[i].upload.fileSize <= this.max_size) {
                         this.queue[i].loading = true;
                         this.queue[i].send();
                         this.uploadStarted(i, this.queue[i].upload);
@@ -494,8 +486,6 @@ AjaxUpload.prototype = {
             return true;
         }
 
-        console.log(this.allowed_types);
-
         var regexp = new RegExp("\.("+this.allowed_types.join("|")+")$", "i");
         return name.match(regexp);
     },
@@ -506,16 +496,18 @@ AjaxUpload.prototype = {
      *@name transportFrame
      */
     transportFrame: function(field) {
-        if(this.loading)
+        if(this.loading) {
             return false;
+        }
+
+
+        var form = $(field).parents("form");
+
+        form.attr("id", "");
 
         var $this = this;
         if(field.files) {
             this.hideBrowseHandler();
-
-            var form = $(field).parents("form");
-
-            form.attr("id", "");
 
             // we can upload through the file-handler, yeah :)
             this.transferAjax(field.files);
@@ -545,10 +537,6 @@ AjaxUpload.prototype = {
 
             this.hideBrowseHandler();
 
-            var form = $(field).parents("form");
-
-            form.attr("id", "");
-
             this.queue[upload.fileIndex] = {
                 send: function() {
                     form.submit();
@@ -571,7 +559,7 @@ AjaxUpload.prototype = {
 
             };
 
-            if(getInternetExplorerVersion() == -1) {
+            if(getInternetExplorerVersion() === -1) {
                 frame.onload = testing;
             } else {
                 frame.attachEvent("onload", testing);
@@ -605,11 +593,13 @@ AjaxUpload.prototype = {
      *@name placeBrowseHandler
      */
     placeBrowseHandler: function() {
-        if(this.loading)
+        if(this.loading) {
             this.hideBrowseHandler();
+        }
 
-        if(typeof this.browse == "undefined")
+        if(typeof this.browse === "undefined") {
             return false;
+        }
 
         var $this = this;
 
@@ -624,22 +614,25 @@ AjaxUpload.prototype = {
                 $("#" + this.id + "_uploadForm").find(".fileSelectInput").attr("multiple", "multiple");
                 $("#" + this.id + "_uploadForm").find(".fileSelectInput").attr("name", "file[]");
             }
+        }
 
-            $("#" + this.id + "_uploadForm").hover(function(){
-                if(!$this.loading) {
-                    $this.browse.removeAttr("disabled");
-                    $this.placeBrowseHandler();
-                } else {
-                    $this.browse.attr("disabled", "disabled");
-                    $this.hideBrowseHandler();
-                }
-            });
+        if(!$this.loading) {
+            $this.browse.removeAttr("disabled");
+        } else {
+            $this.browse.attr("disabled", "disabled");
         }
 
         var $form = $("#" + this.id + "_uploadForm");
         $form.css("display", "block");
-        $form.css({top: this.browse.offset().top, left: this.browse.offset().left + this.browse.outerWidth() - $form.width(), width: this.browse.outerWidth(), height: this.browse.outerHeight(), overflow: "hidden"});
+        $form.css({
+            top: this.browse.offset().top,
+            left: this.browse.offset().left + this.browse.outerWidth() - $form.width(),
+            width: this.browse.outerWidth(),
+            height: this.browse.outerHeight(), overflow: "hidden"
+        });
         $form.fadeTo(0, 0);
+
+        setTimeout(this.placeBrowseHandler.bind(this), 500);
     },
 
     /**
@@ -648,8 +641,9 @@ AjaxUpload.prototype = {
      *@name hideBrowseHandler
      */
     hideBrowseHandler: function() {
-        if(typeof this.browse == "undefined")
+        if(typeof this.browse === "undefined") {
             return false;
+        }
 
         var $form = $("#" + this.id + "_uploadForm");
         $form.css({top: - 400, left: this.browse.offset().left});
@@ -662,29 +656,29 @@ AjaxUpload.prototype = {
      *@name abort
      */
     abort: function(fileIndex) {
-        if(typeof fileIndex == "undefined") {
-            for(i in this.queue) {
-                if(this.queue[i] != null) {
-                    this.queue[i].abort();
-                    this.cancel(i);
-                    this._complete(null, this, i, this.queue[i].upload);
-                    this.queue[i].loading = false;
-                    this.queue[i].loaded = true;
-                }
+        if(typeof fileIndex === "undefined") {
+            for(var i in this.queue) {
+                this.abortIndex(i);
             }
 
             this.queue = [];
 
             this.loading = false;
         } else {
-            if(typeof this.queue[fileIndex] != "undefined") {
-                this.queue[fileIndex].abort();
-                this.cancel(fileIndex);
-                this._complete(null, this, fileIndex, this.queue[fileIndex].upload);
-                this.queue[fileIndex].loading = false;
-                this.queue[fileIndex].loaded = true;
-            }
+            this.abortIndex(fileIndex);
         }
+    },
 
+    /**
+     * aborts specific index.
+     */
+    abortIndex: function(index) {
+        if(typeof this.queue[index] !== "undefined") {
+            this.queue[index].abort();
+            this.cancel(index);
+            this._complete(null, this, index, this.queue[index].upload);
+            this.queue[index].loading = false;
+            this.queue[index].loaded = true;
+        }
     }
 };
