@@ -361,7 +361,7 @@ abstract class Object
             return $this->callExtraMethod($name, self::$cache_extra_methods[$this->classname][$name], $args);
         }
 
-        if (is_callable(array($this, $name))) {
+        if (method_exists($this, $name) && is_callable(array($this, $name))) {
             return call_user_func_array(array($this, $name), $args);
         }
 
