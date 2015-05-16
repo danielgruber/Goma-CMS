@@ -551,8 +551,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if you can access a specific history-record
      *
-     *@name canViewHistory
-     *@access public
+     * @param string|object $record
+     * @return bool
      */
     public static function canViewHistory($record = null) {
         if (is_object($record)) {
@@ -570,7 +570,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         } else if (is_string($record)) {
             $c = new $record;
         } else {
-            throwError("6", "Invalid Argument Error", "Invalid Argument for DataObject::canViewRecord Object or Class_name required");
+            throw new InvalidArgumentException("Invalid first argument for DataObject::canViewRecord object or class-name required");
         }
         return $c->can("Write");
     }
@@ -2562,8 +2562,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets a has-one-dataobject
      *
-     *@name getHasOne
-     *@access public
+     * @param string $name name of relationship
+     * @param array $filter
+     * @return DataObject
      */
     public function getHasOne($name, $filter = null) {
 
@@ -2587,7 +2588,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             if ($this[$name . "id"] == 0) {
 
                 if (PROFILE) Profiler::unmark("getHasOne");
-                return false;
+                return null;
             }
 
             $filter["id"] = $this[$name . "id"];

@@ -47,9 +47,15 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	public function testLinkMethod() {
 		Object::linkMethod("TestObject", "testlink", "testObjectExtFunction", true);
 		$this->assertEqual($this->o->testlink(), "test");
+        $this->assertEqual($this->o->TESTLINK(), "test");
+        $this->assertEqual($this->o->TeStLiNK(), "test");
+        $this->assertEqual($this->o->__call(" tEstlink ", array()), "test");
 		
 		Object::linkMethod("TestObject", "testlink_absolute", "testObjectExtFunction", false);
 		$this->assertEqual($this->o->testlink_absolute(), "test");
+        $this->assertEqual($this->o->TESTLINK_ABSOLUTE(), "test");
+        $this->assertEqual($this->o->TeStLiNK_aBsOlUtE(), "test");
+        $this->assertEqual($this->o->__call(" TeStLiNK_aBsOlUtE ", array()), "test");
 	}
 	
 	/**
