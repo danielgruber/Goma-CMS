@@ -78,6 +78,11 @@ abstract class Object
      */
     const METHOD_NOT_FOUND_BUT_MAY_PARENT = 3;
 
+    /**
+     * method found.
+     */
+    const METHOD_FOUND = 1;
+
 
     /**
      * Extends a class with a method.
@@ -155,6 +160,7 @@ abstract class Object
 
         // check for extra methods here
         $res = self::method_exists_on_object($class, $method, $object);
+
         if ($res === self::METHOD_NOT_FOUND_BUT_MAY_PARENT) {
             // check on parents
             $res = self::check_for_extra_methods_recursive($class, $method);
@@ -183,19 +189,12 @@ abstract class Object
     protected static function method_exists_on_object($class, $method, $object = null)
     {
 
-        if (isset(self::$method_cache[$class . "::" . $method])) {
-            // object-case
-            // if we think as of method-cache that the method does not exist, but we have an instance
-            // then we check also if it might exist on object only.
-            if (!self::$method_cache[$class . "::" . $method] && self::check_for_object_method($object, $method)) {
-                return self::METHOD_ON_OBJECT_FOUND;
-            }
-
+        if (isset(self::$method_cache[$class . "::" . $method]) && (self::$method_cache[$class . "::" . $method] || !isset($object))) {
             return self::$method_cache[$class . "::" . $method];
         }
 
         if(self::method_exists_native_db($class, $method)) {
-            return 1;
+            return self::METHOD_FOUND;
         }
 
         // check on object
@@ -362,7 +361,7 @@ abstract class Object
             return $this->callExtraMethod($name, self::$cache_extra_methods[$this->classname][$name], $args);
         }
 
-        if (method_exists($this, $name) && is_callable(array($this, $name))) {
+        if (is_callable(array($this, $name))) {
             return call_user_func_array(array($this, $name), $args);
         }
 

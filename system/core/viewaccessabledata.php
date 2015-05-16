@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.3.2
+ * @version		2.3.3
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -482,10 +482,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		next($this->data);
 	}
 
-	/**
-	 * gets the current value
-	 *@name current
-	 */
+    /**
+     * gets the current value
+     *
+     * @return mixed|ViewAccessableData
+     */
 	public function current() {
 		$data = current($this->data);
 		if(is_array($data))
@@ -512,12 +513,11 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 	//!Attribute-Calling-API: isset
 
-	/**
-	 * new __cancall
-	 *
-	 *@access public
-	 *@param string - name
-	 */
+    /**
+     * returns if virtual property or method exists. called by Object::method_exists.
+     *
+     * @return bool
+     */
 	public function __canCall($name) {
 		$name = trim($name);
 		$lowername = strtolower($name);
@@ -568,7 +568,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	final public function isOffset($offset) {
-		return $this->__cancall($offset) || Object::method_exists($this->classname, $name);
+		return $this->__cancall($offset) || Object::method_exists($this->classname, $offset);
 	}
 
     /**
@@ -577,9 +577,25 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @param string - name
      * @return bool
      */
-	public function isOffsetMethod($name) {
+	protected function isOffsetMethod($name) {
 		return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->classname, "get" . $name));
 	}
+
+    /**
+     * calls an offset method.
+     *
+     * @param string $methodName
+     * @param array $args
+     * @return mixed
+     */
+    protected function callOffsetMethod($methodName, $args) {
+        $getterName = "get" . $methodName;
+        if(method_exists($this, $getterName)) {
+            return call_user_func_array(array($this, $getterName), $args);
+        } else {
+            return parent::__call($getterName, $args);
+        }
+    }
 
     /**
      * checks if Server-var exists
@@ -587,7 +603,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @param string offset in lowercase
      * @return bool
      */
-	public function isServerMethod($lowerOffset) {
+	protected function isServerMethod($lowerOffset) {
 
 		if(substr($lowerOffset, 0, 8) == "_server_") {
 			$key = substr($lowerOffset, 8);
@@ -659,12 +675,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
         return null;
 	}
 
-	/**
-	 * gets the offset
-	 *
-	 * @param 	string - name
-	 * @param 	array - args
-	 */
+    /**
+     * gets the offset
+     *
+     * @param    string - name
+     * @param    array - args
+     * @return   string
+     */
 	public function getOffset($name, $args = array()) {
 
 		if(PROFILE)
@@ -760,7 +777,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
 		// methods
 		if($this->isOffsetMethod($lowername)) {
-			return call_user_func_array(array($this, "get" . $name), $args);
+			return $this->callOffsetMethod($lowername, $args);
 		}
 
 		if(isset($this->data[$lowername])) {

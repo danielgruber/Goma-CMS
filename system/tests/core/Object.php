@@ -37,10 +37,17 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	/**
 	 * tests basic functionallity
 	*/	
-	public function testExtension() {
+	public function testExtensionMethod() {
+
+        $this->assertTrue(Object::method_exists($this->o, "extra_method"));
+        $this->assertTrue(Object::method_exists($this->o, " exTra_mEthod "));
+
 		$this->assertEqual($this->o->extra_method(), "it works");
+        $this->assertEqual($this->o->EXTRA_METHOD(), "it works");
+        $this->assertEqual($this->o->ExTrA_mEtHoD(), "it works");
+        $this->assertEqual($this->o->__call(" ExTrA_mEtHoD ", array()), "it works");
 	}
-	
+
 	/**
 	 * tests linkMethod
 	*/
@@ -64,9 +71,15 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	public function testCreateMethod() {
 		Object::createMethod("TestObject", "testcreate", "return 'blah';", true);
 		$this->assertEqual($this->o->testcreate(), "blah");
+        $this->assertEqual($this->o->TESTCREATE(), "blah");
+        $this->assertEqual($this->o->TestCreate(), "blah");
+        $this->assertEqual($this->o->__call(" TestCreate ", array()), "blah");
 		
 		Object::createMethod("TestObject", "testcreate_absolute", "return 'blub';", false);
 		$this->assertEqual($this->o->testcreate_absolute(), "blub");
+        $this->assertEqual($this->o->TESTCREATE_ABSOLUTE(), "blub");
+        $this->assertEqual($this->o->TeStCrEATe_AbSolUtE(), "blub");
+        $this->assertEqual($this->o->__call(" TeStCrEATe_AbSolUtE ", array()), "blub");
 	}
 	
 	/**
@@ -195,10 +208,11 @@ class TestObjectExtension extends Extension {
 	static $extra_methods = array(
 		"extra_method"
 	);
-	
+
 	public static function extra_method() {
 		return "it works";
 	}
+
 	public function callExtends() {
 		return "works";
 	}
