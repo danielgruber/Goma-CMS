@@ -183,7 +183,7 @@ class Dev extends RequestHandler {
 
 		self::checkForRedirect();
 
-		return $this->template("dev/dev.html", array("rebuilt_caches" => true, "rebuilt_db" => $data));
+		return $this->template("Dev/dev.html", array("rebuilt_caches" => true, "rebuilt_db" => $data));
 	}
 
 	/**

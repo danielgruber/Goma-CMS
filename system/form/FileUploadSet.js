@@ -4,9 +4,12 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 2.0.1
+ * @version 2.1
  */
 var FileUploadSet = function(name, table, url) {
+
+    "use strict";
+
     this.table = $(table);
     this.url = url;
     this.tbody = this.table.find("tbody");
@@ -34,13 +37,7 @@ var FileUploadSet = function(name, table, url) {
 				url: $this.url + "/remove/" + id,
 				type: "post"
 			}).done(function(){
-				tr.fadeOut("fast", function(){
-					tr.remove();
-					if($this.tbody.find(" > tr").length == 0) {
-						$this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
-					}
-					redraw();
-				});
+                $this.uploader.removeTableRow(tr);
 			});
 		});
 		$(node).css("cursor", "pointer");
@@ -65,6 +62,7 @@ var FileUploadSet = function(name, table, url) {
                     type: "post",
                     dataType: "html"
                 });
+                redrawEvenOddMarkers();
             },
             stop: function() {
                 setTimeout(function(){
@@ -75,25 +73,16 @@ var FileUploadSet = function(name, table, url) {
     };
 	
 	// redraw
-	var redraw = function() {
+	var redrawEvenOddMarkers = function() {
 		if($this.tbody.find("tr").length > 1) {
-			var i = 1;
-			$this.tbody.find("tr").each(function(){
-				$(this).removeClass("grey");
-				if(i == 0) {
-					i++;
-				} else {
-					$(this).addClass("grey");
-					i = 0;
-				}
-			});
+            $this.table.find("tr").removeClass("grey").removeClass("white");
+            $this.table.find("tr:even").addClass("grey");
 		}
 	};
 	
 	bindDeleteEvent(this.tbody.find("tr td.actions .delete img"));
-	
-	lang("loading");
-	lang("waiting");
+
+    preloadLang(["loading", "waiting"]);
 
     bindSortable();
 	
@@ -109,30 +98,21 @@ var FileUploadSet = function(name, table, url) {
 		uploadStarted: function(fileIndex, upload) {
 			var that = this;
 			var id = $this.name+'_upload_'+fileIndex;
-			if($this.tbody.find("tr:last").hasClass("grey")) {
-				var color = "white";
-			} else {
-				var color = "grey";
-			}
+			var color = $this.tbody.find("tr:last").hasClass("grey") ? "white" : "grey";
 			if($this.tbody.find(" > tr > th").length > 0) {
 				$this.tbody.find(" > tr > th").parent().remove();
 			}
 			
 			this.queue[fileIndex].tableid = id;
-			
-			$this.tbody.append('<tr class="'+color+' uploading" id="'+id+'" data-id="node_'+id+'">\
-				<td class="icon"></td>\
-				<td class="filename" title="'+lang("loading")+'"><span class="filename">'+upload.fileName+'</span><div class="progressbar"><div class="progress"></div><span>'+lang("waiting")+'</span></div></div></td>\
-				<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>\
-			</tr>');
-			
-			
-			$("#" + id).find(".delete img").click(function(){
+
+            var tableRow = this.addTableRow(id, color, upload.fileName);
+            tableRow.find("td.filename").append('<div class="progressbar"><div class="progress"></div><span>'+lang("waiting")+'</span></div></div');
+			tableRow.find(".delete img").click(function(){
 				that.abort(fileIndex);
 			});
-			$("#" + id).find(".delete img").css("cursor", "pointer");
-			
-			redraw();
+			tableRow.find(".delete img").css("cursor", "pointer");
+
+            redrawEvenOddMarkers();
 		},
 		
 		dragInDocument: function() {
@@ -151,7 +131,7 @@ var FileUploadSet = function(name, table, url) {
 		 * called when the speed was updated, just for ajax-upload
 		*/
 		speedUpdate: function(fileIndex, file, KBperSecond) {
-			if(typeof this.queue[fileIndex].tableid != "undefined") {
+			if(typeof this.queue[fileIndex].tableid !== "undefined") {
 				var ext = "KB/s";
 				KBperSecond = Math.round(KBperSecond);
 				if(KBperSecond > 1000) {
@@ -168,8 +148,10 @@ var FileUploadSet = function(name, table, url) {
 		*/
 		progressUpdate: function(fileIndex, file, newProgress) {
 			if(typeof this.queue[fileIndex].tableid != "undefined") {
-				$("#" + this.queue[fileIndex].tableid).find(".filename").attr("title", lang("loading") + " ("+newProgress+"%)");
-				$("#" + this.queue[fileIndex].tableid).find(".progress").stop().animate({width: newProgress + "%"}, 200);
+
+                var tableRow = $("#" + this.queue[fileIndex].tableid);
+				tableRow.find(".filename").attr("title", lang("loading") + " ("+newProgress+"%)");
+                tableRow.find(".progress").stop().animate({width: newProgress + "%"}, 200);
 			}
 		},
 		
@@ -177,10 +159,12 @@ var FileUploadSet = function(name, table, url) {
 		 * event is called when the upload is done
 		*/
 		always: function(time, fileIndex) {
-			if(typeof this.queue[fileIndex].tableid != "undefined") {
-				$("#" + this.queue[fileIndex].tableid).find(".progress span").html("100%");
-				$("#" + this.queue[fileIndex].tableid).find(".progress").css("width", "100%");
-				$("#" + this.queue[fileIndex].tableid).removeAttr("title");
+			if(typeof this.queue[fileIndex].tableid !== "undefined") {
+
+                var tableRow = $("#" + this.queue[fileIndex].tableid);
+                tableRow.find(".progress span").html("100%");
+                tableRow.find(".progress").css("width", "100%");
+				tableRow.removeAttr("title");
 			}
 		},
 		
@@ -188,139 +172,122 @@ var FileUploadSet = function(name, table, url) {
 		 * method which is called, when we receive the response
 		*/
 		done: function(html, fileIndex) {
-			if(typeof this.queue[fileIndex].tableid != "undefined") {
+			if(typeof this.queue[fileIndex].tableid !== "undefined") {
 				var tablerow = $("#" + this.queue[fileIndex].tableid);
 				try {
-					var data = eval('('+html+');');
+					var data = JSON.parse(html);
 					if(data.status == 0) {
-                        tablerow.removeClass("uploading");
-						tablerow.find(".filename").html('<div class="error">'+data.errstring+'</div>');
-						setTimeout(function(){
-							tablerow.fadeOut(300, function(){
-								tablerow.remove();
-								if($this.tbody.find(" > tr").length == 0) {
-									$this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
-								}
-							});
-						}, 2000);
-						tablerow.find(".delete img").remove();
+                        this.removeTableRowWithError(tablerow, data.errstring);
 					} else {
 						if(data.multiple) {
-							for(i in data.files) {
-								file = data.files[i];
+							for(var i in data.files) {
+								var file = data.files[i];
 								
 								// the current we can just update
-								if(i == 0) {
-                                    tablerow.removeClass("uploading");
-									tablerow.find(".filename").fadeTo(0, 0.0);
-									tablerow.attr("name", file.id);
-                                    tablerow.attr("data-id", "node_" + file.id);
-									tablerow.find(".icon").fadeTo(0, 0.0, function(){
-										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
-										tablerow.find(".filename").attr("title", file.name);
-										if(file.path)
-											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
-										else
-											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');
-										
-										tablerow.find(".filename").fadeTo(200, 1.0);
-										tablerow.find(".icon").fadeTo(200, 1.0);	
-									});
-
-									
-									
-									tablerow.find(".delete img").unbind("click");
-									bindDeleteEvent(tablerow.find(".delete img"));
+								if(i === 0) {
+                                    this.updateTableRowWhenDoneUploading(tablerow, file);
 								} else {
 									
 									
 									// now add some records
 									this.currentIndex++;
-									var id = $this.name+'_frameupload_'+ this.currentIndex;
-									tablerow.after('<tr class="" id="'+id+'">\
-				<td class="icon"></td>\
-				<td class="filename" title="'+file.name+'"><span class="filename">'+file.name+'</span></div></td>\
-				<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>\
-			</tr>');
-									tablerow = $("#" + id);
-									tablerow.find(".icon").fadeTo(0, 0.0, function(){
-										tablerow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
-										tablerow.find(".filename").attr("title", file.name);
-										if(file.path)
-											tablerow.find(".filename").html('<a href="'+file.path+'" target="_blank">'+file.name+'</a>');
-										else
-											tablerow.find(".filename").html('<a target="_blank">'+file.name+'</a>');	
-											
-										tablerow.find(".filename").fadeTo(200, 1.0);
-										tablerow.find(".icon").fadeTo(200, 1.0);
-									});
-									
-									tablerow.find(".delete img").unbind("click");
-									bindDeleteEvent(tablerow.find(".delete img"));
+                                    var insertedTableRow = this.addTableRow(this.name + "_frameupload_" + this.currentIndex, "", file.name, tablerow);
+
+                                    this.updateTableRowWhenDoneUploading(insertedTableRow, file);
+                                    redrawEvenOddMarkers();
 								}
 							}
-							
-							$this.table.find("tr").removeClass("grey").removeClass("white");
-							$this.table.find("tr:even").addClass("grey");
 						} else {
-                            tablerow.removeClass("uploading");
-							tablerow.find(".filename").fadeTo(200, 0.0);
-							tablerow.attr("name", data.file.id);
-                            tablerow.attr("data-id", "node_" + data.file.id);
-							tablerow.find(".icon").fadeTo(200, 0.0, function(){
-								tablerow.find(".icon").html('<img src="'+data.file.icon16+'" alt="icon" />');
-								tablerow.find(".filename").attr("title", data.file.name);
-								if(data.file.path)
-									tablerow.find(".filename").html('<a href="'+data.file.path+'" target="_blank">'+data.file.name+'</a>');
-								else
-									tablerow.find(".filename").html('<a target="_blank">'+data.file.name+'</a>');	
-							});
-							setTimeout(function(){
-								tablerow.find(".filename").fadeTo(200, 1.0);
-								tablerow.find(".icon").fadeTo(200, 1.0);
-							}, 220);
-							
-							tablerow.find(".delete img").unbind("click");
-							bindDeleteEvent(tablerow.find(".delete img"));
+                            this.updateTableRowWhenDoneUploading(tablerow, data.file);
 						}
 					}
 				} catch(err) {
-					if(this.isAbort) {
-					
-					} else {
-						tablerow.find(".filename").html('<div class="error">'+data.errstring+'</div>');
-						setTimeout(function(){
-							tablerow.fadeOut(300, function(){
-								tablerow.remove();
-								if($this.tbody.find(" > tr").length == 0) {
-									$this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
-								}
-							});
-						}, 2000);
-						tablerow.find(".delete img").remove();
+					if(!this.isAbort) {
+                        this.removeTableRowWithError(tablerow, data.errstring);
 					}
 				}
-				
-				redraw();
 			}
 		},
+
+        /**
+         * adds a file-entry.
+         */
+        addTableRow: function(id, classname, filename, after) {
+            var html = '<tr class="'+classname+'" id="'+id+'">' +
+				'<td class="icon"></td>' +
+				'<td class="filename" title="'+filename+'"><span class="filename">'+filename+'</span></div></td>' +
+				'<td class="actions"><div class="delete"><img src="images/16x16/del.png" height="16" width="16" alt="del" title="'+lang("delete")+'" /></div></td>' +
+			'</tr>';
+
+            if(after !== undefined) {
+                after.after(html);
+            } else {
+                $this.tbody.append(html);
+            }
+
+            return $("#" + id);
+        },
+
+        /**
+         * add error to table-row and remove it.
+         */
+        removeTableRowWithError: function(tableRow, error) {
+
+            var $this = this;
+            tableRow.removeClass("uploading");
+
+            tableRow.find(".filename").html('<div class="error">'+error+'</div>');
+            setTimeout(this.removeTableRow.bind(this, tableRow), 2000);
+            tableRow.find(".delete img").remove();
+        },
+
+        /**
+         * slides up table-row.
+         */
+        removeTableRow: function(tableRow) {
+            tableRow.fadeOut(300, function(){
+                tableRow.remove();
+                if($this.tbody.find(" > tr").length === 0) {
+                    $this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
+                } else {
+                    redrawEvenOddMarkers();
+                }
+            });
+        },
+
+        /**
+         * updates table-row.
+         */
+        updateTableRowWhenDoneUploading: function(tableRow, file) {
+            tableRow.removeClass("uploading");
+            tableRow.find(".filename").fadeTo(200, 0.0);
+            tableRow.attr("name", file.id);
+            tableRow.attr("data-id", "node_" + file.id);
+            tableRow.find(".icon").fadeTo(200, 0.0, function(){
+                tableRow.find(".icon").html('<img src="'+file.icon16+'" alt="icon" />');
+                tableRow.find(".filename").attr("title", file.name);
+                if(file.path) {
+                    tableRow.find(".filename").html('<a href="' + file.path + '" target="_blank">' + file.name + '</a>');
+                } else {
+                    tableRow.find(".filename").html('<a target="_blank">' + file.name + '</a>');
+                }
+
+                tableRow.find(".filename").fadeTo(200, 1.0);
+                tableRow.find(".icon").fadeTo(200, 1.0);
+            });
+
+            tableRow.find(".delete img").unbind("click");
+            bindDeleteEvent(tableRow.find(".delete img"));
+        },
 		
 		/**
 		 * called on cancel
 		*/
 		cancel: function(fileIndex) {	
-			if(typeof this.queue[fileIndex].tableid != "undefined") {
-				var tablerow = $("#" + this.queue[fileIndex].tableid);
-				tablerow.slideUp(300, function(){
-					tablerow.remove();
-					redraw();
-					if($this.tbody.find(" > tr").length == 0) {
-						$this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
-					}
-				});
+			if(typeof this.queue[fileIndex].tableid !== "undefined") {
+				var tablerow = $("#" + $this.queue[fileIndex].tableid);
+                $this.removeTableRow(tablerow);
 			}
-			redraw();
-			
 		}
 		
 	});
