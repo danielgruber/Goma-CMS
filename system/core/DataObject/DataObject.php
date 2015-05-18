@@ -522,7 +522,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $permissions = array($permissions);
         }
 
-        $r = isset($record) ? $record : $this;
+        $usedRecord = isset($record) ? $record : $this;
         foreach($permissions as $perm) {
             $perm = strtolower($perm);
             $can = false;
@@ -532,13 +532,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
 
             if (Object::method_exists($this->classname, "can" . $perm)) {
-                $c = call_user_func_array(array($this, "can" . $perm), array($r));
+                $c = call_user_func_array(array($this, "can" . $perm), array($usedRecord));
                 if (is_bool($c)) {
                     $can = $c;
                 }
             }
 
-            $this->callExtending("can" . $perm, $can, $r);
+            $this->callExtending("can" . $perm, $can, $usedRecord);
 
             if ($can === true) {
                 return true;
@@ -3487,13 +3487,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         {
             $arr[] = $row;
             // store id in cache
-            if (isset($basehash)) self::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
-
+            ModelTransactionCache::put($this->baseClass, $basehash . md5(serialize(array("id" => $row["id"]))), array($row));
+            
             // cleanup
             unset($row);
         }
 
-        self::$datacache[$this->baseClass][$hash] = $arr;
+        ModelTransactionCache::put($this->baseClass, $hash, $arr);
 
         $query->free();
         unset($hash, $basehash, $limits, $sort, $filter, $query); // free memory

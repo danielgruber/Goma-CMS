@@ -1044,12 +1044,29 @@ class SecurityException extends Exception {
 }
 
 class PermissionException extends Exception {
-	/**
-	 * constructor.
-	 */
-	public function __construct($m = "", $code = ExceptionManager::PERMISSION_ERROR, Exception $previous = null) {
+
+    /**
+     * which permission is missing.
+     *
+     * @var string
+     */
+    protected $missingPerm;
+
+    /**
+     * constructor.
+     * @param string $m
+     * @param int $code
+     * @param string $missingPerm
+     * @param Exception $previous
+     */
+	public function __construct($m = "", $code = ExceptionManager::PERMISSION_ERROR, $missingPerm = null, Exception $previous = null) {
+        $this->missingPerm = $missingPerm;
 		parent::__construct($m, $code, $previous);
 	}
+
+    public function getMissingPerm() {
+        return $this->missingPerm;
+    }
 
 }
 
