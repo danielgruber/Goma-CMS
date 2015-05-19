@@ -178,7 +178,9 @@ class ManyManyDropDown extends MultiSelectDropDown
 
 				$dataReturn = array();
 				foreach($this->dataset as $id) {
-					$dataReturn[$id] = $return[$id];
+                    if(isset($return[$id])) {
+                        $dataReturn[$id] = $return[$id];
+                    }
 				}
 
 				return $dataReturn;

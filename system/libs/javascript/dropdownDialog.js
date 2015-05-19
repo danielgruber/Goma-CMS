@@ -3,12 +3,15 @@
   *@link http://goma-cms.org
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
-  * last modified: 17.04.2013
+  * last modified: 19.05.2013
 */
 
 self.dropdownDialogs = [];
 // put the data into the right namespace
 (function($){
+
+    "use strict";
+
 	var counter = 0;
 	var elems = [];
 	var dropdowns = [];
@@ -19,8 +22,9 @@ self.dropdownDialogs = [];
 	window.dropdownDialog = function(uri, elem, position, options) {
 		
 		this.elem = $(elem);
-		if(this.elem.length == 0)
-			return false;
+		if(this.elem.length === 0) {
+            throw new Error("element for dropdown-dialog must exist.");
+        }
 		
 		this.setPosition(position);
 		this.uri = uri;
@@ -30,10 +34,10 @@ self.dropdownDialogs = [];
 		
 		var i;
 		// set options
-		if(typeof options != "undefined") {
-			for(i in options) {
-				this[i] = options[i];
-			}
+		if(typeof options !== "undefined") {
+            for (var i in options) {
+                this[i] = options[i];
+            }
 		}
 			
 
@@ -71,10 +75,11 @@ self.dropdownDialogs = [];
 			
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
 			
-			var $this = this;
+			var $this = this,
+                loading;
 			
 			// first validate id
-			if(this.elem.attr("id") == undefined) {
+			if(this.elem.attr("id") === undefined) {
 				this.elem.attr("id", "link_dropdown_dialog_" + counter);
 				counter++;
 			}
@@ -101,10 +106,10 @@ self.dropdownDialogs = [];
 					$this.moveDropdown($this.currentPos);
 				});
 				
-				var loading = true;
+				loading = true;
 			} else {
 				this.dropdown = $("#dropdownDialog_" + this.elem.attr("id"));
-				var loading = false;
+				loading = false;
 			}
 			
 			
@@ -130,8 +135,9 @@ self.dropdownDialogs = [];
 				}
 			}
 			
-			if(loading)
-				this.setLoading();
+			if(loading) {
+                this.setLoading();
+            }
 				
 			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
 		},
@@ -149,13 +155,12 @@ self.dropdownDialogs = [];
 				
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
 			
-			if(position != null) {
+			if(position !== null && position !== undefined) {
 	 			this.setPosition(position);
 			}
 			
 			if(this.elem.css("display") == "none") {
-				throw "dropdownDialog does not support elements with display:none yet";
-				return false;
+				throw new Error("dropdownDialog does not support elements with display:none yet");
 			}
 			
 			// get position which is logical
@@ -182,10 +187,11 @@ self.dropdownDialogs = [];
 			}
 			
 			// validate
-			if(position == "bottom") {
-				var elemtop = this.elem.offset().top;
-				if((elemtop - this.dropdown.height() - 2) < -10)
-					position = "top";
+			if(position === "bottom") {
+				elemtop = this.elem.offset().top;
+				if((elemtop - this.dropdown.height() - 2) < -10) {
+                    position = "top";
+                }
 			}
 			
 			// add position as class
@@ -237,7 +243,7 @@ self.dropdownDialogs = [];
 			
 			console.log("define position");
 			
-			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.moveDropdown");
+			if(typeof profiler !== "undefined") profiler.mark("dropdownDialog.moveDropdown");
 			
 			this.triangle_position = "center";
 			
@@ -259,38 +265,40 @@ self.dropdownDialogs = [];
 					top: $(this).scrollTop(),
 					left: $(this).scrollLeft()
 				});
-			});;
+			});
 			
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
 			//this.dropdown.css({"display": "block", top: "-1000px"});
-			
+            var triangle_margin_top, positionTop, positionLeft, contentWidth, positionRight;
+
 			switch(position) {
 				case "bottom":
-					var positionTop = elemtop - this.dropdown.height() - 2;
+					positionTop = elemtop - this.dropdown.height() - 2;
 				
 				case "top":
 				case "center":
 
 					
-					if(typeof positionTop == "undefined")
-						var positionTop = elemtop + elemheight - 2;
+					if(typeof positionTop === "undefined") {
+                        positionTop = elemtop + elemheight - 2;
+                    }
 					
 					this.dropdown.find(" > div > .content").css("width", "");
-					var positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
-					var contentwidth = this.dropdown.find(" > div > .content").outerWidth();
+					positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
+					contentWidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
 					
 					// check if this is logical
 					if(contentwidth + positionLeft + 100 > $(document).width()) {
 						this.triangle_position = "right";
-						var positionLeft = elemleft + elemwidth - contentwidth + 14;
+						positionLeft = elemleft + elemwidth - contentWidth + 14;
 					}
 					
 					
 					if(positionLeft < 0) {
 						this.triangle_position = "left";
-						var positionLeft = elemleft - 18;
+						positionLeft = elemleft - 18;
 					}
 						
 					this.dropdown.css({
@@ -305,15 +313,15 @@ self.dropdownDialogs = [];
 					
 					// fix if dropdown is not in document
 					if(positionTop < 0) {
-						var triangle_margin_top = 0 - 20 + positionTop;
+						triangle_margin_top = 0 - 20 + positionTop;
 						positionTop = 4;
 					} else {
-						var triangle_margin_top = 0 - 20;
+						triangle_margin_top = 0 - 20;
 					}
 					
-					var contentWidth = this.dropdown.find(" > div > .content").outerWidth();
+					contentWidth = this.dropdown.find(" > div > .content").outerWidth();
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
-					var positionRight = elemleft + 2 - contentWidth;
+					positionRight = elemleft + 2 - contentWidth;
 					
 					this.dropdown.css({
 						top: positionTop,
@@ -323,16 +331,16 @@ self.dropdownDialogs = [];
 					});
 				break;
 				case "right":
-					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
+					positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
 					// fix if dropdown is not in document
 					if(positionTop < 0) {
-						var triangle_margin_top = 0 - 20 + positionTop;
+						triangle_margin_top = 0 - 20 + positionTop;
 						positionTop = 4;
 					} else {
-						var triangle_margin_top = 0 - 20;
+						triangle_margin_top = 0 - 20;
 					}
 					
-					var positionLeft = elemleft + elemwidth - 2;
+					positionLeft = elemleft + elemwidth - 2;
 					this.dropdown.css({
 						top: positionTop,
 						left: positionLeft,
@@ -344,16 +352,17 @@ self.dropdownDialogs = [];
 			
 			// now set the triangle
 			this.dropdown.find(" > div").prepend('<div class="triangle_position_'+this.triangle_position+' triangle"><div></div></div>');
-			if(typeof triangle_margin_top != "undefined") {
+			if(typeof triangle_margin_top !== "undefined") {
 				this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
 			}
 			
-			if(display)
-				this.dropdown.css("display", "block");
-			else
-				this.dropdown.fadeIn("fast");
+			if(display) {
+                this.dropdown.css("display", "block");
+            } else {
+                this.dropdown.fadeIn("fast");
+            }
 			
-			for(i in scrollElements) {
+			for(var i in scrollElements) {
 				var data = scrollElements[i];
 				data.element.scrollTop(data.top);
 				data.element.scrollLeft(data.left);
@@ -575,27 +584,28 @@ self.dropdownDialogs = [];
 						var h = j.responseText;
 						
 						// if it is json-data
-						if(t == "text/x-json") {
+						if(t.indexOf("text/x-json") != -1) {
 							try {
-								var data = parseJSON(h);
-								var h = data.content;
-								if(data.position != null) {
+								var data = $.parseJSON(h);
+								h = data.content;
+								if(data.position !== undefined && data.position !== null) {
 									that.position = data.position;
 								}
-								if(data.closeButton != null) {
+								if(data.closeButton !== undefined && data.closeButton !== null) {
 									that.closeButton = data.closeButton;
 								}
 								that.setContent(h);
 								
-								if(typeof data.exec != "undefined") {
+								if(typeof data.exec !== "undefined") {
 									
 									// execution should not break json-data before
 									try {
 										var method;
 										if (window.execScript) {
 										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
-										} else
-										  	method = eval('(function(){' + data.exec + '})');
+										} else {
+                                            method = eval('(function(){' + data.exec + '})');
+                                        }
 										
 										method.call(that);
 									} catch(e) {
@@ -610,14 +620,15 @@ self.dropdownDialogs = [];
 							}
 						
 						// if it is javascript
-						} else if(t == "text/javascript") {
+						} else if(t === "text/javascript") {
 							
 							// execution for IE and all other Browsers
 							var method;
-							if (window.execScript)
-							  	window.execScript('method = ' + 'function(' + h + ')',''); // execScript doesn’t return anything
-							else
-							  	method = eval('(function(){' + h + '});');
+							if (window.execScript) {
+                                window.execScript('method = ' + 'function(' + h + ')', ''); // execScript doesn’t return anything
+                            } else {
+                                method = eval('(function(){' + h + '});');
+                            }
 							method.call(this);
 							
 						} else {
@@ -637,14 +648,14 @@ self.dropdownDialogs = [];
 				
 			}).fail(function(jqXHR){
 				// try find out why it has failed
-				if(jqXHR.textStatus == "timeout") {
+				if(jqXHR.textStatus === "timeout") {
 					that.setContent('Error while fetching data from the server: <br /> The response timed out.');
-				} else if(jqXHR.textStatus == "abort") {
+				} else if(jqXHR.textStatus === "abort") {
 					that.setContent('Error while fetching data from the server: <br /> The request was aborted.');
 				} else {
 					that.setContent('Error while fetching data from the server: <br /> Failed to fetch data from the server.');
 				}
-			});;
+			});
 		},
 		players: [
 			{
