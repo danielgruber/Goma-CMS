@@ -861,8 +861,9 @@ class ClassInfo extends Object {
 	/**
 	 * checks for permissions and rebuilds package-index.
 	 *
-	 * @name 	checkPermissionsAndBuild
-	*/
+	 * @name   checkPermissionsAndBuild
+	 * @return bool|string
+	 */
 	public static function checkPermissionsAndBuild() {
 
 
@@ -1111,8 +1112,9 @@ class ClassInfo extends Object {
 		}
 
 		// write files
-		if(!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, $php) || !FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";")) {
-			throwError("8", 'Could not write in cache-directory', 'Could not write ' . ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE . '');
+		if(!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, $php, null, LOCK_EX) ||
+			!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";", null, LOCK_EX)) {
+			throw new LogicException('Could not write in cache-directory. Could not write ' . ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE);
 		} else {
 			return true;
 		}
