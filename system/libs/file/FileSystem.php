@@ -145,7 +145,6 @@ class FileSystem extends Object {
      * @param int $modifier
      * @param int $mode permission of file
      * @return bool
-     * @internal param $writeFileContents
      * @access public
      */
 	public static function writeFileContents($file, $content, $modifier = null, $mode = null) {
