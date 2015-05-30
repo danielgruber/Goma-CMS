@@ -352,17 +352,17 @@ class DropDown extends FormField {
 	/**
 	 * generates the data, which should be shown in the dropdown.
 	 *
-	 * @param int $p number of page the user wants to see
+	 * @param int $page number of page the user wants to see
 	 *
 	 * @access public
 	 * @return array this is an array which contains the data as data and some
 	 * information about paginating.
 	 */
-	public function getDataFromModel($p = 1) {
-		$start = ($p * 10) - 10;
+	public function getDataFromModel($page = 1) {
+		$start = ($page * 10) - 10;
 		$end = $start + 9;
 		$i = 0;
-		$left = ($p == 1) ? false : true;
+		$left = ($page == 1) ? false : true;
 		// check if this is an array with numeric indexes or not
 		if(isset($this->options[0])) {
 			$arr = array();
