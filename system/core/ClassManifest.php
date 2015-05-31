@@ -275,12 +275,8 @@ class ClassManifest {
 
             $class = self::resolveClassName($namespace . trim($class));
 
-            if(!self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)) {
-                if(count($parts[2]) == 1) {
-                    self::moveOldClass($file);
-                }
-
-                continue;
+            if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
+                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)
             }
 
             if($parts[6][$key]) {
@@ -298,14 +294,40 @@ class ClassManifest {
         foreach($parts[1] as $key => $class) {
             $class = self::resolveClassName($namespace . trim($class));
 
-            if(!self::generateDefaultClassInfo($class, $file, $parts[3][$key], $classes, $class_info, true)) {
-                if(count($parts[2]) == 1) {
-                    self::moveOldClass($file);
-                }
-
-                continue;
+            if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
+                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)
             }
         }
+    }
+
+    /**
+     * checks if class has already been indexed from another file.
+     *
+     * @param string $class
+     * @param string $file
+     * @param bool $shouldMoveThisFile
+     * @return bool
+     */
+    protected static function classHasAlreadyBeenIndexed($class, $file, $shouldMoveThisFile) {
+        if(isset($classes[$class]) && $classes[$class] != $file && file_exists($classes[$class])) {
+
+            // check if given file is older and move it when possible
+            if(filemtime($classes[$class]) > filemtime($file)) {
+                if($shouldMoveThisFile) {
+                    self::moveOldClass($file);
+
+                    return true;
+                }
+            } else if(filemtime($classes[$class]) < filemtime($file)) {
+                // check if indexed file is younger and move it when possible.
+                // but cause it should be reindexed, we do not return true.
+                if(count(array_keys($classes, $classes[$class])) == 1) {
+                    self::moveOldClass($classes[$class]);
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -317,18 +339,9 @@ class ClassManifest {
      * @param array $classes
      * @param array $class_info
      * @param bool $interface
-     * @return bool returns false when class is already in a better version existing.
      */
     protected static function generateDefaultClassInfo($class, $file, $parent, &$classes, &$class_info, $interface) {
-        if(isset($classes[$class]) && $classes[$class] != $file && file_exists($classes[$class])) {
-            if(filemtime($classes[$class]) > filemtime($file)) {
-                return false;
-            } else if(filemtime($classes[$class]) < filemtime($file)) {
-                if(count(array_keys($classes, $classes[$class])) == 1) {
-                    self::moveOldClass($classes[$class]);
-                }
-            }
-        }
+
         $classes[$class] = $file;
 
         if(!isset($class_info[$class])) {
@@ -351,8 +364,6 @@ class ClassManifest {
             $class_info[$class]["abstract"] = true;
             $class_info[$class]["interface"] = true;
         }
-
-        return true;
     }
 
     /**
