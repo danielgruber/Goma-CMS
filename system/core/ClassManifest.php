@@ -276,7 +276,7 @@ class ClassManifest {
             $class = self::resolveClassName($namespace . trim($class));
 
             if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
-                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)
+                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false);
             }
 
             if($parts[6][$key]) {
@@ -295,7 +295,7 @@ class ClassManifest {
             $class = self::resolveClassName($namespace . trim($class));
 
             if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
-                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false)
+                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false);
             }
         }
     }
