@@ -1,11 +1,13 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: D
- * Date: 18.05.15
- * Time: 00:43
- */
+<?php defined("IN_GOMA") OR die();
 
+/**
+ * implementation for Database-Writer for MySQL.
+ *
+ * @package		Goma\DB
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 class MySQLWriterImplementation implements iDataBaseWriter {
 
     /**
@@ -482,6 +484,81 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         SQL::writeManipulation($manipulation);
     }
 
+    /**
+     * is used for writing many-many-relations in DataObject::write
+     *
+     * @param array $manipulation
+     * @param string $relationShipName
+     * @param array $data
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @param bool $history
+     * @return array
+     * @throws PermissionException
+     */
+    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2, $history = true)
+    {
+        $relationShip = $this->model()->getManyManyInfo($relationShipName);
+
+        $existing = $this->model()->getManyManyRelationShipData($relationShip);
+
+        // calculate maximum target sort.
+        $maxTargetSort = $this->model()->maxTargetSort($relationShip, $existing);
+
+        $mani_insert = array(
+            "table_name"	=> $relationShip->getTableName(),
+            "command"   	=> "insert",
+            "ignore"		=> true,
+            "fields"		=> array(
+
+            )
+        );
+
+        $i = 0;
+        foreach($data as $key => $info) {
+            if(is_array($info)) {
+                $id = $this->model()->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority, $history);
+
+                $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
+                    $existing[$id][$relationShip->getTargetSortField()] :
+                    ++$maxTargetSort;
+
+                $mani_insert["fields"][$id] = array(
+                    $relationShip->getOwnerField() 		=> $this->versionid,
+                    $relationShip->getTargetField() 	=> $id,
+                    $relationShip->getOwnerSortField()  => $i,
+                    $relationShip->getTargetSortField() => $targetSort
+                );
+
+                foreach($relationShip->getExtraFields() as $field => $type) {
+                    if(isset($info[$field])) {
+                        $mani_insert["fields"][$id][$field] = $info[$field];
+                    }
+                }
+            } else {
+                if(!isset($existing[$info])) {
+                    $mani_insert["fields"][$info] = array(
+                        $relationShip->getOwnerField() 		=> $this->versionid,
+                        $relationShip->getTargetField() 	=> $info,
+                        $relationShip->getOwnerSortField()  => $i,
+                        $relationShip->getTargetSortField() => ++$maxTargetSort
+                    );
+                }
+            }
+            $i++;
+        }
+
+        $mani_insert["fields"] = array_values($mani_insert["fields"]);
+
+        $table = $relationShip->getTableName();
+        if(isset($manipulation[$table . "_insert"])) {
+            $manipulation[$table . "_insert"]["fields"] = array_merge($manipulation[$table . "_insert"]["fields"], $mani_insert["fields"]);
+        } else {
+            $manipulation[$table . "_insert"] = $mani_insert;
+        }
+
+        return $manipulation;
+    }
 
     /**
      * returns model.

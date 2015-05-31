@@ -100,8 +100,8 @@ class DataBaseFieldManager {
     /**
      * parses value with raw and returns it.
      *
-     * @param array data
-     * @param string field
+     * @param array $data
+     * @param string $field
      * @return string val
      */
     protected static function parseRawValue($data, $field) {
