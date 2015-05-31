@@ -4111,8 +4111,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * gets the baseclass of the current record
-     *@name getBaseClass
-     *@access public
+     *
+     * @return string
      */
     public function BaseClass()
     {

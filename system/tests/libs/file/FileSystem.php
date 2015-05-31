@@ -91,7 +91,7 @@ class FileSystemTest extends GomaUnitTest {
 		);
 
 		foreach($sizes as $size => $nice) {
-			$this->assertEqual(FileSizeFormatter::fomat_size($size), $nice, "FileSize-Nice: $size should be printed as $nice, but is ".FileSizeFormatter::fomat_size($size));
+			$this->assertEqual(FileSizeFormatter::format_nice($size), $nice, "FileSize-Nice: $size should be printed as $nice, but is ".FileSizeFormatter::format_nice($size));
 		}
 		
 	}

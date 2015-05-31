@@ -1,9 +1,14 @@
-<?php
+<?php defined('IN_GOMA') OR die();
 /**
- * Created by IntelliJ IDEA.
- * User: D
- * Date: 31.05.15
- * Time: 01:19
+ * Formats file human readable.
+ *
+ * @package	goma framework
+ * @link 	http://goma-cms.org
+ * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 1.0
+ *
+ * last modified: 30.05.2015
  */
 
 class FileSizeFormatter {
@@ -15,7 +20,7 @@ class FileSizeFormatter {
      * @param int $prec
      * @return string
      */
-    public static function fomat_size($size, $prec = 1) {
+    public static function format_nice($size, $prec = 1) {
         $ext = "B";
         if($size > 1300) {
             $size = round($size / 1024, $prec);

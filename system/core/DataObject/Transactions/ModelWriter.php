@@ -78,6 +78,7 @@ class ModelWriter extends Object {
         $this->updatableModel = $objectToUpdate;
         $this->databaseWriter = isset($writer) ? $writer : new MySQLWriterImplementation();
         $this->databaseWriter->setWriter($this);
+        $this->databaseWriter->validate();
     }
 
     /**
@@ -97,11 +98,27 @@ class ModelWriter extends Object {
     }
 
     /**
+     * @return bool $silent
+     */
+    public function getSilent()
+    {
+        return $this->updateLastModified;
+    }
+
+    /**
      * @param bool $created
      */
     public function setUpdateCreated($created) {
         $this->moveAutorAndCreatedFromOld = !$created;
     }
+
+    /**
+     * @return bool $created
+     */
+    public function getUpdateCreated() {
+        return !$this->moveAutorAndCreatedFromOld;
+    }
+
 
     /**
      * @return int
@@ -129,14 +146,6 @@ class ModelWriter extends Object {
     {
         $this->commandType = $commandType;
         return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNewVersion()
-    {
-        return $this->newVersion;
     }
 
     /**
@@ -230,9 +239,9 @@ class ModelWriter extends Object {
             $this->data = array_merge($objectForUpdate->ToArray(), $this->data);
 
             // copy many-many-relations
-            foreach($this->ManyManyRelationships() as $name => $relationShip) {
+            foreach($this->model->ManyManyRelationships() as $name => $relationShip) {
                 if (!isset($this->data[$name . "ids"]) && !isset($this->data[$name])) {
-                    $this->data[$name] = $this->getRelationData($name);
+                    $this->data[$name] = $this->model->getRelationData($name);
                 } else if (!isset($this->data[$name . "ids"]) && is_array($this->data[$name])) {
                     unset($this->data[$name . "ids"]);
                 }
@@ -256,8 +265,8 @@ class ModelWriter extends Object {
         return (
             $model->publishedid == 0 ||
             $model->stateid == 0 ||
-            ($model->stateid != $this->getOldId() && $this->getWriteType() == self::WRITE_TYPE_SAVE) ||
-            ($model->publishedid != $this->getOldId() && $this->getWriteType() == self::WRITE_TYPE_PUBLISH));
+            ($model->stateid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_SAVE) ||
+            ($model->publishedid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH));
     }
 
     /**
@@ -373,31 +382,9 @@ class ModelWriter extends Object {
     }
 
     /**
-     * iterates through has-one-relationships and checks if there is something to write.
-     */
-    protected function checkForWritableHasOne() {
-        if ($has_one = $this->model->hasOne()) {
-            foreach($has_one as $key => $value) {
-                if (isset($this->data[$key]) && is_object($this->data[$key]) && is_a($this->data[$key], "DataObject")) {
-
-                    // check for write
-                    if($this->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $this->data[$key]->wasChanged()) {
-                        $this->data[$key]->writeToDB(false, $this->permissionsOverridden, $this->getWriteType());
-                    }
-
-                    // get id from object
-                    $this->data[$key . "id"] = $this->data[$key]->id;
-                    unset($this->data[$key]);
-                }
-            }
-        }
-    }
-
-    /**
      * writes generated data to DataBase.
      */
     public function write() {
-        $this->validate();
 
         if ($this->data === null) {
             return;
@@ -422,7 +409,7 @@ class ModelWriter extends Object {
      */
     public function validatePermission() {
 
-        if ($this->commandType == self::COMMAND_TYPE_INSERT) {
+        if ($this->commandType == ModelRepository::COMMAND_TYPE_INSERT) {
             if (!$this->model->can("Insert")) {
                 throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
                     "be inserted cause of missing insert permissions.",
@@ -439,7 +426,7 @@ class ModelWriter extends Object {
         }
 
 
-        if ($this->commandType  == self::WRITE_TYPE_PUBLISH) {
+        if ($this->commandType  == ModelRepository::WRITE_TYPE_PUBLISH) {
             if (!$this->model->can("Publish")) {
                 throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
                     "be published cause of missing publish permissions.",

@@ -584,7 +584,7 @@ class Uploads extends DataObject {
      * @return string
      */
     public function filesize() {
-        return FileSizeFormatter::fomat_size(filesize($this->realfile));
+        return FileSizeFormatter::format_nice(filesize($this->realfile));
     }
 
     /**
