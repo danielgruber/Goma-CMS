@@ -822,7 +822,7 @@ class ClassInfo extends Object {
 					return;
 				}
 
-				if($root != ROOT || !isset($root) || !isset($version) || version_compare($version, self::VERSION, "<")) {
+				if(!isset($root) || $root != ROOT || !isset($version) || version_compare($version, self::VERSION, "<")) {
 					ClassInfo::delete();
 					clearstatcache();
 					ClassInfo::loadfile();
@@ -1112,8 +1112,8 @@ class ClassInfo extends Object {
 		}
 
 		// write files
-		if(!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, $php, null, LOCK_EX) ||
-			!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";", null, LOCK_EX)) {
+		if(!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, $php, LOCK_EX) ||
+			!FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";", LOCK_EX)) {
 			throw new LogicException('Could not write in cache-directory. Could not write ' . ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE);
 		} else {
 			return true;
