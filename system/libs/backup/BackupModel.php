@@ -144,7 +144,7 @@ class BackupModel extends DataObject {
      * @return string
      */
 	public function getSize() {
-		return FileSystem::filesize_nice(self::BACKUP_PATH . "/" . $this->name);
+		return FileSizeFormatter::fomat_size(filesize(self::BACKUP_PATH . "/" . $this->name));
 	}
 
     /**

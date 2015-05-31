@@ -6,9 +6,9 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.7.2
+ * @version 1.7.3
  *
- * last modified: 06.03.2015
+ * last modified: 30.05.2015
 */
 
 define('LANGUAGE_ROOT', ROOT . '/languages/');
@@ -48,13 +48,14 @@ class FileSystem extends Object {
 		UPLOADS_ROOT,
 		HTACCESS_FILE
 	);
-	
+
 	/**
 	 * this is the last file which causes an error
 	 *
-	 *@name errFile
-	 *@access public
-	*/
+	 * @name errFile
+	 * @access public
+	 * @return string
+	 */
 	public static function errFile() {
 		$file = self::$errFile;
 		if(substr($file, 0, strlen(ROOT)) == ROOT) {
@@ -78,9 +79,11 @@ class FileSystem extends Object {
 	/**
 	 * creates a directory and forces chmod safe-mode-specific or given mode
 	 *
-	 *@name mkdir
-	 *@access public
-	*/
+	 * @param string $dir
+	 * @param int $mode
+	 * @param bool $throwOnFail
+	 * @return bool
+	 */
 	public static function requireDir($dir, $mode = null, $throwOnFail = true) {
 
 		$mode = self::getMode($mode);
@@ -105,23 +108,25 @@ class FileSystem extends Object {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * alias for requireDir
 	 *
-	 *@name requireFolder
-	 *@access public
-	*/
+	 * @param string $dir
+	 * @param int $mode
+	 * @return bool
+	 */
 	public static function requireFolder($dir, $mode = null) {
 		return self::requireDir($dir, $mode);
 	}
-	
+
 	/**
 	 * createFile
 	 *
-	 *@name createFile
-	 *@access public
-	*/
+	 * @name createFile
+	 * @access public
+	 * @return bool
+	 */
 	public static function createFile($file) {
 		if(!file_exists($file)) {
 			if($handle = @fopen($file, "w")) {
@@ -133,7 +138,7 @@ class FileSystem extends Object {
 				return false;
 			}
 		} else {
-			return -1;
+			throw new LogicException("Can't create file: File exists.");
 		}
 	}
 
@@ -382,41 +387,6 @@ class FileSystem extends Object {
 
 		return (count($errors) == 0);
 	}
-	
-	/**
-	 * nice filezize of file or number
-	 *
-	 *@name filesize_nice
-	 *@access public
-	 *@param string|int - filesize or filename
-	 *@param int - precision of rounding
-	*/
-	public static function filesize_nice($data, $prec = 1) {
-		if(file_exists($data)) {
-			$size = filesize($data);
-		} else if(preg_match('/^[0-9]+$/', $data)) {
-			$size = $data;
-		} else {
-			return false;
-		}
-		
-		
-		$ext = "B";
-		if($size > 1300) {
-			$size = round($size / 1024, $prec);
-			$ext = "K";
-			if($size > 1300) {
-				$size = round($size / 1024, $prec);
-				$ext = "M";
-				if($size > 1300) {
-					$size = round($size / 1024, $prec);
-					$ext = "G";
-				}
-			}
-		}
-		
-		return $size . $ext;
-	}
 
     /**
      * protects file-path
@@ -510,74 +480,6 @@ class FileSystem extends Object {
 		} else {
 			return true;
 		}
-	}
-
-    /**
-     * checks if we could copy/move and overwrite files from directory 1 in directory 2.
-     *
-     * @name    checkMovePerms
-     * @access    public
-     * @param    string - directory 1
-     * @param    string - directory 2
-     * @return bool
-     */
-	public static function checkMovePerms($source, $dest) {
-		if(!file_exists($dest) || !file_exists($source) || !is_writable($dest)) {
-			if(!file_exists($source)) {
-				self::$errFile = $source;
-			} else {
-				self::$errFile = $dest;
-			}
-			return false;
-		}
-		
-		foreach(scandir($source) as $file) {
-			if($file != "." && $file != "..") {
-				if(is_dir($source . "/" . $file)) {
-					if(file_exists($dest . "/" . $file)) {
-						if(!self::checkMovePerms($source . "/" . $file, $dest . "/" . $file)) {
-							return false;
-						}
-					}
-				} else {
-					if(file_exists($dest . "/" . $file)) {
-						if(!is_writable($dest . "/" . $file)) {
-							self::$errFile = $dest . "/" . $file;
-							return false;
-						}
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-    /**
-     * checks if we could copy/move and overwrite given files
-     *
-     * @name    checkMovePermsByList
-     * @access    public
-     * @param    array - filelist
-     * @param    string - destination
-     * @return bool
-     */
-	public static function checkMovePermsByList($list, $dest) {
-		if(!file_exists($dest) || !is_writable($dest)) {
-			self::$errFile = $dest;
-			return false;
-		}
-		
-		foreach($list as $file) {
-
-            $file = self::getNearestFileInPath($file, $dest . "/");
-            if($file !== false) {
-                if (!is_dir($dest . "/" . $file) && !is_writable($dest . "/" . $file)) {
-                    self::$errFile = $dest . "/" . $file;
-                    return false;
-                }
-            }
-		}
-		return true;
 	}
 
 	/**
