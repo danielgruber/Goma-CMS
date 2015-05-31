@@ -323,6 +323,19 @@ class ModelWriter extends Object {
     }
 
     /**
+     * forces to have state and publishedid. it tries to get values from database.
+     */
+    protected function forceVersionIds() {
+        // first check if this record is important
+        if (!$this->model->isField("stateid") || !$this->model->isField("publishedid")) {
+            $info = $this->databaseWriter->findStateRow($this->model->id);
+
+            $this->model->stateid = $info->getSecond();
+            $this->model->publishedid = $info->getFirst();
+        }
+    }
+
+    /**
      * checks if data should be written or it is the same than the data which is already existing.
      *
      * @return bool
@@ -334,23 +347,17 @@ class ModelWriter extends Object {
             return true;
         }
 
-        // first check if this record is important
-        if (!$this->model->isField("stateid") || !$this->model->isField("publishedid")) {
-            $info = $this->databaseWriter->findStateRow($this->model->id);
-
-            $this->model->stateid = $info->getSecond();
-            $this->model->publishedid = $info->getFirst();
-        }
-
-        $oldData = $this->getObjectToUpdate()->ToArray();
+        $this->forceVersionIds();
 
         // try and find out whether to write cause of state
         if (!$this->versionDiffers($this->model)) {
 
-            // first check for raw data.
-            foreach($oldData as $key => $val) {
-                if (!self::valueMatches($val, $this->data[$key]) && $key != "last_modified" && $key != "editorid") {
-                    return true;
+            if($oldData = $this->getObjectToUpdate()->ToArray()) {
+                // first check for raw data.
+                foreach ($oldData as $key => $val) {
+                    if (!self::valueMatches($val, $this->data[$key]) && $key != "last_modified" && $key != "editorid") {
+                        return true;
+                    }
                 }
             }
 
@@ -406,33 +413,36 @@ class ModelWriter extends Object {
 
     /**
      * validates permission.
+     *
+     * @throws PermissionException
      */
     public function validatePermission() {
 
         if ($this->commandType == ModelRepository::COMMAND_TYPE_INSERT) {
-            if (!$this->model->can("Insert")) {
-                throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
-                    "be inserted cause of missing insert permissions.",
-                    ExceptionManager::PERMISSION_ERROR,
-                    "Insert");
-            }
+            $this->validateSinglePermission("Inserted", "added");
         } else {
-            if (!$this->model->can("Write")) {
-                throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
-                    "be updated cause of missing writing permissions.",
-                    ExceptionManager::PERMISSION_ERROR,
-                    "Write");
-            }
+            $this->validateSinglePermission("Write", "written");
         }
 
 
         if ($this->commandType  == ModelRepository::WRITE_TYPE_PUBLISH) {
-            if (!$this->model->can("Publish")) {
-                throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
-                    "be published cause of missing publish permissions.",
-                    ExceptionManager::PERMISSION_ERROR,
-                    "Publish");
-            }
+            $this->validateSinglePermission("Publish", "published");
+        }
+    }
+
+    /**
+     * validates single permission.
+     *
+     * @param string $permission
+     * @param string $verb
+     * @throws PermissionException
+     */
+    protected function validateSinglePermission($permission, $verb) {
+        if (!$this->model->can($permission)) {
+            throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
+                "be ".$verb." cause of missing publish permissions.",
+                ExceptionManager::PERMISSION_ERROR,
+                $permission);
         }
     }
 }
