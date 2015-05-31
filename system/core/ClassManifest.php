@@ -275,7 +275,7 @@ class ClassManifest {
 
             $class = self::resolveClassName($namespace . trim($class));
 
-            if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
+            if(!self::classHasAlreadyBeenIndexed($classes, $class, $file, count($parts[2]) == 1)) {
                 self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false);
             }
 
@@ -294,7 +294,7 @@ class ClassManifest {
         foreach($parts[1] as $key => $class) {
             $class = self::resolveClassName($namespace . trim($class));
 
-            if(!self::classHasAlreadyBeenIndexed($class, $file, count($parts[2]) == 1)) {
+            if(!self::classHasAlreadyBeenIndexed($classes, $class, $file, count($parts[2]) == 1)) {
                 self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false);
             }
         }
@@ -308,7 +308,7 @@ class ClassManifest {
      * @param bool $shouldMoveThisFile
      * @return bool
      */
-    protected static function classHasAlreadyBeenIndexed($class, $file, $shouldMoveThisFile) {
+    protected static function classHasAlreadyBeenIndexed($classes, $class, $file, $shouldMoveThisFile) {
         if(isset($classes[$class]) && $classes[$class] != $file && file_exists($classes[$class])) {
 
             // check if given file is older and move it when possible
