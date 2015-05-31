@@ -178,7 +178,9 @@ class ManyManyDropDown extends MultiSelectDropDown
 
 				$dataReturn = array();
 				foreach($this->dataset as $id) {
-					$dataReturn[$id] = $return[$id];
+                    if(isset($return[$id])) {
+                        $dataReturn[$id] = $return[$id];
+                    }
 				}
 
 				return $dataReturn;
@@ -186,36 +188,37 @@ class ManyManyDropDown extends MultiSelectDropDown
 				return array();
 			}
 		}
-				
-		/**
-		 * getDataFromModel
-		 *
-		 *@param numeric - page
-		*/
-		public function getDataFromModel($p = 1) {
-			
-			$data = clone $this->model;
-			$data->filter($this->where);
-			$data->activatePagination($p);
-			
-			if($this->form()->useStateData) {
-				$data->setVersion("state");
-			}
-			
-			$arr = array();
-			foreach($data as $record) {
-				$arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
-				if(isset($this->info_field)) {
-					if(isset($record[$this->info_field])) {
-						$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
-					}
-				}
-			}			
-			$left = ($p > 1);
-			
-			$right = (ceil($data->count() / 10) > $p);
-			return array("data" => $arr, "left" => $left, "right" => $right);
-		}
+
+    /**
+     * getDataFromModel
+     *
+     * @param int $page
+     * @return array
+     */
+    public function getDataFromModel($page = 1) {
+
+        $data = clone $this->model;
+        $data->filter($this->where);
+        $data->activatePagination($page);
+
+        if($this->form()->useStateData) {
+            $data->setVersion("state");
+        }
+
+        $arr = array();
+        foreach($data as $record) {
+            $arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
+            if(isset($this->info_field)) {
+                if(isset($record[$this->info_field])) {
+                    $arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+                }
+            }
+        }
+        $left = ($page > 1);
+
+        $right = (ceil($data->count() / 10) > $page);
+        return array("data" => $arr, "left" => $left, "right" => $right);
+    }
 		
 		/**
 		 * searches data from the optinos

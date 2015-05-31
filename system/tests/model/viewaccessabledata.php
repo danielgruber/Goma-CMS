@@ -167,6 +167,23 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($view->getCast("TEST"), "Switch");
         $this->assertEqual($view->getCast(" teSt "), "Switch");
     }
+
+
+    /**
+     * tests extended property
+     */
+    public function testExtension() {
+
+        $view = new TestViewClassMethod();
+
+        $this->assertTrue(Object::method_exists($view, "getproperty"));
+
+        $prop = TestViewClassExtendedProperty::$prop = randomString(5);
+
+        $this->assertEqual($view->property, $prop);
+        $this->assertEqual($view->PROPERTY, $prop);
+        $this->assertEqual($view->getTemplateVar("property"), $prop);
+    }
 }
 
 class TestViewClassMethod extends ViewAccessableData {
@@ -183,3 +200,18 @@ class TestViewClassMethod extends ViewAccessableData {
 		return "val";
 	}
 }
+
+class TestViewClassExtendedProperty extends Extension {
+
+    static $prop = "";
+
+    static $extra_methods = array(
+        "getProperty"
+    );
+
+    public function getProperty() {
+        return self::$prop;
+    }
+}
+
+Object::extend("TestViewClassMethod", "TestViewClassExtendedProperty");

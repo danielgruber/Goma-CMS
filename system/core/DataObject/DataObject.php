@@ -578,9 +578,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if a given record can be written to db
      *
-     *@name canWrite
-     *@access public
-     *@param array - record
+     * @name canWrite
+     * @access public
+     * @param array - record
+     * @return bool
      */
     public function canWrite($row = null)
     {
