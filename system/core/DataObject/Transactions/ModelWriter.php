@@ -393,13 +393,11 @@ class ModelWriter extends Object {
      */
     public function write() {
 
-        if ($this->data === null) {
-            return;
-        }
-
-        ModelTransactionCache::clear();
-
         $this->gatherDataToWrite();
+
+        if ($this->data === null) {
+            throw new LogicException("Writer needs to have data.");
+        }
 
         // find out if we should write data
         if ($this->getCommandType() != ModelRepository::COMMAND_TYPE_INSERT) {

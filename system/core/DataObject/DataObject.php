@@ -2708,13 +2708,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         {
             $arr[] = $row;
             // store id in cache
-            ModelTransactionCache::put($this->baseClass, $basehash . md5(serialize(array("id" => $row["id"]))), array($row));
+            if (isset($basehash))
+                DataObjectQuery::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
             
             // cleanup
             unset($row);
         }
 
-        ModelTransactionCache::put($this->baseClass, $hash, $arr);
+        /** @var String $hash */
+        DataObjectQuery::$datacache[$this->baseClass][$hash] = $arr;
 
         $query->free();
         unset($hash, $basehash, $limits, $sort, $filter, $query); // free memory
