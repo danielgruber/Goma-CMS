@@ -581,6 +581,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 		return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->classname, "get" . $name));
 	}
 
+
     /**
      * calls an offset method.
      *

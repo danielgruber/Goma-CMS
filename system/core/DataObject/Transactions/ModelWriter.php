@@ -229,7 +229,7 @@ class ModelWriter extends Object {
      */
     protected function gatherDataToWrite() {
 
-        $this->data = array();
+        $this->data = array_merge($this->model->ToArray(), (array) $this->data);
 
         $objectForUpdate = $this->getObjectToUpdate();
 
