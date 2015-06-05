@@ -18,6 +18,7 @@
  * @property    int versionid
  * @property    int id
  * @property    string baseTable
+ * @property    string baseClass
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -191,42 +192,46 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns a (@link DataObjectSet) with the given parameters
      *
-     *@name get
-     *@access public
-     *@param string - class
-     *@param array - filter
-     *@param array - sort
-     *@param array - limits
-     *@param array - joins
-     *@param null|string|int - version
-     *@param bool - pagination
+     * @name get
+     * @access public
+     * @param string - class
+     * @param array - filter
+     * @param array - sort
+     * @param array - limits
+     * @param array - joins
+     * @param null|string|int - version
+     * @param bool - pagination
+     * @return DataObjectSet
      */
     public static function get($class, $filter = null, $sort = null, $limits = null, $joins = null, $version = null, $pagination = null) {
 
         if (PROFILE) Profiler::mark("DataObject::get");
 
-        $DataSet = new DataObjectSet($class, $filter, $sort, $limits, $joins, array(), $version);
+        $dataSet = new DataObjectSet($class, $filter, $sort, $limits, $joins, array(), $version);
 
         if (isset($pagination) && $pagination !== false) {
 
-            if (is_int($pagination))
-                $DataSet->activatePagination($pagination);
-            else
-                $DataSet->activePagination();
+            if (is_int($pagination)) {
+                $dataSet->activatePagination($pagination);
+            } else {
+                $dataSet->activatePagination();
+            }
         }
 
         if (PROFILE) Profiler::unmark("DataObject::get");
 
-        return $DataSet;
+        return $dataSet;
     }
 
     /**
-     * counts the values of an DataObject
-     *@name count
-     *@param array - where
-     *@param array - fields
-     *@param array - forms
-     *@param array - groupby
+     * counts the number of sets we can find for query.
+     *
+     * @name count
+     * @param String DataObject
+     * @param array $filter
+     * @param array $froms joins
+     * @param array $groupby
+     * @return int
      */
     static function count($name = "", $filter = array(), $froms = array(), $groupby = "")
     {
@@ -373,8 +378,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public static function get_one($dataClass, $filter = array(), $sort = array(), $joins = array())
     {
         if (PROFILE) Profiler::mark("DataObject::get_one");
-
-        $dataClass = strtolower($dataClass);
 
         $output = self::get($dataClass, $filter, $sort, array(1), $joins)->first(false);
 
@@ -885,596 +888,30 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {
-        if (!defined("CLASS_INFO_LOADED")) {
-            throw new LogicException("Calling DataObject::write without loaded classinfo is not allowed.");
+
+        if(!$history) {
+            HistoryWriter::disableHistory();
         }
 
-        // check if table in db and if not, create it
-        if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
-            foreach(array_merge(ClassInfo::getChildren($this->classname), array($this->classname)) as $child) {
-                Object::instance($child)->buildDB();
-            }
-            ClassInfo::write();
-        }
-
-        if ($this->data === null) {
-            return true;
-        }
-
-        if (PROFILE) Profiler::mark("DataObject::write");
-        if (PROFILE) Profiler::mark("DataObject::write prepare");
-
-        // if we insert, we don't have an ID
-        if ($forceInsert === true) {
-            $this->consolidate();
-            $this->data["id"] = 0;
-            $this->data["versionid"] = 0;
-        }
-
-        if (isset(ClassInfo::$class_info[$this->classname]["baseclass"]))
-            $baseClass = ClassInfo::$class_info[$this->classname]["baseclass"];
-        else
-            $baseClass = $this->classname;
-
-        $oldid = 0;
-
-        self::$datacache[$this->baseClass] = array();
-
-        // Generate Data
-        // if we don't insert we merge the old record with the new one
-        if ($forceInsert === true || $this->versionid == 0) {
-
-            // check rights
-            if ($forceInsert !== true && $forceWrite !== true) {
-                if (!$this->can("Insert", $this)) {
-                    if ($snap_priority != 2 || !$this->can("Publish", $this)) {
-                        throw new PermissionException("You don't have the Permission to publish objects of type ".$this->classname.".");
-                    }
-                }
-            }
-
-            $this->onBeforeWrite();
-
-            $command = "insert";
-
-            // get new data
-            $newdata = $this->data;
-        } else {
-            // get old record
-            $data = DataObject::get_one($baseClass, array("versionid" => $this->versionid));
-
-            if ($data) {
-                // check rights
-                if ($forceWrite !== true)
-                    if (!$this->can("Write", $this))
-                        if ($snap_priority != 2 || !$this->can("Publish", $this)) {
-                            if (PROFILE) Profiler::unmark("DataObject::write");
-                            throw new PermissionException("You don't have the Permission to write or publish objects of type ".$this->classname.".");
-                        }
-
-                $this->onBeforeWrite();
-
-                $command = "update";
-                $newdata = array_merge($data->ToArray(), $this->data);
-                $this->data = $data->ToArray();
-
-                if(!$overrideCreated) {
-                    $newdata["created"] = $data["created"]; // force
-                    $newdata["autorid"] = $data["autorid"];
-                } else {
-                    if(!isset($newdata["created"])) {
-                        $newdata["created"] = $data["created"]; // force
-                    }
-
-                    if(!isset($newdata["autorid"])) {
-                        $newdata["autorid"] = $data["autorid"];
-                    }
-                }
-
-                $oldid = $data->versionid;
-
-                // copy many-many-relations
-                foreach($this->ManyManyRelationships() as $name => $relationShip) {
-                    if (!isset($newdata[$name . "ids"]) && !isset($newdata[$name])) {
-                        $newdata[$name] = $this->getRelationData($name);
-                    } else if (!isset($newdata[$name . "ids"]) && is_array($newdata[$name])) {
-                        unset($newdata[$name . "ids"]);
-                    }
-                }
-
-                unset($data);
+        if($snap_priority > 1) {
+            if($forceInsert) {
+                ModelRepository::add($this, $forceWrite, $silent, $overrideCreated);
             } else {
-
-                // check rights
-                if ($forceInsert !== true)
-                    if (!$this->can("Insert", $this->data)) {
-                        if (PROFILE) Profiler::unmark("DataObject::write");
-                        throw new PermissionException("You don't have the Permission to create objects of type ".$this->classname.".");
-                    }
-
-                $this->onBeforeWrite();
-
-                // old record doesn't exist, so we create a new record
-                $command = "insert";
-                $newdata = $this->data;
-            }
-        }
-
-        // first step: decorate the important fields
-        if ($command == "insert") {
-            $newdata["created"] = NOW;
-            $newdata["autorid"] = member::$id;
-            $newdata["last_modified"] = NOW;
-            $newdata["editorid"] = member::$id;
-        } else
-
-            if (!$silent) {
-                $newdata["last_modified"] = NOW;
-                $newdata["editorid"] = member::$id;
-            }
-
-        $newdata["snap_priority"] = $snap_priority;
-        $newdata["class_name"] = $this->isField("class_name") ? $this->fieldGET("class_name") : $this->classname;
-
-        // find out if we should write data
-        if ($command != "insert" && $forceWrite !== true) {
-            if (!$this->checkForChange($snap_priority, $newdata, $changed)) {
-                if (PROFILE) Profiler::unmark("DataObject::write");
-
-                return true;
-            }
-        }
-
-        // WE CAN WRITE!
-
-        // second step: if insert, add new record in state-table and get the auto-increment-id
-        if ($command == "insert") {
-            $manipulation = array(
-                $baseClass . "_state" => array(
-                    "table_name"=> $this->baseTable . "_state",
-                    "command"	=> "insert",
-                    "fields"	=> array(
-                        "stateid"		=> 0,
-                        "publishedid"	=> 0
-                    )
-                )
-            );
-
-            SQL::writeManipulation($manipulation);
-            unset($manipulation);
-            $id = sql::insert_id();
-            $newdata["id"] = $id;
-            $newdata["recordid"] = $id;
-            unset($id);
-        } else if (!isset($this->data["publishedid"])) {
-            $query = new SelectQuery($this->baseTable . "_state", array("id"), array("id" => $this->recordid));
-            if ($query->execute()) {
-                $data = $query->fetch_assoc();
-                if (!isset($data["id"])) {
-                    $manipulation = array(
-                        $baseClass . "_state" => array(
-                            "table_name"=> $this->baseTable . "_state",
-                            "command"	=> "insert",
-                            "fields"	=> array(
-                                "id"	=> $this->recordid
-                            )
-                        )
-                    );
-                    SQL::writeManipulation($manipulation);
-                    unset($manipulation);
-                    $newdata["id"] = $this->recordid;
-                }
-
-            } else {
-                if (PROFILE) Profiler::unmark("DataObject::write");
-                throw new SQLException();
-            }
-        }
-
-
-        // generate has-one-data
-        if ($has_one = $this->hasOne()) {
-            foreach($has_one as $key => $value) {
-                if (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "DataObject")) {
-                    // we just write this if we have really new data
-                    // first check if there is data
-                    // then if data was changed or data is inserted
-                    if ($newdata[$key]->bool() && ($newdata[$key]->original != $newdata[$key]->data || $command == "insert")) {
-                        $newdata[$key]->write(false, true, $snap_priority);
-                        $newdata[$key . "id"] = $newdata[$key]->id;
-                    } else {
-                        $newdata[$key . "id"] = $newdata[$key]->id;
-                    }
-                    unset($newdata[$key]);
-                }
-            }
-        }
-
-        $many_many_objects = array();
-        $many_many_relationships = array();
-
-        // here the magic for many-many happens
-        if ($many_many = $this->ManyManyRelationships()) {
-            foreach($many_many as $key => $value) {
-                if (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet")) {
-                    $many_many_objects[$key] = $newdata[$key];
-                    $many_many_relationships[$key] = $value;
-                    unset($newdata[$key]);
-                }
-                unset($key, $value);
-            }
-        }
-
-        unset($newdata["versionid"]);
-
-        // now set the correct data
-        $this->data = $newdata;
-        $this->viewcache = array();
-
-        // write data
-
-        // generate the write-manipulation
-        $manipulation = array(
-            $baseClass => array(
-                "command"	=> "insert",
-                "fields"	=> array_merge(array(
-                    "class_name"	=> $this->classname,
-                    "last_modified" => NOW
-                ), $this->getFieldValues($baseClass, $command))
-            )
-        );
-
-        if(!SQL::manipulate($manipulation)) {
-            throw new LogicException("Manipulation malformed. " . print_r($manipulation, true));
-        }
-
-        $this->data["versionid"] = SQL::Insert_ID();
-
-        $manipulation = array();
-
-        if ($dataclasses = ClassInfo::DataClasses($baseClass))
-        {
-            foreach($dataclasses as $class => $table)
-            {
-                $manipulation[$class . "_clean"] = array(
-                    "command"	=> "delete",
-                    "table_name"=> ClassInfo::$class_info[$class]["table"],
-                    "id"		=> $this->versionid
-                );
-                $manipulation[$class] = array(
-                    "command"	=> "insert",
-                    "fields"	=> array_merge(array(
-                        "id" 			=> $this->versionid
-                    ), $this->getFieldValues($class, $command))
-                );
-
-            }
-        }
-
-        // relation-data
-
-        /** @var ManyMany_DataObjectSet $object */
-        foreach($many_many_objects as $key => $object) {
-            $object->setRelationENV($many_many_relationships[$key], $this->versionid);
-            $object->writeToDB(false, true, $snap_priority);
-            unset($this->data[$key . "ids"]);
-        }
-
-        $many_many = $this->ManyManyRelationships();
-
-        // many-many
-        if ($many_many) {
-            /** @var ModelManyManyRelationshipInfo $relationShip */
-            foreach($many_many as $name => $relationShip)
-            {
-                if(isset($this->data[$name]) && is_array($this->data[$name])) {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name], $forceWrite, $snap_priority, $history);
-                } else if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
-                {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $this->data[$name . "ids"], $forceWrite, $snap_priority, $history);
-                }
-
-            }
-        }
-
-        // has-many
-        if ($this->hasMany())
-            foreach($this->hasMany() as $name => $class)
-            {
-                if (isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "HasMany_DataObjectSet")) {
-                    $key = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
-                    if ($key === false)
-                    {
-                        $c = $this->classname;
-                        while($c = strtolower(get_parent_class($c)))
-                        {
-                            if ($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    if ($key === false)
-                    {
-                        if (PROFILE) Profiler::unmark("DataObject::write");
-                        throw new LogicException("Could not find relation for ".$name."ids.");
-                    }
-
-                    $this->data[$name]->setRelationENV($name, $key . "id", $this->ID);
-                    $this->data[$name]->writeToDB($forceInsert, $forceWrite, $snap_priority);
-                } else {
-                    if (isset($this->data[$name]) && !isset($this->data[$name . "ids"]))
-                        $this->data[$name . "ids"] = $this->data[$name];
-                    if (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))
-                    {
-                        // find field
-                        $key = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
-                        if ($key === false)
-                        {
-                            $c = $this->classname;
-                            while($c = strtolower(get_parent_class($c)))
-                            {
-                                if ($key = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
-                                {
-                                    break;
-                                }
-                            }
-                        }
-
-                        if ($key === false)
-                        {
-                            throw new LogicException("Could not find relation for ".$name."ids.");
-                        }
-
-                        foreach($this->data[$name . "ids"] as $id) {
-                            $editdata = DataObject::get($class, array("id" => $id));
-                            $editdata[$key . "id"] = $this->id;
-                            $editdata->write(false, true, $snap_priority);
-                            unset($editdata);
-                        }
-                    }
-                }
-            }
-
-
-
-        // add some manipulation to existing many-many-connection, which are not reflected with belongs_many_many
-        if ($oldid != 0) {
-            $manipulation = $this->moveManyManyExtra($manipulation, $oldid);
-        }
-
-        self::$datacache[$this->baseClass] = array();
-
-        // get correct oldid for history
-        if ($data = DataObject::get_one($this->classname, array("id" => $this->RecordID))) {
-            $historyOldID = ($data["publishedid"] == 0) ? $data["publishedid"] : $data["stateid"];
-        } else {
-            $historyOldID = isset($oldid) ? $oldid : 0;
-        }
-
-        // fire events!
-        $this->onBeforeWriteData();
-        $this->callExtending("onBeforeWriteData");
-        $this->onBeforeManipulate($manipulation, $b = "write");
-        $this->callExtending("onBeforeManipulate", $manipulation, $b = "write");
-
-        self::$datacache[$this->baseClass] = array();
-
-        // fire manipulation to DataBase
-        if (SQL::manipulate($manipulation)) {
-
-            if ($this->versionid == 0) {
-                if (PROFILE) Profiler::unmark("DataObject::write");
-                throw new LogicException("There's is not versionid defined.");
-            }
-
-
-            // update state-table
-            if (!self::Versioned($this->classname) || $snap_priority == 2) {
-                if (self::Versioned($this->classname)) {
-                    $this->onBeforePublish();
-                    $this->callExtending("onBeforePublish");
-                    if ($forcePublish !== true) {
-                        if ($forceWrite !== true) {
-                            if (!$this->can("Publish")) {
-                                if (PROFILE) Profiler::unmark("DataObject::write");
-                                throw new PermissionException("You don't have the Permission to publish objects of type ".$this->classname.".");
-                            }
-                        }
-                    }
-                }
-
-                $manipulation = array($baseClass . "_state" => array(
-                    "command"		=> "update",
-                    "table_name" 	=> $this->baseTable . "_state",
-                    "id"			=> $this->id,
-                    "fields"		=> array(
-                        "publishedid"	=> $this->versionid,
-                        "stateid"		=> $this->versionid
-                    )
-                ));
-
-                if ($command != "insert")
-                    $command = "publish";
-            } else {
-                $manipulation = array($baseClass . "_state" => array(
-                    "command"		=> "update",
-                    "table_name" 	=> $this->baseTable . "_state",
-                    "id"			=> $this->id,
-                    "fields"		=> array(
-                        "stateid"		=> $this->versionid
-                    )
-                ));
-            }
-
-            $this->onBeforeManipulate($manipulation, $b = "write_state");
-            $this->callExtending("onBeforeManipulate", $manipulation, $b = "write_state");
-            if (SQL::manipulate($manipulation)) {
-
-                if (StaticsManager::getStatic($this->classname, "history") && $history) {
-                    if ($command == "insert" || !isset($changed)) {
-                        $changed = $this->data;
-                    }
-                    History::push($this->classname, $historyOldID, $this->versionid, $this->id, $command, $changed);
-                }
-                unset($manipulation);
-
-                $this->onAfterWrite();
-                $this->callExtending("onAfterWrite");
-
-                // HERE CLEAN-UP for non-versioned-tables happens
-                // if we don't version this dataobject, we need to delete the old record
-                if (!self::Versioned($this->classname) && isset($oldid) && $command != "insert") {
-                    $manipulation = array(
-                        $baseClass => array(
-                            "command"	=> "delete",
-                            "where" 	=> array(
-                                "id" => $oldid
-                            )
-                        )
-                    );
-
-                    if ($dataclasses = ClassInfo::DataClasses($baseClass))
-                    {
-                        foreach(array_keys($dataclasses) as $class)
-                        {
-                            $manipulation[$class] = array(
-                                "command"	=> "delete",
-                                "where" 	=> array(
-                                    "id" => $oldid
-                                )
-                            );
-                        }
-                    }
-
-                    // clean-up-many-many
-                    foreach($this->ManyManyTables() as $data) {
-                        $manipulation[$data["table"]] = array(
-                            "table" 	=> $data["table"],
-                            "command"	=> "delete",
-                            "where"		=> array(
-                                $data["field"] => $oldid
-                            )
-                        );
-                    }
-
-                    $this->callExtending("deleteOldVersions", $manipulation, $oldid);
-
-                    SQL::manipulate($manipulation);
-                    if (PROFILE) Profiler::unmark("DataObject::write");
-                    return true;
-                } else {
-                    if (PROFILE) Profiler::unmark("DataObject::write");
-                    return true;
-                }
-            } else {
-                if (PROFILE) Profiler::unmark("DataObject::write");
-                throw new SQLException();
-            }
-
-        } else {
-            if (PROFILE) Profiler::unmark("DataObject::write");
-            throw new SQLException();
-        }
-
-    }
-
-    /**
-     * checks for writing
-     *
-     * @param int $snap_priority
-     * @param array $newdata
-     * @param array array $changed
-     * @param bool $includeAll
-     * @return bool
-     * @throws SQLException
-     */
-    public function checkForChange($snap_priority, $newdata, &$changed = array(), $includeAll = false) {
-
-        $newdata = ArrayLib::map_key("strtolower", $newdata);
-
-        // first check if this record is important
-        if (!$this->isField("stateid") || !$this->isField("publishedid")) {
-            $query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $this->recordid));
-            if ($query->execute()) {
-                while($row = $query->fetch_object()) {
-                    $this->publishedid = $row->publishedid;
-                    $this->stateid = $row->stateid;
-                    break;
-                }
-                if (!isset($this->data["publishedid"])) {
-                    $this->publishedid = 0;
-                    $this->stateid = 0;
-                }
-            } else {
-                throw new MySQLException();
-            }
-        }
-
-        // try and find out whether to write cause of state
-        if ($this->publishedid != 0 && $this->stateid != 0 && ($this->stateid == $this->versionid || $snap_priority == 1) && ($this->publishedid == $this->versionid || $snap_priority == 2)) {
-
-            $forceChange = false;
-
-            // first calculate change-count
-            foreach($this->data as $key => $val) {
-                if (isset($newdata[$key])) {
-                    $comparableTypes = array("boolean", "integer", "string", "double");
-                    if (in_array(gettype($newdata[$key]), $comparableTypes) && in_array(gettype($val), $comparableTypes))
-                    {
-                        if ($newdata[$key] != $val) {
-                            $changed[$key] = $newdata[$key];
-                        }
-                    } else if (gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
-                        $changed[$key] = $newdata[$key];
-                    }
-                }
-            }
-
-            // has-one
-            if (!$forceChange && $has_one = $this->hasOne()) {
-                foreach($has_one as $key => $value) {
-                    if (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "DataObject")) {
-                        $forceChange = true;
-                        break;
-                    }
-                }
-            }
-
-            // many-many
-            if (!$forceChange && $relationShips = $this->ManyManyRelationships()) {
-                foreach (array_keys($relationShips) as $name) {
-                    if ((isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"])) || (isset($newdata[$key]) && is_object($newdata[$key]) && is_a($newdata[$key], "ManyMany_DataObjectSet"))) {
-                        if ($includeAll) $changed[$name] = (isset($newdata[$name . "ids"])) ? $newdata[$name . "ids"] : $newdata[$name];
-                        $forceChange = true;
-                        break;
-                    }
-                }
-            }
-
-            // has-many
-            if (!$forceChange && $this->hasMany())
-                foreach($this->hasMany() as $name => $class)
-                {
-                    if (isset($newdata[$name]) && !isset($newdata[$name . "ids"]))
-                        $newdata[$name . "ids"] = $newdata[$name];
-                    if (isset($newdata[$name . "ids"]) && is_array($newdata[$name . "ids"]))
-                    {
-                        if ($includeAll) $changed[$name] = $newdata[$name . "ids"];
-                        $forceChange = true;
-                    }
-                }
-
-            // now check if we should write or not
-            if (!$forceChange && ((count($changed) == 1 && isset($changed["last_modified"])) || (count($changed) == 2 && isset($changed["last_modified"], $changed["editorid"])))) {
-                // should we really write this?! No!
-                return false;
-            } else {
-                return true;
+                ModelRepository::write($this, $forceWrite, $silent, $overrideCreated);
             }
         } else {
-            return true;
+            if($forceInsert) {
+                ModelRepository::addState($this, $forceWrite, $silent, $overrideCreated);
+            } else {
+                ModelRepository::writeState($this, $forceWrite, $silent, $overrideCreated);
+            }
         }
+
+        if(!$history) {
+            HistoryWriter::enableHistory();
+        }
+
+        return true;
     }
 
     /**
@@ -1493,218 +930,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public function writeSilent($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true)
     {
         return $this->write($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, true);
-    }
-
-    /**
-     * gets field-value-pairs for a given class-table of the current data
-     * it returns the data for the table of the given class
-     * this is used for seperating data in write to correct tables
-     *
-     * @param string $class class or table-name
-     * @param string $command command
-     * @param bool $silent default: false
-     * @return array
-     */
-    protected function getFieldValues($class, $command, $silent = false)
-    {
-        $arr = array();
-        if (isset(ClassInfo::$class_info[$class]["db"])) {
-
-            if (isset(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]])) {
-                $arr = $this->fillFieldArray(ClassInfo::$database[ClassInfo::$class_info[$class]["table"]], ($command == "insert"), !$silent);
-            }
-        } else if (isset(ClassInfo::$database[$class])) {
-            $arr = $this->fillFieldArray(ClassInfo::$database[$class], ($command == "insert"), !$silent);
-        }
-
-        // casting
-        foreach($arr as $field => $val) {
-            $casting = $this->casting();
-            if(isset($casting[$field])) {
-                $object = DBField::getObjectByCasting($casting[$field], $field, $val);
-                if(Object::method_exists($object, "forDB")) {
-                    $arr[$field] = $object->forDB();
-                } else {
-                    $arr[$field] = $object->raw();
-                }
-            }
-        }
-
-        return $arr;
-    }
-
-    /**
-     * parses field-data into an array.
-     *
-     * @param array fields
-     * @return array
-     */
-    public function fillFieldArray($fields, $useDefaults = true, $addLastModified = true) {
-        $arr = array();
-
-        foreach($fields as $field => $type)
-        {
-            if (strtolower($field) != "id") {
-                $value =  $this->parseRawValue($this->data, $field);
-                if(!isset($value)) {
-                    $value = $this->parseRawValue($this->data, strtolower($field));
-                }
-
-                if(isset($value)) {
-                    $arr[$field] = $value;
-                } else if($useDefaults == "insert") {
-                    $d = $this->getDefaultValue($field);
-                    if($d != null) {
-                        $arr[$field] = $d;
-                    }
-                }
-
-                if(isset($arr[$field]) && $arr[$field] === false) {
-                    $arr[$field] = 0;
-                }
-            }
-        }
-
-        if (isset($fields["last_modified"]) && $addLastModified) {
-            $arr["last_modified"] = time();
-        }
-
-        return $arr;
-    }
-
-    /**
-     * parses value with raw and returns it.
-     *
-     * @param array data
-     * @param string field
-     * @return string val
-     */
-    protected function parseRawValue($data, $field) {
-        if (isset($data[$field])) {
-            if (is_object($data[$field])) {
-                if (Object::method_exists($data[$field], "raw")) {
-                    return $data[$field]->raw();
-                }
-            }
-
-            return $data[$field];
-        }
-    }
-
-    /**
-     * moves extra many-many-relations.
-     *
-     * @param array $manipulation
-     * @param int $oldId
-     * @return array
-     * @throws SQLException
-     */
-    protected function moveManyManyExtra($manipulation, $oldId) {
-        $currentClass = $this->classname;
-        while($currentClass != null && !ClassInfo::isAbstract($currentClass)) {
-            if (isset(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"])) {
-                foreach(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"] as $info) {
-
-                    $relationShip = $this->getManyManyInfo($info[1], $info[0])->getInverted();
-                    $existingData = $this->getManyManyRelationShipData($relationShip, null, $oldId);
-
-                    $manipulation[$relationShip->getTableName()] = array(
-                        "command"   => "insert",
-                        "table_name"=> $relationShip->getTableName(),
-                        "fields"    => array(
-
-                        )
-                    );
-                    foreach($existingData as $data) {
-                        $newRecord = $data;
-                        $newRecord[$relationShip->getOwnerField()] = $this->versionid;
-                        $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
-
-                        unset($newRecord["versionid"], $newRecord["relationShipId"]);
-                        $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
-                    }
-                }
-            }
-            $currentClass = ClassInfo::getParentClass($currentClass);
-        }
-
-        return $manipulation;
-    }
-
-    /**
-     * is used for writing many-many-relations in DataObject::write
-     *
-     * @param array $manipulation
-     * @param string $relationShipName
-     * @param array $data
-     * @param bool $forceWrite
-     * @param int $snap_priority
-     * @param bool $history
-     * @return array
-     * @throws PermissionException
-     */
-    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2, $history = true)
-    {
-        $relationShip = $this->getManyManyInfo($relationShipName);
-
-        $existing = $this->getManyManyRelationShipData($relationShip);
-
-        // calculate maximum target sort.
-        $maxTargetSort = $this->maxTargetSort($relationShip, $existing);
-
-        $mani_insert = array(
-            "table_name"	=> $relationShip->getTableName(),
-            "command"		=> "insert",
-            "ignore"		=> true,
-            "fields"		=> array(
-
-            )
-        );
-
-        $i = 0;
-        foreach($data as $key => $info) {
-            if(is_array($info)) {
-                $id = $this->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority, $history);
-
-                $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
-                    $existing[$id][$relationShip->getTargetSortField()] :
-                    ++$maxTargetSort;
-
-                $mani_insert["fields"][$id] = array(
-                    $relationShip->getOwnerField() 		=> $this->versionid,
-                    $relationShip->getTargetField() 	=> $id,
-                    $relationShip->getOwnerSortField()  => $i,
-                    $relationShip->getTargetSortField() => $targetSort
-                );
-
-                foreach($relationShip->getExtraFields() as $field => $type) {
-                    if(isset($info[$field])) {
-                        $mani_insert["fields"][$id][$field] = $info[$field];
-                    }
-                }
-            } else {
-                if(!isset($existing[$info])) {
-                    $mani_insert["fields"][$info] = array(
-                        $relationShip->getOwnerField() 		=> $this->versionid,
-                        $relationShip->getTargetField() 	=> $info,
-                        $relationShip->getOwnerSortField()  => $i,
-                        $relationShip->getTargetSortField() => ++$maxTargetSort
-                    );
-                }
-            }
-            $i++;
-        }
-
-        $mani_insert["fields"] = array_values($mani_insert["fields"]);
-
-        $table = $relationShip->getTableName();
-        if(isset($manipulation[$table . "_insert"])) {
-            $manipulation[$table . "_insert"]["fields"] = array_merge($manipulation[$table . "_insert"]["fields"], $mani_insert["fields"]);
-        } else {
-            $manipulation[$table . "_insert"] = $mani_insert;
-        }
-
-        return $manipulation;
     }
 
     /**
@@ -1960,7 +1185,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $this->disconnect();
 
-        self::$datacache[$this->caseClass] = array();
+        DataObjectQuery::$datacache[$this->caseClass] = array();
 
         $this->onBeforeRemove($manipulation);
         $this->callExtending("onBeforeRemove", $manipulation);
@@ -2594,9 +1819,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             $filter["id"] = $this[$name . "id"];
 
-            if (isset(self::$datacache[$this->baseClass][$cache])) {
+            if (isset(DataObjectQuery::$datacache[$this->baseClass][$cache])) {
                 if (PROFILE) Profiler::unmark("getHasOne", "getHasOne datacache");
-                $this->viewcache[$cache] = clone self::$datacache[$this->baseClass][$cache];
+                $this->viewcache[$cache] = clone DataObjectQuery::$datacache[$this->baseClass][$cache];
                 return $this->viewcache[$cache];
             }
 
@@ -2607,7 +1832,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
 
             if (($this->viewcache[$cache] = $response->first(false))) {
-                self::$datacache[$this->baseClass][$cache] = clone $this->viewcache[$cache];
+                DataObjectQuery::$datacache[$this->baseClass][$cache] = clone $this->viewcache[$cache];
                 if (PROFILE) Profiler::unmark("getHasOne");
                 return $this->viewcache[$cache];
             } else {
@@ -3425,11 +2650,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * cache
-     */
-    protected static $datacache = array();
-
-    /**
      * gets all the records of one query as an array
      *@name getRecords
      *@param string|int|false - version
@@ -3464,8 +2684,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
             unset($limithash, $joinhash, $searchhash);
             if (PROFILE) Profiler::unmark("getRecords::hash");
-            if (isset(self::$datacache[$this->baseClass][$hash])) {
-                return self::$datacache[$this->baseClass][$hash];
+            if (isset(DataObjectQuery::$datacache[$this->baseClass][$hash])) {
+                return DataObjectQuery::$datacache[$this->baseClass][$hash];
             }
         }
 
@@ -3870,9 +3090,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public static function clearDataCache($class = null) {
         if (isset($class)) {
             $class = strtolower($class);
-            self::$datacache[$class] = array();
+            DataObjectQuery::$datacache[$class] = array();
         } else {
-            self::$datacache = array();
+            DataObjectQuery::$datacache = array();
         }
     }
 
@@ -4098,7 +3318,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if a DataObject is versioned
      *
-     *@name Versioned
+     *@name versioned
      */
     public static function Versioned($class) {
         if (StaticsManager::hasStatic($class, "versions") && StaticsManager::getStatic($class, "versions") == true)

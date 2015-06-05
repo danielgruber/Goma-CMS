@@ -673,6 +673,7 @@ class Controller extends RequestHandler
 
         $this->callExtending("onBeforeSave", $data, $priority);
 
+        /** @var DataObject $model */
         $model = $this->getSafableModel($data, $givenModel);
 
         if (PROFILE) Profiler::unmark("Controller::save prepare");

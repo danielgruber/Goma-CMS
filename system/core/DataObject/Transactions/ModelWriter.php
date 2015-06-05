@@ -408,7 +408,36 @@ class ModelWriter extends Object {
             }
         }
 
-        $this->databaseWriter->write($this->data);
+        $this->callPreflightEvents();
+
+        $this->databaseWriter->write();
+
+        $this->callPostFlightEvents();
+    }
+
+    /**
+     * preflight events.
+     */
+    protected function callPreflightEvents() {
+        DataObjectQuery::clearCache();
+
+        $this->model->onBeforeWrite();
+        $this->callExtending("onBeforeWrite");
+
+        if($this->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
+            $this->callExtending("onBeforePublish");
+            $this->model->onBeforePublish();
+        }
+
+        $this->callExtending("onBeforeDBWriter");
+    }
+
+    /**
+     * postflight events.
+     */
+    protected function callPostFlightEvents() {
+        $this->callExtending("onAfterWrite");
+        $this->model->onAfterWrite();
     }
 
     /**

@@ -19,11 +19,9 @@ interface iDataBaseWriter {
     public function setWriter($writer);
 
     /**
-     * writes data to Database.
-     *
-     * @param array $data field-value pairs for fields
+     * writes data of Writer to Database.
      */
-    public function write($data);
+    public function write();
 
     /**
      * validates.

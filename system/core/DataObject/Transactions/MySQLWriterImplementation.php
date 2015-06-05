@@ -18,11 +18,6 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     protected $writer;
 
     /**
-     * new generated version.
-     */
-    protected $newVersion;
-
-    /**
      * sets Writer-Object.
      *
      * @param ModelWriter $writer
@@ -35,140 +30,23 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     /**
      * writes data to Database.
      */
-    public function write($data)
+    public function write()
     {
-
-        // generate has-one-data
-        $data = $this->checkForWritableHasOne($data);
-
-        $many_many_objects = array();
-        $many_many_relationships = array();
-
-        // here the magic for many-many happens
-        if ($many_many = $this->model()->ManyManyRelationships()) {
-            foreach($many_many as $key => $value) {
-                if (isset($data[$key]) && is_object($data[$key]) && is_a($data[$key], "ManyMany_DataObjectSet")) {
-                    $many_many_objects[$key] = $data[$key];
-                    $many_many_relationships[$key] = $value;
-                    unset($data[$key]);
-                }
-                unset($key, $value);
-            }
-        }
+        $data = $this->writer->getData();
 
         $baseClass = $this->model()->baseClass();
 
-        $this->newVersion = $this->insertBaseClassAndGetVersionId($data);
+        $this->model()->versionid = $this->insertBaseClassAndGetVersionId($data);
 
         $manipulation = array();
 
+        // generate manipulation for each table.
         if ($dataClasses = ClassInfo::DataClasses($baseClass))
         {
             foreach($dataClasses as $class => $table)
             {
-                $this->generateTableManipulation($data, $class, $manipulation, $this->newVersion);
+                $this->generateTableManipulation($data, $class, $manipulation, $this->model()->versionid);
             }
-        }
-
-        // relation-data
-
-        /** @var ManyMany_DataObjectSet $object */
-        foreach($many_many_objects as $key => $object) {
-            $object->setRelationENV($many_many_relationships[$key], $this->newVersion);
-            $object->writeToDB(false, true, $this->writer->getWriteType());
-            unset($data[$key . "ids"]);
-        }
-
-        $many_many = $this->model()->ManyManyRelationships();
-
-        // many-many
-        if ($many_many) {
-            /** @var ModelManyManyRelationshipInfo $relationShip */
-            foreach($many_many as $name => $relationShip)
-            {
-                if(isset($data[$name]) && is_array($data[$name])) {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name], $this->permissionsOverridden, $this->getWriteType(), $history);
-                } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
-                {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name . "ids"], $this->permissionsOverridden, $this->getWriteType(), $history);
-                }
-
-            }
-        }
-
-        // has-many
-        if ($this->model()->hasMany())
-            foreach($this->model()->hasMany() as $name => $class)
-            {
-                if (isset($data[$name]) && is_object($data[$name]) && is_a($data[$name], "HasMany_DataObjectSet")) {
-                    $key = array_search($this->model()->classname, ClassInfo::$class_info[$class]["has_one"]);
-                    if ($key === false)
-                    {
-                        $currentClass = $this->model()->classname;
-                        while($currentClass = strtolower(get_parent_class($currentClass)))
-                        {
-                            if ($key = array_search($currentClass, ClassInfo::$class_info[$class]["has_one"]))
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    if ($key === false)
-                    {
-                        if (PROFILE) Profiler::unmark("DataObject::write");
-                        throw new LogicException("Could not find relation for ".$name."ids.");
-                    }
-
-                    $data[$name]->setRelationENV($name, $key . "id", $this->recordid);
-                    $data[$name]->writeToDB(false, $this->permissionsOverridden, $this->writer->getWriteType());
-                } else {
-                    if (isset($data[$name]) && !isset($data[$name . "ids"]))
-                        $data[$name . "ids"] = $data[$name];
-                    if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
-                    {
-                        // find field
-                        $key = array_search($this->model->classname, ClassInfo::$class_info[$class]["has_one"]);
-                        if ($key === false)
-                        {
-                            $currentClass = $this->model->classname;
-                            while($currentClass = strtolower(get_parent_class($currentClass)))
-                            {
-                                if ($key = array_search($currentClass, ClassInfo::$class_info[$class]["has_one"]))
-                                {
-                                    break;
-                                }
-                            }
-                        }
-
-                        if ($key === false)
-                        {
-                            throw new LogicException("Could not find relation for ".$name."ids.");
-                        }
-
-                        foreach($data[$name . "ids"] as $id) {
-                            $editdata = DataObject::get($class, array("id" => $id));
-                            $editdata[$key . "id"] = $this->recordid;
-                            $editdata->write(false, true, $this->writer->getCommandType());
-                            unset($editdata);
-                        }
-                    }
-                }
-            }
-
-
-
-        // add some manipulation to existing many-many-connection, which are not reflected with belongs_many_many
-        if ($this->getOldId() != 0) {
-            $manipulation = $this->moveManyManyExtra($manipulation, $this->getOldId());
-        }
-
-        self::$datacache[$this->model()->baseClass()] = array();
-
-        // get correct oldid for history
-        if ($data = DataObject::get_one($this->model->classname, array("id" => $this->recordid))) {
-            $historyOldID = ($data["publishedid"] == 0) ? $data["publishedid"] : $data["stateid"];
-        } else {
-            $historyOldID = $this->getOldId();
         }
 
         // fire events!
@@ -176,90 +54,22 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         $this->model()->callExtending("onBeforeWriteData");
         $this->model()->onBeforeManipulate($manipulation, $b = "write");
         $this->model()->callExtending("onBeforeManipulate", $manipulation, $b = "write");
+        $this->writer->callExtending("onBeforeWriteData", $manipulation);
 
         // fire manipulation to DataBase
         if (SQL::manipulate($manipulation)) {
 
-            if ($this->newVersion == 0) {
-                if (PROFILE) Profiler::unmark("DataObject::write");
-                throw new LogicException("There's no versionid defined.");
-            }
-
-
-            if($this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
-                $this->model()->onBeforePublish();
-
-                $this->insertIntoStateTable(array(
-                    "id"            => $this->recordid,
-                    "publishedid"   => $this->newVersion,
-                    "stateid"       => $this->newVersion
-                ), "update");
-            } else {
-                $this->insertIntoStateTable(array(
-                    "id"            => $this->recordid,
-                    "stateid"       => $this->newVersion
-                ), "update");
-            }
+            $this->updateStateTable();
 
             $this->model()->onBeforeManipulate($manipulation, $b = "write_state");
             $this->model()->callExtending("onBeforeManipulate", $manipulation, $b = "write_state");
             if (SQL::manipulate($manipulation)) {
 
-                if (StaticsManager::getStatic($this->model->classname, "history") && $history) {
-
-                    $command = $this->writer->getCommandType();
-                    if($command != ModelRepository::COMMAND_TYPE_INSERT &&
-                        $this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
-                        $command = "publish";
-                    }
-
-                    History::push($this->model()->classname, $this->getOldId(), $this->newVersion, $this->recordid, $command);
-                }
-                unset($manipulation);
+                $this->checkForAndCleanUpDataTable();
 
                 $this->model()->onAfterWrite();
                 $this->model()->callExtending("onAfterWrite");
-
-                // HERE CLEAN-UP for non-versioned-tables happens
-                // if we don't version this dataobject, we need to delete the old record
-                if (!self::Versioned($this->model()->classname) && $this->getOldId() && $this->getCommandType() != ModelRepository::COMMAND_TYPE_INSERT) {
-                    $manipulation = array(
-                        $baseClass => array(
-                            "command"	=> "delete",
-                            "where" 	=> array(
-                                "id" => $this->oldId
-                            )
-                        )
-                    );
-
-                    if ($dataClasses = ClassInfo::DataClasses($baseClass))
-                    {
-                        foreach(array_keys($dataClasses) as $class)
-                        {
-                            $manipulation[$class] = array(
-                                "command"	=> "delete",
-                                "where" 	=> array(
-                                    "id" => $this->oldId
-                                )
-                            );
-                        }
-                    }
-
-                    // clean-up-many-many
-                    foreach($this->model()->ManyManyTables() as $data) {
-                        $manipulation[$data["table"]] = array(
-                            "table" 	=> $data["table"],
-                            "command"	=> "delete",
-                            "where"		=> array(
-                                $data["field"] => $this->oldId
-                            )
-                        );
-                    }
-
-                    $this->model()->callExtending("deleteOldVersions", $manipulation, $this->oldId);
-
-                    SQL::manipulate($manipulation);
-                }
+                $this->writer->callExtending("onAfterWrite");
             } else {
                 throw new SQLException();
             }
@@ -270,12 +80,73 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     }
 
     /**
+     * updates state table with new record and versionid.
+     */
+    protected function updateStateTable() {
+        if($this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
+            $this->model()->onBeforePublish();
+
+            $this->insertIntoStateTable(array(
+                "id"            => $this->recordid(),
+                "publishedid"   => $this->model()->versionid,
+                "stateid"       => $this->model()->versionid
+            ), "update");
+        } else {
+            $this->insertIntoStateTable(array(
+                "id"            => $this->recordid(),
+                "stateid"       => $this->model()->versionid
+            ), "update");
+        }
+    }
+
+    /**
+     * clean-up for datatable.
+     */
+    protected function checkForAndCleanUpDataTable() {
+        // HERE CLEAN-UP for non-versioned-tables happens
+        // if we don't version this dataobject, we need to delete the old record
+        if (!DataObject::Versioned($this->model()->classname) && $this->writer->getOldId() && $this->writer->getCommandType() != ModelRepository::COMMAND_TYPE_INSERT) {
+            $manipulation = array(
+                $this->model()->BaseClass() => array(
+                    "command"	=> "delete",
+                    "where" 	=> array(
+                        "id" => $this->writer->getOldId()
+                    )
+                )
+            );
+
+            if ($dataClasses = ClassInfo::DataClasses($this->model()->BaseClass()))
+            {
+                foreach(array_keys($dataClasses) as $class)
+                {
+                    $manipulation[$class] = array(
+                        "command"	=> "delete",
+                        "where" 	=> array(
+                            "id" => $this->writer->getOldId()
+                        )
+                    );
+                }
+            }
+
+            $this->model()->callExtending("deleteOldVersions", $manipulation, $this->writer->getOldId());
+            $this->writer->callExtending("deleteOldVersions", $manipulation, $this->writer->getOldId());
+
+            SQL::manipulate($manipulation);
+        }
+    }
+
+    /**
+     * it forces to have the basic record in database.
      * inserts data into table of base-class and gets new generated versionid back.@global
      *
      * @param array $data
      * @return int
      */
     protected function insertBaseClassAndGetVersionId($data) {
+
+        // force record in state table.
+        $this->forceRecordId();
+
         // generate the write-manipulation
         $manipulation = array();
 
@@ -285,7 +156,12 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             throw new LogicException("Manipulation malformed. " . print_r($manipulation, true));
         }
 
-        return SQL::Insert_ID();
+        $id = SQL::Insert_ID();
+        if($id == 0) {
+            throw new LogicException("No ID was inserted to we have a problem.");
+        }
+
+        return $id;
     }
 
     /**
@@ -324,73 +200,6 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     }
 
     /**
-     * iterates through has-one-relationships and checks if there is something to write.
-     */
-    protected function checkForWritableHasOne($data) {
-        if ($has_one = $this->model()->hasOne()) {
-            foreach($has_one as $key => $value) {
-                if (isset($data[$key]) && is_object($data[$key]) && is_a($data[$key], "DataObject")) {
-                    /** @var DataObject $record */
-                    $record = $data[$key];
-
-                    // check for write
-                    if($this->writer->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $record->wasChanged()) {
-                        ModelRepository::write($record, true, $this->writer->getSilent(), $this->writer->getUpdateCreated());
-                    }
-
-                    // get id from object
-                    $data[$key . "id"] = $record->id;
-                    unset($data[$key]);
-                }
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * moves extra many-many-relations.
-     *
-     * @param array $manipulation
-     * @param int $oldId
-     * @return array
-     * @throws SQLException
-     */
-    protected function moveManyManyExtra($manipulation, $oldId) {
-        $currentClass = $this->model()->classname;
-        while($currentClass != null && !ClassInfo::isAbstract($currentClass)) {
-            if (isset(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"])) {
-                foreach(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"] as $info) {
-
-                    $relationShip = $this->model()->getManyManyInfo($info[1], $info[0])->getInverted();
-                    $existingData = $this->model()->getManyManyRelationShipData($relationShip, null, $oldId);
-
-                    if(!empty($existingData)) {
-
-                        $manipulation[$relationShip->getTableName()] = array(
-                            "command"   => "insert",
-                            "table_name"=> $relationShip->getTableName(),
-                            "fields"    => array()
-                        );
-
-                        foreach ($existingData as $data) {
-                            $newRecord = $data;
-                            $newRecord[$relationShip->getOwnerField()] = $this->newVersion;
-                            $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
-
-                            unset($newRecord["versionid"], $newRecord["relationShipId"]);
-                            $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
-                        }
-                    }
-                }
-            }
-            $currentClass = ClassInfo::getParentClass($currentClass);
-        }
-
-        return $manipulation;
-    }
-
-    /**
      * validates write.
      * throws exception when having problems.
      */
@@ -415,7 +224,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      * @throws SQLException
      */
     public function findStateRow($recordid) {
-        $query = new SelectQuery($this->baseTable . "_state", array("publishedid", "stateid"), array("id" => $recordid));
+        $query = new SelectQuery($this->model()->BaseTable() . "_state", array("publishedid", "stateid"), array("id" => $recordid));
         if ($query->execute()) {
             if($row = $query->fetch_object()) {
                 return new Tuple($row->publishedid, $row->stateid);
@@ -425,6 +234,13 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         } else {
             throw new MySQLException();
         }
+    }
+
+    /**
+     * returns recordid of model.
+     */
+    protected function recordid() {
+        return $this->model()->id;
     }
 
     /**
@@ -439,21 +255,21 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             ));
 
             $id = sql::insert_id();
-            $this->recordid = $id;
+            $this->model()->id = $id;
         } else if (!isset($data["publishedid"])) {
-            $query = new SelectQuery($this->baseTable . "_state", array("id"), array("id" => $this->recordid));
+            $query = new SelectQuery($this->model()->baseTable . "_state", array("id"), array("id" => $this->recordid()));
             if ($query->execute()) {
                 $data = $query->fetch_assoc();
 
                 // check if record was found.
                 if (!isset($data["id"])) {
                     $this->insertIntoStateTable(array(
-                        "id" => $this->recordid
+                        "id" => $this->recordid()
                     ));
                 }
 
             } else {
-                throw new SQLException();
+                throw new SQLException("Could not check for recordid in Table " . $this->model()->baseTable . "_state.");
             }
         }
     }
@@ -463,6 +279,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      *
      * @param array $fields
      * @param string $command
+     * @throws SQLException
      */
     protected function insertIntoStateTable($fields, $command = "insert") {
         $manipulation = array(
@@ -481,83 +298,9 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             }
         }
 
-        SQL::writeManipulation($manipulation);
-    }
-
-    /**
-     * is used for writing many-many-relations in DataObject::write
-     *
-     * @param array $manipulation
-     * @param string $relationShipName
-     * @param array $data
-     * @param bool $forceWrite
-     * @param int $snap_priority
-     * @param bool $history
-     * @return array
-     * @throws PermissionException
-     */
-    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2, $history = true)
-    {
-        $relationShip = $this->model()->getManyManyInfo($relationShipName);
-
-        $existing = $this->model()->getManyManyRelationShipData($relationShip);
-
-        // calculate maximum target sort.
-        $maxTargetSort = $this->model()->maxTargetSort($relationShip, $existing);
-
-        $mani_insert = array(
-            "table_name"	=> $relationShip->getTableName(),
-            "command"   	=> "insert",
-            "ignore"		=> true,
-            "fields"		=> array(
-
-            )
-        );
-
-        $i = 0;
-        foreach($data as $key => $info) {
-            if(is_array($info)) {
-                $id = $this->model()->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority, $history);
-
-                $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
-                    $existing[$id][$relationShip->getTargetSortField()] :
-                    ++$maxTargetSort;
-
-                $mani_insert["fields"][$id] = array(
-                    $relationShip->getOwnerField() 		=> $this->versionid,
-                    $relationShip->getTargetField() 	=> $id,
-                    $relationShip->getOwnerSortField()  => $i,
-                    $relationShip->getTargetSortField() => $targetSort
-                );
-
-                foreach($relationShip->getExtraFields() as $field => $type) {
-                    if(isset($info[$field])) {
-                        $mani_insert["fields"][$id][$field] = $info[$field];
-                    }
-                }
-            } else {
-                if(!isset($existing[$info])) {
-                    $mani_insert["fields"][$info] = array(
-                        $relationShip->getOwnerField() 		=> $this->versionid,
-                        $relationShip->getTargetField() 	=> $info,
-                        $relationShip->getOwnerSortField()  => $i,
-                        $relationShip->getTargetSortField() => ++$maxTargetSort
-                    );
-                }
-            }
-            $i++;
+        if(!SQL::writeManipulation($manipulation)) {
+            throw new SQLException("Could not insert into state table.");
         }
-
-        $mani_insert["fields"] = array_values($mani_insert["fields"]);
-
-        $table = $relationShip->getTableName();
-        if(isset($manipulation[$table . "_insert"])) {
-            $manipulation[$table . "_insert"]["fields"] = array_merge($manipulation[$table . "_insert"]["fields"], $mani_insert["fields"]);
-        } else {
-            $manipulation[$table . "_insert"] = $mani_insert;
-        }
-
-        return $manipulation;
     }
 
     /**
