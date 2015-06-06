@@ -150,7 +150,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         // generate the write-manipulation
         $manipulation = array();
 
-        $this->generateTableManipulation($data, $this->model()->baseClass(), $manipulation);
+        $this->generateTableManipulation($data, $this->model()->BaseClass(), $manipulation);
 
         if(!SQL::manipulate($manipulation)) {
             throw new LogicException("Manipulation malformed. " . print_r($manipulation, true));
@@ -174,14 +174,14 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      */
     protected function generateTableManipulation($data, $class, &$manipulation, $versionId = 0) {
 
-        $fields = array_merge(array(
-            "class_name"	=> $this->model()->classname,
-            "last_modified" => NOW
-        ), DataBaseFieldManager::getFieldValues($class,
-            $data,
-            $this->writer->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT,
-            !$this->writer->getSilent()
-        ));
+        $fields = array_merge($this->generateDefaultTableManipulation($class),
+            DataBaseFieldManager::getFieldValues(
+                $class,
+                $data,
+                $this->writer->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT,
+                !$this->writer->getSilent()
+            )
+        );
 
         if($versionId != 0) {
             $manipulation[$class . "_clean"] = array(
@@ -197,6 +197,22 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             "command"	=> "insert",
             "fields"	=> $fields
         );
+    }
+
+    /**
+     * returns default manipulation fields for generated table.
+     *
+     * @return array
+     */
+    protected function generateDefaultTableManipulation($class) {
+        if($this->model()->BaseClass() == $class) {
+            return array(
+                "class_name"	=> $this->model()->classname,
+                "last_modified" => NOW
+            );
+        }
+
+        return array();
     }
 
     /**

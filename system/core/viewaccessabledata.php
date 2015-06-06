@@ -19,7 +19,7 @@ defined("IN_GOMA") OR die();
  * overloading properties.
  *
  * @package		Goma\Core
- * @version		2.3.3
+ * @version		2.3.4
  */
 class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
@@ -643,9 +643,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 *
 	 */
 	public function __call($name, $args) {
-		$name = trim($name);
 
-		return $this->makeObject($name, $this->getOffset($name, $args));
+		if(Object::method_exists($this->classname, $name)) {
+			return parent::__call($name, $args);
+		}
+
+		return $this->doObject($name, $args);
 	}
 
     /**
@@ -941,8 +944,10 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @param string - name of offset
      * @return Object
      */
-	public function doObject($offset) {
-		return $this->__call($offset, array());
+	public function doObject($name, $args = array()) {
+		$name = trim($name);
+
+		return $this->makeObject($name, $this->getOffset($name, $args));
 	}
 
 	//!Attribute-Settings-API

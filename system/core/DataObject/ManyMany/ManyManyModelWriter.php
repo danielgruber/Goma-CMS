@@ -31,6 +31,9 @@ class ManyManyModelWriter extends Extension {
         $owner = $this->getOwner();
         $data = $owner->getData();
 
+        $this->many_many_objects = array();
+        $this->many_many_relationships = array();
+
         // here the magic for many-many happens
         if ($many_many = $owner->getModel()->ManyManyRelationships()) {
             foreach($many_many as $key => $value) {
@@ -70,10 +73,10 @@ class ManyManyModelWriter extends Extension {
             foreach($many_many as $name => $relationShip)
             {
                 if(isset($data[$name]) && is_array($data[$name])) {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name], true, $owner->getWriteType(), $history);
+                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name], true, $owner->getWriteType());
                 } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
                 {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name . "ids"], true, $owner->getWriteType(), $history);
+                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name . "ids"], true, $owner->getWriteType());
                 }
 
             }
@@ -99,7 +102,7 @@ class ManyManyModelWriter extends Extension {
      * @return array
      * @throws PermissionException
      */
-    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2, $history = true)
+    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2)
     {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
@@ -124,7 +127,7 @@ class ManyManyModelWriter extends Extension {
         $i = 0;
         foreach($data as $key => $info) {
             if(is_array($info)) {
-                $id = $owner->getModel()->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority, $history);
+                $id = $owner->getModel()->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority);
 
                 $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
                     $existing[$id][$relationShip->getTargetSortField()] :
