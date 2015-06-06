@@ -98,7 +98,6 @@ class ManyManyModelWriter extends Extension {
      * @param array $data
      * @param bool $forceWrite
      * @param int $snap_priority
-     * @param bool $history
      * @return array
      * @throws PermissionException
      */
