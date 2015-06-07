@@ -949,10 +949,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         // validate versionid
         if(isset($record["versionid"])) {
             $id = $record["versionid"];
-        } else {
-            if(DataObject::count($relationShip->getTarget(), array("versionid" => $key))) {
-                $id = $key;
-            }
+        } else if(DataObject::count($relationShip->getTarget(), array("versionid" => $key)) > 0) {
+            $id = $key;
         }
 
         // did not find versionid, so generate one

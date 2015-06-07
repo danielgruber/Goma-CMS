@@ -145,12 +145,10 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      * @param bool $forceInsert
      * @param bool $forceWrite
      * @param int $snap_priority
+     * @param array $updateLastModifiedIDs
      * @return array
-     * @throws Exception
-     * @throws PermissionException
-     * @throws SQLException
      */
-    protected function writeChangedRecords($forceInsert, $forceWrite, $snap_priority) {
+    protected function writeChangedRecords($forceInsert, $forceWrite, $snap_priority, &$updateLastModifiedIDs) {
         $writeFields = array();
 
         $records = $this->getWritableRecords();
@@ -159,8 +157,6 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             return array();
         }
 
-        $updateLastModifiedIDs = array();
-        $sort = 0;
         /** @var DataObject $record */
         foreach($records as $record) {
             if(!isset($writeFields[$record->versionid]) || $record->id == 0) {
@@ -171,24 +167,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
                     $updateLastModifiedIDs[] = $record->versionid;
                 }
 
-                $ownerSortField = $this->relationShip->getOwnerSortField();
-                $writeFields[$record->versionid] = array(
-                    $this->relationShip->getOwnerField() => $this->ownValue,
-                    $this->relationShip->getTargetSortField() => $sort,
-                    $this->relationShip->getTargetField() => $record->versionid,
-                    $ownerSortField => isset($record->$ownerSortField) ? $record->$ownerSortField : 0
-                );
-
-                // add extra fields
-                if($extraFields = $this->relationShip->getExtraFields()) {
-                    foreach ($extraFields as $field => $char) {
-                        if (isset($record[$field])) {
-                            $writeFields[$record->versionid][$field] = $record->$field;
-                        }
-                    }
-                }
-
-                $sort++;
+                $this->createWriteFieldInfo($writeFields, $this->relationShip, $record);
             }
         }
 
@@ -196,36 +175,24 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     }
 
     /**
-     * returns existing ManyMany-Data.
+     * creates write-field information.
+     *
+     * @param array $writeFields
+     * @param ModelManyManyRelationShipInfo $relationShip
+     * @param DataObject $record
      */
-    protected function getExistingManyManyData() {
-        // check for existing entries
-        $query = new SelectQuery($this->relationShip->getTableName(),
-            array("*"),
-            array($this->relationShip->getOwnerField() => $this->ownValue));
+    protected function createWriteFieldInfo(&$writeFields, $relationShip, $record) {
+        $writeFields[$record->versionid] = array(
+            "versionid" => $record->versionid
+        );
 
-        if($query->execute()) {
-            $existingFields = array();
-            while($row = $query->fetch_assoc()) {
-
-                $targetValue = $row[$this->relationShip->getTargetField()];
-                $existingFields[$targetValue] = array(
-                    $this->relationShip->getOwnerField() => $this->ownValue,
-                    $this->relationShip->getTargetField() => $targetValue,
-                    $this->relationShip->getOwnerSortField() => $row[$this->relationShip->getOwnerSortField()],
-                    $this->relationShip->getTargetSortField() => $row[$this->relationShip->getTargetSortField()],
-                    "id"    => $row["id"]
-                );
-
-                // add extra fields, which exist
-                foreach($this->relationShip->getExtraFields() as $field => $char) {
-                    $existingFields[$targetValue][$field] = $row[$field];
+        // add extra fields
+        if($extraFields = $relationShip->getExtraFields()) {
+            foreach ($extraFields as $field => $char) {
+                if (isset($record[$field])) {
+                    $writeFields[$record->versionid][$field] = $record->$field;
                 }
             }
-
-            return $existingFields;
-        } else {
-            throw new SQLException();
         }
     }
 
@@ -257,62 +224,30 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 
-        $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority);
+        $updateLastModified = array();
+        $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority, $updateLastModified);
 
         // check if nothing is writable.
-        if(empty($writeData)) {
+        if(empty($writeData) && empty($updateLastModified)) {
             return;
         }
 
-        $existingFields = $this->getExistingManyManyData();
+        $manipulation = array();
 
-        $manipulation = array(
-            "insert" => array(
-                "command"	=> "insert",
-                "table_name"=> $this->relationShip->getTableName(),
-                "fields"	=> array(
-
-                ),
-                "ignore"	=> true
-            )
+        // generate manipulation
+        /** @var DataObject $owner */
+        $owner = Object::instance($this->relationShip->getOwner());
+        $manipulation = ManyManyModelWriter::set_many_many_manipulation(
+            $owner,
+            $manipulation,
+            $this->relationShip,
+            $writeData,
+            $forceWrite,
+            $snap_priority
         );
 
-        foreach($writeData as $id => $data) {
-            if(!isset($existingFields[$id])) {
-                $manipulation["insert"]["fields"][] = $data;
-            } else {
-                if($writeData[$id] != $existingFields[$id]) {
-
-                    if($writeData[$id][$this->relationShip->getOwnerSortField()] == 0) {
-                        if(isset($existingFields[$id][$this->relationShip->getOwnerSortField()])) {
-                            $writeData[$id][$this->relationShip->getOwnerSortField()] = $existingFields[$id][$this->relationShip->getOwnerSortField()];
-                        }
-                    }
-
-                    $manipulation[] = array(
-                        "command"	=> "update",
-                        "table_name"=> $this->relationShip->getTableName(),
-                        "id"		=> $existingFields[$id]["id"],
-                        "fields"	=> $writeData[$id]
-                    );
-                }
-            }
-            unset($existingFields[$id]);
-        }
-
-        if(count($existingFields) > 0) {
-            $ids = array_map(function($record){
-                return $record["id"];
-            }, $existingFields);
-            
-            $manipulation["delete"] = array(
-                "command"	=> "delete",
-                "table_name"=> $this->relationShip->getTableName(),
-                "where"	=> array(
-                    "id"    => $ids
-                )
-            );
-        }
+        // update not written records to indicate changes
+        DataObject::update($this->relationShip->getTarget(), array("last_modified" => NOW), array("id" => $updateLastModified));
 
         $this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writeData);
         $this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writeData);
@@ -336,22 +271,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
 
         $return = parent::push($record);
         if($write) {
-            $record->write(false, true);
-            $manipulation = array(
-                array(
-                    "command"	=> "insert",
-                    "table_name"=> $this->relationShip->getTableName(),
-                    "fields"	=> array(
-                        array(
-                            $this->relationShip->getOwnerField()        => $this->ownValue,
-                            $this->relationShip->getTargetField()	    => $record->versionid,
-                            $this->relationShip->getOwnerSortField()    => $this->Count(),
-                            $this->relationShip->getTargetSortField()   => 10000
-                        )
-                    )
-                )
-            );
-            SQL::manipulate($manipulation);
+            $this->writeToDB(false, true);
         }
         return $return;
     }
@@ -364,19 +284,10 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      * @return DataObject record
      */
     public function removeRecord($record, $write = false) {
+        /** @var DataObject $record */
         $record = parent::removeRecord($record);
         if($write) {
-            $manipulation = array(
-                array(
-                    "command"	=> "delete",
-                    "table_name"=> $this->relationShip->getTableName(),
-                    "where"		=> array(
-                        $this->relationShip->getTargetField() 	=> $record->versionid,
-                        $this->relationShip->getOwnerField()    => $this->ownValue
-                    )
-                )
-            );
-            SQL::manipulate($manipulation);
+            $this->writeToDB(false, true);
         }
         return $record;
     }

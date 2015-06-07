@@ -72,11 +72,24 @@ class ManyManyModelWriter extends Extension {
             /** @var ModelManyManyRelationshipInfo $relationShip */
             foreach($many_many as $name => $relationShip)
             {
+
+                /** @var ModelManyManyRelationShipInfo $relationShip */
+                $relationShip = $owner->getModel()->getManyManyInfo($name);
+
+                // it is supported to have extra-fields in this array
                 if(isset($data[$name]) && is_array($data[$name])) {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name], true, $owner->getWriteType());
+                    $manipulation = self::set_many_many_manipulation(
+                        $owner->getModel(), $manipulation,
+                        $relationShip, $data[$name],
+                        true, $owner->getWriteType()
+                    );
                 } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
                 {
-                    $manipulation = $this->set_many_many_manipulation($manipulation, $name, $data[$name . "ids"], true, $owner->getWriteType());
+                    $manipulation = self::set_many_many_manipulation(
+                        $owner->getModel(), $manipulation,
+                        $relationShip, $data[$name . "ids"],
+                        true, $owner->getWriteType()
+                    );
                 }
 
             }
@@ -93,31 +106,27 @@ class ManyManyModelWriter extends Extension {
     /**
      * is used for writing many-many-relations in DataObject::write
      *
+     * @param DataObject $ownerModel
      * @param array $manipulation
-     * @param string $relationShipName
+     * @param ModelManyManyRelationShipInfo $relationShipName
      * @param array $data ids to write
      * @param bool $forceWrite
      * @param int $snap_priority
      * @return array
      * @throws PermissionException
      */
-    protected function set_many_many_manipulation($manipulation, $relationShipName, $data, $forceWrite = false, $snap_priority = 2)
+    public static function set_many_many_manipulation($ownerModel, $manipulation, $relationShip,
+                                                      $data, $forceWrite = false, $snap_priority = 2)
     {
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-
-        /** @var ModelManyManyRelationShipInfo $relationShip */
-        $relationShip = $owner->getModel()->getManyManyInfo($relationShipName);
-
-        $existing = $owner->getModel()->getManyManyRelationShipData($relationShip);
+        $existing = $ownerModel->getManyManyRelationShipData($relationShip);
 
         // calculate maximum target sort.
-        $maxTargetSort = $owner->getModel()->maxTargetSort($relationShip, $existing);
+        $maxTargetSort = $ownerModel->maxTargetSort($relationShip, $existing);
 
-        $manipulation = $this->createManyManyManipulation(
+        $manipulation = self::createManyManyManipulation(
             $manipulation,
             $data,
-            $owner->getModel(),
+            $ownerModel,
             $relationShip,
             $forceWrite,
             $snap_priority,
@@ -125,14 +134,15 @@ class ManyManyModelWriter extends Extension {
             $maxTargetSort
         );
 
+        // if owner and target are the same we have to put everything twice in inverted order
         if(ClassManifest::classesRelated($relationShip->getTarget(), $relationShip->getOwner())) {
             $invertedRelationship = $relationShip->getInverted();
-            $invertedExisting = $owner->getModel()->getManyManyRelationShipData($invertedRelationship);
+            $invertedExisting = $ownerModel->getManyManyRelationShipData($invertedRelationship);
 
-            $manipulation = $this->createManyManyManipulation(
+            $manipulation = self::createManyManyManipulation(
                 $manipulation,
                 $data,
-                $owner->getModel(),
+                $ownerModel,
                 $invertedRelationship,
                 $forceWrite,
                 $snap_priority,
@@ -157,7 +167,7 @@ class ManyManyModelWriter extends Extension {
      * @param int $maxTargetSort
      * @return array
      */
-    protected function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
+    public static function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
 
         $mani_insert = array(
             "table_name"	=> $relationShip->getTableName(),

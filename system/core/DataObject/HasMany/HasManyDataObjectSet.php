@@ -102,7 +102,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
 
         $return = parent::push($record);
         if($write) {
-            $record->write(false, true);
+            $record->writeToDB(false, true);
         }
         return $return;
     }
@@ -110,15 +110,17 @@ class HasMany_DataObjectSet extends DataObjectSet {
     /**
      * removes the relation on writing
      *
-     *@name removeRecord
+     * @param DataObject $record
+     * @param bool $write
+     * @return DataObject record
+     * @internal param $removeRecord
      */
     public function removeRecord($record, $write = false) {
+        /** @var DataObject $record */
         $record = parent::removeRecord($record);
         if($write) {
             $record[$this->field] = 0;
-            if(!$record->write()) {
-                throwError(6, "Permission-Error", "Could not remove Relation from Record ".$record->classname.": ".$record->ID."");
-            }
+            $record->writeToDB(false, true);
         }
         return $record;
     }
