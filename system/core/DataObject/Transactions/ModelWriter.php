@@ -82,9 +82,10 @@ class ModelWriter extends Object {
         $this->model = $model;
         $this->commandType = $commandType;
         $this->updatableModel = $objectToUpdate;
-        $this->databaseWriter = isset($writer) ? $writer : new MySQLWriterImplementation();
-        $this->databaseWriter->setWriter($this);
         $this->repository = $repository;
+
+        $this->databaseWriter = isset($writer) ? clone $writer : new MySQLWriterImplementation();
+        $this->databaseWriter->setWriter($this);
         $this->databaseWriter->validate();
     }
 
