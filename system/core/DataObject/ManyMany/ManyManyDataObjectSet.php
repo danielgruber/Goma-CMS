@@ -304,6 +304,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             $ids = array_map(function($record){
                 return $record["id"];
             }, $existingFields);
+            
             $manipulation["delete"] = array(
                 "command"	=> "delete",
                 "table_name"=> $this->relationShip->getTableName(),

@@ -95,7 +95,7 @@ class ManyManyModelWriter extends Extension {
      *
      * @param array $manipulation
      * @param string $relationShipName
-     * @param array $data
+     * @param array $data ids to write
      * @param bool $forceWrite
      * @param int $snap_priority
      * @return array
@@ -114,26 +114,69 @@ class ManyManyModelWriter extends Extension {
         // calculate maximum target sort.
         $maxTargetSort = $owner->getModel()->maxTargetSort($relationShip, $existing);
 
+        $manipulation = $this->createManyManyManipulation(
+            $manipulation,
+            $data,
+            $owner->getModel(),
+            $relationShip,
+            $forceWrite,
+            $snap_priority,
+            $existing,
+            $maxTargetSort
+        );
+
+        if(ClassManifest::classesRelated($relationShip->getTarget(), $relationShip->getOwner())) {
+            $invertedRelationship = $relationShip->getInverted();
+            $invertedExisting = $owner->getModel()->getManyManyRelationShipData($invertedRelationship);
+
+            $manipulation = $this->createManyManyManipulation(
+                $manipulation,
+                $data,
+                $owner->getModel(),
+                $invertedRelationship,
+                $forceWrite,
+                $snap_priority,
+                $invertedExisting,
+                $maxTargetSort
+            );
+        }
+
+        return $manipulation;
+    }
+
+    /**
+     * creates manipulation out of gotten data.
+     *
+     * @param array $manipulation
+     * @param array $data
+     * @param DataObject $ownerModel
+     * @param ModelManyManyRelationShipInfo $relationShip
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @param array $existing
+     * @param int $maxTargetSort
+     * @return array
+     */
+    protected function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
+
         $mani_insert = array(
             "table_name"	=> $relationShip->getTableName(),
             "command"   	=> "insert",
             "ignore"		=> true,
-            "fields"		=> array(
-
-            )
+            "fields"		=> array()
         );
 
         $i = 0;
         foreach($data as $key => $info) {
             if(is_array($info)) {
-                $id = $owner->getModel()->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority);
+                $id = $ownerModel->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority);
 
                 $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
                     $existing[$id][$relationShip->getTargetSortField()] :
                     ++$maxTargetSort;
 
                 $mani_insert["fields"][$id] = array(
-                    $relationShip->getOwnerField() 		=> $owner->getModel()->versionid,
+                    $relationShip->getOwnerField() 		=> $ownerModel->versionid,
                     $relationShip->getTargetField() 	=> $id,
                     $relationShip->getOwnerSortField()  => $i,
                     $relationShip->getTargetSortField() => $targetSort
@@ -147,7 +190,7 @@ class ManyManyModelWriter extends Extension {
             } else {
                 if(!isset($existing[$info])) {
                     $mani_insert["fields"][$info] = array(
-                        $relationShip->getOwnerField() 		=> $owner->getModel()->versionid,
+                        $relationShip->getOwnerField() 		=> $ownerModel->versionid,
                         $relationShip->getTargetField() 	=> $info,
                         $relationShip->getOwnerSortField()  => $i,
                         $relationShip->getTargetSortField() => ++$maxTargetSort
@@ -186,31 +229,47 @@ class ManyManyModelWriter extends Extension {
         while($currentClass != null && !ClassInfo::isAbstract($currentClass)) {
             if (isset(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"])) {
                 foreach(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"] as $info) {
-
-                    /** @var ModelManyManyRelationShipInfo $relationShip */
-                    $relationShip = $owner->getModel()->getManyManyInfo($info[1], $info[0])->getInverted();
-                    $existingData = $owner->getModel()->getManyManyRelationShipData($relationShip, null, $oldId);
-
-                    if(!empty($existingData)) {
-
-                        $manipulation[$relationShip->getTableName()] = array(
-                            "command"   => "insert",
-                            "table_name"=> $relationShip->getTableName(),
-                            "fields"    => array()
-                        );
-
-                        foreach ($existingData as $data) {
-                            $newRecord = $data;
-                            $newRecord[$relationShip->getOwnerField()] = $owner->getModel()->versionid;
-                            $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
-
-                            unset($newRecord["versionid"], $newRecord["relationShipId"]);
-                            $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
-                        }
-                    }
+                    $this->moveManyManyExtraForRelationShip($manipulation, $oldId, $info);
                 }
             }
             $currentClass = ClassInfo::getParentClass($currentClass);
+        }
+
+        return $manipulation;
+    }
+
+    /**
+     * moves many-many-extra for a specific class.
+     *
+     * @param array $manipulation
+     * @param int $oldId
+     * @param array $info
+     * @return array
+     */
+    protected function moveManyManyExtraForRelationShip($manipulation, $oldId, $info) {
+
+        /** @var ModelWriter $owner */
+        $owner = $this->getOwner();
+
+        /** @var ModelManyManyRelationShipInfo $relationShip */
+        $relationShip = $owner->getModel()->getManyManyInfo($info[1], $info[0])->getInverted();
+        $existingData = $owner->getModel()->getManyManyRelationShipData($relationShip, null, $oldId);
+
+        if(!empty($existingData)) {
+            $manipulation[$relationShip->getTableName()] = array(
+                "command"   => "insert",
+                "table_name"=> $relationShip->getTableName(),
+                "fields"    => array()
+            );
+
+            foreach ($existingData as $data) {
+                $newRecord = $data;
+                $newRecord[$relationShip->getOwnerField()] = $owner->getModel()->versionid;
+                $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
+
+                unset($newRecord["versionid"], $newRecord["relationShipId"]);
+                $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
+            }
         }
 
         return $manipulation;

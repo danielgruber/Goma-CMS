@@ -959,10 +959,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if(!isset($id) || $id == 0) {
 
             $target = $relationShip->getTarget();
-            $object = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
-            $object->write(true, $forceWrite, $snap_priority, $forceWrite, $history);
-            return $object->versionid;
+            /** @var DataObject $dataObject */
+            $dataObject = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
+            $dataObject->write(true, $forceWrite, $snap_priority, $forceWrite, $history);
+
+            return $dataObject->versionid;
         } else {
+
+            // we want to update many-many-extra
             $databaseRecord = null;
             $db = Object::instance($relationShip->getTarget())->DataBaseFields(true);
 
@@ -977,6 +981,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 }
             }
 
+            // we found many-many-extra which can be updated so write please
             if(isset($databaseRecord)) {
                 $databaseRecord->write(false, $forceWrite, $snap_priority, $forceWrite, $history);
                 return $databaseRecord->versionid;

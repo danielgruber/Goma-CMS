@@ -145,7 +145,7 @@ class ModelRepository extends IModelRepository {
      * @param bool $silent
      * @param bool $overrideCreated
      * @param int $writeType
-     * @param IDataBaseConnector $dbWriter
+     * @param iDataBaseConnector|null $dbWriter
      * @return ModelWriter
      */
     public function buildWriter($record, $command, $silent, $overrideCreated, $writeType = self::WRITE_TYPE_PUBLISH, $dbWriter = null) {

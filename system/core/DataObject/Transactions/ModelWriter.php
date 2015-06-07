@@ -72,7 +72,7 @@ class ModelWriter extends Object {
      *
      * @param DataObject $model new version
      * @param int $commandType
-     * @param DataObject $objectToUpdate old version
+     * @param DataObject|null $objectToUpdate old version
      * @param IModelRepository $repository
      * @param iDataBaseWriter $writer
      */
@@ -98,7 +98,7 @@ class ModelWriter extends Object {
     }
 
     /**
-     * @return mixed
+     * @return DataObject
      */
     public function getModel()
     {
