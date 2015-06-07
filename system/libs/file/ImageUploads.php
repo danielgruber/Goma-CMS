@@ -11,7 +11,7 @@
  * @property int width
  * @property int height
  *
- * last modified: 03.05.2015
+ * last modified: 07.06.2015
  */
 class ImageUploads extends Uploads {
     /**
@@ -498,6 +498,23 @@ class ImageUploads extends Uploads {
     }
 
     /**
+     * helper for width() and height()
+     *
+     * @param String $size
+     * @return int
+     */
+    protected function getSize($size) {
+        if(preg_match('/^[0-9]+$/', $this->fieldGET($size)) && $this->fieldGET($size) != 0) {
+            return $this->fieldGet($size);
+        }
+
+        $image = new RootImage($this->realfile);
+        $this->setField($size, $image->$size);
+        $this->write(false, true);
+        return $image->$size;
+    }
+
+    /**
      * returns width
      *
      * @name width
@@ -505,14 +522,7 @@ class ImageUploads extends Uploads {
      * @return int
      */
     public function width() {
-        if(preg_match('/^[0-9]+$/', $this->fieldGET("width")) && $this->fieldGET("width") != 0) {
-            return $this->fieldGet("width");
-        }
-
-        $image = new RootImage($this->realfile);
-        $this->setField("width", $image->width);
-        $this->write(false, true);
-        return $image->width;
+        return $this->getSize("width");
     }
 
     /**
@@ -523,14 +533,7 @@ class ImageUploads extends Uploads {
      * @return int
      */
     public function height() {
-        if(preg_match('/^[0-9]+$/', $this->fieldGET("height"))  && $this->fieldGET("height") != 0) {
-            return $this->fieldGet("height");
-        }
-
-        $image = new RootImage($this->realfile);
-        $this->setField("height", $image->height);
-        $this->write(false, true);
-        return $image->height;
+        return $this->getSize("height");
     }
 
 }

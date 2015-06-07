@@ -298,12 +298,9 @@ class ManyMany_DataObjectSet extends DataObjectSet {
                 }
             }
             unset($existingFields[$id]);
-
         }
 
-
         if(count($existingFields) > 0) {
-
             $ids = array_map(function($record){
                 return $record["id"];
             }, $existingFields);

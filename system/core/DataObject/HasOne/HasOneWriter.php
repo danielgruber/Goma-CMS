@@ -18,6 +18,7 @@ class HasOneWriter extends Extension {
 
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
+
         $data = $owner->getData();
 
         if ($has_one = $owner->getModel()->hasOne()) {
@@ -28,7 +29,14 @@ class HasOneWriter extends Extension {
 
                     // check for write
                     if($owner->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $record->wasChanged()) {
-                        ModelRepository::write($record, true, $owner->getSilent(), $owner->getUpdateCreated());
+                        $writer = $owner->getRepository()->buildWriter(
+                            $record,
+                            -1,
+                            $owner->getSilent(),
+                            $owner->getUpdateCreated(),
+                            $owner->getWriteType(),
+                            $owner->getDatabaseWriter());
+                        $writer->write();
                     }
 
                     // get id from object

@@ -63,14 +63,20 @@ class ModelWriter extends Object {
     private $moveAutorAndCreatedFromOld = true;
 
     /**
+     * repository.
+     */
+    private $repository;
+
+    /**
      * creates write.
      *
      * @param DataObject $model new version
      * @param int $commandType
      * @param DataObject $objectToUpdate old version
+     * @param IModelRepository $repository
      * @param iDataBaseWriter $writer
      */
-    public function __construct($model, $commandType, $objectToUpdate, $writer = null) {
+    public function __construct($model, $commandType, $objectToUpdate, $repository, $writer = null) {
         parent::__construct();
 
         $this->model = $model;
@@ -78,7 +84,16 @@ class ModelWriter extends Object {
         $this->updatableModel = $objectToUpdate;
         $this->databaseWriter = isset($writer) ? $writer : new MySQLWriterImplementation();
         $this->databaseWriter->setWriter($this);
+        $this->repository = $repository;
         $this->databaseWriter->validate();
+    }
+
+    /**
+     * @return IModelRepository
+     */
+    public function getRepository()
+    {
+        return $this->repository;
     }
 
     /**
@@ -186,7 +201,7 @@ class ModelWriter extends Object {
      *
      * @return int
      */
-    protected function getCommandType() {
+    public function getCommandType() {
         return $this->commandType;
     }
 
@@ -471,5 +486,13 @@ class ModelWriter extends Object {
                 ExceptionManager::PERMISSION_ERROR,
                 $permission);
         }
+    }
+
+    /**
+     * @return iDataBaseWriter
+     */
+    public function getDatabaseWriter()
+    {
+        return $this->databaseWriter;
     }
 }

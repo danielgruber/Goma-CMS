@@ -29,7 +29,7 @@ class HasManyWriter extends Extension {
                     /** @var HasMany_DataObjectSet $hasManyObject */
                     $hasManyObject = $data[$name];
 
-                    $key = $this->searchForBelongingHasOneRelationship($class);
+                    $key = $this->searchForBelongingHasOneRelationship($name, $class);
 
                     $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
                     $hasManyObject->writeToDB(false, true, $owner->getWriteType());
@@ -39,16 +39,22 @@ class HasManyWriter extends Extension {
                     }
 
                     if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"])) {
-
                         // find field
-                        $key = $this->searchForBelongingHasOneRelationship($class);
+                        $key = $this->searchForBelongingHasOneRelationship($name, $class);
 
                         foreach ($data[$name . "ids"] as $id) {
                             /** @var DataObject $belongingObject */
                             $belongingObject = DataObject::get_one($class, array("id" => $id));
                             $belongingObject[$key . "id"] = $owner->getModel()->id;
 
-                            ModelRepository::write($belongingObject, true, $owner->getSilent(), $owner->getUpdateCreated());
+                            $writer = $owner->getRepository()->buildWriter(
+                                $belongingObject,
+                                -1,
+                                $owner->getSilent(),
+                                $owner->getUpdateCreated(),
+                                $owner->getWriteType(),
+                                $owner->getDatabaseWriter());
+                            $writer->write();
                         }
                     }
                 }

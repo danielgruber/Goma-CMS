@@ -124,6 +124,13 @@ class Core extends object {
 	public static $cacheManagerApplication;
 
 	/**
+	 * repository.
+	 *
+	 * @var IModelRepository
+	 */
+	protected static $repository;
+
+	/**
 	 * inits the core
 	 *
 	 */
@@ -136,6 +143,7 @@ class Core extends object {
 			define("IS_BACKEND", true);
 		}
 		
+		self::$repository = new ModelRepository();
 
 		// now init session
 		if(PROFILE)
@@ -160,6 +168,15 @@ class Core extends object {
 
 		if(PROFILE)
 			Profiler::unmark("Core::Init");
+	}
+
+	/**
+	 * returns repository.
+	 *
+	 * @return IModelRepository
+	 */
+	public static function repository() {
+		return self::$repository;
 	}
 
 	/**

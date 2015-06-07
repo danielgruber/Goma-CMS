@@ -895,15 +895,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         if($snap_priority > 1) {
             if($forceInsert) {
-                ModelRepository::add($this, $forceWrite, $silent, $overrideCreated);
+                Core::repository()->add($this, $forceWrite, $silent, $overrideCreated);
             } else {
-                ModelRepository::write($this, $forceWrite, $silent, $overrideCreated);
+                Core::repository()->write($this, $forceWrite, $silent, $overrideCreated);
             }
         } else {
             if($forceInsert) {
-                ModelRepository::addState($this, $forceWrite, $silent, $overrideCreated);
+                Core::repository()->addState($this, $forceWrite, $silent, $overrideCreated);
             } else {
-                ModelRepository::writeState($this, $forceWrite, $silent, $overrideCreated);
+                Core::repository()->writeState($this, $forceWrite, $silent, $overrideCreated);
             }
         }
 
