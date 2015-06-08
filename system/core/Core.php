@@ -180,6 +180,13 @@ class Core extends object {
 	}
 
 	/**
+	 * sets repository.
+	 */
+	public static function __setRepo($repository) {
+		self::$repository = $repository;
+	}
+
+	/**
 	 * inits cache-managers.
 	*/
 	public static function initCache() {

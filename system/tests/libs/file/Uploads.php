@@ -92,8 +92,14 @@ class UploadsTest extends GomaUnitTest {
 		$this->match("./" . $path . "/orgSetSize/20/20/", $file);
 		$this->match("./" . $path, $file);
 
-		$img = Uploads::getFile($path);
-		$img->remove(true);
+		if($img = Uploads::getFile($path)) {
+			$img->remove(true);
+
+			$this->assertFalse($img->bool());
+			$this->assertFalse(file_exists($file->realfile));
+		} else {
+			$this->assertTrue(false);
+		}
 
         $textfile = Uploads::getFile($this->textfile->fieldGet("path"));
         if(isset($textfile)) {
@@ -102,9 +108,6 @@ class UploadsTest extends GomaUnitTest {
             $this->assertFalse(file_exists($textfile->realfile));
 
         }
-
-		$this->assertFalse($img->bool());
-		$this->assertFalse(file_exists($file->realfile));
 
 
 	}

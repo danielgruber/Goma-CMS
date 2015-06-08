@@ -8,7 +8,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-class DataObjectFieldWriteTest extends GomaUnitTest implements TestAble
+class DatabaseFieldManagerTest extends GomaUnitTest implements TestAble
 {
     /**
      * area
@@ -18,7 +18,7 @@ class DataObjectFieldWriteTest extends GomaUnitTest implements TestAble
     /**
      * internal name.
      */
-    public $name = "WriteFieldTest";
+    public $name = "DatabaseFieldManagerTest";
 
     /**
      * tests if fillFieldArray works correctly.
@@ -32,6 +32,7 @@ class DataObjectFieldWriteTest extends GomaUnitTest implements TestAble
     }
 
     public function unittestFillFieldArray($array, $expected) {
+        /** @var DataObject $m */
         $m = new MyTestModelForDataObjectFieldWrite($array);
 
         $expected["last_modified"] = time();
@@ -42,7 +43,11 @@ class DataObjectFieldWriteTest extends GomaUnitTest implements TestAble
         $array["blub"] = "1";
         $array["last_modified"] = 1;
 
-        $this->assertEqual($m->fillFieldArray($array, true, true), $expected, "Expected ".print_r($expected, true). " %s");
+        $this->assertEqual(
+            DataBaseFieldManager::fillFieldArray($array, $m->toArray(), $m->classname, true, true),
+            $expected,
+            "Expected ".print_r($expected, true). " %s"
+        );
     }
 }
 
