@@ -237,6 +237,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         // generate manipulation
         /** @var DataObject $owner */
         $owner = Object::instance($this->relationShip->getOwner());
+        $owner->versionid = $this->ownValue;
         $manipulation = ManyManyModelWriter::set_many_many_manipulation(
             $owner,
             $manipulation,
@@ -252,7 +253,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         $this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writeData);
         $this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writeData);
         if(!SQL::manipulate($manipulation)) {
-            throw new LogicException("Could not manipulate Database. Manipulation corrupted. " . print_r($manipulation, true));
+            throw new LogicException("Could not manipulate Database. Manipulation corrupted. <pre>" . print_r($manipulation, true) . "</pre>");
         }
 
 

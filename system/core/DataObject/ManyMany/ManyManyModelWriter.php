@@ -108,7 +108,7 @@ class ManyManyModelWriter extends Extension {
      *
      * @param DataObject $ownerModel
      * @param array $manipulation
-     * @param ModelManyManyRelationShipInfo $relationShipName
+     * @param ModelManyManyRelationShipInfo $relationShip
      * @param array $data ids to write
      * @param bool $forceWrite
      * @param int $snap_priority

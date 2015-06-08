@@ -83,7 +83,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      * updates state table with new record and versionid.
      */
     protected function updateStateTable() {
-        if($this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
+        if($this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH || !DataObject::Versioned($this->model()->classname)) {
             $this->model()->onBeforePublish();
 
             $this->insertIntoStateTable(array(

@@ -8,7 +8,7 @@
  * @author      Goma-Team
  * @version     2.2
  *
- * last modified: 20.04.2015
+ * last modified: 08.06.2015
  */
 
 StaticsManager::addSaveVar("Permission", "providedPermissions");
@@ -416,7 +416,7 @@ class Permission extends DataObject
         foreach ($writeData as $id => $bool) {
             if ($data = DataObject::get_one("Permission", array("versionid" => $id))) {
                 foreach ($data->getAllChildVersionIDs() as $childVersionId) {
-                    $manipulation["insert"]["fields"][$childVersionId] = array(
+                    $manipulation["many_many_permission_groups_group_insert"]["fields"][$childVersionId] = array(
                         $relationShip->getOwnerField() => $ownValue,
                         $relationShip->getTargetField() => $childVersionId,
                         $relationShip->getOwnerSortField()  => $i,
