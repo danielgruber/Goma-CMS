@@ -18,6 +18,8 @@ loadlang("files");
  * @property string type
  * @property string md5
  * @property bool deletable
+ * @property string collectionid
+ * @property Uploads|null collection
  *
  * last modified: 26.01.2015
  */
@@ -181,7 +183,7 @@ class Uploads extends DataObject {
      * it checks if file with md5 already exists and creates it if required.
      *
      * @param    string realfile
-     * @param    string collection
+     * @param    Uploads collection
      * @param    string filename
      * @param    boolean if file is auto-deletable or not
      * @return   Uploads
@@ -191,9 +193,11 @@ class Uploads extends DataObject {
         // check for already existing file.
         if(filesize($realfile) < self::FILESIZE_MD5) {
             $md5 = md5_file($realfile);
+
+            /** @var Uploads $object */
             $object = DataObject::get_one("Uploads", array("md5" => $md5));
             if($object && file_exists($object->realfile)) {
-                if(md5_file($object->realfile) == $md5) {
+                if(md5_file($object->realfile) == $md5 && $object->collectionid == $collection->id) {
 
                     // we found the same file, just create a new DB-Entry, cause we
                     // don't track where db-entry is used. one db entry is for one

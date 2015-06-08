@@ -60,12 +60,17 @@ class UploadsTest extends GomaUnitTest {
 
 
 		// check for second file, which should be stored.
-		$file2 = Uploads::addFile($this->filename . ".jpg", $this->testfile, "TestUpload");
+		$file2 = Uploads::addFile($this->filename . ".jpg", $this->testfile, "FormUpload");
 		$this->assertTrue(file_exists($file2->realfile));
 		$this->assertEqual($file->realfile, $file2->realfile);
 		$this->assertNotEqual($file->filename, $file2->filename);
-		$this->assertNotEqual($file->collection->filename, $file2->collection->filename);
 		$this->assertEqual($file->md5, $file2->md5);
+
+		$file3 = Uploads::addFile($this->filename, $this->testfile, "TestUpload");
+		$this->assertTrue(file_exists($file3->realfile));
+		$this->assertNotEqual($file->realfile, $file3->realfile);
+		$this->assertEqual($file->filename, $file3->filename);
+		$this->assertEqual($file->md5, $file3->md5);
 
 		$this->assertTrue($file->bool());
 

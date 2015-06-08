@@ -208,7 +208,8 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         if($this->model()->BaseClass() == $class) {
             return array(
                 "class_name"	=> $this->model()->classname,
-                "last_modified" => NOW
+                "last_modified" => NOW,
+                "recordid"      => $this->model()->id
             );
         }
 
