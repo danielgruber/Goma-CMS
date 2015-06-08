@@ -213,7 +213,7 @@ class ClassManifest {
                     if (is_dir($dir . "/" . $file)) {
                         self::generate_class_manifest($dir . "/" . $file, $classes, $class_info, $env);
                     } else if (preg_match('/\.php$/i', $file) && $file != "ClassManifest.php") {
-                        self::parsePHPFile($dir . "/" . $file, $classes, $class_info, $env);
+                        self::parsePHPFile($dir . "/" . $file, $classes, $class_info);
                     }
 
                     if ($file == "_config.php") {
@@ -259,9 +259,8 @@ class ClassManifest {
      * @param string $file
      * @param array $classes
      * @param array $class_info
-     * @param array $env
      */
-    protected static function parsePHPFile($file, &$classes, &$class_info, &$env) {
+    protected static function parsePHPFile($file, &$classes, &$class_info) {
         $contents = file_get_contents($file);
 
         // remove everyting that is not php
@@ -294,8 +293,8 @@ class ClassManifest {
         foreach($parts[1] as $key => $class) {
             $class = self::resolveClassName($namespace . trim($class));
 
-            if(!self::classHasAlreadyBeenIndexed($classes, $class, $file, count($parts[2]) == 1)) {
-                self::generateDefaultClassInfo($class, $file, $parts[4][$key], $classes, $class_info, false);
+            if(!self::classHasAlreadyBeenIndexed($classes, $class, $file, count($parts[1]) == 1)) {
+                self::generateDefaultClassInfo($class, $file, $parts[3][$key], $classes, $class_info, false);
             }
         }
     }
