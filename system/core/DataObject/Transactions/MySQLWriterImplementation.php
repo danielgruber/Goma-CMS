@@ -174,13 +174,14 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      */
     protected function generateTableManipulation($data, $class, &$manipulation, $versionId = 0) {
 
-        $fields = array_merge($this->generateDefaultTableManipulation($class),
+        $fields = array_merge(
             DataBaseFieldManager::getFieldValues(
                 $class,
                 $data,
                 $this->writer->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT,
                 !$this->writer->getSilent()
-            )
+            ),
+            $this->generateDefaultTableManipulation($class)
         );
 
         if($versionId != 0) {
@@ -205,7 +206,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
      * @return array
      */
     protected function generateDefaultTableManipulation($class) {
-        if($this->model()->BaseClass() == $class) {
+        if(ClassManifest::isSameClass($this->model()->BaseClass(), $class)) {
             return array(
                 "class_name"	=> $this->model()->classname,
                 "last_modified" => NOW,
@@ -272,6 +273,10 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             ));
 
             $id = sql::insert_id();
+            if($id == 0) {
+                throw new LogicException("There must be an inserted id.");
+            }
+
             $this->model()->id = $id;
         } else if (!isset($data["publishedid"])) {
             $query = new SelectQuery($this->model()->baseTable . "_state", array("id"), array("id" => $this->recordid()));

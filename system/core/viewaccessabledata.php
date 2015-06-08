@@ -554,7 +554,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 
     /**
      * is field
-     * @param $name name of field
+     * @param String $name
      * @return bool
      */
 	public function isField($name) {
@@ -566,6 +566,8 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
 	 * checks if object exists
 	 *
+	 * @param String $offset
+	 * @return bool
 	 */
 	final public function isOffset($offset) {
 		return $this->__cancall($offset) || Object::method_exists($this->classname, $offset);

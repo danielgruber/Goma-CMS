@@ -417,7 +417,7 @@ class ClassManifest {
      * generates data for extension.
      *
      * @param $data info about extension
-     * @param $dir directory
+     * @param String $dir
      * @param $classes class-index
      * @param $class_info classinfo-index
      * @param $env environment info

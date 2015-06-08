@@ -110,7 +110,7 @@ class ModelWriter extends Object {
      */
     public function setSilent($silent)
     {
-        $this->updateLastModified = $silent;
+        $this->updateLastModified = !$silent;
     }
 
     /**

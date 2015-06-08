@@ -248,7 +248,8 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         );
 
         // update not written records to indicate changes
-        DataObject::update($this->relationShip->getTarget(), array("last_modified" => NOW), array("id" => $updateLastModified));
+        $baseClassTarget = ClassInfo::$class_info[$this->relationShip->getTarget()]["baseClass"];
+        DataObject::update($baseClassTarget, array("last_modified" => NOW), array("id" => $updateLastModified));
 
         $this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writeData);
         $this->dataobject->callExtending("onBeforeManipulateManyMany", $manipulation, $this, $writeData);
