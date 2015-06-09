@@ -270,7 +270,7 @@ self.dropdownDialogs = [];
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
 			//this.dropdown.css({"display": "block", top: "-1000px"});
-            var triangle_margin_top, positionTop, positionLeft, contentWidth, positionRight;
+            var triangle_margin_top, positionTop, positionLeft, positionRight;
 
 			switch(position) {
 				case "bottom":
@@ -286,11 +286,12 @@ self.dropdownDialogs = [];
 					
 					this.dropdown.find(" > div > .content").css("width", "");
 					positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
-					contentWidth = this.dropdown.find(" > div > .content").outerWidth();
+
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
-					
+
+					var contentWidth = this.getContentWidth();
 					// check if this is logical
-					if(contentwidth + positionLeft + 100 > $(document).width()) {
+					if(contentWidth + positionLeft + 100 > $(document).width()) {
 						this.triangle_position = "right";
 						positionLeft = elemleft + elemwidth - contentWidth + 14;
 					}
@@ -318,10 +319,9 @@ self.dropdownDialogs = [];
 					} else {
 						triangle_margin_top = 0 - 20;
 					}
-					
-					contentWidth = this.dropdown.find(" > div > .content").outerWidth();
+
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
-					positionRight = elemleft + 2 - contentWidth;
+					positionRight = elemleft + 2 - this.getContentWidth();
 					
 					this.dropdown.css({
 						top: positionTop,
@@ -369,6 +369,17 @@ self.dropdownDialogs = [];
 			}
 			
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.moveDropdown");
+		},
+
+		/**
+		 * returns content-width.
+		 */
+		getContentWidth: function() {
+			if(this.dropdown.find(" > div > .content").length > 0) {
+				return this.dropdown.find(" > div > .content").outerWidth();
+			}
+
+			return 0;
 		},
 		
 		/**

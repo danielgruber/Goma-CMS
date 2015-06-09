@@ -633,8 +633,9 @@ class ClassInfo extends Object {
 			defined("CLASS_INFO_LOADED") OR define("CLASS_INFO_LOADED", true);
 
 			// patch until 2.1 daisy, then we drop this
-			if(file_exists(APP_FOLDER . "/application/config.php"))
+			if(file_exists(APP_FOLDER . "/application/config.php")) {
 				ClassManifest::addPreload(APP_FOLDER . "/application/config.php");
+			}
 
 			// normal code
 			foreach(ClassManifest::$preload as $_file) {
@@ -675,8 +676,6 @@ class ClassInfo extends Object {
 
 				unset($class, $data);
 			}
-			
-			
 			
 			foreach(self::$class_info as $class => $data) {
 				if(!ClassInfo::isAbstract($class)) {

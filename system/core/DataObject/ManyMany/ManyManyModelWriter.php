@@ -235,14 +235,17 @@ class ManyManyModelWriter extends Extension {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
 
-        $currentClass = $owner->getModel()->classname;
-        while($currentClass != null && !ClassInfo::isAbstract($currentClass)) {
-            if (isset(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"])) {
-                foreach(ClassInfo::$class_info[$currentClass]["many_many_relations_extra"] as $info) {
-                    $this->moveManyManyExtraForRelationShip($manipulation, $oldId, $info);
+        $dataClasses = array_merge(
+            array($owner->getModel()->BaseClass()),
+            ClassInfo::DataClasses($owner->getModel()->classname)
+        );
+
+        foreach($dataClasses as $dataClass) {
+            if (isset(ClassInfo::$class_info[$dataClass]["many_many_relations_extra"])) {
+                foreach(ClassInfo::$class_info[$dataClass]["many_many_relations_extra"] as $info) {
+                    $manipulation = $this->moveManyManyExtraForRelationShip($manipulation, $oldId, $info);
                 }
             }
-            $currentClass = ClassInfo::getParentClass($currentClass);
         }
 
         return $manipulation;

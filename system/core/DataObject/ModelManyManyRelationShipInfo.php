@@ -438,7 +438,7 @@ class ModelManyManyRelationShipInfo {
      */
     public static function findInverseManyManyRelationship($relationName, $class, $info, $belonging = false)
     {
-        $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0]) : ModelInfoGenerator::generateBelongs_many_many($info[0]);
+        $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0], true) : ModelInfoGenerator::generateBelongs_many_many($info[0], true);
 
         // if inverse is set in value of relationship, just validate inverse
         if (isset($info[1])) {
@@ -452,12 +452,7 @@ class ModelManyManyRelationShipInfo {
             }
         } else {
             // find relationship on other class
-            foreach ($relationships as $name => $relationValue) {
-                // validate relation
-                if (self::isInverseValid($relationValue, $relationName, $class)) {
-                    return $name;
-                }
-            }
+            return self::findInverseRelationshipsWithoutHint($relationships, $relationName, $class);
         }
 
         if ($belonging) {
@@ -466,6 +461,32 @@ class ModelManyManyRelationShipInfo {
             return null;
         }
 
+    }
+
+    /**
+     * checks other classes relationships if there is an inverse or more than one.
+     * it throws an exception when there are more than one inverse relationships possible.
+     *
+     * @param array $relationships
+     * @param String $relationName
+     * @param String $class
+     * @return String
+     */
+    public static function findInverseRelationshipsWithoutHint($relationships, $relationName, $class) {
+        /** @var String $possibleRelationship */
+
+        $possibleRelationship = null;
+        foreach ($relationships as $name => $relationValue) {
+            // validate relation
+            if (self::isInverseValid($relationValue, $relationName, $class)) {
+                if(isset($possibleRelationship)) {
+                    throw new LogicException("There is more than one possible inverse relationship for $relationName. Please add inverse to definition.");
+                }
+                $possibleRelationship = $name;
+            }
+        }
+
+        return $possibleRelationship;
     }
 
     /**
@@ -481,7 +502,7 @@ class ModelManyManyRelationShipInfo {
         $relationInfo = self::getRelationInfoWithInverse($value);
 
         return  (!isset($relationInfo[1]) || $relationInfo[1] == strtolower($relationName)) &&
-        (ClassManifest::isSameClass($relationInfo[0], $class) || is_subclass_of($class, $relationInfo[0]));
+        (ClassManifest::isSameClass($relationInfo[0], $class));
     }
 
     /**

@@ -143,6 +143,7 @@ class DataObjectClassInfo extends Extension
                         $relationShip->toClassInfo();
 
                     if($relationShip->getBelongingName() == null) {
+
                         ClassInfo::$class_info[$relationShip->getTarget()]["many_many_relations_extra"][] = array(
                             $class, $relationShip->getRelationShipName()
                         );
@@ -199,7 +200,6 @@ class DataObjectClassInfo extends Extension
             }
             unset($_c, $parent, $classInstance);
         }
-
         if (PROFILE) Profiler::unmark("DataObjectClassInfo::generate");
     }
 

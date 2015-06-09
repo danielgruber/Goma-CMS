@@ -304,7 +304,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         } else if (isset(ClassInfo::$database[$name])) {
             $table_name = $name;
         } else {
-            throwError(6, "Table not found", "Table or model '" . $name . "' does not exist.");
+            throw new LogicException("Table or model '" . $name . "' does not exist.");
         }
 
         if (!isset($data["last_modified"]) && !$silent)
@@ -1621,6 +1621,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
 
         $query->sort($this->getManyManySort($relationShip));
+
+        logging(print_r($relationShip, true));
+        logging(print_r($query, true));
 
         return $query;
     }
