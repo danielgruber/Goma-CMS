@@ -13,7 +13,7 @@
 
 class GomaRestfulService extends RequestHandler {
     public $url_handlers = array(
-        '$ClassName!/$ID'	=> "handleWithDataType"
+        '$ClassName!'	=> "handleWithDataType"
     );
 
     public $allowed_actions = array(
@@ -44,7 +44,7 @@ class GomaRestfulService extends RequestHandler {
 
             $array = call_user_func_array(array($class, "toRESTArray"), array($object));
 
-            HTTPResponse::setHeader("content-type", "application/x-json");
+            HTTPResponse::setHeader("content-type", "text/json");
 
             return json_encode($array);
         }

@@ -13,6 +13,7 @@ Core::addRules(array(
 	"system/livecounter"		=> "liveCounterController",
 	'system/ajax//link/$id' 	=> 'ajaxlink',
 	'system/ajax//popup/$id' 	=> 'ajaxlink',
+	"api/v2"					=> "GomaRestfulService",
 	"api/v1//\$ClassName!" 		=> "RestfulServer",
 	"treeserver" 				=> "TreeServer",
 	'images/resampled' 			=> "imageResize",
