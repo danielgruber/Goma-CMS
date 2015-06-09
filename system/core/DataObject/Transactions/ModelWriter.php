@@ -245,7 +245,9 @@ class ModelWriter extends Object {
      */
     protected function gatherDataToWrite() {
 
-        $this->data = array_merge($this->model->ToArray(), (array) $this->data);
+        $modelData = $this->model->ToArray();
+        unset($modelData["recordid"]);
+        $this->data = array_merge($modelData, (array) $this->data);
 
         $objectForUpdate = $this->getObjectToUpdate();
 
