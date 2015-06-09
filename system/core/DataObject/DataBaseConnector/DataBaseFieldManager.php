@@ -50,6 +50,10 @@ class DataBaseFieldManager {
             }
         }
 
+        if(isset($arr["recordid"])) {
+            unset($arr["recordid"]);
+        }
+
         return $arr;
     }
 

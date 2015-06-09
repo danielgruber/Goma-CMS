@@ -175,13 +175,13 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     protected function generateTableManipulation($data, $class, &$manipulation, $versionId = 0) {
 
         $fields = array_merge(
+            $this->generateDefaultTableManipulation($class),
             DataBaseFieldManager::getFieldValues(
                 $class,
                 $data,
                 $this->writer->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT,
                 !$this->writer->getSilent()
-            ),
-            $this->generateDefaultTableManipulation($class)
+            )
         );
 
         if($versionId != 0) {
