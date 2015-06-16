@@ -9,7 +9,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.0.7
+ * @version     2.0.8
  */
 
 class SelectQuery extends Object {
@@ -332,8 +332,10 @@ class SelectQuery extends Object {
 	/**
 	 * adds an left-join
 	 *
-	 *@param string - table
-	 *@param string - statement after the ON
+	 * @param string $table
+	 * @param string $statement after the ON
+	 * @param string $alias to use in join
+	 * @return $this
 	 */
 	public function leftJoin($table, $statement, $alias = "") {
 		$this->getAliasAndStatement($table, $statement, $alias);
@@ -344,8 +346,10 @@ class SelectQuery extends Object {
 	/**
 	 * adds an right-join
 	 *
-	 *@param string - table
-	 *@param string - statement after the ON
+	 * @param string $table table
+	 * @param string $statement after the ON
+	 * @param string $alias use in join
+	 * @return $this
 	 */
 	public function rightJoin($table, $statement, $alias = "") {
 		$this->getAliasAndStatement($table, $statement, $alias);
@@ -353,6 +357,14 @@ class SelectQuery extends Object {
 		return $this;
 	}
 
+	/**
+	 * replaces user-defined alias with internal used alias to know the right table.
+	 * it is used to improve uniqueness.
+	 *
+	 * @param string $table
+	 * @param string $statement
+	 * @param string $alias
+	 */
 	public function getAliasAndStatement(&$table, &$statement, &$alias) {
 		$alias = ($alias == "") ? self::getAlias($table) : $alias;
 
@@ -364,6 +376,12 @@ class SelectQuery extends Object {
 
 	}
 
+	/**
+	 * replaces user-defined table-aliases with internal table-aliases.
+	 *
+	 * @param $statement
+	 * @return mixed
+	 */
 	public function replaceAliasInStatement($statement) {
 		foreach($this->from as $a => $data) {
 			if(is_array($data)) {
@@ -386,7 +404,7 @@ class SelectQuery extends Object {
 	 *@return bool
 	 */
 	public function isJoinedTo($table) {
-		return isset($this->form[$table]);
+		return isset($this->from[$table]);
 	}
 
 	/**
@@ -635,9 +653,12 @@ class SelectQuery extends Object {
 	/**
 	 * generates the coliding SQL
 	 *
-	 *@name generateColidingSQL
+	 * @param string $from
+	 * @param array $colidingFields
+	 * @param int $i to indicate where in query this is called.
+	 * @return string
 	 */
-	public function generateColidingSQL($from, $colidingFields, &$i) {
+	protected function generateColidingSQL($from, $colidingFields, &$i) {
 		// some added caches ;)
 		if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
 			$colidingSQL = "";

@@ -305,7 +305,44 @@ class ManyManyModelWriter extends Extension {
                 )
             );
         }
+    }
 
+    /**
+     * translates versionids to active versionids.
+     *
+     * @param ModelManyManyRelationShipInfo $relationShip
+     * @param array $ids
+     * @return array
+     */
+    public function translateVersionIDs($relationShip, $ids) {
+        $newIds = array();
+
+        // first check if records are up 2 date.
+        /** @var DataObject $targetObject */
+        $targetObject = Object::instance($relationShip->getTarget());
+        $selectQuery = new SelectQuery($targetObject->BaseTable(),
+            array(
+                $targetObject->BaseTable() . ".recordid",
+                $targetObject->BaseTable() . ".id",
+                $targetObject->BaseTable() . ".snap_priority",
+                $targetObject->BaseClass() . "_state.id AS stateid"
+            ),
+            array(
+                $targetObject->BaseTable() . ".id" => $ids
+            )
+        );
+
+        // left join state table so we see what kind of version it is or was not.
+        $selectQuery->leftJoin($targetObject->BaseClass() . "_state",
+            ' ON (s.publishedid = ' . $targetObject->BaseTable() . '.id ' .
+            'AND ' . $targetObject->BaseTable() . '.snap_priority = 2) OR ' .
+            '(s.stateid = ' . $targetObject->BaseTable() . '.id ' .
+            'AND ' . $targetObject->BaseTable() . '.snap_priority < 2)', "s");
+
+        print_r($selectQuery->build());
+        exit;
+
+        return $newIds;
     }
 }
 

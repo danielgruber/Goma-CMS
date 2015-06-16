@@ -299,13 +299,15 @@ class DropDown extends FormField {
 
 		$this->getValue();
 
-		if(!$this->disabled)
-			if($this->multiselect)
+		if(!$this->disabled) {
+			if ($this->multiselect) {
 				return $this->dataset;
-			else
+			} else {
 				return parent::result();
-		else
+			}
+		} else {
 			return null;
+		}
 	}
 
 	/**

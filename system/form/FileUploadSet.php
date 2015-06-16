@@ -6,7 +6,7 @@
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
- * @version 1.2
+ * @version 1.2.1
  */
 class FileUploadSet extends FormField
 {
@@ -627,6 +627,8 @@ class FileUploadSet extends FormField
     public function FileList()
     {
         $list = array();
+
+        /** @var Uploads $file */
         foreach ($this->value as $file) {
             $list[$file->id] = array(
                 "filename" => $file->filename,
@@ -647,7 +649,7 @@ class FileUploadSet extends FormField
      *
      * @name result
      * @access public
-     * @return mixed
+     * @return ManyMany_DataObjectSet<Uploads>
      */
     public function result()
     {
