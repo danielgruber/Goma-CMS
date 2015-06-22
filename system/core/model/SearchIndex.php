@@ -23,10 +23,13 @@ class SearchIndex extends DataObjectExtension {
 	static $db = array(
 		"indexversion"	=> "decimal(6,2)"
 	);
-	
+
 	/**
 	 * indexes a given record.
-	*/
+	 *
+	 * @param DataObject $record
+	 * @return bool
+	 */
 	static function indexRecord($record) {
 		$many_many_data = $record->ManyManyTables();
 		
@@ -58,27 +61,29 @@ class SearchIndex extends DataObjectExtension {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * searches in a DataObject with this index.
 	 *
-	 * @param	string $class class
-	 * @param 	string $search words or search-terms
-	 * @param 	string $filter additional filter
-	 * @param	string $limits limits
-	 * @param 	string $joins additional joins
-	 * @param 	int|boolean $pagination false for disabling or int for items per page
-	 * @param 	boolean|string $groupby group by which field or disabled
+	 * @param    string $class class
+	 * @param    string $search words or search-terms
+	 * @param    string $filter additional filter
+	 * @param    string $limits limits
+	 * @param    string $joins additional joins
+	 * @param    int|boolean $pagination false for disabling or int for items per page
+	 * @param    boolean|string $groupby group by which field or disabled
 	 *
-	*/
+	 * @return DataObjectSet|DataSet
+	 */
 	static function search($class, $search = "", $filter = array(), $limits = array(), $join = array(), $pagination = false, $groupby = false) {
 		$DataSet = new DataObjectSet($class, $filter, array(), $limits, $join, $search);
 		
 		if ($pagination !== false) {
-			if (is_int($pagination))
+			if (is_int($pagination)) {
 				$DataSet->activatePagination($pagination);
-			else
-				$DataSet->activePagination();
+			} else {
+				$DataSet->activatePagination();
+			}
 		}
 		
 		if ($groupby !== false) {

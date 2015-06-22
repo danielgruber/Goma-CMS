@@ -1,15 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 10.12.2014
-  * $Version 1.5
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Basic Class some system behaviour.
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version    1.0
+ */
 class systemController extends Controller {
 	/**
 	 * js-debug-limit in KB
@@ -18,46 +18,26 @@ class systemController extends Controller {
 	 *@access public
 	*/
 	const JS_DEBUG_LIMIT = 2048;
-	
-	/**
-	 * you can set the mobile state to active or disabled
-	*/
+
 	public $url_handlers = array(
-		"setMobile/0"			=> "disableMobile",
-		"setMobile/1"			=> "enableMobile",
 		"setUserView/\$bool!"	=> "setUserView",
 		"switchView",
 		"getLang/\$lang"		=> "getLang",
-		"ck_uploader"			=> "ckeditor_upload",
-		"ck_imageuploader"		=> "ckeditor_imageupload",
 		"indexSearch/\$max"		=> "indexSearch"
 	);
 	
-	public $allowed_actions = array("disableMobile", "enableMobile", "setUserView", "switchView", "getLang", "ckeditor_upload", "ckeditor_imageupload", "indexSearch");
-	
-	/**
-	 * disables the mobile version
-	*/
-	public function disableMobile() {
-		$_SESSION["nomobile"] = true;
-		$this->redirectback();
-	}
-	
-	/**
-	 * enables the mobile version
-	*/
-	public function enableMobile() {
-		unset($_SESSION["nomobile"]);
-		$this->redirectback();
-	}
-	
-	/**
-	 * by default, without modifier enable mobile state
-	*/
+	public $allowed_actions = array(
+		"setUserView",
+		"switchView",
+		"getLang",
+		"indexSearch",
+		"cron"
+	);
+
 	public function index() {
-		HTTPResponse::redirect(BASE_URI);
-		exit;
+		return false;
 	}
+
 	/**
 	 * sets the user view
 	 *
@@ -72,6 +52,7 @@ class systemController extends Controller {
 		}
 		$this->redirectback();
 	}
+
 	/**
 	 * switches the view
 	 *
@@ -172,169 +153,7 @@ class systemController extends Controller {
 		HTTPResponse::output('('.json_encode($output).')');
 		exit;
 	}
-	
-	/**
-	 * uploads files for the ckeditor
-	 *
-	 *@name ckeditor_upload
-	 *@access public
-	*/
-	public function ckeditor_upload() {
-	
-		if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
-			die(0);
-		}
-	
-		$allowed_types = array(
-			"jpg",
-			"png",
-			"bmp",
-			"jpeg",
-			"zip",
-			"rar",
-			"doc",
-			"txt",
-			"text",
-			"pdf",
-			"dmg",
-			"7z",
-			"gif",
-			"mp3",
-			"xls",
-			"xlsx",
-			"docx",
-			"pptx",
-			"numbers",
-			"key",
-			"pages"
-		);
-		$allowed_size = 100 * 1024 * 1024;
-		
-		
-		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
-			if(Core::phpInputFile()) {
-				$tmp_name = Core::phpInputFile();
 
-				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
-					$_FILES["upload"] = array(
-						"name" => $_SERVER["HTTP_X_FILE_NAME"],
-						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
-						"error" => 0,
-						"tmp_name" => $tmp_name
-					);
-				}
-				
-			}
-		}
-		
-		if(isset($_FILES["upload"])) {
-			if($_FILES["upload"]["error"] == 0) {
-				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
-					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
-				}
-		
-		
-				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
-					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
-					if($_FILES["upload"]["size"] <= $allowed_size) {
-						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
-							echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path.'\', "");</script>';
-							exit;
-						} else {
-							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-						}
-					} else {
-						return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filesize_failure").'");</script>';
-					}
-				} else {
-					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filetype_failure").'");</script>';
-
-				}
-			} else {
-				return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-			}
-		} else {
-			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-		}
-	}
-	
-	/**
-	 * uploads files for the ckeditor
-	 *
-	 *@name ckeditor_upload
-	 *@access public
-	*/
-	public function ckeditor_imageupload() {
-	
-		if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
-			die(0);
-		}
-	
-		$allowed_types = array(
-			"jpg",
-			"png",
-			"bmp",
-			"jpeg",
-			"gif"
-		);
-		$allowed_size = 20 * 1024 * 1024;
-		
-		if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
-			if(Core::phpInputFile()) {
-				$tmp_name = Core::phpInputFile();
-
-				if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
-					$_FILES["upload"] = array(
-						"name" => $_SERVER["HTTP_X_FILE_NAME"],
-						"size" => $_SERVER["HTTP_X_FILE_SIZE"],
-						"error" => 0,
-						"tmp_name" => $tmp_name
-					);
-				}
-				
-			}
-		}
-		
-		if(isset($_FILES["upload"])) {
-			if($_FILES["upload"]["error"] == 0) {
-				if(GOMA_FREE_SPACE - $_FILES["upload"]["size"] < 10 * 1024 * 1024) {
-					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("error_disk_space").'");</script>';
-				}
-				
-				if(preg_match('/\.('.implode("|", $allowed_types).')$/i',$_FILES["upload"]["name"])) {
-					$filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
-					if($_FILES["upload"]["size"] <= $allowed_size) {
-						if($response = Uploads::addFile($filename, $_FILES["upload"]["tmp_name"], "ckeditor_uploads")) {
-							$info = GetImageSize($response->realfile);
-							$width = $info[0];
-							$height = $info[0];
-							if(filesize($response->realfile) > 1024 * 1024 * 4 || $width > HTMLText::MAX_RESIZE_WIDTH || $height > HTMLText::MAX_RESIZE_HEIGHT) {
-								$add = 'alert(parent.lang("alert_big_image"));';
-							} else {
-								$add = "";
-							}
-							
-							echo '<script type="text/javascript">'.$add.'
-							window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'\', "");</script>';
-							exit;
-						} else {
-							return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-						}
-					} else {
-						return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filesize_failure").'");</script>';
-					}
-				} else {
-					return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.filetype_failure").'");</script>';
-
-				}
-			} else {
-				return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-			}
-		} else {
-			return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
-		}
-	}
-	
 	/**
 	 * indexes some records for search.
 	*/
@@ -370,5 +189,12 @@ class systemController extends Controller {
 		}
 		
 		return 1;
+	}
+
+	/**
+	 * cron jobs.
+	 */
+	public function cron() {
+		Core::callHook("cron");
 	}
 }

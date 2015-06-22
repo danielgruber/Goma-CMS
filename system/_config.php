@@ -7,29 +7,37 @@
  */
 
 Core::addRules(array(
-	"dev" 						=> "dev",
-	'admin//$item' 				=> "adminController",
-	'api/stats' 				=> "StatController",
-	"system/livecounter"		=> "liveCounterController",
-	'system/ajax//link/$id' 	=> 'ajaxlink',
-	'system/ajax//popup/$id' 	=> 'ajaxlink',
-	"api/v2"					=> "GomaRestfulService",
-	"api/v1//\$ClassName!" 		=> "RestfulServer",
-	"treeserver" 				=> "TreeServer",
-	'images/resampled' 			=> "imageResize",
-	'profile//$Action' 			=> "ProfileController",
-	'member/$id!' 				=> "ProfileController",
-	"uploads" 					=> "UploadController",
-	"gloader" 					=> "Gloader",
-	"system/help" 				=> "HelpController",
-	"pusher" 					=> "PushController",
-	"treecallback"				=> "TreeCallbackUrl",
-	"system/smtp"				=> "SMTPConnector"
+	'dev' 							=> 'dev',
+	'admin//$item' 					=> 'adminController',
+
+	'api/stats' 					=> 'StatController',
+	'api/v2'						=> 'GomaRestfulService',
+	'api/v1//$ClassName!' 			=> 'RestfulServer',
+
+	'images/resampled' 				=> 'imageResize',
+
+	'profile//$Action' 				=> 'ProfileController',
+	'member/$id!' 					=> 'ProfileController',
+
+	'uploads' 						=> 'UploadController',
+	'gloader' 						=> 'Gloader',
+	'pusher' 						=> 'PushController',
+
+	'treecallback'					=> 'TreeCallbackUrl',
+	'treeserver' 					=> 'TreeServer',
+
+	'system/help' 					=> 'HelpController',
+	'system/smtp'					=> 'SMTPConnector',
+	"system/livecounter"			=> 'liveCounterController',
+	'system/ajax//link/$id' 		=> 'ajaxlink',
+	'system/ajax//popup/$id' 		=> 'ajaxlink',
+	'system//ck_uploader'			=> 'CKEditorUploadsController',
+	'system//ckeditor_imageupload'	=> 'CKEditorUploadsController'
 ), 10);
 
-Core::addRules(array("system" => "SystemController", ), 9);
+Core::addRules(array('system' => 'SystemController', ), 9);
 
-Core::addRules(array('' => "HomePageController"), 1);
+Core::addRules(array('' => 'HomePageController'), 1);
 
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));
