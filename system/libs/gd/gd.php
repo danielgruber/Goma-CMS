@@ -709,11 +709,11 @@ class GD extends Object
             }
 
             foreach ($this->type as $typeDefinition) {
-                if (strpos(strtolower($typeDefinition["extension"]), strtolower($type)) !== false) {
+                if (isset($typeDefinition["extension"]) && strpos(strtolower($typeDefinition["extension"]), strtolower($type)) !== false) {
                     return $typeDefinition;
                 }
 
-                if (strtolower($type) == strtolower($typeDefinition["content_type"])) {
+                if (isset($typeDefinition["content_type"]) && strtolower($type) == strtolower($typeDefinition["content_type"])) {
                     return $typeDefinition;
                 }
             }

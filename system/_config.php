@@ -32,7 +32,7 @@ Core::addRules(array(
 	'system/ajax//link/$id' 		=> 'ajaxlink',
 	'system/ajax//popup/$id' 		=> 'ajaxlink',
 	'system//ck_uploader'			=> 'CKEditorUploadsController',
-	'system//ckeditor_imageupload'	=> 'CKEditorUploadsController'
+	'system//ck_imageuploader'		=> 'CKEditorUploadsController'
 ), 10);
 
 Core::addRules(array('system' => 'SystemController', ), 9);

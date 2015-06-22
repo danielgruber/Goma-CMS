@@ -1622,9 +1622,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $query->sort($this->getManyManySort($relationShip));
 
-        logging(print_r($relationShip, true));
-        logging(print_r($query, true));
-
         return $query;
     }
 
