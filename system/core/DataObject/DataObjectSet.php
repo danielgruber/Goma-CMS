@@ -267,7 +267,7 @@ class DataObjectSet extends DataSet {
      * returns the first item
      * @name first
      * @access public
-     * @return DataObject
+     * @return DataObject|null
      */
 	public function first($forceObject = true)
 	{

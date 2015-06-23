@@ -536,6 +536,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return string
      */
     public static function getHistoryLang($record) {
+
         switch($record->action) {
             case "update":
             case "publish":

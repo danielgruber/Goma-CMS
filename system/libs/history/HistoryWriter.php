@@ -49,7 +49,7 @@ class HistoryWriter extends Extension {
                 $command = "publish";
             }
 
-            History::push($owner->getModel()->classname, $owner->getOldId(), $owner->getModel()->versionid, $owner->getModel()->versionid, $command);
+            History::push($owner->getModel()->classname, $owner->getOldId(), $owner->getModel()->versionid, $owner->getModel()->id, $command);
         }
         unset($manipulation);
     }

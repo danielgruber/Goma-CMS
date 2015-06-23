@@ -308,15 +308,16 @@ class History extends DataObject {
 		
 		return false;
 	}
-	
+
 	/**
 	 * returns the new version
 	 * it's a object of $this->dbobject
 	 * returns false if not available, because of versions disabled
- 	 *
-	 *@name newversion
-	 *@access public
-	*/
+	 *
+	 * @name newversion
+	 * @access public
+	 * @return DataObject|null
+	 */
 	public function newversion() {
 		if($this->fieldGet("newversion") && ClassInfo::exists($this->dbobject)) {
 			
@@ -325,27 +326,29 @@ class History extends DataObject {
 			}
 		}
 		
-		return false;
+		return null;
 	}
-	
+
 	/**
 	 * returns the id of the new version
 	 *
-	 *@name newversionid
-	 *@access public
-	*/
+	 * @name newversionid
+	 * @access public
+	 * @return string
+	 */
 	public function newversionid() {
 		return $this->fieldGet("newversion");
 	}
-	
+
 	/**
 	 * returns the old version
 	 * it's a object of $this->dbobject
 	 * returns false if not available, because of versions disabled
- 	 *
-	 *@name oldversion
-	 *@access public
-	*/
+	 *
+	 * @name oldversion
+	 * @access public
+	 * @return DataObject|null
+	 */
 	public function oldversion() {
 		if($this->fieldGet("oldversion") && ClassInfo::exists($this->dbobject)) {
 			
@@ -354,38 +357,41 @@ class History extends DataObject {
 			}
 		}
 		
-		return false;
+		return null;
 	}
-	
+
 	/**
 	 * returns the id of the old version
 	 *
-	 *@name oldversionid
-	 *@access public
-	*/
+	 * @name oldversionid
+	 * @access public
+	 * @return string
+	 */
 	public function oldversionid() {
 		return $this->fieldGet("oldversion");
 	}
-	
+
 	/**
 	 * returns the record
 	 *
-	 *@name record
-	 *@access public
-	*/
+	 * @name record
+	 * @access public
+	 * @return DataObject|null
+	 */
 	public function record() {
 		if(ClassInfo::exists($this->dbobject)) {
 			return DataObject::get_by_id($this->dbobject, $this->fieldGet("record"));
 		}
 		
-		return false;
+		return null;
 	}
-	
+
 	/**
 	 * class-name of a event
 	 *
-	 *@name EventClass
-	*/
+	 * @name EventClass
+	 * @return string
+	 */
 	public function EventClass() {
 		$data = $this->HistoryData();
 		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
