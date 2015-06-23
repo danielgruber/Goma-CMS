@@ -1,4 +1,5 @@
 <?php defined('IN_GOMA') OR die();
+
 /**
  * This class provides methods to resample images.
  *
@@ -8,7 +9,6 @@
  * @author 	Goma-Team
  * @version 1.1
  */
-
 class GD extends Object
 {
     /***
