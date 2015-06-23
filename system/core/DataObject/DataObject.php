@@ -1171,12 +1171,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 }
 
                 // clean-up-many-many
-                foreach($this->ManyManyTables() as $data) {
-                    $manipulation[$data["table"]] = array(
-                        "table" 	=> $data["table"],
+                /** @var ModelManyManyRelationShipInfo $relationShip */
+                foreach($this->ManyManyRelationships() as $relationShip) {
+                    $manipulation[$relationShip->getTableName()] = array(
+                        "table" 	=> $relationShip->getTableName(),
                         "command"	=> "delete",
                         "where"		=> array(
-                            $data["field"] => $ids
+                            $relationShip->getOwnerField() => $ids
                         )
                     );
                 }
