@@ -49,7 +49,7 @@ class UploadController extends Controller {
 	public function handleFile() {
 
 		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
-		
+
 		if($data->count() == 0) {
 			return false;
 		}
