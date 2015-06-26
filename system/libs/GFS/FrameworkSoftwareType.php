@@ -273,20 +273,21 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	public static function generateDistroFileName($name) {
 		return "framework." . GOMA_VERSION . "-" . BUILD_VERSION . ".gfs";
 	}
-	
+
 	/**
 	 * builds a framework
 	 *
-	 *@name buildDistro
-	 *@access public
-	*/
+	 * @param String $file filename
+	 * @param String $name
+	 * @return bool|mixed|string
+	 */
 	public static function buildDistro($file, $name) {
 		if(isset($_SESSION["finalizeFrameworkDistro"]))
 			return self::finalizeDistro($_SESSION["finalizeFrameworkDistro"]);
 		
 		if(file_exists($file))
 			@unlink($file);
-		
+
 		$form = new Form(new G_FrameworkSoftwareType(null), "buildDistro", array(
 			new HiddenField("file", $file),
 			new HTMLField("title", "<h1>".lang("update_framework")."</h1><h3>".lang("distro_build")."</h3>"),

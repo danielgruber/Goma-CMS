@@ -30,9 +30,9 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @param 	array $items items to start
 	*/
 	public function __construct($items = array()) {
-		$this->items = $items;
-		
 		parent::__construct();
+
+		$this->items = $items;
 	}
 	
 	/**
