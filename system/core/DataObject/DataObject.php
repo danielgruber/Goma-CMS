@@ -2226,6 +2226,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         }
 
+        /** @var SelectQuery $query */
         $query = clone self::$query_cache[$this->baseClass];
 
         if (PROFILE) Profiler::unmark("DataObject::buildQuery hairy");
@@ -2455,7 +2456,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         // don't forget filtering on class-name
         if ($forceClasses) {
             $class_names = array_merge(array($this->classname), ClassInfo::getChildren($this->classname));
-            $query->addFilter(array("class_name" => $class_names));
+
+            if(!isset($query->filter["class_name"])) {
+                $query->addFilter(array("class_name" => $class_names));
+            }
         }
 
 
