@@ -34,7 +34,6 @@ class AutoCompleterField extends ControllerExtension {
 			if(is_a($this->owner->autocomplete, "DataSet")) {
 				$this->data = $this->owner->autocomplete;
 			} else if(is_a($this->owner->Form()->result, "ViewAccessableData")) {
-				//echo $this->owner->Form()->result->dataClass;
 				$this->data = DataObject::get($this->owner->Form()->result->dataClass);
 			}
 
@@ -58,7 +57,7 @@ class AutoCompleterField extends ControllerExtension {
 			$arr = array();
 			$filtered = $this->data->filter(array($this->owner->name => array(
 					"LIKE",
-					$_GET["term"] . "%"
+					"%" . trim($_GET["term"]) . "%"
 				)))->groupBy($this->owner->name);
 			foreach($filtered as $record) {
 				$arr[] = array(
