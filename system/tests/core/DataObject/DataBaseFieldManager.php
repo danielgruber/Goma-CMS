@@ -62,9 +62,3 @@ class TestObjectToRaw {
         return $this->val;
     }
 }
-
-class MyTestModelForDataObjectFieldWrite extends DataObject {
-    static $default = array(
-        "blub" => 2
-    );
-}

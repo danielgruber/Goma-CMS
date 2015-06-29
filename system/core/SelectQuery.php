@@ -190,16 +190,16 @@ class SelectQuery extends Object {
 	 *@param string - type, default: ASC
 	 */
 	public function sort($field, $type = "ASC", $order = 0) {
-		
+
 		$collate = null;
-		
+
 		if(is_array($field)) {
 			if(isset($field["field"], $field["type"])) {
-				
+
 				if(isset($field["collate"])) {
 					$collate = $field["collate"];
 				}
-				
+
 				$type = $field["type"];
 				$field = $field["field"];
 			} else {
@@ -518,27 +518,26 @@ class SelectQuery extends Object {
 				if($field == "*")
 					continue;
 
-				if($i == 0)
-					$i++;
-				else
-					$sql .= ", ";
-
 				/* --- */
 
-				if(!_ereg('^[0-9]+$', $key)) {
+				if(!preg_match('/^[0-9]+$/', $key)) {
 					$alias = $key;
 				} else {
 					if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
 						$alias = $field;
 						$field = self::getAlias($DBFields[$field]) . "." . $field;
 					} else if(isset($colidingFields[$field])) {
-
 						continue;
 					} else {
 						$sql .= " " . $field . "";
 						continue;
 					}
 				}
+
+				if($i == 0)
+					$i++;
+				else
+					$sql .= ", ";
 
 				$sql .= " " . $field . " AS " . $alias . " ";
 			}
