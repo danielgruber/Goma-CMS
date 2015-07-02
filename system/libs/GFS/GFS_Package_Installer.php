@@ -6,7 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package		Goma\Framework
- * @version		2.7.3
+ * @version		2.7.4
  */
 
 class GFS_Package_installer extends GFS {
@@ -21,7 +21,14 @@ class GFS_Package_installer extends GFS {
 	 *@name unpacked
 	*/
 	public static $unpacked = array();
-	
+
+	/**
+	 * local cache.
+	 */
+	private $paths;
+	private $dbvalues;
+	private $destination;
+
 	/**
 	 * construct with read-only
 	 *
@@ -31,50 +38,34 @@ class GFS_Package_installer extends GFS {
 	public function __construct($filename) {
 		parent::__construct($filename, GFS_READONLY);
 	}
-	
+
 	/**
 	 * unpack
 	 *
-	 *@name unpack
-	 *@access public
-	 *@param string - directory to which we unpack
-	*/
+	 * @name unpack
+	 * @access public
+	 * @param string $destination directory to which we unpack
+	 * @param string $path not supported yet
+	 * @return bool|int
+	 */
 	public function unpack($destination, $path = "") {
 		if($path != "") {	
 			//! TODO: Support Subfolders!
-			throwError(6, "Wrong-Argument-Error", "GFS_Package_Installer doesn't support subfolders.");
+			throw new InvalidArgumentException("GFS_Package_Installer doesn't support subfolders.");
 		}
 		if(!$this->valid) {
 			return false;
 		}
-		
-		// first we write everything to a temporary folder
-		$tempfolder = ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
-		
-		
-		/*$f = @disk_free_space("/");
-		if($f !== null && $f !== "" && $f !== false) {
-			// check for disk-quote
-			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-			define("GOMA_FREE_SPACE", $free);
-			if($free / 1024 / 1024 < 5) {
-				// free space
-				FileSystem::delete($tempfolder);
-				header("HTTP/1.1 500 Server Error");
-				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-			}
-		}*/
-		
+
 		// write files
 		$this->status = "Writing files...";
 		$this->current = "";
 		
 		// we get time, if it is over 2, we reload ;)
 		$start = microtime(true);
-		$number = count($this->db);
-		if(file_exists($tempfolder . "/.gfsprogess")) {
+		if(file_exists($this->tempFolder() . "/.gfsprogess")) {
 			
-			$data = file_get_contents($tempfolder . "/.gfsprogess");
+			$data = file_get_contents($this->tempFolder() . "/.gfsprogess");
 			if(preg_match('/^[0-9]+$/i', $data)) {
 				$i = $data;
 				$count = 1;
@@ -85,70 +76,30 @@ class GFS_Package_installer extends GFS {
 			}
 			
 		} else {
-  	 		FileSystem::requireDir($tempfolder);
+  	 		FileSystem::requireDir($this->tempFolder());
 			$i = 0;
 			$count = 1;
 		}
-		
-		$db = array_values($this->db);
-		$paths = array_keys($this->db);
+
+		$this->dbvalues = array_values($this->db);
+		$this->paths = array_keys($this->db);
+		$this->destination = $destination;
 		
 		// let's go
-		while($i < count($db)) {
-			
-			$path = $paths[$i];
-			$data = $db[$i];
-			if($data["type"] == GFS_DIR_TYPE) {
-				FileSystem::requireDir($tempfolder . "/" . $path);
-			} else {
-				if(!file_exists($tempfolder . "/" . $path)) {
-					FileSystem::RequireDir(substr($tempfolder . "/" . $path, 0, strrpos($tempfolder . "/" . $path, "/")));
-					$this->writeToFileSystem($path, $tempfolder . "/" . $path);
-					@chmod($tempfolder . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
-				}
-			}
-			$this->current = basename($path);
+		while($i < count($this->dbvalues)) {
+
+			$this->unpackToFileSystem($i);
 			
 			// maximum 2.0 second
-			if(microtime(true) - $start > 2.0) {
-				$i++;
-				$count++;
-				file_put_contents($tempfolder . "/.gfsprogess", serialize(array("i" => $i, "count" => $count)));
-				$this->progress = ($i / count($this->db) * 100) * 0.7;
-				$perhit = $i / $count;
-				$remaining = round((round((count($this->db) - $i) / $perhit * 3) + 3) * 1.42);
-				if($remaining > 60) {
-					$remaining = round($remaining / 60);
-					if($remaining > 60) {
-						$remaining = round($remaining / 60);
-						$this->remaining = "More than ".$remaining." hours remaining";
-					} else {
-						$this->remaining = "More than ".$remaining." minutes remaining";
-					}
-				} else {
-					$this->remaining = "More than ".$remaining." seconds remaining";
-				}
-				if(defined("IN_GFS_EXTERNAL")) {
-					$this->showUI();
-				} else {
-					$file = $this->buildFile($destination);
-					$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&unpack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?unpack[]=".urlencode($this->file)."";
-					if(count(self::$unpacked)) {
-						foreach(self::$unpacked as $file) {
-							$uri .= "&unpack[]=" . urlencode($file);
-						}
-					}
-					$this->showUI($file . "?redirect=" . urlencode($uri));
-				}
-			}
+			$this->checkForTime($start, $i, $count, 0.7, 0);
 			$i++;
 			unset($data, $path);
 		}
 		
 		// now move all files
-		if(file_exists($tempfolder . "/.gfsrprogess")) {
+		if(file_exists($this->tempFolder() . "/.gfsrprogess")) {
 			
-			$data = file_get_contents($tempfolder . "/.gfsrprogess");
+			$data = file_get_contents($this->tempFolder() . "/.gfsrprogess");
 			if(preg_match('/^[0-9]+$/i', $data)) {
 				$i = $data;
 				$count = 1;
@@ -164,57 +115,25 @@ class GFS_Package_installer extends GFS {
 		}
 		
 		// let's go
-		while($i < count($db)) {
-			$path = $paths[$i];
-			$data = $db[$i];
+		while($i < count($this->dbvalues)) {
+			$path = $this->paths[$i];
+			$data = $this->dbvalues[$i];
 			if($data["type"] == GFS_DIR_TYPE) {
 					FileSystem::requireDir($destination . "/" . $path);
 			} else {
 				FileSystem::requireDir(substr($destination . "/" . $path, 0, strrpos($destination . "/" . $path, "/")));
 				// helps in some cases ;)
 				@unlink($destination . "/" . $path);
-				if(@rename($tempfolder . "/" . $path, $destination . "/" . $path))
+				if(@rename($this->tempFolder() . "/" . $path, $destination . "/" . $path))
 					chmod($destination . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
-			
+
 			}
-			
+
 			$this->status = "Renaming files...";
 			$this->current = basename($path);
 			
 			// maximum of 0.5 seconds
-			if(microtime(true) - $start > 2.0) {
-				$i++;
-				$count++;
-				file_put_contents($tempfolder . "/.gfsrprogess", serialize(array("i" => $i, "count" => $count)));
-				$this->progress = 70 + ($i / count($this->db) * 100) * 0.3;
-				$perhit = $i / $count;
-				$remaining = round((round((count($this->db) - $i) / $perhit * 3) + 3) * 0.40);
-				if($remaining > 60) {
-					$remaining = round($remaining / 60);
-					if($remaining > 60) {
-						$remaining = round($remaining / 60);
-						$this->remaining = "More than ".$remaining." hours remaining";
-					} else {
-						$this->remaining = "More than ".$remaining." minutes remaining";
-					}
-				} else {
-					$this->remaining = "More than ".$remaining." seconds remaining";
-				}
-				if(defined("IN_GFS_EXTERNAL")) {
-					$this->showUI();
-				} else {
-					$file = $this->buildFile($destination);
-					
-					$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&unpack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?unpack[]=".urlencode($this->file)."";
-					if(count(self::$unpacked)) {
-						foreach(self::$unpacked as $file) {
-							$uri .= "&unpack[]=" . urlencode($file);
-						}
-					}
-					$this->showUI($file . "?redirect=" . urlencode($uri));
-				}
-				
-			}
+			$this->checkForTime($start, $i, $count, 0.3, 0.7);
 			$i++;
 			unset($data, $path);
 		}
@@ -223,7 +142,7 @@ class GFS_Package_installer extends GFS {
 		
 		// clean up
 		
-		FileSystem::delete($tempfolder);
+		FileSystem::delete($this->tempFolder());
 		
 		if(defined("IN_GFS_EXTERNAL")) {
 			if(isset($_GET["redirect"]))
@@ -233,13 +152,106 @@ class GFS_Package_installer extends GFS {
 		return true;
 		
 	}
-	
+
+	/**
+	 * writes given index to filesystem.
+	 *
+	 * @param int $i
+	 * @return void
+	 */
+	protected function unpackToFileSystem($i) {
+		$path = $this->paths[$i];
+		$data = $this->dbvalues[$i];
+		if($data["type"] == GFS_DIR_TYPE) {
+			FileSystem::requireDir($this->tempFolder() . "/" . $path);
+		} else {
+			if(!file_exists($this->tempFolder() . "/" . $path)) {
+				FileSystem::RequireDir(substr($this->tempFolder() . "/" . $path, 0, strrpos($this->tempFolder() . "/" . $path, "/")));
+				$this->writeToFileSystem($path, $this->tempFolder() . "/" . $path);
+				@chmod($this->tempFolder() . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
+			}
+		}
+		$this->current = basename($path);
+	}
+
+	/**
+	 * checks for the time.
+	 *
+	 * @param int $start
+	 * @param $i
+	 * @param $count
+	 * @param $operationMultiplier how much of 100% the operation should take
+	 * @param $operationDone how much of 100% the previous has been taken
+	 */
+	protected function checkForTime($start, $i, $count, $operationMultiplier, $operationDone) {
+		// maximum 2.0 second
+		if(microtime(true) - $start > 2.0) {
+			$i++;
+			$count++;
+			file_put_contents($this->tempFolder() . "/.gfsprogess", serialize(array("i" => $i, "count" => $count)));
+
+			$this->calculateRemaining($i, $count, $start, $operationMultiplier, $operationDone);
+
+			if(defined("IN_GFS_EXTERNAL")) {
+				$this->showUI();
+			} else {
+				$file = $this->buildFile($this->destination);
+				$uri = strpos($_SERVER["REQUEST_URI"], "?") ? $_SERVER["REQUEST_URI"] . "&unpack[]=".urlencode($this->file)."" : $_SERVER["REQUEST_URI"] . "?unpack[]=".urlencode($this->file)."";
+				if(count(self::$unpacked)) {
+					foreach(self::$unpacked as $file) {
+						$uri .= "&unpack[]=" . urlencode($file);
+					}
+				}
+
+				$this->showUI($file . "?redirect=" . urlencode($uri));
+			}
+		}
+	}
+
+	/**
+	 * calculates remaining.
+	 *
+	 * @param $i number of elements done
+	 * @param $count number of requests done
+	 * @param $startTime
+	 * @param $operationMultiplier how much of 100% the operation should take
+	 * @param $operationDone how much of 100% the previous has been taken
+	 */
+	protected function calculateRemaining($i, $count, $startTime, $operationMultiplier, $operationDone) {
+		$this->progress = ($i / count($this->db) * 100) * $operationMultiplier + $operationDone;
+
+		$perHitTime = (microtime(true) - $startTime) / $count;
+
+		$remaining = round((100 - $this->progress) * $perHitTime / ($this->progress / $count) / 1000);
+		if($remaining > 60) {
+			$remaining = round($remaining / 60);
+			if($remaining > 60) {
+				$remaining = round($remaining / 60);
+				$this->remaining = "More than ".$remaining." hours remaining";
+			} else {
+				$this->remaining = "More than ".$remaining." minutes remaining";
+			}
+		} else {
+			$this->remaining = "More than ".$remaining." seconds remaining";
+		}
+	}
+
+	/**
+	 * returns temp-folder.
+	 *
+	 * @return string
+	 */
+	protected function tempFolder() {
+		return ROOT . CACHE_DIRECTORY . "/" . basename($this->file);
+	}
+
 	/**
 	 * if a specific file was unpacked
 	 *
-	 *@name wasUnpacked
-	 *@access public
-	*/
+	 * @name wasUnpacked
+	 * @access public
+	 * @return bool
+	 */
 	public static function wasUnpacked($file = null) {
 		if(isset($file)) {
 			$file = str_replace('\\\\', '\\', realpath($file));
@@ -254,13 +266,14 @@ class GFS_Package_installer extends GFS {
 				return false;
 		}
 	}
-	
+
 	/**
 	 * builds the Code for the external file
 	 *
-	 *@name buildFile
-	 *@access public
-	*/
+	 * @name buildFile
+	 * @access public
+	 * @return string
+	 */
 	public function buildFile($destination) {
 
 		$goma = new GomaSeperatedEnvironment();

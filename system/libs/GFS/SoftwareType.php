@@ -344,7 +344,7 @@ abstract class g_SoftwareType {
 				
 				$log .= "Moving ".$data["installfolders"]["source"]." to ".$data["installfolders"]["destination"].".\n";
 				if(($return = FileSystem::moveLogged($data["installfolders"]["source"], $data["installfolders"]["destination"])) === false) {
-					throwError(6, 'PHP-Error', "Could not move files of Update. Failed in file " . FileSystem::errFile());
+					throw new FileMoverCannotMoveException("Failed in file " . FileSystem::errFile());
 				}
 				
 				$log .= $return;

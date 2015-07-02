@@ -298,10 +298,11 @@ class i18n extends Object {
 			if(defined("PROJECT_LANG") && self::LangExists("PROJECT_LANG")) {
 				return self::selectLang(PROJECT_LANG);
 			} else {
-				if(self::LangExists(DEFAULT_LANG))
+				if(self::LangExists(DEFAULT_LANG)) {
 					return DEFAULT_LANG;
-				else
-					throwError(6, "Language-Error", "No Language found");
+				} else {
+					throw new LogicException("No language found. Please define at least an existing DEFAULT_LANG as constant.");
+				}
 			}
 		}
 	}
