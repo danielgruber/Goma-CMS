@@ -63,23 +63,9 @@ class GFS_Package_installer extends GFS {
 		
 		// we get time, if it is over 2, we reload ;)
 		$start = microtime(true);
-		if(file_exists($this->tempFolder() . "/.gfsprogess")) {
-			
-			$data = file_get_contents($this->tempFolder() . "/.gfsprogess");
-			if(preg_match('/^[0-9]+$/i', $data)) {
-				$i = $data;
-				$count = 1;
-			} else {
-				$data = unserialize($data);
-				$i = $data["i"];
-				$count = $data["count"];
-			}
-			
-		} else {
-  	 		FileSystem::requireDir($this->tempFolder());
-			$i = 0;
-			$count = 1;
-		}
+		$info = $this->getProgressInfo(".gfsprogress");
+		$i = $info[0];
+		$count = $info[1];
 
 		$this->dbvalues = array_values($this->db);
 		$this->paths = array_keys($this->db);
@@ -97,41 +83,15 @@ class GFS_Package_installer extends GFS {
 		}
 		
 		// now move all files
-		if(file_exists($this->tempFolder() . "/.gfsrprogess")) {
-			
-			$data = file_get_contents($this->tempFolder() . "/.gfsrprogess");
-			if(preg_match('/^[0-9]+$/i', $data)) {
-				$i = $data;
-				$count = 1;
-			} else {
-				$data = unserialize($data);
-				$i = $data["i"];
-				$count = $data["count"];
-			}
-			
-		} else {
-			$i = 0;
-			$count = 1;
-		}
+		$rinfo = $this->getProgressInfo(".gfsrprogress");
+		$i = $rinfo[0];
+		$count = $rinfo[1];
 		
 		// let's go
 		while($i < count($this->dbvalues)) {
-			$path = $this->paths[$i];
-			$data = $this->dbvalues[$i];
-			if($data["type"] == GFS_DIR_TYPE) {
-					FileSystem::requireDir($destination . "/" . $path);
-			} else {
-				FileSystem::requireDir(substr($destination . "/" . $path, 0, strrpos($destination . "/" . $path, "/")));
-				// helps in some cases ;)
-				@unlink($destination . "/" . $path);
-				if(@rename($this->tempFolder() . "/" . $path, $destination . "/" . $path))
-					chmod($destination . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
 
-			}
+			$this->renameUnpacked($i);
 
-			$this->status = "Renaming files...";
-			$this->current = basename($path);
-			
 			// maximum of 0.5 seconds
 			$this->checkForTime($start, $i, $count, 0.3, 0.7);
 			$i++;
@@ -154,6 +114,28 @@ class GFS_Package_installer extends GFS {
 	}
 
 	/**
+	 * gets progress info for given file.
+	 *
+	 * @param $file
+	 * @return array
+	 */
+	protected function getProgressInfo($file) {
+		if(file_exists($this->tempFolder() . "/" . $file)) {
+			$data = file_get_contents($this->tempFolder() . "/" . $file);
+			if(preg_match('/^[0-9]+$/i', $data)) {
+				return array($data, 1);
+				$i = $data;
+				$count = 1;
+			} else {
+				$data = unserialize($data);
+				return array($data["i"], $data["count"]);
+			}
+		} else {
+			return array(0, 0);
+		}
+	}
+
+	/**
 	 * writes given index to filesystem.
 	 *
 	 * @param int $i
@@ -172,6 +154,30 @@ class GFS_Package_installer extends GFS {
 			}
 		}
 		$this->current = basename($path);
+	}
+
+	/**
+	 * renames file at index.
+	 *
+	 * @param $i
+	 */
+	protected function renameUnpacked($i) {
+		$path = $this->paths[$i];
+		$data = $this->dbvalues[$i];
+		if($data["type"] == GFS_DIR_TYPE) {
+			FileSystem::requireDir($this->destination . "/" . $path);
+		} else {
+			FileSystem::requireDir(substr($this->destination . "/" . $path, 0, strrpos($this->destination . "/" . $path, "/")));
+			// helps in some cases ;)
+			@unlink($this->destination . "/" . $path);
+			if(@rename($this->tempFolder() . "/" . $path, $this->destination . "/" . $path))
+				chmod($this->destination . "/" . $path, isset($this->writeMode) ? $this->writeMode : 0777);
+
+		}
+
+		$this->status = "Renaming files...";
+		$this->current = basename($path);
+
 	}
 
 	/**
