@@ -26,6 +26,7 @@ Core::addRules(array(
 	'treecallback'					=> 'TreeCallbackUrl',
 	'treeserver' 					=> 'TreeServer',
 
+	'system/cron'					=> 'CronController',
 	'system/help' 					=> 'HelpController',
 	'system/smtp'					=> 'SMTPConnector',
 	"system/livecounter"			=> 'liveCounterController',

@@ -30,8 +30,7 @@ class systemController extends Controller {
 		"setUserView",
 		"switchView",
 		"getLang",
-		"indexSearch",
-		"cron"
+		"indexSearch"
 	);
 
 	public function index() {
@@ -189,12 +188,5 @@ class systemController extends Controller {
 		}
 		
 		return 1;
-	}
-
-	/**
-	 * cron jobs.
-	 */
-	public function cron() {
-		Core::callHook("cron");
 	}
 }
