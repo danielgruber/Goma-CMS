@@ -182,6 +182,11 @@ class Form extends object {
 	public $request;
 
 	/**
+	 * @var bool
+	 */
+	public $disabled = false;
+
+	/**
 	 *@name __construct
 	 *@access public
 	 *@param object - controller
@@ -1063,6 +1068,8 @@ class Form extends object {
 	public function & form() {
 		return $this;
 	}
+
+
 
 	/**
 	 * genrates an id for this form

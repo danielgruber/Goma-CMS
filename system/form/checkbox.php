@@ -90,7 +90,11 @@ class CheckBox extends FormField {
 	 *@access public
 	 */
 	public function result() {
-		return isset($_POST[$this->postname()]) ? true : false;
+		if($this->disabled || $this->form()->disabled) {
+			return $this->value;
+		}
+
+		return (isset($this->form()->post[$this->postname()]) && $this->form()->post[$this->postname()]) ? true : false;
 	}
 
 }
