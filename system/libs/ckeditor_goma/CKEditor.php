@@ -27,19 +27,22 @@ class GomaCKEditor extends GomaEditor {
 	 * javascript-config for HTML-Code.
 	*/
 	static $htmlConfig = '
-			toolbar : [{ name: "document", items : [ "Source"] },
-				{ name: "links", items : [ "Link","Unlink","Anchor" ] },
-				{ name: "clipboard", items : [ "Cut","PasteText","PasteFromWord","-","Undo","Redo" ] },
-				{ name: "basicstyles", items : [ "Bold","Italic","Underline","-","RemoveFormat" ] },
-				{ name: "justify", items: ["JustifyLeft","JustifyCenter","JustifyRight","JustifyBlock"] },
-				{ name: "tools", items : [ "Maximize" ] },
+			toolbarGroups: [
+				{ name: "clipboard", groups: [ "clipboard", "undo" ] },
+				{ name: "editing", groups: [ "find", "selection", "spellchecker", "editing" ] },
+				{ name: "links", groups: [ "links" ] },
+				{ name: "insert", groups: [ "insert" ] },
+				{ name: "forms", groups: [ "forms" ] },
+				{ name: "tools", groups: [ "tools" ] },
+				{ name: "document", groups: [ "mode", "document", "doctools" ] },
+				{ name: "others", groups: [ "others" ] },
+				{ name: "about", groups: [ "about" ] },
 				"/",
-				{ name: "insert", items : [ "Image","Table"] },
-				{ name: "styles", items : [ "Styles","Format" ] },
-				{ name: "colors", items : [ "TextColor","BGColor" ] },
-				{ name: "editing", items : [ "BidiLtr","BidiRtl" ] },
-				{ name: "Scayt", items: ["Scayt"]},
-				{ name: "paragraph", items : [ "NumberedList","BulletedList","-","Outdent","Indent"] }],
+				{ name: "basicstyles", groups: [ "basicstyles", "cleanup" ] },
+				{ name: "colors", groups: [ "colors" ] },
+				{ name: "paragraph", groups: [ "list", "indent", "blocks", "align", "bidi", "paragraph" ] },
+				{ name: "styles", groups: [ "styles" ] }
+			],
     		language: "$lang",
     		baseHref: "$baseUri",
     		contentsCss: "$css",
@@ -53,25 +56,30 @@ class GomaCKEditor extends GomaEditor {
      * extra javascript-code for html.
     */
     static $htmlJS = '
-		CKEDITOR.config.extraPlugins = "imagepaste";
-		CKEDITOR.config.autoGrow_onStartup = true;';
-	
+		//CKEDITOR.config.autoGrow_onStartup = true;
+
+		// Set the most common block elements.
+		CKEDITOR.config.format_tags = "p;h1;h2;h3;pre";';
+
 	/**
-	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to generate the editor.
+	 * this method is called when a new Editor is generated. it should generate the text-field and JavaScript to
+	 * generate the editor.
 	 *
-	 * @param 	string $name the name as which the data should posted to the server
-	 * @param 	string $type type for which the editor should be generated
-	 * @param 	string $text the text for the editor
-	 * @param	array $params list of some params like width css baseUri lang
-	*/
+	 * @param    string $name the name as which the data should posted to the server
+	 *
+	 * @param    string $type type for which the editor should be generated
+	 * @param    string $text the text for the editor
+	 * @param    array $params list of some params like width css baseUri lang
+	 * @return 	 HTMLNode
+	 */
 	public function generateEditor($name, $type, $text, $params = array()) {
 		$id = $this->classname . "_" . $name;
-		$width = isset($params["width"]) ? $params["width"] : "";
 		
-		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_4/";');
-		Resources::add("system/libs/thirdparty/ckeditor4_4/ckeditor.js", "js");
-		Resources::add("system/libs/ajax/ajaxupload.js", "js");
-		if(ClassInfo::exists("pages")) Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
+		Resources::addData('var CKEDITOR_BASEPATH = "'.BASE_URI.'system/libs/thirdparty/ckeditor4_5/";');
+		Resources::add("system/libs/thirdparty/ckeditor4_5/ckeditor.js", "js");
+		if(ClassInfo::exists("pages")) {
+			Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
+		}
 		Resources::add("ckeditor_goma.css", "css");
 		
 		if($type == "html") {
@@ -80,8 +88,11 @@ class GomaCKEditor extends GomaEditor {
 			$params = ArrayLib::map_key("strtolower", $params);
 			if(preg_match_all('/\$([a-zA-Z0-9_]+)/i', $config, $matches)) {
 				foreach($matches[1] as $k => $param) {
-					if(isset($params[strtolower($param)]))
+					if(isset($params[strtolower($param)])) {
 						$config = str_replace($matches[0][$k], $params[strtolower($param)], $config);
+					} else {
+						$config = str_replace($matches[0][$k], "", $config);
+					}
 				}
 			}
 			
