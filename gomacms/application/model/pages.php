@@ -45,15 +45,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *@var array
      */
     static $db = array(	'path' 				=> 'varchar(500)',
-        'rights' 			=> 'int(2)',
-        'mainbar' 			=> 'int(1)',
-        'mainbartitle' 		=> 'varchar(200)',
-        'googletitle'		=> "varchar(200)",
-        'title' 			=> 'varchar(200)',
-        'data' 				=> 'HTMLtext',
-        'sort'				=> 'int(8)',
-        'include_in_search'	=> 'int(1)',
-        'meta_description'	=> 'varchar(200)');
+                           'rights' 			=> 'int(2)',
+                           'mainbar' 			=> 'int(1)',
+                           'mainbartitle' 		=> 'varchar(200)',
+                           'googletitle'		=> "varchar(200)",
+                           'title' 			=> 'varchar(200)',
+                           'data' 				=> 'HTMLtext',
+                           'sort'				=> 'int(8)',
+                           'include_in_search'	=> 'int(1)',
+                           'meta_description'	=> 'varchar(200)');
 
     /**
      * searchable fields
@@ -107,8 +107,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *@var array
      */
     static $has_one = array(	"read_permission" 		=> "Permission",
-        "edit_permission"		=> "Permission",
-        "publish_permission" 	=> "Permission");
+                                "edit_permission"		=> "Permission",
+                                "publish_permission" 	=> "Permission");
 
 
     /**
@@ -131,11 +131,10 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * defaults
      */
-    static $default = array(
-        "parenttype" 		=> "root",
-        "include_in_search" => 1,
-        "mainbar"			=> 1,
-        "sort"				=> 10000);
+    static $default = array(	"parenttype" 		=> "root",
+                                "include_in_search" => 1,
+                                "mainbar"			=> 1,
+                                "sort"				=> 10000);
 
     /**
      * icon
@@ -449,7 +448,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      * @param 	boolean save new history entry
      */
     public function addPermission($perm, $name, $write = false, $history = true) {
-        $perm->write(true, true, 2, false, false);
+        if($this->id != 0) {
+            $perm->write(true, true, 2, false, false);
+        }
 
         $field = $name . "id";
         $this->$field = $perm->id;
@@ -1113,7 +1114,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
             $nodes = array();
             foreach($data as $record) {
-                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->classname);
+                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
 
                 // add a bubble for changed or new pages.
                 if(!$record->isPublished())
@@ -1155,7 +1156,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
             $nodes = array();
             foreach($data as $record) {
-                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->classname);
+                $node = new TreeNode("page_" . $record->versionid, $record->id, $record->title, $record->class);
 
                 // add a bubble for changed or new pages.
                 if(!$record->isPublished())

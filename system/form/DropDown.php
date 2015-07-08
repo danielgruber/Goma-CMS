@@ -666,9 +666,9 @@ class DropDown extends FormField {
 				}
 
 				if(($this->multiselect && in_array($id, $this->dataset)) || $this->value == $id) {
-					$li->append("<a href=\"" . $this->externalURL() . "/uncheckValue/" . urlencode($id) . "\" class=\"checked\" id=\"dropdown_" . $this->id() . "_" . dbescape($id) . "\">" . $value . "</a>");
+					$li->append("<a href=\"" . $this->externalURL() . "/uncheckValue/" . urlencode($id) . "\" class=\"checked\" id=\"dropdown_" . $this->id() . "_" . convert::raw2sql($id) . "\">" . $value . "</a>");
 				} else {
-					$li->append("<a href=\"" . $this->externalURL() . "/checkValue/" . urlencode($id) . "\" id=\"dropdown_" . $this->id() . "_" . dbescape($id) . "\">" . $value . "</a>");
+					$li->append("<a href=\"" . $this->externalURL() . "/checkValue/" . urlencode($id) . "\" id=\"dropdown_" . $this->id() . "_" . convert::raw2sql($id) . "\">" . $value . "</a>");
 				}
 
 				if(isset($smallText)) {
@@ -704,8 +704,8 @@ class DropDown extends FormField {
 	 * validation for security reason, that the user can't check values aren't
 	 * existing.
 	 *
-	 * @param mixed value
-	 * @access public
+	 * @param mixed $value
+	 * @return bool
 	 */
 	public function validate($value) {
 		if(!$this->multiselect && $this->options) {
