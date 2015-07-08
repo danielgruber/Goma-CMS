@@ -46,6 +46,8 @@ class GomaCKEditor extends GomaEditor {
     		language: "$lang",
     		baseHref: "$baseUri",
     		contentsCss: "$css",
+    		uploadUrl: "$uploadpath",
+    		imageUploadUrl: "$imageuploadpath",
     		filebrowserUploadUrl: "$uploadpath",
     		filebrowserImageUploadUrl : "$imageuploadpath",
     		width: "$width",
@@ -56,7 +58,7 @@ class GomaCKEditor extends GomaEditor {
      * extra javascript-code for html.
     */
     static $htmlJS = '
-		//CKEDITOR.config.autoGrow_onStartup = true;
+		CKEDITOR.config.extraPlugins = "uploadimage";
 
 		// Set the most common block elements.
 		CKEDITOR.config.format_tags = "p;h1;h2;h3;pre";';

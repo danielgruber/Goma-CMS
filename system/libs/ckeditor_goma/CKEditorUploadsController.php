@@ -88,14 +88,13 @@ class CKEditorUploadsController extends RequestHandler {
 
             // add file to upload storage
             if($response = Uploads::addFile($fileInfo[0], $fileInfo[1], "ckeditor_uploads")) {
-                echo '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path.'\', "");</script>';
-                exit;
+                return $this->respondToUpload(true, $this->getFileUrl($response), $response->filename, "");
             } else {
-                return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+                return $this->respondToUpload(false, "", "", lang("files.upload_failure"));
             }
 
         } catch(LogicException $e) {
-            return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.$e->getMessage().'");</script>';
+            return $this->respondToUpload(false, "", "", $e->getMessage());
         }
     }
 
@@ -126,15 +125,56 @@ class CKEditorUploadsController extends RequestHandler {
                     $add = "";
                 }
 
-                echo '<script type="text/javascript">' . $add .
-							'window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', \'./'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, ".")).'\', "");</script>';
-                exit;
+                return $this->respondToUpload(true, $this->getFileUrl($response), $response->filename, $add);
             } else {
-                return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.lang("files.upload_failure").'");</script>';
+                return $this->respondToUpload(false, "", "", lang("files.upload_failure"));
             }
 
         } catch(LogicException $e) {
-            return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).', "", "'.$e->getMessage().'");</script>';
+            return $this->respondToUpload(false, "", "", $e->getMessage());
+        }
+    }
+
+    /**
+     * returns file url from File-Path.
+     *
+     * @param Uploads $response
+     * @return string
+     */
+    protected function getFileUrl($response) {
+        return './'.$response->path . "/index" . substr($response->filename, strrpos($response->filename, "."));
+    }
+
+    /**
+     * @param bool $uploaded
+     * @param string $path
+     * @param string $filename
+     * @param string $error
+     * @return string
+     */
+    protected function respondToUpload($uploaded, $path, $filename, $error) {
+        if(!isset($_GET["CKEditorFuncNum"])) {
+            HTTPResponse::setHeader("content-type", "application/json");
+
+            $response = array(
+                "uploaded" => (int) $uploaded
+            );
+
+            if($path) {
+                $response["url"] = $path;
+                $response["fileName"] = $filename;
+            }
+
+            if($error) {
+                $response["error"] = array(
+                    "message" => $error
+                );
+            }
+
+            return json_encode($response);
+        } else {
+            return '<script type="text/javascript">window.parent.CKEDITOR.tools.callFunction('.addSlashes($_GET['CKEditorFuncNum']).',
+            '.var_export($path, true).', '.var_export($error, true).');</script>';
         }
     }
 
