@@ -1350,7 +1350,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     protected function filterParents($allowed_parents, $allow_parents) {
         // now filter
         if(is_array($allow_parents) && count($allow_parents) > 0) {
-            foreach($allowed_parents as $parent) {
+            foreach($allowed_parents as $key => $parent) {
 
                 // set found to false
                 $found = false;
@@ -1372,17 +1372,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
                 // if not found, unset
                 if(!$found) {
-                    unset($allowed_parents[$parent]);
-                }
-
-                // if not found, unset
-                if(!$found) {
-                    unset($allowed_parents[$parent]);
+                    unset($allowed_parents[$key]);
                 }
             }
         }
 
-        return $allowed_parents;
+        return array_values($allowed_parents);
     }
 
     /**
