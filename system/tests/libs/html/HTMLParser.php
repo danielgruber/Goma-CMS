@@ -36,7 +36,7 @@ class HTMLParserTests extends GomaUnitTest {
 		$this->unitParseLink("JaVaScRiPt:192.168.2.1", false, "index.php/");
 		$this->unitParseLink("MaIlTo:daniel@ibpg.eu", false, "index.php/");
 
-		$this->unitParseLink("index.php", false);
+		$this->unitParseLink("index.php", '"index.php"');
 
 		$this->unitParseLink("blah/test/notexisting", '"index.php/blah/test/notexisting"', "index.php/");
 		$this->unitParseLink("./blah/test/notexisting", '"./blah/test/notexisting"', "index.php/");

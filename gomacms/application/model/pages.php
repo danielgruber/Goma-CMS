@@ -173,8 +173,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
     /**
      * gets the parenttype
-     *@name getParentType
-     *@access public
+     *
+     * @return string
      */
     public function getParentType()
     {
@@ -1285,8 +1285,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
     /**
      * gets allowed parents
-     *@name allowed_parents
-     *@access public
+     *
+     * @return array
      */
     public function allowed_parents() {
         if(PROFILE) Profiler::mark("pages::allowed_parents");
@@ -1299,7 +1299,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         // for performance reason we cache this part
         if(!isset(self::$cache_parent[$this->classname]) || self::$cache_parent[$this->classname] == array()) {
 
-
             $allowed_parents = array();
 
             // first check all pages
@@ -1311,15 +1310,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
                 if(is_array($allowed) && count($allowed) > 0) {
                     foreach($allowed as $allow) {
                         $allow = strtolower($allow);
-
-                        // if ! these children are absolutly prohibited
+                        // if ! these children are absolutely prohibited
                         if(substr($allow, 0, 1) == "!") {
-                            if(substr($allow, 1) == $this->classname || is_subclass_of($this->classname, substr($allow, 1))) {
+                            if(ClassManifest::isOfType($this->classname, substr($allow, 1))) {
                                 unset($allowed_parents[$child]);
                                 continue 2;
                             }
                         } else {
-                            if($allow == $this->classname || is_subclass_of($this->classname, $allow)) {
+                            if(ClassManifest::isOfType($this->classname, $allow)) {
                                 $allowed_parents[$child] = $child;
                             }
                         }
@@ -1327,40 +1325,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
                 }
             }
 
-            // now filter
-            $allow_parents = StaticsManager::getStatic($this->classname, "allow_parent");
-            if(is_array($allow_parents) && count($allow_parents) > 0) {
-                foreach($allowed_parents as $parent) {
-
-                    // set found to false
-                    $found = false;
-
-                    // try find the parent
-                    foreach($allow_parents as $allow) {
-                        $allow = strtolower($allow);
-                        if(substr($allow, 0, 1) == "!") {
-                            if(substr($allow, 1) == $parent || is_subclass_of($parent, substr($allow, 1))) {
-                                unset($allowed_parents[$parent]);
-                                continue 2;
-                            }
-                        } else {
-                            if($allow == $parent || is_subclass_of($parent, $allow)) {
-                                $found = true;
-                            }
-                        }
-                    }
-
-                    // if not found, unset
-                    if(!$found) {
-                        unset($allowed_parents[$parent]);
-                    }
-
-                    // if not found, unset
-                    if(!$found) {
-                        unset($allowed_parents[$parent]);
-                    }
-                }
-            }
+            $allowed_parents = $this->filterParents($allowed_parents, StaticsManager::getStatic($this->classname, "allow_parent"));
 
             self::$cache_parent[$this->classname] = $allowed_parents;
 
@@ -1376,12 +1341,58 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     }
 
     /**
+     * filters parents with given local allow_parents array of class.
+     *
+     * @param array $allowed_parents currently allowed parents
+     * @param array $allow_parents filter of current class
+     * @return array
+     */
+    protected function filterParents($allowed_parents, $allow_parents) {
+        // now filter
+        if(is_array($allow_parents) && count($allow_parents) > 0) {
+            foreach($allowed_parents as $parent) {
+
+                // set found to false
+                $found = false;
+
+                // try find the parent
+                foreach($allow_parents as $allow) {
+                    $allow = strtolower($allow);
+                    if(substr($allow, 0, 1) == "!") {
+                        if(ClassManifest::isOfType($parent, substr($allow, 1))) {
+                            unset($allowed_parents[$parent]);
+                            continue 2;
+                        }
+                    } else {
+                        if(ClassManifest::isOfType($parent, $allow)) {
+                            $found = true;
+                        }
+                    }
+                }
+
+                // if not found, unset
+                if(!$found) {
+                    unset($allowed_parents[$parent]);
+                }
+
+                // if not found, unset
+                if(!$found) {
+                    unset($allowed_parents[$parent]);
+                }
+            }
+        }
+
+        return $allowed_parents;
+    }
+
+    /**
      * checks if specifc class is allowed child for given page
      *
-     *@name checkCanChild
-     *@access public
-     *@param string - child-class
-     *@param string - parent-class
+     * @name checkCanChild
+     * @access public
+     * @param string - child-class
+     * @param string - parent-class
+     * @return bool
      */
     public function checkCanChild($child, $parent) {
         $children = StaticsManager::getStatic($parent, "allow_children");

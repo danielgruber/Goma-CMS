@@ -161,39 +161,35 @@ class HTMLParser extends Object
     public static function parseLink($href, $beforeHref, $afterHref, $base = BASE_SCRIPT, $root = ROOT_PATH, $prependBase = "")
     {
         $attrs = "";
-        $lowerhref = strtolower($href);
 
         // check for prefixes.
         foreach (self::$allowedPrefixes as $prefix) {
-            if (substr($lowerhref, 0, strlen($prefix)) == $prefix) {
+            if (substr(strtolower($href), 0, strlen($prefix)) == $prefix) {
                 return false;
             }
         }
 
         // check anchor
-        if (substr($lowerhref, 0, 1) == "#") {
+        if (substr(strtolower($href), 0, 1) == "#") {
             $attrs = 'data-anchor="' . substr($href, 1) . '"';
             $href = URL . URLEND . $href;
         }
 
         // check ROOT_PATH
-        if (substr($lowerhref, 0, strlen($root)) == strtolower($root)) {
+        if (substr(strtolower($href), 0, strlen($root)) == strtolower($root)) {
             $href = substr($href, strlen($root));
         }
 
         // check for existing files.
-        if (!preg_match('/\.php\/(.*)/i', $href) && !strpos($href, "?")) {
-            if (file_exists(ROOT . $href)) {
-                $href = $prependBase . $href;
-            }
-        } else
-
-            if (substr($lowerhref, 0, strlen($base)) != strtolower($base) &&
-                substr($lowerhref, 0, strlen($root . $base)) != strtolower($root . $base) &&
-                substr($lowerhref, 0, 2) != "./"
-            ) {
-                $href = $prependBase . $base . $href;
-            }
+        if (!preg_match('/\.php\/(.*)/i', $href) && !strpos($href, "?") && file_exists(ROOT . $href)) {
+            $href = $prependBase . $href;
+        } else if (
+            substr(strtolower($href), 0, strlen($base)) != strtolower($base) &&
+            substr(strtolower($href), 0, strlen($root . $base)) != strtolower($root . $base) &&
+            substr(strtolower($href), 0, 2) != "./"
+        ) {
+            $href = $prependBase . $base . $href;
+        }
 
         $newlink = $beforeHref . trim('"' . $href . '" ' . $attrs) . $afterHref;
 

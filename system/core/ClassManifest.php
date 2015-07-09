@@ -172,6 +172,17 @@ class ClassManifest {
     }
 
     /**
+     * returns true if is same type, so also if given class is subclass of parent.
+     *
+     * @param string|object $child
+     * @param string|object $parent
+     * @return bool
+     */
+    public static function isOfType($child, $parent) {
+        return self::isSameClass($child, $parent) || is_subclass_of(self::resolveClassName($child), self::resolveClassName($parent));
+    }
+
+    /**
      * @param $class
      * @return string
      */
