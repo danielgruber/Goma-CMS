@@ -59,6 +59,7 @@ class GomaCKEditor extends GomaEditor {
     */
     static $htmlJS = '
 		CKEDITOR.config.extraPlugins = "uploadimage";
+		CKEDITOR.config.removeButtons = "Font";
 
 		// Set the most common block elements.
 		CKEDITOR.config.format_tags = "p;h1;h2;h3;pre";';
