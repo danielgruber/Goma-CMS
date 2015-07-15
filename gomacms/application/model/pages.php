@@ -141,6 +141,11 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     static $icon = "images/icons/goma16/file.png";
 
+    /**
+     * parent-resolver for this class.
+     */
+    private $parentResolver;
+
     //!Getters and Setters
 
     /**
@@ -178,7 +183,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public function getParentType()
     {
-        if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->allowed_parents()))
+        if(($this->parentid == 0 || $this->parentid == "") && in_array("pages", $this->parentResolver()->getAllowedParents()))
         {
             return "root";
         } else
@@ -680,7 +685,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
             $pclassname = strtolower($d["class_name"]);
         }
 
-        if(in_array($pclassname, $this->allowed_parents())) {
+        if(in_array($pclassname, $this->parentResolver()->getAllowedParents())) {
             return true;
         }
 
@@ -726,7 +731,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
         parent::getForm($form);
 
-        $allowed_parents = $this->allowed_parents();
+        $allowed_parents = $this->parentResolver()->getAllowedParents();
 
         $form->addValidator(new requiredFields(array('path','title', 'parenttype')), "default_required_fields"); // valiadte it!
         $form->addValidator(new FormValidator(array($this, "validatePageType")), "pagetype");
@@ -907,8 +912,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * returns versioned fields
      *
-     *@name getVersionedFields
-     *@access public
+     * @return array
      */
     public function getVersionedFields() {
         return array(
@@ -1059,41 +1063,75 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * local argument sql to implement view-permissions
      *
-     * @param SelectQuery
+     * @param SelectQuery $query
      */
 
     public function argumentQuery(&$query) {
         parent::argumentQuery($query);
 
         if(!Permission::check("superadmin")) {
+            array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
+            array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
+
             if(!member::login()) {
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
-
-                $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password')");
+                $this->addFilterToQueryForGuest($query);
             } else if(Permission::check("ADMIN_CONTENT")) {
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
-
-                $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users', 'admin') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+                $this->addFilterToQueryForAdmin($query);
             } else {
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission_state AS view_permission_state ON view_permission_state.id = pages.read_permissionid");
-                array_push($query->from, "LEFT JOIN ".DB_PREFIX."permission AS view_permission ON view_permission.id = view_permission_state.publishedid");
-
-                $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users') OR view_permission.id IN (SELECT permissionid FROM ".DB_PREFIX . ClassInfo::$class_info["permission"]["many_many_tables"]["groups"]["table"]." WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."'))");
+                $this->addFilterToQueryForUsers($query);
             }
         }
     }
 
     /**
+     * adds filter to query when not logged in.
+     *
+     * @param SelectQuery $query
+     */
+    protected function addFilterToQueryForGuest(&$query) {
+        $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password')");
+    }
+
+    /**
+     * adds filter to query for people who are able to manage all pages.
+     *
+     * @param SelectQuery $query
+     */
+    protected function addFilterToQueryForAdmin(&$query) {
+        $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users') OR
+            view_permission.id IN (
+                SELECT permissionid
+                FROM ".DB_PREFIX . Object::instance("permission")->getManyManyInfo("groups")->getTableName() ."
+                WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."')
+            )");
+    }
+
+    /**
+     * adds filter to query for people who are able to login but not able to edit all pages.
+     *
+     * @param SelectQuery $query
+     */
+    protected function addFilterToQueryForUsers(&$query) {
+        $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users', 'admin') OR
+            view_permission.id IN (
+                SELECT permissionid
+                FROM ".DB_PREFIX . Object::instance("permission")->getManyManyInfo("groups")->getTableName() ."
+                WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."')
+            )");
+    }
+
+    /**
      * builds the tree.
      *
-     * @param 	TreeNode|int $parent parent node or no parent node = 0
-     * @param 	array $dataparams "version", "filter"
+     * @param    TreeNode|int $parent parent node or no parent node = 0
+     *
+     * @param    array $dataparams "version", "filter"
+     * @return array
      */
     static function build_tree($parentNode = null, $dataParams = array()) {
         if(!isset($dataParams["search"]) || !$dataParams["search"]) {
-            if(!is_object($parentNode) && $parentNode == 0) {
+            if(!is_object($parentNode) && $parentNode ==
+                0) {
                 $data = DataObject::get("pages", array("parentid" => 0));
             } else if(is_a($parentNode, "TreeNode")) {
                 if($parentNode->model) {
@@ -1178,50 +1216,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         }
     }
 
-    //!APIs
-    /**
-     * gets the data object of a site of a given url
-     *
-     *@name getByURL
-     *@access public
-     *@param string - url
-     */
-    public static function getByURL($url) {
-        $request = new Request("GET", $url);
-        // check if a path is given, else give back homepage
-        if($params = $request->match("\$path!")) {
-            // first get the site with the first url-part
-            $currentdata = DataObject::get("pages", array("path" => $params["path"], "parentid" => 0));
-            if($currentdata > 0) {
-                // then go part for part
-                while($request->remaining() != "") {
-                    if($params = $request->match("\$path!")) {
-                        $newdata = DataObject::get("pages", array("path" => $params["path"], "parentid" => $currentdata["id"]));
-                        if($newdata->count() == 0) {
-                            break;
-                        } else {
-                            $currentdata = $newdata;
-                            unset($newdata);
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                return $currentdata->first();
-            } else {
-                return false;
-            }
-        } else {
-            return DataObject::get_one("pages", array());
-        }
-
-    }
-
     /**
      * returns text what to show about the event
      *
-     *@name generateHistoryData
-     *@access public
+     * @name generateHistoryData
+     * @access public
+     * @param History $record
+     * @return array
      */
     public static function generateHistoryData($record) {
         $compared = false;
@@ -1269,142 +1270,20 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      * - icon
      * this API may extended with notification settings later
      *
-     *@name NotifySettings
-     *@access public
+     * @name NotifySettings
+     * @access public
+     * @return array
      */
     public static function NotifySettings() {
         return array("title" => lang("content"), "icon" => "images/icons/other/content.png");
     }
 
     /**
-     * cache for allowed_parents
-     *@name cache_parent
-     *@access public
-     */
-    private static $cache_parent = array();
-
-    /**
-     * gets allowed parents
-     *
-     * @return array
-     */
-    public function allowed_parents() {
-        if(PROFILE) Profiler::mark("pages::allowed_parents");
-
-        $cacher = new Cacher("cache_parents");
-        if($cacher->checkValid()) {
-            self::$cache_parent = $cacher->getData();
-        }
-
-        // for performance reason we cache this part
-        if(!isset(self::$cache_parent[$this->classname]) || self::$cache_parent[$this->classname] == array()) {
-
-            $allowed_parents = array();
-
-            // first check all pages
-            $allPages = array_merge((array) array("pages"), ClassInfo::getChildren("pages"));
-            foreach($allPages as $child) {
-
-                // get allowed children for this page
-                $allowed = StaticsManager::getStatic($child, "allow_children");
-                if(is_array($allowed) && count($allowed) > 0) {
-                    foreach($allowed as $allow) {
-                        $allow = strtolower($allow);
-                        // if ! these children are absolutely prohibited
-                        if(substr($allow, 0, 1) == "!") {
-                            if(ClassManifest::isOfType($this->classname, substr($allow, 1))) {
-                                unset($allowed_parents[$child]);
-                                continue 2;
-                            }
-                        } else {
-                            if(ClassManifest::isOfType($this->classname, $allow)) {
-                                $allowed_parents[$child] = $child;
-                            }
-                        }
-                    }
-                }
-            }
-
-            $allowed_parents = $this->filterParents($allowed_parents, StaticsManager::getStatic($this->classname, "allow_parent"));
-
-            self::$cache_parent[$this->classname] = $allowed_parents;
-
-            if(PROFILE) Profiler::unmark("pages::allowed_parents", "pages::allowed_parents generate");
-
-            $cacher->write(self::$cache_parent, 86400);
-
-            return $allowed_parents;
-        } else {
-            if(PROFILE) Profiler::unmark("pages::allowed_parents");
-            return self::$cache_parent[$this->classname];
-        }
-    }
-
-    /**
-     * filters parents with given local allow_parents array of class.
-     *
-     * @param array $allowed_parents currently allowed parents
-     * @param array $allow_parents filter of current class
-     * @return array
-     */
-    protected function filterParents($allowed_parents, $allow_parents) {
-        // now filter
-        if(is_array($allow_parents) && count($allow_parents) > 0) {
-            foreach($allowed_parents as $key => $parent) {
-
-                // set found to false
-                $found = false;
-
-                // try find the parent
-                foreach($allow_parents as $allow) {
-                    $allow = strtolower($allow);
-                    if(substr($allow, 0, 1) == "!") {
-                        if(ClassManifest::isOfType($parent, substr($allow, 1))) {
-                            unset($allowed_parents[$parent]);
-                            continue 2;
-                        }
-                    } else {
-                        if(ClassManifest::isOfType($parent, $allow)) {
-                            $found = true;
-                        }
-                    }
-                }
-
-                // if not found, unset
-                if(!$found) {
-                    unset($allowed_parents[$key]);
-                }
-            }
-        }
-
-        return array_values($allowed_parents);
-    }
-
-    /**
-     * checks if specifc class is allowed child for given page
-     *
-     * @name checkCanChild
-     * @access public
-     * @param string - child-class
-     * @param string - parent-class
-     * @return bool
-     */
-    public function checkCanChild($child, $parent) {
-        $children = StaticsManager::getStatic($parent, "allow_children");
-        if(count($children) > 0) {
-            foreach($children as $allowed_child) {
-                if(is_a($child, $allowed_child))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * gets controller
-     *@name controller
-     *@access public
+     *
+     * @name controller
+     * @access public
+     * @return bool|Object|string
      */
     public function controller($controller = null) {
         if(parent::controller($controller)) {
@@ -1414,6 +1293,18 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
             $this->controller->model_inst = $this;
             return $this->controller;
         }
+    }
+
+    /**
+     * @return ParentResolver
+     */
+    private function parentResolver()
+    {
+        if(!isset($this->parentResolver)) {
+            $this->parentResolver = new ParentResolver($this->classname, $this->baseClass);
+        }
+
+        return $this->parentResolver;
     }
 
 }

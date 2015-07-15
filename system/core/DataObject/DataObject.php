@@ -439,11 +439,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     //!Init
 
     /**
-     * this defines a right for advrights or rechte, which tests if an user is an admin
-     *@name __construct
-     *@param array
-     *@param string|object
-     *@param array|string - fields
+     * generates a new DataObject with given record-info.
+     *
+     *@param array|null $record
      */
     public function __construct($record = null) {
         parent::__construct();
