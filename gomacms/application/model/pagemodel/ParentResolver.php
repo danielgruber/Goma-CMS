@@ -88,7 +88,6 @@ class ParentResolver {
     /**
      * gets all allowed parents by the allow_children variable.
      *
-     * @param string $classname class-name
      * @return array
      */
     protected function getAllowedParentsByChildrenVar() {
@@ -131,7 +130,6 @@ class ParentResolver {
      * filters parents with given local allow_parents array of class.
      *
      * @param array $allowed_parents currently allowed parents
-     * @param array $allow_parents filter of current class
      * @return array
      */
     protected function filterParents($allowed_parents) {
@@ -238,6 +236,4 @@ class ParentResolver {
     {
         $this->allowParentVar = $allowParentVar;
     }
-
-
 }

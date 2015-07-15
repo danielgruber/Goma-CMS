@@ -11,7 +11,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.7.1
+ * @version     2.7.2
  *
  * @property null|Pages parent
  * @property string path
@@ -1306,5 +1306,4 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 
         return $this->parentResolver;
     }
-
 }
