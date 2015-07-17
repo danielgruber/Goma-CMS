@@ -271,6 +271,7 @@ class ManyManyModelWriter extends Extension {
         if(!empty($existingData)) {
             $manipulation[$relationShip->getTableName()] = array(
                 "command"   => "insert",
+                "ignore"	=> true,
                 "table_name"=> $relationShip->getTableName(),
                 "fields"    => array()
             );
