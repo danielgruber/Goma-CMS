@@ -40,18 +40,18 @@ class mysqliDriver extends object implements SQLDriver
      * @access public
      * @use: connect to db
      **/
-    public function __construct()
+    public function __construct($autoConnect = true)
     {
         parent::__construct();
 
         /* --- */
-        if (!defined("NO_AUTO_CONNECT")) {
+        if (!defined("NO_AUTO_CONNECT") || !$autoConnect) {
             global $dbuser;
 
             global $dbdb;
             global $dbpass;
             global $dbhost;
-            if (!isset(self::$db)) {
+            if (!isset($this->_db)) {
                 self::connect($dbuser, $dbdb, $dbpass, $dbhost);
             }
         }
@@ -901,7 +901,7 @@ class mysqliDriver extends object implements SQLDriver
      */
     private function manipulateInsert($data, $class)
     {
-        if(count($data["fields"]) > 0) {
+        if(isset($data["fields"]) && count($data["fields"]) > 0) {
             if (
                 (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
                 (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
@@ -1001,12 +1001,9 @@ class mysqliDriver extends object implements SQLDriver
      */
     private function getFieldsFromInsertManipulation($data) {
 
-        $fields = $data["fields"];
-        if (isset($fields[0])) {
-            $fields = $fields[0];
-        }
+        $fields = $this->getRecords($data);
 
-        return array_keys($fields);
+        return array_keys($fields[0]);
     }
 
     /**
