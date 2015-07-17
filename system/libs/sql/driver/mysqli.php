@@ -975,6 +975,41 @@ class mysqliDriver extends object implements SQLDriver
     }
 
     /**
+     * formats the records in a correct way.
+     *
+     * @param array $data
+     * @return array
+     */
+    private function getRecords($data) {
+        $records = $data["fields"];
+        if(!isset($records[0])) {
+            $records = array($records);
+        }
+
+        if(!is_array($records[0])) {
+            throw new InvalidArgumentException("You have to either put a dictionary or an array of dictionaries.");
+        }
+
+        return $records;
+    }
+
+    /**
+     * returns field out of data array.
+     *
+     * @param $data
+     * @return array
+     */
+    private function getFieldsFromInsertManipulation($data) {
+
+        $fields = $data["fields"];
+        if (isset($fields[0])) {
+            $fields = $fields[0];
+        }
+
+        return array_keys($fields);
+    }
+
+    /**
      * storage engines.
      */
     public function listStorageEngines()
