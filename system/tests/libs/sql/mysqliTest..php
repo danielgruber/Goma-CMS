@@ -141,6 +141,19 @@ class MysqliTest extends GomaUnitTest {
                 )
             )
         ), array("t"))), "VALUES ( '\\'abc\\'' ) , ( '2' )");
+
+        $this->assertEqual(trim($this->unittestgetValuesSQL(array(
+            "fields" => array(
+                array(
+                    "t" => "'abc'",
+                    "a" => 5
+                ),
+                array(
+                    "a" => 3,
+                    "t" => 2
+                )
+            )
+        ), array("t", "a"))), "VALUES ( '\\'abc\\'', '5' ) , ( '2', '3' )");
     }
 
     protected function unittestgetValuesSQL($data, $fields) {
