@@ -801,9 +801,9 @@ class mysqliDriver extends object implements SQLDriver
      * - update
      * - delete
      *
-     * @name writeManipulation
-     * @access public
-     * @param array - manipulation
+     * @param array $manipulation
+     * @return bool
+     * @throws MySQLException
      */
     public function writeManipulation($manipulation)
     {
@@ -858,82 +858,7 @@ class mysqliDriver extends object implements SQLDriver
                     }
                     break;
                 case "insert":
-                    if (count($data["fields"]) > 0) {
-                        if (
-                            (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-                            (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
-                        ) {
-                            if (isset($data["ignore"]) && $data["ignore"])
-                                $sql = 'INSERT IGNORE INTO ' . DB_PREFIX . $table_name . ' ';
-                            else
-                                $sql = 'INSERT INTO ' . DB_PREFIX . $table_name . ' ';
-
-                            $fields = ' (';
-                            $values = ' VALUES (';
-
-                            // multi data
-                            if (isset($data["fields"][0])) {
-                                $a = 0;
-                                foreach ($data["fields"] as $fields_data) {
-                                    if ($a == 0) {
-                                        // do nothing, it will be done at the end, because we need it above
-
-                                    } else {
-                                        $values .= " ) , ( ";
-                                    }
-
-                                    $i = 0;
-                                    foreach ($fields_data as $field => $value) {
-                                        if ($i == 0) {
-                                            $i++;
-                                        } else {
-                                            if ($a == 0) {
-                                                $fields .= ",";
-                                            }
-
-                                            $values .= ", ";
-                                        }
-
-                                        if ($a == 0) {
-                                            $fields .= convert::raw2sql($field);
-                                        }
-                                        $values .= "'" . convert::raw2sql($value) . "'";
-                                    }
-
-                                    if ($a == 0) {
-                                        $a++; // now we can edit it
-                                    }
-
-                                    unset($i);
-                                }
-                                unset($a, $field_data);
-
-                                // just one record
-                            } else {
-                                $i = 0;
-                                foreach ($data["fields"] as $field => $value) {
-                                    if ($i == 0) {
-                                        $i++;
-                                    } else {
-                                        $fields .= ",";
-                                        $values .= ",";
-                                    }
-                                    $fields .= convert::raw2sql($field);
-                                    $values .= "'" . convert::raw2sql($value) . "'";
-                                }
-                                unset($i);
-                            }
-                            $fields .= ")";
-                            $values .= ")";
-                            $sql .= $fields . $values;
-                            if (sql::query($sql)) {
-                                unset($fields, $values);
-                                // everything is fine
-                            } else {
-                                throw new MySQLException();
-                            }
-                        }
-                    }
+                    $this->manipulateInsert($data, $class);
                     break;
                 case "delete":
                     if (!isset($data["where"]) && isset($data["id"]))
@@ -966,6 +891,87 @@ class mysqliDriver extends object implements SQLDriver
         }
         if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
         return true;
+    }
+
+    /**
+     * creates insert operation out of manipulation.
+     *
+     * @param $data
+     * @throws MySQLException, InvalidArgumentException
+     */
+    private function manipulateInsert($data, $class)
+    {
+        if(count($data["fields"]) > 0) {
+            if (
+                (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
+                (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
+            ) {
+                if (isset($data["ignore"]) && $data["ignore"]) {
+                    $sql = 'INSERT IGNORE INTO ' . DB_PREFIX . $table_name . ' ';
+                } else {
+                    $sql = 'INSERT INTO ' . DB_PREFIX . $table_name . ' ';
+                }
+
+                $fields = $this->getFieldsFromInsertManipulation($data);
+                $sql .= "(".implode(",", array_map(array("convert", "raw2sql"), $fields)).")";
+
+                $sql .= $this->getValuesSQL($data, $fields);
+
+                if (sql::query($sql)) {
+                    unset($fields, $values);
+                    // everything is fine
+                } else {
+                    throw new MySQLException();
+                }
+            }
+        }
+    }
+
+    /**
+     * returns values sql with the VALUES part of the query.
+     *
+     * @param array $data
+     * @param array $fields
+     * @return string
+     */
+    private function getValuesSQL($data, $fields) {
+        $records = $this->getRecords($data);
+
+        $sql = " VALUES ( ";
+
+        $recordCount = count($records);
+        for($i = 0; $i < $recordCount; $i++) {
+
+            if ($i != 0) {
+                $sql .= " ) , ( ";
+            }
+
+            $record = $records[$i];
+
+            if(count($record) != count($fields)) {
+                throw new InvalidArgumentException("Every dictionary must have the same size of entries. \n" .
+                    print_r($record, true) .
+                    " fields: " . print_r($fields, true));
+            }
+
+            foreach($fields as $field) {
+                if(!isset($record[$field])) {
+                    throw new InvalidArgumentException("Every dictionary must have the same entry-keys.\n" .
+                        print_r($record, true) .
+                        " fields: " . print_r($fields, true));
+                }
+
+                if($field != $fields[0]) {
+                    $sql .= ", ";
+                }
+
+                $sql .= "'" . convert::raw2sql($record[$field]) . "'";
+            }
+        }
+
+        $sql .= " ) ";
+
+        return $sql;
     }
 
     /**
