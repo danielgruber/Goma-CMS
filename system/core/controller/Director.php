@@ -18,11 +18,6 @@ class Director {
     public static $rules = array();
 
     /**
-     * url.
-     */
-    public static $url;
-
-    /**
      * Controllers used in this Request
      *@name Controllers
      */
@@ -36,16 +31,37 @@ class Director {
     public static $requestController;
 
     /**
+     * sorted rules.
+     *
+     * @var array
+     */
+    private static $sortedRules;
+
+    /**
      * adds some rules to controller
-     *@param array - rules
-     *@param numeric - priority
+     *@param array $rules
+     *@param int $priority
      */
     public static function addRules($rules, $priority = 50) {
+        self::$sortedRules = null;
+
         if(isset(self::$rules[$priority])) {
             self::$rules[$priority] = array_merge(self::$rules[$priority], $rules);
         } else {
             self::$rules[$priority] = $rules;
         }
+    }
+
+    /**
+     * gets all active rules sorted.
+     */
+    public static function getSortedRules() {
+        if(!isset(self::$sortedRules)) {
+            self::$sortedRules = self::$rules;
+            krsort(self::$sortedRules);
+        }
+
+        return self::$sortedRules;
     }
 
     /**
@@ -87,7 +103,6 @@ class Director {
      */
     public static function direct($url) {
 
-        self::$url = $url;
         if(PROFILE)
             Profiler::mark("render");
 
@@ -106,38 +121,26 @@ class Director {
             }
         }
 
-        $orgrequest = new Request((isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'], $url, $_GET, array_merge((array)$_POST, (array)$_FILES));
+        $request = new Request((isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'], $url, $_GET, array_merge((array)$_POST, (array)$_FILES));
 
-        krsort(self::$rules);
+        $ruleMatcher = RuleMatcher::initWithRulesAndRequest(self::getSortedRules(), $request);
+        while($nextController = $ruleMatcher->matchNext()) {
+            if(!ClassInfo::exists($nextController)) {
+                ClassInfo::delete();
+                throw new LogicException("Controller $nextController does not exist.");
+            }
 
-        // get  current controller
-        foreach(self::$rules as $priority => $rules) {
-            foreach($rules as $rule => $controller) {
-                $request = clone $orgrequest;
-                if($args = $request->match($rule, true)) {
-                    if($request->getParam("controller")) {
-                        $controller = $request->getParam("controller");
-                    }
+            $inst = new $nextController;
+            self::$requestController = $inst;
+            self::$controller = array($inst);
 
-                    if(!ClassInfo::exists($controller)) {
-                        ClassInfo::delete();
-                        throw new LogicException("Controller $controller does not exist.");
-                    }
-
-                    $inst = new $controller;
-                    self::$requestController = $inst;
-                    self::$controller = array($inst);
-
-                    /** @var RequestHandler $inst */
-                    $data = $inst->handleRequest($request);
-                    if($data === false) {
-                        continue;
-                    }
-                    self::serve($data);
-                    break 2;
-                }
+            /** @var RequestHandler $inst */
+            $data = $inst->handleRequest($ruleMatcher->getCurrentRequest());
+            if($data !== false) {
+                return self::serve($data);
             }
         }
 
+        return false;
     }
 }
