@@ -71,6 +71,16 @@ class CKEditorUploadsController extends RequestHandler {
     );
 
     /**
+     * gets an upload-token.
+     */
+    public static function getUploadToken() {
+        $accessToken = randomString(20);
+        $_SESSION["uploadTokens"][$accessToken] = true;
+
+        return $accessToken;
+    }
+
+    /**
      * uploads files for the ckeditor
      *
      * @name ckeditor_upload
@@ -78,11 +88,6 @@ class CKEditorUploadsController extends RequestHandler {
      * @return string
      */
     public function ckeditor_upload() {
-
-        if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
-            die(0);
-        }
-
         try {
             $fileInfo = $this->validateUpload(self::$allowed_file_types, self::$allowed_file_size);
 
@@ -106,11 +111,6 @@ class CKEditorUploadsController extends RequestHandler {
      * @return string
      */
     public function ckeditor_imageupload() {
-
-        if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
-            die(0);
-        }
-
         try {
             $fileInfo = $this->validateUpload(self::$allowed_image_types, self::$allowed_image_size);
 
@@ -186,6 +186,10 @@ class CKEditorUploadsController extends RequestHandler {
      * @return array
      */
     protected static function validateUpload($allowedTypes, $allowedSize) {
+        if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
+            die(0);
+        }
+
         if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
             if(Core::phpInputFile()) {
                 $tmp_name = Core::phpInputFile();

@@ -37,22 +37,20 @@ class HTMLEditor extends Textarea
 				), lang("EDITOR_TOGGLE", "Toggle Editor"))
 			));
 			
-			$accessToken = randomString(20);
--			$_SESSION["uploadTokens"][$accessToken] = true;
-			
-			$params = array("width" => $this->width, "baseUri" => BASE_URI, "lang" => Core::$lang, "css" => $this->buildEditorCSS(), "uploadpath" => BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken=' . $accessToken, "imageuploadpath" => BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken);
+			$params = array("width" => $this->width, "baseUri" => BASE_URI, "lang" => Core::$lang, "css" => $this->buildEditorCSS());
 			$this->container->append(GomaEditor::get("html")->generateEditor($this->name, "html", $this->value, $params));
 			
 			$this->callExtending("afterRender");
 			
 			return $this->container;
 	}
-	
+
 	/**
 	 * builds editor.css
 	 *
-	 *@name buildEditorCSS
-	*/
+	 * @name buildEditorCSS
+	 * @return bool|string
+	 */
 	public function buildEditorCSS() {
 		$cache = CACHE_DIRECTORY . "/htmleditor_compare_" . Core::GetTheme() . ".css";
 		if(/*(!file_exists($cache) || filemtime($cache) < TIME + 300) && */file_exists("tpl/" . Core::getTheme() . "/editor.css")) {

@@ -84,9 +84,12 @@ class GomaCKEditor extends GomaEditor {
 			Resources::add("system/libs/ckeditor_goma/pagelinks.js", "js");
 		}
 		Resources::add("ckeditor_goma.css", "css");
-		
+
+		$accessToken = CKEditorUploadsController::getUploadToken();
+		$params["uploadpath"] = BASE_URI . BASE_SCRIPT.'/system/ck_uploader/?accessToken=' . $accessToken;
+		$params["imageuploadpath"] = BASE_URI . BASE_SCRIPT.'/system/ck_imageuploader/?accessToken='.$accessToken;
+
 		if($type == "html") {
-			
 			$config = self::$htmlConfig;
 			$params = ArrayLib::map_key("strtolower", $params);
 			if(preg_match_all('/\$([a-zA-Z0-9_]+)/i', $config, $matches)) {
