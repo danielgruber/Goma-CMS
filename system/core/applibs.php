@@ -279,8 +279,8 @@ function getRedirect($parentDir = false, $controller = null) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else if(isset($controller)) {
 			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
-		} else if(isset(Core::$requestController)) {
-			return htmlentities(ROOT_PATH . BASE_SCRIPT . Core::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
+		} else if(isset(Director::$requestController)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . Director::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
 		} else {
 			// TODO What is with redirect from other sites with other URLEND?
 			if(URLEND == "/") {
@@ -298,8 +298,8 @@ function getRedirect($parentDir = false, $controller = null) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else if(isset($controller)) {
 			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
-		} else if(isset(Core::$requestController)) {
-			return htmlentities(ROOT_PATH . BASE_SCRIPT . Core::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
+		} else if(isset(Director::$requestController)) {
+			return htmlentities(ROOT_PATH . BASE_SCRIPT . Director::$requestController->originalNamespace, ENT_COMPAT, "UTF-8", false);
 		} else {
 			return htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, "UTF-8", false);
 		}

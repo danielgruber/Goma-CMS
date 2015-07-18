@@ -124,10 +124,10 @@ class RequestHandler extends Object {
 		}
 
 		if (!isset($this -> subController) || !$this -> subController) {
-			Core::$requestController = $this;
-			Core::$controller[] = $this;
+			Director::$requestController = $this;
+			Director::$controller[] = $this;
 		}
-		$this -> requestHandlerKey = count(Core::$controller);
+		$this -> requestHandlerKey = count(Director::$controller);
 	}
 
     /**
@@ -201,7 +201,7 @@ class RequestHandler extends Object {
             }
 
             $data = $this -> handleAction($action);
-            array_pop(Core::$controller);
+            array_pop(Director::$controller);
             return $data;
         }
 

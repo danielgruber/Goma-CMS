@@ -1,17 +1,11 @@
-<?php
-/**
- * @package		Goma\System\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
-
-defined("IN_GOMA") OR die();
+<?php defined("IN_GOMA") OR die();
 
 /**
  * Requests are represented by this class.
  *
  * @package		Goma\System\Core
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version		2.0.2
  */
 class Request extends Object {

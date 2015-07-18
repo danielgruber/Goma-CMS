@@ -191,7 +191,7 @@ class contentController extends FrontedController
 			
 			if(PROFILE) Profiler::mark("contentController checkupload");
 
-			if(self::$enableBacktracking && is_a(Core::$requestController, "contentController")) {
+			if(self::$enableBacktracking && is_a(Director::$requestController, "contentController")) {
 				
 				$contentmd5 = md5($content);
 				$cache = new Cacher("uploadTracking_" . $contentmd5);
@@ -243,16 +243,16 @@ class contentController extends FrontedController
 					if(count($uploadObjects) > 0) {
 	
 						$hash = md5($uploadHash);
-						$cacher = new Cacher("track_" . Core::$requestController->modelInst()->versionid . "_" . $hash);
+						$cacher = new Cacher("track_" . Director::$requestController->modelInst()->versionid . "_" . $hash);
 						if($cacher->checkValid()) {
 							return true;
 						} else {
-							Core::$requestController->modelInst()->UploadTracking()->setData(array());
+							Director::$requestController->modelInst()->UploadTracking()->setData(array());
 							foreach($uploadObjects as $upload) {
-															Core::$requestController->modelInst()->UploadTracking()->push($upload);
+								Director::$requestController->modelInst()->UploadTracking()->push($upload);
 							}
-							
-							Core::$requestController->modelInst()->UploadTracking()->write(false, true);
+
+							Director::$requestController->modelInst()->UploadTracking()->write(false, true);
 							$cacher->write(1, 14 * 86400);
 						}
 					}
