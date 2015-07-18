@@ -9,14 +9,16 @@
 */
 
 Core::addRules(array(
-	"rate/\$name/\$rate"			=> "ratingController",
-	"search"						=> "searchController",
-	"boxes_new"						=> "boxesController",
-	"sitemap.xml"					=> "SitemapController",
-	"favicon.ico"					=> "FaviconController"
+	'rate/\$name/\$rate'			=> 'ratingController',
+	'search'						=> 'searchController',
+	'boxes_new'						=> 'boxesController',
+	'sitemap.xml'					=> 'SitemapController',
+	'favicon.ico'					=> 'FaviconController'
 ), 11);
 
 
+
 Core::addRules(array(
-	'$path!//$Action/$id/$otherid' => "SiteController"
+	'' => 'HomePageController',
+	'$path!//$Action/$id/$otherid' => 'SiteController'
 ), 1);

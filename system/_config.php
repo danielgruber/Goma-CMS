@@ -38,8 +38,6 @@ Core::addRules(array(
 
 Core::addRules(array('system' => 'SystemController', ), 9);
 
-Core::addRules(array('' => 'HomePageController'), 1);
-
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));
 gloader::addLoadAble("draggable", "system/libs/javascript/ui/draggable.js");
