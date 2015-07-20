@@ -70,24 +70,12 @@ class Core extends object {
 	public static $hooks = array();
 
 	/**
-	 * current active url
-	 *
-	 */
-	public static $url;
-
-	/**
-	 * if mobile is activated
-	 *
-	 */
-	public static $isMobile = true;
-
-	/**
 	 * file which contains data from php://input
 	 *
 	 *@name phpInputFile
 	 *@accesss public
 	 */
-	public static $phpInputFile;
+	protected static $phpInputFile;
 
 	/**
 	 * callbacks for $_cms_blah

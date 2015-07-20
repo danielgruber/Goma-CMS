@@ -17,31 +17,11 @@ defined('IN_GOMA') OR die();
 class RequestHandler extends Object {
 
 	/**
-	 * defines if this is a sub-controller.
-	 *
-	 * @access public
-	*/
-	public $subController;
-
-	/**
-	 * current depth of request-handlers
-	 */
-	private $requestHandlerKey;
-
-	/**
 	 * url-handlers
 	 * @name 	url_handlers
 	 * @access 	public
 	 */
 	public $url_handlers = array('$Action' => '$Action');
-
-	/**
-	 * defines whether shift on success or not
-	 *
-	 * @name 	shiftOnSuccess
-	 * @access 	protected
-	 */
-	protected $shiftOnSuccess = true;
 
 	/**
 	 * requests, key is name of the request and value the function for it
@@ -61,6 +41,14 @@ class RequestHandler extends Object {
 	public $namespace;
 
 	/**
+	 * defines whether shift on success or not
+	 *
+	 * @name 	shiftOnSuccess
+	 * @access 	protected
+	 */
+	protected $shiftOnSuccess = true;
+
+	/**
 	 * original namespace, so always from first controller
 	 *
 	 * @name 	originalNamespace
@@ -68,12 +56,24 @@ class RequestHandler extends Object {
 	public $originalNamespace;
 
 	/**
+	 * defines if this is a sub-controller.
+	 *
+	 * @access public
+	 * @var bool
+	 */
+	protected $subController;
+
+	/**
 	 * the current request
 	 *
-	 * @name 	request
      * @var     Request
 	 */
-	public $request;
+	protected $request;
+
+	/**
+	 * current depth of request-handlers
+	 */
+	private $requestHandlerKey;
 
 	/**
 	 * sets vars
@@ -294,38 +294,33 @@ class RequestHandler extends Object {
 
 	/**
 	 * checks the permissions
-	 *@name checkPermission
-	 *@access protected
-	 *@param string - permission
+	 *
+	 * @param string - permission
+	 * @return bool
 	 */
 	protected function checkPermission($action) {
 		if (PROFILE)
 			Profiler::mark("RequestHandler::checkPermission");
 
 		$class = $this;
-		$actionLower = strtolower($action);
 
-		while (isset($class) && $class->classname != "object") {
+		while ($class && Object::instance($class)->classname != "object") {
 			
 			if(Object::method_exists($class, "checkPermissionsOnClass")) {
 
 				// check class
-				$r = $class->checkPermissionsOnClass($action);
+				$result = $class->checkPermissionsOnClass($action);
 
 				// if we have an result which is a boolean.
-				if (is_bool($r)) {
+				if (is_bool($result)) {
 					if (PROFILE)
 						Profiler::unmark("RequestHandler::checkPermission");
 
-					return $r;
+					return $result;
 				}
 
 				// check for parent class
-				if (!ClassInfo::isAbstract(get_parent_class($class))) {
-					$class = Object::instance(get_parent_class($class));
-				} else {
-					$class = null;
-				}
+				$class = ClassInfo::isAbstract(get_parent_class($class)) ? get_parent_class($class) : null;
 			} else {
 				$class = null;
 			}
@@ -445,7 +440,23 @@ class RequestHandler extends Object {
 	 *@access public
 	 */
 	public function parentController() {
-		return Core::$Controller[$this -> requestHandlerKey - 1];
+		return Director::$controller[$this -> requestHandlerKey - 1];
+	}
+
+	/**
+	 * @return Request|null
+	 */
+	public function getRequest()
+	{
+		return $this->request;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isSubController()
+	{
+		return $this->subController;
 	}
 }
 
