@@ -8,9 +8,9 @@
  * @link 	http://goma-cms.org
  * @license LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	Goma-Team
- * @version 1.3.2
+ * @version 1.3.3
  *
- * last modified: 23.03.2015
+ * last modified: 20.07.2015
 */
 
 class Cacher {
@@ -214,15 +214,13 @@ class Cacher {
 	public function isValid() {
 		return $this->checkValid();
 	}
-	
+
 	/**
 	 * gets the data of the cache
 	 *
-	 * @name getdata
-	 * @access public
-	 * @use to get the data
-	 * @return string - data
-	*/
+	 * @return mixed
+	 * @throws Exception
+	 */
 	public function getData() {
 		if(PROFILE) Profiler::mark("cacher");
 
