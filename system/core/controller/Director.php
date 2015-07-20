@@ -8,7 +8,10 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version		1.0
  */
-class Director {
+
+StaticsManager::AddSaveVar("Director", "rules");
+
+class Director extends Object {
 
     /**
      * addon urls by modules or others

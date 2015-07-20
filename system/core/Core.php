@@ -7,7 +7,6 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-StaticsManager::AddSaveVar("Core", "rules");
 StaticsManager::AddSaveVar("Core", "hooks");
 StaticsManager::AddSaveVar("Core", "cmsVarCallbacks");
 
