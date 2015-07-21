@@ -186,17 +186,17 @@ class Form extends object {
 	 */
 	public $disabled = false;
 
+
 	/**
-	 *@name __construct
-	 *@access public
-	 *@param object - controller
-	 *@param string - name
-	 *@param array - fields
-	 *@param array - actions
-	 *@param array - validators
-	 *@param Request - request
-	 */
-	public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
+	 * @param RequestHandler $controller
+	 * @param string $name
+	 * @param array $fields
+	 * @param array $actions
+	 * @param array $validators
+	 * @param Request|null $request
+	 * @param ViewAccessableData|null $model
+     */
+	public function __construct(RequestHandler $controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
 		parent::__construct();
 
@@ -207,17 +207,17 @@ class Form extends object {
 
 		gloader::load("modernizr");
 
-		if(!is_object($controller)) {
-			throw new InvalidArgumentException('Controller "' . $controller . '" is no object');
+		if(!is_a($controller, "RequestHandler")) {
+			throw new InvalidArgumentException('Controller "' . get_class($controller) . '" is not a request-handler.');
 		}
 
 		$this->controller = $controller;
 		$this->name = $name;
 		$this->secretKey = randomString(30);
 		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
-		$this->request = $request;
+		$this->request = isset($request) ? $request : $controller->getRequest();
 
-		if(isset($request)) {
+		if(isset($this->request)) {
 			$this->post = $request->post_params;
 		} else {
 			$this->post = $_POST;

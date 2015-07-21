@@ -23,7 +23,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 	 * tests form RequestHandler connection.
 	*/
 	public function testFormRequestHandler() {
-		$form = new Form($c = new StdClass(), "test");
+		$form = new Form($c = new Controller(), "test");
 
 		$this->assertEqual($form->name(), "test");
 		$this->assertEqual($form->controller, $c);
@@ -48,7 +48,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 
 		$this->assertEqual($field->name, $name);
 
-		$form = new Form(new StdClass(), "test", array(
+		$form = new Form(new Controller(), "test", array(
 			$field
 		));
 

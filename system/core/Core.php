@@ -129,7 +129,6 @@ class Core extends object {
 			
 			
 		// init language-support
-		require_once (FRAMEWORK_ROOT . "core/i18n.php");
 		i18n::Init();	
 		
 		if(defined("SQL_LOADUP"))

@@ -21,7 +21,7 @@ class CheckBoxFieldTests extends GomaUnitTest implements TestAble
     public $name = "Checkbox";
 
     public function testDisabled() {
-        $form = new Form($this, "checkbox", array(
+        $form = new Form(new Controller(), "checkbox", array(
             $checkbox = new CheckBox("name", "Name")
         ));
 
