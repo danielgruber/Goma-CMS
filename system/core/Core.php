@@ -106,6 +106,11 @@ class Core extends object {
 	protected static $repository;
 
 	/**
+	 * session.
+	 */
+	protected static $session;
+
+	/**
 	 * inits the core
 	 *
 	 */
@@ -123,7 +128,7 @@ class Core extends object {
 		// now init session
 		if(PROFILE)
 			Profiler::mark("session");
-		SessionManager::Init();
+		self::$session = SessionManager::startWithId(null);
 		if(PROFILE)
 			Profiler::unmark("session");
 			
