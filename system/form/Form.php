@@ -200,19 +200,66 @@ class Form extends object {
 
 		parent::__construct();
 
-		/* --- */
-
 		if(PROFILE)
 			Profiler::mark("form::__construct");
 
-		gloader::load("modernizr");
+		$this->name = $name;
 
+		$this->initWithRequest($controller, $request);
+
+		$this->initModel($controller, $model);
+
+		$this->checkForRestore();
+
+		//$this->showFields = array();
+		$this->fieldList = new ArrayList();
+
+		$this->addFields($fields, $actions, $validators);
+
+		// create form tag
+		$this->form = $this->createFormTag();
+
+		if(PROFILE)
+			Profiler::unmark("form::__construct");
+	}
+
+	/**
+	 * adds field to the form.
+	 */
+	public function addFields($fields, $actions, $validators) {
+		// register fields
+		/** @var FormField $field */
+		foreach($fields as $sort => $field) {
+			$this->fieldList->push($field);
+			$field->setForm($this);
+		}
+
+		// register actions
+		/** @var FormAction $action */
+		foreach($actions as $submit => $action) {
+			$action->setForm($this);
+			$this->actions[$action->name] = array(
+				"field" => $action,
+				"submit" => $action->getSubmit()
+			);
+		}
+
+		$this->validators = array_merge($this->validators, (array) $validators);
+	}
+
+	/**
+	 * inits form with request.
+	 *
+	 * @param RequestHandler $controller
+	 * @param Request $request
+	 */
+	protected function initWithRequest($controller, $request) {
 		if(!is_a($controller, "RequestHandler")) {
 			throw new InvalidArgumentException('Controller "' . get_class($controller) . '" is not a request-handler.');
 		}
 
 		$this->controller = $controller;
-		$this->name = $name;
+
 		$this->secretKey = randomString(30);
 		$this->url = str_replace('"', '', $_SERVER["REQUEST_URI"]);
 		$this->request = isset($request) ? $request : $controller->getRequest();
@@ -222,56 +269,27 @@ class Form extends object {
 		} else {
 			$this->post = $_POST;
 		}
+	}
 
+	/**
+	 * inits model.
+	 *
+	 * @param Controller $controller
+	 * @param ViewAccessableData|null $model
+	 */
+	protected function initModel($controller, $model) {
 		// set model
 		if(isset($model)) {
 			$this->model = $model;
 		} else if(Object::method_exists($controller, "modelInst") && $controller->modelInst()) {
 			$this->model = $controller->modelInst();
 		}
-
-		// get form-state
-		if(session_store_exists("form_state_" . $this->name) && isset($this->post))
-			$this->state = new FormState(session_restore("form_state_" . $this->name));
-		else
-			$this->state = new FormState();
-
-		$this->checkForRestore();
-
-		//$this->showFields = array();
-		$this->fieldList = new ArrayList();
-
-		// register fields
-		foreach($fields as $sort => $field) {
-			/*$this->showFields[$field->name] = $field;
-			 $this->fieldSort[$field->name] = 1 + $sort;*/
-			$this->fieldList->push($field);
-			$field->setForm($this);
-			$sort++;
-		}
-
-		// register actions
-		foreach($actions as $submit => $action) {
-			$action->setForm($this);
-			$this->actions[$action->name] = array(
-				"field" => $action,
-				"submit" => $action->getSubmit()
-			);
-		}
-
-		if(!is_array($validators))
-			$validators = array($validators);
-
-		$this->validators = array_merge($this->validators, $validators);
-
-		// create form tag
-		$this->form = $this->createFormTag();
-
-		if(PROFILE)
-			Profiler::unmark("form::__construct");
 	}
 
-	public function checkForRestore() {
+	/**
+	 * checks for form-restore and inits state.
+	 */
+	protected function checkForRestore() {
 		// if we restore form
 		if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
 			$data = session_restore("form_" . strtolower($this->name));
@@ -282,12 +300,19 @@ class Form extends object {
 			$this->restorer = $data;
 			unset($_SESSION["form_restore_" . $this->name]);
 		}
+
+		// get form-state
+		if(session_store_exists("form_state_" . $this->name) && isset($this->post)) {
+			$this->state = new FormState(session_restore("form_state_" . $this->name));
+		} else {
+			$this->state = new FormState();
+		}
 	}
 
 	/**
 	 * creates the Form-Tag
 	 */
-	public function createFormTag() {
+	protected function createFormTag() {
 		return new HTMLNode('form', array(
 			'method' => 'post',
 			'name' => $this->name(),
@@ -352,8 +377,8 @@ class Form extends object {
 
 	/**
 	 * renders the form
-	 *@name render
-	 *@access public
+	 *
+	 * @return mixed|string
 	 */
 	public function render() {
 		if($this->controller && isset($this->controller->request) && is_a($this->controller->request, "Request")) {
@@ -396,8 +421,10 @@ class Form extends object {
 
 	/**
 	 * renders the form
-	 *@name renderForm
-	 *@access public
+	 *
+	 * @name renderForm
+	 * @access public
+	 * @return mixed|string
 	 */
 	public function renderForm() {
 		$this->renderedFields = array();
@@ -882,40 +909,41 @@ class Form extends object {
 	/**
 	 * gets the secret
 	 *
-	 *@name getSecret
-	 *@access public
+	 * @name getSecret
+	 * @access public
+	 * @return string
 	 */
 	public function getSecret() {
 		return $this->secret;
 	}
 
 	/**
-	 * gets the field by the given name
+	 * gets the field by the given name or returns null.
 	 *
-	 * @name 	getField
-	 * @access 	public
-	 * @param 	string - name
+	 * @param string $name
+	 * @return FormField|null
 	 */
 	public function getField($name) {
 
-		return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : false;
+		return (isset($this->fields[strtolower($name)])) ? $this->fields[strtolower($name)] : null;
 	}
 
 	/**
 	 * returns if a field exists in this form
 	 *
-	 *@name isField
-	 *@access public
+	 * @param string $name
+	 * @return bool
 	 */
-	public function isField($name) {
+	public function hasField($name) {
 		return (isset($this->fields[strtolower($name)]));
 	}
 
 	/**
 	 * returns if a field exists and wasn't rendered in this form
 	 *
-	 *@name isField
-	 *@access public
+	 * @name isField
+	 * @access public
+	 * @return bool
 	 */
 	public function isFieldToRender($name) {
 		return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
@@ -924,10 +952,8 @@ class Form extends object {
 	/**
 	 * registers a field in this form
 	 *
-	 *@name registerField
-	 *@access public
-	 *@param string - name
-	 *@param object - field
+	 * @param string $name
+	 * @param FormField $field
 	 */
 	public function registerField($name, $field) {
 		$this->fields[strtolower($name)] = $field;
@@ -937,8 +963,7 @@ class Form extends object {
 	 * unregisters the field from this form
 	 * this means that the field will not be rendered
 	 *
-	 *@name unRegister
-	 *@access public
+	 * @param string $name
 	 */
 	public function unRegister($name) {
 		unset($this->fields[strtolower($name)]);
@@ -947,9 +972,7 @@ class Form extends object {
 	/**
 	 * registers the field as rendered
 	 *
-	 *@name registerRendered
-	 *@access public
-	 *@param string - name
+	 * @param string $name
 	 */
 	public function registerRendered($name) {
 		$this->renderedFields[strtolower($name)] = true;
@@ -1008,11 +1031,11 @@ class Form extends object {
 	/**
 	 * returns if a field exists in this form
 	 *
-	 *@name __isset
-	 *@access public
+	 * @param string $offset
+	 * @return bool
 	 */
 	public function __isset($offset) {
-		return $this->isField($offset);
+		return $this->hasField($offset);
 	}
 
 	/**
@@ -1119,128 +1142,3 @@ class Form extends object {
 	}
 
 }
-
-/**
- * handler for externel urls
- *
- *@name ExternalForm
- *@parent RequestHandler
- */
-class ExternalFormController extends RequestHandler {
-	/**
-	 * handles the request
-	 *
-	 *@name handleRequest
-	 *@access public
-	 *@param Request
-	 */
-	public function handleRequest($request, $subController = false) {
-
-		$this->request = $request;
-		$this->subController = $subController;
-
-		$this->init();
-
-		$form = $request->getParam("form");
-		$field = $request->getParam("field");
-		return $this->FieldExtAction($form, $field);
-	}
-
-	/**
-	 * a external resource for a form
-	 *@name FieldExtAction
-	 *@access public
-	 *@param name - form
-	 *@param name - field
-	 */
-	public function FieldExtAction($form, $field) {
-		$field = strtolower($field);
-		
-		if(session_store_exists("form_" . strtolower($form))) {
-			$f = session_restore("form_" . strtolower($form));
-
-			if(isset($f->$field)) {
-				
-				$data = $f->$field->handleRequest($this->request);
-
-
-				session_store("form_" . strtolower($form), $f);
-				return $data;
-			}
-			return false;
-
-		}
-		return false;
-	}
-
-}
-
-class FormRequestExtension extends Extension {
-	public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
-			$handleWithMethod = false;
-
-			$externalForm = new ExternalFormController();
-
-			$request = $this->getOwner()->request;
-
-			if($arguments = $request->match('$form!/$field!', true)) {
-				$content = $externalForm->handleRequest($request);
-				if(!$content) {
-					$content = $this->getOwner()->index();
-				}
-			} else {
-				$content = $this->getOwner()->index();
-			}
-		}
-	}
-
-	public function extendHasAction( $action, &$hasAction) {
-		if($action == "forms" && $this->getOwner()->request->getParam("id") == "form") {
-			$hasAction = true;
-		}
-	}
-}
-
-class FormState extends Object {
-	protected $data;
-
-	function __construct($data = array()) {
-		$this->data = $data;
-	}
-
-	function __get($name) {
-		if(!isset($this->data[$name]))
-			$this->data[$name] = new FormState;
-		if(is_array($this->data[$name]))
-			$this->data[$name] = new FormState($this->data[$name]);
-		return $this->data[$name];
-	}
-
-	function __set($name, $value) {
-		$this->data[$name] = $value;
-	}
-
-	function __isset($name) {
-		return isset($this->data[$name]);
-	}
-
-	function __toString() {
-		if(!$this->data)
-			return "";
-		else
-			return json_encode($this->toArray());
-	}
-
-	function toArray() {
-		$output = array();
-		foreach($this->data as $k => $v) {
-			$output[$k] = (is_object($v) && method_exists($v, 'toArray')) ? $v->toArray() : $v;
-		}
-		return $output;
-	}
-
-}
-
-Object::extend("RequestHandler", "FormRequestExtension");
-Core::addRules(array('system/forms/$form!/$field!' => "ExternalFormController"), 50);

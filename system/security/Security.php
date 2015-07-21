@@ -1,4 +1,4 @@
-<?php
+<?php defined("IN_GOMA") OR die();
 /**
   *@package goma framework
   *@link http://goma-cms.org
@@ -7,8 +7,6 @@
   * last modified: 31.03.2013
   * $Version 2.1.8
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class Security extends Object {
 	/**

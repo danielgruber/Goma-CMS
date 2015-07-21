@@ -123,7 +123,7 @@ class Core extends object {
 		// now init session
 		if(PROFILE)
 			Profiler::mark("session");
-		session_start();
+		SessionManager::Init();
 		if(PROFILE)
 			Profiler::unmark("session");
 			
