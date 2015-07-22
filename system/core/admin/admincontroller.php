@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.1
+ * @version     1.5.2
  */
 class adminController extends Controller
 {
@@ -70,8 +70,7 @@ class adminController extends Controller
     /**
      * returns current controller
      *
-     * @name activeController
-     * @access public
+     * @return adminController
      */
     static function activeController()
     {
@@ -96,6 +95,7 @@ class adminController extends Controller
      *
      * @name handleRequest
      * @access public
+     * @return string|false
      */
     public function handleRequest($request, $subController = false)
     {
@@ -111,6 +111,7 @@ class adminController extends Controller
      *
      * @name handleItem
      * @access public
+     * @return mixed
      */
     public function handleItem()
     {
@@ -119,15 +120,16 @@ class adminController extends Controller
 
         $class = $this->request->getParam("item") . "admin";
 
-        if (classinfo::exists($class)) {
-            $c = new $class;
+        if (ClassInfo::exists($class)) {
+            /** @var RequestHandler $controller */
+            $controller = new $class;
 
             Core::$favicon = ClassInfo::getClassIcon($class);
 
-            if (Permission::check($c->rights)) {
-                self::$activeController = $c;
+            if (Permission::check($controller->rights)) {
+                self::$activeController = $controller;
 
-                return $c->handleRequest($this->request);
+                return $controller->handleRequest($this->request);
             }
         }
     }
@@ -136,6 +138,7 @@ class adminController extends Controller
      * title
      *
      * @name title
+     * @return string
      */
     public function title()
     {
@@ -147,6 +150,7 @@ class adminController extends Controller
      *
      * @name adminTitle
      * @access public
+     * @return string
      */
     final public function adminTitle()
     {
@@ -158,6 +162,7 @@ class adminController extends Controller
      *
      * @name PreviewURL
      * @access public
+     * @return string
      */
     public function PreviewURL()
     {
@@ -169,6 +174,7 @@ class adminController extends Controller
      *
      * @name switchLang
      * @access public
+     * @return string
      */
     public function switchLang()
     {
@@ -298,8 +304,7 @@ class adminController extends Controller
     /**
      * history
      *
-     * @name history
-     * @access public
+     * @return bool|string
      */
     public function history()
     {
@@ -311,7 +316,7 @@ class adminController extends Controller
 
         $this->template = "admin/index_not_permitted.html";
 
-        return parent::index();
+        return false;
     }
 
     /**
@@ -328,8 +333,7 @@ class adminController extends Controller
     /**
      * here you can modify classes content-div
      *
-     * @name contentClass
-     * @access public
+     * @return string
      */
     public function contentClass()
     {
@@ -339,8 +343,7 @@ class adminController extends Controller
     /**
      * history-url
      *
-     * @name historyURL
-     * @access public
+     * @return string
      */
     public function historyURL()
     {
@@ -379,8 +382,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * user-bar
      *
-     * @name userbar
-     * @access public
+     * @return array|string
      */
     public function userbar()
     {
