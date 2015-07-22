@@ -59,7 +59,7 @@ class UploadController extends Controller {
 			return false;
 		}
 		
-		session_write_close();
+		Core::globalSession()->stopSession();
 		
 		return $data->first()->controller()->handleRequest($this->request);
 	}	

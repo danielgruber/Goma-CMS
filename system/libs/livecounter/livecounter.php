@@ -228,7 +228,7 @@ class livecounter extends DataObject
 	}
 
 	public static function onBeforeShutdownUsingLife() {
-		session_write_close();
+		Core::globalSession()->stopSession();
 		
 		if(function_exists("fastcgi_finish_request")) {
 			fastcgi_finish_request();
@@ -721,7 +721,7 @@ class livecounterController extends Controller {
 			exit;
 		}
 
-		session_write_close();
+		Core::globalSession()->stopSession();
 		ignore_user_abort(true);
 
 		livecounter::migrateStats();

@@ -70,7 +70,7 @@ class SessionManager implements ISessionManager {
      * @param string|null $id
      * @param string|null $name
      */
-    protected function init($id = null, $name = null) {
+    public function init($id = null, $name = null) {
 
         $this->setName($name);
         $this->setId($id);

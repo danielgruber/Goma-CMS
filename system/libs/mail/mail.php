@@ -107,10 +107,10 @@ class Mail
 
         $mail = $this->prepareMail();
 
-        session_write_close();
+        Core::globalSession()->stopSession();
         $r = $mail->send();
 
-        session_start();
+        Core::globalSession()->init();
 
         return $r;
     }

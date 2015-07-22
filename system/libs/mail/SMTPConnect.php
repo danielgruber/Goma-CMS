@@ -33,7 +33,7 @@ class SMTPConnector extends Controller
 			exit;
 		}
 
-		session_write_close();
+		Core::globalSession()->stopSession();
 
 		HTTPResponse::sendHeader();
 		if(isset($_POST["host"], $_POST["auth"], $_POST["user"], $_POST["pwd"], $_POST["secure"], $_POST["port"])) {

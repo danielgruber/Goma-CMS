@@ -160,7 +160,7 @@ class systemController extends Controller {
 		if(!Permission::check("ADMIN"))
 			return false;
 		
-		session_write_close();
+		Core::globalSession()->stopSession();
 		$maximum = $this->getParam("max") ? $this->getParam("max") : 10;
 		$manipulation = array();
 		foreach(ClassInfo::getChildren("DataObject") as $class) {

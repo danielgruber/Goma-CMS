@@ -22,6 +22,15 @@ interface ISessionManager {
     public static function startWithIdAndName($id, $name = null);
 
     /**
+     * you can restart the session after you stopped it.
+     *
+     * @param null|string $id
+     * @param null|string $name
+     * @return mixed
+     */
+    public function init($id = null, $name = null);
+
+    /**
      * gets a value for key.
      *
      * @param string $key

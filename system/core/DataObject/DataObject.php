@@ -2873,6 +2873,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * gets the controller for this class
      *@name controller
      *@access public
+     *@return RequestHandler
      */
     public function controller($controller = null)
     {

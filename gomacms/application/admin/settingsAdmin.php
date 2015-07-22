@@ -81,16 +81,17 @@ class settingsAdmin extends adminItem
 	 * upgrades data regarding safe-mode.
 	*/
 	public static function upgradeSafeMode() {
-		session_write_close();
+		Core::globalSession()->stopSession();
 		FileSystem::applySafeMode(null, null, true);
 	}
 
 	/**
 	 * returns an array of the wiki-article and youtube-video for this controller
 	 *
-	 *@name helpArticle
-	 *@access public
-	*/
+	 * @name helpArticle
+	 * @access public
+	 * @return array
+	 */
 	public function helpArticle() {
 		return array("wiki" => "Einstellungen");
 	}
