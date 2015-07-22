@@ -2858,17 +2858,18 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @var Controller
      */
-    public $controller = "";
+    protected $controller = "";
 
     /**
      * sets the controller
-     *@name setController
-     *@access public
+     *
+     * @param Controller $controller
      */
-    public function setController(Object &$controller)
+    public function setController(Controller $controller)
     {
         $this->controller = $controller;
     }
+
     /**
      * gets the controller for this class
      *
@@ -2931,7 +2932,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     protected function linkController ($controller) {
         $this->controller = clone $controller;
         $this->controller->setModelInst($this);
-        $this->controller->request = null;
         return $this->controller;
     }
 

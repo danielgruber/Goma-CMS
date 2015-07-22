@@ -9,6 +9,18 @@
  */
 
 class TreeNode extends ArrayList {
+
+	/**
+	 * colors for Tree-Node.
+	 */
+	const COLOR_GREEN = "green";
+	const COLOR_YELLOW = "yellow";
+	const COLOR_RED = "red";
+	const COLOR_BLUE = "blue";
+	const COLOR_GREY = "grey";
+	const COLOR_ORANGE = "orange";
+	const COLOR_PURPLE = "purple";
+
 	/**
 	 * unique id of the node.
 	 *
@@ -95,7 +107,6 @@ class TreeNode extends ArrayList {
 		if(!isset($nodeid)) {
 			return false;
 		}
-			
 		
 		$this->nodeid = $nodeid;
 		$this->recordid = $recordid;
@@ -107,65 +118,66 @@ class TreeNode extends ArrayList {
 			$this->icon = ClassInfo::getClassIcon($class_name);
 		}
 	}
-	
+
 	/**
 	 * returns the icon
 	 *
-	 *@name getIcon
-	 *@access public
-	*/
+	 * @name getIcon
+	 * @access public
+	 * @return string|null
+	 */
 	public function getIcon() {
 		return $this->icon;
 	}
-	
+
 	/**
 	 * sets an icon
 	 *
-	 *@name setIcon
-	 *@access public
-	*/
+	 * @return bool
+	 */
 	public function setIcon($icon) {
-		if($icon && $icon = ClassInfo::findFile($icon)) {
+		if($icon && $icon = ClassInfo::findFile($icon, $this->treeclass)) {
 			$this->icon = $icon;
 			return true;
 		}
 		
 		return false;
 	}
-	
+
 	/**
 	 * adds a bubble
 	 *
-	 *@name addBubble
-	 *@access public
-	 *@param text
-	 *@param color: green, yellow, red, blue, grey, orange, purple
-	*/
+	 * @name addBubble
+	 * @access public
+	 * @param text
+	 * @param string $color : green, yellow, red, blue, grey, orange, purple
+	 * @return $this
+	 */
 	public function addBubble($text, $color = "blue") {
 		
 		$this->bubbles[md5($text)] = array("text" => $text, "color" => $color);
 		return $this;
 	}
-	
+
 	/**
 	 * removes a bubble
 	 *
-	 *@name removeBubble
-	 *@access public
-	 *@param text
-	*/
+	 * @param string $text
+	 * @return $this
+	 */
 	public function removeBubble($text) {
 		unset($this->bubbles[md5($text)]);
 		return $this;
 	}
-	
+
 	/**
 	 * returns all bubbles
 	 *
-	 *@name Bubbles
-	 *@access public
-	 *@param text
-	*/
+	 * @name Bubbles
+	 * @access public
+	 * @param text
+	 * @return array
+	 */
 	public function bubbles() {
 		return $this->bubbles;
 	}

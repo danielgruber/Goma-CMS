@@ -227,7 +227,7 @@ class Profiler {
 		$memoryout = $memory . str_repeat(" ", 20 - strlen($memory));
 		$content .= "        " . $timeout . "" . str_repeat(" ", 20 - strlen($timeout)) . "" . $memoryout . "Whole Execution";
 
-		if($output || (PROFILE && right(7) && !Core::is_ajax())) {
+		if($output || (PROFILE && Permission::check(7) && !Core::is_ajax())) {
 			echo '<div style="background: #ffffff; width: 550px; height: 80%; padding: 5px; font-size: 12px;position: absolute; top: 50px; left: 20px; z-index: 9999;color: #000000;" id="profiler_windows">
 									[ <a href="javascript: void(0);" onclick="document.getElementById(\'profiler_windows\').style.display = \'none\';">Close windows</a> ]
 									<div style="overflow: auto;width: 550px; height: 98%;">

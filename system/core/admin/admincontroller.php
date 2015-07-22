@@ -492,8 +492,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * gets data fpr available points
      *
-     * @name this
-     * @access public
+     * @return DataSet
      */
     public function this()
     {
@@ -502,7 +501,7 @@ class admin extends ViewAccessableData implements PermProvider
         foreach (ClassInfo::getChildren("adminitem") as $child) {
             $class = new $child;
             if ($class->text) {
-                if (right($class->rights) && $class->visible()) {
+                if (Permission::check($class->rights) && $class->visible()) {
                     if (adminController::activeController()->classname == $child)
                         $active = true;
                     else
@@ -524,8 +523,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * gets addcontent
      *
-     * @name getAddContent
-     * @access public
+     * @return string
      */
     public function getAddContent()
     {
@@ -540,16 +538,14 @@ class admin extends ViewAccessableData implements PermProvider
      */
     public function getLost_password()
     {
-        $controller = new lost_password();
-
-        return $controller->render();
+        $profile = new ProfileController();
+        return $profile->lost_password();
     }
 
     /**
      * returns a list of installed software at a given maximum number
      *
-     * @name Software
-     * @access public
+     * @return ViewAccessableData
      */
     public function Software($number = 7)
     {
@@ -559,8 +555,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * returns if store is available
      *
-     * @name isStoreAvailable
-     * @access public
+     * @return bool
      */
     public function isStoreAvailable()
     {
@@ -570,8 +565,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * returns updatable packages
      *
-     * @name getUpdatables
-     * @access public
+     * @return DataSet
      */
     public function getUpdatables()
     {
@@ -581,7 +575,7 @@ class admin extends ViewAccessableData implements PermProvider
     /**
      * returns updatables as json
      *
-     * @name getUpdatables_JSON
+     * @return string
      */
     public function getUpdatables_JSON()
     {

@@ -25,10 +25,15 @@ define("SESSION_TIMEOUT", 24*3600);
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.12
+ * @version     2.2.13
  */
 class livecounter extends DataObject
 {
+	/**
+	 * sessionid for user-counted.
+	 */
+	const SESSION_USER_COUNTED = "user_counted";
+
 	/**
 	 * disable history for this DataObject, because it would be a big lag of performance
 	*/
@@ -133,9 +138,9 @@ class livecounter extends DataObject
 		// user identifier
 		$user_identifier = self::getUserIdentifier();
 		
-		self::$userCounted = isset($_SESSION["user_counted"]) ? $_SESSION["user_counted"] : null;
+		self::$userCounted = Core::globalSession()->get(self::SESSION_USER_COUNTED);
 
-		$_SESSION["user_counted"] = TIME;
+		Core::globalSession()->set(self::SESSION_USER_COUNTED, time());
 		// just rewirte cookie
 		self::setGomaCookies($user_identifier, $host);
 				

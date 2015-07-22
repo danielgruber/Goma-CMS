@@ -31,17 +31,19 @@ class ajaxlink extends RequestHandler
      * @param callback - function
      * @access public
      */
-    public function __construct($callback = null, $code = "")
+    public function __construct($callback = false, $code = "")
     {
         parent::__construct();
 
-        if (!$callback) {
+        if ($callback === false) {
             throw new InvalidArgumentException("Callback for Ajaxpopup required.");
         }
 
 
         $code = ($code == "") ? strtolower(randomString(20)) : strtolower($code);
-        Core::globalSession()->set("ajaxpopups_" . $code, $callback);
+        if(Core::globalSession() != null) {
+            Core::globalSession()->set("ajaxpopups_" . $code, $callback);
+        }
         $this->code = $code;
     }
 
@@ -64,7 +66,7 @@ class ajaxlink extends RequestHandler
      *
      * @name popup
      * @access public
-     * @return bool|mixed
+     * @return string|false
      */
     public function popup()
     {
@@ -86,7 +88,7 @@ class ajaxlink extends RequestHandler
      *
      * @name action
      * @access public
-     * @return string
+     * @return string|false
      */
     public function action()
     {

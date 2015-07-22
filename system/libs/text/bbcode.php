@@ -121,17 +121,6 @@ class BBcode extends TextTransformer
 				$text = preg_replace('/\[color=([a-zA-Z0-9#_\-]+)\](.*)\[\/color\]/Usi', '<span style="color: \\1;">\\2</span>', $text);
 				$text = preg_replace('/\[size=([0-9]+)\](.*)\[\/size\]/Usi', '<span style="font-size: \\1px;">\\2</span>', $text);
 				
-				preg_match_all('/\[email\](.*)\[\/email\]/i',$text,$emails);
-				foreach($emails[1] as $key => $value)
-				{
-						unset($rand);
-						$rand = randomString(30); // generate code for crypt
-						$_SESSION[$rand] = $value;
-						$text = preg_replace('/\[email\]'.preg_quote($value,'/').'\[\/email\]/i','<img src="images/captcha/emailprotect.php?key='.$rand.'" alt="email" />',$text, 1);
-				}
-				
-				
-				
 				/*
 				 * quotes
 				*/

@@ -665,7 +665,7 @@ class Core extends object {
 	 *
 	 */
 	public static function adminAsUser() {
-		return (!defined("IS_BACKEND") && isset($_SESSION["adminAsUser"]));
+		return (!defined("IS_BACKEND") && Core::globalSession()->hasKey("adminAsUser"));
 	}
 
 	//!Rendering-Methods

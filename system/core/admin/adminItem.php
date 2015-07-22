@@ -238,13 +238,15 @@ class adminItem extends AdminController implements PermProvider {
 		return $this->selectModel(ArrayLib::firstkey($this->modelInstances), $onThis);
 			
 	}
+
 	/**
 	 * decorates the given model with some needed vars
 	 *
-	 *@name decorateModel
-	 *@access public
-	 *@param object
-	*/
+	 * @param DataObject $model
+	 * @param array $additional
+	 * @param Controller|null $controller
+	 * @return DataObject
+	 */
 	public function decorateModel($model, $additional = array(), $controller = null) {
 		
 		$model->customise(array_merge(array(
@@ -350,33 +352,37 @@ class adminItem extends AdminController implements PermProvider {
 
 		return $this->selectModel($model)->form(null, null, array(), false, $submit);
 	}
+
 	/**
 	 * alias for cms_add
 	 *
-	 *@name add
-	 *@access public
-	*/
+	 * @name add
+	 * @access public
+	 * @return mixed|string
+	 */
 	public function add() {
 		return $this->cms_add();	
 	}
-	
+
 	/**
 	 *  provides no perms
 	 *
-	 *@name providePerms
-	 *@access public
-	*/ 
+	 * @name providePerms
+	 * @access public
+	 * @return array
+	 */
 	public function providePerms()
 	{
-			return array();
+		return array();
 	}
-	
+
 	/**
 	 * generates the normal controller for the model inst
 	 *
-	 *@name getControllerInst
-	 *@access public
-	*/
+	 * @name getControllerInst
+	 * @access public
+	 * @return bool|Controller|null
+	 */
 	public function getControllerInst() {
 
 		if(!isset($this->controllerInst)) {
@@ -386,14 +392,14 @@ class adminItem extends AdminController implements PermProvider {
 
 			// try to get controller from default model. at the moment adminItem is the controller.
 			$this->model_inst->controller = Object::instance($this->model())->controller;
-			if($c = $this->model_inst->controller()) {
+			if($currentController = $this->model_inst->controller()) {
 
 				// set Model-Inst.
-				$c->setModelInst(clone $this->model_inst, null);
+				$currentController->setModelInst(clone $this->model_inst, null);
 
 				// adminItem should be always the owner of its own model-inst.
 				$this->model_inst->controller = $controller;
-				$this->controllerInst = $c;
+				$this->controllerInst = $currentController;
 			} else {
 				return false;
 			}

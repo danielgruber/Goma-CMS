@@ -15,8 +15,8 @@ class SMTPConnector extends Controller
 	 * returns a token which is used for authentification.
 	*/
 	public static function allowSMTPConnect() {
-		$_SESSION["allow_smtp"] = randomString(20);
-		return $_SESSION["allow_smtp"];
+		Core::globalSession()->set("allow_smtp", randomString(20));
+		return Core::globalSession()->get("allow_smtp");
 	}
 
 	/**
@@ -26,7 +26,7 @@ class SMTPConnector extends Controller
 
 		HTTPResponse::setHeader("content-type", "text/plain");
 		
-		if(!isset($_POST["allow_smtp"]) || !isset($_SESSION["allow_smtp"]) || $_SESSION["allow_smtp"] != $_POST["allow_smtp"]) {
+		if(!isset($_POST["allow_smtp"]) || Core::globalSession()->get("allow_smtp") != $_POST["allow_smtp"]) {
 			HTTPResponse::setResHeader(403);
 			HTTPResponse::sendHeader();
 			echo "AUTH_ERROR";

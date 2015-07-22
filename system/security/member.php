@@ -13,6 +13,11 @@
  */
 class Member extends Object {
 	/**
+	 * user-login const
+	 */
+	const USER_LOGIN = "g_userlogin";
+
+	/**
 	 * id of the current logged in user
 	 *
 	 *@name id
@@ -152,8 +157,8 @@ class Member extends Object {
 	 * looks for logged in user and validates session.
 	*/
 	public static function getUserObject() {
-		if(isset($_SESSION["g_userlogin"])) {
-			if($data = DataObject::get_one("user", array("id" => $_SESSION["g_userlogin"]))) {
+		if(Core::globalSession()->hasKey(self::USER_LOGIN)) {
+			if($data = DataObject::get_one("user", array("id" => Core::globalSession()->get(self::USER_LOGIN)))) {
 				$currsess = session_id();
 
 				if($data['phpsess'] == $currsess)
@@ -260,14 +265,13 @@ class Member extends Object {
 	
 	/**
 	 * checks if an user have the rights
-	 *@name right
-	 *@access public
-	 *@param string|numeric - if numeric: the rights from 1 - 10, if string: the advanced rights
+	 *
+	 *@param string|number $name if numeric: the rights from 1 - 10, if string: the advanced rights
 	 *@return bool
 	*/
 	static function right($name)
 	{
-		return right($name);
+		return Permission::check($name);
 	}
 	
 	/**
@@ -317,14 +321,15 @@ class Member extends Object {
 		self::checkDefaults();
 
 		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
-		
+
+		/** @var User $data */
 		if($data) {
 			// check password
 			if(Hash::checkHashMatches($pwd, $data->fieldGet("password"))) {
 				if($data->status == 1) {
 					// register login
-					$_SESSION["g_userlogin"] = $data->id;
-					
+					Core::globalSession()->set(self::USER_LOGIN, $data->id);
+
 					$data->phpsess = session_id();
 					$data->performLogin();
 					
@@ -349,11 +354,13 @@ class Member extends Object {
 	 *@access public
 	*/
 	public static function doLogout() {
-		$data = DataObject::get_by_id("user", $_SESSION["g_userlogin"]);
+		$data = DataObject::get_by_id("user", Core::globalSession()->get(self::USER_LOGIN));
+		/** @var User $data */
 		if($data) {
 			$data->performLogout();
 		}
-		unset($_SESSION["g_userlogin"]);
+
+		Core::globalSession()->remove(self::USER_LOGIN);
 	}
 
     /**
@@ -380,16 +387,15 @@ class Member extends Object {
 	 * unique identifier of this user.
 	*/
 	public static function uniqueID() {
-		if(isset($_SESSION["uniqueID"])) {
-			return $_SESSION["uniqueID"];
+		if(Core::globalSession()->hasKey("uniqueID")) {
+			return Core::globalSession()->get("uniqueID");
 		} else {
 			if(self::$loggedIn) {
-				$_SESSION["uniqueID"] = self::$loggedIn->uniqueID();
-				return $_SESSION["uniqueID"];
+				Core::globalSession()->set("uniqueID", self::$loggedIn->uniqueID());
 			} else {
-				$_SESSION["uniqueID"] = md5(randomString(20));
-				return $_SESSION["uniqueID"];
+				Core::globalSession()->set("uniqueID", md5(randomString(20)));
 			}
+			return Core::globalSession()->get("uniqueID");
 		}
 	}
 }

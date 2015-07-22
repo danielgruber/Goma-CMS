@@ -19,6 +19,16 @@ class systemController extends Controller {
 	*/
 	const JS_DEBUG_LIMIT = 2048;
 
+	/**
+	 * string for adminAsUser.
+	 *
+	 * @var string
+	 */
+	const ADMIN_AS_USER = "adminAsUser";
+
+	/**
+	 * @var array
+	 */
 	public $url_handlers = array(
 		"setUserView/\$bool!"	=> "setUserView",
 		"switchView",
@@ -45,9 +55,9 @@ class systemController extends Controller {
 	*/
 	public function setUserView() {
 		if($this->getParam("bool") == 1) {
-			$_SESSION["adminAsUser"] = true;
+			Core::globalSession()->set(self::ADMIN_AS_USER, true);
 		} else {
-			unset($_SESSION["adminAsUser"]);
+			Core::globalSession()->remove(self::ADMIN_AS_USER);
 		}
 		$this->redirectback();
 	}
@@ -59,10 +69,11 @@ class systemController extends Controller {
 	 *@access public
 	*/
 	public function switchView() {
-		if(isset($_SESSION["adminAsUser"]))
-			unset($_SESSION["adminAsUser"]);
-		else
-			$_SESSION["adminAsUser"] = 1;
+		if(Core::globalSession()->hasKey(self::ADMIN_AS_USER)) {
+			Core::globalSession()->remove(self::ADMIN_AS_USER);
+		} else {
+			Core::globalSession()->set(self::ADMIN_AS_USER, true);
+		}
 		
 		HTTPResponse::unsetCachable();
 		
@@ -161,7 +172,6 @@ class systemController extends Controller {
 			return false;
 		
 		Core::globalSession()->stopSession();
-		$maximum = $this->getParam("max") ? $this->getParam("max") : 10;
 		$manipulation = array();
 		foreach(ClassInfo::getChildren("DataObject") as $class) {
 			

@@ -452,6 +452,14 @@ class RequestHandler extends Object {
 	}
 
 	/**
+	 * @param Request $request
+	 */
+	public function setRequest($request)
+	{
+		$this->request = $request;
+	}
+
+	/**
 	 * @return boolean
 	 */
 	public function isSubController()

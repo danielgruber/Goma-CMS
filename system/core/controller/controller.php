@@ -57,8 +57,8 @@ class Controller extends RequestHandler
 
     /**
      * instance of the model
-     * @name model_inst
-     * @access public
+     *
+     * @var DataObject
      */
     public $model_inst = false;
 
@@ -505,6 +505,7 @@ class Controller extends RequestHandler
      *
      * @name edit
      * @access public
+     * @return string
      */
     public function edit()
     {

@@ -68,29 +68,6 @@ function lang($name, $default = "") {
 }
 
 /**
- * Checks if a group has a right.
- *
- * @param string $name Name identifier of the right.
- * @param string $group Name identifier of the group.
- *
- * @return boolean
- */
-function advrights($right, $group) {
-	return Permission::advrights($right, $group);
-}
-
-/**
- * Checks if the current user has a right.
- *
- * @param string $right Name identifier of the right.
- *
- * @return boolean
- */
-function right($right) {
-	return Permission::check($right);
-}
-
-/**
  * Merges arrays recursive.
  *
  * Merges any number of arrays / parameters recursively, replacing
