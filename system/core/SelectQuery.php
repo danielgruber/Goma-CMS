@@ -492,7 +492,7 @@ class SelectQuery extends Object {
 
 				// join all from-tables
 				foreach($this->from as $alias => $statement) {
-					if(_ereg("^[0-9]+$", $alias))
+					if(RegexpUtil::isNumber($alias))
 						continue;
 
 					if($i == 0) {
@@ -520,7 +520,7 @@ class SelectQuery extends Object {
 
 				/* --- */
 
-				if(!preg_match('/^[0-9]+$/', $key)) {
+				if(!RegexpUtil::isNumber($key)) {
 					$alias = $key;
 				} else {
 					if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
@@ -556,17 +556,16 @@ class SelectQuery extends Object {
 
 		// validate from
 		foreach($from as $alias => $data) {
-			if(preg_match('/^[0-9]+$/', $alias)) {
+			if(RegexpUtil::isNumber($alias)) {
 				if(is_array($data)) {
-					$table = $data["table"];
 					$data = $data["statement"];
 					$from[$alias] = $this->replaceAliasInStatement($data);
 				} else {
-					$table = $alias;
 					$from[$alias] = $this->replaceAliasInStatement($from[$alias]);
 				}
 				continue;
 			}
+			
 			if(is_array($data)) {
 				$table = $data["table"];
 				$data = $data["statement"];

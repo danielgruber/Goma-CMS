@@ -118,7 +118,7 @@ class ArrayLib
         $array = array();
         if ($arr) {
             foreach ($arr as $key => $value) {
-                if (_ereg('^[0-9]+$', $key)) {
+                if (RegexpUtil::isNumber($key)) {
                     $array[$value] = $value;
                 } else {
                     $array[$key] = $value;

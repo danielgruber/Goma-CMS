@@ -30,6 +30,13 @@ class SessionManager implements ISessionManager {
     protected $id;
 
     /**
+     * name of the session.
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
      * static if session id existing.
      */
     protected static $existing;
@@ -38,27 +45,35 @@ class SessionManager implements ISessionManager {
      * starts session with different id.
      * the old session will be stopped.
      *
-     * @param $id
+     * @param string|null $id
+     * @param string|null $name name of session
      * @return ISessionManager
      */
-    public static function startWithId($id)
+    public static function startWithIdAndName($id, $name = null)
     {
-        return new SessionManager($id);
+        return new SessionManager($id, $name);
     }
 
     /**
      * protected constructor.
      *
-     * @param string $id
+     * @param string|null $id
+     * @param string|null $name name of session
      */
-    protected function __construct($id) {
-        $this->init($id);
+    protected function __construct($id, $name) {
+        $this->init($id, $name);
     }
 
     /**
      * inits current session.
+     *
+     * @param string|null $id
+     * @param string|null $name
      */
-    protected function init($id = null) {
+    protected function init($id = null, $name = null) {
+
+        $this->name = $name;
+
         if(self::$existing != $this->id) {
             if(isset($id)) {
                 $this->id = $id;
@@ -66,6 +81,10 @@ class SessionManager implements ISessionManager {
 
             if (self::$existing != null) {
                 session_write_close();
+            }
+
+            if(isset($name)) {
+                session_name($name);
             }
 
             session_id($this->id);
@@ -180,5 +199,16 @@ class SessionManager implements ISessionManager {
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * returns if key exists.
+     *
+     * @param $key
+     * @return boolean
+     */
+    public function hasKey($key)
+    {
+        return isset($_SESSION[$key]);
     }
 }

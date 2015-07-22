@@ -549,7 +549,7 @@ class pgsqlDriver extends object implements SQLDriver
 					$ifields = $data["fields"];
 					$type = $data["type"];
 				}
-				else if(_ereg("\(", $data)) 
+				else if(preg_match("/\(/", $data))
 				{
 					$name = $key;
 					$allowed_indexes[$name] = true;
@@ -667,7 +667,7 @@ class pgsqlDriver extends object implements SQLDriver
 					$type = $data["type"];
 					$ifields = $data["fields"];
 				}
-				else if(_ereg("\(", $data)) 
+				else if(preg_match("/\(/", $data))
 				{
 					$sql .= $data;
 					continue;

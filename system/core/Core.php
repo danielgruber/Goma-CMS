@@ -108,7 +108,7 @@ class Core extends object {
 	/**
 	 * session.
 	 */
-	protected static $session;
+	protected static $globalSession;
 
 	/**
 	 * inits the core
@@ -128,7 +128,7 @@ class Core extends object {
 		// now init session
 		if(PROFILE)
 			Profiler::mark("session");
-		self::$session = SessionManager::startWithId(null);
+		self::$globalSession = SessionManager::startWithIdAndName(null, null);
 		if(PROFILE)
 			Profiler::unmark("session");
 			
@@ -163,6 +163,22 @@ class Core extends object {
 	 */
 	public static function __setRepo($repository) {
 		self::$repository = $repository;
+	}
+
+	/**
+	 * returns session.
+	 *
+	 * @return ISessionManager
+	 */
+	public static function globalSession() {
+		return self::$globalSession;
+	}
+
+	/**
+	 * sets global session.
+	 */
+	public static function __setSession($session) {
+		self::$globalSession = $session;
 	}
 
 	/**

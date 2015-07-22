@@ -19,7 +19,7 @@ interface ISessionManager {
      * @param $id
      * @return ISessionManager
      */
-    public static function startWithId($id);
+    public static function startWithIdAndName($id, $name = null);
 
     /**
      * gets a value for key.
@@ -45,6 +45,14 @@ interface ISessionManager {
      * @return boolean if something happended
      */
     public function remove($key);
+
+    /**
+     * returns if key exists.
+     *
+     * @param $key
+     * @return boolean
+     */
+    public function hasKey($key);
 
     /**
      * purges the session.

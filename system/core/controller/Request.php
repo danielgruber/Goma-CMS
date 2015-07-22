@@ -199,7 +199,7 @@ class Request extends Object {
 			$pattern = substr($pattern, 0, -1);
 		}
 
-		if (_ereg("^//", $pattern)) {
+		if (preg_match("/^\/\//", $pattern)) {
 			$shiftOnSuccess = false;
 			$pattern = substr($pattern, 2);
 		}

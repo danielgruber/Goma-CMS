@@ -141,19 +141,9 @@ function array_merge_recursive_distinct() {
  *
  * @param string $key Data identification key
  * @param mixed $data The data, that has to be stored.
- *
- * @return bool Success
  */
 function session_store($key, $data) {
-	if(isset($_SESSION["store"][$key]))
-		$random = $_SESSION["store"][$key];
-	else
-		$random = randomString(10);
-	// create file
-	FileSystem::write(ROOT . CACHE_DIRECTORY . "data." . $random . ".goma", serialize($data), null, 0773);
-	unset($file);
-	$_SESSION["store"][$key] = $random;
-	return true;
+	Core::globalSession()->set($key, $data);
 }
 
 /**
@@ -166,21 +156,10 @@ function session_store($key, $data) {
  *
  * @param string $key Data identification key
  *
- * @return mixed Data on success, otherwise false.
+ * @return mixed Data on success, otherwise null.
  */
 function session_restore($key) {
-	if(isset($_SESSION["store"][$key]))
-		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma")) {
-			$d = unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"));
-			if(is_object($d) && method_exists($d, "__wakeup")) {
-				$d->__wakeup();
-			}
-			return $d;
-		} else {
-			return false;
-		}
-	else
-		return false;
+	return Core::globalSession()->get($key);
 }
 
 /**
@@ -191,72 +170,7 @@ function session_restore($key) {
  * @return boolean
  */
 function session_store_exists($key) {
-	if(isset($_SESSION["store"][$key]))
-		if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $_SESSION["store"][$key] . ".goma"))
-			return true;
-		else
-			return false;
-	else
-		return false;
-}
-
-/**
- * Checks for an ID, if it is linked with session data.
- *
- * @param string $id Data identification ID
- *
- * @return boolean
- */
-function session_store_exists_byID($id) {
-	$id = basename($id);
-	return file_exists(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma");
-}
-
-/**
- * Accesses session data by ID.
- *
- * @param string $id Data identification ID
- *
- * @return mixed Data on success, otherwise false.
- */
-function session_restore_byID($id) {
-	$id = basename($id);
-	if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma")) {
-		return unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $id . ".goma"));
-	} else {
-		return false;
-	}
-}
-
-/**
- * Binds a session data key to an ID.
- *
- * @param string $id Data identification ID
- * @param string $key Data identification key
- *
- * @return boolean
- */
-function bindSessionKeyToID($id, $key) {
-	if(session_store_exists_byID($id)) {
-		$_SESSION["store"][$key] = $id;
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
- * Gets the linked ID from a session data key.
- *
- * @param string $key Data identification key
- *
- * @return mixed ID on success, otherwise false.
- */
-function getStoreID($key) {
-	if(isset($_SESSION["store"][$key]))
-		return $_SESSION["store"][$key];
-	else
-		return false;
+	return Core::globalSession()->hasKey($key);
 }
 
 /**

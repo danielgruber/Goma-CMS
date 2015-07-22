@@ -177,57 +177,58 @@ class Permission extends DataObject
      *
      * @name check
      * @access public
-     * @param r string - permission
+     * @param $permissionCode string - permission
      * @return bool
      */
-    public static function check($r)
+    public static function check($permissionCode)
     {
-        $r = strtolower($r);
+        $permissionCode = strtolower($permissionCode);
 
         if (!defined("SQL_INIT"))
             return true;
 
-        if (isset(self::$perm_cache[$r]))
-            return self::$perm_cache[$r];
+        if (isset(self::$perm_cache[$permissionCode]))
+            return self::$perm_cache[$permissionCode];
 
-        if ($r != "superadmin" && self::check("superadmin")) {
+        if ($permissionCode != "superadmin" && self::check("superadmin")) {
             return true;
         }
 
-        if (_ereg('^[0-9]+$', $r)) {
-            return self::right($r);
+        if (RegexpUtil::isNumber($permissionCode)) {
+            return self::right($permissionCode);
         } else {
-            if (isset(self::$providedPermissions[$r])) {
-                if ($data = DataObject::get_one("Permission", array("name" => array("LIKE", $r)))) {
-                    self::$perm_cache[$r] = $data->hasPermission();
+            if (isset(self::$providedPermissions[$permissionCode])) {
+                /** @var Permission $data */
+                if ($data = DataObject::get_one("Permission", array("name" => array("LIKE", $permissionCode)))) {
+                    self::$perm_cache[$permissionCode] = $data->hasPermission();
                     $data->forModel = "permission";
                     if ($data->type != "groups") {
                         $data->write(false, true, 2, false, false);
                     }
-                    return self::$perm_cache[$r];
+                    return self::$perm_cache[$permissionCode];
                 } else {
 
-                    if (isset(self::$providedPermissions[$r]["default"]["inherit"]) && strtolower(self::$providedPermissions[$r]["default"]["inherit"]) != $r) {
-                        if ($data = self::forceExisting(self::$providedPermissions[$r]["default"]["inherit"])) {
+                    if (isset(self::$providedPermissions[$permissionCode]["default"]["inherit"]) && strtolower(self::$providedPermissions[$permissionCode]["default"]["inherit"]) != $permissionCode) {
+                        if ($data = self::forceExisting(self::$providedPermissions[$permissionCode]["default"]["inherit"])) {
                             $perm = clone $data;
                             $perm->consolidate();
                             $perm->id = 0;
                             $perm->parentid = 0;
-                            $perm->name = $r;
+                            $perm->name = $permissionCode;
                             $data->forModel = "permission";
-                            self::$perm_cache[$r] = $perm->hasPermission();
+                            self::$perm_cache[$permissionCode] = $perm->hasPermission();
                             $perm->write(true, true, 2);
-                            return self::$perm_cache[$r];
+                            return self::$perm_cache[$permissionCode];
                         }
                     }
-                    $perm = new Permission(array_merge(self::$providedPermissions[$r]["default"], array("name" => $r)));
+                    $perm = new Permission(array_merge(self::$providedPermissions[$permissionCode]["default"], array("name" => $permissionCode)));
 
-                    if (isset(self::$providedPermissions[$r]["default"]["type"]))
-                        $perm->setType(self::$providedPermissions[$r]["default"]["type"]);
+                    if (isset(self::$providedPermissions[$permissionCode]["default"]["type"]))
+                        $perm->setType(self::$providedPermissions[$permissionCode]["default"]["type"]);
 
-                    self::$perm_cache[$r] = $perm->hasPermission();
+                    self::$perm_cache[$permissionCode] = $perm->hasPermission();
                     $perm->write(true, true, 2, false, false);
-                    return self::$perm_cache[$r];
+                    return self::$perm_cache[$permissionCode];
                 }
             } else {
                 if (Member::Admin()) {

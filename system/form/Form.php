@@ -434,7 +434,7 @@ class Form extends object {
 
 		// check get
 		foreach($_GET as $key => $value) {
-			if(_ereg("^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$", $key, $matches)) {
+			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
 
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
@@ -585,7 +585,7 @@ class Form extends object {
 		$i = 0;
 
 		foreach($this->post as $key => $value) {
-			if(_ereg("^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$", $key, $matches)) {
+			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
 					return $this->fields[$matches[1]]->handleAction($matches[2]);

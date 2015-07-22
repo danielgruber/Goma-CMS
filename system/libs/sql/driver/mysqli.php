@@ -708,7 +708,7 @@ class mysqliDriver extends object implements SQLDriver
                     $name = $data["name"];
                     $type = $data["type"];
                     $ifields = $data["fields"];
-                } else if (_ereg("\(", $data)) {
+                } else if (preg_match("/\(/", $data)) {
                     $sql .= $data;
                     continue;
                 } else {

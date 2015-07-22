@@ -509,7 +509,7 @@ class SQL extends object
                         $includeWhere = false;
                     }
                 } else if ($a == 0) {
-                    if (_ereg('^[0-9]+$', $field) && ($value == "OR" || $value == "||")) {
+                    if (RegexpUtil::isNumber($field) && ($value == "OR" || $value == "||")) {
                         $a++;
                         $sql .= " OR ";
                         continue;
