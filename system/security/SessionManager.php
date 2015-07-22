@@ -93,8 +93,8 @@ class SessionManager implements ISessionManager {
      * sets id and name.
      */
     protected function setSessionParams() {
-        if(isset($name)) {
-            session_name($name);
+        if(isset($this->name)) {
+            session_name($this->name);
         }
 
         if(isset($this->id)) {
