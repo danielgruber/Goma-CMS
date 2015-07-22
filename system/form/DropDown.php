@@ -428,7 +428,7 @@ class DropDown extends FormField {
 		$data = $this->options;
 		$result = array();
 		foreach($data as $key => $val) {
-			if(_eregi(preg_quote($search), $val)) {
+			if(preg_match('/' . preg_quote($search, '/') . '/i', $val)) {
 				$result[$key] = preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
 			}
 		}

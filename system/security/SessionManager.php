@@ -72,27 +72,33 @@ class SessionManager implements ISessionManager {
      */
     protected function init($id = null, $name = null) {
 
-        $this->name = $name;
+        $this->setName($name);
+        $this->setId($id);
 
         if(self::$existing != $this->id) {
-            if(isset($id)) {
-                $this->id = $id;
-            }
-
             if (self::$existing != null) {
                 session_write_close();
             }
 
-            if(isset($name)) {
-                session_name($name);
-            }
-
-            session_id($this->id);
+            $this->setSessionParams();
 
             session_start();
 
             $this->id = session_id();
             self::$existing = $this->id;
+        }
+    }
+
+    /**
+     * sets id and name.
+     */
+    protected function setSessionParams() {
+        if(isset($name)) {
+            session_name($name);
+        }
+
+        if(isset($this->id)) {
+            session_id($this->id);
         }
     }
 
@@ -199,6 +205,33 @@ class SessionManager implements ISessionManager {
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param string
+     */
+    protected function setId($id) {
+        if(isset($id)) {
+            $this->id = $id;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    protected function setName($name)
+    {
+        if(isset($name)) {
+            $this->name = $name;
+        }
     }
 
     /**

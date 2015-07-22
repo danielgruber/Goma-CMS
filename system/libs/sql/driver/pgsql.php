@@ -500,7 +500,7 @@ class pgsqlDriver extends object implements SQLDriver
 						$log .= "Modify Field ".$name." to ".$type."\n";
 					}
 					
-					if(!_eregi('enum', $fields[$name])) 
+					if(!preg_match('/enum/i', $fields[$name]))
 					{
 						if(!isset($defaults[$name]) && $data[$name]["default"] != "") 
 						{

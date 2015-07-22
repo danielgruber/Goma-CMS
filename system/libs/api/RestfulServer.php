@@ -80,7 +80,7 @@ class RestfulServer extends RequestHandler
 						{
 								foreach(self::$available_response_types as $extension => $data)
 								{
-										if(_eregi('^(.*)\.'.$extension.'$', $this->getParam($field), $match))
+										if(preg_match('/^(.*)\.'.$extension.'$/i', $this->getParam($field), $match))
 										{
 												$this->request->params[$field] = $match[1];
 												HTTPResponse::addHeader("content-type", $data[1]);

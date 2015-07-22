@@ -169,7 +169,7 @@ class HTTPResponse
 			}
 			
 			
-			if((!isset(self::$headers["content-type"]) || _eregi("html",self::$headers["content-type"])) && !self::$disabledparsing)
+			if((!isset(self::$headers["content-type"]) || preg_match("/html/i",self::$headers["content-type"])) && !self::$disabledparsing)
 			{
 					$body = str_replace('{$_queries}',sql::$queries,$body);
 					

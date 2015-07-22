@@ -89,7 +89,7 @@ class DataObjectClassInfo extends Extension
                             } else {
                                 $length = $maxlength;
                                 // support for ASC/DESC
-                                if (_eregi("(ASC|DESC)", $field, $matches)) {
+                                if (preg_match("/(ASC|DESC)/i", $field, $matches)) {
                                     $field = preg_replace("/(ASC|DESC)/i", "", $field);
                                     $indexes[$key]["fields"][] = $field . " (" . $length . ") " . $matches[1] . "";
                                 } else {

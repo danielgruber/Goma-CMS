@@ -47,7 +47,7 @@ function NRCompress_ImageEncodeCallback($matches)
  */ 
 function NRCompress_CSSImageEncodeCallback($matches)
 {
-	if(_eregi("^".ROOT_PATH, $matches[3]))
+	if(preg_match("/^" . str_replace(ROOT_PATH, '/', '\\/') . '/i', $matches[3]))
 	{
 			$url = substr($matches[3], strlen(ROOT_PATH));
 	} else

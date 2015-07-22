@@ -180,9 +180,9 @@ class FieldSet extends FormField
      */
     public function remove($field = null)
     {
-        if($field == null && $this->parent) {
+        if($field === null && $this->parent) {
+            /** @var FormField $subField */
             foreach($this->items as $subField) {
-                /** @var FormField $subField */
                 $subField->remove();
             }
 
@@ -205,13 +205,9 @@ class FieldSet extends FormField
      */
     protected function removeSpecific($fieldName) {
         if ($this->parent) {
-            if ($this->form()->getField($fieldName) !== null) {
-                $this->form()->unregisterField($fieldName);
-            }
+            $this->form()->unregisterField($fieldName);
 
-            if (isset($this->items[$fieldName])) {
-                unset($this->items[$fieldName]);
-            }
+            unset($this->items[$fieldName]);
 
             foreach ($this->items as $subField) {
                 /** @var FieldSet $subField */

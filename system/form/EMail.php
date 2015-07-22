@@ -32,11 +32,13 @@ class Email extends TextField {
 
 	/**
 	 * this is the validation for this field if it is required
-	 *@name validation
-	 *@access public
+	 *
+	 * @name validation
+	 * @access public
+	 * @return bool|string
 	 */
 	public function validate($value) {
-		if(_eregi('^([a-zA-Z0-9\-\._]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9]{2,9})$', $value)) {
+		if(RegexpUtil::isEmail($value)) {
 			return true;
 		} else {
 			return lang("form_email_not_valid", "Please enter a correct E-Mail-Adresse");

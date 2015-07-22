@@ -571,27 +571,6 @@ function var_lang($str, $replace = array()) {
 }
 
 /**
- * the function ereg with preg_match
- *@name _ereg
- *@params: view php manual of ereg
- */
-function _ereg($pattern, $needed, &$reg = "") {
-	if(is_array($needed)) {
-		return false;
-	}
-	return preg_match('/' . str_replace('/', '\\/', $pattern) . '/', $needed, $reg);
-}
-
-/**
- * the function eregi with preg_match
- *@name _eregi
- *@params: view php manual of eregi
- */
-function _eregi($pattern, $needed, &$reg = "") {
-	return preg_match('/' . str_replace('/', '\\/', $pattern) . '/i', $needed, $reg);
-}
-
-/**
  * checks of the file-extension
  *
  *@name checkFileExt

@@ -565,7 +565,7 @@ class SelectQuery extends Object {
 				}
 				continue;
 			}
-			
+
 			if(is_array($data)) {
 				$table = $data["table"];
 				$data = $data["statement"];

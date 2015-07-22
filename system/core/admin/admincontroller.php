@@ -220,7 +220,7 @@ class adminController extends Controller
 			}
 			
 			if(!Core::is_ajax()) {
-				if(!_eregi('</html', $content)) {
+				if(!preg_match('/<\/html/i', $content)) {
 					if(!Permission::check("ADMIN")) {
 						$admin = new Admin();
 						return $admin->customise(array("content" => $content))->renderWith("admin/index_not_permitted.html");
