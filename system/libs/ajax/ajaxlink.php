@@ -68,11 +68,9 @@ class ajaxlink extends RequestHandler
      */
     public function popup()
     {
-        $code = $this->getParam("id");
+        $code = trim($this->getParam("id"));
         if (Core::globalSession()->hasKey("ajaxpopups_" . $code)) {
-            $callback = Core::globalSession()->get("ajaxpopups_" . $code);
-
-            return call_user_func_array($callback, array());
+            return call_user_func_array(Core::globalSession()->get("ajaxpopups_" . $code), array());
         } else {
             return false;
         }
@@ -92,12 +90,11 @@ class ajaxlink extends RequestHandler
      */
     public function action()
     {
-        $code = $this->getParam("id");
-        $code = trim($code);
+        $code = trim($this->getParam("id"));
         if (Core::globalSession()->hasKey("ajaxlinks." . $code)) {
             return tpl::init(Core::globalSession()->get("ajaxlinks." . $code));
         } else {
-            return $code . " wasn't found.";
+            return false;
         }
     }
 }
