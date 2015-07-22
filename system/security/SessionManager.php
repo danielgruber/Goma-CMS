@@ -75,7 +75,7 @@ class SessionManager implements ISessionManager {
         $this->setName($name);
         $this->setId($id);
 
-        if(self::$existing != $this->id) {
+        if(!isset(self::$existing) || self::$existing != $this->id) {
             if (self::$existing != null) {
                 session_write_close();
             }
