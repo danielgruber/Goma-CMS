@@ -153,7 +153,7 @@ class TreeNode extends ArrayList {
 	 * @param string $color : green, yellow, red, blue, grey, orange, purple
 	 * @return $this
 	 */
-	public function addBubble($text, $color = "blue") {
+	public function addBubble($text, $color = self::COLOR_BLUE) {
 		
 		$this->bubbles[md5($text)] = array("text" => $text, "color" => $color);
 		return $this;
