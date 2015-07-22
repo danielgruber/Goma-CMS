@@ -23,17 +23,19 @@ class TreeCallbackUrl extends RequestHandler {
 		"handleByModel",
 		"handleByKey"
 	);
-	
+
 	/**
 	 * generates a tree-callback-URL for a given TreeNode.
 	 *
-	 * @param	TreeNode $node the treenode for generating the URL
-	*/
+	 * @param TreeNode $treenode the treenode for generating the URL
+	 * @param TreeRenderer $renderer
+	 * @return string
+	 */
 	static function generate_tree_url(TreeNode $treenode, TreeRenderer $renderer) {
 		
 		$renderer->tree = null;
 		$renderKey = md5(serialize($renderer));
-		session_store("tree_renderer_" . $renderKey, $renderer);
+		Core::globalSession()->set("tree_renderer_" . $renderKey, $renderer);
 		
 		if($treenode->getChildCallback() == null && isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
@@ -41,7 +43,7 @@ class TreeCallbackUrl extends RequestHandler {
 			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
 		} else if($treenode->getChildCallback() != null) {
 			$key = md5(serialize($treenode));
-			session_store("tree_node_" . $key, $treenode);
+			Core::globalSession()->set("tree_node_" . $key, $treenode);
 			return "treecallback/key/" . $key . "/" . $renderKey . URLEND . "?redirect=" . urlencode(getRedirect());
 		} else {
 			throw new LogicException("Could not generate URL from TreeNode. You are required to set the child-callback through TreeNode::setChildCallback(\$callback)");
@@ -54,7 +56,7 @@ class TreeCallbackUrl extends RequestHandler {
 	public function handleByModel() {
 		$model = $this->getParam("model");
 		$parent = $this->getParam("parent");
-		$renderer = session_restore("tree_renderer_" . $this->getParam("renderer"));
+		$renderer = Core::globalSession()->get("tree_renderer_" . $this->getParam("renderer"));
 			
 		if(Core::is_ajax()) {
 			
@@ -83,10 +85,10 @@ class TreeCallbackUrl extends RequestHandler {
 	*/
 	public function handleByKey() {
 		$key = $this->getParam("key");
-		$renderer = session_restore("tree_renderer_" . $this->getParam("renderer"));
+		$renderer = Core::globalSession()->get("tree_renderer_" . $this->getParam("renderer"));
 		
-		if(session_store_exists("tree_node_" . $key)) {
-			$node = session_restore("tree_node_" . $key);
+		if(Core::globalSession()->hasKey("tree_node_" . $key)) {
+			$node = Core::globalSession()->get("tree_node_" . $key);
 			$tree = $node->forceChildren();
 			
 			if(Core::is_ajax()) {

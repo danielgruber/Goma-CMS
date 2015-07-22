@@ -242,6 +242,18 @@ class SessionManager implements ISessionManager {
      */
     public function hasKey($key)
     {
-        return isset($_SESSION[$key]);
+        if(!isset($_SESSION[$key])) {
+            return false;
+        }
+
+        if (substr($_SESSION[$key], 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR) {
+            $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
+
+            if(!file_exists(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma")) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
