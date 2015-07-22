@@ -2855,8 +2855,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * controller
-     *@name controller
-     *@access public
+     *
+     * @var Controller
      */
     public $controller = "";
 
@@ -2872,15 +2872,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets the controller for this class
      *
-     * @return Controller
+     * @return Controller|null
      */
     public function controller($controller = null)
     {
         if (isset($controller)) {
-            $this->controller = clone $controller;
-            $this->controller->setModelInst($this);
-            $this->controller->request = null;
-            return $this->controller;
+            /** @var Controller $controller */
+            $controller = Object::instance($controller);
+            return $this->linkController($controller);
         }
 
         if (is_object($this->controller))
@@ -2892,17 +2891,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         if ($this->controller != "")
         {
-            $this->controller = new $this->controller;
-            $this->controller->setModelInst($this);
-            return $this->controller;
+            /** @var Controller $controller */
+            $controller = Object::instance($this->controller);
+            return $this->linkController($controller);
         } else {
 
             if (ClassInfo::exists($this->classname . "controller"))
             {
-                $c = $this->classname . "controller";
-                $this->controller = new $c();
-                $this->controller->setModelInst($this);
-                return $this->controller;
+                /** @var Controller $controller */
+                $controller = Object::instance($this->classname . "controller");
+                return $this->linkController($controller);
             } else {
 
                 // find existing controller in parent classes.
@@ -2910,19 +2908,31 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                     $parent = $this->classname;
                     while(($parent = ClassInfo::getParentClass($parent)) != "dataobject") {
                         if (!$parent)
-                            return false;
+                            return null;
 
                         if (ClassInfo::exists($parent . "controller")) {
-                            $c = $parent . "controller";
-                            $this->controller = new $c();
-                            $this->controller->setModelInst($this);
-                            return $this->controller;
+                            /** @var Controller $controller */
+                            $controller = Object::instance($parent . "controller");
+                            return $this->linkController($controller);
                         }
                     }
                 }
             }
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * links given controller to this model.
+     *
+     * @param Controller $controller
+     * @return Controller
+     */
+    protected function linkController ($controller) {
+        $this->controller = clone $controller;
+        $this->controller->setModelInst($this);
+        $this->controller->request = null;
+        return $this->controller;
     }
 
     //! APIs
