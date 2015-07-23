@@ -21,7 +21,7 @@ class AddContent
     /**
      * the addcontent of the current session
      */
-    public static $addcontent;
+    protected static $addcontent;
 
     /**
      * adds addcontent
@@ -29,7 +29,7 @@ class AddContent
      * @name add
      * @param string - content
      */
-    static public function add($content)
+    public static function add($content)
     {
         Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . $content);
     }
@@ -40,7 +40,7 @@ class AddContent
      * @name add
      * @param string - content
      */
-    static public function addSuccess($content)
+    public static function addSuccess($content)
     {
         Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="success">' . $content . '</div>');
     }
@@ -51,7 +51,7 @@ class AddContent
      * @name add
      * @param string - content
      */
-    static public function addError($content)
+    public static function addError($content)
     {
         Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="error">' . $content . '</div>');
     }
@@ -62,7 +62,7 @@ class AddContent
      * @name add
      * @param string - content
      */
-    static public function addNotice($content)
+    public static function addNotice($content)
     {
         Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="notice">' . $content . '</div>');
     }

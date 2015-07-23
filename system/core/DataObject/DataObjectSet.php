@@ -87,7 +87,7 @@ class DataObjectSet extends DataSet {
 	/**
 	 * controller of this dataobjectset
 	 *
-	 *@name controller
+	 * @var Controller|String|null
 	*/
 	public $controller = "";
 
@@ -114,8 +114,9 @@ class DataObjectSet extends DataSet {
 			$this->dataobject = Object::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;
-			if($this->dataobject->controller != "")
-				$this->controller = $this->dataobject->controller;
+			if($this->dataobject->controller != null) {
+				$this->controller($this->dataobject->controller);
+			}
 
 			$this->filter($filter);
 			$this->sort = (isset($sort) && !empty($sort)) ? $sort : StaticsManager::getStatic($class, "default_sort");
@@ -812,13 +813,11 @@ class DataObjectSet extends DataSet {
 	/**
 	 * gets the controller
 	 *
-	 *@name controller
-	 *@access public
-	*/
+	 * @return bool|null|string
+	 */
 	public function controller($controller = null) {
 
-
-		if(isset($controller)) {
+		if(is_object($controller)) {
 			$this->controller = clone $controller;
 			$this->controller->setModelInst($this, $this->dataobject->classname);
 			return $this->controller;
@@ -833,18 +832,19 @@ class DataObjectSet extends DataSet {
 
 		if($this->controller != "")
 		{
-				$this->controller = new $this->controller();
-				$this->controller->setModelInst($this, $this->dataobject->classname);
-				return $this->controller;
+			$this->controller = new $this->controller();
+			$this->controller->setModelInst($this, $this->dataobject->classname);
+			return $this->controller;
 		} else {
-
+			/** @var Controller $controller */
 			$controller = $this->dataobject->controller();
 			if($controller) {
 				$controller->setModelInst($this, $this->dataobject->classname);
 				return $controller;
 			}
 		}
-		return false;
+
+		return null;
 	}
 
 

@@ -21,10 +21,10 @@ class DataObjectSetControllerTest extends GomaUnitTest implements TestAble {
 	}
 
 	public function testssetModelInst() {
-		$c = new MyTestControllerForDataObjectSet();
-		$c->setModelInst(new Uploads);
-		$this->assertEqual($c->model, "uploads");
-		$this->assertIsA($c->modelInst(), "uploads");
+		$dataObjectSet = new MyTestControllerForDataObjectSet();
+		$dataObjectSet->setModelInst(new Uploads());
+		$this->assertEqual($dataObjectSet->model, "uploads");
+		$this->assertIsA($dataObjectSet->modelInst(), "uploads");
 	}
 }
 

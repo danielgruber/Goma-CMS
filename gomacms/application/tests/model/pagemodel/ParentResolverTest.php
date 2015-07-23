@@ -17,7 +17,7 @@ class ParentResolverTest extends GomaUnitTest implements TestAble {
     public $name = "ParentResolver";
 
     public function testFilterParents() {
-        $pages = new ParentResolver();
+        $pages = new ParentResolver("mockPage", "pages");
         $reflectionMethod = new ReflectionMethod("ParentResolver", "filterParents");
         $reflectionMethod->setAccessible(true);
 
@@ -27,4 +27,8 @@ class ParentResolverTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($reflectionMethod->invoke($pages, $allowParents1, array("test")), array("test"));
         $this->assertEqual($reflectionMethod->invoke($pages, array(), array("abc")), array());
     }
+}
+
+class mockPage extends Page {
+
 }
