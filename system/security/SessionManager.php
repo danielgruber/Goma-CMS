@@ -138,14 +138,7 @@ class SessionManager implements ISessionManager {
      */
     public function set($key, $value)
     {
-        $matchValue = $value;
-        if(is_object($value)) {
-            $matchValue = serialize($value);
-        }
-
-        if(is_array($value)) {
-            $matchValue = serialize($value);
-        }
+        $matchValue = (is_array($value) || is_object($value)) ? serialize($value) : $value;
 
         if(strlen($matchValue) > self::FILE_THRESHOLD) {
             $random = randomString(20);
