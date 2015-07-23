@@ -291,14 +291,15 @@ class Form extends object {
 	 */
 	protected function checkForRestore() {
 		// if we restore form
-		if(isset($_SESSION["form_restore_" . $this->name]) && session_store_exists("form_" . strtolower($this->name))) {
+		if(Core::globalSession()->hasKey("form_restore." . $this->name()) && session_store_exists("form_" . strtolower($this->name))) {
 			$data = session_restore("form_" . strtolower($this->name));
 			$this->useStateData = $data->useStateData;
 			$this->result = $data->result;
 			$this->post = $data->post;
 			$this->state = $data->state;
 			$this->restorer = $data;
-			unset($_SESSION["form_restore_" . $this->name]);
+
+			Core::globalSession()->remove("form_restore." . $this->name());
 		}
 
 		// get form-state
@@ -328,7 +329,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function activateRestore() {
-		$_SESSION["form_restore_" . $this->name] = true;
+		Core::globalSession()->set("form_restore." . $this->name, true);
 	}
 
 	/**
@@ -338,7 +339,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function disableRestore() {
-		unset($_SESSION["form_restore_" . $this->name]);
+		Core::globalSession()->remove("form_restore." . $this->name);
 	}
 
 	/**
@@ -414,7 +415,7 @@ class Form extends object {
 			}
 		}
 
-		unset($_SESSION["form_secrets"][$this->name()]);
+		Core::globalSession()->remove("form_secrets." . $this->name());
 		$this->defaultFields();
 		return $this->renderForm();
 	}
@@ -572,15 +573,15 @@ class Form extends object {
 
 	/**
 	 * submission
-	 *@name submit
-	 *@access public
+	 *
+	 * @name submit
+	 * @access public
+	 * @return mixed|string
 	 */
 	public function submit() {
 		$this->callExtending("beforeSubmit");
 
 		$this->post = $_POST;
-
-		$_SESSION["form_secrets"] = array();
 
 		$i = 0;
 
@@ -674,7 +675,7 @@ class Form extends object {
 		}
 
 		if($valid !== true) {
-			$_SESSION["form_secrets"][$this->name()] = $this->__get("secret_" . $this->ID())->value;
+			Core::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
 			$this->form->append($errors);
 			return $this->renderForm();
 		}

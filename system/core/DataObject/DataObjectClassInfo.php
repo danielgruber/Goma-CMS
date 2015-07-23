@@ -57,13 +57,18 @@ class DataObjectClassInfo extends Extension
                     if (!is_array($fields))
                         $fields = explode(",", $fields);
 
+                    if(strtolower($value["type"]) == "unique") {
+                        if(!in_array("recordid", $fields)) {
+                            $fields[] = "recordid";
+                        }
+                    }
+
                     $maxlength = $length = floor(333 / count($fields));
                     $fields_ordered = array();
 
                     foreach ($fields as $field) {
                         if (isset($db_fields[$field])) {
                             if (preg_match('/\(\s*([0-9]+)\s*\)/Us', $db_fields[$field], $matches)) {
-
                                 $fields_ordered[$field] = $matches[1] - 1;
                             } else {
                                 $fields_ordered[$field] = $maxlength;
@@ -102,9 +107,19 @@ class DataObjectClassInfo extends Extension
                             $i++;
                         }
                     }
-
                 } else if (isset($db_fields[$key])) {
                     $indexes[$key] = $value;
+
+                    if(strtolower($value) == "unique") {
+                        $indexes[$key] = array(
+                            "name" => $key,
+                            "fields" => array(
+                                $key,
+                                "recordid"
+                            ),
+                            "type"  => "unique"
+                        );
+                    }
                 } else if (!$value) {
                     unset($db_fields[$key]);
                 }

@@ -26,7 +26,7 @@ interface ISessionManager {
      *
      * @param null|string $id
      * @param null|string $name
-     * @return mixed
+     * @return void
      */
     public function init($id = null, $name = null);
 

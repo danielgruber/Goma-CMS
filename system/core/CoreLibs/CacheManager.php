@@ -196,7 +196,7 @@ class CacheManager {
         }
 
         // lifetime for sessions is 1 hour.
-        if(preg_match('/^data\.([a-zA-Z0-9_]{10})\.goma$/Usi', $file)) {
+        if(preg_match('/^data\.([a-zA-Z0-9_]{20})\.goma$/Usi', $file)) {
             if(filemtime($this->cacheDirectory . $file) > NOW - 3600) {
                 return false;
             }

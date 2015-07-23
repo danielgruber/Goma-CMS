@@ -316,7 +316,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         $this->model()->onBeforeManipulate($manipulation, $b = "write_state");
         $this->model()->callExtending("onBeforeManipulate", $manipulation, $b = "write_state");
 
-        if(!SQL::writeManipulation($manipulation)) {
+        if(!SQL::manipulate($manipulation)) {
             throw new SQLException("Could not insert into state table.");
         }
     }

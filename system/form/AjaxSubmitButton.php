@@ -210,7 +210,7 @@ class AjaxSubmitButton extends FormAction {
 		}
 
 		if($form->getsecret()) {
-			$_SESSION["form_secrets"][$form->name()] = randomString(30);
+			Core::globalSession()->set("form_secrets." . $form->name(), randomString(30));
 			$response->exec('$("#' . $form->fields["secret_" . $form->id()]->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
 		}
 

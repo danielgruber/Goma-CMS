@@ -18,7 +18,22 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 *@access public
 	*/
 	public static $type = "backup";
-	
+
+	/**
+	 * session-var.
+	 */
+	const FINALIZE_SESSION_VAR = "finalizeCMSDistro";
+
+	/**
+	 * default __construct
+	 *
+	 *@name __construct
+	 *@access public
+	 */
+	public function __construct($file) {
+		parent::__construct($file);
+	}
+
 	/**
 	 * stores the data from the form in $formResult
 	 *
@@ -664,8 +679,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * building the distro
 	*/
 	public static function buildDistro($file, $name) {
-		if(isset($_SESSION["finalizeCMSDistro"]))
-			return self::finalizeDistro($_SESSION["finalizeCMSDistro"]);
+		if(Core::globalSession()->hasKey(self::FINALIZE_SESSION_VAR))
+			return self::finalizeDistro(Core::globalSession()->get(self::FINALIZE_SESSION_VAR));
 		
 		if(file_exists($file))
 			@unlink($file);
@@ -692,15 +707,16 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		return $form->render();
 	}
-	
+
 	/**
 	 * finalizes the build
 	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
+	 * @name finalizeDistro
+	 * @access public
+	 * @return bool
+	 */
 	public function finalizeDistro($data) {
-		$_SESSION["finalizeCMSDistro"] = $data;
+		Core::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
 		
 		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
 		self::backup($data["file"], null, $changelog);
@@ -719,8 +735,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 		}
 		
 		$gfs->close();
-		
-		unset($_SESSION["finalizeCMSDistro"]);
+
+		Core::globalSession()->remove(self::FINALIZE_SESSION_VAR);
 		
 		return true;
 	}
@@ -728,13 +744,14 @@ class G_AppSoftwareType extends G_SoftwareType {
 	/**
 	 * 
 	*/
-	
+
 	/**
 	 * lists installed software
 	 *
-	 *@name listSoftware
-	 *@access public
-	*/
+	 * @name listSoftware
+	 * @access public
+	 * @return array
+	 */
 	public static function listSoftware() {
 		$data = array(
 			ClassInfo::$appENV["app"]["name"]	=> array(

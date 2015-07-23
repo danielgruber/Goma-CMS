@@ -12,6 +12,14 @@
  */
 class CKEditorUploadsController extends RequestHandler {
 
+    /**
+     * file contents for access file.
+     */
+    const FILE_CONTENT = "ckeditor_permit";
+
+    /**
+     * @var array
+     */
     public $url_handlers = array(
         "ck_uploader"			=> "ckeditor_upload",
         "ck_imageuploader"		=> "ckeditor_imageupload",
@@ -75,7 +83,8 @@ class CKEditorUploadsController extends RequestHandler {
      */
     public static function getUploadToken() {
         $accessToken = randomString(20);
-        $_SESSION["uploadTokens"][$accessToken] = true;
+        $file = ROOT . CACHE_DIRECTORY . "data." . $accessToken . ".goma";
+        FileSystem::write($file, self::FILE_CONTENT, LOCK_EX);
 
         return $accessToken;
     }
@@ -186,7 +195,9 @@ class CKEditorUploadsController extends RequestHandler {
      * @return array
      */
     protected static function validateUpload($allowedTypes, $allowedSize) {
-        if(!isset($_GET["accessToken"]) || !isset($_SESSION["uploadTokens"][$_GET["accessToken"]])) {
+        if(!isset($_GET["accessToken"]) ||
+            !file_exists(self::getFileForKey($_GET["accessToken"])) ||
+            file_get_contents(self::getFileForKey($_GET["accessToken"])) != self::FILE_CONTENT) {
             die(0);
         }
 
@@ -220,5 +231,12 @@ class CKEditorUploadsController extends RequestHandler {
         } else {
             throw new LogicException(lang("files.upload_failure"));
         }
+    }
+
+    /**
+     * returns file by key.
+     */
+    protected static function getFileForKey($key) {
+        return ROOT . CACHE_DIRECTORY . "data." . $key . ".goma";
     }
 }

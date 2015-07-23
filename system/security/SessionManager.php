@@ -69,6 +69,7 @@ class SessionManager implements ISessionManager {
      *
      * @param string|null $id
      * @param string|null $name
+     * @return void
      */
     public function init($id = null, $name = null) {
 
@@ -113,11 +114,11 @@ class SessionManager implements ISessionManager {
         $data = null;
 
         if(isset($_SESSION[$key])) {
-            if(substr($_SESSION[$key], 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR) {
+            if(self::isStoreIndicator($_SESSION[$key])) {
                 $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
 
-                if(file_exists(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma")) {
-                    $data = unserialize(file_get_contents(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma"));
+                if(file_exists(self::getFilePathForKey($fileKey))) {
+                    $data = unserialize(file_get_contents(self::getFilePathForKey($fileKey)));
                 }
             } else {
                 $data = $_SESSION[$key];
@@ -140,14 +141,19 @@ class SessionManager implements ISessionManager {
      */
     public function set($key, $value)
     {
+        $matchValue = $value;
         if(is_object($value)) {
-            $value = serialize($value);
+            $matchValue = serialize($value);
         }
 
-        if(strlen($value) > self::FILE_THRESHOLD) {
+        if(is_array($value)) {
+            $matchValue = serialize($value);
+        }
+
+        if(strlen($matchValue) > self::FILE_THRESHOLD) {
             $random = randomString(20);
 
-            FileSystem::write(ROOT . CACHE_DIRECTORY . "data." . $random . ".goma", serialize($value), LOCK_EX, 0773);
+            FileSystem::write(self::getFilePathForKey($random), $matchValue, LOCK_EX, 0773);
 
             $_SESSION[$key] = self::STORE_INDICATOR . $random;
         } else {
@@ -164,11 +170,11 @@ class SessionManager implements ISessionManager {
     public function remove($key)
     {
         if(isset($_SESSION[$key])) {
-            if (substr($_SESSION[$key], 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR) {
+            if (self::isStoreIndicator($_SESSION[$key])) {
                 $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
 
-                if (file_exists(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma")) {
-                    unlink(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma");
+                if (file_exists(self::getFilePathForKey($fileKey))) {
+                    unlink(self::getFilePathForKey($fileKey));
                 }
             }
 
@@ -246,14 +252,34 @@ class SessionManager implements ISessionManager {
             return false;
         }
 
-        if (substr($_SESSION[$key], 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR) {
+        if (self::isStoreIndicator($_SESSION[$key])) {
             $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
 
-            if(!file_exists(ROOT . CACHE_DIRECTORY . "data." . $fileKey . ".goma")) {
+            if(!file_exists(self::getFilePathForKey($fileKey))) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * returns if it is the store inidcator.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    protected function isStoreIndicator($value) {
+        return is_string($value) && substr($value, 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR;
+    }
+
+    /**
+     * returns file-path for extension-file by key.
+     *
+     * @param string $key
+     * @return string path
+     */
+    protected static function getFilePathForKey($key) {
+        return ROOT . CACHE_DIRECTORY . "data." . $key . ".goma";
     }
 }

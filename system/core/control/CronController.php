@@ -16,6 +16,8 @@ class CronController extends RequestHandler {
      * cron.
      */
     public function handleRequest() {
+        ini_set('max_execution_time', 300);
+
         Core::callHook("cron");
     }
 }

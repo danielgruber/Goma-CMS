@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version    1.0
+ * @version    1.0.1
  */
 class ModelWriter extends Object {
 
@@ -268,8 +268,6 @@ class ModelWriter extends Object {
             $this->data = $this->model->toArray();
         }
 
-        $this->updateStatusFields();
-
         $this->callExtending("gatherDataToWrite");
     }
 
@@ -297,12 +295,10 @@ class ModelWriter extends Object {
      */
     protected static function valueMatches($var1, $var2) {
         $comparableTypes = array("boolean", "integer", "string", "double");
-        if (in_array(gettype($var1), $comparableTypes) && in_array(gettype($var2), $comparableTypes))
+        if ($var1 != $var2)
         {
-            if ($var1 != $var2) {
-                return false;
-            }
-        } else if (gettype($var1) != gettype($var2) || $var1 != $var2) {
+            return false;
+        } else if (gettype($var1) != gettype($var2) && (!in_array(gettype($var1), $comparableTypes) || !in_array(gettype($var2), $comparableTypes))) {
             return false;
         }
 
@@ -373,7 +369,7 @@ class ModelWriter extends Object {
             if($oldData = $this->getObjectToUpdate()->ToArray()) {
                 // first check for raw data.
                 foreach ($oldData as $key => $val) {
-                    if (!self::valueMatches($val, $this->data[$key]) && $key != "last_modified" && $key != "editorid") {
+                    if (!self::valueMatches($val, $this->data[$key])) {
                         return true;
                     }
                 }
@@ -423,6 +419,8 @@ class ModelWriter extends Object {
                 return;
             }
         }
+
+        $this->updateStatusFields();
 
         $this->callPreflightEvents();
 
