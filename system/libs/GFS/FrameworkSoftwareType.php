@@ -11,6 +11,12 @@
  * @version	1.5.13
  */
 class G_FrameworkSoftwareType extends G_SoftwareType {
+
+	/**
+	 * session key for finalizing.
+	 */
+	const FINALIZE_SESSION_KEY = "finalizeFrameworkDistro";
+
 	/**
 	 * type is "framework"
 	 *
@@ -18,14 +24,13 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	 *@access public
 	*/
 	public static $type = "framework";
-	
+
 	/**
 	 * installs the framework
 	 * in this case we always upgrade the framework
 	 *
-	 *@name getInstallInfo
-	 *@access public
-	*/
+	 * @return array|bool
+	 */
 	public function getInstallInfo($forceInstall = false) {
 		$gfs = new GFS($this->file);
 		$info = $gfs->parsePlist("info.plist");
@@ -113,13 +118,14 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	public function checkMovePermissions() {
 
 	}
-	
+
 	/**
 	 * gets package info
 	 *
-	 *@name getPackageInfo
-	 *@access public
-	*/
+	 * @name getPackageInfo
+	 * @access public
+	 * @return array|bool
+	 */
 	public function getPackageInfo() {
 		$gfs = new GFS($this->file);
 		$info = $gfs->parsePlist("info.plist");
@@ -203,27 +209,26 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		
 		return true;
 	}
-	
+
 	/**
 	 * restores the framework
 	 *
-	 *@name getRestoreInfo
-	 *@access public
-	*/
+	 * @param bool $forceCompleteRestore
+	 * @return bool
+	 */
 	public function getRestoreInfo($forceCompleteRestore = false) {
 		return false;
 	}
-	
+
 	/**
 	 * generates a distro
 	 *
-	 *@name backup
-	 *@access public
-	*/
+	 * @param string $file
+	 * @param string $name
+	 * @param string|null $changelog
+	 * @return bool
+	 */
 	public static function backup($file, $name, $changelog = null) {
-		$frameworkplist = new CFPropertyList(FRAMEWORK_ROOT . "info.plist");
-		$frameworkenv = $frameworkplist->toArray();
-
 		// if we are currently building the file, don't delete
 		if(!GFS_Package_Creator::wasPacked($file)) {
 			if(file_exists($file)) {
@@ -282,8 +287,8 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	 * @return bool|mixed|string
 	 */
 	public static function buildDistro($file, $name) {
-		if(isset($_SESSION["finalizeFrameworkDistro"]))
-			return self::finalizeDistro($_SESSION["finalizeFrameworkDistro"]);
+		if(Core::globalSession()->hasKey(self::FINALIZE_SESSION_KEY))
+			return self::finalizeDistro(Core::globalSession()->get(self::FINALIZE_SESSION_KEY));
 		
 		if(file_exists($file))
 			@unlink($file);
@@ -308,15 +313,15 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		
 		return $form->render();
 	}
-	
+
 	/**
 	 * finalizes the build
 	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
+	 * @param array $data
+	 * @return bool
+	 */
 	public function finalizeDistro($data) {
-		$_SESSION["finalizeFrameworkDistro"] = $data;
+		Core::globalSession()->set(self::FINALIZE_SESSION_KEY, $data);
 		
 		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
 		self::backup($data["file"], "framework", $changelog);
@@ -336,9 +341,8 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		}
 
 		$gfs->close();
-		
-		unset($_SESSION["finalizeFrameworkDistro"]);
 
+		Core::globalSession()->remove(self::FINALIZE_SESSION_KEY);
 
 		return true;
 	}
@@ -346,13 +350,12 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	/**
 	 * 
 	*/
-	
+
 	/**
 	 * lists installed software
 	 *
-	 *@name listSoftware
-	 *@access public
-	*/
+	 * @return array
+	 */
 	public static function listSoftware() {
 		return array(
 			"framework"	=> array(
