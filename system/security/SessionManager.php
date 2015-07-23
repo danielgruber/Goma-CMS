@@ -114,12 +114,9 @@ class SessionManager implements ISessionManager {
         $data = null;
 
         if(isset($_SESSION[$key])) {
-            if(self::isStoreIndicator($_SESSION[$key])) {
-                $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
-
-                if(file_exists(self::getFilePathForKey($fileKey))) {
-                    $data = unserialize(file_get_contents(self::getFilePathForKey($fileKey)));
-                }
+            $fileKey = self::getStoreIndicator($_SESSION[$key]);
+            if ($fileKey !== null && file_exists(self::getFilePathForKey($fileKey))) {
+                $data = unserialize(file_get_contents(self::getFilePathForKey($fileKey)));
             } else {
                 $data = $_SESSION[$key];
             }
