@@ -170,12 +170,10 @@ class SessionManager implements ISessionManager {
     public function remove($key)
     {
         if(isset($_SESSION[$key])) {
-            if (self::isStoreIndicator($_SESSION[$key])) {
-                $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
 
-                if (file_exists(self::getFilePathForKey($fileKey))) {
-                    unlink(self::getFilePathForKey($fileKey));
-                }
+            $fileKey = self::getStoreIndicator($_SESSION[$key]);
+            if ($fileKey !== null && file_exists(self::getFilePathForKey($fileKey))) {
+                unlink(self::getFilePathForKey($fileKey));
             }
 
             unset($_SESSION[$key]);
@@ -252,12 +250,9 @@ class SessionManager implements ISessionManager {
             return false;
         }
 
-        if (self::isStoreIndicator($_SESSION[$key])) {
-            $fileKey = substr($_SESSION[$key], strlen(self::STORE_INDICATOR));
-
-            if(!file_exists(self::getFilePathForKey($fileKey))) {
-                return false;
-            }
+        $fileKey = self::getStoreIndicator($_SESSION[$key]);
+        if ($fileKey !== null && !file_exists(self::getFilePathForKey($fileKey))) {
+            return false;
         }
 
         return true;
@@ -267,10 +262,14 @@ class SessionManager implements ISessionManager {
      * returns if it is the store inidcator.
      *
      * @param mixed $value
-     * @return bool
+     * @return string|null
      */
-    protected function isStoreIndicator($value) {
-        return is_string($value) && substr($value, 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR;
+    protected function getStoreIndicator($value) {
+        if(is_string($value) && substr($value, 0, strlen(self::STORE_INDICATOR)) == self::STORE_INDICATOR) {
+            return substr($value, strlen(self::STORE_INDICATOR));
+        }
+
+        return null;
     }
 
     /**
