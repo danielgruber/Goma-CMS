@@ -5,7 +5,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version     5.0
+ * @version     5.0.1
  */
 class DataObjectClassInfo extends Extension
 {
@@ -58,9 +58,7 @@ class DataObjectClassInfo extends Extension
                         $fields = explode(",", $fields);
 
                     if(strtolower($value["type"]) == "unique") {
-                        if(!in_array("recordid", $fields)) {
-                            $fields[] = "recordid";
-                        }
+                       $value["type"] = "index";
                     }
 
                     $maxlength = $length = floor(333 / count($fields));
@@ -111,14 +109,7 @@ class DataObjectClassInfo extends Extension
                     $indexes[$key] = $value;
 
                     if(strtolower($value) == "unique") {
-                        $indexes[$key] = array(
-                            "name" => $key,
-                            "fields" => array(
-                                $key,
-                                "recordid"
-                            ),
-                            "type"  => "unique"
-                        );
+                        $indexes[$key] = "index";
                     }
                 } else if (!$value) {
                     unset($db_fields[$key]);
