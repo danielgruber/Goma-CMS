@@ -89,14 +89,16 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	abstract public function getRestoreInfo($forceCompleteRestore = false);
-	
+
 	/**
 	 * makes a backup of the given name of software
 	 *
-	 *@name backup
-	 *@access public
-	*/
-	abstract public static function backup($file, $name);
+	 * @param string $file
+	 * @param string $name
+	 * @param string|null $changelog
+	 * @return boolean
+	 */
+	abstract public static function backup($file, $name, $changelog = null);
 
 	/**
 	 * builds a distributable version of this software
