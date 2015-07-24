@@ -43,6 +43,9 @@ class ParentResolver {
 
     /**
      * given class-name.
+     *
+     * @param string $className
+     * @param string $baseClassForScan base-class where to start scanning for pages.
      */
     public function __construct($className, $baseClassForScan) {
         $this->className = $className;
