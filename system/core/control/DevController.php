@@ -239,6 +239,9 @@ class Dev extends RequestHandler {
 	/**
 	 * builds an app-distro
 	 *
+	 * @param string|null $name
+	 * @param string|null $subname
+	 * @return bool|mixed
 	 */
 	public function buildAppDistro($name = null, $subname = null) {
 		if(!isset($name)) {
@@ -259,7 +262,7 @@ class Dev extends RequestHandler {
 				return false;
 			$file = ROOT . CACHE_DIRECTORY . "/" . $filename;
 
-			$return = call_user_func_array(array("G_" . $name . "SoftwareType", "buildDistro"), array($file, $subname));
+			$return = call_user_func_array(array("G_" . $name . "SoftwareType", "buildDistro"), array($file, $subname, $this));
 			if(is_string($return))
 				return $return;
 

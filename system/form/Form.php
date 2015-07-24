@@ -265,7 +265,7 @@ class Form extends object {
 		$this->request = isset($request) ? $request : $controller->getRequest();
 
 		if(isset($this->request)) {
-			$this->post = $request->post_params;
+			$this->post = $this->request->post_params;
 		} else {
 			$this->post = $_POST;
 		}

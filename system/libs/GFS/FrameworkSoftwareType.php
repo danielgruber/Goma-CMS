@@ -13,11 +13,6 @@
 class G_FrameworkSoftwareType extends G_SoftwareType {
 
 	/**
-	 * session key for finalizing.
-	 */
-	const FINALIZE_SESSION_KEY = "finalizeFrameworkDistro";
-
-	/**
 	 * type is "framework"
 	 *
 	 *@name type
@@ -268,13 +263,14 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		
 		return true;
 	}
-	
+
 	/**
 	 * returns the current framework-version with gfs
 	 *
-	 *@name generateDistroFileName
-	 *@access public
-	*/
+	 * @name generateDistroFileName
+	 * @access public
+	 * @return string
+	 */
 	public static function generateDistroFileName($name) {
 		return "framework." . GOMA_VERSION . "-" . BUILD_VERSION . ".gfs";
 	}
@@ -284,72 +280,30 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	 *
 	 * @param String $file filename
 	 * @param String $name
+	 * @param RequestHandler $controller
 	 * @return bool|mixed|string
 	 */
-	public static function buildDistro($file, $name) {
-		if(Core::globalSession()->hasKey(self::FINALIZE_SESSION_KEY))
-			return self::finalizeDistro(Core::globalSession()->get(self::FINALIZE_SESSION_KEY));
+	public static function buildDistro($file, $name, $controller) {
+		if(Core::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
+			return Object::instance("g_frameworkSoftWareType")->finalizeDistro(Core::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 		
 		if(file_exists($file))
 			@unlink($file);
 
-		$form = new Form(new G_FrameworkSoftwareType(null), "buildDistro", array(
+		$form = new Form($controller, "buildDistro", array(
 			new HiddenField("file", $file),
 			new HTMLField("title", "<h1>".lang("update_framework")."</h1><h3>".lang("distro_build")."</h3>"),
 			$version = new TextField("version", lang("version"), GOMA_VERSION . "-" . BUILD_VERSION),
-			new Textarea("changelog", lang("distro_changelog")),
-			
-			/*new HidableFieldSet("advanced", array(
-				new Textarea("preflight", lang("install_option_preflight")),
-				new Textarea("postflight", lang("install_option_postflight")),
-				new Textarea("script_info", lang("install_option_getinfo"))
-			), lang("install_advanced_options", "advanced install-options"))*/
+			new Textarea("changelog", lang("distro_changelog"))
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
+			new FormAction("submit", lang("download"), array(Object::instance("g_frameworkSoftWareType"), "finalizeDistro"))
 		));
 		
 		$version->disable();
 		
 		return $form->render();
 	}
-
-	/**
-	 * finalizes the build
-	 *
-	 * @param array $data
-	 * @return bool
-	 */
-	public function finalizeDistro($data) {
-		Core::globalSession()->set(self::FINALIZE_SESSION_KEY, $data);
-		
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], "framework", $changelog);
-		
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-
-		$gfs->close();
-
-		Core::globalSession()->remove(self::FINALIZE_SESSION_KEY);
-
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
 
 	/**
 	 * lists installed software
@@ -365,5 +319,14 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 				"canDisable"	=> false
 			)
 		);
+	}
+
+	/**
+	 * @param array $data
+	 * @return string
+	 */
+	protected function getDistroName($data)
+	{
+		return "framework";
 	}
 }

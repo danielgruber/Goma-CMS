@@ -20,17 +20,12 @@ class G_AppSoftwareType extends G_SoftwareType {
 	public static $type = "backup";
 
 	/**
-	 * session-var.
-	 */
-	const FINALIZE_SESSION_VAR = "finalizeCMSDistro";
-
-	/**
 	 * default __construct
 	 *
 	 *@name __construct
 	 *@access public
 	 */
-	public function __construct($file) {
+	public function __construct($file = null) {
 		parent::__construct($file);
 	}
 
@@ -86,12 +81,13 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		return $_data;
 	}
-	
+
 	/**
 	 * validates the installation
 	 *
-	 *@name validateInstall
-	*/
+	 * @name validateInstall
+	 * @return bool|string
+	 */
 	public function validateInstall($obj) {
 		$result = $obj->form->result;
 		$notAllowedFolders = array(
@@ -279,13 +275,14 @@ class G_AppSoftwareType extends G_SoftwareType {
 			return $data;
 		}
 	}
-	
+
 	/**
 	 * gets package info
 	 *
-	 *@name getPackageInfo
-	 *@access public
-	*/
+	 * @name getPackageInfo
+	 * @access public
+	 * @return array
+	 */
 	public function getPackageInfo() {
 		$gfs = new GFS($this->file);
 		$info = $gfs->parsePlist("info.plist");
@@ -441,12 +438,13 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		return $_data;
 	}
-	
+
 	/**
 	 * validates the restore
 	 *
-	 *@name validateInstall
-	*/
+	 * @name validateInstall
+	 * @return bool|string
+	 */
 	public function validateRestore($obj) {
 		$result = $obj->form->result;
 		if($result["type"] != "copyconfig") {
@@ -640,13 +638,15 @@ class G_AppSoftwareType extends G_SoftwareType {
 			return $form->render();
 		}
 	}
-	
+
 	/**
 	 * generates a distro
 	 *
-	 *@name backup
-	 *@access public
-	*/
+	 * @param string $file
+	 * @param string|null $name
+	 * @param string|null $changelog
+	 * @return bool
+	 */
 	public static function backup($file, $name, $changelog = null) {
 		
 		$tables = ClassInfo::Tables("user");
@@ -664,30 +664,36 @@ class G_AppSoftwareType extends G_SoftwareType {
 		
 		return true;
 	}
-	
+
 	/**
 	 * returns the current framework-version with gfs
 	 *
-	 *@name generateDistroFileName
-	 *@access public
-	*/
+	 * @name generateDistroFileName
+	 * @access public
+	 * @return string
+	 */
 	public static function generateDistroFileName($name) {
 		return ClassInfo::$appENV["app"]["name"] . "." . ClassInfo::appVersion() . ".gfs";
 	}
-	
+
 	/**
 	 * building the distro
-	*/
-	public static function buildDistro($file, $name) {
-		if(Core::globalSession()->hasKey(self::FINALIZE_SESSION_VAR))
-			return self::finalizeDistro(Core::globalSession()->get(self::FINALIZE_SESSION_VAR));
+	 *
+	 * @param string $file
+	 * @param null|string $name
+	 * @param RequestHandler $controller
+	 * @return mixed|string
+	 */
+	public static function buildDistro($file, $name, $controller) {
+		if(Core::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
+			return Object::instance("g_appSoftwareType")->finalizeDistro(Core::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 		
 		if(file_exists($file))
 			@unlink($file);
 		
 		$title = isset(ClassInfo::$appENV["app"]["title"]) ? ClassInfo::$appENV["app"]["title"] : ClassInfo::$appENV["app"]["name"];
 		
-		$form = new Form(new G_AppSoftwareType(null), "buildDistro", array(
+		$form = new Form($controller, "buildDistro", array(
 			new HiddenField("file", $file),
 			new HTMLField("title", "<h1>".convert::raw2text($title)."</h1><h3>".lang("distro_build")."</h3>"),
 			$version = new TextField("version", lang("version"), ClassInfo::appVersion()),
@@ -700,50 +706,13 @@ class G_AppSoftwareType extends G_SoftwareType {
 			), lang("install_advanced_options", "advanced install-options"))*/
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
+			new FormAction("submit", lang("download"), array(Object::instance("g_appSoftwareType"), "finalizeDistro"))
 		));
 		
 		$version->disable();
 		
 		return $form->render();
 	}
-
-	/**
-	 * finalizes the build
-	 *
-	 * @name finalizeDistro
-	 * @access public
-	 * @return bool
-	 */
-	public function finalizeDistro($data) {
-		Core::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
-		
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], null, $changelog);
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-		
-		$gfs->close();
-
-		Core::globalSession()->remove(self::FINALIZE_SESSION_VAR);
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
 
 	/**
 	 * lists installed software
@@ -765,5 +734,14 @@ class G_AppSoftwareType extends G_SoftwareType {
 		}
 		
 		return $data;
+	}
+
+	/**
+	 * @param array $data
+	 * @return string
+	 */
+	protected function getDistroName($data)
+	{
+		return null;
 	}
 }

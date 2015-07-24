@@ -11,6 +11,13 @@ define("DEFAULT_PACKAGE_FOLDER", FRAMEWORK_ROOT . "installer/data/apps");
  * @version	1.7.2
  */
 abstract class g_SoftwareType {
+
+
+	/**
+	 * session-var.
+	 */
+	const FINALIZE_SESSION_VAR = "finalizeCMSDistro";
+
 	/**
 	 * file-name of the current file
 	 *
@@ -46,7 +53,7 @@ abstract class g_SoftwareType {
 	 *@name __construct
 	 *@access public
 	*/
-	public function __construct($file) {
+	public function __construct($file = null) {
 		$this->file = $file;
 	}
 	
@@ -90,14 +97,16 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	abstract public static function backup($file, $name);
-	
+
 	/**
 	 * builds a distributable version of this software
 	 *
-	 *@name buildDistro
-	 *@access public
-	*/
-	abstract public static function buildDistro($file, $name);
+	 * @param string $file
+	 * @param string|null $name
+	 * @param RequestHandler $controller
+	 * @return
+	 */
+	abstract public static function buildDistro($file, $name, $controller);
 	
 	/**
 	 * generates the filename for a distributable
@@ -118,6 +127,12 @@ abstract class g_SoftwareType {
 	 *@access public
 	*/
 	abstract public static function listSoftware();
+
+	/**
+	 * @param array $data
+	 * @return string
+	 */
+	abstract protected function getDistroName($data);
 	
 	/**
 	 * disables the software
@@ -915,6 +930,39 @@ abstract class g_SoftwareType {
 		$files = array_map(create_function('$val', 'return substr($val, '.var_export(strlen($folder), true).');'), $files);
 		
 		return new FileMover($files, null, $destination);
+	}
+
+	/**
+	 * finalizes the build
+	 *
+	 * @name finalizeDistro
+	 * @access public
+	 * @return bool
+	 */
+	public function finalizeDistro($data) {
+		Core::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
+
+		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
+		static::backup($data["file"], $this->getDistroName($data), $changelog);
+
+		$gfs = new GFS($data["file"]);
+		if(isset($data["preflight"])) {
+			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
+		}
+
+		if(isset($data["postflight"])) {
+			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
+		}
+
+		if(isset($data["script_info"])) {
+			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
+		}
+
+		$gfs->close();
+
+		Core::globalSession()->remove(self::FINALIZE_SESSION_VAR);
+
+		return true;
 	}
 
 	/**

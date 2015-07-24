@@ -198,77 +198,48 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		}
 		return $name . "." . ClassInfo::expVersion($name) . ".gfs";
 	}
-	
+
 	/**
 	 * building the distro
-	*/
-	public static function buildDistro($file, $name) {
+	 *
+	 * @param string $file
+	 * @param null|string $name
+	 * @param RequestHandler $controller
+	 * @return bool|mixed|string
+	 */
+	public static function buildDistro($file, $name, $controller) {
+		if(Core::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
+			return Object::instance("g_expansionSoftWareType")->finalizeDistro(Core::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
+
 		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
 			return false;
 		}
 		
 		$title = isset(ClassInfo::$appENV["expansion"][$name]["title"]) ? ClassInfo::$appENV["expansion"][$name]["title"] : ClassInfo::$appENV["expansion"][$name]["name"];
 		
-		$form = new Form(new G_ExpansionSoftwareType(null), "buildDistro", array(
+		$form = new Form($controller, "buildDistro", array(
 			new HiddenField("file", $file),
 			new HiddenField("expName", $name),
 			new HTMLField("title", "<h1>".convert::raw2text($title)."</h1><h3>".lang("distro_build")."</h3>"),
 			$version = new TextField("version", lang("version"), ClassInfo::expVersion($name)),
-			new Textarea("changelog", lang("distro_changelog")),
-			
-			/*new HidableFieldSet("advanced", array(
-				new Textarea("preflight", lang("install_option_preflight")),
-				new Textarea("postflight", lang("install_option_postflight")),
-				new Textarea("script_info", lang("install_option_getinfo"))
-			), lang("install_advanced_options", "advanced install-options"))*/
+			new Textarea("changelog", lang("distro_changelog"))
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), "finalizeDistro")
+			new FormAction("submit", lang("download"), array(Object::instance("g_expansionSoftWareType"), "finalizeDistro"))
 		));
 		
 		$version->disable();
 		
 		return $form->render();
 	}
-	
-	/**
-	 * finalizes the build
-	 *
-	 *@name finalizeDistro
-	 *@access public
-	*/
-	public function finalizeDistro($data) {
-		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
-		self::backup($data["file"], $data["expName"], $changelog);
-		
-		$gfs = new GFS($data["file"]);
-		if(isset($data["preflight"])) {
-			$gfs->addFile(".preflight", "<?php " . $data["preflight"]);
-		}
-		
-		if(isset($data["postflight"])) {
-			$gfs->addFile(".postflight", "<?php " . $data["postflight"]);
-		}
-		
-		if(isset($data["script_info"])) {
-			$gfs->addFile(".getinstallinfo", "<?php " . $data["script_info"]);
-		}
-		
-		$gfs->close();
-		
-		return true;
-	}
-	
-	/**
-	 * 
-	*/
-	
+
 	/**
 	 * lists installed software
 	 *
-	 *@name listSoftware
-	 *@access public
-	*/
+	 * @name listSoftware
+	 * @access public
+	 * @return array
+	 */
 	public static function listSoftware() {
 		$arr = array();
 		// generate for expansions
@@ -407,5 +378,14 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		$gfs->writePlist("backup/info.plist", $appInfo);
 		
 		return true;
+	}
+
+	/**
+	 * @param array $data
+	 * @return string
+	 */
+	protected function getDistroName($data)
+	{
+		return $data["expName"];
 	}
 }
