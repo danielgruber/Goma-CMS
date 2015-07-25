@@ -105,22 +105,6 @@ class Controller extends RequestHandler
     );
 
     /**
-     * areas
-     *
-     * @name areas
-     * @access public
-     */
-    public $areas = array();
-
-    /**
-     * content of areas
-     *
-     * @name areaData
-     * @access public
-     */
-    public $areaData = array();
-
-    /**
      * design-specific vars.
      */
     static $less_vars = null;
@@ -324,8 +308,7 @@ class Controller extends RequestHandler
     /**
      * this action will be called if no other action was found
      *
-     * @name index
-     * @access public
+     * @return string|false
      */
     public function index()
     {
@@ -344,31 +327,11 @@ class Controller extends RequestHandler
     }
 
     /**
-     * renders given view with areas
-     *
-     * @name renderWithAreas
-     * @access public
-     */
-    public function renderWithAreas($template, $model = null)
-    {
-        $areas = array_keys($this->areaData);
-
-        if (!isset($model))
-            $model = $this->modelInst();
-
-        foreach ($this->areaData as $key => $value) {
-            $this->tplVars[$key] = $value;
-        }
-        // get iAreas
-
-        return $model->customise($this->tplVars)->renderWith($template);
-    }
-
-    /**
      * renders with given view
      *
-     * @name renderWith
-     * @access public
+     * @param string $template
+     * @param ViewAccessableData|null $model
+     * @return mixed
      */
     public function renderWith($template, $model = null)
     {
@@ -383,6 +346,7 @@ class Controller extends RequestHandler
      *
      * @name record
      * @access public
+     * @return string|false
      */
     public function record()
     {
@@ -442,11 +406,13 @@ class Controller extends RequestHandler
      *
      * @name form
      * @access public
-     * @param string - name
-     * @param object|false - model
-     * @param array - additional fields
-     * @param bool - if calling getEditForm or getForm on model
-     * @param string - submission
+     * @param string $name
+     * @param ViewAccessableData|null $model
+     * @param array $fields
+     * @param bool $edit if calling getEditForm or getForm on model
+     * @param string $submission
+     * @param bool $disabled
+     * @return string
      */
     public function form($name = null, $model = null, $fields = array(), $edit = false, $submission = "submit_form", $disabled = false)
     {
@@ -819,7 +785,7 @@ class Controller extends RequestHandler
      */
     public function confirm($title, $btnokay = null, $redirectOnCancel = null, $description = null)
     {
-        $form = new RequestForm(array(
+        $form = new RequestForm($this, array(
             new HTMLField("confirm", '<div class="text">' . $title . '</div>')
         ), lang("confirm", "Confirm..."), md5("confirm_" . $title . $this->classname), array(), ($btnokay === null) ? lang("yes") : $btnokay, $redirectOnCancel);
 
@@ -853,7 +819,7 @@ class Controller extends RequestHandler
     {
 
         $field = ($usePwdField) ? new PasswordField("prompt_text", $title, $value) : new TextField("prompt_text", $title, $value);
-        $form = new RequestForm(array(
+        $form = new RequestForm($this, array(
             $field
         ), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->classname), $validators, null, $redirectOnCancel);
         $data = $form->get();

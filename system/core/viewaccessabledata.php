@@ -644,13 +644,13 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * new call method
 	 *
 	 */
-	public function __call($name, $args) {
+	public function __call($methodName, $args) {
 
-		if(Object::method_exists($this->classname, $name)) {
-			return parent::__call($name, $args);
+		if(Object::method_exists($this->classname, $methodName)) {
+			return parent::__call($methodName, $args);
 		}
 
-		return $this->doObject($name, $args);
+		return $this->doObject($methodName, $args);
 	}
 
     /**

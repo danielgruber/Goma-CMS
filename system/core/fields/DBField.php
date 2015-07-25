@@ -287,26 +287,26 @@ class DBField extends Object implements IDataBaseField
      * @access public
      * @return mixed|string
      */
-    public function __call($name, $args) {
+    public function __call($methodName, $args) {
 
         if(defined("IN_UNIT_TEST")) {
             $trace = debug_backtrace();
             if(isset($trace[0]['file'])) {
-                throw new LogicException('Call to undefined method ' . $this->classname . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+                throw new LogicException('Call to undefined method ' . $this->classname . '::' . $methodName . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
             } else {
-                throw new LogicException('Call to undefined method ' . $this->classname . '::' . $name);
+                throw new LogicException('Call to undefined method ' . $this->classname . '::' . $methodName);
             }
         }
 
         if(DEV_MODE) {
             $trace = debug_backtrace();
             if(isset($trace[0]['file']))
-                log_error('Warning: Call to undefined method ' . $this->classname . '::' . $name . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
+                log_error('Warning: Call to undefined method ' . $this->classname . '::' . $methodName . ' in '.$trace[0]['file'].' on line '.$trace[0]['line']);
             else
-                log_error('Warning: Call to undefined method ' . $this->classname . '::' . $name);
+                log_error('Warning: Call to undefined method ' . $this->classname . '::' . $methodName);
 
             if(DEV_MODE)
-                AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->classname . '::' . $name . '</div>');
+                AddContent::add('<div class="error"><b>Warning</b> Call to undefined method ' . $this->classname . '::' . $methodName . '</div>');
         }
 
 

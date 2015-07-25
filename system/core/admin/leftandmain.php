@@ -97,14 +97,16 @@ class LeftAndMain extends AdminItem {
 		}
 		return $options;
 	}
-	
+
 	/**
 	 * inserts the data in the leftandmain-template
 	 *
-	 *@name serve
-	 *@access public
-	*/
+	 * @name serve
+	 * @access public
+	 * @return mixed|string
+	 */
 	public function serve($content) {
+
 		if(Core::is_ajax()) {
 			HTTPResponse::setBody($content);
 			HTTPResponse::output();
@@ -431,13 +433,14 @@ class LeftAndMain extends AdminItem {
 	public function contentClass() {
 		return parent::contentclass() . " left-and-main";
 	}
-	
+
 	/**
 	 * add-form
 	 *
-	 *@name cms_add
-	 *@access public
-	*/
+	 * @name cms_add
+	 * @access public
+	 * @return string
+	 */
 	public function cms_add() {	
 		
 		define("LAM_CMS_ADD", 1);
@@ -445,22 +448,8 @@ class LeftAndMain extends AdminItem {
 		$model = clone $this->modelInst();
 		
 		if($this->getParam("model")) {
-			if(count($this->models) > 1) {
-				foreach($this->models as $_model) {
-					$_model = trim(strtolower($_model));
-					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-						$type = $this->getParam("model");
-						$model = new $type;
-						break;
-					}
-				}
-			} else {
-				$models = array_values($this->models);
-				$_model = trim(strtolower($models[0]));
-				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-					$type = $this->getParam("model");
-					$model = new $type;
-				}
+			if($selectedModel = $this->getModelByName($this->getParam("model"))) {
+				$model = $selectedModel;
 			}
 		} else {
 			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
@@ -475,17 +464,19 @@ class LeftAndMain extends AdminItem {
 		
 		return $this->selectModel($model)->form();
 	}
-	
+
 	/**
 	 * index-method
 	 *
-	 *@name index
-	*/
+	 * @name index
+	 * @return string
+	 */
 	public function index() {
 		Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
 		
 		if(!$this->template)
 			return "";
+
 		return parent::index();
 	}
 }

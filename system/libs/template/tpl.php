@@ -1864,29 +1864,30 @@ class tplCaller extends Object implements ArrayAccess
 			
 		/**
 		 * __call-access-layer
-		 *@name __call
+		 *
+*@name __call
 		 *@access public
-		 *@param name
+		 *@param $methodName
 		 *@param args
 		*/
-		public function __call($name,$args)
+		public function __call($methodName,$args)
 		{
-				if(Object::method_exists($this->classname, $name))
+				if(Object::method_exists($this->classname, $methodName))
 				{
-					if(method_exists($this->classname, $name))
-						return call_user_func_array(array("parent", $name), $args);
+					if(method_exists($this->classname, $methodName))
+						return call_user_func_array(array("parent", $methodName), $args);
 					else
-						return call_user_func_array(array("parent", "__call"), array($name, $args));
-				} else if(Object::method_exists($this->classname, "_" . $name))
+						return call_user_func_array(array("parent", "__call"), array($methodName, $args));
+				} else if(Object::method_exists($this->classname, "_" . $methodName))
 				{
-					return call_user_func_array(array($this, "_" . $name), $args);
-				} else if(isset($this->callers[strtolower($name)])) {
-					$this->callers[strtolower($name)]->dataobject->convertDefault = null;
-					return $this->callers[strtolower($name)];
+					return call_user_func_array(array($this, "_" . $methodName), $args);
+				} else if(isset($this->callers[strtolower($methodName)])) {
+					$this->callers[strtolower($methodName)]->dataobject->convertDefault = null;
+					return $this->callers[strtolower($methodName)];
 				} else {
-						if(Object::method_exists($this->dataobject, $name))
+						if(Object::method_exists($this->dataobject, $methodName))
 						{
-								return call_user_func_array(array($this->dataobject, $name), $args);
+								return call_user_func_array(array($this->dataobject, $methodName), $args);
 						} else
 						{
 								return false;

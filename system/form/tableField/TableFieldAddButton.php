@@ -46,25 +46,26 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 			'addbtn' => "add"
 		);
 	}
-	
-	
+
+
 	/**
-	 * edit-action
+	 * add-action.
 	 *
-	 *@name edit
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param Request $request
+	 * @return string
+	 */
 	public function add($tableField, $request) {
 		$obj = $tableField->getData();
 		$tableField->form()->controller->request->post_params = $_POST;
 
 		$submit = $tableField->form()->useStateData ? "submit_form" : "publish";
 
-		$content = $obj->controller($tableField->form()->controller)->form("add", null, array(), false, $submit);
+		$content = $obj->controller($tableField->form()->getController())->form("add", null, array(), false, $submit);
 
 		Core::setTitle(lang("add_record"));
 		
-		$controller = $tableField->form()->controller;
+		$controller = $tableField->form()->getController();
 		return $controller->serve($content);
 	}
 }

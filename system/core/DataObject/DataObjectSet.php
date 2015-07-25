@@ -813,7 +813,7 @@ class DataObjectSet extends DataSet {
 	/**
 	 * gets the controller
 	 *
-	 * @return bool|null|string
+	 * @return Controller
 	 */
 	public function controller($controller = null) {
 

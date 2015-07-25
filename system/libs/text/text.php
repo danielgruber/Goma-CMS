@@ -61,11 +61,11 @@ class Text extends Object
 		 *@name __call
 		 *@access public
 		*/
-		public function __call($name, $arguments)
+		public function __call($methodName, $arguments)
 		{
-				if(classinfo::exists($name) && is_subclass_of($name, "TextTransformer"))
+				if(classinfo::exists($methodName) && is_subclass_of($methodName, "TextTransformer"))
 				{
-						$class = new $name($this->text);
+						$class = new $methodName($this->text);
 						$newtext = $class->transform();
 						return $newtext;
 				}

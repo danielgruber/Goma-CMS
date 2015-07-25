@@ -386,8 +386,7 @@ class FormField extends RequestHandler implements ArrayAccess
             $data =& $this->parent->form();
             return $data;
         } else {
-            $debug = debug_backtrace(false);
-            throwError(6, 'PHP-Error', 'No Form for Field ' . $this->classname . ' in ' . $debug[0]["file"] . ' on line ' . $debug[0]["line"] . '');
+            throw new LogicException('No Form for Field ' . $this->classname);
         }
     }
 

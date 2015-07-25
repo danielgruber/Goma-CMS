@@ -94,24 +94,22 @@ class contentAdmin extends LeftAndMain
 	protected $sort_field = "sort";
 
 	static $less_vars = "tint-blue.less";
-	
+
 	/**
 	 * returns the URL for the View Website-Button
 	 *
-	 *@name PreviewURL
-	 *@access public
-	*/
+	 * @return string
+	 */
 	public function PreviewURL() {
 		return defined("PREVIEW_URL") ? PREVIEW_URL : BASE_URI;
 	}
-	
-	
+
+
 	/**
 	 * history-url
 	 *
-	 *@name historyURL
-	 *@access public
-	*/
+	 * @return string
+	 */
 	public function historyURL() {
 		return "admin/history/pages";
 	}
@@ -129,21 +127,24 @@ class contentAdmin extends LeftAndMain
 					parent::redirectback($param, $value);
 			}
 	}
-	
+
 	/**
 	 * init JavaScript-Files
-	*/
+	 *
+	 * @param Request $request
+	 */
 	public function Init($request = null) {
 		Resources::add(APPLICATION . "/application/model/pages.js", "js", "tpl");
 		return parent::Init($request);
 	}
-	
+
 	/**
 	 * generates the options for the create-select-field
 	 *
-	 *@name CreateOptions
-	 *@access public
-	*/
+	 * @name CreateOptions
+	 * @access public
+	 * @return array
+	 */
 	public function createOptions() {
 		$data = array("page" => ClassInfo::getClassTitle("Page"));
 		foreach(ClassInfo::getChildren("page") as $page) {
@@ -185,36 +186,19 @@ class contentAdmin extends LeftAndMain
 			}
 		}
 	}
-	
+
 	/**
 	 * add-form
 	 *
-	 *@name cms_add
-	 *@access public
-	*/
+	 * @name cms_add
+	 * @access public
+	 * @return mixed|string
+	 */
 	public function cms_add() {	
 		
 		define("LAM_CMS_ADD", 1);
-		
-		if($this->getParam("model")) {
-			if(count($this->models) > 1) {
-				foreach($this->models as $_model) {
-					$_model = trim(strtolower($_model));
-					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-						$type = $this->getParam("model");
-						$model = new $type;
-						break;
-					}
-				}
-			} else {
-				$models = array_values($this->models);
-				$_model = trim(strtolower($models[0]));
-				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-					$type = $this->getParam("model");
-					$model = new $type;
-				}
-			}
-		} else {
+
+		if(!$this->getParam("model") || ($model = $this->getModelByName($this->getParam("model")) == null)) {
 			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
 		
 			$model = new ViewAccessableData();

@@ -196,7 +196,7 @@ class Form extends object {
 	 * @param Request|null $request
 	 * @param ViewAccessableData|null $model
      */
-	public function __construct(RequestHandler $controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
+	public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
 		parent::__construct();
 
@@ -744,17 +744,32 @@ class Form extends object {
     }
 
 	/**
+	 * @return RequestHandler
+	 */
+	public function getController()
+	{
+		return $this->controller;
+	}
+
+	/**
+	 * @return Request
+	 */
+	public function getRequest()
+	{
+		return $this->request;
+	}
+
+	/**
 	 * sets the default submission
 	 *@name setSubmission
 	 *@access public
 	 */
 	public function setSubmission($submission) {
-		if($submission)
-			if(Object::method_exists($this->controller, $submission)) {
-				$this->submission = $submission;
-			} else {
-				throwError('6', 'Logical Exception', 'Unknowen function "' . $submission . '" for Controller ' . get_class($this->controller) . '. Please create function and run dev.');
-			}
+		if (is_callable($submission) || Object::method_exists($this->controller, $submission)) {
+			$this->submission = $submission;
+		} else {
+			throw new LogicException("Unknown Function '$submission'' for Controller {$this->controller}.");
+		}
 	}
 
 	/**

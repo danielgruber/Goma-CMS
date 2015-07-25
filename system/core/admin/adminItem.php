@@ -133,30 +133,32 @@ class adminItem extends AdminController implements PermProvider {
 			
 		return parent::model($model);
 	}
-	
+
 	/**
 	 * creates model-inst
 	 *
-	 *@name createModelInst
-	 *@access public
-	*/
-	public function modelInst($m = null) {
+	 * @name createModelInst
+	 * @access public
+	 * @return DataObject|null|Object|ViewAccessAbleData
+	 */
+	public function modelInst($firstModel = null) {
 		
 		
-		if(isset($m) && is_object($this->modelInst)) {
-			$this->autoSelectModel(true, $m);
-			return $this->modelInst;
-		} else if(is_object($this->model_inst))
+		if(isset($firstModel) && is_object($firstModel)) {
+			$this->autoSelectModel(true, $firstModel);
 			return $this->model_inst;
+		} else if(is_object($this->model_inst)) {
+			return $this->model_inst;
+		}
 		
 		if(count($this->models) == 1)
 		{
 
-			$m = arraylib::first($this->models);
+			$firstModel = ArrayLib::first($this->models);
 			if(!is_object($this->model_inst))
-				$this->model_inst = $this->decorateModel(DataObject::get($m, $this->where), array(), $this);
+				$this->model_inst = $this->decorateModel(DataObject::get($firstModel, $this->where), array(), $this);
 			
-			$this->modelInstances = array($m => $this->model_inst);
+			$this->modelInstances = array($firstModel => $this->model_inst);
 			
 			return $this->model_inst;
 		} else if(count($this->models) > 1) {
@@ -164,30 +166,31 @@ class adminItem extends AdminController implements PermProvider {
 			foreach($this->models as $model) {
 				$models[$model] = $this->decorateModel(DataObject::get($model, $this->where));
 			}
-			
+
+			/** @var ViewAccessableData $model */
 			foreach($models as $model) {
 				$model->customise($models);
 			}
 			
 			$this->modelInstances = $models;
 			// select model
-			$this->autoSelectModel(true, $m);
+			$this->autoSelectModel(true, $firstModel);
 			
 			return $this->model_inst;
-				
 		} else {
-			throw new LogicException("No Model for Admin-Module ".$this->classname);
+			throw new LogicException("No Model for Admin-Module " . $this->classname);
 		}
 	}
-	
+
 	/**
 	 * gives back a instance if this controller with the given model
 	 *
-	 *@name selectModel
-	 *@access public
-	 *@param string - name
-	 *@param bool - if instead writing on this object
-	*/
+	 * @name selectModel
+	 * @access public
+	 * @param string $name
+	 * @param bool $onThis set model for this instance or create new instance.
+	 * @return adminItem
+	 */
 	public function selectModel($name, $onThis = false) {
 		
 		if(!is_object($name)) {
@@ -197,15 +200,15 @@ class adminItem extends AdminController implements PermProvider {
 		}
 		
 		if($onThis) {
-		 	$this->model_inst = (is_object($name)) ? $name : $this->modelInstances[$name];
-			$this->model_inst->controller = $this;
+			/** @var ViewAccessableData $name */
+			$this->setModelInst((is_object($name)) ? $name : $this->modelInstances[$name]);
 			$this->model = null;
 			$this->controllerInst = null;
 			return $this;
 		} else {
 			$controller = clone $this;
-			$controller->model_inst = (is_object($name)) ? $name : $this->modelInstances[$name];
-			$controller->model_inst->controller = $controller;
+			/** @var ViewAccessableData $name */
+			$controller->setModelInst((is_object($name)) ? $name : $this->modelInstances[$name]);
 			$controller->model = null;
 			$controller->controllerInst = null;
 			
@@ -275,29 +278,31 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * we provide all methods of the model-controller, too
 	 *
-	 * @name 	__call
-	 * @access 	public
-	*/
-	public function __call($name, $args) {
+	 * @param string $methodName
+	 * @param array $args
+	 * @return mixed
+	 */
+	public function __call($methodName, $args) {
 		
-		if(Object::method_exists($this->getControllerInst(), $name)) {
+		if(Object::method_exists($this->getControllerInst(), $methodName)) {
 			$this->getControllerInst()->request = $this->request;
-			return call_user_func_array(array($this->getControllerInst(), $name), $args);
+			return call_user_func_array(array($this->getControllerInst(), $methodName), $args);
 		}
-		return parent::__call($name, $args);
+
+		return parent::__call($methodName, $args);
 	}
 
 	/**
 	 * we provide all methods of the model-controller, too
 	 * method_exists-overloading-api of @see Object
 	 *
-	 * @name 	__cancall
-	 * @access 	public
-	 * @param 	string method-name
-	*/
-	public function __cancall($name) {
+	 * @name    __cancall
+	 * @param    string $methodName
+	 * @return bool
+	 */
+	public function __cancall($methodName) {
 		if($c = $this->getControllerInst()) {
-			return Object::method_exists($c, $name);
+			return Object::method_exists($c, $methodName);
 		} else {
 			return false;
 		}
@@ -312,35 +317,22 @@ class adminItem extends AdminController implements PermProvider {
 	public function cms_edit() {
 		return $this->edit();
 	}
-	
-	
+
+
 	/**
 	 * add-form
 	 *
-	 *@name cms_add
-	 *@access public
-	*/
+	 * @name cms_add
+	 * @access public
+	 * @return mixed|string
+	 */
 	public function cms_add() {	
 		
 		$model = clone $this->modelInst();
 		
 		if($this->getParam("model")) {
-			if(count($this->models) > 1) {
-				foreach($this->models as $_model) {
-					$_model = trim(strtolower($_model));
-					if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-						$type = $this->getParam("model");
-						$model = new $type;
-						break;
-					}
-				}
-			} else {
-				$models = array_values($this->models);
-				$_model = trim(strtolower($models[0]));
-				if(is_subclass_of($this->getParam("model"), $_model) || $_model == $this->getParam("model")) {
-					$type = $this->getParam("model");
-					$model = new $type;
-				}
+			if($selectedModel = $this->getModelByName($this->getParam("model"))) {
+				$model = $selectedModel;
 			}
 		}
 		
@@ -351,6 +343,30 @@ class adminItem extends AdminController implements PermProvider {
 		$submit = DataObject::Versioned($model->classname) ? "publish" : null;
 
 		return $this->selectModel($model)->form(null, null, array(), false, $submit);
+	}
+
+	/**
+	 * gets model by given name.
+	 *
+	 * @param string $name name of object.
+	 * @return Object|null
+	 */
+	protected function getModelByName($name) {
+		if(count($this->models) > 1) {
+			foreach($this->models as $currentModel) {
+				$currentModel = trim(strtolower($currentModel));
+				if(ClassManifest::isOfType($name, $currentModel)) {
+					return new $name();
+				}
+			}
+		} else {
+			$firstModel = ArrayLib::first($this->models);
+			if(ClassManifest::isOfType($name, $firstModel)) {
+				return new $name;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -408,30 +424,32 @@ class adminItem extends AdminController implements PermProvider {
 		return $this->controllerInst;
 		
 	}
-	
+
 	/**
 	 * action-handler with implemented auto-model-selecting
 	 *
-	 *@name handleAction
-	 *@access public
-	 *@param string - name
-	*/
-	public function handleAction($name) {
+	 * @name handleAction
+	 * @access public
+	 * @param string $actionName
+	 * @return false|mixed|null
+	 */
+	public function handleAction($actionName) {
 		if($this->model_inst && $this->getParam("model") !== null) {
 			if(isset($this->modelInstances[$this->getParam("model")])) {
 				$this->selectModel($this->getParam("model"), true);
 			}
 		}
 		
-		return parent::handleAction($name);
+		return parent::handleAction($actionName);
 	}
-	
+
 	/**
 	 * gets a controller for a record in a given model
 	 *
-	 *@name handleRecordForModel
-	 *@access public
-	*/
+	 * @name handleRecordForModel
+	 * @access public
+	 * @return string
+	 */
 	public function handleRecordForModel() {
 		
 		$model = $this->getParam("model");
@@ -453,20 +471,21 @@ class adminItem extends AdminController implements PermProvider {
 			return $this->index();
 		}
 	}
-	
+
 	/**
 	 * handles a request with a given record in it's controller
 	 *
-	 *@name record
-	 *@access public
-	*/
+	 * @name record
+	 * @access public
+	 * @return string
+	 */
 	public function record() {
 		$id = $this->getParam("id");
 		
 		$model = $this->model();
 		
 		// get data
-		$data = DataObject::get($model, array("id" => $id));
+		$data = DataObject::get_by_id($model, $id);
 		$this->callExtending("handleRecord", $model);
 		$this->decorateRecord($data);
 		$data = $this->decorateModel($data);

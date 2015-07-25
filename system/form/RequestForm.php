@@ -64,6 +64,11 @@ class RequestForm extends Object {
 	 * cause we are acting like a controller, we need also the current request.
 	*/
 	public $request;
+
+	/**
+	 * @var Controller
+	 */
+	public $controller;
 	
 	/**
 	 * constructing the form
@@ -76,10 +81,10 @@ class RequestForm extends Object {
 	 *@param array - validators
 	 *@param string - title of the okay-button
 	*/
-	public function __construct($fields, $title, $key = "", $validators = array(), $btnokay = null, $redirect = null) {
+	public function __construct($controller, $fields, $title, $key = "", $validators = array(), $btnokay = null, $redirect = null) {
 		parent::__construct();
 		
-		
+		$this->controller = $controller;
 		$this->title = $title;
 		$this->dialog = new Dialog("", $title);
 		$this->validators = $validators;
@@ -101,13 +106,14 @@ class RequestForm extends Object {
 		
 		$this->redirect = $redirect;
 	}
-	
+
 	/**
 	 * returns the data if submitted and if it wasn't, it will send the data to the browser
 	 *
-	 *@name get
-	 *@access public
-	*/
+	 * @name get
+	 * @access public
+	 * @return mixed|string|void
+	 */
 	public function get() {
 		
 		if(isset($_POST[md5($this->title . $this->key)]) && isset($_SESSION["requestform"][md5($this->title . $this->key)]))
@@ -135,9 +141,9 @@ class RequestForm extends Object {
 		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), $redirect, $this->dialog->getcloseJS() . "return false;");
 			if(isset($_GET["dropdownDialog"]))
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajaxDialog", "submit", array("green"));
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, array($this, "ajaxDialog"), array($this, "submit"), array("green"));
 			else
-				$submit = new AjaxSubmitButton("submit", $this->btnokay, "ajax", "submit", array("green"));
+				$submit = new AjaxSubmitButton("submit", $this->btnokay, array($this, "ajax"), array($this, "submit"), array("green"));
 			
 		} else {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), getredirect(true));
@@ -146,12 +152,11 @@ class RequestForm extends Object {
 			
 		// add field to identify current submit
 		$fields[] = new HiddenField(md5($this->title . $this->key), true);
-		$this->realform = new Form($this,  "request",$fields, array(
+		$this->realform = new Form($this->controller,  "request",$fields, array(
 			$cancel,
 			$submit
-			
 		), $this->validators);
-		$this->realform->setSubmission("submit");
+		$this->realform->setSubmission(array($this, "submit"));
 		
 		$data = $this->realform->render();
 		

@@ -130,13 +130,14 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 		}
 		return false;
 	}
-	
+
 	/**
 	 * edit-action
 	 *
-	 *@name edit
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param Request $request
+	 * @return
+	 */
 	public function delete($tableField, $request) {
 		$data = clone $tableField->getData();
 		$data->filter(array("id" => $request->getParam("id")));
@@ -148,8 +149,8 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 				$title = $data->name;
 			}
 			Core::setTitle($title);
-			Core::$requestController = $tableField->form()->controller;
-			$content = $data->first()->controller($tableField->form()->controller)->delete();
+			Core::$requestController = $tableField->form()->getController();
+			$content = $data->first()->controller($tableField->form()->getController())->delete();
 		} else {
 			$tableField->Form()->redirectToForm();
 			exit;

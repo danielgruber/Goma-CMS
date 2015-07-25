@@ -343,46 +343,46 @@ abstract class Object
      *
      * @link http://php.net/manual/de/language.oop5.overloading.php
      *
-     * @param string $name Name of the method.
+     * @param string $methodName Name of the method.
      * @param string $args Arguments.
      *
      * @return mixed The return of the function.
      */
-    public function __call($name, $args)
+    public function __call($methodName, $args)
     {
 
-        $name = trim(strtolower($name));
+        $methodName = trim(strtolower($methodName));
 
-        if (isset(self::$extra_methods[$this->classname][$name])) {
-            return $this->callExtraMethod($name, self::$extra_methods[$this->classname][$name], $args);
+        if (isset(self::$extra_methods[$this->classname][$methodName])) {
+            return $this->callExtraMethod($methodName, self::$extra_methods[$this->classname][$methodName], $args);
         }
 
-        if (isset(self::$cache_extra_methods[$this->classname][$name])) {
-            return $this->callExtraMethod($name, self::$cache_extra_methods[$this->classname][$name], $args);
+        if (isset(self::$cache_extra_methods[$this->classname][$methodName])) {
+            return $this->callExtraMethod($methodName, self::$cache_extra_methods[$this->classname][$methodName], $args);
         }
 
-        if (method_exists($this, $name) && is_callable(array($this, $name))) {
-            return call_user_func_array(array($this, $name), $args);
+        if (method_exists($this, $methodName) && is_callable(array($this, $methodName))) {
+            return call_user_func_array(array($this, $methodName), $args);
         }
 
         // check last
-        if (isset(self::$temp_extra_methods[$this->classname][$name])) {
-            return $this->callExtraMethod($name, self::$temp_extra_methods[$this->classname][$name], $args);
+        if (isset(self::$temp_extra_methods[$this->classname][$methodName])) {
+            return $this->callExtraMethod($methodName, self::$temp_extra_methods[$this->classname][$methodName], $args);
         }
 
         // check parents
         $c = $this->classname;
         while ($c = ClassInfo::GetParentClass($c)) {
-            if (isset(self::$extra_methods[$c][$name])) {
+            if (isset(self::$extra_methods[$c][$methodName])) {
 
                 // cache result
-                self::$cache_extra_methods[$this->classname][$name] = self::$extra_methods[$c][$name];
+                self::$cache_extra_methods[$this->classname][$methodName] = self::$extra_methods[$c][$methodName];
 
-                return $this->callExtraMethod($name, self::$extra_methods[$c][$name], $args);
+                return $this->callExtraMethod($methodName, self::$extra_methods[$c][$methodName], $args);
             }
         }
 
-        throw new BadMethodCallException("Call to undefined method '" . get_class($this) . "::" . $name . "'");
+        throw new BadMethodCallException("Call to undefined method '" . get_class($this) . "::" . $methodName . "'");
     }
 
     /**

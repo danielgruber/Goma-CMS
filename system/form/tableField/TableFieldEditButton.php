@@ -112,13 +112,14 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			'editbtn/$id' => "edit"
 		);
 	}
-	
+
 	/**
 	 * edit-action
 	 *
-	 *@name edit
-	 *@access public
-	*/
+	 * @param TableField $tableField
+	 * @param Request $request
+	 * @return string
+	 */
 	public function edit($tableField, $request) {
 		$data = clone $tableField->getData();
 		$data->filter(array("id" => $request->getParam("id")));
@@ -130,8 +131,8 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 				$title = $data->name;
 			}
 			Core::setTitle($title);
-			if($tableField->form()->controller->request)
-				$tableField->form()->controller->request->post_params = $_POST;
+			if($tableField->form()->getRequest())
+				$tableField->form()->getRequest()->post_params = $_POST;
 			
 			$content = $data->first()->controller($tableField->form()->controller)->edit();
 		} else {
@@ -139,7 +140,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			exit;
 		}
 		
-		$controller = $tableField->form()->controller;
+		$controller = $tableField->form()->getController();
 		return $controller->serve($content);
 	}
 }
