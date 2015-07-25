@@ -64,6 +64,13 @@ interface ISessionManager {
     public function hasKey($key);
 
     /**
+     * lists all keys which exist at the moment.
+     *
+     * @return array
+     */
+    public function listKeys();
+
+    /**
      * purges the session.
      */
     public function purge();
@@ -77,4 +84,12 @@ interface ISessionManager {
      * returns session-id.
      */
     public function getId();
+
+    /**
+     * remove by key prefix.
+     *
+     * @param string $prefix
+     * @return int
+     */
+    public function removeByPrefix($prefix);
 }

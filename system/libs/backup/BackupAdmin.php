@@ -12,6 +12,17 @@ loadlang('backup');
  */
 class BackupAdmin extends TableView
 {
+
+    /**
+     * session-var for storing db-file.
+     */
+    const SESSION_VAR_DB_FILE = "dbfile";
+
+    /**
+     * session-var for storing complete file.
+     */
+    const SESSION_VAR_COMPLETE = "completebackup";
+
     /**
      * url-handlers
      *
@@ -177,11 +188,23 @@ class BackupAdmin extends TableView
      *@name add_db
     */
     public function add_db() {
-        $_SESSION["dbfile"] = $file = isset($_SESSION["dbfile"]) ? $_SESSION["dbfile"] : "sql." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".sgfs";
-        Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $file);
-        unset($_SESSION["dbfile"]);
+        Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $this->getFileFromSession(self::SESSION_VAR_DB_FILE, "sql", "sgfs"));
+
+        Core::globalSession()->remove(self::SESSION_VAR_DB_FILE);
+
         BackupModel::forceSyncFolder();
         $this->redirectBack();
+    }
+
+    /**
+     * get file and stores it in session.
+     */
+    protected function getFileFromSession($session, $prefix, $extension) {
+        if(Core::globalSession()->hasKey($session)) {
+            return Core::globalSession()->get($session);
+        }
+
+        return $prefix . "." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . "." . $extension;
     }
 
     /**
@@ -200,9 +223,10 @@ class BackupAdmin extends TableView
             $exclude[$key] = "/" . $val;
         }
 
-        $_SESSION["backupfile"] = $file = isset($_SESSION["backupfile"]) ? $_SESSION["backupfile"] : "full." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . ".gfs";
-        Backup::generateBackup(BackupModel::BACKUP_PATH . "/" . $file, $exclude);
-        unset($_SESSION["backupfile"]);
+        Backup::generateBackup(BackupModel::BACKUP_PATH . "/" . $this->getFileFromSession(self::SESSION_VAR_COMPLETE, "full", "gfs"), $exclude);
+
+        Core::globalSession()->remove(self::SESSION_VAR_COMPLETE);
+
         BackupModel::forceSyncFolder();
         $this->redirectBack();
     }
@@ -237,8 +261,9 @@ class BackupAdmin extends TableView
             if(is_array($data)) {
                 $rand = randomString(20);
                 $data["rand"] = $rand;
-                $_SESSION["restore"] = array();
-                $_SESSION["restore"][$rand] = $data;
+
+                Core::globalSession()->removeByPrefix("restore.");
+                Core::globalSession()->set("restore." . $rand, $data);
 
                 $dataset = new ViewAccessableData($data);
                 return $dataset->renderWith("admin/restoreInfo.html");
@@ -256,8 +281,8 @@ class BackupAdmin extends TableView
     */
     public function execRestore() {
         $rand = $this->getParam("rand");
-        if(isset($_SESSION["restore"][$rand])) {
-            $data = $_SESSION["restore"][$rand];
+        if(Core::globalSession()->hasKey("restore." . $rand)) {
+            $data = Core::globalSession()->get("restore." . $rand);
             G_SoftwareType::install($data);
             HTTPResponse::redirect(BASE_URI);
         } else {

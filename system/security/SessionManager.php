@@ -271,4 +271,34 @@ class SessionManager implements ISessionManager {
     protected static function getFilePathForKey($key) {
         return ROOT . CACHE_DIRECTORY . "data." . $key . ".goma";
     }
+
+    /**
+     * lists all keys which exist at the moment.
+     *
+     * @return array
+     */
+    public function listKeys()
+    {
+        return array_keys($_SESSION);
+    }
+
+    /**
+     * remove by key prefix.
+     *
+     * @param string $prefix
+     * @return int
+     */
+    public function removeByPrefix($prefix)
+    {
+        $i = 0;
+        foreach($this->listKeys() as $key) {
+            if(substr($key, 0, strlen($prefix)) == $prefix) {
+                if($this->remove($key)) {
+                    $i++;
+                }
+            }
+        }
+
+        return $i;
+    }
 }

@@ -85,7 +85,7 @@ class i18n extends Object {
 
 		// check lang selection
 		Core::$lang = self::AutoSelectLang($language);
-		$_SESSION["lang"] = Core::$lang;
+		Core::globalSession()->set("lang", Core::$lang);
 		setCookie('g_lang', Core::$lang, TIME + 365 * 24 * 60 * 60, '/', $host);
 
 		global $lang;
@@ -267,8 +267,8 @@ class i18n extends Object {
 		}
 
 		// define current language
-		if(isset($_SESSION['lang']) && !empty($_SESSION["lang"]) && self::LangExists($_SESSION["lang"])) {
-			return $_SESSION["lang"];
+		if(self::LangExists(Core::globalSession()->get("lang"))) {
+			return Core::globalSession()->get("lang");
 		} else if(isset($_COOKIE["g_lang"]) && self::langExists($_COOKIE["g_lang"])) {
 			return $_COOKIE["g_lang"];
 		} else if(self::$selectByHttp) {
@@ -283,7 +283,8 @@ class i18n extends Object {
 	/**
 	 * select language based on lang-code
 	 *
-	 *@name selectLang
+	 * @name selectLang
+	 * @return string
 	 */
 	public function selectLang($code) {
 
@@ -310,10 +311,11 @@ class i18n extends Object {
 	/**
 	 * returns if given lang exists
 	 *
-	 *@name LangExists
+	 * @name LangExists
+	 * @return bool
 	 */
 	public function LangExists($code) {
-		if($code == "." || $code == "..")
+		if(!$code || $code == "." || $code == "..")
 			return false;
 
 		if(is_dir(LANGUAGE_DIRECTORY . "/" . $code)) {
