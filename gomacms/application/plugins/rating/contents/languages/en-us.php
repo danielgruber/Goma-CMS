@@ -10,7 +10,7 @@
 $lang = array(
 	"vote"              => "vote",
 	"votes"             => "votes",
-	"rated"             => "You've already voted!",
+	"already_rated"     => "You've already voted!",
 	"thanks_for_voting" => "Thanks for your vote",
 	"perms_delete"		=> "Reset votes",
 	"allow_rate"		=> "Allow rating"

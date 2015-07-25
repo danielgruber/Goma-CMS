@@ -1,0 +1,55 @@
+<?php defined("IN_GOMA") OR die();
+
+/**
+ * Controller for Rating.
+ *
+ * @author	Goma-Team
+ * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package	Goma\Framework
+ * @version 1.1
+ */
+class RatingController extends Controller
+{
+    /**
+     * @param Request $request
+     * @param bool $subController
+     * @return string
+     */
+    public function handleRequest($request, $subController = false)
+    {
+        $this->request = $request;
+
+        $this->Init();
+
+        $name = strtolower($request->getParam("name"));
+        $rate = $request->getParam("rate");
+
+        $ratingRecord = Rating::getRatingByName($name);
+        if(!$ratingRecord->hasAlreadyVoted($_SERVER["REMOTE_ADDR"])) {
+            $ratingRecord->rates++;
+            $ratingRecord->rating += $rate;
+            $ratingRecord->rators = serialize(array_merge(array($_SERVER["REMOTE_ADDR"]), (array)unserialize($ratingRecord->rators)));
+
+            if (request::isJSResponse()) {
+                HTTPResponse::addHeader("content-type", "text/javascript");
+                $response = new AjaxResponse;
+                $response->exec('$("#rating_' . $name . '").html("' . convert::raw2js($ratingRecord->stars) . '<div class=\"message\">' . lang("exp_gomacms_rating.thanks_for_voting") . '</div>");');
+
+                return $response->render();
+            } else {
+                $this->redirectback();
+            }
+        } else {
+            if (request::isJSResponse()) {
+                HTTPResponse::addHeader("content-type", "text/javascript");
+                $response = new AjaxResponse;
+                $response->exec("alert('" . lang("exp_gomacms_rating.already_rated") . "');");
+
+                return $response->render();
+            } else {
+                $_SESSION["rating_message"] = lang("exp_gomacms_rating.already_rated");
+                $this->redirectback();
+            }
+        }
+    }
+}
