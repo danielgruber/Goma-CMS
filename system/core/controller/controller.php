@@ -133,8 +133,8 @@ class Controller extends RequestHandler
             livecounter::run();
             //livecounterController::run();
             if (PROFILE) Profiler::unmark("livecounter");
-            $_SESSION["user_counted"] = TIME;
 
+            Core::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);
         }
 
         if ($title = $this->PageTitle()) {
@@ -159,6 +159,7 @@ class Controller extends RequestHandler
      *
      * @name helpArticle
      * @access public
+     * @return array
      */
     public function helpArticle()
     {
@@ -181,6 +182,7 @@ class Controller extends RequestHandler
      *
      * @name modelInst
      * @access public
+     * @return DataObject
      */
     public function modelInst($model = null)
     {
@@ -224,6 +226,7 @@ class Controller extends RequestHandler
      *
      * @name model
      * @access public
+     * @return null|string
      */
     public function model($model = null)
     {
@@ -627,6 +630,7 @@ class Controller extends RequestHandler
      * @param    integer $priority Defines what type of save it is: 0 = autosave, 1 = save, 2 = publish
      * @param    boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
      * @param    boolean $forceWrite forces the database to write without involving permissions
+     * @return bool|DataObject
      */
     public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null)
     {
@@ -862,6 +866,7 @@ class Controller extends RequestHandler
      *
      * @name keyChainCheck
      * @access public
+     * @return bool
      */
     public static function KeyChainCheck($password)
     {
