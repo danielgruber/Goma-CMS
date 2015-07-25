@@ -198,7 +198,8 @@ class contentAdmin extends LeftAndMain
 		
 		define("LAM_CMS_ADD", 1);
 
-		if(!$this->getParam("model") || ($model = $this->getModelByName($this->getParam("model")) == null)) {
+		$model = $this->getModelByName($this->getParam("model"));
+		if(!$model) {
 			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
 		
 			$model = new ViewAccessableData();

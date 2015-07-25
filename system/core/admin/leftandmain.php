@@ -408,13 +408,12 @@ class LeftAndMain extends AdminItem {
 		if(!$record->getVersion()) $record->version = "state";
 		$this->marked = $record->class_name . "_" . $record->recordid;
 	}
-	
+
 	/**
 	 * view all versions
 	 *
-	 *@name versions
-	 *@access public 
-	*/
+	 * @return string
+	 */
 	public function versions() {
 		if($this->ModelInst() && DataObject::Versioned($this->ModelInst()->dataClass)) {
 			$controller = new VersionsViewController($this->ModelInst());
@@ -423,13 +422,14 @@ class LeftAndMain extends AdminItem {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * adds content-class left-and-main to content-div
 	 *
-	 *@name contentClass
-	 *@access public
-	*/
+	 * @name contentClass
+	 * @access public
+	 * @return string
+	 */
 	public function contentClass() {
 		return parent::contentclass() . " left-and-main";
 	}

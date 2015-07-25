@@ -245,7 +245,7 @@ class adminItem extends AdminController implements PermProvider {
 	/**
 	 * decorates the given model with some needed vars
 	 *
-	 * @param DataObject $model
+	 * @param ViewAccessableData|DataObjectSet $model
 	 * @param array $additional
 	 * @param Controller|null $controller
 	 * @return DataObject
@@ -485,11 +485,11 @@ class adminItem extends AdminController implements PermProvider {
 		$model = $this->model();
 		
 		// get data
-		$data = DataObject::get_by_id($model, $id);
+		$data = DataObject::get($model, array("id" => $id));
 		$this->callExtending("handleRecord", $model);
 		$this->decorateRecord($data);
 		$data = $this->decorateModel($data);
-		
+
 		// check for deleted if no data is there
 		if($data->Count() > 0) {
 			return $this->selectModel($data->first())->handleRequest($this->request);
@@ -499,7 +499,7 @@ class adminItem extends AdminController implements PermProvider {
 			$this->callExtending("handleRecord", $model);
 			$this->decorateRecord($data);
 			$data = $this->decorateModel($data);
-			
+
 			if($data->Count() > 0) {
 				return $this->selectModel($data->first())->handleRequest($this->request);
 			} else {

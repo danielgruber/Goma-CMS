@@ -144,7 +144,6 @@ class RequestHandler extends Object {
 
 		$this -> subController = $subController;
 		$this -> Init($request);
-		$class = $this -> classname;
 
         // check for extensions
 		$content = null;
@@ -158,10 +157,10 @@ class RequestHandler extends Object {
         // search for action
         $this->request = $request;
 
+		$class = $this->classname;
 		while ($class != "object" && !empty($class) && !ClassInfo::isAbstract($class)) {
             $handlers = Object::instance($class)->url_handlers;
 			foreach ($handlers as $pattern => $action) {
-
                 if($data = $this->matchRuleWithResult($pattern, $action, $request)) {
                     return $data;
                 }
@@ -186,7 +185,6 @@ class RequestHandler extends Object {
         }
 
         if ($argument = $request -> match($rule, $this -> shiftOnSuccess, $this -> classname)) {
-
             if ($action{0} == "$") {
                 $action = substr($action, 1);
                 if ($this -> getParam($action, false)) {
@@ -304,26 +302,20 @@ class RequestHandler extends Object {
 
 		$class = $this;
 
-		while ($class && Object::instance($class)->classname != "object") {
-			
-			if(Object::method_exists($class, "checkPermissionsOnClass")) {
+		while ($class && $class->classname != "object" && Object::method_exists($class, "checkPermissionsOnClass")) {
+			// check class
+			$result = $class->checkPermissionsOnClass($action);
 
-				// check class
-				$result = $class->checkPermissionsOnClass($action);
+			// if we have an result which is a boolean.
+			if (is_bool($result)) {
+				if (PROFILE)
+					Profiler::unmark("RequestHandler::checkPermission");
 
-				// if we have an result which is a boolean.
-				if (is_bool($result)) {
-					if (PROFILE)
-						Profiler::unmark("RequestHandler::checkPermission");
-
-					return $result;
-				}
-
-				// check for parent class
-				$class = ClassInfo::isAbstract(get_parent_class($class)) ? get_parent_class($class) : null;
-			} else {
-				$class = null;
+				return $result;
 			}
+
+			// check for parent class
+			$class = !ClassInfo::isAbstract(get_parent_class($class)) ? Object::instance(get_parent_class($class)) : null;
 		}
 
 		if (PROFILE)
