@@ -19,6 +19,7 @@
  * @property    int id
  * @property    string baseTable
  * @property    string baseClass
+ * @property    string class_name
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {

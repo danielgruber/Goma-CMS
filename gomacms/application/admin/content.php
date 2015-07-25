@@ -173,7 +173,7 @@ class contentAdmin extends LeftAndMain
 					if(Core::is_ajax()) {
 						$response = new AjaxResponse();
 						Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
-						$response->exec("reloadTree(function(){ LoadTreeItem('".$data["class_name"] . "_" . $data["id"]."'); });");
+						$response->exec("reloadTree(function(){ LoadTreeItem('".$data->class_name . "_" . $data->id."'); });");
 						HTTPResponse::setBody($response->render());
 						HTTPResponse::output();
 						exit;

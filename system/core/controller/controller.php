@@ -271,8 +271,6 @@ class Controller extends RequestHandler
      */
     public function handleRequest($request, $subController = false)
     {
-        $this->areaData = array();
-
         if (StaticsManager::hasStatic($this->classname, "less_vars")) {
             Resources::$lessVars = StaticsManager::getStatic($this->classname, "less_vars");
         }
@@ -288,7 +286,6 @@ class Controller extends RequestHandler
             HTTPResponse::output();
             exit;
         }
-
 
         return $data;
     }
