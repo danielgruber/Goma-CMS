@@ -63,6 +63,6 @@ class GomaTestController extends RequestHandler {
 	}
 }
 
-Core::addRules(array(
+Director::addRules(array(
 	"dev/unit-test" => "GomaTestController"
 ), 50);

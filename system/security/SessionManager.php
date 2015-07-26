@@ -83,6 +83,10 @@ class SessionManager implements ISessionManager {
 
             $this->setSessionParams();
 
+            if(headers_sent($file, $line)) {
+                throw new LogicException("Cannot modify session: Headers already sent in file $file on line $line");
+            }
+
             session_start();
 
             $this->id = session_id();
@@ -113,7 +117,7 @@ class SessionManager implements ISessionManager {
         $data = null;
 
         if(isset($_SESSION[ROOT][$key])) {
-            $fileKey = self::getStoreIndicator($_SESSION[$key]);
+            $fileKey = self::getStoreIndicator($_SESSION[ROOT][$key]);
             if ($fileKey !== null && file_exists(self::getFilePathForKey($fileKey))) {
                 $data = unserialize(file_get_contents(self::getFilePathForKey($fileKey)));
             } else {

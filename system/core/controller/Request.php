@@ -6,7 +6,7 @@
  * @package		Goma\System\Core
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		2.1
+ * @version		2.0.3
  */
 class Request extends Object {
 	/**
@@ -15,14 +15,6 @@ class Request extends Object {
 	 *@access public
 	 */
 	public $url;
-
-	/**
-	 * the method of this request
-	 * POST, GET, PUT, DELETE or HEAD
-	 *@name request_method
-	 *@access public
-	 */
-	public $request_method;
 
 	/**
 	 * all params
@@ -40,59 +32,77 @@ class Request extends Object {
 
 	/**
 	 * get params
-	 *@name get_params
-	 *@access public
+	 *
+	 * @var array
 	 */
 	public $get_params = array();
 
 	/**
 	 * post params
-	 *@name post_params
-	 *@access public
+	 *
+	 * @var array
 	 */
 	public $post_params = array();
 
 	/**
+	 * headers of this request
+	 *
+	 * @var array
+	 */
+	protected $headers;
+
+	/**
+	 * the method of this request
+	 * POST, GET, PUT, DELETE or HEAD
+	 *
+	 * @var String
+	 */
+	protected $request_method;
+
+	/**
 	 * url-parts
-	 *@name url_parts
-	 *@access public
+	 *
+	 * @var array
 	 */
 	protected $url_parts = array();
 
 	/**
 	 * this var contains a sizeof params, which were parsed but not shifted
-	 *@name unshiftedButParsedParams
-	 *@access public
+	 *
+	 * @var int
 	 */
 	protected $unshiftedButParsedParams = 0;
 
 	/**
 	 * shifted path until now
 	 *
-	 *@name shiftedPart
-	 *@access public
+	 * @var string
 	 */
 	protected $shiftedPart = "";
 
 	/**
-	 *@name __construct
-	 *@param string - Request-method
+	 * @param string $method
+	 * @param string $url
+	 * @param array $get_params
+	 * @param array $post_params
+	 * @param array $headers
 	 */
-	public function __construct($method, $url, $get_params = array(), $post_params = array()) {
+	public function __construct($method, $url, $get_params = array(), $post_params = array(), $headers = array()) {
 		parent::__construct();
 
-		$this -> request_method = $method;
+		$this -> request_method = strtoupper(trim($method));
 		$this -> url = $url;
 		$this -> get_params = ArrayLib::map_key("strtolower", $get_params);
 		$this -> post_params = ArrayLib::map_key("strtolower", $post_params);
+		$this -> headers = ArrayLib::map_key("strtolower", $headers);
 		$this -> url_parts = explode('/', $url);
 
 	}
 
 	/**
 	 * checks if POST
-	 *@name isPOST
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public function isPOST() {
 		return ($this -> request_method == "POST");
@@ -100,8 +110,8 @@ class Request extends Object {
 
 	/**
 	 * checks if GET
-	 *@name isGET
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public function isGET() {
 		return ($this -> request_method == "GET");
@@ -109,8 +119,8 @@ class Request extends Object {
 
 	/**
 	 * checks if PUT
-	 *@name isPUT
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public function isPUT() {
 		return ($this -> request_method == "PUT");
@@ -118,20 +128,20 @@ class Request extends Object {
 
 	/**
 	 * checks if DELETE
-	 *@name isDELETE
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public function isDELETE() {
 		return ($this -> request_method == "DELETE");
 	}
 
 	/**
-	 * checks if DELETE
-	 *@name isDELETE
-	 *@access public
+	 * checks if HEAD
+	 *
+	 * @return bool
 	 */
 	public function isHEAD() {
-		return ($this -> request_method == "HEAD");
+		return ($this->request_method == "HEAD");
 	}
 
 	/**
@@ -304,8 +314,10 @@ class Request extends Object {
 
 	/**
 	 * gets a param
-	 *@name getParam
-	 *@access public
+	 *
+	 * @param string $param
+	 * @param bool|string $useall
+	 * @return mixed|null
 	 */
 	public function getParam($param, $useall = true) {
 		$param = strtolower($param);
@@ -328,6 +340,16 @@ class Request extends Object {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * returns given header.
+	 *
+	 * @param string $header
+	 * @return string|null
+	 */
+	public function getHeader($header) {
+		return isset($this->headers[strtolower($header)]) ? $this->headers[strtolower($header)] : null;
 	}
 
 	/**

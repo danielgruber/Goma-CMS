@@ -84,10 +84,10 @@ class CacheManagerTests extends GomaUnitTest {
         $this->unitShouldDelete("gfs.__test.php", time() - 7500, 6000, true);
 
 
-        $this->unitShouldDelete("data.test123456.goma", time() - 120, 1, false);
+        $this->unitShouldDelete("data.test1234567890test12.goma", time() - 120, 1, false);
 
-        $this->unitShouldDelete("data.test123456.goma", time() - 3700, 1, true);
-        $this->unitShouldDelete("data.test123456.goma", time() - 7500, 6000, true);
+        $this->unitShouldDelete("data.test1234567890test12.goma", time() - 3700, 1, true);
+        $this->unitShouldDelete("data.test1234567890test12.goma", time() - 7500, 6000, true);
 
         $this->unitShouldDelete("deletecache", time() - 3700, 0, false);
         $this->unitShouldDelete("autoloader_exclude", time() - 3700, 0, false);
@@ -100,12 +100,16 @@ class CacheManagerTests extends GomaUnitTest {
      * @param bool $expected
      */
     public function unitShouldDelete($filename, $timestamp, $minLifeTime, $expected) {
-        $c = new CacheManager(CACHE_DIRECTORY);
-        touch($c->dir() . $filename, $timestamp);
+        $cacheManager = new CacheManager(CACHE_DIRECTORY);
+        touch($cacheManager->dir() . $filename, $timestamp);
 
-        $diff = $timestamp - NOW;
-        $this->assertEqual($c->shouldDeleteCacheFile($filename, $minLifeTime), $expected, "%s $filename with timestamp-diff $diff and lifetime $minLifeTime.");
+        $diff = $timestamp - time();
+        $this->assertEqual(
+            $cacheManager->shouldDeleteCacheFile($filename, $minLifeTime),
+            $expected,
+            "%s $filename with timestamp-diff $diff and lifetime $minLifeTime."
+        );
 
-        FileSystem::delete($c->dir() . $filename);
+        FileSystem::delete($cacheManager->dir() . $filename);
     }
 }

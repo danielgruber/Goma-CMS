@@ -57,7 +57,7 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 	 */
 	public function add($tableField, $request) {
 		$obj = $tableField->getData();
-		$tableField->form()->controller->request->post_params = $_POST;
+		$tableField->form()->getRequest()->post_params = $_POST;
 
 		$submit = $tableField->form()->useStateData ? "submit_form" : "publish";
 

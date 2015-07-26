@@ -41,6 +41,13 @@ class Director extends Object {
     private static $sortedRules;
 
     /**
+     * Init.
+     */
+    public static function Init() {
+        StaticsManager::setSaveVars("director");
+    }
+
+    /**
      * adds some rules to controller
      *@param array $rules
      *@param int $priority
@@ -124,7 +131,12 @@ class Director extends Object {
             }
         }
 
-        $request = new Request((isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'], $url, $_GET, array_merge((array)$_POST, (array)$_FILES));
+        $request = new Request(
+            (isset($_SERVER['X-HTTP-Method-Override'])) ? $_SERVER['X-HTTP-Method-Override'] : $_SERVER['REQUEST_METHOD'],
+            $url,
+            $_GET,
+            array_merge((array)$_POST, (array)$_FILES),
+            getallheaders());
 
         $ruleMatcher = RuleMatcher::initWithRulesAndRequest(self::getSortedRules(), $request);
         while($nextController = $ruleMatcher->matchNext()) {

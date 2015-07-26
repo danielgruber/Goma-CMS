@@ -333,10 +333,10 @@ function loadFramework() {
 	if (PROFILE)
 		Profiler::unmark("Manifest");
 
-	// set some object-specific vars
-	StaticsManager::setSaveVars("core");
+	// init
 	StaticsManager::setSaveVars("object");
-		
+
+	Director::Init();
 	Core::Init();
 }
 

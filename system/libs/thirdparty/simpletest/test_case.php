@@ -310,6 +310,7 @@ class SimpleTestCase {
      *    @access public
      */
     function assert($expectation, $compare, $message = '%s') {
+
         if ($expectation->test($compare)) {
             return $this->pass(sprintf(
                     $message,
