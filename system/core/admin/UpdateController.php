@@ -35,7 +35,7 @@ class UpdateController extends adminController {
     /**
      * default index action. Shows Update-Page.
      *
-     * @return mixed|string
+     * @return bool|string
      */
 	public function index() {
 		$view = new ViewAccessableData();

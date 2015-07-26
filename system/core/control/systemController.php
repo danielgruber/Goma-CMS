@@ -44,7 +44,7 @@ class systemController extends Controller {
 	);
 
 	/**
-	 * @return bool
+	 * @return bool|string
 	 */
 	public function index() {
 		return false;
