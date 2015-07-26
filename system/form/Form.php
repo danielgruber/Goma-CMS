@@ -208,7 +208,7 @@ class Form extends object {
 		if(PROFILE)
 			Profiler::mark("form::__construct");
 
-		$this->name = $name;
+		$this->name = strtolower($name);
 
 		$this->initWithRequest($controller, $request);
 
@@ -410,7 +410,7 @@ class Form extends object {
 		}
 	
 		Resources::add("form.css", "css");
-		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey("form_" . strtolower($this->name))) {
+		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
 			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
@@ -558,8 +558,9 @@ class Form extends object {
 	/**
 	 * sets the result
 	 *
-	 *@name setResult
-	 *@access public
+	 * @name setResult
+	 * @access public
+	 * @return bool
 	 */
 	public function setResult($result) {
 		if(is_object($result)) {

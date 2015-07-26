@@ -284,6 +284,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	 * @return bool|mixed|string
 	 */
 	public static function buildDistro($file, $name, $controller) {
+
 		if(Core::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
 			return Object::instance("g_frameworkSoftWareType")->finalizeDistro(Core::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 		

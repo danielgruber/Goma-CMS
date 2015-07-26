@@ -90,21 +90,6 @@ class GFS_Package_Creator extends GFS {
 		if(isset($index)) {
 			$this->fileIndex = $index;
 		}
-
-		
-		
-		/*$f = @disk_free_space("/");
-		if($f !== null && $f !== "" && $f !== false) {
-			// check for disk-quote
-			$free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
-			define("GOMA_FREE_SPACE", $free);
-			if($free / 1024 / 1024 < 20) {
-				// free space
-				@unlink($this->file);
-				header("HTTP/1.1 500 Server Error");
-				die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
-			}
-		}*/
 		
 		// Adding files...
 		$this->status = "Adding files...";
@@ -128,8 +113,6 @@ class GFS_Package_Creator extends GFS {
 			$this->addFile("/gfsprogress" . count($this->fileIndex), serialize(array("i" => $i, "count" => $count)));
 		}
 
-		//file_put_contents("./info_" . $count . ".log", print_r($this->db, true) . "\n", FILE_APPEND);
-		
 		$realfiles = array_keys($this->fileIndex);
 		$paths = array_values($this->fileIndex);
 		
@@ -139,7 +122,6 @@ class GFS_Package_Creator extends GFS {
 			if(microtime(true) - $start < 2.0) {
 				if(!$this->exists($paths[$i])) {
 					$this->addFromFile($realfiles[$i], $paths[$i]);
-					//file_put_contents("./info_" . $count . ".log", $paths[$i] . "\n", FILE_APPEND);
 				}
 			} else {
 				$count++;
@@ -196,13 +178,14 @@ class GFS_Package_Creator extends GFS {
 			}
 		}
 	}
-	
+
 	/**
 	 * if a specific file was packed
 	 *
-	 *@name wasPacked
-	 *@access public
-	*/
+	 * @name wasPacked
+	 * @access public
+	 * @return bool
+	 */
 	public static function wasPacked($file = null) {
 		if(isset($file)) {
 			$file = str_replace('\\\\', '\\', realpath($file));

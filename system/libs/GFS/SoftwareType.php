@@ -942,6 +942,7 @@ abstract class g_SoftwareType {
 	 * @return bool
 	 */
 	public function finalizeDistro($data) {
+
 		Core::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
 
 		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
