@@ -407,6 +407,15 @@ class LoginInvalidException extends LogicException {
 	public function __construct($m = "", $code = ExceptionManager::LOGIN_INVALID, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
+
+	/**
+	 * correct status.
+	 *
+	 * @return int
+	 */
+	public function http_status() {
+		return 403;
+	}
 }
 
 class LoginUserLockedException extends LogicException {
@@ -416,6 +425,15 @@ class LoginUserLockedException extends LogicException {
 	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_LOCKED, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
+
+	/**
+	 * correct status.
+	 *
+	 * @return int
+	 */
+	public function http_status() {
+		return 403;
+	}
 }
 
 class LoginUserMustUnlockException extends LogicException {
@@ -424,5 +442,14 @@ class LoginUserMustUnlockException extends LogicException {
 	 */
 	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_MUST_UNLOCK, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
+	}
+
+	/**
+	 * correct status.
+	 *
+	 * @return int
+	 */
+	public function http_status() {
+		return 403;
 	}
 }
