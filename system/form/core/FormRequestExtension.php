@@ -16,6 +16,7 @@ class FormRequestExtension extends Extension {
      * @param bool $handleWithMethod
      */
     public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
+
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 
@@ -40,7 +41,8 @@ class FormRequestExtension extends Extension {
      * @param string $action
      * @param bool $hasAction
      */
-    public function extendHasAction( $action, &$hasAction) {
+    public function extendHasAction($action, &$hasAction) {
+
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 

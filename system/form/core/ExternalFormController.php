@@ -40,13 +40,11 @@ class ExternalFormController extends RequestHandler {
     public function FieldExtAction($form, $field) {
         $field = strtolower($field);
 
-        if(session_store_exists("form_" . strtolower($form))) {
-            $f = session_restore("form_" . strtolower($form));
+        if($fieldInstance = Core::globalSession()->get(Form::SESSION_PREFIX . "." . strtolower($form))) {
+            if(isset($fieldInstance->$field)) {
+                $data = $fieldInstance->$field->handleRequest($this->request);
 
-            if(isset($f->$field)) {
-                $data = $f->$field->handleRequest($this->request);
-
-                session_store("form_" . strtolower($form), $f);
+                Core::globalSession()->set(Form::SESSION_PREFIX . "." . strtolower($form), $fieldInstance);
                 return $data;
             }
             return false;

@@ -18,6 +18,12 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @version 2.4.1
  */
 class Form extends object {
+
+	/**
+	 * session-prefix for form.
+	 */
+	const SESSION_PREFIX = "form";
+
 	/**
 	 * name of the form
 	 *@name name
@@ -169,8 +175,7 @@ class Form extends object {
 	/**
 	 * current state of this form
 	 *
-	 *@name state
-	 *@access public
+	 * @var FormState
 	 */
 	public $state;
 
@@ -291,8 +296,11 @@ class Form extends object {
 	 */
 	protected function checkForRestore() {
 		// if we restore form
-		if(Core::globalSession()->hasKey("form_restore." . $this->name()) && session_store_exists("form_" . strtolower($this->name))) {
-			$data = session_restore("form_" . strtolower($this->name));
+		if(
+			Core::globalSession()->hasKey("form_restore." . $this->name()) &&
+			Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))
+		) {
+			$data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 			$this->useStateData = $data->useStateData;
 			$this->result = $data->result;
 			$this->post = $data->post;
@@ -303,8 +311,8 @@ class Form extends object {
 		}
 
 		// get form-state
-		if(session_store_exists("form_state_" . $this->name) && isset($this->post)) {
-			$this->state = new FormState(session_restore("form_state_" . $this->name));
+		if(Core::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
+			$this->state = new FormState(Core::globalSession()->get("form_state_" . $this->name));
 		} else {
 			$this->state = new FormState();
 		}
@@ -402,9 +410,9 @@ class Form extends object {
 		}
 	
 		Resources::add("form.css", "css");
-		if(isset($_POST["form_submit_" . $this->name()]) && session_store_exists("form_" . strtolower($this->name))) {
+		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey("form_" . strtolower($this->name))) {
 			// check secret
-			if($this->secret && $_POST["secret_" . $this->ID()] == $this->state->secret) {
+			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
 				return $this->submit();
 			} else if(!$this->secret) {
@@ -436,11 +444,9 @@ class Form extends object {
 		// check get
 		foreach($_GET as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
-
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
-					if(session_store_exists("form_" . strtolower($this->name))) {
-						$data = session_restore("form_" . strtolower($this->name));
+					if($data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 						$this->result = $data->result;
 						$this->post = $data->post;
 						$this->restorer = $data;
@@ -463,7 +469,6 @@ class Form extends object {
 		$fields = "";
 
 		foreach($this->fieldList as $field) {
-			$name = strtolower($field->name);
 			if($this->isFieldToRender($field->name)) {
 				$this->registerRendered($field->name);
 				$div = $field->field();
@@ -539,7 +544,7 @@ class Form extends object {
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
-		session_store("form_state_" . $this->name, $this->state->ToArray());
+		Core::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
 
 		$this->saveToSession();
 
@@ -583,8 +588,6 @@ class Form extends object {
 
 		$this->post = $_POST;
 
-		$i = 0;
-
 		foreach($this->post as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
@@ -594,7 +597,7 @@ class Form extends object {
 			}
 		}
 
-		$data = session_restore("form_" . strtolower($this->name));
+		$data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->post = $this->post;
 
 		// just write it
@@ -653,43 +656,23 @@ class Form extends object {
 			$result = call_user_func_array($callback, array($result));
 		}
 
-		// find actions in fields
-		foreach($data->fields as $field) {
-			if(is_a($field, "FormActionHandler")) {
-				if(isset($_POST[$field->postname()]) || (isset($_POST["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel")) {
-					$i++;
-					if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
-						if($submit == "@default") {
-							$submission = $this->submission;
-						} else {
-							$submission = $submit;
-						}
-						break;
-					} else {
-						$this->state = $data->state;
-						$this->defaultFields();
-						return $this->renderForm();
-					}
-				}
+		$submission = $this->findSubmission($data, $this->post, $result);
+
+		if($valid !== true || $submission === null) {
+			if($errors) {
+				Core::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
+				$this->form->append($errors);
+			} else {
+				$this->state = $data->state;
+				$this->defaultFields();
 			}
-		}
 
-		if($valid !== true) {
-			Core::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
-			$this->form->append($errors);
-			return $this->renderForm();
-		}
-
-		// no registered action has submitted the form
-		if($i == 0) {
-			$this->state = $data->state;
-			$this->defaultFields();
 			return $this->renderForm();
 		}
 
 		$data->callExtending("afterSubmit", $result);
 
-		session_store("form_state_" . $this->name, $this->state->ToArray());
+		Core::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
 
 		if(is_callable($submission)) {
 			return call_user_func_array($submission, array(
@@ -708,6 +691,34 @@ class Form extends object {
 				$this->controller
 			));
 		}
+	}
+
+	/**
+	 * finds a submission for the form. returns null when not found.
+	 */
+	protected function findSubmission($form, $post, $result) {
+		$submission = null;
+		// find actions in fields
+		/** @var FormAction $field */
+		foreach($form->fields as $field) {
+			if(is_a($field, "FormActionHandler")) {
+				if(isset($post[$field->postname()]) ||
+					(isset($post["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel")) {
+					if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
+						if($submit == "@default") {
+							$submission = $this->submission;
+						} else {
+							$submission = $submit;
+						}
+						break;
+					} else {
+						return null;
+					}
+				}
+			}
+		}
+
+		return $submission;
 	}
 
 	//! Manipulate the form
@@ -1069,7 +1080,7 @@ class Form extends object {
 	 * saves current form to session
 	 */
 	public function saveToSession() {
-		session_store("form_" . strtolower($this->name), $this);
+		Core::globalSession()->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
 	}
 
 	/**

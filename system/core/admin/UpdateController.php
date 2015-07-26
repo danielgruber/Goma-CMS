@@ -142,7 +142,7 @@ class UpdateController extends adminController {
             $inst->filename = basename($file);
             $inst->fileid = convert::raw2text($this->getParam("id"));
 
-            session_store("update_" . $inst->fileid, $inst);
+            Core::globalSession()->set("update." . $inst->fileid, $inst);
 
             return $inst->renderWith("admin/updateInfo.html");
         }
@@ -194,13 +194,14 @@ class UpdateController extends adminController {
             return null; // no update found.
         }
     }
-	
-	/**
-	 * shows a form for uploading a file.
-	 *
-	 *@name index
-	 *@access public
-	*/
+
+    /**
+     * shows a form for uploading a file.
+     *
+     * @name index
+     * @access public
+     * @return mixed|string
+     */
 	public function upload() {
 
         // show upload-button and a download-button. User can down and reupload file now.
@@ -261,13 +262,12 @@ class UpdateController extends adminController {
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $data["file"]->id . URLEND . "?redirect=" . urlencode(BASE_URI . BASE_SCRIPT . "admin" . URLEND));
 		exit;
 	}
-	
-	/**
-	 * installs the update
-	 *
-	 *@name installUpdate
-	 *@access public
-	*/
+
+    /**
+     * installs the update
+     *
+     * @return bool
+     */
 	public function installUpdate() {
 		if(preg_match('/^[0-9]+$/', $this->getParam("update"))) {
 			if(!($fileid = $this->getParam("update"))) {
@@ -287,14 +287,14 @@ class UpdateController extends adminController {
 				exit;
 			}
 		
-			if(!session_store_exists("update_" . $file->id)) {
+			if(!Core::globalSession()->hasKey("update." . $file->id)) {
 				AddContent::addError(lang("less_rights", "You are not permitted to do this."));
 				
 				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
 				exit;
 			}
 			
-			$data = session_restore("update_" . $file->id);
+			$data = Core::globalSession()->get("update_" . $file->id);
 		} else {
 			
 			if(!in_array($this->getParam("update"), $_SESSION["updates"])) {
@@ -309,14 +309,14 @@ class UpdateController extends adminController {
 				exit;
 			}
 			
-			if(!session_store_exists("update_" . $this->getParam("update"))) {
+			if(!Core::globalSession()->hasKey("update_" . $this->getParam("update"))) {
 				AddContent::addError(lang("less_rights", "You are not permitted to do this."));
 				
 				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
 				exit;
 			}
 			
-			$data = session_restore("update_" . $this->getParam("update"));
+			$data = Core::globalSession()->get("update_" . $this->getParam("update"));
 		}
 		
 		return G_SoftwareType::install($data);
