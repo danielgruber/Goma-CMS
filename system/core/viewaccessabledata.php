@@ -399,7 +399,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @param string - template
      * @param array - areas
      * @param expansion -name of you want to use the expansion-path too
-     * @return mixed
+     * @return string
      */
 	public function renderWith($view, $expansion = null) {
 		return tpl::render($view, array(), $this, $expansion);

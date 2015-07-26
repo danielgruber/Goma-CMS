@@ -9,6 +9,11 @@
  */
 class Dev extends RequestHandler {
 	/**
+	 * session-key for dev without perm.
+	 */
+	const SESSION_DEV_WITHOUT_PERM = "dev_without_perm";
+
+	/**
 	 * title of current view
 	 */
 	public static $title = "Creating new Database";
@@ -39,8 +44,7 @@ class Dev extends RequestHandler {
 	 *
 	 */
 	public static function redirectToDev() {
-		@session_start();
-		$_SESSION["dev_without_perms"] = true;
+		Core::globalSession()->set(self::SESSION_DEV_WITHOUT_PERM, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
 		exit ;
 	}
@@ -54,7 +58,7 @@ class Dev extends RequestHandler {
 
 		HTTPResponse::unsetCacheable();
 
-		if(!isset($_SESSION["dev_without_perms"]) && !Permission::check("ADMIN")) {
+		if(!Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM) && !Permission::check("ADMIN")) {
 			makeProjectAvailable();
 
 			throw new PermissionException();
@@ -109,7 +113,7 @@ class Dev extends RequestHandler {
 		Core::callHook("deleteCachesInDev");
 
 		// check if dev-without-perms, so redirect directly
-		if(isset($_SESSION["dev_without_perms"])) {
+		if(Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -137,7 +141,7 @@ class Dev extends RequestHandler {
 		define("DEV_BUILD", true);
 
 		// redirect if needed
-		if(isset($_SESSION["dev_without_perms"])) {
+		if(Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/builddev" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -194,16 +198,13 @@ class Dev extends RequestHandler {
 	public static function checkForRedirect() {
 		// redirect if needed
 		if(isset($_GET["redirect"])) {
-			if(isset($_SESSION["dev_without_perms"])) {
-				unset($_SESSION["dev_without_perms"]);
-			}
+			Core::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM);
 			HTTPResponse::redirect($_GET["redirect"]);
 			exit ;
 		}
 
 		// redirect to BASE if needed
-		if(isset($_SESSION["dev_without_perms"])) {
-			unset($_SESSION["dev_without_perms"]);
+		if(Core::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM)) {
 			header("Location: " . ROOT_PATH);
 			Core::callHook("onBeforeShutDown");
 			exit;

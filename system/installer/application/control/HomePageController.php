@@ -12,33 +12,38 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class HomePageController extends RequestHandler {
 	/**
+	 * lang selected session key.
+	 */
+	const SESSION_LANGSELECT = "langselected";
+
+	/**
 	 * shows install fronted if language is already selected, else shows lang-select
 	*/
 	public function index() {
-		if(isset($_SESSION["langselected"]) || isset($_GET["setlang"])) {
-			$_SESSION["langselected"] = true;
+		if(Core::globalSession()->hasKey(self::SESSION_LANGSELECT) || isset($_GET["setlang"])) {
+			Core::globalSession()->set(self::SESSION_LANGSELECT, true);
 			$controller = new InstallController();
 			return $controller->handleRequest($this->request);
 		} else {
 			return $this->langSelect();
 		}
 	}
+
 	/**
 	 * shows lang-select
 	 *
-	 *@name langSelect
-	*/
+	 * @return string
+	 */
 	public function langSelect() {
 		$data = new ViewAccessAbleData();
 		return $data->customise(array("firstrun" => 1,"content" => tpl::Render("install/langselect.html")))->renderWith("install/install.html");
 	}
-	
+
 	/**
 	 * returns an array of the wiki-article and youtube-video for this controller
 	 *
-	 *@name helpArticle
-	 *@access public
-	*/
+	 * @return array
+	 */
 	public function helpArticle() {
 		return array("yt" => "QcIBX3Rh0RA#t=03m08s");
 	}

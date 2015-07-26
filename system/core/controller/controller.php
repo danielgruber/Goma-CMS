@@ -7,10 +7,15 @@ defined("IN_GOMA") OR die();
  * @author        Goma-Team
  * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package        Goma\Controller
- * @version        2.3.5
+ * @version        2.3.6
  */
 class Controller extends RequestHandler
 {
+    /**
+     * keychain constant for session.
+     */
+    const SESSION_KEYCHAIN = "c_keychain";
+
     /**
      * showform if no edit right
      *
@@ -851,10 +856,10 @@ class Controller extends RequestHandler
             $cookielt = 14 * 24 * 60 * 60;
         }
 
-        if (isset($_SESSION["keychain"])) {
-            $_SESSION["keychain"] = array();
-        }
-        $_SESSION["keychain"][] = $password;
+        $keychain = self::getCurrentKeychain();
+        $keychain[] = $password;
+
+        Core::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
 
         if ($cookie) {
             setCookie("keychain_" . md5(md5($password)), md5($password), NOW + $cookielt);
@@ -870,7 +875,14 @@ class Controller extends RequestHandler
      */
     public static function KeyChainCheck($password)
     {
-        if ((isset($_SESSION["keychain"]) && in_array($password, $_SESSION["keychain"])) || (isset($_COOKIE["keychain_" . md5(md5($password))]) && $_COOKIE["keychain_" . md5(md5($password))] == md5($password)) || isset($_GET[getPrivateKey()])) {
+        $keychain = self::getCurrentKeychain();
+        if ((in_array($password, $keychain)) ||
+            (
+                isset($_COOKIE["keychain_" . md5(md5($password))]) &&
+                $_COOKIE["keychain_" . md5(md5($password))] == md5($password)
+            ) ||
+            isset($_GET[getPrivateKey()])
+        ) {
             return true;
         } else {
             return false;
@@ -885,12 +897,25 @@ class Controller extends RequestHandler
      */
     public static function keyChainRemove($password)
     {
-        if (isset($_SESSION["keychain"])) {
-            if ($key = array_search($password, $_SESSION["keychain"])) {
-                unset($_SESSION["keychain"][$key]);
-            }
+        $keychain = self::getCurrentKeychain();
+
+        if ($key = array_search($password, $keychain)) {
+            unset($keychain[$key]);
         }
 
+        Core::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
+
         setCookie("keychain_" . md5(md5($password)), null, -1);
+    }
+
+    /**
+     * returns current keychain-array.
+     */
+    protected static function getCurrentKeychain() {
+        if(Core::globalSession()->hasKey(self::SESSION_KEYCHAIN)) {
+            return Core::globalSession()->get(self::SESSION_KEYCHAIN);
+        }
+
+        return array();
     }
 }

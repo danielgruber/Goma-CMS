@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class SortableTableView extends adminItem
+class SortableTableView extends TableView
 {
     public $pages = true;
     public $perPage = 20;
@@ -145,43 +145,6 @@ class SortableTableView extends adminItem
         }
         HTTPResponse::output(1);
         exit;
-    }
-
-    /**
-     * checks if the user is allowed to call this action
-     *
-     * @name checkPermissions
-     * @access public
-     * @param string $action
-     * @return bool
-     */
-    public function checkPermission($action)
-    {
-        $this->actions = ArrayLib::map_key("strtolower", $this->actions);
-
-        if (isset($this->actions[$action])) {
-            return true;
-        }
-
-        return parent::checkPermission($action);
-    }
-
-    /**
-     * deletes some of the data
-     *
-     * @name deleteMany
-     * @access public
-     */
-    public function deleteMany()
-    {
-        if (Core::globalSession()->get("deletekey." . $this->classname) == $_POST["deletekey"]) {
-            $data = $_POST["data"];
-            unset($data["all"]);
-            foreach ($data as $key => $value) {
-                DataObject::get($this->model_inst, array("id" => $key))->remove();
-            }
-            $this->redirectBack();
-        }
     }
 
     /**

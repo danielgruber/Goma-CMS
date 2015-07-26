@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.2.7
+ * @version     2.2.8
  */
  
 class LeftAndMain extends AdminItem {
@@ -73,23 +73,25 @@ class LeftAndMain extends AdminItem {
 	 * render-class.
 	*/
 	static $render_class = "LeftAndMain_TreeRenderer";
-	
+
 	/**
 	 * gets the title of the root node
 	 *
-	 *@name getRootNode
-	 *@access public
-	*/
+	 * @name getRootNode
+	 * @access public
+	 * @return string
+	 */
 	public function getRootNode() {
 		return parse_lang($this->root_node);
 	}
-	
+
 	/**
 	 * generates the options for the create-select-field
 	 *
-	 *@name CreateOptions
-	 *@access public
-	*/
+	 * @name CreateOptions
+	 * @access public
+	 * @return array
+	 */
 	public function createOptions() {
 		$options = array();
 		foreach($this->models as $model) {
@@ -133,8 +135,8 @@ class LeftAndMain extends AdminItem {
 			$this->ModelInst()->addmode = 1;
 		
 		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode(), "TREEOPTIONS" => $this->generateTreeOptions()))->renderWith($this->baseTemplate);
-		
-		$_SESSION[$this->classname . "_LaM_marked"] = $this->marked;
+
+		Core::globalSession()->set("LaM_marked." . $this->classname, $this->marked);
 		
 		// parent-serve
 		return parent::serve($output);
@@ -287,7 +289,10 @@ class LeftAndMain extends AdminItem {
 		
 		$this->marked = $this->getParam("marked");
 		$search = $this->getParam("search");
-		HTTPResponse::setBody($this->createTree($search), isset($_SESSION[$this->classname . "_LaM_marked"]) ? $_SESSION[$this->classname . "_LaM_marked"] : 0);
+
+		$marked = Core::globalSession()->get("LaM_marked." . $this->classname) ?: 0;
+
+		HTTPResponse::setBody($this->createTree($search), $marked);
 		HTTPResponse::output();
 		exit;
 	}
@@ -367,28 +372,30 @@ class LeftAndMain extends AdminItem {
 			return $response;
 		}
 	}
-	
+
 	/**
 	 * decorate model
 	 *
-	 *@name decorateModel
-	 *@access public
-	 *@param object - model
-	 *@param array additional
-	 *@param object|null controller
-	*/
+	 * @name decorateModel
+	 * @access public
+	 * @param object - model
+	 * @param array additional
+	 * @param object|null controller
+	 * @return DataObject
+	 */
 	public function decorateModel($model, $add = array(), $controller = null) {
 		$add["types"] = $this->Types();
 
 		return parent::decorateModel($model, $add, $controller);
 	}
-	
+
 	/**
 	 * gets the options for add
 	 *
-	 *@name Types
-	 *@access public
-	*/
+	 * @name Types
+	 * @access public
+	 * @return DataSet
+	 */
 	public function Types() {
 		$data = $this->createOptions();
 		$arr = new DataSet();
