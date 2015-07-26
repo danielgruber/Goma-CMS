@@ -111,7 +111,7 @@ define('STATUS_DISABLED', 0);
 
 // version
 define("GOMA_VERSION", "2.0RC3");
-define("BUILD_VERSION", "109");
+define("BUILD_VERSION", "110");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -147,6 +147,8 @@ require_once (FRAMEWORK_ROOT . 'libs/file/FileSystem.php');
 require_once (FRAMEWORK_ROOT . 'libs/template/tpl.php');
 require_once (FRAMEWORK_ROOT . 'libs/http/httpresponse.php');
 require_once (FRAMEWORK_ROOT . 'core/Core.php');
+require_once (FRAMEWORK_ROOT . 'core/controller/Director.php');
+require_once (FRAMEWORK_ROOT . 'security/ISessionManager.php');
 require_once (FRAMEWORK_ROOT . 'core/CoreLibs/CacheManager.php');
 require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 

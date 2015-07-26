@@ -44,6 +44,12 @@ class Dev extends RequestHandler {
 	 *
 	 */
 	public static function redirectToDev() {
+
+		if(Core::globalSession() == null) {
+			ClassManifest::tryToInclude("SessionManager", "system/security/SessionManager.php");
+			Core::__setSession(SessionManager::startWithIdAndName(null));
+		}
+
 		Core::globalSession()->set(self::SESSION_DEV_WITHOUT_PERM, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
 		exit ;
