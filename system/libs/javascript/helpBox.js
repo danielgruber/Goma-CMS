@@ -150,6 +150,8 @@
                     right: positionRight,
                     bottom: positionBottom
                 });
+            } else {
+                box.css("display", "none");
             }
         }
     };
