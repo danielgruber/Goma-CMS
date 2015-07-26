@@ -56,15 +56,16 @@ abstract class g_SoftwareType {
 	public function __construct($file = null) {
 		$this->file = $file;
 	}
-	
+
 	/**
 	 * gets information on how to install this software
 	 * this method might expand files for installing
 	 *
-	 *@name install
-	 *@access public
-	*/
-	abstract public function getInstallInfo($forceInstall = false);
+	 * @param RequestHandler $controller
+	 * @param bool $forceInstall
+	 * @return
+	 */
+	abstract public function getInstallInfo($controller, $forceInstall = false);
 	
 	/**
 	 * gets basic information about a package and validates basic info

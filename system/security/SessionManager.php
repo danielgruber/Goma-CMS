@@ -8,7 +8,7 @@
  * @author      Goma-Team
  * @version     1.0
  *
- * last modified: 21.07.2015
+ * last modified: 26.07.2015
  */
 class SessionManager implements ISessionManager {
 
@@ -109,16 +109,15 @@ class SessionManager implements ISessionManager {
      * @param string $key
      * @return mixed
      */
-    public function get($key)
-    {
+    public function get($key) {
         $data = null;
 
-        if(isset($_SESSION[$key])) {
+        if(isset($_SESSION[ROOT][$key])) {
             $fileKey = self::getStoreIndicator($_SESSION[$key]);
             if ($fileKey !== null && file_exists(self::getFilePathForKey($fileKey))) {
                 $data = unserialize(file_get_contents(self::getFilePathForKey($fileKey)));
             } else {
-                $data = $_SESSION[$key];
+                $data = $_SESSION[ROOT][$key];
             }
 
             if(is_object($data) && method_exists($data, "__wakeup")) {
@@ -136,8 +135,7 @@ class SessionManager implements ISessionManager {
      * @param mixed $value
      * @return void
      */
-    public function set($key, $value)
-    {
+    public function set($key, $value) {
         $matchValue = (is_array($value) || is_object($value)) ? serialize($value) : $value;
 
         if(strlen($matchValue) > self::FILE_THRESHOLD) {
@@ -145,9 +143,9 @@ class SessionManager implements ISessionManager {
 
             FileSystem::write(self::getFilePathForKey($random), $matchValue, LOCK_EX, 0773);
 
-            $_SESSION[$key] = self::STORE_INDICATOR . $random;
+            $_SESSION[ROOT][$key] = self::STORE_INDICATOR . $random;
         } else {
-            $_SESSION[$key] = $value;
+            $_SESSION[ROOT][$key] = $value;
         }
     }
 
@@ -157,16 +155,15 @@ class SessionManager implements ISessionManager {
      * @param string $key
      * @return boolean if something happended
      */
-    public function remove($key)
-    {
-        if(isset($_SESSION[$key])) {
+    public function remove($key) {
+        if(isset($_SESSION[ROOT][$key])) {
 
-            $fileKey = self::getStoreIndicator($_SESSION[$key]);
+            $fileKey = self::getStoreIndicator($_SESSION[ROOT][$key]);
             if ($fileKey !== null && file_exists(self::getFilePathForKey($fileKey))) {
                 unlink(self::getFilePathForKey($fileKey));
             }
 
-            unset($_SESSION[$key]);
+            unset($_SESSION[ROOT][$key]);
 
             return true;
         }
@@ -177,9 +174,8 @@ class SessionManager implements ISessionManager {
     /**
      * purges the session.
      */
-    public function purge()
-    {
-        foreach($_SESSION as $key => $val) {
+    public function purge() {
+        foreach($_SESSION[ROOT] as $key => $val) {
             $this->remove($key);
         }
     }
@@ -187,8 +183,7 @@ class SessionManager implements ISessionManager {
     /**
      * stops session-manager.
      */
-    public function stopSession()
-    {
+    public function stopSession() {
         session_write_close();
         self::$existing = null;
     }
@@ -196,8 +191,7 @@ class SessionManager implements ISessionManager {
     /**
      * returns session-id.
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -213,16 +207,14 @@ class SessionManager implements ISessionManager {
     /**
      * @return string
      */
-    public function getName()
-    {
+    public function getName() {
         return $this->name;
     }
 
     /**
      * @param string $name
      */
-    protected function setName($name)
-    {
+    protected function setName($name) {
         if(isset($name)) {
             $this->name = $name;
         }
@@ -234,13 +226,12 @@ class SessionManager implements ISessionManager {
      * @param $key
      * @return boolean
      */
-    public function hasKey($key)
-    {
-        if(!isset($_SESSION[$key])) {
+    public function hasKey($key) {
+        if(!isset($_SESSION[ROOT][$key])) {
             return false;
         }
 
-        $fileKey = self::getStoreIndicator($_SESSION[$key]);
+        $fileKey = self::getStoreIndicator($_SESSION[ROOT][$key]);
         if ($fileKey !== null && !file_exists(self::getFilePathForKey($fileKey))) {
             return false;
         }
@@ -277,9 +268,8 @@ class SessionManager implements ISessionManager {
      *
      * @return array
      */
-    public function listKeys()
-    {
-        return array_keys($_SESSION);
+    public function listKeys() {
+        return array_keys($_SESSION[ROOT]);
     }
 
     /**
@@ -288,8 +278,7 @@ class SessionManager implements ISessionManager {
      * @param string $prefix
      * @return int
      */
-    public function removeByPrefix($prefix)
-    {
+    public function removeByPrefix($prefix) {
         $i = 0;
         foreach($this->listKeys() as $key) {
             if(substr($key, 0, strlen($prefix)) == $prefix) {
