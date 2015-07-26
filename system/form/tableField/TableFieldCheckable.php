@@ -1,4 +1,5 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * Table-Field plugin to add a new column with checkboxes.
  *
@@ -7,19 +8,22 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.0.1
+ * @version     1.1
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class TableFieldCheckable implements TableField_ColumnProvider {
-	
+
+	/**
+	 * session-prefix.
+	 */
+	const SESSION_PREFIX = "tablefield_check";
+
 	/**
 	 * returns the currently checked values by name of tablefield.
 	*/
 	public static function getChecked($checkName = "check") {
 		self::updateSession($checkName);
-		return isset($_SESSION["tablefield"]["check_" . $checkName]) ? $_SESSION["tablefield"]["check_" . $checkName] : array();
+
+		return Core::globalSession()->get(self::SESSION_PREFIX . "." . $checkName) ?: array();
 	}
 	/**
 	 * You can define the name of the Checkboxes here.
@@ -36,19 +40,35 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	*/
 	public static function updateSession($name) {
 		if(!isset($_POST[$name . "_check"])) {
-			unset($_SESSION["tablefield"]["check_" . $name]);
+			Core::globalSession()->remove(self::SESSION_PREFIX . "." . $name);
 		}
 		
 		if(isset($_POST[$name . "_check"])) {
-			isset($_SESSION["tablefield"]["check_" . $name]) OR $_SESSION["tablefield"]["check_" . $name] = array();
+			$sessionData = self::getSessionDataForKey($name);
 			foreach($_POST[$name . "_check"] as $k => $v) {
 				if(isset($_POST[$name][$k])) {
-					$_SESSION["tablefield"]["check_" . $name][$k] = true;
+					$sessionData[$k] = true;
 				} else {
-					unset($_SESSION["tablefield"]["check_" . $name][$k]);
+					unset($sessionData[$k]);
 				}
 			}
+
+			Core::globalSession()->set(self::SESSION_PREFIX . "." . $name, $sessionData);
 		}
+	}
+
+	/**
+	 * returns session-data for key.
+	 *
+	 * @param string $name
+	 * @return array
+	 */
+	protected static function getSessionDataForKey($name) {
+		if(Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . $name)) {
+			return Core::globalSession()->get(self::SESSION_PREFIX . "." . $name);
+		}
+
+		return array();
 	}
 	
 	/**
@@ -114,8 +134,9 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 		$data = new ViewAccessableData();
 		$data->id = $record->id;
 		$data->name = $this->checkname;
-		$data->checked = isset($_SESSION["tablefield"]["check_" . $this->checkname][$record->ID]);
-		
+
+		$sessionData = self::getSessionDataForKey($this->checkname);
+		$data->checked = isset($sessionData[$record->ID]);
 		
 		return $data->renderWith("form/tableField/checkbox.html");
 	}
