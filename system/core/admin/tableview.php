@@ -113,18 +113,18 @@ class TableView extends AdminItem
 
         return $this->modelInst()->customise(
             array(
-                "search" => $search,
-                "perPage" => $this->perPage,
-                "datafields" => $fields,
-                "action" => $actions,
-                "globalaction" => $globalactions
-            ),
-            array_merge(
-                array(
-                    "deletekey" => Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname),
-                    "deletable" => isset($this->actions["delete"])
-                ),
-                $this->tplVars
+                array_merge(
+                    array(
+                        "search" => $search,
+                        "perPage" => $this->perPage,
+                        "datafields" => $fields,
+                        "action" => $actions,
+                        "globalaction" => $globalactions,
+                        "deletekey" => Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname),
+                        "deletable" => isset($this->actions["delete"])
+                    ),
+                    $this->tplVars
+                )
             ))->renderWith($this->template);
     }
 

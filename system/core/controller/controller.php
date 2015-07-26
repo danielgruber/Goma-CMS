@@ -313,7 +313,7 @@ class Controller extends RequestHandler
     /**
      * this action will be called if no other action was found
      *
-     * @return string|false
+     * @return string|bool
      */
     public function index()
     {

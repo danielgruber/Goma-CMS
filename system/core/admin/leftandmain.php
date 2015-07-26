@@ -134,9 +134,16 @@ class LeftAndMain extends AdminItem {
 		if(defined("LAM_CMS_ADD"))
 			$this->ModelInst()->addmode = 1;
 		
-		$output = $data->customise(array("CONTENT"	=> $content, "activeAdd" => $this->getParam("model"), "SITETREE" => $this->createTree($search), "searchtree" => $search, "ROOT_NODE" => $this->getRootNode(), "TREEOPTIONS" => $this->generateTreeOptions()))->renderWith($this->baseTemplate);
-
-		Core::globalSession()->set("LaM_marked." . $this->classname, $this->marked);
+		$output = $data->customise(
+			array(
+				"CONTENT"	=> $content,
+				"activeAdd" => $this->getParam("model"),
+				"SITETREE" => $this->createTree($search),
+				"searchtree" => $search,
+				"ROOT_NODE" => $this->getRootNode(),
+				"TREEOPTIONS" => $this->generateTreeOptions()
+			)
+		)->renderWith($this->baseTemplate);
 		
 		// parent-serve
 		return parent::serve($output);
@@ -158,9 +165,10 @@ class LeftAndMain extends AdminItem {
 		if(Object::method_exists($tree_class, "generateTreeOptions")) {
 			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html, $this));
 		}
-		
-		$t = new $tree_class;
-		$t->callExtending("generateTreeOptions", $html, $this);
+
+		/** @var Object $treeInstance */
+		$treeInstance = new $tree_class;
+		$treeInstance->callExtending("generateTreeOptions", $html, $this);
 		
 		if($html->children()) {
 			return $html->render();
@@ -290,9 +298,7 @@ class LeftAndMain extends AdminItem {
 		$this->marked = $this->getParam("marked");
 		$search = $this->getParam("search");
 
-		$marked = Core::globalSession()->get("LaM_marked." . $this->classname) ?: 0;
-
-		HTTPResponse::setBody($this->createTree($search), $marked);
+		HTTPResponse::setBody($this->createTree($search));
 		HTTPResponse::output();
 		exit;
 	}

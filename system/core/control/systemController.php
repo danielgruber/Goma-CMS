@@ -43,6 +43,9 @@ class systemController extends Controller {
 		"indexSearch"
 	);
 
+	/**
+	 * @return bool
+	 */
 	public function index() {
 		return false;
 	}

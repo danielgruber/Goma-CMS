@@ -114,13 +114,11 @@ class SortableTableView extends TableView
         Resources::addData("var adminURI = " . var_export($this->namespace, true) . ";");
 
         return $this->model_inst->customise(
-            array(
-                "datafields" => $fields,
-                "action" => $actions,
-                "globalaction" => $globalactions
-            ),
             array_merge(
                 array(
+                    "datafields" => $fields,
+                    "action" => $actions,
+                    "globalaction" => $globalactions,
                     "deletekey" => Core::globalSession()->get("deletekey." . $this->classname),
                     "deletable" => isset($this->actions["delete"])
                 ),
