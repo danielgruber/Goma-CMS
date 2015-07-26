@@ -356,7 +356,7 @@ class adminController extends Controller
     public function helpData()
     {
         return array(
-            "#navi-toggle span" => array(
+            "#navi-toggle span span" => array(
                 "text" => lang("HELP.SHOW-MENU")
             ),
             "#history"          => array(

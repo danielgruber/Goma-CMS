@@ -215,13 +215,12 @@ class adminItem extends AdminController implements PermProvider {
 			return $controller;
 		}
 	}
-	
+
 	/**
 	 * auto selects the model
 	 *
-	 *@name auotSelectModel
-	 *@access public
-	*/
+	 * @return adminItem
+	 */
 	public function autoSelectModel($onThis = false, $model = null) {
 		
 		if(isset($model) && is_string($model)) {

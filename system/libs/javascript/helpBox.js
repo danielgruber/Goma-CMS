@@ -11,7 +11,7 @@
     var helpData = [], w = window, shown = false;
     
     w.addHelp = function(data) {
-        for(i in data)  {
+        for(var i in data)  {
             if(typeof data[i] == "string") {
                 helpData.push({selector: i, text: data[i]});
             } else {
@@ -23,7 +23,7 @@
     };
     
     w.renderHelp = function() {
-        for(i in helpData) {
+        for(var i in helpData) {
             var data = helpData[i];
             if(!data.rendered) {
                 helpData[i].id = randomString(10);
@@ -32,16 +32,19 @@
                 $("body").append('<div id="'+helpData[i].id+'" class="help-box"><div class="wrapper"><div class="arrow"></div><div class="content">'+data.text+'</div></div></div>');
             }
             
-            var id = helpData[i].id, box = $("#" + id), s = $(data.selector), position;
-            
+            var id = helpData[i].id,
+                box = $("#" + id),
+                element = $(data.selector + ":first"),
+                position;
+
             if(!shown) {
 	            box.css("display", "none");
             } else {
 	            box.css("display", "block");
             }
             
-            if(s.length == 1) {
-            	if(!s.is(":visible") || s.width() < 5) {
+            if(element.length >= 1) {
+            	if(!element.is(":visible") || element.width() < 5) {
 	            	box.css("display", "none");
 	            	continue;
             	}
@@ -49,8 +52,8 @@
                 
                 if(data.position === undefined) {
                     // get position which is logical
-                    var elemtop = s.offset().top,
-                    elemleft = s.offset().left,
+                    var elemtop = element.offset().top,
+                    elemleft = element.offset().left,
                     elemright = $(document).width() - elemleft;
                 
                     if(elemleft < 100 && elemtop > 100) {
@@ -66,7 +69,7 @@
                     }
     
                     // validate
-                    if(position == "top") {
+                    if(position === "top") {
                         if((elemtop - box.height() - 2) < -10)
                             position = "bottom";
                     }
@@ -79,10 +82,10 @@
                 
                 var boxWidth = box.outerWidth(),
                 boxHeight = box.outerHeight(),
-                elemtop = s.offset().top,
-                elemleft = s.offset().left,
-                elemWidth = s.outerWidth(true),
-                elemHeight = s.outerHeight(true),
+                elemtop = element.offset().top,
+                elemleft = element.offset().left,
+                elemWidth = element.outerWidth(true),
+                elemHeight = element.outerHeight(true),
                 positionTop = "auto", 
                 positionLeft = "auto",
                 positionRight = "auto",
@@ -139,7 +142,7 @@
                     		positionRight = data.right;
                     break;
                 }
-                
+
                 box.css({
                     position: _position,
                     top: positionTop,
@@ -147,8 +150,6 @@
                     right: positionRight,
                     bottom: positionBottom
                 });
-                
-                
             }
         }
     };
