@@ -290,4 +290,15 @@ class SessionManager implements ISessionManager {
 
         return $i;
     }
+
+    /**
+     * regenerates session-id.
+     *
+     * @return string new session
+     */
+    public function regenerateId() {
+        session_regenerate_id(true);
+
+        return session_id();
+    }
 }

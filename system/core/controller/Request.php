@@ -6,7 +6,7 @@
  * @package		Goma\System\Core
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		2.0.2
+ * @version		2.1
  */
 class Request extends Object {
 	/**
@@ -57,14 +57,14 @@ class Request extends Object {
 	 *@name url_parts
 	 *@access public
 	 */
-	public $url_parts = array();
+	protected $url_parts = array();
 
 	/**
 	 * this var contains a sizeof params, which were parsed but not shifted
 	 *@name unshiftedButParsedParams
 	 *@access public
 	 */
-	public $unshiftedButParsedParams = 0;
+	protected $unshiftedButParsedParams = 0;
 
 	/**
 	 * shifted path until now
@@ -72,7 +72,7 @@ class Request extends Object {
 	 *@name shiftedPart
 	 *@access public
 	 */
-	public $shiftedPart = "";
+	protected $shiftedPart = "";
 
 	/**
 	 *@name __construct
@@ -332,17 +332,33 @@ class Request extends Object {
 
 	/**
 	 * gets the remaining parts
-	 *@name remaining
-	 *@access public
+	 *
+	 * @return string
 	 */
 	public function remaining() {
 		return implode("/", $this -> url_parts);
 	}
 
 	/**
+	 * @return mixed
+	 */
+	public function getShiftedPart()
+	{
+		return $this->shiftedPart;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getUnshiftedButParsedParams()
+	{
+		return $this->unshiftedButParsedParams;
+	}
+
+	/**
 	 * checks if ajax response is needed
-	 *@name isJSResponse
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public static function isJSResponse() {
 		return (Core::is_ajax() && (isset($_GET["ajaxfy"]) || isset($_POST["ajaxfy"])));
@@ -350,8 +366,8 @@ class Request extends Object {
 
 	/**
 	 * checks if is ajax
-	 *@name is_ajax
-	 *@access public
+	 *
+	 * @return bool
 	 */
 	public static function is_ajax() {
 		return Core::is_ajax();

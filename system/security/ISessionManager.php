@@ -92,4 +92,11 @@ interface ISessionManager {
      * @return int
      */
     public function removeByPrefix($prefix);
+
+    /**
+     * regenerates session-id.
+     *
+     * @return string new session
+     */
+    public function regenerateId();
 }

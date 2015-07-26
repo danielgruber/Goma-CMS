@@ -112,13 +112,10 @@ class RequestHandler extends Object {
 			$this -> request = $request;
 
 		if (isset($this -> request)) {
-			if (!isset($this->namespace)) {
-				$this->namespace = $this->request->shiftedPart;
-				$this->originalNamespace = $this->namespace;
-			} else {
-				$this->originalNamespace = $this->namespace;
-				$this->namespace = $this -> request->shiftedPart;
-			}
+			$this->originalNamespace = $this->namespace;
+			$this->namespace = $this->request->getShiftedPart();
+			
+			if(!isset($this->originalNamespace)) $this->originalNamespace = $this->namespace;
 		} else {
 			throw new InvalidArgumentException("RequestHandler" . $this -> classname . " has no request-instance.");
 		}
