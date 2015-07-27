@@ -6,9 +6,9 @@
  * @link        http://goma-cms.org
  * @license:    LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author      Goma-Team
- * @version     2.2
+ * @version     2.2.1
  *
- * last modified: 08.06.2015
+ * last modified: 27.07.2015
  */
 
 StaticsManager::addSaveVar("Permission", "providedPermissions");
@@ -153,6 +153,7 @@ class Permission extends DataObject
      *
      * @name reorderedPermissionsHelper
      * @access protected
+     * @return array
      */
     protected static function reorderedPermissionsHelper($perm)
     {
@@ -182,13 +183,14 @@ class Permission extends DataObject
      */
     public static function check($permissionCode)
     {
+        $userId =  member::$loggedIn ? member::$loggedIn->id : 0;
         $permissionCode = strtolower($permissionCode);
 
         if (!defined("SQL_INIT"))
             return true;
 
-        if (isset(self::$perm_cache[$permissionCode]))
-            return self::$perm_cache[$permissionCode];
+        if (isset(self::$perm_cache[$userId][$permissionCode]))
+            return self::$perm_cache[$userId][$permissionCode];
 
         if ($permissionCode != "superadmin" && self::check("superadmin")) {
             return true;
@@ -200,12 +202,12 @@ class Permission extends DataObject
             if (isset(self::$providedPermissions[$permissionCode])) {
                 /** @var Permission $data */
                 if ($data = DataObject::get_one("Permission", array("name" => array("LIKE", $permissionCode)))) {
-                    self::$perm_cache[$permissionCode] = $data->hasPermission();
+                    self::$perm_cache[$userId][$permissionCode] = $data->hasPermission();
                     $data->forModel = "permission";
                     if ($data->type != "groups") {
                         $data->write(false, true, 2, false, false);
                     }
-                    return self::$perm_cache[$permissionCode];
+                    return self::$perm_cache[$userId][$permissionCode];
                 } else {
 
                     if (isset(self::$providedPermissions[$permissionCode]["default"]["inherit"]) && strtolower(self::$providedPermissions[$permissionCode]["default"]["inherit"]) != $permissionCode) {
@@ -216,9 +218,9 @@ class Permission extends DataObject
                             $perm->parentid = 0;
                             $perm->name = $permissionCode;
                             $data->forModel = "permission";
-                            self::$perm_cache[$permissionCode] = $perm->hasPermission();
+                            self::$perm_cache[$userId][$permissionCode] = $perm->hasPermission();
                             $perm->write(true, true, 2);
-                            return self::$perm_cache[$permissionCode];
+                            return self::$perm_cache[$userId][$permissionCode];
                         }
                     }
                     $perm = new Permission(array_merge(self::$providedPermissions[$permissionCode]["default"], array("name" => $permissionCode)));
@@ -226,9 +228,9 @@ class Permission extends DataObject
                     if (isset(self::$providedPermissions[$permissionCode]["default"]["type"]))
                         $perm->setType(self::$providedPermissions[$permissionCode]["default"]["type"]);
 
-                    self::$perm_cache[$permissionCode] = $perm->hasPermission();
+                    self::$perm_cache[$userId][$permissionCode] = $perm->hasPermission();
                     $perm->write(true, true, 2, false, false);
-                    return self::$perm_cache[$permissionCode];
+                    return self::$perm_cache[$userId][$permissionCode];
                 }
             } else {
                 if (Member::Admin()) {
@@ -437,6 +439,7 @@ class Permission extends DataObject
      *
      * @name preserveDefaults
      * @åccess public
+     * @return bool|void
      */
     public function preserveDefaults($prefix = DB_PREFIX, &$log)
     {
@@ -524,6 +527,7 @@ class Permission extends DataObject
      *
      * @name hasPermission
      * @access public
+     * @return bool
      */
     public function hasPermission()
     {

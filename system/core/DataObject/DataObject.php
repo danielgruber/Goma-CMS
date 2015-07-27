@@ -20,6 +20,8 @@
  * @property    string baseTable
  * @property    string baseClass
  * @property    string class_name
+ * @property    int last_modified timestamp
+ * @property    int created timestamp
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {

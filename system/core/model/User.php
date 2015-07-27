@@ -82,20 +82,19 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 *@name versions
 	*/
 	static $versions = true;
-	
+
+	/**
+	 * authentications.
+	 */
+	static $has_many = array("authentications"	=> "UserAuthentication");
+
 	/**
 	 * every user has one group and an avatar-picture, which is reflected in this relation
-	 *
-	 *@name has_one
-	 *@access public
 	*/
 	static $has_one = array("avatar" => "Uploads"); 
 	
 	/**
 	 * every user has additional groups
-	 *
-	 *@name many_many
-	 *@access public
 	*/
 	static $many_many = array("groups" => "group");
 	
@@ -113,8 +112,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	static $default = array(
 			'status'	=> '1'
 	);
-	
-	public $insertRights = 1;
 	
 	/**
 	 * gets all groups if a object
@@ -168,10 +165,12 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	{
 		return true;
 	}
-	
+
 	/**
 	 * forms
-	*/
+	 *
+	 * @param Form $form
+	 */
 	public function getForm(&$form)
 	{
 		// add default tab
@@ -213,14 +212,12 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
 	}
-	
+
 	/**
 	 * gets the edit-form for profile-edit or admin-edit
 	 *
-	 *@name getEditForm
-	 *@access public
-	 *@param object - form
-	*/
+	 * @param Form $form
+	 */
 	public function getEditForm(&$form)
 	{
 			
@@ -272,12 +269,13 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$form->addAction(new CancelButton("cancel", lang("cancel")));
 		$form->addAction(new FormAction("submit", lang("save"), "publish", array("green")));
 	}
-	
+
 	/**
 	 * form for password-edit
 	 *
-     * @return Form
-	*/
+	 * @param string $id
+	 * @return Form
+	 */
 	public function pwdform($id = null)
 	{
 		if(!isset($id)) {
@@ -302,27 +300,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 		return $pwdform;
 	}
-
-    /**
-     * validates an new user
-     *
-     * @return bool|string
-     */
-	public function _validateuser($obj)
-	{
-        if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
-        {
-            // check if username is unique
-            if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
-            {
-                return lang("register_username_bad", "The username is already taken.");
-            }
-            return true;
-        } else
-        {
-            return lang("passwords_not_match");
-        }
-	}
 	
 	/**
 	 * nickname is always lowercase
@@ -331,14 +308,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		parent::onBeforeWrite();
 		
 		$this->nickname = strtolower($this->nickname);
-	}
-	
-	/**
-	 * sets the password with md5
-	*/
-	public function setpassword($value)
-	{
-		$this->setField("password", Hash::getHashFromDefaultFunction($value));
 	}
 	
 	/**
@@ -363,13 +332,42 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
         return true;
 	}
-	
+
+	/**
+	 * validates an new user
+	 *
+	 * @return bool|string
+	 */
+	public function _validateuser($obj)
+	{
+		if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
+		{
+			// check if username is unique
+			if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
+			{
+				return lang("register_username_bad", "The username is already taken.");
+			}
+			return true;
+		} else
+		{
+			return lang("passwords_not_match");
+		}
+	}
+
+	/**
+	 * sets the password with md5
+	 */
+	public function setPassword($value)
+	{
+		$this->setField("password", Hash::getHashFromDefaultFunction($value));
+	}
+
 	/**
 	 * password should not be visible
 	 *
      * @return string
 	*/
-	public function getpassword() {
+	public function getPassword() {
 			return "";
 	}
 
@@ -536,25 +534,18 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return string
      */
     public static function getHistoryLang($record) {
-
         switch($record->action) {
             case "update":
             case "publish":
-
                 // check for login
                 if(self::isLoginInHistory($record)) {
-                    return str_replace('$euser', '<a href="member/'.$record->record()->ID . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', lang("h_user_login"));
-                } else {
-
-                    // check if user changed his profile on its own
-                    if($record->autorid == $record->newversion()->id) {
-                       return lang("h_profile_update", '$user updated the own profile');
-                    } else {
-
-                        // admin changed profile
-                        return lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
-                    }
-                }
+                    return str_replace('$euser', '<a href="member/'.$record->record()->id . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', lang("h_user_login"));
+                } else if($record->autorid == $record->newversion()->id) {
+				   return lang("h_profile_update", '$user updated the own profile');
+				} else {
+					// admin changed profile
+					return lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
+				}
                 break;
             case "insert":
                 return lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
@@ -563,7 +554,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
                 return lang("h_user_remove", '$user removed the user $euser');
                 break;
             default:
-                return "Unknowen event " . $record->action;
+                return "Unknown event " . $record->action;
         }
     }
 

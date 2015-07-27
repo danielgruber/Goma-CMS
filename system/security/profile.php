@@ -65,13 +65,14 @@ class ProfileController extends FrontedController {
 
 		return '<h1>'.lang("edit_profile").'</h1>' . $c->edit();
 	}
-	
+
 	/**
 	 * default screen
 	 *
-	 *@name index
-	 *@access public
-	*/
+	 * @name index
+	 * @access public
+	 * @return bool|string
+	 */
 	public function index($id = null) {
 		$id = ($id == null) ? $this->getParam("id") : $id;
 		if(!$id && !member::login()) {
@@ -120,7 +121,7 @@ class ProfileController extends FrontedController {
 		// if login and a user want's to login as someone else, we should log him out
 		if(member::login() && isset($_POST["pwd"]))
 		{
-			member::doLogout();
+			AuthenticationService::doLogout();
 		// if a user goes to login and is logged in, we redirect him home
 		} else if(member::login()) {
 			HTTPResponse::redirect(getRedirect(true));
@@ -139,13 +140,12 @@ class ProfileController extends FrontedController {
 		
 		return tpl::render("profile/login.html");
 	}
-	
+
 	/**
-	 * switch-lang
+	 * switch-lang view
 	 *
-	 *@name switchlang
-	 *@access public
-	*/
+	 * @return string
+	 */
 	public function switchlang() {
 		return tpl::render("switchlang.html");
 	}
@@ -155,12 +155,10 @@ class ProfileController extends FrontedController {
 	*/
 	public function	logout()
 	{
-			if(ClassInfo::$appENV["app"]["name"] == "gomacms" && version_compare(ClassInfo::$appENV["app"]["version"] . "-" . ClassInfo::$appENV["app"]["build"], "2.0.0-030", "<")) {
-				member::doLogout();
-			} else if(isset($_POST["logout"])) {
-				member::doLogout();
-			}
-							
-			HTTPResponse::redirect(getRedirect(true));
+		if(isset($_POST["logout"])) {
+			AuthenticationService::doLogout();
+		}
+
+		HTTPResponse::redirect(getRedirect(true));
 	}
 }

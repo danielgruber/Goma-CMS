@@ -61,53 +61,9 @@ class Member extends Object {
 	/**
 	 * object of logged in user
 	 *
-	 *@name loggedIn
-	 *@access public
+	 * @var User
 	*/
 	public static $loggedIn;
-	
-	/**
-	 * checks for default admin and basic groups
-	 *
-	 *@name checkDefaults
-	 *@access public
-	*/
-	public static function checkDefaults() {
-		
-		$cacher = new Cacher("groups-checkDefaults");
-		if($cacher->checkValid()) {
-		
-		} else {
-			if(DataObject::count("group", array("type" => 2)) == 0) {
-				$group = new Group();
-				$group->name = lang("admins", "admin");
-				$group->type = 2;
-				$group->permissions()->add(Permission::forceExisting("superadmin"));
-				$group->permissions()->write(false, true, 2);
-				$group->write(true, true, 2, false, false);
-			}
-			
-			if(DataObject::count("group", array("type" => 1)) == 0) {
-				$group = new Group();
-				$group->name = lang("user", "users");
-				$group->type = 1;
-				$group->write(true, true, 2, false, false);
-			}
-			
-			if(isset(self::$default_admin) && DataObject::count("user") == 0) {
-				$user = new User();
-				$user->nickname = self::$default_admin["nickname"];
-				$user->password = self::$default_admin["password"];
-				$user->write(true, true);
-				$user->groups()->add(DataObject::get_one("group", array("type" => 2)));
-				$user->groups()->write(false, true);
-			}
-			
-			$cacher->write(true, 3600);
-		}
-		
-		
-	}
 	
 	/**
 	 * checks the login and writes the types
@@ -122,21 +78,22 @@ class Member extends Object {
 			return true;
 		}
 		
-		self::checkDefaults();
+		DefaultPermission::checkDefaults();
 		
-		if($data = self::getUserObject()) {
-			if($data["timezone"]) {
-				Core::setCMSVar("TIMEZONE", $data["timezone"]);
+		if($auth = AuthenticationService::getAuthRecord(Core::globalSession()->getId())) {
+			$user = $auth->user;
+			if($user["timezone"]) {
+				Core::setCMSVar("TIMEZONE", $user["timezone"]);
 				date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
 			}
 			
-			self::$id = $data->id;
-			self::$nickname = $data->nickname;
+			self::$id = $user->id;
+			self::$nickname = $user->nickname;
 			
-			self::forceGroups($data);
-			
+			self::$groups = DefaultPermission::forceGroups($user);
+
 			self::$groupType = self::$groups->first()->type;
-			
+
 			// every group has at least the type 1, 0 is just for guests
 			if(self::$groupType == 0) {
 				self::$groupType = 1;
@@ -144,93 +101,13 @@ class Member extends Object {
 				self::$groups->first()->write(false, true, 2, false, false);
 			}
 			
-			self::$loggedIn = $data;
+			self::$loggedIn = $user;
 			if(PROFILE) Profiler::unmark("member::Init");
 			return true;
 		} else {
 			if(PROFILE) Profiler::unmark("member::Init");
 			return false;
 		}
-	}
-
-	/**
-	 * looks for logged in user and validates session.
-	*/
-	public static function getUserObject() {
-		if(Core::globalSession()->hasKey(self::USER_LOGIN)) {
-			if($data = DataObject::get_one("user", array("id" => Core::globalSession()->get(self::USER_LOGIN)))) {
-				$currsess = session_id();
-
-				if($data['phpsess'] == $currsess)
-				{
-					return $data;
-				} else {
-					self::doLogout();
-				}
-			}
-		}
-	}
-
-	/**
-	 * forces groups to be existing or creates them.
-	 *
-	 * @param 	DataObject of Type User
-	*/
-	public static function forceGroups($data) {
-
-		self::$groups = $data->groups(null, "type DESC");
-
-		// if no group is set, set default group user
-		if(self::$groups->forceData()->Count() == 0) {
-
-			$group = self::getDefaultGroup();
-			
-			self::$groups->add($group);
-			self::$groups->write(false, true, 2, false, false);
-		}
-	}
-
-	/**
-	 * returns a group which any user can be assigned safetly to based on permissions.
-	 *
-	 * @name 	getDefaultGroup
-	 * @return 	Group
-	*/
-	public static function getDefaultGroup() {
-		// check for default user group			
-		$defaultGroup = DataObject::get_one("group", array("usergroup" => 1));
-		if(!$defaultGroup) {
-	
-			// check if any group exists, which a user can be safely asigned to without giving him admin permission
-			$groupCount = DataObject::count("group", array("type" => 1));
-
-			// validate group and permissions
-			if($groupCount == 0 || ($groupCount == 1 && DataObject::get_one("group", array("type" => 1))->permissions()->Count() > 0)) {
-
-				// create new
-				$defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-				$defaultGroup->write(true, true, 2, false, false);
-			} else {
-
-				// iterate trough all groups with type 1 and set default group to the first one without permissions
-				foreach(DataObject::get("group", array("type" => 1)) as $defaultGroup) {
-					if($defaultGroup->permissions()->count() == 0) {
-						$defaultGroup->usergroup = 1;
-						$defaultGroup->write(false, true, 2, true, false);
-						break;
-					} else {
-						unset($defaultGroup);
-					}
-				}
-				
-				if(!isset($defaultGroup)) {
-					$defaultGroup = new Group(array("name" => lang("user"), "type" => 1, "usergroup" => 1));
-					$defaultGroup->write(true, true, 2, false, false);
-				}
-			}
-		}
-
-		return $defaultGroup;
 	}
 
     /**
@@ -286,10 +163,8 @@ class Member extends Object {
 	*/
 	public static function doLogin($user, $pwd)
 	{
-		self::checkDefaults();
-
 		try {
-			self::checkLogin($user, $pwd);
+			AuthenticationService::checkLogin($user, $pwd);
 
 			return true;
 		} catch(LoginInvalidException $e) {
@@ -312,55 +187,6 @@ class Member extends Object {
 		}
 
 		return false;
-	}
-
-	/**
-	 * performs a login and throws an exception if login cannot be validates.
-	*/
-	public static function checkLogin($user, $pwd) {
-		self::checkDefaults();
-
-		$data = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
-
-		/** @var User $data */
-		if($data) {
-			// check password
-			if(Hash::checkHashMatches($pwd, $data->fieldGet("password"))) {
-				if($data->status == 1) {
-					// register login
-					Core::globalSession()->set(self::USER_LOGIN, $data->id);
-
-					$data->phpsess = session_id();
-					$data->performLogin();
-					
-					return true;
-				} else if($data->status == 0) {
-					throw new LoginUserMustUnlockException();
-				} else {
-					throw new LoginUserLockedException();
-				}
-			} else {
-				throw new LoginInvalidException();
-			}
-		} else {
-			throw new LoginInvalidException();
-		}
-	}
-	
-	/**
-	 * forces a logout
-	 *
-	 *@name doLogout
-	 *@access public
-	*/
-	public static function doLogout() {
-		$data = DataObject::get_by_id("user", Core::globalSession()->get(self::USER_LOGIN));
-		/** @var User $data */
-		if($data) {
-			$data->performLogout();
-		}
-
-		Core::globalSession()->remove(self::USER_LOGIN);
 	}
 
     /**

@@ -11,6 +11,10 @@ defined('IN_GOMA') OR die();
 /**
  * defines the basic group.
  *
+ * @property 	int type
+ * @property 	string name
+ * @property 	int usergroup
+ *
  * @package		Goma\Security\Users
  *
  * @author		Goma-Team
