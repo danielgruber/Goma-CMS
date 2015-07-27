@@ -93,8 +93,8 @@ class InstallController extends Controller {
 		$app = $this->getParam("app");
 		
 		if(isset($apps[$app])) {
-			$t = G_SoftwareType::getByType($apps[$app]["plist_type"], $apps[$app]["file"]);
-			$data = $t->getInstallInfo();
+			$softwareType = G_SoftwareType::getByType($apps[$app]["plist_type"], $apps[$app]["file"]);
+			$data = $softwareType->getInstallInfo($this);
 			if(is_array($data)) {
 				$rand = randomString(20);
 				$data["rand"] = $rand;
