@@ -44,7 +44,12 @@ class AuthenticationService {
         if($data = DataObject::get_one("user", array("id" => $id))) {
             $currsess = isset($sessionId) ? $sessionId : Core::globalSession()->getId();
 
-            if($data->authentications(array("token" => $currsess))->count() > 0) {
+            if($data->authentications(
+                    array(
+                        "token" => $currsess,
+                        "last_modified" => array(">", time() - self::$expirationLimit)
+                    )
+                )->count() > 0) {
                 return $data;
             }
 
@@ -66,7 +71,10 @@ class AuthenticationService {
         $session->regenerateId();
 
         /** @var UserAuthentication $auth */
-        if($auth = DataObject::get_one("UserAuthentication", array("token" => $oldToken))) {
+        if($auth = DataObject::get_one("UserAuthentication", array(
+            "token" => $oldToken,
+            "last_modified" => array(">", time() - self::$expirationLimit)
+        ))) {
             $auth->token = $session->getId();
             Core::repository()->write($auth, true);
         }
