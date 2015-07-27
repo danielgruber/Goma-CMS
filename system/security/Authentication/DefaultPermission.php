@@ -24,7 +24,7 @@ class DefaultPermission {
      *@access public
      */
     public static function checkDefaults() {
-        $cacher = new Cacher(CACHE_DEFAULT_CHECK);
+        $cacher = new Cacher(self::CACHE_DEFAULT_CHECK);
         if(!$cacher->checkValid()) {
             if(DataObject::count("group", array("type" => 2)) == 0) {
                 $group = new Group();
