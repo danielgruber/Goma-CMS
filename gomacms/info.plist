@@ -13,9 +13,9 @@
 	<key>version</key>
 	<string>2.0RC3</string>
 	<key>build</key>
-	<string>080</string>
+	<string>081</string>
 	<key>requireFrameworkVersion</key>
-	<string>2.0RC3-106</string>
+	<string>2.0RC3-111</string>
 	<key>icon</key>
 	<string>templates/images/app-icon.png</string>
 	<key>excludeModelsFromDistro</key>
