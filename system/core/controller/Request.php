@@ -145,6 +145,15 @@ class Request extends Object {
 	}
 
 	/**
+	 * checks if OPTIONS
+	 *
+	 * @return bool
+	 */
+	public function isOPTIONS() {
+		return ($this->request_method == "OPTIONS");
+	}
+
+	/**
 	 * array-implementations
 	 */
 
