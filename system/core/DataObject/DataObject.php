@@ -3236,8 +3236,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * returns one or many hasMany-Relations.
      *
      * @name hasMany
-     * @param name of has-many-relation to give back.
-     * @param if to only give back the class or also give the relation to inverse back.
+     * @param string|null $name of has-many-relation to give back.
+     * @param boolean $classOnly if only give back the class or also give back the relation and inverse back.
+     * @return array|bool|mixed
      */
     public function hasMany($component = null, $classOnly = true) {
         $has_many = (isset(ClassInfo::$class_info[$this->classname]["has_many"]) ? ClassInfo::$class_info[$this->classname]["has_many"] : array());
@@ -3267,7 +3268,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-relations
      *
-     *@name ManyMany
+     * @name ManyMany
+     * @return array
      */
     public function ManyMany() {
         $many_many = (isset(ClassInfo::$class_info[$this->classname]["many_many"]) ? ClassInfo::$class_info[$this->classname]["many_many"] : array());
@@ -3285,15 +3287,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-relations belonging to this
      *
-     *@name BelongsManyMany
+     * @name BelongsManyMany
+     * @return array
      */
     public function BelongsManyMany() {
         $belongs_many_many = (isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"]) ? ClassInfo::$class_info[$this->classname]["belongs_many_many"] : array());
 
         if ($classes = ClassInfo::dataclasses($this->classname)) {
             foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["many_many"]))
+                if (isset(ClassInfo::$class_info[$class]["belongs_many_many"])) {
                     $belongs_many_many = array_merge(ClassInfo::$class_info[$class]["belongs_many_many"], $belongs_many_many);
+                }
             }
         }
 
