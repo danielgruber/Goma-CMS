@@ -167,13 +167,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         return $data;
     }
 
-    /*
-	 * gets a DataObject versioned
-	 *
-	 *@name getVersioned
-	 *@access public
-	*/
-    public static function get_versioned($class, $version = "publish" , $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
+    /**
+     * gets a DataObject versioned
+     *
+     * @param $class
+     * @param null|string $version DataObject::VERSION_STATE|DataObject::VERSION_PUBLISHED|DataObject::VERSION_GROUP
+     * @param array|string $filter
+     * @param array|string $sort
+     * @param array|int $limits
+     * @param array $joins
+     * @param bool $group
+     * @param bool $pagination
+     * @return array|DataObjectSet
+     * @internal param $getVersioned
+     * @access public
+     */
+    public static function get_versioned($class, $version = null, $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
         $data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
         if ($group !== false) {
             return $data->groupBy($group);

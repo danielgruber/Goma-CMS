@@ -8,7 +8,7 @@
  * @author      Goma-Team
  * @version     1.0
  *
- * last modified: 22.07.2015
+ * last modified: 01.08.2015
  */
 
 class RegexpUtil {
@@ -19,7 +19,17 @@ class RegexpUtil {
      * @return bool
      */
     public static function isNumber($string) {
-        return preg_match('/^[0-9]+$/', $string);
+        return preg_match('/^\-?[0-9]+$/', $string);
+    }
+
+    /**
+     * returns if string is a double.
+     *
+     * @param string $string
+     * @return bool
+     */
+    public static function isDouble($string) {
+        return preg_match('/^\-?[0-9\.]+$/', $string);
     }
 
     /**

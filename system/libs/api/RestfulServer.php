@@ -261,7 +261,7 @@ class RestfulServer extends RequestHandler
 										$data = DataObject::_search($this->ClassName,array($this->getParam("search")), $where);
 								} else
 								{
-										$data = DataObject::_get($this->ClassName,$where);
+										$data = DataObject::get($this->ClassName, $where);
 								}
 								
 								$output = $data->$relation(array(), $fields);
@@ -295,7 +295,7 @@ class RestfulServer extends RequestHandler
 								$data = DataObject::_search($this->ClassName,array($this->getParam("search")), $where, $fields);
 						} else
 						{
-								$data = DataObject::_get($this->ClassName,$where, $fields);
+								$data = DataObject::get($this->ClassName, $where);
 						}
 						
 						$i = 0;

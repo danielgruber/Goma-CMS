@@ -10,18 +10,19 @@ loadlang("files");
  * @link 		http://goma-cms.org
  * @license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author 	    Goma-Team
- * @version 	1.5.12
+ * @version 	1.5.13
  *
  * @property string realfile
  * @property string filename
  * @property string path
  * @property string type
  * @property string md5
+ * @property string url
  * @property bool deletable
  * @property string collectionid
  * @property Uploads|null collection
  *
- * last modified: 26.01.2015
+ * last modified: 02.08.2015
  */
 class Uploads extends DataObject {
     /**
@@ -619,6 +620,17 @@ class Uploads extends DataObject {
     }
 
     /**
+     * returns url.
+     */
+    public function getUrl() {
+        if(file_exists($this->getPath())) {
+            return BASE_URI . $this->getPath();
+        } else {
+            return BASE_URI . BASE_SCRIPT . $this->getPath() . URLEND;
+        }
+    }
+
+    /**
      * to array if we need data for REST-API.
      * @param array $additional_fields
      * @return array
@@ -626,12 +638,7 @@ class Uploads extends DataObject {
     public function ToRESTArray($additional_fields = array()) {
         $arr = parent::ToRESTArray($additional_fields);
         $arr["path"] = $this->getPath();
-
-        if(file_exists($this->getPath())) {
-            $arr["url"] = BASE_URI . $this->getPath();
-        } else {
-            $arr["url"] = BASE_URI . BASE_SCRIPT . $this->getPath() . URLEND;
-        }
+        $arr["url"] = $this->url;
 
         unset($arr["realfile"]);
         return $arr;
