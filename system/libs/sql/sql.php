@@ -473,12 +473,12 @@ class SQL extends object
         return self::$driver->setDefaultSort($table, $field, $type, $prefix);
     }
 
-    public function listStorageEngines()
+    static function listStorageEngines()
     {
         return self::$driver->listStorageEngines();
     }
 
-    public function setStorageEngine($table, $engine)
+    static function setStorageEngine($table, $engine)
     {
         return self::$driver->setStorageEngine($table, $engine);
     }
@@ -610,7 +610,7 @@ interface SQLDriver
      * @param password
      * @param hostname
      */
-    public function connect($dbuser, $dbdb, $dbpass, $host);
+    static function connect($dbuser, $dbdb, $dbpass, $host);
 
     /**
      * runs a query
@@ -619,38 +619,38 @@ interface SQLDriver
      * @param string - query
      * @param bool - if unbuffered
      */
-    public function query($sql, $unbuffered = false, $debug = true);
+    static function query($sql, $unbuffered = false, $debug = true);
 
     /**
      * the following functions are simly sql-functions
      */
-    public function fetch_row($result);
+    static function fetch_row($result);
 
-    public function close();
+    static function close();
 
-    public function fetch_object($result);
+    static function fetch_object($result);
 
-    public function fetch_array($result);
+    static function fetch_array($result);
 
-    public function fetch_assoc($result);
+    static function fetch_assoc($result);
 
-    public function num_rows($result);
+    static function num_rows($result);
 
-    public function error();
+    static function error();
 
-    public function errno();
+    static function errno();
 
-    public function insert_id();
+    static function insert_id();
 
-    public function free_result($result);
+    static function free_result($result);
 
-    public function escape_string($str);
+    static function escape_string($str);
 
-    public function real_escape_string($str);
+    static function real_escape_string($str);
 
-    public function affected_rows();
+    static function affected_rows();
 
-    public function protect($str);
+    static function protect($str);
 
     /**
      * splits more than one query at the ;
@@ -658,45 +658,45 @@ interface SQLDriver
      * @access public
      * @param string - queries
      */
-    public function split($sql);
+    static function split($sql);
 
-    public function list_tables($database);
+    static function list_tables($database);
 
     /**
      * table-functions
      */
-    public function getFieldsOfTable($table, $prefix = null, $track = true);
+    static function getFieldsOfTable($table, $prefix = null, $track = true);
 
     /**
      * table-functions V2
      */
-    public function showTableDetails($table, $track = true, $prefix = null);
+    static function showTableDetails($table, $track = true, $prefix = null);
 
-    public function requireTable($table, $fields, $indexes, $defaults, $prefix = null);
+    static function requireTable($table, $fields, $indexes, $defaults, $prefix = null);
 
-    public function dontRequireTable($table, $prefix = null);
+    static function dontRequireTable($table, $prefix = null);
 
-    public function setDefaultSort($table, $field, $type = "ASC", $prefix = null);
+    static function setDefaultSort($table, $field, $type = "ASC", $prefix = null);
 
     /**
      * INDEX-functions
      */
-    public function addIndex($table, $field, $type, $name = null, $db_prefix = null);
+    static function addIndex($table, $field, $type, $name = null, $db_prefix = null);
 
-    public function dropIndex($table, $name, $db_prefix = null);
+    static function dropIndex($table, $name, $db_prefix = null);
 
-    public function getIndexes($table, $db_prefix = null);
+    static function getIndexes($table, $db_prefix = null);
 
-    public function writeManipulation($manipulation);
+    static function writeManipulation($manipulation);
 
     /**
      * storage engines.
      */
-    public function listStorageEngines();
+    static function listStorageEngines();
 
-    public function setStorageEngine($table, $engine);
+    static function setStorageEngine($table, $engine);
 
-    public function setCharsetUTF8();
+    static function setCharsetUTF8();
 
 }
 

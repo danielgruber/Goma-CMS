@@ -428,7 +428,9 @@ class mysqliDriver extends object implements SQLDriver
         if ($result = sql::query($sql)) {
             while ($row = sql::fetch_object($result)) {
                 if (!isset($indexes[$row->Key_name])) {
-                    if(in_array($row->Index_type, array("FULLTEXT", "SPATIAL", "PRIMARY"))) {
+                    if($row->Key_name == "PRIMARY") {
+                        $type = "PRIMARY";
+                    } else if(in_array($row->Index_type, array("FULLTEXT", "SPATIAL"))) {
                         $type = $row->Index_type;
                     } else if ($row->Non_unique == 0) {
                         $type = "UNIQUE";

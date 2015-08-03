@@ -170,17 +170,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets a DataObject versioned
      *
-     * @param $class
-     * @param null|string $version DataObject::VERSION_STATE|DataObject::VERSION_PUBLISHED|DataObject::VERSION_GROUP
-     * @param array|string $filter
-     * @param array|string $sort
-     * @param array|int $limits
-     * @param array $joins
-     * @param bool $group
-     * @param bool $pagination
-     * @return array|DataObjectSet
-     * @internal param $getVersioned
-     * @access public
+     *@name getVersioned
+     *@access public
      */
     public static function get_versioned($class, $version = null, $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
         $data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
@@ -635,9 +626,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if a given record can deleted in database
      *
-     *@name canDelete
-     *@access public
-     *@param array - reocrd
+     * @name canDelete
+     * @access public
+     * @param array - reocrd
+     * @return bool
      */
     public function canDelete($row = null)
     {
@@ -2204,6 +2196,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         // check if table in db and if not, create it
         if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
+
+            ClassInfo::$database[$this->baseTable] = array();
             foreach(array_merge(ClassInfo::getChildren($this->classname), array($this->classname)) as $child) {
                 Object::instance($child)->buildDB();
             }
@@ -2728,7 +2722,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // store id in cache
             if (isset($basehash))
                 DataObjectQuery::$datacache[$this->baseClass][$basehash . md5(serialize(array("id" => $row["id"])))] = array($row);
-            
+
             // cleanup
             unset($row);
         }
@@ -3236,9 +3230,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * returns one or many hasMany-Relations.
      *
      * @name hasMany
-     * @param string|null $name of has-many-relation to give back.
-     * @param boolean $classOnly if only give back the class or also give back the relation and inverse back.
-     * @return array|bool|mixed
+     * @param name of has-many-relation to give back.
+     * @param if to only give back the class or also give the relation to inverse back.
      */
     public function hasMany($component = null, $classOnly = true) {
         $has_many = (isset(ClassInfo::$class_info[$this->classname]["has_many"]) ? ClassInfo::$class_info[$this->classname]["has_many"] : array());
@@ -3268,8 +3261,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-relations
      *
-     * @name ManyMany
-     * @return array
+     *@name ManyMany
      */
     public function ManyMany() {
         $many_many = (isset(ClassInfo::$class_info[$this->classname]["many_many"]) ? ClassInfo::$class_info[$this->classname]["many_many"] : array());
@@ -3287,17 +3279,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-relations belonging to this
      *
-     * @name BelongsManyMany
-     * @return array
+     *@name BelongsManyMany
      */
     public function BelongsManyMany() {
         $belongs_many_many = (isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"]) ? ClassInfo::$class_info[$this->classname]["belongs_many_many"] : array());
 
         if ($classes = ClassInfo::dataclasses($this->classname)) {
             foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["belongs_many_many"])) {
+                if (isset(ClassInfo::$class_info[$class]["many_many"]))
                     $belongs_many_many = array_merge(ClassInfo::$class_info[$class]["belongs_many_many"], $belongs_many_many);
-                }
             }
         }
 
@@ -3386,6 +3376,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     //!Dev-Area: Generation of DataBase
 
+    static $i = 0;
+
     /**
      * dev
      *
@@ -3421,7 +3413,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // get correct SQL-Types for Goma-Field-Types
             foreach($db_fields as $field => $type) {
                 if (isset($casting[strtolower($field)])) {
-
                     if ($casting[strtolower($field)] = DBField::parseCasting($casting[strtolower($field)])) {
 
                         $type = call_user_func_array(array($casting[strtolower($field)]["class"], "getFieldType"), (isset($casting[strtolower($field)]["args"])) ? $casting[strtolower($field)]["args"] : array());
@@ -3431,12 +3422,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 }
             }
 
+            ClassInfo::$database[$this->table()] = $db_fields;
+
             // now require table
             $log .= SQL::requireTable($this->table(), $db_fields, $indexes , $this->defaults, $prefix);
         }
 
         // versioned
         if ($this->Table() && $this->table() == $this->baseTable) {
+
             if (!SQL::getFieldsOfTable($this->baseTable . "_state")) {
                 $exists = false;
             } else {
@@ -3446,17 +3440,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // force table
             $log .= SQL::requireTable(	$this->baseTable . "_state",
                 array(	"id" => "int(10) PRIMARY KEY auto_increment",
-                    "stateid" => "int(10)",
-                    "publishedid" => "int(10)"
+                          "stateid" => "int(10)",
+                          "publishedid" => "int(10)"
                 ),
                 array(	"publishedid" => array(	"name" => "publishedid",
-                    "fields" => array("publishedid"),
-                    "type" => "index"
+                                                     "fields" => array("publishedid"),
+                                                     "type" => "index"
                 ),
-                    "stateid" => array(	"name" => "stateid",
-                        "fields" => array("stateid"),
-                        "type" => "index"
-                    )
+                          "stateid" => array(	"name" => "stateid",
+                                                 "fields" => array("stateid"),
+                                                 "type" => "index"
+                          )
                 ),
                 array(),
                 $prefix
