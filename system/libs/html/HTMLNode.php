@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * @package goma framework
  * @link http://goma-cms.org
  * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author Goma-Team
- * last modified: 26.12.2012
- * $Version 1.3.2
+ * @version 1.3.2
+ * 
+ * last modified: 04.08.2015
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class HTMLNode extends Object
 {
     /**
@@ -158,14 +157,15 @@ class HTMLNode extends Object
      *
      * @name text
      * @access public
-     * @param STRING ! - text - if you want to set it
+     * @param string $new if you want to set it.
+     * @return string
      */
     public function text($new = null)
     {
 
         if ($new !== null) {
             if (!is_string($new)) {
-                throwError(6, 'PHP-Error', '$new is not a string in ' . __FILE__ . ' on line ' . __LINE__ . '');
+                throw new InvalidArgumentException("New content must be a string for HTMLNode::text.");
             }
             $this->content = array(convert::raw2xml($new));
 
@@ -185,6 +185,7 @@ class HTMLNode extends Object
      *
      * @name val
      * @access public
+     * @return array|null|string
      */
     public function val($value = null)
     {
@@ -208,10 +209,11 @@ class HTMLNode extends Object
      *
      * @name parent
      * @access public
+     * @return HTMLNode|null
      */
     public function parent()
     {
-        return isset($this->parentNode) ? $this->parentNode : false;
+        return isset($this->parentNode) ? $this->parentNode : null;
     }
 
     /**
@@ -219,7 +221,7 @@ class HTMLNode extends Object
      *
      * @name next
      * @access public
-     * @return HTMLNode
+     * @return HTMLNode|null
      */
     public function next()
     {
@@ -228,9 +230,9 @@ class HTMLNode extends Object
             $key = array_search($this, $children);
             $key++;
 
-            return isset($children[$key]) ? $children[$key] : false;
+            return isset($children[$key]) ? $children[$key] : null;
         } else {
-            return false;
+            return null;
         }
     }
 
@@ -240,7 +242,7 @@ class HTMLNode extends Object
      * @name getNode
      * @access public
      * @param int $index
-     * @return string|HTMLNode
+     * @return string|HTMLNode|null
      */
     public function getNode($index)
     {
@@ -248,7 +250,7 @@ class HTMLNode extends Object
             return $this->content[$index];
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -267,6 +269,7 @@ class HTMLNode extends Object
      *
      * @name children
      * @access public
+     * @return array
      */
     public function Children()
     {
@@ -281,6 +284,7 @@ class HTMLNode extends Object
      * @access public
      * @param name
      * @param value - optional
+     * @return null|string
      */
     public function attr($name, $value = null)
     {
@@ -309,6 +313,7 @@ class HTMLNode extends Object
      * @access public
      * @param string - name of the attrbiute
      * @param string - if you want to set this value
+     * @return null|string
      */
     public function css($name, $value = null)
     {
@@ -385,6 +390,7 @@ class HTMLNode extends Object
      *
      * @name addClass
      * @access public
+     * @return null
      */
     public function addClass($class)
     {
@@ -396,6 +402,7 @@ class HTMLNode extends Object
      *
      * @name removeClass
      * @access public
+     * @return null
      */
     public function removeClass($class)
     {
@@ -410,6 +417,7 @@ class HTMLNode extends Object
      *
      * @name hasClass
      * @access public
+     * @return bool
      */
     public function hasClass($class)
     {
@@ -565,6 +573,7 @@ class HTMLNode extends Object
      *
      * @name __toString
      * @access public
+     * @return string
      */
     public function __toString()
     {
@@ -576,6 +585,7 @@ class HTMLNode extends Object
      *
      * @name forTemplate
      * @access public
+     * @return string
      */
     public function forTemplate()
     {
