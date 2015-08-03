@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.1
+ * @version     1.1.1
  */
 class TableFieldCheckable implements TableField_ColumnProvider {
 
@@ -19,7 +19,10 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 
 	/**
 	 * returns the currently checked values by name of tablefield.
-	*/
+	 *
+	 * @param string $checkName
+	 * @return array
+	 */
 	public static function getChecked($checkName = "check") {
 		self::updateSession($checkName);
 
@@ -29,20 +32,20 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	 * You can define the name of the Checkboxes here.
 	 *
 	 * @param String $name name of the checkboxes
-	*/
+	 */
 	public function __construct($name = "check") {
 		$this->checkname = $name;
 		self::updateSession($name);
 	}
-	
+
 	/**
 	 * updates the session-data.
-	*/
+	 */
 	public static function updateSession($name) {
 		if(!isset($_POST[$name . "_check"])) {
 			Core::globalSession()->remove(self::SESSION_PREFIX . "." . $name);
 		}
-		
+
 		if(isset($_POST[$name . "_check"])) {
 			$sessionData = self::getSessionDataForKey($name);
 			foreach($_POST[$name . "_check"] as $k => $v) {
@@ -70,18 +73,18 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 
 		return array();
 	}
-	
+
 	/**
 	 * Add a column 'Check'.
-	 * 
+	 *
 	 * @param TableField $tableField
-	 * @param array $columns 
+	 * @param array $columns
 	 */
 	public function augmentColumns($tableField, &$columns) {
 		if(!in_array('Check', $columns))
 			array_unshift($columns, 'Check');
 	}
-	
+
 	/**
 	 * Return any special attributes that will be used for the column.
 	 *
@@ -94,10 +97,10 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array('class' => 'col-checkboxes');
 	}
-	
+
 	/**
 	 * Add the title.
-	 * 
+	 *
 	 * @param TableField $tableField
 	 * @param string $columnName
 	 *
@@ -108,18 +111,18 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 			return array('title' => '');
 		}
 	}
-	
+
 	/**
 	 * Which columns are handled by this component.
-	 * 
+	 *
 	 * @param type $tableField
 	 *
-	 * @return type 
+	 * @return type
 	 */
 	public function getColumnsHandled($tableField) {
 		return array('Check');
 	}
-	
+
 	/**
 	 * generates the content of the column "Actions".
 	 *
@@ -127,17 +130,17 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	 * @param DataObject $record
 	 * @param string $columnName
 	 *
-	 * @return string - the HTML for the column 
+	 * @return string - the HTML for the column
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
-	
+
 		$data = new ViewAccessableData();
 		$data->id = $record->id;
 		$data->name = $this->checkname;
 
 		$sessionData = self::getSessionDataForKey($this->checkname);
 		$data->checked = isset($sessionData[$record->ID]);
-		
+
 		return $data->renderWith("form/tableField/checkbox.html");
 	}
 }

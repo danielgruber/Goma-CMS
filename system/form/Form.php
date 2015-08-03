@@ -660,7 +660,7 @@ class Form extends object {
 		$submission = $this->findSubmission($data, $this->post, $result);
 
 		if($valid !== true || $submission === null) {
-			if($errors) {
+			if($errors->getNode(0)->content) {
 				Core::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
 				$this->form->append($errors);
 			} else {

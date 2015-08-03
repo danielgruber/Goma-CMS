@@ -239,7 +239,8 @@ class HTMLNode extends Object
      *
      * @name getNode
      * @access public
-     * @param int - index
+     * @param int $index
+     * @return string|HTMLNode
      */
     public function getNode($index)
     {

@@ -18,23 +18,26 @@ class DataObjectCompare {
      * @param array $newdata
      * @return array
      */
-    public static function getChanges($model, $newdata) {
+    public static function getChanges($model, $newdata)
+    {
         $changed = array();
 
-        if(is_object($newdata) && Object::method_exists($newdata, "toArray")) {
+        if (is_object($newdata) && Object::method_exists($newdata, "toArray")) {
             /** @var ViewAccessableData $newdata */
             $newdata = $newdata->ToArray();
         }
 
         // first calculate change-count
         $data = $model->ToArray();
-        foreach($data as $key => $val) {
+        foreach ($data as $key => $val) {
             if (isset($newdata[$key])) {
                 $comparableTypes = array("boolean", "integer", "string", "double");
-                if (in_array(gettype($newdata[$key]), $comparableTypes) && in_array(gettype($val), $comparableTypes))
-                {
+                if (gettype($newdata[$key]) != gettype($val) &&
+                    !in_array(gettype($newdata[$key]), $comparableTypes) &&
+                    !in_array(gettype($val), $comparableTypes)
+                ) {
                     $changed[] = $key;
-                } else if (gettype($newdata[$key]) != gettype($val) || $newdata[$key] != $val) {
+                } else if ($newdata[$key] != $val) {
                     $changed[] = $key;
                 }
             }
@@ -42,5 +45,4 @@ class DataObjectCompare {
 
         return $changed;
     }
-
 }
