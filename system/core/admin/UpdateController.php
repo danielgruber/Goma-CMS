@@ -1,56 +1,56 @@
 <?php defined("IN_GOMA") OR die();
 /**
-  * @package 	goma framework
-  * @link 		http://goma-cms.org
-  * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  * @author 	Goma-Team
-  *	@Version 	2.3
-  *
-  * last modified: 30.13.2015
-*/
+ * @package 	goma framework
+ * @link 		http://goma-cms.org
+ * @license 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ *	@Version 	2.3
+ *
+ * last modified: 30.13.2015
+ */
 
 class UpdateController extends adminController {
-	/**
-	 * allowed actions
-	 *
-	 *@name allowed_actions
-	 *@access public
-	*/
-	public $allowed_actions = array(
-		"installUpdate",
-		"showInfo",
-		"upload",
-		"showPackageInfo"
-	);
+    /**
+     * allowed actions
+     *
+     *@name allowed_actions
+     *@access public
+     */
+    public $allowed_actions = array(
+        "installUpdate",
+        "showInfo",
+        "upload",
+        "showPackageInfo"
+    );
 
     /**
      * title in view of this controller
      *
      * @return string
      */
-	public function title() {
-		return lang("update");
-	}
+    public function title() {
+        return lang("update");
+    }
 
     /**
      * default index action. Shows Update-Page.
      *
      * @return bool|string
      */
-	public function index() {
-		$view = new ViewAccessableData();
+    public function index() {
+        $view = new ViewAccessableData();
 
-		$updates = isset($_GET["noJS"]) ? new DataSet($this->generateUpdatePackages()) : new DataSet(array());
-		$updatables = G_SoftwareType::listUpdatablePackages();
-		
-		$view->customise(array( "updates" => $updates,
+        $updates = isset($_GET["noJS"]) ? new DataSet($this->generateUpdatePackages()) : new DataSet(array());
+        $updatables = G_SoftwareType::listUpdatablePackages();
+
+        $view->customise(array( "updates" => $updates,
                                 "BASEURI" => BASE_URI,
                                 "storeAvailable" => G_SoftwareType::isStoreAvailable(),
                                 "updatables" => new DataSet($updatables),
                                 "updatables_json" => json_encode($updatables)));
-		
-		return $view->renderWith("admin/update.html");
-	}
+
+        return $view->renderWith("admin/update.html");
+    }
 
     /**
      * generates update-packages.
@@ -105,8 +105,8 @@ class UpdateController extends adminController {
      * @access public
      * @return mixed
      */
-	public function showPackageInfo() {
-		if($this->getParam("id")) {
+    public function showPackageInfo() {
+        if($this->getParam("id")) {
             try {
                 $file = $this->getFilePackage($this->getParam("id"));
             } catch(Exception $e) {
@@ -114,12 +114,12 @@ class UpdateController extends adminController {
             }
 
 
-			return $this->showFileInfoForFile($file);
-		} else {
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-			exit;
-		}
-	}
+            return $this->showFileInfoForFile($file);
+        } else {
+            HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+            exit;
+        }
+    }
 
     /**
      * returns update-info page or redirects for given Update-File.
@@ -187,7 +187,7 @@ class UpdateController extends adminController {
                 throw new StoreConnectionError("Store is not available. Maybe you disabled remote connections?");
             }
 
-        // check for local updates.
+            // check for local updates.
         } else if(in_array($id, $_SESSION["updates"])) {
             return array_search($id, $_SESSION["updates"]);
         } else {
@@ -202,7 +202,7 @@ class UpdateController extends adminController {
      * @access public
      * @return mixed|string
      */
-	public function upload() {
+    public function upload() {
 
         // show upload-button and a download-button. User can down and reupload file now.
         $form = new Form($this, "update", array(
@@ -212,20 +212,20 @@ class UpdateController extends adminController {
         ));
 
         // check if we have a possible download.
-		if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
+        if(isset($_GET["download"]) && preg_match('/^http(s)?\:\/\/(www\.)?goma\-cms\.org/i', $_GET["download"])) {
 
             if($model = $this->tryToDownload($_GET["download"])) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
-				exit;
-			}
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $model->id);
+                exit;
+            }
 
             $form->add(new HTMLField("download", '<a href="'.addslashes($_GET["download"]).'" class="button">'.lang("update_file_download").'</a>'), 0);
-		}
-		
-		$file->max_filesize = -1;
-		$form->addValidator(new RequiredFields(array("file")), "valid");
-		return $form->render();
-	}
+        }
+
+        $file->max_filesize = -1;
+        $form->addValidator(new RequiredFields(array("file")), "valid");
+        return $form->render();
+    }
 
     /**
      * tries to download a file from goma-server and returns model if succeeded.
@@ -245,80 +245,80 @@ class UpdateController extends adminController {
         return null;
     }
 
-	/**
-	 * validates the update
-	 *
-	 *@name checkUpdate
-	 *@access public
-	*/
-	public function checkUpdate($data) {
-		$file = $data["file"]->realfile;
-		if(!file_exists($file)) {
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-			exit;
-		}
-		
-		
-		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $data["file"]->id . URLEND . "?redirect=" . urlencode(BASE_URI . BASE_SCRIPT . "admin" . URLEND));
-		exit;
-	}
+    /**
+     * validates the update
+     *
+     *@name checkUpdate
+     *@access public
+     */
+    public function checkUpdate($data) {
+        $file = $data["file"]->realfile;
+        if(!file_exists($file)) {
+            HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+            exit;
+        }
+
+
+        HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/showInfo/" . $data["file"]->id . URLEND . "?redirect=" . urlencode(BASE_URI . BASE_SCRIPT . "admin" . URLEND));
+        exit;
+    }
 
     /**
      * installs the update
      *
      * @return bool
      */
-	public function installUpdate() {
-		if(preg_match('/^[0-9]+$/', $this->getParam("update"))) {
-			if(!($fileid = $this->getParam("update"))) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
-			
-			if(!($file = DataObject::get_one("Uploads", array("id" => $fileid)))) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
-			
-			clearstatcache();
-			if(!file_exists($file->realfile)) {
-				$file->remove(true);
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
-		
-			if(!Core::globalSession()->hasKey("update." . $file->id)) {
-				AddContent::addError(lang("less_rights", "You are not permitted to do this."));
-				
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
-				exit;
-			}
-			
-			$data = Core::globalSession()->get("update_" . $file->id);
-		} else {
-			
-			if(!in_array($this->getParam("update"), $_SESSION["updates"])) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-				exit;
-			}
-			
-			$file = array_search($this->getParam("update"), $_SESSION["updates"]);
-			
-			if(!preg_match('/\.gfs$/i', $file)) {
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-				exit;
-			}
-			
-			if(!Core::globalSession()->hasKey("update_" . $this->getParam("update"))) {
-				AddContent::addError(lang("less_rights", "You are not permitted to do this."));
-				
-				HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
-				exit;
-			}
-			
-			$data = Core::globalSession()->get("update_" . $this->getParam("update"));
-		}
-		
-		return G_SoftwareType::install($data);
-	}
+    public function installUpdate() {
+        if(preg_match('/^[0-9]+$/', $this->getParam("update"))) {
+            if(!($fileid = $this->getParam("update"))) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            if(!($file = DataObject::get_one("Uploads", array("id" => $fileid)))) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            clearstatcache();
+            if(!file_exists($file->realfile)) {
+                $file->remove(true);
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            if(!Core::globalSession()->hasKey("update." . $file->id)) {
+                AddContent::addError(lang("less_rights", "You are not permitted to do this."));
+
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
+                exit;
+            }
+
+            $data = Core::globalSession()->get("update." . $file->id);
+        } else {
+
+            if(!in_array($this->getParam("update"), $_SESSION["updates"])) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+                exit;
+            }
+
+            $file = array_search($this->getParam("update"), $_SESSION["updates"]);
+
+            if(!preg_match('/\.gfs$/i', $file)) {
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+                exit;
+            }
+
+            if(!Core::globalSession()->hasKey("update." . $this->getParam("update"))) {
+                AddContent::addError(lang("less_rights", "You are not permitted to do this."));
+
+                HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
+                exit;
+            }
+
+            $data = Core::globalSession()->get("update." . $this->getParam("update"));
+        }
+
+        return G_SoftwareType::install($data);
+    }
 }

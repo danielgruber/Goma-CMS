@@ -387,6 +387,14 @@ class Request extends Object {
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getUrlParts()
+	{
+		return $this->url_parts;
+	}
+
+	/**
 	 * checks if ajax response is needed
 	 *
 	 * @return bool
