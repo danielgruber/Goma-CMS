@@ -6,7 +6,7 @@
  * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author Goma-Team
  * @version 1.3.2
- * 
+ *
  * last modified: 04.08.2015
  */
 class HTMLNode extends Object

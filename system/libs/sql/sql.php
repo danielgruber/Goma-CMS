@@ -4,9 +4,9 @@
  * @link            http://goma-cms.org
  * @license:        LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
  * @author          Goma-Team
- * @version         2.2.4
+ * @version         2.2.5
  *
- * last modified: 20.04.2014
+ * last modified: 04.08.2015
  */
 class SQL extends object
 {
@@ -396,7 +396,7 @@ class SQL extends object
     /**
      * lists all fields of the table
      */
-    static function getFieldsOfTable($table, $prefix = false, $track = true)
+    static function getFieldsOfTable($table, $prefix = null, $track = true)
     {
         if (self::$driver)
             return self::$driver->getFieldsOfTable($table, $prefix, $track);
@@ -413,7 +413,7 @@ class SQL extends object
      * @param bool - if track query
      * @param string - prefix
      */
-    static function showTableDetails($table, $track = true, $prefix = false)
+    static function showTableDetails($table, $track = true, $prefix = null)
     {
         return self::$driver->showTableDetails($table, $track, $prefix);
     }
@@ -429,7 +429,7 @@ class SQL extends object
      * @param array - defaults
      * @param string - prefix
      */
-    static function requireTable($table, $fields, $indexes, $defaults, $prefix = false)
+    static function requireTable($table, $fields, $indexes, $defaults, $prefix = null)
     {
         return self::$driver->requireTable($table, $fields, $indexes, $defaults, $prefix);
     }
@@ -442,7 +442,7 @@ class SQL extends object
      * @param string - table
      * @param string - prefix
      */
-    static function dontRequireTable($table, $prefix = false)
+    static function dontRequireTable($table, $prefix = null)
     {
         return self::$driver->dontRequireTable($table, $prefix);
     }
@@ -468,7 +468,7 @@ class SQL extends object
      * @param string - type
      * @param bool|string - prefix
      */
-    static function setDefaultSort($table, $field, $type = "ASC", $prefix = false)
+    static function setDefaultSort($table, $field, $type = "ASC", $prefix = null)
     {
         return self::$driver->setDefaultSort($table, $field, $type, $prefix);
     }
@@ -665,18 +665,18 @@ interface SQLDriver
     /**
      * table-functions
      */
-    public function getFieldsOfTable($table, $prefix = false, $track = true);
+    public function getFieldsOfTable($table, $prefix = null, $track = true);
 
     /**
      * table-functions V2
      */
-    public function showTableDetails($table, $track = true, $prefix = false);
+    public function showTableDetails($table, $track = true, $prefix = null);
 
-    public function requireTable($table, $fields, $indexes, $defaults, $prefix = false);
+    public function requireTable($table, $fields, $indexes, $defaults, $prefix = null);
 
-    public function dontRequireTable($table, $prefix = false);
+    public function dontRequireTable($table, $prefix = null);
 
-    public function setDefaultSort($table, $field, $type = "ASC", $prefix = false);
+    public function setDefaultSort($table, $field, $type = "ASC", $prefix = null);
 
     /**
      * INDEX-functions

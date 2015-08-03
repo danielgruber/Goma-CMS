@@ -428,12 +428,8 @@ class mysqliDriver extends object implements SQLDriver
         if ($result = sql::query($sql)) {
             while ($row = sql::fetch_object($result)) {
                 if (!isset($indexes[$row->Key_name])) {
-                    if ($row->Index_type == "FULLTEXT") {
-                        $type = "FULLTEXT";
-                    } else if($row->Index_type == "SPATIAL") {
-                        $type = "SPATIAL";
-                    } else if ($row->Key_name == "PRIMARY") {
-                        $type = "PRIMARY";
+                    if(in_array($row->Index_type, array("FULLTEXT", "SPATIAL", "PRIMARY"))) {
+                        $type = $row->Index_type;
                     } else if ($row->Non_unique == 0) {
                         $type = "UNIQUE";
                     } else {
@@ -839,8 +835,8 @@ class mysqliDriver extends object implements SQLDriver
         if (!isset($prefix))
             $prefix = DB_PREFIX;
 
-        if ($data = $this->showTableDetails($table, true, $prefix)) {
-            return sql::query('DROP TABLE ' . $prefix . $table . '');
+        if ($this->showTableDetails($table, true, $prefix)) {
+            return sql::query('DROP TABLE ' . $prefix . $table);
         }
         return true;
     }
