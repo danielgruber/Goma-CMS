@@ -512,9 +512,18 @@ class DBField extends Object implements IDataBaseField
     /**
      * returns false because no object can be done
      *
-     *@name canDoObject
+     * @name canDoObject
+     * @return bool
      */
     public function canDoObject() {
         return false;
+    }
+
+    /**
+     * returns field-value for database.
+     */
+    public function forDB()
+    {
+        return "'".convert::raw2sql($this->value)."'";
     }
 }

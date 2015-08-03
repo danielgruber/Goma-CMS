@@ -508,6 +508,8 @@ class mysqliDriver extends object implements SQLDriver
 
         $log = "";
 
+        $forceUserMyISAM = false;
+
         $updates = "";
 
         if ($data = $this->showTableDetails($table, true, $prefix)) {
@@ -603,6 +605,13 @@ class mysqliDriver extends object implements SQLDriver
                         break;
                     case "fulltext":
                         $type = "FULLTEXT";
+                        break;
+                    case "spatial":
+                        $type = "SPATIAL";
+                        if(!$forceUserMyISAM) {
+                            $forceUserMyISAM = true;
+                            $this->setStorageEngine($prefix . $table, "MyISAM");
+                        }
                         break;
                     case "index":
                         $type = "INDEX";
@@ -724,6 +733,10 @@ class mysqliDriver extends object implements SQLDriver
                     case "unique":
                         $type = "UNIQUE";
                         break;
+                    case "spatial":
+                        $type = "SPATIAL";
+                        $forceUserMyISAM = true;
+                        break;
                     case "index":
                     default:
                         $type = "INDEX";
@@ -735,13 +748,17 @@ class mysqliDriver extends object implements SQLDriver
             $sql .= ") DEFAULT CHARACTER SET 'utf8' COLLATE utf8_general_ci";
             $log .= $sql . "\n";
 
+            if($forceUserMyISAM) {
+                $sql .= " ENGINE = MyISAM";
+            }
+
             if (sql::query($sql)) {
                 ClassInfo::$database[$table] = $fields;
 
                 if ($version = $this->getServerVersion()) {
                     $engines = $this->listStorageEngines();
 
-                    if (version_compare($version, "5.6", ">=") && isset($engines["innodb"])) {
+                    if (!$forceUserMyISAM && version_compare($version, "5.6", ">=") && isset($engines["innodb"])) {
                         $this->setStorageEngine($prefix . $table, "InnoDB");
                     } else if (isset($engines["myisam"])) {
                         $this->setStorageEngine($prefix . $table, "MyISAM");
@@ -829,8 +846,9 @@ class mysqliDriver extends object implements SQLDriver
                                     } else {
                                         $sql .= " , ";
                                     }
-                                    $sql .= " " . $field . " = '" . convert::raw2sql($value) . "' ";
 
+                                    $casting = DBField::getObjectByCasting(ClassInfo::$database[$table_name][$field], $field, $value);
+                                    $sql .= " " . $field . " = " . $casting->forDB() . " ";
                                 }
                                 unset($i);
 
@@ -915,7 +933,7 @@ class mysqliDriver extends object implements SQLDriver
                 $fields = $this->getFieldsFromInsertManipulation($data);
                 $sql .= "(".implode(",", array_map(array("convert", "raw2sql"), $fields)).")";
 
-                $sql .= $this->getValuesSQL($data, $fields);
+                $sql .= $this->getValuesSQL($data, $fields, $table_name);
 
                 if (sql::query($sql)) {
                     unset($fields, $values);
@@ -932,9 +950,10 @@ class mysqliDriver extends object implements SQLDriver
      *
      * @param array $data
      * @param array $fields
+     * @param string $table
      * @return string
      */
-    private function getValuesSQL($data, $fields) {
+    private function getValuesSQL($data, $fields, $table) {
         $records = $this->getRecords($data);
 
         $sql = " VALUES ( ";
@@ -965,7 +984,8 @@ class mysqliDriver extends object implements SQLDriver
                     $sql .= ", ";
                 }
 
-                $sql .= "'" . convert::raw2sql($record[$field]) . "'";
+                $casting = DBField::getObjectByCasting(ClassInfo::$database[$table][$field], $field, $record[$field]);
+                $sql .= $casting->forDB();
             }
         }
 
@@ -1034,7 +1054,6 @@ class mysqliDriver extends object implements SQLDriver
 
     public function setStorageEngine($table, $engine)
     {
-
         $sql = "ALTER TABLE " . $table . " ENGINE = " . $engine . "";
         if (self::query($sql)) {
             return true;
