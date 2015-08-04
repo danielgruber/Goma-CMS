@@ -1100,9 +1100,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     {
         // check if table in db and if not, create it
         if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
-            foreach(array_merge(ClassInfo::getChildren($this->classname), array($this->classname)) as $child) {
+            if($this->classname != $this->baseClass) {
+                Object::instance($this->baseClass)->buildDB();
+            }
+
+            foreach(array_merge(array($this->classname), ClassInfo::getChildren($this->classname)) as $child) {
                 Object::instance($child)->buildDB();
             }
+
             ClassInfo::write();
         }
 
@@ -2197,8 +2202,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         // check if table in db and if not, create it
         if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
 
-            ClassInfo::$database[$this->baseTable] = array();
-            foreach(array_merge(ClassInfo::getChildren($this->classname), array($this->classname)) as $child) {
+            if($this->classname != $this->baseClass) {
+                Object::instance($this->baseClass)->buildDB();
+            }
+
+            foreach(array_merge(array($this->classname), ClassInfo::getChildren($this->classname)) as $child) {
                 Object::instance($child)->buildDB();
             }
             ClassInfo::write();
