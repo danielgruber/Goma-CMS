@@ -5,7 +5,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version     5.0.1
+ * @version     5.0.2
  */
 class DataObjectClassInfo extends Extension
 {
@@ -58,7 +58,7 @@ class DataObjectClassInfo extends Extension
                         $fields = explode(",", $fields);
 
                     if(strtolower($value["type"]) == "unique") {
-                       $value["type"] = "index";
+                        $value["type"] = "index";
                     }
 
                     $maxlength = $length = floor(333 / count($fields));
@@ -83,17 +83,16 @@ class DataObjectClassInfo extends Extension
                         $i = 0;
                         foreach ($fields_ordered as $field => $length) {
                             if ($length < $maxlength) {
-
                                 $maxlength = floor($indexlength / (count($fields) - $i));
                                 $indexlength -= $length;
                                 $indexes[$key]["fields"][] = $field;
-                            } else if (preg_match('/enum/i', $db_fields[$field])) {
+                            } else if (preg_match('/enum/i', $db_fields[$field]) ||strpos($db_fields[$field], ",")) {
                                 $indexes[$key]["fields"][] = $field;
                             } else {
                                 $length = $maxlength;
                                 // support for ASC/DESC
-                                if (preg_match("/(ASC|DESC)/i", $field, $matches)) {
-                                    $field = preg_replace("/(ASC|DESC)/i", "", $field);
+                                if (preg_match("/ (ASC|DESC)/i", $field, $matches)) {
+                                    $field = preg_replace("/ (ASC|DESC)/i", "", $field);
                                     $indexes[$key]["fields"][] = $field . " (" . $length . ") " . $matches[1] . "";
                                 } else {
                                     $indexes[$key]["fields"][] = $field . " (" . $length . ")";
