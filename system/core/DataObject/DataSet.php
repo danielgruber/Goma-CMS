@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.8
+ * @version     1.5.9
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
@@ -17,24 +17,21 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 
     /**
      * if to use pages in this dataset
-     *@name pages
-     *@param bool
+     * @var bool
      */
     protected $pagination = false;
 
     /**
      * how many items per page
      *
-     *@name perPage
-     *@access public
+     * @var int
      */
     protected $perPage = 10;
 
     /**
      * the current page of this dataset
      *
-     *@name page
-     *@access public
+     * @var int|null
      */
     public $page = null;
 
@@ -114,17 +111,6 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      */
     public function Count() {
         return count($this->dataCache);
-    }
-
-    /**
-     * deprecated method
-     *
-     *@name _count
-     *@access public
-     */
-    public function _count() {
-        Core::Deprecate(2.0, "".$this->classname."::Count");
-        return $this->Count();
     }
 
     /**
@@ -516,8 +502,10 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * activates pagination
      *
-     *@name activatePagination
-     *@access public
+     * @param int|null $page
+     * @param int|null $perPage
+     * @internal param $activatePagination
+     * @access public
      */
     public function activatePagination($page = null, $perPage = null) {
         if(isset($perPage) && $perPage > 0)
@@ -560,16 +548,6 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     public function disablePagination() {
         $this->pagination = false;
         $this->reRenderSet();
-    }
-
-    /**
-     * returns if pagination is activated
-     *
-     *@name isPagination
-     *@access public
-     */
-    public function isPagination() {
-        return $this->pagination;
     }
 
     /**
@@ -772,6 +750,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
                 return parent::getOffset($offset, $args);
             } else {
                 if(is_object($this->first())) {
+                    Core::Deprecate(2.0, "first()->$offset");
                     return $this->first()->getOffset($offset, $args);
                 }
             }
@@ -803,13 +782,12 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      *@param mixed - new value
      */
     public function __set($key, $value) {
-        $name = strtolower(trim($key));
-
         if(Object::method_exists($this->classname, "set" . $key)) {
             return call_user_func_array(array($this, "set" . $key), array($value));
         }
 
         if(is_object($this->first())) {
+            Core::Deprecate(2.0, "first()->$key");
             return $this->first()->__set($key, $value);
         }
         return false;
@@ -857,6 +835,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
             return parent::makeObject($offset, $data, $cachename);
         } else {
             if(is_object($this->first())) {
+                Core::Deprecate(2.0, "first()->$offset()");
                 return $this->first()->makeObject($offset, $data, $cachename);
             }
         }
@@ -927,14 +906,32 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * on customise make a copy of the data in protected
      *
-     *@name customise
-     *@access public
+     * @name customise
+     * @access public
+     * @return $this
      */
     public function customise($loop = array(), $loop1 = array()) {
         $response = parent::customise($loop, $loop1);
         // we always want to apply the customised data of the first state to each record
         $this->protected_customised = $this->customised;
         return $response;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isPagination()
+    {
+        return $this->pagination;
+    }
+
+
+    /**
+     * @return int
+     */
+    public function getPerPage()
+    {
+        return $this->perPage;
     }
 
 }

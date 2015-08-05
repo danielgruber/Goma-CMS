@@ -15,48 +15,48 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * some other props
-	*/
+	 */
 	/**
 	 * filter for this dataset
 	 *
 	 *@name filter
 	 *@access protected
-	*/
+	 */
 	protected $filter = array();
 	/**
 	 * sorting
 	 *
 	 *@name sort
 	 *@access protected
-	*/
+	 */
 	protected $sort;
 	/**
 	 * limits
 	 *
 	 *@name limit
 	 *@access protected
-	*/
+	 */
 	protected $limit;
 	/**
 	 * joins
 	 *
 	 *@name join
 	 *@access protected
-	*/
+	 */
 	protected $join;
 	/**
 	 * for search
 	 *
 	 *@name search
 	 *@access protected
-	*/
+	 */
 	protected $search = array();
 	/**
 	 * versioning
 	 *
 	 *@name version
 	 *@access protected
-	*/
+	 */
 	protected $version;
 
 	/**
@@ -64,7 +64,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name count
 	 *@access protected
-	*/
+	 */
 	protected $count;
 
 	/**
@@ -72,8 +72,8 @@ class DataObjectSet extends DataSet {
 	 *
 	 * @name dataobject
 	 * @access protected
-     * @var DataObject
-	*/
+	 * @var DataObject
+	 */
 	public $dataobject;
 
 	/**
@@ -81,19 +81,19 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name data
 	 *@access public
-	*/
+	 */
 	public $data = null;
 
 	/**
 	 * controller of this dataobjectset
 	 *
 	 * @var Controller|String|null
-	*/
+	 */
 	public $controller = "";
 
 	/**
 	 * sort by ids.
-	*/
+	 */
 	protected $sortByIds = null;
 	protected $idField = null;
 
@@ -102,12 +102,13 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name __construct
 	 *@access public
-	*/
+	 */
 	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
 		parent::__construct(null);
 
 		if(isset($class)) {
 			if(is_a($class, "DataObjectSet")) {
+				/** @var DataObjectSet $class */
 				$class = $class->dataobject;
 			}
 
@@ -134,7 +135,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name setData
 	 *@access public
-	*/
+	 */
 	public function setData($data = array()) {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
@@ -147,18 +148,18 @@ class DataObjectSet extends DataSet {
 	 *@name ToArray
 	 *@access public
 	 *@param array - extra fields, which are not in database
-	*/
+	 */
 	public function ToArray($additional_fields = array())
 	{
-			$data = array();
-			foreach((array) $this->data as $record) {
-				if(is_object($record)) {
-					$data[] = $record->toArray($additional_fields);
-				} else {
-					$data[] = $record;
-				}
+		$data = array();
+		foreach((array) $this->data as $record) {
+			if(is_object($record)) {
+				$data[] = $record->toArray($additional_fields);
+			} else {
+				$data[] = $record;
 			}
-			return $data;
+		}
+		return $data;
 	}
 
 	/**
@@ -166,7 +167,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name queryVersion
 	 *@access public
-	*/
+	 */
 	public function queryVersion() {
 		return $this->version;
 	}
@@ -176,7 +177,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name getTableName
 	 *@access public
-	*/
+	 */
 	public function getTable_Name() {
 		if(!isset($this->dataobject))
 			return null;
@@ -192,7 +193,7 @@ class DataObjectSet extends DataSet {
 	 *@param int - start
 	 *@param int - length
 	 *@return array
-	*/
+	 */
 	protected function getRecordsByRange($start, $length) {
 		if(PROFILE) Profiler::mark("DataObjectSet::getRecordsByRange");
 
@@ -264,23 +265,23 @@ class DataObjectSet extends DataSet {
 		return $newData;
 	}
 
-    /**
-     * returns the first item
-     * @name first
-     * @access public
-     * @return DataObject|null
-     */
+	/**
+	 * returns the first item
+	 * @name first
+	 * @access public
+	 * @return DataObject|null
+	 */
 	public function first($forceObject = true)
 	{
-        $this->forceData();
+		$this->forceData();
 
-        if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
-            return $this->current(key($this->data));
-        } else if($forceObject) {
-            return $this->dataobject;
-        } else {
-            return null;
-        }
+		if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
+			return $this->current(key($this->data));
+		} else if($forceObject) {
+			return $this->dataobject;
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -290,7 +291,7 @@ class DataObjectSet extends DataSet {
 	 *@name getRange
 	 *@access public
 	 *@return DataSet
-	*/
+	 */
 	public function getRange($start, $length) {
 		return new DataSet($this->getRecordsByRange($start, $length));
 	}
@@ -302,7 +303,7 @@ class DataObjectSet extends DataSet {
 	 *@name getArrayRange
 	 *@access public
 	 *@return array
-	*/
+	 */
 	public function getArrayRange($start, $length) {
 		return $this->getRecordsByRange($start, $length);
 	}
@@ -312,7 +313,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name Count
 	 *@access public
-	*/
+	 */
 	public function Count() {
 		if(isset($this->count)) {
 			return $this->count;
@@ -336,7 +337,7 @@ class DataObjectSet extends DataSet {
 	 *@name max
 	 *@access public
 	 *@param string $field
-	*/
+	 */
 	public function Max($field) {
 		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
 			$field = $this->dataobject->table() . "." . $field;
@@ -358,7 +359,7 @@ class DataObjectSet extends DataSet {
 	 *@name maxCount
 	 *@access public
 	 *@param string $field
-	*/
+	 */
 	public function MaxCount($field) {
 		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
 			$field = $this->dataobject->table() . "." . $field;
@@ -379,7 +380,7 @@ class DataObjectSet extends DataSet {
 	 *@name min
 	 *@access public
 	 *@param string $field
-	*/
+	 */
 	public function Min($field) {
 
 		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
@@ -401,7 +402,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name rewind
 	 *@access public
-	*/
+	 */
 	public function rewind() {
 		$this->forceData();
 		parent::rewind();
@@ -409,8 +410,10 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * gets the current value
-	 *@name current
-	*/
+	 *
+	 * @name current
+	 * @return mixed|ViewAccessableData
+	 */
 	public function current($position = null)
 	{
 		if(!isset($position))
@@ -443,7 +446,7 @@ class DataObjectSet extends DataSet {
 	 *@name forceData
 	 *@access public
 	 *@param numeric - position
-	*/
+	 */
 	public function forceData($position = null) {
 
 		if(!isset($this->dataCache) && isset($this->dataobject)) {
@@ -461,7 +464,7 @@ class DataObjectSet extends DataSet {
 	/**
 	 * check if data exists
 	 *@name valid
-	*/
+	 */
 	public function valid()
 	{
 		$this->forceData();
@@ -473,7 +476,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name filter
 	 *@access public
-	*/
+	 */
 	public function filter($filter) {
 		if(isset($filter) && $this->filter != $filter) {
 			$this->filter = $filter;
@@ -487,7 +490,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name addFilter
 	 *@access public
-	*/
+	 */
 	public function addFilter($filter) {
 		if(isset($filter)) {
 			$this->filter = array_merge((array) $this->filter, (array) $filter);
@@ -501,7 +504,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name groupBy
 	 *@access public
-	*/
+	 */
 	public function groupBy($field) {
 		return $this->dataobject->getGroupedRecords($this->version, $field, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
 	}
@@ -511,7 +514,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name purgeData
 	 *@access protected
-	*/
+	 */
 	protected function purgeData() {
 		$this->data = null;
 		$this->count = null;
@@ -523,7 +526,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name addJoin
 	 *@access public
-	*/
+	 */
 	public function addJoin($join) {
 		$this->join = array_merge((array)$this->join, (array)$join);
 		$this->purgeData();
@@ -535,7 +538,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name removeJoin
 	 *@access public
-	*/
+	 */
 	public function removeJoin($key) {
 		unset($this->join[$key]);
 		$this->purgeData();
@@ -547,7 +550,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name join
 	 *@access public
-	*/
+	 */
 	public function join($join) {
 		if(isset($join)) {
 			$this->join = $join;
@@ -561,7 +564,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name limit
 	 *@access public
-	*/
+	 */
 	public function limit($limit) {
 
 		if((is_string($limit) && preg_match('/^[0-9]+$/', $limit)) || is_int($limit)) {
@@ -593,49 +596,33 @@ class DataObjectSet extends DataSet {
 	/**
 	 * activates pagination
 	 *
-	 *@name activatePagination
-	 *@access public
-	*/
+	 * @param int|null $page
+	 * @param int|null $perPage
+	 */
 	public function activatePagination($page = null, $perPage = null) {
-		if(isset($perPage) && $perPage > 0)
-			$this->perPage = $perPage;
 
-		if(isset($page)) {
-
-			// first validate the data
-			$pages = ceil($this->Count() / $this->perPage);
-			if($pages < $page) {
-				$page = $pages;
-			}
-
-			$this->page = $page;
-		}
-		if(!isset($this->page)) {
-			$this->page = 1;
-		}
-
-		$this->pagination = true;
 		$this->purgeData();
+		parent::activatePagination($page, $perPage);
 	}
 
-    /**
-     * sorts with callback.
-     *
-     * @param $callback
-     */
-    public function sortWithCallback($callback) {
-        usort($this->dataCache, $callback);
-    }
+	/**
+	 * sorts with callback.
+	 *
+	 * @param $callback
+	 */
+	public function sortWithCallback($callback) {
+		usort($this->dataCache, $callback);
+	}
 
-    /**
-     * resorts the data
-     *
-     * @name sort
-     * @access public
-     * @param string - column
-     * @param string - optional - type
-     * @return $this
-     */
+	/**
+	 * resorts the data
+	 *
+	 * @name sort
+	 * @access public
+	 * @param string - column
+	 * @param string - optional - type
+	 * @return $this
+	 */
 	public function sort($column, $type = "") {
 
 		if(is_array($column)) {
@@ -663,10 +650,10 @@ class DataObjectSet extends DataSet {
 		switch(strtolower($type)) {
 			case "desc":
 				$type = "DESC";
-			break;
+				break;
 			default:
 				$type = "ASC";
-			break;
+				break;
 		}
 
 		if(isset($this->sort["field"]) && $this->sort["field"] == $column && $this->sort["type"] == $type) {
@@ -683,7 +670,7 @@ class DataObjectSet extends DataSet {
 	 * checks if we can sort by a specefied field
 	 *
 	 *@name canSortBy
-	*/
+	 */
 	public function canSortBy($field) {
 		return $this->dataobject->canSortBy($field);
 	}
@@ -692,7 +679,7 @@ class DataObjectSet extends DataSet {
 	 * checks if we can sort by a specefied field
 	 *
 	 *@name canSortBy
-	*/
+	 */
 	public function canFilterBy($field) {
 		return $this->dataobject->canFilterBy($field); //! TODO: Implement Filter in DataObjectSet
 	}
@@ -701,7 +688,7 @@ class DataObjectSet extends DataSet {
 	 * sets version-type.
 	 *
 	 * @param	mixed $version type: "published"/"state"/"grouped"/false (get all records not grouped by recordid)/integer
-	*/
+	 */
 	public function setVersion($version) {
 		$this->version = $version;
 		$this->dataobject->queryVersion = $version;
@@ -714,7 +701,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name getVersion
 	 *@access public
-	*/
+	 */
 	public function getVersion() {
 		return $this->version;
 	}
@@ -724,7 +711,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name search
 	 *@access public
-	*/
+	 */
 	public function search($search) {
 		if(isset($search)) {
 			$this->search = $search;
@@ -738,7 +725,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name add
 	 *@access public
-	*/
+	 */
 	public function push(DataObject $record, $write = false) {
 		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record[$key]))
@@ -761,7 +748,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name addMany
 	 *@access public
-	*/
+	 */
 	public function addMany($data) {
 		$addedIDs = array();
 		foreach($data as $record) {
@@ -785,14 +772,14 @@ class DataObjectSet extends DataSet {
 	 *@name getConverted
 	 *@access protected
 	 *@param various - data
-	*/
+	 */
 	public function getConverted($item) {
 		if(is_array($item)) {
 			if(isset($item["class_name"]) && ClassInfo::exists($item["class_name"])) {
-                $object = new $item["class_name"]($item);
-            } else {
-                $object = new $this->dataobject->classname ($item);
-            }
+				$object = new $item["class_name"]($item);
+			} else {
+				$object = new $this->dataobject->classname ($item);
+			}
 		} else {
 			$object = $item;
 		}
@@ -854,28 +841,28 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name toString
 	 *@access public
-	*/
+	 */
 	public function __toString() {
-        try {
-            if($controller = $this->controller()) {
-                if($controller->template != "") {
-                    return $controller->index();
-                } else {
-                    return false;
-                }
-            }
-            return "controller not found";
-        } catch(Exception $e) {
-            Goma_ExceptionHandler($e);
-        }
+		try {
+			if($controller = $this->controller()) {
+				if($controller->template != "") {
+					return $controller->index();
+				} else {
+					return false;
+				}
+			}
+			return "controller not found";
+		} catch(Exception $e) {
+			Goma_ExceptionHandler($e);
+		}
 	}
 
 	/**
 	 * bool - for IF in template
- 	 *
+	 *
 	 *@name toBool
 	 *@access public
-	*/
+	 */
 	public function bool() {
 		return ($this->Count() > 0);
 	}
@@ -885,7 +872,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name fieldToArray
 	 *@access public
-	*/
+	 */
 	public function fieldToArray($field) {
 		$this->forceData();
 		return parent::fieldToArray($field);
@@ -899,7 +886,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - to force insert
 	 *@param bool - to force write
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-	*/
+	 */
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
@@ -925,7 +912,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - to force insert
 	 *@param bool - to force write
 	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-	*/
+	 */
 	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
@@ -951,7 +938,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - force delete
 	 *@param bool - if cancel on error, or resume
 	 *@param bool - if force to delete versions, too
-	*/
+	 */
 	private function remove($force = false, $forceAll = false) {
 		foreach($this as $key => $record) {
 			if($record->remove($force, $forceAll)) {
@@ -964,9 +951,9 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * public removal
-	*/
+	 */
 	public function getRemove() {
-        throw new BadMethodCallException("Method remove is not allowed anymore and DataObjectSet, please select a single DataObject");
+		throw new BadMethodCallException("Method remove is not allowed anymore and DataObjectSet, please select a single DataObject");
 	}
 
 	/**
@@ -977,7 +964,7 @@ class DataObjectSet extends DataSet {
 	 *@param string - name
 	 *@param bool - edit-form
 	 *@param bool - disabled
-	*/
+	 */
 	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 
 		// if name is not set, we generate a name from this model
@@ -996,9 +983,9 @@ class DataObjectSet extends DataSet {
 
 		$form->addValidator(new DataValidator($this->dataobject), "datavalidator");
 
-        if(is_object($this->dataobject)) {
-            $form->setResult(clone $this->dataobject);
-        }
+		if(is_object($this->dataobject)) {
+			$form->setResult(clone $this->dataobject);
+		}
 
 		$form->add(new HiddenField("class_name", $this->dataobject->classname));
 
@@ -1029,7 +1016,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name form
 	 *@access public
-	*/
+	 */
 	public function form() {
 		return $this->controller()->form(null, $this);
 	}
@@ -1039,7 +1026,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 *@name renderForm
 	 *@access public
-	*/
+	 */
 	public function renderForm() {
 		return $this->controller()->renderForm(null, $this);
 	}
@@ -1055,12 +1042,15 @@ class DataObjectSet extends DataSet {
 
 	// some API patches
 	public function isDeleted() {
+		Core::Deprecate(2.0, "first->isDeleted");
 		return $this->first()->isDeleted();
 	}
 	public function isPublished() {
+		Core::Deprecate(2.0, "first->isPublished");
 		return $this->first()->isPublished();
 	}
 	public function everPublished() {
+		Core::Deprecate(2.0, "first->everPublished");
 		return $this->first()->everPublished();
 	}
 }
