@@ -13,7 +13,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * This class provides information about other classes.
  *
  * @package		Goma\System\Core
- * @version		3.8
+ * @version		3.8.1
  */
 class ClassInfo extends Object {
 	/**
@@ -113,6 +113,11 @@ class ClassInfo extends Object {
 
 		if(self::$childData == array() && file_exists(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE)) {
 			include (ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE);
+			if($children === null) {
+				self::delete();
+				self::loadfile();
+				exit;
+			}
 			self::$childData = $children;
 		}
 
@@ -709,7 +714,7 @@ class ClassInfo extends Object {
 				unset($class, $data);
 			}
 
-			FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";");
+			FileSystem::writeFileContents(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE, "<?php\n\$children = " . var_export(self::$childData, true) . ";", LOCK_EX);
 
 			// reappend
 			self::$class_info["permission"]["providedPermissions"] = Permission::$providedPermissions;
@@ -1085,6 +1090,10 @@ class ClassInfo extends Object {
 		// first consolidate data
 		if(self::$childData == array() && file_exists(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE)) {
 			include (ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE);
+			if($children === null) {
+				self::delete();
+				return;
+			}
 			self::$childData = $children;
 		}
 

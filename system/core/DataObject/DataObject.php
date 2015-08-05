@@ -1233,9 +1233,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if this version of the record is published
      *
-     * @name isPublished
      * @access public
      * @return bool
+     * @throws MySQLException
+     * @throws SQLException
      */
     public function isPublished() {
 
@@ -1280,8 +1281,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gives back if ever published
      *
-     *@name isPublished
-     *@access public
+     * @name isPublished
+     * @access public
+     * @return bool
      */
     public function everPublished() {
         if ($this->isPublished()) {
