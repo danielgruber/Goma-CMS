@@ -610,7 +610,7 @@ interface SQLDriver
      * @param password
      * @param hostname
      */
-    static function connect($dbuser, $dbdb, $dbpass, $host);
+    public function connect($dbuser, $dbdb, $dbpass, $host);
 
     /**
      * runs a query
@@ -619,38 +619,38 @@ interface SQLDriver
      * @param string - query
      * @param bool - if unbuffered
      */
-    static function query($sql, $unbuffered = false, $debug = true);
+    public function query($sql, $unbuffered = false, $debug = true);
 
     /**
      * the following functions are simly sql-functions
      */
-    static function fetch_row($result);
+    public function fetch_row($result);
 
-    static function close();
+    public function close();
 
-    static function fetch_object($result);
+    public function fetch_object($result);
 
-    static function fetch_array($result);
+    public function fetch_array($result);
 
-    static function fetch_assoc($result);
+    public function fetch_assoc($result);
 
-    static function num_rows($result);
+    public function num_rows($result);
 
-    static function error();
+    public function error();
 
-    static function errno();
+    public function errno();
 
-    static function insert_id();
+    public function insert_id();
 
-    static function free_result($result);
+    public function free_result($result);
 
-    static function escape_string($str);
+    public function escape_string($str);
 
-    static function real_escape_string($str);
+    public function real_escape_string($str);
 
-    static function affected_rows();
+    public function affected_rows();
 
-    static function protect($str);
+    public function protect($str);
 
     /**
      * splits more than one query at the ;
@@ -658,45 +658,45 @@ interface SQLDriver
      * @access public
      * @param string - queries
      */
-    static function split($sql);
+    public function split($sql);
 
-    static function list_tables($database);
+    public function list_tables($database);
 
     /**
      * table-functions
      */
-    static function getFieldsOfTable($table, $prefix = null, $track = true);
+    public function getFieldsOfTable($table, $prefix = null, $track = true);
 
     /**
      * table-functions V2
      */
-    static function showTableDetails($table, $track = true, $prefix = null);
+    public function showTableDetails($table, $track = true, $prefix = null);
 
-    static function requireTable($table, $fields, $indexes, $defaults, $prefix = null);
+    public function requireTable($table, $fields, $indexes, $defaults, $prefix = null);
 
-    static function dontRequireTable($table, $prefix = null);
+    public function dontRequireTable($table, $prefix = null);
 
-    static function setDefaultSort($table, $field, $type = "ASC", $prefix = null);
+    public function setDefaultSort($table, $field, $type = "ASC", $prefix = null);
 
     /**
      * INDEX-functions
      */
-    static function addIndex($table, $field, $type, $name = null, $db_prefix = null);
+    public function addIndex($table, $field, $type, $name = null, $db_prefix = null);
 
-    static function dropIndex($table, $name, $db_prefix = null);
+    public function dropIndex($table, $name, $db_prefix = null);
 
-    static function getIndexes($table, $db_prefix = null);
+    public function getIndexes($table, $db_prefix = null);
 
-    static function writeManipulation($manipulation);
+    public function writeManipulation($manipulation);
 
     /**
      * storage engines.
      */
-    static function listStorageEngines();
+    public function listStorageEngines();
 
-    static function setStorageEngine($table, $engine);
+    public function setStorageEngine($table, $engine);
 
-    static function setCharsetUTF8();
+    public function setCharsetUTF8();
 
 }
 

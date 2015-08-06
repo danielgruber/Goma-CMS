@@ -503,7 +503,7 @@ class DBField extends Object implements IDataBaseField
         if(isset($casting)) {
             return new $casting["class"]($name, $value, isset($casting["args"]) ? $casting["args"] : array());
         } else if($throwErrorOnFail) {
-            throwError(6, "Logical Exception", "Invalid casting given to DBField::getObjectByCasting '".$casting."'");
+            throw new LogicException("Invalid casting given to DBField::getObjectByCasting '".$casting."'");
         } else {
             return new DBField($name, $value, array());
         }
@@ -522,7 +522,7 @@ class DBField extends Object implements IDataBaseField
     /**
      * returns field-value for database.
      */
-    public function forDB()
+    public function forDBQuery()
     {
         return "'".convert::raw2sql($this->value)."'";
     }

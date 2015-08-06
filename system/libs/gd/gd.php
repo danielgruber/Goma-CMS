@@ -294,7 +294,9 @@ class GD extends Object
      * @param int $srcWidth
      * @param int $srcHeight
      * @param Size $imageSize
-     * @return Tuple<Position,Size> information about the area where we get data from
+     * @param Position|null $cropPosition
+     * @param Size|null $cropSize
+     * @return Tuple <Position,Size> information about the area where we get data from
      */
     protected function getSrcImageArea($srcWidth, $srcHeight, $imageSize, $cropPosition = null, $cropSize = null) {
         $size = new Size($srcWidth, $srcHeight);
@@ -366,7 +368,6 @@ class GD extends Object
      * the first value of the tuple is the position and second is the size.
      *
      * @param Size $srcArea
-     * @param Size $destSize
      * @param Size $imageSize
      * @return Tuple<Position,Size> information about the area where we put data to
      */

@@ -1,21 +1,21 @@
 <?php defined('IN_GOMA') OR die();
 
 /**
-  *	@package 	goma framework
-  *	@link 		http://goma-cms.org
-  *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *	@author 	Goma-Team
-  * @Version 	1.6
-  *
-  * last modified: 26.01.2015
-*/
+ *	@package 	goma framework
+ *	@link 		http://goma-cms.org
+ *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *	@author 	Goma-Team
+ * @Version 	1.6
+ *
+ * last modified: 06.08.2015
+ */
 class ImageUploadsController extends UploadsController {
 	/**
 	 * handlers
 	 *
 	 *@name handlers
 	 *@access public
-	*/
+	 */
 	public $url_handlers = array(
 		"setWidth/\$width" 					=> "setWidth",
 		"setHeight/\$height"				=> "setHeight",
@@ -27,11 +27,11 @@ class ImageUploadsController extends UploadsController {
 		"noCropSetHeight/\$height"			=> "noCropSetHeight",
 		"noCropSetSize/\$width/\$height"	=> "noCropSetSize"
 	);
-	
+
 	/**
 	 * allowed actions
-	*/
-	
+	 */
+
 	public $allowed_actions = array(
 		"setWidth" 			=> "->checkImagePerms",
 		"setHeight"			=> "->checkImagePerms",
@@ -46,7 +46,7 @@ class ImageUploadsController extends UploadsController {
 
 	/**
 	 * checks if filename ends with correct extension and if there is a permit-file.
-	*/
+	 */
 	public function checkImagePerms() {
 		if(!self::checkFilename($this->modelInst()->filename)) {
 			return false;
@@ -59,33 +59,33 @@ class ImageUploadsController extends UploadsController {
 		return true;
 	}
 
-    /**
-     * check if filename matches.
-     * @param $filename
-     * @return bool
-     */
+	/**
+	 * check if filename matches.
+	 * @param $filename
+	 * @return bool
+	 */
 	public function checkFilename($filename) {
 		return preg_match('/\.('.implode("|", ImageUploads::$file_extensions).')$/i', $filename);
 	}
 
-    /**
-     * sends the image to the browser
-     *
-     * @name index
-     * @access public
-     * @return false
-     */
+	/**
+	 * sends the image to the browser
+	 *
+	 * @name index
+	 * @access public
+	 * @return false
+	 */
 	public function index() {
-        if($this->getParam("height") || $this->getParam("width")) {
-            return false;
-        }
+		if($this->getParam("height") || $this->getParam("width")) {
+			return false;
+		}
 
 		if(self::checkFilename($this->modelInst()->filename)) {
 			$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
 
 			// generate
 			$image = new RootImage($this->modelInst()->realfile);
-            $image->filename = $this->modelInst()->filename;
+			$image->filename = $this->modelInst()->filename;
 
 			// write to cache
 			if(preg_match('/index\.(jpg|jpeg|png|bmp|gif)$/', URL)) {
@@ -96,9 +96,9 @@ class ImageUploadsController extends UploadsController {
 			// output
 			$image->output();
 
-            exit;
+			exit;
 		}
-		
+
 		return false;
 	}
 
@@ -114,7 +114,7 @@ class ImageUploadsController extends UploadsController {
 	 * @param 	int $thumbHeight
 	 * @param 	boolean $output or return image
 	 * @return 	GD
-	*/
+	 */
 	public function resizeImage($width, $height, $thumbLeft = 50, $thumbTop = 50, $thumbWidth = 100, $thumbHeight = 100, $output = true) {
 		$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
 
@@ -122,11 +122,11 @@ class ImageUploadsController extends UploadsController {
 		$image = new RootImage($this->modelInst()->realfile);
 
 
-        if(!isset($width)) {
-            $width = $height / $image->height * $image->width;
-        } else if(!isset($height)) {
-            $height = $width / $image->width * $image->height;
-        }
+		if(!isset($width)) {
+			$width = $height / $image->height * $image->width;
+		} else if(!isset($height)) {
+			$height = $width / $image->width * $image->height;
+		}
 
 		// resize
 		$img = $image->resize($width, $height, true, new Position($thumbLeft, $thumbTop), new Size($thumbWidth, $thumbHeight));
@@ -137,7 +137,7 @@ class ImageUploadsController extends UploadsController {
 		} catch(Exception $e) {
 			log_exception($e);
 		}
-		
+
 		// output
 		if($output) {
 			$img->Output();
@@ -145,113 +145,113 @@ class ImageUploadsController extends UploadsController {
 
 		return $img;
 	}
-	
+
 	/**
 	 * sets the width
 	 *
 	 *@name setWidth
 	 *@access public
-	*/
+	 */
 	public function setWidth() {
 
 		$width = (int) $this->getParam("width");
-		
+
 		$this->resizeImage($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-	
+
 		exit;
 	}
-	
+
 	/**
 	 * sets the height
 	 *
 	 *@name setHeight
 	 *@access public
-	*/
+	 */
 	public function setHeight() {
 
 		$height = (int) $this->getParam("height");
 
 		$this->resizeImage(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-		
+
 		exit;
 	}
-	
+
 	/**
 	 * sets the size
 	 *
 	 *@name setSize
 	 *@access public
-	*/
+	 */
 	public function setSize() {
 
 		$height = (int) $this->getParam("height");
 		$width = (int) $this->getParam("width");
-		
+
 		$this->resizeImage($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
-		
+
 		exit;
 	}
-	
+
 	/**
-	 * sets the size on the original 
+	 * sets the size on the original
 	 *
 	 *@name orgSetSize
 	 *@åccess public
-	*/
+	 */
 	public function orgSetSize() {
 
 		$height = (int) $this->getParam("height");
 		$width = (int) $this->getParam("width");
-		
+
 		$this->resizeImage($width, $height);
-		
+
 		exit;
 	}
-	
+
 	/**
-	 * sets the width on the original 
+	 * sets the width on the original
 	 *
 	 *@name orgSetWidth
 	 *@åccess public
-	*/
+	 */
 	public function orgSetWidth() {
 
 		$width = (int) $this->getParam("width");
-		
+
 		$this->resizeImage($width, null);
-		
+
 		exit;
 	}
-	
+
 	/**
 	 * sets the height on the original
 	 *
 	 *@name orgSetHeight
 	 *@access public
-	*/
-	public function orgSetHeight() {	
+	 */
+	public function orgSetHeight() {
 		$height = (int) $this->getParam("height");
-		
+
 		$this->resizeImage(null, $height);
-		
+
 		exit;
 	}
-	
+
 	/**
-	 * sets the size on the original 
+	 * sets the size on the original
 	 *
 	 *@name noCropSetSize
 	 *@åccess public
-	*/
+	 */
 	public function noCropSetSize() {
 
 		$height = (int) $this->getParam("height");
 		$width = (int) $this->getParam("width");
-		
+
 		// create image
 		$image = new RootImage($this->modelInst()->realfile);
 		$img = $image->resize($width, $height, true);
-		
+
 		// write to cache
 		try {
 			FileSystem::requireDir(substr(ROOT . URL,0,strrpos(ROOT . URL, "/")));
@@ -259,39 +259,39 @@ class ImageUploadsController extends UploadsController {
 		} catch(Exception $e) {
 			log_exception($e);
 		}
-		
+
 		// output
 		$img->Output();
-		
+
 		exit;
 	}
-	
+
 	/**
-	 * sets the width on the original 
+	 * sets the width on the original
 	 *
 	 *@name orgSetWidth
 	 *@åccess public
-	*/
+	 */
 	public function noCropSetWidth() {
 
 		$width = (int) $this->getParam("width");
-		
+
 		$this->resizeImage($width, null);
-		
+
 		exit;
 	}
-	
+
 	/**
 	 * sets the height on the original
 	 *
 	 *@name noCropSetHeight
 	 *@access public
-	*/
-	public function noCropSetHeight() {	
+	 */
+	public function noCropSetHeight() {
 
 		$height = (int) $this->getParam("height");
 		$this->resizeImage(null, $height);
-		
+
 		exit;
 	}
 }

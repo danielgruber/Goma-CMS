@@ -22,7 +22,7 @@ loadlang("files");
  * @property string collectionid
  * @property Uploads|null collection
  *
- * last modified: 02.08.2015
+ * last modified: 06.08.2015
  */
 class Uploads extends DataObject {
     /**
@@ -266,10 +266,12 @@ class Uploads extends DataObject {
      * checks if collection-tree exists and gets last generated or found location.
      *
      * @name 	generateCollectionTree
-     * @param 	string collectionPath
+     * @param 	string $collectionPath
      * @return 	Uploads
      */
     public static function generateCollectionTree($collectionPath) {
+
+        $collection = null;
         // determine id of collection
         $collectionTree = explode(".", $collectionPath);
 
@@ -290,8 +292,9 @@ class Uploads extends DataObject {
     /**
      * removes the file after remvoing from Database
      *
-     *@name onAfterRemove
-     *@access public
+     * @name onAfterRemove
+     * @access public
+     * @return void
      */
     public function onAfterRemove() {
         if(file_exists($this->realfile)) {
@@ -306,6 +309,10 @@ class Uploads extends DataObject {
 
         $cacher = new Cacher("file_" . $this->fieldGet("realfile"));
         $cacher->delete();
+
+        if(file_exists($this->path)) {
+            FileSystem::delete($this->path);
+        }
 
         parent::onAfterRemove();
     }
@@ -357,6 +364,10 @@ class Uploads extends DataObject {
         $CacheForRealfile = new Cacher("file_" . $this->fieldGet("realfile"));
         $CacheForRealfile->delete();
 
+        if(file_exists($this->path)) {
+            FileSystem::delete($this->path);
+        }
+
     }
 
     /**
@@ -374,10 +385,6 @@ class Uploads extends DataObject {
                 $record->remove(true);
                 continue;
             }
-            // in test
-            //@unlink($record->realfile);
-            logging("removing file ".$record->realfile."");
-            //$record->remove(true);
         }
     }
 

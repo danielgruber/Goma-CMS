@@ -5,7 +5,7 @@ class PointSQLField extends DBField {
     /**
      * for db.
      */
-    public function forDB() {
+    public function forDBQuery() {
         return "GeomFromText('POINT(".$this->value.")')";
     }
 }

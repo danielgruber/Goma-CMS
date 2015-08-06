@@ -34,7 +34,7 @@ class VirtualPage extends Page {
 	public function getForm(&$form) {
 		parent::getForm($form);
 		
-		$form->add($dropdown = new HasOneDropDown("regardingPage", lang("virtual_page")));
+		$form->add($dropdown = new HasOneDropDown("regardingPage", lang("virtual_page")), 0, "content");
 		
 		$form->addValidator(new RequiredFields(array("regardingPage")), "validateRegarding");
 		$form->addValidator(new FormValidator(array($this, "validate")), "validateSelf");
@@ -58,15 +58,16 @@ class VirtualPageController extends PageController {
 	/**
 	 * handles the action
 	 *
-	 *@name index
-	*/
+	 * @name index
+	 * @return bool|string
+	 */
 	public function index() {
 		$model = $this->modelInst()->regardingPage();
 		$model->title = $this->modelInst()->title;
 		if(is_object($model->controller())) {
 			return $model->controller()->index();
 		} else {
-			throwError(6, "Unknown Error", "VirtualPage must have an regarding Page, but regarding page seems missing or imcompabible.");
+			throw new LogicException("VirtualPage must have an regarding Page, but regarding page seems missing or incompabible.");
 		}
 	}
 }

@@ -880,7 +880,7 @@ class mysqliDriver extends object implements SQLDriver
                                     }
 
                                     $casting = DBField::getObjectByCasting(ClassInfo::$database[$table_name][$field], $field, $value);
-                                    $sql .= " " . $field . " = " . $casting->forDB() . " ";
+                                    $sql .= " " . $field . " = " . $casting->forDBQuery() . " ";
                                 }
                                 unset($i);
 
@@ -1017,7 +1017,7 @@ class mysqliDriver extends object implements SQLDriver
                 }
 
                 $casting = DBField::getObjectByCasting(ClassInfo::$database[$table][$field], $field, $record[$field]);
-                $sql .= $casting->forDB();
+                $sql .= $casting->forDBQuery();
             }
         }
 

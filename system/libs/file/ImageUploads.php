@@ -48,8 +48,8 @@ class ImageUploads extends Uploads {
      * some defaults
      */
     static $default = array(
-        "thumbLeft"		=> 0,
-        "thumbTop"		=> 0,
+        "thumbLeft"		=> 50,
+        "thumbTop"		=> 50,
         "thumbWidth"	=> 100,
         "thumbHeight"	=> 100
     );
@@ -198,6 +198,12 @@ class ImageUploads extends Uploads {
         return $file;
     }
 
+    /**
+     * checks if file has bas and returns without if having.
+     *
+     * @param string $file
+     * @return string
+     */
     public function checkForBase($file) {
         $fileWithoutBase = substr($file, strlen("index.php/"));
         if(file_exists($fileWithoutBase)) {
