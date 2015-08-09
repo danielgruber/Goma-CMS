@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version    1.0
+ * @version    1.0.1
  */
 class HasManyWriter extends Extension {
 
@@ -38,7 +38,7 @@ class HasManyWriter extends Extension {
                         $data[$name . "ids"] = $data[$name];
                     }
 
-                    if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"])) {
+                    if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
                         // find field
                         $key = $this->searchForBelongingHasOneRelationship($name, $class);
 
@@ -91,6 +91,27 @@ class HasManyWriter extends Extension {
         }
 
         return $key;
+    }
+
+    /**
+     * validates if input is correct.
+     *
+     * @param $data
+     * @return bool
+     */
+    private function validateIDsData($data)
+    {
+        if(!is_array($data)) {
+            return false;
+        }
+
+        foreach($data as $record) {
+            if(!is_string($record) && !is_int($record)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 Object::extend("ModelWriter", "HasManyWriter");
