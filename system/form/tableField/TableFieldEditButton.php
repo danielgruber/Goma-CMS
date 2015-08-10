@@ -98,15 +98,16 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 		$data = new ViewAccessableData();
 		return $data->customise(array("title" => $this->title, "link" => $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/editButton.html");
 	}
-	
+
 	/**
 	 * provides url-handlers as in controller, but without any permissions-functionallity
 	 *
 	 * this is NOT namespaced, so please be unique
 	 *
-	 *@name getURLHandlers
-	 *@access public
-	*/
+	 * @name getURLHandlers
+	 * @access public
+	 * @return array
+	 */
 	public function getURLHandlers($tableField) {
 		return array(
 			'editbtn/$id' => "edit"

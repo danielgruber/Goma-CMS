@@ -291,6 +291,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public function setPath($value)
     {
+        $this->setField("path", $this->replacePath($value));
+    }
+
+    /**
+     * replaces path with correct info.
+     */
+    protected function replacePath($value) {
         $value = trim($value);
         $value = strtolower($value);
 
@@ -307,8 +314,8 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         // normal chars
         $value = preg_replace('/[^a-zA-Z0-9\-_]/', '-', $value);
         $value = str_replace('--', '-', $value);
-        $this->setField("path", $value);
 
+        return $value;
     }
 
     /**
@@ -702,7 +709,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public function validatePageFileName($obj) {
         $data = $obj->form->result;
-        $filename = $data["filename"];
+        $filename = $this->replacePath($data["filename"]);
         $parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
         if(isset($obj->form->result["recordid"])) {
             if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->form->result["recordid"]))) > 0) {

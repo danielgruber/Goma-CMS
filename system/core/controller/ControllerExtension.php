@@ -53,14 +53,14 @@ abstract class ControllerExtension extends Controller implements ExtensionModel
 		{
 				if(!is_object($object))
 				{
-						throwError(20,'PHP-Error', '$object isn\'t a object in '.__FILE__.' on line '.__LINE__.'');
+					throw new InvalidArgumentException('$object isn\'t a object');
 				}
+
 				if(class_exists($object->classname))
 				{
-						$this->owner = $object;
-				} else
-				{
-						throwError(20, 'PHP-Error', 'Class '.$class.' doesn\'t exist in context.');
+					$this->owner = $object;
+				} else {
+					throw new LogicException('Class '.$class.' doesn\'t exist in context.');
 				}
 		}
 		

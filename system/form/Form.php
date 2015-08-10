@@ -95,9 +95,8 @@ class Form extends object {
 
 	/**
 	 * controller of this form
-	 *@name controller
-	 *@access public
-	 *@var object
+	 *
+	 * @var RequestHandler
 	 */
 	public $controller;
 
@@ -410,6 +409,7 @@ class Form extends object {
 		}
 	
 		Resources::add("form.css", "css");
+
 		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
 			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {

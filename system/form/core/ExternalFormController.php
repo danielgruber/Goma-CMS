@@ -11,7 +11,7 @@
  */
 class ExternalFormController extends RequestHandler {
     /**
-     * handles the request
+     * handles the requemst
      *
      * @param Request $request
      * @param bool $subController
@@ -40,11 +40,20 @@ class ExternalFormController extends RequestHandler {
     public function FieldExtAction($form, $field) {
         $field = strtolower($field);
 
-        if($fieldInstance = Core::globalSession()->get(Form::SESSION_PREFIX . "." . strtolower($form))) {
-            if(isset($fieldInstance->$field)) {
-                $data = $fieldInstance->$field->handleRequest($this->request);
+        /** @var Form $formInstance */
+        if($formInstance = Core::globalSession()->get(Form::SESSION_PREFIX . "." . strtolower($form))) {
+            if(isset($formInstance->$field)) {
+                $oldRequest = $formInstance->request;
+                $oldControllerRequest = $formInstance->controller->getRequest();
 
-                Core::globalSession()->set(Form::SESSION_PREFIX . "." . strtolower($form), $fieldInstance);
+                $formInstance->request = $this->request;
+                $formInstance->controller->setRequest($this->request);
+
+                $data = $formInstance->$field->handleRequest($this->request);
+
+                $formInstance->request = $oldRequest;
+                $formInstance->controller->setRequest($oldControllerRequest);
+                Core::globalSession()->set(Form::SESSION_PREFIX . "." . strtolower($form), $formInstance);
                 return $data;
             }
             return false;

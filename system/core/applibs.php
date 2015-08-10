@@ -587,8 +587,9 @@ function showsite($content, $title) {
 /**
  * in goma we now compare version and buildnumber seperate
  *
- *@name goma_version_compare
- *@access public
+ * @name goma_version_compare
+ * @access public
+ * @return bool|int
  */
 function goma_version_compare($v1, $v2, $operator = null) {
 	// first split version

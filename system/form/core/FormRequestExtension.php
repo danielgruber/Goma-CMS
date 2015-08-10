@@ -26,7 +26,7 @@ class FormRequestExtension extends Extension {
             $externalForm = new ExternalFormController();
 
             if($arguments = $owner->getRequest()->match('$form!/$field!', true)) {
-                $content = $externalForm->handleRequest($owner->getRequest());
+                $content = $externalForm->handleRequest($owner->getRequest(), true);
                 if(!$content) {
                     $content = $owner->index();
                 }

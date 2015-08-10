@@ -110,13 +110,14 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 			'deletebtn/$id' => "delete"
 		);
 	}
-	
+
 	/**
 	 * provide some actions of this tablefield
 	 *
-	 *@name getActions
-	 *@access public
-	*/
+	 * @name getActions
+	 * @access public
+	 * @return array
+	 */
 	public function getActions($tableField) {
 		return array("deletebtn_redirect");
 	}
@@ -136,7 +137,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 	 *
 	 * @param TableField $tableField
 	 * @param Request $request
-	 * @return
+	 * @return string
 	 */
 	public function delete($tableField, $request) {
 		$data = clone $tableField->getData();
@@ -156,7 +157,7 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 			exit;
 		}
 		
-		$controller = $tableField->form()->controller;
+		$controller = $tableField->form()->getController();
 		return $controller->serve($content);
 	}
 }

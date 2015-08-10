@@ -161,7 +161,6 @@ class RequestForm extends Object {
 		$data = $this->realform->render();
 		
 		if(is_array($data)) {
-			
 			return $data;
 		}
 		

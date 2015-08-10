@@ -441,10 +441,11 @@ class RequestHandler extends Object {
 	}
 
 	/**
+	 * sets the request.
+	 *
 	 * @param Request $request
 	 */
-	public function setRequest($request)
-	{
+	public function setRequest($request) {
 		$this->request = $request;
 	}
 

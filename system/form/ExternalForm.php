@@ -84,8 +84,10 @@ class ExternalForm extends FormField {
 
 	/**
 	 * renders the bluebox
-	 *@name render
-	 *@access public
+	 *
+	 * @name render
+	 * @access public
+	 * @return mixed|string
 	 */
 	public function render() {
 		Core::setTitle($this->extTitle);
