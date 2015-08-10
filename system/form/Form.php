@@ -15,7 +15,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @package Goma\Form
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version 2.4.1
+ * @version 2.4.2
  */
 class Form extends object {
 
@@ -68,6 +68,9 @@ class Form extends object {
 
 	public $fieldSort;
 
+	/**
+	 * @var ArrayList<FormField>
+	 */
 	public $fieldList;
 
 	/**
@@ -389,27 +392,9 @@ class Form extends object {
 	 * @return mixed|string
 	 */
 	public function render() {
-		if($this->request && isset($this->request) && is_a($this->request, "Request")) {
-			$params = array_values($this->request->params);
-			
-			// just watch out for external-form.
-			if(count($this->request->url_parts) > 2 && strtolower($this->request->url_parts[0]) == "forms" && strtolower($this->request->url_parts[1]) == strtolower($this->name)) {
-				$request = $this->request;
-				$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
-				$request->shift(3);
-				$externForm = new ExternalFormController();
-				Core::serve($externForm->handleRequest($request));
-			} else if(count($this->request->url_parts) > 1 && strtolower($this->request->url_parts[0]) == strtolower($this->name) && $params[count($params) - 1] == "forms") {
-				$request = $this->request;
-				$request->params = array("form" => strtolower($request->url_parts[0]), "field" => strtolower($request->url_parts[1]));
-				$request->shift(2);
-				$externForm = new ExternalFormController();
-				Core::serve($externForm->handleRequest($request));
-			}
-		}
-	
 		Resources::add("form.css", "css");
 
+		// check for submit or append info for user to resubmit.
 		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
 			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
@@ -423,6 +408,7 @@ class Form extends object {
 			}
 		}
 
+		// render form now.
 		Core::globalSession()->remove("form_secrets." . $this->name());
 		$this->defaultFields();
 		return $this->renderForm();
@@ -468,6 +454,7 @@ class Form extends object {
 
 		$fields = "";
 
+		/** @var FormField $field */
 		foreach($this->fieldList as $field) {
 			if($this->isFieldToRender($field->name)) {
 				$this->registerRendered($field->name);
@@ -519,6 +506,7 @@ class Form extends object {
 		}
 
 		foreach($this->validators as $validator) {
+			/** @var FormValidator $validator */
 			if(is_object($validator)) {
 				$validator->setForm($this);
 				$js .= $validator->JS();
