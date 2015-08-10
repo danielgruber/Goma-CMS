@@ -181,7 +181,7 @@ class Form extends object {
 	/**
 	 * request
 	 *
-	 *@name request
+	 * @var Request
 	 */
 	public $request;
 
@@ -389,18 +389,18 @@ class Form extends object {
 	 * @return mixed|string
 	 */
 	public function render() {
-		if($this->controller && isset($this->controller->request) && is_a($this->controller->request, "Request")) {
-			$params = array_values($this->controller->request->params);
+		if($this->request && isset($this->request) && is_a($this->request, "Request")) {
+			$params = array_values($this->request->params);
 			
 			// just watch out for external-form.
-			if(count($this->controller->request->url_parts) > 2 && strtolower($this->controller->request->url_parts[0]) == "forms" && strtolower($this->controller->request->url_parts[1]) == strtolower($this->name)) {
-				$request = $this->controller->request;
+			if(count($this->request->url_parts) > 2 && strtolower($this->request->url_parts[0]) == "forms" && strtolower($this->request->url_parts[1]) == strtolower($this->name)) {
+				$request = $this->request;
 				$request->params = array("form" => strtolower($request->url_parts[1]), "field" => strtolower($request->url_parts[2]));
 				$request->shift(3);
 				$externForm = new ExternalFormController();
 				Core::serve($externForm->handleRequest($request));
-			} else if(count($this->controller->request->url_parts) > 1 && strtolower($this->controller->request->url_parts[0]) == strtolower($this->name) && $params[count($params) - 1] == "forms") {
-				$request = $this->controller->request;
+			} else if(count($this->request->url_parts) > 1 && strtolower($this->request->url_parts[0]) == strtolower($this->name) && $params[count($params) - 1] == "forms") {
+				$request = $this->request;
 				$request->params = array("form" => strtolower($request->url_parts[0]), "field" => strtolower($request->url_parts[1]));
 				$request->shift(2);
 				$externForm = new ExternalFormController();
