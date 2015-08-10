@@ -17,6 +17,8 @@ StaticsManager::addSaveVar("Permission", "providedPermissions");
  * @property int parentid
  * @property string forModel
  * @property int id
+ * @property string type
+ * @property string password
  */
 class Permission extends DataObject
 {

@@ -17,6 +17,7 @@
  * @property string path
  * @property bool active - can be set from outside
  * @property string title
+ * @property Permission|null read_permission
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier

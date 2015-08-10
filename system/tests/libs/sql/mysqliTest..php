@@ -161,6 +161,12 @@ class MysqliTest extends GomaUnitTest {
 
         $reflectionMethod = new ReflectionMethod("MySQLiDriver", "getValuesSQL");
         $reflectionMethod->setAccessible(true);
-        return $reflectionMethod->invoke($mysql, $data, $fields);
+
+        ClassInfo::$database["mysqli_test"] = array();
+        foreach($fields as $field) {
+            ClassInfo::$database["mysqli_test"][$field] = "varchar(200)";
+        }
+
+        return $reflectionMethod->invoke($mysql, $data, $fields, "mysqli_test");
     }
 }

@@ -51,17 +51,11 @@ abstract class ControllerExtension extends Controller implements ExtensionModel
 		*/		
 		public function setOwner($object)
 		{
-				if(!is_object($object))
-				{
-					throw new InvalidArgumentException('$object isn\'t a object');
-				}
+			if(!is_object($object)) {
+				throw new InvalidArgumentException('$object isn\'t a object');
+			}
 
-				if(class_exists($object->classname))
-				{
-					$this->owner = $object;
-				} else {
-					throw new LogicException('Class '.$class.' doesn\'t exist in context.');
-				}
+			$this->owner = $object;
 		}
 		
 		/**

@@ -80,7 +80,9 @@ class contentController extends FrontedController
      */
     public function extendHasAction($action, &$hasAction)
     {
-        $this->checkForReadPermission();
+        if(!$this->checkForReadPermission()) {
+            return false;
+        }
 
         array_push(self::$activeNodes, $this->modelInst()->id);
 
@@ -124,34 +126,44 @@ class contentController extends FrontedController
 
     /**
      * checks for read action.
+     *
+     * @return boolean
      */
     public function checkForReadPermission() {
-        if ($this->modelInst()->read_permission && $this->modelInst()->read_permission->type == "password") {
+
+        /** @var Pages $model */
+        $model = $this->modelInst();
+        if ($model->read_permission && $model->read_permission->type == "password") {
             $passwords = array();
             $this->callExtending("providePasswords", $passwords);
-            if ($this->modelInst()->read_permission->password != "" || $passwords) {
-                $password = $this->modelInst()->read_permission->password;
+            if ($model->read_permission->password != "" || $passwords) {
+                $password = $model->read_permission->password;
                 if (!$this->KeyChainCheck($password)) {
                     foreach ($passwords as $pwd) {
                         if ($this->KeyChainCheck($pwd)) {
-                            $found = true;
+                            return true;
                         }
                     }
 
-                    if (!isset($found)) {
-                        $validator = new FormValidator(array($this, "validatePassword"));
-                        $validator->args = array(array_merge(array($this->modelInst()->read_permission->password), $passwords));
-
-                        // set password + breadcrumb
-                        if ($pwd = $this->prompt(lang("password", "password"), array($validator), null, null, true)) {
-                            $this->keyChainAdd($pwd);
-                            //$hasAction = true;
-                        } else {
-                            return false;
-                        }
-                    }
+                    return $this->showPasswordForm(array_merge(array($model->read_permission->password), $passwords));
                 }
             }
+        }
+    }
+
+    /**
+     * shows password accept form. we need an array as given password.
+     */
+    protected function showPasswordForm($passwords) {
+        $validator = new FormValidator(array($this, "validatePassword"));
+        $validator->args = array($passwords);
+
+        // set password + breadcrumb
+        if ($pwd = $this->prompt(lang("password", "password"), array($validator), null, null, true)) {
+            $this->keyChainAdd($pwd);
+            return true;
+        } else {
+            return false;
         }
     }
 

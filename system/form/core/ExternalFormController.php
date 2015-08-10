@@ -33,9 +33,9 @@ class ExternalFormController extends RequestHandler {
      * calls handle-Request on the FormField we found.
      * it also manages session-managment.
      *
-     * @param Form $form
-     * @param FormField $field
-     * @return bool
+     * @param string $form
+     * @param string $field
+     * @return bool|mixed
      */
     public function FieldExtAction($form, $field) {
         $field = strtolower($field);

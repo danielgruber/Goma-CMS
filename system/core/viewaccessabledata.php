@@ -1119,11 +1119,7 @@ abstract class Extension extends Object implements ExtensionModel {
             throw new InvalidArgumentException('Object is not an object');
 		}
 
-		if(class_exists($object->classname)) {
-			$this->owner = $object;
-		} else {
-            throw new LogicException('Class ' . $class . ' not found.', ExpansionManager::CLASS_NOT_FOUND);
-		}
+		$this->owner = $object;
 
 		return $this;
 	}
