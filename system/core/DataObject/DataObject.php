@@ -3683,23 +3683,24 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
 
         // clean up many-many-tables
-        foreach($this->manyManyTables() as $name => $data) {
-            if(!isset(self::$cleanUp[$data["table"]])) {
-                $sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." = 0 OR ". $data["extfield"] ." = 0";
+        /** @var ModelManyManyRelationShipInfo $relationShip */
+        foreach($this->ManyManyRelationships() as $relationShip) {
+            if(!isset(self::$cleanUp[$relationShip->getTableName()])) {
+                $sql = "DELETE FROM ". DB_PREFIX . $relationShip->getTableName() ." WHERE ". $relationShip->getOwnerField() ." = 0 OR ". $relationShip->getTargetField() ." = 0";
                 if (SQL::Query($sql)) {
                     if (SQL::affected_rows() > 0)
-                        $log .= 'Clean-Up Many-Many-Table '.$data["table"]  . "\n";
+                        $log .= 'Clean-Up Many-Many-Table '. $relationShip->getTableName()  . "\n";
                 } else {
-                    $log .= 'Failed to clean-up Many-Many-Table '.$data["table"]. "\n";
+                    $log .= 'Failed to clean-up Many-Many-Table '. $relationShip->getTableName() . "\n";
                 }
 
-                if(isset(ClassInfo::$class_info[$data["object"]]["baseclass"])) {
-                    $extBaseTable = ClassInfo::ClassTable(ClassInfo::$class_info[$data["object"]]["baseclass"]);
-                    $sql = "DELETE FROM ". DB_PREFIX . $data["table"] ." WHERE ". $data["field"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $data["extfield"] ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
+                if(isset(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"])) {
+                    $extBaseTable = ClassInfo::ClassTable(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"]);
+                    $sql = "DELETE FROM ". DB_PREFIX . $relationShip->getTableName() ." WHERE ". $relationShip->getOwnerField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $relationShip->getTargetField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
                     register_shutdown_function(array("sql", "queryAfterDie"), $sql);
                 }
 
-                self::$cleanUp[$data["table"]] = true;
+                self::$cleanUp[$relationShip->getTableName()] = true;
             }
         }
     }

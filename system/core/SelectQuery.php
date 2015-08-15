@@ -186,8 +186,11 @@ class SelectQuery extends Object {
 
 	/**
 	 * adds one rule to orderby
-	 *@param string - field
-	 *@param string - type, default: ASC
+	 *
+	 * @param string $field
+	 * @param string $type
+	 * @param int $order
+	 * @return $this
 	 */
 	public function sort($field, $type = "ASC", $order = 0) {
 
@@ -202,12 +205,20 @@ class SelectQuery extends Object {
 
 				$type = $field["type"];
 				$field = $field["field"];
-			} else {
+			} else if(count($field) == 2) {
 				$field = array_values($field);
 				if(isset($field[1])) {
 					$type = $field[1];
 				}
 				$field = $field[0];
+			} else {
+				foreach($field as $fieldName => $type) {
+					if(is_string($fieldName) && !RegexpUtil::isNumber($fieldName) && in_array(strtolower($type), array("desc", "asc"))) {
+						$this->sort($fieldName, $type);
+					}
+				}
+
+				return $this;
 			}
 		} else {
 			if(preg_match('/^(.*)\s*(asc|desc)$/i', $field, $matches)) {
@@ -594,6 +605,13 @@ class SelectQuery extends Object {
 			$sql .= implode(",", $this->groupby);
 		}
 
+
+		// HAVING
+		if(count($this->having) > 0) {
+			$sql .= " HAVING ";
+			$sql .= SQL::ExtractToWhere($this->having, false, $DBFields, $colidingFields);
+		}
+
 		ksort($this->orderby);
 		// ORDER BY
 		if(count($this->orderby) > 0) {
@@ -614,12 +632,6 @@ class SelectQuery extends Object {
 					$sql .= $data[0] . $collate . " " . $data[1];
 				}
 			}
-		}
-
-		// HAVING
-		if(count($this->having) > 0) {
-			$sql .= " HAVING ";
-			$sql .= SQL::ExtractToWhere($this->having, false, $DBFields, $colidingFields);
 		}
 
 		// LIMIT

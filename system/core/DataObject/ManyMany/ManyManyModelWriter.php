@@ -25,7 +25,7 @@ class ManyManyModelWriter extends Extension {
     /**
      * on before write.
      */
-    public function onBeforeWrite() {
+    public function gatherDataToWrite() {
 
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
@@ -51,6 +51,8 @@ class ManyManyModelWriter extends Extension {
 
     /**
      * called when data was written so we have new versionid, but transaction is still on stage.
+     *
+     * @param array $manipulation
      */
     public function onBeforeWriteData(&$manipulation) {
 

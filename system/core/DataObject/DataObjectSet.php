@@ -70,8 +70,6 @@ class DataObjectSet extends DataSet {
 	/**
 	 * dataobject for this DataObjectSet
 	 *
-	 * @name dataobject
-	 * @access protected
 	 * @var DataObject
 	 */
 	public $dataobject;

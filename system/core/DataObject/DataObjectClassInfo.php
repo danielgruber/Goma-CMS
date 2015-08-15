@@ -57,7 +57,7 @@ class DataObjectClassInfo extends Extension
                     if (!is_array($fields))
                         $fields = explode(",", $fields);
 
-                    if(strtolower($value["type"]) == "unique") {
+                    if(strtolower($value["type"]) == "unique" || $value["type"] === true) {
                         $value["type"] = "index";
                     }
 
@@ -107,7 +107,7 @@ class DataObjectClassInfo extends Extension
                 } else if (isset($db_fields[$key])) {
                     $indexes[$key] = $value;
 
-                    if(strtolower($value) == "unique") {
+                    if(strtolower($value) == "unique" || $value === true) {
                         $indexes[$key] = "index";
                     }
                 } else if (!$value) {
