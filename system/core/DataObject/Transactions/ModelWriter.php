@@ -245,8 +245,6 @@ class ModelWriter extends Object {
      */
     protected function gatherDataToWrite() {
 
-        $this->model->onBeforeWrite();
-
         $modelData = $this->model->ToArray();
         unset($modelData["recordid"]);
         $this->data = array_merge($modelData, (array) $this->data);
@@ -407,6 +405,8 @@ class ModelWriter extends Object {
      */
     public function write() {
 
+        $this->callPreflightEvents();
+
         $this->gatherDataToWrite();
 
         if ($this->data === null) {
@@ -420,9 +420,9 @@ class ModelWriter extends Object {
             }
         }
 
-        $this->updateStatusFields();
+        $this->callExtending("onBeforeDBWriter");
 
-        $this->callPreflightEvents();
+        $this->updateStatusFields();
 
         $this->databaseWriter->write();
 
@@ -442,8 +442,6 @@ class ModelWriter extends Object {
             $this->callExtending("onBeforePublish");
             $this->model->onBeforePublish();
         }
-
-        $this->callExtending("onBeforeDBWriter");
     }
 
     /**
