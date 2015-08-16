@@ -492,6 +492,21 @@ class Uploads extends DataObject {
     }
 
     /**
+     * checks if file has bas and returns without if having.
+     *
+     * @param string $file
+     * @return string
+     */
+    public function checkForBase($file) {
+        $fileWithoutBase = substr($file, strlen("index.php/"));
+        if(file_exists($fileWithoutBase)) {
+            $file = $fileWithoutBase;
+        }
+
+        return $file;
+    }
+
+    /**
      * sets the path
      *
      *@name setPath
@@ -630,11 +645,7 @@ class Uploads extends DataObject {
      * returns url.
      */
     public function getUrl() {
-        if(file_exists($this->getPath())) {
-            return BASE_URI . $this->getPath();
-        } else {
-            return BASE_URI . BASE_SCRIPT . $this->getPath() . URLEND;
-        }
+        return BASE_URI . $this->checkForBase($this->getPath());
     }
 
     /**

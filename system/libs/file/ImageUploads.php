@@ -199,21 +199,6 @@ class ImageUploads extends Uploads {
     }
 
     /**
-     * checks if file has bas and returns without if having.
-     *
-     * @param string $file
-     * @return string
-     */
-    public function checkForBase($file) {
-        $fileWithoutBase = substr($file, strlen("index.php/"));
-        if(file_exists($fileWithoutBase)) {
-            $file = $fileWithoutBase;
-        }
-
-        return $file;
-    }
-
-    /**
      * returns url for specific scenario.
      *
      * @param int $desiredWidth -1 for no desired with
