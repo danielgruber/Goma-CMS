@@ -22,7 +22,7 @@ loadlang("files");
  * @property string collectionid
  * @property Uploads|null collection
  *
- * last modified: 06.08.2015
+ * last modified: 19.08.2015
  */
 class Uploads extends DataObject {
     /**
@@ -205,7 +205,7 @@ class Uploads extends DataObject {
                     // connection to another model.
                     $file = clone $object;
                     $file->collectionid = $collection->id;
-                    $file->path = strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collection->hash())) . "/" . randomString(6) . "/" . $filename;
+                    $file->path = self::buildPath($collection, $filename);
                     $file->filename = $filename;
 
                     return $file;
@@ -223,12 +223,33 @@ class Uploads extends DataObject {
         return new Uploads(array(
             "filename" 		=> $filename,
             "type"			=> "file",
-            "realfile"		=> UPLOAD_DIR . "/" . md5($collection->hash()) . "/" . randomString(8) . $filename,
-            "path"			=> strtolower(preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $collection->hash())) . "/" . randomString(6) . "/" . $filename,
+            "realfile"		=> UPLOAD_DIR . "/" . md5($collection->hash()) . "/" . randomString(8) . self::cleanUpURL($filename),
+            "path"			=> self::buildPath($collection, $filename),
             "collectionid" 	=> $collection->id,
             "deletable"		=> $deletable,
             "md5"			=> isset($md5) ? $md5 : null
         ));
+    }
+
+    /**
+     * builds path out of data.
+     *
+     * @param Uploads $collection
+     * @param string $filename
+     * @return string
+     */
+    protected function buildPath($collection, $filename) {
+        return strtolower(self::cleanUpURL($collection->hash())) . "/" . randomString(6) . "/" . self::cleanUpURL($filename);
+    }
+
+    /**
+     * removes unwanted letters from string.
+     *
+     * @param string $path
+     * @return string
+     */
+    protected static function cleanUpURL($path) {
+        return preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $path);
     }
 
     /**
