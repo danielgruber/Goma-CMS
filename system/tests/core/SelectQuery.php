@@ -21,9 +21,9 @@ class SelectQueryTest extends GomaUnitTest implements TestAble {
      * test availability functions.
      */
     public function testColiding() {
-        $query = new SelectQuery("MyTestModelForDataObjectFieldWrite", array("myfield" => 0));
+        /*$query = new SelectQuery("MyTestModelForDataObjectFieldWrite", array("myfield" => 0));
         $query->db_fields["myfield"] = "MyTestModelForDataObjectFieldWrite.myfield";
 
-        echo $query->build();
+        echo $query->build();*/
     }
 }

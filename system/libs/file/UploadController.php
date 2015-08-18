@@ -48,19 +48,24 @@ class UploadController extends Controller {
      */
 	public function handleFile() {
 
-		$data = DataObject::Get("Uploads", array("path" => $this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename")));
+		$upload = Uploads::getFile($this->getParam("collection") . "/" . $this->getParam("hash") . "/" . $this->getParam("filename"));
 
-		if($data->count() == 0) {
+		if(!$upload) {
 			return false;
 		}
 		
-		if(!file_exists($data->first()->realfile)) {
-			$data->first()->remove(true);
+		if(!file_exists($upload->realfile)) {
+			$upload->remove(true);
 			return false;
 		}
-		
+
+		if($upload->deletable) {
+			$upload->deletable = false;
+			$upload->write(false, true);
+		}
+
 		Core::globalSession()->stopSession();
 		
-		return $data->first()->controller()->handleRequest($this->request);
+		return $upload->controller()->handleRequest($this->request);
 	}	
 }

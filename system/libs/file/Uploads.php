@@ -88,8 +88,11 @@ class Uploads extends DataObject {
     /**
      * adds a file to the upload-folder
      *
-     * @name addFile
-     * @access public
+     * @param $filename
+     * @param string $realfile
+     * @param string $collectionPath
+     * @param string $class_name
+     * @param boolean $deletable
      * @return Uploads
      */
     public static function addFile($filename, $realfile, $collectionPath, $class_name = null, $deletable = null) {
@@ -137,8 +140,10 @@ class Uploads extends DataObject {
     /**
      * get file class by class or filename.
      *
-     * @name    getFileClass
+     * @param string $class_name
+     * @param string $filename
      * @return string
+     * @internal param $getFileClass
      */
     public static function getFileClass($class_name, $filename) {
         // make it a valid class-name
@@ -159,6 +164,36 @@ class Uploads extends DataObject {
         }
 
         return $class_name;
+    }
+
+    /**
+     * gets the object for the given file-path
+     *
+     * @name getFile
+     * @access public
+     * @return Uploads|null
+     */
+    public static function getFile($path) {
+
+        if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
+            $path = $match[1] . "/" . $match[2] . "/" . $match[3];
+        }
+
+        $cacher = new Cacher("file_" . $path);
+        if($cacher->checkValid()) {
+            $data = $cacher->getData();
+            return new $data["class_name"]($data);
+        } else {
+            if(($data = DataObject::get_one("Uploads", array("path" => $path))) !== null) {
+                $cacher->write($data->toArray(), 86400);
+                return $data;
+            } else if(($data = DataObject::get_one("Uploads", array("realfile" => $path))) !== null) {
+                $cacher->write($data->toArray(), 86400);
+                return $data;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -183,10 +218,10 @@ class Uploads extends DataObject {
      * builds an instance of file.
      * it checks if file with md5 already exists and creates it if required.
      *
-     * @param    string realfile
-     * @param    Uploads collection
-     * @param    string filename
-     * @param    boolean if file is auto-deletable or not
+     * @param    string $realfile
+     * @param    Uploads $collection
+     * @param    string $filename
+     * @param    boolean $deletable if file is auto-deletable or not
      * @return   Uploads
      */
     public static function getFileInstance($realfile, $collection, $filename, $deletable) {
@@ -207,10 +242,10 @@ class Uploads extends DataObject {
                     $file->collectionid = $collection->id;
                     $file->path = self::buildPath($collection, $filename);
                     $file->filename = $filename;
+                    $file->deletable = $deletable;
 
                     return $file;
                 } else {
-
                     // maybe file of object has changed and md5 is not valid anymore
                     // so rewrite md5-hash of object
                     $object->md5 = md5_file($object->realfile);
@@ -255,23 +290,25 @@ class Uploads extends DataObject {
     /**
      * returns object of file-collection by given collection-data. (string or object)
      *
-     * @name 	getCollection
-     * @param 	mixed 		collection as string or object
-     * @param 	boolean		use cache to cache results.
-     * @return 	Uploads 	null if SQL not loaded up, else object of type Uploads
+     * @param mixed $collectionPath collection as string or object
+     * @param bool $useCache use cache to cache results.
+     * @param bool $create
+     * @return Uploads null if SQL not loaded up, else object of type Uploads or null when create is false and nothing found.
+     * @throws Exception
      */
-    public static function getCollection($collectionPath, $useCache = true) {
+    public static function getCollection($collectionPath, $useCache = true, $create = true) {
         if(!is_object($collectionPath)) {
             if(defined("SQL_LOADUP")) {
 
                 $cacher = new Cacher("uploads_collection_" . $collectionPath);
-                if($cacher->checkValid() && $r = DataObject::get_by_id("Uploads", $cacher->getData())) {
-                    return $r;
+                if($useCache && $cacher->checkValid() && $collectionObject = DataObject::get_by_id("Uploads", $cacher->getData())) {
+                    return $collectionObject;
                 } else {
+                    $collection = self::generateCollectionTree($collectionPath, $create);
 
-                    $collection = self::generateCollectionTree($collectionPath);
-
-                    $cacher->write($collection->id, 86400);
+                    if($collection) {
+                        $cacher->write($collection->id, 86400);
+                    }
                 }
             } else {
                 return null;
@@ -286,28 +323,45 @@ class Uploads extends DataObject {
     /**
      * checks if collection-tree exists and gets last generated or found location.
      *
-     * @name 	generateCollectionTree
-     * @param 	string $collectionPath
-     * @return 	Uploads
+     * @param string $collectionPath
+     * @param bool $create
+     * @return Uploads
+     * @internal param $generateCollectionTree
      */
-    public static function generateCollectionTree($collectionPath) {
+    public static function generateCollectionTree($collectionPath, $create) {
 
-        $collection = null;
+        $collectionObject = null;
         // determine id of collection
         $collectionTree = explode(".", $collectionPath);
 
         // check for each level of collection if it is existing.
         foreach($collectionTree as $collection) {
-            $data = DataObject::get_one("Uploads", array("filename" => $collection, "type" => "collection"));
-            if($data) {
-                $collection = $data;
+
+            /** @var Uploads $collectionObject */
+            // find parent collection
+            if($data = DataObject::get_one("Uploads",
+                array(
+                    "filename" => $collection,
+                    "collectionid" => isset($collectionObject) ? $collectionObject->id : 0,
+                    "type" => "collection"
+                )
+            )) {
+                $collectionObject = $data;
+            } else if($create) {
+                $collectionObject = new Uploads(
+                    array(
+                        "filename" => $collection,
+                        "type" => "collection",
+                        "collectionid" => isset($collectionObject) ? $collectionObject->id : 0
+                    )
+                );
+                $collectionObject->write(false, true);
             } else {
-                $collection = new Uploads(array("filename" => $collection, "type" => "collection", "collectionid" => isset($id) ? $id : 0));
-                $collection->write(false, true);
+                return null;
             }
         }
 
-        return $collection;
+        return $collectionObject;
     }
 
     /**
@@ -321,7 +375,7 @@ class Uploads extends DataObject {
         if(file_exists($this->realfile)) {
             $data = DataObject::get("Uploads", array("realfile" => $this->realfile));
             if($data->Count() == 0) {
-                @unlink($this->realfile);
+                FileSystem::delete($this->realfile);
             }
         }
 
@@ -335,37 +389,15 @@ class Uploads extends DataObject {
             FileSystem::delete($this->path);
         }
 
-        parent::onAfterRemove();
-    }
-
-    /**
-     * gets the object for the given file-path
-     *
-     * @name getFile
-     * @access public
-     * @return Uploads|null
-     */
-    public static function getFile($path) {
-
-        if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
-            $path = $match[1] . "/" . $match[2] . "/" . $match[3];
-        }
-
-        $cacher = new Cacher("file_" . $path);
-        if($cacher->checkValid()) {
-            $data = $cacher->getData();
-            return new $data["class_name"]($data);
-        } else {
-            if(($data = DataObject::get_one("Uploads", array("path" => $path))) !== null) {
-                $cacher->write($data->toArray(), 86400);
-                return $data;
-            } else if(($data = DataObject::get_one("Uploads", array("realfile" => $path))) !== null) {
-                $cacher->write($data->toArray(), 86400);
-                return $data;
-            } else {
-                return null;
+        if($this->collection) {
+            $collectionFiles = $this->collection->getCollectionFiles()->forceData();
+            if($collectionFiles->count() == 0 ||
+                ($collectionFiles->first()->id == $this->id && $collectionFiles->count() == 1)) {
+                $this->collection->remove(true);
             }
         }
+
+        parent::onAfterRemove();
     }
 
     /**
@@ -375,20 +407,11 @@ class Uploads extends DataObject {
      *@access public
      */
     public function onBeforeWrite() {
-        if(!$this->forceDeletable) {
-            $this->deletable = true;
-        }
-
         $CacheForPath = new Cacher("file_" . $this->fieldGet("path"));
         $CacheForPath->delete();
 
         $CacheForRealfile = new Cacher("file_" . $this->fieldGet("realfile"));
         $CacheForRealfile->delete();
-
-        if(file_exists($this->path)) {
-            FileSystem::delete($this->path);
-        }
-
     }
 
     /**
@@ -400,11 +423,13 @@ class Uploads extends DataObject {
     public function cleanUpDB($prefix = DB_PREFIX, &$log) {
         parent::cleanUpDB($prefix, $log);
 
-        $data = DataObject::get("Uploads", array("deletable" => 1, "last_modified" => array(">", NOW - 60 * 60 * 24 * 14)));
+        $data = DataObject::get("Uploads", array("deletable" => 1, "last_modified" => array(">", NOW - 120 * 60 * 24 * 14)));
         foreach($data as $record) {
             if(!file_exists($record->realfile)) {
                 $record->remove(true);
                 continue;
+            } else {
+                logging("Would delete file " . $record->path . ", but Goma beta does not allow ;)");
             }
         }
     }
@@ -460,7 +485,7 @@ class Uploads extends DataObject {
      */
     public function hash() {
         if($this->realfile == "") {
-            $this->realfile = md5($this->identifier);
+            return md5($this->identifier);
         }
 
         $this->write(false, true);
@@ -516,12 +541,15 @@ class Uploads extends DataObject {
      * checks if file has bas and returns without if having.
      *
      * @param string $file
+     * @param string $base
      * @return string
      */
-    public function checkForBase($file) {
-        $fileWithoutBase = substr($file, strlen("index.php/"));
-        if(file_exists($fileWithoutBase)) {
-            $file = $fileWithoutBase;
+    public function checkForBase($file, $base = BASE_SCRIPT) {
+        if(substr($file, 0, strlen($base)) == $base) {
+            $fileWithoutBase = substr($file, strlen($base));
+            if (file_exists($fileWithoutBase)) {
+                return $fileWithoutBase;
+            }
         }
 
         return $file;
@@ -644,7 +672,7 @@ class Uploads extends DataObject {
      */
     public function bool() {
         if(parent::bool()) {
-            return ($this->realfile !== "" && is_file($this->realfile));
+            return ($this->type == "collection" || ($this->realfile !== "" && is_file($this->realfile)));
         } else {
             return false;
         }
