@@ -112,16 +112,29 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
         $mockData = array("test" => 1);
         $newData = array("test" => 2);
         $mockObject = new MockUpdatableObject();
+        $mockObject->checkLogic = true;
         $mockObject->data = $mockData;
 
         $newDataObject = new MockUpdatableObject();
+        $mockObject->checkLogic = false;
         $newDataObject->data = $newData;
 
         $writer = new ModelWriter($newDataObject, ModelRepository::COMMAND_TYPE_UPDATE, $mockObject, new MockDBRepository(), new MockDBWriter());
+        $writer->getInstance("ModelWriterTestExtensionForEvents")->checkLogic = true;
         $writer->write();
+
+        $this->assertEqual($mockObject->onBeforeWriteFired, 0);
+        $this->assertEqual($mockObject->onAfterWriteFired, 0);
 
         $this->assertEqual($newDataObject->onBeforeWriteFired, 1);
         $this->assertEqual($newDataObject->onAfterWriteFired, 1);
+
+        /** @var ModelWriterTestExtensionForEvents $extInstance */
+        $extInstance = $writer->getInstance("ModelWriterTestExtensionForEvents");
+        $this->assertEqual($extInstance->onBeforeWriteFired, 1);
+        $this->assertEqual($extInstance->onAfterWriteFired, 1);
+        $this->assertEqual($extInstance->onBeforeDBWriterFired, 1);
+        $this->assertEqual($extInstance->gatherDataToWrite, 1);
     }
 
     /**
@@ -160,6 +173,7 @@ class MockUpdatableObject extends Object {
     public $id = 1;
     public $onBeforeWriteFired = 0;
     public $onAfterWriteFired = 0;
+    public $checkLogic = false;
 
     public function __get($k) {
         return "";
@@ -174,6 +188,9 @@ class MockUpdatableObject extends Object {
     }
 
     public function onAfterWrite() {
+        if($this->checkLogic && $this->onBeforeWriteFired == $this->onAfterWriteFired) {
+            throw new LogicException("OnBeforeWrite must be fired before onAfterWrite");
+        }
         $this->onAfterWriteFired++;
     }
 
@@ -182,6 +199,39 @@ class MockUpdatableObject extends Object {
     }
 }
 
+class ModelWriterTestExtensionForEvents extends Extension {
+    public $onBeforeWriteFired = 0;
+    public $onAfterWriteFired = 0;
+    public $gatherDataToWrite = 0;
+    public $onBeforeDBWriterFired = 0;
+    public $checkLogic = false;
+
+    public function gatherDataToWrite() {
+        if($this->checkLogic && $this->gatherDataToWrite == $this->onBeforeWriteFired) {
+            throw new LogicException("onBeforeWrite must be fired before onGatherDataToWrite");
+        }
+        $this->gatherDataToWrite++;
+    }
+
+    public function onBeforeWrite() {
+        $this->onBeforeWriteFired++;
+    }
+
+    public function onBeforeDBWriter() {
+        if($this->checkLogic && $this->onBeforeDBWriterFired == $this->gatherDataToWrite) {
+            throw new LogicException("gatherDataToWrite must be fired before onBeforeDBWrite");
+        }
+        $this->onBeforeDBWriterFired++;
+    }
+
+    public function onAfterWrite() {
+        if($this->checkLogic && $this->onBeforeDBWriterFired == $this->onAfterWriteFired) {
+            throw new LogicException("onBeforeDBWriter must be fired before onAfterWrite");
+        }
+        $this->onAfterWriteFired++;
+    }
+}
+Object::extend("ModelWriter", "ModelWriterTestExtensionForEvents");
 
 class MockDBRepository extends  IModelRepository {
 
