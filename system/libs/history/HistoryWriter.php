@@ -41,7 +41,7 @@ class HistoryWriter extends Extension {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
 
-        if (StaticsManager::getStatic($owner->getModel()->classname, "history") && !self::$disabled) {
+        if (!self::$disabled && StaticsManager::getStatic($owner->getModel()->classname, "history")) {
 
             $command = $owner->getCommandType();
             if($command != ModelRepository::COMMAND_TYPE_INSERT &&

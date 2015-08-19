@@ -100,7 +100,28 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
         $reflectionMethodData->setAccessible(true);
         $reflectionMethodData->invoke($writer);
 
+        $this->assertEqual($newDataObject->onBeforeWriteFired, 0);
+
         return $reflectionMethod->invoke($writer);
+    }
+
+    /**
+     * tests write-method once.
+     */
+    public function testWrite() {
+        $mockData = array("test" => 1);
+        $newData = array("test" => 2);
+        $mockObject = new MockUpdatableObject();
+        $mockObject->data = $mockData;
+
+        $newDataObject = new MockUpdatableObject();
+        $newDataObject->data = $newData;
+
+        $writer = new ModelWriter($newDataObject, ModelRepository::COMMAND_TYPE_UPDATE, $mockObject, new MockDBRepository(), new MockDBWriter());
+        $writer->write();
+
+        $this->assertEqual($newDataObject->onBeforeWriteFired, 1);
+        $this->assertEqual($newDataObject->onAfterWriteFired, 1);
     }
 
     /**
@@ -130,13 +151,15 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     }
 }
 
-class MockUpdatableObject {
+class MockUpdatableObject extends Object {
     public $data;
 
     public $stateid = 1;
     public $publishedid = 1;
     public $versionid = 1;
     public $id = 1;
+    public $onBeforeWriteFired = 0;
+    public $onAfterWriteFired = 0;
 
     public function __get($k) {
         return "";
@@ -144,6 +167,14 @@ class MockUpdatableObject {
 
     public function ToArray() {
         return $this->data;
+    }
+
+    public function onBeforeWrite() {
+        $this->onBeforeWriteFired++;
+    }
+
+    public function onAfterWrite() {
+        $this->onAfterWriteFired++;
     }
 
     public function __call($key, $val) {
