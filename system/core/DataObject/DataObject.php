@@ -1339,17 +1339,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *@name getActions
      *@param object - form-object
      */
-    public function getActions(&$form, $edit = false)
-    {
+    public function getActions(&$form, $edit = false) {
         $form->setResult($this);
-
     }
 
     /**
      * returns a list of fields you want to show if we use the history-compare-view
      *
-     *@name getVersionedFields
-     *@access public
+     * @name getVersionedFields
+     * @access public
+     * @return array
      */
     public function getVersionedFields() {
         return array();
@@ -2620,10 +2619,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             }
 
-            if ($filter)
+            if ($filter) {
                 $query->addFilter(array($filter));
-            else
-                throw new LogicException("Could not search for ".$searchQuery.". No Search-Fields defined in {$this->baseClass}.");
+            } else {
+                $searchQuery = var_export($searchQuery, true);
+                throw new LogicException("Could not search for " . $searchQuery . ". No Search-Fields defined in {$this->baseClass}.");
+            }
         }
         return $query;
     }

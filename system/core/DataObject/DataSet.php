@@ -504,14 +504,13 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      *
      * @param int|null $page
      * @param int|null $perPage
-     * @internal param $activatePagination
      * @access public
      */
     public function activatePagination($page = null, $perPage = null) {
         if(isset($perPage) && $perPage > 0)
             $this->perPage = $perPage;
 
-        if(isset($page)) {
+        if(isset($page) && RegexpUtil::isNumber($page) && $page > 0) {
 
             // first validate the data
             $pages = ceil($this->Count() / $this->perPage);
@@ -583,14 +582,21 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     }
 
     /**
-     * gets available pages
+     * gets available pages as array to render it in good pagination-style.
      *
-     *@name getPages
-     *@access public
+     * @return array
      */
     public function getPages() {
-        $pages = ceil($this->Count() / $this->perPage);
-        return $this->renderPages($pages, $this->page);
+        return $this->renderPages($this->getPageCount(), $this->page);
+    }
+
+    /**
+     * returns page-count.
+     *
+     * @return int
+     */
+    public function getPageCount() {
+        return ceil($this->Count() / $this->perPage);
     }
 
     /**
@@ -628,8 +634,9 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * returns the page-number of the next page
      *
-     *@name nextPage
-     *@access public
+     * @name nextPage
+     * @access public
+     * @return int
      */
     public function nextPage() {
         $pages = ceil($this->Count() / $this->perPage);
@@ -657,12 +664,13 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * get an array of pages by given pagecount
      *
-    @name renderPages
-     *@access public
-     *@param int - pagecount
-     *@param int - current page
+     * @name renderPages
+     * @access public
+     * @param int $pagecount
+     * @param int $currentpage
+     * @return array
      */
-    public function renderPages($pagecount, $currentpage = 1) {
+    protected function renderPages($pagecount, $currentpage = 1) {
         if($pagecount < 2) {
             return array(1 => array(
                 "page" 	=> 1,
@@ -933,5 +941,4 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     {
         return $this->perPage;
     }
-
 }

@@ -889,7 +889,7 @@ class Form extends object {
 			$this->validators[$name] = $validator;
 			$validator->setForm($this);
 		} else {
-			throwError(6, "Invalid Argument", "Form::addValidator - No Object or name given. First parameter needs to be object and second string.");
+			throw new InvalidArgumentException("Form::addValidator - No Object or name given. First parameter needs to be object and second string.");
 		}
 	}
 

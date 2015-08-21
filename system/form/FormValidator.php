@@ -1,74 +1,78 @@
-<?php
-/**
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 30.08.2012
-  * $Version 2.0.2
-*/
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined("IN_GOMA") OR die();
 
+/**
+ * Basic validator class. Accepts a callback for validation.
+ *
+ * @package		Goma\Form\Validation
+ *
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ */
 class FormValidator extends Object
 {
-		/**
-		 *@name array
-		 *@var mixed - the data
-		*/
-		public $data;
-		/**
-		 * form
-		 *
-		 *@name form
-		 *@access public
-		 *@var object
-		*/
-		public $form;
-		/**
-		 * additional args for the function
-		*/
-		public $args = array();
-		/**
-		 *@name __construct
-		 *@param mixed - datas
-		 *@return object
-		*/
-		public function __construct($data = null)
-		{
-				parent::__construct();
-				
-				if($this->classname == "formvalidator" && !is_callable($data)) {
-					throwError(6, "Invalid Argument", "FormValidator requires a valid callback to be given.");
-				}
-				
-				$this->data = $data;
-		}
-		
-		/**
-		 * sets the form
-		 *@name setForm
-		 *@param object
-		*/
-		public function setForm(&$form)
-		{
-				$this->form = $form;
-		}
-		/**
-		 * validates the data
-		 *@name validate
-		 *@return bool|string
-		*/
-		public function validate()
-		{
-				return call_user_func_array($this->data, array_merge(array($this), $this->args));
-		}
-		/**
-		 * generates some javascript for validating
-		 *@name js
-		 *@access public
-		*/
-		public function JS()
-		{
-				return "";
-		}
+    /**
+     * @name array
+     * @var mixed - the data
+     */
+    protected $data;
+
+    /**
+     * @var Form
+     */
+    protected $form;
+
+    /**
+     * additional args for the function
+     */
+    protected $args = array();
+
+    /**
+     * @param callback $data
+     * @param array $args
+     */
+    public function __construct($data = null, $args = null)
+    {
+        parent::__construct();
+
+        if ($this->classname == "formvalidator" && !is_callable($data)) {
+            throw new InvalidArgumentException("FormValidator requires a valid callback to be given.");
+        }
+
+        $this->args = isset($args) && is_array($args) ? $args : array();
+        $this->data = $data;
+    }
+
+    /**
+     * sets the form
+     *
+     * @name setForm
+     * @param object
+     */
+    public function setForm(&$form)
+    {
+        $this->form = $form;
+    }
+
+    /**
+     * validates the data
+     *
+     * @name validate
+     * @return bool|string
+     */
+    public function validate()
+    {
+        return call_user_func_array($this->data, array_merge(array($this), $this->args));
+    }
+
+    /**
+     * generates some javascript for validating
+     *
+     * @name js
+     * @access public
+     * @return string
+     */
+    public function JS()
+    {
+        return "";
+    }
 }
