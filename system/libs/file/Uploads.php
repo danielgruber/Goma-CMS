@@ -22,7 +22,7 @@ loadlang("files");
  * @property string collectionid
  * @property Uploads|null collection
  *
- * last modified: 19.08.2015
+ * last modified: 22.08.2015
  */
 class Uploads extends DataObject {
     /**
@@ -348,14 +348,7 @@ class Uploads extends DataObject {
             )) {
                 $collectionObject = $data;
             } else if($create) {
-                $collectionObject = new Uploads(
-                    array(
-                        "filename" => $collection,
-                        "type" => "collection",
-                        "collectionid" => isset($collectionObject) ? $collectionObject->id : 0
-                    )
-                );
-                $collectionObject->write(false, true);
+                $collectionObject = self::createCollection($collection, isset($collectionObject) ? $collectionObject->id : 0);
             } else {
                 return null;
             }
@@ -459,19 +452,16 @@ class Uploads extends DataObject {
      */
     public function getSubCollection($name) {
         if($this->type == "file") {
-            return $this->collection()->getSubCollection($name);
+            if(!$this->collection) {
+                $this->addToDefaultCollection();
+            }
+
+            return $this->collection->getSubCollection($name);
         } else {
-            $data = DataObject::get_one("Uploads", array("collectionid" => $this->id, "filename" => $name));
-            if($data) {
-                return $data;
-            } else {
-                $collection = new Uploads(array(
-                    "filename" 		=> $name,
-                    "collectionid" 	=> $name,
-                    "type" 			=> "collection"
-                ));
-                $collection->write(true, true);
+            if($collection = DataObject::get_one("Uploads", array("collectionid" => $this->id, "filename" => $name))) {
                 return $collection;
+            } else {
+                return self::createCollection($name, $this->id);
             }
         }
     }
@@ -607,22 +597,18 @@ class Uploads extends DataObject {
                     return "images/icons/goma16/file@2x.png";
                 else
                     return "images/icons/goma16/file.png";
-                break;
             case 32:
                 if($retina)
                     return "images/icons/goma32/file@2x.png";
                 else
                     return "images/icons/goma32/file.png";
-                break;
             case 64:
                 if($retina)
                     return "images/icons/goma64/file@2x.png";
                 else
                     return "images/icons/goma64/file.png";
-                break;
             case 128:
                 return "images/icons/goma/128x128/file.png";
-                break;
         }
         return "images/icons/goma/128x128/file.png";
     }
@@ -709,5 +695,30 @@ class Uploads extends DataObject {
 
         unset($arr["realfile"]);
         return $arr;
+    }
+
+
+    /**
+     * creates a new collection with given name and id.
+     */
+    protected static function createCollection($name, $parentId) {
+        $collection = new Uploads(array(
+            "filename" 		=> $name,
+            "collectionid" 	=> $parentId,
+            "type" 			=> "collection"
+        ));
+        $collection->write(true, true);
+        return $collection;
+    }
+
+    /**
+     * creates a default collection and adds this file to it.
+     */
+    protected function addToDefaultCollection() {
+        $this->collection = self::getCollection("default");
+
+        if($this->id != 0) {
+            $this->write(false, true);
+        }
     }
 }

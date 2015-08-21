@@ -155,8 +155,7 @@ class contentController extends FrontedController
      * shows password accept form. we need an array as given password.
      */
     protected function showPasswordForm($passwords) {
-        $validator = new FormValidator(array($this, "validatePassword"));
-        $validator->args = array($passwords);
+        $validator = new FormValidator(array($this, "validatePassword"), array($passwords));
 
         // set password + breadcrumb
         if ($pwd = $this->prompt(lang("password", "password"), array($validator), null, null, true)) {
