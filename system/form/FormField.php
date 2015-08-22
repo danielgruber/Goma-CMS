@@ -130,7 +130,7 @@ class FormField extends RequestHandler implements ArrayAccess
         $this->randomKey = randomString(3);
 
         $this->name = $name;
-        $this->dbname = $name;
+        $this->dbname = strtolower(trim($name));
         $this->title = $title;
         $this->value = $value;
         $this->parent =& $parent;

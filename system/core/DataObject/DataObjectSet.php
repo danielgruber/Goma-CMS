@@ -9,7 +9,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5
+ * @version     1.5.1
  */
 class DataObjectSet extends DataSet {
 
@@ -60,7 +60,7 @@ class DataObjectSet extends DataSet {
 	protected $version;
 
 	/**
-	 * count of the data in this set
+	 *  of the data in this set
 	 *
 	 *@name count
 	 *@access protected
@@ -309,8 +309,9 @@ class DataObjectSet extends DataSet {
 	/**
 	 * count
 	 *
-	 *@name Count
-	 *@access public
+	 * @name Count
+	 * @access public
+	 * @return int|null
 	 */
 	public function Count() {
 		if(isset($this->count)) {
@@ -332,14 +333,13 @@ class DataObjectSet extends DataSet {
 	/**
 	 * gets the maximum value of given field in this set.
 	 *
-	 *@name max
-	 *@access public
-	 *@param string $field
+	 * @name max
+	 * @access public
+	 * @param string $field
+	 * @return null|int
 	 */
 	public function Max($field) {
-		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
-			$field = $this->dataobject->table() . "." . $field;
-		}
+		$field = $this->getFieldWithTable($field);
 
 		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max', $this->filter, array(), $this->limit, $this->join, $this->search);
 
@@ -351,17 +351,16 @@ class DataObjectSet extends DataSet {
 	}
 
 	/**
-	 * gets the maximum value of given field in this set + returns a count of all fields in this set as a comma-seperated-string.
-	 * this is for use in caching.
+	 * gets the maximum value of given field in this set + returns a count of all fields in this set as a
+	 * comma-seperated-string. this is for use in caching.
 	 *
-	 *@name maxCount
-	 *@access public
-	 *@param string $field
+	 * @name maxCount
+	 * @access public
+	 * @param string $field
+	 * @return null|string
 	 */
 	public function MaxCount($field) {
-		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
-			$field = $this->dataobject->table() . "." . $field;
-		}
+		$field = $this->getFieldWithTable($field);
 
 		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max, count(*) AS count', $this->filter, array(), $this->limit, $this->join, $this->search);
 
@@ -375,16 +374,14 @@ class DataObjectSet extends DataSet {
 	/**
 	 * gets the minimum value of given field in this set.
 	 *
-	 *@name min
-	 *@access public
-	 *@param string $field
+	 * @name min
+	 * @access public
+	 * @param string $field
+	 * @return null
 	 */
 	public function Min($field) {
 
-		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
-			$field = $this->dataobject->table() . "." . $field;
-		}
-
+		$field = $this->getFieldWithTable($field);
 
 		$data = $this->dataobject->getAggregate($this->version, 'min("'.convert::raw2sql($field).'") as min', $this->filter, array(), $this->limit, $this->join, $this->search);
 
@@ -393,6 +390,41 @@ class DataObjectSet extends DataSet {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * gets the sum value of given field in this set.
+	 *
+	 * @name sum
+	 * @access public
+	 * @param string $field
+	 * @return null
+	 */
+	public function Sum($field) {
+
+		$field = $this->getFieldWithTable($field);
+
+		$data = $this->dataobject->getAggregate($this->version, 'sum("'.convert::raw2sql($field).'") as sum', $this->filter, array(), $this->limit, $this->join, $this->search);
+
+		if(isset($data[0]["sum"])) {
+			return $data[0]["sum"];
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * gets field name correctly.
+	 *
+	 * @param string $field
+	 * @return string
+	 */
+	protected function getFieldWithTable($field) {
+		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
+			return $this->dataobject->table() . "." . $field;
+		}
+
+		return $field;
 	}
 
 	/**
