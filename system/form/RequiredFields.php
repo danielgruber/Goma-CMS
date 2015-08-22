@@ -71,7 +71,7 @@ class RequiredFields extends FormValidator
                 $fieldName = $fieldObject->dbname;
                 if (!isset($this->form->result[$fieldName]) ||
                     empty($this->form->result[$fieldName]) ||
-                    (is_object($this->form->result[$fieldName]) && is_a($this->form->result[$fieldName], "ViewAccessableData") && !$this->form->result[$fieldName]->bool())) {
+                    (is_object($this->form->result[$fieldName]) && Object::method_exists($this->form->result[$fieldName], "bool") && !$this->form->result[$fieldName]->bool())) {
                     $missing[] = $fieldObject->title;
                 } else {
                     // own validation
