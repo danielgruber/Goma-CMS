@@ -40,18 +40,16 @@ class DataValidator extends FormValidator
 		}
 
 		if (is_array($this->data->ToArray())) {
-			$_data = array_merge($this->data->ToArray(), $result);
+			$resultSet = array_merge($this->data->ToArray(), $result);
 		} else {
-			$_data = $result;
+			$resultSet = $result;
 		}
 
-		foreach ($this->form->result as $field => $data) {
+		foreach ($result as $field => $data) {
 			if (Object::method_exists($this->data->classname, "validate" . $field)) {
 				$method = "validate" . $field;
-				$str = $this->data->$method($_data);
-				if ($str === true) {
-					// everything ok
-				} else {
+				$str = $this->data->$method($resultSet);
+				if ($str !== true) {
 					$valid = false;
 					$errors[] = $str;
 				}
