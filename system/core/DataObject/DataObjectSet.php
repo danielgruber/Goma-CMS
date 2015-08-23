@@ -9,7 +9,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.1
+ * @version     1.5.2
  */
 class DataObjectSet extends DataSet {
 
@@ -383,7 +383,7 @@ class DataObjectSet extends DataSet {
 
 		$field = $this->getFieldWithTable($field);
 
-		$data = $this->dataobject->getAggregate($this->version, 'min("'.convert::raw2sql($field).'") as min', $this->filter, array(), $this->limit, $this->join, $this->search);
+		$data = $this->dataobject->getAggregate($this->version, 'min('.convert::raw2sql($field).') as min', $this->filter, array(), $this->limit, $this->join, $this->search);
 
 		if(isset($data[0]["min"])) {
 			return $data[0]["min"];
@@ -404,7 +404,7 @@ class DataObjectSet extends DataSet {
 
 		$field = $this->getFieldWithTable($field);
 
-		$data = $this->dataobject->getAggregate($this->version, 'sum("'.convert::raw2sql($field).'") as sum', $this->filter, array(), $this->limit, $this->join, $this->search);
+		$data = $this->dataobject->getAggregate($this->version, 'sum('.convert::raw2sql($field).') as sum', $this->filter, array(), $this->limit, $this->join, $this->search);
 
 		if(isset($data[0]["sum"])) {
 			return $data[0]["sum"];
