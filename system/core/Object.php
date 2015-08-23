@@ -397,8 +397,40 @@ abstract class Object
     protected function callExtraMethod($method_name, $extra_method, $args = array())
     {
         // first if it is a callback
-        if (is_array($extra_method)) {
+        $method_callback = $this->getMethodCallBack($extra_method, $method_name, $args);
 
+        if(!is_callable($method_callback)) {
+            throw new BadMethodCallException('Tried to call Extra-Method ' . print_r($extra_method, true) .
+                ' via '.print_r($method_callback, true).', but it is not callable.');
+        }
+
+        return call_user_func_array($method_callback, $args);
+    }
+
+    /**
+     * gets method callback out of information and modifies args.
+     *
+     * @param array|Closure $extra_method
+     * @param $method_name
+     * @param array $args
+     * @return Closure
+     */
+    protected function getMethodCallBack($extra_method, $method_name, &$args) {
+        if(is_a($extra_method, "Closure")) {
+            return $extra_method;
+        } else if(is_a($extra_method[count($extra_method) - 1], "closure")) {
+            /** @var Closure $closure */
+            for($i = count($extra_method) - 2; $i >= 0; $i--) {
+                $object = is_object($extra_method[$i]) ? $extra_method[$i] : $this->getInstance($extra_method[$i]);
+                if(!isset($object)) {
+                    $object = Object::instance($extra_method[$i]);
+                }
+                array_unshift($args, $object);
+            }
+            $closure = $extra_method[1];
+
+            return $closure;
+        } else if(is_array($extra_method)) {
             $method_callback = $extra_method;
             if (is_string($extra_method[0]) && substr($extra_method[0], 0, 4) == "EXT:") {
                 $method_callback[0] = $this->getInstance(substr($method_callback[0], 4));
@@ -407,16 +439,11 @@ abstract class Object
                 $method_callback[0] = $this;
             }
 
-            if(!is_callable($method_callback)) {
-                throw new BadMethodCallException('Tried to call Extra-Method ' . print_r($extra_method, true) .
-                    ' via '.print_r($method_callback, true).', but it is not callable.');
-            }
-
-            return call_user_func_array($method_callback, $args);
+            return $method_callback;
+        } else {
+            array_unshift($args, $this);
+            return $extra_method;
         }
-
-        array_unshift($args, $this);
-        return call_user_func_array($extra_method, $args);
     }
 
     /**

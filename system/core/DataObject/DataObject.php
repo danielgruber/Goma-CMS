@@ -464,14 +464,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function defineStatics() {
 
-        if ($has_many = $this->hasMany()) {
-
-            foreach ($has_many as $key => $val) {
-                Object::LinkMethod($this->classname, $key, array("this", "getHasMany"), true);
-                Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-            }
-        }
-
         if ($many_many_relationships = $this->ManyManyRelationships()) {
             foreach ($many_many_relationships as $key => $val) {
                 Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
@@ -1339,16 +1331,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *@name getActions
      *@param object - form-object
      */
-    public function getActions(&$form, $edit = false) {
+    public function getActions(&$form, $edit = false)
+    {
         $form->setResult($this);
+
     }
 
     /**
      * returns a list of fields you want to show if we use the history-compare-view
      *
-     * @name getVersionedFields
-     * @access public
-     * @return array
+     *@name getVersionedFields
+     *@access public
      */
     public function getVersionedFields() {
         return array();
@@ -1731,70 +1724,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
 
         return $arr;
-    }
-
-    /**
-     * gets the data object for a has-many-relation
-     *
-     *@name getHasMany
-     *@access public
-     */
-    public function getHasMany($name, $filter = null, $sort = null, $limit = null) {
-
-        $name = trim(strtolower($name));
-
-        $has_many = $this->hasMany();
-        if (!isset($has_many[$name]))
-        {
-            throw new LogicException("No Has-many-relation '".$name."' on ".$this->classname);
-        }
-
-        $cache = "has_many_{$name}_".var_export($filter, true)."_".var_export($sort, true) . "_" . var_export($limit, true);
-        if (isset($this->viewcache[$cache])) {
-            return $this->viewcache[$cache];
-        }
-
-        $class = $has_many[$name];
-        $inverse = null;
-        if(is_array($has_many[$name]) && isset($has_many[$name]["class"])) {
-            $class = $has_many[$name]["class"];
-            if(isset($has_many[$name]["inverse"]) && isset(ClassInfo::$class_info[$class]["has_one"][$has_many[$name]["inverse"]])) {
-                $inverse = $has_many[$name]["inverse"];
-            }
-        }
-
-        if(!isset($inverse)) {
-
-            $inverse = array_search($this->classname, ClassInfo::$class_info[$class]["has_one"]);
-            if ($inverse === false)
-            {
-                $c = $this->classname;
-                while($c = ClassInfo::getParentClass($c))
-                {
-                    if ($inverse = array_search($c, ClassInfo::$class_info[$class]["has_one"]))
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if ($inverse === false)
-            {
-                throw new LogicException("No inverse has-one-relationship on '" . $class . "' found.");
-            }
-        }
-
-        $filter[$inverse . "id"] = $this["id"];
-        $set = new HasMany_DataObjectSet($class, $filter, $sort, $limit);
-        $set->setRelationENV($name, $inverse . "id");
-
-        if ($this->queryVersion == DataObject::VERSION_STATE) {
-            $set->setVersion(DataObject::VERSION_STATE);
-        }
-
-        $this->viewcache[$cache] = $set;
-
-        return $set;
     }
 
     /**
@@ -3234,38 +3163,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             if (isset(ClassInfo::$class_info[$this->classname]["has_one"][$component])) {
                 return ClassInfo::$class_info[$this->classname]["has_one"][$component];
             }
-        }
-    }
-
-    /**
-     * returns one or many hasMany-Relations.
-     *
-     * @name hasMany
-     * @param name of has-many-relation to give back.
-     * @param if to only give back the class or also give the relation to inverse back.
-     */
-    public function hasMany($component = null, $classOnly = true) {
-        $has_many = (isset(ClassInfo::$class_info[$this->classname]["has_many"]) ? ClassInfo::$class_info[$this->classname]["has_many"] : array());
-
-        if ($classes = ClassInfo::dataclasses($this->classname)) {
-            foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["has_many"]))
-                    $has_many = array_merge(ClassInfo::$class_info[$class]["has_many"], $has_many);
-            }
-        }
-
-        if($component) {
-            if($has_many && isset($has_many[strtolower($component)])) {
-                $has_many = $has_many[strtolower($component)];
-            } else {
-                return false;
-            }
-        }
-
-        if($has_many && $classOnly) {
-            return preg_replace('/(.+)?\..+/', '$1', $has_many);
-        } else {
-            return $has_many ? $has_many : array();
         }
     }
 

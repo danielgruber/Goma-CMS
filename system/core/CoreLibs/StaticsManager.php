@@ -195,6 +195,7 @@ class StaticsManager {
             if(Object::method_exists(get_class($class), "defineStatics")) {
                 $class->defineStatics();
             }
+            $class->callExtending("extendDefineStatics");
 
             return true;
         }

@@ -16,6 +16,11 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	public $name = "Object";
 
 	/**
+	 * @var Object
+	 */
+	protected $o;
+
+	/**
 	 * setup test
 	*/
 	public function setUp() {
@@ -46,6 +51,10 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($this->o->EXTRA_METHOD(), "it works");
         $this->assertEqual($this->o->ExTrA_mEtHoD(), "it works");
         $this->assertEqual($this->o->__call(" ExTrA_mEtHoD ", array()), "it works");
+
+		$instance = $this->o->getInstance("TestObjectExtension");
+		$instance2 = $this->o->getInstance("TestObjectExtension");
+		$this->assertTrue($instance === $instance2);
 	}
 
 	/**

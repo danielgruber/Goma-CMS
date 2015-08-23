@@ -10,56 +10,58 @@
  */
 class DataValidator extends FormValidator
 {
-	/**
-	 * @param ViewAccessableData $data
-	 */
-	public function __construct($data)
-	{
+    /**
+     * @param ViewAccessableData $data
+     */
+    public function __construct($data)
+    {
 
-		if (!is_subclass_of($data, "ViewAccessableData")) {
-			throw new InvalidArgumentException('$data is not child of DataObject.');
-		}
-		$this->data = $data;
-	}
+        if (!is_subclass_of($data, "ViewAccessableData")) {
+            throw new InvalidArgumentException('$data is not child of DataObject.');
+        }
+        $this->data = $data;
+    }
 
-	/**
-	 * validates the data
-	 *
-	 * @name valdiate
-	 * @access public
-	 * @return bool|string
-	 */
-	public function validate()
-	{
-		$valid = true;
-		$errors = array();
-		if (is_object($this->form->result)) {
-			$result = $this->form->result->ToArray();
-		} else {
-			$result = $this->form->result;
-		}
+    /**
+     * validates the data
+     *
+     * @name valdiate
+     * @access public
+     * @return bool|string
+     */
+    public function validate()
+    {
+        $valid = true;
+        $errors = array();
+        if (is_object($this->form->result)) {
+            $result = $this->form->result->ToArray();
+        } else {
+            $result = $this->form->result;
+        }
 
-		if (is_array($this->data->ToArray())) {
-			$resultSet = array_merge($this->data->ToArray(), $result);
-		} else {
-			$resultSet = $result;
-		}
+        if (is_array($this->data->ToArray())) {
+            $_data = array_merge($this->data->ToArray(), $result);
+        } else {
+            $_data = $result;
+        }
 
-		foreach ($result as $field => $data) {
-			if (Object::method_exists($this->data->classname, "validate" . $field)) {
-				$method = "validate" . $field;
-				$str = $this->data->$method($resultSet);
-				if ($str !== true) {
-					$valid = false;
-					$errors[] = $str;
-				}
-			}
-		}
+        foreach ($this->form->result as $field => $data) {
+            if (Object::method_exists($this->data->classname, "validate" . $field)) {
+                $method = "validate" . $field;
+                $str = $this->data->$method($_data);
+                if ($str === true) {
+                    // everything ok
+                } else {
+                    $valid = false;
+                    $errors[] = $str;
+                }
+            }
+        }
 
-		if ($valid) {
-			return true;
-		} else {
-			return implode(",", $errors);
-		}
-	}
+        if ($valid) {
+            return true;
+        } else {
+            return implode(",", $errors);
+        }
+    }
 }
