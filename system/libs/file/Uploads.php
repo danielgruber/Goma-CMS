@@ -22,7 +22,7 @@ loadlang("files");
  * @property string collectionid
  * @property Uploads|null collection
  *
- * last modified: 22.08.2015
+ * last modified: 25.08.2015
  */
 class Uploads extends DataObject {
     /**
@@ -367,7 +367,7 @@ class Uploads extends DataObject {
     public function onAfterRemove() {
         if(file_exists($this->realfile)) {
             $data = DataObject::get("Uploads", array("realfile" => $this->realfile));
-            if($data->Count() == 0) {
+            if($data->Count() === 0) {
                 FileSystem::delete($this->realfile);
             }
         }
@@ -384,7 +384,7 @@ class Uploads extends DataObject {
 
         if($this->collection) {
             $collectionFiles = $this->collection->getCollectionFiles()->forceData();
-            if($collectionFiles->count() == 0 ||
+            if($collectionFiles->count() === 0 ||
                 ($collectionFiles->first()->id == $this->id && $collectionFiles->count() == 1)) {
                 $this->collection->remove(true);
             }

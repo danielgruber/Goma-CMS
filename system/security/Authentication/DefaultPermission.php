@@ -8,7 +8,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  *
- * @version		1.0
+ * @version		1.0.1
  */
 class DefaultPermission {
 
@@ -26,7 +26,7 @@ class DefaultPermission {
     public static function checkDefaults() {
         $cacher = new Cacher(self::CACHE_DEFAULT_CHECK);
         if(!$cacher->checkValid()) {
-            if(DataObject::count("group", array("type" => 2)) == 0) {
+            if(DataObject::count("group", array("type" => 2)) === 0) {
                 $group = new Group();
                 $group->name = lang("admins", "admin");
                 $group->type = 2;
@@ -35,14 +35,14 @@ class DefaultPermission {
                 $group->write(true, true, 2, false, false);
             }
 
-            if(DataObject::count("group", array("type" => 1)) == 0) {
+            if(DataObject::count("group", array("type" => 1)) === 0) {
                 $group = new Group();
                 $group->name = lang("user", "users");
                 $group->type = 1;
                 $group->write(true, true, 2, false, false);
             }
 
-            if(isset(Member::$default_admin) && DataObject::count("user") == 0) {
+            if(isset(Member::$default_admin) && DataObject::count("user") === 0) {
                 $user = new User();
                 $user->nickname = Member::$default_admin["nickname"];
                 $user->password = Member::$default_admin["password"];
@@ -65,7 +65,7 @@ class DefaultPermission {
         $groups = $user->groups(null, "type DESC");
 
         // if no group is set, set default group user
-        if($groups->forceData()->Count() == 0) {
+        if($groups->forceData()->Count() === 0) {
 
             $group = self::getDefaultGroup();
 
@@ -100,7 +100,7 @@ class DefaultPermission {
 
                 // iterate trough all groups with type 1 and set default group to the first one without permissions
                 foreach(DataObject::get("group", array("type" => 1)) as $defaultGroup) {
-                    if($defaultGroup->permissions()->count() == 0) {
+                    if($defaultGroup->permissions()->count() === 0) {
                         $defaultGroup->usergroup = 1;
                         $defaultGroup->write(false, true, 2, true, false);
                         break;

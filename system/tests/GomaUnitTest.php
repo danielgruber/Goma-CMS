@@ -8,7 +8,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-require_once("system/libs/thirdparty/simpletest/unit_tester.php");
+require_once(ROOT . "/system/libs/thirdparty/simpletest/unit_tester.php");
 
 abstract class GomaUnitTest extends UnitTestCase implements TestAble {
 	/**
