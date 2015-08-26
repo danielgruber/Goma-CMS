@@ -30,6 +30,10 @@ class DataObjectTests extends GomaUnitTest
         $this->unitTestWriteToDB(array(false, true, 1), "writeState");
     }
 
+    /**
+     * @param $args
+     * @param $expectedCall
+     */
     public function unitTestWriteToDB($args, $expectedCall) {
         $oldRepo = Core::repository();
         $fakeRepo = new fakeRepo();
@@ -42,9 +46,29 @@ class DataObjectTests extends GomaUnitTest
 
         Core::__setRepo($oldRepo);
     }
+
+    /**
+     * tests if table exists for write-entity.
+     */
+    public function testTableExistence() {
+        $this->assertTrue(Object::instance("MockWriteEntity")->hasTable());
+        $this->assertFalse(Object::instance("MockWriteExtendedEntity")->hasTable());
+        $this->assertTrue(Object::instance("MockWriteEntity")->hasTable());
+        $this->assertFalse(Object::instance("MockWriteExtendedEntityWithFieldsInParent")->hasTable());
+    }
 }
 
 class MockWriteEntity extends DataObject {}
+
+class MockWriteExtendedEntity extends MockWriteEntity {}
+
+class MockWriteEntityWithFields extends DataObject {
+    static $db = array(
+        "test" => "int(10)"
+    );
+}
+
+class MockWriteExtendedEntityWithFieldsInParent extends MockWriteEntityWithFields {}
 
 class fakeRepo extends  IModelRepository {
 

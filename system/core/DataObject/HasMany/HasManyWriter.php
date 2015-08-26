@@ -121,12 +121,14 @@ class HasManyWriter extends Extension {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
         /** @var HasManyGetter $extensionInstance */
-        $extensionInstance = $owner->getModel()->getInstance(HasManyGetter::ID);
-        // has-many
-        if ($has_many = $extensionInstance->hasMany()) {
-            if($owner->checkForChangeInRelationship(array_keys($has_many), true, true)) {
-                $changed = true;
-                return;
+        if($extensionInstance = $owner->getModel()->getInstance(HasManyGetter::ID)) {
+            // has-many
+            if ($has_many = $extensionInstance->hasMany()) {
+                if ($owner->checkForChangeInRelationship(array_keys($has_many), true, true)) {
+                    $changed = true;
+
+                    return;
+                }
             }
         }
     }

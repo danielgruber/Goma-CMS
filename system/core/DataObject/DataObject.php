@@ -3124,7 +3124,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * table
      *
-     *@name Table
+     * @name Table
+     * @return bool
      */
     public function Table() {
         return isset(ClassInfo::$class_info[$this->classname]["table"]) ? ClassInfo::$class_info[$this->classname]["table"] : false;
@@ -3133,7 +3134,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * table
      *
-     *@name hasTable
+     * @name hasTable
+     * @return bool
      */
     public function hasTable() {
         return ((isset(ClassInfo::$class_info[$this->classname]["table_exists"]) ? ClassInfo::$class_info[$this->classname]["table_exists"] : false) && $this->Table());
@@ -3142,7 +3144,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * has-one-relations
      *
-     *@name hasOne
+     * @name hasOne
+     * @return array
      */
     public function hasOne($component = null) {
         if ($component === null) {
@@ -3184,7 +3187,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * many-many-relations belonging to this
      *
-     *@name BelongsManyMany
+     * @name BelongsManyMany
+     * @return array
      */
     public function BelongsManyMany() {
         $belongs_many_many = (isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"]) ? ClassInfo::$class_info[$this->classname]["belongs_many_many"] : array());
@@ -3237,7 +3241,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns array of ModelManyManyRelationShipInfo Objects
      *
-     * @return ManyManyRelationships
+     * @return array
      */
     public function ManyManyRelationships() {
         return DataObjectClassInfo::getManyManyRelationships($this->classname);
@@ -3247,7 +3251,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if a DataObject is versioned
      *
-     *@name versioned
+     * @name versioned
+     * @return bool
      */
     public static function Versioned($class) {
         if (StaticsManager::hasStatic($class, "versions") && StaticsManager::getStatic($class, "versions") == true)

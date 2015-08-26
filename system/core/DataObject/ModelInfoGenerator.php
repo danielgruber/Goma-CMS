@@ -13,24 +13,23 @@ class ModelInfoGenerator {
      * combines data from given class-attribute + given extension method
      * @param string|object $class
      * @param string $staticProp static property on class
-     * @param string $extensionMethod static method on extension
+     * @param string|null $extensionMethod static method on extension
      * @param bool $useParents
+     * @internal
      * @return array
      */
-    protected static function generate_combined_array($class, $staticProp, $extensionMethod, $useParents = false) {
+    public static function generate_combined_array($class, $staticProp, $extensionMethod = null, $useParents = false) {
         $class = ClassManifest::resolveClassName($class);
 
-        $fields = array();
-
-        if (StaticsManager::hasStatic($class, $staticProp)) {
-            $fields = (array)StaticsManager::getStatic($class, $staticProp);
-        }
+        $fields = (array) self::getNotExtendedStatic($class, $staticProp);
 
         // fields of extensions
-        foreach(Object::getExtensionsForClass($class, false) as $extension) {
-            if(Object::method_exists($extension, $extensionMethod)) {
-                if($extensionFields = call_user_func_array(array($extension, $extensionMethod), array($class))) {
-                    $fields = array_merge($fields, (array) $extensionFields);
+        if($extensionMethod !== null) {
+            foreach (Object::getExtensionsForClass($class, false) as $extension) {
+                if (Object::method_exists($extension, $extensionMethod)) {
+                    if ($extensionFields = call_user_func_array(array($extension, $extensionMethod), array($class))) {
+                        $fields = array_merge($fields, (array)$extensionFields);
+                    }
                 }
             }
         }
@@ -44,6 +43,30 @@ class ModelInfoGenerator {
         $fields = ArrayLib::map_key("strtolower", $fields, false);
 
         return $fields;
+    }
+
+    /**
+     * gets static property while checking if it is only extended property.
+     *
+     * @param string $class
+     * @param string $staticProp
+     * @internal
+     * @return mixed
+     */
+    public static function getNotExtendedStatic($class, $staticProp) {
+        if (StaticsManager::hasStatic($class, $staticProp)) {
+            // validates that it is not just the extended property.
+            $parent = get_parent_class($class);
+            $fields = (array)StaticsManager::getStatic($class, $staticProp);
+
+            if($parent && (array) StaticsManager::getStatic($parent, $staticProp) == $fields) {
+                return array();
+            }
+
+            return $fields;
+        }
+
+        return null;
     }
 
     /**

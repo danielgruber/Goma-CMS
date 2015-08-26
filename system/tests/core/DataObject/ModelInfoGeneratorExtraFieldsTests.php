@@ -18,7 +18,7 @@ class ModelInfoGeneratorExtraFieldsTest extends GomaUnitTest implements TestAble
     /**
      * internal name.
      */
-    public $name = "ModelInfoGenerator";
+    public $name = "ModelInfoGeneratorExtra";
 
 
     public function testManyManyExtraFieldGeneration() {
@@ -30,7 +30,6 @@ class ModelInfoGeneratorExtraFieldsTest extends GomaUnitTest implements TestAble
             "mayFourth" => "int(2)"
         ));
     }
-
 }
 
 class DummyModelForGenerator {

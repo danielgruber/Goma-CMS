@@ -17,6 +17,9 @@ class ManyManyDataObjectSetTests extends GomaUnitTest
      */
     public $name = "ManyMany_DataObjectSet";
 
+    /**
+     * relationship env.
+     */
     public function testSetRelationENV() {
         $dataset = new ManyMany_DataObjectSet("group");
 

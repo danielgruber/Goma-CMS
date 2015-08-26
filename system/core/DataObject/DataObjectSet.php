@@ -311,7 +311,7 @@ class DataObjectSet extends DataSet {
 	 *
 	 * @name Count
 	 * @access public
-	 * @return int|null
+	 * @return int
 	 */
 	public function Count() {
 		if(isset($this->count)) {
@@ -322,10 +322,10 @@ class DataObjectSet extends DataSet {
 		} else {
 			$data = $this->dataobject->getAggregate($this->version, 'count(*) as count', $this->filter, array(), $this->limit, $this->join, $this->search);
 			if(isset($data[0]["count"])) {
-				$this->count = $data[0]["count"];
+				$this->count = (int) $data[0]["count"];
 				return $this->count;
 			} else {
-				return null;
+				throw new LogicException("Could not count records.");
 			}
 		}
 	}
