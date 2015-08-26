@@ -101,7 +101,6 @@ class mysqliDriver extends object implements SQLDriver
             return $result;
         else {
             if ($debug) {
-                var_dump($sql);
                 $trace = debug_backtrace();
                 log_error('SQL-Error in Statement: ' . $sql . ' in ' . $trace[1]["file"] . ' on line ' . $trace[1]["line"] . '.');
                 $this->runDebug($sql);
