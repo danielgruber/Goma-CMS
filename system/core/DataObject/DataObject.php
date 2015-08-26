@@ -2957,19 +2957,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * gets a object of this record with id and versionid set to 0.
      * it also adds hasmany-relations.
      *
-     *@name duplicate
-     *@access public
+     * @name duplicate
+     * @access public
+     * @return DataObject|ViewAccessableData
      */
     public function duplicate() {
         $this->consolidate();
-        $data = clone $this;
+        $data = parent::duplicate();
 
         $data->id = 0;
         $data->versionid = 0;
-
-        foreach($this->hasMany() as $name => $class) {
-            $data->data[$name] = $this->getHasMany($name);
-        }
 
         return $data;
     }

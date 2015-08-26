@@ -429,9 +429,12 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	/**
 	 * gets a duplicated object
 	 *
+	 * @return ViewAccessableData
 	 */
 	public function duplicate() {
-		return clone $this;
+		$duplicate = clone $this;
+		$this->callExtending("duplicate");
+		return $duplicate;
 	}
 
 	//!Iterator

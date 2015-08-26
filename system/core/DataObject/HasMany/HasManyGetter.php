@@ -13,6 +13,11 @@
 class HasManyGetter extends Extension {
 
     /**
+     * id of class.
+     */
+    const ID = "HasManyGetter";
+
+    /**
      * extra-methods.
      */
     static $extra_methods = array(
@@ -146,7 +151,7 @@ class HasManyGetter extends Extension {
             }
         }
 
-        if($component) {
+        if($component !== null) {
             if($has_many && isset($has_many[strtolower($component)])) {
                 $has_many = $has_many[strtolower($component)];
             } else {
@@ -158,6 +163,17 @@ class HasManyGetter extends Extension {
             return preg_replace('/(.+)?\..+/', '$1', $has_many);
         } else {
             return $has_many ? $has_many : array();
+        }
+    }
+
+    /**
+     * duplicate extension.
+     */
+    public function duplicate() {
+        /** @var DataObject $owner */
+        $owner = $this->getOwner();
+        foreach($this->hasMany() as $name => $class) {
+            $owner->setField($name, $this->getHasMany($name));
         }
     }
 }

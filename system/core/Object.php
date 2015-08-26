@@ -413,7 +413,7 @@ abstract class Object
      * @param array|Closure $extra_method
      * @param $method_name
      * @param array $args
-     * @return Closure
+     * @return Callback
      */
     protected function getMethodCallBack($extra_method, $method_name, &$args) {
         if(is_a($extra_method, "Closure")) {

@@ -306,12 +306,12 @@ class ModelWriter extends Object {
     /**
      * updates changed-array and $forceChanged when relationship has changed.
      *
-     * @param array names of relationship
+     * @param array $relationShips names of relationship
      * @param bool $useIds
      * @param string $useObject
      * @return bool
      */
-    protected function checkForChangeInRelationship($relationShips, $useIds = true, $useObject = null) {
+    public function checkForChangeInRelationship($relationShips, $useIds = true, $useObject = null) {
         foreach ($relationShips as $name) {
 
             if ($useIds && (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))) {
@@ -373,6 +373,9 @@ class ModelWriter extends Object {
                 }
             }
 
+            $changed = false;
+            $this->callExtending("extendHasChanged", $changed);
+
             // has-one
             if ($has_one = $this->model->hasOne()) {
                 if($this->checkForChangeInRelationship(array_keys($has_one), false, "DataObject")) {
@@ -387,14 +390,7 @@ class ModelWriter extends Object {
                 }
             }
 
-            // has-many
-            if ($has_many = $this->model->hasMany()) {
-                if($this->checkForChangeInRelationship(array_keys($has_many), true, true)) {
-                    return true;
-                }
-            }
-
-            return false;
+            return $changed;
         } else {
             return true;
         }
