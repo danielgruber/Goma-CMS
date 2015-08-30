@@ -653,12 +653,12 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *
      * @name validateParentId
      * @access public
-     *
+     * @param FormValidator $obj
      * @return bool|string
      */
     public function validatePageType($obj)
     {
-        $data = $obj->form->result;
+        $data = $obj->getForm()->result;
         $parentid = $data["parentid"];
 
         // check if form was filled out correctrly.
@@ -705,15 +705,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *
      * @name validatePageFileName
      * @access public
-     * @param obj - object
+     * @param FormValidator $obj
      * @return bool|string
      */
     public function validatePageFileName($obj) {
-        $data = $obj->form->result;
+        $data = $obj->getForm()->result;
         $filename = $this->replacePath($data["filename"]);
         $parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
-        if(isset($obj->form->result["recordid"])) {
-            if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->form->result["recordid"]))) > 0) {
+        if(isset($obj->getForm()->result["recordid"])) {
+            if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->getForm()->result["recordid"]))) > 0) {
                 return lang("site_exists", "The page with this filename already exists.");
             } else {
                 return true;
