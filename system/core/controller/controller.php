@@ -823,14 +823,12 @@ class Controller extends RequestHandler
      */
     public function prompt($title, $validators = array(), $value = null, $redirectOnCancel = null, $usePwdField = null)
     {
-
         $field = ($usePwdField) ? new PasswordField("prompt_text", $title, $value) : new TextField("prompt_text", $title, $value);
         $form = new RequestForm($this, array(
             $field
         ), lang("prompt", "Insert Text..."), md5("prompt_" . $title . $this->classname), $validators, null, $redirectOnCancel);
         $data = $form->get();
         return $data["prompt_text"];
-
     }
 
     /**

@@ -75,11 +75,13 @@ class ExpansionManager {
     /**
      * gets the resource-folder for an Expansion
      *
-     * @name getResourceFolder
-     * @access public
+     * @param $class
+     * @param bool $forceAbsolute
      * @return null|string
+     * @internal param $getResourceFolder
+     * @access public
      */
-    public static function getResourceFolder($class, $forceAbsolute = false, $exp = null)
+    public static function getResourceFolder($class, $forceAbsolute = false)
     {
         if($exp = self::getExpansionName($class)) {
             $extFolder = self::getExpansionFolder($exp, $forceAbsolute);

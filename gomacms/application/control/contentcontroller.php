@@ -13,7 +13,7 @@
  *
  * @version     2.1.2
  */
-class contentController extends FrontedController
+class ContentController extends FrontedController
 {
     /**
      * this is for mainbar, so we know, which ids of site has to be marked as active
@@ -80,8 +80,9 @@ class contentController extends FrontedController
      */
     public function extendHasAction($action, &$hasAction)
     {
-        if(!$this->checkForReadPermission()) {
-            return false;
+        $check = $this->checkForReadPermission();
+        if(is_array($check)) {
+            return $this->showPasswordForm($check);
         }
 
         array_push(self::$activeNodes, $this->modelInst()->id);
@@ -145,14 +146,19 @@ class contentController extends FrontedController
                         }
                     }
 
-                    return $this->showPasswordForm(array_merge(array($model->read_permission->password), $passwords));
+                    return array_merge(array($model->read_permission->password), $passwords);
                 }
             }
         }
+
+        return true;
     }
 
     /**
      * shows password accept form. we need an array as given password.
+     *
+     * @param array $passwords
+     * @return bool
      */
     protected function showPasswordForm($passwords) {
         $validator = new FormValidator(array($this, "validatePassword"), array($passwords));

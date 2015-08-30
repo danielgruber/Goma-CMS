@@ -75,4 +75,28 @@ class FormValidator extends Object
     {
         return "";
     }
+
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return Form
+     */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getArgs()
+    {
+        return $this->args;
+    }
 }

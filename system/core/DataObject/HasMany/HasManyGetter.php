@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version    1.0
+ * @version    1.0.1
  */
 class HasManyGetter extends Extension {
 
@@ -84,7 +84,9 @@ class HasManyGetter extends Extension {
             $set->setVersion(DataObject::VERSION_STATE);
         }
 
-        $owner->setField($name, $set);
+        if(!$filter && !$sort && !$limit) {
+            $owner->setField($name, $set);
+        }
 
         return $set;
     }
@@ -140,6 +142,10 @@ class HasManyGetter extends Extension {
      */
     public function hasMany($component = null, $classOnly = true) {
         $owner = $this->getOwner();
+
+        if(!$owner) {
+            return array();
+        }
 
         $has_many = (isset(ClassInfo::$class_info[$owner->classname]["has_many"]) ? ClassInfo::$class_info[$owner->classname]["has_many"] : array());
 
