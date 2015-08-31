@@ -94,7 +94,7 @@ class HasManyGetter extends Extension {
         /** @var DataObject $owner */
         $owner = $this->getOwner();
 
-        $info = $this->findInverse($has_many[$name]);
+        $info = $this->findInverse($name, $has_many[$name]);
 
         $filter = array();
         $ids = $owner->fieldGet($name . "ids");
@@ -112,10 +112,11 @@ class HasManyGetter extends Extension {
     /**
      * finds inverse for has-many-relationship.
      *
+     * @param string $name
      * @param string|array $hasMany has-many-relationship
      * @return Tuple<class,inverse>
      */
-    protected function findInverse($hasMany) {
+    protected function findInverse($name, $hasMany) {
 
         $inverse = null;
         if(is_array($hasMany) && isset($hasMany["class"])) {
@@ -128,23 +129,7 @@ class HasManyGetter extends Extension {
         }
 
         if(!isset($inverse)) {
-            $inverse = array_search($this->getOwner()->classname, ClassInfo::$class_info[$class]["has_one"]);
-            if ($inverse === false)
-            {
-                $currentClass = $this->getOwner()->classname;
-                while($currentClass = ClassInfo::getParentClass($currentClass))
-                {
-                    if ($inverse = array_search($currentClass, ClassInfo::$class_info[$class]["has_one"]))
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if ($inverse === false)
-            {
-                throw new LogicException("No inverse has-one-relationship on '" . $class . "' found.");
-            }
+            $inverse = HasManyWriter::searchForBelongingHasOneRelationship($this->getOwner(), $name, $class);
         }
 
         return new Tuple($class, $inverse);

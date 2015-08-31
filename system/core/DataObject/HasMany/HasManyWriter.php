@@ -14,10 +14,8 @@ class HasManyWriter extends Extension {
 
     /**
      * writes has-many-relationships.
-     *
-     * @param array $data
      */
-    protected function onBeforeWriteData($data) {
+    protected function onBeforeWriteData() {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
         $data = $owner->getData();
@@ -31,7 +29,7 @@ class HasManyWriter extends Extension {
                         /** @var HasMany_DataObjectSet $hasManyObject */
                         $hasManyObject = $data[$name];
 
-                        $key = $this->searchForBelongingHasOneRelationship($name, $class);
+                        $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
 
                         $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
                         $hasManyObject->writeToDB(false, true, $owner->getWriteType());
@@ -42,7 +40,7 @@ class HasManyWriter extends Extension {
 
                         if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
                             // find field
-                            $key = $this->searchForBelongingHasOneRelationship($name, $class);
+                            $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
 
                             foreach ($data[$name . "ids"] as $id) {
                                 /** @var DataObject $belongingObject */
@@ -70,18 +68,15 @@ class HasManyWriter extends Extension {
     /**
      * searches for belonging has-one-relationship.
      *
+     * @param DataObject $model
      * @param String $relationShipName
      * @param String $hasManyTarget
      * @return mixed
      */
-    protected function searchForBelongingHasOneRelationship($relationShipName, $hasManyTarget) {
-
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-
-        $key = array_search($owner->getModel()->classname, ClassInfo::$class_info[$hasManyTarget]["has_one"]);
+    public static function searchForBelongingHasOneRelationship($model, $relationShipName, $hasManyTarget) {
+        $key = array_search($model->classname, ClassInfo::$class_info[$hasManyTarget]["has_one"]);
         if ($key === false) {
-            $currentClass = $owner->getModel()->classname;
+            $currentClass = $model->classname;
             while ($currentClass = strtolower(get_parent_class($currentClass))) {
                 if ($key = array_search($currentClass, ClassInfo::$class_info[$hasManyTarget]["has_one"])) {
                     break;
