@@ -318,7 +318,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	*/
 	public static function _validateCode($obj)
 	{
-        $value = $obj->form->result["code"];
+        $value = $obj->getForm()->result["code"];
         if(!is_string($value)) {
             return true;
         }
@@ -340,10 +340,10 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 */
 	public function _validateuser($obj)
 	{
-		if($obj->form->result["password"] == $obj->form->result["repeat"] && $obj->form->result["repeat"] != "")
+		if($obj->getForm()->result["password"] == $obj->getForm()->result["repeat"] && $obj->getForm()->result["repeat"] != "")
 		{
 			// check if username is unique
-			if(DataObject::count("user", array("nickname" => $obj->form->result["nickname"])) > 0)
+			if(DataObject::count("user", array("nickname" => $obj->getForm()->result["nickname"])) > 0)
 			{
 				return lang("register_username_bad", "The username is already taken.");
 			}
@@ -377,16 +377,16 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return string
      */
 	public function validatepwd($obj) {
-		if(isset($obj->form->result["oldpwd"]))
+		if(isset($obj->getForm()->result["oldpwd"]))
 		{
-			$data = DataObject::get_one("user", array("id" => $obj->form->result["id"]));
+			$data = DataObject::get_one("user", array("id" => $obj->getForm()->result["id"]));
 			if($data) {
 				// export data
 				$data = $data->ToArray();
 				$pwd = $data["password"];
 				
 				// check old password
-				if(Hash::checkHashMatches($obj->form->result["oldpwd"], $pwd))
+				if(Hash::checkHashMatches($obj->getForm()->result["oldpwd"], $pwd))
 				{
 					return self::validateNewAndRepeatPwd($obj);
 				} else {
@@ -401,15 +401,16 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		}
 	}
 
-    /**
-     * validates new password and repeat matches.
-     *
-     * @return bool|string
-     */
+	/**
+	 * validates new password and repeat matches.
+	 *
+	 * @param FormValidator $obj
+	 * @return bool|string
+	 */
 	public static function validateNewAndRepeatPwd($obj) {
-		if(isset($obj->form->result["password"], $obj->form->result["repeat"]) && $obj->form->result["password"] != "")
+		if(isset($obj->getForm()->result["password"], $obj->getForm()->result["repeat"]) && $obj->getForm()->result["password"] != "")
 		{
-			if($obj->form->result["password"] == $obj->form->result["repeat"])
+			if($obj->getForm()->result["password"] == $obj->getForm()->result["repeat"])
 			{
 				return true;
 			} else

@@ -45,7 +45,7 @@ class VirtualPage extends Page {
 	 * validate self
 	*/
 	public function validate($obj) {
-		$data = $obj->form->result;
+		$data = $obj->getForm()->result;
 		if(isset($data["recordid"]) && $data["regardingPageid"] == $data["recordid"]) {
 			return lang("error_page_self");
 		}

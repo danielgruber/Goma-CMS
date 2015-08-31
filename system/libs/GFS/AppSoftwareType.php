@@ -89,7 +89,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * @return bool|string
 	 */
 	public function validateInstall($obj) {
-		$result = $obj->form->result;
+		$result = $obj->getForm()->result;
 		$notAllowedFolders = array(
 			"dev", "admin", "pm", "system"
 		);
@@ -442,11 +442,12 @@ class G_AppSoftwareType extends G_SoftwareType {
 	/**
 	 * validates the restore
 	 *
+	 * @param FormValidator $obj
 	 * @name validateInstall
 	 * @return bool|string
 	 */
 	public function validateRestore($obj) {
-		$result = $obj->form->result;
+		$result = $obj->getForm()->result;
 		if($result["type"] != "copyconfig") {
 			return $this->validateInstall($obj);
 		} else {
@@ -458,8 +459,9 @@ class G_AppSoftwareType extends G_SoftwareType {
 	/**
 	 * restores the framework
 	 *
-	 *@name getRestoreInfo
-	 *@access public
+	 * @name getRestoreInfo
+	 * @access public
+	 * @return mixed|string
 	 */
 	public function getRestoreInfo($forceCompleteRestore = false) {
 		$gfs = new GFS($this->file);

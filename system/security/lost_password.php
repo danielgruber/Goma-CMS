@@ -125,12 +125,13 @@ class lost_passwordExtension extends ControllerExtension
     /**
      * validates data
      * @name validate
+     * @param FormValidator $obj
      * @access public
      * @return bool|string
      */
     public function validate($obj)
     {
-        $data = $obj->form->result["email"];
+        $data = $obj->getForm()->result["email"];
         if(!$data) {
             return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
         }
@@ -145,6 +146,7 @@ class lost_passwordExtension extends ControllerExtension
 
     public function submit($data)
     {
+        /** @var User $data */
         $data = DataObject::get_one("user", array("nickname" => $data["email"], "OR", "email" => $data["email"]));
 
         // update code

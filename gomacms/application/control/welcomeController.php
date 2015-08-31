@@ -95,7 +95,7 @@ class welcomeController extends Controller {
 	 * pwd-validation
 	*/
 	public function validatePassword($obj) {
-		$result = $obj->form->result;
+		$result = $obj->getForm()->result;
 		if($result["password"] != $result["repeat"] && $result["password"] != "") {
 			return lang("passwords_not_match");
 		} else if(empty($result["username"])) {

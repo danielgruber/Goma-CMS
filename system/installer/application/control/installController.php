@@ -108,15 +108,15 @@ class InstallController extends Controller {
 			}
 		}
 	}
-	
+
 	/**
 	 * validates the installation
 	 *
-	 *@name validateInstall
-	 *@access public
-	*/
+	 * @param FormValidator $obj
+	 * @return bool|string
+	 */
 	public function validateInstall($obj) {
-		$result = $obj->form->result;
+		$result = $obj->getForm()->result;
 		$notAllowedFolders = array(
 			"dev", "admin", "pm", "system"
 		);

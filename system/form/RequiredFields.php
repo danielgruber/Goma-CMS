@@ -109,20 +109,22 @@ class RequiredFields extends FormValidator
             if (!isset($this->form->fields[$field])) {
                 continue;
             }
-            $f = $this->form->fields[$field];
+
+            /** @var FormField $formField */
+            $formField = $this->form->fields[$field];
             $key = "v_" . $field;
-            $js .= "var " . $key . " = function() { " . $f->jsValidation() . "}
+            $js .= "var " . $key . " = function() { " . $formField->jsValidation() . "}
 						if(" . $key . "() === false) {
 							valid = false;	
 						}";
-            $js .= 'if($("#' . $f->ID() . '").length > 0)
+            $js .= 'if($("#' . $formField->ID() . '").length > 0)
 								{
-									if($("#' . $f->ID() . '").length > 0)
+									if($("#' . $formField->ID() . '").length > 0)
 									{
 										// input
-										if($("#' . $f->ID() . '").val() == "")
+										if($("#' . $formField->ID() . '").val() == "")
 										{
-											$("#' . $f->ID() . '").parent().append(require_lang);
+											$("#' . $formField->ID() . '").parent().append(require_lang);
 											valid = false;
 										}
 									}											

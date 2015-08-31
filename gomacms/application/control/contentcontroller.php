@@ -184,7 +184,7 @@ class ContentController extends FrontedController
     public function validatePassword($obj, $passwords)
     {
         foreach ($passwords as $password) {
-            if ($obj->form->result["prompt_text"] == $password) {
+            if ($obj->getForm()->result["prompt_text"] == $password) {
                 return true;
             }
         }

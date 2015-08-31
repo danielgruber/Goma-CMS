@@ -32,7 +32,7 @@ class UserTests extends GomaUnitTest
      * checks if validatecode works correctly.
      */
     public function testValidateCode() {
-        $obj = new StdClass();
+        $obj = new FormValidatorMock();
         $obj->form  = new StdClass();
         $obj->form->result = array(
             "code" => ""
@@ -94,7 +94,7 @@ class UserTests extends GomaUnitTest
     }
 
     public function unitValidatePwd($new, $repeat, $expected) {
-        $obj = new StdClass();
+        $obj = new FormValidatorMock();
         $obj->form  = new StdClass();
         $obj->form->result = array(
             "password"  => $new,
@@ -104,5 +104,13 @@ class UserTests extends GomaUnitTest
 
 
         $this->assertEqual(User::validateNewAndRepeatPwd($obj), $expected, "Validating ".var_export($new, true)." and ".var_export($repeat, true).". %s");
+    }
+}
+
+class FormValidatorMock {
+    public $form;
+
+    public function getForm() {
+        return $this->form;
     }
 }

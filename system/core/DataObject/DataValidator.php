@@ -33,10 +33,10 @@ class DataValidator extends FormValidator
 	{
 		$valid = true;
 		$errors = array();
-		if (is_object($this->form->result)) {
-			$result = $this->form->result->ToArray();
+		if (is_object($this->getForm()->result)) {
+			$result = $this->getForm()->result->ToArray();
 		} else {
-			$result = $this->form->result;
+			$result = $this->getForm()->result;
 		}
 
 		if (is_array($this->data->ToArray())) {
