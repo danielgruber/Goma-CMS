@@ -17,10 +17,11 @@ class SearchController extends FrontedController
         public $model = "pages";
         
         public $title = "{\$_lang_search.search}";
-        
+
         /**
-         *@name index
-        */
+         * @name index
+         * @return bool|string
+         */
         public function index()
         {
         		Core::setTitle(lang("search.search"));
@@ -34,7 +35,7 @@ class SearchController extends FrontedController
                 		Core::setTitle(convert::raw2text($word) . " - " . lang("search.search"));
                         $data = DataObject::search_object("pages", array($word), array("include_in_search" => 1));
                         $data->activatePagination(isset($_GET["pa"]) ? $_GET["pa"] : null);
-                        return $data->customise(array(), array("word" => convert::raw2text($word)))->renderWith("pages/search.html");
+                        return $data->customise(array("word" => convert::raw2text($word)))->renderWith("pages/search.html");
                 }
         }
 }
