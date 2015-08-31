@@ -50,12 +50,14 @@ class TreeRenderer extends Object {
 		
 		parent::__construct();
 	}
-	
+
 	/**
 	 * sets a given node expanded.
 	 *
-	 * @param	int $nodeID nodeid
-	*/
+	 * @param    int $nodeID nodeid
+	 *
+	 * @return $this
+	 */
 	public function setExpanded($nodeID) {
 		if(is_array($nodeID))
 			foreach($nodeID as $id)
@@ -65,12 +67,14 @@ class TreeRenderer extends Object {
 		
 		return $this;
 	}
-	
+
 	/**
 	 * sets a given node collapsed.
 	 *
-	 * @param	int $nodeID nodeid
-	*/
+	 * @param    int $nodeID nodeid
+	 *
+	 * @return $this
+	 */
 	public function setCollapsed($nodeID) {
 		if(is_array($nodeID))
 			foreach($nodeID as $id)
@@ -136,13 +140,15 @@ class TreeRenderer extends Object {
 			return $this->renderChild($this->tree);
 		}
 	}
-	
+
 	/**
 	 * method to render all subchildren of given array of children.
 	 *
-	 * @name	renderSubChildren
-	 * @access	protected
-	*/
+	 * @name    renderSubChildren
+	 *
+	 * @access    protected
+	 * @return string
+	 */
 	protected function renderSubChildren($nodes, $parentID = 0) {
 		$html = "";
 		foreach($nodes as $node) {
@@ -188,9 +194,7 @@ class TreeRenderer extends Object {
 			$wrapper->addClass("node-area");
 			$wrapper->addClass("clearfix");
 		}
-		
-		
-		
+
 		if(is_callable($this->actionCallback)) {
 			$menu = call_user_func_array($this->actionCallback, array($child));
 			if(is_array($menu)) {
@@ -237,10 +241,13 @@ class TreeRenderer extends Object {
 		
 		return $node->render();
 	}
-	
+
 	/**
 	 * renders a subMenu for the contextMenu.
-	*/
+	 *
+	 * @param array $items
+	 * @param HTMLNode $menu
+	 */
 	protected function renderContextMenu($items, &$menu) {
 		if(!isset(self::$isFirefox8)) {
 			if(preg_match('/firefox\/([0-9]+)/i', $_SERVER["HTTP_USER_AGENT"], $bMatches)) {

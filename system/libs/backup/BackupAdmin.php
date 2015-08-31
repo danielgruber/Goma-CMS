@@ -130,9 +130,10 @@ class BackupAdmin extends TableView
     /**
      * upload a backup
      *
-     *@name upload
-     *@access public
-    */
+     * @name upload
+     * @access public
+     * @return mixed|string
+     */
     public function upload() {
 
         $form = new Form($this, "Backup_Upload", array(

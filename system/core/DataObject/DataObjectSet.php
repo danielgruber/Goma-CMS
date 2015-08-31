@@ -739,8 +739,9 @@ class DataObjectSet extends DataSet {
 	/**
 	 * search
 	 *
-	 *@name search
-	 *@access public
+	 * @name search
+	 * @access public
+	 * @return $this
 	 */
 	public function search($search) {
 		if(isset($search)) {

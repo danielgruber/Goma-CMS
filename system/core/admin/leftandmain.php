@@ -187,10 +187,13 @@ class LeftAndMain extends AdminItem {
 			$bubbles
 		));
 	}
-	
+
 	/**
 	 * generates the context-menu.
-	*/
+	 *
+	 * @param DataObject $child
+	 * @return array
+	 */
 	public function generateContextMenu($child) {
 		$data = array();
 		if($child->treeclass) {
@@ -213,13 +216,14 @@ class LeftAndMain extends AdminItem {
 		
 		return $data;
 	}
-	
+
 	/**
 	 * creates the Tree
 	 *
-	 *@name createTree
-	 *@access public
-	*/
+	 * @param string $search
+	 * @param bool $marked
+	 * @return String
+	 */
 	public function createTree($search = "", $marked = null) {
 		$tree_class = $this->tree_class;
 		if($tree_class == "") {
@@ -257,6 +261,7 @@ class LeftAndMain extends AdminItem {
 		
 		// generate tree
 		$tree = call_user_func_array(array($tree_class, "build_tree"), array(0, $options));
+		/** @var TreeRenderer $treeRenderer */
 		$treeRenderer = new self::$render_class($tree, null, null, $this->originalNamespace, $this);
 		$treeRenderer->setLinkCallback(array($this, "generateTreeLink"));
 		$treeRenderer->setActionCallback(array($this, "generateContextMenu"));

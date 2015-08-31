@@ -103,7 +103,7 @@ class HasManyGetter extends Extension {
         } else {
             $filter[$info->getSecond() . "id"] = $this->getOwner()->id;
         }
-        $set = new HasMany_DataObjectSet($info->getFirst());
+        $set = new HasMany_DataObjectSet($info->getFirst(), $filter);
         $set->setRelationENV($name, $info->getSecond() . "id");
 
         return $set;

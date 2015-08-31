@@ -63,7 +63,7 @@ class TableView extends AdminItem
         $fields = array();
         $search = false;
 
-        if (isset($_POST) && isset($_POST["delete_many"])) {
+        if (isset($this->request->post_params["delete_many"])) {
             $this->deleteMany();
         }
 
@@ -151,8 +151,8 @@ class TableView extends AdminItem
      */
     public function deleteMany()
     {
-        if (Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname) == $_POST["deletekey"]) {
-            $data = $_POST["data"];
+        if (Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname) == $this->request->post_params["deletekey"]) {
+            $data = $this->request->post_params["data"];
             unset($data["all"]);
             foreach ($data as $key => $value) {
                 if ($record = DataObject::get_one($this->model(), array("id" => $key)))

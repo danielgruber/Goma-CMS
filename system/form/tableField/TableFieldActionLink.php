@@ -126,7 +126,8 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 				return;
 			}
 		}
-		
+
+		// required for parsing variables
 		$data = $record;
 		
 		// format innerhtml
@@ -150,10 +151,13 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		
 		
 		$data = new ViewAccessableData();
-		$data->destination = $destination;
-		$data->inner = $value;
-		$data->title = $title;
-		$data->classes = implode(" " , (array) $this->classes);
+		/** @var string $destination */
+		$data->setField("destination", $destination);
+		/** @var string $inner */
+		$data->setField("inner", $inner);
+		/** @var $title $title */
+		$data->setField("title", $title);
+		$data->setField("classes", implode(" " , (array) $this->classes));
 		
 		return $data->renderWith("form/tableField/actionLink.html");
 	}
