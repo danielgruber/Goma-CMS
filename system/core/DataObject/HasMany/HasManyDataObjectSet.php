@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.2
+ * @version     1.2.1
  */
 class HasMany_DataObjectSet extends DataObjectSet {
 
@@ -62,11 +62,12 @@ class HasMany_DataObjectSet extends DataObjectSet {
     /**
      * generates a form
      *
-     *@name form
-     *@access public
-     *@param string - name
-     *@param bool - edit-form
-     *@param bool - disabled
+     * @name form
+     * @access public
+     * @param string $name
+     * @param bool $edit if edit form
+     * @param bool $disabled
+     * @return Form
      */
     public function generateForm($name = null, $edit = false, $disabled = false) {
 
@@ -89,7 +90,8 @@ class HasMany_DataObjectSet extends DataObjectSet {
     /**
      * sets the has-one-relation when adding to has-many-set
      *
-     *@name push
+     * @name push
+     * @return bool
      */
     public function push(DataObject $record, $write = false) {
         if($this->classname == "hasmany_dataobjectset") {
@@ -104,6 +106,11 @@ class HasMany_DataObjectSet extends DataObjectSet {
         if($write) {
             $record->writeToDB(false, true);
         }
+
+        if(isset($this->filter["id"]) && $record->id != 0) {
+            array_push($this->filter["id"], $record->id);
+        }
+
         return $return;
     }
 
@@ -118,6 +125,12 @@ class HasMany_DataObjectSet extends DataObjectSet {
     public function removeRecord($record, $write = false) {
         /** @var DataObject $record */
         $record = parent::removeRecord($record);
+
+        if(isset($this->filter["id"]) && $record->id != 0) {
+            $key = array_search($record->id, $this->filter["id"]);
+            unset($this->filter["id"][$key]);
+        }
+
         if($write) {
             $record[$this->field] = 0;
             $record->writeToDB(false, true);

@@ -8,7 +8,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version    1.0.1
+ * @version    1.0.2
  */
 class HasManyGetter extends Extension {
 
@@ -61,32 +61,50 @@ class HasManyGetter extends Extension {
         }
 
         /** @var HasMany_DataObjectSet $hasManyObject */
-        if($hasManyObject = $owner->fieldGet($name)) {
-            if(!$filter && !$sort && !$limit) {
-                return $hasManyObject;
+        $hasManyObject = $owner->fieldGet($name);
+        if(!$hasManyObject || !is_a($hasManyObject, "DataObjectSet")) {
+            $hasManyObject = $this->getNewHasManyObject($has_many, $name);
+            $owner->setField($name, $hasManyObject);
+
+            if ($owner->queryVersion == DataObject::VERSION_STATE) {
+                $hasManyObject->setVersion(DataObject::VERSION_STATE);
             }
-
-            $objectToFilter = clone $hasManyObject;
-            $objectToFilter->filter($filter);
-            $objectToFilter->sort($sort);
-            $objectToFilter->limit($limit);
-
-            return $objectToFilter;
-        }
-
-        $info = $this->findInverse($has_many[$name]);
-
-        $filter[$info->getSecond() . "id"] = $this->getOwner()->id;
-        $set = new HasMany_DataObjectSet($info->getFirst(), $filter, $sort, $limit);
-        $set->setRelationENV($name, $info->getSecond() . "id");
-
-        if ($owner->queryVersion == DataObject::VERSION_STATE) {
-            $set->setVersion(DataObject::VERSION_STATE);
         }
 
         if(!$filter && !$sort && !$limit) {
-            $owner->setField($name, $set);
+            return $hasManyObject;
         }
+
+        $objectToFilter = clone $hasManyObject;
+        $objectToFilter->addFilter($filter);
+        $objectToFilter->sort($sort);
+        $objectToFilter->limit($limit);
+
+        return $objectToFilter;
+    }
+
+    /**
+     * generates new has-many-object.
+     *
+     * @param array $has_many
+     * @param string $name
+     * @return HasMany_DataObjectSet
+     */
+    protected function getNewHasManyObject($has_many, $name) {
+        /** @var DataObject $owner */
+        $owner = $this->getOwner();
+
+        $info = $this->findInverse($has_many[$name]);
+
+        $filter = array();
+        $ids = $owner->fieldGet($name . "ids");
+        if($ids && is_array($ids)) {
+            $filter["id"] = $ids;
+        } else {
+            $filter[$info->getSecond() . "id"] = $this->getOwner()->id;
+        }
+        $set = new HasMany_DataObjectSet($info->getFirst());
+        $set->setRelationENV($name, $info->getSecond() . "id");
 
         return $set;
     }

@@ -23,38 +23,41 @@ class HasManyWriter extends Extension {
         $data = $owner->getData();
 
         // has-many
-        if ($has_many = $owner->getModel()->hasMany()) {
-            foreach ($has_many as $name => $class) {
-                if (isset($data[$name]) && is_object($data[$name]) && is_a($data[$name], "HasMany_DataObjectSet")) {
-                    /** @var HasMany_DataObjectSet $hasManyObject */
-                    $hasManyObject = $data[$name];
+        /** @var HasManyGetter $hasManyExtension */
+        if($hasManyExtension = $owner->getModel()->getInstance(HasManyGetter::ID)) {
+            if ($has_many = $hasManyExtension->hasMany()) {
+                foreach ($has_many as $name => $class) {
+                    if (isset($data[$name]) && is_object($data[$name]) && is_a($data[$name], "HasMany_DataObjectSet")) {
+                        /** @var HasMany_DataObjectSet $hasManyObject */
+                        $hasManyObject = $data[$name];
 
-                    $key = $this->searchForBelongingHasOneRelationship($name, $class);
-
-                    $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
-                    $hasManyObject->writeToDB(false, true, $owner->getWriteType());
-                } else {
-                    if (isset($data[$name]) && !isset($data[$name . "ids"])) {
-                        $data[$name . "ids"] = $data[$name];
-                    }
-
-                    if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
-                        // find field
                         $key = $this->searchForBelongingHasOneRelationship($name, $class);
 
-                        foreach ($data[$name . "ids"] as $id) {
-                            /** @var DataObject $belongingObject */
-                            $belongingObject = DataObject::get_one($class, array("id" => $id));
-                            $belongingObject[$key . "id"] = $owner->getModel()->id;
+                        $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
+                        $hasManyObject->writeToDB(false, true, $owner->getWriteType());
+                    } else {
+                        if (isset($data[$name]) && !isset($data[$name . "ids"])) {
+                            $data[$name . "ids"] = $data[$name];
+                        }
 
-                            $writer = $owner->getRepository()->buildWriter(
-                                $belongingObject,
-                                -1,
-                                $owner->getSilent(),
-                                $owner->getUpdateCreated(),
-                                $owner->getWriteType(),
-                                $owner->getDatabaseWriter());
-                            $writer->write();
+                        if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
+                            // find field
+                            $key = $this->searchForBelongingHasOneRelationship($name, $class);
+
+                            foreach ($data[$name . "ids"] as $id) {
+                                /** @var DataObject $belongingObject */
+                                $belongingObject = DataObject::get_one($class, array("id" => $id));
+                                $belongingObject[$key . "id"] = $owner->getModel()->id;
+
+                                $writer = $owner->getRepository()->buildWriter(
+                                    $belongingObject,
+                                    -1,
+                                    $owner->getSilent(),
+                                    $owner->getUpdateCreated(),
+                                    $owner->getWriteType(),
+                                    $owner->getDatabaseWriter());
+                                $writer->write();
+                            }
                         }
                     }
                 }
