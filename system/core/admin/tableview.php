@@ -84,22 +84,26 @@ class TableView extends AdminItem
         foreach ($this->fields as $name => $title) {
             $arr = array("name" => $name, "title" => parse_lang($title), "sortable" => false);
 
-            if (isset($this->fields[$name]) && isset(ClassInfo::$database[$this->modelInst()->table_name][$name])) {
+            $table_name = ClassInfo::$class_info[$this->modelInst()->dataClass]["table"];
+            if (isset($this->fields[$name]) && isset(ClassInfo::$database[$table_name][$name])) {
                 $search = true;
                 $arr["sortable"] = true;
                 $arr["searchable"] = true;
-                if (isset($_GET["order"]) && $_GET["order"] == $name && isset($_GET["ordertype"]) && $_GET["ordertype"] == "desc") {
+                if (isset($this->request->get_params["order"]) && $this->request->get_params["order"] == $name &&
+                    isset($this->request->get_params["ordertype"]) && $this->request->get_params["ordertype"] == "desc") {
                     $this->ModelInst()->sort($name, "desc");
                     $arr["order"] = true;
                     $arr["orderdesc"] = true;
-                } else if (isset($_GET["order"]) && $_GET["order"] == $name) {
+                } else if (isset($this->request->get_params["order"]) && $this->request->get_params["order"] == $name) {
                     $this->ModelInst()->sort($name, "asc");
                     $arr["order"] = true;
                 }
 
-                if (isset($_POST["search_" . $name]) && $_POST["search_" . $name] != "" && !isset($_POST["search_" . $name . "_cancel"])) {
-                    $this->modelInst()->addFilter(array($name => array("LIKE", "%" . $_POST["search_" . $name] . "%")));
-                    $arr["searchval"] = $_POST["search_" . $name];
+                if (isset($this->request->post_params["search_" . $name]) &&
+                    $this->request->post_params["search_" . $name] != "" &&
+                    !isset($this->request->post_params["search_" . $name . "_cancel"])) {
+                    $this->modelInst()->addFilter(array($name => array("LIKE", "%" . $this->request->post_params["search_" . $name] . "%")));
+                    $arr["searchval"] = $this->request->post_params["search_" . $name];
                 }
             }
 
@@ -111,8 +115,7 @@ class TableView extends AdminItem
 
         Core::globalSession()->set(self::DELETE_SESSION_KEY . "." . $this->classname, randomString(10));
 
-        return $this->modelInst()->customise(
-            array(
+        $data = $this->modelInst()->customise(
                 array_merge(
                     array(
                         "search" => $search,
@@ -125,7 +128,9 @@ class TableView extends AdminItem
                     ),
                     $this->tplVars
                 )
-            ))->renderWith($this->template);
+            );
+
+        return $data->renderWith($this->template);
     }
 
     /**

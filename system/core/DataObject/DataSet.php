@@ -918,8 +918,8 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      * @access public
      * @return $this
      */
-    public function customise($loop = array(), $loop1 = array()) {
-        $response = parent::customise($loop, $loop1);
+    public function customise($loop = array()) {
+        $response = parent::customise($loop);
         // we always want to apply the customised data of the first state to each record
         $this->protected_customised = $this->customised;
         return $response;
