@@ -85,7 +85,7 @@ class HasManyWriter extends Extension {
         }
 
         if ($key === false) {
-            throw new LogicException("Could not find relation for " . $relationShipName . "ids.");
+            throw new LogicException("Could not find inverse-relation for " . $relationShipName . " on class $hasManyTarget.");
         }
 
         return $key;
