@@ -718,8 +718,6 @@ div.adminPanel table, div.adminPanel td {
 }
 
 .button {
-
-	
 	background: transparent;
 	
 	padding: 0.5em 1em;
@@ -745,6 +743,9 @@ div.adminPanel table, div.adminPanel td {
 
 	-webkit-appearance: none;
 }
+.button.button-clear {
+  border: 0;
+}
 .button:hover {
 	background: @color-action;
 	color: #fff !important;
@@ -768,19 +769,26 @@ div.adminPanel table, div.adminPanel td {
 .button.red:hover {
 	background: @system-red !important;
 	color: #fff !important;
+  &.button-clear {
+	color: darken(@system-red, 10%) !important;
+  }
 }
 
 .button.yellow {
 	border-color: @system-yellow;
-	color: @system-yellow !important;
+	color: darken(@system-yellow, 10%) !important;
 }
 
 .button.yellow:hover {
 	background: @system-yellow !important;
 	color: #fff !important;
+
+  &.button-clear {
+	color: darken(@system-yellow, 20%) !important;
+  }
 }
 
-.button.green {
+.button-clear.green {
 	border-color: @system-green;
 	color: @system-green !important;
 	font-weight: bold;
@@ -788,6 +796,15 @@ div.adminPanel table, div.adminPanel td {
 .button.green:hover {
 	background: @system-green !important;
 	color: #fff !important;
+
+  &.button-clear {
+	color: darken(@system-green, 10%) !important;
+  }
+}
+
+.button.button-clear:hover {
+  background: transparent !important;
+  border: 0 !important;
 }
 
 .button.disabled, .button[disabled] {

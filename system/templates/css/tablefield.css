@@ -293,26 +293,6 @@
 	font-style: italic;
 	text-align: center;
 }
-.tablefield-table .tablefield-editbutton, .tablefield-table .tablefield-deletebutton {
-	display: inline-block;
-
-	input {
-		border: 0;
-		background: url(../../../images/icons/fatcow16/edit.png) no-repeat;
-		filter: none;
-		-ms-filter: none;
-		color: transparent !important;
-		font-size: 0;
-		width: 16px;
-		height: 16px;
-		padding: 0;
-		margin: 0;
-	}
-}
-
-.tablefield-table .tablefield-deletebutton input {
-	background-image: url(../../../images/icons/fatcow16/delete.png);
-}
 
 .tablefield_pagination th {
 	padding: 0.75em;
@@ -395,14 +375,6 @@ only screen and (     -o-min-device-pixel-ratio: 2/1) {
  	
  	.tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
 		background-image: url(images/delete@2x.png);
-		background-size: 16px 16px;
-	}
-	.tablefield-table .tablefield-editbutton input {
-		background-image: url(../../../images/icons/fatcow16/edit@2x.png);
-		background-size: 16px 16px;
-	}
-	.tablefield-table .tablefield-deletebutton input {
-		background-image: url(../../../images/icons/fatcow16/delete@2x.png);
 		background-size: 16px 16px;
 	}
 }

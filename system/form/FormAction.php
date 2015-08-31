@@ -1,153 +1,166 @@
-<?php
+<?php defined('IN_GOMA') OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 24.12.2012
-  * $Version 2.1.2
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Basic FormAction class which represents a basic "button".
+ *
+ * @package     Goma\Form
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1.1
+ */
 class FormAction extends FormField implements FormActionHandler
 {
-		/**
-		 * the submission-method on the controller for this form-action
-		 *
-		 *@name submit
-		 *@access protected
-		*/
-		protected $submit;
-		
-		/**
-		 * defines that these fields doesn't have a value
-		 *
-		 *@name hasNoValue
-		*/
-		public $hasNoValue = true;
-		
-		/**
-		 *@name __construct
-		 *@access public
-	  	 *@param string - name
-		 *@param string - title
-		 *@param string - optional submission
-		 *@param object - form
-		*/
-		public function __construct($name, $value, $submit = null, $classes = null, &$form = null)
-		{
-				parent::__construct($name, $value);
-				if($submit === null)
-						$submit = "@default";
-				
-				$this->submit = $submit;
-				if($form != null)
-				{
-						$this->parent = $form;
-						$this->setForm($form);
-				}
-				
-				if(isset($classes))
-					if(is_array($classes))
-						foreach($classes as $class)
-							$this->addClass($class);
-					else
-						$this->addClass($class);
-		}
-		
-		/**
-		 * generates the node
-		 *
-		 *@name createNode
-		 *@access public
-		*/
-		public function createNode()
-		{
-				$node = parent::createNode();
-				$node->type = "submit";
-				$node->addClass("button");
-				$node->addClass("formaction");
-				$node->removeClass("input");
-				return $node;
-		}
-		
-		/**
-		 * renders the field
-		 *@name field
-		 *@access public
-		*/
-		public function field()
-		{
-				if(PROFILE) Profiler::mark("FormAction::field");
-				
-				$this->callExtending("beforeField");
-				$this->input->val($this->title);
-				
-				$this->container->append($this->input);
-				
-				$this->container->setTag("span");
-				$this->container->addClass("formaction");
-				
-				$this->callExtending("afterField");
-				
-				if(PROFILE) Profiler::unmark("FormAction::field");
-				
-				return $this->container;
-		}
-		
-		/**
-		 * returns if submit or not
-		 *
-		 *@name canSubmit
-		 *@access public
-		 *@param submission
-		*/
-		public function canSubmit($data) {
-			return true;
-		}
-		
-		/**
-		 * sets the submit-method
-		 *
-		 *@name setSubmit
-		 *@access public
-		*/
-		public function setSubmit($submit) {
-			$this->submit = $submit;
-		}
-		
-		/**
-		 * returns the submit-method
-		 *
-		 *@name getSubmit
-		 *@access public
-		*/
-		public function getSubmit() {
-			return $this->submit;
-		}
-		
-		/**
-		 * here you can add classes or remove some
-		*/
-		
-		/**
-		 * adds a class to the input
-		 *
-		 *@name addClass
-		 *@access public
-		*/
-		public function addClass($class) {
-			$this->input->addClass($class);
-		}
-		
-		/**
-		 * removes a class from the input
-		 *
-		 *@name removeClass
-		 *@access public
-		*/
-		public function removeClass($class) {
-			$this->input->removeClass($class);
-		}
+    /**
+     * the submission-method on the controller for this form-action
+     *
+     * @name submit
+     * @access protected
+     */
+    protected $submit;
+
+    /**
+     * defines that these fields doesn't have a value
+     *
+     * @name hasNoValue
+     */
+    public $hasNoValue = true;
+
+    /**
+     * @name __construct
+     * @access public
+     * @param string - name
+     * @param string - title
+     * @param string - optional submission
+     * @param object - form
+     */
+    public function __construct($name, $value, $submit = null, $classes = null, &$form = null)
+    {
+        parent::__construct($name, $value);
+        if ($submit === null)
+            $submit = "@default";
+
+        $this->submit = $submit;
+        if ($form != null) {
+            $this->parent = $form;
+            $this->setForm($form);
+        }
+
+        if (isset($classes))
+            if (is_array($classes))
+                foreach ($classes as $class)
+                    $this->addClass($class);
+            else
+                $this->addClass($class);
+    }
+
+    /**
+     * generates the node
+     *
+     * @name createNode
+     * @access public
+     * @return HTMLNode
+     */
+    public function createNode()
+    {
+        $node = new HTMLNode("button", array(
+            "class" => "input",
+            "name"  => $this->PostName(),
+            "type"  => "submit"
+        ), $this->title);
+        $node->addClass("button");
+        $node->addClass("formaction");
+        $node->removeClass("input");
+
+        return $node;
+    }
+
+    /**
+     * renders the field
+     *
+     * @name field
+     * @access public
+     * @return HTMLNode
+     */
+    public function field()
+    {
+        if (PROFILE) Profiler::mark("FormAction::field");
+
+        $this->callExtending("beforeField");
+        $this->input->html($this->title);
+
+        $this->container->append($this->input);
+
+        $this->container->setTag("span");
+        $this->container->addClass("formaction");
+
+        $this->callExtending("afterField");
+
+        if (PROFILE) Profiler::unmark("FormAction::field");
+
+        return $this->container;
+    }
+
+    /**
+     * returns if submit or not
+     *
+     * @name canSubmit
+     * @access public
+     * @param submission
+     * @return bool
+     */
+    public function canSubmit($data)
+    {
+        return true;
+    }
+
+    /**
+     * sets the submit-method
+     *
+     * @name setSubmit
+     * @access public
+     */
+    public function setSubmit($submit)
+    {
+        $this->submit = $submit;
+    }
+
+    /**
+     * returns the submit-method
+     *
+     * @name getSubmit
+     * @access public
+     * @return null|string
+     */
+    public function getSubmit()
+    {
+        return $this->submit;
+    }
+
+    /**
+     * here you can add classes or remove some
+     */
+
+    /**
+     * adds a class to the input
+     *
+     * @name addClass
+     * @access public
+     */
+    public function addClass($class)
+    {
+        $this->input->addClass($class);
+    }
+
+    /**
+     * removes a class from the input
+     *
+     * @name removeClass
+     * @access public
+     */
+    public function removeClass($class)
+    {
+        $this->input->removeClass($class);
+    }
 }

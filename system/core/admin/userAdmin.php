@@ -72,13 +72,15 @@ class userAdmin extends adminItem {
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
 		$config->addComponent(new TableFieldActionLink(	$this->namespace . '/toggleLock/$id' . URLEND . '?redirect=' . urlencode(getredirect()), 
-														'<img src="images/icons/fatcow16/lock.png" data-retina="images/icons/fatcow16/lock@2x.png" alt="'.lang("lock").'" />', 
+														'<i class="fa fa-lock"></i>',
 														lang("lock"), 
-														array($this, "checkForUnlock")));
+														array($this, "checkForUnlock"),
+			array("button button-clear yellow")));
 		$config->addComponent(new TableFieldActionLink(	$this->namespace . '/toggleLock/$id' . URLEND . '?redirect=' . urlencode(getredirect()), 
-														'<img src="images/icons/fatcow16/lock_break.png" data-retina="images/icons/fatcow16/lock_break@2x.png" alt="'.lang("unlock").'" />', 
+														'<i class="fa fa-unlock"></i>',
 														lang("unlock"), 
-														array($this, "checkForLock")));
+														array($this, "checkForLock"),
+														array("button button-clear yellow")));
 
 		$form = new Form($this, "form", array(
 			new TableField("userTable", lang("users"), $this->modelInst(), $config)
@@ -106,7 +108,8 @@ class userAdmin extends adminItem {
 	 * switches the lock-state of an user.
 	 *
 	 * @name toggleLock
-	*/
+	 * @return bool|string
+	 */
 	public function toggleLock() {
 		if($this->getParam("id") && Permission::check("USERS_MANAGE") && $this->getParam("id") != member::$id) {
 			if($data = DataObject::get_by_id("user", $this->getParam("id"))) {
@@ -130,16 +133,19 @@ class userAdmin extends adminItem {
 
 		$this->redirectBack();
 	}
-	
+
 	/**
 	 * this is the method, which is called when a action was completed successfully or not.
 	 *
-	 * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
+	 * it is called when actions of this controller are completed and the user should be notified. For example if the
+	 * user saves data and it was successfully saved, this method is called with the param save_success. It is also
+	 * called if an error occurs.
 	 *
-	 * @param 	string $action the action called
-	 * @param	object $record optional: record if available
-	 * @access 	public
-	*/
+	 * @param    string $action the action called
+	 * @param    object $record optional: record if available
+	 * @access    public
+	 * @return bool|string
+	 */
 	public function actionComplete($action, $record = null) {
 		if($action == "publish_success") {
 			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));

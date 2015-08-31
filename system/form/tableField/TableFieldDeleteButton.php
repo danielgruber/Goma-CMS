@@ -90,21 +90,23 @@ class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_Ac
 			}
 		}
 		
-		$action = new TableField_FormAction($tableField, "deletebtn_" . $record->ID, $this->title, "deletebtn_redirect", array("id" => $record->ID));
+		$action = new TableField_FormAction($tableField, "deletebtn_" . $record->ID, '<i class="fa fa-minus-circle"></i>', "deletebtn_redirect", array("id" => $record->ID));
 		$action->addExtraClass("tablefield-deletebutton");
+		$action->addClass("red button-clear");
 		
 		$data = new ViewAccessableData();
 		return $data->customise(array("field" => $action->field()))->renderWith("form/tableField/deleteButton.html");
 	}
-	
+
 	/**
 	 * provides url-handlers as in controller, but without any permissions-functionallity
 	 *
 	 * this is NOT namespaced, so please be unique
 	 *
-	 *@name getURLHandlers
-	 *@access public
-	*/
+	 * @name getURLHandlers
+	 * @access public
+	 * @return array
+	 */
 	public function getURLHandlers($tableField) {
 		return array(
 			'deletebtn/$id' => "delete"

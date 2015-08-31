@@ -1291,63 +1291,46 @@ class tplCaller extends Object implements ArrayAccess
 	/**
 	 * includes CSS
 	 *
-	 * @name INCLUDE_CSS
-	 * @access public
-	 * @return string
+	 * @param string $name
 	 */
 	public function include_css($name)
 	{
-		if (preg_match("/\.(css|scss|sass|less)$/i", $name)) {
-			if (isset($this->subPath)) {
-				if (self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
-					$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
-					Resources::add($name, "css");
-
-					return "";
-				} else if (self::file_exists(APPLICATION_TPL_PATH . $this->subPath . "/" . $name)) {
-					$name = APPLICATION_TPL_PATH . $this->subPath . "/" . $name;
-					Resources::add($name, "css");
-
-					return "";
-				} else if (self::file_exists(SYSTEM_TPL_PATH . $this->subPath . "/" . $name)) {
-					$name = SYSTEM_TPL_PATH . $this->subPath . "/" . $name;
-					Resources::add($name, "css");
-
-					return "";
-				}
-			}
-			if (self::file_exists($this->tplBase . "/" . $name)) {
-				$name = $this->tplBase . "/" . $name;
-			}
-		}
-		Resources::add($name, "css");
-
-		return "";
+		$this->includeCssByType($name);
 	}
 
 	/**
 	 * includes CSS in main-class
 	 *
-	 * @name INCLUDE_CSS_MAIN
-	 * @access public
+	 * @param string $name
 	 */
 	public function include_css_main($name)
 	{
-		if (preg_match("/\.css$/i", $name)) {
+		$this->includeCssByType($name, "main");
+	}
+
+	/**
+	 * includes css.
+	 *
+	 * @param string $name
+	 * @param string $type
+	 * @return string
+	 */
+	protected function includeCssByType($name, $type = "") {
+		if (preg_match("/\.(css|scss|sass|less)$/i", $name)) {
 			if (isset($this->subPath)) {
 				if (self::file_exists("tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name)) {
 					$name = "tpl/" . Core::getTheme() . "/" . $this->subPath . "/" . $name;
-					Resources::add($name, "css", "main");
+					Resources::add($name, "css", $type);
 
 					return "";
 				} else if (self::file_exists(APPLICATION_TPL_PATH . $this->subPath . "/" . $name)) {
 					$name = APPLICATION_TPL_PATH . $this->subPath . "/" . $name;
-					Resources::add($name, "css", "main");
+					Resources::add($name, "css", $type);
 
 					return "";
 				} else if (self::file_exists(SYSTEM_TPL_PATH . $this->subPath . "/" . $name)) {
 					$name = SYSTEM_TPL_PATH . $this->subPath . "/" . $name;
-					Resources::add($name, "css", "main");
+					Resources::add($name, "css", $type);
 
 					return "";
 				}
@@ -1356,9 +1339,7 @@ class tplCaller extends Object implements ArrayAccess
 				$name = $this->tplBase . "/" . $name;
 			}
 		}
-		Resources::add($name, "css", "main");
-
-		return "";
+		Resources::add($name, "css", $type);
 	}
 
 	/**

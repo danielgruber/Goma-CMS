@@ -13,18 +13,49 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldActionLink implements TableField_ColumnProvider {
+
+	/**
+	 * description.
+	 *
+	 * @var string
+	 */
+	protected $description;
+
+	/**
+	 * @var string
+	 */
+	protected $inner;
+
+	/**
+	 * @var bool|mixed
+	 */
+	protected $requirePerm;
+
+	/**
+	 * @var null|string
+	 */
+	protected $title;
+
+	/**
+	 * @var array
+	 */
+	protected $classes;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param   string $destination link-URL with params replaced by data of record
 	 * @param   string $inner HTML between a-tags
-	 * @param	mixed $requirePerm how to check if permissions is required (callback, string, boolean)
+	 * @param    string $title
+	 * @param   mixed $requirePerm how to check if permissions is required (callback, string, boolean)
+	 * @param array $classes
 	 */
-	public function __construct($destination, $inner, $title = null, $requirePerm = false) {
+	public function __construct($destination, $inner, $title = null, $requirePerm = false, $classes = array()) {
 		$this->destination = $destination;
 		$this->inner = $inner;
 		$this->requirePerm = $requirePerm;
 		$this->title = $title;
+		$this->classes = $classes;
 	}
 	
 	
@@ -42,7 +73,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	/**
 	 * Return any special attributes that will be used for the column.
 	 *
-	 * @param GridField $tableField
+	 * @param TableField $tableField
 	 * @param DataObject $record
 	 * @param string $columnName
 	 *
@@ -69,9 +100,9 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 	/**
 	 * Which columns are handled by this component.
 	 * 
-	 * @param type $tableField
+	 * @param TableField $tableField
 	 *
-	 * @return type 
+	 * @return array
 	 */
 	public function getColumnsHandled($tableField) {
 		return array('Actions');
@@ -122,6 +153,7 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		$data->destination = $destination;
 		$data->inner = $value;
 		$data->title = $title;
+		$data->classes = implode(" " , (array) $this->classes);
 		
 		return $data->renderWith("form/tableField/actionLink.html");
 	}

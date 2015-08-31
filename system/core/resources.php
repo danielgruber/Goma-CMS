@@ -904,7 +904,7 @@ class Resources extends Object {
 				if (is_dir($dir . "/" . $file) && $file != "." && $file != "..") {
 					$this->scanToClassInfo($dir . "/" . $file);
 				} else {
-					if (preg_match('/\.(js|css|html|less)$/i', $file)) {
+					if (preg_match('/\.(js|css|html|less|scss|sass)$/i', $file)) {
 						ClassInfo::$class_info[$this->classname]["files"][$dir . "/" . $file] = true;
 					}
 				}
