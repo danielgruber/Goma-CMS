@@ -148,6 +148,12 @@ class TableFieldActionLink implements TableField_ColumnProvider {
 		$formatTitle = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $formatTitle);
 		$formatTitle = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $formatTitle);
 		eval('$title = "' . $formatTitle . '";');
+
+		// format title
+		$formatInner = str_replace('"', '\\"', $this->inner);
+		$formatInner = preg_replace_callback('/\{?\$([a-zA-Z0-9_][a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9_]+)\((.*?)\)}?/si', array("TableFieldDataColumns", "convert_vars"), $formatInner);
+		$formatInner = preg_replace_callback('/\$([a-zA-Z0-9_][a-zA-Z0-9_\.]+)/si', array("TableFieldDataColumns", "vars"), $formatInner);
+		eval('$inner = "' . $formatInner . '";');
 		
 		
 		$data = new ViewAccessableData();

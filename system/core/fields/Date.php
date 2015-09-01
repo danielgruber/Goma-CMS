@@ -56,6 +56,9 @@ class DateSQLField extends DateTimeSQLField {
 
     /**
      * default convert
+     *
+     * @param string $format
+     * @return bool|mixed|null|string
      */
     public function date($format = DATE_FORMAT_DATE) {
         return goma_date($format, $this->value);
