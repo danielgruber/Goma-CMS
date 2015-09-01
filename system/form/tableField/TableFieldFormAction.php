@@ -24,10 +24,14 @@ class TableField_FormAction extends FormAction {
      */
     public function __construct($tableField = null, $name = null, $title = null, $actionName = null, $args = null) {
         if(!is_object($tableField))
-            return ;
+            return;
+
         $this->tableField = $tableField;
         $this->actionName = $actionName;
         $this->args = $args;
+
+        $this->useHtml = true;
+
         parent::__construct($this->tableField->name . "_" . $name, $title);
 
         $this->setForm($tableField->Form());

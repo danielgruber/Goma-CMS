@@ -28,6 +28,11 @@ class FormAction extends FormField implements FormActionHandler
     public $hasNoValue = true;
 
     /**
+     * use html.
+     */
+    public $useHtml = false;
+
+    /**
      * @name __construct
      * @access public
      * @param string - name
@@ -88,7 +93,11 @@ class FormAction extends FormField implements FormActionHandler
         if (PROFILE) Profiler::mark("FormAction::field");
 
         $this->callExtending("beforeField");
-        $this->input->html($this->title);
+        if($this->useHtml) {
+            $this->input->html($this->title);
+        } else {
+            $this->input->val($this->title);
+        }
 
         $this->container->append($this->input);
 

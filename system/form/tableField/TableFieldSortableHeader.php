@@ -32,23 +32,23 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 
 			// sortable column
 			if($title && $tableField->getData()->canSortBy($columnField)) {
-				$dir = 'asc';
-				if($state->sortColumn == $columnField && $state->sortDirection == 'asc') {
-					$dir = 'desc';
-				}
-				
-				$field = new TableField_FormAction($tableField, "SetOrder" . $columnField, $title, "sort" . $dir, array("SortColumn" => $columnField));
-				
-				$field->addExtraClass("tablefield-sortable");
 
+				$title = convert::raw2text($title);
+				$nextDirection = "desc";
 				if($state->sortColumn == $columnField){
-					$field->addExtraClass('tablefield-sorted');
-
-					if($state->sortDirection == 'asc')
-						$field->addExtraClass('tablefield-sorted-asc');
-					else
-						$field->addExtraClass('tablefield-sorted-desc');
+					if($state->sortDirection == 'asc') {
+						$title .= ' <i class="fa fa-caret-down"></i>';
+					} else {
+						$title .= ' <i class="fa fa-caret-up"></i>';
+						$nextDirection = "asc";
+					}
+				} else {
+					$title .= ' <i class="fa fa-sort"></i>';
 				}
+
+				$field = new TableField_FormAction($tableField, "SetOrder" . $columnField, $title, "sort" . $nextDirection, array("SortColumn" => $columnField));
+				$field->addExtraClass("tablefield-sortable");
+				$field->addClass("button-clear");
 
 				// last column
 			} else if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
