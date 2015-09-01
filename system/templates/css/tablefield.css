@@ -55,28 +55,11 @@
 				
 				fieldset {
 					position: relative;
-					
-					.tablefield-button-filter, .tablefield-button-reset, .tablefield-button-resetFields {
-						input {
-							color: transparent !important;
-							font-size: 0;
-							height: 26px;
-							width: 26px;
-							background:  #eee url(images/loope.png) no-repeat 4px 4px;
-							filter: none;
-							-ms-filter: none;
-							border: 1px solid #c0c0c0;
-						}
-					}
-					
-					.tablefield-button-reset input, .tablefield-button-resetFields input {
-						background-image: url(images/delete.png);
-					}
-					
-					.tablefield-button-resetFields {
-						position: absolute;
-						right: 0.31em;
-						top: 0.18em;
+
+				  	.tablefield-button-resetFields {
+					  position: absolute;
+					  right: -.625em;
+					  top: 0;
 					}
 				}
 				

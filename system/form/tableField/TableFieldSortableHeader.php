@@ -29,6 +29,8 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 			$currentColumn++;
 			$metadata = $tableField->getColumnMetadata($columnField);
 			$title = $metadata['title'];
+
+			// sortable column
 			if($title && $tableField->getData()->canSortBy($columnField)) {
 				$dir = 'asc';
 				if($state->sortColumn == $columnField && $state->sortDirection == 'asc') {
@@ -47,15 +49,19 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 					else
 						$field->addExtraClass('tablefield-sorted-desc');
 				}
+
+				// last column
+			} else if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
+				$field = new TableField_FormAction($tableField, "toggleFilter", '<i title="' . lang("search") . '" class="fa fa-search"></i>', "toggleFilterVisibility", null);
+				$field->addExtraClass("tablefield-button-filter");
+				$field->addExtraClass("trigger");
+				$field->addClass("button-clear");
+
+				// not sortable column
 			} else {
-				if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
-					$field = new TableField_FormAction($tableField, "toggleFilter", "", "toggleFilterVisibility", null);
-					$field->addExtraClass("tablefield-button-filter");
-					$field->addExtraClass("trigger");		
-				} else {
-					$field = new HTMLField($columnField, '<span class="non-sortable">' . $title . '</span>');
-				}
+				$field = new HTMLField($columnField, '<span class="non-sortable">' . $title . '</span>');
 			}
+
 			$fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
 		}
 		
