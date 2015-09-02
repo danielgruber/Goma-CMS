@@ -159,7 +159,7 @@ class Mail
                 $replyTo = self::parseSingleAddress($reply);
                 $mailer->addReplyTo($replyTo[0], $replyTo[1]);
             } else if($reply) {
-                $mailer->addReplyTo($addressInfo[0], $addressInfo[1];
+                $mailer->addReplyTo($addressInfo[0], $addressInfo[1]);
             }
         } else {
             $mailer->setFrom("noreply@" . $_SERVER["SERVER_NAME"], "noreply@" . $_SERVER["SERVER_NAME"]);
