@@ -104,9 +104,11 @@ class lost_passwordExtension extends ControllerExtension
 
     /**
      * saves new password
-     *@name pwdsave
-     *@access public
-    */
+     *
+     * @name pwdsave
+     * @access public
+     * @return string
+     */
     public function pwdsave($data)
     {
         $user = DataObject::get_by_id("User", array("id" => $data["id"]));

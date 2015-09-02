@@ -63,13 +63,12 @@ class Mail
     /**
      * sets $sender, $html, $reply
      *
-     * @name    __construct
-     * @param    string - address of sender
-     * @param    bool - message format
-     * @param    bool - reply
+     * @param null $from
+     * @param bool $html
+     * @param null $reply
+     * @param null $sendername
      * @access    public
-     * @return    bool
-     **/
+     */
     public function __construct($from = null, $html = true, $reply = null, $sendername = null)
     {
         if ($from === null) {
@@ -156,9 +155,11 @@ class Mail
             $addressInfo = self::parseSingleAddress($from);
             $mailer->setFrom($addressInfo[0], $addressInfo[1]);
 
-            if ($reply) {
+            if (is_string($reply)) {
                 $replyTo = self::parseSingleAddress($reply);
                 $mailer->addReplyTo($replyTo[0], $replyTo[1]);
+            } else if($reply) {
+                $mailer->addReplyTo($addressInfo[0], $addressInfo[1];
             }
         } else {
             $mailer->setFrom("noreply@" . $_SERVER["SERVER_NAME"], "noreply@" . $_SERVER["SERVER_NAME"]);

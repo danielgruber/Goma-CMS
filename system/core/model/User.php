@@ -490,6 +490,8 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
         if($write) {
             $this->write(false, true);
         }
+
+		return $this->code;
     }
 	
 	/**
