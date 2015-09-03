@@ -406,6 +406,7 @@ class tpl extends Object
 	 *
 	 * @name compile
 	 * @access public
+	 * @return mixed
 	 */
 	public static function compile($tpl)
 	{
@@ -485,7 +486,7 @@ class tpl extends Object
 		$tpl = preg_replace('/<%\s*(\$)(caller\-\>ENDCached)\((.*)\);?\s*%>/Usi', '<?php \\1\\2(\\3); } ?>', $tpl);
 
 		// parse functions
-		$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php echo \\1\\2(\\3); ?>', $tpl);
+		$tpl = preg_replace('/<%\s*(\$)([a-z0-9_\.\->\(\)\$\-]+)\((.*)\);?\s*%>/Usi', '<?php $currentObjectForPrinting = \\1\\2(\\3); if(!is_object($currentObjectForPrinting) && !is_array($currentObjectForPrinting)) { echo $currentObjectForPrinting; } ?>', $tpl);
 
 		$tpl = preg_replace('/<%\s*echo\s+(.*)\s*%>/Usi', '<?php echo \\1; ?>', $tpl);
 		$tpl = preg_replace('/<%\s*print\s+(.*)\s*%>/Usi', '<?php print \\1; ?>', $tpl);
@@ -606,6 +607,7 @@ $data = array_pop($dataStack);
 	 * this function parses functions in the tpl
 	 *
 	 * @name functions
+	 * @return string
 	 */
 	public static function functions(array $matches)
 	{
@@ -640,6 +642,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name areas
 	 * @access public
+	 * @return string
 	 */
 	public static function areas($matches)
 	{
@@ -653,6 +656,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name areas
 	 * @access public
+	 * @return string
 	 */
 	public static function iareas($matches)
 	{
@@ -667,6 +671,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name PHPRenderIF
 	 * @access public
+	 * @return string
 	 */
 	public static function PHPRenderIF($matches)
 	{
@@ -678,6 +683,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name PHPRenderELSEIF
 	 * @access public
+	 * @return string
 	 */
 	public static function PHPRenderELSEIF($matches)
 	{
@@ -688,6 +694,7 @@ $data = array_pop($dataStack);
 	 * callback for vars in <% %>
 	 *
 	 * @name percent_vars
+	 * @return string
 	 */
 	public static function percent_vars($matches)
 	{
@@ -734,6 +741,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name convert_vars
 	 * @access public
+	 * @return string
 	 */
 	public static function convert_vars($matches)
 	{
@@ -785,6 +793,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name convert_vars_echo
 	 * @access public
+	 * @return string
 	 */
 	public static function convert_vars_echo($matches)
 	{
@@ -795,6 +804,7 @@ $data = array_pop($dataStack);
 	 * callback for vars
 	 *
 	 * @name vars
+	 * @return string
 	 */
 	public static function vars($matches)
 	{
@@ -815,6 +825,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name renderIF
 	 * @access public
+	 * @return string
 	 */
 	public static function renderIF($matches)
 	{
@@ -866,6 +877,7 @@ $data = array_pop($dataStack);
 	 *
 	 * @name renderELSEIF
 	 * @access public
+	 * @return string
 	 */
 	public static function renderELSEIF($matches)
 	{
@@ -875,9 +887,9 @@ $data = array_pop($dataStack);
 	/**
 	 * returns a filename, which you can include
 	 *
-	 * @name getIncludeName
-	 * @access public
-	 * @param string - tplname
+	 * @param string $name
+	 * @param string $class
+	 * @return array
 	 */
 	public static function getIncludeName($name, $class = "")
 	{
@@ -1101,6 +1113,7 @@ class tplCaller extends Object implements ArrayAccess
 	 *
 	 * @name resource_path
 	 * @access public
+	 * @return string
 	 */
 	public function resource_path($exp = null)
 	{

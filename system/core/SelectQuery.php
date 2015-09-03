@@ -9,7 +9,7 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     2.0.8
+ * @version     2.0.9
  */
 
 class SelectQuery extends Object {
@@ -426,7 +426,8 @@ class SelectQuery extends Object {
 	/**
 	 * builds the SQL-Query
 	 *
-	 *@param string - override fields part
+	 * @param string - override fields part
+	 * @return string
 	 */
 	public function build($fields = null) {
 
@@ -435,10 +436,10 @@ class SelectQuery extends Object {
 
 		// first make a index of all fields and check for coliding fields
 		// we cache this part, because we need this just one time foreach from-array
-		$from = md5(var_export($this->from, true) . implode($this->db_fields));
-		if(isset(self::$new_field_cache[$from])) {
-			$colidingFields = self::$new_field_cache[$from]["coliding"];
-			$DBFields = self::$new_field_cache[$from]["dbfields"];
+		$fromHash = md5(var_export($this->from, true) . implode($this->db_fields));
+		if(isset(self::$new_field_cache[$fromHash])) {
+			$colidingFields = self::$new_field_cache[$fromHash]["coliding"];
+			$DBFields = self::$new_field_cache[$fromHash]["dbfields"];
 		} else {
 			$DBFields = $this->db_fields;
 
@@ -476,8 +477,8 @@ class SelectQuery extends Object {
 					}
 				}
 			}
-			self::$new_field_cache[$from]["coliding"] = $colidingFields;
-			self::$new_field_cache[$from]["dbfields"] = $DBFields;
+			self::$new_field_cache[$fromHash]["coliding"] = $colidingFields;
+			self::$new_field_cache[$fromHash]["dbfields"] = $DBFields;
 			unset($alias, $statement, $tablefields, $field);
 		}
 
@@ -497,82 +498,28 @@ class SelectQuery extends Object {
 		}
 
 		if(is_array($fields) && count($fields) > 0) {
-
-			if(in_array("*", $fields)) {
-				$i = 0;
-
-				// join all from-tables
-				foreach($this->from as $alias => $statement) {
-					if(RegexpUtil::isNumber($alias))
-						continue;
-
-					if($i == 0) {
-						$i++;
-					} else {
-						$sql .= ", ";
-					}
-					if(!empty($alias)) {
-						$sql .= " " . $alias . ".*";
-					}
-				}
-			}
-
-			$sql .= $this->generateColidingSQL($from, $colidingFields, $i);
-
-			foreach($fields as $key => $field) {
-				// some basic filter
-				if(is_array($field))
-					continue;
-
-				$field = str_replace("`", "", $field);
-
-				if($field == "*")
-					continue;
-
-				/* --- */
-
-				if(!RegexpUtil::isNumber($key)) {
-					$alias = $key;
-				} else {
-					if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
-						$alias = $field;
-						$field = self::getAlias($DBFields[$field]) . "." . $field;
-					} else if(isset($colidingFields[$field])) {
-						continue;
-					} else {
-						$sql .= " " . $field . "";
-						continue;
-					}
-				}
-
-				if($i == 0)
-					$i++;
-				else
-					$sql .= ", ";
-
-				$sql .= " " . $field . " AS " . $alias . " ";
-			}
-
+			$sql .= $this->generateFieldSQLFromArray($fields, $fromHash, $this->from, $colidingFields);
 		} else if(is_string($fields)) {
 			$sql .= " " . $fields . " ";
-			/*$i = 1;
-			 $sql .= $this->generateColidingSQL($from, $colidingFields, $i);*/
+			if(is_array($this->fields) && $fieldsSQL = $this->generateFieldSQLFromArray($this->fields, $fromHash, array(), array())) {
+				$sql .= "," . $fieldsSQL;
+			}
 		}
 
 		// FROM
 
 		$sql .= " FROM ";
 
-		$from = $this->from;
+		$fromHash = $this->from;
 
 		// validate from
-		foreach($from as $alias => $data) {
+		foreach($fromHash as $alias => $data) {
 			if(RegexpUtil::isNumber($alias)) {
 				if(is_array($data)) {
 					$data = $data["statement"];
-					$from[$alias] = $this->replaceAliasInStatement($data);
+					$fromHash[$alias] = $this->replaceAliasInStatement($data);
 				} else {
-					$from[$alias] = $this->replaceAliasInStatement($from[$alias]);
+					$fromHash[$alias] = $this->replaceAliasInStatement($fromHash[$alias]);
 				}
 				continue;
 			}
@@ -580,7 +527,7 @@ class SelectQuery extends Object {
 			if(is_array($data)) {
 				$table = $data["table"];
 				$data = $data["statement"];
-				$from[$alias] = $data;
+				$fromHash[$alias] = $data;
 			} else {
 				$table = $alias;
 			}
@@ -592,7 +539,7 @@ class SelectQuery extends Object {
 			}
 		}
 
-		$sql .= implode(" ", $from);
+		$sql .= implode(" ", $fromHash);
 
 		// WHERE
 
@@ -740,7 +687,9 @@ class SelectQuery extends Object {
 
 	/**
 	 * sets an limit
-	 *@param array - limitarr
+	 *
+	 * @param array - limitarr
+	 * @return $this
 	 */
 	public function limit($limit) {
 		$this->limit = $limit;
@@ -783,4 +732,62 @@ class SelectQuery extends Object {
 		unset($this->result);
 	}
 
+	/**
+	 * @param array $fields
+	 * @param string $fromHash
+	 * @param array $from
+	 * @param array $colidingFields
+	 * @return string
+	 */
+	protected function generateFieldSQLFromArray($fields, $fromHash, $from, $colidingFields)
+	{
+		$fieldsData = array();
+
+		if(in_array("*", $fields)) {
+			// join all from-tables
+			foreach($from as $alias => $statement) {
+				if(RegexpUtil::isNumber($alias))
+					continue;
+
+				if(!empty($alias)) {
+					$fieldsData[] = $alias . ".*";
+				}
+			}
+		}
+
+		if($colidingSQL = $this->generateColidingSQL($fromHash, $colidingFields, $i = 0)) {
+			$fieldsData[] = $colidingSQL;
+		}
+
+		foreach($fields as $key => $field) {
+			// some basic filter
+			if(is_array($field))
+				continue;
+
+			$field = str_replace("`", "", $field);
+
+			if($field == "*")
+				continue;
+
+			/* --- */
+
+			if(!RegexpUtil::isNumber($key)) {
+				$alias = $key;
+			} else {
+				if(isset($DBFields[$field]) && !isset($colidingFields[$field])) {
+					$alias = $field;
+					$field = self::getAlias($DBFields[$field]) . "." . $field;
+				} else if(isset($colidingFields[$field])) {
+					continue;
+				} else {
+					$fieldsData[] = $field;
+					continue;
+				}
+			}
+
+			$fieldsData[] .= $field . " AS " . $alias;
+		}
+
+		return implode(",", $fieldsData);
+	}
 }

@@ -36,9 +36,9 @@ class DataObjectCompare {
                     !in_array(gettype($newdata[$key]), $comparableTypes) &&
                     !in_array(gettype($val), $comparableTypes)
                 ) {
-                    $changed[] = $key;
+                    $changed[] = strtolower(trim($key));
                 } else if ($newdata[$key] != $val) {
-                    $changed[] = $key;
+                    $changed[] = strtolower(trim($key));
                 }
             }
         }
