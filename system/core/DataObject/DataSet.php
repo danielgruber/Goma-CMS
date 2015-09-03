@@ -505,6 +505,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      * @param int|null $page
      * @param int|null $perPage
      * @access public
+     * @return $this
      */
     public function activatePagination($page = null, $perPage = null) {
         if(isset($perPage) && $perPage > 0)
@@ -526,6 +527,8 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 
         $this->pagination = true;
         $this->reRenderSet();
+
+        return $this;
     }
 
     /**

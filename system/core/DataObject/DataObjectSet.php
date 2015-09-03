@@ -628,11 +628,12 @@ class DataObjectSet extends DataSet {
 	 *
 	 * @param int|null $page
 	 * @param int|null $perPage
+	 * @return $this
 	 */
 	public function activatePagination($page = null, $perPage = null) {
 
 		$this->purgeData();
-		parent::activatePagination($page, $perPage);
+		return parent::activatePagination($page, $perPage);
 	}
 
 	/**
