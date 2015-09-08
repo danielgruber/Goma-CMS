@@ -428,6 +428,7 @@ class SelectQuery extends Object {
 	 *
 	 * @param string - override fields part
 	 * @return string
+	 * @throws SQLException
 	 */
 	public function build($fields = null) {
 
@@ -501,7 +502,7 @@ class SelectQuery extends Object {
 			$sql .= $this->generateFieldSQLFromArray($fields, $fromHash, $this->from, $colidingFields);
 		} else if(is_string($fields)) {
 			$sql .= " " . $fields . " ";
-			if(is_array($this->fields) && $fieldsSQL = $this->generateFieldSQLFromArray($this->fields, $fromHash, array(), array())) {
+			if(is_array($this->fields) && $fieldsSQL = $this->generateFieldSQLFromArray($this->fields, "withoutfrom_" . $fromHash, array(), array())) {
 				$sql .= "," . $fieldsSQL;
 			}
 		}
@@ -612,74 +613,37 @@ class SelectQuery extends Object {
 	 *
 	 * @param string $from
 	 * @param array $colidingFields
-	 * @param int $i to indicate where in query this is called.
 	 * @return string
 	 */
-	protected function generateColidingSQL($from, $colidingFields, &$i) {
+	protected function generateColidingSQL($from, $colidingFields) {
+
 		// some added caches ;)
 		if(isset(self::$new_field_cache[$from]["colidingSQL"])) {
-			$colidingSQL = "";
-			if(strlen(trim(self::$new_field_cache[$from]["colidingSQL"])) > 0) {
-				// comma
-				if(isset($i)) {
-					if($i != 0) {
-						$colidingSQL = ", ";
-					}
-				}
-			}
-
-			// i
-			if(isset($i)) {
-				$i += self::$new_field_cache[$from]["colidingSQLi"];
-			} else {
-				$i = self::$new_field_cache[$from]["colidingSQLi"];
-			}
-
-			return $colidingSQL . self::$new_field_cache[$from]["colidingSQL"];
+			return self::$new_field_cache[$from]["colidingSQL"];
 		} else {
-			$colidingSQL = "";
-			$a = 0;
+			$colidingSQL = array();
 
 			// fix coliding fields
 			foreach($colidingFields as $field => $tables) {
 
-				if($a == 0)
-					$a++;
-				else
-					$colidingSQL .= ", ";
-
 				if(is_string($tables)) {
 					if(strpos($tables, ".")) {
-						$colidingSQL .= $tables;
+						$colidingSQL[] = $tables;
 					} else {
-						$colidingSQL .= self::getAlias($tables) . "." . $field . " AS " . $field . " ";
+						$colidingSQL[] = self::getAlias($tables) . "." . $field . " AS " . $field . " ";
 					}
 					continue;
 				}
 
-				$colidingSQL .= " CASE ";
+				$fieldSQL = " CASE ";
 				foreach($tables as $table) {
-					$colidingSQL .= " WHEN " . self::getAlias($table) . "." . $field . " IS NOT NULL THEN " . self::getAlias($table) . "." . $field . " ";
+					$fieldSQL .= " WHEN " . self::getAlias($table) . "." . $field . " IS NOT NULL THEN " . self::getAlias($table) . "." . $field . " ";
 				}
-				$colidingSQL .= " ELSE NULL END AS " . $field . "";
+				$fieldSQL .= " ELSE NULL END AS " . $field . "";
+				$colidingSQL[] = $fieldSQL;
 			}
 
 			self::$new_field_cache[$from]["colidingSQL"] = $colidingSQL;
-			self::$new_field_cache[$from]["colidingSQLi"] = $a;
-
-			// comma
-			if(isset($i) && $a != 0) {
-				if($i != 0) {
-					$colidingSQL = ", " . $colidingSQL;
-				}
-			}
-
-			// i
-			if(isset($i)) {
-				$i += $a;
-			} else {
-				$i = $a;
-			}
 
 			return $colidingSQL;
 		}
@@ -755,9 +719,7 @@ class SelectQuery extends Object {
 			}
 		}
 
-		if($colidingSQL = $this->generateColidingSQL($fromHash, $colidingFields, $i = 0)) {
-			$fieldsData[] = $colidingSQL;
-		}
+		$fieldsData = array_merge($fieldsData, $this->generateColidingSQL($fromHash, $colidingFields, $i = 0));
 
 		foreach($fields as $key => $field) {
 			// some basic filter

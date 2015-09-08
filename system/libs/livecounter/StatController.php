@@ -33,10 +33,13 @@ class StatController extends Controller {
         "yesterday"		=> "ADMIN"
     );
 
+    /**
+     * @param string|object|array $content
+     */
     public function __output($content) {
         HTTPResponse::setHeader("content-type", "text/x-json");
         HTTPResponse::sendHeader();
-        echo json_encode($data);
+        echo json_encode($content);
         exit;
     }
 

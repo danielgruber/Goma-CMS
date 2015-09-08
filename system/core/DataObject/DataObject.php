@@ -1517,8 +1517,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets relation ids
      *
-     *@name getRelationIDs
-     *@access public
+     * @name getRelationIDs
+     * @access public
+     * @return array|bool
      */
     public function getRelationIDs($relname) {
         $relname = trim(strtolower($relname));
@@ -1531,7 +1532,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $has_many = $this->hasMany();
         $many_many = $this->ManyMany();
         $belongs_many_many = $this->BelongsManyMany();
-        $many_many_tables = $this->ManyManyTables();
 
         if (isset($has_many[$relname])) {
             // has-many
@@ -1556,6 +1556,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 return array();
             }
         } else if (isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
+
             if (isset($this->data[$relname . "ids"])) {
                 return $this->data[$relname . "ids"];
             }
@@ -1572,6 +1573,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             $query = $this->getManyManyQuery($relationShip, array($relationShip->getTargetField()));
             $query->execute();
+
             $arr = array();
             while($row = $query->fetch_assoc())
             {
