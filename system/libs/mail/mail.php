@@ -63,10 +63,10 @@ class Mail
     /**
      * sets $sender, $html, $reply
      *
-     * @param null $from
+     * @param string|null $from
      * @param bool $html
-     * @param null $reply
-     * @param null $sendername
+     * @param string|null $reply
+     * @param string|null $sendername
      * @access    public
      */
     public function __construct($from = null, $html = true, $reply = null, $sendername = null)

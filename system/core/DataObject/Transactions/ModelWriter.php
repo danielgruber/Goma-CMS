@@ -320,10 +320,8 @@ class ModelWriter extends Object {
 
             if($useObject) {
                 if((isset($this->data[$name]))) {
-                    if($useObject === true) {
-                        if(is_array($this->data[$name])) {
-                            return true;
-                        }
+                    if(is_array($this->data[$name])) {
+                        return true;
                     } else if(is_a($this->data[$name], $useObject)) {
                         return true;
                     }
