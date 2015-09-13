@@ -128,7 +128,7 @@ class livecounter extends DataObject
 		self::$alreadyRun = true;
 		
 		// set correct host, avoid problems with localhost
-		$host = self::getHost();
+		$host = GlobalSessionManager::getCookieHost();
 	
 		// user identifier
 		$user_identifier = self::getUserIdentifier();
@@ -185,15 +185,6 @@ class livecounter extends DataObject
 		return $user_identifier;
 	}
 
-	public static function getHost() {
-		// set correct host, avoid problems with localhost
-		$host = $_SERVER["HTTP_HOST"];
-		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
-			$host = "." . $host;
-
-		return $host;
-	}
-
 	public static function checkForAttacks($user_identifier) {
 		/**
 		 * for users without enabled cookies, this works!
@@ -234,15 +225,11 @@ class livecounter extends DataObject
 			fastcgi_finish_request();
 		}
 
-		$start = microtime(true);
-
 		$userAgent = self::getUserAgent();
 		
 		if(preg_match('/favicon\.ico/', $_SERVER["REQUEST_URI"]) || substr($_SERVER["REQUEST_URI"], 0, strlen(ROOT_PATH . "null")) == ROOT_PATH . "null" || URL == "null") {
 			return false;
 		}
-
-		$host = self::getHost();
 
 		$user_identifier = self::getUserIdentifier();
 
