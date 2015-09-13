@@ -31,7 +31,7 @@ class AddContent
      */
     public static function add($content)
     {
-        Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . $content);
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . $content);
     }
 
     /**
@@ -42,7 +42,7 @@ class AddContent
      */
     public static function addSuccess($content)
     {
-        Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="success">' . $content . '</div>');
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="success">' . $content . '</div>');
     }
 
     /**
@@ -53,7 +53,7 @@ class AddContent
      */
     public static function addError($content)
     {
-        Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="error">' . $content . '</div>');
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="error">' . $content . '</div>');
     }
 
     /**
@@ -64,7 +64,7 @@ class AddContent
      */
     public static function addNotice($content)
     {
-        Core::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="notice">' . $content . '</div>');
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEY, self::getCurrentSessionContent() . '<div class="notice">' . $content . '</div>');
     }
 
     /**
@@ -77,7 +77,7 @@ class AddContent
     {
         self::$addcontent .= self::getCurrentSessionContent();
 
-        Core::globalSession()->remove(self::SESSION_KEY);
+        GlobalSessionManager::globalSession()->remove(self::SESSION_KEY);
 
         return self::$addcontent;
     }
@@ -90,7 +90,7 @@ class AddContent
      */
     public static function flush()
     {
-        Core::globalSession()->remove(self::SESSION_KEY);
+        GlobalSessionManager::globalSession()->remove(self::SESSION_KEY);
         self::$addcontent = "";
     }
 
@@ -98,6 +98,6 @@ class AddContent
      * returns current content of session.
      */
     protected static function getCurrentSessionContent() {
-        return Core::globalSession()->get(self::SESSION_KEY) ?: "";
+        return GlobalSessionManager::globalSession()->get(self::SESSION_KEY) ?: "";
     }
 }

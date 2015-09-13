@@ -44,7 +44,7 @@ class ExternalFormControllerTest extends GomaUnitTest
 
         // check for session
         /** @var Form $formInstance */
-        $formInstance = Core::globalSession()->get(Form::SESSION_PREFIX . ".testform");
+        $formInstance = GlobalSessionManager::globalSession()->get(Form::SESSION_PREFIX . ".testform");
         $this->assertEqual($formInstance->getRequest(), $oldRequest);
         $this->assertEqual($formInstance->getController()->getRequest(), $oldRequest);
     }

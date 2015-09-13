@@ -33,7 +33,7 @@ class InstallController extends Controller {
 	 * shows install fronted if language is already selected, else shows lang-select
 	*/
 	public function index() {
-		if(Core::globalSession()->hasKey("lang")) {
+		if(GlobalSessionManager::globalSession()->hasKey("lang")) {
 			return tpl::render("install/index.html");
 		} else {
 			HTTPResponse::Redirect(BASE_URI . BASE_SCRIPT . "/install/langselect/");

@@ -47,7 +47,7 @@ class RatingController extends Controller
 
                 return $response->render();
             } else {
-                Core::globalSession()->set("rating_message." . $name, lang("exp_gomacms_rating.already_rated"));
+                GlobalSessionManager::globalSession()->set("rating_message." . $name, lang("exp_gomacms_rating.already_rated"));
                 $this->redirectback();
             }
         }

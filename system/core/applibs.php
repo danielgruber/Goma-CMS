@@ -120,7 +120,7 @@ function array_merge_recursive_distinct() {
  * @param mixed $data The data, that has to be stored.
  */
 function session_store($key, $data) {
-	Core::globalSession()->set($key, $data);
+	GlobalSessionManager::globalSession()->set($key, $data);
 }
 
 /**
@@ -136,7 +136,7 @@ function session_store($key, $data) {
  * @return mixed Data on success, otherwise null.
  */
 function session_restore($key) {
-	return Core::globalSession()->get($key);
+	return GlobalSessionManager::globalSession()->get($key);
 }
 
 /**
@@ -147,7 +147,7 @@ function session_restore($key) {
  * @return boolean
  */
 function session_store_exists($key) {
-	return Core::globalSession()->hasKey($key);
+	return GlobalSessionManager::globalSession()->hasKey($key);
 }
 
 /**

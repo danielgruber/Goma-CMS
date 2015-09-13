@@ -30,7 +30,7 @@ class TreeServer extends RequestHandler {
 		$id = $this->getParam("id");
 		$name = $this->getParam("name");
 
-		Core::globalSession()->set("treestatus_" . $name . "_" . $id, false);
+		GlobalSessionManager::globalSession()->set("treestatus_" . $name . "_" . $id, false);
 		if(Core::is_ajax()) {
 			return ROOT_PATH . "treeserver/setExpanded/".$name."/".$id."/?redirect=".urlencode(Core::activeURL());
 		} else {
@@ -46,7 +46,7 @@ class TreeServer extends RequestHandler {
 		$id = $this->getParam("id");
 		$name = $this->getParam("name");
 
-		Core::globalSession()->set("treestatus_" . $name . "_" . $id, true);
+		GlobalSessionManager::globalSession()->set("treestatus_" . $name . "_" . $id, true);
 		if(Core::is_ajax()) {
 			return ROOT_PATH . "treeserver/setCollapsed/".$name."/".$id."/?redirect=".urlencode(Core::activeURL());;
 		} else {

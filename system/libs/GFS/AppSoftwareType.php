@@ -687,8 +687,8 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * @return mixed|string
 	 */
 	public static function buildDistro($file, $name, $controller) {
-		if(Core::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
-			return Object::instance("g_appSoftwareType")->finalizeDistro(Core::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
+		if(GlobalSessionManager::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
+			return Object::instance("g_appSoftwareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 
 		if(file_exists($file))
 			@unlink($file);

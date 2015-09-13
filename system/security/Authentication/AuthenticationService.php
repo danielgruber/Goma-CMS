@@ -42,7 +42,7 @@ class AuthenticationService {
      */
     public static function getUserObject($id, $sessionId = null) {
         if($data = DataObject::get_one("user", array("id" => $id))) {
-            $currsess = isset($sessionId) ? $sessionId : Core::globalSession()->getId();
+            $currsess = isset($sessionId) ? $sessionId : GlobalSessionManager::globalSession()->getId();
 
             if($data->authentications(
                     array(
@@ -64,7 +64,7 @@ class AuthenticationService {
      */
     public static function regenerateToken($session = null) {
         if(!isset($session)) {
-            $session = Core::globalSession();
+            $session = GlobalSessionManager::globalSession();
         }
         $oldToken = $session->getId();
 
@@ -90,7 +90,7 @@ class AuthenticationService {
      */
     public static function doLogout($sessionId = null) {
         if(!isset($sessionId)) {
-            $sessionId = Core::globalSession()->getId();
+            $sessionId = GlobalSessionManager::globalSession()->getId();
         }
 
         $data = DataObject::get_one("UserAuthentication", array("token" => $sessionId));
@@ -123,7 +123,7 @@ class AuthenticationService {
                     DefaultPermission::forceGroups($userObject);
 
                     $authentication = new UserAuthentication(array(
-                        "token" => isset($sessionId) ? $sessionId : Core::globalSession()->getId(),
+                        "token" => isset($sessionId) ? $sessionId : GlobalSessionManager::globalSession()->getId(),
                         "userid" => $userObject->id
                     ));
                     Core::repository()->add($authentication, true);

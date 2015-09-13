@@ -164,8 +164,8 @@ class Rating extends DataObject
      * gets rating-message.
      */
     protected function getRatingMessage($name) {
-        if($message = Core::globalSession()->get("rating_message." . $name)) {
-            Core::globalSession()->remove("rating_message." . $name);
+        if($message = GlobalSessionManager::globalSession()->get("rating_message." . $name)) {
+            GlobalSessionManager::globalSession()->remove("rating_message." . $name);
             return $message;
         }
 

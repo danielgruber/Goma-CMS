@@ -325,7 +325,7 @@ class DataObjectSet extends DataSet {
 				$this->count = (int) $data[0]["count"];
 				return $this->count;
 			} else {
-				throw new LogicException("Could not count records.");
+				return 0;
 			}
 		}
 	}

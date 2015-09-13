@@ -20,8 +20,8 @@ class HomePageController extends RequestHandler {
 	 * shows install fronted if language is already selected, else shows lang-select
 	*/
 	public function index() {
-		if(Core::globalSession()->hasKey(self::SESSION_LANGSELECT) || isset($_GET["setlang"])) {
-			Core::globalSession()->set(self::SESSION_LANGSELECT, true);
+		if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_LANGSELECT) || isset($_GET["setlang"])) {
+			GlobalSessionManager::globalSession()->set(self::SESSION_LANGSELECT, true);
 			$controller = new InstallController();
 			return $controller->handleRequest($this->request);
 		} else {

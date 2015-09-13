@@ -21,7 +21,7 @@ class livecounterController extends Controller {
             exit;
         }
 
-        Core::globalSession()->stopSession();
+        GlobalSessionManager::globalSession()->stopSession();
         ignore_user_abort(true);
 
         livecounter::migrateStats();

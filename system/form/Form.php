@@ -299,22 +299,22 @@ class Form extends object {
 	protected function checkForRestore() {
 		// if we restore form
 		if(
-			Core::globalSession()->hasKey("form_restore." . $this->name()) &&
-			Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))
+			GlobalSessionManager::globalSession()->hasKey("form_restore." . $this->name()) &&
+			GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))
 		) {
-			$data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
+			$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 			$this->useStateData = $data->useStateData;
 			$this->result = $data->result;
 			$this->post = $data->post;
 			$this->state = $data->state;
 			$this->restorer = $data;
 
-			Core::globalSession()->remove("form_restore." . $this->name());
+			GlobalSessionManager::globalSession()->remove("form_restore." . $this->name());
 		}
 
 		// get form-state
-		if(Core::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
-			$this->state = new FormState(Core::globalSession()->get("form_state_" . $this->name));
+		if(GlobalSessionManager::globalSession()->hasKey("form_state_" . $this->name) && isset($this->post)) {
+			$this->state = new FormState(GlobalSessionManager::globalSession()->get("form_state_" . $this->name));
 		} else {
 			$this->state = new FormState();
 		}
@@ -339,7 +339,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function activateRestore() {
-		Core::globalSession()->set("form_restore." . $this->name, true);
+		GlobalSessionManager::globalSession()->set("form_restore." . $this->name, true);
 	}
 
 	/**
@@ -349,7 +349,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function disableRestore() {
-		Core::globalSession()->remove("form_restore." . $this->name);
+		GlobalSessionManager::globalSession()->remove("form_restore." . $this->name);
 	}
 
 	/**
@@ -395,7 +395,7 @@ class Form extends object {
 		Resources::add("form.css", "css");
 
 		// check for submit or append info for user to resubmit.
-		if(isset($this->post["form_submit_" . $this->name()]) && Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+		if(isset($this->post["form_submit_" . $this->name()]) && GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
 			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
@@ -409,7 +409,7 @@ class Form extends object {
 		}
 
 		// render form now.
-		Core::globalSession()->remove("form_secrets." . $this->name());
+		GlobalSessionManager::globalSession()->remove("form_secrets." . $this->name());
 		$this->defaultFields();
 		return $this->renderForm();
 	}
@@ -432,7 +432,7 @@ class Form extends object {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
 					$this->activateRestore();
-					if($data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
+					if($data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 						$this->result = $data->result;
 						$this->post = $data->post;
 						$this->restorer = $data;
@@ -532,7 +532,7 @@ class Form extends object {
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
-		Core::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
+		GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
 
 		$this->saveToSession();
 
@@ -586,7 +586,7 @@ class Form extends object {
 			}
 		}
 
-		$data = Core::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
+		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->post = $this->post;
 
 		// just write it
@@ -649,7 +649,7 @@ class Form extends object {
 
 		if($valid !== true || $submission === null) {
 			if($errors->getNode(0)->content) {
-				Core::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
+				GlobalSessionManager::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
 				$this->form->append($errors);
 			} else {
 				$this->state = $data->state;
@@ -661,7 +661,7 @@ class Form extends object {
 
 		$data->callExtending("afterSubmit", $result);
 
-		Core::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
+		GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
 
 		if(is_callable($submission)) {
 			return call_user_func_array($submission, array(
@@ -1069,7 +1069,7 @@ class Form extends object {
 	 * saves current form to session
 	 */
 	public function saveToSession() {
-		Core::globalSession()->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
+		GlobalSessionManager::globalSession()->set(self::SESSION_PREFIX . "." . strtolower($this->name), $this);
 	}
 
 	/**

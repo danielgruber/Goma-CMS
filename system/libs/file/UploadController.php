@@ -64,7 +64,7 @@ class UploadController extends Controller {
 			$upload->write(false, true);
 		}
 
-		Core::globalSession()->stopSession();
+		GlobalSessionManager::globalSession()->stopSession();
 		
 		return $upload->controller()->handleRequest($this->request);
 	}	

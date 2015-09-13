@@ -42,23 +42,23 @@ class ExpansionManager {
     /**
      * determines expansion name by classname or expansion-name.
      *
-     * @param 	string name
+     * @param 	string $name
      * @return 	string|null
      */
     public static function getExpansionName($name) {
-        if(is_object($name)) {
-            if(isset($name->inExpansion) && self::getExpansionData($name->inExpansion)) {
-                return $name->inExpansion;
-            } else {
-                $name = ClassManifest::resolveClassName($name);
+        if(is_object($name) && isset($name->inExpansion) && self::getExpansionData($name->inExpansion)) {
+            return $name->inExpansion;
+        } else if(is_string($name) && self::getExpansionData($name)) {
+            return $name;
+        } else {
+            $class = ClassManifest::resolveClassName($name);
+
+            if(isset(ClassInfo::$class_info[$class]["inExpansion"]) && self::getExpansionData(ClassInfo::$class_info[$class]["inExpansion"])) {
+                return ClassInfo::$class_info[$class]["inExpansion"];
             }
         }
 
-        if(isset(ClassInfo::$class_info[$name]["inExpansion"]) && self::getExpansionData(ClassInfo::$class_info[$name]["inExpansion"])) {
-            return ClassInfo::$class_info[$name]["inExpansion"];
-        }
-
-        return self::getExpansionData($name) ? $name : null;
+        return null;
     }
 
     /**

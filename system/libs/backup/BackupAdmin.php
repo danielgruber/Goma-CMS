@@ -191,7 +191,7 @@ class BackupAdmin extends TableView
     public function add_db() {
         Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $this->getFileFromSession(self::SESSION_VAR_DB_FILE, "sql", "sgfs"));
 
-        Core::globalSession()->remove(self::SESSION_VAR_DB_FILE);
+        GlobalSessionManager::globalSession()->remove(self::SESSION_VAR_DB_FILE);
 
         BackupModel::forceSyncFolder();
         $this->redirectBack();
@@ -201,8 +201,8 @@ class BackupAdmin extends TableView
      * get file and stores it in session.
      */
     protected function getFileFromSession($session, $prefix, $extension) {
-        if(Core::globalSession()->hasKey($session)) {
-            return Core::globalSession()->get($session);
+        if(GlobalSessionManager::globalSession()->hasKey($session)) {
+            return GlobalSessionManager::globalSession()->get($session);
         }
 
         return $prefix . "." . randomString(5) . "." . date("m-d-y_H-i-s", NOW) . "." . $extension;
@@ -226,7 +226,7 @@ class BackupAdmin extends TableView
 
         Backup::generateBackup(BackupModel::BACKUP_PATH . "/" . $this->getFileFromSession(self::SESSION_VAR_COMPLETE, "full", "gfs"), $exclude);
 
-        Core::globalSession()->remove(self::SESSION_VAR_COMPLETE);
+        GlobalSessionManager::globalSession()->remove(self::SESSION_VAR_COMPLETE);
 
         BackupModel::forceSyncFolder();
         $this->redirectBack();
@@ -263,8 +263,8 @@ class BackupAdmin extends TableView
                 $rand = randomString(20);
                 $data["rand"] = $rand;
 
-                Core::globalSession()->removeByPrefix("restore.");
-                Core::globalSession()->set("restore." . $rand, $data);
+                GlobalSessionManager::globalSession()->removeByPrefix("restore.");
+                GlobalSessionManager::globalSession()->set("restore." . $rand, $data);
 
                 $dataset = new ViewAccessableData($data);
                 return $dataset->renderWith("admin/restoreInfo.html");
@@ -282,8 +282,8 @@ class BackupAdmin extends TableView
     */
     public function execRestore() {
         $rand = $this->getParam("rand");
-        if(Core::globalSession()->hasKey("restore." . $rand)) {
-            $data = Core::globalSession()->get("restore." . $rand);
+        if(GlobalSessionManager::globalSession()->hasKey("restore." . $rand)) {
+            $data = GlobalSessionManager::globalSession()->get("restore." . $rand);
             G_SoftwareType::install($data);
             HTTPResponse::redirect(BASE_URI);
         } else {

@@ -45,12 +45,12 @@ class Dev extends RequestHandler {
 	 */
 	public static function redirectToDev() {
 
-		if(Core::globalSession() == null) {
+		if(GlobalSessionManager::globalSession() == null) {
 			ClassManifest::tryToInclude("SessionManager", "system/security/SessionManager.php");
-			Core::__setSession(SessionManager::startWithIdAndName(null));
+			GlobalSessionManager::__setSession(SessionManager::startWithIdAndName(null));
 		}
 
-		Core::globalSession()->set(self::SESSION_DEV_WITHOUT_PERM, true);
+		GlobalSessionManager::globalSession()->set(self::SESSION_DEV_WITHOUT_PERM, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
 		exit ;
 	}
@@ -64,7 +64,7 @@ class Dev extends RequestHandler {
 
 		HTTPResponse::unsetCacheable();
 
-		if(!Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM) && !Permission::check("ADMIN")) {
+		if(!GlobalSessionManager::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM) && !Permission::check("ADMIN")) {
 			makeProjectAvailable();
 
 			throw new PermissionException();
@@ -119,7 +119,7 @@ class Dev extends RequestHandler {
 		Core::callHook("deleteCachesInDev");
 
 		// check if dev-without-perms, so redirect directly
-		if(Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
+		if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/rebuildcaches" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -147,7 +147,7 @@ class Dev extends RequestHandler {
 		define("DEV_BUILD", true);
 
 		// redirect if needed
-		if(Core::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
+		if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_DEV_WITHOUT_PERM)) {
 			$url = ROOT_PATH . BASE_SCRIPT . "dev/builddev" . URLEND . "?redirect=" . urlencode(getredirect(true));
 			header("Location: " . $url);
 			echo "<script>location.href = '" . $url . "';</script><br /> Redirecting to: <a href='" . $url . "'>'.$url.'</a>";
@@ -204,13 +204,13 @@ class Dev extends RequestHandler {
 	public static function checkForRedirect() {
 		// redirect if needed
 		if(isset($_GET["redirect"])) {
-			Core::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM);
+			GlobalSessionManager::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM);
 			HTTPResponse::redirect($_GET["redirect"]);
 			exit ;
 		}
 
 		// redirect to BASE if needed
-		if(Core::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM)) {
+		if(GlobalSessionManager::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM)) {
 			header("Location: " . ROOT_PATH);
 			Core::callHook("onBeforeShutDown");
 			exit;

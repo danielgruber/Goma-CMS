@@ -113,7 +113,7 @@ class TableView extends AdminItem
         if ($this->search === false)
             $search = $this->search;
 
-        Core::globalSession()->set(self::DELETE_SESSION_KEY . "." . $this->classname, randomString(10));
+        GlobalSessionManager::globalSession()->set(self::DELETE_SESSION_KEY . "." . $this->classname, randomString(10));
 
         $data = $this->modelInst()->customise(
                 array_merge(
@@ -123,7 +123,7 @@ class TableView extends AdminItem
                         "datafields" => $fields,
                         "action" => $actions,
                         "globalaction" => $globalactions,
-                        "deletekey" => Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname),
+                        "deletekey" => GlobalSessionManager::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname),
                         "deletable" => isset($this->actions["delete"])
                     ),
                     $this->tplVars
@@ -156,7 +156,7 @@ class TableView extends AdminItem
      */
     public function deleteMany()
     {
-        if (Core::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname) == $this->request->post_params["deletekey"]) {
+        if (GlobalSessionManager::globalSession()->get(self::DELETE_SESSION_KEY . "." . $this->classname) == $this->request->post_params["deletekey"]) {
             $data = $this->request->post_params["data"];
             unset($data["all"]);
             foreach ($data as $key => $value) {

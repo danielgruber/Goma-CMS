@@ -13,11 +13,6 @@ loadlang('st');
 */
 
 /**
- * session-timeout for goma-cookie. this also lives after browser has closed.
-*/
-define("SESSION_TIMEOUT", 24*3600);
-
-/**
  * This class handles everything about statistics.
  *
  * @package     Goma\Statistics
@@ -138,9 +133,9 @@ class livecounter extends DataObject
 		// user identifier
 		$user_identifier = self::getUserIdentifier();
 		
-		self::$userCounted = Core::globalSession()->get(self::SESSION_USER_COUNTED);
+		self::$userCounted = GlobalSessionManager::globalSession()->get(self::SESSION_USER_COUNTED);
 
-		Core::globalSession()->set(self::SESSION_USER_COUNTED, time());
+		GlobalSessionManager::globalSession()->set(self::SESSION_USER_COUNTED, time());
 		// just rewirte cookie
 		self::setGomaCookies($user_identifier, $host);
 				
@@ -233,7 +228,7 @@ class livecounter extends DataObject
 	}
 
 	public static function onBeforeShutdownUsingLife() {
-		Core::globalSession()->stopSession();
+		GlobalSessionManager::globalSession()->stopSession();
 		
 		if(function_exists("fastcgi_finish_request")) {
 			fastcgi_finish_request();

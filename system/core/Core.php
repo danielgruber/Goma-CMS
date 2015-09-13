@@ -106,11 +106,6 @@ class Core extends object {
 	protected static $repository;
 
 	/**
-	 * session.
-	 */
-	protected static $globalSession;
-
-	/**
 	 * inits the core
 	 *
 	 */
@@ -130,7 +125,7 @@ class Core extends object {
 		// now init session
 		if(PROFILE)
 			Profiler::mark("session");
-		self::$globalSession = SessionManager::startWithIdAndName(null, null);
+		GlobalSessionManager::Init();
 		if(PROFILE)
 			Profiler::unmark("session");
 			
@@ -172,15 +167,19 @@ class Core extends object {
 	 *
 	 * @return ISessionManager
 	 */
-	public static function globalSession() {
-		return self::$globalSession;
+	public static function globalSession()
+	{
+		return GlobalSessionManager::globalSession();
 	}
 
 	/**
 	 * sets global session.
+	 *
+	 * @param ISessionManager $session
 	 */
-	public static function __setSession($session) {
-		self::$globalSession = $session;
+	public static function __setSession($session)
+	{
+		GlobalSessionManager::__setSession($session);
 	}
 
 	/**
@@ -667,7 +666,7 @@ class Core extends object {
 	 *
 	 */
 	public static function adminAsUser() {
-		return (!defined("IS_BACKEND") && Core::globalSession()->hasKey(SystemController::ADMIN_AS_USER));
+		return (!defined("IS_BACKEND") && GlobalSessionManager::globalSession()->hasKey(SystemController::ADMIN_AS_USER));
 	}
 
 	//!Rendering-Methods

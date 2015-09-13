@@ -28,7 +28,7 @@ class imageResize extends RequestHandler
 
     public function handleRequest($request, $subController = false)
     {
-        Core::globalSession()->stopSession();
+        GlobalSessionManager::globalSession()->stopSession();
 
         return parent::handleRequest($request, $subController);
     }

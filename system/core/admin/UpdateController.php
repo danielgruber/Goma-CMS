@@ -142,7 +142,7 @@ class UpdateController extends adminController {
             $inst->filename = basename($file);
             $inst->fileid = convert::raw2text($this->getParam("id"));
 
-            Core::globalSession()->set("update." . $inst->fileid, $inst);
+            GlobalSessionManager::globalSession()->set("update." . $inst->fileid, $inst);
 
             return $inst->renderWith("admin/updateInfo.html");
         }
@@ -287,14 +287,14 @@ class UpdateController extends adminController {
                 exit;
             }
 
-            if(!Core::globalSession()->hasKey("update." . $file->id)) {
+            if(!GlobalSessionManager::globalSession()->hasKey("update." . $file->id)) {
                 AddContent::addError(lang("less_rights", "You are not permitted to do this."));
 
                 HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/upload/");
                 exit;
             }
 
-            $data = Core::globalSession()->get("update." . $file->id);
+            $data = GlobalSessionManager::globalSession()->get("update." . $file->id);
         } else {
 
             if(!in_array($this->getParam("update"), $_SESSION["updates"])) {
@@ -309,14 +309,14 @@ class UpdateController extends adminController {
                 exit;
             }
 
-            if(!Core::globalSession()->hasKey("update." . $this->getParam("update"))) {
+            if(!GlobalSessionManager::globalSession()->hasKey("update." . $this->getParam("update"))) {
                 AddContent::addError(lang("less_rights", "You are not permitted to do this."));
 
                 HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "admin/update/");
                 exit;
             }
 
-            $data = Core::globalSession()->get("update." . $this->getParam("update"));
+            $data = GlobalSessionManager::globalSession()->get("update." . $this->getParam("update"));
         }
 
         return G_SoftwareType::install($data);

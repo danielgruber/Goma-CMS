@@ -109,7 +109,7 @@ class SortableTableView extends TableView
 
         $this->modelInst()->sort($this->sort_field, "ASC");
 
-        Core::globalSession()->set("deletekey." . $this->classname, randomString(10));
+        GlobalSessionManager::globalSession()->set("deletekey." . $this->classname, randomString(10));
 
         Resources::addData("var adminURI = " . var_export($this->namespace, true) . ";");
 
@@ -119,7 +119,7 @@ class SortableTableView extends TableView
                     "datafields" => $fields,
                     "action" => $actions,
                     "globalaction" => $globalactions,
-                    "deletekey" => Core::globalSession()->get("deletekey." . $this->classname),
+                    "deletekey" => GlobalSessionManager::globalSession()->get("deletekey." . $this->classname),
                     "deletable" => isset($this->actions["delete"])
                 ),
                 $this->tplVars

@@ -293,11 +293,11 @@ class Backup extends Object {
 	 *@access public
 	*/
 	public static function generateBackup($file, $excludeList = array(), $excludeSQLList = array(), $SQLprefix = DB_PREFIX, $includeTPL = true, $framework = null, $changelog = null) {
-		if(GFS_Package_Creator::wasPacked() && Core::globalSession()->hasKey("backup") &&
-			GFS_Package_Creator::wasPacked(Core::globalSession()->get("backup"))) {
-			$file = Core::globalSession()->get("backup");
+		if(GFS_Package_Creator::wasPacked() && GlobalSessionManager::globalSession()->hasKey("backup") &&
+			GFS_Package_Creator::wasPacked(GlobalSessionManager::globalSession()->get("backup"))) {
+			$file = GlobalSessionManager::globalSession()->get("backup");
 		} else {
-			Core::globalSession()->set("backup", $file);
+			GlobalSessionManager::globalSession()->set("backup", $file);
 			self::generateFileBackup($file, $excludeList, $includeTPL);
 		}
 		$DBfile = self::generateDBBackup(ROOT . CACHE_DIRECTORY ."/database.sgfs", $SQLprefix, $excludeSQLList);

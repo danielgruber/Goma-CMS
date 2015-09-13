@@ -26,7 +26,7 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	public static function getChecked($checkName = "check") {
 		self::updateSession($checkName);
 
-		return Core::globalSession()->get(self::SESSION_PREFIX . "." . $checkName) ?: array();
+		return GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . $checkName) ?: array();
 	}
 	/**
 	 * You can define the name of the Checkboxes here.
@@ -43,7 +43,7 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	 */
 	public static function updateSession($name) {
 		if(!isset($_POST[$name . "_check"])) {
-			Core::globalSession()->remove(self::SESSION_PREFIX . "." . $name);
+			GlobalSessionManager::globalSession()->remove(self::SESSION_PREFIX . "." . $name);
 		}
 
 		if(isset($_POST[$name . "_check"])) {
@@ -56,7 +56,7 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 				}
 			}
 
-			Core::globalSession()->set(self::SESSION_PREFIX . "." . $name, $sessionData);
+			GlobalSessionManager::globalSession()->set(self::SESSION_PREFIX . "." . $name, $sessionData);
 		}
 	}
 
@@ -67,8 +67,8 @@ class TableFieldCheckable implements TableField_ColumnProvider {
 	 * @return array
 	 */
 	protected static function getSessionDataForKey($name) {
-		if(Core::globalSession()->hasKey(self::SESSION_PREFIX . "." . $name)) {
-			return Core::globalSession()->get(self::SESSION_PREFIX . "." . $name);
+		if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . $name)) {
+			return GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . $name);
 		}
 
 		return array();

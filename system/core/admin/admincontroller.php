@@ -195,7 +195,7 @@ class adminController extends Controller
         if (Permission::check("superadmin")) {
 
 
-            Core::globalSession()->stopSession();
+            GlobalSessionManager::globalSession()->stopSession();
             ignore_user_abort(true);
             // we delete all logs that are older than 30 days
             Core::CleanUpLog($count);

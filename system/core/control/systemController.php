@@ -58,9 +58,9 @@ class systemController extends Controller {
 	*/
 	public function setUserView() {
 		if($this->getParam("bool") == 1) {
-			Core::globalSession()->set(self::ADMIN_AS_USER, true);
+			GlobalSessionManager::globalSession()->set(self::ADMIN_AS_USER, true);
 		} else {
-			Core::globalSession()->remove(self::ADMIN_AS_USER);
+			GlobalSessionManager::globalSession()->remove(self::ADMIN_AS_USER);
 		}
 		$this->redirectback();
 	}
@@ -72,10 +72,10 @@ class systemController extends Controller {
 	 *@access public
 	*/
 	public function switchView() {
-		if(Core::globalSession()->hasKey(self::ADMIN_AS_USER)) {
-			Core::globalSession()->remove(self::ADMIN_AS_USER);
+		if(GlobalSessionManager::globalSession()->hasKey(self::ADMIN_AS_USER)) {
+			GlobalSessionManager::globalSession()->remove(self::ADMIN_AS_USER);
 		} else {
-			Core::globalSession()->set(self::ADMIN_AS_USER, true);
+			GlobalSessionManager::globalSession()->set(self::ADMIN_AS_USER, true);
 		}
 		
 		HTTPResponse::unsetCachable();
@@ -174,7 +174,7 @@ class systemController extends Controller {
 		if(!Permission::check("ADMIN"))
 			return false;
 		
-		Core::globalSession()->stopSession();
+		GlobalSessionManager::globalSession()->stopSession();
 		$manipulation = array();
 		foreach(ClassInfo::getChildren("DataObject") as $class) {
 			

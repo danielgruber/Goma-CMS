@@ -29,7 +29,7 @@ class FrontedController extends Controller
      */
     public function View()
     {
-        if (Core::globalSession()->hasKey(SystemController::ADMIN_AS_USER)) {
+        if (GlobalSessionManager::globalSession()->hasKey(SystemController::ADMIN_AS_USER)) {
             return lang("user", "user");
         } else {
             return lang("admin", "admin");

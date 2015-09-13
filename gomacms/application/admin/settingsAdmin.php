@@ -81,7 +81,7 @@ class settingsAdmin extends adminItem
 	 * upgrades data regarding safe-mode.
 	*/
 	public static function upgradeSafeMode() {
-		Core::globalSession()->stopSession();
+		GlobalSessionManager::globalSession()->stopSession();
 		FileSystem::applySafeMode(null, null, true);
 	}
 

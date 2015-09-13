@@ -139,7 +139,7 @@ class Controller extends RequestHandler
             //livecounterController::run();
             if (PROFILE) Profiler::unmark("livecounter");
 
-            Core::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);
+            GlobalSessionManager::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);
         }
 
         if ($title = $this->PageTitle()) {
@@ -857,7 +857,7 @@ class Controller extends RequestHandler
         $keychain = self::getCurrentKeychain();
         $keychain[] = $password;
 
-        Core::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
 
         if ($cookie) {
             setCookie("keychain_" . md5(md5($password)), md5($password), NOW + $cookielt);
@@ -901,7 +901,7 @@ class Controller extends RequestHandler
             unset($keychain[$key]);
         }
 
-        Core::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
+        GlobalSessionManager::globalSession()->set(self::SESSION_KEYCHAIN, $keychain);
 
         setCookie("keychain_" . md5(md5($password)), null, -1);
     }
@@ -910,8 +910,8 @@ class Controller extends RequestHandler
      * returns current keychain-array.
      */
     protected static function getCurrentKeychain() {
-        if(Core::globalSession()->hasKey(self::SESSION_KEYCHAIN)) {
-            return Core::globalSession()->get(self::SESSION_KEYCHAIN);
+        if(GlobalSessionManager::globalSession()->hasKey(self::SESSION_KEYCHAIN)) {
+            return GlobalSessionManager::globalSession()->get(self::SESSION_KEYCHAIN);
         }
 
         return array();

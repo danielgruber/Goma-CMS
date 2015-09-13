@@ -85,7 +85,7 @@ class i18n extends Object {
 
 		// check lang selection
 		Core::$lang = self::AutoSelectLang($language);
-		Core::globalSession()->set("lang", Core::$lang);
+		GlobalSessionManager::globalSession()->set("lang", Core::$lang);
 		setCookie('g_lang', Core::$lang, TIME + 365 * 24 * 60 * 60, '/', $host);
 
 		global $lang;
@@ -267,8 +267,8 @@ class i18n extends Object {
 		}
 
 		// define current language
-		if(self::LangExists(Core::globalSession()->get("lang"))) {
-			return Core::globalSession()->get("lang");
+		if(self::LangExists(GlobalSessionManager::globalSession()->get("lang"))) {
+			return GlobalSessionManager::globalSession()->get("lang");
 		} else if(isset($_COOKIE["g_lang"]) && self::langExists($_COOKIE["g_lang"])) {
 			return $_COOKIE["g_lang"];
 		} else if(self::$selectByHttp) {

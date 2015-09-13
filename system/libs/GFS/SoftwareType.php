@@ -944,7 +944,7 @@ abstract class g_SoftwareType {
 	 */
 	public function finalizeDistro($data) {
 
-		Core::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
+		GlobalSessionManager::globalSession()->set(self::FINALIZE_SESSION_VAR, $data);
 
 		$changelog = (empty($data["changelog"])) ? null : $data["changelog"];
 		static::backup($data["file"], $this->getDistroName($data), $changelog);
@@ -964,7 +964,7 @@ abstract class g_SoftwareType {
 
 		$gfs->close();
 
-		Core::globalSession()->remove(self::FINALIZE_SESSION_VAR);
+		GlobalSessionManager::globalSession()->remove(self::FINALIZE_SESSION_VAR);
 
 		return true;
 	}

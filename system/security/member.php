@@ -80,7 +80,7 @@ class Member extends Object {
 		
 		DefaultPermission::checkDefaults();
 		
-		if($auth = AuthenticationService::getAuthRecord(Core::globalSession()->getId())) {
+		if($auth = AuthenticationService::getAuthRecord(GlobalSessionManager::globalSession()->getId())) {
 			$user = $auth->user;
 			if($user["timezone"]) {
 				Core::setCMSVar("TIMEZONE", $user["timezone"]);
@@ -213,15 +213,15 @@ class Member extends Object {
 	 * unique identifier of this user.
 	*/
 	public static function uniqueID() {
-		if(Core::globalSession()->hasKey("uniqueID")) {
-			return Core::globalSession()->get("uniqueID");
+		if(GlobalSessionManager::globalSession()->hasKey("uniqueID")) {
+			return GlobalSessionManager::globalSession()->get("uniqueID");
 		} else {
 			if(self::$loggedIn) {
-				Core::globalSession()->set("uniqueID", self::$loggedIn->uniqueID());
+				GlobalSessionManager::globalSession()->set("uniqueID", self::$loggedIn->uniqueID());
 			} else {
-				Core::globalSession()->set("uniqueID", md5(randomString(20)));
+				GlobalSessionManager::globalSession()->set("uniqueID", md5(randomString(20)));
 			}
-			return Core::globalSession()->get("uniqueID");
+			return GlobalSessionManager::globalSession()->get("uniqueID");
 		}
 	}
 }

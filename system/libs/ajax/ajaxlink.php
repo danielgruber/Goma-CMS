@@ -41,8 +41,8 @@ class ajaxlink extends RequestHandler
 
 
         $code = ($code == "") ? strtolower(randomString(20)) : strtolower($code);
-        if(Core::globalSession() != null) {
-            Core::globalSession()->set("ajaxpopups_" . $code, $callback);
+        if(GlobalSessionManager::globalSession() != null) {
+            GlobalSessionManager::globalSession()->set("ajaxpopups_" . $code, $callback);
         }
         $this->code = $code;
     }
@@ -71,8 +71,8 @@ class ajaxlink extends RequestHandler
     public function popup()
     {
         $code = trim($this->getParam("id"));
-        if (Core::globalSession()->hasKey("ajaxpopups_" . $code)) {
-            return call_user_func_array(Core::globalSession()->get("ajaxpopups_" . $code), array());
+        if (GlobalSessionManager::globalSession()->hasKey("ajaxpopups_" . $code)) {
+            return call_user_func_array(GlobalSessionManager::globalSession()->get("ajaxpopups_" . $code), array());
         } else {
             return false;
         }
@@ -93,8 +93,8 @@ class ajaxlink extends RequestHandler
     public function action()
     {
         $code = trim($this->getParam("id"));
-        if (Core::globalSession()->hasKey("ajaxlinks." . $code)) {
-            return tpl::init(Core::globalSession()->get("ajaxlinks." . $code));
+        if (GlobalSessionManager::globalSession()->hasKey("ajaxlinks." . $code)) {
+            return tpl::init(GlobalSessionManager::globalSession()->get("ajaxlinks." . $code));
         } else {
             return false;
         }

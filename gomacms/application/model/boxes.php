@@ -674,7 +674,7 @@ class boxPageController extends PageController
 			
 			if($this->modelInst()->can("Write")) {
 			
-				if(Core::globalSession()->hasKey(SystemController::ADMIN_AS_USER)) {
+				if(GlobalSessionManager::globalSession()->hasKey(SystemController::ADMIN_AS_USER)) {
 					$arr[] = array(
 							"url" 			=> BASE_SCRIPT . "system/switchview" . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"]),
 							"title"			=> lang("switch_view_edit_on", "enable edit-mode")

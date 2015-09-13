@@ -111,7 +111,7 @@ define('STATUS_DISABLED', 0);
 
 // version
 define("GOMA_VERSION", "2.0RC3");
-define("BUILD_VERSION", "112");
+define("BUILD_VERSION", "113");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);
@@ -140,6 +140,7 @@ if (PROFILE)
 require_once (FRAMEWORK_ROOT . 'core/applibs.php');
 require_once (FRAMEWORK_ROOT . 'core/Object.php');
 require_once (FRAMEWORK_ROOT . 'core/CoreLibs/StaticsManager.php');
+require_once (FRAMEWORK_ROOT . 'core/CoreLibs/GlobalSessionManager.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassManifest.php');
 require_once (FRAMEWORK_ROOT . 'core/ClassInfo.php');
 require_once (FRAMEWORK_ROOT . 'core/controller/RequestHandler.php');
