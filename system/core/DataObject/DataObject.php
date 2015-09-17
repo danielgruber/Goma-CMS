@@ -2915,10 +2915,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * checks if we can sort by a specified field
      *
-     *@name canSortBy
-     *@access public
+     * @param string $field
+     * @return bool
      */
     public function canSortBy($field) {
+        $field = strtolower($field);
         $fields = $this->DataBaseFields(true);
         return isset($fields[$field]);
     }
@@ -2926,8 +2927,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * checks if we can filter by a specified field
      *
-     *@name canSortBy
-     *@access public
+     * @param string $field
+     * @return bool
      */
     public function canFilterBy($field) {
         if (strpos($field, ".") !== false) {

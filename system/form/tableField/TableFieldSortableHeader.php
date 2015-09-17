@@ -37,9 +37,9 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 				$nextDirection = "desc";
 				if($state->sortColumn == $columnField){
 					if($state->sortDirection == 'asc') {
-						$title .= ' <i class="fa fa-caret-down"></i>';
-					} else {
 						$title .= ' <i class="fa fa-caret-up"></i>';
+					} else {
+						$title .= ' <i class="fa fa-caret-down"></i>';
 						$nextDirection = "asc";
 					}
 				} else {
