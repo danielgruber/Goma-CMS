@@ -74,9 +74,6 @@ class Member extends Object {
 	*/
 	public static function Init() {
 		if(PROFILE) Profiler::mark("member::Init");
-		if(isset(self::$id)) {
-			return true;
-		}
 		
 		DefaultPermission::checkDefaults();
 		
