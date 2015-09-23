@@ -129,7 +129,7 @@ class CKEditorUploadsController extends RequestHandler {
                 $width = $info[0];
                 $height = $info[0];
                 if(filesize($response->realfile) > 1024 * 1024 * 4 || $width > HTMLText::MAX_RESIZE_WIDTH || $height > HTMLText::MAX_RESIZE_HEIGHT) {
-                    $add = 'alert(parent.lang("alert_big_image"));';
+                    $add = lang("alert_big_image");
                 } else {
                     $add = "";
                 }

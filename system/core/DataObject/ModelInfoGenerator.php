@@ -103,7 +103,12 @@ class ModelInfoGenerator {
     public static function validateDBFields($class, $fields) {
         foreach($fields as $name => $type) {
             // hack to not break current Goma-CMS Build
-            if(in_array($name, ViewAccessableData::$notViewableMethods) && (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
+            if((
+                    in_array($name, array("long", "order", "select", "where", "group", "sort")) ||
+                    in_array($name, ViewAccessableData::$notViewableMethods)
+                )
+                &&
+                (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {
                 throw new DBFieldNotValidException($class . "." . $name);
             }
         }

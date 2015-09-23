@@ -463,7 +463,7 @@ class RequestException extends Exception {
 	/**
 	 * constructor.
 	*/
-	public function __construct($m = "", $code = 8, Exception $previous) {
+	public function __construct($m = "", $code = 8, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 }
