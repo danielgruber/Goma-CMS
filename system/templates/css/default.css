@@ -305,3 +305,17 @@ body.fileupload-drag-over {
 	-webkit-box-shadow: inset 0 0 0.5em #ccc;
 	box-shadow: inset 0 0 0.5em #ccc;
 }
+
+.AlignLeft {
+  text-align: left;
+}
+.AlignRight {
+  text-align: right;
+}
+.AlignCenter {
+  text-align: center;
+}
+.AlignJustify {
+  text-align: justify;
+  text-justify: inter-word;
+}
