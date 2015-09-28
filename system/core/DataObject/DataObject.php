@@ -146,33 +146,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
 
     /**
-     * gets an instance of the class
-     *
-     * DEPRECATED!
-     *
-     *@name _get
-     *@access public
-     *@param string - name
-     *@param array - where
-     *@param array - fields
-     *@param array - orderby
-     */
-    public static function _get($class, $filter = array(), $fields = array(), $sort = array(), $joins = array(), $limits = array(), $pagination = false, $groupby = false)
-    {
-        Core::Deprecate(2.0, "DataObject::get_versioned");
-        $data = $data = self::get($class, $filter, $sort, $limits, $joins, null, $pagination);
-        if ($groupby !== false) {
-            return $data->groupBy($groupby);
-        }
-
-        return $data;
-    }
-
-    /**
      * gets a DataObject versioned
      *
-     *@name getVersioned
-     *@access public
+     * @name getVersioned
+     * @access public
+     * @return array|DataObjectSet
      */
     public static function get_versioned($class, $version = null, $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
         $data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
@@ -186,8 +164,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets a DataObject versioned
      *
-     *@name getVersioned
-     *@access public
+     * @name getVersioned
+     * @access public
+     * @return array|DataObjectSet
      */
     public static function get_version() {
         return call_user_func_array(array("DataObject", "get_Versioned"), func_get_args());
@@ -394,11 +373,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets a record by id
      *
-     *@name get_by_id
-     *@access public
-     *@param string - name
-     *@param numeric - id
-     *@param array - joins
+     * @name get_by_id
+     * @access public
+     * @param string - name
+     * @param numeric - id
+     * @param array - joins
+     * @return DataObject
      */
     public static function get_by_id($class, $id, $joins = array()) {
         return self::get_one($class, array("id" => $id), array(), $joins);

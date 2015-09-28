@@ -14,12 +14,12 @@ class GFS_Package_installer extends GFS {
 	public $current;
 	public $progress;
 	public $remaining;
-	
+
 	/**
 	 * already unpacked files
 	 *
 	 *@name unpacked
-	*/
+	 */
 	public static $unpacked = array();
 
 	/**
@@ -34,7 +34,7 @@ class GFS_Package_installer extends GFS {
 	 *
 	 *@name __construct
 	 *@access public
-	*/
+	 */
 	public function __construct($filename) {
 		parent::__construct($filename, GFS_READONLY);
 	}
@@ -49,7 +49,7 @@ class GFS_Package_installer extends GFS {
 	 * @return bool|int
 	 */
 	public function unpack($destination, $path = "") {
-		if($path != "") {	
+		if($path != "") {
 			//! TODO: Support Subfolders!
 			throw new InvalidArgumentException("GFS_Package_Installer doesn't support subfolders.");
 		}
@@ -60,7 +60,7 @@ class GFS_Package_installer extends GFS {
 		// write files
 		$this->status = "Writing files...";
 		$this->current = "";
-		
+
 		// we get time, if it is over 2, we reload ;)
 		$start = microtime(true);
 		$info = $this->getProgressInfo(".gfsprogress");
@@ -70,47 +70,47 @@ class GFS_Package_installer extends GFS {
 		$this->dbvalues = array_values($this->db);
 		$this->paths = array_keys($this->db);
 		$this->destination = $destination;
-		
+
 		// let's go
 		while($i < count($this->dbvalues)) {
 
 			$this->unpackToFileSystem($i);
-			
+
 			// maximum 2.0 second
 			$this->checkForTime($start, $i, $count, 0.7, 0);
 			$i++;
 			unset($data, $path);
 		}
-		
+
 		// now move all files
 		$rinfo = $this->getProgressInfo(".gfsrprogress");
 		$i = $rinfo[0];
 		$count = $rinfo[1];
-		
+
 		// let's go
 		while($i < count($this->dbvalues)) {
 
 			$this->renameUnpacked($i);
 
 			// maximum of 0.5 seconds
-			$this->checkForTime($start, $i, $count, 0.3, 0.7);
+			$this->checkForTime($start, $i, $count, 0.3, 0.7, ".gfsrprogress");
 			$i++;
 			unset($data, $path);
 		}
-		
+
 		self::$unpacked[] = $this->file;
-		
+
 		// clean up
-		
+
 		FileSystem::delete($this->tempFolder());
-		
+
 		if(defined("IN_GFS_EXTERNAL")) {
 			if(isset($_GET["redirect"]))
 				header("Location:" . $_GET["redirect"]);
-			exit; 
+			exit;
 		}
 		return true;
-		
+
 	}
 
 	/**
@@ -189,12 +189,12 @@ class GFS_Package_installer extends GFS {
 	 * @param $operationMultiplier how much of 100% the operation should take
 	 * @param $operationDone how much of 100% the previous has been taken
 	 */
-	protected function checkForTime($start, $i, $count, $operationMultiplier, $operationDone) {
+	protected function checkForTime($start, $i, $count, $operationMultiplier, $operationDone, $filename = ".gfsprogress") {
 		// maximum 2.0 second
 		if(microtime(true) - $start > 2.0) {
 			$i++;
 			$count++;
-			file_put_contents($this->tempFolder() . "/.gfsprogess", serialize(array("i" => $i, "count" => $count)));
+			file_put_contents($this->tempFolder() . "/" . $filename, serialize(array("i" => $i, "count" => $count)));
 
 			$this->calculateRemaining($i, $count, $start, $operationMultiplier, $operationDone);
 
@@ -263,7 +263,7 @@ class GFS_Package_installer extends GFS {
 			$file = str_replace('\\\\', '\\', realpath($file));
 			$file = str_replace('\\', '/', realpath($file));
 			$unpack = isset($_GET["unpack"]) ? str_replace('\\', '/', str_replace('\\\\', '\\', $_GET["unpack"])) : array();
-			
+
 			return in_array($file, $unpack);
 		} else {
 			if(isset($_GET["unpack"]))
@@ -295,18 +295,18 @@ class GFS_Package_installer extends GFS {
 		$file = $goma->build($code);
 
 		return $file;
- 
+
 	}
-	
+
 	/**
 	 * shows the ui
 	 *
 	 *@name showUI
 	 *@access public
-	*/
+	 */
 	public function showUI($file = "",$reload = true) {
 		if(!defined("BASE_URI")) define("BASE_URI", "./"); // most of the users use this path ;)
-		
+
 		$template = new Template;
 		$template->assign("destination", $file);
 		$template->assign("reload", $reload);

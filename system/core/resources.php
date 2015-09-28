@@ -322,8 +322,9 @@ class Resources extends Object {
 	}
 
 	/**
-	 * adds some css code
-	 *@param string - js
+	 * adds some css code in raw format.
+	 *
+	 * @param string $css
 	 */
 	public static function addCSS($css) {
 		self::$resources_css["raw"]["data"][] = $css;

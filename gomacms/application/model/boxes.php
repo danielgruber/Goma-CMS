@@ -515,7 +515,7 @@ class Box extends Boxes
 			
 			$form->add(new AutoFormField("border", lang("border")), null, "settings");
 			$form->add(new AutoFormField("fullsized", lang("fullwidth")), null, "settings");
-			$form->add(new AutoFormField("usebgcolor", lang("color")), null, "settings");
+			$form->add(new AutoFormField("usebgcolor", lang("bgcolor")), null, "settings");
 			$form->add(new ColorPicker("color", lang("color")), null, "settings");
 			$form->add(new TextField("cssclass", lang("cssclass")), null, "settings");
 			$form->add(new TextField("width", lang("width")), null, "settings");

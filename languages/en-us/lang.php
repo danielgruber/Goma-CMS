@@ -105,6 +105,12 @@ $lang = array(
 	"user_creat_bad"                               	=> "Error while creating.",
 	/* ADMIN AREA  */
 	/* boxes START  */
+	"bgimage"										=> "Background-image",
+	"fullwidth"										=> "Full Width",
+	"color"											=> "Color",
+	"bgcolor"										=> "Backgroundcolor",
+	"cssclass"										=> "CSS-Class",
+	"width"											=> "Width",
 	"NEW_BOX"                                      => "Create box",
 	"EDIT_BOX"                                     => "Edit box",
 	"DEL_BOX"                                      => "Delete box",

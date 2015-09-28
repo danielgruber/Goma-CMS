@@ -8,7 +8,7 @@
  * @author	Goma-Team
  * @license	GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Framework
- * @version	1.5.13
+ * @version	1.5.14
  */
 class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
@@ -22,8 +22,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * installs the framework
 	 *
-	 *@name getInstallInfo
-	 *@access public
+	 * @name getInstallInfo
+	 * @access public
+	 * @return array
 	 */
 	public function getInstallInfo($controller, $forceInstall = false) {
 		$gfs = new GFS($this->file);
@@ -47,16 +48,6 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		$dir = FRAMEWORK_ROOT . "temp/" . md5($this->file);
 
 		FileSystem::requireDir($dir);
-
-		/*if($gfs->exists(".preflight")) {
-			$gfs->writeToFileSystem(".preflight", $dir . "/.preflight");
-			$data["preflight"][] = $dir . "/.preflight";
-		}
-		
-		if($gfs->exists(".postflight")) {
-			$gfs->writeToFileSystem(".postflight", $dir . "/.postflight");
-			$data["postflight"][] = $dir . "/.postflight";
-		}*/
 
 		$data["version"] = $info["version"];
 
@@ -138,8 +129,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * restores the framework
 	 *
-	 *@name getRestoreInfo
-	 *@access public
+	 * @name getRestoreInfo
+	 * @access public
+	 * @return bool
 	 */
 	public function getRestoreInfo($forceCompleteRestore = false) {
 		return false;
@@ -148,8 +140,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * generates a distro
 	 *
-	 *@name backup
-	 *@access public
+	 * @name backup
+	 * @access public
+	 * @return bool
 	 */
 	public static function backup($file, $name, $changelog = null) {
 		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
@@ -189,8 +182,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * returns the current framework-version with gfs
 	 *
-	 *@name generateDistroFileName
-	 *@access public
+	 * @name generateDistroFileName
+	 * @access public
+	 * @return bool|string
 	 */
 	public static function generateDistroFileName($name) {
 		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
@@ -272,8 +266,9 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	/**
 	 * gets package info
 	 *
-	 *@name getPackageInfo
-	 *@access public
+	 * @name getPackageInfo
+	 * @access public
+	 * @return array
 	 */
 	public function getPackageInfo() {
 		$gfs = new GFS($this->file);
@@ -386,6 +381,6 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	 */
 	protected function getDistroName($data)
 	{
-		return $data["expName"];
+		return $data["expname"];
 	}
 }

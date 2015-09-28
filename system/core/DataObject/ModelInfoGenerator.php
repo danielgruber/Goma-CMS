@@ -104,7 +104,7 @@ class ModelInfoGenerator {
         foreach($fields as $name => $type) {
             // hack to not break current Goma-CMS Build
             if((
-                    in_array($name, array("long", "order", "select", "where", "group", "sort")) ||
+                    in_array($name, array("long", "order", "select", "where", "group")) ||
                     in_array($name, ViewAccessableData::$notViewableMethods)
                 )
                 &&

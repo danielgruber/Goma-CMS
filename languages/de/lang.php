@@ -104,6 +104,12 @@ $lang = array(
 	"user_creat_bad"                               	=> "Fehler bei anlegen des Benutzers!",
 	/* ADMIN AREA  */
 	/* boxes START  */
+	"bgimage"										=> "Hintergrundbild",
+	"fullwidth"										=> "Volle Breite",
+	"color"											=> "Farbe",
+	"bgcolor"										=> "Hintergrundfarbe",
+	"cssclass"										=> "CSS-Klasse",
+	"width"											=> "Breite",
 	"NEW_BOX"                                      => "Box erstellen",
 	"EDIT_BOX"                                     => "Box bearbeiten",
 	"DEL_BOX"                                      => "Box l&ouml;schen",
