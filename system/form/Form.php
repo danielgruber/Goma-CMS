@@ -1156,5 +1156,4 @@ class Form extends object {
 			}
 		}
 	}
-
 }

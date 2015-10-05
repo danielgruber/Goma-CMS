@@ -1,23 +1,23 @@
 <?php
 /**
-  * inspiration by Silverstripe 3.0 GridField
-  * http://silverstripe.org
-  *
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.07.2014
-  * $Version - 1.1
+ * inspiration by Silverstripe 3.0 GridField
+ * http://silverstripe.org
+ *
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
+ * last modified: 25.07.2014
+ * $Version - 1.1
  */
- 
+
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLHandler {
-	
+
 	/**
- 	 * constructor.
-	*/
+	 * constructor.
+	 */
 	public function __construct($title = null, $requirePerm = null) {
 		if(!isset($requirePerm)) {
 			$requirePerm = "write";
@@ -34,15 +34,15 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 
 	/**
 	 * Add a column 'Actions'
-	 * 
+	 *
 	 * @param type $tableField
-	 * @param array $columns 
+	 * @param array $columns
 	 */
 	public function augmentColumns($tableField, &$columns) {
 		if(!in_array('Actions', $columns))
 			$columns[] = 'Actions';
 	}
-	
+
 	/**
 	 * Return any special attributes that will be used for the column
 	 *
@@ -54,10 +54,10 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 	public function getColumnAttributes($tableField, $columnName, $record) {
 		return array('class' => 'col-buttons');
 	}
-	
+
 	/**
-	 * Add the title 
-	 * 
+	 * Add the title
+	 *
 	 * @param TableField $tableField
 	 * @param string $columnName
 	 * @return array
@@ -67,23 +67,23 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			return array('title' => '');
 		}
 	}
-	
+
 	/**
 	 * Which columns are handled by this component
-	 * 
+	 *
 	 * @param type $tableField
-	 * @return type 
+	 * @return type
 	 */
 	public function getColumnsHandled($tableField) {
 		return array('Actions');
 	}
-	
+
 	/**
 	 *
 	 * @param TableField $tableField
 	 * @param DataObject $record
 	 * @param string $columnName
-	 * @return string - the HTML for the column 
+	 * @return string - the HTML for the column
 	 */
 	public function getColumnContent($tableField, $record, $columnName) {
 		if($this->requirePerm) {
@@ -94,7 +94,7 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 				return;
 			}
 		}
-		
+
 		$data = new ViewAccessableData();
 		return $data->customise(array("title" => $this->title, "link" => $tableField->externalURL() . "/editbtn/" . $record->ID . URLEND . "?redirect=" . urlencode($_SERVER["REQUEST_URI"])))->renderWith("form/tableField/editButton.html");
 	}
@@ -134,14 +134,13 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			Core::setTitle($title);
 			if($tableField->form()->getRequest())
 				$tableField->form()->getRequest()->post_params = $_POST;
-			
+
 			$content = $data->first()->controller($tableField->form()->controller)->edit();
 		} else {
 			$tableField->Form()->redirectToForm();
 			exit;
 		}
-		
-		$controller = $tableField->form()->getController();
-		return $controller->serve($content);
+
+		return $content;
 	}
 }
