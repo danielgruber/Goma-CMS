@@ -47,8 +47,6 @@ class lost_passwordExtension extends ControllerExtension
             $code = $_GET["code"];
             if(DataObject::count("user", array("code" => $code)) > 0)
             {
-
-
                 /** @var User $data */
                 $data = DataObject::get_one("user", array("code" => $code), array("id"));
 

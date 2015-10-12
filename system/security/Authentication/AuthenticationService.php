@@ -112,35 +112,35 @@ class AuthenticationService {
     public static function checkLogin($user, $pwd, $sessionId = null) {
         DefaultPermission::checkDefaults();
 
-        $userObject = DataObject::get_one("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
+        $users = DataObject::get("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
 
         /** @var User $userObject */
-        if($userObject) {
-            // check password
-            if(Hash::checkHashMatches($pwd, $userObject->fieldGet("password"))) {
-                if($userObject->status == 1) {
+        if($users->count() > 0) {
+            foreach($users as $userObject) {
+                // check password
+                if (Hash::checkHashMatches($pwd, $userObject->fieldGet("password"))) {
+                    if ($userObject->status == 1) {
 
-                    DefaultPermission::forceGroups($userObject);
+                        DefaultPermission::forceGroups($userObject);
 
-                    $authentication = new UserAuthentication(array(
-                        "token" => isset($sessionId) ? $sessionId : GlobalSessionManager::globalSession()->getId(),
-                        "userid" => $userObject->id
-                    ));
-                    Core::repository()->add($authentication, true);
+                        $authentication = new UserAuthentication(array(
+                            "token"  => isset($sessionId) ? $sessionId : GlobalSessionManager::globalSession()->getId(),
+                            "userid" => $userObject->id
+                        ));
+                        Core::repository()->add($authentication, true);
 
-                    $userObject->performLogin();
+                        $userObject->performLogin();
 
-                    return $userObject;
-                } else if($userObject->status == 0) {
-                    throw new LoginUserMustUnlockException();
-                } else {
-                    throw new LoginUserLockedException();
+                        return $userObject;
+                    } else if ($userObject->status == 0) {
+                        throw new LoginUserMustUnlockException();
+                    } else {
+                        throw new LoginUserLockedException();
+                    }
                 }
-            } else {
-                throw new LoginInvalidException();
             }
-        } else {
-            throw new LoginInvalidException();
         }
+
+        throw new LoginInvalidException();
     }
 }
