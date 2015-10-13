@@ -444,6 +444,7 @@ class ModelWriter extends Object {
     protected function callPostFlightEvents() {
         $this->callExtending("onAfterWrite");
         $this->model->onAfterWrite();
+        $this->model->callExtending("onAfterWrite");
     }
 
     /**
@@ -474,8 +475,8 @@ class ModelWriter extends Object {
      */
     protected function validateSinglePermission($permission, $verb) {
         if (!$this->model->can($permission)) {
-            throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't" .
-                "be ".$verb." cause of missing publish permissions.",
+            throw new PermissionException("Record {$this->model->id} of type {$this->model->classname} can't " .
+                "be ".$verb." cause of missing $permission permissions.",
                 ExceptionManager::PERMISSION_ERROR,
                 $permission);
         }

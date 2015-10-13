@@ -44,12 +44,9 @@ class HistoryWriter extends Extension {
         if (!self::$disabled && StaticsManager::getStatic($owner->getModel()->classname, "history")) {
 
             $command = $owner->getCommandType();
-            if($command != ModelRepository::COMMAND_TYPE_INSERT &&
-                $owner->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
-                $command = "publish";
-            }
+            $writeType = $owner->getWriteType();
 
-            History::push($owner->getModel()->classname, $owner->getOldId(), $owner->getModel()->versionid, $owner->getModel()->id, $command);
+            History::push($owner->getModel()->classname, $owner->getOldId(), $owner->getModel()->versionid, $owner->getModel()->id, $command, $writeType);
         }
         unset($manipulation);
     }

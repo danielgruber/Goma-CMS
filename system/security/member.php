@@ -79,6 +79,11 @@ class Member extends Object {
 		
 		if($auth = AuthenticationService::getAuthRecord(GlobalSessionManager::globalSession()->getId())) {
 			$user = $auth->user;
+
+			if(!$user) {
+				return false;
+			}
+
 			if($user["timezone"]) {
 				Core::setCMSVar("TIMEZONE", $user["timezone"]);
 				date_default_timezone_set(Core::getCMSVar("TIMEZONE"));

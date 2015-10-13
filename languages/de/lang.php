@@ -551,19 +551,13 @@ $lang = array(
 	"tablefield_out_of"		=> "von",
 
 	"history"				=> "Änderungs-Geschichte",
-	
-	// history
-	"h_pages_update"		=> '$user bearbeitete die Seite <a href="$pageUrl">$page</a>',
-	"h_pages_publish"		=> '$user veröffentlichte die Seite <a href="$pageUrl">$page</a>',
-	"h_pages_unpublish"		=> '$user nahm die Seite <a href="$pageUrl">$page</a> zurück',
-	"h_pages_remove"		=> '$user löschte die Seite <a href="$pageUrl">$page</a>',
-	"h_pages_create"		=> '$user erstellte die Seite <a href="$pageUrl">$page</a>',
-	
+
 	"h_user_update"			=> '$user bearbeitete den Benutzer <a href="$userUrl">$euser</a>',
 	"h_profile_update"		=> '$user bearbeitete das eigene Profil.',
 	"h_user_remove"			=> '$user löschte den Benutzer $euser',
 	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
-	"h_user_login"			=> '$euser hat sich eingeloggt',
+	"h_user_login"			=> '<a href="$userUrl">$euser</a> hat sich eingeloggt',
+	"h_user_logout"			=> '<a href="$userUrl">$euser</a> hat sich ausgeloggt',
 	
 	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>',
 	

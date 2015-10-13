@@ -985,12 +985,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * unpublishes the record
      *
-     *@name unpublish
-     *@access public
+     * @param bool $force
+     * @param bool $history
+     * @return bool
+     * @throws PermissionException
+     * @internal param $unpublish
+     * @access public
      */
     public function unpublish($force = false, $history = true) {
         if ((!$this->can("Publish")) && !$force)
-            return false;
+            throw new PermissionException("Record {$this->id} of type {$this->classname} can't " .
+                "be unpublished cause of missing publish permissions.",
+                ExceptionManager::PERMISSION_ERROR,
+                "publish");
 
         $manipulation = array(
             $this->baseTable . "_state" => array(
@@ -1011,47 +1018,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         if (SQL::manipulate($manipulation)) {
             if (StaticsManager::getStatic($this->classname, "history") && $history) {
-                History::push($this->classname, 0, $this->versionid, $this->id, "unpublish");
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * publishes the record
-     *
-     *@name publish
-     *@access public
-     */
-    public function publish($force = false, $history = true) {
-        if ((!$this->can("Publish")) && !$force)
-            return false;
-
-        if ($this->isPublished())
-            return true;
-
-        $manipulation = array(
-            $this->baseTable . "_state" => array(
-                "table_name" 	=> $this->baseTable . "_state",
-                "command"		=> "update",
-                "id"			=> $this->recordid,
-                "fields"		=> array(
-                    "publishedid"	=> $this->versionid
-                )
-            )
-        );
-
-        $this->onBeforePublish();
-        $this->callExtending("OnBeforePublish");
-
-        $this->onBeforeManipulate($manipulation, $b = "publish");
-        $this->callExtending("onBeforeManipulate", $manipulation, $b = "publish");
-
-        if (SQL::manipulate($manipulation)) {
-            if (StaticsManager::getStatic($this->classname, "history") && $history) {
-                History::push($this->classname, 0, $this->versionid, $this->id, "publish");
+                History::push($this->classname, $this->versionid, $this->versionid, $this->id, IModelRepository::COMMAND_TYPE_UNPUBLISH);
             }
             return true;
         }
@@ -1175,7 +1142,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $this->callExtending("onBeforeRemove", $manipulation);
         if (SQL::manipulate($manipulation)) {
             if (StaticsManager::getStatic($this->classname, "history") && $history) {
-                History::push($this->classname, 0, $this->versionid, $this->id, "remove");
+                History::push($this->classname, $this->versionid, 0, $this->id, "remove");
             }
             $this->onAfterRemove($this);
             $this->callExtending("onAfterRemove", $this);

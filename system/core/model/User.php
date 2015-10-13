@@ -7,7 +7,7 @@
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		1.3.1
+ * @version		1.3.2
  *
  * @property string nickname
  * @property string code
@@ -513,7 +513,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      *
      * @name generateHistoryData
      * @access public
-     * @param Histroy $record
+     * @param History $record
      * @return array|bool
      */
 	public static function generateHistoryData($record) {
@@ -527,7 +527,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		
 		return array(   "icon" => self::getHistoryIcon($record),
                         "text" => $lang,
-                        "relevant" => ($record->autor && !self::isLoginInHistory($record)));
+                        "relevant" => !!$record->autor );
 	}
 
     /**
@@ -540,10 +540,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
         switch($record->action) {
             case "update":
             case "publish":
-                // check for login
-                if(self::isLoginInHistory($record)) {
-                    return str_replace('$euser', '<a href="member/'.$record->record()->id . URLEND .'">' . convert::raw2text($record->record()->title) . '</a>', lang("h_user_login"));
-                } else if($record->autorid == $record->newversion()->id) {
+                if($record->autorid == $record->newversion()->id) {
 				   return lang("h_profile_update", '$user updated the own profile');
 				} else {
 					// admin changed profile
@@ -568,29 +565,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return string path
      */
     public static function getHistoryIcon($record) {
-        // check for user login.
-        if(self::isLoginInHistory($record)) {
-            return "images/icons/fatcow16/user_go.png";
-        }
-
         $icon = array(
             "insert" => "images/icons/fatcow16/user_add.png",
+			IModelRepository::COMMAND_TYPE_INSERT => "images/icons/fatcow16/user_add.png",
             "remove" => "images/icons/fatcow16/user_delete.png",
+			IModelRepository::COMMAND_TYPE_DELETE => "images/icons/fatcow16/user_delete.png",
         );
 
         return isset($icon[$record->action]) ? $icon[$record->action] : "images/icons/fatcow16/user_edit.png";
-    }
-
-    /**
-     * returns true when history-entry can be seen as login.
-     *
-     * @param History record
-     * @return bool
-     */
-    protected static function isLoginInHistory($record) {
-        return $record->action != "insert" &&
-                ($record->oldversion() && $record->newversion() &&
-                    ($record->oldversion()->phpsess != $record->newversion()->phpsess || $record->oldversion()->code != $record->newversion()->code));
     }
 
     /**

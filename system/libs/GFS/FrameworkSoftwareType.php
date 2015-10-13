@@ -29,7 +29,6 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	public function getInstallInfo($controller, $forceInstall = false) {
 		$gfs = new GFS($this->file);
 		$info = $gfs->parsePlist("info.plist");
-		$appInfo = $gfs->parsePlist("data/system/info.plist");
 
 		$data = array("filename" => basename($this->file), "installType" => "update");
 		if(isset($info["type"]) && $info["type"] == "framework") {

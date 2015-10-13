@@ -21,6 +21,12 @@
 	<key>excludeModelsFromDistro</key>
 	<array>
 	</array>
+	<key>langPath</key>
+	<string>lang</string>
+	<key>langName</key>
+	<string>gomacms</string>
+	<key>defaultLang</key>
+	<string>en-us</string>
 	<key>excludeFiles</key>
 	<array>
 		<string>/application/.WELCOME_RUN</string>

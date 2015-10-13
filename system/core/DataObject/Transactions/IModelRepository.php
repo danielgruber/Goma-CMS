@@ -19,6 +19,8 @@ abstract class IModelRepository {
     const COMMAND_TYPE_UPDATE = 2;
     const COMMAND_TYPE_INSERT = 1;
     const COMMAND_TYPE_DELETE = 3;
+    const COMMAND_TYPE_PUBLISH = 4;
+    const COMMAND_TYPE_UNPUBLISH = 5;
 
     /**
      * reads from a given model class.

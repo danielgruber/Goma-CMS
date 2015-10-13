@@ -556,19 +556,15 @@ $lang = array(
 	"history"				=> "Modification-History",
 	
 	// history
-	"h_pages_update"		=> '$user updated the page <a href="$pageUrl">$page</a>',
-	"h_pages_publish"		=> '$user published the page <a href="$pageUrl">$page</a>',
-	"h_pages_unpublish"		=> '$user unpublished the page <a href="$pageUrl">$page</a>',
-	"h_pages_remove"		=> '$user removed the page <a href="$pageUrl">$page</a>',
-	"h_pages_create"		=> '$user created the page <a href="$pageUrl">$page</a>',
 	"h_settings"			=> '$user updated the <a href="$url">settings</a>',
 	
 	"h_user_update"			=> '$user updated the user <a href="$userUrl">$euser</a>',
 	"h_profile_update"		=> '$user updated the own profile.',
 	"h_user_remove"			=> '$user removed the user $euser',
 	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
-	"h_user_login"			=> '$euser logged in',
-	
+	"h_user_login"			=> '<a href="$userUrl">$euser</a> logged in',
+	"h_user_logout"			=> '<a href="$userUrl">$euser</a> logged out',
+
 	"h_group_update"		=> '$user updated the group <a href="$groupUrl">$group</a>',
 	"h_group_remove"		=> '$user removed the group $group',
 	"h_group_create"		=> '$user created the group <a href="$groupUrl">$group</a>',

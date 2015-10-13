@@ -1,19 +1,29 @@
 <?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 12.04.2013
-  * $Version 1.0.8
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+defined("IN_GOMA") OR die();
 
 /**
- * @property string action
+ * Model for History.
+ *
+ * @package     Goma\Model
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ * @property 	string action
+ * @property 	string dbobject
+ * @property 	int writeType
+ *
+ * @version    1.0
  */
+
 class History extends DataObject {
+
+	/**
+	 * store history for this count of days.
+	 *
+	 * @var int
+	 */
+	public static $storeHistoryForDays = 90;
+
 	/**
 	 * db-fields
 	*/
@@ -22,7 +32,8 @@ class History extends DataObject {
 		"record"		=> "int(10)",
 		"oldversion"	=> "int(10)",
 		"newversion"	=> "int(10)",
-		"action"		=> "varchar(100)",
+		"action"		=> "varchar(30)",
+		"writetype"		=> "int(10)",
 		"changecount"	=> "int(10)",
 		"changed"		=> "text"
 	);
@@ -68,26 +79,27 @@ class History extends DataObject {
 	 *@access private
 	*/
 	private $historyData;
-	
+
 	/**
 	 * you can push history-events by yourself into this
 	 *
-	 *@name push
-	 *@access public
-	 *@param class-name of the data to insert
-	 *@param old version-id of data
-	 *@param new version-id of data
-	 *@param id of the record to which the versions belong
-	 *@param name of the action which happended, for example: "insert", "delete", "update"
-	 *@param array - changed data
-	*/
-	public static function push($class, $oldrecord, $newrecord, $recordid, $action, $changed = null) {
+	 * @name push
+	 * @access public
+	 * @param string $class -name of the data to insert
+	 * @param int|DataObject $oldrecord version-id of data
+	 * @param int|DataObject $newrecord version-id of data
+	 * @param int $recordid of the record to which the versions belong
+	 * @param int $command by IModelRespository. you can also put here custom action. (max 30 chars)
+	 * @param int $writeType by IModelRepository
+	 * @param array - changed data
+	 * @return bool
+	 */
+	public static function push($class, $oldrecord, $newrecord, $recordid, $command, $writeType = -1, $changed = null) {
 		
 		if(PROFILE) Profiler::mark("history::push");
 
 		// if it's an object, get the class-name from the object
-		if(is_object($class))
-			$class = $class->classname;
+		$class = ClassManifest::resolveClassName($class);
 		
 		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))
@@ -103,11 +115,7 @@ class History extends DataObject {
 		}
 		
 		if(isset($changed) && !DataObject::versioned($class)) {
-			$cc = count($changed);
-			$c = serialize($changed);
-		} else {
-			$c = 0;
-			$cc = null;
+			$serializedChanged = serialize($changed);
 		}
 		
 		// create the history-record
@@ -116,29 +124,30 @@ class History extends DataObject {
 			"oldversion"	=> $oldrecord,
 			"newversion"	=> $newrecord,
 			"record"		=> $recordid,
-			"action"		=> $action,
-			"changed"		=> $c,
-			"cc"			=> $cc
+			"action"		=> $command,
+			"writetype" 	=> $writeType,
+			"changed"		=> isset($serializedChanged) ? $serializedChanged : null
 		));
 
+		$record->callExtending("onBeforeAddHistory");
 
-		
 		// insert data, we force to insert and to write, so override permission-system ;)
-		$return = $record->write(true, true, 2, true, false);
+		$return = Core::repository()->write($record, true, true);
 
 		if(PROFILE) Profiler::unmark("history::push");
-		if(PushController::$pusher && in_array($record->dbobject, History::supportHistoryView())) {
-			//PushController::trigger("history-update", array("rendering" => $record->renderWith("history/event.html")));
-		}
+
+		$record->callExtending("historyAdded");
+
 		return $return;
 	}
-	
+
 	/**
 	 * returns a list of classes supporting HistoryView
 	 *
-	 *@name supportHistoryView
-	 *@access public
-	*/
+	 * @name supportHistoryView
+	 * @access public
+	 * @return array
+	 */
 	public static function supportHistoryView() {
 		if(isset(self::$supportHistoryView))
 			return self::$supportHistoryView;
@@ -152,26 +161,28 @@ class History extends DataObject {
 		
 		return self::$supportHistoryView;
 	}
-	
+
 	/**
 	 * if we can this history-event
 	 *
-	 *@name canSeeEvent
-	*/
+	 * @name canSeeEvent
+	 * @return bool
+	 */
 	public function canSeeEvent() {
 		if($this->historyData() !== false && call_user_func_array(array($this->dbobject, "canViewHistory"), array($this))) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * returns the text for a history-element
 	 * makes $content in template available or $object->content
 	 *
-	 *@name getContent
-	 *@access public
-	*/
+	 * @name getContent
+	 * @access public
+	 * @return bool|mixed
+	 */
 	public function getContent() {
 		if($data = $this->historyData()) {
 			$text = $data["text"];
@@ -190,14 +201,15 @@ class History extends DataObject {
 		
 		return false;
 	}
-	
+
 	/**
 	 * returns the icon for a history-element
 	 * makes $content in template available or $object->content
 	 *
-	 *@name getIcon
-	 *@access public
-	*/
+	 * @name getIcon
+	 * @access public
+	 * @return bool|string
+	 */
 	public function getIcon() {
 		if($data = $this->historyData()) {
 			return ClassInfo::findFile($data["icon"], $this->dbobject);
@@ -205,12 +217,13 @@ class History extends DataObject {
 		
 		return false;
 	}
-	
+
 	/**
 	 * gets the info if all versions are available for this history-object
 	 *
-	 *@name getIsVersioned
-	*/
+	 * @name getIsVersioned
+	 * @return bool
+	 */
 	public function getIsVersioned() {
 		if(isset($this->_versioned)) {
 			return $this->_versioned;
@@ -233,22 +246,24 @@ class History extends DataObject {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * gets the edit-url
 	 *
-	 *@name getEditURL
-	*/
+	 * @name getEditURL
+	 * @return null
+	 */
 	public function getEditURL() {
 		$data = $this->historyData();
 		return isset($data["editurl"]) ? $data["editurl"] : null;
 	}
-	
+
 	/**
 	 * gets the info if all versions are available for this history-object and comparing
 	 *
-	 *@name getCompared
-	*/
+	 * @name getCompared
+	 * @return bool
+	 */
 	public function getCompared() {
 		$data = $this->historyData();
 		$temp = new $this->dbobject();
@@ -258,14 +273,15 @@ class History extends DataObject {
 		
 		return false;
 	}
-	
+
 	/**
 	 * returns the retina-icon for a history-element
 	 * makes $content in template available or $object->content
 	 *
-	 *@name getIcon
-	 *@access public
-	*/
+	 * @name getIcon
+	 * @access public
+	 * @return bool|string
+	 */
 	public function getRetinaIcon() {
 		if($data = $this->historyData()) {
 			$icon = ClassInfo::findFile($data["icon"], $this->dbobject);
@@ -278,12 +294,13 @@ class History extends DataObject {
 		
 		return false;
 	}
-	
+
 	/**
 	 * gets history-data
 	 *
-	 *@name historyData
-	*/
+	 * @name historyData
+	 * @return bool|mixed
+	 */
 	public function historyData() {
 		if(isset($this->historyData)) {
 			return $this->historyData;
@@ -295,7 +312,7 @@ class History extends DataObject {
 				if(isset($data["text"], $data["icon"])) {
 					$this->historyData = $data;
 				} else if(is_array($data)) {
-					throwError(6, "Invalid Result", "Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
+					throw new LogicException("Invalid Result from ".$this->dbobject."::generateHistoryData: icon & text required!");
 				} else {
 					$this->historyData = false;
 					return false;
@@ -320,7 +337,6 @@ class History extends DataObject {
 	 */
 	public function newversion() {
 		if($this->fieldGet("newversion") && ClassInfo::exists($this->dbobject)) {
-			
 			if(DataObject::versioned($this->dbobject)) {
 				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
@@ -407,7 +423,7 @@ class History extends DataObject {
 		parent::cleanUpDB();
 		
 		$id = null;
-		$sql = "SELECT id FROM ".DB_PREFIX.$this->classname." WHERE last_modified < " . (NOW - 90 * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
+		$sql = "SELECT id FROM ".DB_PREFIX.$this->Table()." WHERE last_modified < " . (NOW - self::$storeHistoryForDays * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
 		if ($result = SQL::Query($sql)) {
 			if($row = SQL::fetch_object($result)) {
 				$id = $row->id;
@@ -416,7 +432,7 @@ class History extends DataObject {
 		
 		if($id) {
 			// delete
-			$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->classname." WHERE id < ".$id."";
+			$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->Table()." WHERE id < ".$id."";
 			$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->baseTable."_state WHERE publishedid < ".$id."";
 			
 			SQL::Query($sqlDeleteData);

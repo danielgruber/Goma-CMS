@@ -62,11 +62,6 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             $this->updateStateTable();
 
             $this->checkForAndCleanUpDataTable();
-
-            $this->model()->onAfterWrite();
-            $this->model()->callExtending("onAfterWrite");
-            $this->writer->callExtending("onAfterWrite");
-
         } else {
             throw new SQLException();
         }

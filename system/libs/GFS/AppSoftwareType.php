@@ -36,7 +36,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 *@access public
 	 */
 	public function saveFormData($data) {
-		$_data = $data["installData"];
+		$_data = $data["installdata"];
 
 		if(!is_array($_data["postflightCode"])) {
 			$_data["postflightCode"] = array($_data["postflightCode"]);
@@ -400,7 +400,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 *@access public
 	 */
 	public function saveRFormData($data) {
-		$_data = $data["installData"];
+		$_data = $data["installdata"];
 
 		if($_data["type"] == "copyconfig") {
 			if(!is_array($_data["postflightCode"])) {
@@ -650,9 +650,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * @return bool
 	 */
 	public static function backup($file, $name, $changelog = null) {
-
-		$tables = ClassInfo::Tables("user");
-		$tables = array_merge($tables, ClassInfo::Tables("history"));
+		$tables = array_merge(ClassInfo::Tables("user"), ClassInfo::Tables("UserAuthentication"), ClassInfo::Tables("history"));
 		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
