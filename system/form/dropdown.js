@@ -138,7 +138,13 @@ DropDown.prototype = {
 	 *@name setField
 	 *@param string - content
 	*/
-	setField: function(content) {
+	setField: function(content, setHeight) {
+		if(setHeight === true) {
+			this.widget.find(" > .field").css("height", this.widget.find(" > .field").height());
+		} else {
+			this.widget.find(" > .field").css("height", "");
+		}
+
 		this.widget.find(" > .field").html(content);
 		this.bindFieldEvents();
 		this.updateDropdownPosition();
@@ -161,24 +167,21 @@ DropDown.prototype = {
 	*/
 	showDropDown: function() {
 		if(this.widget.find(" > .dropdown").css("display") == "none") {
-			
-			
 			this.widget.find(" > .field").addClass("active");
 			// set correct position
 			this.updateDropdownPosition();
 			
-			var fieldhtml = this.widget.find(" > .field").html();
-			//this.widget.find(" > .field").css({height: this.widget.find(" > .field").height()});
+			var oldFieldHTML = this.widget.find(" > .field").html();
 			
 			// show loading
-			this.widget.find(" > .field").html("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+			this.setFieldLoading();
 			var $this = this;
 			
 			// load data
 			this.reloadData(function(){
 				//$this.widget.find(" > .field").css({height: ""});
 				$this.widget.find(" > .dropdown").fadeIn(200);
-				$this.setField(fieldhtml);
+				$this.setField(oldFieldHTML);
 				var width = $this.widget.find(" > .field").outerWidth(false) - ($this.widget.find(" > .dropdown").outerWidth(false) - $this.widget.find(" > .dropdown").width());
 				$this.widget.find(" > .dropdown").css({ width: width});
 				$this.widget.find(" > .dropdown .search").focus();
@@ -389,8 +392,6 @@ DropDown.prototype = {
 		} else {
 			this.widget.find(" > .field > .value-holder").removeClass("sortable");
 		}
-
-
 	},
 	
 	/**
@@ -400,55 +401,37 @@ DropDown.prototype = {
 	 *@param id
 	*/
 	check: function(id, hide) {
-		var that = this;
-		var h = hide;
-		if(this.multiple) {
-			
-			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-			$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
-			
-			// id contains id of form-field and value
-			this.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-			$.ajax({
-				url: this.url + "/checkValue/",
-				type: "post",
-				data: {"value": id},
-				error: function() {
-					alert("Failed to check Node. Please check your Internet-Connection");
-				}, 
-				success: function(html) {
-					// everything is fine
-					that.setField(html);
-				}
-			});
-		} else {
+		var _this = this;
+		var shouldHide = hide;
+		if(!this.multiple) {
 			this.widget.find(" > .dropdown > .content ul li a.checked").removeClass("checked");
-			
-			// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
-			$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
-			
-			// id contains id of form-field and value
 			this.input.val(id);
-			that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
-			$.ajax({
-				url: this.url + "/checkValue/",
-				type: "post",
-				data: {"value": id},
-				error: function() {
-					alert("Failed to check Node. Please check your Internet-Connection");
-				}, 
-				success: function(html) {
-					// everything is fine
-					that.setField(html);
-					if(typeof h == "undefined" || h == true)
-						that.hideDropDown();
-					
-					that.input.val(id);
-				}
-			});	
-			
-			
 		}
+			
+		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
+		$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
+
+		// id contains id of form-field and value
+		this.setFieldLoading();
+		$.ajax({
+			url: this.url + "/checkValue/",
+			type: "post",
+			data: {"value": id},
+			error: function() {
+				alert("Failed to check Node. Please check your Internet-Connection");
+			},
+			success: function(html) {
+				// everything is fine
+				_this.setField(html);
+
+				if(!_this.multiple) {
+					if(typeof shouldHide == "undefined" || shouldHide == true)
+						_this.hideDropDown();
+
+					_this.input.val(id);
+				}
+			}
+		});
 	},
 	/**
 	 * unchecks a node
@@ -457,14 +440,10 @@ DropDown.prototype = {
 	 *@param id
 	*/
 	uncheck: function(id) {
-		var that = this;
-		
-		// this is just for dropdowns with multiple values
-		
 		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
 		$(document.getElementById("dropdown_" + this.id + "_" + id)).removeClass("checked");
 		
-		that.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."));
+		this.setFieldLoading();
 		$.ajax({
 			url: this.url + "/uncheckValue/",
 			type: "post",
@@ -474,15 +453,22 @@ DropDown.prototype = {
 			}, 
 			success: function(html) {
 				// everything is fine
-				that.setField(html);
-			}
+				this.setField(html);
+
+				if(!this.multiple) {
+					if(this.input.val() == id) {
+						this.input.val(0);
+						this.showDropDown();
+					}
+				}
+			}.bind(this)
 		});
-		
-		if(!this.multiple) {
-			if(that.input.val() == id) {
-				that.input.val(0);
-				this.showDropDown();
-			}
-		}
+	},
+
+	/**
+	 * sets field loading.
+	 */
+	setFieldLoading: function(){
+		this.setField("<img height=\"12\" width=\"12\" src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading..."), true);
 	}
 }
