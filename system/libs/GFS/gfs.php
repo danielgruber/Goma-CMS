@@ -1137,13 +1137,14 @@ class GFS extends Object {
 		
 		return array();
 	}
-	
+
 	/**
 	 * writes given data to given plist-file
 	 *
-	 *@name writePlist
-	 *@access public
-	*/
+	 * @name writePlist
+	 * @access public
+	 * @return bool|int
+	 */
 	public function writePlist($file, $data) {
 		$this->checkValidOrThrow();
 		

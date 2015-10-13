@@ -45,7 +45,7 @@ class SoftwareTypeTest extends GomaUnitTest {
 
 		$generatedIndex = G_SoftwareType::buildPackageIndex();
 
-		$this->assertEqual($generatedIndex, array());
+		$this->assertEqual($generatedIndex, array(), "Checking for errors: " . print_r($generatedIndex, true));
 	}
 
 	public function testListing() {
@@ -142,7 +142,69 @@ class SoftwareTypeTest extends GomaUnitTest {
     }
 
     public function unitIsValidPackageType($data, $shouldUpdate, $expected) {
-
         $this->assertEqual(g_SoftwareType::isValidPackageTypeAndVersion($data, $shouldUpdate), $expected, "%s " . print_r($data, true) . " Update: [$shouldUpdate]");
     }
+
+	public function testReadingPlist() {
+		$data = g_SoftwareType::getPlistFromPlist(ROOT . "system/info.plist");
+		$this->assertNotEqual($data, array());
+		$this->assertEqual($data["type"], "framework");
+	}
+
+	public function testReadingPlistFromGFS() {
+		$data = array(
+			"blub" => randomString(10),
+			"blah" => 2
+		);
+		$file = ROOT . "system/temp/test3plist.gfs";
+		$gfs = new GFS($file);
+		$gfs->writePlist("test.plist", $data);
+		$gfs->close();
+
+		$info = g_SoftwareType::getPlistFromGFS($file, "test.plist");
+		$this->assertEqual($info, $data);
+
+		FileSystem::delete($file);
+	}
+
+	public function testGetPlistorGFS() {
+		$data = array(
+			"blub" => randomString(10),
+			"blah" => 2
+		);
+		$file = ROOT . "system/temp/test2plist.gfs";
+		$pfile = ROOT . "system/temp/test2plist.plist";
+		$gfs = new GFS($file);
+		$gfs->writePlist("test.plist", $data);
+		FileSystem::write($pfile, $gfs->getFileContents("test.plist"));
+
+		$this->assertNotEqual(file_get_contents($pfile), "");
+		$this->assertEqual(file_get_contents($pfile), $gfs->getFileContents("test.plist"));
+
+		$gfs->close();
+
+		touch($pfile, NOW);
+		touch($file, NOW - 1);
+
+		clearstatcache();
+
+		$this->assertEqual(g_SoftwareType::getFromPlistOrGFS($pfile, $file, "test.plist", true), $data);
+		$this->assertTrue(file_exists($pfile));
+
+		touch($pfile, NOW);
+		touch($file, NOW);
+
+		clearstatcache();
+
+		$this->assertEqual(filemtime($file), filemtime($pfile));
+
+		$this->assertEqual(g_SoftwareType::getFromPlistOrGFS($pfile, $file, "test.plist"), $data);
+		$this->assertTrue(file_exists($pfile));
+
+		$this->assertEqual(g_SoftwareType::getFromPlistOrGFS($pfile, $file, "test.plist", true), $data);
+		$this->assertFalse(file_exists($pfile));
+
+		FileSystem::delete($file);
+		FileSystem::delete($pfile);
+	}
 }

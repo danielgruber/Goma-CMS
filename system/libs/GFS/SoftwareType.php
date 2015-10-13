@@ -784,7 +784,7 @@ abstract class g_SoftwareType {
 					// this is important to know which file is meant by package record.
 					$info["file"] = $file;
 
-					self::fillPackageArray($data["packages"], $info, $appFolder . "/" . $file, $appFolder . "/" . $file . ".plist");
+					self::fillPackageArray($data["packages"], $info, $appFolder . "/" . $file, $appFolder . "/" . $file . ".plist", $appFolder);
 					
 				}
 			}
@@ -800,37 +800,33 @@ abstract class g_SoftwareType {
 	/**
 	 *  fills packages array with information from plist.
 	 *
-	 * @param 	data packages-array
-	 * @param 	info plist
-	 * @param 	gfs
-	 * @param 	plist
-	*/
-	public static function fillPackageArray(&$data, $info, $gfs, $plist) {
-
+	 * @param array $data packages-array
+	 * @param array $info info-array
+	 * @param string $gfs path to gfs
+	 * @param string $plist path to plist
+	 * @param string $appFolder path to appfolder
+	 */
+	protected static function fillPackageArray(&$data, $info, $gfs, $plist, $appFolder) {
 		// check requirements for package first
 		if(isset($info["type"], $info["version"])) {
 			if(isset($info["name"])) {
 				if(isset($data[$info["type"]][$info["name"]])) {
 
-					foreach($data[$info["type"]][$info["name"]] as $v => $d) {
+					foreach($data[$info["type"]][$info["name"]] as $existingAppVersion => $existingAppData) {
 
-						// delete file which was found and has older version
-						if(goma_version_compare($v, $info["version"], "<")) {
-							@unlink($appFolder . "/" . $d["file"]);
-							@unlink($appFolder . "/" . $d["file"] . ".plist");
-							unset($data[$info["type"]][$info["name"]][$v]);
+						if(goma_version_compare($existingAppVersion, $info["version"], "<")) {
+							// delete file which was found and has older version
+							@unlink($appFolder . "/" . $existingAppData["file"]);
+							@unlink($appFolder . "/" . $existingAppData["file"] . ".plist");
+							unset($data[$info["type"]][$info["name"]][$existingAppVersion]);
 							$data[$info["type"]][$info["name"]][$info["version"]] = $info;
-
-							
 						} else {
-
 							// delete this file cause a newer version was found.
 							@unlink($gfs);
 							@unlink($plist);
 						}
 					}
 				} else {
-
 					// no version found until now, so its properbly the newest
 					$data[$info["type"]][$info["name"]][$info["version"]] = $info;
 				}
@@ -841,10 +837,10 @@ abstract class g_SoftwareType {
     /**
      * gets data from a plist or plist in GFS-Archive.
      *
-     * @param    string path to plist
-     * @param    string path to gfs
-     * @param    string path in GFS to plist
-     * @param    boolean delete plist when not readable
+     * @param    string $plist path to plist
+     * @param    string $gfs path to gfs
+     * @param    string $file path in gfs to plist
+     * @param    boolean $deletePlist delete when not readable
      * @return   array
      */
 	public static function getFromPlistOrGFS($plist, $gfs, $file, $deletePlist = false) {
@@ -862,19 +858,19 @@ abstract class g_SoftwareType {
 
 	/**
 	 * gets array from plist.
-	*/
-	public static function getPlistFromPlist($plist) {
-
-		if(!file_exists($plist)) {
+	 *
+	 * @param string $plistPath
+	 * @return bool|mixed
+	 */
+	public static function getPlistFromPlist($plistPath) {
+		if(!file_exists($plistPath)) {
 			return false;
 		}
 
 		$plist = new CFPropertyList();
 		try {
-			$plist -> parse(file_get_contents($plist));
-			$info = $plist -> toArray();
-
-			return $info;
+			$plist -> parse(file_get_contents($plistPath));
+			return $plist -> toArray();
 		} catch (Exception $e) {
 			return false;
 		}
