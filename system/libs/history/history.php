@@ -92,10 +92,10 @@ class History extends DataObject {
 	 * @param int $command by IModelRespository. you can also put here custom action. (max 30 chars)
 	 * @param int $writeType by IModelRepository
 	 * @param array - changed data
-	 * @return bool
+	 * @return History
 	 */
 	public static function push($class, $oldrecord, $newrecord, $recordid, $command, $writeType = -1, $changed = null) {
-		
+
 		if(PROFILE) Profiler::mark("history::push");
 
 		// if it's an object, get the class-name from the object
@@ -132,13 +132,13 @@ class History extends DataObject {
 		$record->callExtending("onBeforeAddHistory");
 
 		// insert data, we force to insert and to write, so override permission-system ;)
-		$return = Core::repository()->write($record, true, true);
+		Core::repository()->write($record, true, true);
 
 		if(PROFILE) Profiler::unmark("history::push");
 
 		$record->callExtending("historyAdded");
 
-		return $return;
+		return $record;
 	}
 
 	/**

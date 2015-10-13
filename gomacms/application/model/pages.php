@@ -1317,7 +1317,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * @return ParentResolver
      */
-    private function parentResolver()
+    public function parentResolver()
     {
         if(!isset($this->parentResolver)) {
             $this->parentResolver = new ParentResolver($this->classname, $this->baseClass);

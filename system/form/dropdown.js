@@ -21,16 +21,19 @@ var DropDown = function(id, url, multiple, sortable) {
 };
 
 DropDown.prototype = {
+
+	currentSearchResult: "",
+	currentRequest: null,
+	inSort: false,
+
 	/**
 	 * inits the dropdown-events
 	 *
 	 *@name init
 	*/
 	init: function() {
-		var that = this,
-			currentSearch = "";
+		var that = this;
 
-		this.inSort = false;
 			
 		this.widget.disableSelection();
 		this.widget.find(" > .field").css("cursor", "pointer");
@@ -63,16 +66,13 @@ DropDown.prototype = {
 			}
 		});
 		
-		this.currentRequest = null;
-		this.currentSearch = "";
-		
 		this.widget.find(" > .dropdown").click(function(){
 			that.widget.find(" > .dropdown > .header > .search").focus();
 		});
 		
 		this.widget.find(" > .dropdown > .header > .search").keyup(function(e){
 			var code = e.keyCode ? e.keyCode : e.which;
-			if ((code < 37 || code > 40) && code != 13) {
+			if ((code < 37 || code > 40) && code != 13 && code != 91) {
 				that.page = 1;
 				that.reloadData();
 			} else {
@@ -249,14 +249,24 @@ DropDown.prototype = {
 				type: "post",
 				data: {"search": search},
 				dataType: "json",
-				error: function() {
-					that.setContent("Error! Please try again");
-					if(onfinish != null) {
-						onfinish();
+				error: function(jqXHR, status, text) {
+					if(status != "abort") {
+						that.setContent("Error! Please try again");
+						if (onfinish != null) {
+							onfinish();
+						}
+
+						setTimeout(that.reloadData.bind(that, fn), 1000);
 					}
 				},
 				success: function(data) {
-					
+					var inputVal = that.widget.find(" > .dropdown > .header > .search").val();
+					if(this != inputVal && that.currentSearchResult == inputVal) {
+						return;
+					}
+
+					that.currentSearchResult = this;
+
 					if(!data || data == "")
 						that.setContent("No data given, Your Session might have timed out.");
 						
@@ -271,8 +281,7 @@ DropDown.prototype = {
 					} else {
 						that.widget.find(".dropdown > .header > .pagination > span > .left").addClass("disabled");
 					}
-					
-					this.value = data.value;
+
 					var content = "";
 					// render data
 					if(data.data) {
@@ -283,7 +292,7 @@ DropDown.prototype = {
 							
 							content += "<li>";
 							
-							if(this.value[val.key] || this.value[val.key] === 0)
+							if(data.value[val.key] || data.value[val.key] === 0)
 								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
 							else
 								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
@@ -306,7 +315,7 @@ DropDown.prototype = {
 						onfinish();
 					}
 					
-				}
+				}.bind(search)
 			});
 		};
 		
@@ -476,5 +485,4 @@ DropDown.prototype = {
 			}
 		}
 	}
-
 }

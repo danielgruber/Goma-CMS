@@ -199,19 +199,21 @@ class contentAdmin extends LeftAndMain
 		define("LAM_CMS_ADD", 1);
 
 		$model = $this->getModelByName($this->getParam("model"));
+
+		if($model->canWrite($model)) {
+			$model->queryVersion = "state";
+		}
+
+		// show page for selecting type
 		if(!$model) {
 			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
 		
 			$model = new ViewAccessableData();
 			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
 		}
-		
-		if(DataObject::Versioned($model->dataClass) && $model->canWrite($model)) {
-			$model->queryVersion = "state";
-		}
-		
-		$allowed_parents = $model->allowed_parents();
-		
+
+		$allowed_parents = $model->parentResolver()->getAllowedParents();
+
 		$this->selectModel($model, true);
 		
 		// render head-bar
