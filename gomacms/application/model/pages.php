@@ -1264,6 +1264,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
             case "remove":
                 $lang = lang("gomacms.h_pages_remove", '$user removed the page <a href="$pageUrl">$page</a>');
                 $icon = "images/icons/fatcow16/page_white_delete.png";
+                $record->setField("newversion", $record->oldversionid);
                 break;
             case IModelRepository::COMMAND_TYPE_UNPUBLISH:
             case "unpublish":
