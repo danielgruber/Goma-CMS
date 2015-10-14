@@ -158,9 +158,10 @@ class RequestHandler extends Object {
 		while ($class != "object" && !empty($class) && !ClassInfo::isAbstract($class)) {
             $handlers = Object::instance($class)->url_handlers;
 			foreach ($handlers as $pattern => $action) {
-                if($data = $this->matchRuleWithResult($pattern, $action, $request)) {
-                    return $data;
-                }
+				$data = $this->matchRuleWithResult($pattern, $action, $request);
+				if($data !== null && $data !== false) {
+					return $data;
+				}
 			}
 
 			$class = get_parent_class($class);

@@ -20,25 +20,26 @@ class MailTests extends GomaUnitTest {
 	*/
 	public $name = "Mail";
 
-	protected $hookPrepareCalled = 0;
-	protected $hookSendCalled = 0;
+	public $hookPrepareCalled = 0;
+	public $hookSendCalled = 0;
 
 	/**
 	 * setup event-handler.
 	*/
 	public function setUp() {
-		Core::addToHook("mail_prepareMailer", function($mail, $mailer){
-			$this->hookPrepareCalled++;
-			$this->assertIsA($mail, "Mail");
-			$this->assertIsA($mailer, "PHPMailer");
+		$that = $this;
+		Core::addToHook("mail_prepareMailer", function($mail, $mailer) use($that) {
+			$that->hookPrepareCalled++;
+			$that->assertIsA($mail, "Mail");
+			$that->assertIsA($mailer, "PHPMailer");
 
 			$mail->debug = 1;
 		});
 
-		Core::addToHook("mail_prepareSend", function($mail, $mailer){
-			$this->hookSendCalled++;
-			$this->assertIsA($mail, "Mail");
-			$this->assertIsA($mailer, "PHPMailer");
+		Core::addToHook("mail_prepareSend", function($mail, $mailer) use ($that) {
+			$that->hookSendCalled++;
+			$that->assertIsA($mail, "Mail");
+			$that->assertIsA($mailer, "PHPMailer");
 
 			$mail->debugSend = 1;
 		});

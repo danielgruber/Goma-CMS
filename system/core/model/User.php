@@ -538,6 +538,8 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      */
     public static function getHistoryLang($record) {
         switch($record->action) {
+			case IModelRepository::COMMAND_TYPE_UPDATE:
+			case IModelRepository::COMMAND_TYPE_PUBLISH:
             case "update":
             case "publish":
                 if($record->autorid == $record->newversion()->id) {
@@ -547,9 +549,11 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 					return lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
 				}
                 break;
+			case IModelRepository::COMMAND_TYPE_INSERT:
             case "insert":
                 return lang("h_user_create", '$user created the user <a href="$userUrl">$euser</a>');
                 break;
+			case IModelRepository::COMMAND_TYPE_DELETE:
             case "remove":
                 return lang("h_user_remove", '$user removed the user $euser');
                 break;
@@ -622,7 +626,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
      * @return Uploads
 	*/
 	public function getImage() {
-		if($this->avatar) {
+		if($this->avatar && $this->avatar->realfile) {
 			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classname != "gravatarimagehandler") || $this->avatar->classname == "gravatarimagehandler") {
 				$this->avatarid = 0;
 				$this->write(false, true, 2, false, false);

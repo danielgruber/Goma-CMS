@@ -81,15 +81,16 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             "mains"
         );
 
-        $this->assertThrows(function() {
-            $this->unitFindInverseManyManyRelationship(
+        $that = $this;
+        $this->assertThrows(function() use($that) {
+            $that->unitFindInverseManyManyRelationship(
                 "belongs", "ManyManyRelationshipTest", array("ManyManyRelationshipTestBelonging", "test"), false,
                 null
             );
         }, "LogicException");
 
-        $this->assertThrows(function() {
-            $this->unitFindInverseManyManyRelationship(
+        $this->assertThrows(function() use($that) {
+            $that->unitFindInverseManyManyRelationship(
                 "mains", "ManyManyRelationshipTestBelonging", array("ManyManyRelationshipTest", "belonging"), true,
                 "belongs"
             );
@@ -111,7 +112,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         );
     }
 
-    protected function unitFindInverseManyManyRelationship($relationName, $class, $info, $belonging, $expected) {
+    public function unitFindInverseManyManyRelationship($relationName, $class, $info, $belonging, $expected) {
         $data = ModelManyManyRelationShipInfo::findInverseManyManyRelationship($relationName, $class, $info, $belonging);
 
         $this->assertEqual($data, $expected);

@@ -188,102 +188,11 @@ class contentAdmin extends LeftAndMain
 	}
 
 	/**
-	 * add-form
-	 *
-	 * @name cms_add
-	 * @access public
-	 * @return mixed|string
-	 */
-	public function cms_add() {	
-		
-		define("LAM_CMS_ADD", 1);
-
-		$model = $this->getModelByName($this->getParam("model"));
-
-		if($model->canWrite($model)) {
-			$model->queryVersion = "state";
-		}
-
-		// show page for selecting type
-		if(!$model) {
-			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
-		
-			$model = new ViewAccessableData();
-			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()))->renderWith("admin/leftandmain_add.html");
-		}
-
-		$allowed_parents = $model->parentResolver()->getAllowedParents();
-
-		$this->selectModel($model, true);
-		
-		// render head-bar
-		$html = '<div class="headBar"><a href="#" class="leftbar_toggle" title="{$_lang_toggle_sidebar}"><img src="system/templates/images/appbar.list.png" alt="{$_lang_show_sidebar}" /></a><span class="'.$model->classname.' pageType"><img src="'.ClassInfo::getClassIcon($model->classname).'" alt="" /><span>';
-
-		$html .= convert::raw2text(ClassInfo::getClassTitle($model->classname));
-		
-		// end of title in head-bar
-		$html .= ' </span></span></div>';
-		
-		$form = new Form($this, "add_page");
-		
-		if(isset($_GET["parentid"]) && $_GET["parentid"] != 0) {
-			$form->setResult(array(
-				"parenttype"	=> "subpage",
-				"parentid"		=> $_GET["parentid"]
-			));
-		} else {
-			$form->setResult(array(
-				"parenttype"	=> "root",
-				"parentid"		=> 0
-			));
-
-		}
-		
-		$form->useStateData = true;
-
-		$form->add(new HTMLField('headbar', $html));
-		$form->add($title = new textField('title', lang("title_page", "title of the page")));
-		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
-				"root" => lang("no_parentpage", "Root Page"),
-				"subpage" => array(
-					lang("subpage","sub page"),
-					"parent"
-				)
-			)));
-			
-		
-		if(!$this->modelInst()->can("insert")) {
-			$parenttype->disableOption("root");
-		}
-		
-		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("'.implode($allowed_parents, '","').'")'));
-		
-		$parentDropdown->info_field = "url";
-		
-		$form->add(new HiddenField("class_name", $model->classname));
-		
-		$form->addValidator(new requiredFields(array('filename','title', 'parenttype')), "default_required_fields"); // valiadte it!
-		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");
-		$form->addValidator(new FormValidator(array($model, "validatePageFileName")), "filename");
-		
-		// default submission
-		$form->setSubmission("submit_form_generate");	
-			
-		$form->addValidator(new DataValidator($model), "datavalidator");
-		
-		//if($model->can("Write"))
-			$form->addAction(new AjaxSubmitButton("save_draft",lang("next_step", "next step"),"AjaxSaveGenerate", null, array("green")));
-		
-		return $form->render();
-	}
-	
-	
-	/**
 	 * unpublishes the current version
 	 *
 	 *@name unpublish
 	 *@access public
-	*/
+	 */
 	public function unpublish() {
 		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) && $this->modelInst()->unpublish()) {
 			if(Core::is_ajax()) {
@@ -311,10 +220,10 @@ class contentAdmin extends LeftAndMain
 			exit;
 		}
 	}
-	
+
 	/**
 	 * generates the context-menu.
-	*/
+	 */
 	public function generateContextMenu($child) {
 		if(!$child->model || $child->model->can("write")) {
 			return array_merge(array(array(
@@ -322,35 +231,139 @@ class contentAdmin extends LeftAndMain
 				"label"		=> lang("SUBPAGE_CREATE"),
 				"ajaxhref"	=> $this->originalNamespace . "/add" . URLEND . "?parentid=" . $child->recordid
 			),
-			"hr"), parent::generateContextMenu($child));
+				"hr"), parent::generateContextMenu($child));
 		}
-		
+
 		return parent::generateContextMenu($child);
-			
+
 	}
-	
+
+	/**
+	 * add-form
+	 *
+	 * @name cms_add
+	 * @access public
+	 * @return mixed|string
+	 */
+	public function cms_add() {
+		// TODO: Remove this also from leftAndMain
+		defined("LAM_CMS_ADD") OR define("LAM_CMS_ADD", 1);
+
+		$model = $this->getModelForAdd();
+		if(is_a($model, "pages")) {
+			/** @var Pages $model */
+			return $this->getFormForAdd($model)->render();
+		} else {
+			Resources::addJS('$(function(){$(".leftbar_toggle, .leftandmaintable tr > .left").addClass("active");$(".leftbar_toggle, .leftandmaintable tr > .left").removeClass("not_active");$(".leftbar_toggle").addClass("index");});');
+
+			return $model->renderWith("admin/leftandmain_add.html");
+		}
+	}
+
+	/**
+	 * gets model for adding a page.
+	 *
+	 * @return ViewAccessableData
+	 */
+	protected function getModelForAdd() {
+		$model = $this->getModelByName($this->getParam("model"));
+
+		// show page for selecting type
+		if(!$model) {
+			$model = new ViewAccessableData();
+			return $model->customise(array("adminuri" => $this->adminURI(), "types" => $this->types()));
+		}
+
+		$model->queryVersion = "state";
+
+		return $model;
+	}
+
+	/**
+	 * generates form for adding a page.
+	 *
+	 * @param Pages $model
+	 * @return Form
+	 */
+	protected function getFormForAdd($model) {
+
+		$controller = clone $this;
+		$controller->selectModel($model, true);
+		$form = new Form($controller, "add_page");
+
+		if (isset($_GET["parentid"]) && $_GET["parentid"] != 0) {
+			$form->setResult(array(
+				"parenttype" => "subpage",
+				"parentid"   => $_GET["parentid"]
+			));
+		} else {
+			$form->setResult(array(
+				"parenttype" => "root",
+				"parentid"   => 0
+			));
+		}
+
+		$form->useStateData = true;
+
+		$headBarView = new ViewAccessableData(array(
+			"classname" => $model->classname,
+			"classtitle"=> ClassInfo::getClassTitle($model->classname),
+			"classicon"	=> ClassInfo::getClassIcon($model->classname)
+		));
+		$form->add(new HTMLField('headbar', $headBarView->renderWith("admin/content-headbar.html")));
+
+		$this->getAddFormFields($form, $model);
+
+		return $form;
+	}
+
+	/**
+	 * adds fields to add-form.
+	 *
+	 * @param Form $form
+	 * @param Pages $model
+	 */
+	protected function getAddFormFields(&$form, $model) {
+		$form->add($title = new textField('title', lang("title_page", "title of the page")));
+		$form->add($parenttype = new ObjectRadioButton("parenttype", lang("hierarchy", "hierarchy"), array(
+			"root"    => lang("no_parentpage", "Root Page"),
+			"subpage" => array(
+				lang("subpage", "sub page"),
+				"parent"
+			)
+		)));
+
+
+		if (!$this->modelInst()->can("insert")) {
+			$parenttype->disableOption("root");
+		}
+
+		$allowed_parents = $model->parentResolver()->getAllowedParents();
+		$form->add($parentDropdown = new HasOneDropDown("parent", lang("parentpage", "Parent Page"), "title", ' `pages`.`class_name` IN ("' . implode($allowed_parents, '","') . '")'));
+		$parentDropdown->info_field = "url";
+
+		$form->add(new HiddenField("class_name", $model->classname));
+
+		$form->addValidator(new requiredFields(array('filename', 'title', 'parenttype')), "default_required_fields"); // valiadte it!
+		$form->addValidator(new FormValidator(array($model, "validatePageType")), "pagetype");
+		$form->addValidator(new FormValidator(array($model, "validatePageFileName")), "filename");
+
+		// default submission
+		$form->setSubmission("submit_form_generateUniquePath");
+		$form->addValidator(new DataValidator($model), "datavalidator");
+
+		$form->addAction(new AjaxSubmitButton("save_draft", lang("next_step", "next step"), "AjaxSaveGenerate", null, array("green")));
+
+		$model->getAddFormFields($form);
+		$model->callExtending("getAddFormFields", $form);
+	}
+
 	/**
 	 * generates mainbar-title and path for newly generated page.
 	*/
-	public function submit_form_generate($data) {
+	public function submit_form_generateUniquePath($data) {
 		$data["mainbartitle"] = $data["title"];
-		$value = $data["title"];
-		$value = trim($value);
-		$value = strtolower($value);
-		
-		// special chars
-		$value = str_replace("ä", "ae", $value);
-		$value = str_replace("ö", "oe", $value);
-		$value = str_replace("ü", "ue", $value);
-		$value = str_replace("ß", "ss", $value);
-		$value = str_replace("ù", "u", $value);
-		$value = str_replace("û", "u", $value);
-		$value = str_replace("ú", "u", $value);
-		
-		$value = str_replace(" ",  "-", $value);
-		// normal chars
-		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
-		$value = str_replace('--', '-', $value);
+		$value = PageUtils::cleanPath($data["title"]);
 		
 		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
 		$i = 1;
@@ -374,23 +387,7 @@ class contentAdmin extends LeftAndMain
 	*/
 	public function ajaxSaveGenerate($data, $response) {
 		$data["mainbartitle"] = $data["title"];
-		$value = $data["title"];
-		$value = trim($value);
-		$value = strtolower($value);
-		
-		// special chars
-		$value = str_replace("ä", "ae", $value);
-		$value = str_replace("ö", "oe", $value);
-		$value = str_replace("ü", "ue", $value);
-		$value = str_replace("ß", "ss", $value);
-		$value = str_replace("ù", "u", $value);
-		$value = str_replace("û", "u", $value);
-		$value = str_replace("ú", "u", $value);
-		
-		$value = str_replace(" ",  "-", $value);
-		// normal chars
-		$value = preg_replace('/[^a-zA-Z0-9\-\._]/', '-', $value);
-		$value = str_replace('--', '-', $value);
+		$value = PageUtils::cleanPath($data["title"]);
 		
 		$parentid = ($data["parenttype"] == "root") ? 0 : $data["parentid"];
 		$i = 1;

@@ -292,37 +292,14 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public function setPath($value)
     {
-        $this->setField("path", $this->replacePath($value));
-    }
-
-    /**
-     * replaces path with correct info.
-     */
-    protected function replacePath($value) {
-        $value = trim($value);
-        $value = strtolower($value);
-
-        // special chars
-        $value = str_replace("ä", "ae", $value);
-        $value = str_replace("ö", "oe", $value);
-        $value = str_replace("ü", "ue", $value);
-        $value = str_replace("ß", "ss", $value);
-        $value = str_replace("ù", "u", $value);
-        $value = str_replace("û", "u", $value);
-        $value = str_replace("ú", "u", $value);
-
-        $value = str_replace(" ",  "-", $value);
-        // normal chars
-        $value = preg_replace('/[^a-zA-Z0-9\-_]/', '-', $value);
-        $value = str_replace('--', '-', $value);
-
-        return $value;
+        $this->setField("path", PageUtils::cleanPath($value));
     }
 
     /**
      * gets the title of the window
      *
-     *@name getWindowTitle
+     * @name getWindowTitle
+     * @return string
      */
     public function getWindowTitle() {
         if($this->fieldGet("googleTitle")) {
@@ -710,7 +687,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public function validatePageFileName($obj) {
         $data = $obj->getForm()->result;
-        $filename = $this->replacePath($data["filename"]);
+        $filename =  PageUtils::cleanPath($data["filename"]);
         $parentid = ($data["parentid"] == "") ? 0 : $data["parentid"];
         if(isset($obj->getForm()->result["recordid"])) {
             if($filename == "index" || DataObject::count("pages", array("path" => array("LIKE", $filename), "parentid" => $parentid, "recordid" => array("!=", $obj->getForm()->result["recordid"]))) > 0) {
@@ -871,15 +848,22 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
 						
 					});
 				});'));
+    }
 
+    /**
+     * here you can extend add-form.
+     *
+     * @param Form $form
+     */
+    public function getAddFormFields(&$form) {
 
     }
 
     /**
      * gets form-actions
      *
-     *@name getActions
-     *@access public
+     * @param Form $form
+     * @param bool $edit
      */
     public function getActions(&$form, $edit = false) {
 

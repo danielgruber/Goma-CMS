@@ -34,7 +34,7 @@ class ImageUploadsTest extends GomaUnitTest
         $this->unitTestResizeCase("OrgSetSize", 500, 375);
 
         /* no crop set size */
-        $this->unitTestResizeCase("noCropSetSize", 500, 375);
+        $this->unitTestResizeCase("NoCropSetSize", 500, 375);
 
         /* set width */
         $this->unitTestResizeCase("SetWidth", 500, null);
