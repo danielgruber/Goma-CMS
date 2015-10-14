@@ -22,8 +22,11 @@ class ContentAdminTest extends GomaUnitTest implements TestAble
         $method = new ReflectionMethod("contentAdmin", "getModelForAdd");
         $method->setAccessible(true);
 
-        $this->assertIsA($method->invoke($content), "ViewAccessableData");
-        $this->assertNotA($method->invoke($content), "Pages");
+        $viewData = $method->invoke($content);
+        $this->assertIsA($viewData, "ViewAccessableData");
+        $this->assertNotA($viewData, "Pages");
+        $this->assertIsA($viewData->types, "DataSet");
+        $this->assertTrue(is_string($viewData->adminuri));
         $this->assertNotEqual($content->cms_add(), "");
 
         $request = new Request("get", "blah");
