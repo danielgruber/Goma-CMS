@@ -7,7 +7,7 @@
  *
  * @author        Goma-Team
  * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version    2.3.3
+ * @version    2.3.4
  */
 class FormField extends RequestHandler implements ArrayAccess
 {
@@ -115,6 +115,11 @@ class FormField extends RequestHandler implements ArrayAccess
     protected $fullSizedField = false;
 
     /**
+     * max-length.
+     */
+    public $maxLength = -1;
+
+    /**
      * @name __construct
      * @param string - name
      * @param string - title
@@ -161,17 +166,25 @@ class FormField extends RequestHandler implements ArrayAccess
 
     /**
      * creates the Node
+     *
      * @name createNode
      * @access public
+     * @return HTMLNode
      */
     public function createNode()
     {
-        return new HTMLNode("input", array(
+        $input = new HTMLNode("input", array(
             'name' => $this->PostName(),
             "class" => "input",
             "type" => "text",
             "title" => $this->title
         ));
+
+        if($this->maxLength > 0) {
+            $input->attr("maxlength", $this->maxLength);
+        }
+
+        return $input;
     }
 
     /**

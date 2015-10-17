@@ -362,6 +362,7 @@ class Permission extends DataObject
                     $manipulation["perm_groups_insert"] = array(
                         "table_name" => $table,
                         "command" => "insert",
+                        "ignore" => true,
                         "fields" => array()
                     );
 
