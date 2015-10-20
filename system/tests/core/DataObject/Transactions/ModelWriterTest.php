@@ -166,27 +166,27 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     public function testPermissionCalling() {
         $this->assertEqual(
             $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_INSERT, IModelRepository::WRITE_TYPE_PUBLISH),
-            array("insert", "publish")
+            array(ModelPermissionManager::PERMISSION_TYPE_INSERT, ModelPermissionManager::PERMISSION_TYPE_PUBLISH)
         );
 
         $this->assertEqual(
             $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_PUBLISH, IModelRepository::WRITE_TYPE_PUBLISH),
-            array("write", "publish")
+            array(ModelPermissionManager::PERMISSION_TYPE_WRITE, ModelPermissionManager::PERMISSION_TYPE_PUBLISH)
         );
 
         $this->assertEqual(
             $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_INSERT, IModelRepository::WRITE_TYPE_SAVE),
-            array("insert")
+            array(ModelPermissionManager::PERMISSION_TYPE_INSERT)
         );
 
         $this->assertEqual(
             $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_UPDATE, IModelRepository::WRITE_TYPE_PUBLISH),
-            array("write", "publish")
+            array(ModelPermissionManager::PERMISSION_TYPE_WRITE, ModelPermissionManager::PERMISSION_TYPE_PUBLISH)
         );
 
         $this->assertEqual(
             $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_UPDATE, IModelRepository::WRITE_TYPE_SAVE),
-            array("write")
+            array(ModelPermissionManager::PERMISSION_TYPE_WRITE)
         );
 
         try {
