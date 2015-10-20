@@ -534,22 +534,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public static function canViewHistory($record = null) {
         if (is_object($record)) {
             if ($record->oldversion && $record->newversion) {
-                return ($record->oldversion->can("Write", $record->oldversion) && $record->newversion->can("Write", $record->newversion));
+                return ($record->oldversion->can(ModelPermissionManager::PERMISSION_TYPE_WRITE, $record->oldversion) && $record->newversion->can(ModelPermissionManager::PERMISSION_TYPE_WRITE, $record->newversion));
             } else if ($record->newversion) {
-                return $record->newversion->can("Write", $record->newversion);
+                return $record->newversion->can(ModelPermissionManager::PERMISSION_TYPE_WRITE, $record->newversion);
             } else if ($record->record) {
-                return $record->record->can("Write", $record->record);
+                return $record->record->can(ModelPermissionManager::PERMISSION_TYPE_WRITE, $record->record);
             }
         }
 
         if (is_object($record)) {
-            $c = new $record->dbobject;
+            $classInstance = new $record->dbobject;
         } else if (is_string($record)) {
-            $c = new $record;
+            $classInstance = new $record;
         } else {
             throw new InvalidArgumentException("Invalid first argument for DataObject::canViewRecord object or class-name required");
         }
-        return $c->can("Write");
+        return $classInstance->can(ModelPermissionManager::PERMISSION_TYPE_WRITE);
     }
 
     /**
@@ -989,7 +989,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @param bool $history
      * @return bool
      * @throws PermissionException
-     * @internal param $unpublish
      * @access public
      */
     public function unpublish($force = false, $history = true) {
@@ -1057,7 +1056,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if (!isset($this->data))
             return true;
 
-        if ($force || $this->can("Delete"))
+        if ($force || $this->can(ModelPermissionManager::PERMISSION_TYPE_DELETE))
         {
             // get the ids which are needed
             $ids = array();
@@ -1447,8 +1446,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function set_many_many($name, $data, $force = false)
     {
-        if ($force || $this->can("Write", $this)) {
-            if ($force || !$this->isPublished() || $this->can("Publish", $this)) {
+        if ($force || $this->can(ModelPermissionManager::PERMISSION_TYPE_WRITE, $this)) {
+            if ($force || !$this->isPublished() || $this->can(ModelPermissionManager::PERMISSION_TYPE_PUBLISH, $this)) {
                 $manipulation = $this->set_many_many_manipulation(array(), $name, $data);
 
                 $this->onBeforeManipulate($manipulation, $b = "set_many_many");

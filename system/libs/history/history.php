@@ -186,7 +186,7 @@ class History extends DataObject {
 	public function getContent() {
 		if($data = $this->historyData()) {
 			$text = $data["text"];
-			if(preg_match('/\$user/', $text)) {
+			if(strpos($text, '$user') !== false) {
 				// generate user
 				if($this->autor) {
 					$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';

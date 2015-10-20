@@ -455,14 +455,14 @@ class ModelWriter extends Object {
     public function validatePermission() {
 
         if ($this->commandType == ModelRepository::COMMAND_TYPE_INSERT) {
-            $this->validateSinglePermission("Inserted", "added");
+            $this->validateSinglePermission(ModelPermissionManager::PERMISSION_TYPE_INSERT, "added");
         } else {
-            $this->validateSinglePermission("Write", "written");
+            $this->validateSinglePermission(ModelPermissionManager::PERMISSION_TYPE_WRITE, "written");
         }
 
 
         if ($this->commandType  == ModelRepository::WRITE_TYPE_PUBLISH) {
-            $this->validateSinglePermission("Publish", "published");
+            $this->validateSinglePermission(ModelPermissionManager::PERMISSION_TYPE_PUBLISH, "published");
         }
     }
 
