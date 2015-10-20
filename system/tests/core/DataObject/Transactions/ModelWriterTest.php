@@ -162,6 +162,51 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
 
         return $reflectionMethod->invoke(null, $var1, $var2);
     }
+
+    public function testPermissionCalling() {
+        $this->assertEqual(
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_INSERT, IModelRepository::WRITE_TYPE_PUBLISH),
+            array("insert", "publish")
+        );
+
+        $this->assertEqual(
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_PUBLISH, IModelRepository::WRITE_TYPE_PUBLISH),
+            array("write", "publish")
+        );
+
+        $this->assertEqual(
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_INSERT, IModelRepository::WRITE_TYPE_SAVE),
+            array("insert")
+        );
+
+        $this->assertEqual(
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_UPDATE, IModelRepository::WRITE_TYPE_PUBLISH),
+            array("write", "publish")
+        );
+
+        $this->assertEqual(
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_UPDATE, IModelRepository::WRITE_TYPE_SAVE),
+            array("write")
+        );
+
+        try {
+            $this->unittestPermissionCalling(IModelRepository::COMMAND_TYPE_UPDATE, IModelRepository::WRITE_TYPE_SAVE, false);
+            $this->assertFalse(true);
+        } catch(Exception $e) {
+            $this->assertIsA($e, "PermissionException");
+        }
+    }
+
+    public function unittestPermissionCalling($commandType, $writeType, $validate = true) {
+        $model = new MockUpdatableObject();
+        $model->validate = $validate;
+        $modelWriter = new ModelWriter($model, $commandType, $model, new MockDBRepository(), new MockDBWriter());
+        $modelWriter->setWriteType($writeType);
+
+        $modelWriter->validatePermission();
+
+        return $model->getCalledPermissions();
+    }
 }
 
 class MockUpdatableObject extends Object {
@@ -174,6 +219,25 @@ class MockUpdatableObject extends Object {
     public $onBeforeWriteFired = 0;
     public $onAfterWriteFired = 0;
     public $checkLogic = false;
+    protected $calledPermissions = array();
+    public $validate = true;
+
+    public function can($permission) {
+        $this->calledPermissions[] = strtolower($permission);
+        return $this->validate;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCalledPermissions()
+    {
+        return $this->calledPermissions;
+    }
+
+    public function clearPermissions() {
+        $this->calledPermissions = array();
+    }
 
     public function __get($k) {
         return "";
@@ -205,6 +269,7 @@ class ModelWriterTestExtensionForEvents extends Extension {
     public $gatherDataToWrite = 0;
     public $onBeforeDBWriterFired = 0;
     public $checkLogic = false;
+    protected $calledPermissions = array();
 
     public function gatherDataToWrite() {
         if($this->checkLogic && $this->gatherDataToWrite == $this->onBeforeWriteFired) {
