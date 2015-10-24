@@ -64,7 +64,7 @@ class ModelRepository extends IModelRepository {
      * writes a record in repository. it decides if record exists or not and updates or inserts.
      *
      * @param DataObject $record
-     * @param bool if $forceWrite if to override permissions
+     * @param bool $forceWrite if to override permissions
      * @param bool $silent if to not update last-modified and editorid
      * @param bool $overrideCreated if to not force created and autorid to not be changed
      * @throws PermissionException

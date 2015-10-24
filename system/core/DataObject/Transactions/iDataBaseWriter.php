@@ -24,6 +24,11 @@ interface iDataBaseWriter {
     public function write();
 
     /**
+     * publish.
+     */
+    public function publish();
+
+    /**
      * validates.
      */
     public function validate();

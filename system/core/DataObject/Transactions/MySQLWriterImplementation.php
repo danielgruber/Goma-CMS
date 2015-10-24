@@ -68,17 +68,26 @@ class MySQLWriterImplementation implements iDataBaseWriter {
     }
 
     /**
+     * publish.
+     */
+    public function publish()
+    {
+        $this->writer->callExtending("onBeforePublish");
+        $this->model()->onBeforePublish();
+
+        $this->insertIntoStateTable(array(
+            "id"            => $this->recordid(),
+            "publishedid"   => $this->model()->versionid,
+            "stateid"       => $this->model()->versionid
+        ), "update");
+    }
+
+    /**
      * updates state table with new record and versionid.
      */
     protected function updateStateTable() {
         if($this->writer->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH || !DataObject::Versioned($this->model()->classname)) {
-            $this->model()->onBeforePublish();
-
-            $this->insertIntoStateTable(array(
-                "id"            => $this->recordid(),
-                "publishedid"   => $this->model()->versionid,
-                "stateid"       => $this->model()->versionid
-            ), "update");
+            $this->publish();
         } else {
             $this->insertIntoStateTable(array(
                 "id"            => $this->recordid(),

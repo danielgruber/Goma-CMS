@@ -275,12 +275,21 @@ class ModelWriter extends Object {
      * @param DataObject $model
      * @return bool
      */
-    protected function versionDiffers($model) {
+    protected function hasBeenWritten($model) {
         return (
             $model->publishedid == 0 ||
-            $model->stateid == 0 ||
-            ($model->stateid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_SAVE) ||
-            ($model->publishedid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH));
+            $model->stateid == 0);
+    }
+
+    /**
+     * checks if it must be written cause this record is up2date, but it is not the current record in the database.
+     *
+     * @param DataObject $model
+     * @return bool
+     */
+    protected function isNotActiveRecord($model) {
+        return ($model->stateid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_SAVE) ||
+        ($model->publishedid != $this->getOldId() && $this->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH);
     }
 
     /**
@@ -360,7 +369,7 @@ class ModelWriter extends Object {
         $this->forceVersionIds();
 
         // try and find out whether to write cause of state
-        if (!$this->versionDiffers($this->model)) {
+        if (!$this->hasBeenWritten($this->model)) {
 
             if($oldData = $this->getObjectToUpdate()->ToArray()) {
                 // first check for raw data.
@@ -398,7 +407,6 @@ class ModelWriter extends Object {
      * writes generated data to DataBase.
      */
     public function write() {
-
         $this->callPreflightEvents();
 
         $this->gatherDataToWrite();
@@ -408,19 +416,20 @@ class ModelWriter extends Object {
         }
 
         // find out if we should write data
-        if ($this->getCommandType() != ModelRepository::COMMAND_TYPE_INSERT) {
-            if (!$this->checkForChanges()) {
-                return;
+        $changes = $this->checkForChanges();
+        if ($this->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $changes || $this->isNotActiveRecord($this->model)) {
+            if ($changes || $this->writeType != IModelRepository::WRITE_TYPE_PUBLISH) {
+                $this->callExtending("onBeforeDBWriter");
+
+                $this->updateStatusFields();
+
+                $this->databaseWriter->write();
+            } else {
+                $this->databaseWriter->publish();
             }
+
+            $this->callPostFlightEvents();
         }
-
-        $this->callExtending("onBeforeDBWriter");
-
-        $this->updateStatusFields();
-
-        $this->databaseWriter->write();
-
-        $this->callPostFlightEvents();
     }
 
     /**
@@ -431,11 +440,6 @@ class ModelWriter extends Object {
 
         $this->model->onBeforeWrite();
         $this->callExtending("onBeforeWrite");
-
-        if($this->getWriteType() == ModelRepository::WRITE_TYPE_PUBLISH) {
-            $this->callExtending("onBeforePublish");
-            $this->model->onBeforePublish();
-        }
     }
 
     /**
