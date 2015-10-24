@@ -10,7 +10,7 @@ Thumbs.db
 nbproject/
 
 # Goma files
-_config.php
+/_config.php
 .index-db
 .htaccess
 web.config

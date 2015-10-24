@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Main file of Goma-CMS.
  * 
  * @package Goma\System
@@ -118,18 +118,7 @@ defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJ
 
 chdir(ROOT);
 
-/*$f = @disk_free_space("/");
- if($f !== null && $f !== "" && $f !== false) {
- // check for disk-quote
- $free = (disk_free_space("/") > disk_free_space(ROOT)) ? disk_free_space(ROOT) : disk_free_space("/");
- define("GOMA_FREE_SPACE", $free);
- if($free / 1024 / 1024 < 10) {
- header("HTTP/1.1 500 Server Error");
- die(file_get_contents(ROOT . "system/templates/framework/disc_quota_exceeded.html"));
- }
- } else {*/
 define("GOMA_FREE_SPACE", 100000000000);
-//}
 
 // require data
 
@@ -156,8 +145,8 @@ require_once (FRAMEWORK_ROOT . 'libs/sql/sql.php');
 
 if (PROFILE)
 	Profiler::unmark("core_requires");
-	
-	
+
+
 
 // set error-handler
 set_error_handler("Goma_ErrorHandler");
@@ -376,10 +365,10 @@ function loadApplication($directory) {
 				}
 				define('DB_PREFIX', $GLOBALS["dbprefix"]);
 			}
-			
+
 			$domaininfo['date_format_date'] = isset($domaininfo['date_format_date']) ? $domaininfo['date_format_date'] : "d.m.Y";
 			$domaininfo['date_format_time'] = isset($domaininfo['date_format_time']) ? $domaininfo['date_format_time'] : "H:i";
-			
+
 			FileSystem::$safe_mode = isset($domaininfo["safe_mode"]) ? $domaininfo["safe_mode"] : false;
 
 			define('DATE_FORMAT', $domaininfo['date_format_date'] . " - " . $domaininfo['date_format_time']);
@@ -395,7 +384,7 @@ function loadApplication($directory) {
 				define("SQL_DRIVER_OVERRIDE", $domaininfo["sql_driver"]);
 			}
 
-		} else {			
+		} else {
 			define("DATE_FORMAT", "d.m.Y - H:i");
 			Core::setCMSVar("TIMEZONE", DEFAULT_TIMEZONE);
 		}
@@ -458,11 +447,6 @@ function parseUrl() {
 		$port = ":" . $port;
 	}
 
-	if ($_SERVER["HTTP_HOST"] != $_SERVER["SERVER_NAME"]) {
-		header("Location: " . $http . '://' . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
-		exit ;
-	}
-
 	define("BASE_URI", $http . '://' . $_SERVER["SERVER_NAME"] . $port . ROOT_PATH);
 
 	// generate URL
@@ -471,8 +455,6 @@ function parseUrl() {
 	// we should do this, because the url is not correct else
 	if (preg_match('/\?/', $url)) {
 		$url = substr($url, 0, strpos($url, '?'));
-	} else {
-		$url = $url;
 	}
 
 	$url = substr($url, strlen(ROOT_PATH . BASE_SCRIPT));
@@ -510,6 +492,6 @@ function parseUrl() {
 		header("Location: " . BASE_URI . "index.php/" . $url);
 		exit;
 	}
-	
+
 	define("URL", $url);
 }
