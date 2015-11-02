@@ -80,6 +80,8 @@ class MySQLWriterImplementation implements iDataBaseWriter {
             "publishedid"   => $this->model()->versionid,
             "stateid"       => $this->model()->versionid
         ), "update");
+
+        $this->model()->stateid = $this->model()->publishedid = $this->model()->versionid;
     }
 
     /**
@@ -93,6 +95,8 @@ class MySQLWriterImplementation implements iDataBaseWriter {
                 "id"            => $this->recordid(),
                 "stateid"       => $this->model()->versionid
             ), "update");
+
+            $this->model()->stateid = $this->model()->versionid;
         }
     }
 
