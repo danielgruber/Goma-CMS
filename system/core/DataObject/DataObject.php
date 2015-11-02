@@ -23,6 +23,8 @@
  * @property    int last_modified timestamp
  * @property    int created timestamp
  * @property    int recordid
+ * @property    int stateid
+ * @property    int publishedid
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
