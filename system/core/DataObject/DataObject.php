@@ -1917,12 +1917,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets versions of this ordered by time DESC
      *
-     *@name versions
-     *@access public
+     * @param null|array|int $limit
+     * @param array $where
+     * @param bool $orderasc
+     * @return array|DataObjectSet
      */
     public function versions($limit = null, $where = array(), $orderasc = false) {
         $ordertype = ($orderasc === true) ? "ASC" : "DESC";
-        return DataObject::get_versioned($this->classname, false, array_merge($where,array(
+        return DataObject::get_versioned($this->classname, false, array_merge((array) $where, array(
             "recordid"	=> $this->recordid
         )),  array($this->baseTable . ".id", $ordertype), $limit);
     }
@@ -1930,25 +1932,27 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets versions of this ordered by time ASC
      *
-     *@name versions
-     *@access public
+     * @param null|array|int $limit
+     * @param array $where
+     * @return array|DataObjectSet
      */
     public function versionsASC($limit = null, $where = array()) {
         return $this->versions($limit, $where, true);
     }
 
     /**
-     * gets the editor
+     * gets the editor-user.
      *
-     *@name editor
-     *@access public
+     * @return User
      */
     public function editor() {
         if ($this->fieldGet("editorid") != 0) {
             return DataObject::get_one("user",array('id' => $this['editorid']));
-        } else
+        } else {
             return $this->autor();
+        }
     }
+
 
     /**
      * generates the form via controller
