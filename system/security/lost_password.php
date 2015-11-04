@@ -8,31 +8,31 @@ defined('IN_GOMA') OR die();
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- * @version		2.3.1
+ * @version		2.3.2
  */
 class lost_passwordExtension extends ControllerExtension
 {
 
     /**
      * add url-handler
-    */
+     */
     public $url_handlers = array(
         "lost_password"	=> "lost_password"
     );
 
     /**
      * add action
-    */
+     */
     public $allowed_actions = array("lost_password");
 
     /**
      * register method
-    */
+     */
     static $extra_methods = array("lost_password");
 
     /**
      * renders the action
-    */
+     */
     public function lost_password()
     {
         Core::setTitle(lang("lost_password", "lost password"));
@@ -42,7 +42,7 @@ class lost_passwordExtension extends ControllerExtension
             return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_know_password", "You know your password, else you would not be logged in!");
         }
 
-        if(isset($_GET["code"]) && $_GET["code"] != "")
+        if(isset($_GET["code"]) && ($_GET["code"] != "" || isset($_GET["deny"])))
         {
             $code = $_GET["code"];
             if(DataObject::count("user", array("code" => $code)) > 0)
@@ -56,6 +56,9 @@ class lost_passwordExtension extends ControllerExtension
                 }
 
                 return $this->getEditPasswordForm($data)->render();
+            } else {
+                $view = new ViewAccessableData();
+                return $view->customise(array("codeWrong" => true))->renderWith("mail/lostPasswordSent.html");
             }
         }
 
@@ -155,25 +158,18 @@ class lost_passwordExtension extends ControllerExtension
         $email = $data["email"];
 
         $mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
-        $text = "<p>" . lang("hello", "Hello")." ".convert::raw2xml($data["title"])."!</p>
 
-        <p>".lang("lp_text")."</p>
-        <p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."</a></p>
-        <p>
-        ".lang("lp_deny") . "</p>
-        <p><a target=\"_blank\" href=\"".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&amp;deny=1\">".BASE_URI.BASE_SCRIPT."profile/lost_password".URLEND."?code=".$key."&deny=1</a> </p>
-
-        <br />
-        <p>".lang("lp_mfg", "Kind Regards")."</p>";
+        $text = $data->customise(array(
+            "key" => $key
+        ))->renderWith("mail/lostPassword.html");
 
         if($mail->sendHTML($email, lang("lost_password"), $text))
         {
-            return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_mail_sent", "The E-mail was sent!");
+            return $data->renderWith("mail/lostPasswordSent.html");
         } else
         {
             return lang("mail_not_sent", "Mail couldn't be transmitted.");
         }
-
     }
 }
 

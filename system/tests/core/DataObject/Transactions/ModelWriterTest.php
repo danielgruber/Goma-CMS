@@ -428,4 +428,12 @@ class MockDBWriter implements iDataBaseWriter {
     {
         return new Tuple(1, 1);
     }
+
+    /**
+     * publish.
+     */
+    public function publish()
+    {
+        // TODO: Implement publish() method.
+    }
 }

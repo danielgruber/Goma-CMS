@@ -252,6 +252,8 @@ $lang = array(
 	"lp_know_password"								=> "You know your password.",
 	"lp_deny"										=> "Click to the follwing link, if you didn't initiate this request.",
 	"lp_deny_okay"									=> "The request was successfully deleted!",
+	"lp_code"										=> "Code",
+	"lp_wrong_code"									=> "Unfortunately the provided code was wrong.",
 
 
 	"user_needs_activation"							=> "A new user has been registered and needs to be activated.",
