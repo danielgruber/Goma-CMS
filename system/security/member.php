@@ -179,11 +179,10 @@ class Member extends Object {
 			// user is locked
 			AddContent::addError(lang("login_locked"));
 		} catch(LoginUserMustUnlockException $e) {
-
 			// user must activate account
 			$add = "";
 			if(ClassInfo::exists("registerExtension")) {
-				$add = ' <a href="profile/resendActivation/?email=' . urlencode($data->email) . '">'.lang("register_resend_title").'</a>';
+				$add = ' <a href="profile/resendActivation/?email=' . urlencode($e->getUser()->email) . '">'.lang("register_resend_title").'</a>';
 			}
 			AddContent::addError(lang("login_not_unlocked") . $add);
 		}
@@ -247,11 +246,20 @@ class LoginInvalidException extends LogicException {
 }
 
 class LoginUserLockedException extends LogicException {
+
+	protected $user;
+
 	/**
 	 * constructor.
+	 * @param string $m
+	 * @param User|null $user
+	 * @param Exception|int $code
+	 * @param Exception $previous
 	 */
-	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_LOCKED, Exception $previous = null) {
+	public function __construct($m = "", $user = null, $code = ExceptionManager::LOGIN_USER_LOCKED, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
+
+		$this->user = $user;
 	}
 
 	/**
@@ -261,14 +269,30 @@ class LoginUserLockedException extends LogicException {
 	 */
 	public function http_status() {
 		return 403;
+	}
+
+	/**
+	 * @return null|User
+	 */
+	public function getUser()
+	{
+		return $this->user;
 	}
 }
 
 class LoginUserMustUnlockException extends LogicException {
+
+	protected $user;
+
 	/**
 	 * constructor.
+	 * @param string $m
+	 * @param User|null $user
+	 * @param Exception|int $code
+	 * @param Exception $previous
 	 */
-	public function __construct($m = "", $code = ExceptionManager::LOGIN_USER_MUST_UNLOCK, Exception $previous = null) {
+	public function __construct($m = "", $user = null, $code = ExceptionManager::LOGIN_USER_MUST_UNLOCK, Exception $previous = null) {
+		$this->user = $user;
 		parent::__construct($m, $code, $previous);
 	}
 
@@ -279,5 +303,13 @@ class LoginUserMustUnlockException extends LogicException {
 	 */
 	public function http_status() {
 		return 403;
+	}
+
+	/**
+	 * @return null|User
+	 */
+	public function getUser()
+	{
+		return $this->user;
 	}
 }

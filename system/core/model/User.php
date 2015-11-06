@@ -11,12 +11,13 @@
  *
  * @property string nickname
  * @property string code
- * @property int code_has_sent
- * @property Uploads avatar
- * @property int status
  * @property string password
+ * @property string email
  * @property int avatarid
-
+ * @property int code_has_sent
+ * @property int status
+ * @property Uploads avatar
+ *
  * @method DataObjectSet<Group> groups() groups($filter, $sort, $limit)
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier

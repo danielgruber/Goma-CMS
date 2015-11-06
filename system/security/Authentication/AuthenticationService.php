@@ -133,9 +133,9 @@ class AuthenticationService {
 
                         return $userObject;
                     } else if ($userObject->status == 0) {
-                        throw new LoginUserMustUnlockException();
+                        throw new LoginUserMustUnlockException("User must validate email-address.", $userObject);
                     } else {
-                        throw new LoginUserLockedException();
+                        throw new LoginUserLockedException("User was locked by administrator.", $userObject);
                     }
                 }
             }

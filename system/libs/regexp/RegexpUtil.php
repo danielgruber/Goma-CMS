@@ -51,4 +51,14 @@ class RegexpUtil {
     public static function isPhoneNumber($phone) {
         return preg_match('/^\+?[0-9\s]+$/', $phone);
     }
+
+    /**
+     * is website.
+     *
+     * @param string $website
+     * @return bool
+     */
+    public static function isWebsite($website) {
+        return preg_match('/^(http\:\/\/|https\:\/\/)?([a-z0-9][a-z0-9\-]*\.)+[a-z0-9][a-z0-9\-]*/i', $website);
+    }
 }
