@@ -375,7 +375,7 @@ $lang = array(
 	"livecounter_info"								=> "The Realtime-Visitor-Counter let you know how many visitors are exactly in this moment on your website, but it needs more performance.",
 	"register_enabled_info"							=> "Visitors can register on your site.",
 	"register_require_email_info"					=> "Send out validation-emails to validate email-adresse.",
-	"register_requre_acitvation"					=> "You're account was registered successfully. An administrator needs to activate it.",
+	"register_require_acitvation"					=> "You're account was registered successfully. An administrator needs to activate it.",
 	"sitestatus_info"								=> "If site is under maintenance, only admins can view the site.",
 	
 	/* users and groups */

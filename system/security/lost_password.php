@@ -10,9 +10,12 @@ defined('IN_GOMA') OR die();
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version		2.3.2
  */
-class lost_passwordExtension extends ControllerExtension
-{
-
+class lost_passwordExtension extends ControllerExtension {
+    /**
+     * template when lost password has been sent.
+     */
+    const LOST_PASSWORD_SENT = "profile/lostPasswordSent.html";
+    const LOST_PASSWORD_MAIL = "mail/lostPassword.html";
     /**
      * add url-handler
      */
@@ -58,7 +61,7 @@ class lost_passwordExtension extends ControllerExtension
                 return $this->getEditPasswordForm($data)->render();
             } else {
                 $view = new ViewAccessableData();
-                return $view->customise(array("codeWrong" => true))->renderWith("mail/lostPasswordSent.html");
+                return $view->customise(array("codeWrong" => true))->renderWith(self::LOST_PASSWORD_SENT);
             }
         }
 
@@ -90,7 +93,6 @@ class lost_passwordExtension extends ControllerExtension
      * @return Form
      */
     public function getEditPasswordForm($user) {
-
         $pwdform = new Form($this, "editpwd", array(
             new HTMLField("heading","<h3>".lang("lost_password", "lost password")."</h3>"),
             new HiddenField("id", $user->id),
@@ -132,8 +134,7 @@ class lost_passwordExtension extends ControllerExtension
      * @access public
      * @return bool|string
      */
-    public function validate($obj)
-    {
+    public function validate($obj) {
         $data = $obj->getForm()->result["email"];
         if(!$data) {
             return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
@@ -147,8 +148,7 @@ class lost_passwordExtension extends ControllerExtension
         }
     }
 
-    public function submit($data)
-    {
+    public function submit($data) {
         /** @var User $data */
         $data = DataObject::get_one("user", array("nickname" => $data["email"], "OR", "email" => $data["email"]));
 
@@ -161,11 +161,11 @@ class lost_passwordExtension extends ControllerExtension
 
         $text = $data->customise(array(
             "key" => $key
-        ))->renderWith("mail/lostPassword.html");
+        ))->renderWith(self::LOST_PASSWORD_MAIL);
 
         if($mail->sendHTML($email, lang("lost_password"), $text))
         {
-            return $data->renderWith("mail/lostPasswordSent.html");
+            return $data->renderWith(self::LOST_PASSWORD_SENT);
         } else
         {
             return lang("mail_not_sent", "Mail couldn't be transmitted.");

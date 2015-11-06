@@ -22,61 +22,61 @@ class Member extends Object {
 	 *
 	 *@name id
 	 *@access public
-	*/
+	 */
 	public static $id;
-	
+
 	/**
 	 * nickname of the user logged in
 	 *
 	 *@name nickname
 	 *@access public
-	*/
+	 */
 	public static $nickname;
-	
+
 	/**
 	 * this var reflects the status of the highest group in which the user is
 	 *
 	 *@name groupType
 	 *@access public
 	 *@var enum(0,1,2)
-	*/
+	 */
 	public static $groupType = 0;
-	
+
 	/**
 	 * set of groups of this user
 	 *
 	 *@name groups
 	 *@access public
-	*/
+	 */
 	public static $groups = array();
-	
+
 	/**
 	 * default-admin
 	 *
 	 *@name default_admin
 	 *@access public
-	*/
+	 */
 	public static $default_admin;
-	
+
 	/**
 	 * object of logged in user
 	 *
 	 * @var User
-	*/
+	 */
 	public static $loggedIn;
-	
+
 	/**
 	 * checks the login and writes the types
 	 *
 	 * @name 	Init
 	 * @access 	public
 	 * @return 	boolean	true if logged in
-	*/
+	 */
 	public static function Init() {
 		if(PROFILE) Profiler::mark("member::Init");
-		
+
 		DefaultPermission::checkDefaults();
-		
+
 		if($auth = AuthenticationService::getAuthRecord(GlobalSessionManager::globalSession()->getId())) {
 			$user = $auth->user;
 
@@ -88,10 +88,10 @@ class Member extends Object {
 				Core::setCMSVar("TIMEZONE", $user["timezone"]);
 				date_default_timezone_set(Core::getCMSVar("TIMEZONE"));
 			}
-			
+
 			self::$id = $user->id;
 			self::$nickname = $user->nickname;
-			
+
 			self::$groups = DefaultPermission::forceGroups($user);
 
 			self::$groupType = self::$groups->first()->type;
@@ -102,7 +102,7 @@ class Member extends Object {
 				self::$groups->first()->type = 1;
 				self::$groups->first()->write(false, true, 2, false, false);
 			}
-			
+
 			self::$loggedIn = $user;
 			if(PROFILE) Profiler::unmark("member::Init");
 			return true;
@@ -112,11 +112,11 @@ class Member extends Object {
 		}
 	}
 
-    /**
-     * returns the groupids of the groups of the user
-     *
-     * @return array
-     */
+	/**
+	 * returns the groupids of the groups of the user
+	 *
+	 * @return array
+	 */
 	public static function groupIDs() {
 		if(is_array(self::$groups)) {
 			return self::$groups;
@@ -124,35 +124,35 @@ class Member extends Object {
 		return self::$groups->fieldToArray("id");
 	}
 
-    /**
-     * returns if the user is logged in
-     *
-     * @return bool
-     */
+	/**
+	 * returns if the user is logged in
+	 *
+	 * @return bool
+	 */
 	public static function login() {
 		return (self::$groupType > 0);
 	}
 
-    /**
-     * returns if the user is an admin
-     *
-     * @return bool
-     */
+	/**
+	 * returns if the user is an admin
+	 *
+	 * @return bool
+	 */
 	public static function admin() {
 		return (self::$groupType == 2);
 	}
-	
+
 	/**
 	 * checks if an user have the rights
 	 *
 	 *@param string|number $name if numeric: the rights from 1 - 10, if string: the advanced rights
 	 *@return bool
-	*/
+	 */
 	static function right($name)
 	{
 		return Permission::check($name);
 	}
-	
+
 	/**
 	 * login an user with the params
 	 * if the params are incorrect, it returns false.
@@ -162,7 +162,7 @@ class Member extends Object {
 	 * @param 	string - nickname
 	 * @param 	string - password
 	 * @return 	bool
-	*/
+	 */
 	public static function doLogin($user, $pwd)
 	{
 		try {
@@ -190,13 +190,13 @@ class Member extends Object {
 		return false;
 	}
 
-    /**
-     * require login
-     *
-     * @name require_Login
-     * @access public
-     * @return bool
-     */
+	/**
+	 * require login
+	 *
+	 * @name require_Login
+	 * @access public
+	 * @return bool
+	 */
 	public static function require_login() {
 		if(!self::login()) {
 			AddContent::addNotice(lang("require_login"));
@@ -209,10 +209,10 @@ class Member extends Object {
 		HTTPResponse::redirect(ROOT_PATH . BASE_SCRIPT . "profile/login/?redirect=" . $_SERVER["REQUEST_URI"]);
 		exit;
 	}
-	
+
 	/**
 	 * unique identifier of this user.
-	*/
+	 */
 	public static function uniqueID() {
 		if(GlobalSessionManager::globalSession()->hasKey("uniqueID")) {
 			return GlobalSessionManager::globalSession()->get("uniqueID");

@@ -370,7 +370,7 @@ $lang = array(
 	"description_info"								=> "Die Beschreibung wird von Suchmaschinen benutzt, um den Inhalt Ihrer Seite für Nutzer klarer zu machen.",
 	"register_enabled_info"							=> "Ermöglicht es Gästen sich zu registrieren",
 	"register_require_email_info"					=> "Es wird bei der Registrierung eine Bestätigungs-E-Mail gesendet, um die E-Mail-Adresse zu validieren.",
-	"register_requre_acitvation"					=> "Ihr Account wurde erfolgreich registriert. Ein Administrator muss ihn nun nur noch aktivieren.",
+	"register_require_acitvation"					=> "Ihr Account wurde erfolgreich registriert. Ein Administrator muss ihn nun nur noch aktivieren.",
 	"sitestatus_info"								=> "Wenn sich die Seite im Wartungsmodus befindet, kann Sie nur von Mitgliedern angezeigt werden, die auch die Administration aufrufen können. Sie können diese Funktion z.B. verwenden, wenn Sie Wartungsarbeiten durchführen.",
 	
 	/* users and groups */
