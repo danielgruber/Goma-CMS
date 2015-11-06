@@ -41,4 +41,14 @@ class RegexpUtil {
     public static function isEmail($email) {
         return preg_match('/^([a-zA-Z0-9\-\._]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9]{2,9})$/', $email);
     }
+
+    /**
+     * returns if phone-number is valid.
+     *
+     * @param string $phone
+     * @return bool
+     */
+    public static function isPhoneNumber($phone) {
+        return preg_match('/^\+?[0-9\s]+$/', $phone);
+    }
 }

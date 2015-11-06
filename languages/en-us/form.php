@@ -1,13 +1,14 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 10.02.2013
-*/   
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
+ * last modified: 10.02.2013
+ */
 $form_lang = array(
-	'email_not_valid'			=> 'Please enter a valid email-adresse.',
+	'email_not_valid'			=> 'Please enter a valid email-address.',
+	'phone_not_valid'			=> 'Please enter a valid phone-number.',
 	'required_fields'			=> 'Please enter text in all mandatory fields:',
 	'edit_data'					=> "edit data",
 	'required_field'			=> "This field is a mandatory field!",
@@ -19,7 +20,7 @@ $form_lang = array(
 	"number_not_valid"			=> "Please insert a valid number!",
 	"bad_pagetype"				=> "Please set a valid pagetype!",
 	"not_saved_yet"				=> "The action could not be completed for security reason, yet. Please repeat it!",
-	
+
 	"tablefield.reset"			=> "Reset",
 	"tablefield.filterBy"		=> "filter by "
 );

@@ -12,19 +12,20 @@ defined("IN_GOMA") OR die();
 class Email extends TextField {
 	/**
 	 * this function generates some JavaScript for the validation of the field
-	 *@name jsValidation
-	 *@access public
+	 * @name jsValidation
+	 * @access public
+	 * @return string
 	 */
 	public function jsValidation() {
 		return '
-							var regexp = /^([a-zA-Z0-9\-\._]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9]{2,9})$/;
+							var regexp = /^\+?[0-9\s]+$/;
 							if(regexp.test($("#' . $this->ID() . '").val()))
 							{
 									
 							} else
 							{
 									$("#' . $this->divID() . '").find(".err").remove();
-									$("#' . $this->ID() . '").after("<div class=\"err\" style=\"color: #ff0000;\">' . lang("form_email_not_valid", "Please enter a correct E-Mail-Adresse") . '</div>");
+									$("#' . $this->ID() . '").after("<div class=\"err\" style=\"color: #ff0000;\">' . lang("form_email_not_valid", "Please enter a correct email-address.") . '</div>");
 									return false;
 							}
 						';
@@ -41,8 +42,7 @@ class Email extends TextField {
 		if(RegexpUtil::isEmail($value)) {
 			return true;
 		} else {
-			return lang("form_email_not_valid", "Please enter a correct E-Mail-Adresse");
+			return lang("form_email_not_valid", "Please enter a correct email-address.");
 		}
 	}
-
 }

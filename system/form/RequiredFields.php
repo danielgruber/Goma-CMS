@@ -51,6 +51,10 @@ class RequiredFields extends FormValidator
                 $text .= ' \'' . $value . '\'';
             }
 
+            if($errorString != "") {
+                $errorString .= "<br />";
+            }
+
             return $errorString . $text;
         }
     }
