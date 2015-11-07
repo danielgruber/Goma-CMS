@@ -1043,7 +1043,7 @@ class mysqliDriver extends object implements SQLDriver
             throw new InvalidArgumentException("You have to either put a dictionary or an array of dictionaries.");
         }
 
-        return $records;
+        return array_values($records);
     }
 
     /**

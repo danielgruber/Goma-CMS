@@ -16,6 +16,7 @@ class lost_passwordExtension extends ControllerExtension {
      */
     const LOST_PASSWORD_SENT = "profile/lostPasswordSent.html";
     const LOST_PASSWORD_MAIL = "mail/lostPassword.html";
+
     /**
      * add url-handler
      */
@@ -45,9 +46,9 @@ class lost_passwordExtension extends ControllerExtension {
             return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_know_password", "You know your password, else you would not be logged in!");
         }
 
-        if(isset($_GET["code"]) && ($_GET["code"] != "" || isset($_GET["deny"])))
+        if($this->getParam("code") != "" || $this->getParam("deny"))
         {
-            $code = $_GET["code"];
+            $code = $this->getParam("code");
             if(DataObject::count("user", array("code" => $code)) > 0)
             {
                 /** @var User $data */
@@ -117,14 +118,10 @@ class lost_passwordExtension extends ControllerExtension {
         $user = DataObject::get_by_id("User", array("id" => $data["id"]));
         $user->password = $data["password"];
         $user->code = randomString(20);
-        if($user->write(false, true))
-        {
-            return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_update_ok", "Your password was updated successful!");
-        } else
-        {
-            throwErrorByID(3);
-        }
 
+        Core::repository()->write($user, true);
+
+        return "<h1>".lang("lost_password", "lost password")."</h1>" . lang("lp_update_ok", "Your password was updated successful!");
     }
 
     /**
