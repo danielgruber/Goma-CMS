@@ -135,6 +135,7 @@ class siteController extends Controller
      *
      * @name index
      * @access public
+     * @return bool|false|mixed|null|string
      */
     public function index()
     {
@@ -198,15 +199,13 @@ class HomePageController extends SiteController
      * @access public
      * @return false|string
      */
-    public function index()
-    {
-
+    public function index() {
         defined("HOMEPAGE") OR define("HOMEPAGE", true);
 
         if (isset($_GET["r"])) {
             $redirect = DataObject::get_one("pages", array("id" => $_GET["r"]));
             if ($redirect) {
-                $query = preg_replace('/\&?r\=' . preg_quote($_GET["r"]) . '/', '', $_SERVER["QUERY_STRING"]);
+                $query = preg_replace('/\&?r\=' . preg_quote($_GET["r"], "/") . '/', '', $_SERVER["QUERY_STRING"]);
                 HTTPResponse::redirect($redirect->url . "?" . $query);
             }
         }
