@@ -39,7 +39,7 @@ class Form extends object {
 	 *@name dataHandlers
 	 *@access public
 	 */
-	public $dataHandlers = array();
+	protected $dataHandlers = array();
 
 	/**
 	 * all available fields in this form
@@ -586,6 +586,7 @@ class Form extends object {
 			}
 		}
 
+		/** @var Form $data */
 		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->post = $this->post;
 
@@ -641,7 +642,7 @@ class Form extends object {
 		$result = $realresult;
 		unset($realresult, $allowed_result);
 
-		foreach($data->dataHandlers as $callback) {
+		foreach($data->getDataHandlers() as $callback) {
 			$result = call_user_func_array($callback, array($result));
 		}
 
@@ -721,10 +722,19 @@ class Form extends object {
 	 *@param callback
 	 */
 	public function addDataHandler($callback) {
-		if(is_callable($callback))
+		if(is_callable($callback)) {
 			$this->dataHandlers[] = $callback;
-		else
-			throwError(6, "Invalid Argument", "Argument 1 for Form::addDataHandler should be a valid callback.");
+		} else {
+			throw new InvalidArgumentException("Argument 1 for Form::addDataHandler should be a valid callback.");
+		}
+	}
+
+	/**
+	 * @return array<Callback>
+	 */
+	public function getDataHandlers()
+	{
+		return $this->dataHandlers;
 	}
 
 	/**

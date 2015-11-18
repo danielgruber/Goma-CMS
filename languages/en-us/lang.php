@@ -391,7 +391,7 @@ $lang = array(
 	"contact_greetings"								=> "Best Regards<br /><br />Goma-Auto-Messenger",
 	// register e-mail
 	"thanks_for_register"							=> "Very thanks, that you registered on out site.",
-	"account_activate"								=> "to activate your account, please click on the following link:",
+	"account_activate"								=> "To activate your account, please click on the following link:",
 	"register_greetings"							=> "Best Regards<br /><br />The team",
 	"register_ok_activate"							=> "The user was successfully created. Please visit your email-inbox to activate the account.",
 	"register_resend"								=> "The activation-mail was successfully resent.",

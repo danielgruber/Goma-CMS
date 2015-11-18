@@ -133,7 +133,7 @@ class UpdateController extends adminController {
             exit;
         }
 
-        $data = G_SoftwareType::getInstallInfos($file);
+        $data = G_SoftwareType::getInstallInfos($this, $file);
 
         if(is_string($data)) {
             return $data;

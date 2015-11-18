@@ -241,48 +241,51 @@ abstract class g_SoftwareType {
 		return new ViewAccessableData($apps);
 	}
 
-    /**
-     * gets install-infos about a GFS-file
-     *
-     * @name getInstallInfos
-     * @access public
-     * @return string|array
-     */
-	public static function getInstallInfos($file, $forceInstall = false, $forceUpdate = false) {
+	/**
+	 * gets install-infos about a GFS-file
+	 *
+	 * @param RequestHandler $controller
+	 * @param string $file
+	 * @param bool $forceInstall
+	 * @param bool $forceUpdate
+	 * @return array|string
+	 */
+	public static function getInstallInfos($controller, $file, $forceInstall = false, $forceUpdate = false) {
 		$gfs = new GFS($file);
-		
+
 		if(!$gfs->valid) {
 			return lang("gfs_invalid");
 		}
-		
+
 		$info = $gfs->parsePlist("info.plist");
-		
-		if(isset($info["type"])) {	
+
+		if(isset($info["type"])) {
 			if($info["type"] == "app") {
-                $info["type"] = "backup";
-            }
-			
+				$info["type"] = "backup";
+			}
+
 			foreach(ClassInfo::getChildren("G_SoftwareType") as $child) {
 				if(StaticsManager::getStatic($child, "type") == $info["type"]) {
+					/** @var g_SoftwareType $inst */
 					$inst = new $child($file);
-					
-					$data = $inst->getInstallInfo($forceInstall);
+
+					$data = $inst->getInstallInfo($controller, $forceInstall);
 					if($forceUpdate && $data["installType"] != "update") {
 						$data["installable"] = false;
 						$data["error"] = lang("install_not_update");
 					}
-					
+
 					if($gfs->isSigned(self::getAppStorePublic())) {
 						$data["signed"] = true;
 					} else if(GFS::$openssl_problems) {
 						$data["signed_ssl_not_installed"] = true;
 					}
-					
+
 					return $data;
 				}
 			}
 		}
-		
+
 		return lang("install_invalid_file");
 	}
 

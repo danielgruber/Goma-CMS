@@ -230,7 +230,7 @@ class AjaxSubmitButton extends FormAction {
 		$result = $realresult;
 		unset($realresult, $allowed_result);
 
-		foreach($this->form()->dataHandlers as $callback) {
+		foreach($this->form()->getDataHandlers() as $callback) {
 			$result = call_user_func_array($callback, array($result));
 		}
 		

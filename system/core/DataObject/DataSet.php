@@ -514,7 +514,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
         if(isset($page) && RegexpUtil::isNumber($page) && $page > 0) {
 
             // first validate the data
-            $pages = ceil($this->Count() / $this->perPage);
+            $pages = max(ceil($this->Count() / $this->perPage), 1);
             if($pages < $page) {
                 $page = $pages;
             }
