@@ -374,59 +374,43 @@ class HTTPResponse
 			self::addHeader('Cache-Control','post-check=0, pre-check=0');
 			self::addHeader('Content-Length', filesize($file));
 	}
+
 	/**
-	 * redirects
-	 *@name redirect
-	 *@param string - to
-	 *@param bool - 301?
-	*/
-	public static function redirect($url, $_301 = false)
-	{	
-			
-			$hash = md5($url . $_SERVER["HTTP_HOST"]);
-			if(defined('SPEEDCACHE_ACTIVE'))
-			{
-					
-					
-					$file = ROOT . CACHE_DIRECTORY . "/speedcache.".$hash.".php";
-					if(file_exists($file))
-					{
-							unlink($file);
-					}
+	 * redirects back.
+	 *
+	 * @param $url
+	 * @param bool|false $_301
+	 */
+	public static function redirect($url, $_301 = false) {
+		Core::callHook("beforeRedirect", $url, $_301);
+
+		self::setResHeader($_301 ? 301 : 302);
+		if(Core::is_ajax())
+		{
+			if(Request::isJSResponse() || isset($_GET["dropdownDialog"])) {
+				self::setResHeader(200);
+				$response = new AjaxResponse();
+				$response->exec("window.location.href = " . var_export($url, true) . ";");
+				$output = $response->render();
+				self::sendHeader();
+				echo $output;
+				exit;
 			}
-			
-			if(!$_301)
+
+			if(preg_match('/\?/', $url))
 			{
-					self::setResHeader(302);
+					$url .= "&ajax=1";
 			} else
 			{
-					self::setResHeader(301);
+					$url .= "?ajax=1";
 			}
-			if(Core::is_ajax())
-			{
-				if(Request::isJSResponse() || isset($_GET["dropdownDialog"])) {
-					self::setResHeader(200);
-					$response = new AjaxResponse();
-					$response->exec("window.location.href = " . var_export($url, true)) . ";";
-					$output = $response->render();
-					self::sendHeader();
-					echo $output;
-					exit;
-				}
-				
-				if(preg_match('/\?/', $url))
-				{
-						$url .= "&ajax=1";
-				} else
-				{
-						$url .= "?ajax=1";
-				}
-			}
-			self::addHeader('Location', $url);
-			self::sendheader();
-			echo '<script type="text/javascript">location.href = "'.$url.'";</script><br /> Redirecting to: <a href="'.$url.'">'.$url.'</a>';
-			
-			Core::callHook("onBeforeShutdown");
-			exit;
+		}
+
+		self::addHeader('Location', $url);
+		self::sendheader();
+		echo '<script type="text/javascript">location.href = "'.addSlashes($url).'";</script><br /> Redirecting to: <a href="'.addSlashes($url).'">'.convert::raw2text($url).'</a>';
+
+		Core::callHook("onBeforeShutdown");
+		exit;
 	}
 }
