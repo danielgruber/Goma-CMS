@@ -160,13 +160,12 @@ function session_store_exists($key) {
  */
 function getRedirect($parentDir = false, $controller = null) {
 	// AJAX Request
-	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"])) {
+	if(Core::is_ajax() && isset($_SERVER["HTTP_X_REFERER"]) && protectUrl($_SERVER["HTTP_X_REFERER"])) {
 		return htmlentities($_SERVER["HTTP_X_REFERER"], ENT_COMPAT, "UTF-8", false);
 	}
 
 	if($parentDir) {
-
-		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
+		if(isset($_GET["redirect"]) && protectUrl($_GET["redirect"])) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else if(isset($controller)) {
 			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
@@ -180,12 +179,9 @@ function getRedirect($parentDir = false, $controller = null) {
 			} else {
 				return htmlentities(substr($_SERVER["REQUEST_URI"], 0, strrpos($_SERVER["REQUEST_URI"], "/")) . URLEND, ENT_COMPAT, "UTF-8", false);
 			}
-
 		}
-
 	} else {
-
-		if(isset($_GET["redirect"]) && $_GET["redirect"]) {
+		if(isset($_GET["redirect"]) && protectUrl($_GET["redirect"])) {
 			return htmlentities($_GET["redirect"], ENT_COMPAT, "UTF-8", false);
 		} else if(isset($controller)) {
 			return htmlentities(ROOT_PATH . BASE_SCRIPT . $controller->originalNamespace, ENT_COMPAT, "UTF-8", false);
