@@ -198,6 +198,21 @@ function getRedirect($parentDir = false, $controller = null) {
 	}
 }
 
+function protectUrl($url) {
+	if(preg_match('/^(http|https|ftp)\:\/\/(.*)/i', $url, $matches)) {
+		$server = $_SERVER["SERVER_NAME"];
+		if(strtolower(substr($matches[2], 0, strlen($server))) != strtolower($server)) {
+			return "";
+		} else {
+			if(strtolower($matches[2]) != $server && strtolower(substr($matches[2], 0, strlen($server) + 1)) != strtolower($server) . "/") {
+				return "";
+			}
+		}
+	}
+
+	return $url;
+}
+
 /**
  * generates a translated date.
  */

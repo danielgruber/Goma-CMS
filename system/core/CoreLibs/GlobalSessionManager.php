@@ -82,7 +82,7 @@ class GlobalSessionManager {
     public static function setGomaCookies($user_identifier, $host)
     {
         setCookie(self::SESSION_ID_COOKIE, $user_identifier, TIME + SESSION_TIMEOUT, '/', $host, false, true);
-        setCookie(self::LIFE_ID_COOKIE, $user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host);
+        setCookie(self::LIFE_ID_COOKIE, $user_identifier, TIME + 365 * 24 * 60 * 60, '/', $host, false, true);
     }
 
     /**
