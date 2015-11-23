@@ -635,11 +635,11 @@ class SelectQuery extends Object {
 					continue;
 				}
 
-				$fieldSQL = " CASE ";
+				$fieldSQL = " coalesce( ";
 				foreach($tables as $table) {
-					$fieldSQL .= " WHEN " . self::getAlias($table) . "." . $field . " IS NOT NULL THEN " . self::getAlias($table) . "." . $field . " ";
+					$fieldSQL .= self::getAlias($table) . "." . $field . ",";
 				}
-				$fieldSQL .= " ELSE NULL END AS " . $field . "";
+				$fieldSQL .= "'')";
 				$colidingSQL[] = $fieldSQL;
 			}
 

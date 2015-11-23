@@ -218,6 +218,7 @@ function goma_date($format, $date = NOW) {
 
 	require (ROOT . LANGUAGE_DIRECTORY . Core::getCMSVar("lang") . "/calendar.php");
 
+	/** @var array $calendar */
 	$str = str_replace(array_keys($calendar), array_values($calendar), $str);
 	return $str;
 }
