@@ -122,7 +122,10 @@ class RegisterExtension extends ControllerExtension
 
 			// great, let's show a form
 		} else {
-			$user = new user();
+			$user = new User();
+
+			$this->callExtending("extendNewUserForRegistration", $user);
+
 			return $user->controller($this->getOwner())->form(false, false, array(), false, "doregister");
 		}
 	}

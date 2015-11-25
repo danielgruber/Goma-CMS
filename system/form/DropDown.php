@@ -5,6 +5,7 @@
  *
  * It supports the same as Select, but also Search and Pagination for big data.
  *
+ * @property HTMLNode widget
  * @package Goma\Form
  *
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
@@ -84,10 +85,10 @@ class DropDown extends FormField {
 	 * @access protected
 	 */
 	protected $multiselect = false;
-	
+
 	/**
-	 * sortable relationships.	
-	*/
+	 * sortable relationships.
+	 */
 	public $sortable = false;
 
 	/**
@@ -213,13 +214,13 @@ class DropDown extends FormField {
 					)),
 					new HTMLNode("div", array("class" => "pagination"), array(
 						new HTMLNode("span", array("class" => "left"), array(new HTMLNode("a", array(
-								"class" => "left disabled fa fa-angle-left fa-3x",
-								"href" => "javascript:;"
-							), ""))),
+							"class" => "left disabled fa fa-angle-left fa-3x",
+							"href" => "javascript:;"
+						), ""))),
 						new HTMLNode("span", array("class" => "right"), array(new HTMLNode("a", array(
-								"class" => "right disabled fa fa-angle-right fa-3x",
-								"href" => "javascript:;"
-							), "")))
+							"class" => "right disabled fa fa-angle-right fa-3x",
+							"href" => "javascript:;"
+						), "")))
 					)),
 					new HTMLNode("div", array("class" => "clear"))
 				)),
@@ -328,7 +329,7 @@ class DropDown extends FormField {
 		}
 
 		if(!$this->disabled) {
-			Resources::addJS("$(function(){ var _" . md5("dropdown_" . $this->ID()) . " = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
+			Resources::addJS("$(function(){ var ".$this->javascriptVariable()." = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
 		}
 
 		if($this->disabled) {
@@ -349,6 +350,15 @@ class DropDown extends FormField {
 			Profiler::unmark("FormField::field");
 
 		return $this->container;
+	}
+
+	/**
+	 * public javascript-variable-name.
+	 *
+	 * @return string
+	 */
+	public function javascriptVariable() {
+		return "_" . md5("dropdown_" . $this->ID());
 	}
 
 	/**
@@ -438,6 +448,7 @@ class DropDown extends FormField {
 		$end = $start + 9;
 		$i = 0;
 		$left = ($p == 1) ? false : true;
+		$right = false;
 
 		// check if this is an array with numeric indexes or not
 		if(isset($result[0])) {
@@ -476,7 +487,7 @@ class DropDown extends FormField {
 			}
 		}
 		// clean up
-		unset($i, $start, $end);
+		unset($i);
 
 		return array(
 			"data" => $arr,
@@ -537,17 +548,17 @@ class DropDown extends FormField {
 		// left and right is pagination (left arrow and right)
 		return json_encode($return);
 	}
-	
+
 	/**
-	 * saves sort.	
-	*/
+	 * saves sort.
+	 */
 	public function saveSort() {
 		$newSet = array();
 		if(isset($_POST["sorted"])) {
 			foreach($_POST["sorted"] as $id) {
 				$newSet[] = $id;
 			}
-		} 
+		}
 		$this->dataset = $newSet;
 		session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		return "ok";
@@ -716,5 +727,4 @@ class DropDown extends FormField {
 
 		return true;
 	}
-
 }
