@@ -1167,7 +1167,15 @@ if (window.loader === undefined) {
 		*/
 		w.setLang = function(data) {
 		    lang = data;
-		}
+		};
+
+		/**
+		 * gets language array.
+		 * @returns {Array}
+		 */
+		w.getLang = function() {
+			return lang;
+		};
 		
 		/**
 		 * starts a indexing for search.

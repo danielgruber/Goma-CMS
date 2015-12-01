@@ -10,9 +10,9 @@
  * @version		1.3.2
  *
  * @property string nickname
+ * @property string email
  * @property string code
  * @property string password
- * @property string email
  * @property int avatarid
  * @property int code_has_sent
  * @property int status

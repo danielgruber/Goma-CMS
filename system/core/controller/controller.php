@@ -260,6 +260,7 @@ class Controller extends RequestHandler
      *
      * @name countModelRecords
      * @access public
+     * @return int
      */
     public function countModelRecords()
     {
@@ -275,7 +276,10 @@ class Controller extends RequestHandler
 
     /**
      * handles requests
-     * @name handleRequest
+     *
+     * @param Request $request
+     * @param bool $subController
+     * @return false|mixed|null|string
      */
     public function handleRequest($request, $subController = false)
     {
@@ -304,9 +308,7 @@ class Controller extends RequestHandler
      * @name __output
      * @access public
      */
-    public function __output($content)
-    {
-
+    public function __output($content) {
         return $content;
     }
 
@@ -315,16 +317,15 @@ class Controller extends RequestHandler
      *
      * @return string|bool
      */
-    public function index()
-    {
+    public function index() {
         if ($this->template) {
             $this->tplVars["namespace"] = $this->namespace;
             if (is_a($this->modelInst(), "DataObject") && $this->modelInst()->controller != $this) {
                 $model = DataObject::Get($this->model(), $this->where);
                 $model->controller = clone $this;
-                return $model->customise($this->tplVars)->renderWith($this->template);
+                return $model->customise($this->tplVars)->renderWith($this->template, $this->inExpansion);
             } else {
-                return $this->modelInst()->customise($this->tplVars)->renderWith($this->template);
+                return $this->modelInst()->customise($this->tplVars)->renderWith($this->template, $this->inExpansion);
             }
         } else {
             throw new LogicException("No Template for Controller " . $this->classname . ". Please define \$template to activate the index-method.");

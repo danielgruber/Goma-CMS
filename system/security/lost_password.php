@@ -137,8 +137,9 @@ class lost_passwordExtension extends ControllerExtension {
             return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");
         }
 
-        $object = DataObject::get("user", array("nickname" => array("LIKE", $data), "OR", "email" => $data));
-        if($object->Count() > 0 && $object->email) {
+        /** @var User $user */
+        $user = DataObject::get_one("user", array("nickname" => array("LIKE", $data), "OR", "email" => $data));
+        if($user && $user->email) {
             return true;
         } else {
             return lang("lp_not_found", "There is no E-Mail-Adresse for your data.");

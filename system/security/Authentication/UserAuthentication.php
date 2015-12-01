@@ -57,11 +57,15 @@ class UserAuthentication extends DataObject implements HistoryData {
         switch($record->action) {
             case "remove":
             case IModelRepository::COMMAND_TYPE_DELETE:
-                $lang = lang("h_user_logout");
-                if($record->oldversion()) {
-                    $version = $record->oldversion();
+                if($record->created - $record->oldversion()->last_modified < AuthenticationService::$expirationLimit) {
+                    $lang = lang("h_user_logout");
+                    if ($record->oldversion()) {
+                        $version = $record->oldversion();
+                    }
+                    $icon = "images/icons/fatcow16/user_go.png";
+                } else {
+                    return false;
                 }
-                $icon = "images/icons/fatcow16/user_go.png";
                 break;
             case "insert":
             case "publish":

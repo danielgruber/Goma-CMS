@@ -107,9 +107,10 @@ class AuthenticationService {
      * @param string $user
      * @param string $pwd
      * @param string|null $sessionId
+     * @param int $allowStatus which status should be additionally allowed?
      * @return User
      */
-    public static function checkLogin($user, $pwd, $sessionId = null) {
+    public static function checkLogin($user, $pwd, $sessionId = null, $allowStatus = -1) {
         DefaultPermission::checkDefaults();
 
         $users = DataObject::get("user", array("nickname" => trim(strtolower($user)), "OR", "email" => array("LIKE", $user)));
@@ -119,7 +120,7 @@ class AuthenticationService {
             foreach($users as $userObject) {
                 // check password
                 if (Hash::checkHashMatches($pwd, $userObject->fieldGet("password"))) {
-                    if ($userObject->status == 1) {
+                    if ($userObject->status == 1 || $userObject->status == $allowStatus) {
 
                         DefaultPermission::forceGroups($userObject);
 

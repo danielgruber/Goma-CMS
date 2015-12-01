@@ -22,11 +22,11 @@ class History extends DataObject {
 	 *
 	 * @var int
 	 */
-	public static $storeHistoryForDays = 90;
+	public static $storeHistoryForDays = 365;
 
 	/**
 	 * db-fields
-	*/
+	 */
 	static $db = array(
 		"dbobject"		=> "varchar(100)",
 		"record"		=> "int(10)",
@@ -37,10 +37,10 @@ class History extends DataObject {
 		"changecount"	=> "int(10)",
 		"changed"		=> "text"
 	);
-	
+
 	/**
 	 * indexes
-	*/
+	 */
 	static $index = array(
 		"dbobject"	=> array(
 			"type"		=> "INDEX",
@@ -48,36 +48,36 @@ class History extends DataObject {
 			"fields"	=> "dbobject,class_name"
 		)
 	);
-	
+
 	/**
 	 * disable history for this dataobject, because we would have an endless loop
 	 *
 	 *@name history
 	 *@access public
-	*/
+	 */
 	static $history = false;
-	
+
 	/**
 	 * small cache for classes supporting HistoryView
 	 *
 	 *@name supportHistoryView
 	 *@access private
-	*/
+	 */
 	static $supportHistoryView;
-	
+
 	/**
 	 * sort-direction of the history
 	 *
 	 *@name default_sort
-	*/ 
+	 */
 	static $default_sort = "created DESC";
-	
+
 	/**
 	 * cache for history-data
 	 *
 	 *@name data
 	 *@access private
-	*/
+	 */
 	private $historyData;
 
 	/**
@@ -100,24 +100,24 @@ class History extends DataObject {
 
 		// if it's an object, get the class-name from the object
 		$class = ClassManifest::resolveClassName($class);
-		
+
 		// if we've got the version as object given, get versionid from object
 		if(is_object($oldrecord))
 			$oldrecord = $oldrecord->versionid;
-		
+
 		// if we've got the version as object given, get versionid from object
 		if(is_object($newrecord))
 			$newrecord = $newrecord->versionid;
-		
+
 		// check if history is enabled on that dataobject
 		if(!StaticsManager::getStatic($class, "history")) {
 			return false;
 		}
-		
+
 		if(isset($changed) && !DataObject::versioned($class)) {
 			$serializedChanged = serialize($changed);
 		}
-		
+
 		// create the history-record
 		$record = new History(array(
 			"dbobject" 		=> $class,
@@ -151,14 +151,14 @@ class History extends DataObject {
 	public static function supportHistoryView() {
 		if(isset(self::$supportHistoryView))
 			return self::$supportHistoryView;
-			
+
 		self::$supportHistoryView = array();
 		foreach(ClassInfo::getChildren("DataObject") as $child) {
 			if(StaticsManager::getStatic($child, "history") && ClassInfo::hasInterface($child, "HistoryData") && call_user_func_array(array($child, "canViewHistory"), array($child))) {
 				self::$supportHistoryView[] = $child;
 			}
 		}
-		
+
 		return self::$supportHistoryView;
 	}
 
@@ -186,7 +186,7 @@ class History extends DataObject {
 	public function getContent() {
 		if($data = $this->historyData()) {
 			$text = $data["text"];
-			if(strpos($text, '$user') !== false) {
+			if(preg_match('/\$user/', $text)) {
 				// generate user
 				if($this->autor) {
 					$user = '<a href="member/'.$this->autor->ID . URLEND.'" class="user">' . convert::Raw2text($this->autor->title) . '</a>';
@@ -198,7 +198,7 @@ class History extends DataObject {
 				return $text;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -214,7 +214,7 @@ class History extends DataObject {
 		if($data = $this->historyData()) {
 			return ClassInfo::findFile($data["icon"], $this->dbobject);
 		}
-		
+
 		return false;
 	}
 
@@ -228,19 +228,19 @@ class History extends DataObject {
 		if(isset($this->_versioned)) {
 			return $this->_versioned;
 		}
-		
+
 		$this->_versioned = false;
 		$data = $this->historyData();
 		if(isset($data["versioned"]) && $data["versioned"] && isset($data["editurl"])) {
 			if(!DataObject::versioned($this->dbobject) || $this->fieldGet("newversion") == 0 || $this->fieldGet("oldversion") == 0) {
 				return false;
 			}
-			
+
 			if(DataObject::count($this->dbobject, array("versionid" => array($this->fieldGet("newversion"), $this->fieldGet("oldversion")))) == 2) {
 				$this->_versioned = true;
 				return true;
 			}
-			
+
 			return false;
 		} else {
 			return false;
@@ -270,7 +270,7 @@ class History extends DataObject {
 		if(!isset($data["compared"]) || $data["compared"]) {
 			return ($this->getIsVersioned() && $temp->getVersionedFields());
 		}
-		
+
 		return false;
 	}
 
@@ -288,10 +288,10 @@ class History extends DataObject {
 			$retinaPath = substr($icon, 0, strrpos($icon, ".")) . "@2x" . substr($icon, strrpos($icon, "."));
 			if(file_exists($retinaPath))
 				return $retinaPath;
-			
+
 			return $icon;
 		}
-		
+
 		return false;
 	}
 
@@ -305,7 +305,7 @@ class History extends DataObject {
 		if(isset($this->historyData)) {
 			return $this->historyData;
 		}
-		
+
 		if(ClassInfo::exists($this->dbobject)) {
 			if(Object::method_exists($this->dbobject, "generateHistoryData")) {
 				$data = call_user_func_array(array($this->dbobject, "generateHistoryData"), array($this));
@@ -322,7 +322,7 @@ class History extends DataObject {
 				return false;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -341,7 +341,7 @@ class History extends DataObject {
 				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("newversion")));
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -367,12 +367,12 @@ class History extends DataObject {
 	 */
 	public function oldversion() {
 		if($this->fieldGet("oldversion") && ClassInfo::exists($this->dbobject)) {
-			
+
 			if(DataObject::versioned($this->dbobject)) {
 				return DataObject::get_one($this->dbobject, array("versionid" => $this->fieldGet("oldversion")));
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -398,7 +398,7 @@ class History extends DataObject {
 		if(ClassInfo::exists($this->dbobject)) {
 			return DataObject::get_by_id($this->dbobject, $this->fieldGet("record"));
 		}
-		
+
 		return null;
 	}
 
@@ -412,31 +412,33 @@ class History extends DataObject {
 		$data = $this->HistoryData();
 		return "history_" . $this->dbobject . (isset($data["class"]) ? " " . $data["class"] : "") . ((isset($data["relevant"]) && $data["relevant"]) ? " relevant" : " irrelevant");
 	}
-	
+
 	/**
 	 * clean up DB
 	 *
 	 *@name cleanUpDB
 	 *@åccess public
-	*/
+	 */
 	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
 		parent::cleanUpDB();
-		
-		$id = null;
-		$sql = "SELECT id FROM ".DB_PREFIX.$this->Table()." WHERE last_modified < " . (NOW - self::$storeHistoryForDays * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
-		if ($result = SQL::Query($sql)) {
-			if($row = SQL::fetch_object($result)) {
-				$id = $row->id;
+
+		if(self::$storeHistoryForDays > 0) {
+			$id = null;
+			$sql = "SELECT id FROM " . DB_PREFIX . $this->Table() . " WHERE last_modified < " . (NOW - self::$storeHistoryForDays * 60 * 60 * 24) . " ORDER BY id DESC LIMIT 1";
+			if ($result = SQL::Query($sql)) {
+				if ($row = SQL::fetch_object($result)) {
+					$id = $row->id;
+				}
 			}
-		}
-		
-		if($id) {
-			// delete
-			$sqlDeleteData = "DELETE FROM ".DB_PREFIX . $this->Table()." WHERE id < ".$id."";
-			$sqlDeleteState = "DELETE FROM ".DB_PREFIX . $this->baseTable."_state WHERE publishedid < ".$id."";
-			
-			SQL::Query($sqlDeleteData);
-			SQL::Query($sqlDeleteState);
+
+			if ($id) {
+				// delete
+				$sqlDeleteData = "DELETE FROM " . DB_PREFIX . $this->Table() . " WHERE id < " . $id . "";
+				$sqlDeleteState = "DELETE FROM " . DB_PREFIX . $this->baseTable . "_state WHERE publishedid < " . $id . "";
+
+				SQL::Query($sqlDeleteData);
+				SQL::Query($sqlDeleteState);
+			}
 		}
 	}
 }
