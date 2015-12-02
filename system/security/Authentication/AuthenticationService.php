@@ -15,7 +15,7 @@ class AuthenticationService {
     /**
      * limit of time when session expires.
      */
-    static $expirationLimit = 604800;
+    public static $expirationLimit = 604800;
 
     /**
      * gets auth-record for current authentification.

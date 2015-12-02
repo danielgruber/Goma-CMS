@@ -50,10 +50,6 @@ class UserAuthentication extends DataObject implements HistoryData {
      */
     public static function generateHistoryData($record) {
         /** @var UserAuthentication $version */
-        $version = null;
-        $lang = "";
-        $icon = "";
-
         switch($record->action) {
             case "remove":
             case IModelRepository::COMMAND_TYPE_DELETE:
@@ -67,9 +63,7 @@ class UserAuthentication extends DataObject implements HistoryData {
                     return false;
                 }
                 break;
-            case "insert":
-            case "publish":
-            case IModelRepository::COMMAND_TYPE_INSERT:
+            default:
                 $lang = lang("h_user_login");
                 $version = $record->newversion();
                 $icon = "images/icons/fatcow16/user_go.png";

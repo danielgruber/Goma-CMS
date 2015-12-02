@@ -13,6 +13,7 @@
  * @property string email
  * @property string code
  * @property string password
+ * @property string title
  * @property int avatarid
  * @property int code_has_sent
  * @property int status
