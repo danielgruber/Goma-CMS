@@ -12,11 +12,16 @@ defined("IN_GOMA") OR die();
  */
 class FormFieldResponse {
     /**
-     * string.
+     * name.
      *
      * @var string
      */
     protected $name;
+
+    /**
+     * @var string.
+     */
+    protected $title;
 
     /**
      * id.
@@ -79,30 +84,57 @@ class FormFieldResponse {
     protected $js;
 
     /**
+     * children.
+     */
+    protected $children = array();
+
+    /**
+     * is disabled.
+     */
+    protected $isDisabled = false;
+
+    /**
      * constructor.
      * @param string $name
      * @param string $type
      * @param string $id
      * @param string $divId
-     * @param int $maxLength
-     * @param string $regex
-     * @param null|string $js
-     * @param null|HTMLNode $renderedField
-     * @param bool $isHidden
-     * @param array $extra
      */
-    public function __construct($name, $type, $id, $divId, $maxLength, $regex, $js = null, $renderedField = null, $isHidden = false, $extra = array())
+    public function __construct($name, $type, $id, $divId)
     {
         $this->name = $name;
         $this->type = $type;
         $this->id = $id;
         $this->divId = $divId;
-        $this->maxLength = $maxLength;
-        $this->regexp = $regex;
-        $this->renderedField = $renderedField;
-        $this->isHidden = $isHidden;
-        $this->extra = $extra;
-        $this->js = $js;
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @param string $id
+     * @param string $divId
+     * @return FormFieldResponse
+     */
+    public static function create($name, $type, $id, $divId) {
+        return new FormFieldResponse($name, $type, $id, $divId);
+    }
+
+    /**
+     * adds a child.
+     *
+     * @param FormFieldResponse $child
+     */
+    public function addChild($child) {
+        if(!is_a($child, "FormFieldResponse")) throw new InvalidArgumentException("Child must be FormFieldResponse.");
+
+        $this->children[] = $child;
+    }
+
+    /**
+     * returns children.
+     */
+    public function getChildren() {
+        return $this->children;
     }
 
     /**
@@ -123,10 +155,12 @@ class FormFieldResponse {
 
     /**
      * @param string $id
+     * @return $this
      */
     public function setId($id)
     {
         $this->id = $id;
+        return $this;
     }
 
     /**
@@ -139,10 +173,12 @@ class FormFieldResponse {
 
     /**
      * @param string $divId
+     * @return $this
      */
     public function setDivId($divId)
     {
         $this->divId = $divId;
+        return $this;
     }
 
     /**
@@ -155,10 +191,12 @@ class FormFieldResponse {
 
     /**
      * @param int $maxLength
+     * @return $this
      */
     public function setMaxLength($maxLength)
     {
         $this->maxLength = $maxLength;
+        return $this;
     }
 
     /**
@@ -171,10 +209,12 @@ class FormFieldResponse {
 
     /**
      * @param string $regexp
+     * @return $this
      */
     public function setRegexp($regexp)
     {
         $this->regexp = $regexp;
+        return $this;
     }
 
     /**
@@ -187,10 +227,12 @@ class FormFieldResponse {
 
     /**
      * @param HTMLNode $renderedField
+     * @return $this
      */
     public function setRenderedField($renderedField)
     {
         $this->renderedField = $renderedField;
+        return $this;
     }
 
     /**
@@ -203,10 +245,12 @@ class FormFieldResponse {
 
     /**
      * @param boolean $isHidden
+     * @return $this
      */
     public function setIsHidden($isHidden)
     {
         $this->isHidden = $isHidden;
+        return $this;
     }
 
     /**
@@ -219,10 +263,12 @@ class FormFieldResponse {
 
     /**
      * @param mixed $extra
+     * @return $this
      */
     public function setExtra($extra)
     {
         $this->extra = $extra;
+        return $this;
     }
 
     /**
@@ -235,10 +281,12 @@ class FormFieldResponse {
 
     /**
      * @param string $type
+     * @return $this
      */
     public function setType($type)
     {
         $this->type = $type;
+        return $this;
     }
 
     /**
@@ -251,10 +299,48 @@ class FormFieldResponse {
 
     /**
      * @param string $js
+     * @return $this
      */
     public function setJs($js)
     {
         $this->js = $js;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsDisabled()
+    {
+        return $this->isDisabled;
+    }
+
+    /**
+     * @param mixed $isDisabled
+     * @return $this
+     */
+    public function setIsDisabled($isDisabled)
+    {
+        $this->isDisabled = $isDisabled;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     * @return $this
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+        return $this;
     }
 
     /**
@@ -272,11 +358,21 @@ class FormFieldResponse {
             "isHidden" => $this->isHidden,
             "extra" => $this->extra,
             "hasRenderData" => $this->renderedField != null,
-            "js" => $this->js
+            "js" => $this->js,
+            "disabled"  => $this->isDisabled
         );
 
         if($includeRendered) {
             $data["field"] = $this->renderedField != null ? $this->renderedField->__toString() : "";
+        }
+
+        if($this->children) {
+            $data["children"] = array();
+
+            /** @var FormFieldResponse $child */
+            foreach($this->children as $child) {
+                $data["children"][] = $child->ToRestArray();
+            }
         }
 
         return $data;

@@ -262,9 +262,11 @@ class FormField extends RequestHandler {
      * @return FormFieldResponse
      */
     public function exportFieldInfo() {
-        $info = $this->exportBasicInfo();
-        $info->setRenderedField($this->field());
-        $info->setJs($this->js());
+        $info = $this->exportBasicInfo()
+            ->setRenderedField($this->field())
+            ->setJs($this->js());
+
+        $this->callExtending("afterRenderFormResponse", $info);
 
         return $info;
     }
@@ -275,14 +277,11 @@ class FormField extends RequestHandler {
      * @return FormFieldResponse
      */
     public function exportBasicInfo() {
-        return new FormFieldResponse(
-            $this->name,
-            $this->classname,
-            $this->ID(),
-            $this->divID(),
-            $this->maxLength,
-            $this->regexp
-        );
+        return FormFieldResponse::create($this->name, $this->classname, $this->ID(), $this->divID())
+            -> setMaxLength($this->maxLength)
+            -> setRegexp($this->regexp)
+            -> setTitle($this->title)
+            -> setIsDisabled($this->disabled);
     }
 
     /**

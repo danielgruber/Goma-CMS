@@ -106,44 +106,68 @@ class FieldSet extends FormField
 
         $this->container->append($this->input);
 
-        // get content
-        uasort($this->items, array($this, "sort"));
-
-        $i = 0;
-        /** @var FormField $item */
-        foreach ($this->items as $item) {
-
-            // if a FieldSet is disabled all subfields should disabled, too
-            if ($this->disabled) {
-                $item->disable();
-            }
-
-
-            $name = strtolower($item->name);
-            // if a field is deleted the field does not exist in that array
-            if ($this->form()->isFieldToRender($name)) {
-                $this->form()->registerRendered($name);
-                $div = $item->field();
-                if (is_object($div) && !$div->hasClass("hidden")) {
-                    if ($i == 0) {
-                        $i++;
-                        $div->addClass("one");
-                    } else {
-                        $i = 0;
-                        $div->addClass("two");
-                    }
-                    $div->addClass("visibleField");
-                }
-                $this->container->append($div);
-            }
-        }
-        unset($i, $div, $item);
         $this->callExtending("afterField");
 
         $this->container->addClass("hidden");
         if (PROFILE) Profiler::unmark("FieldSet::field");
 
         return $this->container;
+    }
+
+    /**
+     * this function generates some JSON for using client side stuff.
+     *
+     * @name exportJSON
+     * @return FormFieldResponse
+     */
+    public function exportFieldInfo() {
+        $info = $this->exportBasicInfo(true)
+            ->setRenderedField($this->field())
+            ->setJs($this->js());
+
+        /** @var FormFieldResponse $child */
+        foreach($info->getChildren() as $child) {
+            $info->getRenderedField()->append($child->getRenderedField());
+        }
+
+        $this->callExtending("afterRenderFormResponseWithChildren", $info);
+
+        return $info;
+    }
+
+    /**
+     * exports basic field info.
+     *
+     * @param bool $withChildren if render child fields.
+     * @return FormFieldResponse
+     */
+    public function exportBasicInfo($withChildren = false) {
+        $data = parent::exportBasicInfo();
+
+        // get content
+        uasort($this->items, array($this, "sort"));
+
+        /** @var FormField $item */
+        foreach($this->items as $item) {
+            // if a FieldSet is disabled all subfields should disabled, too
+            if ($this->disabled) {
+                $item->disable();
+            }
+
+            $name = strtolower($item->name);
+
+            if ($this->form()->isFieldToRender($name)) {
+                $this->form()->registerRendered($name);
+
+                if($withChildren) {
+                    $data->addChild($item->exportFieldInfo());
+                } else {
+                    $data->addChild($item->exportBasicInfo());
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**

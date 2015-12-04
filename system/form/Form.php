@@ -472,7 +472,7 @@ class Form extends object {
 			$jsonData[] = $field->ToRestArray();
 		}
 
-		/** @var FormFieldResponse $field */
+		/** @var FormFieldResponse $action */
 		foreach($actions as $action) {
 			$actionDataSet->add($action->ToRestArray(true));
 			$jsonData[] = $action->ToRestArray();

@@ -558,12 +558,7 @@ if (goma.ui === undefined) {
 					
 					if (content_type == "text/javascript") {
 						if (object !== undefined) {
-							if (window.execScript) {
-							  	window.execScript('method = ' + 'function (' + html + ')',''); // execScript doesn’t return anything
-							} else {
-						  		method = eval('(function () {' + html + '});');
-						  	}
-						  	
+							var method = new Function(html);
 							method.call(object);
 						} else {
 							eval_global(html);

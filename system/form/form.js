@@ -17,6 +17,8 @@ if(typeof goma == "undefined")
         goma.form.garbageCollect();
 
 		var that = this;
+
+        this.fields = fields;
 		
 		this.form = $("#" + id);
 		this.form.removeClass("leave_check");
@@ -74,19 +76,29 @@ if(typeof goma == "undefined")
 			return that.unloadEvent();
 		});
 
-        for(var i in fields) {
-            if(fields.hasOwnProperty(i)) {
-               if(fields[i]["js"]) {
-                   eval_global(fields[i]["js"]);
-               }
-            }
-        }
+        this.runScripts(fields);
 		
 		goma.form._list[id.toLowerCase()] = this;
 		return this;
 	};
 	
 	goma.form.prototype = {
+        runScripts: function (fields) {
+            for(var i in fields) {
+                if(fields.hasOwnProperty(i)) {
+                    if(fields[i]["js"]) {
+                        var method = new Function("field", fields[i]["js"]);
+
+                        method.call(this, fields[i]);
+                    }
+
+                    if(fields[i]["children"]) {
+                        this.runScripts(fields[i]["children"]);
+                    }
+                }
+            }
+        },
+
 		setLeaveCheck: function(bool) {
 			if(bool)
 				this.form.addClass("leave_check");
