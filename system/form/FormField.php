@@ -313,7 +313,7 @@ class FormField extends RequestHandler {
      */
     public function result()
     {
-        if ($this->disabled) {
+        if ($this->disabled || $this->form()->disabled) {
             return $this->value;
         } else {
             return isset($this->form()->post[$this->PostName()]) ? $this->form()->post[$this->PostName()] : null;

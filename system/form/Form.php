@@ -218,7 +218,6 @@ class Form extends object {
 
 		$this->checkForRestore();
 
-		//$this->showFields = array();
 		$this->fieldList = new ArrayList();
 
 		$this->addFields($fields, $actions, $validators);

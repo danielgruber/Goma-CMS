@@ -13,8 +13,9 @@ class CheckBox extends FormField {
 	/**
 	 * creates the node
 	 *
-	 *@name createNode
-	 *@access public
+	 * @name createNode
+	 * @access public
+	 * @return HTMLNode
 	 */
 	public function createNode() {
 		$node = parent::createNode();
@@ -45,8 +46,9 @@ class CheckBox extends FormField {
 
 	/**
 	 * renders the field
-	 *@name field
-	 *@access public
+	 * @name field
+	 * @access public
+	 * @return HTMLNode
 	 */
 	public function field() {
 		if(PROFILE)
@@ -71,8 +73,9 @@ class CheckBox extends FormField {
 	/**
 	 * returns the javascript for this field
 	 *
-	 *@name js
-	 *@access public
+	 * @name js
+	 * @access public
+	 * @return string
 	 */
 	public function js() {
 
@@ -84,15 +87,12 @@ class CheckBox extends FormField {
 	/**
 	 * the result of the field
 	 *
-	 *@name result
-	 *@access public
+	 * @name result
+	 * @access public
+	 * @return bool
 	 */
 	public function result() {
-		if($this->disabled || $this->form()->disabled) {
-			return $this->value;
-		}
-
-		return (isset($this->form()->post[$this->postname()]) && $this->form()->post[$this->postname()]) ? true : false;
+		return !!parent::result();
 	}
 
 }
