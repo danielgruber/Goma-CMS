@@ -9,8 +9,7 @@
  * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version    2.3.4
  */
-class FormField extends RequestHandler implements ArrayAccess
-{
+class FormField extends RequestHandler {
     /**
      * secret key for this form field
      *
@@ -30,6 +29,7 @@ class FormField extends RequestHandler implements ArrayAccess
     /**
      * the parent field of this field, e.g. a form or a fieldset
      *
+     * @var Form
      * @name parent
      * @access protected
      */
@@ -93,17 +93,16 @@ class FormField extends RequestHandler implements ArrayAccess
     /**
      * defines if this field is disabled
      *
-     * @name disabled
-     * @access public
+     * @var bool
      */
     public $disabled = false;
 
     /**
      * title of the field.
      *
-     * @name title
+     * @var string
      */
-    public $title;
+    protected $title;
 
     /**
      * defines if this field should use the full width or not
@@ -111,20 +110,36 @@ class FormField extends RequestHandler implements ArrayAccess
      *
      * @name fullSizedField
      * @access public
+     * @var bool
      */
     protected $fullSizedField = false;
 
     /**
      * max-length.
+     *
+     * @var int
      */
-    public $maxLength = -1;
+    protected $maxLength = -1;
 
     /**
-     * @name __construct
-     * @param string - name
-     * @param string - title
-     * @param mixed - value
-     * @param object - form
+     * regexp for matching field value.
+     *
+     * @var string
+     */
+    protected $regexp = null;
+
+    /**
+     * regexp-error.
+     */
+    protected $regexpError = "form_not_matching";
+
+    /**
+     * created field.
+     *
+     * @param string $name
+     * @param string $title
+     * @param mixed $value
+     * @param Form|null $parent
      */
     public function __construct($name = null, $title = null, $value = null, &$parent = null)
     {
@@ -202,6 +217,7 @@ class FormField extends RequestHandler implements ArrayAccess
      * renders the field
      * @name field
      * @access public
+     * @return HTMLNode
      */
     public function field()
     {
@@ -229,20 +245,10 @@ class FormField extends RequestHandler implements ArrayAccess
     }
 
     /**
-     * field function for mobile version
-     *
-     * @name mobileField
-     * @access public
-     */
-    public function mobileField()
-    {
-        return $this->field();
-    }
-
-    /**
      * this function generates some JavaScript for this formfield
      * @name js
      * @access public
+     * @return string
      */
     public function js()
     {
@@ -250,13 +256,33 @@ class FormField extends RequestHandler implements ArrayAccess
     }
 
     /**
-     * this function generates some JavaScript for the validation of the field
-     * @name jsValidation
-     * @access public
+     * this function generates some JSON for using client side stuff.
+     *
+     * @name exportJSON
+     * @return FormFieldResponse
      */
-    public function jsValidation()
-    {
-        return "";
+    public function exportFieldInfo() {
+        $info = $this->exportBasicInfo();
+        $info->setRenderedField($this->field());
+        $info->setJs($this->js());
+
+        return $info;
+    }
+
+    /**
+     * exports basic field info.
+     *
+     * @return FormFieldResponse
+     */
+    public function exportBasicInfo() {
+        return new FormFieldResponse(
+            $this->name,
+            $this->classname,
+            $this->ID(),
+            $this->divID(),
+            $this->maxLength,
+            $this->regexp
+        );
     }
 
     /**
@@ -264,9 +290,19 @@ class FormField extends RequestHandler implements ArrayAccess
      *
      * @name validation
      * @access public
+     * @return bool
      */
-    public function validate($value)
-    {
+    public function validate($value) {
+        if($this->maxLength > 0 && is_string($value) && strlen($value) > $this->maxLength) {
+            return lang("form_too_long") . $this->title;
+        }
+
+        if($this->regexp) {
+            if(!preg_match($this->regexp, $value)) {
+                return lang($this->regexpError) . $this->title;
+            }
+        }
+
         return true;
     }
 
@@ -288,9 +324,10 @@ class FormField extends RequestHandler implements ArrayAccess
     /**
      * sets the parent form-object
      * @name setForm
+     * @param Form $form
      * @access public
      */
-    public function setForm(Object &$form)
+    public function setForm(&$form)
     {
         $this->parent =& $form;
 
@@ -313,7 +350,6 @@ class FormField extends RequestHandler implements ArrayAccess
      */
     public function getValue()
     {
-
         if (!isset($this->hasNoValue) || !$this->hasNoValue) {
             if (!$this->disabled && $this->POST && isset($this->form()->post[$this->PostName()])) {
                 $this->value = $this->form()->post[$this->PostName()];
@@ -351,6 +387,7 @@ class FormField extends RequestHandler implements ArrayAccess
      * generates an id for the field
      * @name id
      * @access public
+     * @return string
      */
     public function ID()
     {
@@ -361,6 +398,7 @@ class FormField extends RequestHandler implements ArrayAccess
      * generates an id for the div
      * @name divID
      * @access public
+     * @return string
      */
     public function divID()
     {
@@ -372,6 +410,7 @@ class FormField extends RequestHandler implements ArrayAccess
      *
      * @name externalURL
      * @access public
+     * @return string
      */
     public function externalURL()
     {
@@ -429,25 +468,15 @@ class FormField extends RequestHandler implements ArrayAccess
     }
 
     /**
-     * creates a HTMLNode
-     *
-     * @name createTag
-     * @access public
-     */
-    public function createTag($tag, $attr, $content)
-    {
-        $node = new HTMLNode($tag, $attr, $content);
-        return $node->render();
-    }
-
-    /**
      * getter-method for state
+     * @param string $name
+     * @return mixed
      */
     public function __get($name)
     {
         if (strtolower($name) == "state") {
             return $this->form()->state->{$this->classname . $this->name};
-        } else if (isset($this->$name)) {
+        } else if (property_exists($this, $name)) {
             return $this->$name;
         } else {
             throw new LogicException("\$" . $name . " is not defined in " . $this->classname . " with name " . $this->name . ".");
@@ -455,49 +484,51 @@ class FormField extends RequestHandler implements ArrayAccess
     }
 
     /**
-     * unsets an attribute.
-     *
-     * @param    string $offset
+     * @return string
      */
-    public function offsetUnset($offset)
+    public function getTitle()
     {
-        if (isset($this->$offset))
-            unset($this->$offset);
+        return $this->title;
     }
 
     /**
-     * returns whether an attribute is set.
-     *
-     * @param    string $offset
-     * @return    boolean
+     * @param string $title
      */
-    public function offsetExists($offset)
+    public function setTitle($title)
     {
-        return property_exists($this, $offset);
-    }
-
-
-    /**
-     * returns the value of an attribute.
-     *
-     * @param    string $offset
-     * @return    boolean
-     */
-    public function offsetGet($offset)
-    {
-        return property_exists($this, $offset) ? $this->$offset : null;
+        $this->title = $title;
     }
 
     /**
-     * sets the value of an attribute.
-     *
-     * @param    string $offset
-     * @param    mixed $value
-     * @return    boolean
+     * @return int
      */
-    public function offsetSet($offset, $value)
+    public function getMaxLength()
     {
-        $this->$offset = $value;
+        return $this->maxLength;
+    }
+
+    /**
+     * @param int $maxLength
+     */
+    public function setMaxLength($maxLength)
+    {
+        $this->maxLength = $maxLength;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRegexp()
+    {
+        return $this->regexp;
+    }
+
+    /**
+     * @param string $regexp
+     */
+    public function setRegexp($regexp)
+    {
+        $this->regexp = $regexp;
     }
 
     /**

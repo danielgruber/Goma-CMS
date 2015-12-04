@@ -77,6 +77,21 @@ class FormValidator extends Object
     }
 
     /**
+     * validator.
+     */
+    public function exportFieldInfo($fields, $action) {
+        $data = array(
+            "js" => $this->JS()
+        );
+
+        if($data["js"]) {
+            return $data;
+        }
+
+        return array();
+    }
+
+    /**
      * @return mixed
      */
     public function getData()

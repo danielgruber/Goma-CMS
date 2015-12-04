@@ -1,24 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.11.2013
-  * $Version 1.2.2
+ * @package goma form framework
+ * @link http://goma-cms.org
+ * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author Goma-Team
+ *
+ * last modified: 04.12.2015
+ * $Version 1.3
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class NumberField extends FormField {
-	/**
-	 * maximum length of the number
-	 *
-	 *@name maxlength
-	 *@access public
-	*/
-	public $maxlength;
-	
 	/**
 	 * start of range
 	 *
@@ -34,36 +25,38 @@ class NumberField extends FormField {
 	 *@access protected
 	*/
 	protected $rangeEnd;
-	
+
 	/**
-	 *@name __construct
-	 *@param string - name
-	 *@param string - title
-	 *@param mixed - value
-	 *@param object - form
-	*/	
-	public function __construct($name = null, $title = null, $value = null, $maxlength = null, $parent = null) {
-		$this->maxlength = $maxlength;
+	 * @var string
+	 */
+	protected $regexp = RegexpUtil::NUMBER_REGEXP;
+
+	/**
+	 * @var string
+	 */
+	protected $regexpError = "form_no_number";
+
+	/**
+	 * NumberField constructor.
+	 * @param string $name
+	 * @param string $title
+	 * @param int $value
+	 * @param int $maxLength
+	 * @param Form|null $parent
+	 */
+	public function __construct($name = null, $title = null, $value = null, $maxLength = null, $parent = null) {
 		parent::__construct($name, $title, $value, $parent);
+
+		$this->maxLength = $maxLength;
 	}
-	
+
 	/**
-	 * this is the validation for this field if it is required
-	 *@name validation
-	 *@access public
-	*/
-	public function validate($value)
-	{
-		if($this->maxlength !== null) {
-			if(strlen($value) > $this->maxlength)
-				return lang("form_too_long") . '"' . $this->title . '" ';
-		}
-		
-		if(!preg_match('/^[0-9\.\-\s\,]+$/', $value)) {
-			
-			return lang("form_no_number") . '"' . $this->title . '" ';
-		}
-		
+	 * more of validation.
+	 *
+	 * @param $value
+	 * @return bool|string
+	 */
+	public function validate($value) {
 		if(isset($this->rangeStart) && $value < $this->rangeStart) {
 			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
@@ -72,39 +65,18 @@ class NumberField extends FormField {
 			return lang("form_number_wrong_area") . '"' . $this->title . '" ';
 		}
 		
-		return true;
+		return parent::validate($value);
 	}
-	
+
 	/**
 	 * sets the range
 	 *
-	 *@name setRange
-	 *@access public
-	*/
+	 * @param null|int $start
+	 * @param null|int $end
+	 * @access public
+	 */
 	public function setRange($start = null, $end = null) {
 		$this->rangeStart = $start;
 		$this->rangeEnd = $end;
 	}
-	
-	/**
-	 * this is the validation for this field if it is required
-	 *@name validation
-	 *@access public
-	*/
-	public function JSValidation()
-	{
-		return '
-							var regexp = /^[0-9\.\-\s\,]+$/;
-							if(regexp.test($("#'.$this->ID().'").val()))
-							{
-									
-							} else
-							{
-									$("#'.$this->divID().'").find(".err").remove();
-									$("#'.$this->ID().'").before("<div class=\"err\" style=\"color: #ff0000;\">'.lang("form_number_not_valid", "Please enter a valid Number").'</div>");
-									return false;
-							}
-						';
-	}
 }
-

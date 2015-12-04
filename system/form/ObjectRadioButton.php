@@ -121,7 +121,7 @@ class ObjectRadioButton extends RadioButton
 		*/
 		public function JS()
 		{
-				$js = '$(function(){
+				$js = 'alert(1);
 					var radioids = '.json_encode($this->javaScriptNeeded).';
 					for(i in radioids) {
 						var id = radioids[i];
@@ -149,7 +149,7 @@ class ObjectRadioButton extends RadioButton
 						else
 							$("#" + currid).find(".form_field:first-child").find(".input").click();
 					});
-				});';
+				';
 				return $js;
 		}
 }

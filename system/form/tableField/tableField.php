@@ -7,7 +7,7 @@
  * http://silverstripe.org
  *
  * @package     Goma\Form\TableField
- * @property 	state set of objects
+ * @property 	array state set of objects
  *
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
@@ -112,7 +112,7 @@ class tableField extends FormField {
     /**
      * sets the data
      *
-     * @param DatatSet $data
+     * @param DataSet $data
      * @return $this
      */
 	public function setData(DataSet $data) {
@@ -435,7 +435,7 @@ class tableField extends FormField {
 					// A return value of null means this columns should be skipped altogether.
 					if($colContent === null) continue;
 					$colAttributes = $this->getColumnAttributes($record, $column);
-					$rowContent .= $this->createTag('td', $colAttributes, $colContent);
+					$rowContent .= new HTMLNode('td', $colAttributes, $colContent);
 				}
 				
 				$classes = array('tablefield-item');
@@ -443,13 +443,12 @@ class tableField extends FormField {
 				if ($record->last()) $classes[] = 'last';
 				$classes[] = ($record->white()) ? 'even' : 'odd';
 				
-				$row = $this->createTag(
+				$row = new HTMLNode(
 					'tr',
 					array(
 						"class" => implode(' ', $classes),
 						'data-id' => $record->ID,
-						// !TODO: Allow to customise this as customising columns
-						'data-class' => $record->ClassName,
+						'data-class' => $record->ClassName
 					),
 					$rowContent
 				);
@@ -461,17 +460,17 @@ class tableField extends FormField {
 		
 		// Display a message when the table field is empty
 		if(!(isset($content['body']) && $content['body'])) {    
-			$content['body'] = $this->createTag(
+			$content['body'] = new HTMLNode(
 				'tr',
 				array("class" => 'tablefield-item tablefield-no-items'),
-				$this->createTag('td', array('colspan' => count($columns)), lang("no_result", "No items found!"))
+				new HTMLNode('td', array('colspan' => count($columns)), lang("no_result", "No items found!"))
 			);
 		}
 		
 		// create the relevant parts of the table
-		$head = $content['header'] ? $this->createTag('thead', array(), $content['header']) : '';
-		$body = $content['body'] ? $this->createTag('tbody', array('class' => 'tablefield-items'), $content['body']) : '';
-		$foot = $content['footer'] ? $this->createTag('tfoot', array(), $content['footer']) : '';
+		$head = $content['header'] ? new HTMLNode('thead', array(), $content['header']) : '';
+		$body = $content['body'] ? new HTMLNode('tbody', array('class' => 'tablefield-items'), $content['body']) : '';
+		$foot = $content['footer'] ? new HTMLNode('tfoot', array(), $content['footer']) : '';
 		
 		$tableAttrs = array(
 			'id' => isset($this->id) ? $this->id : null,
@@ -482,23 +481,21 @@ class tableField extends FormField {
 		
 		$this->form()->disableRestore();
 		
-		return $this->createTag('fieldset', array("class" => "tablefield-fieldset"), 
-				$content['before'] .
-				$this->createTag('table', $tableAttrs, $head."\n".$foot."\n".$body) .
-				$content['after']
-			);
+		return new HTMLNode('fieldset', array("class" => "tablefield-fieldset"),
+			$content['before'] .
+			new HTMLNode('table', $tableAttrs, $head."\n".$foot."\n".$body) .
+			$content['after']
+		);
 	}
 
     /**
      * Custom request handler that will check component handlers before proceeding to the default implementation.
      *
-     * @todo There is too much code copied from RequestHandler here.
      * @param   Request $request
      * @param   bool $subController
      * @return  false|mixed|null
      */
 	public function handleRequest($request, $subController = false) {
-
 		$this->request = $request;
 		
 		if($this->getParam("tableState")) {
@@ -547,13 +544,14 @@ class tableField extends FormField {
         return false;
     }
 
-    /**
-     * checks if access for method is available and gives return of method back if calable.
-     *
-     * @param   object component
-     * @param   string $action
-     * @return  string
-     */
+	/**
+	 * checks if access for method is available and gives return of method back if calable.
+	 *
+	 * @param string $component
+	 * @param string $action
+	 * @param Request $request
+	 * @return string
+	 */
     public function executeAction($component, $action, $request) {
         if(!method_exists($component, 'checkAccessAction') || $component->checkAccessAction($action)) {
             if(!$action) {
@@ -567,15 +565,13 @@ class tableField extends FormField {
 
         return false;
     }
-	
+
 	/**
 	 * Pass an action on the first TableField_ActionProvider that matches the $actionName
-	 *
 	 * @param string $actionName
-	 * @param mixed $args
-	 * @param arrray $data - send data from a form
-	 * @return type
-	 * @throws InvalidArgumentException
+	 * @param array $args
+	 * @param mixed $data
+	 * @return string
 	 */
 	public function _handleAction($actionName, $args, $data) {
 		$actionName = strtolower($actionName);
@@ -588,7 +584,8 @@ class tableField extends FormField {
 				return $component->handleAction($this, $actionName, $args, $data);
 			}
 		}
-		throwError(6, "Not Found", "Can't handle action '$actionName'");
+
+		throw new LogicException("Can't handle action $actionName, hasAction should have catched this.");
 	}
 
     /**
@@ -597,7 +594,7 @@ class tableField extends FormField {
     public function __wakeup() {
 		parent::__wakeup();
 		
-		if(is_object($this->data)) {
+		if(is_object($this->data) && method_exists($this->data, "__wakeup")) {
 			$this->data->__wakeup();
 		}
 	}

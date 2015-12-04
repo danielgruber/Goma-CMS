@@ -16,7 +16,7 @@ defined("IN_GOMA") OR die();
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package	Goma\Form
- * @version	2.1.8
+ * @version	2.1.9
  */
 class AjaxSubmitButton extends FormAction {
 	/**
@@ -52,119 +52,43 @@ class AjaxSubmitButton extends FormAction {
 
 	/**
 	 * generates the js
-	 *@name js
-	 *@access public
+	 * @name js
+	 * @access public
+	 * @return string
 	 */
 	public function js() {
 		// appendix to the url
-		$append = ' + "?redirect=' . urlencode(getRedirect()) . '"';
+		$append = '?redirect=' . urlencode(getRedirect());
 		foreach($_GET as $key => $val) {
-			$append .= ' + "&' . urlencode($key) . '=' . urlencode($val) . '"';
+			$append .= '&' . urlencode($key) . '=' . urlencode($val);
 		}
 
-		Resources::addData('var url_' . $this->name . ' = "' . $this->externalURL() . '/";');
-		return '$(function(){
-					var button = $("#' . $this->ID() . '");
-					var container = $("#' . $this->divID() . '");
-					button.click(function(){
-						var eventb = jQuery.Event("beforesubmit");
-						$("#' . $this->id() . '").trigger(eventb);
-						if ( eventb.result === false ) {
-							return false;
-						}
-						var event = jQuery.Event("formsubmit");
-						$("#' . $this->form()->id() . '").trigger(event);
-						if ( event.result === false ) {
-							return false;
-						}
-			
-						$("#' . $this->form()->id() . '").gForm().setLeaveCheck(false);
-						button.css("display", "none");
-						container.append("<img src=\"images/16x16/loading.gif\" alt=\"loading...\" class=\"loading\" />");
-						$("body").css("cursor", "wait");
-						
-						goma.ui.updateFlexBoxes();
-						$.ajax({
-							url: url_' . $this->name . '' . $append . ',
-							type: "post",
-							data: $("#' . $this->form()->id() . '").serialize(),
-							dataType: "html",
-							complete: function()
-							{
-								$("body").css("cursor", "default");
-								$("body").css("cursor", "auto");
-								container.find(".loading").remove();
-								button.css("display", "inline");
-								
-								var eventb = jQuery.Event("ajaxresponded");
-								$("#' . $this->form()->id() . '").trigger(eventb);
-								
-								goma.ui.updateFlexBoxes();
-							},
-							success: function(script, textStatus, jqXHR) {
-								
-								goma.ui.loadResources(jqXHR).done(function(){;
-    								if (window.execScript)
-    								 	window.execScript("method = " + "function(){" + script + "};",""); // execScript doesn’t return anything
-    								else
-    								 	method = eval("(function(){" + script + "});");
-    								RunAjaxResources(jqXHR);
-    								var r = method.call($("#' . $this->form()->id() . '").get(0));
-    								
-    								$("#' . $this->form()->id() . '").gForm().setLeaveCheck(false);
+		Resources::add("system/form/actions/AjaxSubmitButton.js", "js", "tpl");
 
-    								goma.ui.updateFlexBoxes();
-    								
-    								return r;
-								});
-							},
-							error: function(jqXHR, textStatus, errorThrown)
-							{
-								alert("There was an error while submitting your data, please check your Internet Connection or send an E-Mail to the administrator");
-								
-								goma.ui.updateFlexBoxes();
-							}
-						});
-						return false;
-					});
-				});';
+		return 'initAjaxSubmitbutton('.var_export($this->ID(), true).', '.var_export($this->divID(), true).', '.var_export($this->form()->ID(), true).', '.var_export($this->externalURL() . "/", true).', '.var_export($append, true).');';
 	}
 
 	/**
-	 * handles submits via AJAX
-	 *@name handleRequest
-	 *@access public
-	 *@param object - request
+	 * endpoint for ajax request.
+	 *
+	 * @name handleRequest
+	 * @access public
+	 * @param object - request
+	 * @return false|mixed|null|string|void
 	 */
 	public function handleRequest(request $request) {
 		$this->request = $request;
 
 		$this->init();
 
-		$form = $this->form();
-
 		return $this->submit();
-
-		if(isset($_POST["form_submit_" . $form->name()])) {
-			// check secret
-			if($form->getsecret() && $this->form()->secretKey && $_POST["secret_" . $form->ID()] == $this->form()->secretKey) {
-				return $this->submit();
-			} else if(!$form->getsecret()) {
-				return $this->submit();
-			}
-		}
-
-		$response = new AjaxResponse();
-		$response->exec(new Dialog("1<br />Your Request wasn't be correct, please try again or refresh your page. Error while checking your RequestID.", "Error"));
-		$response->exec("$('#" . $form->fields["form_submit_" . $form->name()]->id() . "').find('input').val('" . $this->form()->secretKey . "');");
-		return $response->render();
-
 	}
 
 	/**
 	 * submit-function
-	 *@name submit
-	 *@access public
+	 * @name submit
+	 * @access public
+	 * @return mixed
 	 */
 	public function submit() {
 		$response = new AjaxResponse;
@@ -216,7 +140,8 @@ class AjaxSubmitButton extends FormAction {
 
 		$result = $form->result;
 		if(is_object($result) && is_subclass_of($result, "dataobject")) {
-			$result = $result->to_array();
+			/** @var DataObject $result */
+			$result = $result->ToArray();
 		}
 
 		$realresult = array();

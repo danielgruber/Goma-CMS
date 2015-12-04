@@ -10,42 +10,44 @@ if(typeof goma == "undefined")
 	var goma = {};
 
 (function ( $ ) {
-	goma.form = function(id) {
+	goma.form = function(id, fields) {
 		if(!this instanceof goma.form)
 			return new goma.form(id);
-		
-		
+
+        goma.form.garbageCollect();
+
 		var that = this;
 		
 		this.form = $("#" + id);
 		this.form.removeClass("leave_check");
 		
-		$("#" + id).bind("formsubmit",function(){
+		this.form.bind("formsubmit",function(){
 			that.form.addClass("leave_check");
 		});
 		
 		var button = false;
-		$("#" + id).find("button[type=submit], input[type=submit]").click(function(){
+		this.form.find("button[type=submit], input[type=submit]").click(function(){
 			button = true;
 			that.form.removeClass("leave_check");
 		});
 		
-		$("#" + id).submit(function(){
+		this.form.submit(function(){
+            that.form.find(".err").slideUp();
+
 			if(button == false) {
-				button = true;
 				setTimeout(function(){
-					$("#"+id+" .default_submit").click();
+                    that.form.find(".default_submit").click();
 				}, 100);
 				return false;
 			}
 			var eventb = jQuery.Event("beforesubmit");
-			$("#"+id).trigger(eventb);
+			that.form.trigger(eventb);
 			if ( eventb.result === false ) {
 				return false;
 			}
 			
 			var event = jQuery.Event("formsubmit");
-			$("#"+id).trigger(event);
+			that.form.trigger(event);
 			if ( event.result === false ) {
 				return false;
 			}
@@ -54,7 +56,7 @@ if(typeof goma == "undefined")
 			button = false;
 		});
 		
-		$("#" + id).find("select, input, textarea").change(function(){
+		this.form.find("select, input, textarea").change(function(){
 			that.form.addClass("leave_check");
 		});
 		
@@ -68,13 +70,21 @@ if(typeof goma == "undefined")
 			return false;
 		});
 		
-		goma.ui.bindUnloadEvent($("#" + id), function(){
+		goma.ui.bindUnloadEvent(this.form, function(){
 			return that.unloadEvent();
 		});
+
+        for(var i in fields) {
+            if(fields.hasOwnProperty(i)) {
+               if(fields[i]["js"]) {
+                   eval_global(fields[i]["js"]);
+               }
+            }
+        }
 		
-		goma.form.list[id.toLowerCase()] = this;
+		goma.form._list[id.toLowerCase()] = this;
 		return this;
-	}
+	};
 	
 	goma.form.prototype = {
 		setLeaveCheck: function(bool) {
@@ -93,13 +103,21 @@ if(typeof goma == "undefined")
 		}
 	};
 	
-	goma.form.list = [];
+	goma.form._list = [];
+	goma.form.garbageCollect = function() {
+		for(var i in goma.form._list) {
+			if($("#" + id).length == 0) {
+                delete goma.form._list[i];
+            }
+		}
+	};
 	
 	$.fn.gForm = function() {
-		
+        goma.form.garbageCollect();
+
 		if(this.get(0).tagName.toLowerCase() == "form") {
-			if(typeof goma.form.list[this.attr("id").toLowerCase()] != "undefined") {
-				return goma.form.list[this.attr("id").toLowerCase()];
+			if(typeof goma.form._list[this.attr("id").toLowerCase()] != "undefined") {
+				return goma.form._list[this.attr("id").toLowerCase()];
 			} else {
 				return new goma.form(this.attr("id").toLowerCase());
 			}

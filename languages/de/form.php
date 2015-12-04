@@ -12,6 +12,7 @@ $form_lang = array(
 	'required_fields'			=> 'Sie haben nicht alle Pflichtfelder ausgef&uuml;llt. Bitte f&uuml;llen Sie folgende Felder aus:',
 	'edit_data'					=> "Datensatz bearbeiten",
 	'required_field'			=> "Dieses Feld ist obligatorisch.",
+	"not_matching"				=> "Die Eingabe hat das falsche Format.",
 	'too_long'					=> "Ihre Eingaben sind zu lang. Bitte &uuml;berpr&uuml;fen Sie das Feld ",
 	'no_number'					=> "Ihr Eingabe ist keine Zahl. Bitte &uuml;berpr&uuml;fen Sie das Feld ",
 	"number_wrong_area"			=> "Die Zahl liegt nicht in dem vorgegebenen Bereich. Bitte &uuml;berpr&uuml;fen Sie das Feld ",

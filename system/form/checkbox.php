@@ -78,9 +78,7 @@ class CheckBox extends FormField {
 
 		Resources::add("system/libs/javascript/checkbox/gCheckBox.js", "js", "tpl");
 
-		return '$(function(){
-				var obj = $("#' . $this->ID() . '").gCheckBox();
-			});';
+		return 'var obj = $("#' . $this->ID() . '").gCheckBox();';
 	}
 
 	/**

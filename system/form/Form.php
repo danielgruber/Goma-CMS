@@ -281,15 +281,18 @@ class Form extends object {
 	/**
 	 * inits model.
 	 *
-	 * @param Controller $controller
+	 * @param RequestHandler $controller
 	 * @param ViewAccessableData|null $model
 	 */
 	protected function initModel($controller, $model) {
 		// set model
 		if(isset($model)) {
 			$this->model = $model;
-		} else if(Object::method_exists($controller, "modelInst") && $controller->modelInst()) {
-			$this->model = $controller->modelInst();
+		} else if(Object::method_exists($controller, "modelInst")) {
+			if($controller->modelInst()) {
+				/** @var Controller $controller */
+				$this->model = $controller->modelInst();
+			}
 		}
 	}
 
@@ -377,8 +380,6 @@ class Form extends object {
 		}
 
 		$this->add(new HiddenField("form_submit_" . $this->name(), "1"));
-		// add that this is a submit-function
-		$this->add(new JavaScriptField("leave_check", '$(function(){new goma.form(' . var_export($this->ID(), true) . '); });'));
 
 		Resources::add("system/form/form.js", "js", "tpl");
 
@@ -408,25 +409,21 @@ class Form extends object {
 			}
 		}
 
+		if($data = $this->checkForSubfield()) {
+			return $data;
+		}
+
 		// render form now.
 		GlobalSessionManager::globalSession()->remove("form_secrets." . $this->name());
+
 		$this->defaultFields();
 		return $this->renderForm();
 	}
 
 	/**
-	 * renders the form
-	 *
-	 * @name renderForm
-	 * @access public
-	 * @return mixed|string
+	 * checks for rendering of sub-field.
 	 */
-	public function renderForm() {
-		$this->renderedFields = array();
-		if(PROFILE)
-			Profiler::mark("Form::renderForm");
-		$this->callExtending("beforeRender");
-
+	protected function checkForSubfield() {
 		// check get
 		foreach($_GET as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z0-9_]+)$/", $key, $matches)) {
@@ -442,82 +439,52 @@ class Form extends object {
 			}
 		}
 
-		//$this->saveToSession();
+		return false;
+	}
+
+	/**
+	 * renders the form
+	 *
+	 * @name renderForm
+	 * @access public
+	 * @return mixed|string
+	 */
+	public function renderForm() {
+		$this->renderedFields = array();
+		if(PROFILE)
+			Profiler::mark("Form::renderForm");
+		$this->callExtending("beforeRender");
 
 		$this->form->action = $this->url;
 
-		$this->form->append('<input type="submit" name="default_submit" value="" class="default_submit" style="position: absolute;bottom: 0px;right: 0px;height: 0px !important;width:0px !important;background: transparent;color: transparent;border: none;-webkit-box-shadow: none;box-shadow:none;-moz-box-shadow:none;outline: 0;padding: 0;margin:0;" />');
+		$fieldDataSet = new DataSet();
+		$actionDataSet = new DataSet();
 
-		// first we have to sort the fields
-		//usort($this->showFields, array($this, "sort"));
-		$i = 0;
+		$jsonData = array();
 
-		$fields = "";
+		$fields = $this->getFormFields();
+		$actions = $this->getActionFields();
+		$validators = $this->getValidator($fields, $actions);
 
-		/** @var FormField $field */
-		foreach($this->fieldList as $field) {
-			if($this->isFieldToRender($field->name)) {
-				$this->registerRendered($field->name);
-				$div = $field->field();
-				if(is_object($div) && !$div->hasClass("hidden")) {
-					if($i == 0) {
-						$i++;
-						$div->addClass("one");
-					} else {
-						$i = 0;
-						$div->addClass("two");
-					}
-					$div->addClass("visibleField");
-				}
-				$fields .= $div;
-			}
+		/** @var FormFieldResponse $field */
+		foreach($fields as $field) {
+			$fieldDataSet->add($field->ToRestArray(true));
+			$jsonData[] = $field->ToRestArray();
 		}
 
-		unset($field);
-
-		$i = 0;
-		$actions = "";
-		foreach($this->actions as $action) {
-			$field = $action["field"];
-			$container = $field->field();
-			if($i == 0) {
-				$i++;
-				$container->addClass("action_one");
-			} else {
-				$i = 0;
-				$container->addClass("action_two");
-			}
-			$actions .= $container;
+		/** @var FormFieldResponse $field */
+		foreach($actions as $action) {
+			$actionDataSet->add($action->ToRestArray(true));
+			$jsonData[] = $action->ToRestArray();
 		}
 
-		unset($div, $i, $container);
-
-		// javascript
-		$js = '(function($){
-						$(function(){ 
-							$("#form_' . $this->form->name . ' .err").remove(); 
-							$("#form_' . $this->form->name . '").bind("formsubmit", function() {
-								$("#form_' . $this->form->name . ' .err").remove();
-							});
-						 });';
-
-		foreach($this->fields as $field) {
-			$js .= $field->JS();
+		foreach($validators as $validator) {
+			$jsonData[] = $validator;
 		}
-
-		foreach($this->validators as $validator) {
-			/** @var FormValidator $validator */
-			if(is_object($validator)) {
-				$validator->setForm($this);
-				$js .= $validator->JS();
-			}
-		}
-
-		$js .= "})(jQuery);";
 
 		$view = new ViewAccessableData();
-		$view->fields = $fields;
-		$view->actions = $actions;
+		$view->fields = $fieldDataSet;
+		$view->actions = $actionDataSet;
 
 		$this->form->append($view->renderWith("form/form.html"));
 
@@ -527,8 +494,8 @@ class Form extends object {
 
 		if(PROFILE)
 			Profiler::mark("Form::renderForm::render");
-		$data = $this->form->render("          ");
-		Resources::addJS($js);
+		$data = $this->form->render();
+		Resources::addJS('$(function(){new goma.form(' . var_export($this->ID(), true) . ', '.json_encode($jsonData).'); });');
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
@@ -540,7 +507,45 @@ class Form extends object {
 			Profiler::unmark("Form::renderForm");
 
 		return $data;
+	}
 
+	protected function getFormFields() {
+		$fields = array();
+
+		/** @var FormField $field */
+		foreach($this->fieldList as $field) {
+			if($this->isFieldToRender($field->name)) {
+				$this->registerRendered($field->name);
+				$fields[] = $field->exportFieldInfo();
+			}
+		}
+
+		return $fields;
+	}
+
+	protected function getActionFields() {
+		$actions = array();
+
+		/** @var array $action */
+		foreach($this->actions as $action) {
+			$actions[] = $action["field"]->exportFieldInfo();
+		}
+
+		return $actions;
+	}
+
+	protected function getValidator(&$fields, &$actions) {
+		$validators = array();
+
+		/** @var FormValidator $validator */
+		foreach($this->validators as $validator) {
+			$data = $validator->exportFieldInfo($fields, $actions);
+			if($data) {
+				$validators[] = $data;
+			}
+		}
+
+		return $validators;
 	}
 
 	/**
@@ -895,7 +900,7 @@ class Form extends object {
 			unset($_name);
 		}
 
-		if(is_object($validator) && isset($name)) {
+		if(is_object($validator) && is_a($validator, "FormValidator") && isset($name)) {
 			$this->validators[$name] = $validator;
 			$validator->setForm($this);
 		} else {

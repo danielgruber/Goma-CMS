@@ -117,7 +117,7 @@ class RequiredFields extends FormValidator
             /** @var FormField $formField */
             $formField = $this->form->fields[$field];
             $key = "v_" . $field;
-            $js .= "var " . $key . " = function() { " . $formField->jsValidation() . "}
+            $js .= "var " . $key . " = function() { " . "}
 						if(" . $key . "() === false) {
 							valid = false;	
 						}";
