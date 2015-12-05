@@ -19,7 +19,8 @@ if(typeof goma == "undefined")
 		var that = this;
 
         this.fields = fields;
-		
+
+        this.id = id;
 		this.form = $("#" + id);
 		this.form.removeClass("leave_check");
 		
@@ -118,8 +119,10 @@ if(typeof goma == "undefined")
 	goma.form._list = [];
 	goma.form.garbageCollect = function() {
 		for(var i in goma.form._list) {
-			if($("#" + id).length == 0) {
-                delete goma.form._list[i];
+            if(goma.form._list.hasOwnProperty(i)) {
+                if($("#" + goma.form._list[i].id).length == 0) {
+                    delete goma.form._list[i];
+                }
             }
 		}
 	};

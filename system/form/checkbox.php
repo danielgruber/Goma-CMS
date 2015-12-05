@@ -45,32 +45,6 @@ class CheckBox extends FormField {
 	}
 
 	/**
-	 * renders the field
-	 * @name field
-	 * @access public
-	 * @return HTMLNode
-	 */
-	public function field() {
-		if(PROFILE)
-			Profiler::mark("FormField::field");
-
-		$this->callExtending("beforeField");
-
-		$this->setValue();
-
-		$this->container->append(new HTMLNode("label", array("for" => $this->ID()), $this->title));
-
-		$this->container->append($this->input);
-
-		$this->callExtending("afterField");
-
-		if(PROFILE)
-			Profiler::unmark("FormField::field");
-
-		return $this->container;
-	}
-
-	/**
 	 * returns the javascript for this field
 	 *
 	 * @name js

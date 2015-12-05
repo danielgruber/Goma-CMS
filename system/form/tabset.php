@@ -94,7 +94,7 @@ class TabSet extends FieldSet
                 $child->getRenderedField()->addClass("active");
                 setcookie("tabs_" . $this->name, $child->getName(), 0, "/");
 
-                $listItem->addClass("active");
+                $listItem->getNode(0)->addClass("active");
             }
             $list->append($listItem);
         }
