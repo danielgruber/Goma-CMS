@@ -114,7 +114,7 @@ class TabSet extends FieldSet
 
             if (!$activeTabFound) {
                 // make first tab active
-                $list->getNode(0)->addClass("active");
+                $list->getNode(0)->getNode(0)->addClass("active");
                 $children[0]->getRenderedField()->addClass("active");
             }
         }
