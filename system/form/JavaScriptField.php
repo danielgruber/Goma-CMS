@@ -41,6 +41,6 @@ class JavaScriptField extends FormField
 		
 		public function js()
 		{
-				return $this->js;
+				return JSMin::minify($this->js);
 		}
 }

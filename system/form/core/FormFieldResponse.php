@@ -94,6 +94,11 @@ class FormFieldResponse {
     protected $isDisabled = false;
 
     /**
+     * reference to field.
+     */
+    protected $field;
+
+    /**
      * constructor.
      * @param string $name
      * @param string $type
@@ -123,11 +128,26 @@ class FormFieldResponse {
      * adds a child.
      *
      * @param FormFieldResponse $child
+     * @return $this
      */
     public function addChild($child) {
         if(!is_a($child, "FormFieldResponse")) throw new InvalidArgumentException("Child must be FormFieldResponse.");
 
         $this->children[] = $child;
+
+        return $this;
+    }
+
+    /**
+     * @param $child
+     * @return $this
+     */
+    public function removeChild($child) {
+        $key = array_search($child, $this->children);
+        unset($this->children[$key]);
+        $this->children = array_values($this->children);
+
+        return $this;
     }
 
     /**
@@ -135,6 +155,24 @@ class FormFieldResponse {
      */
     public function getChildren() {
         return $this->children;
+    }
+
+    /**
+     * @return FormField
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
+     * @param FormField $field
+     * @return $this
+     */
+    public function setField($field)
+    {
+        $this->field = $field;
+        return $this;
     }
 
     /**

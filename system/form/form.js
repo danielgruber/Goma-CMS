@@ -78,7 +78,7 @@ if(typeof goma == "undefined")
 		});
 
         this.runScripts(fields);
-		
+
 		goma.form._list[id.toLowerCase()] = this;
 		return this;
 	};
@@ -120,7 +120,7 @@ if(typeof goma == "undefined")
 		}
 	};
 	
-	goma.form._list = [];
+	goma.form._list = {};
 	goma.form.garbageCollect = function() {
 		for(var i in goma.form._list) {
             if(goma.form._list.hasOwnProperty(i)) {

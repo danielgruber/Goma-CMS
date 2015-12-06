@@ -99,7 +99,12 @@ class ObjectRadioButton extends RadioButton
                 /** @var FormFieldResponse $child */
                 foreach($info->getChildren() as $child) {
                     if($child->getName() == $field->name) {
-                        $field = $child->getRenderedField();
+                        if($this->form()->isFieldToRender($child->getName())) {
+                            $child->getField()->addRenderData($child);
+                            $field = $child->getRenderedField();
+                        } else {
+                            $field = null;
+                        }
                     }
                 }
             }
@@ -130,9 +135,8 @@ class ObjectRadioButton extends RadioButton
      * @return FormFieldResponse
      */
     public function exportFieldInfo() {
-        $info = $this->exportBasicInfo(true);
-        $info->setRenderedField($this->field($info))
-             ->setJs($this->js());
+        $info = $this->exportBasicInfo();
+        $this->addRenderData($info);
 
         $this->callExtending("afterRenderFormResponse", $info);
 
@@ -140,10 +144,20 @@ class ObjectRadioButton extends RadioButton
     }
 
     /**
-     * @param bool $withChildren
+     * adds render data.
+     * @param FormFieldResponse $info
+     */
+    public function addRenderData($info)
+    {
+        $this->form()->registerRendered($info->getName());
+
+        $info->setRenderedField($this->field($info))->setJs($this->js());
+    }
+
+    /**
      * @return FormFieldResponse
      */
-    public function exportBasicInfo($withChildren = false)
+    public function exportBasicInfo()
     {
         $data = parent::exportBasicInfo();
 
@@ -153,16 +167,7 @@ class ObjectRadioButton extends RadioButton
                 $field = $this->form()->getField($node["title"][1]);
                 $node["title"] = $node["title"][0];
 
-                $name = $field->name;
-                if ($this->form()->isFieldToRender($name)) {
-
-                    if ($withChildren) {
-                        $this->form()->registerRendered($name);
-                        $data->addChild($field->exportFieldInfo());
-                    } else {
-                        $data->addChild($field->exportBasicInfo());
-                    }
-                }
+                $data->addChild($field->exportBasicInfo());
             }
         }
 

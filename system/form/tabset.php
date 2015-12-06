@@ -50,17 +50,20 @@ class TabSet extends FieldSet
     }
 
     /**
-     * this function generates some JSON for using client side stuff.
-     *
-     * @name exportJSON
-     * @return FormFieldResponse
+     * @param FormFieldResponse $info
      */
-    public function exportFieldInfo() {
-        $info = parent::exportFieldInfo();
+    public function addRenderData($info)
+    {
+        foreach($info->getChildren() as $child) {
+            /** @var FormFieldResponse $child */
+            if($child->getField()->hidden()) {
+                $info->removeChild($child);
+            }
+        }
+
+        parent::addRenderData($info);
 
         $this->renderTabList($info);
-
-        return $info;
     }
 
     /**

@@ -115,33 +115,27 @@ class FieldSet extends FormField
     }
 
     /**
-     * this function generates some JSON for using client side stuff.
-     *
-     * @name exportJSON
-     * @return FormFieldResponse
+     * @param FormFieldResponse $info
      */
-    public function exportFieldInfo() {
-        $info = $this->exportBasicInfo(true)
-            ->setRenderedField($this->field())
-            ->setJs($this->js());
+    public function addRenderData($info)
+    {
+        parent::addRenderData($info);
 
         /** @var FormFieldResponse $child */
         foreach($info->getChildren() as $child) {
-            $info->getRenderedField()->append($child->getRenderedField());
+            if($this->form()->isFieldToRender($child->getName())) {
+                $child->getField()->addRenderData($child);
+                $info->getRenderedField()->append($child->getRenderedField());
+            }
         }
-
-        $this->callExtending("afterRenderFormResponseWithChildren", $info);
-
-        return $info;
     }
 
     /**
      * exports basic field info.
      *
-     * @param bool $withChildren if render child fields.
      * @return FormFieldResponse
      */
-    public function exportBasicInfo($withChildren = false) {
+    public function exportBasicInfo() {
         $data = parent::exportBasicInfo();
 
         // get content
@@ -157,13 +151,7 @@ class FieldSet extends FormField
             $name = strtolower($item->name);
 
             if ($this->form()->isFieldToRender($name)) {
-                $this->form()->registerRendered($name);
-
-                if($withChildren) {
-                    $data->addChild($item->exportFieldInfo());
-                } else {
-                    $data->addChild($item->exportBasicInfo());
-                }
+                $data->addChild($item->exportBasicInfo());
             }
         }
 

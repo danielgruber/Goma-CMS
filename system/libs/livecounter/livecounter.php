@@ -87,7 +87,7 @@ class livecounter extends DataObject
 	/**
 	 * bot-list
 	*/
-	public static $bot_list = "(googlebot|seoscanners|curl|wget|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot)";
+	public static $bot_list = "(googlebot|seoscanners|curl|wget|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot|jobboerse\.com|DotBot)";
 	
 	/**
 	 * some bots use the referer.
