@@ -406,7 +406,7 @@ class FormFieldResponse {
             $data["field"] = $this->renderedField != null ? $this->renderedField->__toString() : "";
         }
 
-        if($this->children) {
+        if(!empty($this->children)) {
             $data["children"] = array();
 
             /** @var FormFieldResponse $child */
