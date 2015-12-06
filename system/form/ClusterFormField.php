@@ -149,48 +149,62 @@ class ClusterFormField extends FormField {
 		return new HTMLNode("div");
 	}
 
-    /**
-     * renders the field
-     *
-     * @name field
-     * @access public
-     * @return HTMLNode
-     */
-	public function field() {
-		
-		if(PROFILE) Profiler::mark("ClusterFormField::field");
-		
-		$this->callExtending("beforeField");
-		
-		$this->setValue();
-		
-		$this->container->append(new HTMLNode(
-			"label",
-			array("for"	=> $this->ID()),
-			$this->title
-		));
-		
-		// create subnode
+	/**
+	 * this function generates some JSON for using client side stuff.
+	 *
+	 * @name exportJSON
+	 * @return FormFieldResponse
+	 */
+	public function exportFieldInfo() {
+		$info = $this->exportBasicInfo(true)
+				->setRenderedField($this->field())
+				->setJs($this->js());
+
+		/** @var FormFieldResponse $child */
 		$subContainer = new HTMLNode("div");
-		
+		foreach($info->getChildren() as $child) {
+			$subContainer->append($child->getRenderedField());
+		}
+		$info->getRenderedField()->append($subContainer);
+
+		$this->callExtending("afterRenderFormResponseWithChildren", $info);
+
+		return $info;
+	}
+
+	/**
+	 * exports basic field info.
+	 *
+	 * @param bool $withChildren if render child fields.
+	 * @return FormFieldResponse
+	 */
+	public function exportBasicInfo($withChildren = false) {
+		$data = parent::exportBasicInfo();
+
 		// get content
-		usort($this->items, array($this, "sort"));
+		uasort($this->items, array($this, "sort"));
+
+		/** @var FormField $item */
 		foreach($this->items as $item) {
-			if($this->isFieldToRender($item->name)) {
-				$this->registerRendered($item->name);
-				/** @var FormField $item */
-				$subContainer->append($item->exportFieldInfo()->getRenderedField());
+			// if a FieldSet is disabled all subfields should disabled, too
+			if ($this->disabled) {
+				$item->disable();
+			}
+
+			$name = strtolower($item->name);
+
+			if ($this->form()->isFieldToRender($name)) {
+				$this->form()->registerRendered($name);
+
+				if($withChildren) {
+					$data->addChild($item->exportFieldInfo());
+				} else {
+					$data->addChild($item->exportBasicInfo());
+				}
 			}
 		}
-		
-		// append it to the main-tree
-		$this->container->append($subContainer);
-		
-		$this->callExtending("afterField");
-		
-		if(PROFILE) Profiler::unmark("ClusterFormField::field");
-		
-		return $this->container;
+
+		return $data;
 	}
 	
 	/**
@@ -209,6 +223,7 @@ class ClusterFormField extends FormField {
 		$this->sort[$field->name] = $sort;
 		$this->items[$field->name] = $field;
 		if(isset($this->parent))
+			/** @var FormField $field */
 			$field->setForm($this);
 	}
 	
@@ -288,9 +303,6 @@ class ClusterFormField extends FormField {
 	 *@access public
 	*/
 	public function getValue() {
-
-
-
 		if(!$this->disabled && $this->POST && isset($this->orgForm()->post[$this->PostName()])) {
 			$this->value = $this->orgForm()->post[$this->PostName()];
 		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name]) && is_object($this->orgForm()->result)) {
@@ -298,7 +310,6 @@ class ClusterFormField extends FormField {
 		} else if($this->POST && $this->value == null && isset($this->orgForm()->result[$this->name])) {
             $this->value = $this->orgForm()->result[$this->name];
         }
-
 	}
 
 	/**
@@ -415,12 +426,7 @@ class ClusterFormField extends FormField {
 	 */
 	public function js()
 	{
-		$js = "";
-		foreach($this->fields as $field) {
-			$js .= $field->JS();
-		}
-		
-		return $js;
+		return "";
 	}
 
 	/**
@@ -551,6 +557,4 @@ class ClusterFormField extends FormField {
 	{
 			return $this->isField($offset);
 	}
-
-		
 }
