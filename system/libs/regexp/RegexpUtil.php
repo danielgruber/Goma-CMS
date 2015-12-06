@@ -12,6 +12,9 @@
  */
 
 class RegexpUtil {
+    const EMAIL_REGEXP = '/^([a-zA-Z0-9\-\._]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9]{2,9})$/';
+    const NUMBER_REGEXP = '/^\-?[0-9\.]+$/';
+
     /**
      * returns if string is a number.
      *
@@ -29,7 +32,7 @@ class RegexpUtil {
      * @return bool
      */
     public static function isDouble($string) {
-        return preg_match('/^\-?[0-9\.]+$/', $string);
+        return preg_match(self::NUMBER_REGEXP, $string);
     }
 
     /**
@@ -39,7 +42,7 @@ class RegexpUtil {
      * @return bool
      */
     public static function isEmail($email) {
-        return preg_match('/^([a-zA-Z0-9\-\._]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z0-9]{2,9})$/', $email);
+        return preg_match(self::EMAIL_REGEXP, $email);
     }
 
     /**

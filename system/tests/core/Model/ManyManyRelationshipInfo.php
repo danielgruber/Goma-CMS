@@ -133,6 +133,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             } else if($name == "belongs") {
                 $this->assertEqual($relationShip->getBelongingName(), "mains");
                 $this->assertEqual($relationShip->getTarget(), strtolower("ManyManyRelationshipTestBelonging"));
+                $this->assertEqual($relationShip->getExtraFields(), ManyManyRelationshipTest::$many_many_extra_fields["belongs"]);
             }
 
             $this->assertNull($relationShip->getTargetTableName());
@@ -215,9 +216,9 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * tests if all properties are assigned correctly and accessable.
      */
     public function testAssignMent() {
-        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true, false);
-        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false, false);
-        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false, false);
+        $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true);
+        $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false);
+        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false);
     }
 
     /**
@@ -255,12 +256,38 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         $this->assertEqual($relation->getBelongingName(), $targetRelationName);
         $this->assertEqual($relation->isControlling(), $controlling);
     }
+
+    /**
+     * tests extra-fields.
+     */
+    public function testExtraFields() {
+        $relationShips = ModelManyManyRelationShipInfo::generateFromClass(" ManyManyRelationshipTest");
+        $relationShipsForBelonging = ModelManyManyRelationShipInfo::generateFromClass(" ManyManyRelationshipTestBelonging");
+
+        $this->assertEqual($relationShips["belongs"]->getExtraFields(), $relationShipsForBelonging["mains"]->getExtraFields());
+
+        ManyManyRelationshipTestBelonging::$belongs_many_many["mains"] = array(
+            "test" => "varchar(10)"
+        );
+
+        try {
+            ModelManyManyRelationShipInfo::generateFromClass(" ManyManyRelationshipTestBelonging");
+            $this->assertTrue(false);
+        } catch(Exception $e) {
+            $this->assertIsA($e, "LogicException");
+        }
+    }
 }
 
 class ManyManyRelationshipTest {
     static $many_many = array(
         "belongs"   => "ManyManyRelationshipTestBelonging",
         "tests"     => "ManyManyTestObject"
+    );
+    static $many_many_extra_fields = array(
+        "belongs" => array(
+            "test" => "int(10)"
+        )
     );
 }
 
@@ -270,4 +297,5 @@ class ManyManyRelationshipTestBelonging {
     static $belongs_many_many = array(
         "mains"     => "ManyManyRelationshipTest"
     );
+    static $many_many_extra_fields = array();
 }

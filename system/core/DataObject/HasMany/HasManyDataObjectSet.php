@@ -126,7 +126,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
         /** @var DataObject $record */
         $record = parent::removeRecord($record);
 
-        if(isset($this->filter["id"]) && $record->id != 0) {
+        if(isset($this->filter["id"]) && is_array($this->filter["id"]) && $record->id != 0) {
             $key = array_search($record->id, $this->filter["id"]);
             unset($this->filter["id"][$key]);
         }

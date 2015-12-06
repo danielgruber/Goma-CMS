@@ -69,7 +69,7 @@ class FormFieldResponse {
      * extra-data.
      * @var array
      */
-    protected $extra;
+    protected $extra = array();
 
     /**
      * @var string
@@ -255,19 +255,21 @@ class FormFieldResponse {
 
     /**
      * @return mixed
+     * @param string $key
      */
-    public function getExtra()
+    public function getExtra($key)
     {
-        return $this->extra;
+        return isset($this->extra[$key]) ? $this->extra[$key] : null;
     }
 
     /**
+     * @param string $key
      * @param mixed $extra
      * @return $this
      */
-    public function setExtra($extra)
+    public function setExtra($key, $extra)
     {
-        $this->extra = $extra;
+        $this->extra[$key] = $extra;
         return $this;
     }
 

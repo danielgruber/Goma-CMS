@@ -20,6 +20,8 @@ class ObjectRadioButton extends RadioButton
      */
     protected $javaScriptNeeded = array();
 
+    protected $js = array();
+
     /**
      * defines if we hide disabled nodes
      *
@@ -60,6 +62,7 @@ class ObjectRadioButton extends RadioButton
                 "id" => "displaycontainer_" . $id,
                 "class" => "displaycontainer"
             ), $field->field()));
+            $this->js[] = $field->js();
             $this->form()->registerRendered($field->name);
         }
 
@@ -73,7 +76,7 @@ class ObjectRadioButton extends RadioButton
      * @access public
      * @return HTMLNode
      */
-    public function field()
+    public function field($info = null)
     {
         $this->callExtending("beforeField");
 
@@ -119,6 +122,49 @@ class ObjectRadioButton extends RadioButton
         $this->callExtending("afterField");
 
         return $this->container;
+    }
+
+    /**
+     * this function generates some JSON for using client side stuff.
+     *
+     * @name exportJSON
+     * @return FormFieldResponse
+     */
+    public function exportFieldInfo() {
+        $info = $this->exportBasicInfo(true);
+        $info->setRenderedField($this->field($info))
+             ->setJs($this->js());
+
+        $this->callExtending("afterRenderFormResponseWithChildren", $info);
+
+        return $info;
+    }
+
+    /**
+     * @param bool $withChildren
+     * @return FormFieldResponse
+     */
+    public function exportBasicInfo($withChildren = false)
+    {
+        $data = parent::exportBasicInfo();
+
+        $nodes = $data->getExtra("radioButtons");
+        foreach($nodes as $node) {
+            if (is_array($node["title"]) && isset($node["title"][1])) {
+                $field = $this->form()->getField($node["title"][1]);
+                $node["title"] = $node["title"][0];
+
+                if($withChildren) {
+                    $data->addChild($field->exportFieldInfo());
+                } else {
+                    $data->addChild($field->exportBasicInfo());
+                }
+            }
+        }
+
+        $data->setExtra("radioButtons", $nodes);
+
+        return $data;
     }
 
     /**

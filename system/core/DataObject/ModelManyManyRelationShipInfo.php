@@ -419,6 +419,14 @@ class ModelManyManyRelationShipInfo {
         $relationShip->belongingName = self::findInverseManyManyRelationship($name, $class, $info, $belonging);
 
         $relationShip->extraFields = ModelInfoGenerator::get_many_many_extraFields($class, $name);
+        $belongingExtra = ModelInfoGenerator::get_many_many_extraFields($relationShip->target, $relationShip->belongingName);
+        foreach($belongingExtra as $key => $value) {
+            if(isset($relationShip->extraFields[$key]) && $relationShip->extraFields[$key] != $value) {
+                throw new LogicException("Extra-Fields should not be different on belonging relationship.");
+            }
+
+            $relationShip->extraFields[$key] = $value;
+        }
 
         $relationShip->controlling = !$belonging;
 

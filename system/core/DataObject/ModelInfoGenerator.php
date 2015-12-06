@@ -276,7 +276,6 @@ class ModelInfoGenerator {
      * @return array
      */
     public static function get_many_many_extraFields($class, $name) {
-
         $name = strtolower($name);
         $fields = array();
         if(StaticsManager::hasStatic($class, "many_many_extra_fields")) {

@@ -103,14 +103,15 @@ class ClusterFormField extends FormField {
 		
 		$this->result =& $this->value;
 	}
-	
+
 	/**
 	 * checks if the action is available
 	 * we implement sub-namespaces for sub-items here
 	 *
-	 *@name hasAction
-	 *@access public
-	*/
+	 * @name hasAction
+	 * @access public
+	 * @return bool
+	 */
 	public function hasAction($action) {
 		if(isset($this->fields[$action]))
 			return true;
@@ -234,12 +235,13 @@ class ClusterFormField extends FormField {
 			}
 		}
 	}
-	
+
 	/**
 	 * sorts the items
-	 *@name sort
-	 *@access public
-	*/
+	 * @name sort
+	 * @access public
+	 * @return int
+	 */
 	public function sort($a, $b)
 	{
 		if($this->sort[$a->name] == $this->sort[$b->name])
@@ -253,10 +255,9 @@ class ClusterFormField extends FormField {
 	/**
 	 * sets the form
 	 *
-	 *@name setForm
-	 *@access public
+	 * @param Form
 	*/
-	public function setForm(Object &$form) {
+	public function setForm(&$form) {
 
 		parent::setForm($form);
 		
@@ -273,6 +274,7 @@ class ClusterFormField extends FormField {
 		$this->post =& $this->orgForm()->post;
 		$this->state = $this->orgForm()->state->{$this->classname . $this->name};
 
+		/** @var FormField $field */
 		foreach($this->items as $field) {
             $field->setForm($this);
         }
@@ -297,33 +299,36 @@ class ClusterFormField extends FormField {
         }
 
 	}
-	
+
 	/**
 	 * returns the form
 	 *
-	 *@name form
-	 *@access public	
-	*/
+	 * @name form
+	 * @access public
+	 * @return $this|Form
+	 */
 	public function &form() {
 		return $this;
 	}
-	
+
 	/**
 	 * returns original form
 	 *
-	 *@name orgForm
-	 *@access public
-	*/
+	 * @name orgForm
+	 * @access public
+	 * @return Form
+	 */
 	public function orgForm() {
 		return parent::form();
 	}
-	
+
 	/**
 	 * the url for ajax
 	 *
-	 *@name externalURL
-	 *@access public
-	*/
+	 * @name externalURL
+	 * @access public
+	 * @return string
+	 */
 	public function externalURL()
 	{
 			return $this->orgForm()->externalURL() . "/" . $this->name;
@@ -338,6 +343,7 @@ class ClusterFormField extends FormField {
 	public function disable()
 	{	
 		$this->disabled = true;
+		/** @var FormField $field */
 		foreach($this->fields as $field)
 			$field->disable();
 	}
@@ -351,15 +357,17 @@ class ClusterFormField extends FormField {
 	public function enable()
 	{	
 		$this->disabled = false;
+		/** @var FormField $field */
 		foreach($this->fields as $field)
 			$field->enable();
 	}
-	
+
 	/**
 	 * generates an id for the field
-	 *@name id
-	 *@access public
-	*/
+	 * @name id
+	 * @access public
+	 * @return string
+	 */
 	public function ID()
 	{
 		if(Core::is_ajax()) {
@@ -368,15 +376,17 @@ class ClusterFormField extends FormField {
 			return "form_field_" .  $this->classname . "_" . md5($this->orgForm()->getName() . $this->title) . "_" . $this->name;
 		}
 	}
-	
+
 	/**
 	 * result
 	 *
-	 *@name result
-	 *@access public
-	*/
+	 * @name result
+	 * @access public
+	 * @return array|mixed|null
+	 */
 	public function result() {	
 		$this->result = array();
+		/** @var FormField $field */
 		foreach($this->fields as $field) {
 
 			$this->result[$field->dbname] = $field->result();
@@ -384,22 +394,24 @@ class ClusterFormField extends FormField {
 	
 		return $this->result;
 	}
-	
+
 	/**
 	 * generates an name for this form
-	 *@name name
-	 *@access public
-	*/
+	 * @name name
+	 * @access public
+	 * @return null|string
+	 */
 	public function name()
 	{
 			return $this->name;
 	}
-	
+
 	/**
 	 * this function generates some JavaScript for this formfield
-	 *@name js
-	 *@access public
-	*/
+	 * @name js
+	 * @access public
+	 * @return string
+	 */
 	public function js()
 	{
 		$js = "";
@@ -409,15 +421,16 @@ class ClusterFormField extends FormField {
 		
 		return $js;
 	}
-	
+
 	/**
 	 * registers a field in this form
 	 *
-	 *@name registerField
-	 *@access public
-	 *@param string - name
-	 *@param object - field
-	*/
+	 * @name registerField
+	 * @access public
+	 * @param string - name
+	 * @param object - field
+	 * @return bool
+	 */
 	public function registerField($name, $field) {
 		if($name == $this->name) {
 			return false;
@@ -435,14 +448,15 @@ class ClusterFormField extends FormField {
 	public function unRegister($name) {
 		unset($this->fields[strtolower($name)]);
 	}
-	
+
 	/**
 	 * gets the field by the given name
 	 *
-	 *@name getField
-	 *@access public
-	 *@param string - name
-	*/
+	 * @name getField
+	 * @access public
+	 * @param string - name
+	 * @return bool
+	 */
 	public function getField($offset) {
 		if(isset($this->fields[strtolower($offset)])) 
 			return $this->fields[strtolower($offset)];
@@ -453,20 +467,22 @@ class ClusterFormField extends FormField {
 	/**
 	 * returns if a field exists in this form
 	 *
-	 *@name isField
-	 *@access public
-	*/
+	 * @name isField
+	 * @access public
+	 * @return bool
+	 */
 	public function isField($name)
 	{
 			return (isset($this->fields[strtolower($name)]));
 	}
-	
+
 	/**
 	 * returns if a field exists and wasn't rendered in this form
 	 *
-	 *@name isField
-	 *@access public
-	*/
+	 * @name isField
+	 * @access public
+	 * @return bool
+	 */
 	public function isFieldToRender($name)
 	{
 			return ((isset($this->fields[strtolower($name)])) && !isset($this->renderedFields[strtolower($name)]));
@@ -498,14 +514,15 @@ class ClusterFormField extends FormField {
 	/**
 	 * Overloading
 	*/
-	
+
 	/**
 	 * returns a field in this form by name
 	 * it's not relevant how deep the field is in this form if the field is *not* within a ClusterFormField
 	 *
-	 *@name __get
-	 *@access public
-	*/
+	 * @name __get
+	 * @access public
+	 * @return bool|mixed
+	 */
 	public function __get($offset)
 	{
 		return $this->getField($offset);
@@ -521,13 +538,14 @@ class ClusterFormField extends FormField {
 	{
 			// currently there is no option to overload a form with fields
 	}
-	
+
 	/**
 	 * returns if a field exists in this form
 	 *
-	 *@name __isset
-	 *@access public
-	*/
+	 * @name __isset
+	 * @access public
+	 * @return bool
+	 */
 	public function __isset($offset)
 	{
 			return $this->isField($offset);

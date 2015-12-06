@@ -218,6 +218,7 @@ class FormField extends RequestHandler {
      * @name field
      * @access public
      * @return HTMLNode
+     * @internal
      */
     public function field()
     {
