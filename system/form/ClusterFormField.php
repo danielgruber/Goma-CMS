@@ -178,7 +178,8 @@ class ClusterFormField extends FormField {
 		foreach($this->items as $item) {
 			if($this->isFieldToRender($item->name)) {
 				$this->registerRendered($item->name);
-				$subContainer->append($item->field());
+				/** @var FormField $item */
+				$subContainer->append($item->exportFieldInfo()->getRenderedField());
 			}
 		}
 		

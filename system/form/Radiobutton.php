@@ -56,6 +56,7 @@ class RadioButton extends FormField
      *
      * @name options
      * @access public
+     * @return array
      */
     public function options()
     {
@@ -69,8 +70,8 @@ class RadioButton extends FormField
      * @param $name
      * @param $value
      * @param $title
-     * @param null $checked
-     * @param null $disabled
+     * @param null|bool $checked
+     * @param null|bool $disabled
      * @return HTMLNode
      */
     public function renderOption($name, $value, $title, $checked = null, $disabled = null)
@@ -238,6 +239,7 @@ class RadioButton extends FormField
      * validation for security reason
      *
      * @name validate
+     * @return bool
      */
     public function validate($value)
     {

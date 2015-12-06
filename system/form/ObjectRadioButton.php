@@ -59,8 +59,7 @@ class ObjectRadioButton extends RadioButton
             $node->append(new HTMLNode('div', array(
                 "id" => "displaycontainer_" . $id,
                 "class" => "displaycontainer"
-            ), $field->field()));
-            $this->form()->registerRendered($field->name);
+            ), $field));
         }
 
         return $node;
@@ -69,8 +68,7 @@ class ObjectRadioButton extends RadioButton
     /**
      * renders the field
      *
-     * @name field
-     * @access public
+     * @param FormFieldResponse|null $info
      * @return HTMLNode
      */
     public function field($info = null)
@@ -97,6 +95,13 @@ class ObjectRadioButton extends RadioButton
             if (is_array($title) && isset($title[1])) {
                 $field = $this->form()->getField($title[1]);
                 $title = $title[0];
+
+                /** @var FormFieldResponse $child */
+                foreach($info->getChildren() as $child) {
+                    if($child->getName() == $field->name) {
+                        $field = $child->getRenderedField();
+                    }
+                }
             }
 
             if ($value == $this->value) {
@@ -151,10 +156,15 @@ class ObjectRadioButton extends RadioButton
                 $field = $this->form()->getField($node["title"][1]);
                 $node["title"] = $node["title"][0];
 
-                if($withChildren) {
-                    $data->addChild($field->exportBasicInfo()->setJs($field->js()));
-                } else {
-                    $data->addChild($field->exportBasicInfo());
+                $name = $field->name;
+                if ($this->form()->isFieldToRender($name)) {
+
+                    if ($withChildren) {
+                        $this->form()->registerRendered($name);
+                        $data->addChild($field->exportFieldInfo());
+                    } else {
+                        $data->addChild($field->exportBasicInfo());
+                    }
                 }
             }
         }
