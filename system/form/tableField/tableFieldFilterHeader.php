@@ -35,10 +35,6 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         $columns = $tableField->getColumns();
         $currentColumn = 0;
 
-        if ($state->visible !== true) {
-            return null;
-        }
-
         foreach ($columns as $columnField) {
             $currentColumn++;
             $metadata = $tableField->getColumnMetadata($columnField);
@@ -92,18 +88,20 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
             }
             $field->setForm($tableField->Form());
 
-            $fields->push(array("field" => $field->field(), "name" => $columnField, "title" => $title));
+            $fields->push(array("field" => $field->exportFieldInfo()->getRenderedField(), "name" => $columnField, "title" => $title));
         }
 
         return array(
-            'header' => $forTemplate->customise(array("fields" => $fields))->renderWith("form/tableField/filterHeader.html")
+            'header' => $forTemplate->customise(array("fields" => $fields, "visible" => $state->visible))->renderWith("form/tableField/filterHeader.html")
         );
     }
 
     /**
      * manipulates the dataobjectset
      *
-     * @name manipulate
+     * @param TableField $tableField
+     * @param DataObjectSet $data
+     * @return DataSet
      */
     public function manipulate($tableField, $data)
     {
@@ -165,8 +163,12 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         $state = $tableField->state->tableFieldFilterHeader;
 
         if ($actionName === 'filter') {
-            if (isset($data['filter'])) {
-                foreach ($data['filter'] as $key => $filter) {
+            if($state->visible === false) {
+                $state->visible = true;
+            }
+
+            if (isset($tableField->form()->post['filter'])) {
+                foreach ($tableField->form()->post['filter'] as $key => $filter) {
                     $state->columns->$key = $filter;
                 }
             }

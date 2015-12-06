@@ -58,7 +58,8 @@ class TableFieldSortableHeader implements TableField_HTMLProvider, TableField_Da
 
 				// last column
 			} else if($currentColumn == count($columns) && $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')){
-				$field = new TableField_FormAction($tableField, "toggleFilter", '<i title="' . lang("search") . '" class="fa fa-search"></i>', "toggleFilterVisibility", null);
+				$field = new TableField_FormAction($tableField, "toggleFilter", '<i title="' . lang("search") . '" class="fa fa-search"></i>', "toggleFilterVisibility", null,
+						"var h  = $(this).parents('table').find('.filter-header');if(window['".$tableField->divID()."hasBeenOpened']) { h.addClass('hidden'); window['".$tableField->divID()."hasBeenOpened'] = false; return false; } else if (h.hasClass('hidden')) { window['".$tableField->divID()."hasBeenOpened'] = true; h.removeClass('hidden'); return false; }");
 				$field->addExtraClass("tablefield-button-filter");
 				$field->addExtraClass("trigger");
 				$field->addClass("button-clear");

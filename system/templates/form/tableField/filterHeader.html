@@ -1,4 +1,8 @@
+<% IF $visible %>
 <tr class="filter-header">
+<% ELSE %>
+<tr class="filter-header hidden">
+<% END %>
 	<% CONTROL Fields() %>
 		<td name="$fields.name.text()">
 			$fields.field

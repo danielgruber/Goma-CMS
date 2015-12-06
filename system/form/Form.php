@@ -602,6 +602,7 @@ class Form extends object {
 		// reset result
 
 		// get data
+		/** @var FormField $field */
 		foreach($data->fields as $field) {
 			$result = $field->result();
 

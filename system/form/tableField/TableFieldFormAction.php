@@ -21,8 +21,9 @@ class TableField_FormAction extends FormAction {
      * @param string $title
      * @param string $actionName
      * @param array $args
+     * @param null|string $js
      */
-    public function __construct($tableField = null, $name = null, $title = null, $actionName = null, $args = null) {
+    public function __construct($tableField = null, $name = null, $title = null, $actionName = null, $args = null, $js = null) {
         if(!is_object($tableField))
             return;
 
@@ -34,12 +35,15 @@ class TableField_FormAction extends FormAction {
 
         parent::__construct($this->tableField->name . "_" . $name, $title);
 
+        if(isset($js)) {
+            $this->input->onclick = $js;
+        }
         $this->setForm($tableField->Form());
     }
 
     /**
      * returns false, because a tableField-action never triggers the form to submit
-     * but we hook into
+     * but we hook into it.
      *
      * @name canSubmit
      * @param array $data
