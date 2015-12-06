@@ -34,8 +34,8 @@ class ObjectRadioButton extends RadioButton
      * @param string $postname
      * @param mixed $value
      * @param string $title
-     * @param bool $checked
-     * @param bool $disabled
+     * @param bool|null $checked
+     * @param bool|null $disabled
      * @param FormField $field
      * @return HTMLNode
      * @internal param $renderOption
@@ -104,19 +104,16 @@ class ObjectRadioButton extends RadioButton
                 }
             }
 
-            if ($value == $this->value) {
-                if ($this->disabled || isset($this->disabledNodes[$value])) {
-                    $node->append($this->renderOption($this->PostName(), $value, $title, true, true, $field));
-                } else {
-                    $node->append($this->renderOption($this->PostName(), $value, $title, true, false, $field));
-                }
-            } else {
-                if ($this->disabled || isset($this->disabledNodes[$value])) {
-                    $node->append($this->renderOption($this->PostName(), $value, $title, false, true, $field));
-                } else {
-                    $node->append($this->renderOption($this->PostName(), $value, $title, false, false, $field));
-                }
-            }
+            $node->append(
+                $this->renderOption(
+                    $this->PostName(),
+                    $value,
+                    $title,
+                    $value == $this->value,
+                    $this->disabled || isset($this->disabledNodes[$value]),
+                    $field
+                )
+            );
         }
 
         $this->container->append($node);
