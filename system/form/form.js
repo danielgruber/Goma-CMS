@@ -84,9 +84,13 @@ if(typeof goma == "undefined")
 	};
 	
 	goma.form.prototype = {
-        runScripts: function (fields) {
+        runScripts: function (fields, parent) {
             for(var i in fields) {
                 if(fields.hasOwnProperty(i)) {
+					if(parent != null) {
+						fields[i]["parent"] = parent;
+					}
+
                     if(fields[i]["js"]) {
                         var method = new Function("field", fields[i]["js"]);
 
@@ -94,7 +98,7 @@ if(typeof goma == "undefined")
                     }
 
                     if(fields[i]["children"]) {
-                        this.runScripts(fields[i]["children"]);
+                        this.runScripts(fields[i]["children"], fields[i]);
                     }
                 }
             }

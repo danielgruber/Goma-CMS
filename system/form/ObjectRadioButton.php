@@ -20,8 +20,6 @@ class ObjectRadioButton extends RadioButton
      */
     protected $javaScriptNeeded = array();
 
-    protected $js = array();
-
     /**
      * defines if we hide disabled nodes
      *
@@ -62,7 +60,6 @@ class ObjectRadioButton extends RadioButton
                 "id" => "displaycontainer_" . $id,
                 "class" => "displaycontainer"
             ), $field->field()));
-            $this->js[] = $field->js();
             $this->form()->registerRendered($field->name);
         }
 
@@ -135,7 +132,7 @@ class ObjectRadioButton extends RadioButton
         $info->setRenderedField($this->field($info))
              ->setJs($this->js());
 
-        $this->callExtending("afterRenderFormResponseWithChildren", $info);
+        $this->callExtending("afterRenderFormResponse", $info);
 
         return $info;
     }
@@ -155,7 +152,7 @@ class ObjectRadioButton extends RadioButton
                 $node["title"] = $node["title"][0];
 
                 if($withChildren) {
-                    $data->addChild($field->exportFieldInfo());
+                    $data->addChild($field->exportBasicInfo()->setJs($field->js()));
                 } else {
                     $data->addChild($field->exportBasicInfo());
                 }

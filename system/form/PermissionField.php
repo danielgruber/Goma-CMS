@@ -82,13 +82,14 @@ class PermissionField extends ClusterFormField {
 			$radio->disableOption($disabled_node);
 		}
 	}
-	
+
 	/**
 	 * generates the field
 	 *
-	 *@name field
-	 *@access public
-	*/
+	 * @name field
+	 * @access public
+	 * @return HTMLNode
+	 */
 	public function field() {
 		if(is_object($this->inheritFrom) && is_a($this->inheritFrom, "Permission") && $this->inheritFrom->id != $this->value->id) {
 			$title = isset($this->inheritTitle) ? ' (' . $this->inheritTitle . ')' : null;
