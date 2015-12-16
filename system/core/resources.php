@@ -53,7 +53,7 @@ class Resources extends gObject {
 	/**
 	 * default less-vars.
 	 */
-	static $lessVars = "default.less";
+	public static $lessVars = "default.less";
 
 	/**
 	 * enables debug
@@ -121,11 +121,6 @@ class Resources extends gObject {
 	{
 		self::$names[$name] = $file;
 	}
-
-	/**
-	 * cache for css-default-diretory
-	 */
-	private static $default_directory_contents = false;
 
 	/**
 	 * registered resources
@@ -215,7 +210,6 @@ class Resources extends gObject {
 					if (self::$resources_css["main"]["mtime"] < $mtime) {
 						self::$resources_css["main"]["mtime"] = $mtime;
 					}
-					unset($mtime);
 				}
 				self::$resources_css["main"]["files"][$content] = $content;
 

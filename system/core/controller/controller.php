@@ -63,7 +63,7 @@ class Controller extends RequestHandler
     /**
      * instance of the model
      *
-     * @var DataObject
+     * @var ViewAccessableData
      */
     public $model_inst = false;
 
@@ -110,11 +110,6 @@ class Controller extends RequestHandler
     );
 
     /**
-     * design-specific vars.
-     */
-    static $less_vars = null;
-
-    /**
      * inits the controller:
      * - determining and loading model
      * - checking template
@@ -136,7 +131,6 @@ class Controller extends RequestHandler
 
             if (PROFILE) Profiler::mark("livecounter");
             livecounter::run();
-            //livecounterController::run();
             if (PROFILE) Profiler::unmark("livecounter");
 
             GlobalSessionManager::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);

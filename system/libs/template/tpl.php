@@ -13,17 +13,9 @@
 class tpl extends gObject
 {
 	/**
-	 * @access private
 	 * @var string
-	 * @use: for the root path of the tpl standard: ./tpl/
 	 */
-	static $tplpath = "tpl/";
-
-	/**
-	 * @access public
-	 * @var array - cache
-	 */
-	public static $cache = array();
+	public static $tplpath = "tpl/";
 
 	/**
 	 * found areas
