@@ -75,7 +75,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 	 */
 	public function getDisplayFields(TableField $tableField)
 	{
-		if (!$this->displayFields && gObject::method_exists($tableField->getModel(), "summaryFields")) {
+		if (!empty($this->displayFields) && gObject::method_exists($tableField->getModel(), "summaryFields")) {
 			return gObject::instance($tableField->getModel())->summaryFields();
 		}
 
