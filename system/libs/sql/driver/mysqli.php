@@ -12,7 +12,7 @@ define('SQL_REGEXP', 'RLIKE');
 // LIKE for your SQL without a differnet between A and a
 define('SQL_LIKE', 'LIKE');
 
-class mysqliDriver extends gObject implements SQLDriver
+class mysqliDriver implements SQLDriver
 {
 
     /**
@@ -32,8 +32,6 @@ class mysqliDriver extends gObject implements SQLDriver
      **/
     public function __construct($autoConnect = true)
     {
-        parent::__construct();
-
         /* --- */
         if (!defined("NO_AUTO_CONNECT") || !$autoConnect) {
             global $dbuser;

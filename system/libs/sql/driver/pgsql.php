@@ -14,12 +14,10 @@
  **/
  
 
-class pgsqlDriver extends gObject implements SQLDriver
+class pgsqlDriver implements SQLDriver
 {	
 	public function __construct()
 	{
-		parent::__construct();
-		
 		define("pgsql_connected", false);
 				
 		/* --- */

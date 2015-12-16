@@ -352,7 +352,6 @@ abstract class gObject
      */
     public function __call($methodName, $args)
     {
-
         $methodName = trim(strtolower($methodName));
 
         if (isset(self::$extra_methods[$this->classname][$methodName])) {

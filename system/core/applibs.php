@@ -699,7 +699,7 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 }
 
 function Goma_ExceptionHandler($exception) {
-	if($exception->isIgnorable) {
+	if(isset($exception->isIgnorable) && $exception->isIgnorable) {
 		return;
 	}
 

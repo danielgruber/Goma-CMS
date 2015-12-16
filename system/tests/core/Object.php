@@ -24,7 +24,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * setup test
 	*/
 	public function setUp() {
-		$this->o = new TestGObject();
+		$this->o = new TestObject();
 		$this->dummyMethod = new DummyMethodTest();
 	}
 
@@ -43,8 +43,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * tests basic functionallity
 	*/	
 	public function testExtensionMethod() {
-
-        $this->assertTrue(gObject::method_exists($this->o, "extra_method"));
+		$this->assertTrue(gObject::method_exists($this->o, "extra_method"));
         $this->assertTrue(gObject::method_exists($this->o, " exTra_mEthod "));
 
 		$this->assertEqual($this->o->extra_method(), "it works");
@@ -162,7 +161,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
     }
 
     public function testExtensionWithArgs() {
-        $o = new TestGObject();
+        $o = new TestObject();
 
         $args = $o->getInstance("TestExtensionWithArgs")->args;
         $this->assertEqual($args, array('a', 12, array(23)));
@@ -204,7 +203,7 @@ class TestExtensionWithArgs extends Extension {
     }
 }
 
-class TestGObject extends gObject {
+class TestObject extends gObject {
 	
 	
 	

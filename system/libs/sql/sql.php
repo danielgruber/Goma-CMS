@@ -8,7 +8,7 @@
  *
  * last modified: 04.08.2015
  */
-class SQL extends gObject
+class SQL
 {
     /**
      * this var contains the last query, for debug
@@ -64,7 +64,6 @@ class SQL extends gObject
     public static function Init()
     {
         new SQL();
-
     }
 
     /**
@@ -73,10 +72,6 @@ class SQL extends gObject
      **/
     public function __construct($driver = null)
     {
-        parent::__construct();
-
-        /* --- */
-
         if (!isset($driver)) {
             if (defined("SQL_DRIVER_OVERRIDE")) {
                 $driver = SQL_DRIVER_OVERRIDE;
