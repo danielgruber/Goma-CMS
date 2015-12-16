@@ -13,7 +13,7 @@ class TableFieldTests extends GomaUnitTest
     /**
      * area
      */
-    static $area = "Form";
+    static $area = "TableField";
 
     /**
      * internal name.
@@ -62,8 +62,9 @@ class TableFieldTestHandleAction implements TableField_URLHandler {
     /**
      * edit-action
      *
-     *@name edit
-     *@access public
+     * @name edit
+     * @access public
+     * @return string
      */
     public function test($tableField, $request)
     {

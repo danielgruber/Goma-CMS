@@ -61,8 +61,9 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 		if (is_array($displayFields)) {
 			$this->displayFields = $displayFields;
 			return $this;
-		} else
-			throwError(6, "Invalid Argument", "First argument of TableFieldDataColumns::setDisplayFields should be an array.");
+		} else {
+			throw new InvalidArgumentException("First argument of TableFieldDataColumns::setDisplayFields should be an array.");
+		}
 	}
 
 	/**
@@ -153,6 +154,10 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 	 */
 	public function getColumnContent($tableField, $record, $columnName)
 	{
+		if(!is_object($record) || !is_string($columnName)) {
+			throw new InvalidArgumentException("Second argument must be object. Third string. TableFieldDataColumns::getColumnContent");
+		}
+
 		$fields = $this->getDisplayFields($tableField);
 
 		if (is_array($fields[$columnName]) && isset($fields[$columnName]["callback"])) {

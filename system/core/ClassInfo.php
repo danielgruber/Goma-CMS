@@ -957,14 +957,15 @@ class ClassInfo extends gObject {
 		header("HTTP/1.1 500 Server Error");
 		echo $error;
 		exit;
-	} 
+	}
 
 	/**
 	 * adds interface to list.
-	*/
+	 * @param string $interface
+	 */
 	static function addInterface($interface) {
 		
-		$interface = strtolower($interface);
+		$interface = strtolower(trim($interface));
 		
 		if($interface == "")
 			return;

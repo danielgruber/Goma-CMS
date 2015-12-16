@@ -1,18 +1,24 @@
-<?php
+<?php defined('IN_GOMA') OR die();
+
 /**
- *@package goma framework
- *@link http://goma-cms.org
- *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- *@Copyright (C) 2009 - 2013 Goma-Team
- * last modified: 25.07.2014
- * $Version 1.1
+ * Delete-Button for TableFields.
+ *
+ * Inspiration by Silverstripe 3.0 GridField
+ * http://silverstripe.org
+ *
+ * @package     Goma\Form\TableField
+ * @property 	array state set of objects
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     1.1.1
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class TableFieldDeleteButton implements TableField_ColumnProvider, TableField_ActionProvider, TableField_URLHandler {
 	/**
 	 * constructor.
+	 * @param null|string $title
+	 * @param null|bool $requirePerm
 	 */
 	public function __construct($title = null, $requirePerm = null) {
 		if(!isset($requirePerm)) {
