@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class StringLib extends Object
+class StringLib extends gObject
 {
 		/**
 		 * the function ereg with preg_match

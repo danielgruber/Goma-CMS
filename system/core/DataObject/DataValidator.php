@@ -46,7 +46,7 @@ class DataValidator extends FormValidator
 		}
 
 		foreach ($result as $field => $data) {
-			if (Object::method_exists($this->data->classname, "validate" . $field)) {
+			if (gObject::method_exists($this->data->classname, "validate" . $field)) {
 				$method = "validate" . $field;
 				$str = $this->data->$method($resultSet);
 				if ($str !== true) {

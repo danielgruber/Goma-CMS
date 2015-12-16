@@ -24,7 +24,7 @@ class EclipseReporter extends SimpleScorer {
 
     /**
      *    Reporter to be run inside of Eclipse interface.
-     *    @param object $listener   Eclipse listener (?).
+     *    @param gObject $listener   Eclipse listener (?).
      *    @param boolean $cc        Whether to include test coverage.
      */
     function __construct(&$listener, $cc=false){

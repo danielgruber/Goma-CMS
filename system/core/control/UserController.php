@@ -41,7 +41,7 @@ class userController extends Controller
 	 * called if an error occurs.
 	 *
 	 * @param    string $action the action called
-	 * @param    object $record optional: record if available
+	 * @param    gObject $record optional: record if available
 	 * @access    public
 	 * @return bool|string
 	 */

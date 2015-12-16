@@ -92,4 +92,4 @@ class FormDisabler extends FormDecorator {
 	}
 }
 
-Object::extend("Form", "FormDisabler");
+gObject::extend("Form", "FormDisabler");

@@ -757,7 +757,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
         if(strtolower($offset) == "count") {
             return $this->Count();
         } else
-            if(Object::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
+            if(gObject::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
                 return parent::getOffset($offset, $args);
             } else {
                 if(is_object($this->first())) {
@@ -781,7 +781,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
         if(strtolower($offset) == "count")
             return true;
 
-        return ((Object::method_exists($this->classname, $offset) || parent::__cancall($offset)) || (is_object($this->first()) && Object::method_exists($this->first(), $offset)));
+        return ((gObject::method_exists($this->classname, $offset) || parent::__cancall($offset)) || (is_object($this->first()) && gObject::method_exists($this->first(), $offset)));
     }
 
     /**
@@ -793,7 +793,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      *@param mixed - new value
      */
     public function __set($key, $value) {
-        if(Object::method_exists($this->classname, "set" . $key)) {
+        if(gObject::method_exists($this->classname, "set" . $key)) {
             return call_user_func_array(array($this, "set" . $key), array($value));
         }
 

@@ -127,7 +127,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
  
-class FastJSON extends object
+class FastJSON extends gObject
 {
 
 	// public methods

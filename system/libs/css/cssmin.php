@@ -10,7 +10,7 @@
  *
  * @version 1.0.5
  */
-class CSSMin extends Object
+class CSSMin extends gObject
 {
 		/**
 		  * the before char.

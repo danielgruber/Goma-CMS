@@ -85,10 +85,10 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     }
 
     protected function unitTestChanged($mockData, $newData) {
-        $mockObject = new MockUpdatableObject();
+        $mockObject = new MockUpdatableGObject();
         $mockObject->data = $mockData;
 
-        $newDataObject = new MockUpdatableObject();
+        $newDataObject = new MockUpdatableGObject();
         $newDataObject->data = $newData;
 
         $writer = new ModelWriter($newDataObject, ModelRepository::COMMAND_TYPE_UPDATE, $mockObject, new MockDBRepository(), new MockDBWriter());
@@ -111,11 +111,11 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     public function testWrite() {
         $mockData = array("test" => 1);
         $newData = array("test" => 2);
-        $mockObject = new MockUpdatableObject();
+        $mockObject = new MockUpdatableGObject();
         $mockObject->checkLogic = true;
         $mockObject->data = $mockData;
 
-        $newDataObject = new MockUpdatableObject();
+        $newDataObject = new MockUpdatableGObject();
         $mockObject->checkLogic = false;
         $newDataObject->data = $newData;
 
@@ -198,7 +198,7 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     }
 
     public function unittestPermissionCalling($commandType, $writeType, $validate = true) {
-        $model = new MockUpdatableObject();
+        $model = new MockUpdatableGObject();
         $model->validate = $validate;
         $modelWriter = new ModelWriter($model, $commandType, $model, new MockDBRepository(), new MockDBWriter());
         $modelWriter->setWriteType($writeType);
@@ -209,7 +209,7 @@ class ModelWriterTests extends GomaUnitTest implements TestAble
     }
 }
 
-class MockUpdatableObject extends Object {
+class MockUpdatableGObject extends gObject {
     public $data;
 
     public $stateid = 1;
@@ -296,7 +296,7 @@ class ModelWriterTestExtensionForEvents extends Extension {
         $this->onAfterWriteFired++;
     }
 }
-Object::extend("ModelWriter", "ModelWriterTestExtensionForEvents");
+gObject::extend("ModelWriter", "ModelWriterTestExtensionForEvents");
 
 class MockDBRepository extends  IModelRepository {
 

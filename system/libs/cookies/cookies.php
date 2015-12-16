@@ -11,7 +11,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class cookies extends object
+class cookies extends gObject
 {
 		/**
 		 * This var contains the cookie name

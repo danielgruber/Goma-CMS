@@ -244,7 +244,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function countRAW($name, $filter)
     {
-        $dataobject = Object::instance($name);
+        $dataobject = gObject::instance($name);
 
         $table_name = $dataobject->Table();
 
@@ -284,7 +284,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         //Core::Deprecate(2.0);
 
         if (ClassInfo::exists($name) && is_subclass_of($name, "DataObject")) {
-            $DataObject = Object::instance($name);
+            $DataObject = gObject::instance($name);
             $table_name = $DataObject->Table();
         } else if (isset(ClassInfo::$database[$name])) {
             $table_name = $name;
@@ -392,7 +392,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @name search_object
      * @access public
-     * @param string|object $class
+     * @param string|gObject $class
      * @param array $search words to search
      * @param array $filter filter query
      * @param array $sort
@@ -449,16 +449,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         if ($many_many_relationships = $this->ManyManyRelationships()) {
             foreach ($many_many_relationships as $key => $val) {
-                Object::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
-                Object::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-                Object::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
-                Object::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
+                gObject::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
+                gObject::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
+                gObject::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
+                gObject::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
             }
         }
 
         if ($has_one = $this->HasOne()) {
             foreach($has_one as $key => $val) {
-                Object::LinkMethod($this->classname, $key, array("this", "getHasOne"), true);
+                gObject::LinkMethod($this->classname, $key, array("this", "getHasOne"), true);
             }
         }
     }
@@ -510,7 +510,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 $can = Permission::check($this->baseClass . "::" . $perm);
             }
 
-            if (Object::method_exists($this->classname, "can" . $perm)) {
+            if (gObject::method_exists($this->classname, "can" . $perm)) {
                 $c = call_user_func_array(array($this, "can" . $perm), array($usedRecord));
                 if (is_bool($c)) {
                     $can = $c;
@@ -530,7 +530,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if you can access a specific history-record
      *
-     * @param string|object $record
+     * @param string|gObject $record
      * @return bool
      */
     public static function canViewHistory($record = null) {
@@ -559,7 +559,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @name canWrite
      * @access public
-     * @param array - record
+     * @param  DataObject|null $row
      * @return bool
      */
     public function canWrite($row = null)
@@ -712,10 +712,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if publish-right is available
      *
-     *@name canPublish
-     *@access public
+     * @name canPublish
+     * @access public
+     * @return bool
      */
     public function canPublish($record = null) {
+        //TODO: Should this be like this? maybe only when versioning is turned off.
         return true;
     }
 
@@ -943,7 +945,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             // we want to update many-many-extra
             $databaseRecord = null;
-            $db = Object::instance($relationShip->getTarget())->DataBaseFields(true);
+            $db = gObject::instance($relationShip->getTarget())->DataBaseFields(true);
 
             // just find out if we may be update the record given.
             foreach($record as $field => $v) {
@@ -1042,11 +1044,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         // check if table in db and if not, create it
         if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
             if($this->classname != $this->baseClass) {
-                Object::instance($this->baseClass)->buildDB();
+                gObject::instance($this->baseClass)->buildDB();
             }
 
             foreach(array_merge(array($this->classname), ClassInfo::getChildren($this->classname)) as $child) {
-                Object::instance($child)->buildDB();
+                gObject::instance($child)->buildDB();
             }
 
             ClassInfo::write();
@@ -2088,11 +2090,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if ($this->baseTable != "" && !isset(ClassInfo::$database[$this->baseTable])) {
 
             if($this->classname != $this->baseClass) {
-                Object::instance($this->baseClass)->buildDB();
+                gObject::instance($this->baseClass)->buildDB();
             }
 
             foreach(array_merge(array($this->classname), ClassInfo::getChildren($this->classname)) as $child) {
-                Object::instance($child)->buildDB();
+                gObject::instance($child)->buildDB();
             }
             ClassInfo::write();
         }
@@ -2764,10 +2766,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * sets the controller
      *
-     * @param Controller $controller
+     * @param RequestHandler $controller
      */
-    public function setController(Controller $controller)
+    public function setController($controller)
     {
+        if(!is_a($controller, "RequestHandler")) {
+            throw new InvalidArgumentException("Argument must be a RequestHandler.");
+        }
         $this->controller = $controller;
     }
 
@@ -2780,7 +2785,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     {
         if (isset($controller)) {
             /** @var Controller $controller */
-            $controller = Object::instance($controller);
+            $controller = gObject::instance($controller);
             return $this->linkController($controller);
         }
 
@@ -2794,14 +2799,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if ($this->controller != "")
         {
             /** @var Controller $controller */
-            $controller = Object::instance($this->controller);
+            $controller = gObject::instance($this->controller);
             return $this->linkController($controller);
         } else {
 
             if (ClassInfo::exists($this->classname . "controller"))
             {
                 /** @var Controller $controller */
-                $controller = Object::instance($this->classname . "controller");
+                $controller = gObject::instance($this->classname . "controller");
                 return $this->linkController($controller);
             } else {
 
@@ -2814,7 +2819,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
                         if (ClassInfo::exists($parent . "controller")) {
                             /** @var Controller $controller */
-                            $controller = Object::instance($parent . "controller");
+                            $controller = gObject::instance($parent . "controller");
                             return $this->linkController($controller);
                         }
                     }
@@ -2854,7 +2859,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * gets the class as an instance of the given class-name.
      *
      * @param   string type of object
-     * @return  Object of type $value
+     * @return  gObject of type $value
      */
     public function getClassAs($value) {
         if (is_subclass_of($value, $this->baseClass)) {
@@ -2975,7 +2980,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @name riseField
      * @param   Object model
      * @param   string $field
-     * @return  Object
+     * @return  gObject
      */
     protected function riseField($model, $field, $i) {
         $val = $model->$field;
@@ -3023,7 +3028,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         foreach($this->HasOne() as $name => $class) {
             if($includeHasOne || isset($additional_fields[$name])) {
-                if ($this->$name && Object::method_exists($this->$name, "ToRestArray")) {
+                if ($this->$name && gObject::method_exists($this->$name, "ToRestArray")) {
                     $data[$name] = $this->$name()->ToRestArray();
                 }
             }
@@ -3214,7 +3219,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if (StaticsManager::hasStatic($class, "versions") && StaticsManager::getStatic($class, "versions") == true)
             return true;
 
-        if (Object::instance($class)->versioned == true)
+        if (gObject::instance($class)->versioned == true)
             return true;
 
         return false;

@@ -251,33 +251,34 @@ class ClusterFormField extends FormField {
 			
 		return ($this->sort[$a->name] > $this->sort[$b->name]) ? 1 : -1;
 	}
-	
+
 	/**
 	 * sets the form
-	 *
-	 * @param Form
-	*/
-	public function setForm(&$form) {
+	 * @param Form $form
+	 * @param bool $renderAfterSetForm
+	 */
+	public function setForm(&$form, $renderAfterSetForm = true) {
 
-		parent::setForm($form);
-		
+		parent::setForm($form, false);
+
 		unset($this->fields[$this->name]);
 		$this->orgForm()->registerField($this->name, $this);
 
 		while(!isset($form->url) && is_object($form)) {
-            $form = $form->form();
-        }
+			$form = $form->form();
+		}
 
 		$this->url =& $form->url;
-        $this->model =& $this->orgForm()->model;
-        $this->controller =& $this->orgForm()->controller;
+		$this->model =& $this->orgForm()->model;
+		$this->controller =& $this->orgForm()->controller;
 		$this->post =& $this->orgForm()->post;
 		$this->state = $this->orgForm()->state->{$this->classname . $this->name};
 
-		/** @var FormField $field */
 		foreach($this->items as $field) {
-            $field->setForm($this);
-        }
+			$field->setForm($this);
+		}
+
+		if($renderAfterSetForm) $this->renderAfterSetForm();
 	}
 	
 	/**

@@ -293,7 +293,7 @@ class Pusher
 	  *
 	  * @param string $channel The name of the channel
 	  * @param array $params Additional parameters for the query e.g. $params = array( 'info' => 'connection_count' )
-	  *	@return object
+	  *	@return gObject
 	  */
 	public function get_channel_info($channel, $params = array() )
 	{

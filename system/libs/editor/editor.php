@@ -10,7 +10,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version		1.0
 */
-abstract class GomaEditor extends Object {
+abstract class GomaEditor extends gObject {
 	/**
 	 * defines which types of code it supports.
 	 *
@@ -42,12 +42,12 @@ abstract class GomaEditor extends Object {
 		$type = strtolower($type);
 		self::$types = ArrayLib::map_key("strtolower", self::$types);
 		if(isset(self::$default[$type]) && ClassInfo::exists(self::$default[$type]))
-			return Object::instance(self::$default[$type]);
+			return gObject::instance(self::$default[$type]);
 		
 		foreach(ClassInfo::getChildren("GomaEditor") as $class) {
 			$types = array_map((array)StaticsManager::getStatic($class, "types"), "strtolower");
 			if(in_array($type, $types)) {
-				return Object::instance($class);
+				return gObject::instance($class);
 			}
 		}
 		

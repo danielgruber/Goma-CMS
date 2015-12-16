@@ -299,7 +299,7 @@ class SimpleDumper {
     /**
      *    Creates a human readable description of the
      *    difference between two objects.
-     *    @param object $first        First object.
+     *    @param gObject $first        First object.
      *    @param mixed $second        Object to compare with.
      *    @param boolean $identical   If true then type anomolies count.
      *    @return string              Human readable description.
@@ -317,7 +317,7 @@ class SimpleDumper {
     /**
      *    Get all members of an object including private and protected ones.
      *    A safer form of casting to an array.
-     *    @param object $object     Object to list members of,
+     *    @param gObject $object     Object to list members of,
      *                              including private ones.
      *    @return array             Names and values in the object.
      */
@@ -341,7 +341,7 @@ class SimpleDumper {
     /**
      *    Extracts a private member's value when reflection won't play ball.
      *    @param string $name        Property name.
-     *    @param object $object      Object to read.
+     *    @param gObject $object      Object to read.
      *    @return mixed              Value of property.
      */
     private function getPrivatePropertyNoMatterWhat($name, $object) {

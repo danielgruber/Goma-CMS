@@ -166,7 +166,7 @@ class Dev extends RequestHandler {
 		makeProjectUnavailable();
 
 		// patch
-		Object::$cache_singleton_classes = array();
+		gObject::$cache_singleton_classes = array();
 
         $data = "";
 		if(defined("SQL_LOADUP")) {

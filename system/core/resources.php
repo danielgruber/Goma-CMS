@@ -18,12 +18,12 @@ StaticsManager::AddSaveVar("Resources", "scanFolders");
  * @package		Goma\System\Core
  * @version		1.5.4
  */
-class Resources extends Object {
+class Resources extends gObject {
 
 	/**
 	 * version of this class
 	 *
-	 *@var CONST
+	 *@var string
 	 */
 	const VERSION = "1.5.4";
 
@@ -149,17 +149,14 @@ class Resources extends Object {
 
 	/**
 	 * add-functionality
-	 *
-	 *@param string - name: special name; name of gloader-resource @see gloader; filename
-	 *@param resource-type
-	 *@param combine-name
+	 * @param string $content
+	 * @param string|null $type
+	 * @param string|null $combine_name
+	 * @param string|null $lessVars
 	 */
-	public static function add($content, $type = false, $combine_name = "", $lessVars = null) {
+	public static function add($content, $type = null, $combine_name = null, $lessVars = null) {
 		if (PROFILE) Profiler::mark("resources::Add");
 
-		if (Core::is_ajax() || isset($_GET["debug"])) {
-			self::enableDebug();
-		}
 		// special names
 		if (isset(self::$names[$content])) {
 			$content = self::$names[$content];
@@ -167,12 +164,12 @@ class Resources extends Object {
 
 		if (isset(gloader::$resources[$content])) {
 			gloader::load($content);
-			return true;
+			return;
 		}
 
 		// find out type if not set
-		if ($type === false) {
-			if (checkFileExt($content, "css")) {
+		if (!isset($type)) {
+			if (RegexpUtil::checkFileExt($content, "css") || RegexpUtil::checkFileExt($content, "less")) {
 				$type = "css";
 			} else {
 				$type = "js";
@@ -199,7 +196,7 @@ class Resources extends Object {
 			case "stylesheet":
 
 
-				if(checkFileExt($content, "php") || !self::file_exists(ROOT . $content)) {
+				if(RegexpUtil::checkFileExt($content, "php") || !self::file_exists(ROOT . $content)) {
 					self::registerLoaded("css", $content);
 
 					// register
@@ -232,7 +229,7 @@ class Resources extends Object {
 			case "script":
 			case "js":
 			case "javascript":
-				if ($combine_name != "" && !checkFileExt($content, "php") && $path === true /* file exists */) {
+				if ($combine_name != "" && !RegexpUtil::checkFileExt($content, "php") && $path === true /* file exists */) {
 					// last modfied of the whole block
 					if (!isset(self::$resources_js[$combine_name])) {
 						self::$resources_js[$combine_name] = array(
@@ -341,9 +338,16 @@ class Resources extends Object {
 
 	/**
 	 * gets the resources
-	 *
+	 * @param bool $css
+	 * @param bool $js
+	 * @return string
 	 */
 	public static function get($css = true, $js = true) {
+
+		if (Core::is_ajax() || isset($_GET["debug"])) {
+			self::enableDebug();
+		}
+
 		if (PROFILE) Profiler::mark("Resources::get");
 
 		if($path = self::getFilePath(self::$lessVars)) {
@@ -781,15 +785,16 @@ class Resources extends Object {
 	/**
 	 * gets full file
 	 *
-	 *@param string - file
+	 * @param string - file
+	 * @return string
 	 */
 	public static function getFileName($file) {
 		$ext = self::getFileExt();
-		if (checkFileExt($file, "js")) {
+		if (RegexpUtil::checkFileExt($file, "js")) {
 			return substr($file, 0, -3) . $ext . ".js";
 		}
 
-		if (checkFileExt($file, "css")) {
+		if (RegexpUtil::checkFileExt($file, "css") || RegexpUtil::checkFileExt($file, "less")) {
 			return substr($file, 0, -4) . $ext . ".css";
 		}
 
@@ -847,7 +852,7 @@ class Resources extends Object {
 	public static function file_exists($file) {
 
 		if (isset($_GET["flush"]) && self::$cacheUpdated === false) {
-			Object::instance("Resources")->generateClassInfo();
+			gObject::instance("Resources")->generateClassInfo();
 			ClassInfo::write();
 		}
 

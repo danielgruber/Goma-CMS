@@ -67,7 +67,7 @@ class TreeServer extends RequestHandler {
 		$getinactive = $this->getParam("getinactive");
 		if(Core::is_ajax()) {
 			$this->setExpanded();
-			$data = Object::instance($name)->renderTree($href, 0,$id, $getinactive);
+			$data = gObject::instance($name)->renderTree($href, 0,$id, $getinactive);
 			return $data;
 		} else {
 			$this->setExpanded();

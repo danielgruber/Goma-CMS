@@ -60,4 +60,4 @@ class DummyExtensionForGenerator extends DataObjectExtension {
         )
     );
 }
-Object::extend("DummyModelForGenerator", "DummyExtensionForGenerator");
+gObject::extend("DummyModelForGenerator", "DummyExtensionForGenerator");

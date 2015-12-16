@@ -186,4 +186,4 @@ class ModelInfoTestDOTestClass extends DataObject {
     public static $has_one = array();
 }
 
-Object::extend("ModelInfoTestClass", "ModelInfoTestExtensionClass");
+gObject::extend("ModelInfoTestClass", "ModelInfoTestExtensionClass");

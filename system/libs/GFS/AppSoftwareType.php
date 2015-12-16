@@ -686,7 +686,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 */
 	public static function buildDistro($file, $name, $controller) {
 		if(GlobalSessionManager::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
-			return Object::instance("g_appSoftwareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
+			return gObject::instance("g_appSoftwareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 
 		if(file_exists($file))
 			@unlink($file);
@@ -706,7 +706,7 @@ class G_AppSoftwareType extends G_SoftwareType {
 			), lang("install_advanced_options", "advanced install-options"))*/
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), array(Object::instance("g_appSoftwareType"), "finalizeDistro"))
+			new FormAction("submit", lang("download"), array(gObject::instance("g_appSoftwareType"), "finalizeDistro"))
 		));
 
 		$version->disable();

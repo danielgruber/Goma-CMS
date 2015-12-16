@@ -91,9 +91,10 @@ class SoftwareUpgradeManager {
 	/**
 	 * writes version to file.
 	 *
-	 * @param 	string 	file
-	 * @param 	string 	version
-	*/
+	 * @param    string    file
+	 * @param    string    version
+	 * @return bool
+	 */
 	public static function writeVersion($file, $version) {
 		return FileSystem::write($file, '<?php $version = ' . var_export($version, true) . ';', LOCK_EX);
 	}
@@ -101,8 +102,9 @@ class SoftwareUpgradeManager {
 	/**
 	 * gets installed version from folder.
 	 *
-	 * @param 	string folder
-	*/
+	 * @param    string folder
+	 * @return int
+	 */
 	public static function getInstalledVersion($folder) {
 		if(file_exists($folder . "/version.php")) {
 			include ($folder . "/version.php");

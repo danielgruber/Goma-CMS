@@ -21,4 +21,4 @@ class InfoTextField extends Extension {
 	}
 }
 
-Object::extend("FormField", "InfoTextField");
+gObject::extend("FormField", "InfoTextField");

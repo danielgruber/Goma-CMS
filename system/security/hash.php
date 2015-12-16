@@ -11,12 +11,12 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Hash extends Object {
+class Hash extends gObject {
 	/**
 	 * generates a hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		
@@ -61,7 +61,7 @@ class Hash extends Object {
 	*/
 	public static function checkHashMatches($string, $hash) {
 		foreach(classinfo::getchildren("hash") as $class) {
-			if(Object::method_exists($class, "HashMatches")) {
+			if(gObject::method_exists($class, "HashMatches")) {
 				if(call_user_func_array(array($class, "HashMatches"), array($string, $hash))) {
 					return true;
 				}
@@ -78,7 +78,7 @@ class md5Hash extends Hash {
 	 * generates a md5-hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		return md5($string);
@@ -90,7 +90,7 @@ class GomaHash extends Hash {
 	 * generates a Goma-hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		
@@ -103,7 +103,7 @@ class GomaSHA512Hash extends Hash {
 	 * checks if a hash matches
 	 *
 	 *@name HashMatches
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function HashMatches($string, $hash) {
 		if(strpos($hash, ":")) {
@@ -129,7 +129,7 @@ class GomaSHA512Hash extends Hash {
 	 * generates a Goma-hash
 	 *
 	 *@name makeHash
-	 *@Œccess public
+	 *@ï¿½ccess public
 	*/
 	public static function makeHash($string) {
 		$salt = Hash::generateSalt();

@@ -11,7 +11,7 @@ class ModelInfoGenerator {
 
     /**
      * combines data from given class-attribute + given extension method
-     * @param string|object $class
+     * @param string|gObject $class
      * @param string $staticProp static property on class
      * @param string|null $extensionMethod static method on extension
      * @param bool $useParents
@@ -25,8 +25,8 @@ class ModelInfoGenerator {
 
         // fields of extensions
         if($extensionMethod !== null) {
-            foreach (Object::getExtensionsForClass($class, false) as $extension) {
-                if (Object::method_exists($extension, $extensionMethod)) {
+            foreach (gObject::getExtensionsForClass($class, false) as $extension) {
+                if (gObject::method_exists($extension, $extensionMethod)) {
                     if ($extensionFields = call_user_func_array(array($extension, $extensionMethod), array($class))) {
                         $fields = array_merge($fields, (array)$extensionFields);
                     }
@@ -72,7 +72,7 @@ class ModelInfoGenerator {
     /**
      * gets all dbfields
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -82,7 +82,7 @@ class ModelInfoGenerator {
 
         $fields = array_merge(self::getHasOneArrayWithValue($class, "int(10)"), $fields);
 
-        if (!empty($fields) && Object::method_exists($class, "DefaultSQLFields")) {
+        if (!empty($fields) && gObject::method_exists($class, "DefaultSQLFields")) {
             $fields = array_merge(call_user_func_array(array($class, "DefaultSQLFields"), array($class)), $fields);
         }
 
@@ -117,7 +117,7 @@ class ModelInfoGenerator {
     /**
      * returns defaults
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -131,7 +131,7 @@ class ModelInfoGenerator {
     /**
      * returns casting
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -146,7 +146,7 @@ class ModelInfoGenerator {
      * gets has_one
      *
      * @access public
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -167,7 +167,7 @@ class ModelInfoGenerator {
     /**
      * returns has-one array with given value.
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param string $value
      * @return array
      */
@@ -186,7 +186,7 @@ class ModelInfoGenerator {
      * gets search-fields.
      *
      * @access public
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -203,7 +203,7 @@ class ModelInfoGenerator {
      * gets has_many
      *
      * @access public
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -218,7 +218,7 @@ class ModelInfoGenerator {
     /**
      * gets many_many
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -233,7 +233,7 @@ class ModelInfoGenerator {
     /**
      * gets belongs_many_many
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param bool $parents
      * @return array
      */
@@ -271,7 +271,7 @@ class ModelInfoGenerator {
     /**
      * gets extra-fields for given class and key.
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param string $name of many-many-relationship
      * @return array
      */
@@ -285,8 +285,8 @@ class ModelInfoGenerator {
             }
         }
 
-        foreach(Object::getExtensionsForClass($class, false) as $extension) {
-            if(Object::method_exists($extension, "many_many_extra_fields")) {
+        foreach(gObject::getExtensionsForClass($class, false) as $extension) {
+            if(gObject::method_exists($extension, "many_many_extra_fields")) {
                 if($extensionFields = call_user_func_array(array($extension, "many_many_extra_fields"), array())) {
                     $extensionFields = ArrayLib::map_key("strtolower", $extensionFields);
                     if(isset($extensionFields[$name])) {
@@ -303,7 +303,7 @@ class ModelInfoGenerator {
     /**
      * indexes
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @return array
      */
     public static function generateIndexes($class) {

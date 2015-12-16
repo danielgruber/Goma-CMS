@@ -14,7 +14,7 @@ defined('IN_GOMA') OR die();
  * @package     Goma\System\Core
  * @version     2.3.1
  */
-class RequestHandler extends Object {
+class RequestHandler extends gObject {
 
 	/**
 	 * url-handlers
@@ -155,8 +155,8 @@ class RequestHandler extends Object {
         $this->request = $request;
 
 		$class = $this->classname;
-		while ($class != "object" && !empty($class) && !ClassInfo::isAbstract($class)) {
-            $handlers = Object::instance($class)->url_handlers;
+		while ($class && !ClassInfo::isAbstract($class)) {
+            $handlers = gObject::instance($class)->url_handlers;
 			foreach ($handlers as $pattern => $action) {
 				$data = $this->matchRuleWithResult($pattern, $action, $request);
 				if($data !== null && $data !== false) {
@@ -223,7 +223,7 @@ class RequestHandler extends Object {
      */
 	public function hasAction($action) {
 		$hasAction = true;
-		if (!Object::method_exists($this, $action) || !$this -> checkPermission($action)) {
+		if (!gObject::method_exists($this, $action) || !$this -> checkPermission($action)) {
 			$hasAction = false;
 		}
 
@@ -247,7 +247,7 @@ class RequestHandler extends Object {
 		$this -> onBeforeHandleAction($action, $content, $handleWithMethod);
 		$this -> callExtending("onBeforeHandleAction", $action, $content, $handleWithMethod);
 
-		if ($handleWithMethod && Object::method_exists($this, $action))
+		if ($handleWithMethod && gObject::method_exists($this, $action))
 			$content = call_user_func_array(array($this, $action), array());
 
 		$this -> extendHandleAction($action, $content);
@@ -300,7 +300,7 @@ class RequestHandler extends Object {
 
 		$class = $this;
 
-		while ($class && $class->classname != "object" && Object::method_exists($class, "checkPermissionsOnClass")) {
+		while ($class != null && gObject::method_exists($class, "checkPermissionsOnClass")) {
 			// check class
 			$result = $class->checkPermissionsOnClass($action);
 
@@ -313,7 +313,7 @@ class RequestHandler extends Object {
 			}
 
 			// check for parent class
-			$class = !ClassInfo::isAbstract(get_parent_class($class)) ? Object::instance(get_parent_class($class)) : null;
+			$class = !ClassInfo::isAbstract(get_parent_class($class)) ? gObject::instance(get_parent_class($class)) : null;
 		}
 
 		if (PROFILE)
@@ -339,7 +339,7 @@ class RequestHandler extends Object {
 				return $data;
 			} else if (substr($data, 0, 2) == "->") {
 				$func = substr($data, 2);
-				if (Object::method_exists($this, $func)) {
+				if (gObject::method_exists($this, $func)) {
 					return $this->$func();
 				} else {
 					return false;

@@ -10,7 +10,7 @@
  
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class TableFieldConfig extends Object {
+class TableFieldConfig extends gObject {
 	
 	/**
 	 *

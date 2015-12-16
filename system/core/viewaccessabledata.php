@@ -21,7 +21,7 @@ defined("IN_GOMA") OR die();
  * @package		Goma\Core
  * @version		2.3.4
  */
-class ViewAccessableData extends Object implements Iterator, ArrayAccess {
+class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	/**
 	 * default datatype for casting.
 	 *
@@ -552,7 +552,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      */
 	public function offsetExists($offset) {
 		// third call
-		return $this->__cancall($offset) || Object::method_exists($this->classname, $offset);
+		return $this->__cancall($offset) || gObject::method_exists($this->classname, $offset);
 	}
 
     /**
@@ -573,7 +573,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 * @return bool
 	 */
 	final public function isOffset($offset) {
-		return $this->__cancall($offset) || Object::method_exists($this->classname, $offset);
+		return $this->__cancall($offset) || gObject::method_exists($this->classname, $offset);
 	}
 
     /**
@@ -583,7 +583,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @return bool
      */
 	protected function isOffsetMethod($name) {
-		return (!in_array("get" . $name, self::$notViewableMethods) && Object::method_exists($this->classname, "get" . $name));
+		return (!in_array("get" . $name, self::$notViewableMethods) && gObject::method_exists($this->classname, "get" . $name));
 	}
 
 
@@ -649,7 +649,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 	 */
 	public function __call($methodName, $args) {
 
-		if(Object::method_exists($this->classname, $methodName)) {
+		if(gObject::method_exists($this->classname, $methodName)) {
 			return parent::__call($methodName, $args);
 		}
 
@@ -753,7 +753,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			return true;
 		}
 
-		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
+		if(!in_array($lowername, self::$notCallableGetters) && gObject::method_exists($this->classname, $name)) {
 			return false;
 		}
 
@@ -780,7 +780,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
 			// methods
 		}
 
-		if(!in_array($lowername, self::$notCallableGetters) && Object::method_exists($this->classname, $name)) {
+		if(!in_array($lowername, self::$notCallableGetters) && gObject::method_exists($this->classname, $name)) {
 			return parent::__call($name, $args);
 		}
 
@@ -889,7 +889,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * @name    makeObject
      * @param    string key or name of object
      * @param    mixed data
-     * @return   Object
+     * @return   gObject
      */
 	public function makeObject($name, $data) {
 		if(PROFILE)
@@ -947,7 +947,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
      * gets offset as object
      * @name doObject
      * @param string - name of offset
-     * @return Object
+     * @return gObject
      */
 	public function doObject($name, $args = array()) {
 		$name = trim($name);
@@ -1100,7 +1100,7 @@ class ViewAccessableData extends Object implements Iterator, ArrayAccess {
  * @package		Goma\System\Core
  * @version		1.0
  */
-abstract class Extension extends Object implements ExtensionModel {
+abstract class Extension extends gObject implements ExtensionModel {
 
 	/**
 	 * extra_methods

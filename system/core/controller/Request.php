@@ -8,7 +8,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version		2.0.3
  */
-class Request extends Object {
+class Request extends gObject {
 	/**
 	 * url of the request
 	 *@name url

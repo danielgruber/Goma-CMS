@@ -139,7 +139,7 @@ class adminItem extends AdminController implements PermProvider {
 	 *
 	 * @name createModelInst
 	 * @access public
-	 * @return DataObject|null|Object|ViewAccessAbleData
+	 * @return DataObject|null|gObject|ViewAccessAbleData
 	 */
 	public function modelInst($firstModel = null) {
 		
@@ -283,7 +283,7 @@ class adminItem extends AdminController implements PermProvider {
 	 */
 	public function __call($methodName, $args) {
 		
-		if(Object::method_exists($this->getControllerInst(), $methodName)) {
+		if(gObject::method_exists($this->getControllerInst(), $methodName)) {
 			$this->getControllerInst()->request = $this->request;
 			return call_user_func_array(array($this->getControllerInst(), $methodName), $args);
 		}
@@ -301,7 +301,7 @@ class adminItem extends AdminController implements PermProvider {
 	 */
 	public function __cancall($methodName) {
 		if($c = $this->getControllerInst()) {
-			return Object::method_exists($c, $methodName);
+			return gObject::method_exists($c, $methodName);
 		} else {
 			return false;
 		}
@@ -348,7 +348,7 @@ class adminItem extends AdminController implements PermProvider {
 	 * gets model by given name.
 	 *
 	 * @param string $name name of object.
-	 * @return Object|null
+	 * @return gObject|null
 	 */
 	protected function getModelByName($name) {
 		if(count($this->models) > 1) {
@@ -406,7 +406,7 @@ class adminItem extends AdminController implements PermProvider {
 			$controller = $this->modelInst()->controller;
 
 			// try to get controller from default model. at the moment adminItem is the controller.
-			$this->model_inst->controller = Object::instance($this->model())->controller;
+			$this->model_inst->controller = gObject::instance($this->model())->controller;
 			if($currentController = $this->model_inst->controller()) {
 
 				// set Model-Inst.

@@ -10,7 +10,7 @@
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 
-class JavaScriptResponse extends Object
+class JavaScriptResponse extends gObject
 {
 		/**
 		 * renders the response

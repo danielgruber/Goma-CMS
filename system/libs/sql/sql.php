@@ -8,7 +8,7 @@
  *
  * last modified: 04.08.2015
  */
-class SQL extends object
+class SQL extends gObject
 {
     /**
      * this var contains the last query, for debug
@@ -43,7 +43,7 @@ class SQL extends object
      * @name factory
      * @param string - name of driver
      * @access public
-     * @return object
+     * @return gObject
      */
     static public function factory($name)
     {

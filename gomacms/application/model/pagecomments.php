@@ -196,5 +196,5 @@ class PageCommentsControllerExtension extends ControllerExtension {
 	}
 }
 
-Object::extend("pages", "PageCommentsDataObjectExtension");
-Object::extend("contentController", "PageCommentsControllerExtension");
+gObject::extend("pages", "PageCommentsDataObjectExtension");
+gObject::extend("contentController", "PageCommentsControllerExtension");

@@ -149,7 +149,7 @@ class contentAdmin extends LeftAndMain
 		$data = array("page" => ClassInfo::getClassTitle("Page"));
 		foreach(ClassInfo::getChildren("page") as $page) {
 			if(ClassInfo::exists($page)) {
-				if(!Object::method_exists($page, "hidden") || call_user_func_array(array($page, "hidden"), array($page)) !== true) {
+				if(!gObject::method_exists($page, "hidden") || call_user_func_array(array($page, "hidden"), array($page)) !== true) {
 									$data[$page] = convert::raw2text(ClassInfo::getClassTitle($page));
 				}
 			}

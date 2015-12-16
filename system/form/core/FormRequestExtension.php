@@ -52,4 +52,4 @@ class FormRequestExtension extends Extension {
     }
 }
 
-Object::extend("RequestHandler", "FormRequestExtension");
+gObject::extend("RequestHandler", "FormRequestExtension");

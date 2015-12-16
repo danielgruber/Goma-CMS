@@ -19,7 +19,7 @@ define("GFS_DB_TYPE", "serialize");
 define("GFS_READONLY", 2);
 define("GFS_READWRITE", 1);
 
-class GFS extends Object {
+class GFS extends gObject {
 	
 	/**
 	 * required version for this class

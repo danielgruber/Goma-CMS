@@ -12,8 +12,8 @@ interface TreeModel {
 	/**
 	 * generates a tree.
 	 *
-	 * @param 	object|null $parent parent
-	 * @return 	array|object TreeNodes
+	 * @param 	gObject|null $parent parent
+	 * @return 	array|gObject TreeNodes
 	*/
 	static function build_tree($parent = null, $dataParams = array());
 }

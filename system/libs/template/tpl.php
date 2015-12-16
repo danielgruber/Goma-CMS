@@ -10,7 +10,7 @@
  * $Version 3.6.6
  */
 
-class tpl extends Object
+class tpl extends gObject
 {
 	/**
 	 * @access private
@@ -358,7 +358,7 @@ class tpl extends Object
 
 
 		if (!is_object($class)) {
-			$class = Object::instance("viewaccessabledata");
+			$class = gObject::instance("viewaccessabledata");
 		}
 		$class->customise($replacement);
 
@@ -986,7 +986,7 @@ $data = array_pop($dataStack);
  * @package goma
  * @subpackage template
  */
-class tplCaller extends Object implements ArrayAccess
+class tplCaller extends gObject implements ArrayAccess
 {
 	/**
 	 * goma adds all caller in CONTROL xxx to this var
@@ -1040,7 +1040,7 @@ class tplCaller extends Object implements ArrayAccess
 	 * @name __construct
 	 * @param object - dataobject
 	 */
-	public function __construct(Object &$dataobject, $tpl = "")
+	public function __construct(gObject &$dataobject, $tpl = "")
 	{
 		parent::__construct();
 
@@ -1248,7 +1248,7 @@ class tplCaller extends Object implements ArrayAccess
 			if (is_object($v)) {
 				if (is_a($v, "DataObjectSet")) {
 					$args[$k] = md5(serialize($v->forceData()->toArray()));
-				} else if (Object::method_exists($v, "toArray")) {
+				} else if (gObject::method_exists($v, "toArray")) {
 					$args[$k] = md5(serialize($v->ToArray()));
 				} else {
 					$args[$k] = md5(serialize($v));
@@ -1797,14 +1797,14 @@ class tplCaller extends Object implements ArrayAccess
 
 	public function offsetGet($offset)
 	{
-		if (Object::method_exists($this->dataobject, $offset)) {
+		if (gObject::method_exists($this->dataobject, $offset)) {
 			$data = call_user_func_array(array($this->dataobject, $offset), array());
 			if (is_object($data)) {
 				return new tplCaller($data);
 			} else {
 				return $data;
 			}
-		} else if (Object::method_exists($this, $offset)) {
+		} else if (gObject::method_exists($this, $offset)) {
 			return call_user_func_array(array($this, $offset), array());
 		} else {
 			return false;
@@ -1813,7 +1813,7 @@ class tplCaller extends Object implements ArrayAccess
 
 	public function offsetExists($offset)
 	{
-		if (Object::method_exists($this->dataobject, $offset) || Object::method_exists($this, $offset)) {
+		if (gObject::method_exists($this->dataobject, $offset) || gObject::method_exists($this, $offset)) {
 			return true;
 		} else {
 			return false;
@@ -1880,7 +1880,7 @@ class tplCaller extends Object implements ArrayAccess
 		} else if (parent::method_exists($this->classname, "_" . $name)) {
 			return true;
 		} else {
-			if (Object::method_exists($this->dataobject, $name)) {
+			if (gObject::method_exists($this->dataobject, $name)) {
 				return true;
 			} else {
 				return false;
@@ -1898,19 +1898,19 @@ class tplCaller extends Object implements ArrayAccess
 	 */
 	public function __call($methodName, $args)
 	{
-		if (Object::method_exists($this->classname, $methodName)) {
+		if (gObject::method_exists($this->classname, $methodName)) {
 			if (method_exists($this->classname, $methodName))
-				return call_user_func_array(array("parent", $methodName), $args);
+				return call_user_func_array(array("gObject", $methodName), $args);
 			else
-				return call_user_func_array(array("parent", "__call"), array($methodName, $args));
-		} else if (Object::method_exists($this->classname, "_" . $methodName)) {
+				return call_user_func_array(array("gObject", "__call"), array($methodName, $args));
+		} else if (gObject::method_exists($this->classname, "_" . $methodName)) {
 			return call_user_func_array(array($this, "_" . $methodName), $args);
 		} else if (isset($this->callers[strtolower($methodName)])) {
 			$this->callers[strtolower($methodName)]->dataobject->convertDefault = null;
 
 			return $this->callers[strtolower($methodName)];
 		} else {
-			if (Object::method_exists($this->dataobject, $methodName)) {
+			if (gObject::method_exists($this->dataobject, $methodName)) {
 				return call_user_func_array(array($this->dataobject, $methodName), $args);
 			} else {
 				return false;
@@ -1935,7 +1935,7 @@ class tplCaller extends Object implements ArrayAccess
  * @name tplcacher
  * @access public
  */
-class tplcacher extends Object
+class tplcacher extends gObject
 {
 	/**
 	 * @name filename

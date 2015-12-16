@@ -44,7 +44,7 @@ class SearchPageExtension extends DataObjectExtension implements argumentsSearch
 {
         public function argumentSearchSQL($query, $search, $version, $filter, $sort, $limit, $join, $forceClasses)
         {
-                $_query = Object::instance("boxes")->buildSearchQuery($search);
+                $_query = gObject::instance("boxes")->buildSearchQuery($search);
                 
                 // now generate query and new addWhere
                 $query->addFilter(array("OR", "pages_state.id IN ( ".$_query->build("seiteid") ." )" ));                
@@ -53,4 +53,4 @@ class SearchPageExtension extends DataObjectExtension implements argumentsSearch
         }
 }
 
-Object::extend("pages", "SearchPageExtension");
+gObject::extend("pages", "SearchPageExtension");

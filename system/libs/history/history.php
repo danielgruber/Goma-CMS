@@ -307,7 +307,7 @@ class History extends DataObject {
 		}
 
 		if(ClassInfo::exists($this->dbobject)) {
-			if(Object::method_exists($this->dbobject, "generateHistoryData")) {
+			if(gObject::method_exists($this->dbobject, "generateHistoryData")) {
 				$data = call_user_func_array(array($this->dbobject, "generateHistoryData"), array($this));
 				if(isset($data["text"], $data["icon"])) {
 					$this->historyData = $data;

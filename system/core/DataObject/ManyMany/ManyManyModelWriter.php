@@ -322,7 +322,7 @@ class ManyManyModelWriter extends Extension {
 
         // first check if records are up 2 date.
         /** @var DataObject $targetObject */
-        $targetObject = Object::instance($relationShip->getTarget());
+        $targetObject = gObject::instance($relationShip->getTarget());
         $selectQuery = new SelectQuery($targetObject->BaseTable(),
             array(
                 $targetObject->BaseTable() . ".recordid",
@@ -349,4 +349,4 @@ class ManyManyModelWriter extends Extension {
     }
 }
 
-Object::extend("ModelWriter", "ManyManyModelWriter");
+gObject::extend("ModelWriter", "ManyManyModelWriter");

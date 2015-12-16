@@ -10,7 +10,7 @@
  *
  * @version     2.4
  */
-class HTMLParser extends Object
+class HTMLParser extends gObject
 {
 
     /**

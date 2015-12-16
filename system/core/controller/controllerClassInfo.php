@@ -49,4 +49,4 @@ class ControllerClassInfo extends Extension {
 		}
 	}
 }
-Object::extend("ClassInfo", "ControllerClassInfo");
+gObject::extend("ClassInfo", "ControllerClassInfo");

@@ -227,7 +227,7 @@ class SimpleTestCase {
 
     /**
      *    Sets up an observer for the test end.
-     *    @param object $observer    Must have atTestEnd()
+     *    @param gObject $observer    Must have atTestEnd()
      *                               method.
      *    @access public
      */

@@ -8,7 +8,7 @@
   * $Version 2.1.8
 */
 
-class Security extends Object {
+class Security extends gObject {
 	/**
 	 * registers a IP as potential attacker
 	 *

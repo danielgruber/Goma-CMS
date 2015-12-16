@@ -17,7 +17,7 @@ interface ExtensionModel
  * @package Goma\Framework
  * @version 3.6
  */
-abstract class Object
+abstract class gObject
 {
 
     /**
@@ -101,7 +101,7 @@ abstract class Object
 
         if ($temp) {
             self::$temp_extra_methods[$class][$method] = create_function('$obj', $code);
-        } else if (!Object::method_exists($class, $method)) {
+        } else if (!gObject::method_exists($class, $method)) {
             self::$extra_methods[$class][$method] = create_function('$obj', $code);
         }
     }
@@ -123,7 +123,7 @@ abstract class Object
 
         if ($temp) {
             self::$temp_extra_methods[$class][$method] = $realfunc;
-        } else if (!Object::method_exists($class, $method)) {
+        } else if (!gObject::method_exists($class, $method)) {
             self::$extra_methods[$class][$method] = $realfunc;
         }
 
@@ -140,7 +140,9 @@ abstract class Object
      */
     public static function method_exists($class, $method)
     {
-
+        if(!$method || !$class) {
+            throw new InvalidArgumentException("Method must be set and a string.");
+        }
 
         if (PROFILE) {
             Profiler::mark("Object::method_exists");
@@ -181,9 +183,9 @@ abstract class Object
     /**
      * searches for method and returns true or false when exists or not.
      * it won't search recursively upwards. arguments must be trimmed and lowercase.
-     * @param classname $class
+     * @param string $class
      * @param string $method
-     * @param instance of classname for __cancall null $object
+     * @param gObject $object instance of class for __cancall null $object
      * @return int
      */
     protected static function method_exists_on_object($class, $method, $object = null)
@@ -208,8 +210,8 @@ abstract class Object
     /**
      * checks if method is existing in DB or native.
      *
-     * @param string class
-     * @param string method
+     * @param string $class
+     * @param string $method
      * @return bool
      */
     protected static function method_exists_native_db($class, $method) {
@@ -299,9 +301,9 @@ abstract class Object
     /**
      * Gets the singleton of a class.
      *
-     * @param string|object $class Name of the class.
+     * @param string|gObject $class Name of the class.
      *
-     * @return Object The singleton.
+     * @return gObject The singleton.
      */
     public static function instance($class)
     {
@@ -423,7 +425,7 @@ abstract class Object
             for($i = count($extra_method) - 2; $i >= 0; $i--) {
                 $object = is_object($extra_method[$i]) ? $extra_method[$i] : $this->getInstance($extra_method[$i]);
                 if(!isset($object)) {
-                    $object = Object::instance($extra_method[$i]);
+                    $object = gObject::instance($extra_method[$i]);
                 }
                 array_unshift($args, $object);
             }
@@ -504,7 +506,7 @@ abstract class Object
      *
      * @name getInstance
      * @param string $extensionClassName of extension
-     * @return Object
+     * @return gObject
      */
     public function getInstance($extensionClassName)
     {
@@ -554,7 +556,7 @@ abstract class Object
     {
         $returns = array();
         foreach ($this->getextensions(true) as $extension) {
-            if (Object::method_exists($extension, $method)) {
+            if (gObject::method_exists($extension, $method)) {
                 if ($instance = $this->getinstance($extension)) {
 
                     // so let's call ;)
@@ -593,7 +595,7 @@ abstract class Object
 
         $returns = array();
         foreach ($this->getExtensions(false) as $extension) {
-            if (Object::method_exists($extension, $method)) {
+            if (gObject::method_exists($extension, $method)) {
                 if ($instance = $this->getinstance($extension)) {
                     $instance->setOwner($this);
                     $returns[] = $instance->$method($p1, $p2, $p3, $p4, $p5, $p6, $p7);
@@ -613,7 +615,7 @@ abstract class Object
     static function buildClassInfo($class)
     {
         foreach ((array)StaticsManager::getStatic($class, "extend") as $ext) {
-            Object::extend($class, $ext);
+            gObject::extend($class, $ext);
         }
     }
 

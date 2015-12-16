@@ -310,7 +310,7 @@ class SimpleSignatureMap {
      *    set. Returned by reference.
      *    @param array $parameters    Parameters to search by
      *                                without wildcards.
-     *    @return object              Object held in the first matching
+     *    @return gObject              Object held in the first matching
      *                                slot, otherwise null.
      */
     function &findFirstAction($parameters) {
@@ -999,7 +999,7 @@ class SimpleMock {
      *    Sets up a trigger to throw an exception upon the
      *    method call.
      *    @param string $method     Method name to throw on.
-     *    @param object $exception  Exception object to throw.
+     *    @param gObject $exception  Exception object to throw.
      *                              If not given then a simple
      *                              Exception object is thrown.
      *    @param array $args        Optional argument list filter.
@@ -1023,7 +1023,7 @@ class SimpleMock {
      *                              will allow two calls before throwing
      *                              and so on.
      *    @param string $method     Method name to throw on.
-     *    @param object $exception  Exception object to throw.
+     *    @param gObject $exception  Exception object to throw.
      *                              If not given then a simple
      *                              Exception object is thrown.
      *    @param array $args        Optional argument list filter.
@@ -1041,7 +1041,7 @@ class SimpleMock {
      *    Sets up a trigger to throw an error upon the
      *    method call.
      *    @param string $method     Method name to throw on.
-     *    @param object $error      Error message to trigger.
+     *    @param gObject $error      Error message to trigger.
      *    @param array $args        Optional argument list filter.
      *                              If given then the exception
      *                              will only be thrown if the
@@ -1064,7 +1064,7 @@ class SimpleMock {
      *                              will allow two calls before throwing
      *                              and so on.
      *    @param string $method     Method name to throw on.
-     *    @param object $error      Error message to trigger.
+     *    @param gObject $error      Error message to trigger.
      *    @param array $args        Optional argument list filter.
      *                              If given then the exception
      *                              will only be thrown if the

@@ -545,7 +545,7 @@ function var_lang_callback($data) {
  */
 function var_lang($str, $replace = array()) {
 	if(!is_string($str))
-		throw new LogicException("first argument of var_lang must be string.");
+		throw new InvalidArgumentException("first argument of var_lang must be string.");
 	
 	$language = lang($str, $str);
 	preg_match_all('/%(.*)%/', $language, $regs);
@@ -557,43 +557,6 @@ function var_lang($str, $replace = array()) {
 
 	return $language;
 	// return it!!
-}
-
-/**
- * checks of the file-extension
- *
- *@name checkFileExt
- *@access public
- */
-function checkFileExt($string, $ext) {
-	return (strtolower(substr($string, 0 - strlen($ext) - 1)) == "." . $ext);
-}
-
-/**
- * escapes a string to use it in json
- *@name escapejson
- *@param string - string to escape
- *@return string - escaped string
- */
-function escapejson($str) {
-	$str = convert::raw2js($str);
-	$str = utf8_encode($str);
-	return $str;
-}
-
-/**
- * shows a normals site with given content
- *@name showSite
- *@access public
- *@param string - content
- *@param string - title
- */
-function showsite($content, $title) {
-	if($title) {
-		Core::setTitle($title);
-	}
-
-	return Core::serve($content);
 }
 
 /**
@@ -736,6 +699,10 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 }
 
 function Goma_ExceptionHandler($exception) {
+	if($exception->isIgnorable) {
+		return;
+	}
+
 	log_exception($exception);
 
 	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
@@ -745,7 +712,7 @@ function Goma_ExceptionHandler($exception) {
 	$content = str_replace('{$errdetails}', $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">" . $exception->getTraceAsString() . "</textarea>", $content);
 	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
 
-	if(Object::method_exists($exception, "http_status")) {
+	if(gObject::method_exists($exception, "http_status")) {
 		HTTPResponse::setResHeader($exception->http_status());
 	} else {
 		HTTPResponse::setResHeader(500);

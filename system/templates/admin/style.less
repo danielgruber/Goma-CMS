@@ -817,7 +817,7 @@ div.adminPanel table, div.adminPanel td {
 	border-top: 0;
 	padding-top: 0.5em;
 }
-textarea, input[type=text], input[type=password] {
+textarea, input[type=text], input[type=search], input[type=password] {
 	padding: 0.375em;
 	-moz-border-radius: 0.1875em;
 	-webkit-border-radius: 0.1875em;
@@ -850,7 +850,7 @@ span.formaction {
 	padding: 0.25em;
 }
 
-.visibleField {
+form .fields .form_field:not(.hidden):not(.formaction) {
 	border-bottom: 0.063em solid #e5e5e5;
 }
 

@@ -16,7 +16,7 @@ class DateField extends FormField
 		 * @param 	string $title title
 		 * @param 	string $value value
 		 * @param 	array $between key 0 for start and key 1 for end and key 2 indicates whether to allow the values given
-		 * @param 	object $form
+		 * @param 	gObject $form
 		*/
 		public function __construct($name, $title = null, $value = null, $between = null, $form = null)
 		{

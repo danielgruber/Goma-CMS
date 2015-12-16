@@ -9,7 +9,7 @@ defined("IN_GOMA") OR die();
  * @package Goma\Framework
  * @version 1.3.1
  */
-class Convert extends Object {
+class Convert {
 	/**
 	 * converts raw-code to js
 	 *@param string - raw
@@ -104,7 +104,7 @@ class Convert extends Object {
 	 * Convert a JSON encoded string into an object.
 	 *
 	 * @param string $val
-	 * @return object|boolean
+	 * @return gObject|boolean
 	 */
 	static function json2obj($val) {
 		return json_decode($val);

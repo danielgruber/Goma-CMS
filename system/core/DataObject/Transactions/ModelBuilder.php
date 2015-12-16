@@ -21,7 +21,7 @@ class ModelBuilder {
         if ($model->baseTable != "" && !isset(ClassInfo::$database[$model->baseTable])) {
             if($create || (isset($_GET["create"]) && $_GET["create"] == $model->classname)) {
                 foreach (array_merge(ClassInfo::getChildren($model->classname), array($model->classname)) as $child) {
-                    Object::instance($child)->buildDB();
+                    gObject::instance($child)->buildDB();
                 }
                 ClassInfo::write();
             } else {

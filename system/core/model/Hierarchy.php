@@ -328,7 +328,7 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 				if(SQL::Query($insert)) {
 					return true;
 				} else {
-					throwErrorByID(3);
+					throw new SQLException();
 				}
 			}
 		}
@@ -337,8 +337,8 @@ class Hierarchy extends DataObjectExtension implements TreeModel {
 	/**
 	 * generates a tree.
 	 *
-	 * @param 	object|null $parent parent
-	 * @return 	array|object TreeNodes
+	 * @param 	gObject|null $parent parent
+	 * @return 	array|gObject TreeNodes
 	*/
 	static function build_tree($parent = null, $dataParams = array()) {
 	

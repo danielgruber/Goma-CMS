@@ -74,11 +74,11 @@ class ArrayList extends ViewAccessableData implements Countable {
 		$arr = array();
 		foreach($this->items as $item) {
 			if(is_object($item)) {
-				if(Object::method_exists($item, "toNestedArray")) {
+				if(gObject::method_exists($item, "toNestedArray")) {
 					$arr[] = $item->ToNestedArray();
-				} else if(Object::method_exists($item, "toMap")) {
+				} else if(gObject::method_exists($item, "toMap")) {
 					$arr[] = $item->ToMap();
-				} else if(Object::method_exists($item, "toArray")) {
+				} else if(gObject::method_exists($item, "toArray")) {
 					$arr[] = $item->ToArray();
 				} else {
 					$arr[] = (array) $item;
@@ -92,7 +92,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * pushes a new object or array to the end of the list.
 	 *
-	  *@param 	array|object $item item
+	  *@param 	array|gObject $item item
 	*/
 	public function push($item) {
 		$this->items[] = $item;
@@ -101,7 +101,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * removes a item from the end of the list.
 	 *
-	 * @return 	array|object item
+	 * @return 	array|gObject item
 	*/
 	public function pop() {
 		return array_pop($this->items);
@@ -110,7 +110,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * unshifts a new object or array to the beginning of the list.
 	 *
-	 * @param 	array|object $item item
+	 * @param 	array|gObject $item item
 	*/
 	public function unshift($item) {
 		array_unshift($this->items, $item);
@@ -119,7 +119,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * shifts a item from the beginning of the list.
 	 *
-	 * @return 	array|object the removed item
+	 * @return 	array|gObject the removed item
 	*/
 	public function shift() {
 		return array_shift($this->items);
@@ -192,8 +192,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * replaces a item.
 	 *
-	 * @param 	object|array $item item
-	 * @param	object|array $with new item
+	 * @param 	gObject|array $item item
+	 * @param	gObject|array $with new item
 	*/
 	public function replace($item, $with) {
 		foreach($this->items as $key => $record) {
@@ -209,7 +209,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * removes a specific item or item-index.
 	 * 
-	 *@param object|array item
+	 *@param gObject|array item
 	*/
 	public function remove($item) {
 		if(!is_array($item) && !is_object($item))
@@ -264,7 +264,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * returns the current position of a given item.
 	 *
-	 * @param 	array|object $item item
+	 * @param 	array|gObject $item item
 	 * @return 	int|boolean integer for position of item, boolean false if not found
 	*/
 	public function getItemIndex($item) {
@@ -349,7 +349,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * helper method to analyze if a item matches to a filter.
 	 *
-	 * @param 	Object|array $item item
+	 * @param 	gObject|array $item item
 	 * @param 	array $filter
 	*/
 	static function itemMatchesFilter($item, $filter) {
@@ -488,7 +488,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * moves specific item to another position.
 	 *
-	 * @param 	array|object $item item
+	 * @param 	array|gObject $item item
 	 * @param 	int $to destination position 
 	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
 	*/
@@ -514,8 +514,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * moves specific item before another item.
 	 *
-	 * @param 	array|object $item item
-	 * @param 	array|object $before destination object 
+	 * @param 	array|gObject $item item
+	 * @param 	array|gObject $before destination object
 	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
 	*/
 	public function moveBefore($item, $before, $insertIfNotExisting = false) {
@@ -528,8 +528,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * moves specific item behind another item.
 	 *
-	 * @param 	array|object $item item
-	 * @param 	array|object $behind destination object 
+	 * @param 	array|gObject $item item
+	 * @param 	array|gObject $behind destination object
 	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
 	*/
 	public function moveBehind($item, $behind, $insertIfNotExisting = false) {
@@ -578,7 +578,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * Merges with another array or list by pushing all the items in it onto the
 	 * end of this list.
 	 *
-	 * @param array|object $with
+	 * @param array|gObject $with
 	 */
 	public function merge($with) {
 		foreach ($with as $item) $this->push($item);
@@ -588,7 +588,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * Attribute-getter-API. it gets an element of the list at a specified position.
 	 *
 	 * @param 	int $offset offset
-	 * @return 	array|object
+	 * @return 	array|gObject
 	*/
 	public function __get($offset) {
 		if(isset($this->items[$offset]))
@@ -640,7 +640,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * returns a property of a given Item in the List.
 	 *
-	 * @param 	array|object $item item
+	 * @param 	array|gObject $item item
 	 * @param 	string $prop property
 	*/
 	public function getItemProp($item, $prop) {

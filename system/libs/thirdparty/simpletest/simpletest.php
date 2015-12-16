@@ -70,7 +70,7 @@ class SimpleTest {
      *   Puts the object to the global pool of 'preferred' objects
      *   which can be retrieved with SimpleTest :: preferred() method.
      *   Instances of the same class are overwritten.
-     *   @param object $object      Preferred object
+     *   @param gObject $object      Preferred object
      *   @see preferred()
      */
     static function prefer($object) {
@@ -83,7 +83,7 @@ class SimpleTest {
      *   can be applied in order to retrieve the object of the specific
      *   class
      *   @param array|string $classes       Allowed classes or interfaces.
-     *   @return array|object|null
+     *   @return array|gObject|null
      *   @see prefer()
      */
     static function preferred($classes) {
@@ -298,7 +298,7 @@ class SimpleTestContext {
 
     /**
      *    Accessor for the Singleton resource.
-     *    @return object       Global resource.
+     *    @return gObject       Global resource.
      */
     function get($resource) {
         if (! isset($this->resources[$resource])) {

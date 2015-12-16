@@ -297,4 +297,4 @@ class RegisterExtension extends ControllerExtension
 	}
 }
 
-Object::extend("ProfileController", "RegisterExtension");
+gObject::extend("ProfileController", "RegisterExtension");

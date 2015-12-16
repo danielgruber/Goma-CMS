@@ -9,7 +9,7 @@
  *
  * last modified: 04.08.2015
  */
-class HTMLNode extends Object
+class HTMLNode extends gObject
 {
     /**
      * tag
@@ -126,7 +126,7 @@ class HTMLNode extends Object
         $content = "";
         if (is_array($this->content)) {
             foreach ($this->content as $node) {
-                if (is_object($node) && Object::method_exists($node, "render")) {
+                if (is_object($node) && gObject::method_exists($node, "render")) {
                     if ($whitespace !== null) {
                         $content .= $whitespace . $node->render($whitespace . '          ') . "\n\n";
                     } else {

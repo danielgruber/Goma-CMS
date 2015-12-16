@@ -51,4 +51,4 @@ class HistoryWriter extends Extension {
         unset($manipulation);
     }
 }
-Object::extend("ModelWriter", "HistoryWriter");
+gObject::extend("ModelWriter", "HistoryWriter");

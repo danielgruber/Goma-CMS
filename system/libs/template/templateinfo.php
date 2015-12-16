@@ -11,7 +11,7 @@
  * @version     2.1
  * @changed 	20.03.2015
  */
-class templateInfo extends object
+class templateInfo extends gObject
 {
 	
 	/**

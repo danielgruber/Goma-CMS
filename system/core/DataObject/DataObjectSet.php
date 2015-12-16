@@ -110,7 +110,7 @@ class DataObjectSet extends DataSet {
 				$class = $class->dataobject;
 			}
 
-			$this->dataobject = Object::instance($class);
+			$this->dataobject = gObject::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;
 			if($this->dataobject->controller != null) {
@@ -820,7 +820,7 @@ class DataObjectSet extends DataSet {
 
 		$object->dataset =& $this;
 
-		if(is_object($object) && Object::method_exists($object, "customise")) {
+		if(is_object($object) && gObject::method_exists($object, "customise")) {
 			$object->customise($this->protected_customised);
 			return $object;
 		} else {

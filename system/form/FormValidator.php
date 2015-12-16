@@ -8,7 +8,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-class FormValidator extends Object
+class FormValidator extends gObject
 {
     /**
      * @name array

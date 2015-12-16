@@ -14,7 +14,7 @@
  **/
  
 
-class pgsqlDriver extends object implements SQLDriver 
+class pgsqlDriver extends gObject implements SQLDriver
 {	
 	public function __construct()
 	{
@@ -389,7 +389,7 @@ class pgsqlDriver extends object implements SQLDriver
 		if(sql::query($sql))
 			return true;
 		else
-			throwErrorByID(3);
+			throw new SQLException();
 	}
 	
 	
@@ -404,7 +404,7 @@ class pgsqlDriver extends object implements SQLDriver
 		if(sql::query($sql))
 			return true;
 		else
-			throwErrorByID(3);
+			throw new SQLException();
 	}
 	
 	
@@ -705,7 +705,7 @@ class pgsqlDriver extends object implements SQLDriver
 				ClassInfo::$database[$table] = $fields;
 				return $log;
 			} else {
-				throwErrorByID(3);
+				throw new SQLException();
 			}
 		}
 			
@@ -789,7 +789,7 @@ class pgsqlDriver extends object implements SQLDriver
 									// everything is fine
 								} else
 								{
-									throwErrorById(3);
+									throw new SQLException();
 								}	
 							}
 						}
@@ -884,7 +884,7 @@ class pgsqlDriver extends object implements SQLDriver
 							} 
 							else
 							{
-								throwErrorById(3);
+								throw new SQLException();
 							}
 						}	
 					}
@@ -907,7 +907,7 @@ class pgsqlDriver extends object implements SQLDriver
 							if(sql::query($sql)) {
 								// everything is fine
 							} else {
-								throwErrorById(3);
+								throw new SQLException();
 							}
 						}
 					}

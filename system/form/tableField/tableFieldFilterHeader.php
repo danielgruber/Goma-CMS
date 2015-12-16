@@ -31,6 +31,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         $fields = new DataSet();
 
         $state = $tableField->state->tableFieldFilterHeader;
+        $state->visible = is_object($state->visible) ? false : $state->visible;
         $filterArguments = $state->columns->toArray();
         $columns = $tableField->getColumns();
         $currentColumn = 0;

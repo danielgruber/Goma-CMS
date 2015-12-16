@@ -11,7 +11,7 @@
  *
  * @version		1.4
  */
-class Member extends Object {
+class Member extends gObject {
 	/**
 	 * user-login const
 	 */

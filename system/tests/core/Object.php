@@ -16,7 +16,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	public $name = "Object";
 
 	/**
-	 * @var Object
+	 * @var gObject
 	 */
 	protected $o;
 
@@ -24,7 +24,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * setup test
 	*/
 	public function setUp() {
-		$this->o = new TestObject();
+		$this->o = new TestGObject();
 		$this->dummyMethod = new DummyMethodTest();
 	}
 
@@ -44,8 +44,8 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	*/	
 	public function testExtensionMethod() {
 
-        $this->assertTrue(Object::method_exists($this->o, "extra_method"));
-        $this->assertTrue(Object::method_exists($this->o, " exTra_mEthod "));
+        $this->assertTrue(gObject::method_exists($this->o, "extra_method"));
+        $this->assertTrue(gObject::method_exists($this->o, " exTra_mEthod "));
 
 		$this->assertEqual($this->o->extra_method(), "it works");
         $this->assertEqual($this->o->EXTRA_METHOD(), "it works");
@@ -61,13 +61,13 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * tests linkMethod
 	*/
 	public function testLinkMethod() {
-		Object::linkMethod("TestObject", "testlink", "testObjectExtFunction", true);
+		gObject::linkMethod("TestObject", "testlink", "testObjectExtFunction", true);
 		$this->assertEqual($this->o->testlink(), "test");
         $this->assertEqual($this->o->TESTLINK(), "test");
         $this->assertEqual($this->o->TeStLiNK(), "test");
         $this->assertEqual($this->o->__call(" tEstlink ", array()), "test");
 		
-		Object::linkMethod("TestObject", "testlink_absolute", "testObjectExtFunction", false);
+		gObject::linkMethod("TestObject", "testlink_absolute", "testObjectExtFunction", false);
 		$this->assertEqual($this->o->testlink_absolute(), "test");
         $this->assertEqual($this->o->TESTLINK_ABSOLUTE(), "test");
         $this->assertEqual($this->o->TeStLiNK_aBsOlUtE(), "test");
@@ -78,13 +78,13 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 	 * tests createMethod
 	*/
 	public function testCreateMethod() {
-		Object::createMethod("TestObject", "testcreate", "return 'blah';", true);
+		gObject::createMethod("TestObject", "testcreate", "return 'blah';", true);
 		$this->assertEqual($this->o->testcreate(), "blah");
         $this->assertEqual($this->o->TESTCREATE(), "blah");
         $this->assertEqual($this->o->TestCreate(), "blah");
         $this->assertEqual($this->o->__call(" TestCreate ", array()), "blah");
 		
-		Object::createMethod("TestObject", "testcreate_absolute", "return 'blub';", false);
+		gObject::createMethod("TestObject", "testcreate_absolute", "return 'blub';", false);
 		$this->assertEqual($this->o->testcreate_absolute(), "blub");
         $this->assertEqual($this->o->TESTCREATE_ABSOLUTE(), "blub");
         $this->assertEqual($this->o->TeStCrEATe_AbSolUtE(), "blub");
@@ -119,33 +119,33 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual($this->dummyMethod->__call("myDynamicMethod", array()), "It works");
 		$this->assertEqual($this->dummyMethod->myDynamicMethod(), "It works");
 
-		$this->assertFalse(Object::method_exists($this->dummyMethod->classname, "myDynamicMethod"));
+		$this->assertFalse(gObject::method_exists($this->dummyMethod->classname, "myDynamicMethod"));
 	}
 
     public function testEmptyMethod() {
-        $this->assertFalse(Object::method_exists("", ""));
-        $this->assertFalse(Object::method_exists("test", ""));
-        $this->assertFalse(Object::method_exists("", "test"));
+        $this->assertThrows(function() { gObject::method_exists("", ""); }, "InvalidArgumentException");
+        $this->assertThrows(function() { gObject::method_exists("test", ""); }, "InvalidArgumentException");
+        $this->assertThrows(function() { gObject::method_exists("", "test"); }, "InvalidArgumentException");
     }
 
 
     public function testInstance() {
-        $this->assertIsA(Object::instance("DummyMethodTest"), "DummyMethodTest");
-        $this->assertClone(Object::instance("DummyMethodTest"), Object::instance("DummyMethodTest"));
+        $this->assertIsA(gObject::instance("DummyMethodTest"), "DummyMethodTest");
+        $this->assertClone(gObject::instance("DummyMethodTest"), gObject::instance("DummyMethodTest"));
 
         // check for cloning
-        $o = Object::instance("DummyMethodTest");
+        $o = gObject::instance("DummyMethodTest");
         $o->b = 1;
-        $this->assertEqual(Object::instance($o)->b, 1);
-        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 1);
+        $this->assertEqual(gObject::instance($o)->b, 1);
+        $this->assertNotEqual(gObject::instance("DummyMethodTest")->b, 1);
 
         // check if these are clones
-        $second = Object::instance("DummyMethodTest");
+        $second = gObject::instance("DummyMethodTest");
         $second->b = 2;
-        $this->assertEqual(Object::instance($o)->b, 1);
-        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 1);
-        $this->assertEqual(Object::instance($second)->b, 2);
-        $this->assertNotEqual(Object::instance("DummyMethodTest")->b, 2);
+        $this->assertEqual(gObject::instance($o)->b, 1);
+        $this->assertNotEqual(gObject::instance("DummyMethodTest")->b, 1);
+        $this->assertEqual(gObject::instance($second)->b, 2);
+        $this->assertNotEqual(gObject::instance("DummyMethodTest")->b, 2);
     }
 
     public function testExtensionArguments() {
@@ -155,21 +155,21 @@ class ObjectTest extends GomaUnitTest implements TestAble {
     }
 
     public function unitExtensionArguments($exp, $name, $args) {
-        $info = Object::getArgumentsFromExtend($exp);
+        $info = gObject::getArgumentsFromExtend($exp);
 
         $this->assertEqual($info[0], $name, "Name $name expected %s");
         $this->assertEqual($info[1], $args, "Arguments $args expected %s");
     }
 
     public function testExtensionWithArgs() {
-        $o = new TestObject();
+        $o = new TestGObject();
 
         $args = $o->getInstance("TestExtensionWithArgs")->args;
         $this->assertEqual($args, array('a', 12, array(23)));
     }
 }
 
-class DummyMethodTest extends Object {
+class DummyMethodTest extends gObject {
     public $b;
 
 	public function ownMethod() {
@@ -204,7 +204,7 @@ class TestExtensionWithArgs extends Extension {
     }
 }
 
-class TestObject extends Object {
+class TestGObject extends gObject {
 	
 	
 	
@@ -226,8 +226,8 @@ class TestObjectExtension extends Extension {
 		return "works";
 	}
 }
-Object::extend("testObject", "TestObjectExtension");
-Object::extend("testObject", "TestExtensionWithArgs('a', 12, array(23))");
+gObject::extend("testObject", "TestObjectExtension");
+gObject::extend("testObject", "TestExtensionWithArgs('a', 12, array(23))");
 
 function testObjectExtFunction() {
 	return "test";

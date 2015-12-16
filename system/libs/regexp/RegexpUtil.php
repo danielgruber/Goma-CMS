@@ -64,4 +64,16 @@ class RegexpUtil {
     public static function isWebsite($website) {
         return preg_match('/^(http\:\/\/|https\:\/\/)?([a-z0-9][a-z0-9\-]*\.)+[a-z0-9][a-z0-9\-]*/i', $website);
     }
+
+
+    /**
+     * checks of the file-extension
+     *
+     * @param string $filename
+     * @param string $ext
+     * @return bool
+     */
+    public static function checkFileExt($filename, $ext) {
+        return (strtolower(substr($filename, 0 - strlen($ext) - 1)) == "." . $ext);
+    }
 }

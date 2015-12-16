@@ -17,7 +17,7 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 2.4.2
  */
-class Form extends object {
+class Form extends gObject {
 
 	/**
 	 * session-prefix for form.
@@ -287,7 +287,7 @@ class Form extends object {
 		// set model
 		if(isset($model)) {
 			$this->model = $model;
-		} else if(Object::method_exists($controller, "modelInst")) {
+		} else if(gObject::method_exists($controller, "modelInst")) {
 			if($controller->modelInst()) {
 				/** @var Controller $controller */
 				$this->model = $controller->modelInst();
@@ -513,9 +513,13 @@ class Form extends object {
 
 		/** @var FormField $field */
 		foreach($this->fieldList as $field) {
-			if($this->isFieldToRender($field->name)) {
-				$this->registerRendered($field->name);
-				$fields[] = $field->exportFieldInfo();
+			try {
+				if ($this->isFieldToRender($field->name)) {
+					$this->registerRendered($field->name);
+					$fields[] = $field->exportFieldInfo();
+				}
+			} catch(Exception $e) {
+				$fields[] = new FormFieldErrorResponse($field->name, $e);
 			}
 		}
 
@@ -527,7 +531,11 @@ class Form extends object {
 
 		/** @var array $action */
 		foreach($this->actions as $action) {
-			$actions[] = $action["field"]->exportFieldInfo();
+			try {
+				$actions[] = $action["field"]->exportFieldInfo();
+			} catch(Exception $e) {
+				$actions[] = new FormFieldErrorResponse($action["field"]->name, $e);
+			}
 		}
 
 		return $actions;
@@ -537,10 +545,15 @@ class Form extends object {
 		$validators = array();
 
 		/** @var FormValidator $validator */
-		foreach($this->validators as $validator) {
-			$data = $validator->exportFieldInfo($fields, $actions);
-			if($data) {
-				$validators[] = $data;
+		foreach($this->validators as $name => $validator) {
+			try {
+				$data = $validator->exportFieldInfo($fields, $actions);
+				if($data) {
+					$data["name"] = $name;
+					$validators[] = $data;
+				}
+			} catch(Exception $e) {
+				$validators[] = new FormFieldErrorResponse($name, $e);
 			}
 		}
 
@@ -780,7 +793,7 @@ class Form extends object {
 	 *@access public
 	 */
 	public function setSubmission($submission) {
-		if (is_callable($submission) || Object::method_exists($this->controller, $submission)) {
+		if (is_callable($submission) || gObject::method_exists($this->controller, $submission)) {
 			$this->submission = $submission;
 		} else {
 			throw new LogicException("Unknown Function '$submission'' for Controller {$this->controller}.");

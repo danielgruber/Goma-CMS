@@ -12,7 +12,7 @@ define('SQL_REGEXP', 'RLIKE');
 // LIKE for your SQL without a differnet between A and a
 define('SQL_LIKE', 'LIKE');
 
-class mysqliDriver extends object implements SQLDriver
+class mysqliDriver extends gObject implements SQLDriver
 {
 
     /**

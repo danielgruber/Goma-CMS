@@ -98,7 +98,7 @@ class DropDown extends FormField {
 	 * @param string $title label for the field
 	 * @param array $options array of key-value for the data selectable
 	 * @param int|string $value a integer or string for the selected item
-	 * @param object $parent a Form object if you want to give the form it will be
+	 * @param gObject $parent a Form object if you want to give the form it will be
 	 * applied to
 	 *
 	 * @access public
@@ -118,8 +118,8 @@ class DropDown extends FormField {
 		// if mutliselect, we have to store an array
 		if($this->multiselect) {
 
-			if($this->POST && isset($this->form()->post[$this->PostName()]) && session_store_exists("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()])) {
-				$dataset = session_restore("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()]);
+			if($this->POST && isset($this->form()->post[$this->PostName()]) && Core::globalSession()->hasKey("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()])) {
+				$dataset = Core::globalSession()->get("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()]);
 				if(is_array($dataset)) {
 					$this->dataset = $dataset;
 					$this->key = $this->form()->post[$this->PostName()];
@@ -145,7 +145,7 @@ class DropDown extends FormField {
 			}
 			$this->input->value = $this->key;
 
-			if(is_object($this->dataset) && Object::method_exists($this->dataset->classname, "toArray")) {
+			if(is_object($this->dataset) && gObject::method_exists($this->dataset->classname, "toArray")) {
 				$this->dataset = $this->dataset->ToArray();
 			}
 
@@ -321,7 +321,7 @@ class DropDown extends FormField {
 	public function field() {
 		if(PROFILE)
 			Profiler::mark("FormField::field");
-		session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+		Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		$this->callExtending("beforeField");
 
 		if($this->sortable) {
@@ -560,7 +560,7 @@ class DropDown extends FormField {
 			}
 		}
 		$this->dataset = $newSet;
-		session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+		Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		return "ok";
 	}
 
@@ -574,7 +574,7 @@ class DropDown extends FormField {
 
 		if($this->multiselect) {
 			$this->dataset[] = $this->getParam("value");
-			session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		} else {
 			$this->value = $this->getParam("value");
 		}
@@ -599,7 +599,7 @@ class DropDown extends FormField {
 		if($this->multiselect) {
 			$key = array_search($this->getParam("value"), $this->dataset);
 			unset($this->dataset[$key]);
-			session_store("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		} else {
 			if($this->value == $this->getParam("value"))
 				$this->value = null;

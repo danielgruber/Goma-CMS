@@ -917,7 +917,7 @@ class MemberExpectation extends IdenticalExpectation {
 
     /**
      *    Tests the expectation. True if the property value is identical.
-     *    @param object $actual         Comparison object.
+     *    @param gObject $actual         Comparison object.
      *    @return boolean               True if identical.
      */
     function test($actual) {
@@ -940,7 +940,7 @@ class MemberExpectation extends IdenticalExpectation {
     /**
      *    Extracts the member value even if private using reflection.
      *    @param string $name        Property name.
-     *    @param object $object      Object to read.
+     *    @param gObject $object      Object to read.
      *    @return mixed              Value of property.
      */
     private function getProperty($name, $object) {
@@ -959,7 +959,7 @@ class MemberExpectation extends IdenticalExpectation {
     /**
      *    Extracts a private member's value when reflection won't play ball.
      *    @param string $name        Property name.
-     *    @param object $object      Object to read.
+     *    @param gObject $object      Object to read.
      *    @return mixed              Value of property.
      */
     private function getPrivatePropertyNoMatterWhat($name, $object) {

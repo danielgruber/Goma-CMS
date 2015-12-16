@@ -192,7 +192,7 @@ class tableField extends FormField {
      * Get the value of a named field  on the given record.
      * Use of this method ensures that any special rules around the data for this tablefield are followed.
      *
-     * @param   object $record
+     * @param   gObject $record
      * @param   string $fieldName
      * @return  string
      */
@@ -204,10 +204,12 @@ class tableField extends FormField {
 		}
 		
 		// Default implementation
-		if(Object::method_exists($record, $fieldName)) {
+		if(gObject::method_exists($record, $fieldName)) {
 			return $record->$fieldName();
-		} else {
+		} else if(is_object($record)) {
 			return $record->getTemplateVar($fieldName);
+		} else {
+			throw new LogicException("Record must be Object of Type ViewAccessableData.");
 		}
 	}
 
@@ -336,7 +338,7 @@ class tableField extends FormField {
 		
 		// first init all
 		foreach($this->getComponents() as $item) {
- 			if(Object::method_exists($item, "Init")) {
+ 			if(gObject::method_exists($item, "Init")) {
 				$item->Init($this);
 			}
 		}
@@ -523,7 +525,7 @@ class tableField extends FormField {
      * gets url handlers from component and trys to get an action.
      * returns false when no action was found.
      *
-     * @param   Object $component
+     * @param   gObject $component
      * @param   Request $request
      * @return  string|false
      */

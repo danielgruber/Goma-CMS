@@ -41,4 +41,4 @@ class RatingDataObjectExtension extends DataObjectExtension
     }
 }
 
-Object::extend("pages", "RatingDataObjectExtension");
+gObject::extend("pages", "RatingDataObjectExtension");

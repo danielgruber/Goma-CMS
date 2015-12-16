@@ -24,15 +24,15 @@ class LangSelectTest extends GomaUnitTest implements TestAble
      * tests assigning properties.
      */
     public function testAssignProps() {
-        $defaultTypes = Object::instance("FileUploadSet")->allowed_file_types;
-        $defaultCollection = Object::instance("FileUploadSet")->collection;
+        $defaultTypes = gObject::instance("FileUploadSet")->allowed_file_types;
+        $defaultCollection = gObject::instance("FileUploadSet")->collection;
 
         $this->unitTestAssignProps("test", "blub", $defaultTypes, "blub");
         $this->unitTestAssignProps("*", "blub", "*", "blub");
         $this->unitTestAssignProps(array("png", "jpg"), "blub", array("png", "jpg"), "blub");
         $this->unitTestAssignProps("*", null, "*", $defaultCollection);
 
-        $this->assertEqual(Object::instance("FileUploadSet")->handleUpload(null), "No Upload defined.");
+        $this->assertEqual(gObject::instance("FileUploadSet")->handleUpload(null), "No Upload defined.");
     }
 
     public function unitTestAssignProps($fileTypes, $collection, $expectedTypes, $expectedCollection) {

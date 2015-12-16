@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Notification extends Object {
+class Notification extends gObject {
 	/**
 	 * notify a user about anything
 	 *

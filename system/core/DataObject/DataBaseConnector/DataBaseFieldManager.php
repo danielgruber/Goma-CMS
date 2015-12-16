@@ -39,10 +39,10 @@ class DataBaseFieldManager {
 
         // casting
         foreach($arr as $field => $val) {
-            $casting = Object::instance($className)->casting();
+            $casting = gObject::instance($className)->casting();
             if(isset($casting[$field])) {
                 $object = DBField::getObjectByCasting($casting[$field], $field, $val);
-                if(Object::method_exists($object, "forDB")) {
+                if(gObject::method_exists($object, "forDB")) {
                     $arr[$field] = $object->forDB();
                 } else {
                     $arr[$field] = $object->raw();
@@ -82,7 +82,7 @@ class DataBaseFieldManager {
                 if(isset($value)) {
                     $arr[$field] = $value;
                 } else if($useDefaults) {
-                    $defaultValue = Object::instance($className)->getDefaultValue($field);
+                    $defaultValue = gObject::instance($className)->getDefaultValue($field);
                     if($defaultValue != null) {
                         $arr[$field] = $defaultValue;
                     }
@@ -111,7 +111,7 @@ class DataBaseFieldManager {
     protected static function parseRawValue($data, $field) {
         if (isset($data[$field])) {
             if (is_object($data[$field])) {
-                if (Object::method_exists($data[$field], "raw")) {
+                if (gObject::method_exists($data[$field], "raw")) {
                     return $data[$field]->raw();
                 }
             }

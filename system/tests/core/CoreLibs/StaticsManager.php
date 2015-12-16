@@ -113,7 +113,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
     }
 }
 
-class testDefineStatics extends Object {
+class testDefineStatics extends gObject {
     public static $hasBeenCalled = false;
     public $hasBeenLocallyCalled = false;
 

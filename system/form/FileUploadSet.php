@@ -158,7 +158,7 @@ class FileUploadSet extends FormField
      */
     public function storeData()
     {
-        session_store("FileUploadSet_" . $this->key, $this->value);
+        Core::globalSession()->set("FileUploadSet_" . $this->key, $this->value);
         $this->Form()->saveToSession();
     }
 
@@ -178,8 +178,8 @@ class FileUploadSet extends FormField
             $this->uploadClass = $relationShip->getTarget();
         }
 
-        if (isset($this->form()->post[$this->PostName() . "__key"]) && session_store_exists("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
-            $this->value = session_restore("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
+        if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
+            $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
             $this->key = $this->form()->post[$this->PostName() . "__key"];
         } else {
             if(!isset($this->uploadClass)) {
@@ -655,8 +655,8 @@ class FileUploadSet extends FormField
     {
         $this->getValue();
 
-        if (isset($this->form()->post[$this->PostName() . "__key"]) && session_store_exists("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
-            $this->value = session_restore("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
+        if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {
+            $this->value = Core::globalSession()->get("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"]);
             $this->key = $this->form()->post[$this->PostName() . "__key"];
         }
 

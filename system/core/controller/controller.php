@@ -201,14 +201,14 @@ class Controller extends RequestHandler
 
         if (!is_object($this->model_inst) || (isset($model) && ClassInfo::exists($model))) {
             if (isset($this->model)) {
-                $this->model_inst = Object::instance($this->model);
+                $this->model_inst = gObject::instance($this->model);
             } else {
                 if (ClassInfo::exists($model = substr($this->classname, 0, -10))) {
                     $this->model = $model;
-                    $this->model_inst = Object::instance($this->model);
+                    $this->model_inst = gObject::instance($this->model);
                 } else if (ClassInfo::exists($model = substr($this->classname, 0, -11))) {
                     $this->model = $model;
-                    $this->model_inst = Object::instance($this->model);
+                    $this->model_inst = gObject::instance($this->model);
                 }
             }
         } else if (!isset($this->model)) {
@@ -293,7 +293,7 @@ class Controller extends RequestHandler
             Resources::addData("goma.help.initWithParams(" . json_encode($this->helpArticle()) . ");");
         }
 
-        if (Core::is_ajax() && is_object($data) && Object::method_exists($data, "render")) {
+        if (Core::is_ajax() && is_object($data) && gObject::method_exists($data, "render")) {
             HTTPResponse::setBody($data->render());
             HTTPResponse::output();
             exit;
@@ -420,7 +420,7 @@ class Controller extends RequestHandler
      * @param bool $disabled
      * @return string
      */
-    public function form($name = null, $model = null, $fields = array(), $edit = false, $submission = "submit_form", $disabled = false)
+    public function form($name = null, $model = null, $fields = array(), $edit = false, $submission = null, $disabled = false)
     {
         return $this->buildForm($name, $model, $fields, $edit, $submission, $disabled)->render();
     }
@@ -428,22 +428,35 @@ class Controller extends RequestHandler
     /**
      * builds the form
      *
-     * @name buildForm
-     * @access public
+     * @param string|null $name
+     * @param ViewAccessableData|null $model
+     * @param array $fields
+     * @param bool $edit
+     * @param callback|null $submission
+     * @param bool $disabled
+     * @return Form
      */
-    public function buildForm($name = null, $model = null, $fields = array(), $edit = false, $submission = "submit_form", $disabled = false)
+    public function buildForm($name = null, $model = null, $fields = array(), $edit = false, $submission = null, $disabled = false)
     {
         if (!isset($model) || !$model) {
             $model = clone $this->modelInst();
         }
 
-        if (!Object::method_exists($model, "generateForm")) {
+        if(!isset($submission)) {
+            $submission = "submit_form";
+        }
+
+        if (!gObject::method_exists($model, "generateForm")) {
             throw new LogicException("No Method generateForm for Model " . get_class($model));
         }
 
         // add the right controller
         $form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null, $this);
         $form->setSubmission($submission);
+
+        foreach($fields as $field) {
+            $form->add($field);
+        }
 
         // we add where to the form
         foreach ($this->where as $key => $value) {
@@ -457,12 +470,12 @@ class Controller extends RequestHandler
 
     /**
      * renders the form for this model
-     *
-     * @name renderForm
-     * @access public
-     * @param string - name
-     * @param array - additional fields
-     * @param string - submission
+     * @param bool $name
+     * @param array $fields
+     * @param string $submission
+     * @param bool $disabled
+     * @param null|ViewAccessableData $model
+     * @return string
      */
     public function renderForm($name = false, $fields = array(), $submission = "safe", $disabled = false, $model = null)
     {
@@ -590,7 +603,7 @@ class Controller extends RequestHandler
      *
      * @param array $data
      * @param Form $form
-     * @param Object $controller
+     * @param gObject $controller
      * @param bool $overrideCreated
      * @param int $priority
      * @param string $action
@@ -616,7 +629,7 @@ class Controller extends RequestHandler
      * @access    public
      * @param    array $data
      * @param Form $form
-     * @param Object $controller
+     * @param gObject $controller
      * @param bool $overrideCreated
      * @return string
      * @throws Exception
@@ -677,7 +690,7 @@ class Controller extends RequestHandler
      * returns a model which is writable with given data and optional given model.
      * if no model was given, an instance of the controlled model is generated.
      *
-     * @param    array|object $data Data or Object of Data
+     * @param    array|gObject $data Data or Object of Data
      * @param    ViewAccessableData $givenModel
      * @return ViewAccessableData
      */
@@ -688,7 +701,7 @@ class Controller extends RequestHandler
 
         if(isset($data["class_name"])) {
             if(!ClassManifest::classesRelated($data["class_name"], $model)) {
-                $model = Object::instance($data["class_name"]);
+                $model = gObject::instance($data["class_name"]);
             }
         }
 
@@ -728,7 +741,7 @@ class Controller extends RequestHandler
      * it is called when actions of this controller are completed and the user should be notified. For example if the user saves data and it was successfully saved, this method is called with the param save_success. It is also called if an error occurs.
      *
      * @param    string $action the action called
-     * @param    object $record optional: record if available
+     * @param    gObject $record optional: record if available
      * @access    public
      * @return string
      */
@@ -798,7 +811,7 @@ class Controller extends RequestHandler
 
         if (isset($description)) {
             if(is_object($description)) {
-                if(Object::method_exists($description, "generateRepresentation")) {
+                if(gObject::method_exists($description, "generateRepresentation")) {
                     /** @var DataObject $description */
                     $description = $description->generateRepresentation(true);
                 } else {

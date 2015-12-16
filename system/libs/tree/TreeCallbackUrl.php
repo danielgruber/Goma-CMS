@@ -37,9 +37,9 @@ class TreeCallbackUrl extends RequestHandler {
 		$renderKey = md5(serialize($renderer));
 		GlobalSessionManager::globalSession()->set("tree_renderer_" . $renderKey, $renderer);
 		
-		if($treenode->getChildCallback() == null && isset($treenode->model) && Object::method_exists($treenode->model->dataclass, "build_tree")) {
+		if($treenode->getChildCallback() == null && isset($treenode->model) && gObject::method_exists($treenode->model->dataclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->model->dataclass . "/" . $treenode->model->recordid . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
-		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID) && Object::method_exists($treenode->treeclass, "build_tree")) {
+		} else if(ClassInfo::exists($treenode->treeclass) && isset($treenode->RecordID) && gObject::method_exists($treenode->treeclass, "build_tree")) {
 			return "treecallback/model/" . $treenode->treeclass . "/" . $treenode->RecordID . "/" . $renderKey . URLEND  . "?redirect=" . urlencode(getRedirect());
 		} else if($treenode->getChildCallback() != null) {
 			$key = md5(serialize($treenode));
@@ -60,7 +60,7 @@ class TreeCallbackUrl extends RequestHandler {
 			
 		if(Core::is_ajax()) {
 			
-			if(ClassInfo::exists($model) && Object::method_exists($model, "build_tree")) {
+			if(ClassInfo::exists($model) && gObject::method_exists($model, "build_tree")) {
 				$record = DataObject::get_by_id($model, $parent);
 				$tree = call_user_func_array(array($model, "build_tree"), array($record));
 				

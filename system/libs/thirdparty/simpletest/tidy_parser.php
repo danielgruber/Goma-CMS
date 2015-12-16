@@ -141,7 +141,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Visits the given node and all children
-     *  @param object $node      Tidy XML node.
+     *  @param gObject $node      Tidy XML node.
      */
     private function walkTree($node) {
         if ($node->name == 'a') {
@@ -166,7 +166,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Helper method for traversing the XML tree.
-     *  @param object $node     Tidy XML node.
+     *  @param gObject $node     Tidy XML node.
      */
     private function walkChildren($node) {
         if ($node->hasChildren()) {
@@ -178,7 +178,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Facade for forms containing preparsed widgets.
-     *  @param object $node     Tidy XML node.
+     *  @param gObject $node     Tidy XML node.
      *  @return SimpleForm      Facade for SimpleBrowser.
      */
     private function createEmptyForm($node) {
@@ -187,7 +187,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Visits the given node and all children
-     *  @param object $node      Tidy XML node.
+     *  @param gObject $node      Tidy XML node.
      */
     private function walkForm($node, $form, $enclosing_label = '') {
         if ($node->name == 'a') {
@@ -214,7 +214,7 @@ class SimpleTidyPageBuilder {
     /**
      *  Tests a node for a "for" atribute. Used for
      *  attaching labels.
-     *  @param object $node      Tidy XML node.
+     *  @param gObject $node      Tidy XML node.
      *  @return boolean          True if the "for" attribute exists.
      */
     private function hasFor($node) {
@@ -223,7 +223,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Adds the widget into the form container.
-     *  @param object $node             Tidy XML node of widget.
+     *  @param gObject $node             Tidy XML node of widget.
      *  @param SimpleForm $form         Form to add it to.
      *  @param string $enclosing_label  The label of any label
      *                                  tag we might be in.
@@ -259,7 +259,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Parses the options from inside an XML select node.
-     *  @param object $node      Tidy XML node.
+     *  @param gObject $node      Tidy XML node.
      *  @return array            List of SimpleTag options.
      */
     private function collectSelectOptions($node) {
@@ -279,7 +279,7 @@ class SimpleTidyPageBuilder {
     /**
      *  Convenience method for collecting all the attributes
      *  of a tag. Not sure why Tidy does not have this.
-     *  @param object $node      Tidy XML node.
+     *  @param gObject $node      Tidy XML node.
      *  @return array            Hash of attribute strings.
      */
     private function attributes($node) {
@@ -322,7 +322,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Collects frame information inside a frameset tag.
-     *  @param object $node     Tidy XML node.
+     *  @param gObject $node     Tidy XML node.
      *  @return array           List of SimpleTag frame descriptions.
      */
     private function collectFrames($node) {
@@ -340,7 +340,7 @@ class SimpleTidyPageBuilder {
 
     /**
      *  Extracts the XML node text.
-     *  @param object $node     Tidy XML node.
+     *  @param gObject $node     Tidy XML node.
      *  @return string          The text only.
      */
     private function innerHtml($node) {

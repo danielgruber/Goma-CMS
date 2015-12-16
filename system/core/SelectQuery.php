@@ -12,7 +12,7 @@
  * @version     2.0.9
  */
 
-class SelectQuery extends Object {
+class SelectQuery {
 	/**
 	 * own data
 	 *
@@ -106,8 +106,6 @@ class SelectQuery extends Object {
 	 *@param array - where
 	 */
 	public function __construct($table = "", $fields = array(), $filter = array()) {
-		parent::__construct();
-
 		if($table != "")
 			$this->from($table);
 		$this->fields = $fields;
@@ -184,19 +182,12 @@ class SelectQuery extends Object {
 			}
 	}
 
-	/**
-	 * adds one rule to orderby
-	 *
-	 * @param string $field
-	 * @param string $type
-	 * @param int $order
-	 * @return $this
-	 */
 	public function sort($field, $type = "ASC", $order = 0) {
 
 		$collate = null;
 
 		if(is_array($field)) {
+			$fieldValues = array_values($field);
 			if(isset($field["field"], $field["type"])) {
 
 				if(isset($field["collate"])) {
@@ -205,16 +196,19 @@ class SelectQuery extends Object {
 
 				$type = $field["type"];
 				$field = $field["field"];
-			} else if(count($field) == 2) {
-				$field = array_values($field);
-				if(isset($field[1])) {
-					$type = $field[1];
+			} else if(count($field) == 2 && !in_array(strtolower($fieldValues[0]), array("desc", "asc"))) {
+				if(isset($fieldValues[1])) {
+					$type = $fieldValues[1];
 				}
-				$field = $field[0];
+				$field = $fieldValues[0];
 			} else {
 				foreach($field as $fieldName => $type) {
-					if(is_string($fieldName) && !RegexpUtil::isNumber($fieldName) && in_array(strtolower($type), array("desc", "asc"))) {
-						$this->sort($fieldName, $type);
+					if(is_string($fieldName) && !RegexpUtil::isNumber($fieldName)) {
+						if(in_array(strtolower($type), array("desc", "asc"))) {
+							$this->sort($fieldName, $type);
+						} else if(is_bool($type)) {
+							$this->sort($fieldName, $type ? "asc" : "desc");
+						}
 					}
 				}
 
@@ -270,7 +264,7 @@ class SelectQuery extends Object {
 	 * adds one to the having-part
 	 *@name having
 	 *@param string - clause
-	 *@return object
+	 *@return gObject
 	 */
 	public function having($str) {
 		$this->having[] = $str;
@@ -281,7 +275,7 @@ class SelectQuery extends Object {
 	 * adds a field or more than one field as array to field-list
 	 *
 	 *@param string|array - fields
-	 *@return object
+	 *@return gObject
 	 */
 	public function fields($fields, $table = "") {
 		if(is_array($fields)) {

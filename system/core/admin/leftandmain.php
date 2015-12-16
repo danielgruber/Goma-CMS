@@ -162,11 +162,11 @@ class LeftAndMain extends AdminItem {
 		
 		$html = new HTMLNode("div");
 		
-		if(Object::method_exists($tree_class, "generateTreeOptions")) {
+		if(gObject::method_exists($tree_class, "generateTreeOptions")) {
 			call_user_func_array(array($tree_class, "generateTreeOptions"), array($html, $this));
 		}
 
-		/** @var Object $treeInstance */
+		/** @var gObject $treeInstance */
 		$treeInstance = new $tree_class;
 		$treeInstance->callExtending("generateTreeOptions", $html, $this);
 		
@@ -230,14 +230,14 @@ class LeftAndMain extends AdminItem {
 			throw new LogicException("Failed to load Tree-Class. Please define \$tree_class in ".$this->classname);
 		}
 		
-		if(!Object::method_exists($tree_class, "build_tree")) {
+		if(!gObject::method_exists($tree_class, "build_tree")) {
 			throw new LogicException("Tree-Class does not have a method build_tree. Maybe you have to update your version of goma?");
 		}
 		
 		$options = array("version" => "state", "search" => $search, "filter" => array());
 			
 		// give the tree-class the ability to modify the options.
-		if(Object::method_exists($tree_class, "argumentTree")) {
+		if(gObject::method_exists($tree_class, "argumentTree")) {
 			$newParams = call_user_func_array(array($tree_class, "argumentTree"), array($this, $options));
 			if(is_array($newParams) && isset($newParams["version"]) && isset($newParams["filter"])) {
 				$options = $newParams;
@@ -391,7 +391,7 @@ class LeftAndMain extends AdminItem {
 	 * @access public
 	 * @param object - model
 	 * @param array additional
-	 * @param object|null controller
+	 * @param gObject|null controller
 	 * @return DataObject
 	 */
 	public function decorateModel($model, $add = array(), $controller = null) {

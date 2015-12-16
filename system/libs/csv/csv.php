@@ -9,7 +9,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version	 	1.1
  */
-class CSV extends Object implements Iterator
+class CSV extends gObject implements Iterator
 {
 		/**
 		 * this var contains the raw csv-string.

@@ -64,7 +64,7 @@ if(typeof goma == "undefined")
 		});
 		
 		$("#"+id+" > .default_submit").click(function(){
-			$("#"+id+" > .actions  input[type=submit]").each(function(){
+			$("#"+id+" > .actions  button[type=submit]").each(function(){
 				if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
 					$(this).click();
 					return false;

@@ -51,10 +51,10 @@ class DataObjectTests extends GomaUnitTest
      * tests if table exists for write-entity.
      */
     public function testTableExistence() {
-        $this->assertTrue(Object::instance("MockWriteEntity")->hasTable());
-        $this->assertFalse(Object::instance("MockWriteExtendedEntity")->hasTable());
-        $this->assertTrue(Object::instance("MockWriteEntity")->hasTable());
-        $this->assertFalse(Object::instance("MockWriteExtendedEntityWithFieldsInParent")->hasTable());
+        $this->assertTrue(gObject::instance("MockWriteEntity")->hasTable());
+        $this->assertFalse(gObject::instance("MockWriteExtendedEntity")->hasTable());
+        $this->assertTrue(gObject::instance("MockWriteEntity")->hasTable());
+        $this->assertFalse(gObject::instance("MockWriteExtendedEntityWithFieldsInParent")->hasTable());
     }
 }
 

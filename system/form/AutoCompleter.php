@@ -75,4 +75,4 @@ class AutoCompleterField extends ControllerExtension {
 
 }
 
-Object::extend("FormField", "AutoCompleterField");
+gObject::extend("FormField", "AutoCompleterField");

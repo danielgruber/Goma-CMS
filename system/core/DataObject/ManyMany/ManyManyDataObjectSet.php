@@ -236,7 +236,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
 
         // generate manipulation
         /** @var DataObject $owner */
-        $owner = Object::instance($this->relationShip->getOwner());
+        $owner = gObject::instance($this->relationShip->getOwner());
         $owner->versionid = $this->ownValue;
         $manipulation = ManyManyModelWriter::set_many_many_manipulation(
             $owner,

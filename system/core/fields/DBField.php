@@ -4,7 +4,7 @@
  * Every value of an field can used as object if you call doObject($offset)
  * This Object has some very cool methods to convert the field
  */
-class DBField extends Object implements IDataBaseField
+class DBField extends gObject implements IDataBaseField
 {
     /**
      * this var contains the value
@@ -196,7 +196,7 @@ class DBField extends Object implements IDataBaseField
         $new = clone $this;
         foreach($arr as $method)
         {
-            if(Object::method_exists($new, $method))
+            if(gObject::method_exists($new, $method))
             {
                 $new->setValue($new->$method());
             }
@@ -429,7 +429,7 @@ class DBField extends Object implements IDataBaseField
             $args = array();
         }
 
-        if(Object::method_exists($this, $var)) {
+        if(gObject::method_exists($this, $var)) {
             return call_user_func_array(array($this, $var), $args);
         }
 

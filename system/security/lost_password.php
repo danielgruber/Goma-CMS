@@ -171,5 +171,5 @@ class lost_passwordExtension extends ControllerExtension {
     }
 }
 
-Object::extend("ProfileController", "lost_passwordExtension");
-Object::extend("AdminController", "lost_passwordExtension");
+gObject::extend("ProfileController", "lost_passwordExtension");
+gObject::extend("AdminController", "lost_passwordExtension");

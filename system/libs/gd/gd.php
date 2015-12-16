@@ -9,7 +9,7 @@
  * @author 	Goma-Team
  * @version 1.1
  */
-class GD extends Object
+class GD extends gObject
 {
     /***
      * default expires-time for images in browser-cache.
@@ -150,8 +150,15 @@ class GD extends Object
      * it does not validate if image exists.
      *
      * @param string $image
+     * @throws FileNotFoundException
+     * @throws GDFileMalformedException
+     * @throws GDFiletypeNotSupportedException
      */
     protected function initWithImage($image) {
+        if(!is_file($image)) {
+            throw new FileNotFoundException();
+        }
+
         if($this->info = GetImageSize($image)) {
             $this->width = $this->info[0];
             $this->height = $this->info[1];
@@ -160,10 +167,10 @@ class GD extends Object
             if(isset(self::$supported_types[$type])) {
                 $this->type = self::$supported_types[$type];
             } else {
-                throw new LogicException("GD-Lib does not support Type of image.");
+                throw new GDFiletypeNotSupportedException("GD-Lib does not support type of image.");
             }
         } else {
-            throw new LogicException("Image $image seems to be malformed");
+            throw new GDFileMalformedException("Image $image seems to be malformed");
         }
     }
 
@@ -378,14 +385,14 @@ class GD extends Object
 
         $relation = $srcArea->getWidth() / $srcArea->getHeight();
         if($relation > 1) {
-            $calculatedWidth = round($imageSize->getHeight() * $srcArea->getWidth() / $srcArea->getHeight());
+            $calculatedWidth = ceil($imageSize->getHeight() * $srcArea->getWidth() / $srcArea->getHeight());
 
             if($calculatedWidth < $imageSize->getWidth()) {
                 $position = $position->updateX(($imageSize->getWidth() - $calculatedWidth) / 2);
                 $size = $size->updateWidth($calculatedWidth);
             }
         } else {
-            $calculatedHeight = round($imageSize->getHeight() * $srcArea->getHeight() / $srcArea->getWidth());
+            $calculatedHeight = ceil($imageSize->getHeight() * $srcArea->getHeight() / $srcArea->getWidth());
             if($calculatedHeight < $imageSize->getHeight()) {
                 $position = $position->updateY(($imageSize->getHeight() - $calculatedHeight) / 2);
                 $size = $size->updateHeight($calculatedHeight);
@@ -732,8 +739,6 @@ class GD extends Object
             $this->gd = null;
         }
     }
-
-
 }
 
 /**
@@ -744,16 +749,20 @@ class GD extends Object
 if (!function_exists('imagecreatefrombmp')) {
     function imagecreatefrombmp($filename) {
         // version 1.00
-        if (!($fh = fopen($filename, 'rb'))) {
-            trigger_error('imagecreatefrombmp: Can not open ' . $filename, E_USER_WARNING);
-            return false;
+
+        if(!file_exists($filename)) {
+            throw new FileNotFoundException("imagecreatefrombmp: Can not find" . $filename);
         }
+
+        if (!($fh = fopen($filename, 'rb'))) {
+            throw new FileNotPermittedException('imagecreatefrombmp: Can not open ' . $filename);
+        }
+
         // read file header
         $meta = unpack('vtype/Vfilesize/Vreserved/Voffset', fread($fh, 14));
         // check for bitmap
         if ($meta['type'] != 19778) {
-            trigger_error('imagecreatefrombmp: ' . $filename . ' is not a bitmap!', E_USER_WARNING);
-            return false;
+            throw new GDFileMalformedException('imagecreatefrombmp: ' . $filename . ' is not a bitmap!');
         }
         // read image header
         $meta += unpack('Vheadersize/Vwidth/Vheight/vplanes/vbits/Vcompression/Vimagesize/Vxres/Vyres/Vcolors/Vimportant', fread($fh, 40));
@@ -774,8 +783,7 @@ if (!function_exists('imagecreatefrombmp')) {
             if ($meta['imagesize'] < 1) {
                 $meta['imagesize'] = @filesize($filename) - $meta['offset'];
                 if ($meta['imagesize'] < 1) {
-                    trigger_error('imagecreatefrombmp: Can not obtain filesize of ' . $filename . '!', E_USER_WARNING);
-                    return false;
+                    throw new GDFileMalformedException('imagecreatefrombmp: Can not obtain filesize of ' . $filename);
                 }
             }
         }
@@ -799,6 +807,9 @@ if (!function_exists('imagecreatefrombmp')) {
         $vide = chr(0);
         $y = $meta['height'] - 1;
         $error = 'imagecreatefrombmp: ' . $filename . ' has not enough data!';
+
+        $ex = new GDFileMalformedWithDataException($error);
+
         // loop through the image data beginning with the lower left corner
         while ($y >= 0) {
             $x = 0;
@@ -807,15 +818,15 @@ if (!function_exists('imagecreatefrombmp')) {
                     case 32:
                     case 24:
                         if (!($part = substr($data, $p, 3))) {
-                            trigger_error($error, E_USER_WARNING);
-                            return $im;
+                            $ex->data = $im;
+                            throw $ex;
                         }
                         $color = unpack('V', $part . $vide);
                         break;
                     case 16:
                         if (!($part = substr($data, $p, 2))) {
-                            trigger_error($error, E_USER_WARNING);
-                            return $im;
+                            $ex->data = $im;
+                            throw $ex;
                         }
                         $color = unpack('v', $part);
                         $color[1] = (($color[1] & 0xf800) >> 8) * 65536 + (($color[1] & 0x07e0) >> 3) * 256 + (($color[1] & 0x001f) << 3);
@@ -860,8 +871,7 @@ if (!function_exists('imagecreatefrombmp')) {
                         $color[1] = $palette[ $color[1] + 1 ];
                         break;
                     default:
-                        trigger_error('imagecreatefrombmp: ' . $filename . ' has ' . $meta['bits'] . ' bits and this is not supported!', E_USER_WARNING);
-                        return false;
+                        throw new GDFileMalformedException('imagecreatefrombmp: ' . $filename . ' has ' . $meta['bits'] . ' bits and this is not supported!');
                 }
                 imagesetpixel($im, $x, $y, $color[1]);
                 $x++;
@@ -873,4 +883,28 @@ if (!function_exists('imagecreatefrombmp')) {
         fclose($fh);
         return $im;
     }
+}
+
+class GDException extends Exception {
+    protected $standardCode = ExceptionManager::GD_EXCEPTION;
+
+    public function __construct($message = "Unknown GD-Exception occurred.", $code = null, Exception $previous = null) {
+        if(!isset($code)) {
+            $code =  $this->standardCode;
+        }
+
+        parent::__construct($message, $code, $previous);
+    }
+}
+
+class GDFileMalformedException extends GDException {
+    protected $standardCode = ExceptionManager::GD_FILE_MALFORMED;
+}
+class GDFiletypeNotSupportedException extends GDException {
+    protected $standardCode = ExceptionManager::GD_TYPE_NOT_SUPPORTED;
+}
+class GDFileMalformedWithDataException extends GDFileMalformedException {
+    public $data;
+
+    protected $standardCode = ExceptionManager::GD_FILE_MALFORMED;
 }

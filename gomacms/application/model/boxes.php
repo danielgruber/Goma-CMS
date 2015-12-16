@@ -580,7 +580,7 @@ class BoxesTplExtension extends Extension {
 	}
 }
 
-Object::extend("tplCaller", "BoxesTPLExtension");
+gObject::extend("tplCaller", "BoxesTPLExtension");
 
 /**
  * boxpage

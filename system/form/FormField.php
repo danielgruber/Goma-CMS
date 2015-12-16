@@ -11,49 +11,37 @@
  */
 class FormField extends RequestHandler {
     /**
-     * secret key for this form field
-     *
-     * @name randomKey
-     * @access public
-     */
-    public $randomKey = "";
-
-    /**
      * this var defines if the value of $this->form()->post[$name] should be set as value if it is set
      *
-     * @name POST
-     * @access protected
+     * @var boolean
      */
     protected $POST = true;
 
     /**
      * the parent field of this field, e.g. a form or a fieldset
      *
-     * @var Form
+     * @var Form|FieldSet
      * @name parent
-     * @access protected
      */
     protected $parent;
 
     /**
      * this var contains the node-object of the input-element
      *
-     * @see HTMLNode
-     * @name input
-     * @access public
-     * @var object
+     * @var HTMLNode
      */
     public $input;
 
     /**
      * this var contains the container
-     * @see HTMLNode
-     * @name container
-     * @access public
-     * @var object
+     *
+     * @var HTMLNode
      */
     public $container;
 
+    /**
+     * @var array
+     */
     public $url_handlers = array(
         '$Action//$id/$otherid' => '$Action'
     );
@@ -61,24 +49,21 @@ class FormField extends RequestHandler {
     /**
      * value
      *
-     * @name value
-     * @access public
+     * @var mixed
      */
     public $value;
 
     /**
      * name of this field
      *
-     * @name name
-     * @access public
+     * @var string
      */
     public $name;
 
     /**
      * name of the data-relation
      *
-     * @name dbname
-     * @access public
+     * @var string
      */
     public $dbname;
 
@@ -108,8 +93,6 @@ class FormField extends RequestHandler {
      * defines if this field should use the full width or not
      * this is good, for example for textarea or something else to get correct position of info and label-area
      *
-     * @name fullSizedField
-     * @access public
      * @var bool
      */
     protected $fullSizedField = false;
@@ -147,8 +130,6 @@ class FormField extends RequestHandler {
 
         /* --- */
 
-        $this->randomKey = randomString(3);
-
         $this->name = $name;
         $this->dbname = strtolower(trim($name));
         $this->title = $title;
@@ -158,12 +139,10 @@ class FormField extends RequestHandler {
             $this->form()->fields[$name] = $this;
             if (is_a($this->parent, "form")) {
                 $this->parent->fieldList->add($this);
-
             } else {
                 $this->parent->items[$name] = $this;
                 $this->parent->sort[$name] = count($this->parent->sort);
             }
-
         }
 
         $this->input = $this->createNode();
@@ -207,9 +186,8 @@ class FormField extends RequestHandler {
      * @name setValue
      * @access public
      */
-    public function setValue()
-    {
-        if ($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && Object::method_exists($this->value->classname, "__toString"))))
+    public function setValue() {
+        if ($this->input && ($this->input->getTag() == "input" || $this->input->getTag() == "textarea") && (is_string($this->value) || (is_object($this->value) && gObject::method_exists($this->value->classname, "__toString"))))
             $this->input->val($this->value);
     }
 
@@ -334,11 +312,10 @@ class FormField extends RequestHandler {
 
     /**
      * sets the parent form-object
-     * @name setForm
      * @param Form $form
-     * @access public
+     * @param bool $renderAfterSetForm
      */
-    public function setForm(&$form)
+    public function setForm(&$form, $renderAfterSetForm = true)
     {
         $this->parent =& $form;
 
@@ -349,8 +326,7 @@ class FormField extends RequestHandler {
 
 
         $this->getValue();
-        $this->renderAfterSetForm();
-
+        if($renderAfterSetForm) $this->renderAfterSetForm();
     }
 
     /**
@@ -391,7 +367,7 @@ class FormField extends RequestHandler {
      */
     public function remove()
     {
-        $this->form()->unregisterField($this->name);
+        $this->form()->remove($this->name);
     }
 
     /**

@@ -16,7 +16,7 @@ define('IMAGE_ROOT', ROOT . '/images/');
 define('UPLOADS_ROOT', ROOT . '/uploads/');
 define('HTACCESS_FILE', ROOT . '.htaccess');
 
-class FileSystem extends Object {
+class FileSystem extends gObject {
 	/**
 	 * this is the last file which causes an error
 	 *
@@ -83,6 +83,7 @@ class FileSystem extends Object {
 	 * @param int $mode
 	 * @param bool $throwOnFail
 	 * @return bool
+	 * @throws FileNotPermittedException
 	 */
 	public static function requireDir($dir, $mode = null, $throwOnFail = true) {
 
@@ -95,7 +96,7 @@ class FileSystem extends Object {
 				return true;
 			} else {
 				if($throwOnFail) {
-					throw new LogicException("Could not create folder '" . $dir . "'.");
+					throw new FileNotPermittedException("Could not create folder '" . $dir . "'.");
 				}
 				self::$errFile = $dir;
 				return false;
@@ -123,9 +124,10 @@ class FileSystem extends Object {
 	/**
 	 * createFile
 	 *
-	 * @name createFile
-	 * @access public
+	 * @param $file
 	 * @return bool
+	 * @throws FileExistsException
+	 * @access public
 	 */
 	public static function createFile($file) {
 		if(!file_exists($file)) {
@@ -138,7 +140,7 @@ class FileSystem extends Object {
 				return false;
 			}
 		} else {
-			throw new LogicException("Can't create file: File exists.");
+			throw new FileExistsException("Can't create file: File exists.");
 		}
 	}
 
@@ -182,8 +184,6 @@ class FileSystem extends Object {
      * @return bool
      */
 	public static function chmod($file, $mode, $breakOnFail = true, $tryOwn = false) {
-		
-
 		$r = @chmod($file, $mode);
 
 		// maybe try to own this file.
@@ -629,4 +629,27 @@ class FileSystem extends Object {
 			return false;
 		}
 	}
+}
+
+class FileException extends Exception {
+	protected $standardCode = ExceptionManager::FILE_EXCEPTION;
+	public function __construct($message = "Unknown File-Exception.", $code = null, Exception $previous = null) {
+		if(!isset($code)) {
+			$code =  $this->standardCode;
+		}
+
+		parent::__construct($message, $code, $previous);
+	}
+}
+
+class FileNotFoundException extends FileException {
+	protected $standardCode = ExceptionManager::FILE_NOT_FOUND;
+}
+
+class FileNotPermittedException extends FileException {
+	protected $standardCode = ExceptionManager::FILE_NOT_PERMITTED;
+}
+
+class FileExistsException extends FileException {
+	protected $standardCode = ExceptionManager::FILE_ALREADY_EXISTING;
 }

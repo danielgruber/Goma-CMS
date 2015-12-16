@@ -17,7 +17,7 @@ StaticsManager::addSaveVar("i18n", "defaultLanguagefiles");
  * @package		Goma\System\Core
  * @version		1.4.5
  */
-class i18n extends Object {
+class i18n extends gObject {
 	/**
 	 * files to load
 	 */
@@ -243,7 +243,7 @@ class i18n extends Object {
 	 *
 	 *@name AutoSelectLang
 	 */
-	public function AutoSelectLang($code) {
+	public static function AutoSelectLang($code) {
 		if(isset($code) && self::LangExists($code)) {
 			return $code;
 		}
@@ -286,8 +286,7 @@ class i18n extends Object {
 	 * @name selectLang
 	 * @return string
 	 */
-	public function selectLang($code) {
-
+	public static function selectLang($code) {
 		if($code != "." && $code != ".." && is_dir(LANGUAGE_DIRECTORY . "/" . $code)) {
 			return $code;
 		} else {
@@ -314,7 +313,7 @@ class i18n extends Object {
 	 * @name LangExists
 	 * @return bool
 	 */
-	public function LangExists($code) {
+	public static function LangExists($code) {
 		if(!$code || $code == "." || $code == "..")
 			return false;
 
@@ -334,7 +333,7 @@ class i18n extends Object {
 	 * this function builds a cache which has a langcode-lang-database
 	 *
 	 */
-	public function getLangDB() {
+	public static function getLangDB() {
 		$cacher = new Cacher("langDB" . count(scandir(LANGUAGE_DIRECTORY)));
 		if($cacher->checkValid()) {
 			return $cacher->getData();
@@ -357,7 +356,7 @@ class i18n extends Object {
 	 *
 	 *@name getLangCodes
 	 */
-	public function getLangCodes($code) {
+	public static function getLangCodes($code) {
 		$data = self::getLangInfo(self::selectLang($code));
 		if(isset($data["langCodes"]))
 			return array_merge($data["areaCodes"], array($code));
@@ -365,7 +364,7 @@ class i18n extends Object {
 			return array($code);
 	}
 	
-	public function prefered_language ($available_languages,$http_accept_language="auto") { 
+	public static function prefered_language ($available_languages,$http_accept_language="auto") {
 	    // if $http_accept_language was left out, read it from the HTTP-Header 
 	    if ($http_accept_language == "auto") $http_accept_language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : ''; 
 	

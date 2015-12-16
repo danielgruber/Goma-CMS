@@ -203,7 +203,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 	 */
 	public static function buildDistro($file, $name, $controller) {
 		if(GlobalSessionManager::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
-			return Object::instance("g_expansionSoftWareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
+			return gObject::instance("g_expansionSoftWareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 
 		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
 			return false;
@@ -219,7 +219,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			new Textarea("changelog", lang("distro_changelog"))
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), array(Object::instance("g_expansionSoftWareType"), "finalizeDistro"))
+			new FormAction("submit", lang("download"), array(gObject::instance("g_expansionSoftWareType"), "finalizeDistro"))
 		));
 
 		$version->disable();

@@ -20,4 +20,4 @@ class UploadsPageBacktrace extends DataObjectExtension {
         "linkingPages"	=> "pages"
     );
 }
-Object::extend("Uploads", "UploadsPageBacktrace");
+gObject::extend("Uploads", "UploadsPageBacktrace");

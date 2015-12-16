@@ -179,7 +179,7 @@ class systemController extends Controller {
 		foreach(ClassInfo::getChildren("DataObject") as $class) {
 			
 			
-			if (in_array("searchindex", Object::$extensions[$class])) {
+			if (in_array("searchindex", gObject::$extensions[$class])) {
 				$notIndexed = DataObject::get($class, "indexversion = 0 OR indexversion < '".SearchIndex::VERSION."'", array(), $max);
 				foreach($notIndexed as $record) {
 					if(microtime(true) - EXEC_START_TIME > 2.0)

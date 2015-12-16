@@ -9,7 +9,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class HTMLCacheController extends Object
+class HTMLCacheController extends gObject
 {
 	/**
 	 * unnecessary words caused of filter

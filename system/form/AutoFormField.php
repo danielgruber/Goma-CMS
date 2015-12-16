@@ -15,7 +15,7 @@ class AutoFormField extends FormField {
 	 *
 	 *@name field
 	 *@access public
-	 *@var object
+	 *@var gObject
 	 */
 	public $field;
 

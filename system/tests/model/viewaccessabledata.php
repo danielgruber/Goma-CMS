@@ -151,9 +151,9 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual($testClass->myLittleValue(), "val");
 		$this->assertIsA($testClass->myLittleTest(), "DBField");
 		$this->assertEqual($testClass->__call("myLittleValue", array()), "val");
-		$this->assertTrue(Object::method_exists($testClass,"myLittleValue"));
-		$this->assertTrue(Object::method_exists($testClass,"myLittleTest"));
-		$this->assertFalse(Object::method_exists($testClass->classname,"myLittleTest"));
+		$this->assertTrue(gObject::method_exists($testClass,"myLittleValue"));
+		$this->assertTrue(gObject::method_exists($testClass,"myLittleTest"));
+		$this->assertFalse(gObject::method_exists($testClass->classname,"myLittleTest"));
 		$this->assertEqual($testClass->getMyLittleTest, "val");
 	}
 
@@ -176,7 +176,7 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 
         $view = new TestViewClassMethod();
 
-        $this->assertTrue(Object::method_exists($view, "getproperty"));
+        $this->assertTrue(gObject::method_exists($view, "getproperty"));
 
         $prop = TestViewClassExtendedProperty::$prop = randomString(5);
 
@@ -214,4 +214,4 @@ class TestViewClassExtendedProperty extends Extension {
     }
 }
 
-Object::extend("TestViewClassMethod", "TestViewClassExtendedProperty");
+gObject::extend("TestViewClassMethod", "TestViewClassExtendedProperty");

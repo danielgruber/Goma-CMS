@@ -245,4 +245,4 @@ class ContentTPLExtension extends Extension {
         return $div->html();
     }
 }
-Object::extend("tplCaller", "ContentTPLExtension");
+gObject::extend("tplCaller", "ContentTPLExtension");

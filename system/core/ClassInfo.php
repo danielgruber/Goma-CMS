@@ -15,7 +15,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * @package		Goma\System\Core
  * @version		3.8.1
  */
-class ClassInfo extends Object {
+class ClassInfo extends gObject {
 	/**
 	 * version of class-info
 	 *
@@ -113,6 +113,7 @@ class ClassInfo extends Object {
 
 		if(self::$childData == array() && file_exists(ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE)) {
 			include (ROOT . CACHE_DIRECTORY . ".children" . CLASS_INFO_DATAFILE);
+			/** @var array $children */
 			if($children === null) {
 				self::delete();
 				self::loadfile();
@@ -208,7 +209,7 @@ class ClassInfo extends Object {
      * returns if class exists and is not empty.
      * it returns correct class-name.
      *
-     * @param string|object class
+     * @param string|gObject class
      * @return string
      * @throws LogicException
      */
@@ -226,7 +227,7 @@ class ClassInfo extends Object {
     /**
      * checks if class is abstract
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @return bool
      */
 	public static function isAbstract($class) {
@@ -236,7 +237,7 @@ class ClassInfo extends Object {
     /**
      * gets the parent class of a given class
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @return string
      */
 	public static function get_parent_class($class) {
@@ -258,7 +259,7 @@ class ClassInfo extends Object {
 
     /**
      * gets info to a specific class
-     * @param string|object $class
+     * @param string|gObject $class
      * @return array|null
      */
 	public static function getInfo($class) {
@@ -651,20 +652,20 @@ class ClassInfo extends Object {
 				Profiler::mark("classinfo_renderafter");
 
 			foreach(self::$class_info as $class => $data) {
-				if(Object::method_exists($class, "buildClassInfo")) {
+				if(gObject::method_exists($class, "buildClassInfo")) {
 					call_user_func_array(array($class, "buildClassInfo"), array($class));
 				}
 			}
 
 			foreach(self::$class_info as $class => $data) {
-				if(Object::method_exists($class, "buildClassInfo")) {
+				if(gObject::method_exists($class, "buildClassInfo")) {
 					call_user_func_array(array($class, "buildClassInfo"), array($class));
 				}
 
-				Object::instance("ClassInfo")->callExtending("generate", $class);
+				gObject::instance("ClassInfo")->callExtending("generate", $class);
 
 				// generates save-vars
-				if(class_exists($class) && is_subclass_of($class, "object") || $class == "object") {
+				if(class_exists($class) && is_subclass_of($class, "gObject") || $class == "gobject") {
 					// save vars
 					foreach(StaticsManager::getSaveVars($class) as $value) {
 						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
@@ -689,7 +690,7 @@ class ClassInfo extends Object {
 						Permission::addPermissions($c->providePerms());
 					}
 
-					if(Object::method_exists($class, "generateClassInfo")) {
+					if(gObject::method_exists($class, "generateClassInfo")) {
 						if(!isset($c))
 							$c = new $class;
 						$c->generateClassInfo();
@@ -755,7 +756,7 @@ class ClassInfo extends Object {
 
 			define("CLASS_INFO_GENERATED", true);
 
-			Object::$cache_singleton_classes = array();
+			gObject::$cache_singleton_classes = array();
 			// object reset
 			StaticsManager::$set_save_vars = array();
 			// class_info reset
@@ -987,7 +988,7 @@ class ClassInfo extends Object {
 			logging("finalize");
 			foreach(ClassInfo::$class_info as $class => $data) {
 				// generates save-vars
-				if(class_exists($class) && is_subclass_of($class, "object") || $class == "object") {
+				if(class_exists($class) && is_subclass_of($class, "gObject") || $class == "gobject") {
 					// save vars
 					foreach(StaticsManager::getSaveVars($class) as $value) {
 						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
@@ -1149,5 +1150,5 @@ class ClassInfoWriteError extends LogicException {
 	}
 }
 
-StaticsManager::addSaveVar("Object", "extensions");
-StaticsManager::addSaveVar("Object", "extra_methods");
+StaticsManager::addSaveVar("gObject", "extensions");
+StaticsManager::addSaveVar("gObject", "extra_methods");

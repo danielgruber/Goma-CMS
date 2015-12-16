@@ -11,7 +11,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class template extends object
+class template extends gObject
 {
         /**
 		 * the variables
@@ -27,7 +27,7 @@ class template extends object
 		protected $ifs = array();
 		/**
 		 * this var contains the object
-		 *@var object
+		 *@var gObject
 		*/
 		protected $object;
 		/**
@@ -44,7 +44,7 @@ class template extends object
 				
 				if(!$object)
 				{
-					$object = Object::instance("ViewAccessAbleData");
+					$object = gObject::instance("ViewAccessAbleData");
 				}
 				$this->object = $object;
 		}

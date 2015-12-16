@@ -34,7 +34,7 @@ class StatController extends Controller {
     );
 
     /**
-     * @param string|object|array $content
+     * @param string|gObject|array $content
      */
     public function __output($content) {
         HTTPResponse::setHeader("content-type", "text/x-json");

@@ -70,6 +70,8 @@ class GDTest extends GomaUnitTest
 
         $this->unitGDResizeCalculation(new Size(1000, 1000), new Size(200, 240), new Size(200, 240), new Tuple(new Position(84, 0), new Size(833, 1000)), new Tuple(new Position(0,0), new Size(200, 240)));
 
+        $this->unitGDResizeCalculation(new Size(1678, 790), new Size(1024, 455), new Size(1024, 455), new Tuple(new Position(0, 22), new Size(1678, 746)), new Tuple(new Position(0,0), new Size(1024, 455)));
+
     }
 
     public function unitGDResizeCalculation($sourceSize, $targetSize, $expectedSize, $expectedSourceArea, $expectedDestArea) {

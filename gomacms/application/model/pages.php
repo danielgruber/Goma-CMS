@@ -1093,7 +1093,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users') OR
             view_permission.id IN (
                 SELECT permissionid
-                FROM ".DB_PREFIX . Object::instance("permission")->getManyManyInfo("groups")->getTableName() ."
+                FROM ".DB_PREFIX . gObject::instance("permission")->getManyManyInfo("groups")->getTableName() ."
                 WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."')
             )");
     }
@@ -1107,7 +1107,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
         $query->addFilter("read_permissionid = 0 OR view_permission.type IN ('all', 'password', 'users', 'admin') OR
             view_permission.id IN (
                 SELECT permissionid
-                FROM ".DB_PREFIX . Object::instance("permission")->getManyManyInfo("groups")->getTableName() ."
+                FROM ".DB_PREFIX . gObject::instance("permission")->getManyManyInfo("groups")->getTableName() ."
                 WHERE groupid IN ('".implode("','", member::$loggedIn->groupsids)."')
             )");
     }
@@ -1287,13 +1287,13 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *
      * @name controller
      * @access public
-     * @return bool|Object|string
+     * @return bool|gObject|string
      */
     public function controller($controller = null) {
         if(parent::controller($controller)) {
             return parent::controller($controller);
         } else {
-            $this->controller = Object::instance("contentController");
+            $this->controller = gObject::instance("contentController");
             $this->controller->model_inst = $this;
             return $this->controller;
         }

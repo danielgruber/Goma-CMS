@@ -157,7 +157,7 @@ class Newsettings extends DataObject implements HistoryData {
 	public function generateSubClassForm(&$form) {
 		$tabs = $form->tabs;
 		foreach(ClassInfo::getChildren("newsettings") as $child) {
-			$tabs->add($currenttab = new Tab($child, array(),parse_lang(Object::instance($child)->tab)));
+			$tabs->add($currenttab = new Tab($child, array(),parse_lang(gObject::instance($child)->tab)));
 			$inst = new $child($this->data);
 			// sync data
 			$inst->getFormFromDB($currenttab);

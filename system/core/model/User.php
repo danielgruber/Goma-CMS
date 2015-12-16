@@ -14,6 +14,7 @@
  * @property string code
  * @property string password
  * @property string title
+ * @property string name
  * @property int avatarid
  * @property int code_has_sent
  * @property int status

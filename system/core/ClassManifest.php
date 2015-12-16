@@ -27,7 +27,7 @@ class ClassManifest {
 	/**
 	 * List of class aliases.
 	 */
-	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "testsuite" => "Object");
+	private static $class_alias = array("showsitecontroller" => "frontedcontroller", "object" => "gObject", "_array" => "arraylib", "dataobjectholder" => "viewaccessabledata", "autoloader" => "ClassManifest", "testsuite" => "Object");
 
 	/**
 	 * Loads a class.
@@ -147,8 +147,8 @@ class ClassManifest {
 
     /**
      * returns true if two classes can be treated as the same.
-     * @param string|object $class1
-     * @param string|object $class2
+     * @param string|gObject $class1
+     * @param string|gObject $class2
      * @return bool
      */
     public static function isSameClass($class1, $class2) {
@@ -158,8 +158,8 @@ class ClassManifest {
     /**
      * returns true if two classes can be treated as the same or are subclasses of each other.
      *
-     * @param string|object $class1
-     * @param string|object $class2
+     * @param string|gObject $class1
+     * @param string|gObject $class2
      * @return bool
      */
     public static function classesRelated($class1, $class2) {
@@ -174,8 +174,8 @@ class ClassManifest {
     /**
      * returns true if is same type, so also if given class is subclass of parent.
      *
-     * @param string|object $child
-     * @param string|object $parent
+     * @param string|gObject $child
+     * @param string|gObject $parent
      * @return bool
      */
     public static function isOfType($child, $parent) {

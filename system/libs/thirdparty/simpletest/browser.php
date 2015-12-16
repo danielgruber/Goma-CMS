@@ -203,7 +203,7 @@ class SimpleBrowser {
      *    Get the HTML parser to use. Can be overridden by
      *    setParser. Otherwise scans through the available parsers and
      *    uses the first one which is available.
-     *    @return object SimplePHPPageBuilder or SimpleTidyPageBuilder
+     *    @return gObject SimplePHPPageBuilder or SimpleTidyPageBuilder
      */
     protected function getParser() {
         if ($this->parser) {

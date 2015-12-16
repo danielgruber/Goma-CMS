@@ -11,7 +11,7 @@
 
 StaticsManager::AddSaveVar("Director", "rules");
 
-class Director extends Object {
+class Director extends gObject {
 
     /**
      * addon urls by modules or others
@@ -29,7 +29,7 @@ class Director extends Object {
     /**
      * the current active controller
      *
-     *@var object
+     *@var gObject
      */
     public static $requestController;
 

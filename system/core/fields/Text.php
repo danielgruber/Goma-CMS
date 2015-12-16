@@ -23,7 +23,6 @@ class TextSQLField extends Varchar
      */
     public function niceHTML($left = "	")
     {
-        echo 1;
         $value = $this->value;
         $value = str_replace("\n", "\n" . $left, $value);
 

@@ -102,4 +102,19 @@ class ExceptionManager {
      * no inverse found.
      */
     const RELATIONSHIP_INVERSE_REQUIRED = -62;
+
+	/**
+	 * gd.
+	 */
+	const GD_EXCEPTION = -700;
+	const GD_FILE_MALFORMED = -701;
+	const GD_TYPE_NOT_SUPPORTED = -701;
+
+	/**
+	 * file.
+	 */
+	const FILE_EXCEPTION = -800;
+	const FILE_NOT_PERMITTED = -803;
+	const FILE_NOT_FOUND = -804;
+	const FILE_ALREADY_EXISTING = -810;
 }

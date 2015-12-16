@@ -49,4 +49,4 @@ class HasOneWriter extends Extension {
         $owner->setData($data);
     }
 }
-Object::extend("ModelWriter", "HasOneWriter");
+gObject::extend("ModelWriter", "HasOneWriter");

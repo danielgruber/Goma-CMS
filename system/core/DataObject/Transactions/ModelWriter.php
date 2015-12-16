@@ -10,7 +10,7 @@
  *
  * @version    1.0.1
  */
-class ModelWriter extends Object {
+class ModelWriter extends gObject {
 
     /**
      * DataObject to write.

@@ -31,13 +31,13 @@ class HasManyGetter extends Extension {
     public function extendDefineStatics() {
         if ($has_many = $this->hasMany()) {
             foreach ($has_many as $key => $val) {
-                Object::LinkMethod($this->getOwner()->classname, $key, array("HasManyGetter", function($instance) use($key) {
+                gObject::LinkMethod($this->getOwner()->classname, $key, array("HasManyGetter", function($instance) use($key) {
                     $args = func_get_args();
                     $args[0] = $key;
                     return call_user_func_array(array($instance, "getHasMany"), $args);
                 }), true);
 
-                Object::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
+                gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
             }
         }
     }
@@ -186,4 +186,4 @@ class HasManyGetter extends Extension {
         }
     }
 }
-Object::extend("DataObject", "HasManyGetter");
+gObject::extend("DataObject", "HasManyGetter");

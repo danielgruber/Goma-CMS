@@ -9,7 +9,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class Text extends Object
+class Text extends gObject
 {
 		/**
 		 * the text
@@ -82,7 +82,7 @@ class Text extends Object
 		}
 }
 
-abstract class TextTransformer extends Object
+abstract class TextTransformer extends gObject
 {
 		/**
 		 * the text

@@ -351,5 +351,5 @@ class UploadsPageBacktraceController extends ControllerExtension
     }
 }
 
-Object::extend("UploadsController", "UploadsPageBacktraceController");
+gObject::extend("UploadsController", "UploadsPageBacktraceController");
 Core::addToHook("onBeforeServe", array("contentController", "outputHook"));

@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class RequestForm extends Object {
+class RequestForm extends gObject {
 	/**
 	 * title of the form
 	*/
@@ -175,7 +175,7 @@ class RequestForm extends Object {
 				exit;
 		} else {
 				$view = new ViewAccessableData();
-				return showSite($view->customise(array("content" => $data, "title" => $this->title))->renderWith("framework/dialog.html"), null);
+				return Core::serve($view->customise(array("content" => $data, "title" => $this->title))->renderWith("framework/dialog.html"));
 
 		}
 	}

@@ -469,8 +469,10 @@ class ImageUploads extends Uploads {
     /**
      * sets the height on the original, so not the thumbnail we saved
      *
-     * @name noCropSetHeight
-     * @access public
+     * @param $height
+     * @param bool $absolute
+     * @param string $html
+     * @param string $style
      * @return string
      */
     public function noCropSetHeight($height, $absolute = false, $html = "", $style = "") {
@@ -493,10 +495,15 @@ class ImageUploads extends Uploads {
      *
      * @param String $size
      * @return int
+     * @throws FileNotFoundException
      */
     protected function getSize($size) {
         if(preg_match('/^[0-9]+$/', $this->fieldGET($size)) && $this->fieldGET($size) != 0) {
             return $this->fieldGet($size);
+        }
+
+        if(!$this->realfile) {
+            throw new FileNotFoundException("File for ImageUploads was not found.");
         }
 
         $image = new RootImage($this->realfile);
@@ -507,24 +514,41 @@ class ImageUploads extends Uploads {
 
     /**
      * returns width
-     *
-     * @name width
-     * @access public
      * @return int
+     * @throws Exception
+     * @internal param $width
+     * @access public
      */
     public function width() {
-        return $this->getSize("width");
+        try {
+            return $this->getSize("width");
+        } catch(Exception $e) {
+            if ($e instanceof FileException OR $e instanceof GDException) {
+                return -1;
+            } else {
+                // Keep throwing it.
+                throw $e;
+            }
+        }
     }
 
     /**
      * returns height
-     *
-     * @name height
-     * @access public
      * @return int
+     * @throws Exception
+     * @internal param $height
+     * @access public
      */
     public function height() {
-        return $this->getSize("height");
+        try {
+            return $this->getSize("height");
+        } catch(Exception $e) {
+            if ($e instanceof FileException OR $e instanceof GDException) {
+                return -1;
+            } else {
+                // Keep throwing it.
+                throw $e;
+            }
+        }
     }
-
 }

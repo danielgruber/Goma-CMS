@@ -131,4 +131,4 @@ class HasManyWriter extends Extension {
         }
     }
 }
-Object::extend("ModelWriter", "HasManyWriter");
+gObject::extend("ModelWriter", "HasManyWriter");

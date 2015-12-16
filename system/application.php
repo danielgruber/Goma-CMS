@@ -324,7 +324,7 @@ function loadFramework() {
 		Profiler::unmark("Manifest");
 
 	// init
-	StaticsManager::setSaveVars("object");
+	StaticsManager::setSaveVars("gobject");
 
 	Director::Init();
 	Core::Init();

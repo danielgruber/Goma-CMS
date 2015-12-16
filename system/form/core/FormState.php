@@ -9,7 +9,7 @@
  * @package Goma\Form
  * @version 2.2
  */
-class FormState extends Object {
+class FormState extends gObject {
     protected $data;
 
     function __construct($data = array()) {

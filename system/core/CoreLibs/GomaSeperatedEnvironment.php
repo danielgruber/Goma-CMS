@@ -156,7 +156,7 @@ class GomaSeperatedEnvironment {
 				copy(self::getClassPath($class), $e);
 				$code .= 'if(!class_exists('.var_export($class, true).')) include_once('.var_export($e, true).');';
 
-				if(Object::method_exists($class, "codeForExternalSystem")) {
+				if(gObject::method_exists($class, "codeForExternalSystem")) {
 					$code .= call_user_func_array(array($class, "codeForExternalSystem"), array());
 				}
 			} else {

@@ -92,6 +92,6 @@ class membersController extends PageController
 				$id = $this->request->getParam("id");
 				$userdata = DataObject::get("user", array("id" => $id));
 				
-				return Object::instance("ProfileController")->index($id);
+				return gObject::instance("ProfileController")->index($id);
 		}
 }

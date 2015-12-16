@@ -8,7 +8,7 @@
  * @version		1.0
  */
 
-class TreeRenderer extends Object {
+class TreeRenderer extends gObject {
 	/**
 	 * the current tree.
 	*/

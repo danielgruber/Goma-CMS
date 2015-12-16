@@ -285,7 +285,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	public static function buildDistro($file, $name, $controller) {
 
 		if(GlobalSessionManager::globalSession()->hasKey(g_SoftwareType::FINALIZE_SESSION_VAR))
-			return Object::instance("g_frameworkSoftWareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
+			return gObject::instance("g_frameworkSoftWareType")->finalizeDistro(GlobalSessionManager::globalSession()->get(g_SoftwareType::FINALIZE_SESSION_VAR));
 
 		if(file_exists($file))
 			@unlink($file);
@@ -297,7 +297,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 			new Textarea("changelog", lang("distro_changelog"))
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
-			new FormAction("submit", lang("download"), array(Object::instance("g_frameworkSoftWareType"), "finalizeDistro"))
+			new FormAction("submit", lang("download"), array(gObject::instance("g_frameworkSoftWareType"), "finalizeDistro"))
 		));
 
 		$version->disable();

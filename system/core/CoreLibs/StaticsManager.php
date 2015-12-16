@@ -27,7 +27,7 @@ class StaticsManager {
      * validates if class and variable/method-names are valid.
      * it throws an exception if not and returns correct class-name.
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @param string $var
      * @return string classname
      */
@@ -36,7 +36,7 @@ class StaticsManager {
         $class = ClassInfo::find_class_name($class);
 
         if (empty($var)) {
-            throw new LogicException("Invalid name of variable $var for $class");
+            throw new InvalidArgumentException("Invalid name of variable $var for $class");
         }
 
         return $class;
@@ -45,7 +45,7 @@ class StaticsManager {
     /**
      * Gets the value of $class::$$var.
      *
-     * @param string|object $class Name of the class.
+     * @param string|gObject $class Name of the class.
      * @param string $var Name of the variable.
      *
      * @return mixed Value of $var.
@@ -59,7 +59,7 @@ class StaticsManager {
     /**
      * Checks, if $class::$$var is set.
      *
-     * @param string|object $class Name of the class.
+     * @param string|gObject $class Name of the class.
      * @param string $var Name of the variable.
      *
      * @return boolean
@@ -73,7 +73,7 @@ class StaticsManager {
     /**
      * Sets $value for $class::$$var.
      *
-     * @param string|object $class Name of the class.
+     * @param string|gObject $class Name of the class.
      * @param string $var Name of the variable.
      * @param mixed $value
      *
@@ -92,7 +92,7 @@ class StaticsManager {
     /**
      * Calls $class::$$func.
      *
-     * @param string|object $class Name of the class.
+     * @param string|gObject $class Name of the class.
      * @param string $func Name of the function.
      *
      * @return mixed return value of call
@@ -110,7 +110,7 @@ class StaticsManager {
 
     /**
      * adds a var to cache
-     * @param class|object $class
+     * @param class|gObject $class
      * @param string $variableName
      */
     public static function addSaveVar($class, $variableName)
@@ -144,7 +144,6 @@ class StaticsManager {
      */
     public static function setSaveVars($class)
     {
-
         if (PROFILE)  Profiler::mark("ClassInfo::setSaveVars");
 
         $classname = ClassManifest::resolveClassName($class);
@@ -178,7 +177,7 @@ class StaticsManager {
             }
         }
 
-        if (ClassInfo::hasInterface($class, "saveVarSetter") && Object::method_exists($class, "__setSaveVars")) {
+        if (ClassInfo::hasInterface($class, "saveVarSetter") && gObject::method_exists($class, "__setSaveVars")) {
             call_user_func_array(array($class, "__setSaveVars"), array($class));
         }
     }
@@ -187,12 +186,12 @@ class StaticsManager {
      * tries to call defineStatics-Hook.
      * returns true if it has tried and false if it was not object.
      *
-     * @param Object $class
+     * @param gObject $class
      * @return bool
      */
     public static function callStaticHook($class) {
         if(is_object($class)) {
-            if(Object::method_exists(get_class($class), "defineStatics")) {
+            if(gObject::method_exists(get_class($class), "defineStatics")) {
                 $class->defineStatics();
             }
             $class->callExtending("extendDefineStatics");

@@ -1,17 +1,18 @@
-<?php
-/**y
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 01.02.2015
-  * $Version 1.4.1
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined("IN_GOMA") OR die();
 
 i18n::AddLang("/members");
 
+/**
+ * this class provides Profile-Views for User.
+ *
+ * @package     goma framework
+ * @link        http://goma-cms.org
+ * @license:    LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author      Goma-Team
+ * @version     1.0
+ *
+ * last modified: 16.12.2015
+ */
 class ProfileController extends FrontedController {
 	
 	/**
@@ -42,13 +43,14 @@ class ProfileController extends FrontedController {
 	 * define right model.	
 	*/
 	public $model = "user";
-	
+
 	/**
 	 * shows the edit-screen
 	 *
-	 *@name edit
-	 *@access public
-	*/
+	 * @name edit
+	 * @access public
+	 * @return string
+	 */
 	public function edit() {
 		if(!member::login())
 		{
@@ -113,7 +115,7 @@ class ProfileController extends FrontedController {
 	 * login-method
 	*/
 	public function login() {
-		
+
 		Core::addBreadCrumb(lang("login"), "profile/login/");
 		Core::setTitle(lang("login"), "profile/login/");
 

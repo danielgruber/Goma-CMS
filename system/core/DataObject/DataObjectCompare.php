@@ -22,7 +22,7 @@ class DataObjectCompare {
     {
         $changed = array();
 
-        if (is_object($newdata) && Object::method_exists($newdata, "toArray")) {
+        if (is_object($newdata) && gObject::method_exists($newdata, "toArray")) {
             /** @var ViewAccessableData $newdata */
             $newdata = $newdata->ToArray();
         }

@@ -13,7 +13,7 @@ defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 StaticsManager::addSaveVar("Backup", "excludeList");
 StaticsManager::addSaveVar("Backup", "fileExcludeList");
 
-class Backup extends Object {
+class Backup extends gObject {
 	/**
 	 * list of excluded tables
 	 *
@@ -181,7 +181,7 @@ class Backup extends Object {
 						$data .= "; \n\n\n\n\n\n";
 				} else
 				{
-						throwErrorById(3);
+						throw new SQLException();
 				}
 			
 			}

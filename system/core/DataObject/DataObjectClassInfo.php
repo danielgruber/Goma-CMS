@@ -27,7 +27,7 @@ class DataObjectClassInfo extends Extension
         self::generateModelClassInfo($class);
 
         if (class_exists($class) && class_exists("DataObject") && is_subclass_of($class, "DataObject")) {
-            $classInstance = Object::instance($class);
+            $classInstance = gObject::instance($class);
 
             $has_one = ModelInfoGenerator::generateHas_one($class);
             $has_many = ModelInfoGenerator::generateHas_many($class);
@@ -230,7 +230,7 @@ class DataObjectClassInfo extends Extension
     /**
      * returns array of ModelManyManyRelationShipInfo
      *
-     * @param string|object $class
+     * @param string|gObject $class
      * @return array
      */
     public static function getManyManyRelationships($class) {
@@ -262,4 +262,4 @@ class DataObjectClassInfo extends Extension
 
 }
 
-Object::extend("ClassInfo", "DataObjectClassInfo");
+gObject::extend("ClassInfo", "DataObjectClassInfo");
