@@ -29,7 +29,7 @@ class Director extends gObject {
     /**
      * the current active controller
      *
-     *@var gObject
+     * @var RequestHandler|Controller
      */
     public static $requestController;
 

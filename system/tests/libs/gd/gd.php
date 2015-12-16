@@ -44,6 +44,16 @@ class GDTest extends GomaUnitTest
         $this->assertEqual($reflectionMethod->invoke($gd, $etag, $mtime, $http_mod, $http_etag), $expected);
     }
 
+    public function testExceptions() {
+        $this->assertThrows(function() {
+            new GD("./");
+        }, "FileException");
+
+        $this->assertThrows(function() {
+            new GD("./index.php");
+        }, "GDFileMalformedException");
+    }
+
     /**
      * tests if gd resize resizes correctly.
      */

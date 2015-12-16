@@ -63,7 +63,7 @@ class Controller extends RequestHandler
     /**
      * instance of the model
      *
-     * @var ViewAccessableData
+     * @var RequestHandler|Controller
      */
     public $model_inst = false;
 
@@ -167,9 +167,15 @@ class Controller extends RequestHandler
 
     /**
      * sets the model.
+     * @param  RequestHandler|Controller $model
+     * @param bool $name
      */
-    public function setModelInst(ViewAccessableData $model, $name = false)
+    public function setModelInst($model, $name = false)
     {
+        if(!is_a($model, "ViewAccessableData")) {
+            throw new InvalidArgumentException("Argument must be type of ViewAccessableData.");
+        }
+
         $this->model_inst = $model;
         $this->model = ($name !== false) ? $name : $model->classname;
 
@@ -181,7 +187,7 @@ class Controller extends RequestHandler
      *
      * @name modelInst
      * @access public
-     * @return DataObject
+     * @return RequestHandler|Controller
      */
     public function modelInst($model = null)
     {

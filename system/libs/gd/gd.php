@@ -114,6 +114,9 @@ class GD extends gObject
 
     /**
      * @param null $image
+     * @throws FileNotFoundException
+     * @throws GDFileMalformedException
+     * @throws GDFiletypeNotSupportedException
      */
     public function __construct($image = null)
     {
@@ -125,8 +128,8 @@ class GD extends gObject
 
 
         $this->pic = $image;
-        if(!file_exists($image)) {
-            throw new LogicException("File for GD-Lib not found. " . $image);
+        if(!is_file($image)) {
+            throw new FileNotFoundException("File for GD-Lib not found. " . $image);
         }
 
         $this->initWithImage($image);
@@ -155,10 +158,6 @@ class GD extends gObject
      * @throws GDFiletypeNotSupportedException
      */
     protected function initWithImage($image) {
-        if(!is_file($image)) {
-            throw new FileNotFoundException();
-        }
-
         if($this->info = GetImageSize($image)) {
             $this->width = $this->info[0];
             $this->height = $this->info[1];
