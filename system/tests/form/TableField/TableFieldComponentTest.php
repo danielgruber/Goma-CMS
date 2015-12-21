@@ -27,7 +27,7 @@ abstract class TableComponentFieldTests extends GomaUnitTest {
     public function testTableField_ColumnProvider() {
         $field = $this->GetField();
 
-        $tableField = new TableField();
+        $tableField = new TableField("test", "blah", new ViewAccessableData());
 
         if($field instanceof TableField_ColumnProvider) {
             $columns = array();

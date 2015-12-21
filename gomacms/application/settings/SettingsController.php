@@ -39,10 +39,11 @@ class SettingsController extends Controller {
 	/**
 	 * gets a value for settings-key.
 	 *
-	 * @name 	get
-	 * @access 	public
-	 * @param 	string - name
-	*/
+	 * @name   get
+	 * @access public
+	 * @param  string $name
+	 * @return null
+	 */
 	public static function get($name)
 	{
 		return (isset(self::$settingsCache) && self::$settingsCache->offsetExists($name)) ? self::$settingsCache->$name : null;

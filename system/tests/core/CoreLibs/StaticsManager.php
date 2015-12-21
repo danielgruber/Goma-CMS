@@ -36,7 +36,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
 
             $this->fail("Variable not exists, but setStatic does not fire an Exception.");
         } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
+            $this->assertIsA($e, "ReflectionException");
         }
 
         try {
@@ -44,7 +44,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
 
             $this->fail("Class not exists, but setStatic does not fire an Exception.");
         } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
+            $this->assertIsA($e, "ReflectionException");
             $this->assertPattern("/Class/i", $e->getMessage());
         }
 
@@ -53,7 +53,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
 
             $this->fail("Variable empty, but setStatic does not fire an Exception.");
         } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
+            $this->assertIsA($e, "ReflectionException");
             $this->assertPattern("/variable/i", $e->getMessage());
         }
     }
@@ -65,7 +65,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
 
             $this->fail("Class not exists, but setStatic does not fire an Exception.");
         } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
+            $this->assertIsA($e, "ReflectionException");
             $this->assertPattern("/Class/i", $e->getMessage());
         }
 
@@ -74,7 +74,7 @@ class StaticsManagerTest extends GomaUnitTest implements TestAble
 
             $this->fail("Variable empty, but setStatic does not fire an Exception.");
         } catch(Exception $e) {
-            $this->assertIsA($e, "LogicException");
+            $this->assertIsA($e, "InvalidArgumentException");
             $this->assertPattern("/variable/i", $e->getMessage());
         }
     }

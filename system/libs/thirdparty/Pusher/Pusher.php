@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
 		Pusher PHP Library
 	/////////////////////////////////
 	PHP library for the Pusher API.
@@ -25,23 +25,23 @@ class PusherException extends Exception
 }
 
 class PusherInstance {
-	
+
 	private static $instance = null;
 	private static $app_id	= '';
 	private static $secret	= '';
 	private static $api_key = '';
-	
+
 	private function __construct() { }
 	private function __clone() { }
-	
+
 	public static function get_pusher()
 	{
 		if (self::$instance !== null) return self::$instance;
 
 		self::$instance = new Pusher(
-			self::$api_key, 
-			self::$secret, 
-			self::$app_id
+				self::$api_key,
+				self::$secret,
+				self::$app_id
 		);
 
 		return self::$instance;
@@ -50,44 +50,110 @@ class PusherInstance {
 
 class Pusher
 {
-	public static $VERSION = '2.0.0';
+	public static $VERSION = '2.2.2';
 
-	private $settings = array ();
+	private $settings = array(
+			'scheme' => 'http',
+			'host' => 'api.pusherapp.com',
+			'port' => 80,
+			'timeout' => 30,
+			'debug' => false
+	);
 	private $logger = null;
 
 	/**
-	* PHP5 Constructor. 
-	* 
-	* Initializes a new Pusher instance with key, secret , app ID and channel. 
-	* You can optionally turn on debugging for all requests by setting debug to true.
-	* 
-	* @param string $auth_key
-	* @param string $secret
-	* @param int $app_id
-	* @param bool $debug [optional]
-	* @param string $host [optional]
-	* @param int $port [optional]
-	* @param int $timeout [optional]
-	*/
-	public function __construct( $auth_key, $secret, $app_id, $debug = false, $host = 'http://api.pusherapp.com', $port = '80', $timeout = 30 )
+	 * PHP5 Constructor.
+	 *
+	 * Initializes a new Pusher instance with key, secret , app ID and channel.
+	 * You can optionally turn on debugging for all requests by setting debug to true.
+	 *
+	 * @param string $auth_key
+	 * @param string $secret
+	 * @param int $app_id
+	 * @param bool $options [optional]
+	 *		Options to configure the Pusher instance.
+	 * 	Was previously a debug flag. Legacy support for this exists if a boolean is passed.
+	 * 	scheme - e.g. http or https
+	 * 	host - the host e.g. api.pusherapp.com. No trailing forward slash.
+	 * 	port - the http port
+	 * 	timeout - the http timeout
+	 * 	encrypted - quick option to use scheme of https and port 443.
+	 * @param string $host [optional] - deprecated
+	 * @param int $port [optional] - deprecated
+	 * @param int $timeout [optional] - deprecated
+	 */
+	public function __construct( $auth_key, $secret, $app_id, $options = array(), $host = null, $port = null, $timeout = null )
 	{
-		// Check compatibility, disable for speed improvement
 		$this->check_compatibility();
 
-		// Setup defaults
-		$this->settings['server'] = $host;
-		$this->settings['port']		= $port;
-		$this->settings['auth_key'] = $auth_key;
-		$this->settings['secret'] = $secret;
-		$this->settings['app_id'] = $app_id;
-		$this->settings['url']		= '/apps/' . $this->settings['app_id'];
-		$this->settings['debug']	= $debug;
-		$this->settings['timeout']	= $timeout;
+		/** Start backward compatibility with old constructor **/
+		if( is_bool( $options ) === true ) {
+			$options = array(
+					'debug' => $options
+			);
+		}
 
+		if( !is_null( $host ) ) {
+			$match = null;
+			preg_match("/(http[s]?)\:\/\/(.*)/", $host, $match);
+
+			if( count( $match ) === 3 ) {
+				$this->settings[ 'scheme' ] = $match[ 1 ];
+				$host = $match[ 2 ];
+			}
+
+			$this->settings[ 'host' ] = $host;
+
+			$this->log( 'Legacy $host parameter provided: ' .
+					$this->settings[ 'scheme' ] + ' host: ' + $this->settings[ 'host' ] );
+		}
+
+		if( !is_null( $port ) ) {
+			$options[ 'port' ] = $port;
+		}
+
+		if( !is_null( $timeout ) ) {
+			$options[ 'timeout' ] = $timeout;
+		}
+
+		/** End backward compatibility with old constructor **/
+
+		if( isset( $options[ 'encrypted' ] ) &&
+				$options[ 'encrypted' ] === true &&
+				!isset( $options[ 'scheme' ] ) &&
+				!isset( $options[ 'port' ] ) ) {
+
+			$options[ 'scheme' ] = 'https';
+			$options[ 'port' ] = 443;
+		}
+
+		$this->settings['auth_key'] 	= $auth_key;
+		$this->settings['secret'] 		= $secret;
+		$this->settings['app_id'] 		= $app_id;
+		$this->settings['base_path']	= '/apps/' . $this->settings['app_id'];
+
+		foreach( $options as $key => $value ) {
+			// only set if valid setting/option
+			if( isset( $this->settings[ $key ] ) ) {
+				$this->settings[ $key ] = $value;
+			}
+		}
+
+		// ensure host doesn't have a scheme prefix
+		$this->settings[ 'host' ] =
+				preg_replace( '/http[s]?\:\/\//', '', $this->settings[ 'host' ], 1 );
 	}
 
 	/**
-	 * Set a logger to be informed of interal log messages.
+	 * Fetch the settings.
+	 * @return array
+	 */
+	public function getSettings() {
+		return $this->settings;
+	}
+
+	/**
+	 * Set a logger to be informed of internal log messages.
 	 */
 	public function set_logger( $logger ) {
 		$this->logger = $logger;
@@ -103,8 +169,8 @@ class Pusher
 	}
 
 	/**
-	* Check if the current PHP setup is sufficient to run this class
-	*/
+	 * Check if the current PHP setup is sufficient to run this class
+	 */
 	private function check_compatibility()
 	{
 		if ( ! extension_loaded( 'curl' ) || ! extension_loaded( 'json' ) )
@@ -118,7 +184,40 @@ class Pusher
 		}
 
 	}
-	
+
+	/**
+	 * validate number of channels and channel name format.
+	 */
+	private function validate_channels($channels) {
+		if( count( $channels ) > 100 ) {
+			throw new PusherException('An event can be triggered on a maximum of 100 channels in a single call.');
+		}
+
+		foreach ($channels as $channel) {
+			$this->validate_channel($channel);
+		}
+	}
+
+	/**
+	 * Ensure a channel name is valid based on our spec
+	 */
+	private function validate_channel( $channel )
+	{
+		if ( ! preg_match( '/\A[-a-zA-Z0-9_=@,.;]+\z/', $channel ) ) {
+			throw new PusherException( 'Invalid channel name ' . $channel );
+		}
+	}
+
+	/**
+	 * Ensure a socket_id is valid based on our spec
+	 */
+	private function validate_socket_id( $socket_id )
+	{
+		if ( $socket_id !== null && !preg_match( '/\A\d+\.\d+\z/', $socket_id ) ) {
+			throw new PusherException( 'Invalid socket ID ' . $socket_id );
+		}
+	}
+
 	/**
 	 * Utility function used to create the curl object with common settings
 	 */
@@ -126,28 +225,35 @@ class Pusher
 	{
 		# Create the signed signature...
 		$signed_query = Pusher::build_auth_query_string(
-			$this->settings['auth_key'],
-			$this->settings['secret'],
-			$request_method,
-			$s_url,
-			$query_params);
+				$this->settings['auth_key'],
+				$this->settings['secret'],
+				$request_method,
+				$s_url,
+				$query_params);
 
-		$full_url = $this->settings['server'] . ':' . $this->settings['port'] . $s_url . '?' . $signed_query;
+		$full_url = $this->settings['scheme'] . '://' .
+				$this->settings['host'] . ':' .
+				$this->settings['port'] . $s_url . '?' . $signed_query;
 
 		$this->log( 'curl_init( ' . $full_url . ' )' );
-		
-		# Set cURL opts and execute request
-		$ch = curl_init();
+
+		// Create or reuse existing curl handle
+		static $ch;
+		if (null === $ch) {
+			$ch = curl_init();
+		}
+
 		if ( $ch === false )
 		{
 			throw new PusherException('Could not initialise cURL!');
 		}
-		
+
+		# Set cURL opts and execute request
 		curl_setopt( $ch, CURLOPT_URL, $full_url );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array ( "Content-Type: application/json" ) );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array ( "Content-Type: application/json", "Expect:" ) );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, $this->settings['timeout'] );
-		
+
 		return $ch;
 	}
 
@@ -162,45 +268,48 @@ class Pusher
 
 		$this->log( 'exec_curl response: ' . print_r( $response, true ) );
 
-		curl_close( $ch );
+		if( $response[ 'body' ] === false ) {
+			$this->log( 'exec_curl error: ' . curl_error( $ch ) );
+		}
 
 		return $response;
 	}
-	
+
 	/**
-	 *	Build the required HMAC'd auth string
+	 * Build the required HMAC'd auth string
 	 *
-	 *	@param string $auth_key
-	 *	@param string $auth_secret
-	 *	@param string $request_path
-	 *	@param array $query_params
-	 *	@param string $auth_version [optional]
-	 *	@param string $auth_timestamp [optional]
-	 *	@return string
+	 * @param string $auth_key
+	 * @param string $auth_secret
+	 * @param string $request_method
+	 * @param string $request_path
+	 * @param array $query_params
+	 * @param string $auth_version [optional]
+	 * @param string $auth_timestamp [optional]
+	 * @return string
 	 */
 	public static function build_auth_query_string($auth_key, $auth_secret, $request_method, $request_path,
-		$query_params = array(), $auth_version = '1.0', $auth_timestamp = null)
-	{ 
+												   $query_params = array(), $auth_version = '1.0', $auth_timestamp = null)
+	{
 		$params = array();
 		$params['auth_key'] = $auth_key;
 		$params['auth_timestamp'] = (is_null($auth_timestamp)?time() : $auth_timestamp);
 		$params['auth_version'] = $auth_version;
-		
+
 		$params = array_merge($params, $query_params);
 		ksort($params);
-		
+
 		$string_to_sign = "$request_method\n" . $request_path . "\n" . Pusher::array_implode( '=', '&', $params );
 
 		$auth_signature = hash_hmac( 'sha256', $string_to_sign, $auth_secret, false );
-		
+
 		$params['auth_signature'] = $auth_signature;
 		ksort($params);
-		
+
 		$auth_query_string = Pusher::array_implode( '=', '&', $params );
-		
+
 		return $auth_query_string;
 	}
-	
+
 	/**
 	 * Implode an array with the key and value pair giving
 	 * a glue, a separator between pairs and the array
@@ -211,28 +320,28 @@ class Pusher
 	 * @return string The imploded array
 	 */
 	public static function array_implode( $glue, $separator, $array ) {
-			if ( ! is_array( $array ) ) return $array;
-			$string = array();
-			foreach ( $array as $key => $val ) {
-					if ( is_array( $val ) )
-							$val = implode( ',', $val );
-					$string[] = "{$key}{$glue}{$val}";
+		if ( ! is_array( $array ) ) return $array;
+		$string = array();
+		foreach ( $array as $key => $val ) {
+			if ( is_array( $val ) )
+				$val = implode( ',', $val );
+			$string[] = "{$key}{$glue}{$val}";
 
-			}		 
-			return implode( $separator, $string );
+		}
+		return implode( $separator, $string );
 	}
 
 	/**
-	* Trigger an event by providing event name and payload. 
-	* Optionally provide a socket ID to exclude a client (most likely the sender).
-	*
-	* @param array $channel An array of channel names to publish the event on.
-	* @param string $event
-	* @param mixed $data Event data
-	* @param int $socket_id [optional]
-	* @param bool $debug [optional]
-	* @return bool|string
-	*/
+	 * Trigger an event by providing event name and payload.
+	 * Optionally provide a socket ID to exclude a client (most likely the sender).
+	 *
+	 * @param array $channels An array of channel names to publish the event on.
+	 * @param string $event
+	 * @param mixed $data Event data
+	 * @param int $socket_id [optional]
+	 * @param bool $debug [optional]
+	 * @return bool|string
+	 */
 	public function trigger( $channels, $event, $data, $socket_id = null, $debug = false, $already_encoded = false )
 	{
 		if( is_string( $channels ) === true ) {
@@ -240,14 +349,13 @@ class Pusher
 			$channels = array( $channels );
 		}
 
-		if( count( $channels ) > 100 ) {
-			throw new PusherException('An event can be triggered on a maximum of 100 channels in a single call.');
-		}
+		$this->validate_channels( $channels );
+		$this->validate_socket_id( $socket_id );
 
 		$query_params = array();
-		
-		$s_url = $this->settings['url'] . '/events';		
-		
+
+		$s_url = $this->settings['base_path'] . '/events';
+
 		$data_encoded = $already_encoded ? $data : json_encode( $data );
 
 		$post_params = array();
@@ -287,18 +395,20 @@ class Pusher
 		}
 
 	}
-	
+
 	/**
-	  *	Fetch channel information for a specific channel.
-	  *
-	  * @param string $channel The name of the channel
-	  * @param array $params Additional parameters for the query e.g. $params = array( 'info' => 'connection_count' )
-	  *	@return gObject
-	  */
+	 *	Fetch channel information for a specific channel.
+	 *
+	 * @param string $channel The name of the channel
+	 * @param array $params Additional parameters for the query e.g. $params = array( 'info' => 'connection_count' )
+	 *	@return object
+	 */
 	public function get_channel_info($channel, $params = array() )
 	{
+		$this->validate_channel($channel);
+
 		$response = $this->get( '/channels/' . $channel, $params );
-		
+
 		if( $response[ 'status' ] == 200)
 		{
 			$response = json_decode( $response[ 'body' ] );
@@ -307,13 +417,13 @@ class Pusher
 		{
 			$response = false;
 		}
-		
+
 		return $response;
 	}
-	
+
 	/**
 	 * Fetch a list containing all channels
-	 * 
+	 *
 	 * @param array $params Additional parameters for the query e.g. $params = array( 'info' => 'connection_count' )
 	 *
 	 * @return array
@@ -321,7 +431,7 @@ class Pusher
 	public function get_channels($params = array())
 	{
 		$response = $this->get( '/channels', $params );
-		
+
 		if( $response[ 'status' ] == 200)
 		{
 			$response = json_decode( $response[ 'body' ] );
@@ -331,26 +441,26 @@ class Pusher
 		{
 			$response = false;
 		}
-		
+
 		return $response;
 	}
 
 	/**
 	 * GET arbitrary REST API resource using a synchronous http client.
-   * All request signing is handled automatically.
-   *  
-   * @param string path Path excluding /apps/APP_ID
-   * @param params array API params (see http://pusher.com/docs/rest_api)
-   *
-   * @return See Pusher API docs
+	 * All request signing is handled automatically.
+	 *
+	 * @param string path Path excluding /apps/APP_ID
+	 * @param params array API params (see http://pusher.com/docs/rest_api)
+	 *
+	 * @return See Pusher API docs
 	 */
 	public function get( $path, $params = array() ) {
-		$s_url = $this->settings['url'] . $path;	
+		$s_url = $this->settings['base_path'] . $path;
 
 		$ch = $this->create_curl( $s_url, 'GET', $params );
 
 		$response = $this->exec_curl( $ch );
-		
+
 		if( $response[ 'status' ] == 200)
 		{
 			$response[ 'result' ] = json_decode( $response[ 'body' ], true );
@@ -359,19 +469,22 @@ class Pusher
 		{
 			$response = false;
 		}
-		
+
 		return $response;
 	}
 
 	/**
-	* Creates a socket signature
-	* 
-	* @param int $socket_id
-	* @param string $custom_data
-	* @return string
-	*/
+	 * Creates a socket signature
+	 *
+	 * @param int $socket_id
+	 * @param string $custom_data
+	 * @return string
+	 */
 	public function socket_auth( $channel, $socket_id, $custom_data = false )
 	{
+		$this->validate_channel( $channel );
+		$this->validate_socket_id( $socket_id );
+
 		if($custom_data == true)
 		{
 			$signature = hash_hmac( 'sha256', $socket_id . ':' . $channel . ':' . $custom_data, $this->settings['secret'], false );
@@ -391,13 +504,13 @@ class Pusher
 	}
 
 	/**
-	* Creates a presence signature (an extension of socket signing)
-	*
-	* @param int $socket_id
-	* @param string $user_id
-	* @param mixed $user_info
-	* @return string
-	*/
+	 * Creates a presence signature (an extension of socket signing)
+	 *
+	 * @param int $socket_id
+	 * @param string $user_id
+	 * @param mixed $user_info
+	 * @return string
+	 */
 	public function presence_auth( $channel, $socket_id, $user_id, $user_info = false )
 	{
 

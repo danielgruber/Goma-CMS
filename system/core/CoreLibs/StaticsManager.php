@@ -48,12 +48,26 @@ class StaticsManager {
      * @param string|gObject $class Name of the class.
      * @param string $var Name of the variable.
      *
+     * @param bool $ignoreAccess
      * @return mixed Value of $var.
      */
-    public static function getStatic($class, $var)
+    public static function getStatic($class, $var, $ignoreAccess = false)
     {
-        $class = self::validate_static_call($class, $var);
-        return eval('return isset(' . $class . '::$' . $var . ") ? " . $class . '::$' . $var . " : null;");
+        $class = ClassManifest::resolveClassName($class);
+
+        $reflectionClass = new ReflectionClass($class);
+
+        if($reflectionClass->hasProperty($var)) {
+            $property = $reflectionClass->getProperty($var);
+
+            if ($ignoreAccess) {
+                $property->setAccessible(true);
+            }
+
+            return $property->getValue();
+        }
+
+        return null;
     }
 
     /**
@@ -66,8 +80,14 @@ class StaticsManager {
      */
     public static function hasStatic($class, $var)
     {
-        $class = self::validate_static_call($class, $var);
-        return eval('return isset(' . $class . '::$' . $var . ');');
+        if(empty($var)) {
+            throw new InvalidArgumentException("Variable might not be empty.");
+        }
+
+        $class = ClassManifest::resolveClassName($class);
+        $reflectionClass = new ReflectionClass($class);
+
+        return $reflectionClass->hasProperty($var);
     }
 
     /**
@@ -76,17 +96,25 @@ class StaticsManager {
      * @param string|gObject $class Name of the class.
      * @param string $var Name of the variable.
      * @param mixed $value
-     *
-     * @return void
+     * @param bool $ignoreAccess
+     * @throws ReflectionException
      */
-    public static function setStatic($class, $var, $value)
+    public static function setStatic($class, $var, $value, $ignoreAccess = false)
     {
-        $class = self::validate_static_call($class, $var);
-        return eval('
-        if(isset(' . $class . '::$' . $var . '))
-            ' . $class . '::$' . $var . ' = ' . var_export($value, true) . ';
-        else
-            throw new LogicException("Could not set Variable ' . $var . ' on Class ' . $class . '.");');
+        $class = ClassManifest::resolveClassName($class);
+
+        $reflectionClass = new ReflectionClass($class);
+        if($reflectionClass->hasProperty($var)) {
+            $property = $reflectionClass->getProperty($var);
+
+            if ($ignoreAccess) {
+                $property->setAccessible(true);
+            }
+
+            $property->setValue($value);
+        } else {
+            throw new ReflectionException("Variable $var not found on class $class.");
+        }
     }
 
     /**
@@ -110,7 +138,7 @@ class StaticsManager {
 
     /**
      * adds a var to cache
-     * @param class|gObject $class
+     * @param string|gObject $class
      * @param string $variableName
      */
     public static function addSaveVar($class, $variableName)

@@ -10,7 +10,6 @@
  *
  * @version     2.0.10
  */
-
 class contentAdmin extends LeftAndMain
 {
 	/**

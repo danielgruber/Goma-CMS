@@ -1,15 +1,15 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 19.03.2013
-  * $Version 1.4.9
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Push-Controller.
+ *
+ * @package     Goma\Push
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0.10
+ */
 class PushController extends Controller {
 	/**
 	 * pusher
@@ -24,27 +24,51 @@ class PushController extends Controller {
 	public $allowed_actions = array(
 		"auth"
 	);
-	
+
+	protected static $key;
+	private static $hasBeenInited;
+
 	/**
 	 * inits the push-controller
-	 *
-	 *@name init
-	 *@access public
-	*/
+	 * @param string $key
+	 * @param string $secret
+	 * @param string $app_id
+	 */
 	static function initPush($key, $secret, $app_id) {
+		self::$key = $key;
 		self::$pusher = new Pusher($key, $secret, $app_id);
-		Resources::addData("goma.Pusher.init('".$key."');var uniqueID = ".var_export(member::uniqueID(), true).";");
-		
+		if(Core::globalSession()->get("pushActive") && !self::$hasBeenInited) {
+			self::initJS();
+		}
+	}
+
+	static function enablePush() {
+		if(!self::$hasBeenInited) {
+			self::initJS();
+		}
+
+		GlobalSessionManager::globalSession()->set("pushActive", true);
+	}
+
+	static function disablePush() {
+		GlobalSessionManager::globalSession()->set("pushActive", false);
+	}
+
+	protected static function initJS() {
+		self::$hasBeenInited = true;
+		Resources::addData("goma.Pusher.init('" . self::$key . "');var uniqueID = " . var_export(member::uniqueID(), true) . ";");
+
 		Resources::add("notifications.css", "css");
 		gloader::load("notifications");
 	}
-	
+
 	/**
 	 * triggers event
 	 *
-	 *@name trigger
-	 *@access public
-	*/
+	 * @name trigger
+	 * @access public
+	 * @return bool
+	 */
 	static function trigger($event, $data) {
 		if(isset(self::$pusher)) {
 			return self::$pusher->trigger("presence-goma", $event, $data);
@@ -85,6 +109,5 @@ class PushController extends Controller {
 		
 		header('', true, 403);
 		echo "Forbidden";
-		
 	}
 }

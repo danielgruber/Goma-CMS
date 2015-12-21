@@ -1588,9 +1588,7 @@ class tplCaller extends gObject implements ArrayAccess
 
 	/**
 	 * gets all headers as HTML
-	 *
-	 * @name headers
-	 * @access public
+	 * @return string
 	 */
 	public function headerHTML()
 	{
@@ -1641,8 +1639,7 @@ class tplCaller extends gObject implements ArrayAccess
 	/**
 	 * devide
 	 *
-	 * @name devide
-	 * @access public
+	 * @return float
 	 */
 	public function devide()
 	{

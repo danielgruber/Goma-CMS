@@ -914,7 +914,7 @@ if (goma.Pusher === undefined) {
 	goma.Pusher = (function () {
 		'use strict';
 		
-		var js = "http://js.pusher.com/2.0/pusher.min.js";
+		var js = "//js.pusher.com/3.0/pusher.min.js";
 		return {
 			
 			init: function (pub_key, options) {

@@ -187,30 +187,29 @@ class adminController extends Controller
      * @name flushLog
      * @return mixed|string
      */
-    public function flushLog($count = 40)
-    {
-
+    public function flushLog($count = 40) {
         $count = $this->getParam("count") ? $this->getParam("count") : $count;
 
         if (Permission::check("superadmin")) {
-
-
+            PushController::enablePush();
             GlobalSessionManager::globalSession()->stopSession();
             ignore_user_abort(true);
             // we delete all logs that are older than 30 days
             Core::CleanUpLog($count);
 
             if (!Core::is_ajax()) {
-
                 AddContent::addSuccess(lang("flush_log_success"));
                 $this->redirectBack();
                 exit;
-
             } else {
                 HTTPResponse::setHeader("content-type", "text/x-json");
                 HTTPResponse::sendHeader();
 
                 Notification::notify($this->classname, lang("flush_log_success"), null, "PushNotification");
+
+                GlobalSessionManager::Init();
+                PushController::disablePush();
+
                 echo json_encode(1);
                 exit;
             }
@@ -402,17 +401,6 @@ class admin extends ViewAccessableData implements PermProvider
     public function historyURL()
     {
         return adminController::activeController()->historyURL();
-    }
-
-    /**
-     * headers
-     *
-     * @name header
-     * @access public
-     */
-    public function header()
-    {
-        return Core::GetHeaderHTML();
     }
 
     public function TooManyLogs()

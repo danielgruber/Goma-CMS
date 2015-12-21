@@ -74,10 +74,6 @@ if(isset($_GET["settpl"]) && !Permission::check("SETTINGS_ADMIN")) {
 	throw new PermissionException("You are not allowed to change the template at runtime.");
 }
 
-if(settingsController::get("favicon")) {
-	Core::$favicon = "./favicon.ico";
-}
-
 if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
 	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
 }

@@ -7,8 +7,8 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-StaticsManager::AddSaveVar("Core", "hooks");
-StaticsManager::AddSaveVar("Core", "cmsVarCallbacks");
+StaticsManager::AddSaveVar(Core::ID, "hooks");
+StaticsManager::AddSaveVar(Core::ID, "cmsVarCallbacks");
 
 /**
  * Goma Core.
@@ -17,6 +17,8 @@ StaticsManager::AddSaveVar("Core", "cmsVarCallbacks");
  * @version		3.4
  */
 class Core extends gObject {
+	const HEADER_HTML_HOOK = "getHeaderHTML";
+	const ID = "Core";
 
 	/**
 	 *@var array
@@ -65,7 +67,6 @@ class Core extends gObject {
 
 	/**
 	 * global hooks
-	 *
 	 */
 	public static $hooks = array();
 
@@ -83,14 +84,6 @@ class Core extends gObject {
 	 *@name cmsVarCallbacks
 	 */
 	private static $cmsVarCallbacks = array();
-
-	/**
-	 * contains the path to the favicon.
-	 *
-	 * @access public
-	 * @var string
-	 */
-	public static $favicon;
 	
 	/**
 	 * cache-managers.
@@ -279,9 +272,8 @@ class Core extends gObject {
 	}
 
 	/**
-	 * @param string - title of the link
-	 * @param string - href attribute of the link
-	 * @use: for adding breadcrumbs
+	 * @param string $title
+	 * @param string $link
 	 * @return bool
 	 */
 	public static function addBreadcrumb($title, $link) {
@@ -290,9 +282,9 @@ class Core extends gObject {
 	}
 
 	/**
-	 *@access public
-	 *@param string - title of addtitle
-	 *@use: for adding title
+	 * @access public
+	 * @param string $title
+	 * @return bool
 	 */
 	public static function setTitle($title) {
 		self::$title = convert::raw2text($title);
@@ -306,17 +298,15 @@ class Core extends gObject {
 	 * @param Closure $callback
 	 */
 	public static function addToHook($name, $callback) {
-		// check for existance
 		if(!isset(self::$hooks[strtolower($name)]) || !in_array($callback, self::$hooks[strtolower($name)])) {
 			self::$hooks[strtolower($name)][] = $callback;
 		}
-			
 	}
 
 	/**
 	 * calls all callbacks for a hook
 	 *
-	 * @param 		string 	name of the hook
+	 * @param 		string 	$name of the hook
 	 * @params.. 	mixed 	additional params up to 7
 	 */
 	public static function callHook($name, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null) {
@@ -333,11 +323,11 @@ class Core extends gObject {
 	 * registers an CMS-Var-Callback
 	 *
 	 * @param 	Closure
-	 * @param 	int 		priority
+	 * @param 	int $priority
 	 */
-	public function addCMSVarCallback($callback, $prio = 10) {
+	public function addCMSVarCallback($callback, $priority = 10) {
 		if(is_callable($callback)) {
-			self::$cmsVarCallbacks[$prio][] = $callback;
+			self::$cmsVarCallbacks[$priority][] = $callback;
 		}
 	}
 
@@ -498,10 +488,7 @@ class Core extends gObject {
 			}
 		}
 
-		if(self::$favicon) {
-			$html .= '		<link rel="icon" href="' . self::$favicon . '" type="image/x-icon" />';
-			$html .= '		<link rel="apple-touch-icon-precomposed" href="'.RetinaPath(self::$favicon).'" />';
-		}
+		Core::callHook(self::HEADER_HTML_HOOK, $html);
 
 		return $html;
 	}
@@ -688,10 +675,7 @@ class Core extends gObject {
 
 		Director::direct($url);
 	}
-
 }
-
-
 
 /**
  * shows an page with error details and nothing else
