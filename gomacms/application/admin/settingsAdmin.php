@@ -1,70 +1,69 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.11.2012
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Settings.
+ *
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma-CMS/Admin
+ * @version 1.0.5
+ */
 class settingsAdmin extends adminItem
 {
 	// config
 	public $text = '{$_lang_settings}';
-	
+
 	public $sort = 980;
-	
+
 	public $rights = "SETTINGS_ADMIN";
-	
+
 	public $models = array("newsettings");
-	
+
 	public $template = "admin/settings.html";
-	
+
 	static $icon = "templates/images/settings.png";
-	
+
 	static $less_vars = "tint-blue.less";
-	
+
 	/**
 	 * history-url
-	 *
-	 *@name historyURL
-	 *@access public
-	*/
+	 */
 	public function historyURL() {
 		return "admin/history/newsettings";
 	}
-	
+
 	/**
 	 * generates the form
-	 *
-	 *@name Form
-	*/
+	 */
 	public function Form() {
 
 		$data = DataObject::get("newsettings", array("id" => 1))->first();
 		return parent::Form(null, $data);
 	}
-	
+
 	/**
 	 * writes correct settings to correct location
 	 *
-	 *@name submit_form
-	*/
+	 * @param array $data
+	 * @param Form|null $form
+	 * @param null $model
+	 * @return string|void
+	 * @throws Exception
+	 */
 	public function submit_form($data, $form, $model = null) {
-
 		if(isset($data["lang"], $data["status"], $data["timezone"], $data["date_format_date"])) {
 			if(!file_exists(ROOT . LANGUAGE_DIRECTORY . $data["lang"])) {
-				throwError(6, "Invalid-Error", "Selected language not existing!");
+				throw new LogicException("Selected language is not existing!");
 			}
+
 			$status = (SITE_MODE == STATUS_DISABLED) ? STATUS_DISABLED : $data["status"];
-			writeProjectConfig(array(	'lang' => $data["lang"], 
-										"status" => $status, 
-										"safe_mode" => isset($data["safe_mode"]) ? $data["safe_mode"] : FileSystem::$safe_mode, 
-										"timezone" => $data["timezone"], 
-										"date_format_date" => $data["date_format_date"], 
-										"date_format_time" => $data["date_format_time"]));
+			writeProjectConfig(array(	'lang' => $data["lang"],
+					"status" => $status,
+					"safe_mode" => isset($data["safe_mode"]) ? $data["safe_mode"] : FileSystem::$safe_mode,
+					"timezone" => $data["timezone"],
+					"date_format_date" => $data["date_format_date"],
+					"date_format_time" => $data["date_format_time"]));
 
 			if(isset($data["safe_mode"]) && FileSystem::$safe_mode != $data["safe_mode"]) {
 				FileSystem::$safe_mode = (bool) $data["safe_mode"];
@@ -73,13 +72,13 @@ class settingsAdmin extends adminItem
 		} else {
 			throw new LogicException("settingsAdmin::submit_form needs at least lang, status, timezone and date_format_date.");
 		}
-		
+
 		parent::safe($data, $form, $model);
 	}
-	
+
 	/**
 	 * upgrades data regarding safe-mode.
-	*/
+	 */
 	public static function upgradeSafeMode() {
 		GlobalSessionManager::globalSession()->stopSession();
 		FileSystem::applySafeMode(null, null, true);

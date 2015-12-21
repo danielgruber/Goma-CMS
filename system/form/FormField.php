@@ -288,7 +288,7 @@ class FormField extends RequestHandler {
 
         if($this->regexp) {
             if(!preg_match($this->regexp, $value)) {
-                return lang($this->regexpError) . $this->title;
+                return lang($this->regexpError) . " '" . $this->title . "'";
             }
         }
 

@@ -17,7 +17,7 @@ StaticsManager::addSaveVar("i18n", "defaultLanguagefiles");
  * @package		Goma\System\Core
  * @version		1.4.5
  */
-class i18n extends gObject {
+class i18n extends Object {
 	/**
 	 * files to load
 	 */
@@ -27,7 +27,7 @@ class i18n extends gObject {
 	 * files to load
 	 */
 	public static $defaultLanguagefiles = array();
-	
+
 	public static $selectByHttp = true;
 
 	/**
@@ -52,12 +52,12 @@ class i18n extends gObject {
 	 *
 	 */
 	public static $date_formats = array("d.m.Y", "d-m-Y", "F j, Y", "F jS Y", "Y-m-d");
-	
+
 	public static $time_formats = array("H:i", "g:i a", "g.i a", "H.i");
 
 	/**
 	 * returns name for cache for language.
-	*/
+	 */
 	public static function getLangCacheName() {
 		if(isset(ClassInfo::$appENV["expansion"])) {
 			return "lang_" . Core::$lang . count(i18n::$languagefiles) . count(ClassInfo::$appENV["expansion"]);
@@ -77,7 +77,7 @@ class i18n extends gObject {
 			Profiler::mark("i18n::Init");
 		StaticsManager::setSaveVars("i18n");
 
-	
+
 		// set correct host, avoid problems with localhost
 		$host = $_SERVER["HTTP_HOST"];
 		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
@@ -143,19 +143,19 @@ class i18n extends gObject {
 			}
 
 			$lang = ArrayLib::map_key("strtoupper", $lang);
-			
+
 			$cacher->write($lang, 600);
 		}
-		
+
 		if(PROFILE)
 			Profiler::unmark("i18n::Init");
 	}
-	
+
 	/**
 	 * load template language.
-	*/
+	 */
 	public static function loadTPLLang($tpl) {
-		
+
 		if(file_exists(ROOT . "/tpl/" . $tpl . "/lang/" . Core::$lang . ".php")) {
 			self::loadExpansionLang(ROOT . "tpl/" . $tpl . "/lang/" . Core::$lang . ".php", "tpl", $GLOBALS["lang"]);
 		}
@@ -198,15 +198,15 @@ class i18n extends gObject {
 
 		if(PROFILE)
 			Profiler::unmark("i18n::listLangs");
-		
-		
-		
+
+
+
 		return $data;
 	}
 
 	/**
 	 * helper for sort
-	*/
+	 */
 	static function sortByCurrent($a, $b) {
 		if($a == Core::$lang) {
 			return -1;
@@ -241,9 +241,10 @@ class i18n extends gObject {
 	/**
 	 * select language based on current data
 	 *
-	 *@name AutoSelectLang
+	 * @name AutoSelectLang
+	 * @return string
 	 */
-	public static function AutoSelectLang($code) {
+	public function AutoSelectLang($code) {
 		if(isset($code) && self::LangExists($code)) {
 			return $code;
 		}
@@ -286,7 +287,8 @@ class i18n extends gObject {
 	 * @name selectLang
 	 * @return string
 	 */
-	public static function selectLang($code) {
+	public function selectLang($code) {
+
 		if($code != "." && $code != ".." && is_dir(LANGUAGE_DIRECTORY . "/" . $code)) {
 			return $code;
 		} else {
@@ -313,7 +315,7 @@ class i18n extends gObject {
 	 * @name LangExists
 	 * @return bool
 	 */
-	public static function LangExists($code) {
+	public function LangExists($code) {
 		if(!$code || $code == "." || $code == "..")
 			return false;
 
@@ -331,9 +333,8 @@ class i18n extends gObject {
 
 	/**
 	 * this function builds a cache which has a langcode-lang-database
-	 *
 	 */
-	public static function getLangDB() {
+	protected static function getLangDB() {
 		$cacher = new Cacher("langDB" . count(scandir(LANGUAGE_DIRECTORY)));
 		if($cacher->checkValid()) {
 			return $cacher->getData();
@@ -344,68 +345,74 @@ class i18n extends gObject {
 				$db[$lang] = $lang;
 				if(isset($data["langCodes"]))
 					foreach($data["langCodes"] as $code) {
-						$db[$code] = $lang;
+						if(isset($db[$code]) && $lang != PROJECT_LANG) {
+							$db[$code] = array_merge((array) $db[$code], array($lang));
+						} else {
+							$db[$code] = $lang;
+						}
 					}
 			}
 			$cacher->write($db, 86400);
 			return $db;
 		}
 	}
+
 	/**
 	 * returns an array of locale-codes for given code
 	 *
-	 *@name getLangCodes
+	 * @name getLangCodes
+	 * @return array
 	 */
-	public static function getLangCodes($code) {
+	public function getLangCodes($code) {
 		$data = self::getLangInfo(self::selectLang($code));
 		if(isset($data["langCodes"]))
 			return array_merge($data["areaCodes"], array($code));
 		else
 			return array($code);
 	}
-	
-	public static function prefered_language ($available_languages,$http_accept_language="auto") {
-	    // if $http_accept_language was left out, read it from the HTTP-Header 
-	    if ($http_accept_language == "auto") $http_accept_language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : ''; 
-	
-	    // standard  for HTTP_ACCEPT_LANGUAGE is defined under 
-	    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4 
-	    // pattern to find is therefore something like this: 
-	    //    1#( language-range [ ";" "q" "=" qvalue ] ) 
-	    // where: 
-	    //    language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" ) 
-	    //    qvalue         = ( "0" [ "." 0*3DIGIT ] ) 
-	    //            | ( "1" [ "." 0*3("0") ] ) 
-	    preg_match_all("/([[:alpha:]]{1,8})(-([[:alpha:]|-]{1,8}))?" . 
-	                   "(\s*;\s*q\s*=\s*(1\.0{0,3}|0\.\d{0,3}))?\s*(,|$)/i", 
-	                   $http_accept_language, $hits, PREG_SET_ORDER); 
-	
-	    // default language (in case of no hits) is the first in the array 
-	    $bestlang = $available_languages[0]; 
-	    $bestqval = 0; 
-	
-	    foreach ($hits as $arr) { 
-	        // read data from the array of this hit 
-	        $langprefix = strtolower ($arr[1]); 
-	        if (!empty($arr[3])) { 
-	            $langrange = strtolower ($arr[3]); 
-	            $language = $langprefix . "-" . $langrange; 
-	        } 
-	        else $language = $langprefix; 
-	        $qvalue = 1.0; 
-	        if (!empty($arr[5])) $qvalue = floatval($arr[5]); 
-	      
-	        // find q-maximal language  
-	        if (in_array($language,$available_languages) && ($qvalue > $bestqval)) { 
-	            $bestlang = $language; 
-	            $bestqval = $qvalue; 
-	        } 
-	        // if no direct hit, try the prefix only but decrease q-value by 10% (as http_negotiate_language does) 
-	        else if (in_array($langprefix,$available_languages) && (($qvalue*0.9) > $bestqval)) { 
-	            $bestlang = $langprefix; 
-	            $bestqval = $qvalue*0.9; 
-	        } 
-	    } 
-	    return $bestlang; 
+
+	public function prefered_language ($available_languages, $http_accept_language="auto") {
+		// if $http_accept_language was left out, read it from the HTTP-Header
+		if ($http_accept_language == "auto") $http_accept_language = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '';
+
+		// standard  for HTTP_ACCEPT_LANGUAGE is defined under
+		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+		// pattern to find is therefore something like this:
+		//    1#( language-range [ ";" "q" "=" qvalue ] )
+		// where:
+		//    language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
+		//    qvalue         = ( "0" [ "." 0*3DIGIT ] )
+		//            | ( "1" [ "." 0*3("0") ] )
+		preg_match_all("/([[:alpha:]]{1,8})(-([[:alpha:]|-]{1,8}))?" .
+				"(\s*;\s*q\s*=\s*(1\.0{0,3}|0\.\d{0,3}))?\s*(,|$)/i",
+				$http_accept_language, $hits, PREG_SET_ORDER);
+
+		// default language (in case of no hits) is the first in the array
+		$bestlang = $available_languages[0];
+		$bestqval = 0;
+
+		foreach ($hits as $arr) {
+			// read data from the array of this hit
+			$langprefix = strtolower ($arr[1]);
+			if (!empty($arr[3])) {
+				$langrange = strtolower ($arr[3]);
+				$language = $langprefix . "-" . $langrange;
+			}
+			else $language = $langprefix;
+			$qvalue = 1.0;
+			if (!empty($arr[5])) $qvalue = floatval($arr[5]);
+
+			// find q-maximal language
+			if (in_array($language,$available_languages) && ($qvalue > $bestqval)) {
+				$bestlang = $language;
+				$bestqval = $qvalue;
+			}
+			// if no direct hit, try the prefix only but decrease q-value by 10% (as http_negotiate_language does)
+			else if (in_array($langprefix,$available_languages) && (($qvalue*0.9) > $bestqval)) {
+				$bestlang = $langprefix;
+				$bestqval = $qvalue*0.9;
+			}
+		}
+		return $bestlang;
 	}
 }

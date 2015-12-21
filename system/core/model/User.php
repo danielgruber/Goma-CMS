@@ -24,6 +24,7 @@
  */
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
+	const USERS_PERMISSION = "USERS_MANAGE";
 	/**
 	 * the name of this dataobject
 	 *
@@ -613,7 +614,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 */
 	public function providePerms() {
 		return array(
-			"USERS_MANAGE"	=> array(
+				self::USERS_PERMISSION	=> array(
 				"title"		=> '{$_lang_administration}: {$_lang_user}',
 				"default"	=> array(
 					"type"	 	=> "admins",

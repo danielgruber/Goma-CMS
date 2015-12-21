@@ -497,7 +497,7 @@ class ClassInfo extends gObject {
 		self::$database = array();
 		$file = ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE;
 
-		if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW) && (!function_exists("apc_exists") || !apc_exists(CLASS_INFO_DATAFILE)))) {
+		if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW))) {
 			if(PROFILE)
 				Profiler::mark("generate_class_info");
 			defined("GENERATE_CLASS_INFO") OR define('GENERATE_CLASS_INFO', true);
@@ -744,11 +744,6 @@ class ClassInfo extends gObject {
 				throw new ClassInfoWriteError('Could not write ClassInfo. Could not write ' . $file, ExceptionManager::CLASSINFO_WRITE_ERROR);
 			}
 
-			if(function_exists("apc_store")) {
-				$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "interfaces" => self::$interfaces, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
-				apc_store(CLASS_INFO_DATAFILE, $data);
-			}
-
 			//chmod(ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE, 0773);
 
 			if(!$wasUnavailable)
@@ -777,78 +772,33 @@ class ClassInfo extends gObject {
 		} else {
 			defined("CLASS_INFO_LOADED") OR define("CLASS_INFO_LOADED", true);
 
-			// apc-cache
-			if(function_exists("apc_fetch") && apc_exists(CLASS_INFO_DATAFILE)) {
-				$data = apc_fetch(CLASS_INFO_DATAFILE);
-				if($data["root"] != ROOT || !isset($data["root"]) || !isset($data["version"]) || version_compare($data["version"], self::VERSION, "<")) {
-					ClassInfo::delete();
-					clearstatcache();
-					ClassInfo::loadfile();
-					return;
-				}
+			// just include file
+			try {
+				include (ROOT . CACHE_DIRECTORY . "/" . CLASS_INFO_DATAFILE);
+			} catch (Exception $e) {
+				ClassInfo::delete();
+				clearstatcache();
+				ClassInfo::loadfile();
+				return;
+			}
 
-				// init vars
-				self::$appENV = $data["appENV"];
-				self::$class_info = $data["class_info"];
-				self::$files = $data["files"];
-				self::$tables = $data["tables"];
-				self::$database = $data["database"];
-				self::$childData = $data["childData"];
-				self::$interfaces = $data["interfaces"];
-				ClassManifest::$preload = $data["preload"];
+			if(!isset($root) || $root != ROOT || !isset($version) || version_compare($version, self::VERSION, "<")) {
+				ClassInfo::delete();
+				clearstatcache();
+				ClassInfo::loadfile();
+				return;
+			}
 
-				// load preloads
-				foreach($data["preload"] as $file) {
-					if(file_exists($file)) {
-						include_once ($file);
-					} else {
-						ClassInfo::delete();
-						clearstatcache();
-						ClassInfo::loadfile();
-						return;
-					}
-				}
+			if(defined("SQL_LOADUP") && self::$appENV["app"]["SQL"] === false) {
+				ClassInfo::delete();
+				ClassInfo::loadfile();
+				return;
+			}
 
-				// run hooks
-				if(self::$ClassInfoHooks) {
-					foreach(self::$ClassInfoHooks as $hook) {
-						call_user_func_array($hook, array());
-					}
-				}
-			} else {
-
-				// just include file
-				try {
-					include (ROOT . CACHE_DIRECTORY . "/" . CLASS_INFO_DATAFILE);
-				} catch (Exception $e) {
-					ClassInfo::delete();
-					clearstatcache();
-					ClassInfo::loadfile();
-					return;
-				}
-
-				if(!isset($root) || $root != ROOT || !isset($version) || version_compare($version, self::VERSION, "<")) {
-					ClassInfo::delete();
-					clearstatcache();
-					ClassInfo::loadfile();
-					return;
-				}
-
-				if(defined("SQL_LOADUP") && self::$appENV["app"]["SQL"] === false) {
-					ClassInfo::delete();
-					ClassInfo::loadfile();
-					return;
-				}
-
-				if(function_exists("apc_store")) {
-					ClassInfo::Write();
-				}
-
-				// run hooks
-				if(self::$ClassInfoHooks) {
-					foreach(self::$ClassInfoHooks as $hook) {
-						call_user_func_array($hook, array());
-					}
+			// run hooks
+			if(self::$ClassInfoHooks) {
+				foreach(self::$ClassInfoHooks as $hook) {
+					call_user_func_array($hook, array());
 				}
 			}
 		}
@@ -1056,10 +1006,6 @@ class ClassInfo extends gObject {
 			}
 		}
 
-		if(function_exists("apc_delete")) {
-			apc_delete(CLASS_INFO_DATAFILE);
-		}
-
 		return true;
 	}
 
@@ -1113,12 +1059,6 @@ class ClassInfo extends gObject {
 
 		foreach(ClassManifest::$preload as $_file) {
 			$php .= "\ninclude_once(" . var_export($_file, true) . ");";
-		}
-
-		// generate apc-part
-		if(function_exists("apc_store")) {
-			$data = array("appENV" => self::$appENV, "class_info" => self::$class_info, "files" => self::$files, "tables" => self::$tables, "database" => self::$database, "preload" => ClassManifest::$preload, "interfaces" => self::$interfaces, "childData" => self::$childData, "root" => ROOT, "version" => self::VERSION);
-			apc_store(CLASS_INFO_DATAFILE, $data);
 		}
 
 		// write files
