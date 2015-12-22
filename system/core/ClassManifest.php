@@ -43,7 +43,8 @@ class ClassManifest {
 		if(PROFILE)
 			Profiler::mark("Manifest::load");
 		
-		self::loadInterface($class) || self::loadClass($class) || self::generateAlias($class);
+		if(!self::loadInterface($class) && !self::loadClass($class) && !self::generateAlias($class))
+            throw new LogicException("Could not load $class.");
 		
 		if(class_exists('Core', false)) {
 			Core::callHook('loadedClass', $class);
@@ -81,16 +82,17 @@ class ClassManifest {
 		}
 	}
 
-	/**
-	 * loads class.
-	*/
+    /**
+     * loads class.
+     * @param string $class
+     * @return bool
+     */
 	protected static function loadClass($class) {
 		if(isset(ClassInfo::$files[$class])) {
 			if(!include(ClassInfo::$files[$class])) {
 				ClassInfo::Delete();
 				throw new LogicException("Could not include " . ClassInfo::$files[$class] . ". ClassInfo seems to be old.");
 			}
-			self::setSaveVars(ClassInfo::$files[$class]);
 
 			return true;
 		}
@@ -563,7 +565,7 @@ class ClassManifest {
 	}
 
 	public static function addUnitTest () {
-		self::$class_alias["unittestcase"] = "object";
+		self::$class_alias["unittestcase"] = gObject::ID;
 	}
 
 }

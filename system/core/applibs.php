@@ -67,6 +67,20 @@ function lang($name, $default = "") {
 	}
 }
 
+function getSSLUrl() {
+	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
+	$port = $_SERVER["SERVER_PORT"];
+	if ($http == "http" && $port == 80) {
+		$port = "";
+	} else if ($http == "https" && $port == 443) {
+		$port = "";
+	} else {
+		$port = ":" . $port;
+	}
+
+	return "https://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"];
+}
+
 /**
  * Merges arrays recursive.
  *

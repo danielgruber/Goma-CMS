@@ -668,7 +668,7 @@ class ClassInfo extends gObject {
 				if(class_exists($class) && is_subclass_of($class, "gObject") || $class == "gobject") {
 					// save vars
 					foreach(StaticsManager::getSaveVars($class) as $value) {
-						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
+						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value, true);
 						unset($value);
 					}
 

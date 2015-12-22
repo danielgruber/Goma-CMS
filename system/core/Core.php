@@ -66,9 +66,14 @@ class Core extends gObject {
 	public static $requestController;
 
 	/**
+	 * @var string
+	 */
+	public static $favicon;
+
+	/**
 	 * global hooks
 	 */
-	public static $hooks = array();
+	private static $hooks = array();
 
 	/**
 	 * file which contains data from php://input
@@ -106,7 +111,7 @@ class Core extends gObject {
 
 		ob_start();
 
-		StaticsManager::setSaveVars("core");
+		StaticsManager::setSaveVars(self::ID);
 
 		if(isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
 			Resources::addData("goma.ENV.is_backend = true;");
@@ -486,6 +491,11 @@ class Core extends gObject {
 			} else {
 				$html .= "<meta name=\"" . $data["name"] . "\" content=\"" . $data["value"] . "\" />\n";
 			}
+		}
+
+		if(!empty(self::$favicon)) {
+			$html .= '		<link rel="icon" href="' . self::$favicon . '" type="image/x-icon" />';
+			$html .= '		<link rel="apple-touch-icon-precomposed" href="'.RetinaPath(self::$favicon).'" />';
 		}
 
 		Core::callHook(self::HEADER_HTML_HOOK, $html);

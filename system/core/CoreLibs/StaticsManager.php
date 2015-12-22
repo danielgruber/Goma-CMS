@@ -14,7 +14,6 @@ class StaticsManager {
     public static $save_vars;
     /**
      * array of classes, which we have already set SaveVars
-     *
      */
     public static $set_save_vars = array();
 
@@ -201,7 +200,7 @@ class StaticsManager {
     protected static function setSaveVarsAndHook($class) {
         foreach (self::getSaveVars($class) as $var) {
             if (isset(ClassInfo::$class_info[$class][$var])) {
-                self::setStatic($class, $var, ClassInfo::$class_info[$class][$var]);
+                self::setStatic($class, $var, ClassInfo::$class_info[$class][$var], true);
             }
         }
 

@@ -446,7 +446,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @access protected
      */
     public function defineStatics() {
-
         if ($many_many_relationships = $this->ManyManyRelationships()) {
             foreach ($many_many_relationships as $key => $val) {
                 gObject::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);

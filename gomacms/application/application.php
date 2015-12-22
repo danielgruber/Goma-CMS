@@ -27,7 +27,8 @@ if(isset($_SESSION["welcome_screen"]) || (!file_exists(APP_FOLDER . "application
 		$_POST
 	);
 	$welcomeController = new welcomeController();
-	return Core::serve($welcomeController->handleRequest($request));
+	Core::serve($welcomeController->handleRequest($request));
+	return;
 }
 
 if(PROFILE) Profiler::mark("settings");
@@ -36,24 +37,11 @@ settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
 
-if(settingsController::get("useSSL") == 1) {
-	// generate BASE_URI
-	$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
-	$port = $_SERVER["SERVER_PORT"];
-	if ($http == "http" && $port == 80) {
-		$port = "";
-	} else if ($http == "https" && $port == 443) {
-		$port = "";
-	} else {
-		$port = ":" . $port;
-	}
-
-	if($http == "http" && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
-		header("Location: https://" . $_SERVER["SERVER_NAME"] . $port . $_SERVER["REQUEST_URI"]);
-		exit;
-	} else if(isset($_GET["forceNoSSL"])) {
-		$_SESSION["forceNoSSL"] = true;
-	}
+if(settingsController::get("useSSL") == 1 && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
+	header("Location: " . getSSLUrl());
+	return;
+} else if(isset($_GET["forceNoSSL"])) {
+	$_SESSION["forceNoSSL"] = true;
 }
 
 Resources::$gzip = settingsController::get("gzip");
@@ -68,6 +56,10 @@ Core::setHeader("robots", "index,follow");
 $tpl = isset($_GET["settpl"]) ? $_GET["settpl"] : settingsController::Get("stpl");
 Core::setTheme($tpl);
 i18n::loadTPLLang(Core::getTheme());
+
+if(settingsController::get("favicon")) {
+	Core::$favicon = "./favicon.ico";
+}
 
 // check for permission for actions run at the top
 if(isset($_GET["settpl"]) && !Permission::check("SETTINGS_ADMIN")) {
