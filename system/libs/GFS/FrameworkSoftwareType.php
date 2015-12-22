@@ -116,9 +116,8 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 	/**
 	 * gets package info
 	 *
-	 * @name getPackageInfo
-	 * @access public
 	 * @return array|bool
+	 * @throws Exception
 	 */
 	public function getPackageInfo() {
 		$gfs = new GFS($this->file);
@@ -126,7 +125,7 @@ class G_FrameworkSoftwareType extends G_SoftwareType {
 		$appInfo = $gfs->parsePlist("data/system/info.plist");
 
 		if(!$appInfo)
-			return false;
+			throw new Exception("Could not read Package-Info.");
 
 		$data = array("filename" => basename($this->file), "installType" => "update","version" => $info["version"]);
 

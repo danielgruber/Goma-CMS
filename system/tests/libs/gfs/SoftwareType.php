@@ -54,9 +54,6 @@ class SoftwareTypeTest extends GomaUnitTest {
 		$this->assertNotNull($installList);
 
 		foreach($installList as $k => $v) {
-
-
-
 			$this->assertNotNull($v["filename"]);
 			$this->assertNotNull($v["file"]);
 			$this->assertNotNull($v["type"]);

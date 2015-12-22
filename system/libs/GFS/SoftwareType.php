@@ -629,7 +629,6 @@ abstract class g_SoftwareType {
 			foreach($data["packages"] as $type => $apps) {
 				foreach($apps as $app => $appInfo) {
 					if(isset($appInfo["file"])) {
-
 						self::buildPackageInfo($app, $type, $dir, $appInfo, $appInfo["version"], $packages, false);
 					} else {
 						foreach($appInfo as $version => $versionInfo) {
@@ -661,21 +660,23 @@ abstract class g_SoftwareType {
      * @internal param $buildPackageInfo
      */
 	protected static function buildPackageInfo($app, $type, $dir, $data, $version, &$packages, $shouldUpdate = true) {
-		$appdata = self::getByType($type, $dir . $data["file"])->getPackageInfo();
-		$appdata["file"] = $dir . $data["file"];
-		$appdata["plist_type"] = $type;
-		if($appdata // data exists
-			&& self::isValidPackageTypeAndVersion($appdata, $shouldUpdate))
-		{
+		try {
+			$appdata = self::getByType($type, $dir . $data["file"])->getPackageInfo();
+			$appdata["file"] = $dir . $data["file"];
+			$appdata["plist_type"] = $type;
+			if ($appdata // data exists
+					&& self::isValidPackageTypeAndVersion($appdata, $shouldUpdate)
+			) {
 
-			if(isset($packages[$app])) {
-				if(goma_version_compare($packages[$app]["version"], $version, "<")) {
+				if (isset($packages[$app])) {
+					if (goma_version_compare($packages[$app]["version"], $version, "<")) {
+						$packages[$app] = $appdata;
+					}
+				} else {
 					$packages[$app] = $appdata;
 				}
-			} else {
-				$packages[$app] = $appdata;
 			}
-		}
+		} catch(Exception $e) {}
 	}
 
     /**
@@ -886,14 +887,10 @@ abstract class g_SoftwareType {
      * @return array|bool
      */
 	public static function getPlistFromGFS($gfs, $file) {
-		try {
-			$gfs = new GFS($gfs);
-			$info = $gfs->parsePlist($file);
+		$gfs = new GFS($gfs);
+		$info = $gfs->parsePlist($file);
 
-			return $info;
-		} catch(Exception $e) {
-			return false;
-		}
+		return $info;
 	}
 
 	/**

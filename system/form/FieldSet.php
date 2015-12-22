@@ -60,20 +60,12 @@ class FieldSet extends FormField
     /**
      * sets the form for all subfields, too
      *
-     * @name setForm
-     * @access public
-     * @param form
+     * @param Form $form
+     * @param bool $renderAfterSetForm
      */
-    public function setForm(&$form)
+    public function setForm(&$form, $renderAfterSetForm = true)
     {
-        if (is_object($form)) {
-            $this->parent =& $form;
-            $this->state = $this->form()->state->{$this->classname . $this->name};
-            $this->form()->fields[$this->name] = $this;
-            $this->renderAfterSetForm();
-        } else {
-            throw new InvalidArgumentException('$form is not an object. $form needs to be an object in setForm.');
-        }
+        parent::setForm($form, false);
 
         /** @var FormField $field */
         foreach ($this->fields as $sort => $field) {
@@ -81,6 +73,8 @@ class FieldSet extends FormField
             $this->sort[$field->name] = 1 + $sort;
             $field->setForm($this);
         }
+
+        if($renderAfterSetForm) $this->renderAfterSetForm();
     }
 
     /**

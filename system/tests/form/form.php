@@ -39,6 +39,29 @@ class FormTest extends GomaUnitTest implements TestAble {
 		$this->caseFieldAccessable("address1", new TextField("address1", "name"));
 		$this->caseFieldAccessable("_1", new TextField("_1", "name"));
         $this->caseFieldAccessable("test", new TextField("test", "blub"));
+
+		$this->caseFieldAccessable("test", new FieldSet("test", "blub"));
+		$this->caseFieldAccessable("blah", new FieldSet("BLAH", "blub"));
+
+		$this->caseFieldAccessable("TEST", new FieldSet("test", "blub"));
+		$this->caseFieldAccessable("Blah", new FieldSet("BLAH", "blub"));
+
+		$this->caseFieldAccessable("TEST", new RadioButton("test", "blub"));
+		$this->caseFieldAccessable("Blah", new RadioButton("BLAH", "blub"));
+
+		$this->caseFieldAccessable("TEST", new FormAction("test", "blub"));
+		$this->caseFieldAccessable("Blah", new FormAction("BLAH", "blub"));
+
+		$form = new Form(new Controller(), "test", array(
+			$set = new FieldSet("BLAH", array(
+				$t = new FormField("test"),
+				$b = new FormField("Blub")
+			))
+		));
+
+		$this->assertEqual($form->blah, $set);
+		$this->assertEqual($form->Test, $t);
+		$this->assertEqual($form->BLub, $b);
 	}
 
 	/**
@@ -46,7 +69,7 @@ class FormTest extends GomaUnitTest implements TestAble {
 	*/
 	public function caseFieldAccessable($name, $field) {
 
-		$this->assertEqual($field->name, $name);
+		$this->assertEqual(strtolower($field->name), strtolower($name));
 
 		$form = new Form(new Controller(), "test", array(
 			$field

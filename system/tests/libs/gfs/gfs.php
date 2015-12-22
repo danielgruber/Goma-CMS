@@ -103,4 +103,23 @@ class GFSTest extends GomaUnitTest {
 
 		FileSystem::delete(FRAMEWORK_ROOT . "temp/testcontents.gfs");
 	}
+
+	public function testWritePlist() {
+		$data = array(
+				"blub" => randomString(10),
+				"blah" => 2
+		);
+		$file = ROOT . "system/temp/test3plist.gfs";
+		if(file_exists($file) && filesize($file) > 1000 * 1000) {
+			FileSystem::delete($file);
+		}
+
+		$gfs = new GFS($file);
+		$gfs->writePlist("test.plist", $data);
+		$gfs->close();
+		$info = g_SoftwareType::getPlistFromGFS($file, "test.plist");
+		$this->assertEqual($info, $data);
+		//FileSystem::delete($file); // without this line it does not work
+
+	}
 }

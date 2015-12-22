@@ -19,7 +19,7 @@ define("GFS_DB_TYPE", "serialize");
 define("GFS_READONLY", 2);
 define("GFS_READWRITE", 1);
 
-class GFS extends gObject {
+class GFS {
 	
 	/**
 	 * required version for this class
@@ -172,25 +172,27 @@ class GFS extends gObject {
 	 * file-permissions for files that should be written.
 	*/
 	protected $writeMode = 0777;
-	
+
 	/**
 	 * opens GFS-Archive. It throws some exceptions when something fails.
 	 *
-	 * @name 	__construct
-	 * @access 	public
-	 * @param 	filename
-	*/
+	 * @param string $filename
+	 * @param int $flag
+	 * @param int $writeMode
+	 * @throws GFSDBException
+	 * @throws GFSFileException
+	 * @throws GFSVersionException
+	 */
 	public function __construct($filename, $flag = null, $writeMode = 0777) {
-		parent::__construct();
-		
 		$this->file = $filename;
 		$this->writeMode = $writeMode;
 		if(is_dir($this->file)) {
 			$this->valid = false;
-			throw new LogicException("GFS-File is a Folder.");
+			throw new InvalidArgumentException("GFS-File is a Folder.");
 		}
 		
 		if(file_exists($this->file)) {
+			clearstatcache(true, $this->file);
 			$filesize = filesize($this->file);
 			$this->file = realpath($this->file);
 			if($flag == GFS_READONLY) {
@@ -345,15 +347,16 @@ class GFS extends gObject {
 
 		fseek($this->pointer, $this->position);
 	}
-	
+
 	/**
 	 * adds a file.
 	 *
-	 * @name 	addFromFile
-	 * @access 	public
-	 * @param 	string - file
-	 * @param 	string - path in container
-	*/
+	 * @name    addFromFile
+	 * @access    public
+	 * @param    string - file
+	 * @param    string - path in container
+	 * @return bool|int
+	 */
 	public function addFromFile($file, $path, $not_add_if_dir = array()) {
 		
 		$this->checkValidOrThrow();
@@ -1207,13 +1210,12 @@ class GFS extends gObject {
 		
 		return $path;
 	}
-		
+
 	/**
 	 * writes the database
 	 *
-	 *@name UpdateDB
-	 *@access public
-	*/
+	 * @return bool
+	 */
 	public function updateDB() {
 		if(PROFILE) Profiler::mark("updateDB");
 		$this->checkValidOrThrow();
@@ -1303,13 +1305,12 @@ class GFS extends gObject {
 				
 		return true;
 	}
-	
+
 	/**
 	 * closes a GFS-Archive
 	 *
-	 *@name close
-	 *@access public
-	*/
+	 * @return bool
+	 */
 	public function close() {
 
 		if($this->valid === false) {
@@ -1380,43 +1381,20 @@ class GFS extends gObject {
 	
 }
 
-/**
- * EXCEPTIONS
-*/
-class GFSVersionException extends Exception {
-	/**
-	 * constructor.
-	 */
-	public function __construct($m = "", $code = 41, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
+class GFSException extends Exception {
+	protected $internalCode = 40;
+	public function __construct($m = "", $code = null, Exception $previous = null) {
+		parent::__construct($m, $code ? $code : $this->internalCode, $previous);
 	}
 }
-
-class GFSFileException extends Exception {
-	/**
-	 * constructor.
-	 */
-	public function __construct($m = "", $code = 42, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
-	}
-
+class GFSVersionException extends GFSException {
+	protected $internalCode = 41;
 }
 
-class GFSDBException extends Exception {
-	/**
-	 * constructor.
-	 */
-	public function __construct($m = "", $code = 43, Exception $previous = null) {
-		if(version_compare(phpversion(), "5.3.0", "<"))
-			parent::__construct($m, $code, $previous);
-		else
-			parent::__construct($m, $code);
-	}
+class GFSFileException extends GFSException {
+	protected $internalCode = 42;
+}
 
+class GFSDBException extends GFSException {
+	protected $internalCode = 43;
 }
