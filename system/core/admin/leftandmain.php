@@ -95,7 +95,9 @@ class LeftAndMain extends AdminItem {
 	public function createOptions() {
 		$options = array();
 		foreach($this->models as $model) {
-			$options[$model] = ClassInfo::getClassTitle($model);
+			if($title = ClassInfo::getClassTitle($model)) {
+				$options[$model] = $title;
+			}
 		}
 		return $options;
 	}

@@ -149,7 +149,9 @@ class contentAdmin extends LeftAndMain
 		foreach(ClassInfo::getChildren("page") as $page) {
 			if(ClassInfo::exists($page)) {
 				if(!gObject::method_exists($page, "hidden") || call_user_func_array(array($page, "hidden"), array($page)) !== true) {
-									$data[$page] = convert::raw2text(ClassInfo::getClassTitle($page));
+					if($title = ClassInfo::getClassTitle($page)) {
+						$data[$page] = convert::raw2text($title);
+					}
 				}
 			}
 		}
@@ -264,7 +266,7 @@ class contentAdmin extends LeftAndMain
 	 *
 	 * @return ViewAccessableData
 	 */
-	protected function getModelForAdd() {
+	protected function  getModelForAdd() {
 		$model = $this->getModelByName($this->getParam("model"));
 
 		// show page for selecting type

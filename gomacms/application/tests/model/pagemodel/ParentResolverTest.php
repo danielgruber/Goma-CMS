@@ -44,14 +44,14 @@ class ParentResolverTest extends GomaUnitTest implements TestAble {
 }
 
 class mockPage extends Page {
-
+    static $cname = "";
 }
 
 class mockAbc extends mockPage {
     static $allow_parents = array();
-
+    static $cname = "";
 }
 
 class testMock extends mockPage {
-
+    static $cname = "";
 }
