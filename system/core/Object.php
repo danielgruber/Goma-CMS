@@ -295,7 +295,7 @@ abstract class gObject
             return array(ClassInfo::find_class_name($exts[1]), $exts[2]);
         }
 
-        return array(ClassInfo::find_class_name($ext), "");
+        return array(ClassInfo::find_class_name($ext), array());
 
     }
 
@@ -506,7 +506,7 @@ abstract class gObject
      *
      * @name getInstance
      * @param string $extensionClassName of extension
-     * @return gObject
+     * @return Extension
      */
     public function getInstance($extensionClassName)
     {
@@ -528,7 +528,12 @@ abstract class gObject
                 return null;
             }
 
-            self::$extension_instances[$this->classname][$extensionClassName] = clone eval("return new " . $extensionClassName . "(" . self::$cache_extensions[$this->classname][$extensionClassName] . ");");
+            $reflectionClass = new ReflectionClass($extensionClassName);
+            $args =
+                is_array(self::$cache_extensions[$this->classname][$extensionClassName]) ?
+                    self::$cache_extensions[$this->classname][$extensionClassName] :
+                    eval('return array('.self::$cache_extensions[$this->classname][$extensionClassName].');');
+            self::$extension_instances[$this->classname][$extensionClassName] = $reflectionClass->newInstanceArgs($args);
         }
 
         // own instance
@@ -621,7 +626,19 @@ abstract class gObject
 
     public function __wakeup()
     {
+        foreach($this->ext_instances as $instance) {
+            /** @var Extension $instance */
+            $instance->setOwner($this);
+            $instance->__wakeup();
+        }
         StaticsManager::setSaveVars($this);
+    }
+
+    public function __clone() {
+        foreach($this->ext_instances as $key => $instance) {
+            $this->ext_instances[$key] = clone $instance;
+            $this->ext_instances[$key]->setOwner($this);
+        }
     }
 
     /**

@@ -81,8 +81,8 @@ class LeftAndMain extends AdminItem {
 	 * @access public
 	 * @return string
 	 */
-	public function getRootNode() {
-		return parse_lang($this->root_node);
+	protected function getRootNode() {
+		return "";
 	}
 
 	/**

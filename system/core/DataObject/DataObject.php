@@ -2393,7 +2393,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         foreach($this->getextensions() as $ext)
         {
             if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
-                $newquery = $this->getinstance($ext)->setOwner($this)->argumentQuery($query, $version, $filter, $sort, $limit, $join, $forceClasses);
+                $newquery = $this->getinstance($ext)->argumentQuery($query, $version, $filter, $sort, $limit, $join, $forceClasses);
                 if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
                     $query = $newquery;
                     unset($newquery);
@@ -2401,7 +2401,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
 
             if (ClassInfo::hasInterface($ext, "argumentsSearchQuery")) {
-                $newquery = $this->getinstance($ext)->setOwner($this)->argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
+                $newquery = $this->getinstance($ext)->argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
                 if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
                     $query = $newquery;
                     unset($newquery);
@@ -2544,7 +2544,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         foreach($this->getextensions() as $ext)
         {
             if (ClassInfo::hasInterface($ext, "argumentsQuery")) {
-                $newquery = $this->getinstance($ext)->setOwner($this)->argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
+                $newquery = $this->getinstance($ext)->argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
                 if (is_object($newquery) && (strtolower(get_class($newquery)) == "dbquery" || is_subclass_of($newquery, "DBQuery"))) {
                     $query = $newquery;
                     unset($newquery);

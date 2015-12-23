@@ -51,15 +51,7 @@ class contentAdmin extends LeftAndMain
 	static $icon = "templates/images/content.png";	
 	
 	public $sort = 990;
-	
-	
-	/**
-	 * title of the first node of the tree
-	 *
-	 *@name root_node
-	*/
-	public $root_node = "{\$_lang_pagetree}";
-	
+
 	/**
 	 * colors in the tree
 	 *
@@ -93,6 +85,17 @@ class contentAdmin extends LeftAndMain
 	protected $sort_field = "sort";
 
 	static $less_vars = "tint-blue.less";
+
+	/**
+	 * gets the title of the root node
+	 *
+	 * @name getRootNode
+	 * @access public
+	 * @return string
+	 */
+	protected function getRootNode() {
+		return lang("pagetree");
+	}
 
 	/**
 	 * returns the URL for the View Website-Button

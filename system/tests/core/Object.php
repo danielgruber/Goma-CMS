@@ -149,7 +149,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 
     public function testExtensionArguments() {
         $this->unitExtensionArguments("TestObjectExtension('12aB', 34, true)", "testobjectextension", "'12aB', 34, true");
-        $this->unitExtensionArguments("TestObjectExtension", "testobjectextension", "");
+        $this->unitExtensionArguments("TestObjectExtension", "testobjectextension", array());
         $this->unitExtensionArguments("TestObjectExtension(array(123,456))", "testobjectextension", "array(123,456)");
     }
 
@@ -157,7 +157,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $info = gObject::getArgumentsFromExtend($exp);
 
         $this->assertEqual($info[0], $name, "Name $name expected %s");
-        $this->assertEqual($info[1], $args, "Arguments $args expected %s");
+        $this->assertEqual($info[1], $args, "Arguments ".var_export($args, true) . " expected %s");
     }
 
     public function testExtensionWithArgs() {
@@ -166,6 +166,23 @@ class ObjectTest extends GomaUnitTest implements TestAble {
         $args = $o->getInstance("TestExtensionWithArgs")->args;
         $this->assertEqual($args, array('a', 12, array(23)));
     }
+
+	public function testexpansionInstanceSerialize() {
+		$o = new TestObject();
+		$this->assertIsA($o->getInstance("TestObjectExtension"), "TestObjectExtension");
+		$this->assertEqual($o->getInstance("TestObjectExtension")->getOwner(), $o);
+
+		$d = clone $o;
+		$d->test = 1;
+
+		$this->assertNotEqual($d->getInstance("TestObjectExtension")->getOwner(), $o);
+
+		$d->getInstance("TestObjectExtension")->setOwner(new StdClass());
+		$data = unserialize(serialize($d));
+
+		$this->assertIsA($data->getInstance("TestObjectExtension"), "TestObjectExtension");
+		$this->assertEqual($data->getInstance("TestObjectExtension")->getOwner(), $data);
+	}
 }
 
 class DummyMethodTest extends gObject {

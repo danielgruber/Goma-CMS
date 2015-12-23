@@ -34,7 +34,11 @@ class HasManyGetter extends Extension {
                 gObject::LinkMethod($this->getOwner()->classname, $key, array("HasManyGetter", function($instance) use($key) {
                     $args = func_get_args();
                     $args[0] = $key;
-                    return call_user_func_array(array($instance, "getHasMany"), $args);
+                    try {
+                        return call_user_func_array(array($instance, "getHasMany"), $args);
+                    } catch(InvalidArgumentException $e) {
+                        throw new LogicException("Something got wrong wiring the HasMany-Relationship.", 0, $e);
+                    }
                 }), true);
 
                 gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
@@ -50,6 +54,7 @@ class HasManyGetter extends Extension {
      * @return HasMany_DataObjectSet
      */
     public function getHasMany($name, $filter = null, $sort = null, $limit = null) {
+
         $name = trim(strtolower($name));
         /** @var DataObject $owner */
         $owner = $this->getOwner();
@@ -57,7 +62,7 @@ class HasManyGetter extends Extension {
         $has_many = $this->hasMany();
         if (!isset($has_many[$name]))
         {
-            throw new LogicException("No Has-many-relation '".$name."' on ".$this->classname);
+            throw new InvalidArgumentException("No Has-many-relation '".$name."' on ".$this->classname);
         }
 
         /** @var HasMany_DataObjectSet $hasManyObject */

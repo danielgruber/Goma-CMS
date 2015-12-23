@@ -191,7 +191,7 @@ class ModelManyManyRelationShipInfo {
         if($owner) {
             $this->owner = $owner;
         } else if(!$this->owner) {
-            throw new LogicException("ModelManyManyRelationShipInfo requires an owner. Owner can't be null.");
+            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires an owner. Owner can't be null.");
         }
     }
 
@@ -203,7 +203,7 @@ class ModelManyManyRelationShipInfo {
         if($target) {
             $this->target = $target;
         } else if(!$this->target) {
-            throw new LogicException("ModelManyManyRelationShipInfo requires a target. target can't be null.");
+            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires a target. target can't be null.");
         }
     }
 
@@ -215,7 +215,7 @@ class ModelManyManyRelationShipInfo {
         if($relationShipName) {
             $this->relationShipName = $relationShipName;
         } else if(!$this->relationShipName) {
-            throw new LogicException("ModelManyManyRelationShipInfo requires a relationship-name. name can't be null.");
+            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires a relationship-name. name can't be null.");
         }
 
     }
