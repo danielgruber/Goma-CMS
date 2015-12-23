@@ -90,11 +90,12 @@ class HasMany_DataObjectSet extends DataObjectSet {
     /**
      * sets the has-one-relation when adding to has-many-set
      *
-     * @name push
+     * @param DataObject $record
+     * @param bool $write
      * @return bool
      */
     public function push(DataObject $record, $write = false) {
-        if($this->classname == "hasmany_dataobjectset") {
+        if($this->classname == "hasmany_dataobjectset" && $this->field != null) {
             if(isset($this[$this->field])) {
                 $record[$this->field] = $this[$this->field];
             } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {

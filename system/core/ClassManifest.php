@@ -43,8 +43,7 @@ class ClassManifest {
 		if(PROFILE)
 			Profiler::mark("Manifest::load");
 		
-		if(!self::loadInterface($class) && !self::loadClass($class) && !self::generateAlias($class))
-            throw new InvalidArgumentException("Could not load class $class.");
+		self::loadInterface($class) || self::loadClass($class) || self::generateAlias($class);
 		
 		if(class_exists('Core', false)) {
 			Core::callHook('loadedClass', $class);
