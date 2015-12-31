@@ -1,4 +1,5 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
  * inspiration by Silverstripe 3.0 GridField
  *
@@ -9,9 +10,6 @@
  * last modified: 12.08.2013
  * $Version - 1.1
  */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider, TableField_ColumnProvider
 {
     /**
@@ -54,7 +52,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
                 $searchField->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
 
                 if ($value != "") {
-                    $searchAction = new TableField_FormAction($tableField, "resetFields" . str_replace(".", "_", $columnField), '<i title="' . lang("form_tablefield.reset") . '" class="fa fa-times"></i>', "resetFields", null);
+                    $searchAction = new TableField_FormAction($tableField, "resetFields" . str_replace(".", "_", $columnField), '<i title="' . lang("form_tablefield.reset") . '" class="fa fa-times"></i>', "resetFields", $columnField);
                     $searchAction->addExtraClass("tablefield-button-resetFields");
                     $searchAction->addExtraClass("no-change-track");
                     $searchAction->addClass("button-clear");
@@ -157,6 +155,12 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         return array("filter", "reset", "resetFields", "toggleFilterVisibility");
     }
 
+    /**
+     * @param TableField $tableField
+     * @param string $actionName
+     * @param string $arguments
+     * @param $data
+     */
     public function handleAction($tableField, $actionName, $arguments, $data)
     {
         $state = $tableField->state->tableFieldFilterHeader;
@@ -166,8 +170,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
             $state->reset = true;
             $state->visible = false;
         } else if ($actionName === "resetfields") {
-            $state->columns = null;
-            $state->reset = true;
+            $state->resetColumn = $arguments;
         } else if ($actionName === "togglefiltervisibility") {
             if ($state->visible === true) {
                 $state->visible = false;
@@ -195,13 +198,13 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     public function Init($tableField) {
         $state = $tableField->state->tableFieldFilterHeader;
 
-        if (isset($tableField->form()->post['filter'])) {
+        if (isset($tableField->form()->post['filter']) && !$state->reset) {
             $hasValue = false;
             foreach ($tableField->form()->post['filter'] as $key => $filter) {
-                if($filter) {
+                if($filter && $state->resetColumn != $key) {
                     $hasValue = true;
                     $state->columns->$key = $filter;
-                } else if($state->columns->$key) {
+                } else if($state->columns->$key || $state->resetColumn == $key) {
                     $state->columns->$key = null;
                 }
             }
@@ -211,6 +214,14 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
                     $state->visible = true;
                 }
             }
+        }
+
+        if($state->reset) {
+            $state->reset = false;
+        }
+
+        if($state->resetColumn) {
+            $state->resetColumn = null;
         }
     }
 
