@@ -104,15 +104,12 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
      */
     public function manipulate($tableField, $data)
     {
+        $this->filter($tableField);
+
         $state = $tableField->state->tableFieldFilterHeader;
         if ($state->visible !== true) {
             return $data;
         }
-        if (!$state->reset)
-            $this->handleAction($tableField, "filter", array(), $_POST);
-        else
-            $state->reset = false;
-        $state = $tableField->state->tableFieldFilterHeader;
 
         if (!isset($state->columns)) {
             return $data;
@@ -141,6 +138,16 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         }
 
         return $data;
+    }
+
+    /**
+     * @param TableField $tableField
+     */
+    public function Init($tableField) {
+        $state = $tableField->state->tableFieldFilterHeader;
+        if(!is_bool($state->visible)) {
+            $state->visible = false;
+        }
     }
 
     /**
@@ -195,7 +202,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     /**
      * @param TableField $tableField
      */
-    public function Init($tableField) {
+    public function filter($tableField) {
         $state = $tableField->state->tableFieldFilterHeader;
 
         if (isset($tableField->form()->post['filter']) && !$state->reset) {
