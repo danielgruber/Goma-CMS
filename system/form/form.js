@@ -63,7 +63,7 @@ if(typeof goma == "undefined")
 			that.form.addClass("leave_check");
 		});
 		
-		$("#"+id+" > .default_submit").click(function(){
+		$("#"+id+" input.default_submit").click(function(){
 			$("#"+id+" > .actions  button[type=submit]").each(function(){
 				if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
 					$(this).click();

@@ -597,7 +597,6 @@ abstract class gObject
      */
     public function LocalCallExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
     {
-
         $returns = array();
         foreach ($this->getExtensions(false) as $extension) {
             if (gObject::method_exists($extension, $method)) {

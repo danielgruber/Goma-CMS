@@ -131,10 +131,8 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
                         }
                     }
 
-                    if ($values && count($values) > 0) {
+                    if (is_array($values) && count($values) > 0) {
                         $data->AddFilter(array($columnName => $values));
-                    } else if ($values) {
-                        $data->addFilter(array($columnName => array("LIKE", "%" . $values[0] . "%")));
                     } else {
                         $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
                     }
@@ -163,17 +161,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     {
         $state = $tableField->state->tableFieldFilterHeader;
 
-        if ($actionName === 'filter') {
-            if($state->visible === false) {
-                $state->visible = true;
-            }
-
-            if (isset($tableField->form()->post['filter'])) {
-                foreach ($tableField->form()->post['filter'] as $key => $filter) {
-                    $state->columns->$key = $filter;
-                }
-            }
-        } else if ($actionName === 'reset') {
+        if ($actionName === 'reset') {
             $state->columns = null;
             $state->reset = true;
             $state->visible = false;
@@ -199,6 +187,31 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     {
         if (!in_array('Actions', $columns))
             $columns[] = 'Actions';
+    }
+
+    /**
+     * @param TableField $tableField
+     */
+    public function Init($tableField) {
+        $state = $tableField->state->tableFieldFilterHeader;
+
+        if (isset($tableField->form()->post['filter'])) {
+            $hasValue = false;
+            foreach ($tableField->form()->post['filter'] as $key => $filter) {
+                if($filter) {
+                    $hasValue = true;
+                    $state->columns->$key = $filter;
+                } else if($state->columns->$key) {
+                    $state->columns->$key = null;
+                }
+            }
+
+            if($hasValue) {
+                if ($state->visible === false) {
+                    $state->visible = true;
+                }
+            }
+        }
     }
 
     /**
