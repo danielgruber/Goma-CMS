@@ -550,7 +550,7 @@ class FileUploadSet extends FormField
             }
         } else {
             $this->tbody->append(
-                new HTMLNode('tr', array(), array(
+                new HTMLNode('tr', array("class" => "empty"), array(
                     new HTMLNode('th', array("colspan" => 3, "class" => "empty"), lang("files.no_file"))
                 ))
             );

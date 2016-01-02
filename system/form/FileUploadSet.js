@@ -47,7 +47,7 @@ var FileUploadSet = function(name, table, url) {
         $this.table.sortable({
             opacity: 0.75,
             revert: true,
-            items: 'tr:not(.uploading)',
+            items: 'dbody tr:not(.uploading):not(.empty)',
             tolerance: 'pointer',
             containment: "parent",
             start: function(event, ui) {
@@ -232,8 +232,6 @@ var FileUploadSet = function(name, table, url) {
          * add error to table-row and remove it.
          */
         removeTableRowWithError: function(tableRow, error) {
-
-            var $this = this;
             tableRow.removeClass("uploading");
 
             tableRow.find(".filename").html('<div class="error">'+error+'</div>');
@@ -248,7 +246,7 @@ var FileUploadSet = function(name, table, url) {
             tableRow.fadeOut(300, function(){
                 tableRow.remove();
                 if($this.tbody.find(" > tr").length === 0) {
-                    $this.tbody.append('<tr><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
+                    $this.tbody.append('<tr class="empty"><th class="empty" colspan="3">'+lang("files.no_file")+'</th></tr>');
                 } else {
                     redrawEvenOddMarkers();
                 }
@@ -285,10 +283,10 @@ var FileUploadSet = function(name, table, url) {
 		*/
 		cancel: function(fileIndex) {	
 			if(typeof this.queue[fileIndex].tableid !== "undefined") {
-				var tablerow = $("#" + $this.queue[fileIndex].tableid);
-                $this.removeTableRow(tablerow);
+				var tablerow = $("#" + this.queue[fileIndex].tableid);
+                this.removeTableRow(tablerow);
 			}
 		}
 		
 	});
-}
+};

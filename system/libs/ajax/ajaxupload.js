@@ -360,8 +360,6 @@ AjaxUpload.prototype = {
             return false;
         }
 
-        var $this = this;
-
         for ( var i = 0; i < files.length; i++) {
             var file = files[i];
 
@@ -513,16 +511,9 @@ AjaxUpload.prototype = {
             this.transferAjax(field.files);
             return true;
         } else {
-            // okay, let's make iframe-upload
-
-            // first create the iframe, we want to send the file through
-
-
             this.loading = true;
 
             var iframe = randomString(10);
-
-            this.frameID = iframe;
 
             var upload = {};
             upload.downloadStartTime = new Date().getTime();

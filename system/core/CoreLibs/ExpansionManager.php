@@ -78,8 +78,6 @@ class ExpansionManager {
      * @param $class
      * @param bool $forceAbsolute
      * @return null|string
-     * @internal param $getResourceFolder
-     * @access public
      */
     public static function getResourceFolder($class, $forceAbsolute = false)
     {
