@@ -661,7 +661,7 @@ class Form extends gObject {
 		unset($realresult, $allowed_result);
 
 		foreach($data->getDataHandlers() as $callback) {
-			$result = call_user_func_array($callback, array($result));
+			$result = call_user_func_array($callback, array($result, $this));
 		}
 
 		$submission = $this->findSubmission($data, $this->post, $result);

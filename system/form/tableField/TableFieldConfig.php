@@ -31,14 +31,17 @@ class TableFieldConfig extends gObject {
 	 * constructor
 	 */
 	public function __construct() {
+		parent::__construct();
+
 		$this->components = array();
 	}
-	
+
 	/**
 	 * adds a component to the set
 	 *
-	 *@name addComponent
-	 *@access public
+	 * @name addComponent
+	 * @access public
+	 * @return $this
 	 */
 	public function addComponent(TableFieldComponent $component, $insertBefore = null) {
 		if($insertBefore) {
@@ -129,7 +132,7 @@ class TableFieldConfig_Base extends TableFieldConfig {
 	/**
 	 *
 	 * @param int $itemsPerPage - How many items per page should show up per page
-	 * @return GridFieldConfig_Base
+	 * @return TableFieldConfig_Base
 	 */
 	public static function create($itemsPerPage=null){
 		return new TableFieldConfig_Base($itemsPerPage);
@@ -159,7 +162,7 @@ class TableFieldConfig_Editable extends TableFieldConfig_Base {
 	/**
 	 *
 	 * @param int $itemsPerPage - How many items per page should show up per page
-	 * @return GridFieldConfig_Base
+	 * @return TableFieldConfig_Editable
 	 */
 	public static function create($itemsPerPage=null){
 		return new TableFieldConfig_Editable($itemsPerPage);

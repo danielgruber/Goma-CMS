@@ -128,11 +128,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     protected $viewcache = array();
 
     /**
-     * DEPRECATED API
-     */
-    public $versioned;
-
-    /**
      * storage engine.
      */
     static $engine;
@@ -1336,13 +1331,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * generates a form
      *
-     * @name 	form
-     * @access 	public
-     * @param 	string  	name
-     * @param  	bool  		edit-form or normal form. this changes if getForm() or getEditForm() get called.
-     * @param 	bool  		disabled-state by default
-     * @param 	Request 	Request-Object
-     * @param 	controller 	Controller
+     * @param    string|null $name
+     * @param    bool $edit edit-form or normal form. this changes if getForm() or getEditForm() get called.
+     * @param    bool $disabled
+     * @param    Request $request
+     * @param    Controller $controller
+     * @param    string|array|callback $submission
+     * @return   Form
      */
     public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 
@@ -3218,8 +3213,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if (StaticsManager::hasStatic($class, "versions") && StaticsManager::getStatic($class, "versions") == true)
             return true;
 
-        if (gObject::instance($class)->versioned == true)
-            return true;
+        $inst = gObject::instance($class);
+        if (property_exists($inst, "versioned"))
+            if($inst->versioned === true)
+                return true;
 
         return false;
     }

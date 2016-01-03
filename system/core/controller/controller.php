@@ -451,6 +451,7 @@ class Controller extends RequestHandler
         }
 
         // add the right controller
+        /** @var DataObject $model */
         $form = $model->generateForm($name, $edit, $disabled, isset($this->request) ? $this->request : null, $this);
         $form->setSubmission($submission);
 
@@ -696,7 +697,6 @@ class Controller extends RequestHandler
      */
     public function getSafableModel($data, ViewAccessableData $givenModel = null)
     {
-
         $model = isset($givenModel) ? $givenModel->_clone() : $this->modelInst()->_clone();
 
         if(isset($data["class_name"])) {
