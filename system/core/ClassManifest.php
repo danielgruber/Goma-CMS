@@ -281,7 +281,7 @@ class ClassManifest {
 
         $namespace = self::getNamespace($contents);
 
-        preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z0-9\\\\_]+))?(\s+implements\s+([a-zA-Z0-9\\\\_,\s]+?))?\s+\{/Usi', $contents, $parts);
+        preg_match_all('/(abstract\s+)?class\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z0-9\\\\_]+))?(\s+implements\s+([a-zA-Z0-9\\\\_,\s]+?))?\s*\{/Usi', $contents, $parts);
         foreach($parts[2] as $key => $class) {
 
             $class = self::resolveClassName($namespace . trim($class));

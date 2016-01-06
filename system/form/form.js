@@ -12,7 +12,7 @@ if(typeof goma == "undefined")
 (function ( $ ) {
 	goma.form = function(id, fields) {
 		if(!this instanceof goma.form)
-			return new goma.form(id);
+			return new goma.form(id, fields);
 
         goma.form.garbageCollect();
 

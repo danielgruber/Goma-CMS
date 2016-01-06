@@ -46,16 +46,6 @@ class HiddenField extends FormField
     }
 
     /**
-     * gets the result, which is the value we got.
-     *
-     * @return mixed|null
-     */
-    public function result()
-    {
-        return $this->value;
-    }
-
-    /**
      * sets the value
      *
      * @name setValue

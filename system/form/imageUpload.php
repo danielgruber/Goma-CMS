@@ -10,7 +10,7 @@
 
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
-class imageUpload extends FileUpload
+class ImageUpload extends FileUpload
 {
 		/**
 		 * all allowed file-extensions

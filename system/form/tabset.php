@@ -14,6 +14,13 @@
 class TabSet extends FieldSet
 {
     /**
+     * manual set name of active tab.
+     *
+     * @var string|null
+     */
+    public $activeTab = null;
+
+    /**
      * @name __construct
      * @access public
      * @param string - name
@@ -92,11 +99,12 @@ class TabSet extends FieldSet
                 "id" => $child->getDivId() . "_tab"
             )));
 
-            if ((isset($_POST["tabs_" . $child->getName()])) && !$activeTabFound) {
+            if ((isset($this->form()->post["tabs_" . $child->getName()])) && !$activeTabFound) {
                 $activeTabFound = true;
                 $child->getRenderedField()->addClass("active");
                 setcookie("tabs_" . $this->name, $child->getName(), 0, "/");
 
+                $children[$i]->getRenderedField()->addClass("active");
                 $listItem->getNode(0)->addClass("active");
             }
             $list->append($listItem);
@@ -104,14 +112,18 @@ class TabSet extends FieldSet
 
         if (!$activeTabFound) {
             // check session
-            if (isset($_COOKIE["tabs_" . $this->name])) {
+            $active = isset($this->activeTab) ? $this->activeTab : (isset($_COOKIE["tabs_" . $this->name]) ? $_COOKIE["tabs_" . $this->name] : null);
+            if (isset($active)) {
+                $i = 0;
                 foreach ($list->content as $item) {
-                    if ($item->getNode(0)->name == "tabs_" . $_COOKIE["tabs_" . $this->name]) {
+                    if ($item->getNode(0)->name == "tabs_" . $active) {
                         $item->getNode(0)->addClass("active");
-                        $children[0]->getRenderedField()->addClass("active");
+                        $children[$i]->getRenderedField()->addClass("active");
                         $activeTabFound = true;
                         break;
                     }
+
+                    $i++;
                 }
             }
 

@@ -97,7 +97,7 @@ class ClusterFormField extends FormField {
 		
 		foreach((array)$fields as $field) {
 			$field->overridePostName = $this->name . "_" . $field->name;
-			$this->sort = 1 + count($this->items);
+			$this->sort[$field->name] = 1 + count($this->items);
 			$this->items[] = $field;
 		}
 		

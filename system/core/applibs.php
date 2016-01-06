@@ -284,9 +284,10 @@ function makeProjectAvailable($project = APPLICATION) {
  * @param string $project Name of the project, default is the current
  * application.
  *
- * @return void
+ * @return bool
  */
 function isProjectUnavailable($project = APPLICATION) {
+	clearstatcache();
 	return (file_exists(ROOT . $project . "/503.goma") && filemtime(ROOT . $project . "/503.goma") > NOW - 10);
 }
 

@@ -1,16 +1,26 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 15.06.2011
-  * $Version: 1.0
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Adds a info-text to field.
+ *
+ * @package        Goma\Form-Framework
+ *
+ * @author        Goma-Team
+ * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version    2.0
+ */
 class InfoTextField extends Extension {
+	/**
+	 * created field with info-field.
+	 * @param FormField $field
+	 * @param string $info
+	 * @return FormField
+	 */
+	public static function createFieldWithInfo($field, $info) {
+		$field->info = $info;
+		return $field;
+	}
+
 	/**
 	 * adds the info to the field
 	*/

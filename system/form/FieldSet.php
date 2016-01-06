@@ -51,10 +51,17 @@ class FieldSet extends FormField
 
         $this->container->setTag("fieldset");
 
-        if (is_array($fields))
+        if (is_array($fields)) {
             $this->fields = $fields;
-        else
+
+            foreach($fields as $field) {
+                if(!is_object($field)) {
+                    throw new InvalidArgumentException("Every Field must be an instance of FormField.");
+                }
+            }
+        } else {
             $this->fields = array();
+        }
     }
 
     /**

@@ -117,6 +117,18 @@ class FormField extends RequestHandler {
     protected $regexpError = "form_not_matching";
 
     /**
+     * creates field.
+     * @param $name
+     * @param $title
+     * @param $value
+     * @param null $parent
+     * @return static
+     */
+    public static function create($name, $title, $value = null, $parent = null) {
+        return new static($name, $title, $value, $parent);
+    }
+
+    /**
      * created field.
      *
      * @param string $name
@@ -255,7 +267,7 @@ class FormField extends RequestHandler {
         $this->form()->registerRendered($info->getName());
 
         $info-> setRenderedField($this->field())
-             -> setJs($this->js());
+            -> setJs($this->js());
 
         $this->callExtending("afterRenderFormResponse", $info);
     }
@@ -303,7 +315,7 @@ class FormField extends RequestHandler {
      */
     public function result()
     {
-        if ($this->disabled || $this->form()->disabled) {
+        if ($this->disabled || $this->form()->disabled || !$this->POST) {
             return $this->value;
         } else {
             return isset($this->form()->post[$this->PostName()]) ? $this->form()->post[$this->PostName()] : null;
