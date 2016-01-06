@@ -80,14 +80,14 @@ class ImageUploads extends Uploads {
             if(substr($file, 0, strlen("index.php/")) != "index.php/") {
                 if(!file_exists($file)) {
                     FileSystem::requireDir(dirname($file));
-                    FileSystem::write($file . ".permit", 1);
+                    FileSystem::write(ImageUploadsController::calculatePermitFile($file), 1);
                 }
             } else {
                 if(file_exists(substr($file, strlen("index.php/")))) {
                     $file = substr($file, strlen("index.php/"));
                 } else {
                     FileSystem::requireDir(substr(dirname($file), strlen("index.php/")));
-                    FileSystem::write(substr(dirname($file), strlen("index.php/")) . ".permit", 1);
+                    FileSystem::write(ImageUploadsController::calculatePermitFile(substr(dirname($file), strlen("index.php/"))), 1);
                 }
             }
 
@@ -180,7 +180,7 @@ class ImageUploads extends Uploads {
         $file = $this->removePrefix($file, "./index.php/");
 
         FileSystem::requireDir(dirname($file));
-        FileSystem::write($file . ".permit", 1);
+        FileSystem::write(ImageUploadsController::calculatePermitFile($file), 1);
         if(file_exists($file) && filemtime($file) < NOW - Uploads::$cache_life_time) {
             @unlink($file);
         }

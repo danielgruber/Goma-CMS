@@ -517,6 +517,10 @@ class ClusterFormField extends FormField {
 	 */
 	public function __get($offset)
 	{
+		if($offset == "form") {
+			return $this->orgForm()->form;
+		}
+
 		return $this->getField($offset);
 	}
 	

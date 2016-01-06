@@ -51,12 +51,15 @@ class ImageUploadsController extends UploadsController {
 		if(!self::checkFilename($this->modelInst()->filename)) {
 			return false;
 		}
-
-		if(!file_exists(ROOT . URL . ".permit")) {
+		if(!file_exists(ROOT . self::calculatePermitFile(URL)) && !file_exists(ROOT . URL . ".permit")) {
 			return false;
 		}
 
 		return true;
+	}
+
+	public static function calculatePermitFile($file) {
+		return substr($file, 0, strrpos($file, "/") + 1) . "." . substr($file, strrpos($file, "/") + 1) . ".permit";
 	}
 
 	/**
