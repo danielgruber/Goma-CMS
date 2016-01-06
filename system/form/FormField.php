@@ -350,12 +350,16 @@ class FormField extends RequestHandler {
     public function getValue()
     {
         if (!isset($this->hasNoValue) || !$this->hasNoValue) {
-            if (!$this->disabled && $this->POST && isset($this->form()->post[$this->PostName()])) {
-                $this->value = $this->form()->post[$this->PostName()];
-            } else if ($this->POST && $this->value == null && is_object($this->form()->result) && is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->dbname])) {
-                $this->value = ($this->form()->result->doObject($this->dbname)) ? $this->form()->result->doObject($this->dbname)->raw() : null;
-            } else if ($this->POST && $this->value == null && is_array($this->form()->result) && isset($this->form()->result[$this->dbname])) {
-                $this->value = $this->form()->result[$this->dbname];
+            if($this->POST) {
+                if (!$this->disabled && isset($this->form()->post[$this->PostName()])) {
+                    $this->value = $this->form()->post[$this->PostName()];
+                } else if ($this->value == null) {
+                    if(is_a($this->form()->result, "ArrayAccess") && isset($this->form()->result[$this->dbname])) {
+                        $this->value = ($this->form()->result->doObject($this->dbname)) ? $this->form()->result->doObject($this->dbname)->raw() : null;
+                    } else if (is_array($this->form()->result) && isset($this->form()->result[$this->dbname])) {
+                        $this->value = $this->form()->result[$this->dbname];
+                    }
+                }
             }
         }
     }
