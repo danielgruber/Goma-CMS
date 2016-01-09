@@ -43,10 +43,12 @@ class ContactBox extends Box
             InfoTextField::createFieldWithInfo(
                 new Email("email", lang("email")),
                 lang("email_info", "e-mail-info")
-            ), 0, "content"
+            ), null, "content"
         );
 
-        $form->add(new CheckBox("useCaptcha", lang("useCaptcha")));
+        $form->add(new HTMLEditor("text", lang("content"), null, null, $this->width), null, "content");
+
+        $form->add(new CheckBox("useCaptcha", lang("useCaptcha")), null, "content");
     }
 
     /**
@@ -60,7 +62,7 @@ class ContactBox extends Box
             new TextField('name', lang("name")),
             new TextField('subject', lang("subject")),
             new email("email",  lang("email")),
-            new textarea("text", lang("text"), null, "300px")
+            new textarea("text", lang("text"), null, "100px")
         ),
             array(
                 new AjaxSubmitButton("submit", lang("lp_submit"), array($this, "ajaxSubmit"), array($this, "submit"))
@@ -72,7 +74,7 @@ class ContactBox extends Box
 
         $form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
 
-        return $form->render();
+        return $this->text . $form->render();
     }
 
     /**
