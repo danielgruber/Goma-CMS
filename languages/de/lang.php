@@ -650,5 +650,7 @@ $lang = array(
 	"smtp_from"					=> "Absender-E-Mail (optional)",
 	"validating_smtp"			=> "Validiere SMTP-Einstellungen...",
 	"validating_submit"			=> "Es wird funktionieren, jetzt sichern.",
-	"smtp_status"				=> "SMTP-Verbindung"
+	"smtp_status"				=> "SMTP-Verbindung",
+
+	"useCaptcha"				=> "Sicherheitscode verwenden"
 );

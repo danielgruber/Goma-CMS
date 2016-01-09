@@ -7,7 +7,7 @@
   *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
   *@author Goma-Team
   * last modified: 04.08.2010
-*/ 
+*/
 session_start();
 unset($_SESSION['goma_captcha_spam']);
 

@@ -67,7 +67,9 @@ if(isset($_GET["settpl"]) && !Permission::check("SETTINGS_ADMIN")) {
 }
 
 if(settingsController::get("p_app_id") && settingsController::get("p_app_key") && settingsController::get("p_app_secret")) {
-	PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
+	try {
+		PushController::initPush(settingsController::get("p_app_key"), settingsController::get("p_app_secret"), settingsController::get("p_app_id"));
+	} catch(Exception $e) {}
 }
 
 if(settingsController::get("google_site_verification")) {

@@ -1,27 +1,26 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@Copyright (C) 2009 -  2014 Goma-Team
-  * last modified: 02.11.2014
-  * $Version 1.0.3
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * @package goma framework
+ * @link http://goma-cms.org
+ * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @Copyright (C) 2009 -  2014 Goma-Team
+ * last modified: 02.11.2014
+ * $Version 1.0.3
+ */
 class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHandler {
-	
+
 	/**
 	 * provides HTML-fragments
 	 *
-	 *@name provideFragments
-	*/
+	 * @name provideFragments
+	 * @return array|void
+	 */
 	public function provideFragments($tableField) {
 		if(!$tableField->getData()->dataobject->can("Write")){
 			return;
 		}
-		
+
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(
@@ -32,15 +31,15 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 		}
 	}
 
-    /**
-     * provides url-handlers as in controller, but without any permissions-functionallity
-     *
-     * this is NOT namespaced, so please be unique
-     *
-     * @name getURLHandlers
-     * @access public
-     * @return array
-     */
+	/**
+	 * provides url-handlers as in controller, but without any permissions-functionallity
+	 *
+	 * this is NOT namespaced, so please be unique
+	 *
+	 * @name getURLHandlers
+	 * @access public
+	 * @return array
+	 */
 	public function getURLHandlers($tableField) {
 		return array(
 			'addbtn' => "add"
@@ -64,8 +63,7 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 		$content = $obj->controller($tableField->form()->getController())->form("add", null, array(), false, $submit);
 
 		Core::setTitle(lang("add_record"));
-		
-		$controller = $tableField->form()->getController();
-		return $controller->serve($content);
+
+		return $content;
 	}
 }

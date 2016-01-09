@@ -91,54 +91,38 @@ class AjaxSubmitButton extends FormAction {
 	 * @return mixed
 	 */
 	public function submit() {
-		$response = new AjaxResponse;
-		$response->exec('$("#' . $this->form()->ID() . '").find(".error").remove();');
-		$response->exec('var ajax_button = $("#' . $this->ID() . '");');
+		$response = new FormAjaxResponse($this->form(), $this);
 
 		$submission = $this->ajaxsubmit;
-		$form = $this->form();
-		$form->post = $_POST;
+		$this->form()->post = $this->request->post_params;
 		$allowed_result = array();
-		$form->result = array();
+		$this->form()->result = array();
 		// reset result
 		// get data
 
-		foreach($form->fields as $field) {
+		foreach($this->form()->fields as $field) {
 			// patch for correct behaviour on non-ajax and ajax-side
 			$field->getValue();
 
 			// now get results
 			$result = $field->result();
 			if($result !== null) {
-				$form->result[$field->dbname] = $result;
+				$this->form()->result[$field->dbname] = $result;
 				$allowed_result[$field->dbname] = true;
 			}
 		}
 
 		// validation
-		$valid = true;
-		$errors = new HTMLNode('div', array('class' => "error"), array(new HTMLNode('ul', array())));
-
-		foreach($form->validators as $validator) {
-			$validator->setForm($form);
-			$v = $validator->validate();
-			if($v !== true) {
-				$valid = false;
-				$errors->getNode(0)->append(new HTMLNode('li', array('class' => 'erroritem'), $v));
-			}
+		if(!$this->validateForm($response)) {
+			return $response;
 		}
 
-		if($valid !== true) {
-			$response->prepend("#" . $form->ID(), $errors->render());
-			return $response->render();
+		if($this->form()->getsecret()) {
+			GlobalSessionManager::globalSession()->set("form_secrets." . $this->form()->name(), randomString(30));
+			$response->exec('$("#' . $this->form()->fields["secret_" . $this->form()->id()]->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
 		}
 
-		if($form->getsecret()) {
-			GlobalSessionManager::globalSession()->set("form_secrets." . $form->name(), randomString(30));
-			$response->exec('$("#' . $form->fields["secret_" . $form->id()]->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
-		}
-
-		$result = $form->result;
+		$result = $this->form()->result;
 		if(is_object($result) && is_subclass_of($result, "dataobject")) {
 			/** @var DataObject $result */
 			$result = $result->ToArray();
@@ -156,25 +140,25 @@ class AjaxSubmitButton extends FormAction {
 		unset($realresult, $allowed_result);
 
 		foreach($this->form()->getDataHandlers() as $callback) {
-			$result = call_user_func_array($callback, array($result, $form));
+			$result = call_user_func_array($callback, array($result, $this->form()));
 		}
 		
 		if(is_callable($submission)) {
 			return call_user_func_array($submission, array(
 				$result,
 				$response,
-				$this,
+				$this->form(),
 				$this->form()->controller
 			));
 		} else {
 
 			return call_user_func_array(array(
-				$form->controller,
+				$this->form()->controller,
 				$submission
 			), array(
 				$result,
 				$response,
-				$form,
+				$this->form(),
 				$this->form()->controller
 			));
 		}
@@ -196,9 +180,6 @@ class AjaxSubmitButton extends FormAction {
 
 	/**
 	 * returns the submit-method
-	 *
-	 *@name getSubmit
-	 *@access public
 	 */
 	public function getSubmit() {
 		return $this->submit;
@@ -206,12 +187,26 @@ class AjaxSubmitButton extends FormAction {
 
 	/**
 	 * returns the ajax-submit-method
-	 *
-	 *@name getAjaxSubmit
-	 *@access public
 	 */
 	public function getAjaxSubmit() {
 		return $this->ajaxsubmit;
+	}
+
+	/**
+	 * @param FormAjaxResponse $response
+	 * @return bool
+	 */
+	private function validateForm($response)
+	{
+		foreach($this->form()->validators as $validator) {
+			$validator->setForm($this->form());
+			$v = $validator->validate();
+			if($v !== true) {
+				$response->addError($v);
+			}
+		}
+
+		return count($response->getErrors()) == 0;
 	}
 
 }

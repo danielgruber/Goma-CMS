@@ -657,5 +657,7 @@ $lang = array(
 	"smtp_from"					=> "Send-mail (optional)",
 	"validating_smtp"			=> "Validating SMTP-Settings...",
 	"validating_submit"			=> "I know it works, just save.",
-	"smtp_status"				=> "SMTP-Connection"
+	"smtp_status"				=> "SMTP-Connection",
+
+	"useCaptcha"				=> "Use captcha"
 );
