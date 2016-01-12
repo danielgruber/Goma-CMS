@@ -23,4 +23,10 @@ class DataObjectSetTests extends GomaUnitTest
     public function testCount() {
 
     }
+
+    public function setDataTest() {
+        $object = new HasMany_DataObjectSet("user");
+        $object->setData(array());
+        $this->assertEqual($object->count(), 0);
+    }
 }

@@ -76,13 +76,13 @@ class RequiredFields extends FormValidator
                 if (!isset($this->form->result[$fieldName]) ||
                     empty($this->form->result[$fieldName]) ||
                     (is_object($this->form->result[$fieldName]) && gObject::method_exists($this->form->result[$fieldName], "bool") && !$this->form->result[$fieldName]->bool())) {
-                    $missing[] = $fieldObject->title;
+                    $missing[] = $fieldObject->getTitle();
                 } else {
                     // own validation
                     $v = $fieldObject->validate($this->form->result[$fieldName]);
                     if ($v !== true) {
                         $errorString .= $v;
-                        $missing[] = $fieldObject->title;
+                        $missing[] = $fieldObject->getTitle();
                     }
                 }
             }

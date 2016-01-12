@@ -137,7 +137,7 @@ class DataObjectSet extends DataSet {
 	public function setData($data = array()) {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
-		$this->count = null;
+		$this->count = count($data);
 		$this->reRenderSet();
 	}
 

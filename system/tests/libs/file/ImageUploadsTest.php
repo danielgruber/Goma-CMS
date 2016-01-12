@@ -103,11 +103,11 @@ class ImageUploadsTest extends GomaUnitTest
             $args,
             '<img src="'.BASE_URI . BASE_SCRIPT. $path . '" '.$html.' data-retina="'.BASE_URI . BASE_SCRIPT.$retinaPath.'" alt="img.jpg" style=""  />');
 
-        $this->assertTrue(file_exists($path . '.permit'));
-        $this->assertTrue(file_exists($retinaPath . '.permit'));
+        $this->assertTrue(file_exists(ImageUploadsController::calculatePermitFile($path)));
+        $this->assertTrue(file_exists(ImageUploadsController::calculatePermitFile($retinaPath)));
 
-        unlink($path . '.permit');
-        unlink($retinaPath . '.permit');
+        unlink(ImageUploadsController::calculatePermitFile($path));
+        unlink(ImageUploadsController::calculatePermitFile($retinaPath));
     }
 
     /**
