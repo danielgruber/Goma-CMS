@@ -9,9 +9,7 @@ class TimeSQLField extends DBField {
 
     /**
      * gets the field-type
-     *
-     *@name getFieldType
-     *@access public
+     * @return string
      */
     static public function getFieldType($args = array()) {
         return "time";
@@ -32,7 +30,8 @@ class TimeSQLField extends DBField {
     /**
      * converts this with date
      *
-     * @param String format optional
+     * @param String $format optional
+     * @return string|null
      */
     public function date($format =	DATE_FORMAT)
     {
@@ -45,7 +44,7 @@ class TimeSQLField extends DBField {
     /**
      * returns time with format given.
      *
-     * @param String format
+     * @return null|string
      */
     public function timeWithFormat($format) {
         return $this->date($format);
@@ -61,9 +60,8 @@ class TimeSQLField extends DBField {
     /**
      * generatesa a date-field.
      *
-     *@name formfield
-     *@access public
-     *@param string - title
+     * @param string|null $title
+     * @return FormField|TimeField
      */
     public function formfield($title = null)
     {
