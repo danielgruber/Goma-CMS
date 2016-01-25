@@ -1590,7 +1590,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         // get all config
         $has_many = $this->hasMany();
-        $many_many_tables = $this->ManyManyTables();
+        $relationShips = $this->ManyManyRelationships();
 
         if (isset($has_many[$relname])) {
             // has-many
@@ -1614,7 +1614,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             } else {
                 return array();
             }
-        } else if (isset($many_many_tables[$relname])) {
+        } else if (isset($relationShips[$relname])) {
             if (isset($this->data[$relname . "_data"])) {
                 return $this->data[$relname . "_data"];
             }
@@ -1627,7 +1627,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
              * )
              */
 
-            $relationShip = $this->getManyManyInfo($relname);
+            $relationShip = $relationShips[$relname];
 
             $data = $this->getManyManyRelationShipData($relationShip);
 
@@ -1821,9 +1821,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * gets information about many-many-relationship or throws exception.
      *
-     * @param name
+     * @param string $name
+     * @param string|null $class given class
      * @return ModelManyManyRelationShipInfo
-     * @throws LogicException
      */
     public function getManyManyInfo($name, $class = null) {
         // get config
@@ -2324,11 +2324,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         // sort
         if (!empty($sort)) {
             $query->sort($sort);
-        } else {
-            $query->sort(StaticsManager::getStatic($this->classname, "default_sort"));
+        } else if($sort !== false) {
+            if($sort = StaticsManager::getStatic($this->classname, "default_sort")) {
+                $query->sort($sort);
+            }
         }
-
-
 
         // limiting
         $query->limit($limit);
@@ -3307,17 +3307,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // force table
             $log .= SQL::requireTable(	$this->baseTable . "_state",
                 array(	"id" => "int(10) PRIMARY KEY auto_increment",
-                          "stateid" => "int(10)",
-                          "publishedid" => "int(10)"
+                    "stateid" => "int(10)",
+                    "publishedid" => "int(10)"
                 ),
                 array(	"publishedid" => array(	"name" => "publishedid",
-                                                     "fields" => array("publishedid"),
-                                                     "type" => "index"
+                    "fields" => array("publishedid"),
+                    "type" => "index"
                 ),
-                          "stateid" => array(	"name" => "stateid",
-                                                 "fields" => array("stateid"),
-                                                 "type" => "index"
-                          )
+                    "stateid" => array(	"name" => "stateid",
+                        "fields" => array("stateid"),
+                        "type" => "index"
+                    )
                 ),
                 array(),
                 $prefix

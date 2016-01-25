@@ -143,9 +143,8 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * this function returns the data as an array
-	 *@name ToArray
-	 *@access public
-	 *@param array - extra fields, which are not in database
+	 * @param array $additional_fields
+	 * @return array
 	 */
 	public function ToArray($additional_fields = array())
 	{
@@ -172,9 +171,6 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * returns table_name of current dataobject
-	 *
-	 *@name getTableName
-	 *@access public
 	 */
 	public function getTable_Name() {
 		if(!isset($this->dataobject))
@@ -195,12 +191,12 @@ class DataObjectSet extends DataSet {
 	protected function getRecordsByRange($start, $length) {
 		if(PROFILE) Profiler::mark("DataObjectSet::getRecordsByRange");
 
-		if(isset($this->limits[0], $this->limits[1])) {
-			if(($this->limits[0] + $this->limits[1]) <= $start) {
+		if(isset($this->limit[0], $this->limit[1])) {
+			if(($this->limit[0] + $this->limit[1]) <= $start) {
 				if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
 				return array();
-			} else if(($this->limits[0] + $this->limits[1]) < ($start + $length)) {
-				$length = ($this->limits[0] + $this->limits[1]) - $start;
+			} else if(($this->limit[0] + $this->limit[1]) < ($start + $length)) {
+				$length = ($this->limit[0] + $this->limit[1]) - $start;
 			}
 		}
 
@@ -463,7 +459,10 @@ class DataObjectSet extends DataSet {
 		if(is_object($data) && is_a($data, "viewaccessabledata"))
 			$data->dataSetPosition = $position;
 
-		$data->queryVersion = $this->version;
+		if(is_a($data, "DataObject")) {
+			/** @var DataObject $data */
+			$data->queryVersion = $this->version;
+		}
 
 		$this->data[$position] = $data;
 
@@ -472,12 +471,9 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * forces to have the data from the database
-	 *
-	 *@name forceData
-	 *@access public
-	 *@param numeric - position
+	 * @return $this
 	 */
-	public function forceData($position = null) {
+	public function forceData() {
 
 		if(!isset($this->dataCache) && isset($this->dataobject)) {
 			if(!$this->pagination) {

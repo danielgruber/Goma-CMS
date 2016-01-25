@@ -537,9 +537,13 @@ class Uploads extends DataObject {
     public function checkForBase($file, $base = BASE_SCRIPT) {
         if(substr($file, 0, strlen($base)) == $base) {
             $fileWithoutBase = substr($file, strlen($base));
-            if (file_exists($fileWithoutBase)) {
+            if (file_exists($fileWithoutBase) && !is_dir($fileWithoutBase)) {
                 return $fileWithoutBase;
             }
+        }
+
+        if(substr($file, -1) != URLEND) {
+            return $file . URLEND;
         }
 
         return $file;

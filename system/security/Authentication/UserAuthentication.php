@@ -20,6 +20,11 @@ class UserAuthentication extends DataObject implements HistoryData {
     static $versions = true;
 
     /**
+     * no default sort.
+     */
+    static $default_sort = false;
+
+    /**
      * db.
      */
     static $db = array(

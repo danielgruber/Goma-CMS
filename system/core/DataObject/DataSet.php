@@ -372,7 +372,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 
 
         if($this->pagination) {
-            while(isset($this->dataSet[$this->position]) && !$this->dataSet[$this->position]) {
+            while(isset($this->dataset[$this->position]) && !$this->dataset[$this->position]) {
                 $this->position++;
             }
         } else {
@@ -415,7 +415,7 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     {
         $this->position++;
         if($this->pagination) {
-            while(isset($this->dataSet[$this->position]) && !$this->dataSet[$this->position]) {
+            while(isset($this->dataset[$this->position]) && !$this->dataset[$this->position]) {
                 $this->position++;
             }
         } else {
@@ -426,17 +426,13 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     }
 
     /**
-     * gets the current value
-     *@name current
+     * @return mixed|ViewAccessableData
      */
-    public function current()
-    {
+    public function current() {
         $data = $this->getConverted($this->data[$this->position]);
 
         if(is_object($data) && is_a($data, "viewaccessabledata"))
             $data->dataSetPosition = $this->position;
-
-        $data->queryVersion = $this->version;
 
         $this->data[$this->position] = $data;
         return $data;
@@ -747,41 +743,41 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * returns the offset of the first record or the current model
      *
-     *@name getOffset
-     *@access public
-     *@param string - offset
-     *@param arrray - args
+     * @param string $offset
+     * @param array $args
+     * @return $this|int|string
      */
     public function getOffset($offset, $args = array()) {
-
         if(strtolower($offset) == "count") {
             return $this->Count();
-        } else
-            if(gObject::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
-                return parent::getOffset($offset, $args);
-            } else {
-                if(is_object($this->first())) {
-                    Core::Deprecate(2.0, "first()->$offset");
-                    return $this->first()->getOffset($offset, $args);
-                }
+        } else if(gObject::method_exists($this->classname, $offset) || parent::__canCall($offset, $args)) {
+            return parent::getOffset($offset, $args);
+        } else {
+            if(is_object($this->first())) {
+                Core::Deprecate(2.0, "first()->$offset");
+                return $this->first()->getOffset($offset, $args);
             }
+        }
+    }
+
+    public function this() {
+        return $this;
     }
 
     /**
-     * returns if a offset exists
-     *
-     *@name __cancall
-     *@access public
-     *@param string - offset
+     * returns if a method exists dynamically.
+
+     * @param string $method
+     * @return bool
      */
-    public function __cancall($offset) {
-        if($offset == "current")
+    public function __cancall($method) {
+        if($method == "current")
             return true;
 
-        if(strtolower($offset) == "count")
+        if(strtolower($method) == "count")
             return true;
 
-        return ((gObject::method_exists($this->classname, $offset) || parent::__cancall($offset)) || (is_object($this->first()) && gObject::method_exists($this->first(), $offset)));
+        return ((gObject::method_exists($this->classname, $method) || parent::__cancall($method)) || (is_object($this->first()) && gObject::method_exists($this->first(), $method)));
     }
 
     /**

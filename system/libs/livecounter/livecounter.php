@@ -87,7 +87,7 @@ class livecounter extends DataObject
 	/**
 	 * bot-list
 	*/
-	public static $bot_list = "(googlebot|seoscanners|curl|wget|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot|jobboerse\.com|DotBot)";
+	public static $bot_list = "(googlebot|seoscanners|curl|wget|CloudFlare|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot|jobboerse\.com|DotBot)";
 	
 	/**
 	 * some bots use the referer.
@@ -105,6 +105,11 @@ class livecounter extends DataObject
 	static public $alreadyRun = false;
 	
 	static $userCounted = null;
+
+	/**
+	 * @var string|null
+	 */
+	static $user_identifier = null;
 	
 	/**
 	 * allow writing
@@ -178,6 +183,8 @@ class livecounter extends DataObject
 			$user_identifier = md5($userAgent . $_SERVER["REMOTE_ADDR"]);
 		} else if(isset($_COOKIE['goma_sessid'])) {
 			$user_identifier = $_COOKIE['goma_sessid'];
+		} else if(isset(self::$user_identifier)) {
+			$user_identifier = self::$user_identifier;
 		} else {
 			$user_identifier = session_id();
 		}

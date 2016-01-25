@@ -47,9 +47,6 @@ class ContentController extends FrontedController
 
     /**
      * register meta-tags
-     *
-     * @name pagetitle
-     * @access public
      */
     public function pagetitle()
     {

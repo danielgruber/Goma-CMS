@@ -31,6 +31,10 @@ class HasManyWriter extends Extension {
 
                         $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
 
+                        if($hasManyObject->fieldToArray("id")) {
+                            $this->removeFromRelationShip($class, $key . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"));
+                        }
+
                         $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
                         $hasManyObject->writeToDB(false, true, $owner->getWriteType());
                     } else {
@@ -41,6 +45,10 @@ class HasManyWriter extends Extension {
                         if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
                             // find field
                             $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
+
+                            if($data[$name . "ids"]) {
+                                $this->removeFromRelationShip($class, $key . "id", $owner->getModel()->id, $data[$name . "ids"]);
+                            }
 
                             foreach ($data[$name . "ids"] as $id) {
                                 /** @var DataObject $belongingObject */
@@ -63,6 +71,34 @@ class HasManyWriter extends Extension {
         }
 
         $owner->setData($data);
+    }
+
+    /**
+     * set field to 0 for all elements which have at the moment the given id on that field, but
+     * the recordid is not in the given array.
+     *
+     * @param string $class
+     * @param string $field
+     * @param int $key
+     * @param array $excludeRecordIds
+     */
+    protected function removeFromRelationShip($class, $field, $key, $excludeRecordIds) {
+        /** @var ModelWriter $owner */
+        $owner = $this->getOwner();
+
+        foreach(DataObject::get($class,
+            "$field = '".$key."' AND recordid NOT IN ('".implode("','", $excludeRecordIds)."'')"
+        ) as $notExistingElement) {
+            $notExistingElement->$field = 0;
+            $writer = $owner->getRepository()->buildWriter(
+                $notExistingElement,
+                -1,
+                $owner->getSilent(),
+                $owner->getUpdateCreated(),
+                $owner->getWriteType(),
+                $owner->getDatabaseWriter());
+            $writer->write();
+        }
     }
 
     /**

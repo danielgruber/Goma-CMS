@@ -23,6 +23,12 @@ StaticsManager::addSaveVar("Permission", "providedPermissions");
 class Permission extends DataObject
 {
     /**
+     * disable sort
+     * @var bool
+     */
+    public static $default_sort = false;
+
+    /**
      * defaults
      *
      * @name defaults
