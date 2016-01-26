@@ -244,17 +244,7 @@ class ImageUploads extends Uploads {
         // enable it
         $this->manageURL($file);
 
-        return $file;
-    }
-
-    /**
-     * makes a path absolute.
-     *
-     * @param string $file
-     * @return string
-     */
-    public function makeAbsolute($file) {
-        return BASE_URI . $this->checkForBase($file);
+        return $this->checkForBase($file);
     }
 
     /**
@@ -276,8 +266,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl(-1, $height * 2, true, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -302,10 +292,9 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, -1, true, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
-
 
         return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
     }
@@ -330,10 +319,9 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, $height * 2, true, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
-
 
         return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
     }
@@ -358,8 +346,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, $height * 2, false, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -384,8 +372,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, -1, false, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -406,8 +394,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl(-1, $height * 2, false, false);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -433,8 +421,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, $height * 2, false, true);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file .'" height="'.$height.'" width="'.$width.'" data-retina="' . $fileRetina .'" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -459,8 +447,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl($width * 2, -1, false, true);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file . '" width="'.$width.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';
@@ -483,8 +471,8 @@ class ImageUploads extends Uploads {
         $fileRetina = $this->getResizeUrl(-1, $height * 2, false, true);
 
         if($absolute === true) {
-            $file = $this->makeAbsolute($file);
-            $fileRetina = $this->makeAbsolute($fileRetina);
+            $file = BASE_URI . $file;
+            $fileRetina = BASE_URI . $fileRetina;
         }
 
         return '<img src="' . $file . '" height="'.$height.'" data-retina="' . $fileRetina . '" alt="'.$this->filename.'" style="'.$style.'" '.$html.' />';

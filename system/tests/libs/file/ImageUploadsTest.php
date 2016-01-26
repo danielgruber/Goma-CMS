@@ -93,7 +93,7 @@ class ImageUploadsTest extends GomaUnitTest
             new Size(1000, 750),
             $action,
             $args,
-            '<img src="'.$path.'" '.$html.' data-retina="'.$retinaPath.'" alt="img.jpg" style=""  />');
+            '<img src="'.$this->getExpectedPath($path).'" '.$html.' data-retina="'.$this->getExpectedPath($retinaPath).'" alt="img.jpg" style=""  />');
 
         $args[] = true;
         $this->unitTestResizer(
@@ -101,13 +101,21 @@ class ImageUploadsTest extends GomaUnitTest
             new Size(1000, 750),
             $action,
             $args,
-            '<img src="'.BASE_URI . BASE_SCRIPT. $path . '" '.$html.' data-retina="'.BASE_URI . BASE_SCRIPT.$retinaPath.'" alt="img.jpg" style=""  />');
+            '<img src="'.BASE_URI . BASE_SCRIPT. $this->getExpectedPath($path) . '" '.$html.' data-retina="'.BASE_URI . BASE_SCRIPT.$this->getExpectedPath($retinaPath).'" alt="img.jpg" style=""  />');
 
         $this->assertTrue(file_exists(ImageUploadsController::calculatePermitFile($path)));
         $this->assertTrue(file_exists(ImageUploadsController::calculatePermitFile($retinaPath)));
 
         unlink(ImageUploadsController::calculatePermitFile($path));
         unlink(ImageUploadsController::calculatePermitFile($retinaPath));
+    }
+
+    protected function getExpectedPath($path) {
+        if(!file_exists($path) || is_dir($path)) {
+            return $path . URLEND;
+        }
+
+        return $path;
     }
 
     /**
@@ -126,6 +134,6 @@ class ImageUploadsTest extends GomaUnitTest
             "type"      => "file"
         ));
 
-        $this->assertEqual(strtolower(call_user_func_array(array($imageUpload, $action), $args)), strtolower($expected), " Expected " . convert::raw2text($expected) . " %s");
+        $this->assertEqual(strtolower(call_user_func_array(array($imageUpload, $action), $args)), strtolower($expected), " Expected " . $expected . " %s");
     }
 }

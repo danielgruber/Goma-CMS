@@ -535,11 +535,8 @@ class Uploads extends DataObject {
      * @return string
      */
     public function checkForBase($file, $base = BASE_SCRIPT) {
-        if(substr($file, 0, strlen($base)) == $base) {
-            $fileWithoutBase = substr($file, strlen($base));
-            if (file_exists($fileWithoutBase) && !is_dir($fileWithoutBase)) {
-                return $fileWithoutBase;
-            }
+        if($existentFile = $this->checkForExistence($file, $base)) {
+            return $existentFile;
         }
 
         if(substr($file, -1) != URLEND) {
@@ -547,6 +544,20 @@ class Uploads extends DataObject {
         }
 
         return $file;
+    }
+
+    /**
+     * @param string $file
+     * @param string $base
+     * @return bool
+     */
+    protected function checkForExistence($file, $base = BASE_SCRIPT) {
+        if(substr($file, 0, strlen($base)) == $base) {
+            $fileWithoutBase = substr($file, strlen($base));
+            return (file_exists($fileWithoutBase) && !is_dir($fileWithoutBase)) ? $fileWithoutBase : null;
+        }
+
+        return file_exists($file) && !is_dir($file) ? $file : null;
     }
 
     /**

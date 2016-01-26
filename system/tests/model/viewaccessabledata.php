@@ -57,7 +57,26 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual($newCustomised->blah_cust, "test");
 		$this->assertEqual($newCustomised->blub, "blah");
 	}
-	
+
+	/**
+	 *
+	 */
+	public function testGetTemplateVar() {
+		$data = new ViewAccessableData(array("blah" => "blub"));
+
+		$this->assertEqual($data->this(), $data);
+		$this->assertEqual($data->getTemplateVar("this"), $data);
+		$this->assertEqual($data->getTemplateVar("this.blah"), "blub");
+
+		$testModel = new ViewAccessableData(array(
+			"test" => 123
+		));
+
+		$data->customised["this"] = $testModel;
+		$this->assertEqual($data->getTemplateVar("this"), $testModel);
+		$this->assertEqual($data->getTemplateVar("this.test"), $testModel->test);
+	}
+
 	/**
 	 * checks for reset
 	*/
