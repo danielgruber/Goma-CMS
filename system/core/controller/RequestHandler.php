@@ -66,7 +66,7 @@ class RequestHandler extends gObject {
 	/**
 	 * the current request
 	 *
-     * @var     Request
+	 * @var     Request
 	 */
 	protected $request;
 
@@ -127,100 +127,110 @@ class RequestHandler extends gObject {
 		$this -> requestHandlerKey = count(Director::$controller);
 	}
 
-    /**
-     * handles requests
-     * @param Request
-     * @param bool defines if controller should be pushed to history and used for Serve.
-     * @return false|mixed|null|string
-     */
+	/**
+	 * handles requests
+	 * @param $request
+	 * @param bool $subController defines if controller should be pushed to history and used for Serve.
+	 *
+	 * @return false|null|string
+	 * @throws Exception
+	 */
 	public function handleRequest($request, $subController = false) {
 
 		if ($this -> classname == "") {
 			throw new LogicException('Class ' . get_class($this) . ' has no class_name. Please make sure you call <code>parent::__construct();</code> ');
 		}
 
-		$this -> subController = $subController;
-		$this -> Init($request);
+		try {
+			$this->subController = $subController;
+			$this->Init($request);
 
-        // check for extensions
-		$content = null;
+			// check for extensions
+			$content = null;
 
-        $this -> callExtending("onBeforeHandleRequest", $request, $subController, $content);
+			$this->callExtending("onBeforeHandleRequest", $request, $subController, $content);
 
-        if($content !== null) {
-            return $content;
-        }
+			if ($content !== null) {
+				return $content;
+			}
 
-        // search for action
-        $this->request = $request;
+			// search for action
+			$this->request = $request;
 
-		$class = $this->classname;
-		while ($class && !ClassInfo::isAbstract($class)) {
-            $handlers = gObject::instance($class)->url_handlers;
-			foreach ($handlers as $pattern => $action) {
-				$data = $this->matchRuleWithResult($pattern, $action, $request);
-				if($data !== null && $data !== false) {
-					return $data;
+			$class = $this->classname;
+			while ($class && !ClassInfo::isAbstract($class)) {
+				$handlers = gObject::instance($class)->url_handlers;
+				foreach ($handlers as $pattern => $action) {
+					$data = $this->matchRuleWithResult($pattern, $action, $request);
+					if ($data !== null && $data !== false) {
+						return $data;
+					}
+				}
+
+				$class = get_parent_class($class);
+			}
+			return $this->handleAction("index");
+		} catch(Exception $e) {
+			if($subController) {
+				throw $e;
+			}
+
+			return $this->handleException($e);
+		}
+	}
+
+	/**
+	 * matches a rule and returns result of action covered by the rule.
+	 *
+	 * @param string rule
+	 * @param string action
+	 * @param Request request optional
+	 * @return string
+	 */
+	public function matchRuleWithResult($rule, $action, $request = null) {
+		if(!isset($request)) {
+			$request = $this->request;
+		}
+
+		if ($argument = $request -> match($rule, $this -> shiftOnSuccess, $this -> classname)) {
+			if ($action{0} == "$") {
+				$action = substr($action, 1);
+				if ($this -> getParam($action, false)) {
+					$action = $this -> getParam($action, false);
 				}
 			}
 
-			$class = get_parent_class($class);
+			$action = str_replace('-', '_', $action);
+
+			if (!$this -> hasAction($action)) {
+				$action = "index";
+			}
+
+			$data = $this -> handleAction($action);
+			array_pop(Director::$controller);
+			return $data;
 		}
-		return $this -> handleAction("index");
+
+		return null;
 	}
-
-    /**
-     * matches a rule and returns result of action covered by the rule.
-     *
-     * @param string rule
-     * @param string action
-     * @param Request request optional
-     * @return string
-     */
-    public function matchRuleWithResult($rule, $action, $request = null) {
-        if(!isset($request)) {
-            $request = $this->request;
-        }
-
-        if ($argument = $request -> match($rule, $this -> shiftOnSuccess, $this -> classname)) {
-            if ($action{0} == "$") {
-                $action = substr($action, 1);
-                if ($this -> getParam($action, false)) {
-                    $action = $this -> getParam($action, false);
-                }
-            }
-
-            $action = str_replace('-', '_', $action);
-
-            if (!$this -> hasAction($action)) {
-                $action = "index";
-            }
-
-            $data = $this -> handleAction($action);
-            array_pop(Director::$controller);
-            return $data;
-        }
-
-        return null;
-    }
 
 	/**
 	 * in the end this function is called to do last modifications
 	 *
 	 * @param   string content
-     * @return  string
+	 * @return  string
 	 */
 	public function serve($content) {
 		return $content;
 	}
 
-    /**
-     * checks if this class has a given action.
-     * it also checks for permissions.
-     *
-     * @param   string $action
-     * @return  bool
-     */
+	/**
+	 * checks if this class has a given action.
+	 * it also checks for permissions.
+	 *
+	 * @param   string $action
+	 * @return  bool
+	 */
 	public function hasAction($action) {
 		$hasAction = true;
 		if (!gObject::method_exists($this, $action) || !$this -> checkPermission($action)) {
@@ -233,13 +243,13 @@ class RequestHandler extends gObject {
 		return $hasAction;
 	}
 
-    /**
-     * handles the action.
-     *
-     * @name    handleAction
-     * @access  public
-     * @return  mixed|null|false
-     */
+	/**
+	 * handles the action.
+	 *
+	 * @name    handleAction
+	 * @access  public
+	 * @return  mixed|null|false
+	 */
 	public function handleAction($action) {
 		$handleWithMethod = true;
 		$content = null;
@@ -325,12 +335,12 @@ class RequestHandler extends gObject {
 	 * checks permissions on this class.
 	 *
 	 * @return 	null when no definition was found or a boolean when definition was found.
-	*/
+	 */
 	protected function checkPermissionsOnClass($action) {
 		$actionLower = strtolower($action);
 
 		if (in_array($actionLower, $this->allowed_actions)) {
-				return true;
+			return true;
 		} else if (isset($this->allowed_actions[$actionLower])) {
 			$data = $this->allowed_actions[$actionLower];
 
@@ -356,22 +366,22 @@ class RequestHandler extends gObject {
 		return null;
 	}
 
-    /**
-     * default Action
-     *
-     * @return string
-     */
+	/**
+	 * default Action
+	 *
+	 * @return string
+	 */
 	public function index() {
 		return "";
 	}
 
-    /**
-     * simple way for $this->request->getParam which also supports get and post.
-     *
-     * @param string $param
-     * @param bool|string filter, options: true|false|get|post
-     * @return mixed|null
-     */
+	/**
+	 * simple way for $this->request->getParam which also supports get and post.
+	 *
+	 * @param string $param
+	 * @param bool|string filter, options: true|false|get|post
+	 * @return mixed|null
+	 */
 	public function getParam($param, $useall = true) {
 		if (isset($this -> request) && is_a($this -> request, "request")) {
 			return $this -> request -> getParam($param, $useall);
@@ -380,7 +390,7 @@ class RequestHandler extends gObject {
 		if($useall === false) {
 			return null;
 		}
-		
+
 		if (strtolower($useall) != "post" && isset($_GET[$param])) {
 			return $_GET[$param];
 		} else if (strtolower($useall) != "get" && isset($_POST[$param])) {
@@ -391,36 +401,17 @@ class RequestHandler extends gObject {
 	}
 
 	/**
-	 * magic functions of goma
+	 * handles exceptions.
+	 * @param Exception $e
+	 * @return string
+	 * @throws Exception
 	 */
-
-	/**
-	 * throws an error
-	 *
-	 *@name __throwError
-	 *@access public
-	 */
-	public function __throwError($errcode, $errname, $errdetails, $debug = true) {
-
-		if (Core::is_ajax())
-			HTTPResponse::setResHeader(200);
-
-		if (class_exists("ClassInfo", false)) {
-			$template = new template;
-			$template -> assign('errcode', convert::raw2text($errcode));
-			$template -> assign('errname', convert::raw2text($errname));
-			$template -> assign('errdetails', $errdetails);
-			$template -> assign("throwdebug", $debug);
-			HTTPresponse::sendHeader();
-
-			echo $template -> display('framework/error.html');
-		} else {
-			header("X-Powered-By: Goma Error-Management under Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-			echo "Code: " . $errcode . "<br /> Name: " . $errname . "<br /> Details: " . $errdetails;
+	public function handleException($e) {
+		if(is_a($e, "LogicException")) {
+			throw $e;
 		}
 
-		exit ;
-
+		return $e->getMessage();
 	}
 
 	/**
@@ -463,7 +454,7 @@ class RequestHandler extends gObject {
 class RequestException extends Exception {
 	/**
 	 * constructor.
-	*/
+	 */
 	public function __construct($m = "", $code = 8, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}

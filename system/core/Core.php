@@ -586,66 +586,6 @@ class Core extends gObject {
 	}
 
 	/**
-	 * throw an eror
-	 *
-	 */
-	public static function throwError($code, $name, $message) {
-
-		if(defined("ERROR_CODE")) {
-			echo ERROR_CODE . ": " . ERROR_NAME . "\n\n" . ERROR_MESSAGE;
-			exit ;
-		}
-
-		define("ERROR_CODE", $code);
-		define("ERROR_NAME", $name);
-		define("ERROR_MESSAGE", $message);
-		if($code == 6) {
-			ClassInfo::delete();
-		}
-
-		log_error("Code: " . $code . ", Name: " . $name . ", Details: " . $message . ", URL: " . $_SERVER["REQUEST_URI"]);
-
-		if(($code != 1 && $code != 2 && $code != 5)) {
-			$data = debug_backtrace();
-			if(count($data) > 6) {
-				$data = array($data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6]);
-			}
-
-			debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace:\n" . print_r($data, true));
-		} else {
-			debug_log("Code: " . $code . "\nName: " . $name . "\nDetails: " . $message . "\nURL: " . $_SERVER["REQUEST_URI"] . "\nGoma-Version: " . GOMA_VERSION . "-" . BUILD_VERSION . "\nApplication: " . print_r(ClassInfo::$appENV, true) . "\n\n\nBacktrace unavailable due to call");
-		}
-
-		if(is_object(Director::$requestController)) {
-			echo Director::$requestController->__throwError($code, $name, $message);
-		} else {
-			if(Core::is_ajax())
-				HTTPResponse::setResHeader(200);
-
-			if(class_exists("ClassInfo", false) && defined("CLASS_INFO_LOADED")) {
-				$template = new template;
-				$template->assign('errcode', convert::raw2text($code));
-				$template->assign('errname', convert::raw2text($name));
-				$template->assign('errdetails', $message);
-				HTTPresponse::sendHeader();
-
-				echo $template->display('framework/error.html');
-			} else {
-				header("X-Powered-By: Goma Framework " . GOMA_VERSION . "-" . BUILD_VERSION);
-				$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
-				$content = str_replace('{BASE_URI}', BASE_URI, $content);
-				$content = str_replace('{$errcode}', $code, $content);
-				$content = str_replace('{$errname}', $name, $content);
-				$content = str_replace('{$errdetails}', $message, $content);
-				$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
-				echo $content;
-			}
-		}
-
-		exit;
-	}
-
-	/**
 	 * checks if debug-mode
 	 *
 	 */
@@ -689,13 +629,15 @@ class Core extends gObject {
 
 /**
  * shows an page with error details and nothing else
- *@name throwerror
- *@param string - errorcode
- *@param string - errorname
- *@param string - errordetails
- *@return  null
+ * @param int $errcode
+ * @param string $errname
+ * @param string $errdetails
+ * @param int $http_status
+ * @param bool $throwDebug
+ * @return null
+ * @throws Exception
  */
 function throwerror($errcode, $errname, $errdetails, $http_status = 500, $throwDebug = true) {
 	HTTPResponse::setResHeader($http_status);
-	return Core::throwError($errcode, $errname, $errdetails, $throwDebug);
+	throw new Exception($errname . $errdetails, $errcode);
 }

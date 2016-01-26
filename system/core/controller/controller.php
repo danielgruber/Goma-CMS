@@ -280,26 +280,33 @@ class Controller extends RequestHandler
      * @param Request $request
      * @param bool $subController
      * @return false|mixed|null|string
+     * @throws Exception
      */
     public function handleRequest($request, $subController = false)
     {
-        if (StaticsManager::hasStatic($this->classname, "less_vars")) {
-            Resources::$lessVars = StaticsManager::getStatic($this->classname, "less_vars");
+        try {
+            if (StaticsManager::hasStatic($this->classname, "less_vars")) {
+                Resources::$lessVars = StaticsManager::getStatic($this->classname, "less_vars");
+            }
+
+            $data = $this->__output(parent::handleRequest($request, $subController));
+
+            if ($this->helpArticle()) {
+                Resources::addData("goma.help.initWithParams(" . json_encode($this->helpArticle()) . ");");
+            }
+
+            if (Core::is_ajax() && is_object($data) && gObject::method_exists($data, "render")) {
+                HTTPResponse::setBody($data->render());
+                HTTPResponse::output();
+                exit;
+            }
+
+            return $data;
+        } catch(Exception $e) {
+            if($subController) throw $e;
+
+            return $this->handleException($e);
         }
-
-        $data = $this->__output(parent::handleRequest($request, $subController));
-
-        if ($this->helpArticle()) {
-            Resources::addData("goma.help.initWithParams(" . json_encode($this->helpArticle()) . ");");
-        }
-
-        if (Core::is_ajax() && is_object($data) && gObject::method_exists($data, "render")) {
-            HTTPResponse::setBody($data->render());
-            HTTPResponse::output();
-            exit;
-        }
-
-        return $data;
     }
 
     /**
