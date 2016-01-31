@@ -23,6 +23,7 @@ class HasOneWriter extends Extension {
 
         if ($has_one = $owner->getModel()->hasOne()) {
             foreach($has_one as $name => $class) {
+                // TODO: Add unit-test
                 if (!isset($data[$name]) || !is_object($data[$name]) || !is_a($data[$name], "DataObject")) {
                     $oldModel = null;
 
