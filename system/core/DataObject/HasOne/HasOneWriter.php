@@ -22,10 +22,35 @@ class HasOneWriter extends Extension {
         $data = $owner->getData();
 
         if ($has_one = $owner->getModel()->hasOne()) {
-            foreach($has_one as $key => $value) {
-                if (isset($data[$key]) && is_object($data[$key]) && is_a($data[$key], "DataObject")) {
+            foreach($has_one as $name => $class) {
+                if (!isset($data[$name]) || !is_object($data[$name]) || !is_a($data[$name], "DataObject")) {
+                    $oldModel = null;
+
+                    foreach ($data as $k => $v) {
+                        if (substr(strtolower($k), 0, strlen($name) + 1) == $name . ".") {
+                            if(!isset($oldModel)) {
+                                $oldModel = $owner->getModel()->getHasOne($name);
+                                if (!isset($oldModel)) {
+                                    $oldModel = gObject::instance($class);
+                                }
+                            }
+
+                            $oldModel->$k = $v;
+
+                            unset($data[$k]);
+                        }
+                    }
+
+                    if(isset($oldModel)) {
+                        if($oldModel->hasChanged()) {
+                            $data[$name] = $oldModel;
+                        }
+                    }
+                }
+
+                if (isset($data[$name]) && is_object($data[$name]) && is_a($data[$name], "DataObject")) {
                     /** @var DataObject $record */
-                    $record = $data[$key];
+                    $record = $data[$name];
 
                     // check for write
                     if($owner->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $record->wasChanged()) {
@@ -40,8 +65,8 @@ class HasOneWriter extends Extension {
                     }
 
                     // get id from object
-                    $data[$key . "id"] = $record->id;
-                    unset($data[$key]);
+                    $data[$name . "id"] = $record->id;
+                    unset($data[$name]);
                 }
             }
         }
@@ -49,4 +74,5 @@ class HasOneWriter extends Extension {
         $owner->setData($data);
     }
 }
+
 gObject::extend("ModelWriter", "HasOneWriter");
