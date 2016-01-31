@@ -831,6 +831,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *@param bool - whether to track in history (default: true)
      *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
      *@return bool
+     * @deprecated
      */
     public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
     {

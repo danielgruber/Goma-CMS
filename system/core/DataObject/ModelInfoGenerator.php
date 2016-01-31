@@ -105,7 +105,8 @@ class ModelInfoGenerator {
             // hack to not break current Goma-CMS Build
             if((
                     in_array($name, array("long", "order", "select", "where", "group")) ||
-                    in_array($name, ViewAccessableData::$notViewableMethods)
+                    in_array($name, ViewAccessableData::$notViewableMethods) ||
+                    !preg_match('/^[a-zA-Z_][a-zA-Z_0-9]+$/', $name)
                 )
                 &&
                 (ClassInfo::$appENV["app"]["name"] != "gomacms" || goma_version_compare(ClassInfo::appVersion(), "2.0RC2-074", ">="))) {

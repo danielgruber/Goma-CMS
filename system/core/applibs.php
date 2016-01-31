@@ -953,7 +953,7 @@ class PermissionException extends Exception {
      * @param string $missingPerm
      * @param Exception $previous
      */
-	public function __construct($m = "", $code = ExceptionManager::PERMISSION_ERROR, $missingPerm = null, Exception $previous = null) {
+	public function __construct($m = "You're not permitted to access this resource.", $code = ExceptionManager::PERMISSION_ERROR, $missingPerm = null, Exception $previous = null) {
         $this->missingPerm = $missingPerm;
 		parent::__construct($m, $code, $previous);
 	}
@@ -968,7 +968,7 @@ class PHPException extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = ExceptionManager::PHP_ERROR, Exception $previous = null) {
+	public function __construct($m = "PHP-Error", $code = ExceptionManager::PHP_ERROR, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 
@@ -978,7 +978,7 @@ class DBConnectError extends MySQLException {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
+	public function __construct($m = "DB-Connect-Error", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 
@@ -988,7 +988,7 @@ class ServiceUnavailable extends Exception {
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = ExceptionManager::SERVICE_UNAVAILABLE, Exception $previous = null) {
+	public function __construct($m = "Temporary Unavailable", $code = ExceptionManager::SERVICE_UNAVAILABLE, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
 
