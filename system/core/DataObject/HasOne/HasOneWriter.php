@@ -53,6 +53,7 @@ class HasOneWriter extends Extension {
                     $record = $data[$name];
 
                     // check for write
+                    // TODO: Check here if we can write this record or we should get another record to avoid duplication in db.
                     if($owner->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $record->wasChanged()) {
                         $writer = $owner->getRepository()->buildWriter(
                             $record,
