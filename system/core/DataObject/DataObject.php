@@ -25,6 +25,8 @@
  * @property    int recordid
  * @property    int stateid
  * @property    int publishedid
+ *
+ * @property    User autor
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
@@ -429,8 +431,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $this->data = array_merge(array(
             "class_name"	=> $this->classname,
-            "last_modified"	=> NOW,
-            "created"		=> NOW,
+            "last_modified"	=> time(),
+            "created"		=> time(),
             "autorid"		=> member::$id
         ), (array) $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
     }
@@ -2281,44 +2283,35 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                         }
                         $query->removeFilter($key);
                     }
-                } else
-
-                    // has-one
-
-                    if (strpos($key, ".") !== false) {
-                        if (isset($has_one[strtolower(substr($key, 0, strpos($key, ".")))])) {
-                            $has_oneField = substr($key, strpos($key, ".") + 1);
-                            $hasOnes[strtolower(substr($key, 0, strpos($key, ".")))][$has_oneField] = $value;
-                            $query->removeFilter($key);
-                        }
+                } else if (strpos($key, ".") !== false) {
+                    // has one
+                    $hasOnePrefix = strtolower(substr($key, 0, strpos($key, ".")));
+                    if (isset($has_one[$hasOnePrefix])) {
+                        $hasOnes[$hasOnePrefix] = $hasOnePrefix;
                     }
+                }
                 unset($key, $value, $table, $data, $__table, $_table);
             }
         }
 
         if (count($hasOnes) > 0) {
-            foreach($hasOnes as $key => $fields) {
-                $c = $has_one[$key];
-                $table = ClassInfo::$class_info[$c]["table"];
-                $hoBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$c]["baseclass"]]["table"]);
+            foreach($hasOnes as $hasOneKey) {
+                $class = $has_one[$hasOneKey];
+                $table = ClassInfo::$class_info[$class]["table"];
+                $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$class]["baseclass"]]["table"]);
 
-                foreach($fields as $field => $val) {
-                    $fields[$table . "." . $field] = $val;
-                    unset($fields[$field]);
-                }
-
-                $query->from[] = ' INNER JOIN 
-													'.DB_PREFIX . $table.' 
-												AS 
-													'.$table.' 
-												ON  
-												 '.$table.'.recordid = '.$this->Table().'.'.$key.'id AND ('.SQL::ExtractToWhere($fields, false).')';
-                $query->from[] = ' INNER JOIN 
-													'.DB_PREFIX . $hoBaseTable.'_state 
-												AS 
-													'.$hoBaseTable.'_state 
-												ON  
-												 '.$hoBaseTable.'_state.publishedid = '.$table.'.id';
+                $query->from[] = ' INNER JOIN
+													'.DB_PREFIX . $table.'
+												AS
+													'.$hasOneKey.'
+												ON
+												 '.$hasOneKey.'.recordid = '.$this->Table().'.'.$hasOneKey.'id';
+                $query->from[] = ' INNER JOIN
+													'.DB_PREFIX . $hasOneBaseTable.'_state
+												AS
+													'.$hasOneBaseTable.'_state
+												ON
+												 '.$hasOneBaseTable.'_state.publishedid = '.$hasOneKey.'.id';
             }
         }
 
