@@ -839,14 +839,12 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		}
 	}
 
-    /**
-     * gets a var for template
-     *
-     * @name getTemplateVar
-     * @return string
-     */
-	public function getTemplateVar($var) {
-
+	/**
+	 * gets var.
+	 * @param string $var
+	 * @return string
+	 */
+	public function getVar($var) {
 		if(strpos($var, ".")) {
 			$currentvar = substr($var, 0, strpos($var, "."));
 			$remaining = substr($var, strpos($var, ".") + 1);
@@ -860,26 +858,39 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 		$casting = $this->casting();
 
-        // non recursive
+		// non recursive
 		if($remaining == "") {
-			if(is_object($data) && gObject::method_exists($data, "forTemplate")) {
-				return $data->forTemplate();
-			} else if(isset($casting[$currentvar])) {
-				return $this->makeObject($currentvar, $data)->forTemplate();
+			if(isset($casting[$currentvar])) {
+				return $this->makeObject($currentvar, $data);
 			} else {
 				return $data;
 			}
 		} else {
-
-            // recursive
+			// recursive
 			if(is_object($data)) {
-				return $data->getTemplateVar($remaining);
+				return $data->getVar($remaining);
 			} else if(isset($casting[$currentvar])) {
-				return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
+				return $this->makeObject($currentvar, $data)->getVar($remaining);
 			} else {
 				return $data;
 			}
 		}
+	}
+
+    /**
+     * gets a var for template
+     *
+     * @name getTemplateVar
+     * @return string
+     */
+	public function getTemplateVar($var) {
+		$data = $this->getVar($var);
+
+		if(is_object($data) && gObject::method_exists($data, "forTemplate")) {
+			return $data->forTemplate();
+		}
+
+		return $data;
 	}
 
 	//!Attribute-Object-Generation

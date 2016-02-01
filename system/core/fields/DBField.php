@@ -1,4 +1,4 @@
-<?php defined("IN_GOMA") OR die();
+e<?php defined("IN_GOMA") OR die();
 
 /**
  * Every value of an field can used as object if you call doObject($offset)
@@ -416,7 +416,7 @@ class DBField extends gObject implements IDataBaseField
      * @name getTemplateVar
      * @return string|null
      */
-    public function getTemplateVar($var) {
+    public function getVar($var) {
         if(strpos($var, ".")) {
             throw new InvalidArgumentException('Arguments with dots like "' . $var . '" are not allowed in a DB-Field, because it\'s recursive.');
         }
@@ -434,6 +434,16 @@ class DBField extends gObject implements IDataBaseField
         }
 
         return null;
+    }
+
+    /**
+     * gets a var for template
+     *
+     * @name getTemplateVar
+     * @return string|null
+     */
+    public function getTemplateVar($var) {
+        return $this->getVar($var);
     }
 
     /**
