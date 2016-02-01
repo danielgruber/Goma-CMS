@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 11.02.2013
-  * $Version 1.0.3
+ * User-Admin-Panel
+ *
+ * @package goma framework
+ * @link http://goma-cms.org
+ * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author Goma-Team
+ * @version 1.1
 */
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
 class userAdmin extends adminItem {
 	/**
 	 * text
@@ -34,13 +33,14 @@ class userAdmin extends adminItem {
 	);
 	
 	static $icon = "system/templates/admin/images/user.png";
-	
+
 	/**
 	 * history-url
 	 *
-	 *@name historyURL
-	 *@access public
-	*/
+	 * @name historyURL
+	 * @access public
+	 * @return string
+	 */
 	public function historyURL() {
 		return "admin/history/user";
 	}
@@ -112,18 +112,19 @@ class userAdmin extends adminItem {
 	 */
 	public function toggleLock() {
 		if($this->getParam("id") && Permission::check("USERS_MANAGE") && $this->getParam("id") != member::$id) {
-			if($data = DataObject::get_by_id("user", $this->getParam("id"))) {
-				if($data->status == 1) {
-					if($this->confirm(lang("user_lock_q"), lang("yes"), null, $data)) {
-						$data->status = 2;
-						$data->write();
-						return $this->actionComplete("lock_user", $data);
+			/** @var User $user */
+			if($user = DataObject::get_by_id("user", $this->getParam("id"))) {
+				if($user->status == 1) {
+					if($this->confirm(lang("user_lock_q"), lang("yes"), null, $user)) {
+						$user->status = 2;
+						$user->writeToDB();
+						return $this->actionComplete("lock_user", $user);
 					}
 				} else {
-					if($this->confirm(lang("user_unlock_q"), lang("yes"), null, $data)) {
-						$data->status = 1;
-						$data->write();
-						return $this->actionComplete("unlock_user", $data);
+					if($this->confirm(lang("user_unlock_q"), lang("yes"), null, $user)) {
+						$user->status = 1;
+						$user->writeToDB();
+						return $this->actionComplete("unlock_user", $user);
 					}
 				}
 
