@@ -602,28 +602,19 @@ class Uploads extends DataObject {
      *
      * @name getIcon
      * @access public
-     * @param int - size; support for 16, 32, 64 and 128
+     * @param int $size; support for 16, 32, 64 and 128
      * @return string
      */
     public function getIcon($size = 128, $retina = false) {
         switch($size) {
             case 16:
-                if($retina)
-                    return "images/icons/goma16/file@2x.png";
-                else
-                    return "images/icons/goma16/file.png";
             case 32:
-                if($retina)
-                    return "images/icons/goma32/file@2x.png";
-                else
-                    return "images/icons/goma32/file.png";
             case 64:
                 if($retina)
-                    return "images/icons/goma64/file@2x.png";
+                    return "images/icons/goma".$size."/file@2x.png";
                 else
-                    return "images/icons/goma64/file.png";
-            case 128:
-                return "images/icons/goma/128x128/file.png";
+                    return "images/icons/goma".$size."/file.png";
+                break;
         }
         return "images/icons/goma/128x128/file.png";
     }
