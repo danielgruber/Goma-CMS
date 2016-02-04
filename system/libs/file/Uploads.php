@@ -608,22 +608,13 @@ class Uploads extends DataObject {
     public function getIcon($size = 128, $retina = false) {
         switch($size) {
             case 16:
-                if($retina)
-                    return "images/icons/goma16/file@2x.png";
-                else
-                    return "images/icons/goma16/file.png";
             case 32:
-                if($retina)
-                    return "images/icons/goma32/file@2x.png";
-                else
-                    return "images/icons/goma32/file.png";
             case 64:
                 if($retina)
-                    return "images/icons/goma64/file@2x.png";
+                    return "images/icons/goma".$size."/file@2x.png";
                 else
-                    return "images/icons/goma64/file.png";
-            case 128:
-                return "images/icons/goma/128x128/file.png";
+                    return "images/icons/goma".$size."/file.png";
+                break;
         }
         return "images/icons/goma/128x128/file.png";
     }

@@ -107,56 +107,19 @@ class ImageUploads extends Uploads {
         $ext = substr($this->filename, strrpos($this->filename, "."));
         switch($size) {
             case 16:
-                if($this->width > 15) {
-                    if($retina && $this->width > 31) {
-                        $icon = $this->path . "/setWidth/32" . $ext;
-                    } else {
-                        $icon = $this->path . "/setWidth/16" . $ext;
-                    }
-                } else {
-                    if($retina) {
-                        return "images/icons/goma16/image@2x.png";
-                    }
-                    return "images/icons/goma16/image.png";
-                }
-                break;
             case 32:
-                if($this->width > 31) {
-                    if($retina && $this->width > 63) {
-                        $icon = $this->path . "/setWidth/64" . $ext;
-                    } else {
-                        $icon = $this->path . "/setWidth/32" . $ext;
-                    }
-                } else {
-                    if($retina) {
-                        return "images/icons/goma32/image@2x.png";
-                    }
-                    return "images/icons/goma32/image.png";
-                }
-                break;
             case 64:
-                if($this->width > 63) {
-                    if($retina && $this->width > 127) {
-                        $icon = $this->path . "/setWidth/128" . $ext;
+                if($this->width >= $size) {
+                    if($retina && $this->width >= $size * 2) {
+                        $icon = $this->path . "/setWidth/" . ($size * 2) . $ext;
                     } else {
-                        $icon = $this->path . "/setWidth/64" . $ext;
+                        $icon = $this->path . "/setWidth/" . $size . $ext;
                     }
                 } else {
                     if($retina) {
-                        return "images/icons/goma64/image@2x.png";
+                        return "images/icons/goma".$size."/image@2x.png";
                     }
-                    return "images/icons/goma64/image.png";
-                }
-                break;
-            case 128:
-                if($this->width > 127) {
-                    if($retina && $this->width > 255) {
-                        $icon = $this->path . "/setWidth/256" . $ext;
-                    } else {
-                        $icon = $this->path . "/setWidth/128" . $ext;
-                    }
-                } else {
-                    return "images/icons/goma/128x128/image.png";
+                    return "images/icons/goma".$size."/image.png";
                 }
                 break;
         }
