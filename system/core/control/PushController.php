@@ -87,13 +87,14 @@ class PushController extends Controller {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * make auth
 	 *
-	 *@name auth
-	 *@access public
-	*/
+	 * @name auth
+	 * @access public
+	 * @return string
+	 */
 	public function auth() {
 		if(isset($_POST['channel_name']) && preg_match('/^presence\-/', $_POST['channel_name']) && member::login()) {
 			if(self::$pusher && isset($_POST['socket_id'])) {
@@ -108,6 +109,6 @@ class PushController extends Controller {
 		}
 		
 		header('', true, 403);
-		echo "Forbidden";
+		return "Forbidden";
 	}
 }

@@ -357,14 +357,15 @@ class BoxesController extends FrontedController {
 		HTTPResponse::sendHeader();
 		exit;
 	}
-	
+
 	/**
 	 * renders boxes
-	 *
-	 * @name 	render
-	 * @access 	public
-	*/
-	final public function render($pid = null, $count = null) {
+	 * @param string $pid
+	 * @param int|null $count
+	 * @return
+	 * @throws Exception
+	 */
+	final public function render($pid = null, $count = 0) {
 		if(isset($pid)) {
 			$data = DataObject::get("boxes", array("seiteid" => $pid));
 			$this->model_inst = $data;
@@ -372,10 +373,9 @@ class BoxesController extends FrontedController {
 
 		$cacher = new Cacher("boxes2_" . $pid . "_" . Core::adminAsUser() . "_" . member::$id . "_" . $this->modelInst()->maxCount("last_modified"));
 		if($cacher->checkValid()) {
-			return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
+			return $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int) $count, "cache" => $cacher->getData()))->renderWith("boxes/boxes.html");
 		} else {
-
-			$output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => $count))->renderWith("boxes/boxes.html");
+			$output = $this->modelInst()->customise(array("pageid" => $pid, "boxlimit" => (int) $count))->renderWith("boxes/boxes.html");
 
 			if($this->checkCachable()) {
 				$cacher->write($output, 86400);
@@ -389,6 +389,7 @@ class BoxesController extends FrontedController {
 	 * checks if the current set of boxes is cachable.
 	*/
 	public function checkCachable() {
+		/** @var Box $record */
 		foreach($this->modelInst() as $record) {
 			if(!$record->isCacheable()) {
 				return false;
