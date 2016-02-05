@@ -1,58 +1,58 @@
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 19.05.2013
-*/
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
+ * last modified: 19.05.2013
+ */
 
 self.dropdownDialogs = [];
 // put the data into the right namespace
 (function($){
 
-    "use strict";
+	"use strict";
 
 	var counter = 0;
 	var elems = [];
 	var dropdowns = [];
-	
+
 	/**
 	 * the constructor
-	*/ 
+	 */
 	window.dropdownDialog = function(uri, elem, position, options) {
-		
+
 		this.elem = $(elem);
 		if(this.elem.length === 0) {
-            throw new Error("element for dropdown-dialog must exist.");
-        }
-		
+			throw new Error("element for dropdown-dialog must exist.");
+		}
+
 		this.setPosition(position);
 		this.uri = uri;
 		this.triangle_position = "center";
 		this.closeButton = true;
 		this.html = "";
-		
+
 		var i;
 		// set options
 		if(typeof options !== "undefined") {
-            for (var i in options) {
-                this[i] = options[i];
-            }
+			for (var i in options) {
+				this[i] = options[i];
+			}
 		}
-			
+
 
 		this.id = randomString(20);
 		this.Init();
-		
+
 		this.show(uri);
-		
-		
+
+
 		return this;
 	};
-	
+
 	dropdownDialog.prototype = {
 		subDialogs: [],
-		
+
 		checkEdit: function() {
 
 			if(this.dropdown.find("> div > .content > div").html() != this.html) {
@@ -60,7 +60,7 @@ self.dropdownDialogs = [];
 				this.definePosition(this.position);
 			}
 		},
-		
+
 		/**
 		 * inits the dropdown
 		 * creates info for dropdown on related element
@@ -68,22 +68,22 @@ self.dropdownDialogs = [];
 		 * initates the events
 		 * registers all other things
 		 * oh, and before I forget it, it set's loading state ;)
-		 * 
+		 *
 		 *@name Init
-		*/
+		 */
 		Init: function() {
-			
+
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
-			
+
 			var $this = this,
-                loading;
-			
+				loading;
+
 			// first validate id
 			if(this.elem.attr("id") === undefined) {
 				this.elem.attr("id", "link_dropdown_dialog_" + counter);
 				counter++;
 			}
-			
+
 			// second check if an dialog for this element doesnt exist, and if not, create the element
 			if($("#dropdownDialog_" + this.elem.attr("id")).length == 0) {
 				getDocRoot().append('<div id="dropdownDialog_'+this.elem.attr("id")+'" class="dropdownDialog windowindex"></div>');
@@ -93,83 +93,81 @@ self.dropdownDialogs = [];
 					display: "none",
 					"position": "absolute"
 				});
-				
+
 				var d = function(){
 					$this.definePosition();
 				};
-				
-				
+
+
 				this.dropdown.find(" > div > .content").resize(d);
 				$(window).resize(d);
-				
+
 				$(window).scroll(function(){
 					$this.moveDropdown($this.currentPos);
 				});
-				
+
 				loading = true;
 			} else {
 				this.dropdown = $("#dropdownDialog_" + this.elem.attr("id"));
 				loading = false;
 			}
-			
-			
+
+
 			dropdowns[this.dropdown.attr("id")] = this;
 			elems[this.elem.attr("id")] = this;
 			self.dropdownDialogs[this.id] = this;
-			
+
 			// autohide
 			if(!this.elem.hasClass("noAutoHide") && this.autohide != false) {
 				var that = this;
 				CallonDocumentClick(function(){
 					that.hide();
 				}, [this.dropdown, this.elem]);
-				
+
 				goma.ui.bindESCAction($("body"), function(){
 					that.hide();
 				});
 			}
-			
+
 			if(this.elem.hasClass("noIEAjax")) {
 				if($.browser.msie && getInternetExplorerVersion() < 9) {
 					location.href = this.uri;
 				}
 			}
-			
+
 			if(loading) {
-                this.setLoading();
-            }
-				
+				this.setLoading();
+			}
+
 			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.Init");
 		},
-		
+
 		/**
 		 * defines the position of the dropdown
 		 *
 		 *@name definePosition
 		 *@access public
 		 *@param string - position: if to set this.position
-		*/
+		 */
 		definePosition: function(position) {
 			if(console.log)
 				console.log("define position");
-				
+
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
-			
+
 			if(position !== null && position !== undefined) {
-	 			this.setPosition(position);
+				this.setPosition(position);
 			}
-			
+
 			if(this.elem.css("display") == "none") {
 				throw new Error("dropdownDialog does not support elements with display:none yet");
 			}
-			
+
 			// get position which is logical
 			var elemtop = this.elem.offset().top;
 			var elemleft = this.elem.offset().left;
-			var elemheight = this.elem.outerHeight();
-			var elemwidth = this.elem.outerWidth();
 			var elemright = $(document).width() - elemleft;
-			
+
 			if(this.position == "auto") {
 				if(elemleft < 100 && elemtop > 100) {
 					position = "right";
@@ -185,78 +183,81 @@ self.dropdownDialogs = [];
 			} else {
 				position = this.position;
 			}
-			
+
 			// validate
 			if(position === "bottom") {
 				elemtop = this.elem.offset().top;
 				if((elemtop - this.dropdown.height() - 2) < -10) {
-                    position = "top";
-                }
+					position = "top";
+				}
 			}
-			
+
 			// add position as class
 			this.dropdown.find(" > div").attr("class", "");
 			this.dropdown.find(" > div").addClass("position_" + position);
-			
+
 			this.currentPos = position;
 			// now move dropdown
 			this.moveDropdown(position);
-			
+
 			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
-			
+
 			if(console.log)
 				console.log("done: define position");
 		},
-		
+
 		/**
 		 * validates and sets the position
 		 *
 		 *@name setPosition
-		*/
+		 */
 		setPosition: function(position) {
- 			switch(position) {
- 				case "left":
- 					this.position = "left";
- 					break;
- 				case "center":
- 				case "top":
- 					this.position = "top";
- 					break;
- 				case "right":
- 					this.position = "right";
- 					break;
- 				case "bottom":
- 					this.position = "bottom";
- 					break;
- 				default:
- 					this.position = "auto";
- 			}
-	 		
+			switch(position) {
+				case "left":
+					this.position = "left";
+					break;
+				case "center":
+				case "top":
+					this.position = "top";
+					break;
+				case "right":
+					this.position = "right";
+					break;
+				case "bottom":
+					this.position = "bottom";
+					break;
+				case "fixed":
+					this.position = "fixed";
+					break;
+				default:
+					this.position = "auto";
+			}
+
 		},
-		
+
 		/**
 		 * moves the dropdown to the right place cause of position (top, bottom, left, right)
 		 *
 		 *@name moveDropdown
-		*/ 
+		 */
 		moveDropdown: function(position) {
-			
-			console.log("define position");
-			
+
+			console.log && console.log("define position");
+
 			if(typeof profiler !== "undefined") profiler.mark("dropdownDialog.moveDropdown");
-			
+
 			this.triangle_position = "center";
-			
+
 			// first get position of element
 			var elemtop = this.elem.offset().top;
 			var elemleft = this.elem.offset().left;
-			
+
 			var elemheight = this.elem.outerHeight();
 			var elemwidth = this.elem.outerWidth();
 
-			
+
 			this.dropdown.find(" > div > .triangle").remove();
-			
+
 			// preserve scroll
 			var scrollElements = [];
 			this.dropdown.find('.scrollable').each(function(){
@@ -266,24 +267,24 @@ self.dropdownDialogs = [];
 					left: $(this).scrollLeft()
 				});
 			});
-			
+
 			// preserve display
 			var display = (this.dropdown.css("display") == "block");
 			//this.dropdown.css({"display": "block", top: "-1000px"});
-            var triangle_margin_top, positionTop, positionLeft, positionRight;
+			var triangle_margin_top, positionTop, positionLeft, positionRight;
 
 			switch(position) {
 				case "bottom":
 					positionTop = elemtop - this.dropdown.height() - 2;
-				
+
 				case "top":
 				case "center":
 
-					
+
 					if(typeof positionTop === "undefined") {
-                        positionTop = elemtop + elemheight - 2;
-                    }
-					
+						positionTop = elemtop + elemheight - 2;
+					}
+
 					this.dropdown.find(" > div > .content").css("width", "");
 					positionLeft = elemleft - (this.dropdown.find(" > div > .content").width() / 2) + (elemwidth / 2) - 3;
 
@@ -295,23 +296,24 @@ self.dropdownDialogs = [];
 						this.triangle_position = "right";
 						positionLeft = elemleft + elemwidth - contentWidth + 14;
 					}
-					
-					
+
+
 					if(positionLeft < 0) {
 						this.triangle_position = "left";
 						positionLeft = elemleft - 18;
 					}
-						
+
 					this.dropdown.css({
 						top: positionTop,
 						left: positionLeft,
 						right: "auto",
-						bottom: "auto"
+						bottom: "auto",
+						position: "absolute"
 					});
-				break;
+					break;
 				case "left":
 					var positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
-					
+
 					// fix if dropdown is not in document
 					if(positionTop < 0) {
 						triangle_margin_top = 0 - 20 + positionTop;
@@ -322,14 +324,15 @@ self.dropdownDialogs = [];
 
 					this.dropdown.find(" > div > .content").css("width", this.dropdown.find(" > div > .content").width()); // force width
 					positionRight = elemleft + 2 - this.getContentWidth();
-					
+
 					this.dropdown.css({
 						top: positionTop,
 						left: positionRight,
 						right: "auto",
-						bottom: "auto"
+						bottom: "auto",
+						position: "absolute"
 					});
-				break;
+					break;
 				case "right":
 					positionTop = elemtop - (this.dropdown.find(" > div > .content").height() / 2) + (elemheight / 2);
 					// fix if dropdown is not in document
@@ -339,35 +342,49 @@ self.dropdownDialogs = [];
 					} else {
 						triangle_margin_top = 0 - 20;
 					}
-					
+
 					positionLeft = elemleft + elemwidth - 2;
 					this.dropdown.css({
 						top: positionTop,
 						left: positionLeft,
 						right: "auto",
-						bottom: "auto"
+						bottom: "auto",
+						position: "absolute"
 					});
-				break;
+					break;
+				case "fixed":
+
+					this.dropdown.css({
+						top: "10%",
+						left: "10%",
+						right: "10%",
+						bottom: "10%",
+						position: "fixed"
+					});
+
+					break;
 			}
-			
+
 			// now set the triangle
-			this.dropdown.find(" > div").prepend('<div class="triangle_position_'+this.triangle_position+' triangle"><div></div></div>');
-			if(typeof triangle_margin_top !== "undefined") {
-				this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
+			if(position != "fixed") {
+				this.dropdown.find(" > div").prepend('<div class="triangle_position_' + this.triangle_position + ' triangle"><div></div></div>');
+				if (typeof triangle_margin_top !== "undefined") {
+					this.dropdown.find(" > div > .triangle").css("margin-top", triangle_margin_top);
+				}
 			}
-			
+
 			if(display) {
-                this.dropdown.css("display", "block");
-            } else {
-                this.dropdown.fadeIn("fast");
-            }
-			
+				this.dropdown.css("display", "block");
+			} else {
+				this.dropdown.fadeIn("fast");
+			}
+
 			for(var i in scrollElements) {
 				var data = scrollElements[i];
 				data.element.scrollTop(data.top);
 				data.element.scrollLeft(data.left);
 			}
-			
+
 			if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.moveDropdown");
 		},
 
@@ -381,32 +398,32 @@ self.dropdownDialogs = [];
 
 			return 0;
 		},
-		
+
 		/**
 		 * sets the dropdown in loading state
 		 *
 		 *@name setLoading
-		*/ 
+		 */
 		setLoading: function() {
 			this.dropdown.css("display", "block");
 			this.closeButton = false;
 			this.setContent('<img src="system/templates/css/images/loading_big.gif" alt="loading" style="display: block;margin: auto;" />');
 			this.closeButton = true;
 		},
-		
+
 		/**
 		 * sets the given content
 		 * registers subDropdownEvents
 		 *
 		 *@name setContent
 		 *@access public
-		*/ 
+		 */
 		setContent: function(content) {
 			if(typeof profiler != "undefined") profiler.mark("dropdownDialog.setContent");
-			
+
 			this.subDialogs = [];
 			this.dropdown.find(" > div > .content").css("width", ""); // unlock width
-			
+
 			// check if string or jquery object
 			if(typeof content == "string")
 				this.dropdown.find(" > div > .content").html('<div>' + content + '</div>');
@@ -414,26 +431,26 @@ self.dropdownDialogs = [];
 				this.dropdown.find(" > div > .content").html('');
 				$(content).wrap("<div></div>").appendTo(this.dropdown.find(" > div > .content"));
 			}
-			
+
 			// close-button
 			this.dropdown.find(" > div  > .content > .close").remove();
 			if(!this.elem.hasClass("hideClose") && this.closeButton)
 				this.dropdown.find(" > div > .content > div").prepend('<a class="close" href="javascript:;">&times;</a>');
-			
+
 			// closing over elements in dropdown
 			var that = this;
 			this.dropdown.find(".close, *[name=cancel]").click(function(){
 				that.hide();
 				return false;
 			});
-			
+
 			// if is shown also now, we we'll move it to the right position
 			if(this.dropdown.css("display") != "none")
 				this.definePosition(this.position);
-			
+
 			this.dropdown.off(".subdrops");
 			// register event for sub-dialogs
-			this.dropdown.on("click.subdrops", "a", function(){	
+			this.dropdown.on("click.subdrops", "a", function(){
 				if($(this).attr("rel").match(/dropdownDialog/)) {
 					var $this = $(this);
 					setTimeout(function(){
@@ -441,21 +458,21 @@ self.dropdownDialogs = [];
 					}, 100);
 				}
 			});
-			
+
 			// javascript-profiler
 			if(typeof profiler != "undefined") {
 				profiler.unmark("dropdownDialog.setContent");
 			}
 
 		},
-		
+
 		/**
 		 * shows a specific uri in the dropdown
 		 * for example: ./system/blah, it'll get data via ajax and show the result
 		 *
 		 *@name show
 		 *@access public
-		*/
+		 */
 		show: function(uri) {
 			if(this.dropdown.css("display") == "block" && this.dropdown.attr("name") == uri) {
 				return false;
@@ -470,24 +487,24 @@ self.dropdownDialogs = [];
 					}
 				}
 			}
-			
+
 			return this.player_ajax(this.uri);
 		},
-		
+
 		/**
 		 * removes the dropdown
 		 *
 		 *@name removeHeloper
-		*/ 
+		 */
 		removeHelper: function() {
 			this.dropdown.remove();
 		},
-				
+
 		/**
 		 * hides the dropdown if no subdropdowns exist and removes it afterwards
 		 *
 		 *@name remove
-		*/
+		 */
 		remove: function() {
 			// first check if subDropdown is open
 			for(i in this.subDialogs) {
@@ -495,54 +512,54 @@ self.dropdownDialogs = [];
 					return true;
 				}
 			}
-			
+
 			// unregister dropdown
 			dropdowns[this.dropdown.attr("id")] = null;
 			elems[this.elem.attr("id")] = null;
 			self.dropdownDialogs[this.id] = null;
 			var that = this;
-			
+
 			setTimeout(function(){
 				that.dropdown.addClass("hiding");
 			}, 20);
-			
+
 			// animate dropdown
 			this.dropdown.fadeOut("fast", function(){
 				that.removeHelper();
 			});
 		},
-		
+
 		/**
 		 * alias for remove
 		 *
 		 *@name hide
-		*/
+		 */
 		hide: function() {
 			this.remove(); // better solution
 		},
-		
+
 		/**
 		 * player for content-type html
 		 *
 		 *@name play_html
-		*/
+		 */
 		player_html: function(uri) {
 			this.setContent($(uri));
 		},
-		
+
 		/**
 		 * player for images
 		 *
 		 @name player_img
-		*/
+		 */
 		player_img: function(uri) {
 			var href = uri;
-			
+
 			// create an image to get dimensions of the image
 			var preloader = new Image();
 			var that = this;
 			preloader.onload = function(){
-				
+
 				// now calculate correct dimensions, which fit into window
 				var height = preloader.height;
 				var width = preloader.width;
@@ -553,25 +570,25 @@ self.dropdownDialogs = [];
 					var height = dheight;
 					var width = height * sv;
 				}
-				
+
 				// set img-tag
 				that.setContent('<img src="'+href+'" alt="'+href+'" height="'+height+'" width="'+width+'" />');
 			}
-			
+
 			// if an error happens, we can't do anything :(
 			preloader.onerror = function(){
 				that.setContent('<h3>Connection error!</h3> <br /> Please try again later!');
 			}
-			
+
 			// now set src when events set, because of lags in some browsers
 			preloader.src = href;
 		},
-		
+
 		/**
 		 * player for urls reachable via ajax
 		 *
 		 *@name player_ajax
-		*/
+		 */
 		player_ajax: function(uri) {
 			var that = this;
 			var oldURI = uri;
@@ -590,10 +607,10 @@ self.dropdownDialogs = [];
 				try {
 					goma.ui.loadResources(j).done(function(){
 						var t = j.getResponseHeader("content-type");
-						
+
 						// we have to set it new, because of scoping issues
 						var h = j.responseText;
-						
+
 						// if it is json-data
 						if(t.indexOf("text/x-json") != -1) {
 							try {
@@ -606,47 +623,47 @@ self.dropdownDialogs = [];
 									that.closeButton = data.closeButton;
 								}
 								that.setContent(h);
-								
+
 								if(typeof data.exec !== "undefined") {
-									
+
 									// execution should not break json-data before
 									try {
 										var method;
 										if (window.execScript) {
-										  	window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
+											window.execScript('method = function(' + data.exec + ')',''); // execScript doesn’t return anything
 										} else {
-                                            method = eval('(function(){' + data.exec + '})');
-                                        }
-										
+											method = eval('(function(){' + data.exec + '})');
+										}
+
 										method.call(that);
 									} catch(e) {
 										alert(e);
 									}
 								}
-								
-								
+
+
 							} catch(e) {
 								alert(e);
 								that.setContent("error parsing JSON");
 							}
-						
-						// if it is javascript
+
+							// if it is javascript
 						} else if(t === "text/javascript") {
-							
+
 							// execution for IE and all other Browsers
 							var method;
 							if (window.execScript) {
-                                window.execScript('method = ' + 'function(' + h + ')', ''); // execScript doesn’t return anything
-                            } else {
-                                method = eval('(function(){' + h + '});');
-                            }
+								window.execScript('method = ' + 'function(' + h + ')', ''); // execScript doesn’t return anything
+							} else {
+								method = eval('(function(){' + h + '});');
+							}
 							method.call(this);
-							
+
 						} else {
 							// html just must be set to Dialog
 							that.setContent(h);
 						}
-						
+
 						RunAjaxResources(j);
 					}).fail(function(){
 						that.setContent('Error while fetching data from the server: <br /> Failed to fetch data from the server.');
@@ -655,8 +672,8 @@ self.dropdownDialogs = [];
 					alert(e);
 					location.href = oldURI;
 				}
-				
-				
+
+
 			}).fail(function(jqXHR){
 				// try find out why it has failed
 				if(jqXHR.textStatus === "timeout") {
@@ -683,7 +700,7 @@ self.dropdownDialogs = [];
 			}
 		]
 	};
-	
+
 	dropdownDialog.get = function(elem) {
 		if(typeof dropdowns[elem] != "undefined") {
 			return dropdowns[elem];
@@ -695,41 +712,40 @@ self.dropdownDialogs = [];
 			return false;
 		}
 	};
-	
+
 	// jQuery-Extension
-	$.fn.extend({ 
-        dropdownDialog: function(options) {
-        	if(typeof options == "string")
-        		options = {uri: options};
-        	
-        	var defaults = {
-        		"uri": "",
-        		"position": null
-        	};
-        	var o = $.extend(defaults, options);
-        	
-        	var that = this;
-        	var obj = {
-        		instances: [],
-        		hide: function() {
-        			for(i in obj.instances) {
-        				obj.instances[i].hide();
-        			}
-        		},
-        		remove: function() {
-        			for(i in obj.instances) {
-        				obj.instances[i].remove();
-        			}
-        		}
-        	}
-        	this.each(function(){
+	$.fn.extend({
+		dropdownDialog: function(options) {
+			if(typeof options == "string")
+				options = {uri: options};
+
+			var defaults = {
+				"uri": "",
+				"position": null
+			};
+			var o = $.extend(defaults, options);
+
+			var that = this;
+			var obj = {
+				instances: [],
+				hide: function() {
+					for(i in obj.instances) {
+						obj.instances[i].hide();
+					}
+				},
+				remove: function() {
+					for(i in obj.instances) {
+						obj.instances[i].remove();
+					}
+				}
+			}
+			this.each(function(){
 				var instance = new dropdownDialog(o.uri, this, o.position);
 				obj.instances.push(instance);
 			});
-			
+
 			return obj;
-			
-        }
-    });
-    
+
+		}
+	});
 })(jQuery);
