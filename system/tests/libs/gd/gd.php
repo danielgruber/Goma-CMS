@@ -74,7 +74,6 @@ class GDTest extends GomaUnitTest
         $this->unitGDResizeCalculation(new Size(480, 1000), new Size(480, 480), new Size(480, 480), new Tuple(new Position(0,260), new Size(480,480)), new Tuple(new Position(0,0), new Size(480, 480)));
         $this->unitGDResizeCalculation(new Size(480, 1000), new Size(240, 240), new Size(240, 240), new Tuple(new Position(0,260), new Size(480,480)), new Tuple(new Position(0,0), new Size(240, 240)));
 
-        // unit tests from tufast
         $this->unitGDResizeCalculation(new Size(1083, 723), new Size(492, 250), new Size(492, 250), new Tuple(new Position(0, 87), new Size(1083,550)), new Tuple(new Position(0,0), new Size(492, 250)));
         $this->unitGDResizeCalculation(new Size(1083, 723), new Size(1968, 1000), new Size(1968, 1000), new Tuple(new Position(0, 87), new Size(1083,550)), new Tuple(new Position(0,0), new Size(1968, 1000)));
 
@@ -82,9 +81,18 @@ class GDTest extends GomaUnitTest
 
         $this->unitGDResizeCalculation(new Size(1678, 790), new Size(1024, 455), new Size(1024, 455), new Tuple(new Position(0, 22), new Size(1678, 746)), new Tuple(new Position(0,0), new Size(1024, 455)));
 
+        // position tests
+        $this->unitGDResizeCalculation(new Size(1083, 723), new Size(492, 250), new Size(492, 250), new Tuple(new Position(0, 0), new Size(1083,550)), new Tuple(new Position(0,0), new Size(492, 250)), new Position(0, 0));
+        $this->unitGDResizeCalculation(new Size(1083, 723), new Size(492, 250), new Size(492, 250), new Tuple(new Position(0, 173), new Size(1083,550)), new Tuple(new Position(0,0), new Size(492, 250)), new Position(100, 100));
+
+        // complete crop test
+        $this->unitGDResizeCalculation(new Size(480, 1000), new Size(240, 240), new Size(240, 240), new Tuple(new Position(36,192), new Size(360,360)), new Tuple(new Position(0,0), new Size(240, 240)), new Position(30, 30), new Size(75, 36));
+        $this->unitGDResizeCalculation(new Size(480, 1000), new Size(240, 240), new Size(240, 240), new Tuple(new Position(36,192), new Size(360,360)), new Tuple(new Position(0,0), new Size(240, 240)), new Position(30, 30), new Size(75, 75));
+        $this->unitGDResizeCalculation(new Size(480, 1000), new Size(240, 500), new Size(240, 500), new Tuple(new Position(36,75), new Size(360,750)), new Tuple(new Position(0,0), new Size(240, 500)), new Position(30, 30), new Size(75, 75));
+
     }
 
-    public function unitGDResizeCalculation($sourceSize, $targetSize, $expectedSize, $expectedSourceArea, $expectedDestArea) {
+    public function unitGDResizeCalculation($sourceSize, $targetSize, $expectedSize, $expectedSourceArea, $expectedDestArea, $cropPosition = null, $cropSize = null) {
         $gd = new GD();
 
         $reflectionMethodImageSize = new ReflectionMethod('GD', 'getDestImageSize');
@@ -96,7 +104,7 @@ class GDTest extends GomaUnitTest
         $reflectionMethodSourceArea = new ReflectionMethod('GD', 'getSrcImageArea');
         $reflectionMethodSourceArea->setAccessible(true);
 
-        $source = $reflectionMethodSourceArea->invoke($gd, $sourceSize->getWidth(), $sourceSize->getHeight(), $size);
+        $source = $reflectionMethodSourceArea->invoke($gd, $sourceSize->getWidth(), $sourceSize->getHeight(), $size, $cropPosition, $cropSize);
 
         $this->assertEqual($source, $expectedSourceArea, 'Expected Source Area: '.print_r($expectedSourceArea, true).' Got: '.print_r($source, true).' %s');
 

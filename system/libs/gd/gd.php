@@ -307,16 +307,25 @@ class GD extends gObject
     protected function getSrcImageArea($srcWidth, $srcHeight, $imageSize, $cropPosition = null, $cropSize = null) {
         $size = new Size($srcWidth, $srcHeight);
         $position = new Position(0, 0);
+        $cropLeft = isset($cropPosition) ? $cropPosition->getX() : 50;
+        $cropTop = isset($cropPosition) ? $cropPosition->getY() : 50;
 
-        $relation = ($srcWidth / $srcHeight);
+        if(isset($cropSize)) {
+            $size = $size->updateWidth($srcWidth * $cropSize->getWidth() / 100);
+            $position = $position->updateX(($srcWidth - $size->getWidth()) * $cropLeft / 100);
+
+            $size = $size->updateHeight($srcHeight * $cropSize->getHeight() / 100);
+            $position = $position->updateY(($srcHeight - $size->getHeight()) * $cropTop / 100);
+        }
+
+        $relation = ($size->getWidth() / $size->getHeight());
         $newRelation = $imageSize->getWidth() / $imageSize->getHeight();
         if($relation - $newRelation > 0) {
-            $multiplier = $imageSize->getHeight() / $srcHeight;
-            $calculatedWidth = $srcWidth * $multiplier;
+            $multiplier = $imageSize->getHeight() / $size->getHeight();
+            $calculatedWidth = $size->getWidth() * $multiplier;
 
             if($calculatedWidth > $imageSize->getWidth()) {
 
-                $cropLeft = isset($cropPosition) ? $cropPosition->getX() : 50;
                 $cropWidth = isset($cropSize) ? $cropSize->getWidth() : 100;
 
                 $positionSizePair = $this->calculateCropSize($srcWidth, $calculatedWidth, $imageSize->getWidth(), $cropLeft, $cropWidth);
@@ -326,12 +335,11 @@ class GD extends gObject
             }
 
         } else {
-            $multiplier = $imageSize->getWidth() / $srcWidth;
-            $calculatedHeight = $srcHeight * $multiplier;
+            $multiplier = $imageSize->getWidth() / $size->getWidth();
+            $calculatedHeight = $size->getHeight() * $multiplier;
 
             if($calculatedHeight > $imageSize->getHeight()) {
 
-                $cropTop = isset($cropPosition) ? $cropPosition->getY() : 50;
                 $cropHeight = isset($cropSize) ? $cropSize->getHeight() : 100;
 
                 $positionSizePair = $this->calculateCropSize($srcHeight, $calculatedHeight, $imageSize->getHeight(), $cropTop, $cropHeight);
@@ -349,7 +357,7 @@ class GD extends gObject
      * returns smaller size when cropping is needed.
      *
      * @param int $srcSize size that source has
-     * @param int $calculatedSrcSize size that the source image would have if it is scaled like other dimension
+     * @param int $calculatedSrcSize size that the source image would have if it was scaled by other dimension
      * @param int $imageSize size that destination image should have
      * @param int $cropPosition percentage where it will be cropped
      * @param int $cropSize percentage on how big the crop will be
@@ -357,11 +365,11 @@ class GD extends gObject
      */
     protected function calculateCropSize($srcSize, $calculatedSrcSize, $imageSize, $cropPosition = 50, $cropSize = 100) {
         $position = 0;
-        $size = $srcSize;
-        $multiplier = $calculatedSrcSize / $srcSize;
+        $size = $srcSize * $cropSize / 100;
+        $multiplier = $calculatedSrcSize / $size;
 
         if($calculatedSrcSize > $imageSize) {
-            $size = round($imageSize / $multiplier * $cropSize / 100);
+            $size = round($imageSize / $multiplier);
 
             $position = round(($srcSize - $size) * $cropPosition / 100);
         }

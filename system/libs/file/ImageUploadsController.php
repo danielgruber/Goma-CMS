@@ -1,11 +1,13 @@
 <?php defined('IN_GOMA') OR die();
 
 /**
- *	@package 	goma framework
- *	@link 		http://goma-cms.org
- *	@license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- *	@author 	Goma-Team
- * @Version 	1.6
+ * @package 	goma framework
+ * @link 		http://goma-cms.org
+ * @license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ * @author 	Goma-Team
+ * @version 	1.6
+ *
+ * @method ImageUploads modelInst()
  *
  * last modified: 06.08.2015
  */
@@ -51,9 +53,12 @@ class ImageUploadsController extends UploadsController {
 		if(!self::checkFilename($this->modelInst()->filename)) {
 			return false;
 		}
+
 		if(!file_exists(ROOT . self::calculatePermitFile(URL)) && !file_exists(ROOT . URL . ".permit")) {
 			return false;
 		}
+
+		$this->checkForSourceResize();
 
 		return true;
 	}
@@ -150,13 +155,40 @@ class ImageUploadsController extends UploadsController {
 	}
 
 	/**
+	 * checks if image should be resized to have a different source version.
+	 */
+	private function checkForSourceResize() {
+		$model = $this->modelInst();
+		if($model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && $model->id != 0) {
+
+			$width = $model->width * $model->thumbWidth / 100;
+			$height = $model->height * $model->thumbHeight / 100;
+
+			$image = new RootImage($this->modelInst()->realfile);
+			$img = $image->resize($width, $height, true, new Position($model->thumbLeft, $model->thumbTop), new Size($model->thumbWidth, $model->thumbHeight));
+
+			$extension = substr($model->filename, strrpos($model->filename, "."));
+			$newRealFile = $model->realfile . "_" . $model->versionid . $extension;
+			$img->toFile($newRealFile);
+
+			$model->thumbLeft = 0;
+			$model->thumbTop = 0;
+			$model->thumbWidth = 100;
+			$model->thumbHeight = 100;
+			$model->width = $width;
+			$model->height = $height;
+			$model->realfile = $newRealFile;
+			$model->writeToDB(false, true);
+		}
+	}
+
+	/**
 	 * sets the width
 	 *
 	 *@name setWidth
 	 *@access public
 	 */
 	public function setWidth() {
-
 		$width = (int) $this->getParam("width");
 
 		$this->resizeImage($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);

@@ -136,4 +136,23 @@ class ImageUploadsTest extends GomaUnitTest
 
         $this->assertEqual(strtolower(call_user_func_array(array($imageUpload, $action), $args)), strtolower($expected), " Expected " . $expected . " %s");
     }
+
+    /**
+     * get best version for aspect.
+     */
+    public function testgetBestVersionForAspect() {
+        /** @var ImageUploads $imageUpload */
+        $imageUpload = Uploads::addFile("IMG_2008.jpg", "./system/tests/resources/IMG_2008.jpg", "test.image");
+
+        $this->assertEqual($imageUpload->getAspect(), 4 / 3);
+        $this->assertEqual($imageUpload->getBestVersionForAspect(4 / 3), $imageUpload);
+        $this->assertEqual($imageUpload->getBestVersionForAspect(3 / 4), $imageUpload);
+
+        $newUpload = $imageUpload->addImageVersionBySizeInPx(100, 100, 400, 300);
+        $this->assertEqual($newUpload->thumbWidth, 50);
+        $this->assertEqual($newUpload->thumbHeight, 50);
+
+        $this->assertEqual($newUpload->thumbLeft, 25);
+        $this->assertEqual($newUpload->thumbTop, 1 / 3 * 100);
+    }
 }

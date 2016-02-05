@@ -45,8 +45,8 @@ class Position extends Tuple
     /**
      * returns a new Tuple with second value and new first value.
      *
-     * @param mixed $width new value
-     * @return Size
+     * @param int $x new value
+     * @return Position
      */
     public function updateX($x)
     {
@@ -56,8 +56,8 @@ class Position extends Tuple
     /**
      * returns a new Tuple with first value and new second value.
      *
-     * @param mixed $height new value
-     * @return Size
+     * @param int $y new value
+     * @return Position
      */
     public function updateY($y)
     {

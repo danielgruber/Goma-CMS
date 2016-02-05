@@ -10,10 +10,21 @@
  *
  * @property int width
  * @property int height
+ * @property float thumbWidth
+ * @property float thumbHeight
+ * @property float thumbLeft
+ * @property float thumbTop
+ * @property ImageUploads|null sourceImage
+ * @property int sourceImageId
+ *
+ * @method HasMany_DataObjectSet imageVersions($filter = null, $sort = null, $limit = null)
  *
  * last modified: 07.06.2015
  */
 class ImageUploads extends Uploads {
+
+    const ID = "ImageUploads";
+
     /**
      * add some db-fields
      * inherits fields from Uploads
@@ -24,10 +35,23 @@ class ImageUploads extends Uploads {
     static $db = array(
         "width"				=> "int(5)",
         "height"			=> "int(5)",
-        "thumbLeft"			=> "int(3)",
-        "thumbTop"			=> "int(3)",
-        "thumbWidth"		=> "int(3)",
-        "thumbHeight"		=> "int(3)"
+        "thumbLeft"			=> "float(8, 5)",
+        "thumbTop"			=> "float(8, 5)",
+        "thumbWidth"		=> "float(8, 5)",
+        "thumbHeight"		=> "float(8, 5)"
+    );
+
+    /**
+     * add index for aspect-query.
+     *
+     * @var array
+     */
+    static $index = array(
+        "aspectQuery" => array(
+            "name"      => "aspect",
+            "fields"    => "thumbWidth,thumbHeight,width,height",
+            "type"      => "INDEX"
+        )
     );
 
     /**
@@ -52,6 +76,20 @@ class ImageUploads extends Uploads {
         "thumbTop"		=> 50,
         "thumbWidth"	=> 100,
         "thumbHeight"	=> 100
+    );
+
+    /**
+     * @var array
+     */
+    static $has_many = array(
+        "imageVersions" => ImageUploads::ID
+    );
+
+    /**
+     * @var array
+     */
+    static $has_one = array(
+        "sourceImage"   => ImageUploads::ID
     );
 
     /**
@@ -459,8 +497,74 @@ class ImageUploads extends Uploads {
 
         $image = new RootImage($this->realfile);
         $this->setField($size, $image->$size);
-        $this->write(false, true);
+        $this->writeToDB(false, true);
         return $image->$size;
+    }
+
+    /**
+     * adds an image-version by size in pixels.
+     * @param int $left
+     * @param int $top
+     * @param int $width
+     * @param int $height
+     * @param bool $write
+     * @return ImageUploads
+     */
+    public function addImageVersionBySizeInPx($left, $top, $width, $height, $write = true) {
+        $imageUploads = clone $this;
+        $imageUploads->thumbHeight = min($height / $imageUploads->height * 100, 100);
+        $imageUploads->thumbWidth = min($width / $imageUploads->width * 100, 100);
+
+        $leftPercentage = ($this->width - $width) > 1 ? min($left / ($this->width - $width) * 100, 100) : 50;
+        $imageUploads->thumbLeft = $leftPercentage;
+
+        $topPercentage = ($this->height - $height) > 1 ? min($top / ($this->height - $height) * 100, 100) : 50;
+        $imageUploads->thumbTop = $topPercentage;
+
+        $imageUploads->sourceImage = $this;
+        $imageUploads->path = $imageUploads->buildPath($imageUploads->collection, $imageUploads->filename);
+
+        if($this->id != 0 && $write) {
+            $imageUploads->writeToDB(true, true);
+        }
+
+        $this->viewcache = array();
+
+        return $imageUploads;
+    }
+
+    /**
+     * gets best version of file for given aspect-ratio.
+     * aspect is width / height.
+     *
+     * @param float $aspect
+     * @return ImageUploads
+     */
+    public function getBestVersionForAspect($aspect) {
+        // if aspect is on a precision of 5% correct we use this.
+        if(round($aspect * 20) / 20 == round($this->getAspect() * 20) / 20) {
+            return $this;
+        }
+
+        // query for best fitting aspect.
+        /** @var ImageUploads|null $aspectVersion */
+        $aspectVersion = $this->imageVersions(
+            null, " ABS((width * thumbWidth / (height * thumbHeight)) - $aspect) ASC ", 1
+        )->first(false);
+
+        // check if is really the better version.
+        if(isset($aspectVersion) && abs($aspectVersion->getAspect() - $aspect) < ($this->getAspect() - $aspect)) {
+            return $aspectVersion;
+        }
+
+        return $this;
+    }
+
+    /**
+     * calculates aspect for current ImageUploads instance.
+     */
+    public function getAspect() {
+        return ($this->width() * $this->thumbWidth) / ($this->height() * $this->thumbHeight);
     }
 
     /**
