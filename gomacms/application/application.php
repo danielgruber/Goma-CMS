@@ -37,7 +37,7 @@ settingsController::preInit();
 
 if(PROFILE) Profiler::unmark("settings");
 
-if(settingsController::get("useSSL") == 1 && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
+if((!isset($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] == "off") && settingsController::get("useSSL") == 1 && !isset($_GET["forceNoSSL"]) && !isset($_SESSION["forceNoSSL"])) {
 	header("Location: " . getSSLUrl());
 	return;
 } else if(isset($_GET["forceNoSSL"])) {
