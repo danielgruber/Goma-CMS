@@ -53,18 +53,20 @@ class ROOTImage extends GD
      * this function resizes an image to another size and let the relation height-width normal
      * this function caches the result, too
      *
-     * @param numeric $width new width
-     * @param numeric $height height
+     * @param int $width new width
+     * @param int $height height
      * @param bool $crop
+     * @param Position $cropPosition
+     * @param Size $cropSize
      * @return bool|GD
      */
-    public function resize($width, $height, $crop = true)
+    public function resize($width, $height, $crop = true, $cropPosition = null, $cropSize = null)
     {
-        $file = ROOT . CACHE_DIRECTORY . '/image_cache.tn_w_' . $width . '_h_' . $height . '_' . $crop . '_' . $this->md5 . '.img';
+        $file = ROOT . CACHE_DIRECTORY . '/image_cache.tn_w_' . $width . '_h_' . $height . '_' . $crop . '_'.md5(print_r(array($cropPosition, $cropSize), true)).'_' . $this->md5 . '.img';
         if (file_exists($file)) {
             return new GD($file);
         }
-        $gd = parent::resize($width, $height, $crop);
+        $gd = parent::resize($width, $height, $crop, $cropPosition, $cropSize);
         $gd->toFile($file);
         return $gd;
     }
