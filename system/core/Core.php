@@ -330,7 +330,7 @@ class Core extends gObject {
 	 * @param 	Closure
 	 * @param 	int $priority
 	 */
-	public function addCMSVarCallback($callback, $priority = 10) {
+	public static function addCMSVarCallback($callback, $priority = 10) {
 		if(is_callable($callback)) {
 			self::$cmsVarCallbacks[$priority][] = $callback;
 		}

@@ -109,7 +109,7 @@ class RequestHandler extends gObject {
 	 */
 	public function Init($request = null) {
 		if (isset($request))
-			$this -> request = $request;
+			$this -> request = clone $request;
 
 		if (isset($this -> request)) {
 			$this->originalNamespace = $this->namespace;

@@ -244,7 +244,7 @@ class i18n extends Object {
 	 * @name AutoSelectLang
 	 * @return string
 	 */
-	public function AutoSelectLang($code) {
+	public static function AutoSelectLang($code) {
 		if(isset($code) && self::LangExists($code)) {
 			return $code;
 		}
@@ -287,7 +287,7 @@ class i18n extends Object {
 	 * @name selectLang
 	 * @return string
 	 */
-	public function selectLang($code) {
+	public static function selectLang($code) {
 
 		if($code != "." && $code != ".." && is_dir(LANGUAGE_DIRECTORY . "/" . $code)) {
 			return $code;
@@ -315,7 +315,7 @@ class i18n extends Object {
 	 * @name LangExists
 	 * @return bool
 	 */
-	public function LangExists($code) {
+	public static function LangExists($code) {
 		if(!$code || $code == "." || $code == "..")
 			return false;
 

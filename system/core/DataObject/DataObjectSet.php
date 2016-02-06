@@ -113,9 +113,6 @@ class DataObjectSet extends DataSet {
 			$this->dataobject = gObject::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;
-			if($this->dataobject->controller != null) {
-				$this->controller($this->dataobject->controller);
-			}
 
 			$this->filter($filter);
 			$this->sort = (isset($sort) && !empty($sort)) ? $sort : StaticsManager::getStatic($class, "default_sort");
@@ -841,6 +838,13 @@ class DataObjectSet extends DataSet {
 		if(is_object($this->controller))
 		{
 			return $this->controller;
+		}
+
+
+		if($this->dataobject->controller != null) {
+			$this->controller = $this->dataobject->controller;
+			$this->controller->setModelInst($this, $this->dataobject->classname);
+			return $this->dataobject->controller;
 		}
 
 		/* --- */

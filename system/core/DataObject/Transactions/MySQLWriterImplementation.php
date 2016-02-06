@@ -50,7 +50,7 @@ class MySQLWriterImplementation implements iDataBaseWriter {
         }
 
         // fire events!
-        $this->model()->onBeforeWriteData();
+        $this->model()->onBeforeWriteData($this);
         $this->model()->callExtending("onBeforeWriteData");
         $this->model()->onBeforeManipulate($manipulation, $b = "write");
         $this->model()->callExtending("onBeforeManipulate", $manipulation, $b = "write");

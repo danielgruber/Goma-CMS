@@ -359,7 +359,8 @@ self.dropdownDialogs = [];
 						left: "10%",
 						right: "10%",
 						bottom: "10%",
-						position: "fixed"
+						position: "fixed",
+						zIndex: 900
 					});
 
 					break;

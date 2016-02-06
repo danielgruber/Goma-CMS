@@ -438,7 +438,7 @@ class ModelWriter extends gObject {
     protected function callPreflightEvents() {
         DataObjectQuery::clearCache();
 
-        $this->model->onBeforeWrite();
+        $this->model->onBeforeWrite($this);
         $this->callExtending("onBeforeWrite");
     }
 
@@ -447,7 +447,7 @@ class ModelWriter extends gObject {
      */
     protected function callPostFlightEvents() {
         $this->callExtending("onAfterWrite");
-        $this->model->onAfterWrite();
+        $this->model->onAfterWrite($this);
         $this->model->callExtending("onAfterWrite");
     }
 
