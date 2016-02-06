@@ -9,30 +9,31 @@
 				}
 			});
 			
-			gloader.load("sortable");
-			$(".sorttableview_wrapper_sort").sortable({
-				helper: 'clone',
-				items: ' > tr',
-				cursor: "move",
-				update: function(event, ui)
-				{
-					$.ajax({
-						url: BASE_SCRIPT + adminURI + "/saveSort/",
-						data: $(".sorttableview_wrapper_sort").sortable("serialize", {key: "sort_item[]"}),
-						type: "post"
-					});
-					var i = 0;
-					$(".sorttableview_wrapper_sort > tr").each(function(){
-						$(this).removeClass("grey");
-						if(i == 0) {
-							i++;
-						} else {
-							i = 0;
-							$(this).addClass("grey");
-						}
-					});
-				},
-				tolerance: 'pointer',
+			gloader.loadAsync("sortable").done(function(){
+				$(".sorttableview_wrapper_sort").sortable({
+					helper: 'clone',
+					items: ' > tr',
+					cursor: "move",
+					update: function(event, ui)
+					{
+						$.ajax({
+							url: BASE_SCRIPT + adminURI + "/saveSort/",
+							data: $(".sorttableview_wrapper_sort").sortable("serialize", {key: "sort_item[]"}),
+							type: "post"
+						});
+						var i = 0;
+						$(".sorttableview_wrapper_sort > tr").each(function(){
+							$(this).removeClass("grey");
+							if(i == 0) {
+								i++;
+							} else {
+								i = 0;
+								$(this).addClass("grey");
+							}
+						});
+					},
+					tolerance: 'pointer',
+				});
 			});
 		});
 	// ]]>

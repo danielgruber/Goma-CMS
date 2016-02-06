@@ -80,9 +80,10 @@ function tree_bind(tree) {
 		});
 	};
 	
-	gloader.load("history");
-	HistoryLib.bind(manageMarkByUrl, true);
-	
+	gloader.loadAsync("history").done(function(){
+		HistoryLib.bind(manageMarkByUrl, true);
+	});
+
 	manageMarkByUrl(location.pathname);
 }
 

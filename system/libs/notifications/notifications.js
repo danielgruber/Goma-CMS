@@ -26,7 +26,7 @@ goma.ui.Notifications = {
 				goma.ui.getDocRoot().append('<div id="notificationsHolder"><div id="notifications"></div></div>');
 			}
 	},
-	
+
 	/**
 	 * notify a user about anything
 	 * all you need is a class-name, a title, and an icon
@@ -42,15 +42,19 @@ goma.ui.Notifications = {
 	*/
 	notify: function(class_name, title, icon, text, Clickfn) {
 		var notificationID = "notification_" + class_name + goma.ui.Notifications.notifications.length;
-		
-		var notification = $("<div>").addClass("notification").attr("id", notificationID).append('<div class="icon"><img src="'+icon+'" alt="Icon" /></div>\
+
+		var notification = $("<div>").addClass("notification").attr("id", notificationID).append('<div class="icon"><img alt="Icon" /></div>\
 		<div class="title">'+title+'</div>\
 		<div class="text">'+text+'</div>');
-		
+
+		if(icon != null) {
+			notification.find(".icon img").attr("src", icon);
+		}
+
 		if(typeof Clickfn != "undefined") {
 			notification.click(Clickfn);
 		}
-		
+
 		var notification = {
 			node: notification,
 			type: "notification",
@@ -59,14 +63,14 @@ goma.ui.Notifications = {
 			visible: false,
 			class_name: class_name
 		};
-		
+
 		goma.ui.Notifications.notifications[notificationID] = notification;
-		
+
 		setTimeout(function(){
 			goma.ui.Notifications.makeVisible(notification, 5500);
 		}, 250);
 	},
-	
+
 	/**
 	 * makes a notification visible
 	 *
@@ -76,15 +80,15 @@ goma.ui.Notifications = {
 	makeVisible: function(notification, durationClose) {
 		if($("#notifications").length == 0)
 			goma.ui.Notifications.Init();
-		
+
 		var n = notification;
 		n.node.css("display", "none");
 		n.node.prependTo($("#notifications"));
 		var nNode = n.node;
-		
+
 		goma.ui.Notifications.notifications[n.id].visible = true;
 		nNode.slideDown("fast");
-		
+
 		var close = function(){
 			goma.ui.Notifications.notifications[n.id].visible = false;
 			nNode.css("position", "absolute");
@@ -95,9 +99,9 @@ goma.ui.Notifications = {
 			});
 			nNode.off(".close");
 		};
-		
+
 		nNode.on("click.close", close);
-		
+
 		if(typeof durationClose != "undefined" && durationClose != -1) {
 			setTimeout(close, durationClose);
 		}
@@ -108,13 +112,13 @@ $(function(){
 	goma.ui.Notifications.Init();
 	console.log && console.log("init");
 	if(window.uniqueID && goma.Pusher) {
-		
+
 		var c = goma.Pusher.subscribe("private-" + window.uniqueID, function(){
 			this.bind("notification", function(data){
 				goma.ui.Notifications.notify(data[0], data[1], data[2], data[3]);
 			});
 		});
-		
+
 		return true;
 	};
 

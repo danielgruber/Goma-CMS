@@ -13,7 +13,7 @@ if (goma === undefined) {
 }
 
 if (window.console === undefined) {
-	window.console = {log: function(){;}};
+   window.console = {log: function(){;}};
 }
 
 //$.touchPunch.setAutoAssign(false);
@@ -34,148 +34,147 @@ if (goma.ui === undefined) {
 			loadSubscribers = [],
 			prefixes = ["webkit", "moz", "ms", "o"],
 
-			/**
-			 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
-			 * you must register the plugin in PHP
-			 * we stop execution of JavaScript while loading
-			 */
-			gloaded = {"-": true},
-			loadScript = function (comp, fn) {
+		/**
+		 * this code loads external plugins on demand, when it is needed, just call gloader.load("pluginName"); before you need it
+		 * you must register the plugin in PHP
+		 * we stop execution of JavaScript while loading
+		*/
+		gloaded = {"-": true},
+		loadScript = function (comp, fn) {
+			if (gloaded[comp] == null)
+			{
+				$.ajax({
+					cache: true,
+					noRequestTrack: true,
+					url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
+					dataType: "script",
+					async: false
+				});
 
-				if (gloaded[comp] == null)
-				{
-					$.ajax({
-						cache: true,
-						noRequestTrack: true,
-						url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
-						dataType: "script",
-						async: false
-					});
+				gloaded[comp] = true;
 
+				if (fn != null) {
+					fn();
+				}
+			}
+
+		},
+
+		loadScriptAsync = function (comp) {
+			var deferred = $.Deferred();
+			if (gloaded[comp] == null)
+			{
+				$.ajax({
+					cache: true,
+					noRequestTrack: true,
+					url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
+					dataType: "script"
+				}).done(function () {
 					gloaded[comp] = true;
+					deferred.resolve();
+				}).fail(deferred.reject);
+			} else {
+				setTimeout(deferred.resolve, 1);
+			}
 
-					if (fn != null) {
-						fn();
-					}
-				}
-
-			},
-
-			loadScriptAsync = function (comp) {
-				var deferred = $.Deferred();
-				if (gloaded[comp] == null)
-				{
-					$.ajax({
-						cache: true,
-						noRequestTrack: true,
-						url: BASE_SCRIPT + "gloader/" + comp + ".js?v2b8",
-						dataType: "script"
-					}).done(function () {
-						gloaded[comp] = true;
-						deferred.resolve();
-					}).fail(deferred.reject);
-				} else {
-					setTimeout(deferred.resolve, 1);
-				}
-
-				return deferred.promise();
-			},
+			return deferred.promise();
+		},
 
 		// retina support
-			RetinaReplace = function () {
-				$("img").each(function () { //.on("load", "img", function () {
-					var $this = $(this),
-						img = new Image();
+		RetinaReplace = function () {
+			$("img").each(function () { //.on("load", "img", function () {
+				var $this = $(this),
+					img = new Image();
 
-					if ($this.attr("data-retined") !== "complete" && $this.attr("data-retina") && $this.width() !== 0 && $this.height() !== 0) {
-						if (goma.ui.IsImageOk($(this).get(0))) {
-							img.onload = function () {
-								$this.css("width", $this.width());
-								$this.css("height", $this.height());
-								$this.attr("src", $this.attr("data-retina"));
-								img.src = null;
-							};
-							img.src = $this.attr("data-retina");
-							$this.attr("data-retined", "complete");
-						}
+				if ($this.attr("data-retined") !== "complete" && $this.attr("data-retina") && $this.width() !== 0 && $this.height() !== 0) {
+					if (goma.ui.IsImageOk($(this).get(0))) {
+						img.onload = function () {
+							$this.css("width", $this.width());
+							$this.css("height", $this.height());
+							$this.attr("src", $this.attr("data-retina"));
+							img = null;
+						};
+						img.src = $this.attr("data-retina");
+						$this.attr("data-retined", "complete");
 					}
-				});
-
-			},
-
-			flexBoxes = [],
-
-			/**
-			 * this is the algorythm to calculate the 100% size of a box.
-			 */
-			updateFlexHeight = function ($container, setHeight) {
-
-				var maxHeight,
-					inFloat = false;
-
-				if ($container === undefined || $container.html() === undefined) {
-					return false;
 				}
+			});
 
-				if ($container.css("display") == "inline") {
-					throw new Error("inline-elements are not allowed for flex-boxing.");
-					return false;
-				}
+		},
 
-				var scroll = $container.scrollTop();
+		flexBoxes = [],
 
-				$container.css("height", "");
-				maxHeight = updateFlexHeight($container.parent(), false);
+		/**
+		 * this is the algorythm to calculate the 100% size of a box.
+		*/
+		updateFlexHeight = function ($container, setHeight) {
 
-				// first make sure that the parent element is a Flex-Box
-				if (!maxHeight) {
-					$container.css({"display": ""});
-					$container.css("height", "100%");
-					return $container.height();
-				}
+			var maxHeight,
+			inFloat = false;
 
-				if ($container.attr("id") === undefined) {
-					$container.attr("id", randomString(10));
-				}
+			if ($container === undefined || $container.html() === undefined) {
+				return false;
+			}
 
+			if ($container.css("display") == "inline") {
+				throw new Error("inline-elements are not allowed for flex-boxing.");
+				return false;
+			}
+
+			var scroll = $container.scrollTop();
+
+			$container.css("height", "");
+			maxHeight = updateFlexHeight($container.parent(), false);
+
+			// first make sure that the parent element is a Flex-Box
+			if (!maxHeight) {
 				$container.css({"display": ""});
+				$container.css("height", "100%");
+				return $container.height();
+			}
 
-				// now calulate other elements' height
-				$container.parent().find(" > *").each(function () {
-					if ((inFloat && $(this).css("clear") == "both") || $(this).css("clear") == inFloat) {
-						inFloat = false;
-					}
+			if ($container.attr("id") === undefined) {
+				$container.attr("id", randomString(10));
+			}
 
-					if ($(this).attr("id") != $container.attr("id") && $(this).css("float").toLowerCase() != "left" && $(this).css("float").toLowerCase() != "right" && !inFloat && $(this).css("display").toLowerCase() != "none" && $(this).get(0).tagName.toLowerCase() != "td" && $(this).css("position").toLowerCase() != "absolute" && $(this).css("position").toLowerCase() != "fixed") {
-						maxHeight = maxHeight - $(this).outerHeight(true);
-					}
+			$container.css({"display": ""});
 
-					if ($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
-						inFloat = $(this).css("float");
-					}
-				});
+			// now calulate other elements' height
+			$container.parent().find(" > *").each(function () {
+				if ((inFloat && $(this).css("clear") == "both") || $(this).css("clear") == inFloat) {
+					inFloat = false;
+				}
 
-				// calculate the padding and border
-				var paddingMargin = ($container.outerHeight(true) - $container.height());
-				maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
+				if ($(this).attr("id") != $container.attr("id") && $(this).css("float").toLowerCase() != "left" && $(this).css("float").toLowerCase() != "right" && !inFloat && $(this).css("display").toLowerCase() != "none" && $(this).get(0).tagName.toLowerCase() != "td" && $(this).css("position").toLowerCase() != "absolute" && $(this).css("position").toLowerCase() != "fixed") {
+					maxHeight = maxHeight - $(this).outerHeight(true);
+				}
 
-				if(setHeight !== false && ($container.hasClass("flexbox") || $container.css("overflow").toLowerCase() == "auto" || $container.css("overflow").toLowerCase() == "scroll" || $container.css("overflow").toLowerCase() == "hidden"))
-					$container.css("height", maxHeight);
-				$container.scrollTop(scroll);
+				if ($(this).attr("id") == $container.attr("id") && $(this).css("float") != "none") {
+					inFloat = $(this).css("float");
+				}
+			});
 
-				return maxHeight;
-			};
+			// calculate the padding and border
+			var paddingMargin = ($container.outerHeight(true) - $container.height());
+			maxHeight = maxHeight - ($container.outerHeight(true) - $container.height());
+
+			if(setHeight !== false && ($container.hasClass("flexbox") || $container.css("overflow").toLowerCase() == "auto" || $container.css("overflow").toLowerCase() == "scroll" || $container.css("overflow").toLowerCase() == "hidden"))
+				$container.css("height", maxHeight);
+			$container.scrollTop(scroll);
+
+			return maxHeight;
+		};
 
 		$(function () {
 			$.extend(goma.ui, {
 				/**
 				 * this area is by default used to place content loaded via Ajax
-				 */
+				*/
 				mainContent: $("#content").length ? $("#content") : $("body"),
 
 				/**
 				 * this area is by default used to place containers from javascript
-				 */
+				*/
 				DocRoot: ($(".documentRoot").length === 1) ? $(".documentRoot") : $("body")
 			});
 
@@ -183,11 +182,11 @@ if (goma.ui === undefined) {
 				RetinaReplace();
 				// add retina-updae-event
 				document.addEventListener && document.addEventListener("DOMContentLoaded", RetinaReplace, false);
-				if (/WebKit/i.test(navigator.userAgent)) {
-					setInterval(function () {
-						/loaded|complete/.test(document.readyState) && RetinaReplace();
-					}, 100);
-				}
+			    	if (/WebKit/i.test(navigator.userAgent)) {
+			    		setInterval(function () {
+			    			/loaded|complete/.test(document.readyState) && RetinaReplace();
+						}, 100);
+					}
 			}
 
 			window.onbeforeunload = goma.ui.fireUnloadEvents;
@@ -217,7 +216,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * defines if we are in backend
-			 */
+			*/
 			is_backend: false,
 
 			/**
@@ -226,7 +225,7 @@ if (goma.ui === undefined) {
 			 *
 			 * @access public
 			 * @param jquery-object
-			 */
+			*/
 			addFlexBox: function ($container) {
 				flexBoxes.push($container);
 				updateFlexHeight($($container));
@@ -234,7 +233,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * fires an update for flex-boxes
-			 */
+			*/
 			updateFlexBoxes: function () {
 				$(window).resize();
 			},
@@ -244,7 +243,7 @@ if (goma.ui === undefined) {
 			 *
 			 *@name setMainContent
 			 *@param jQuery-Object | string (CSS-Path)
-			 */
+			*/
 			setMainContent: function (node) {
 				if ($(node).length > 0) {
 					goma.ui.mainContent = $(node);
@@ -253,7 +252,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * enables css-transforms on a specified element with specified time and easing.
-			 */
+			*/
 			enableCSSAnimation: function(elem, time, easing) {
 				if(time === undefined)
 					time = 300;
@@ -271,7 +270,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * enables css-transforms on a specified element.
-			 */
+			*/
 			disableCSSAnimation: function(elem) {
 				var elem = $(elem);
 
@@ -283,7 +282,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * returns the main-content as jQuery-Object
-			 */
+			*/
 			getMainContent: function () {
 				return goma.ui.mainContent;
 			},
@@ -294,8 +293,8 @@ if (goma.ui === undefined) {
 				}
 
 				var node = ($(destination).length > 0) ? $(destination) : goma.ui.getMainContent(),
-					deferred = $.Deferred(),
-					data;
+				deferred = $.Deferred(),
+				data;
 
 				node.addClass("loading");
 
@@ -363,7 +362,7 @@ if (goma.ui === undefined) {
 			 * updates page and replaces all normal images with retina-images if defined in attribute data-retina of img-tag
 			 *
 			 *@name updateRetina
-			 */
+			*/
 			updateRetina: function () {
 				if (goma.ui.getDevicePixelRatio() > 1.5) {
 					RetinaReplace();
@@ -374,11 +373,11 @@ if (goma.ui === undefined) {
 			 * fires unload events and returns perfect result for onbeforeunload event
 			 *
 			 *@name fireUnloadEvents
-			 */
+			*/
 			fireUnloadEvents: function (node) {
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
 				var event = jQuery.Event("onbeforeunload"),
-					r = true;
+				r = true;
 
 				$(".g-unload-handler").each(function () {
 					if ($(this).parents(node)) {
@@ -407,7 +406,7 @@ if (goma.ui === undefined) {
 			 *@param string - selector for event-binding
 			 *@param object - data //optional
 			 *@param function - handler
-			 */
+			*/
 			bindUnloadEvent: function (select, data, handler) {
 				$(select).addClass("g-unload-handler");
 				$(select).on("onbeforeunload", data, handler);
@@ -419,7 +418,7 @@ if (goma.ui === undefined) {
 			 *@name removeUnloadHandler
 			 *@param string - selector
 			 *@param function - handler to remove - optional
-			 */
+			*/
 			unbindUnloadEvent: function (select, handler) {
 				$(select).off("onbeforeunload", handler);
 			},
@@ -427,7 +426,7 @@ if (goma.ui === undefined) {
 			/**
 			 * for loading data
 			 * sets data loaded
-			 */
+			*/
 			setLoaded: function (mod) {
 				gloaded[mod] = true;
 			},
@@ -438,13 +437,13 @@ if (goma.ui === undefined) {
 			 *@name load
 			 *@param string - mod
 			 *@param function - fn
-			 */
+			*/
 			load: loadScript,
 			loadAsync: loadScriptAsync,
 
 			/**
 			 * some base-roots in DOM
-			 */
+			*/
 			getContentRoot: function () {
 				return goma.ui.mainContent;
 			},
@@ -456,14 +455,14 @@ if (goma.ui === undefined) {
 			 * sets a progress of a async action as loading bar
 			 *
 			 *@name setProgress
-			 */
+			*/
 			setProgress: function (percent, slowp) {
 				var deferred = $.Deferred(),
 
-					slow = (slowp === undefined) ? false : slowp,
+				slow = (slowp === undefined) ? false : slowp,
 
-					duration = (slow && percent != 100) ? 5000 : 500,
-					i;
+				duration = (slow && percent != 100) ? 5000 : 500,
+				i;
 
 				if ($("#loadingBar").length == 0) {
 					$("body").append('<div id="loadingBar"></div>');
@@ -514,7 +513,7 @@ if (goma.ui === undefined) {
 
 			/**
 			 * registers to the progress-event.
-			 */
+			*/
 			onProgress: function (fn) {
 				if (typeof fn == "function") {
 					loadSubscribers.push(fn);
@@ -526,10 +525,10 @@ if (goma.ui === undefined) {
 			 *
 			 *@name renderResponse
 			 *@access public
-			 */
+			*/
 			renderResponse: function (html, xhr, node, object, checkUnload, progress) {
 				var deferred = $.Deferred(),
-					method;
+				method;
 
 				node = ($(node).length > 0) ? $(node) : goma.ui.getContentRoot();
 
@@ -553,8 +552,8 @@ if (goma.ui === undefined) {
 
 					var content_type = xhr.getResponseHeader("content-type"),
 
-						regexp = new RegExp("<body"),
-						id = randomString(5);
+					regexp = new RegExp("<body"),
+					id = randomString(5);
 
 					if (content_type == "text/javascript") {
 						if (object !== undefined) {
@@ -591,14 +590,14 @@ if (goma.ui === undefined) {
 
 			/**
 			 * css and javascript-management
-			 */
+			*/
 
 			/**
 			 * register a resource loaded
 			 *
 			 *@name registerResource
 			 *@access public
-			 */
+			*/
 			registerResource: function (type, file) {
 				goma.ui.registerResources(type, [file]);
 			},
@@ -608,7 +607,7 @@ if (goma.ui === undefined) {
 			 *
 			 *@name registerResources
 			 *@access public
-			 */
+			*/
 			registerResources: function (type, files) {
 				var i;
 				switch(type) {
@@ -618,131 +617,131 @@ if (goma.ui === undefined) {
 							goma.ui.CSSFiles[files[i]] = "";
 							goma.ui.CSSIncluded[files[i]] = true;
 						}
-						break;
+					break;
 					case "js":
 
 						for (i in files) {
 							goma.ui.JSIncluded[files[i]] = true;
 						}
-						break;
+					break;
 				}
 			},
 
 			loadResources: function (request, progress) {
 				var deferred = $.Deferred(),
 
-					css = request.getResponseHeader("X-CSS-Load"),
-					js = request.getResponseHeader("X-JavaScript-Load"),
-					base_uri = request.getResponseHeader("x-base-uri"),
+				css = request.getResponseHeader("X-CSS-Load"),
+				js = request.getResponseHeader("X-JavaScript-Load"),
+				base_uri = request.getResponseHeader("x-base-uri"),
 				//root_path = request.getResponseHeader("x-root-path"),
-					cssfiles = (css != null) ? css.split(";") : [],
-					jsfiles = (js != null) ? js.split(";") : [],
+				cssfiles = (css != null) ? css.split(";") : [],
+				jsfiles = (js != null) ? js.split(";") : [],
 
-					perProgress = Math.round((50 / (jsfiles.length + cssfiles.length))),
-					p = progress,
+				perProgress = Math.round((50 / (jsfiles.length + cssfiles.length))),
+				p = progress,
 
-					i = 0,
+				i = 0,
 				// we create a function which we call for each of the files and it iterates through the files
 				// if it finishes it notifies the deferred object about the finish
-					loadFile = function () {
+				loadFile = function () {
 
-						// i is for both js and css files
-						// first we load js files and then css, cause when js files fail we can't show the page anymore, so no need of loading css is needed
-						if (i >= jsfiles.length) {
+					// i is for both js and css files
+					// first we load js files and then css, cause when js files fail we can't show the page anymore, so no need of loading css is needed
+					if (i >= jsfiles.length) {
 
-							// get correct index for css-files
-							var a = i - jsfiles.length;
-							if (a < cssfiles.length) {
+						// get correct index for css-files
+						var a = i - jsfiles.length;
+						if (a < cssfiles.length) {
 
-								var file = cssfiles[a],
-									loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
+							var file = cssfiles[a],
+							loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
 
-								// scope to don't have problems with data
-								(function (f) {
-									var file = f;
-									if (!external_regexp.test(file) && file != "") {
-										if (goma.ui.CSSFiles[file] === undefined) {
-											return $.ajax({
-												cache: true,
-												url: loadfile,
-												noRequestTrack: true,
-												dataType: "html"
-											}).done(function (css) {
-												if (goma.ui.progress !== undefined && p) {
-													goma.ui.setProgress(goma.ui.progress + perProgress);
-												}
-
-												// patch uris
-												var base = file.substring(0, file.lastIndexOf("/"));
-												//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
-												//css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + base + '/$1)');
-
-												goma.ui.CSSFiles[file] = css;
-												goma.ui.CSSIncluded[file] = true;
-
-												$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+css+'</style>');
-
-												i++;
-												loadFile();
-											}).fail(function () {
-												deferred.reject();
-											});
-										} else if (goma.ui.CSSIncluded[file] === undefined) {
-											$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
-											goma.ui.CSSIncluded[file] = true;
-										}
-									} else {
-										goma.ui.CSSFiles[file] = css;
-										goma.ui.CSSIncluded[file] = true;
-										if ($("head").html().indexOf(file) != -1) {
-											$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
-										}
-									}
-
-									i++;
-									loadFile();
-								})(file);
-							} else {
-								setTimeout(function () {
-									deferred.notify("loaded");
-								}, 10);
-							}
-						} else {
-							var file = jsfiles[i],
-								loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
-
-							if (file != "") {
-
-								// check for internal cache
-								// we don't load modenizr, because it causes trouble sometimes if you load it via AJAX
-								if (goma.ui.JSFiles[file] === undefined && !file.match(/modernizr\.js/)) {
-
-									// we create a new scope for this to don't have problems with overwriting vars and then callbacking with false ones
-									return (function (file) {
-										$.ajax({
+							// scope to don't have problems with data
+							(function (f) {
+								var file = f;
+								if (!external_regexp.test(file) && file != "") {
+									if (goma.ui.CSSFiles[file] === undefined) {
+										return $.ajax({
 											cache: true,
 											url: loadfile,
 											noRequestTrack: true,
 											dataType: "html"
-										}).done(function (js) {
+										}).done(function (css) {
 											if (goma.ui.progress !== undefined && p) {
 												goma.ui.setProgress(goma.ui.progress + perProgress);
 											}
-											// build into internal cache
-											goma.ui.JSFiles[file] = js;
+
+											// patch uris
+											var base = file.substring(0, file.lastIndexOf("/"));
+											//css = css.replace(/url\(([^'"]+)\)/gi, 'url(' + root_path + base + '/$2)');
+											//css = css.replace(/url\(['"]?([^'"#\>\!\s]+)['"]?\)/gi, 'url(' + base_uri + base + '/$1)');
+
+											goma.ui.CSSFiles[file] = css;
+											goma.ui.CSSIncluded[file] = true;
+
+											$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+css+'</style>');
+
 											i++;
 											loadFile();
 										}).fail(function () {
 											deferred.reject();
 										});
-									})(file);
+									} else if (goma.ui.CSSIncluded[file] === undefined) {
+										$("head").prepend('<style type="text/css" id="css_'+file.replace(/[^a-zA-Z0-9_\-]/g, "_")+'">'+CSSLoaded[file]+'</style>');
+										goma.ui.CSSIncluded[file] = true;
+									}
+								} else {
+									goma.ui.CSSFiles[file] = css;
+									goma.ui.CSSIncluded[file] = true;
+									if ($("head").html().indexOf(file) != -1) {
+										$("head").prepend('<link rel="stylesheet" href="'+file+'" type="text/css" />');
+									}
 								}
-							}
 
-							i++;
-							loadFile();
+								i++;
+								loadFile();
+							})(file);
+						} else {
+							setTimeout(function () {
+								deferred.notify("loaded");
+							}, 10);
 						}
-					};
+					} else {
+						var file = jsfiles[i],
+						loadfile = (!http_regexp.test(file)) ? base_uri + file : file;
+
+						if (file != "") {
+
+							// check for internal cache
+							// we don't load modenizr, because it causes trouble sometimes if you load it via AJAX
+							if (goma.ui.JSFiles[file] === undefined && !file.match(/modernizr\.js/)) {
+
+								// we create a new scope for this to don't have problems with overwriting vars and then callbacking with false ones
+								return (function (file) {
+									$.ajax({
+										cache: true,
+										url: loadfile,
+										noRequestTrack: true,
+										dataType: "html"
+									}).done(function (js) {
+										if (goma.ui.progress !== undefined && p) {
+											goma.ui.setProgress(goma.ui.progress + perProgress);
+										}
+										// build into internal cache
+										goma.ui.JSFiles[file] = js;
+										i++;
+										loadFile();
+									}).fail(function () {
+										deferred.reject();
+									});
+								})(file);
+							}
+						}
+
+						i++;
+						loadFile();
+					}
+				};
 
 				// init loading
 				loadFile();
@@ -750,7 +749,7 @@ if (goma.ui === undefined) {
 
 				deferred.progress(function () {
 					var i,
-						file;
+					file;
 
 					for (i in jsfiles) {
 						file = jsfiles[i];
@@ -777,13 +776,13 @@ if (goma.ui === undefined) {
 			 * this method can only be called after loadResources
 			 *
 			 *@name runResources
-			 */
+			*/
 			runResources: function (request) {
 				var js = request.getResponseHeader("X-JavaScript-Load"),
 				//base_uri = request.getResponseHeader("x-base-uri"),
-					jsfiles = js.split(";"),
-					i,
-					file;
+				jsfiles = js.split(";"),
+				i,
+				file;
 
 				if (js != null) {
 					for (i in jsfiles) {
@@ -799,33 +798,33 @@ if (goma.ui === undefined) {
 
 			// Helper Functions
 			getDevicePixelRatio: function () {
-				if (window.devicePixelRatio === undefined) { return 1; }
-				return window.devicePixelRatio;
-			},
+		        if (window.devicePixelRatio === undefined) { return 1; }
+		        return window.devicePixelRatio;
+		    },
 
-			/**
-			 * checks if a img were loaded correctly
-			 *
-			 *@name isImageOK
-			 */
+		    /**
+		     * checks if a img were loaded correctly
+		     *
+		     *@name isImageOK
+		    */
 			IsImageOk: function (img) {
-				// During the onload event, IE correctly identifies any images that
-				// weren’t downloaded as not complete. Others should too. Gecko-based
-				// browsers act like NS4 in that they report this incorrectly.
-				if (!img.complete) {
-					return false;
-				}
+			    // During the onload event, IE correctly identifies any images that
+			    // weren’t downloaded as not complete. Others should too. Gecko-based
+			    // browsers act like NS4 in that they report this incorrectly.
+			    if (!img.complete) {
+			        return false;
+			    }
 
-				// However, they do have two very useful properties: naturalWidth and
-				// naturalHeight. These give the true size of the image. If it failed
-				// to load, either of these should be zero.
+			    // However, they do have two very useful properties: naturalWidth and
+			    // naturalHeight. These give the true size of the image. If it failed
+			    // to load, either of these should be zero.
 
-				if (img.naturalWidth !== undefined && img.naturalWidth == 0) {
-					return false;
-				}
+			    if (img.naturalWidth !== undefined && img.naturalWidth == 0) {
+			        return false;
+			    }
 
-				// No other way of checking: assume it’s ok.
-				return true;
+			    // No other way of checking: assume it’s ok.
+			    return true;
 			},
 
 			/**
@@ -834,21 +833,21 @@ if (goma.ui === undefined) {
 			 *@name bindESCAction
 			 *@param node
 			 *@param function
-			 */
+			*/
 			bindESCAction: function (node, fn) {
 				var f = fn;
 				$(node).keydown(function (e) {
 					var code = e.keyCode ? e.keyCode : e.which;
 					if (code == 27) {
-						f();
-					}
+		       	 		f();
+		       	 	}
 				});
 			}
 
 		};
 	})(jQuery);
 
-	var gloader = {load: goma.ui.load};
+	var gloader = {load: goma.ui.load, loadAsync: goma.ui.loadAsync};
 }
 
 if (goma.help === undefined) {
@@ -986,14 +985,14 @@ if (window.loader === undefined) {
 
 	// shuffle
 	var array_shuffle = function (array) {
-		var tmp, rand, i;
-		for (i = 0; i < array.length; i++) {
-			rand = Math.floor(Math.random() * array.length);
-			tmp = array[i];
-			array[i] = array[rand];
-			array[rand] =tmp;
-		}
-		return array;
+	  var tmp, rand, i;
+	  for (i = 0; i < array.length; i++) {
+	    rand = Math.floor(Math.random() * array.length);
+	    tmp = array[i];
+	    array[i] = array[rand];
+	    array[rand] =tmp;
+	  }
+	  return array;
 	};
 
 	// put methods into the right namespace
@@ -1004,7 +1003,7 @@ if (window.loader === undefined) {
 
 		$.fn.inlineOffset = function () {
 			var el = $('<i/>').css('display','inline').insertBefore(this[0]),
-				pos = el.offset();
+			pos = el.offset();
 
 			el.remove();
 			return pos;
@@ -1014,12 +1013,12 @@ if (window.loader === undefined) {
 
 			/**
 			 * ajaxfy is a pretty basic and mostly by PHP-handled Ajax-Request, we get back mostly javascript, which can be executed
-			 */
+			*/
 			$(document).on("click", "a[rel=ajaxfy], a.ajaxfy", function ()
 			{
 				var $this = $(this),
-					_html = $this.html(),
-					$container = $this.parents(".record").attr("id");
+				_html = $this.html(),
+				$container = $this.parents(".record").attr("id");
 
 				$this.html("<img src=\"images/16x16/ajax-loader.gif\" alt=\"loading...\" />");
 
@@ -1039,7 +1038,7 @@ if (window.loader === undefined) {
 
 			/**
 			 * ui-ajax is the class for loading data over goma.ui.ajax and rendering it into an element.
-			 */
+			*/
 			$(document).on("click", "a[rel=ui-ajax], a.ui-ajax", function ()
 			{
 				var $this = $(this);
@@ -1050,13 +1049,13 @@ if (window.loader === undefined) {
 					url: $this.attr("href"),
 					data: {"ui-ajax": true}
 				}).done(function () {
-					$this.removeC^lass("loading");
+					$this.removeClass("loading");
 				});
 				return false;
 			});
 
-			// new dropdownDialog, which is very dynamic and greate
-			$(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function ()
+		    // new dropdownDialog, which is very dynamic and greate
+		    $(document).on("click", "a[rel*=dropdownDialog], a.dropdownDialog, a.dropdownDialog-left, a.dropdownDialog-right, a.dropdownDialog-center, a.dropdownDialog-bottom", function ()
 			{
 				var $this = $(this);
 				goma.ui.loadAsync("dropdownDialog").done(function () {
@@ -1064,8 +1063,6 @@ if (window.loader === undefined) {
 					var options = {
 						uri: $this.attr("href")
 					};
-					if ($this.attr("rel") == "dropdownDialog[fixed]" || $this.hasClass("dropdownDialog-fixed"))
-						options.position = "fixed";
 					if ($this.attr("rel") == "dropdownDialog[left]" || $this.hasClass("dropdownDialog-left"))
 						options.position = "left";
 					else if ($this.attr("rel") == "dropdownDialog[center]" || $this.hasClass("dropdownDialog-center"))
@@ -1081,11 +1078,11 @@ if (window.loader === undefined) {
 				return false;
 			});
 
-			/**
+		    /**
 			 * addon for z-index
 			 * every element with class="windowzindex" is with this plugin
 			 * it makes the clicked one on top
-			 */
+			*/
 			$(document).on('click', ".windowzindex", function () {
 				$(".windowzindex").parent().css('z-index', 900);
 				$(this).parent().css("z-index", 901);
@@ -1107,8 +1104,8 @@ if (window.loader === undefined) {
 							});
 							$(this).blur(function () {
 								if ($(this).val()=="") {
-									$(this).val($(this).attr("placeholder"));
-									$(this).css("color", "#999");
+									 $(this).val($(this).attr("placeholder"));
+									 $(this).css("color", "#999");
 
 								}
 							});
@@ -1147,7 +1144,7 @@ if (window.loader === undefined) {
 		 * returns language-data.
 		 *
 		 *@name lang
-		 */
+		*/
 		w.lang = function (name, _default) {
 			if (typeof BASE_SCRIPT == "undefined")
 				return false;
@@ -1161,9 +1158,9 @@ if (window.loader === undefined) {
 
 		/**
 		 * sets language-data.
-		 */
+		*/
 		w.setLang = function(data) {
-			lang = data;
+		    lang = data;
 		};
 
 		/**
@@ -1176,7 +1173,7 @@ if (window.loader === undefined) {
 
 		/**
 		 * starts a indexing for search.
-		 */
+		*/
 		w.startIndexing = function() {
 			$.ajax({
 				url: BASE_SCRIPT + "system/indexSearch"
@@ -1187,7 +1184,7 @@ if (window.loader === undefined) {
 
 		/**
 		 * returns the root of the document
-		 */
+		*/
 		w.getDocRoot = function () {
 			return goma.ui.getDocRoot();
 		};
@@ -1220,7 +1217,7 @@ if (window.loader === undefined) {
 		 *
 		 *@name unbindFormFormSubmit
 		 *@param node
-		 */
+		*/
 		w.unbindFromFormSubmit = function (node) {
 
 			// first make sure it works!
@@ -1249,8 +1246,8 @@ if (window.loader === undefined) {
 			$(node).keydown(function (e) {
 				var code = e.keyCode ? e.keyCode : e.which;
 				if (code == 13) {
-					return false;
-				}
+		       	 	return false;
+		    	}
 			});
 		}
 
@@ -1261,31 +1258,31 @@ if (window.loader === undefined) {
 		 *@name CallonDocumentClick
 		 *@param fn
 		 *@param array - areas, which aren't calling this function (css-selectors)
-		 */
+		*/
 		w.CallonDocumentClick = function (call, exceptions) {
 			var fn = call,
-				mouseover = false,
-				timeout,
-				i,
+			mouseover = false,
+			timeout,
+			i,
 
 
 			// function if we click or tap on an exception
-				exceptionFunc = function () {
-					clearTimeout(timeout);
-					mouseover = true;
-					timeout = setTimeout(function () {
-						mouseover = false;
-					}, 300);
-				},
+			exceptionFunc = function () {
+				clearTimeout(timeout);
+				mouseover = true;
+				timeout = setTimeout(function () {
+					mouseover = false;
+				}, 300);
+			},
 
 			// function if we click anywhere
-				mouseDownFunc = function (e) {
-					setTimeout(function () {
-						if (mouseover === false) {
-							fn(e);
-						}
-					}, 10);
-				};
+			mouseDownFunc = function (e) {
+				setTimeout(function () {
+					if (mouseover === false) {
+						fn(e);
+					}
+				}, 10);
+			};
 
 			if (exceptions) {
 				for (i in exceptions) {
@@ -1318,18 +1315,18 @@ if (window.loader === undefined) {
 		//this parse style & remove style & rebuild style. I like the first one.. but anyway exploring..
 		$.fn.extend
 		({
-			removeCSS: function (cssName) {
-				return this.each(function () {
+		    removeCSS: function (cssName) {
+		        return this.each(function () {
 
-					return $(this).attr('style',
+		            return $(this).attr('style',
 
-						$.grep($(this).attr('style').split(";"),
-							function (curCssName) {
-								if (curCssName.toUpperCase().indexOf(cssName.toUpperCase() + ':') <= 0)
-									return curCssName;
-							}).join(";"));
-				});
-			}
+		            $.grep($(this).attr('style').split(";"),
+		                    function (curCssName) {
+		                        if (curCssName.toUpperCase().indexOf(cssName.toUpperCase() + ':') <= 0)
+		                            return curCssName;
+		                    }).join(";"));
+		        });
+		    }
 		});
 
 
@@ -1369,10 +1366,10 @@ if (window.loader === undefined) {
 					}
 			}
 
-			jqXHR.setRequestHeader("X-Referer", location.href);
-			jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-			if (goma.ENV.is_backend)
-				jqXHR.setRequestHeader("X-Is-Backend", 1);
+	 		jqXHR.setRequestHeader("X-Referer", location.href);
+	 		jqXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+	 		if (goma.ENV.is_backend)
+	 			jqXHR.setRequestHeader("X-Is-Backend", 1);
 		});
 
 		w.event_history = [];
@@ -1457,26 +1454,26 @@ if (window.loader === undefined) {
 	}
 
 	function is_string(input) {
-		return (typeof(input) == 'string');
+	    return (typeof(input) == 'string');
 	}
 
 
 	/**
 	 *@link http://msdn.microsoft.com/en-us/library/ms537509(v=vs.85).aspx
-	 */
+	*/
 	function getInternetExplorerVersion()
 	// Returns the version of Internet Explorer or a -1
 	// (indicating the use of another browser).
 	{
-		var rv = -1; // Return value assumes failure.
-		if (navigator.appName == 'Microsoft Internet Explorer')
-		{
-			var ua = navigator.userAgent;
-			var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-			if (re.exec(ua) != null)
-				rv = parseFloat( RegExp.$1 );
-		}
-		return rv;
+	  var rv = -1; // Return value assumes failure.
+	  if (navigator.appName == 'Microsoft Internet Explorer')
+	  {
+	    var ua = navigator.userAgent;
+	    var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+	    if (re.exec(ua) != null)
+	      rv = parseFloat( RegExp.$1 );
+	  }
+	  return rv;
 	}
 
 	function getFirefoxVersion()
@@ -1486,15 +1483,15 @@ if (window.loader === undefined) {
 		var regexp_firefox = /Firefox/i;
 		if (regexp_firefox.test(ua)) {
 			var re  = new RegExp("Firefox/([0-9]{1,}[\.0-9]{0,})");
-			if (re.exec(ua) != null)
-				rv = parseFloat( RegExp.$1 );
+	    	if (re.exec(ua) != null)
+	      		rv = parseFloat( RegExp.$1 );
 		}
 		return rv;
 	}
 
 	/**
 	 * cookies, thanks to @url http://www.w3schools.com/JS/js_cookies.asp
-	 */
+	*/
 	function setCookie(c_name,value,exdays)
 	{
 		var exdate=new Date();
@@ -1533,10 +1530,10 @@ if (window.loader === undefined) {
 	// patch for IE eval
 	function eval_global(codetoeval) {
 		try {
-			if (window.execScript)
-				window.execScript(codetoeval); // execScript doesn’t return anything
-			else
-				window.eval(codetoeval);
+		    if (window.execScript)
+		        window.execScript(codetoeval); // execScript doesn’t return anything
+		    else
+		        window.eval(codetoeval);
 		} catch(e) {
 			console.log && console.log(e);
 			throw e;
@@ -1557,29 +1554,29 @@ if (window.loader === undefined) {
 	}
 
 	function microtime (get_as_float) {
-		// Returns either a string or a float containing the current time in seconds and microseconds
-		//
-		// version: 1109.2015
-		// discuss at: http://phpjs.org/functions/microtime
-		// +   original by: Paulo Freitas
-		// *     example 1: timeStamp = microtime(true);
-		// *     results 1: timeStamp > 1000000000 && timeStamp < 2000000000
-		var now = new Date().getTime() / 1000;
-		var s = parseInt(now, 10);
+	    // Returns either a string or a float containing the current time in seconds and microseconds
+	    //
+	    // version: 1109.2015
+	    // discuss at: http://phpjs.org/functions/microtime
+	    // +   original by: Paulo Freitas
+	    // *     example 1: timeStamp = microtime(true);
+	    // *     results 1: timeStamp > 1000000000 && timeStamp < 2000000000
+	    var now = new Date().getTime() / 1000;
+	    var s = parseInt(now, 10);
 
-		return (get_as_float) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
+	    return (get_as_float) ? now : (Math.round((now - s) * 1000) / 1000) + ' ' + s;
 	}
 
 	function str_repeat (input, multiplier) {
-		// Returns the input string repeat mult times
-		//
-		// version: 1109.2015
-		// discuss at: http://phpjs.org/functions/str_repeat
-		// +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-		// +   improved by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
-		// *     example 1: str_repeat('-=', 10);
-		// *     returns 1: '-=-=-=-=-=-=-=-=-=-='
-		return new Array(multiplier + 1).join(input);
+	    // Returns the input string repeat mult times
+	    //
+	    // version: 1109.2015
+	    // discuss at: http://phpjs.org/functions/str_repeat
+	    // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	    // +   improved by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+	    // *     example 1: str_repeat('-=', 10);
+	    // *     returns 1: '-=-=-=-=-=-=-=-=-=-='
+	    return new Array(multiplier + 1).join(input);
 	}
 
 	var scrollToHash = function (hash) {
@@ -1615,7 +1612,7 @@ if (window.loader === undefined) {
 	 *
 	 *@name ago
 	 *@param int - unix timestamp
-	 */
+	*/
 	var ago = function (time) {
 		var diff = now() - time;
 		if (diff < 60) {

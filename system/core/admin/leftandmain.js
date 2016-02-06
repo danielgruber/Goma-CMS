@@ -332,37 +332,38 @@ var LaM_type_timeout;
 
 		// bind the sort
 		if(sortable && self.LaMsort) {
-			gloader.load("sortable");
-			node.parent().find("ul").each(function(){
-				var s = this;
-				$(this).find( " > li " ).css("cursor", "move");
-				$(this).sortable({
-					helper: 'clone',
-					items: ' > li:not(.action)',
-					cursor: "move",
-					axis: "y",
-					cancel: " > li.action",
-					update: function(event, ui)
-					{
-						var sortSerialized = $(s).sortable('serialize', {key: "treenode[]", attribute: "data-recordid", expression: /(.+)/});
-						$.ajax({
-							url: BASE_SCRIPT + adminURI + "/savesort/" + marked_node + "/",
-							data: sortSerialized + "&" + oForm.serialize(),
-							type: 'post',
-							error: function(e)
-							{
-								alert(e);
-							},
-							success: function(html, code, jqXHR)
-							{
-								renderResponseTo(html, $(".left .treewrapper"), jqXHR).done(function(){;
-									tree_bind($(".left .treewrapper").find(".goma-tree"));
-									tree_bind_ajax(true, $(".left ul.goma-tree"));
-								});
-							}
-						});
-					},
-					tolerance: 'pointer',
+			gloader.loadAsync("sortable").done(function(){
+				node.parent().find("ul").each(function(){
+					var s = this;
+					$(this).find( " > li " ).css("cursor", "move");
+					$(this).sortable({
+						helper: 'clone',
+						items: ' > li:not(.action)',
+						cursor: "move",
+						axis: "y",
+						cancel: " > li.action",
+						update: function(event, ui)
+						{
+							var sortSerialized = $(s).sortable('serialize', {key: "treenode[]", attribute: "data-recordid", expression: /(.+)/});
+							$.ajax({
+								url: BASE_SCRIPT + adminURI + "/savesort/" + marked_node + "/",
+								data: sortSerialized + "&" + oForm.serialize(),
+								type: 'post',
+								error: function(e)
+								{
+									alert(e);
+								},
+								success: function(html, code, jqXHR)
+								{
+									renderResponseTo(html, $(".left .treewrapper"), jqXHR).done(function(){;
+										tree_bind($(".left .treewrapper").find(".goma-tree"));
+										tree_bind_ajax(true, $(".left ul.goma-tree"));
+									});
+								}
+							});
+						},
+						tolerance: 'pointer',
+					});
 				});
 			});
 		}
