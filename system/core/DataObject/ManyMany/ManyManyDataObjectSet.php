@@ -202,11 +202,13 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      * @param bool $forceInsert to force insert
      * @param bool $forceWrite to force write
      * @param int $snap_priority of the snapshop: autosave 0, save 1, publish 2
+     * @deprecated
      * @return bool
      */
     public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
         try {
             $this->writeToDB($forceInsert, $forceWrite, $snap_priority);
+            return true;
         } catch(Exception $e) {
             log_exception($e);
             return false;
@@ -256,8 +258,6 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         if(!SQL::manipulate($manipulation)) {
             throw new LogicException("Could not manipulate Database. Manipulation corrupted. <pre>" . print_r($manipulation, true) . "</pre>");
         }
-
-
     }
 
     /**

@@ -110,10 +110,10 @@ class welcomeController extends Controller {
 	 * saves settings
 	*/ 
 	public function saveSettings($result) {
-		$data = DataObject::get("newsettings", array("id" => 1));
+		$data = DataObject::get_one("newsettings", array("id" => 1));
 		$data->titel = $result["pagetitle"];
 		$data->timezone = $result["timezone"];
-		$data->write(false, true);
+		$data->writeToDB(false, true);
 		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "finish/");
 	}
 	/**

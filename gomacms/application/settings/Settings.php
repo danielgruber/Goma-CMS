@@ -27,8 +27,7 @@ class Newsettings extends DataObject implements HistoryData {
 		"register"			=> "varchar(100)",
 		"register_enabled"	=> "Switch",
 		"register_email"	=> "Switch",
-		"gzip"				=> "Switch",
-		"useSSL"			=> "Switch"
+		"gzip"				=> "Switch"
 	);
 	
 	/**
@@ -42,8 +41,7 @@ class Newsettings extends DataObject implements HistoryData {
 		"register_email"	=> "1",
 		"register_enabled"	=> "0",
 		"status"			=> "1",
-		"stpl"				=> "default",
-		"useSSL"			=> "0"
+		"stpl"				=> "default"
 	);
 	
 	/**
@@ -71,34 +69,8 @@ class Newsettings extends DataObject implements HistoryData {
 			"register_enabled"	=> lang("register_enabled", "Enable Registration"),
 			"register_email"	=> lang("register_require_email", "Send Registration Mail"),
 			"titel"				=> lang("title"),
-			"gzip"				=> lang("gzip", "G-Zip"),
-			"useSSL"			=> lang("useSSL")
+			"gzip"				=> lang("gzip", "G-Zip")
 		);
-	}
-	
-	/**
-	 * returns the titles for the fields for automatic form generation
-	 *
-	 * @name 	getFieldTitles
-	*/
-	public function getFieldInfo() {
-		return array(
-			"useSSL" => $this->generateUseSSLDescrption()
-		);
-	}
-
-	/**
-	 * returns a valid description for the use SSL field. We do only allow editing this if you
-	 * are connected via SSL.
-	*/
-	public function generateUseSSLDescrption() {
-		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
-		if($http == "https") {
-			return lang("useSSL_info");
-		} else {
-			$url = 'https://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
-			return str_replace('$link', $url, lang("useSSL_unsupported"));
-		}
 	}
 	
 	/**
@@ -139,11 +111,6 @@ class Newsettings extends DataObject implements HistoryData {
 		$status->info = lang("sitestatus_info");
 
 		$this->generateSubClassForm($form);
-
-		$http = (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off" ? "https" : "http";
-		if($http == "http" && $this->useSSL != 1) {
-			$form->useSSL->disable();
-		}
 		
 		$form->addAction(new CancelButton('cancel',lang("cancel")));
 		$form->addAction(new FormAction("submit", lang("save"), null, array("green")));
@@ -207,13 +174,14 @@ class Newsettings extends DataObject implements HistoryData {
 			)
 		);
 	}
-	
+
 	/**
 	 * returns text what to show about the event
 	 *
-	 * @name 	generateHistoryData
-	 * @access 	public
-	*/
+	 * @name    generateHistoryData
+	 * @access    public
+	 * @return array
+	 */
 	public static function generateHistoryData($record) {
 		
 		$lang = lang("h_settings", '$user updated the <a href="$url">settings</a>.');

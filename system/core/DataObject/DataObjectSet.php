@@ -840,13 +840,6 @@ class DataObjectSet extends DataSet {
 			return $this->controller;
 		}
 
-
-		if($this->dataobject->controller != null) {
-			$this->controller = $this->dataobject->controller;
-			$this->controller->setModelInst($this, $this->dataobject->classname);
-			return $this->dataobject->controller;
-		}
-
 		/* --- */
 
 		if($this->controller != "")
@@ -866,34 +859,16 @@ class DataObjectSet extends DataSet {
 		return null;
 	}
 
-
-
 	/**
 	 * toString
-	 *
-	 *@name toString
-	 *@access public
+	 * @return string
 	 */
 	public function __toString() {
-		try {
-			if($controller = $this->controller()) {
-				if($controller->template != "") {
-					return $controller->index();
-				} else {
-					return false;
-				}
-			}
-			return "controller not found";
-		} catch(Exception $e) {
-			Goma_ExceptionHandler($e);
-		}
+		return "DataObjectSet {$this->classname}{".$this->count()."}";
 	}
 
 	/**
 	 * bool - for IF in template
-	 *
-	 *@name toBool
-	 *@access public
 	 */
 	public function bool() {
 		return ($this->Count() > 0);
@@ -902,8 +877,8 @@ class DataObjectSet extends DataSet {
 	/**
 	 * returns an array of the values of a specific field
 	 *
-	 *@name fieldToArray
-	 *@access public
+	 * @param string $field
+	 * @return array
 	 */
 	public function fieldToArray($field) {
 		$this->forceData();
@@ -912,53 +887,41 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * write to DB
-	 *
-	 *@name write
-	 *@access public
-	 *@param bool - to force insert
-	 *@param bool - to force write
-	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	 * @param bool $forceInsert
+	 * @param bool $forceWrite
+	 * @param int $snap_priority
+	 * @deprecated
+	 * @return bool
 	 */
 	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
-		$writtenIDs = array();
-		if(count($this->data) > 0) {
-			foreach($this->data as $record) {
-				if(is_object($record) && (!isset($writtenIDs[$record->id]) || $record->id == 0)) {
-					$writtenIDs[$record->id] = true;
-					if(!$record->write($forceInsert, $forceWrite, $snap_priority)) {
-						return false;
-					}
-				}
-			}
+		try {
+			$this->writeToDB($forceInsert, $forceWrite, $snap_priority);
 			return true;
-		} else if($this->dataobject->hasChanged()) {
-			return $this->dataobject->write();
+		} catch(Exception $e) {
+			log_exception($e);
+			return false;
 		}
 	}
 
 	/**
-	 * write to DB with Exceptions.
-	 *
-	 *@name write
-	 *@access public
-	 *@param bool - to force insert
-	 *@param bool - to force write
-	 *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
+	 * write to DB
+	 * @param bool $forceInsert
+	 * @param bool $forceWrite
+	 * @param int $snap_priority
+	 * @throws Exception
 	 */
 	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 		$writtenIDs = array();
 		if(count($this->data) > 0) {
+			/** @var DataObject $record */
 			foreach($this->data as $record) {
 				if(is_object($record) && (!isset($writtenIDs[$record->id]) || $record->id == 0)) {
 					$writtenIDs[$record->id] = true;
-					if(!$record->writeToDB($forceInsert, $forceWrite, $snap_priority)) {
-						return false;
-					}
+					$record->writeToDB($forceInsert, $forceWrite, $snap_priority);
 				}
 			}
-			return true;
 		} else if($this->dataobject->hasChanged()) {
-			return $this->dataobject->writeToDB();
+			$this->dataobject->writeToDB();
 		}
 	}
 
