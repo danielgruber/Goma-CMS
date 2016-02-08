@@ -58,8 +58,9 @@ class TabSet extends FieldSet
 
     /**
      * @param FormFieldResponse $info
+     * @param bool $notifyField
      */
-    public function addRenderData($info)
+    public function addRenderData($info, $notifyField = true)
     {
         foreach($info->getChildren() as $child) {
             /** @var FormFieldResponse $child */
@@ -68,9 +69,13 @@ class TabSet extends FieldSet
             }
         }
 
-        parent::addRenderData($info);
+        parent::addRenderData($info, false);
 
         $this->renderTabList($info);
+
+        if($notifyField) {
+            $this->callExtending("afterRenderFormResponse", $info);
+        }
     }
 
     /**

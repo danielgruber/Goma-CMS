@@ -1,14 +1,13 @@
-<?php
-/**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 21.12.2011
-  * $Version - 1.1
- */
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
+<?php defined("IN_GOMA") OR die();
 
+/**
+ * Disables FormFields and/or actions.
+ *
+ * @package Goma\Form
+ * @author Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @version 2.4.2
+ */
 class FormDisabler extends FormDecorator {
 	/**
 	 * if form is disabled
@@ -40,6 +39,7 @@ class FormDisabler extends FormDecorator {
 	*/
 	public function beforeRender() {
 		if($this->disabled) {
+			/** @var FormField $field */
 			foreach($this->getOwner()->fields as $field) {
 				if($this->actions !== true || !is_a($field, "FormAction"))
 					$field->disable();

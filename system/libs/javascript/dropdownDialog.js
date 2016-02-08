@@ -607,23 +607,23 @@ self.dropdownDialogs = [];
 				// run code
 				try {
 					goma.ui.loadResources(j).done(function(){
-						var t = j.getResponseHeader("content-type");
+						var content_type = j.getResponseHeader("content-type");
 
 						// we have to set it new, because of scoping issues
-						var h = j.responseText;
+						var content = j.responseText;
 
 						// if it is json-data
-						if(t.indexOf("text/x-json") != -1) {
+						if(content_type.indexOf("text/x-json") != -1) {
 							try {
-								var data = $.parseJSON(h);
-								h = data.content;
+								var data = $.parseJSON(content);
+								content = data.content;
 								if(data.position !== undefined && data.position !== null) {
 									that.position = data.position;
 								}
 								if(data.closeButton !== undefined && data.closeButton !== null) {
 									that.closeButton = data.closeButton;
 								}
-								that.setContent(h);
+								that.setContent(content);
 
 								if(typeof data.exec !== "undefined") {
 
@@ -649,20 +649,20 @@ self.dropdownDialogs = [];
 							}
 
 							// if it is javascript
-						} else if(t === "text/javascript") {
+						} else if(content_type === "text/javascript") {
 
 							// execution for IE and all other Browsers
 							var method;
 							if (window.execScript) {
-								window.execScript('method = ' + 'function(' + h + ')', ''); // execScript doesn’t return anything
+								window.execScript('method = ' + 'function(' + content + ')', ''); // execScript doesn’t return anything
 							} else {
-								method = eval('(function(){' + h + '});');
+								method = eval('(function(){' + content + '});');
 							}
 							method.call(this);
 
 						} else {
 							// html just must be set to Dialog
-							that.setContent(h);
+							that.setContent(content);
 						}
 
 						RunAjaxResources(j);

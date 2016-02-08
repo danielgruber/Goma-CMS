@@ -16,6 +16,11 @@ require_once (FRAMEWORK_ROOT . "form/Hiddenfield.php");
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 2.4.2
+ *
+ * @method disable
+ * @method reenable
+ * @method enableActions
+ * @method disableActions
  */
 class Form extends gObject {
 

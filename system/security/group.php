@@ -178,14 +178,16 @@ class Group extends DataObject implements HistoryData, PermProvider
      * unsets the default group if this is now default.
      *
      * @access public
+     * @param ModelWriter $modelWriter
+     * @throws MySQLException
      */
-    public function onAfterWrite()
+    public function onAfterWrite($modelWriter)
     {
         if ($this->usergroup == 1) {
             DataObject::update("group", array("usergroup" => 0), "recordid != " . $this->recordid . "");
         }
 
-        parent::onAfterWrite();
+        parent::onAfterWrite($modelWriter);
     }
 
     /**

@@ -85,6 +85,7 @@ class HiddenField extends FormField
 
         $this->setValue();
 
+        $this->input->removeAttr("disabled");
         $this->container->append($this->input);
         $this->container->addClass("hidden");
         $this->callExtending("afterField");

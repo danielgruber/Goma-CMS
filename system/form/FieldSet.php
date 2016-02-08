@@ -37,6 +37,18 @@ class FieldSet extends FormField
     public $fields = array();
 
     /**
+     * creates field.
+     * @param string $name
+     * @param array $fields
+     * @param string $label
+     * @param null $parent
+     * @return static
+     */
+    public static function create($name, $fields, $label = null, $parent = null) {
+        return new static($name, $fields, $label, $parent);
+    }
+
+    /**
      * @name __construct
      * @param string - name
      * @param string - title
@@ -116,11 +128,13 @@ class FieldSet extends FormField
     }
 
     /**
+     *
      * @param FormFieldResponse $info
+     * @param bool $notifyField
      */
-    public function addRenderData($info)
+    public function addRenderData($info, $notifyField = true)
     {
-        parent::addRenderData($info);
+        parent::addRenderData($info, false);
 
         /** @var FormFieldResponse $child */
         foreach($info->getChildren() as $child) {
@@ -128,6 +142,10 @@ class FieldSet extends FormField
                 $child->getField()->addRenderData($child);
                 $info->getRenderedField()->append($child->getRenderedField());
             }
+        }
+
+        if($notifyField) {
+            $this->callExtending("afterRenderFormResponse", $info);
         }
     }
 

@@ -262,14 +262,17 @@ class FormField extends RequestHandler {
 
     /**
      * @param FormFieldResponse $info
+     * @param bool $notifyField
      */
-    public function addRenderData($info) {
+    public function addRenderData($info, $notifyField = true) {
         $this->form()->registerRendered($info->getName());
 
         $info-> setRenderedField($this->field())
             -> setJs($this->js());
 
-        $this->callExtending("afterRenderFormResponse", $info);
+        if($notifyField) {
+            $this->callExtending("afterRenderFormResponse", $info);
+        }
     }
 
     /**
