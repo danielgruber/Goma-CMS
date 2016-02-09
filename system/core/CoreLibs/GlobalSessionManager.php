@@ -91,8 +91,7 @@ class GlobalSessionManager {
      * @param string|null $host
      * @return string
      */
-    public static function getCookieHost($host = null)
-    {
+    public static function getCookieHost($host = null) {
         // set correct host, avoid problems with localhost
         if(!isset($host)) $host = $_SERVER["HTTP_HOST"];
 

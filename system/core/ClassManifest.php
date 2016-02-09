@@ -103,7 +103,7 @@ class ClassManifest {
 	protected static function generateAlias($class) {
 		if(isset(self::$class_alias[$class])) {
 			if(DEV_MODE) {
-				// we log this, because it's not good, aliases are just for deprecation
+				// we log this, because it's not good, aliases are just for deprecation.
 				logging("Making alias " . self::$class_alias[$class] . " of " . $class . "");
 			}
 

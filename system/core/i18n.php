@@ -17,7 +17,7 @@ StaticsManager::addSaveVar("i18n", "defaultLanguagefiles");
  * @package		Goma\System\Core
  * @version		1.4.5
  */
-class i18n extends Object {
+class i18n extends gObject {
 	/**
 	 * files to load
 	 */
@@ -71,22 +71,19 @@ class i18n extends Object {
 	 *
 	 *@param string - to init special lang
 	 */
-	public static function Init($language = null) {
+	public static function Init($language) {
+
+		if(!self::LangExists($language)) {
+			throw new InvalidArgumentException("Language not found.");
+		}
+
+		StaticsManager::setSaveVars("i18n");
 
 		if(PROFILE)
 			Profiler::mark("i18n::Init");
-		StaticsManager::setSaveVars("i18n");
-
-
-		// set correct host, avoid problems with localhost
-		$host = $_SERVER["HTTP_HOST"];
-		if(!preg_match('/^[0-9]+/', $host) && $host != "localhost" && strpos($host, ".") !== false)
-			$host = "." . $host;
 
 		// check lang selection
-		Core::$lang = self::AutoSelectLang($language);
-		GlobalSessionManager::globalSession()->set("lang", Core::$lang);
-		setCookie('g_lang', Core::$lang, TIME + 365 * 24 * 60 * 60, '/', $host);
+		Core::$lang = $language;
 
 		global $lang;
 		$lang = array();
@@ -152,6 +149,22 @@ class i18n extends Object {
 	}
 
 	/**
+	 * sets session-language.
+	 * @param null|string $lang
+	 * @return null|string
+	 */
+	public static function SetSessionLang($lang = null) {
+		if(!isset($lang) || !self::LangExists($lang)) {
+			$lang = self::AutoSelectLang();
+		}
+
+		GlobalSessionManager::globalSession()->set("lang", $lang);
+		setCookie('g_lang', $lang, TIME + 365 * 24 * 60 * 60, '/', GlobalSessionManager::getCookieHost());
+
+		return $lang;
+	}
+
+	/**
 	 * load template language.
 	 */
 	public static function loadTPLLang($tpl) {
@@ -167,6 +180,7 @@ class i18n extends Object {
 	 */
 	public static function loadExpansionLang($file, $name, &$language) {
 		require ($file);
+		/** @var array $lang */
 		foreach($lang as $key => $val) {
 			$language[strtoupper($name . "." . $key)] = $val;
 		}
@@ -220,7 +234,8 @@ class i18n extends Object {
 	/**
 	 * returns contents of info.plist of current or given language
 	 *
-	 *@param string - language
+	 * @param string - language
+	 * @return bool|mixed
 	 */
 	public static function getLangInfo($lang = null) {
 		if(!isset($lang))
@@ -244,11 +259,7 @@ class i18n extends Object {
 	 * @name AutoSelectLang
 	 * @return string
 	 */
-	public static function AutoSelectLang($code) {
-		if(isset($code) && self::LangExists($code)) {
-			return $code;
-		}
-
+	public static function AutoSelectLang() {
 		// if a user want to have another language
 		if(isset($_GET['setlang']) && !empty($_GET["setlang"])) {
 			if(self::LangExists($_GET["setlang"]))
