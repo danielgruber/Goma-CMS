@@ -143,23 +143,23 @@ class ImageUploads extends Uploads {
      */
     public function getIcon($size = 128, $retina = false) {
         $ext = substr($this->filename, strrpos($this->filename, "."));
-        switch ($size) {
-            case 16:
-            case 32:
-            case 64:
-                if ($this->width >= $size) {
-                    if ($retina && $this->width >= $size * 2) {
-                        $icon = $this->path . "/setWidth/" . ($size * 2) . $ext;
-                    } else {
-                        $icon = $this->path . "/setWidth/" . $size . $ext;
-                    }
-                } else {
+        if ($this->width() >= $size) {
+            if ($retina && $this->width() >= $size * 2) {
+                $icon = $this->path;
+            } else {
+                $icon = $this->path . "/setWidth/" . $size . $ext;
+            }
+        } else {
+            switch ($size) {
+                case 16:
+                case 32:
+                case 64:
                     if ($retina) {
                         return "images/icons/goma" . $size . "/image@2x.png";
                     }
                     return "images/icons/goma" . $size . "/image.png";
-                }
-                break;
+                    break;
+            }
         }
 
         if (isset($icon)) {

@@ -120,8 +120,9 @@ class FileUpload extends FormField {
 				"id" => $this->ID() . "_upload"
 			), array($link = new HTMLNode("a", array("target" => "_blank"), array(
 					new HTMLNode("div", array("class" => "img"), array(new HTMLNode("img", array(
-							"src" => $this->value->getIcon(),
-							"alt" => convert::raw2text($this->value->filename)
+							"src" 			=> $this->value->getIcon(128),
+							"data-retina" 	=> $this->value->getIcon(128, true),
+							"alt" 			=> convert::raw2text($this->value->filename)
 						)))),
 					new HTMLNode("span", array(), convert::raw2text($this->value->filename)),
 				)))),
@@ -143,9 +144,6 @@ class FileUpload extends FormField {
 
 	/**
 	 * gets the current value
-	 *
-	 * @name 	getValue
-	 * @access 	public
 	 */
 	public function getValue() {
 		parent::getValue();
@@ -230,6 +228,8 @@ class FileUpload extends FormField {
 					"icon16" => $response->getIcon(16),
 					"path" => $response->path,
 					"id" => $response->id,
+					"icon128" => $response->getIcon(128),
+					"icon128@2x" => $response->getIcon(128, true),
 					"icon" => $response->getIcon()
 				);
 
@@ -293,6 +293,8 @@ class FileUpload extends FormField {
 					"realpath" => $response->fieldGet("path"),
 					"icon16" => $response->getIcon(16),
 					"icon" => $response->getIcon(),
+					"icon128" => $response->getIcon(128),
+					"icon128@2x" => $response->getIcon(128, true),
 					"path" => $response->path,
 					"id" => $response->id
 				);
@@ -330,9 +332,8 @@ class FileUpload extends FormField {
 	}
 
 	/**
-	 * sets the right enctype for the form
-	 *@name field
-	 *@access public
+	 * sets the right enctype for the form.
+	 * renders div.
 	 */
 	public function field() {
 		if(PROFILE)
@@ -385,10 +386,7 @@ class FileUpload extends FormField {
 
 	/**
 	 * handles the upload
-	 *
-	 *@name handleUpload
-	 *@access public
-	 */
+	*/
 	public function handleUpload($upload) {
 		if(!isset($upload["name"])) {
 			return "No Upload defined.";
@@ -427,9 +425,9 @@ class FileUpload extends FormField {
 	}
 
 	/**
-	 * the result is a filename
-	 *@name result
-	 *@access public
+	 * the result is a Uploads-Object
+	 *
+	 * @return Uploads
 	 */
 	public function result() {
 		$this->getValue();

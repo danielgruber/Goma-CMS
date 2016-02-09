@@ -98,7 +98,15 @@ function FileUpload(formelement, url, size, types) {
 				if(data.status == 0) {
 					$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
 				} else {
-					$($this.element).find("img").attr("src", data.file.icon);
+					if(data.file["icon128"]) {
+						if(window.devicePixelRatio > 1.5 && data.file["icon128@2x"]) {
+							$($this.element).find("img").attr("src", data.file["icon128@2x"]);
+						} else {
+							$($this.element).find("img").attr("src", data.file.icon128);
+						}
+					} else {
+						$($this.element).find("img").attr("src", data.file.icon);
+					}
 					if(data.file.path)
 						$($this.element).find("a").attr("href", data.file.path);
 					else
@@ -110,7 +118,7 @@ function FileUpload(formelement, url, size, types) {
 				if(this.isAbort) {
 				
 				} else {
-					$this.infoZone.html('<div class="error">An Error occured.</div>');
+					$this.infoZone.html('<div class="error">An Error occured. '+err+'</div>');
 				}
 			}
 		},

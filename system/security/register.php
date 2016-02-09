@@ -8,10 +8,6 @@
 
 defined('IN_GOMA') OR die();
 
-StaticsManager::AddSaveVar(RegisterExtension::ID, "enabled");
-StaticsManager::AddSaveVar(RegisterExtension::ID, "validateMail");
-StaticsManager::AddSaveVar(RegisterExtension::ID, "registerCode");
-
 /**
  * extends the user-class with a registration-form.
  *
@@ -302,4 +298,7 @@ class RegisterExtension extends ControllerExtension
 	}
 }
 
-gObject::extend("ProfileController", "RegisterExtension");
+gObject::extend("ProfileController", RegisterExtension::ID);
+StaticsManager::AddSaveVar(RegisterExtension::ID, "enabled");
+StaticsManager::AddSaveVar(RegisterExtension::ID, "validateMail");
+StaticsManager::AddSaveVar(RegisterExtension::ID, "registerCode");
