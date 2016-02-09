@@ -178,6 +178,7 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 		$this->assertNotEqual($d->getInstance("TestObjectExtension")->getOwner(), $o);
 
 		$d->getInstance("TestObjectExtension")->setOwner(new StdClass());
+		/** @var gObject $data */
 		$data = unserialize(serialize($d));
 
 		$this->assertIsA($data->getInstance("TestObjectExtension"), "TestObjectExtension");

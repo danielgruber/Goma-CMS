@@ -124,9 +124,9 @@ class SessionManager implements ISessionManager {
                 $data = $_SESSION[ROOT][$key];
             }
 
-            if(is_object($data) && method_exists($data, "__wakeup")) {
+            /*if(is_object($data) && method_exists($data, "__wakeup")) {
                 $data->__wakeup();
-            }
+            }*/
         }
 
         return $data;

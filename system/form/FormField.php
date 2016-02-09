@@ -430,7 +430,7 @@ class FormField extends RequestHandler {
      */
     public function PostName()
     {
-        return isset($this->overridePostName) ? $this->overridePostName : $this->name;
+        return isset($this->overridePostName) ? strtolower($this->overridePostName) : strtolower($this->name);
     }
 
     /**

@@ -24,7 +24,7 @@ abstract class gObject
     /**
      * caches
      */
-    static private $method_cache = array(), $cache_extensions = array();
+    static private $method_cache = array(), $cache_extensions = array(), $wakeUpCache = array();
 
     /**
      * Extension methods.
@@ -272,8 +272,8 @@ abstract class gObject
             $arguments = $info[1];
 
             if (ClassInfo::hasInterface($name, "ExtensionModel")) {
-                if (StaticsManager::getStatic($name, 'extra_methods')) {
-                    foreach (StaticsManager::getStatic($name, 'extra_methods') as $method) {
+                if ($methods = StaticsManager::getStatic($name, 'extra_methods')) {
+                    foreach ($methods as $method) {
                         self::$extra_methods[$obj][strtolower($method)] = array("EXT:" . $name, $method);
                     }
                 }
@@ -514,6 +514,7 @@ abstract class gObject
 
         // cache for instances. No clone here, cause an instance can used and customised.
         if (isset($this->ext_instances[$extensionClassName])) {
+            $this->ext_instances[$extensionClassName]->setOwner($this);
             return $this->ext_instances[$extensionClassName];
         }
 
@@ -625,18 +626,26 @@ abstract class gObject
 
     public function __wakeup()
     {
-        foreach($this->ext_instances as $instance) {
-            /** @var Extension $instance */
-            $instance->setOwner($this);
-            $instance->__wakeup();
+        /*if($this->ext_instances) {
+            foreach ($this->ext_instances as $instance) {*/
+                /** @var Extension $instance */
+                /*$instance->setOwner($this);
+                $instance->__wakeup();
+            }
+        }*/
+
+        if(!isset(self::$wakeUpCache[$this->classname])) {
+            StaticsManager::setSaveVars($this);
+            self::$wakeUpCache[$this->classname] = true;
         }
-        StaticsManager::setSaveVars($this);
     }
 
     public function __clone() {
-        foreach($this->ext_instances as $key => $instance) {
-            $this->ext_instances[$key] = clone $instance;
-            $this->ext_instances[$key]->setOwner($this);
+        if($this->ext_instances) {
+            foreach ($this->ext_instances as $key => $instance) {
+                $this->ext_instances[$key] = clone $instance;
+                $this->ext_instances[$key]->setOwner($this);
+            }
         }
     }
 

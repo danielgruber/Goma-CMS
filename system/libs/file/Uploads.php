@@ -25,6 +25,9 @@ loadlang("files");
  * last modified: 25.08.2015
  */
 class Uploads extends DataObject {
+
+    const ID = "Uploads";
+
     /**
      * max-filesize for md5
      *

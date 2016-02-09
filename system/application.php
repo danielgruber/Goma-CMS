@@ -15,10 +15,10 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_COMPILE_ERROR | E_NOTICE);
 /*
  * first check if we use a good version ;)
  *
- * PHP 5.3 is necessary
+ * PHP 5.4 is necessary
  */
 
-if (version_compare(phpversion(), "5.3.0", "<")) {
+if (version_compare(phpversion(), "5.4.0", "<")) {
 	header("HTTP/1.1 500 Server Error");
 	echo file_get_contents(dirname(__FILE__) . "/templates/framework/php5.html");
 	die();
@@ -110,8 +110,8 @@ define('STATUS_MAINTANANCE', 2);
 define('STATUS_DISABLED', 0);
 
 // version
-define("GOMA_VERSION", "2.0RC4");
-define("BUILD_VERSION", "119");
+define("GOMA_VERSION", "2.0RC5");
+define("BUILD_VERSION", "120");
 
 // fix for debug_backtrace
 defined("DEBUG_BACKTRACE_PROVIDE_OBJECT") OR define("DEBUG_BACKTRACE_PROVIDE_OBJECT", true);

@@ -1348,8 +1348,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $name = $this->classname . "_" . $this->versionid . "_" . $this->id;
         }
 
-        $controller = isset($controller) ? $controller : $this->controller;
-
         $form = new Form($controller, $name, array(), array(), array(), $request, $this);
 
         // default submission

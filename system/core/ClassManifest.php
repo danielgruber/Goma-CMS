@@ -188,22 +188,25 @@ class ClassManifest {
      * @return string
      */
     public static function resolveClassName($class) {
+        if(is_object($class)) {
+            if(isset($class->classname)) {
+                return $class->classname;
+            }
 
-		if(is_object($class)) {
-			$class = get_class($class);
-		}
+            $class = strtolower(get_class($class));
+        } else {
+            $class = strtolower(trim($class));
+        }
 
-		$class = trim(strtolower($class));
+        if(substr($class, -1) == "\\") {
+            $class = substr($class, 0, -1);
+        }
 
-		if(substr($class, -1) == "\\") {
-			$class = substr($class, 0, -1);
-		}
+        if(substr($class, 0, 1) == "\\") {
+            $class = substr($class, 1);
+        }
 
-		if(substr($class, 0, 1) == "\\") {
-			$class = substr($class, 1);
-		}
-
-		return $class;
+        return $class;
 	}
 
     /**

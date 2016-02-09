@@ -1164,7 +1164,7 @@ class Form extends gObject {
 	public function __wakeup() {
 		parent::__wakeup();
 		
-		foreach($this->fields as $f) {
+		/*foreach($this->fields as $f) {
 			if(is_object($f)) {
 				$f->__wakeup();
 			}
@@ -1187,6 +1187,6 @@ class Form extends gObject {
 			if(is_object($this->controller)) {
 				$this->controller->__wakeup();
 			}
-		}
+		}*/
 	}
 }

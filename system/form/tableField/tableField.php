@@ -596,8 +596,8 @@ class tableField extends FormField {
     public function __wakeup() {
 		parent::__wakeup();
 		
-		if(is_object($this->data) && method_exists($this->data, "__wakeup")) {
+		/*if(is_object($this->data) && method_exists($this->data, "__wakeup")) {
 			$this->data->__wakeup();
-		}
+		}*/
 	}
 }

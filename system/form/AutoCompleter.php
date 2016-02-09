@@ -41,7 +41,8 @@ class AutoCompleterField extends ControllerExtension {
 			Resources::addJS('$(function(){
 				$("#' . $this->owner->ID() . '").autocomplete({
 					minLength: 1,
-					source: "' . $this->owner->externalURL() . '/autocomplete_search"
+					source: "' . $this->owner->externalURL() . '/autocomplete_search",
+					delay: 50
 				});
 			});');
 		}
@@ -56,14 +57,16 @@ class AutoCompleterField extends ControllerExtension {
 		if(isset($_GET["term"])) {
 			$arr = array();
 			$filtered = $this->data->filter(array($this->owner->name => array(
-					"LIKE",
-					"%" . trim($_GET["term"]) . "%"
-				)))->groupBy($this->owner->name);
+				"LIKE",
+				trim($_GET["term"]) . "%"
+			)))->groupBy($this->owner->name);
+			/** @var DataObjectSet $record */
 			foreach($filtered as $record) {
+				$record->limit(1);
 				$arr[] = array(
-					"id" => $record->id,
-					"label" => convert::raw2text($record[$this->owner->name]),
-					"value" => $record[$this->owner->name]
+					"id" => $record->first()->id,
+					"label" => $record->first()->{$this->owner->name},
+					"value" => $record->first()->{$this->owner->name}
 				);
 			}
 
