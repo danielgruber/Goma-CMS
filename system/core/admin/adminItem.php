@@ -96,13 +96,14 @@ class adminItem extends AdminController implements PermProvider {
 	{
 			return true;
 	}
-	
+
 	/**
 	 * gives back the url of this admin-item
 	 *
-	 *@name url
-	 *@access public
-	*/
+	 * @name url
+	 * @access public
+	 * @return string
+	 */
 	public function url() {
 		return $this->originalNamespace . "/";
 	}
@@ -399,7 +400,6 @@ class adminItem extends AdminController implements PermProvider {
 	 * @return bool|Controller|null
 	 */
 	public function getControllerInst() {
-
 		if(!isset($this->controllerInst)) {
 
 			// preserve controller

@@ -258,11 +258,10 @@ class adminController extends Controller
      * loads content and then loads page
      *
      * @name index
+     * @return bool|string
      */
     public function index()
     {
-
-
         if (Permission::check("ADMIN")) {
 
             if (isset($_GET["flush"])) {

@@ -1949,17 +1949,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
     }
 
-
-    /**
-     * generates the form via controller
-     *
-     *@name form
-     *@access public
-     */
-    public function form() {
-        return $this->controller()->form(null, $this);
-    }
-
     /**
      * gets the class of the current record
      *@name getRecordClass

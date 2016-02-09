@@ -33,11 +33,16 @@ class settingsAdmin extends adminItem
 		return "admin/history/newsettings";
 	}
 
+	public function index() {
+		$this->tplVars["form"] = $this->Form();
+
+		return parent::index();
+	}
+
 	/**
 	 * generates the form
 	 */
 	public function Form() {
-
 		$data = DataObject::get("newsettings", array("id" => 1))->first();
 		return parent::Form(null, $data);
 	}

@@ -29,6 +29,10 @@ class DataObjectFormGenerationTest extends GomaUnitTest implements TestAble {
 		$o = new TestDataObjectForForm();
 		$form = $o->generateForm("test", false, false, null, $controller);
 
+		$this->assertThrows(function() use ($o) {
+			$o->generateForm();
+		}, "InvalidArgumentException");
+
 		$this->assertEqual($form->name(), "test");
 		$this->assertEqual($form->model, $o);
 		$this->assertEqual($form->controller, $controller);

@@ -954,11 +954,15 @@ class DataObjectSet extends DataSet {
 	/**
 	 * generates a form
 	 *
-	 *@name form
-	 *@access public
-	 *@param string - name
-	 *@param bool - edit-form
-	 *@param bool - disabled
+	 * @name form
+	 * @access public
+	 * @param string $name
+	 * @param bool $edit
+	 * @param bool $disabled
+	 * @param Request $request
+	 * @param Controller $controller
+	 * @param string|null|array|Closure $submission
+	 * @return Form
 	 */
 	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 
@@ -966,8 +970,6 @@ class DataObjectSet extends DataSet {
 		if(!isset($name)) {
 			$name = $this->dataobject->classname . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
 		}
-
-		$controller = isset($controller) ? $controller : $this->controller;
 
 		$form = new Form($controller, $name, array(), array(), array(), $request, $this->dataobject);
 		if($disabled)
@@ -1005,27 +1007,6 @@ class DataObjectSet extends DataSet {
 
 		return $form;
 	}
-
-	/**
-	 * generates the form via controller
-	 *
-	 *@name form
-	 *@access public
-	 */
-	public function form() {
-		return $this->controller()->form(null, $this);
-	}
-
-	/**
-	 * generates a form
-	 *
-	 *@name renderForm
-	 *@access public
-	 */
-	public function renderForm() {
-		return $this->controller()->renderForm(null, $this);
-	}
-
 
 	public function __cancall($offset) {
 		$loweroffset = trim(strtolower($offset));
