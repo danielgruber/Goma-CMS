@@ -300,7 +300,7 @@ class Core extends gObject {
 	 * adds a callback to a hook
 	 *
 	 * @param string $name
-	 * @param Closure $callback
+	 * @param Closure|array $callback
 	 */
 	public static function addToHook($name, $callback) {
 		if(!isset(self::$hooks[strtolower($name)]) || !in_array($callback, self::$hooks[strtolower($name)])) {

@@ -8,6 +8,10 @@
 
 defined('IN_GOMA') OR die();
 
+StaticsManager::AddSaveVar(RegisterExtension::ID, "enabled");
+StaticsManager::AddSaveVar(RegisterExtension::ID, "validateMail");
+StaticsManager::AddSaveVar(RegisterExtension::ID, "registerCode");
+
 /**
  * extends the user-class with a registration-form.
  *
@@ -19,6 +23,7 @@ defined('IN_GOMA') OR die();
  */
 class RegisterExtension extends ControllerExtension
 {
+	const ID = "RegisterExtension";
 	/**
 	 * a bool which indicates whether registration is enabled or disabled
 	 *

@@ -855,7 +855,7 @@ if (goma.ui === undefined) {
 		};
 	})(jQuery);
 
-	var gloader = {load: goma.ui.load};
+	var gloader = {load: goma.ui.load, loadAsync: goma.ui.loadAsync};
 }
 
 if (goma.help === undefined) {

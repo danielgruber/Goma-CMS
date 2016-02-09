@@ -31,13 +31,14 @@ class HistoryController extends Controller {
 		"compareVersion"	=> "->canCompareVersion",
 		"restoreVersion"	=> "->canRestoreVersion"
 	);
-	
+
 	/**
 	 * renders the history for given filter
 	 *
-	 *@name renderHistory
-	 *@access public
-	*/
+	 * @name renderHistory
+	 * @access public
+	 * @return bool|string
+	 */
 	public static function renderHistory($filter, $namespace = null) {
 		if(isset($filter["dbobject"])) {
 			$dbObjectFilter = array();

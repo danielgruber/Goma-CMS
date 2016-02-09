@@ -9,8 +9,9 @@
 defined("IN_GOMA") OR die();
 
 
-StaticsManager::AddSaveVar("Resources", "names");
-StaticsManager::AddSaveVar("Resources", "scanFolders");
+StaticsManager::AddSaveVar(Resources::ID, "names");
+StaticsManager::AddSaveVar(Resources::ID, "scanFolders");
+StaticsManager::AddSaveVar(Resources::ID, "gzip");
 
 /**
  * This class manages all Resources like CSS and JS-Files in a Goma-Page.
@@ -19,6 +20,8 @@ StaticsManager::AddSaveVar("Resources", "scanFolders");
  * @version		1.5.4
  */
 class Resources extends gObject {
+
+	const ID = "Resources";
 
 	/**
 	 * version of this class

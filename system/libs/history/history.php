@@ -1,6 +1,8 @@
 <?php
 defined("IN_GOMA") OR die();
 
+StaticsManager::addSaveVar(History::ID, "storeHistoryForDays");
+
 /**
  * Model for History.
  *
@@ -16,6 +18,8 @@ defined("IN_GOMA") OR die();
  */
 
 class History extends DataObject {
+
+	const ID = "History";
 
 	/**
 	 * store history for this count of days.

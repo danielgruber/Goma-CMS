@@ -9,9 +9,12 @@
   * @Version 	1.2.9
 */
 
-Core::addToHook("loadedClassRegisterExtension", array("settingsController", "setRegisterVars"));
+Core::addToHook("loadedClassRegisterExtension", array(SettingsController::ID, "setRegisterVars"));
+Core::addCMSVarCallback(array(SettingsController::ID, "get"));
 
-class SettingsController extends Controller {
+class SettingsController extends gObject {
+	const ID = "SettingsController";
+
 	/**
 	 * this is a cache of the dataobject of settings
 	 *
@@ -27,6 +30,8 @@ class SettingsController extends Controller {
 	 * @access 	public
 	*/
 	public static function PreInit() {
+		if(PROFILE) Profiler::mark("settings");
+
 		$cacher = new Cacher("settings");
 		if($cacher->checkValid()) {
 			self::$settingsCache = new newSettings($cacher->getData());
@@ -34,6 +39,8 @@ class SettingsController extends Controller {
 			self::$settingsCache = DataObject::get("newsettings", array("id" => 1))->first();
 			$cacher->write(self::$settingsCache->toArray(), 3600);
 		}
+
+		if(PROFILE) Profiler::unmark("settings");
 	}
 
 	/**
@@ -46,7 +53,11 @@ class SettingsController extends Controller {
 	 */
 	public static function get($name)
 	{
-		return (isset(self::$settingsCache) && self::$settingsCache->offsetExists($name)) ? self::$settingsCache->$name : null;
+		if(!isset(self::$settingsCache)) {
+			self::PreInit();
+		}
+
+		return self::$settingsCache->offsetExists($name) ? self::$settingsCache->$name : null;
 	}
 	
 	/**
@@ -58,5 +69,3 @@ class SettingsController extends Controller {
 		RegisterExtension::$registerCode = settingsController::get("register");
 	}
 }
-
-Core::addCMSVarCallback(array("settingsController", "get"));

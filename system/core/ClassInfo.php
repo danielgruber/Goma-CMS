@@ -16,6 +16,7 @@ define("CLASS_INFO_DATAFILE", ".class_info.goma.php");
  * @version		3.8.1
  */
 class ClassInfo extends gObject {
+	const GENERATE_CLASS_INFO_KEY = "GENERATE_CLASS_INFO";
 	/**
 	 * version of class-info
 	 *
@@ -26,8 +27,7 @@ class ClassInfo extends gObject {
 	 * defines when class-info expires
 	 *
 	 */
-	public static $expiringTime = 604800;
-	// 7 days by default
+	public static $expiringTime = 604800; // 7 days by default
 
 	/**
 	 * classinfo
@@ -80,6 +80,13 @@ class ClassInfo extends gObject {
 	 * list of all known interfaces.
 	*/
 	public static $interfaces = array();
+
+	/**
+	 * information if class-info has been regenerated in this request.
+	 */
+	public static function ClasssInfoHasBeenRegenerated() {
+		return defined(self::GENERATE_CLASS_INFO_KEY);
+	}
 
     /**
      * registers a hook on class info loaded
@@ -500,7 +507,7 @@ class ClassInfo extends gObject {
 		if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW))) {
 			if(PROFILE)
 				Profiler::mark("generate_class_info");
-			defined("GENERATE_CLASS_INFO") OR define('GENERATE_CLASS_INFO', true);
+			defined(self::GENERATE_CLASS_INFO_KEY) OR define(self::GENERATE_CLASS_INFO_KEY, true);
 			logging('Regenerating Class-Info');
 
 			// check for permissions
