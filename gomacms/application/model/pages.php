@@ -595,7 +595,9 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *
      *@name onBeforeWrite
      */
-    public function onBeforeWrite() {
+    public function onBeforeWrite($modelWriter) {
+
+        parent::onBeforeWrite($modelWriter);
 
         logging("Write record " . $this->title . ".");
 

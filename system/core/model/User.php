@@ -308,9 +308,10 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 	/**
 	 * nickname is always lowercase
+	 * @param ModelWriter $modelWriter
 	 */
-	public function onBeforeWrite() {
-		parent::onBeforeWrite();
+	public function onBeforeWrite($modelWriter) {
+		parent::onBeforeWrite($modelWriter);
 
 		$this->nickname = strtolower($this->nickname);
 	}

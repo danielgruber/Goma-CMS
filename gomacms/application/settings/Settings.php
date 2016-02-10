@@ -70,11 +70,13 @@ class Newsettings extends DataObject implements HistoryData {
 			"gzip"				=> lang("gzip", "G-Zip")
 		);
 	}
-	
+
 	/**
 	 * we discard the cache before writing.
-	*/
-	public function onBeforeWrite() {
+	 * @param ModelWriter $modelWriter
+	 */
+	public function onBeforeWrite($modelWriter) {
+		parent::onBeforeWrite($modelWriter);
 		$cacher = new Cacher("settings");
 		$cacher->delete();
 	}

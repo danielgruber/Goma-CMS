@@ -402,7 +402,9 @@ class Uploads extends DataObject {
      *@name onBeforeWrite
      *@access public
      */
-    public function onBeforeWrite() {
+    public function onBeforeWrite($modelWriter) {
+        parent::onBeforeWrite($modelWriter);
+
         $CacheForPath = new Cacher("file_" . $this->fieldGet("path"));
         $CacheForPath->delete();
 

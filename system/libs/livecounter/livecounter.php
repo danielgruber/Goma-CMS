@@ -87,7 +87,7 @@ class livecounter extends DataObject
 	/**
 	 * bot-list
 	*/
-	public static $bot_list = "(googlebot|seoscanners|curl|wget|CloudFlare|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot|jobboerse\.com|DotBot)";
+	public static $bot_list = "(googlebot|seoscanners|Qwantify|curl|wget|CloudFlare|truebot|msnbot|CareerBot|nagios|SISTRIX|Coda|SeznamBot|AdvBot|crawl|MirrorDetector|AhrefsBot|MJ12bot|lb-spider|exabot|bingbot|yahoo|baiduspider|Ezooms|facebookexternalhit|360spider|80legs\.com|UptimeRobot|YandexBot|unknown|python\-urllib|applebot|jobboerse\.com|DotBot)";
 	
 	/**
 	 * some bots use the referer.
@@ -643,10 +643,11 @@ class livecounter extends DataObject
 		$deleteTimeout = NOW - SESSION_TIMEOUT;
 		// remove old
 		$sqlDeleteData = "DELETE FROM ".DB_PREFIX ."statistics_live WHERE last_modified < ".$deleteTimeout;
+		$sqlDeleteStateData = "DELETE t FROM ".DB_PREFIX ."statistics_live_state t WHERE NOT EXISTS ( SELECT * FROM ".DB_PREFIX ."statistics_live l WHERE l.recordid = t.id)";
 			
 		SQL::Query($sqlDeleteData);
-		
-		// TODO: Delete State data
+		SQL::Query($sqlDeleteStateData);
+
 		$e = microtime(true);
 		$timeAfterDelete = $e - $start;
 		logging("migration: delete done after " .  $timeAfterDelete . " seconds.");

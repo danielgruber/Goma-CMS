@@ -317,7 +317,7 @@ class Permission extends DataObject
      * @name onBeforeWrite
      * @access public
      */
-    public function onBeforeWrite()
+    public function onBeforeWrite($modelWriter)
     {
         if ($this->parentid == $this->id)
             $this->parentid = 0;
@@ -338,7 +338,7 @@ class Permission extends DataObject
             }
         }
 
-        parent::onBeforeWrite();
+        parent::onBeforeWrite($modelWriter);
     }
 
     /**
