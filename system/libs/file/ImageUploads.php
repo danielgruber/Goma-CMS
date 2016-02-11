@@ -147,7 +147,7 @@ class ImageUploads extends Uploads {
             if ($retina && $this->width() >= $size * 2) {
                 $icon = $this->path;
             } else {
-                $icon = $this->path . "/setWidth/" . $size . $ext;
+                $icon = $this->path . "/setSize/" . $size . "/" . $size . $ext;
             }
         } else {
             switch ($size) {

@@ -204,7 +204,7 @@
 		background-size: 1em 1em;
 	}
 
-	.FileUpload_left .progressbar span {
+	.progressbar span {
 		position: absolute;
 		top: 0.25em;
 		left: 50%;
@@ -227,7 +227,18 @@
 }
 
 .FileUpload_right {
-	margin-left: 11em;
+	margin-left: 12em;
+
+	> .wrapper {
+		display: table;
+		height: 13em;
+		width: 100%;
+
+		.actions {
+			display: table-cell;
+			vertical-align: middle;
+		}
+	}
 }
 .FileUpload_right .delete {
 	padding: 0.5em 0px;

@@ -341,7 +341,7 @@ class FileUpload extends FormField {
 		gloader::load("ajaxupload");
 		Resources::add("font-awsome/font-awesome.css", "css");
 		Resources::add("system/form/FileUpload.js", "js", "tpl");
-		Resources::add("FileUpload.css", "css");
+		Resources::add("FileUpload.less", "css");
 		Resources::addJS("$(function(){new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
 		// modify form for right datatype
 		$this->form()->form->enctype = "multipart/form-data";
@@ -357,11 +357,12 @@ class FileUpload extends FormField {
 
 		$this->container->append($this->leftContainer);
 
-		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode('div', array("class" => "actions"), array(
+		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode("div", array("class" => "wrapper"),
+			new HTMLNode('div', array("class" => "actions"), array(
 			new HTMLNode("button", array(
 				"class" => "button delete-file red"
 			), new HTMLNode("i", array("class" => "fa fa-trash show-on-js delete-icon", "type" => "button")))
-		)),
+		))),
 			new HTMLNode('div', array("class" => "no-js-fallback"), array(
 			new HTMLNode('h3', array(), lang("files.replace")),
 			$this->input

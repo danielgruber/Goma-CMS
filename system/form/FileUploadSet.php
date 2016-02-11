@@ -593,7 +593,7 @@ class FileUploadSet extends FormField
         gloader::load("ajaxupload");
         gloader::load("sortable");
         Resources::add("system/form/FileUploadSet.js", "js", "tpl");
-        Resources::add("FileUpload.css", "css");
+        Resources::add("FileUpload.less", "css");
         Resources::addJS("$(function(){new FileUploadSet('" . $this->name . "',$('#" . $this->divID() . " .view'), '" . $this->externalURL() . "');});");            // modify form for right datatype
 
         $this->form()->form->enctype = "multipart/form-data";
