@@ -103,6 +103,8 @@ class adminController extends Controller
             HTTPResponse::redirect(BASE_URI);
         }
 
+        HTTPResponse::$cacheable = false;
+
         return parent::handleRequest($request, $subController);
     }
 
