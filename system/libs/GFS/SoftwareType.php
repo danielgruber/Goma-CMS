@@ -482,7 +482,7 @@ abstract class g_SoftwareType {
 			if(isset(ClassInfo::$appENV["expansion"]) && ClassInfo::$appENV["expansion"]) {
 				// expansions
 				foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
-					self::checkForUpdatePackage($app, ClassInfo::expVersion($app), $updates);
+					self::checkForUpdatePackage($app, ExpansionManager::expVersion($app), $updates);
 				}
 			}
 			
@@ -517,7 +517,7 @@ abstract class g_SoftwareType {
 			foreach(ClassInfo::$appENV["expansion"] as $app => $data) {
 				$apps[$app] = array(
 					"name" 		=> $app,
-					"version"	=> ClassInfo::expVersion($app)
+					"version"	=> ExpansionManager::expVersion($app)
 				);
 			}
 		}

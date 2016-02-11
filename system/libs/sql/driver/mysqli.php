@@ -863,7 +863,7 @@ class mysqliDriver implements SQLDriver
                         if (count($data["fields"]) > 0) {
                             if (
                                 (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-                                (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
+                                (ModelInfoGenerator::classTable($class) && $table_name = ModelInfoGenerator::classTable($class))
                             ) {
                                 if (isset($data["ignore"]) && $data["ignore"])
                                     $sql = "UPDATE IGNORE " . DB_PREFIX . $table_name . " SET ";
@@ -916,7 +916,7 @@ class mysqliDriver implements SQLDriver
                     if (isset($data["where"])) {
                         if (
                             (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-                            (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
+                            (ModelInfoGenerator::classTable($class) && $table_name = ModelInfoGenerator::classTable($class))
                         ) {
                             $where = $data["where"];
                             $where = SQL::extractToWhere($where);
@@ -953,7 +953,7 @@ class mysqliDriver implements SQLDriver
         if(isset($data["fields"]) && count($data["fields"]) > 0) {
             if (
                 (isset($data["table_name"]) && $table_name = $data["table_name"]) ||
-                (ClassInfo::classTable($class) && $table_name = ClassInfo::classTable($class))
+                (ModelInfoGenerator::classTable($class) && $table_name = ModelInfoGenerator::classTable($class))
             ) {
                 if (isset($data["ignore"]) && $data["ignore"]) {
                     $sql = 'INSERT IGNORE INTO ' . DB_PREFIX . $table_name . ' ';

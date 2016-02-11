@@ -661,7 +661,6 @@ class Controller extends RequestHandler
      */
     public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null)
     {
-
         if (PROFILE) Profiler::mark("Controller::save");
 
         if (PROFILE) Profiler::mark("Controller::save prepare");

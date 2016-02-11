@@ -167,15 +167,6 @@ class ClassInfo extends gObject {
 	}
 
 	/**
-	 * gets a table_name for a given class
-	 */
-	public static function classTable($class) {
-		$class = ClassManifest::resolveClassName($class);
-
-		return isset(classinfo::$class_info[$class]["table"]) ? classinfo::$class_info[$class]["table"] : false;
-	}
-
-    /**
      * gets db-fields of an table
      * @param string - table
      * @return array
@@ -280,91 +271,6 @@ class ClassInfo extends gObject {
 	}
 
 	/**
-	 * returns a list of database-tables that can be referred to the DataObject.
-	 * TODO: Move to Model.
-	 * 
-	 * @name 	Tables
-	 * @param 	string class
-	 * @return 	array
-	 */
-	public static function Tables($class) {
-		$class = ClassManifest::resolveClassName($class);
-
-		if(!isset(self::$class_info[$class]["baseclass"]))
-			return array();
-
-		if(self::$class_info[$class]["baseclass"] == $class) {
-			return self::TablesBaseClass($class);
-		} else {
-			return self::TablesBaseClass(self::$class_info[$class]["baseclass"]);
-		}
-	}
-
-	/**
-	 * gets all referred database-tables for a given baseclass.
-	 * this method does not check for Base-Class.
-	 *
-	 * @param 	string baseclass
-	 * @return 	array
-	*/
-	protected static function TablesBaseClass($class) {
-
-		if(!isset(self::$class_info[$class]["table"]) || empty(self::$class_info[$class]["table"])) {
-			return array();
-		}
-
-		$tables = array();
-
-		$tables[$class . "_state"] = $class . "_state";
-
-		$tables = self::fillTableArray($class, $tables);
-
-		foreach(self::getChildren($class) as $subclass) {
-			$tables = self::fillTableArray($subclass, $tables);
-		}
-
-		return $tables;
-	}
-
-	/**
-	 * fills an array with key and value the same for tables for given class.
-	 *
-	 * @param 	string 	class
-	 * @param 	array 	tables
-	 * @return 	array
-	*/
-	protected static function fillTableArray($class, $tables) {
-		if(isset(self::$class_info[$class]["table"])) {
-			$table = self::$class_info[$class]["table"];
-
-			if($table) {
-				$tables[$table] = $table;
-			}
-		}
-				
-		if(isset(self::$class_info[$class]["many_many_tables"]) && self::$class_info[$class]["many_many_tables"]) {
-			foreach(self::$class_info[$class]["many_many_tables"] as $data) {
-				$tables[$data["table"]] = $data["table"];
-			}
-		}
-
-		return $tables;
-
-	}
-
-    /**
-     * returns the base-folder of a expansion or class.
-     *
-     * @param    string    extension or class-name
-     * @param    bool    if force to use as class-name
-     * @param    bool    if force to be absolute path.
-     * @return null|string
-     */
-	public static function getExpansionFolder($name, $forceAbsolute = false) {
-		return ExpansionManager::getExpansionFolder($name, $forceAbsolute);
-	}
-
-	/**
 	 * gets the full version of the installed app
 	 *
 	 */
@@ -376,25 +282,7 @@ class ClassInfo extends gObject {
 		return self::$appENV["app"]["version"];
 	}
 
-    /**
-     * gets the full version of a installed expansion
-     *
-     * @param string - name of expansion
-     * @return bool|string
-     */
-	public static function expVersion($name) {
-		if(!isset(self::$appENV["expansion"][$name])) {
-            return false;
-        }
-
-		if(isset(self::$appENV["expansion"][$name]["build"])) {
-            return self::$appENV["expansion"][$name]["version"] . "-" . self::$appENV["expansion"][$name]["build"];
-        }
-
-		return self::$appENV["expansion"][$name]["version"];
-	}
-
-    /**
+	/**
      * finds a file belonging to a class
      *
      * @param string - file
@@ -582,7 +470,7 @@ class ClassInfo extends gObject {
                 ClassManifest::tryToInclude("ExpansionManager", 'system/Core/CoreLibs/ExpansionManager.php');
 				// expansions
 				foreach(self::$appENV["expansion"] as $expansion => $data) {
-					self::checkForUpgradeScripts(ExpansionManager::getExpansionFolder($expansion), self::expVersion($expansion));
+					self::checkForUpgradeScripts(ExpansionManager::getExpansionFolder($expansion), ExpansionManager::expVersion($expansion));
 				}
 			}
 

@@ -78,7 +78,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		} else {
 			// update installed software
 			$data["installType"] = "update";
-			$data["installed"] = ClassInfo::ExpVersion($appInfo["name"]);
+			$data["installed"] = ExpansionManager::ExpVersion($appInfo["name"]);
 
 			/*if(isset($appInfo["require_version"]) && goma_version_compare($appInfo["require_version"], ClassInfo::appVersion(), ">")) {
 				$data["error"] = lang("update_version_newer_required") . " " . $appInfo["require_version"];
@@ -167,7 +167,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		$plist->add($dict = new CFDictionary());
 		$dict->add("type", new CFString("expansion"));
 		$dict->add("name", new CFString($name));
-		$dict->add("version", new CFString(ClassInfo::expVersion($name)));
+		$dict->add("version", new CFString(ExpansionManager::expVersion($name)));
 		$dict->add("created", new CFDate(NOW));
 		$dict->add("isDistro", new CFString("1"));
 		$dict->add("changelog", new CFString($changelog));
@@ -190,7 +190,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		if(!isset(ClassInfo::$appENV["expansion"][$name])) {
 			return false;
 		}
-		return $name . "." . ClassInfo::expVersion($name) . ".gfs";
+		return $name . "." . ExpansionManager::expVersion($name) . ".gfs";
 	}
 
 	/**
@@ -215,7 +215,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 			new HiddenField("file", $file),
 			new HiddenField("expName", $name),
 			new HTMLField("title", "<h1>".convert::raw2text($title)."</h1><h3>".lang("distro_build")."</h3>"),
-			$version = new TextField("version", lang("version"), ClassInfo::expVersion($name)),
+			$version = new TextField("version", lang("version"), ExpansionManager::expVersion($name)),
 			new Textarea("changelog", lang("distro_changelog"))
 		), array(
 			new LinkAction("cancel", lang("cancel"), ROOT_PATH . BASE_SCRIPT . "dev/buildDistro"),
@@ -306,7 +306,7 @@ class G_ExpansionSoftwareType extends G_SoftwareType {
 		// check if we use install-method
 		if(isset(ClassInfo::$appENV["expansion"][$appInfo["name"]])) {
 			$data["installType"] = "update";
-			$data["installed_version"] = ClassInfo::ExpVersion($appInfo["name"]);
+			$data["installed_version"] = ExpansionManager::ExpVersion($appInfo["name"]);
 		}
 
 		if(isset(ClassInfo::$appENV["expansion"][$appInfo["name"]]["title"]))

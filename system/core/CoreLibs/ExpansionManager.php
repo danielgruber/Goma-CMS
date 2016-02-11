@@ -88,4 +88,23 @@ class ExpansionManager {
 
         return null;
     }
+
+    /**
+     * gets the full version of a installed expansion
+     *
+     * @param string - name of expansion
+     * @return bool|string
+     */
+    public static function expVersion($name)
+    {
+        if (!isset(ClassInfo::$appENV["expansion"][$name])) {
+            return false;
+        }
+
+        if (isset(ClassInfo::$appENV["expansion"][$name]["build"])) {
+            return ClassInfo::$appENV["expansion"][$name]["version"] . "-" . ClassInfo::$appENV["expansion"][$name]["build"];
+        }
+
+        return ClassInfo::$appENV["expansion"][$name]["version"];
+    }
 }

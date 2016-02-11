@@ -66,6 +66,7 @@ $lang = array(
 	"users"											=> "Benutzer",
 	"groups"										=> "Gruppen",
 	"upload file"                                  	=> "Datei hochladen",
+	"crop_image"									=> "Bild zuschneiden",
 	"subject"                                      	=> "Betreff",
 	"message"                                      	=> "Nachricht",
 	"mandatory field"                              	=> "Pflichtfeld",

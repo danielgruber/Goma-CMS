@@ -244,7 +244,6 @@ class ModelWriter extends gObject {
      * @throws PermissionException
      */
     protected function gatherDataToWrite() {
-
         $modelData = $this->model->ToArray();
         unset($modelData["recordid"]);
         $this->data = array_merge($modelData, (array) $this->data);

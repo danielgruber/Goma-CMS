@@ -77,4 +77,33 @@ class FormTest extends GomaUnitTest implements TestAble {
 
 		$this->assertEqual($form->$name, $field, "Check if field with name $name is accessable. %s");
 	}
+
+	protected static $testCalled = false;
+
+	public function testNullResult() {
+		$form = new Form(new Controller(), "test" ,array(
+			new TextField("test", "test")
+		), array(
+			$action = new FormAction("save", "save")
+		));
+
+		$form->setSubmission(array($this, "_testNull"));
+
+		// TODO: Why do we need this here? this is a bug.
+		$form->saveToSession();
+
+		self::$testCalled = false;
+		$this->assertFalse(self::$testCalled);
+
+		$form->submit(array(
+			"test" => null,
+			$action->PostName() => 1
+		));
+		$this->assertTrue(self::$testCalled);
+	}
+
+	public function _testNull($data) {
+		self::$testCalled = true;
+		$this->assertNull($data["test"]);
+	}
 }

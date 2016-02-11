@@ -455,6 +455,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if ($has_one = $this->HasOne()) {
             foreach($has_one as $key => $val) {
                 gObject::LinkMethod($this->classname, $key, array("this", "getHasOne"), true);
+                gObject::LinkMethod($this->classname, "set" . $key, array("this", "setHasOne"), true);
             }
         }
     }
@@ -1682,7 +1683,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function getHasOne($name, $filter = null) {
 
-        $name = trim(strtolower($name));
+        $name = strtolower(trim($name));
 
         if (PROFILE) Profiler::mark("getHasOne");
 
@@ -1728,7 +1729,41 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 return null;
             }
         } else {
-            throw new LogicException("No Has-one-relation '".$name."' on ".$this->classname);
+            throw new InvalidArgumentException("No Has-one-relation '".$name."' on ".$this->classname);
+        }
+    }
+
+    /**
+     * sets has-one.
+     * @param string $name
+     * @param DataObject $value
+     */
+    public function setHasOne($name, $value) {
+        $name = strtolower(trim($name));
+
+        $has_one = $this->hasOne();
+        if (isset($has_one[$name])) {
+            $idField = $name . "id";
+            if(!isset($value)) {
+                $this->$idField = 0;
+            } else if(is_a($value, "DataObject")) {
+                $this->setField($name, $value);
+                $this->$idField = $value->id != 0 ? $value->id : null;
+            } else {
+                if(DEV_MODE) {
+                    $trace = debug_backtrace();
+                    $method = (isset($trace[1]["class"])) ? $trace[1]["class"] . "::" . $trace[1]["function"] : $trace[1]["function"];
+                    $file = isset($trace[1]["file"]) ? $trace[1]["file"] : (isset($trace[2]["file"]) ? $trace[2]["file"] : "Undefined");
+                    $line = isset($trace[1]["line"]) ? $trace[1]["line"] : (isset($trace[2]["line"]) ? $trace[2]["line"] : "Undefined");
+
+                    log_error("SetHasOne called without giving a DataObject in $file on line $line (Method $method).");
+                }
+                $this->setField($name, $value);
+            }
+        } else if(substr($name, 0, 3) == "set") {
+            $this->setHasOne(substr($name, 3), $value);
+        } else {
+            throw new InvalidArgumentException("No Has-one-relation '".$name."' on ".$this->classname);
         }
     }
 
@@ -3533,7 +3568,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 }
 
                 if(isset(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"])) {
-                    $extBaseTable = ClassInfo::ClassTable(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"]);
+                    $extBaseTable = ModelInfoGenerator::ClassTable(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"]);
                     $sql = "DELETE FROM ". DB_PREFIX . $relationShip->getTableName() ." WHERE ". $relationShip->getOwnerField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $relationShip->getTargetField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
                     register_shutdown_function(array("sql", "queryAfterDie"), $sql);
                 }

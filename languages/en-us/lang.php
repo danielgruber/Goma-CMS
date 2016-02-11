@@ -66,6 +66,7 @@ $lang = array(
 	"users"											=> "Users",
 	"groups"										=> "Groups",
 	"upload file"                                  	=> "Upload a file",
+	"crop_image"									=> "Crop image",
 	"plaese insert text into the mandatory field." 	=> "Please enter text in all mandatory fields.",
 	"subject"                                      	=> "Subject",
 	"message"                                      	=> "Message",

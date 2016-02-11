@@ -198,7 +198,6 @@ class Form extends gObject {
 	 */
 	public $disabled = false;
 
-
 	/**
 	 * @param RequestHandler $controller
 	 * @param string $name
@@ -241,18 +240,13 @@ class Form extends gObject {
 		// register fields
 		/** @var FormField $field */
 		foreach($fields as $sort => $field) {
-			$this->fieldList->push($field);
-			$field->setForm($this);
+			$this->add($field);
 		}
 
 		// register actions
 		/** @var FormAction $action */
-		foreach($actions as $submit => $action) {
-			$action->setForm($this);
-			$this->actions[$action->name] = array(
-				"field" => $action,
-				"submit" => $action->getSubmit()
-			);
+		foreach($actions as $action) {
+			$this->addAction($action);
 		}
 
 		$this->validators = array_merge($this->validators, (array) $validators);
@@ -594,10 +588,10 @@ class Form extends gObject {
 	 * @access public
 	 * @return mixed|string
 	 */
-	public function submit() {
+	public function submit($post = null) {
 		$this->callExtending("beforeSubmit");
 
-		$this->post = $_POST;
+		$this->post = isset($post) ? $post : $_POST;
 
 		foreach($this->post as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$/", $key, $matches)) {
@@ -624,10 +618,8 @@ class Form extends gObject {
 		foreach($data->fields as $field) {
 			$result = $field->result();
 
-			if($result !== null) {
-				$this->result[$field->dbname] = $result;
-				$allowed_result[$field->dbname] = true;
-			}
+			$this->result[$field->dbname] = $result;
+			$allowed_result[$field->dbname] = true;
 		}
 
 		// validation
@@ -669,7 +661,7 @@ class Form extends gObject {
 			$result = call_user_func_array($callback, array($result, $this));
 		}
 
-		$submission = $this->findSubmission($data, $this->post, $result);
+		$submission = self::findSubmission($data, $this->post, $result);
 
 		if($valid !== true || $submission === null) {
 			if($errors->getNode(0)->content) {
@@ -708,8 +700,12 @@ class Form extends gObject {
 
 	/**
 	 * finds a submission for the form. returns null when not found.
+	 * @param Form $form
+	 * @param array $post
+	 * @param array $result
+	 * @return null|string
 	 */
-	protected function findSubmission($form, $post, $result) {
+	protected static function findSubmission($form, $post, $result) {
 		$submission = null;
 		// find actions in fields
 		/** @var FormAction $field */
@@ -719,7 +715,7 @@ class Form extends gObject {
 					(isset($post["default_submit"]) && !$field->input->hasClass("cancel") && !$field->input->name != "cancel")) {
 					if($field->canSubmit($result) && $submit = $field->getSubmit($result)) {
 						if($submit == "@default") {
-							$submission = $this->submission;
+							$submission = $form->submission;
 						} else {
 							$submission = $submit;
 						}

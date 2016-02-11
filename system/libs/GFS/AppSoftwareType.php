@@ -650,11 +650,11 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * @return bool
 	 */
 	public static function backup($file, $name, $changelog = null) {
-		$tables = array_merge(ClassInfo::Tables("user"), ClassInfo::Tables("UserAuthentication"), ClassInfo::Tables("history"));
+		$tables = array_merge(ModelInfoGenerator::Tables("user"), ModelInfoGenerator::Tables("UserAuthentication"), ModelInfoGenerator::Tables("history"));
 		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
-				$tables = array_merge($tables, ClassInfo::Tables($model));
+				$tables = array_merge($tables, ModelInfoGenerator::Tables($model));
 			}
 		}
 

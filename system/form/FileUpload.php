@@ -90,6 +90,11 @@ class FileUpload extends FormField {
 	protected $fullSizedField = true;
 
 	/**
+	 * default-icon.
+	 */
+	protected $default_icon = "images/icons/goma/128x128/file.png";
+
+	/**
 	 * @name 	__construct
 	 * @access 	public
 	 */
@@ -120,25 +125,34 @@ class FileUpload extends FormField {
 				"id" => $this->ID() . "_upload"
 			), array($link = new HTMLNode("a", array("target" => "_blank"), array(
 					new HTMLNode("div", array("class" => "img"), array(new HTMLNode("img", array(
-							"src" 			=> $this->value->getIcon(128),
-							"data-retina" 	=> $this->value->getIcon(128, true),
-							"alt" 			=> convert::raw2text($this->value->filename)
+							"src" 			=> $this->getIcon(),
+							"data-retina" 	=> $this->getIcon(true),
+							"alt" 			=> convert::raw2text($this->value ? $this->value->filename : "")
 						)))),
-					new HTMLNode("span", array(), convert::raw2text($this->value->filename))
+					new HTMLNode("span", array(), convert::raw2text($this->value ? $this->value->filename : ""))
 				)))),
 
 			new HTMLNode("input", array(
 				"name" => $this->PostName() . "_file",
 				"id" => $this->ID() . "_file_hidden",
 				"type" => "hidden",
-				"value" => $this->value->fieldGet("path"),
+				"value" => $this->value ? $this->value->fieldGet("path") : "",
 				"class" => "FileUploadValue"
 			))
 		));
 
-		if($this->value->fieldGet("path") != "") {
+		if($this->value && $this->value->fieldGet("path") != "") {
 			$link->href = $this->value->raw();
 		}
+	}
+
+	/**
+	 * returns icon.
+	 * @param bool $retina
+	 * @return string
+	 */
+	public function getIcon($retina = false) {
+		return $this->value ? $this->value->getIcon(128, $retina) : $this->default_icon;
 	}
 
 	/**
@@ -174,11 +188,7 @@ class FileUpload extends FormField {
 				}
 			}
 
-			$this->value = new Uploads( array(
-				"path" => $this->value,
-				"realfile" => $this->value,
-				"filename" => basename($this->value)
-			));
+			$this->value = null;
 		}
 	}
 
@@ -368,7 +378,7 @@ class FileUpload extends FormField {
 			$this->input
 		))));
 
-		if($this->value->realfile)
+		if($this->value && $this->value->realfile)
 			$nojs->append(new HTMLNode('div', array("class" => "delete hide-on-js"), array(
 				new HTMLNode('input', array(
 					"id" => $this->ID() . "__delete",
