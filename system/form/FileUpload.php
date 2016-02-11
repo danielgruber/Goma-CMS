@@ -124,9 +124,8 @@ class FileUpload extends FormField {
 							"data-retina" 	=> $this->value->getIcon(128, true),
 							"alt" 			=> convert::raw2text($this->value->filename)
 						)))),
-					new HTMLNode("span", array(), convert::raw2text($this->value->filename)),
+					new HTMLNode("span", array(), convert::raw2text($this->value->filename))
 				)))),
-			new HTMLNode('div', array("class" => "actions")),
 
 			new HTMLNode("input", array(
 				"name" => $this->PostName() . "_file",
@@ -340,6 +339,7 @@ class FileUpload extends FormField {
 			Profiler::mark("FormField::field");
 
 		gloader::load("ajaxupload");
+		Resources::add("font-awsome/font-awesome.css", "css");
 		Resources::add("system/form/FileUpload.js", "js", "tpl");
 		Resources::add("FileUpload.css", "css");
 		Resources::addJS("$(function(){new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
@@ -357,13 +357,18 @@ class FileUpload extends FormField {
 
 		$this->container->append($this->leftContainer);
 
-		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode('div', array("class" => "no-js-fallback"), array(
+		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode('div', array("class" => "actions"), array(
+			new HTMLNode("button", array(
+				"class" => "button delete-file red"
+			), new HTMLNode("i", array("class" => "fa fa-trash show-on-js delete-icon", "type" => "button")))
+		)),
+			new HTMLNode('div', array("class" => "no-js-fallback"), array(
 			new HTMLNode('h3', array(), lang("files.replace")),
 			$this->input
 		))));
 
 		if($this->value->realfile)
-			$nojs->append(new HTMLNode('div', array("class" => "delete"), array(
+			$nojs->append(new HTMLNode('div', array("class" => "delete hide-on-js"), array(
 				new HTMLNode('input', array(
 					"id" => $this->ID() . "__delete",
 					"name" => $this->PostName() . "__deletefile",

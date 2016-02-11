@@ -14,14 +14,24 @@ function FileUpload(formelement, url, size, types) {
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);
 	this.destInput = $(formelement).find(".FileUploadValue");
-	
+
+	this.actions = this.formelement.find(".actions");
 	// the info-zone
-	this.formelement.find(".actions").append('<div class="progress_info"></div>');
-	this.infoZone = this.formelement.find(".actions").find(".progress_info");
+	this.actions.prepend('<div class="progress_info"></div>');
+	this.infoZone = this.actions.find(".progress_info");
 	
 	// append fallback for not drag'n'drop-browsers
-	this.formelement.find(".actions").append('<input type="button" class="button fileSelect" value="'+lang("files.browse")+'" />');
-	this.browse = this.formelement.find(".actions").find(".fileSelect");
+	this.actions.append('<input type="button" class="button fileSelect" value="'+lang("files.browse")+'" />');
+	this.browse = this.actions.find(".fileSelect");
+
+	this.deleteButton = this.actions.find("button.delete-file");
+	this.deleteButton.click(function(){
+		this.formelement.find("input.FileUploadValue").val("");
+		$($this.element).find("img").attr({"src": "images/icons/goma/128x128/file.png", "alt": "", "height": 128, "height": 128, "style": ""});
+		$($this.element).find("a").removeAttr("href");
+		$($this.element).find("span").html("");
+		return false;
+	}.bind(this));
 	
 	this.uploader = new AjaxUpload("#" + this.element.id, {
 		url: url + "/frameUpload/",

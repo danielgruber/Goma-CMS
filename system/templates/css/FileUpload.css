@@ -171,15 +171,6 @@
 	background: url(../../../images/loading.gif) no-repeat 50% 50%;
 }
 
-.FileUpload_left .progressbar {
-	margin: 0.25em -0.5em;
-	width: 10.875em;
-	height: 1.5em;
-	border: 1px solid #bbb;
-	background: #eee;
-	position: relative;
-}
-
 .FileUpload_left .icon.active {
 	background: #eee;
 }
@@ -188,34 +179,51 @@
 	background: #ddd;
 }
 
-.FileUpload_left .progressbar .progress {
-	height: 1.5em;
-	background: #bbb repeat-x;
-	width: 0.25em;
-}
+.FileUpload_left, .FileUpload_right {
 
-.FileUpload_left .progressbar .cancel {
-	position: absolute;
-	top: 0.25em;
-	right: 0.25em;
-	height: 1em;
-	width: 1em;
-	background: url(images/cancel.png) no-repeat;
-	background-size: 1em 1em;
-}
+	.progressbar {
+		margin: 0.25em -0.5em;
+		height: 1.5em;
+		border: 1px solid #bbb;
+		background: #eee;
+		position: relative;
+	}
+	.progressbar .progress {
+		height: 1.5em;
+		background: #bbb repeat-x;
+		width: 0.25em;
+	}
 
-.FileUpload_left .progressbar span {
-	position: absolute;
-	top: 0.25em;
-	left: 50%;
-	margin-left: -1.25em;
-	line-height: 1em;
-}
+	.progressbar .cancel {
+		position: absolute;
+		top: 0.25em;
+		right: 0.25em;
+		height: 1em;
+		width: 1em;
+		background: url(images/cancel.png) no-repeat;
+		background-size: 1em 1em;
+	}
 
-.FileUpload_left > .actions {
-	text-align: center;
-	padding: 0.5em;
-	width: 10.25em;
+	.FileUpload_left .progressbar span {
+		position: absolute;
+		top: 0.25em;
+		left: 50%;
+		margin-left: -1.25em;
+		line-height: 1em;
+	}
+	> .actions {
+	  text-align: center;
+	  padding: 0.5em;
+	  width: 100%;
+
+	  box-sizing: border-box;
+	  -moz-box-sizing: border-box;
+	  -webkit-box-sizing: border-box;
+
+	  .delete-file {
+		padding: 0.40em 0.75em;
+	  }
+  }
 }
 
 .FileUpload_right {

@@ -331,8 +331,7 @@ class tableField extends FormField {
 		
 		Resources::add("tablefield.less", "css");
 		Resources::add("system/form/tableField/tableField.js");
-		
-		$container = $this->container;
+		Resources::add("font-awsome/font-awesome.css", "css");
 		
 		$columns = $this->getColumns();
 		
