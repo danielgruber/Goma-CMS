@@ -89,21 +89,35 @@ class FormTest extends GomaUnitTest implements TestAble {
 
 		$form->setSubmission(array($this, "_testNull"));
 
-		// TODO: Why do we need this here? this is a bug.
 		$form->saveToSession();
 
 		self::$testCalled = false;
 		$this->assertFalse(self::$testCalled);
 
-		$form->submit(array(
+		$form->post = array(
 			"test" => null,
 			$action->PostName() => 1
-		));
+		);
+		$form->trySubmit();
 		$this->assertTrue(self::$testCalled);
+
+		self::$testCalled = false;
+		$this->assertFalse(self::$testCalled);
+		$form->setSubmission(array($this, "_exceptionSubmit"));
+
+		$form->saveToSession();
+
+		$this->assertNotEqual($form->trySubmit(), "");
+		$this->assertEqual(self::$testCalled, 2);
 	}
 
 	public function _testNull($data) {
-		self::$testCalled = true;
+		self::$testCalled = 1;
 		$this->assertNull($data["test"]);
+	}
+
+	public function _exceptionSubmit() {
+		self::$testCalled = 2;
+		throw new Exception("Problem");
 	}
 }

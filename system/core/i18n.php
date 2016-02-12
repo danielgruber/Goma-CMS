@@ -94,22 +94,13 @@ class i18n extends gObject {
 		} else {
 			require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/lang.php');
 
-			if(isset(ClassInfo::$appENV["expansion"])) {
-				foreach(ClassInfo::$appENV["expansion"] as $name => $data) {
-					$folder = $data["folder"];
-					if(isset($data["langFolder"])) {
-						if(file_exists($folder . $data["langFolder"] . "/" . Core::$lang . ".php")) {
-							self::loadExpansionLang($folder . $data["langFolder"] . "/" . Core::$lang . ".php", "exp_" . $name, $lang);
-						} else if(isset($data["defaulLang"]) && file_exists($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php")) {
-							self::loadExpansionLang($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
-						}
-					} else if(is_dir($folder . "languages")) {
-						if(file_exists($folder . "languages/" . Core::$lang . ".php")) {
-							self::loadExpansionLang($folder . "languages/" . Core::$lang . ".php", "exp_" . $name, $lang);
-						} else if(isset($data["defaulLang"]) && file_exists($folder . "languages/" . $data["defaultLang"] . ".php")) {
-							self::loadExpansionLang($folder . "languages/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
-						}
-						unset($default);
+			foreach(self::$languagefiles as $file) {
+				if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php')) {
+					require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
+				} else if(isset(self::$defaultLanguagefiles[$file])) {
+					if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php')) {
+						copy(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php', ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
+						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
 					}
 				}
 			}
@@ -128,13 +119,22 @@ class i18n extends gObject {
 				}
 			}
 
-			foreach(self::$languagefiles as $file) {
-				if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php')) {
-					require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
-				} else if(isset(self::$defaultLanguagefiles[$file])) {
-					if(file_exists(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php')) {
-						copy(ROOT . LANGUAGE_DIRECTORY . '/' . self::$defaultLanguagefiles[$file] . '/' . $file . '.php', ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
-						require_once (ROOT . LANGUAGE_DIRECTORY . '/' . Core::$lang . '/' . $file . '.php');
+			if(isset(ClassInfo::$appENV["expansion"])) {
+				foreach(ClassInfo::$appENV["expansion"] as $name => $data) {
+					$folder = $data["folder"];
+					if(isset($data["langFolder"])) {
+						if(file_exists($folder . $data["langFolder"] . "/" . Core::$lang . ".php")) {
+							self::loadExpansionLang($folder . $data["langFolder"] . "/" . Core::$lang . ".php", "exp_" . $name, $lang);
+						} else if(isset($data["defaulLang"]) && file_exists($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php")) {
+							self::loadExpansionLang($folder . $data["langFolder"] . "/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
+						}
+					} else if(is_dir($folder . "languages")) {
+						if(file_exists($folder . "languages/" . Core::$lang . ".php")) {
+							self::loadExpansionLang($folder . "languages/" . Core::$lang . ".php", "exp_" . $name, $lang);
+						} else if(isset($data["defaulLang"]) && file_exists($folder . "languages/" . $data["defaultLang"] . ".php")) {
+							self::loadExpansionLang($folder . "languages/" . $data["defaultLang"] . ".php", "exp_" . $name, $lang);
+						}
+						unset($default);
 					}
 				}
 			}
@@ -183,6 +183,12 @@ class i18n extends gObject {
 		/** @var array $lang */
 		foreach($lang as $key => $val) {
 			$language[strtoupper($name . "." . $key)] = $val;
+		}
+
+		if(isset($overrideLang)) {
+			foreach($overrideLang as $key => $value) {
+				$language[$key] = $value;
+			}
 		}
 	}
 

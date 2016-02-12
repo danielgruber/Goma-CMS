@@ -59,6 +59,12 @@ fieldset {
   border: 0;
 }
 
+.form_field.form-field-has-error {
+  > input, select, .input, .field {
+    border-color: @system-red;
+  }
+}
+
 .hidden {
   padding: 0 !important;
 }

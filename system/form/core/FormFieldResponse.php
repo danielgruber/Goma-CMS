@@ -99,6 +99,11 @@ class FormFieldResponse {
     protected $field;
 
     /**
+     * @var boolean
+     */
+    protected $hasError;
+
+    /**
      * constructor.
      * @param string $name
      * @param string $type
@@ -384,6 +389,24 @@ class FormFieldResponse {
     }
 
     /**
+     * @return boolean
+     */
+    public function isHasError()
+    {
+        return $this->hasError;
+    }
+
+    /**
+     * @param boolean $hasError
+     * @return $this
+     */
+    public function setHasError($hasError)
+    {
+        $this->hasError = $hasError;
+        return $this;
+    }
+
+    /**
      * to rest array.
      * @param bool $includeRendered
      * @return array
@@ -399,7 +422,8 @@ class FormFieldResponse {
             "extra" => $this->extra,
             "hasRenderData" => $this->renderedField != null,
             "js" => $this->js,
-            "disabled"  => $this->isDisabled
+            "disabled"  => $this->isDisabled,
+            "hasError" => $this->hasError
         );
 
         if($includeRendered) {

@@ -117,4 +117,10 @@ class ExceptionManager {
 	const FILE_NOT_PERMITTED = -803;
 	const FILE_NOT_FOUND = -804;
 	const FILE_ALREADY_EXISTING = -810;
+
+	/**
+	 * form
+	 */
+	const FORM_INVALID = -900;
+	const FORM_NOT_SUBMITTED = -901;
 }

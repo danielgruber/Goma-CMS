@@ -28,46 +28,39 @@ class RequiredFields extends FormValidator
     /**
      * validates the data
      *
-     * @name validate
-     * @return bool|string
+     * @throws Exception
      */
     public function validate()
     {
         // get data
-        $missing = $this->getMissingFields($errorString);
+        $missing = $this->getMissingFields();
 
         // create response for it
-        if (count($missing) == 0) {
-            return true;
-        } else {
+        if (count($missing) > 0) {
             $text = lang("form_required_fields", "Please fill out the oligatory fields");
             $i = 0;
-            foreach ($missing as $value) {
+            foreach (array_keys($missing) as $field) {
                 if ($i == 0) {
                     $i = 1;
                 } else {
                     $text .= ", ";
                 }
-                $text .= ' \'' . $value . '\'';
+                $text .= ' \'' . $this->getForm()->getField($field)->getTitle() . '\'';
             }
 
-            if($errorString != "") {
-                $errorString .= "<br />";
-            }
+            array_unshift($missing, $text);
 
-            return $errorString . $text;
+            throw new FormMultiFieldInvalidDataException($missing);
         }
     }
 
     /**
      * returns array of missing fields.
      *
-     * @param string $errorString
      * @return array
      */
-    protected function getMissingFields(&$errorString) {
+    protected function getMissingFields() {
         $missing = array();
-        $errorString = "";
 
         foreach ($this->data as $field) {
             if ($this->form->hasField($field)) {
@@ -76,13 +69,16 @@ class RequiredFields extends FormValidator
                 if (!isset($this->form->result[$fieldName]) ||
                     empty($this->form->result[$fieldName]) ||
                     (is_object($this->form->result[$fieldName]) && gObject::method_exists($this->form->result[$fieldName], "bool") && !$this->form->result[$fieldName]->bool())) {
-                    $missing[] = $fieldObject->getTitle();
+                    $missing[$field] = "";
                 } else {
                     // own validation
-                    $v = $fieldObject->validate($this->form->result[$fieldName]);
-                    if ($v !== true) {
-                        $errorString .= $v;
-                        $missing[] = $fieldObject->getTitle();
+                    try {
+                        $v = $fieldObject->validate($this->form->result[$fieldName]);
+                        if ($v !== true) {
+                            $missing[$field] = $v;
+                        }
+                    } catch(Exception $e) {
+                        $missing[$field] = $e->getMessage();
                     }
                 }
             }

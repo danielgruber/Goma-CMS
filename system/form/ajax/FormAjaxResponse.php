@@ -31,6 +31,11 @@ class FormAjaxResponse extends AjaxResponse
     protected $errors = array();
 
     /**
+     * error-fields.
+     */
+    protected $errorFields = array();
+
+    /**
      * success-message(s).
      */
     protected $success = array();
@@ -50,6 +55,7 @@ class FormAjaxResponse extends AjaxResponse
 
         $this->exec('$("#' . $this->form->ID() . '").find(".error").remove();');
         $this->exec('$("#' . $this->form->ID() . '").find(" > .success").remove();');
+        $this->exec('$("#' . $this->form->ID() . '").find(".form-field-has-error").removeClass("form-field-has-error");');
 
         if($button != null) {
             $this->exec('var ajax_button = $("#' . $button->ID() . '");');
@@ -83,6 +89,28 @@ class FormAjaxResponse extends AjaxResponse
      */
     public function resetSuccess() {
         $this->success = array();
+    }
+
+    /**
+     * adds an error-field.
+     * @param string $field
+     */
+    public function addErrorField($field) {
+        $this->errorFields[$field] = $field;
+    }
+
+    /**
+     * returns array of error-fields.
+     */
+    public function getErrorFields() {
+        return $this->errorFields;
+    }
+
+    /**
+     * resets error-fields.
+     */
+    public function resetErrorFields() {
+        $this->errorFields = array();
     }
 
     /**
@@ -144,6 +172,12 @@ class FormAjaxResponse extends AjaxResponse
             }
 
             $this->prepend("#" . $this->form->ID(), $succceses->render());
+        }
+
+        foreach($this->errorFields as $field) {
+            if($this->form->getField($field)) {
+                $this->exec("$('#" . $this->form->getField($field)->divID() . "').addClass('form-field-has-error');");
+            }
         }
 
         return parent::render();

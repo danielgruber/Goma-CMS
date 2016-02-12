@@ -319,44 +319,39 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * validates code for form.
 	 *
-	 *@param string - value
-	 *@return true|string
+	 * @param FormValidator $obj
+	 * @throws FormInvalidDataException
 	 */
 	public static function _validateCode($obj)
 	{
 		$value = $obj->getForm()->result["code"];
-		if(!is_string($value)) {
-			return true;
+		if(is_string($value) && !defined("IS_BACKEND") && RegisterExtension::$registerCode != "" && RegisterExtension::$registerCode != $value) {
+			throw new FormInvalidDataException("code", lang("register_code_wrong", "The Code was wrong!"));
 		}
-
-		if(!defined("IS_BACKEND")) {
-			$code = RegisterExtension::$registerCode;
-			if($code != "" && $code != $value) {
-				return lang("register_code_wrong", "The Code was wrong!");
-			}
-		}
-
-		return true;
 	}
 
 	/**
 	 * validates an new user
-	 *
-	 * @return bool|string
+	 * @param FormValidator $obj
+	 * @throws FormInvalidDataException
+	 * @throws FormMultiFieldInvalidDataException
 	 */
 	public function _validateuser($obj)
 	{
-		if($obj->getForm()->result["password"] == $obj->getForm()->result["repeat"] && $obj->getForm()->result["repeat"] != "")
+		$problems = array();
+		if(DataObject::count("user", array("nickname" => $obj->getForm()->result["nickname"])) > 0)
 		{
-			// check if username is unique
-			if(DataObject::count("user", array("nickname" => $obj->getForm()->result["nickname"])) > 0)
-			{
-				return lang("register_username_bad", "The username is already taken.");
-			}
-			return true;
-		} else
+			$problems["nickname"] = lang("register_username_bad", "The username is already taken.");
+		}
+
+		if($obj->getForm()->result["password"] != $obj->getForm()->result["repeat"] || $obj->getForm()->result["repeat"] == "")
 		{
-			return lang("passwords_not_match");
+			$problems["password"] = lang("passwords_not_match");
+			$problems["repeat"]	= "";
+		}
+
+		if($problems) {
+			throw new FormMultiFieldInvalidDataException($problems);
 		}
 	}
 

@@ -56,12 +56,14 @@ class FormValidator extends gObject
     /**
      * validates the data
      *
-     * @name validate
-     * @return bool|string
+     * @throws Exception
      */
     public function validate()
     {
-        return call_user_func_array($this->data, array_merge(array($this), $this->args));
+        $data = call_user_func_array($this->data, array_merge(array($this), $this->args));
+        if(is_string($data)) {
+            throw new Exception($data);
+        }
     }
 
     /**

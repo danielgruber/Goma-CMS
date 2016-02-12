@@ -60,11 +60,12 @@ class HiddenField extends FormField
     }
 
     /**
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportFieldInfo()
+    public function exportFieldInfo($fieldErrors = null)
     {
-        $info = parent::exportFieldInfo();
+        $info = parent::exportFieldInfo($fieldErrors);
 
         $info->setIsHidden(true);
 

@@ -117,6 +117,11 @@ class FormField extends RequestHandler {
     protected $regexpError = "form_not_matching";
 
     /**
+     * errors.
+     */
+    protected $errors = array();
+
+    /**
      * creates field.
      * @param $name
      * @param $title
@@ -228,6 +233,10 @@ class FormField extends RequestHandler {
 
         $this->container->append($this->input);
 
+        if($this->errors) {
+            $this->container->addClass("form-field-has-error");
+        }
+
         $this->callExtending("afterField");
 
         if (PROFILE) Profiler::unmark("FormField::field");
@@ -249,11 +258,11 @@ class FormField extends RequestHandler {
     /**
      * this function generates some JSON for using client side stuff.
      *
-     * @name exportJSON
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportFieldInfo() {
-        $info = $this->exportBasicInfo();
+    public function exportFieldInfo($fieldErrors = null) {
+        $info = $this->exportBasicInfo($fieldErrors);
 
         $this->addRenderData($info);
 
@@ -278,15 +287,21 @@ class FormField extends RequestHandler {
     /**
      * exports basic field info.
      *
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportBasicInfo() {
+    public function exportBasicInfo($fieldErrors = null) {
+        if(isset($fieldErrors[strtolower($this->name)])) {
+            $this->errors = $fieldErrors[strtolower($this->name)];
+        }
+
         return FormFieldResponse::create($this->name, $this->classname, $this->ID(), $this->divID())
             -> setMaxLength($this->maxLength)
             -> setRegexp($this->regexp)
             -> setTitle($this->title)
             -> setIsDisabled($this->disabled)
-            -> setField($this);
+            -> setField($this)
+            -> setHasError(count($this->errors) > 0);
     }
 
     /**
@@ -551,5 +566,13 @@ class FormField extends RequestHandler {
     public function removeExtraClass($class)
     {
         $this->container->removeClass($class);
+    }
+
+    /**
+     * @param array $errors
+     */
+    public function setErrors($errors)
+    {
+        $this->errors = $errors;
     }
 }

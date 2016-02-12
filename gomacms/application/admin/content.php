@@ -161,13 +161,14 @@ class contentAdmin extends LeftAndMain
 		
 		return $data;
 	}
-	
+
 	/**
 	 * restores the last published version
 	 *
-	 *@name revert_changes
-	 *@access public
-	*/
+	 * @name revert_changes
+	 * @access public
+	 * @return AjaxResponse
+	 */
 	public function revert_changes() {
 		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1)) {
 			if($this->confirm(lang("revert_changes_confirm", "Do you really want to revert changes and go back to the last published version?"))) {
@@ -178,9 +179,7 @@ class contentAdmin extends LeftAndMain
 						$response = new AjaxResponse();
 						Notification::notify("pages", lang("revert_changes_success", "The last version was recovered successfully."), lang("reverted"));
 						$response->exec("reloadTree(function(){ LoadTreeItem('".$data->class_name . "_" . $data->id."'); });");
-						HTTPResponse::setBody($response->render());
-						HTTPResponse::output();
-						exit;
+						return $response;
 					} else {
 						addcontent::addSuccess(lang("revert_changes_success", "The last version was recovered successfully."));
 						$this->redirectBack();
@@ -194,8 +193,9 @@ class contentAdmin extends LeftAndMain
 	/**
 	 * unpublishes the current version
 	 *
-	 *@name unpublish
-	 *@access public
+	 * @name unpublish
+	 * @access public
+	 * @return AjaxResponse
 	 */
 	public function unpublish() {
 		if((is_a($this->modelInst(), "DataObject") || $this->modelInst()->Count() == 1) && $this->modelInst()->unpublish()) {
@@ -203,9 +203,7 @@ class contentAdmin extends LeftAndMain
 				$response = new AjaxResponse();
 				Notification::notify("pages", lang("unpublish_success", "The site was successfully unpublished."), lang("unpublished"));
 				$response->exec("reloadTree(function(){ LoadTreeItem('" . $this->modelInst()->class_name . "_" .$this->modelInst()->id."'); });");
-				HTTPResponse::setBody($response->render());
-				HTTPResponse::output();
-				exit;
+				return $response;
 			} else {
 				AddContent::addSuccess(lang("unpublish_success", "The site was successfully unpublished."));
 				$this->redirectBack();
@@ -215,9 +213,7 @@ class contentAdmin extends LeftAndMain
 		if(Core::is_ajax()) {
 			$response = new AjaxResponse();
 			$response->exec('alert('.var_export(lang("less_rights"), true).');');
-			HTTPResponse::setBody($response->render());
-			HTTPResponse::output();
-			exit;
+			return $response;
 		} else {
 			AddContent::addError(lang("less_rights"));
 			$this->redirectBack();

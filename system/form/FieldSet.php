@@ -152,10 +152,11 @@ class FieldSet extends FormField
     /**
      * exports basic field info.
      *
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportBasicInfo() {
-        $data = parent::exportBasicInfo();
+    public function exportBasicInfo($fieldErrors = null) {
+        $data = parent::exportBasicInfo($fieldErrors);
 
         // get content
         uasort($this->items, array($this, "sort"));
@@ -170,7 +171,7 @@ class FieldSet extends FormField
             $name = strtolower($item->name);
 
             if ($this->form()->isFieldToRender($name)) {
-                $data->addChild($item->exportBasicInfo());
+                $data->addChild($item->exportBasicInfo($fieldErrors));
             }
         }
 

@@ -391,17 +391,17 @@ class Form extends gObject {
 	 * @return mixed|string
 	 */
 	public function render() {
-		Resources::add("form.css", "css");
+		Resources::add("form.less", "css");
 
 		// check for submit or append info for user to resubmit.
 		if(isset($this->post["form_submit_" . $this->name()]) && GlobalSessionManager::globalSession()->hasKey(self::SESSION_PREFIX . "." . strtolower($this->name))) {
 			// check secret
 			if($this->secret && $this->post["secret_" . $this->ID()] == $this->state->secret) {
 				$this->defaultFields();
-				return $this->submit();
+				return $this->trySubmit();
 			} else if(!$this->secret) {
 				$this->defaultFields();
-				return $this->submit();
+				return $this->trySubmit();
 			} else {
 				$this->form->append(new HTMLNode("div", array("class" => "notice", ), lang("form_not_saved_yet", "The Data hasn't saved yet.")));
 			}
@@ -447,7 +447,7 @@ class Form extends gObject {
 	 * @access public
 	 * @return mixed|string
 	 */
-	public function renderForm() {
+	public function renderForm($errors = array()) {
 		$this->renderedFields = array();
 		if(PROFILE)
 			Profiler::mark("Form::renderForm");
@@ -460,7 +460,8 @@ class Form extends gObject {
 
 		$jsonData = array();
 
-		$fields = $this->getFormFields();
+		$errorSet = $this->getErrorDataset($errors, $fieldErrors);
+		$fields = $this->getFormFields($fieldErrors);
 		$actions = $this->getActionFields();
 		$validators = $this->getValidator($fields, $actions);
 
@@ -484,7 +485,7 @@ class Form extends gObject {
 		$view->fields = $fieldDataSet;
 		$view->actions = $actionDataSet;
 
-		$this->form->append($view->renderWith("form/form.html"));
+		$this->form->append($view->customise(array("errors" => new DataSet($errorSet)))->renderWith("form/form.html"));
 
 		$this->callExtending("afterRender");
 
@@ -493,7 +494,7 @@ class Form extends gObject {
 		if(PROFILE)
 			Profiler::mark("Form::renderForm::render");
 		$data = $this->form->render();
-		Resources::addJS('$(function(){new goma.form(' . var_export($this->ID(), true) . ', '.json_encode($jsonData).'); });');
+		Resources::addJS('$(function(){console.log(new goma.form(' . var_export($this->ID(), true) . ', '.json_encode($jsonData).', '.json_encode($errorSet).')); });');
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 
@@ -507,7 +508,56 @@ class Form extends gObject {
 		return $data;
 	}
 
-	protected function getFormFields() {
+	/**
+	 * @param array $errors
+	 * @param array $fieldErrors
+	 * @return array
+	 */
+	protected function getErrorDataset($errors, &$fieldErrors) {
+		$set = array();
+		$fieldErrors = array();
+
+		/** @var Exception $error */
+		foreach($errors as $error) {
+			if(is_a($error, "FormMultiFieldInvalidDataException")) {
+				/** @var FormMultiFieldInvalidDataException $error */
+				foreach($error->getFieldsMessages() as $field => $message) {
+					$set[] = array(
+						"message" 	=> lang($message, $message),
+						"field" 	=> $field,
+						"type"		=> "FormInvalidDataException"
+					);
+				}
+			} else if(is_a($error, "FormInvalidDataException")) {
+				/** @var FormInvalidDataException $error */
+				$set[] = array(
+					"message" 	=> lang($error->getMessage(), $error->getMessage()),
+					"field" 	=> $error->getField(),
+					"type"		=> "FormInvalidDataException"
+				);
+			} else {
+				$set[] = array(
+					"message" 	=> lang($error->getMessage(), $error->getMessage()),
+					"type"		=> get_class($error)
+				);
+			}
+		}
+
+		foreach($set as $error) {
+			if(isset($error["field"])) {
+				$field = strtolower($error["field"]);
+				if(!isset($fieldErrors[$field])) {
+					$fieldErrors[$field] = array($error);
+				} else {
+					$fieldErrors[$field][] = $error;
+				}
+			}
+		}
+
+		return $set;
+	}
+
+	protected function getFormFields($fieldErrors) {
 		$fields = array();
 
 		/** @var FormField $field */
@@ -515,7 +565,8 @@ class Form extends gObject {
 			try {
 				if ($this->isFieldToRender($field->name)) {
 					$this->registerRendered($field->name);
-					$fields[] = $field->exportFieldInfo();
+
+					$fields[] = $field->exportFieldInfo($fieldErrors);
 				}
 			} catch(Exception $e) {
 				$fields[] = new FormFieldErrorResponse($field->name, $e);
@@ -582,17 +633,9 @@ class Form extends gObject {
 	}
 
 	/**
-	 * submission
-	 *
-	 * @name submit
-	 * @access public
-	 * @return mixed|string
+	 * tries to submit.
 	 */
-	public function submit($post = null) {
-		$this->callExtending("beforeSubmit");
-
-		$this->post = isset($post) ? $post : $_POST;
-
+	public function trySubmit() {
 		foreach($this->post as $key => $value) {
 			if(preg_match("/^field_action_([a-zA-Z0-9_]+)_([a-zA-Z_0-9]+)$/", $key, $matches)) {
 				if(isset($this->fields[$matches[1]]) && $this->fields[$matches[1]]->hasAction($matches[2])) {
@@ -606,8 +649,73 @@ class Form extends gObject {
 		$data = GlobalSessionManager::globalSession()->get(self::SESSION_PREFIX . "." . strtolower($this->name));
 		$data->post = $this->post;
 
-		// just write it
 		$this->saveToSession();
+
+		try {
+			$content = $data->handleSubmit();
+
+			GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
+
+			return $content;
+		} catch(Exception $e) {
+			if(is_a($e, "FormNotValidException")) {
+				/** @var FormNotValidException $e */
+				$errors = $e->getErrors();
+			} else {
+				$errors = array($e);
+			}
+
+			$this->state = $data->state;
+
+			$this->defaultFields();
+
+			return $this->renderForm($errors);
+		}
+	}
+
+	/**
+	 * gets the result of the form and submits it to
+	 * - validators
+	 * - data-handlers
+	 * - gets submission
+	 * - submission
+	 * @return mixed|string
+	 * @throws FormNotSubmittedException
+	 * @throws FormNotValidException
+	 */
+	protected function handleSubmit() {
+		$result = $this->gatherResultForSubmit();
+
+		$submission = self::findSubmission($this, $this->post, $result);
+
+		if(!$submission) {
+			throw new FormNotSubmittedException();
+		}
+
+		if(is_callable($submission)) {
+			return call_user_func_array($submission, array(
+				$result,
+				$this,
+				$this->controller
+			));
+		} else {
+			return call_user_func_array(array(
+				$this->controller,
+				$submission
+			), array(
+				$result,
+				$this,
+				$this->controller
+			));
+		}
+	}
+
+	/**
+	 * @return array|mixed
+	 * @throws FormNotValidException
+	 */
+	public function gatherResultForSubmit() {
+		$this->callExtending("beforeSubmit");
 
 		$allowed_result = array();
 		$this->result = array();
@@ -615,7 +723,7 @@ class Form extends gObject {
 
 		// get data
 		/** @var FormField $field */
-		foreach($data->fields as $field) {
+		foreach($this->fields as $field) {
 			$result = $field->result();
 
 			$this->result[$field->dbname] = $result;
@@ -623,17 +731,15 @@ class Form extends gObject {
 		}
 
 		// validation
-		$valid = true;
-		$errors = new HTMLNode('div', array('class' => "error"), array(new HTMLNode('ul', array())));
+		$errors = array();
 
-		$data->result = $this->result;
-
-		foreach($data->validators as $validator) {
-			$validator->setForm($data);
-			$v = $validator->validate();
-			if($v !== true) {
-				$valid = false;
-				$errors->getNode(0)->append(new HTMLNode('li', array('class' => 'erroritem'), $v));
+		foreach($this->validators as $validator) {
+			/** @var FormValidator $validator */
+			$validator->setForm($this);
+			try {
+				$validator->validate();
+			} catch(Exception $e) {
+				$errors[] = $e;
 			}
 		}
 
@@ -652,50 +758,22 @@ class Form extends gObject {
 			}
 		}
 
-		$data->callExtending("getResult", $realresult);
+		$this->callExtending("getResult", $realresult);
 
 		$result = $realresult;
 		unset($realresult, $allowed_result);
 
-		foreach($data->getDataHandlers() as $callback) {
+		foreach($this->getDataHandlers() as $callback) {
 			$result = call_user_func_array($callback, array($result, $this));
 		}
 
-		$submission = self::findSubmission($data, $this->post, $result);
-
-		if($valid !== true || $submission === null) {
-			if($errors->getNode(0)->content) {
-				GlobalSessionManager::globalSession()->set("form_secrets." . $this->name(), $this->__get("secret_" . $this->ID())->value);
-				$this->form->append($errors);
-			} else {
-				$this->state = $data->state;
-				$this->defaultFields();
-			}
-
-			return $this->renderForm();
+		if(count($errors) > 0) {
+			throw new FormNotValidException($errors);
 		}
 
-		$data->callExtending("afterSubmit", $result);
+		$this->callExtending("afterSubmit", $result);
 
-		GlobalSessionManager::globalSession()->set("form_state_" . $this->name, $this->state->ToArray());
-
-		if(is_callable($submission)) {
-			return call_user_func_array($submission, array(
-				$result,
-				$this,
-				$this->controller
-			));
-		} else {
-	
-			return call_user_func_array(array(
-				$this->controller,
-				$submission
-			), array(
-				$result,
-				$this,
-				$this->controller
-			));
-		}
+		return $result;
 	}
 
 	/**

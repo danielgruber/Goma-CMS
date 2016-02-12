@@ -56,10 +56,8 @@ class DataValidator extends FormValidator
 			}
 		}
 
-		if ($valid) {
-			return true;
-		} else {
-			return implode(",", $errors);
+		if (!$valid) {
+			throw new Exception(implode(",", $errors));
 		}
 	}
 }

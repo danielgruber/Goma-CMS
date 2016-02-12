@@ -344,6 +344,10 @@ class DropDown extends FormField {
 		$this->container->append(new HTMLNode("div", array("class" => "widgetwrapper"), array($this->widget)));
 		$this->container->addClass("dropdownContainer");
 
+		if($this->errors) {
+			$this->container->addClass("form-field-has-error");
+		}
+
 		$this->callExtending("afterField");
 
 		if(PROFILE)

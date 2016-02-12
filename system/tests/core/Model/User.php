@@ -39,13 +39,15 @@ class UserTests extends GomaUnitTest
         );
 
         RegisterExtension::$registerCode = "";
-        $this->assertTrue(User::_validateCode($obj));
+        $this->assertNull(User::_validateCode($obj));
 
         RegisterExtension::$registerCode = randomString(3);
-        $this->assertEqual(User::_validateCode($obj), lang("register_code_wrong", "The Code was wrong!"));
+        $this->assertThrows(function() use ($obj) {
+            User::_validateCode($obj);
+        }, "FormInvalidDataException");
 
         $obj->form->result["code"] = RegisterExtension::$registerCode;
-        $this->assertTrue(User::_validateCode($obj));
+        $this->assertNull(User::_validateCode($obj));
     }
 
     /**

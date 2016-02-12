@@ -150,10 +150,11 @@ class RadioButton extends FormField
      * this function generates some JSON for using client side stuff.
      *
      * @name exportJSON
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportFieldInfo() {
-        $info = $this->exportBasicInfo()
+    public function exportFieldInfo($fieldErrors = null) {
+        $info = $this->exportBasicInfo($fieldErrors)
             ->setRenderedField($this->field())
             ->setJs($this->js());
 
@@ -163,11 +164,12 @@ class RadioButton extends FormField
     }
 
     /**
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportBasicInfo()
+    public function exportBasicInfo($fieldErrors = null)
     {
-        $data = parent::exportBasicInfo();
+        $data = parent::exportBasicInfo($fieldErrors);
 
         $nodes = array();
         foreach ($this->options as $value => $title) {

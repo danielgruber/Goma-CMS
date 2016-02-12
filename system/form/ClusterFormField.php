@@ -170,10 +170,11 @@ class ClusterFormField extends FormField {
 	/**
 	 * exports basic field info.
 	 *
+	 * @param array|null $fieldErrors
 	 * @return FormFieldResponse
 	 */
-	public function exportBasicInfo() {
-		$data = parent::exportBasicInfo();
+	public function exportBasicInfo($fieldErrors = null) {
+		$data = parent::exportBasicInfo($fieldErrors);
 
 		// get content
 		uasort($this->items, array($this, "sort"));
@@ -185,7 +186,7 @@ class ClusterFormField extends FormField {
 				$item->disable();
 			}
 
-			$data->addChild($item->exportBasicInfo());
+			$data->addChild($item->exportBasicInfo($fieldErrors));
 		}
 
 		return $data;

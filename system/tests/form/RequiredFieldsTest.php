@@ -23,84 +23,97 @@ class RequiredFieldsTest extends GomaUnitTest implements TestAble {
      * tests fields.
      */
     public function testRequiredFields() {
-        $this->assertIdentical($this->unitTestRequiredFields(array(
+        $this->assertNull($this->unitTestRequiredFields(array(
             new TextField("test", "test")
         ), array(
             "test" => 1
-        ), array("test")), true);
+        ), array("test")));
 
-        $this->assertIdentical($this->unitTestRequiredFields(array(
+        $this->assertNull($this->unitTestRequiredFields(array(
             new TextField("test", "test")
         ), array(
             "test" => 1
-        ), array("TEST")), true);
+        ), array("TEST")));
 
-        $this->assertIdentical($this->unitTestRequiredFields(array(
+        $this->assertNull($this->unitTestRequiredFields(array(
             new TextField("test", "test")
         ), array(
             "test" => 1
-        ), array("TEST1")), true);
+        ), array("TEST1")));
 
-        $this->assertNotIdentical($this->unitTestRequiredFields(array(
-            new TextField("test", "test")
-        ), array(
-            "test" => ""
-        ), array("TEST")), true);
+        $this->assertThrows(function() {
+            $this->unitTestRequiredFields(array(
+                new TextField("test", "test")
+            ), array(
+                "test" => ""
+            ), array("TEST"));
+        }, "FormMultiFieldInvalidDataException");
 
-        $this->assertNotIdentical($this->unitTestRequiredFields(array(
-            new TextField("test", "test")
-        ), array(
-            "test" => 0
-        ), array("TEST")), true);
+        $this->assertThrows(function() {
+            $this->unitTestRequiredFields(array(
+                new TextField("test", "test")
+            ), array(
+                "test" => 0
+            ), array("TEST"));
+        }, "FormMultiFieldInvalidDataException");
 
-        $this->assertNotIdentical($this->unitTestRequiredFields(array(
-            new TextField("test", "test")
-        ), array(
-            "test" => array()
-        ), array("TEST")), true);
+        $this->assertThrows(function() {
+            $this->unitTestRequiredFields(array(
+                new TextField("test", "test")
+            ), array(
+                "test" => array()
+            ), array("TEST"));
+        }, "FormMultiFieldInvalidDataException");
 
-        $this->assertNotIdentical($this->unitTestRequiredFields(array(
-            new TextField("test", "test")
-        ), array(
-            "test" => new ViewAccessableData()
-        ), array("TEST")), true);
+        $this->assertThrows(function() {
+            $this->unitTestRequiredFields(array(
+                new TextField("test", "test")
+            ), array(
+                "test" => new ViewAccessableData()
+            ), array("TEST"));
+        }, "FormMultiFieldInvalidDataException");
 
-        $this->assertIdentical($this->unitTestRequiredFields(array(
+        $this->assertNull($this->unitTestRequiredFields(array(
             new TextField("test", "test")
         ), array(
             "test" => new ViewAccessableData(array(
                 "test" => 1
             ))
-        ), array("TEST")), true);
+        ), array("TEST")));
 
-        $this->assertNotIdentical($this->unitTestRequiredFields(array(
-            new TextField("test", "test")
-        ), array(
-            "test" => new BoolTestClass(false)
-        ), array("TEST")), true);
+        $this->assertThrows(function() {
+            $this->unitTestRequiredFields(array(
+                new TextField("test", "test")
+            ), array(
+                "test" => new BoolTestClass(false)
+            ), array("TEST"));
+        }, "FormMultiFieldInvalidDataException");
 
-        $this->assertIdentical($this->unitTestRequiredFields(array(
+        $this->assertNull($this->unitTestRequiredFields(array(
             new TextField("test", "test")
         ), array(
             "test" => new BoolTestClass(true)
-        ), array("TEST")), true);
+        ), array("TEST")));
 
-        $multiResult = $this->unitTestRequiredFields(array(
-            new TextField("test0", "test1"),
-            new TextField("test1", "test2"),
-            new TextField("test2", "test3"),
-            new TextField("test3", "test4")
-        ), array(
-            "test0" => 0,
-            "test1" => "",
-            "test2" => "",
-            "test3" => ""
-        ), array("TEST1", "test0", "test2", "test3"));
-        $this->assertNotIdentical($multiResult, true);
-        $this->assertPattern('/test1/', $multiResult);
-        $this->assertPattern('/test2/', $multiResult);
-        $this->assertPattern('/test3/', $multiResult);
-        $this->assertPattern('/test4/', $multiResult);
+        try {
+            $this->unitTestRequiredFields(array(
+                new TextField("test0", "test1"),
+                new TextField("test1", "test2"),
+                new TextField("test2", "test3"),
+                new TextField("test3", "test4")
+            ), array(
+                "test0" => 0,
+                "test1" => "",
+                "test2" => "",
+                "test3" => ""
+            ), array("TEST1", "test0", "test2", "test3"));
+
+            $this->assertTrue(false);
+        } catch(FormMultiFieldInvalidDataException $e) {
+            $keys = array_keys($e->getFieldsMessages());
+            array_shift($keys);
+            $this->assertEqual($keys, array("TEST1", "test0", "test2", "test3"));
+        }
 
         try {
             $this->unitTestRequiredFields(array(), array(), "");
@@ -125,7 +138,7 @@ class RequiredFieldsTest extends GomaUnitTest implements TestAble {
         $form->addValidator($required = new RequiredFields($requiredFields), "require");
         $form->result = $result;
 
-        return $required->validate();
+        $required->validate();
     }
 }
 

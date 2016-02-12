@@ -10,7 +10,7 @@ if(typeof goma == "undefined")
 	var goma = {};
 
 (function ( $ ) {
-	goma.form = function(id, fields) {
+	goma.form = function(id, fields, errors) {
 		if(!this instanceof goma.form)
 			return new goma.form(id, fields);
 
@@ -19,6 +19,7 @@ if(typeof goma == "undefined")
 		var that = this;
 
         this.fields = fields;
+		this.errors = errors;
 
         this.id = id;
 		this.form = $("#" + id);

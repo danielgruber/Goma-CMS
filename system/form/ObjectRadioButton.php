@@ -132,10 +132,11 @@ class ObjectRadioButton extends RadioButton
      * this function generates some JSON for using client side stuff.
      *
      * @name exportJSON
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportFieldInfo() {
-        $info = $this->exportBasicInfo();
+    public function exportFieldInfo($fieldErrors = null) {
+        $info = $this->exportBasicInfo($fieldErrors);
         $this->addRenderData($info);
 
         $this->callExtending("afterRenderFormResponse", $info);
@@ -155,11 +156,12 @@ class ObjectRadioButton extends RadioButton
     }
 
     /**
+     * @param array|null $fieldErrors
      * @return FormFieldResponse
      */
-    public function exportBasicInfo()
+    public function exportBasicInfo($fieldErrors = null)
     {
-        $data = parent::exportBasicInfo();
+        $data = parent::exportBasicInfo($fieldErrors);
 
         $nodes = $data->getExtra("radioButtons");
         foreach($nodes as $node) {
@@ -167,7 +169,7 @@ class ObjectRadioButton extends RadioButton
                 $field = $this->form()->getField($node["title"][1]);
                 $node["title"] = $node["title"][0];
 
-                $data->addChild($field->exportBasicInfo());
+                $data->addChild($field->exportBasicInfo($fieldErrors));
             }
         }
 

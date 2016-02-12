@@ -93,56 +93,69 @@ class AjaxSubmitButton extends FormAction {
 	public function submit() {
 		$response = new FormAjaxResponse($this->form(), $this);
 
-		$submission = $this->ajaxsubmit;
-		$this->form()->post = $this->request->post_params;
-		$allowed_result = array();
-		$this->form()->result = array();
 		// reset result
 		// get data
-
-		foreach($this->form()->fields as $field) {
-			// patch for correct behaviour on non-ajax and ajax-side
-			$field->getValue();
-
-			// now get results
-			$result = $field->result();
-			if($result !== null) {
-				$this->form()->result[$field->dbname] = $result;
-				$allowed_result[$field->dbname] = true;
-			}
-		}
-
-		// validation
-		if(!$this->validateForm($response)) {
-			return $response;
-		}
 
 		if($this->form()->getsecret()) {
 			GlobalSessionManager::globalSession()->set("form_secrets." . $this->form()->name(), randomString(30));
 			$response->exec('$("#' . $this->form()->fields["secret_" . $this->form()->id()]->id() . '").val("' . convert::raw2js($this->form()->secretKey) . '");');
 		}
 
-		$result = $this->form()->result;
-		if(is_object($result) && is_subclass_of($result, "dataobject")) {
-			/** @var DataObject $result */
-			$result = $result->ToArray();
-		}
+		try {
+			$this->handleSubmit($response);
 
-		$realresult = array();
-		// now check which fields has edited
-		foreach($result as $key => $value) {
-			if(isset($allowed_result[$key])) {
-				$realresult[$key] = $value;
+			return $response;
+		} catch(Exception $e) {
+			if(is_a($e, "FormNotValidException")) {
+				/** @var FormNotValidException $e */
+				$errors = $e->getErrors();
+			} else {
+				$errors = array($e);
 			}
-		}
 
-		$result = $realresult;
-		unset($realresult, $allowed_result);
+			/** @var Exception $error */
+			foreach($errors as $error) {
+				if(is_a($error, "FormMultiFieldInvalidDataException")) {
+					/** @var FormMultiFieldInvalidDataException $error */
+					foreach($error->getFieldsMessages() as $field => $message) {
+						if($message) {
+							$response->addError(lang($message, $message));
+						}
 
-		foreach($this->form()->getDataHandlers() as $callback) {
-			$result = call_user_func_array($callback, array($result, $this->form()));
+						$response->addErrorField($field);
+					}
+				} else if(is_a($error, "FormInvalidDataException")) {
+					/** @var FormInvalidDataException $error */
+					if($error->getMessage()) {
+						$response->addError(lang($error->getMessage(), $error->getMessage()));
+					}
+
+					$response->addErrorField($error->getField());
+				} else {
+					if($error->getMessage()) {
+						$response->addError(lang($error->getMessage(), $error->getMessage()));
+					}
+				}
+			}
+
+			return $response;
 		}
-		
+	}
+
+	/**
+	 * @param FormAjaxResponse $response
+	 * @return mixed
+	 * @throws FormNotValidException
+	 */
+	protected function handleSubmit($response) {
+		$this->form()->post = $this->request->post_params;
+
+		$result = $this->form()->gatherResultForSubmit();
+
+		$this->form()->result = array();
+
+		$submission = $this->ajaxsubmit;
+
 		if(is_callable($submission)) {
 			return call_user_func_array($submission, array(
 				$result,
@@ -191,24 +204,6 @@ class AjaxSubmitButton extends FormAction {
 	public function getAjaxSubmit() {
 		return $this->ajaxsubmit;
 	}
-
-	/**
-	 * @param FormAjaxResponse $response
-	 * @return bool
-	 */
-	private function validateForm($response)
-	{
-		foreach($this->form()->validators as $validator) {
-			$validator->setForm($this->form());
-			$v = $validator->validate();
-			if($v !== true) {
-				$response->addError($v);
-			}
-		}
-
-		return count($response->getErrors()) == 0;
-	}
-
 }
 
 Core::addRules(array('forms/ajax//$form!/$handler!' => 'AjaxSubmitButton'), 100);
