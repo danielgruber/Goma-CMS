@@ -194,7 +194,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		if(Permission::check("USERS_MANAGE"))
 		{
 			$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"), null, "general");
-			$form->groups->disable();
 		}
 
 		if(!member::login())
@@ -488,7 +487,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$this->code_has_sent = (int) $send;
 
 		if($write) {
-			$this->write(false, true);
+			$this->writeToDB(false, true);
 		}
 
 		return $this->code;
@@ -504,7 +503,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$this->callExtending("performLogout");
 
 		if($this->wasChanged()) {
-			$this->write(false, true);
+			$this->writeToDB(false, true);
 		}
 	}
 
