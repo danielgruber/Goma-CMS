@@ -156,23 +156,8 @@ class FormAjaxResponse extends AjaxResponse
      */
     public function render()
     {
-        if($this->errors) {
-            $errors = new HTMLNode('div', array('class' => "error"), array(new HTMLNode('ul', array())));
-            foreach($this->errors as $error) {
-                $errors->getNode(0)->append(new HTMLNode('li', array('class' => 'erroritem'), $error));
-            }
-
-            $this->prepend("#" . $this->form->ID(), $errors->render());
-        }
-
-        if($this->success) {
-            $succceses = new HTMLNode('div', array('class' => "success"), array(new HTMLNode('ul', array())));
-            foreach($this->success as $success) {
-                $succceses->getNode(0)->append(new HTMLNode('li', array('class' => 'successitem'), $success));
-            }
-
-            $this->prepend("#" . $this->form->ID(), $succceses->render());
-        }
+        $this->renderItems($this->errors, "error");
+        $this->renderItems($this->success, "success");
 
         foreach($this->errorFields as $field) {
             if($this->form->getField($field)) {
@@ -181,5 +166,20 @@ class FormAjaxResponse extends AjaxResponse
         }
 
         return parent::render();
+    }
+
+    /**
+     * @param array $array
+     * @param string $name
+     */
+    protected function renderItems($array, $name) {
+        if(!empty($array)) {
+            $data = new HTMLNode('div', array('class' => $name), array(new HTMLNode('ul', array())));
+            foreach($array as $item) {
+                $data->getNode(0)->append(new HTMLNode('li', array('class' => $name . "item"), $item));
+            }
+
+            $this->prepend("#" . $this->form->ID(), $data->render());
+        }
     }
 }
