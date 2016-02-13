@@ -409,7 +409,7 @@ class DropDown extends FormField {
 		$start = ($page * 10) - 10;
 		$end = $start + 9;
 		$i = 0;
-		$left = ($p == 1) ? false : true;
+		$left = ($page == 1) ? false : true;
 		$right = false;
 		$arr = array();
 
@@ -518,15 +518,8 @@ class DropDown extends FormField {
 		} else {
 			$this->value = $this->getParam("value");
 		}
-		if(Core::is_ajax()) {
-			return $this->renderInputWidget();
-		} else {
-			if($this->multiselect)
-				$this->form()->post[$this->PostName()] = $this->key;
-			else
-				$this->form()->post[$this->PostName()] = $this->value;
-			$this->form()->redirectToForm();
-		}
+
+		$this->redirectToFormOrRespond();
 	}
 
 	/**
@@ -545,6 +538,15 @@ class DropDown extends FormField {
 				$this->value = null;
 		}
 
+		$this->redirectToFormOrRespond();
+	}
+
+	/**
+	 * redirects back or renders form when on ajax.
+	 *
+	 * @return HTMLNode|void
+	 */
+	protected function redirectToFormOrRespond() {
 		if(Core::is_ajax()) {
 			return $this->renderInputWidget();
 		} else {
