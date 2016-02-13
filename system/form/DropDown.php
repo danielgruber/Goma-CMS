@@ -321,6 +321,7 @@ class DropDown extends FormField {
 	public function field() {
 		if(PROFILE)
 			Profiler::mark("FormField::field");
+
 		Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
 		$this->callExtending("beforeField");
 
@@ -328,14 +329,11 @@ class DropDown extends FormField {
 			gloader::load("sortable");
 		}
 
-		if(!$this->disabled) {
-			Resources::addJS("$(function(){ var ".$this->javascriptVariable()." = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
-		}
-
 		if($this->disabled) {
 			$this->field->disabled = "disabled";
-			$this->field->css("background-color", "#ddd");
-			$this->widget->getNode(0)->attr("disabled", "disabled");
+			$this->container->addClass("disabled", "disabled");
+		} else {
+			Resources::addJS("$(function(){ var ".$this->javascriptVariable()." = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
 		}
 
 		$this->container->append(new HTMLNode("label", array("for" => $this->ID()), $this->title));
@@ -370,127 +368,66 @@ class DropDown extends FormField {
 	 *
 	 * @param int $page number of page the user wants to see
 	 *
-	 * @access public
 	 * @return array this is an array which contains the data as data and some
 	 * information about paginating.
 	 */
 	public function getDataFromModel($page = 1) {
-		$start = ($page * 10) - 10;
-		$end = $start + 9;
-		$i = 0;
-		$left = ($page == 1) ? false : true;
-		// check if this is an array with numeric indexes or not
-		if(isset($this->options[0])) {
-			$arr = array();
-			foreach($this->options as $value) {
-				if($i < $start) {
-					$i++;
-					continue;
-				}
-				if($i >= $end) {
-					$right = true;
-					break;
-				}
-				$arr[] = array(
-					"key" => $value,
-					"value" => convert::raw2text($value)
-				);
-				$i++;
-			}
-		} else {
-			$arr = array();
-			foreach($this->options as $key => $value) {
-				if($i < $start) {
-					$i++;
-					continue;
-				}
-				if($i >= $end) {
-					$right = true;
-					break;
-				}
-				$arr[] = array(
-					"key" => $key,
-					"value" => convert::raw2text($value)
-				);
-				$i++;
-			}
-		}
-
-		return array(
-			"data" => $arr,
-			"right" => $right,
-			"left" => $left,
-			"showStart" => $start,
-			"showEnd" => $end,
-			"whole" => count($this->options)
-		);
+		return $this->getResultFromData($page, $this->options);
 	}
 
 	/**
 	 * generates the data, which should be shown in the dropdown if the user
 	 * searches.
 	 *
-	 * @param int $p number of page the user wants to see
+	 * @param int $page number of page the user wants to see
 	 * @param string $search the phrase to search for
 	 *
-	 * @access public
 	 * @return array this is an array which contains the data as data and some
 	 * information about paginating.
 	 */
-	public function searchDataFromModel($p = 1, $search = "") {
+	public function searchDataFromModel($page = 1, $search = "") {
 		// first get result
-		$data = $this->options;
 		$result = array();
-		foreach($data as $key => $val) {
+		foreach($this->options as $key => $val) {
 			if(preg_match('/' . preg_quote($search, '/') . '/i', $val)) {
 				$result[$key] = preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
 			}
 		}
 
+		return $this->getResultFromData($page, $result);
+	}
+
+	/**
+	 * creates result out of data.
+	 *
+	 * @param int $page
+	 * @param array $result
+	 * @return array
+	 */
+	protected function getResultFromData($page, $result) {
 		// generate paging-data
-		$start = ($p * 10) - 10;
+		$start = ($page * 10) - 10;
 		$end = $start + 9;
 		$i = 0;
 		$left = ($p == 1) ? false : true;
 		$right = false;
+		$arr = array();
 
-		// check if this is an array with numeric indexes or not
-		if(isset($result[0])) {
-			$arr = array();
-			foreach($result as $value) {
-				if($i < $start) {
-					$i++;
-					continue;
-				}
-				if($i >= $end) {
-					$right = true;
-					break;
-				}
-				$arr[] = array(
-					"key" => $value,
-					"value" => convert::raw2text($value)
-				);
+		foreach($result as $key => $value) {
+			if($i < $start) {
 				$i++;
+				continue;
 			}
-		} else {
-			$arr = array();
-			foreach($result as $key => $value) {
-				if($i < $start) {
-					$i++;
-					continue;
-				}
-				if($i >= $end) {
-					$right = true;
-					break;
-				}
-				$arr[] = array(
-					"key" => $key,
-					"value" => convert::raw2text($value)
-				);
-				$i++;
+			if($i >= $end) {
+				$right = true;
+				break;
 			}
+			$arr[] = array(
+				"key" => isset($result[0]) ? $value : $key,
+				"value" => convert::raw2text($value)
+			);
+			$i++;
 		}
-		// clean up
 		unset($i);
 
 		return array(
@@ -507,7 +444,6 @@ class DropDown extends FormField {
 	 * responds to a user-request and generates the data, which should be shown in
 	 * the dropdown.
 	 *
-	 * @access public
 	 * @return string json-data to send to the client.
 	 */
 	public function getData() {

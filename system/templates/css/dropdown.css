@@ -11,6 +11,9 @@
 .dropdownContainer .info_field {
 	padding-left: 0.375em;
 }
+.dropdownContainer.disabled .field {
+	background-color: #bbb;
+}
 
 .widget_wrapper .nojs {
 	padding-left: 0.25em;

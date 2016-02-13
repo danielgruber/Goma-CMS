@@ -11,7 +11,7 @@ defined("IN_GOMA") OR die();
  *
  * @version 1.0
  */
-class FormInvalidDataException extends Exception {
+class FormInvalidDataException extends GomaException {
     /**
      * @var int
      */
@@ -30,10 +30,6 @@ class FormInvalidDataException extends Exception {
      * @param Exception|null $previous
      */
     public function __construct($field, $message = "You provided not valid data", $code = null, Exception $previous = null) {
-        if(!isset($code)) {
-            $code =  $this->standardCode;
-        }
-
         $this->field = $field;
 
         parent::__construct($message, $code, $previous);

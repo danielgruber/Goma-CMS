@@ -11,7 +11,7 @@ defined("IN_GOMA") OR die();
  *
  * @version 1.0
  */
-class FormNotValidException extends Exception
+class FormNotValidException extends GomaException
 {
     /**
      * @var int
@@ -31,19 +31,15 @@ class FormNotValidException extends Exception
      */
     public function __construct($errors, $code = null, Exception $previous = null)
     {
-        if (!isset($code)) {
-            $code = $this->standardCode;
-        }
-
         $this->errors = $errors;
+
+        parent::__construct(count($errors) . " Errors in Form.", $code, $previous);
 
         foreach($errors as $error) {
             if(!is_a($error, "Exception")) {
-                throw new InvalidArgumentException("All elements of the array must be type of Exception.");
+                throw new InvalidArgumentException("All elements of the array must be type of Exception.", null, $this);
             }
         }
-
-        parent::__construct(count($errors) . " Errors in Form.", $code, $previous);
     }
 
     /**

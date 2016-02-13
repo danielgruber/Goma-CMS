@@ -912,11 +912,12 @@ if (!function_exists('getallheaders'))
 	}
 }
 
-class SQLException extends Exception {
+class SQLException extends GomaException {
+	protected $standardCode = ExceptionManager::SQL_EXCEPTION;
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "", $code = ExceptionManager::DB_CONNECT_ERROR, Exception $previous = null) {
+	public function __construct($m = "", $code = null, Exception $previous = null) {
 		$sqlerr = SQL::errno() . ": " . sql::error() . "<br /><br />\n\n <strong>Query:</strong> <br />\n<code>" . sql::$last_query . "</code>\n";
 		$m = $sqlerr . "\n" . $m;
 		parent::__construct($m, $code, $previous);
@@ -924,20 +925,42 @@ class SQLException extends Exception {
 
 }
 
+class GomaException extends Exception {
+	/**
+	 * @var int
+	 */
+	protected $standardCode = ExceptionManager::EXCEPTION;
+
+	/**
+	 * GomaException constructor.
+	 *
+	 * @param string $message
+	 * @param null|int $code
+	 * @param Exception|null $previous
+	 */
+	public function __construct($message = "", $code = null, Exception $previous = null) {
+		if(!isset($code)) {
+			$code =  $this->standardCode;
+		}
+
+		parent::__construct($message, $code, $previous);
+	}
+
+	public function http_status() {
+		return 500;
+	}
+}
+
 class MySQLException extends SQLException {
 }
 
-class SecurityException extends Exception {
-	/**
-	 * constructor.
-	 */
-	public function __construct($m = "", $code = ExceptionManager::SECURITY_ERROR, Exception $previous = null) {
-		parent::__construct($m, $code, $previous);
-	}
-
+class SecurityException extends GomaException {
+	protected $standardCode = ExceptionManager::SECURITY_ERROR;
 }
 
-class PermissionException extends Exception {
+class PermissionException extends GomaException {
+
+	protected $standardCode = ExceptionManager::PERMISSION_ERROR;
 
     /**
      * which permission is missing.
@@ -953,7 +976,7 @@ class PermissionException extends Exception {
      * @param string $missingPerm
      * @param Exception $previous
      */
-	public function __construct($m = "You're not permitted to access this resource.", $code = ExceptionManager::PERMISSION_ERROR, $missingPerm = null, Exception $previous = null) {
+	public function __construct($m = "You're not permitted to access this resource.", $code = null, $missingPerm = null, Exception $previous = null) {
         $this->missingPerm = $missingPerm;
 		parent::__construct($m, $code, $previous);
 	}
@@ -964,14 +987,14 @@ class PermissionException extends Exception {
 
 }
 
-class PHPException extends Exception {
+class PHPException extends GomaException {
+	protected $standardCode = ExceptionManager::PHP_ERROR;
 	/**
 	 * constructor.
 	 */
-	public function __construct($m = "PHP-Error", $code = ExceptionManager::PHP_ERROR, Exception $previous = null) {
+	public function __construct($m = "PHP-Error", $code = null, Exception $previous = null) {
 		parent::__construct($m, $code, $previous);
 	}
-
 }
 
 class DBConnectError extends MySQLException {
@@ -984,7 +1007,7 @@ class DBConnectError extends MySQLException {
 
 }
 
-class ServiceUnavailable extends Exception {
+class ServiceUnavailable extends GomaException {
 	/**
 	 * constructor.
 	 */

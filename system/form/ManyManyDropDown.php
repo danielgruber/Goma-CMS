@@ -193,12 +193,12 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 * @param numeric - page
 	 * @return array
 	 */
-	public function searchDataFromModel($p = 1, $search = "") {
+	public function searchDataFromModel($page = 1, $search = "") {
 
 		$data = clone $this->getModel();
 		$data->filter($this->where);
 		$data->search($search);
-		$data->activatePagination($p);
+		$data->activatePagination($page);
 
 		if($this->form()->useStateData) {
 			$data->setVersion("state");
@@ -213,8 +213,8 @@ class ManyManyDropDown extends MultiSelectDropDown
 				}
 			}
 		}
-		$left = ($p > 1);
-		$right = (ceil($data->count() / 10) > $p);
+		$left = ($page > 1);
+		$right = (ceil($data->count() / 10) > $page);
 		return array("data" => $arr, "left" => $left, "right" => $right);
 	}
 

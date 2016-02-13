@@ -194,6 +194,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		if(Permission::check("USERS_MANAGE"))
 		{
 			$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"), null, "general");
+			$form->groups->disable();
 		}
 
 		if(!member::login())
@@ -374,8 +375,9 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 	/**
 	 * validates new and old passwords and returns error string when error happened.
-	 *
-	 * @return string
+	 * @param FormValidator $obj
+	 * @throws DataNotFoundException
+	 * @throws FormInvalidDataException
 	 */
 	public function validatepwd($obj) {
 		if(isset($obj->getForm()->result["oldpwd"]))
@@ -389,16 +391,16 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				// check old password
 				if(Hash::checkHashMatches($obj->getForm()->result["oldpwd"], $pwd))
 				{
-					return self::validateNewAndRepeatPwd($obj);
+					self::validateNewAndRepeatPwd($obj);
 				} else {
-					return lang("password_wrong");
+					throw new FormInvalidDataException("password_wrong");
 				}
 			} else {
-				return lang("error");
+				throw new DataNotFoundException("error");
 			}
 		} else
 		{
-			return lang("password_wrong");
+			throw new FormInvalidDataException("password_wrong");
 		}
 	}
 
@@ -406,20 +408,17 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 * validates new password and repeat matches.
 	 *
 	 * @param FormValidator $obj
-	 * @return bool|string
+	 * @throws FormInvalidDataException
 	 */
 	public static function validateNewAndRepeatPwd($obj) {
 		if(isset($obj->getForm()->result["password"], $obj->getForm()->result["repeat"]) && $obj->getForm()->result["password"] != "")
 		{
-			if($obj->getForm()->result["password"] == $obj->getForm()->result["repeat"])
+			if($obj->getForm()->result["password"] != $obj->getForm()->result["repeat"])
 			{
-				return true;
-			} else
-			{
-				return lang("passwords_not_match");
+				throw new FormInvalidDataException("passwords_not_match");
 			}
 		} else {
-			return lang("password_cannot_be_empty");
+			throw new FormInvalidDataException("password_cannot_be_empty");
 		}
 	}
 
@@ -630,7 +629,6 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		if($this->avatar && $this->avatar->realfile) {
 			if((ClassInfo::exists("gravatarimagehandler") && $this->avatar->filename == "no_avatar.png" && $this->avatar->classname != "gravatarimagehandler") || $this->avatar->classname == "gravatarimagehandler") {
 				$this->avatarid = 0;
-				$this->write(false, true, 2, false, false);
 				return new GravatarImageHandler(array("email" => $this->email));
 			}
 			return $this->avatar;

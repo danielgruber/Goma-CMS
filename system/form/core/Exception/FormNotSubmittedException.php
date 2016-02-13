@@ -11,7 +11,7 @@ defined("IN_GOMA") OR die();
  *
  * @version 1.0
  */
-class FormNotSubmittedException extends Exception {
+class FormNotSubmittedException extends GomaException {
 
     /**
      * @var int
@@ -25,10 +25,6 @@ class FormNotSubmittedException extends Exception {
      * @param Exception|null $previous
      */
     public function __construct($message = "The Form was not submitted.", $code = null, Exception $previous = null) {
-        if(!isset($code)) {
-            $code =  $this->standardCode;
-        }
-
         parent::__construct($message, $code, $previous);
     }
 }

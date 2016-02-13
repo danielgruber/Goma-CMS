@@ -224,11 +224,11 @@ class HasOneDropdown extends SingleSelectDropDown
 		 *@name searchDataFromModel
 		 *@param numeric - page
 		*/
-		public function searchDataFromModel($p = 1, $search = "") {
+		public function searchDataFromModel($page = 1, $search = "") {
 			$data = clone $this->model;
 			$data->filter($this->where);
 			$data->search($search);
-			$data->activatePagination($p);
+			$data->activatePagination($page);
 			
 			if($this->form()->useStateData) {
 				$data->setVersion("state");
@@ -246,8 +246,8 @@ class HasOneDropdown extends SingleSelectDropDown
 					}
 				}
 			}			
-			$left = ($p > 1);
-			$right = (ceil($data->count() / 10) > $p);
+			$left = ($page > 1);
+			$right = (ceil($data->count() / 10) > $page);
 			
 			$pageInfo = $data->getPageInfo();
 			unset($data);

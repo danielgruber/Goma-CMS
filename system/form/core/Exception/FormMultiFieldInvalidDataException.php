@@ -11,7 +11,7 @@ defined("IN_GOMA") OR die();
  *
  * @version 1.0
  */
-class FormMultiFieldInvalidDataException extends Exception
+class FormMultiFieldInvalidDataException extends GomaException
 {
     /**
      * @var int
@@ -31,10 +31,6 @@ class FormMultiFieldInvalidDataException extends Exception
      */
     public function __construct($fieldsMessages, $code = null, Exception $previous = null)
     {
-        if (!isset($code)) {
-            $code = $this->standardCode;
-        }
-
         $this->fieldsMessages = $fieldsMessages;
 
         parent::__construct($this->getFieldsMessage(), $code, $previous);

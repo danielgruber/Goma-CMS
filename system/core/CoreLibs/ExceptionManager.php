@@ -17,11 +17,17 @@ class ExceptionManager {
 	 * db connect error.
 	*/
 	const DB_CONNECT_ERROR = -25;
+	const SQL_EXCEPTION = -26;
 
 	/**
 	 * if permissions are not enough to view this page.
 	*/
 	const PERMISSION_ERROR = -5;
+
+	/**
+	 * normal exception.
+	 */
+	const EXCEPTION = -1;
 
 	/**
 	 * unknown PHP-Error.
@@ -102,6 +108,11 @@ class ExceptionManager {
      * no inverse found.
      */
     const RELATIONSHIP_INVERSE_REQUIRED = -62;
+
+	/**
+	 * data
+	 */
+	const DATA_NOT_FOUND = -404;
 
 	/**
 	 * gd.
