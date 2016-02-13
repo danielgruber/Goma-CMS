@@ -352,7 +352,7 @@ class FileUpload extends FormField {
 		Resources::add("font-awsome/font-awesome.css", "css");
 		Resources::add("system/form/FileUpload.js", "js", "tpl");
 		Resources::add("FileUpload.less", "css");
-		Resources::addJS("$(function(){new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
+		Resources::addJS("$(function(){ window[".var_export("fileupload_" . $this->ID(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
 		// modify form for right datatype
 		$this->form()->form->enctype = "multipart/form-data";
 
@@ -370,8 +370,8 @@ class FileUpload extends FormField {
 		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode("div", array("class" => "wrapper"),
 			new HTMLNode('div', array("class" => "actions"), array(
 			new HTMLNode("button", array(
-				"class" => "button delete-file red"
-			), new HTMLNode("i", array("class" => "fa fa-trash show-on-js delete-icon", "type" => "button")))
+				"class" => "button show-on-js delete-file red"
+			), new HTMLNode("i", array("class" => "fa fa-trash delete-icon", "type" => "button")))
 		))),
 			new HTMLNode('div', array("class" => "no-js-fallback"), array(
 			new HTMLNode('h3', array(), lang("files.replace")),

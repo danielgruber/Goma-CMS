@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma form framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 21.12.2011
-  * $Version 2.0
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * a simple Upload form-field which supports Images with Ajax-Upload + cropping.
+ * it will give back an ImageUploads-Class with parameters correctly filled out.
+ *
+ * @author 	Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @package Goma\Form
+ * @version 1.2
+ */
 class ImageUpload extends FileUpload
 {
 		/**

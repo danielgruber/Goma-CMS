@@ -105,25 +105,7 @@ function FileUpload(formelement, url, size, types) {
 		done: function(html) {
 			try {
 				var data = eval('('+html+');');
-				if(data.status == 0) {
-					$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
-				} else {
-					if(data.file["icon128"]) {
-						if(window.devicePixelRatio > 1.5 && data.file["icon128@2x"]) {
-							$($this.element).find("img").attr("src", data.file["icon128@2x"]);
-						} else {
-							$($this.element).find("img").attr("src", data.file.icon128);
-						}
-					} else {
-						$($this.element).find("img").attr("src", data.file.icon);
-					}
-					if(data.file.path)
-						$($this.element).find("a").attr("href", data.file.path);
-					else
-						$($this.element).find("a").removeAttr("href");
-					$($this.element).find("span").html(data.file.name);
-					$this.destInput.val(data.file.realpath);
-				}
+				this.updateFile(data);
 			} catch(err) {
 				if(this.isAbort) {
 				
@@ -131,6 +113,32 @@ function FileUpload(formelement, url, size, types) {
 					$this.infoZone.html('<div class="error">An Error occured. '+err+'</div>');
 				}
 			}
+		},
+
+		updateFile: function(data) {
+			if(data.status == 0) {
+				$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
+			} else {
+				if(data.file["icon128"]) {
+					if(window.devicePixelRatio > 1.5 && data.file["icon128@2x"]) {
+						this.updateIcon(data.file["icon128@2x"]);
+					} else {
+						this.updateIcon(data.file.icon128);
+					}
+				} else {
+					this.updateIcon(data.file.icon);
+				}
+				if(data.file.path)
+					$($this.element).find("a").attr("href", data.file.path);
+				else
+					$($this.element).find("a").removeAttr("href");
+				$($this.element).find("span").html(data.file.name);
+				$this.destInput.val(data.file.realpath);
+			}
+		},
+
+		updateIcon: function(icon) {
+			$($this.element).find("img").attr("src", icon);
 		},
 		
 		failSize: function(i) {
