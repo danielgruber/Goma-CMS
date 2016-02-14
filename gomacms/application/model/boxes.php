@@ -511,7 +511,7 @@ class Box extends Boxes
 				}
 				
 				$form->add(new HTMLEditor("text", lang("content"), null, null, $width), null, "content");
-				$form->add(new ImageUpload("background", lang("bgimage")), null, "settings");
+				$form->add(new ImageUploadField("background", lang("bgimage")), null, "settings");
 			}
 			
 			$form->add(new AutoFormField("border", lang("border")), null, "settings");

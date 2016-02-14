@@ -1,733 +1,247 @@
-<?php defined('IN_GOMA') OR die();
-
-defined("UPLOAD_DIR") OR die('Constant UPLOAD_DIR not defined, Please define UPLOAD_DIR to proceed.');
-
-loadlang("files");
-
+<?php defined("IN_GOMA") OR die();
 /**
+ * Unit-Tests for Uploads-Class.
  *
- * @package 	goma framework
- * @link 		http://goma-cms.org
- * @license: 	LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- * @author 	    Goma-Team
- * @version 	1.5.13
+ * @package		Goma\Test
  *
- * @property string realfile
- * @property string filename
- * @property string path
- * @property string type
- * @property string md5
- * @property string url
- * @property bool deletable
- * @property string collectionid
- * @property Uploads|null collection
- *
- * last modified: 25.08.2015
+ * @author		Goma-Team
+ * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-class Uploads extends DataObject {
 
-	const ID = "Uploads";
 
-	/**
-	 * max-filesize for md5
-	 *
-	 *@name FILESIZE_MD5
-	 *@access public
-	 */
-	const FILESIZE_MD5 = 52428800; // 50 MB
+class UploadsTest extends GomaUnitTest {
 
 	/**
-	 * max cache lifetime
-	 *
-	 *@name cacheLifeTime
-	 *@access public
-	 */
-	static $cache_life_time = 5356800; // 62 days = 5356800
+	 * area
+	*/
+	static $area = "Files";
 
 	/**
-	 * database-table
-	 *
-	 *@name db
-	 *@access public
-	 */
-	static $db = array(
-		"filename"	=> "varchar(300)",
-		"realfile"	=> "varchar(300)",
-		"path"		=> "varchar(400)",
-		"type"		=> "enum('collection','file')",
-		"deletable"	=> "enum('0', '1')",
-		"md5"		=> "text"
-	);
+	 * internal name.
+	*/
+	public $name = "Uploads";
 
 	/**
-	 * extensions in this files are by default handled by this class
-	 *
-	 *@name file_extensions
-	 *@access public
-	 */
-	static $file_extensions = array();
+	 * setup.
+	*/
+	public function setUp() {
+		$this->testfile = "./system/tests/resources/IMG_2008.jpg";
+		$this->filename = "uploads_testimg.jpg";
 
-	/**
-	 * relations
-	 *
-	 *@name has_one
-	 *@access public
-	 */
-	static $has_one = array(
-		"collection"		=> "Uploads"
-	);
+		// force no old versions of file.
+		$data = DataObject::get("uploads", array("md5" => md5_file($this->testfile)));
 
-	/**
-	 * indexes
-	 */
-	static $index = array(
-		array(
-			"name"      => "pathlookup",
-			"fields"    => "path,class_name",
-			"type"      => "INDEX"
-		)
-	);
-
-	/**
-	 * adds a file to the upload-folder
-	 *
-	 * @param $filename
-	 * @param string $realfile
-	 * @param string $collectionPath
-	 * @param string $class_name
-	 * @param boolean $deletable
-	 * @return Uploads
-	 */
-	public static function addFile($filename, $realfile, $collectionPath, $class_name = null, $deletable = null) {
-		if(!file_exists($realfile) || empty($collectionPath)) {
-			return null;
-		}
-
-		if(!isset($deletable)) {
-			$deletable = false;
-		}
-
-		// get collection info
-		$collection = self::getCollection($collectionPath);
-
-		// we need a collection, without SQL-DB this does not work,
-		// but you can always create Uploads-Object by your own.
-		if($collection === null) {
-			throw new LogicException("Collection must be set. A Database-Connection is required for Uploads::addFile.");
-		}
-		$collectionPath = $collection->hash();
-
-		// determine file-position
-		FileSystem::requireFolder(UPLOAD_DIR . "/" . md5($collectionPath));
-
-		// generate instance of file.
-		$file = self::getFileInstance($realfile, $collection, $filename, $deletable);
-
-		// now reinit the file-object with maybe guessed class-name.
-		$file = $file->getClassAs(self::getFileClass($class_name, $filename));
-
-		if(copy($realfile, $file->realfile)) {
-
-			if($deletable) {
-				$file->forceDeletable = true;
-			}
-
-			if($file->writeToDB(true, true)) {
-				return $file;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * get file class by class or filename.
-	 *
-	 * @param string $class_name
-	 * @param string $filename
-	 * @return string
-	 * @internal param $getFileClass
-	 */
-	public static function getFileClass($class_name, $filename) {
-		// make it a valid class-name
-		if(isset($class_name)) {
-			$class_name = trim(strtolower($class_name));
-		}
-
-		// guess class-name
-		$guessed_class_name = self::guessFileClass($filename);
-
-		// if we dont have a given class-name, use guessed one.
-		if(!isset($class_name)) {
-			$class_name = $guessed_class_name;
-
-			// if guessed classname is a specialisation of class-name, use guessed one.
-		} else if(is_subclass_of($guessed_class_name, $class_name)) {
-			$class_name = $guessed_class_name;
-		}
-
-		return $class_name;
-	}
-
-	/**
-	 * gets the object for the given file-path
-	 *
-	 * @name getFile
-	 * @access public
-	 * @return Uploads|null
-	 */
-	public static function getFile($path) {
-
-		if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
-			$path = $match[1] . "/" . $match[2] . "/" . $match[3];
-		}
-
-		$cacher = new Cacher("file_" . $path);
-		if($cacher->checkValid()) {
-			$data = $cacher->getData();
-			return new $data["class_name"]($data);
-		} else {
-			if(($data = DataObject::get_one("Uploads", array("path" => $path))) !== null) {
-				$cacher->write($data->toArray(), 86400);
-				return $data;
-			} else if(($data = DataObject::get_one("Uploads", array("realfile" => $path))) !== null) {
-				$cacher->write($data->toArray(), 86400);
-				return $data;
-			} else {
-				return null;
-			}
-		}
-	}
-
-	/**
-	 * guesses the file-class
-	 *
-	 * @name guessFileClass
-	 * @access public
-	 * @return string
-	 */
-	public static function guessFileClass($filename) {
-		$ext = strtolower(substr($filename, strrpos($filename, ".") + 1));
-		foreach(ClassInfo::getChildren("Uploads") as $child) {
-			if(in_array($ext, StaticsManager::getStatic($child, "file_extensions"))) {
-				return $child;
-			}
-		}
-
-		return "Uploads";
-	}
-
-	/**
-	 * builds an instance of file.
-	 * it checks if file with md5 already exists and creates it if required.
-	 *
-	 * @param    string $realfile
-	 * @param    Uploads $collection
-	 * @param    string $filename
-	 * @param    boolean $deletable if file is auto-deletable or not
-	 * @return   Uploads
-	 */
-	public static function getFileInstance($realfile, $collection, $filename, $deletable) {
-
-		// check for already existing file.
-		if(filesize($realfile) < self::FILESIZE_MD5) {
-			$md5 = md5_file($realfile);
-
-			/** @var Uploads $object */
-			$object = DataObject::get_one("Uploads", array("md5" => $md5));
-			if($object && file_exists($object->realfile)) {
-				if(md5_file($object->realfile) == $md5 && $object->collectionid == $collection->id) {
-
-					// we found the same file, just create a new DB-Entry, cause we
-					// don't track where db-entry is used. one db entry is for one
-					// connection to another model.
-					$file = clone $object;
-					$file->collectionid = $collection->id;
-					$file->path = self::buildPath($collection, $filename);
-					$file->filename = $filename;
-					$file->deletable = $deletable;
-
-					return $file;
-				} else {
-					// maybe file of object has changed and md5 is not valid anymore
-					// so rewrite md5-hash of object
-					$object->md5 = md5_file($object->realfile);
-					$object->writeToDB(false, true);
-				}
-			}
-		}
-
-		// generate Uploads-Object.
-		return new Uploads(array(
-			"filename" 		=> $filename,
-			"type"			=> "file",
-			"realfile"		=> UPLOAD_DIR . "/" . md5($collection->hash()) . "/" . randomString(8) . self::cleanUpURL($filename),
-			"path"			=> self::buildPath($collection, $filename),
-			"collectionid" 	=> $collection->id,
-			"deletable"		=> $deletable,
-			"md5"			=> isset($md5) ? $md5 : null
-		));
-	}
-
-	/**
-	 * builds path out of data.
-	 *
-	 * @param Uploads $collection
-	 * @param string $filename
-	 * @return string
-	 */
-	protected function buildPath($collection, $filename) {
-		return strtolower(self::cleanUpURL($collection->hash())) . "/" . randomString(6) . "/" . self::cleanUpURL($filename);
-	}
-
-	/**
-	 * removes unwanted letters from string.
-	 *
-	 * @param string $path
-	 * @return string
-	 */
-	protected static function cleanUpURL($path) {
-		return preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $path);
-	}
-
-	/**
-	 * returns object of file-collection by given collection-data. (string or object)
-	 *
-	 * @param mixed $collectionPath collection as string or object
-	 * @param bool $useCache use cache to cache results.
-	 * @param bool $create
-	 * @return Uploads null if SQL not loaded up, else object of type Uploads or null when create is false and nothing found.
-	 * @throws Exception
-	 */
-	public static function getCollection($collectionPath, $useCache = true, $create = true) {
-		if(!is_object($collectionPath)) {
-			if(defined("SQL_LOADUP")) {
-
-				$cacher = new Cacher("uploads_collection_" . $collectionPath);
-				if($useCache && $cacher->checkValid() && $collectionObject = DataObject::get_by_id("Uploads", $cacher->getData())) {
-					return $collectionObject;
-				} else {
-					$collection = self::generateCollectionTree($collectionPath, $create);
-
-					if($collection) {
-						$cacher->write($collection->id, 86400);
-					}
-				}
-			} else {
-				return null;
-			}
-		} else {
-			$collection = $collectionPath;
-		}
-
-		return $collection;
-	}
-
-	/**
-	 * checks if collection-tree exists and gets last generated or found location.
-	 *
-	 * @param string $collectionPath
-	 * @param bool $create
-	 * @return Uploads
-	 * @internal param $generateCollectionTree
-	 */
-	public static function generateCollectionTree($collectionPath, $create) {
-
-		$collectionObject = null;
-		// determine id of collection
-		$collectionTree = explode(".", $collectionPath);
-
-		// check for each level of collection if it is existing.
-		foreach($collectionTree as $collection) {
-
-			/** @var Uploads $collectionObject */
-			// find parent collection
-			if($data = DataObject::get_one("Uploads",
-				array(
-					"filename" => $collection,
-					"collectionid" => isset($collectionObject) ? $collectionObject->id : 0,
-					"type" => "collection"
-				)
-			)) {
-				$collectionObject = $data;
-			} else if($create) {
-				$collectionObject = self::createCollection($collection, isset($collectionObject) ? $collectionObject->id : 0);
-			} else {
-				return null;
-			}
-		}
-
-		return $collectionObject;
-	}
-
-	/**
-	 * removes the file after remvoing from Database
-	 *
-	 * @name onAfterRemove
-	 * @access public
-	 * @return void
-	 */
-	public function onAfterRemove() {
-		if(file_exists($this->realfile)) {
-			$data = DataObject::get("Uploads", array("realfile" => $this->realfile));
-			if($data->Count() === 0) {
-				FileSystem::delete($this->realfile);
-			}
-		}
-
-		$cacher = new Cacher("file_" . $this->fieldGet("path"));
-		$cacher->delete();
-
-		$cacher = new Cacher("file_" . $this->fieldGet("realfile"));
-		$cacher->delete();
-
-		if(file_exists($this->path)) {
-			FileSystem::delete($this->path);
-		}
-
-		if($this->collection) {
-			$collectionFiles = $this->collection->getCollectionFiles()->forceData();
-			if($collectionFiles->count() === 0 ||
-				($collectionFiles->first()->id == $this->id && $collectionFiles->count() == 1)) {
-				$this->collection->remove(true);
-			}
-		}
-
-		parent::onAfterRemove();
-	}
-
-	/**
-	 * event on before write
-	 *
-	 *@name onBeforeWrite
-	 *@access public
-	 */
-	public function onBeforeWrite() {
-		$CacheForPath = new Cacher("file_" . $this->fieldGet("path"));
-		$CacheForPath->delete();
-
-		$CacheForRealfile = new Cacher("file_" . $this->fieldGet("realfile"));
-		$CacheForRealfile->delete();
-	}
-
-	/**
-	 * clean up DB
-	 *
-	 *@name cleanUpDB
-	 *@access public
-	 */
-	public function cleanUpDB($prefix = DB_PREFIX, &$log) {
-		parent::cleanUpDB($prefix, $log);
-
-		$data = DataObject::get("Uploads", array("deletable" => 1, "last_modified" => array(">", NOW - 120 * 60 * 24 * 14)));
-		foreach($data as $record) {
-			if(!file_exists($record->realfile)) {
+		if($data->count() > 0) {
+			foreach($data as $record) {
 				$record->remove(true);
-				continue;
-			} else {
-				logging("Would delete file " . $record->path . ", but Goma beta does not allow ;)");
 			}
 		}
+
+		$this->testTextFile = FRAMEWORK_ROOT . "temp/test.txt";
+		file_put_contents($this->testTextFile, randomString(100));
 	}
 
-	/**
-	 * returns files in the collection
-	 *
-	 * @name getCollectionFiles
-	 * @access public
-	 * @return DataObjectSet
-	 */
-	public function getCollectionFiles() {
-		if($this->type == "file") {
-			return DataObject::get("Uploads", array("collectionid" => $this->collectionid));
+	public function tearDown() {
+		@unlink($this->testTextFile);
+	}
+
+	public function testAddExistsAndRemove() {
+
+		// store first file.
+		$file = Uploads::addFile("1" . $this->filename, $this->testfile, "FormUpload", null, true);
+
+		// file1: Tests Deletable and some basics
+		$this->assertEqual($file->deletable, "1");
+		$file->deletable = false;
+		$file->write(false, true);
+
+		$this->assertEqual($file->deletable, "0");
+		$this->assertEqual($file->filename, "1" . $this->filename);
+		$this->assertEqual($file->classname, "imageuploads");
+		$this->assertTrue(file_exists($file->realfile));
+		$this->assertEqual(md5_file($file->realfile), md5_file($this->testfile));
+		$this->assertEqual(md5_file($this->testfile), $file->md5);
+		$this->assertEqual($file->collection->filename, "FormUpload");
+
+
+		// file2 test: Tests deletable for same file and some tests with same file/collection
+		// check for second file, which should be stored.
+		$file2 = Uploads::addFile($this->filename . ".jpg", $this->testfile, "FormUpload", null, true);
+
+		// should be 0, cause its same like file and should not be deletable.
+		$this->assertEqual($file2->deletable, "1");
+
+		$this->assertTrue(file_exists($file2->realfile));
+		$this->assertEqual($file->realfile, $file2->realfile);
+		$this->assertNotEqual($file->filename, $file2->filename);
+		$this->assertEqual($file->md5, $file2->md5);
+
+		// file3: tests stuff with different collection but same file
+		$file3 = Uploads::addFile($this->filename, $this->testfile, "TestUpload");
+		$this->assertTrue(file_exists($file3->realfile));
+		$this->assertNotEqual($file->realfile, $file3->realfile);
+		$this->assertEqual($file->filename, "1" . $file3->filename);
+		$this->assertEqual($file->md5, $file3->md5);
+
+		$this->assertTrue($file->bool());
+
+        $this->assertNotNull($file2);
+
+        if(isset($file2)) {
+            $this->assertTrue($file2->bool());
+
+            // check for file if we delete one.
+            $file2->remove(true);
+            $this->assertFalse($file2->bool());
+        }
+
+		$this->assertTrue(file_exists($file->realfile));
+
+		$this->textFileTests();
+
+		// try to get file.
+		$path = $file->path;
+
+		$this->match($path, $file);
+		$this->match(BASE_URI . $path, $file);
+		$this->match(BASE_URI . $path . "/orgSetSize/20/20/", $file);
+		$this->match("./" . $path . "/orgSetSize/20/20/", $file);
+		$this->match("./" . $path, $file);
+
+		// test deletes#
+		// $img is now $file here!!
+		if($img = Uploads::getFile($path)) {
+			$this->assertEqual($img->md5, $file->md5);
+			$this->assertEqual($img->md5, md5_file($this->testfile));
+
+			FileSystem::requireDir($img->path);
+			$this->assertTrue(file_exists($this->getFileWithoutBase($img->path)));
+
+			$realfile = $img->realfile;
+			$img->remove(true);
+
+			$this->assertFalse(file_exists($this->getFileWithoutBase($img->path)));
+			$this->assertFalse($img->bool());
+			$this->assertFalse(file_exists($realfile));
 		} else {
-			return DataObject::get("Uploads", array("collectionid" => $this->id));
-		}
-	}
-
-	/**
-	 * gets a subcollection with given name
-	 *
-	 * @name getSubCollection
-	 * @access public
-	 * @param string - name
-	 * @return Uploads
-	 */
-	public function getSubCollection($name) {
-		if($this->type == "file") {
-			if(!$this->collection) {
-				$this->addToDefaultCollection();
-			}
-
-			return $this->collection->getSubCollection($name);
-		} else {
-			if($collection = DataObject::get_one("Uploads", array("collectionid" => $this->id, "filename" => $name))) {
-				return $collection;
-			} else {
-				return self::createCollection($name, $this->id);
-			}
-		}
-	}
-
-	/**
-	 * generates unique path for this collection
-	 *
-	 * @name hash
-	 * @access public
-	 * @return string
-	 */
-	public function hash() {
-		if($this->realfile == "") {
-			return md5($this->identifier);
+			$this->assertTrue(false);
 		}
 
-		$this->write(false, true);
-		return $this->realfile;
+        $textfile = Uploads::getFile($this->textfile->fieldGet("path"));
+        if(isset($textfile)) {
+			$this->assertEqual($textfile->md5, md5_file($this->testTextFile));
+            $textfile->remove(true);
+            $this->assertFalse(file_exists($textfile->realfile));
+        }
+
+		$file3->remove(true);
 	}
 
 	/**
-	 * generates identifier for collection
-	 *
-	 * @name identifier
-	 * @access public
-	 * @return string
-	 */
-	public function identifier() {
-		if($this->collection) {
-			return $this->collection()->identifier() . "." . $this->filename;
-		} else {
-			return $this->filename;
-		}
-	}
-
-	/**
-	 * returns the raw-path
-	 *
-	 * @name raw
-	 * @access public
-	 * @return string
-	 */
-	public function raw() {
-		if($this->deletable) {
-			$this->deletable = true;
-			$this->write(false, true);
-		}
-
-		return $this->path;
-	}
-
-	/**
-	 * returns the path
-	 *
-	 * @name getPath
-	 * @access public
-	 * @return string
-	 */
-	public function getPath(){
-		if(!$this->fieldGET("path") || $this->fieldGet("path") == "Uploads/" || $this->fieldGet("path") == "Uploads")
-			return $this->fieldGET("path");
-
-		return BASE_SCRIPT . 'Uploads/' . $this->fieldGET("path");
-	}
-
-	/**
-	 * checks if file has bas and returns without if having.
+	 * gets file without base.
 	 *
 	 * @param string $file
-	 * @param string $base
 	 * @return string
 	 */
-	public function checkForBase($file, $base = BASE_SCRIPT) {
-		if($existentFile = $this->checkForExistence($file, $base)) {
-			return $existentFile;
-		}
-
-		if(substr($file, -1) != URLEND) {
-			return $file . URLEND;
+	protected function getFileWithoutBase($file) {
+		if(substr($file, 0, strlen(BASE_SCRIPT)) == BASE_SCRIPT) {
+			return substr($file, strlen(BASE_SCRIPT));
 		}
 
 		return $file;
 	}
 
 	/**
-	 * @param string $file
-	 * @param string $base
-	 * @return bool
+	 * checks for hash-method.
 	 */
-	protected function checkForExistence($file, $base = BASE_SCRIPT) {
-		if(substr($file, 0, strlen($base)) == $base) {
-			$fileWithoutBase = substr($file, strlen($base));
-			return (file_exists($fileWithoutBase) && !is_dir($fileWithoutBase)) ? $fileWithoutBase : null;
-		}
-
-		return file_exists($file) && !is_dir($file) ? $file : null;
-	}
-
-	/**
-	 * sets the path
-	 *
-	 *@name setPath
-	 *@access public
-	 */
-	public function setPath($path) {
-		if(substr($path, 0, strlen(BASE_SCRIPT)) == BASE_SCRIPT) {
-			$path = substr($path, strlen(BASE_SCRIPT));
-		}
-
-		if(substr($path, 0, strlen("index.php/")) == "index.php/") {
-			$path = substr($path, strlen("index.php/"));
-		}
-
-		if(substr($path, 0, 8) == "Uploads/") {
-			$this->setField("path", substr($path, 8));
-		} else {
-			$this->setField("path", $path);
-		}
-	}
-
-	/**
-	 * to string
-	 *
-	 * @name __toString
-	 * @access public
-	 * @return null|string
-	 */
-	public function __toString() {
-		if($this->bool()) {
-			return '<a href="'.$this->raw().'">' . $this->filename . '</a>';
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * returns the path to the icon of the file
-	 *
-	 * @name getIcon
-	 * @access public
-	 * @param int $size; support for 16, 32, 64 and 128
-	 * @return string
-	 */
-	public function getIcon($size = 128, $retina = false) {
-		switch($size) {
-			case 16:
-			case 32:
-			case 64:
-				if($retina)
-					return "images/icons/goma".$size."/file@2x.png";
-				else
-					return "images/icons/goma".$size."/file.png";
-				break;
-		}
-		return "images/icons/goma/128x128/file.png";
-	}
-
-	/**
-	 * local argument Query
-	 *
-	 *@name argumentQuery
-	 *@access public
-	 */
-
-	public function argumentQuery(&$query) {
-		parent::argumentQuery($query);
-
-		if(isset($query->filter["path"])) {
-			if(substr($query->filter["path"], 0, strlen(BASE_SCRIPT)) == BASE_SCRIPT) {
-				$query->filter["path"] = substr($query->filter["path"], strlen(BASE_SCRIPT));
-			}
-
-			if(substr($query->filter["path"], 0, strlen("index.php/")) == "index.php/") {
-				$query->filter["path"] = substr($query->filter["path"], strlen("index.php/"));
-			}
-
-			if(substr($query->filter["path"],0,strlen("Uploads")) == "Uploads") {
-				$query->filter["path"] = substr($query->filter["path"], strlen("Uploads") + 1);
-			}
-		}
-	}
-
-	/**
-	 * gets the file-size nice written
-	 *
-	 * @name filesize
-	 * @access public
-	 * @return string
-	 */
-	public function filesize() {
-		return FileSizeFormatter::format_nice(filesize($this->realfile));
-	}
-
-	/**
-	 * returns if this dataobject is valid
-	 *
-	 * @name bool
-	 * @access public
-	 * @return bool
-	 */
-	public function bool() {
-		if(parent::bool()) {
-			return ($this->type == "collection" || ($this->realfile !== "" && is_file($this->realfile)));
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * checks for the permission to show this file
-	 *
-	 * @name checkPermission
-	 * @return bool
-	 */
-	public function checkPermission() {
-		$check = true;
-		$this->callExtendig("checkPermission", $check);
-		return $check;
-	}
-
-	/**
-	 * returns url.
-	 */
-	public function getUrl() {
-		return BASE_URI . $this->checkForBase($this->getPath());
-	}
-
-	/**
-	 * to array if we need data for REST-API.
-	 * @param array $additional_fields
-	 * @return array
-	 */
-	public function ToRESTArray($additional_fields = array()) {
-		$arr = parent::ToRESTArray($additional_fields);
-		$arr["path"] = $this->getPath();
-		$arr["url"] = $this->url;
-
-		unset($arr["realfile"]);
-		return $arr;
-	}
-
-
-	/**
-	 * creates a new collection with given name and id.
-	 */
-	protected static function createCollection($name, $parentId) {
-		$collection = new Uploads(array(
-			"filename" 		=> $name,
-			"collectionid" 	=> $parentId,
-			"type" 			=> "collection"
+	public function testNoDBInterface() {
+		/** @var Uploads $file */
+		$file = new Uploads(array(
+			"filename" 		=> "test.txt",
+			"type"			=> "file",
+			"realfile"		=> $this->testTextFile,
+			"path"			=> "",
+			"collectionid" 	=> 0,
+			"deletable"		=> true,
+			"md5"			=> null
 		));
-		$collection->write(true, true);
-		return $collection;
+
+		$this->assertTrue(file_exists($file->realfile));
+		$this->assertFalse($file->collection);
+		$this->assertEqual($file->hash(), $file->realfile, "hash()-method should return md5 of filename.");
+	}
+
+	public function textFileTests() {
+		$textfilename = basename($this->testTextFile);
+		$textfile = Uploads::addFile(basename($this->testTextFile), $this->testTextFile, "FormUpload");
+		$this->assertEqual($textfile->filename, $textfilename);
+		$this->assertEqual($textfile->classname, "uploads");
+		$this->assertTrue(file_exists($textfile->realfile));
+		$this->assertEqual(md5_file($textfile->realfile), md5_file($this->testTextFile));
+		$this->assertEqual(md5_file($this->testTextFile), $textfile->md5);
+		$this->assertEqual($textfile->collection->filename, "FormUpload");
+
+		$this->textfile = $textfile;
+	}
+
+	public function match($path, $file) {
+		$match = Uploads::getFile($path);
+		$this->assertEqual($match->md5, $file->md5);
+		$this->assertEqual($match->filename, $file->filename);
 	}
 
 	/**
-	 * creates a default collection and adds this file to it.
+	 * tests collections.
 	 */
-	protected function addToDefaultCollection() {
-		$this->collection = self::getCollection("default");
+	public function testCollection() {
+		$collection = "test.c.t.b.a.d.t.d.e.d";
+		$file = Uploads::addFile($this->filename, $this->testfile, $collection);
 
-		if($this->id != 0) {
-			$this->write(false, true);
-		}
+		$this->assertEqual($file->collection->collection->collection->collection->filename, "t");
+		$this->assertEqual($file->collection->collection->collection->collection->collection->filename, "d");
+		$this->assertEqual($file->collection->collection->collection->collection->getSubCollection("d")->filename, "d");
+
+		$file->remove(true);
+
+		$this->assertNull(Uploads::getCollection($collection, true, false));
+	}
+
+	/**
+	 * tests for filenames which are not normal.
+	 */
+	public function testStrangeFilenames() {
+
+		$collection1 = "FormUpload";
+		$collection2 = "FormUpload.Blub";
+		$collection3 = "t.b.a.d.t.d.e.d";
+
+		$this->assertPattern(
+			"/^Uploads\/".preg_quote(md5($collection1), "/")."\/[a-zA-Z0-9]+\/file_123_.jpg$/",
+			$this->unitTestStrangeFilename("file+123 .jpg", $this->testfile, $collection1)
+		);
+
+		$this->assertPattern(
+			"/^Uploads\/".preg_quote(md5($collection2), "/")."\/[a-zA-Z0-9]+\/file_123_.jpg$/",
+			$this->unitTestStrangeFilename("file+123 .jpg", $this->testfile, $collection2)
+		);
+
+		$this->assertPattern(
+			"/^Uploads\/".preg_quote(md5($collection2), "/")."\/[a-zA-Z0-9]+\/file-123_.jpg$/",
+			$this->unitTestStrangeFilename("file-123 .jpg", $this->testfile, $collection2)
+		);
+		$this->assertPattern(
+			"/^Uploads\/".preg_quote(md5($collection3), "/")."\/[a-zA-Z0-9]+\/file-123_.jpg$/",
+			$this->unitTestStrangeFilename("file-123 .jpg", $this->testfile, $collection3)
+		);
+	}
+
+	public function unitTestStrangeFilename($filename, $testfile, $collection) {
+		// store first file.
+		$file = Uploads::addFile($filename, $testfile, $collection);
+		$path = $file->path;
+
+		$file->remove(true);
+
+		return $path;
 	}
 }

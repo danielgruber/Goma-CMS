@@ -228,23 +228,14 @@ class FileUpload extends FormField {
 			if(isset($tmp_name))
 				@unlink($tmp_name);
 
+			/** @var Uploads $response */
 			if(is_object($response)) {
 				HTTPResponse::setHeader("Content-Type", "text/x-json");
 				HTTPResponse::sendHeader();
-				$filedata = array(
-					"name" => $response->filename,
-					"realpath" => $response->fieldGet("path"),
-					"icon16" => $response->getIcon(16),
-					"path" => $response->path,
-					"id" => $response->id,
-					"icon128" => $response->getIcon(128),
-					"icon128@2x" => $response->getIcon(128, true),
-					"icon" => $response->getIcon()
-				);
 
 				echo json_encode(array(
 					"status" => 1,
-					"file" => $filedata
+					"file" => $this->getFileResponse($response)
 				));
 				exit ;
 			} else if(is_string($response)) {
@@ -260,6 +251,25 @@ class FileUpload extends FormField {
 	}
 
 	/**
+	 * renders response.
+	 *
+	 * @param Uploads $response
+	 * @return array
+	 */
+	protected function getFileResponse($response) {
+		return array(
+			"name" => $response->filename,
+			"realpath" => $response->fieldGet("path"),
+			"icon16" => $response->getIcon(16),
+			"path" => $response->path,
+			"id" => $response->id,
+			"icon128" => $response->getIcon(128),
+			"icon128@2x" => $response->getIcon(128, true),
+			"icon" => $response->getIcon()
+		);
+	}
+
+	/**
 	 * sends error with optional status-message in JSON-Format and sets JSON-Header.
 	*/
 	public function sendFailureJSON($error = null) {
@@ -272,12 +282,13 @@ class FileUpload extends FormField {
 
 	/**
 	 * prints failure as JSON without JSON-Header.
-	*/
+	 * @param null $error
+	 */
 	public function printFailureJSON($error = null) {
 
 		HTTPResponse::sendHeader();
 
-		$error = $error || lang("files.upload_failure");
+		$error = isset($error) ? $error :  lang("files.upload_failure");
 
 		echo json_encode(array(
 			"status" => 0,
@@ -295,22 +306,13 @@ class FileUpload extends FormField {
 	public function frameUpload() {
 		if(isset($_FILES["file"])) {
 			$response = $this->handleUpload($_FILES["file"]);
+			/** @var Uploads $response */
 			if(is_object($response)) {
 				HTTPResponse::sendHeader();
-				$filedata = array(
-					"name" => $response->filename,
-					"realpath" => $response->fieldGet("path"),
-					"icon16" => $response->getIcon(16),
-					"icon" => $response->getIcon(),
-					"icon128" => $response->getIcon(128),
-					"icon128@2x" => $response->getIcon(128, true),
-					"path" => $response->path,
-					"id" => $response->id
-				);
 
 				echo json_encode(array(
 					"status" => 1,
-					"file" => $filedata
+					"file" => $this->getFileResponse($response)
 				));
 				exit ;
 			} else if(is_string($response)) {
@@ -341,6 +343,13 @@ class FileUpload extends FormField {
 	}
 
 	/**
+	 * javascript-variable.
+	 */
+	protected function jsVar() {
+		return "fileupload_" . $this->ID();
+	}
+
+	/**
 	 * sets the right enctype for the form.
 	 * renders div.
 	 */
@@ -352,7 +361,7 @@ class FileUpload extends FormField {
 		Resources::add("font-awsome/font-awesome.css", "css");
 		Resources::add("system/form/FileUpload.js", "js", "tpl");
 		Resources::add("FileUpload.less", "css");
-		Resources::addJS("$(function(){ window[".var_export("fileupload_" . $this->ID(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
+		Resources::addJS("$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
 		// modify form for right datatype
 		$this->form()->form->enctype = "multipart/form-data";
 
@@ -449,5 +458,4 @@ class FileUpload extends FormField {
 		$this->getValue();
 		return $this->value;
 	}
-
 }

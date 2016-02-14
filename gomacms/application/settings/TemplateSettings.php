@@ -53,7 +53,7 @@ class TemplateSettings extends NewSettings {
 	*/
 	public function getFormFromDB(&$form) {
 		$form->add(new TemplateSwitcher("stpl", lang("available_styles"), ClassInfo::$appENV["app"]["name"], ClassInfo::appVersion(), GOMA_VERSION . "-" . BUILD_VERSION));
-		$form->add($img = new ImageUpload("favicon", lang("favicon")));
+		$form->add($img = new ImageUploadField("favicon", lang("favicon")));
 		
 		$img->allowed_file_types = array("jpg", "png", "bmp", "gif", "jpeg", "ico");
 		

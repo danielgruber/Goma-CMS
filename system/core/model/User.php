@@ -248,7 +248,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				new LangSelect("custom_lang", lang("lang")),
 				// password management in external window
 				new ExternalForm("passwort", lang("password", "password"), lang("edit_password", "change password"), '**********', array($this, "pwdform")),
-				new ImageUpload("avatar", lang("pic", "image")),
+				new ImageUploadField("avatar", lang("pic", "image")),
 				new TextArea("signatur", lang("signatur", "signature"), null, "100px")
 
 			), lang("general"))
@@ -392,14 +392,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				{
 					self::validateNewAndRepeatPwd($obj);
 				} else {
-					throw new FormInvalidDataException("password_wrong");
+					throw new FormInvalidDataException("password", "password_wrong");
 				}
 			} else {
 				throw new DataNotFoundException("error");
 			}
 		} else
 		{
-			throw new FormInvalidDataException("password_wrong");
+			throw new FormInvalidDataException("password", "password_wrong");
 		}
 	}
 
@@ -414,10 +414,10 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		{
 			if($obj->getForm()->result["password"] != $obj->getForm()->result["repeat"])
 			{
-				throw new FormInvalidDataException("passwords_not_match");
+				throw new FormInvalidDataException("password", "passwords_not_match");
 			}
 		} else {
-			throw new FormInvalidDataException("password_cannot_be_empty");
+			throw new FormInvalidDataException("password", "password_cannot_be_empty");
 		}
 	}
 
