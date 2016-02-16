@@ -861,25 +861,13 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 		$casting = $this->casting();
 
-        // non recursive
-		if($remaining == "") {
-			if(is_object($data) && gObject::method_exists($data, "forTemplate")) {
-				return $data->forTemplate();
-			} else if(isset($casting[$currentvar])) {
-				return $this->makeObject($currentvar, $data)->forTemplate();
-			} else {
-				return $data;
-			}
+		if(is_object($data) && gObject::method_exists($data, "forTemplate")) {
+			return $remaining ? $data->getTemplateVar($remaining) : $data->forTemplate();
+		} else if(isset($casting[$currentvar])) {
+			$object = $this->makeObject($currentvar, $data);
+			return $remaining ? $object->forTemplate() : $object->getTemplateVar($remaining);
 		} else {
-
-            // recursive
-			if(is_object($data) && method_exists($data, "getTemplateVar")) {
-				return $data->getTemplateVar($remaining);
-			} else if(isset($casting[$currentvar])) {
-				return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);
-			} else {
-				return $data;
-			}
+			return $data;
 		}
 	}
 
