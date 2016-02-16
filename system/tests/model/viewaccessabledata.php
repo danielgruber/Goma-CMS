@@ -62,11 +62,26 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 	 *
 	 */
 	public function testGetTemplateVar() {
-		$data = new ViewAccessableData(array("blah" => "blub"));
+		$data = new ViewAccessableData(array("blah" => "blub", "test" => $test = new TestClassWithForTemplate(), "std" => $std = new StdClass()));
 
 		$this->assertEqual($data->this(), $data);
 		$this->assertEqual($data->getTemplateVar("this"), $data);
 		$this->assertEqual($data->getTemplateVar("this.blah"), "blub");
+
+		$test->templateInfo = "blub";
+		$this->assertEqual($data->getTemplateVar("test"), "blub");
+		$this->assertEqual($data->getTemplateVar("test.blah"), "blub");
+		$this->assertEqual($data->test, $test);
+
+		$this->assertEqual($data->getTemplateVar("std"), $std);
+		$this->assertEqual($data->getTemplateVar("std.blub"), $std);
+
+		ViewAccessableData::$casting["std"] = "Varchar";
+
+		$this->assertEqual($data->getTemplateVar("std"), $std);
+		$this->assertEqual($data->getTemplateVar("std.blub"), $std);
+
+		unset(ViewAccessableData::$casting["std"]);
 
 		$testModel = new ViewAccessableData(array(
 			"test" => 123
@@ -203,6 +218,14 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($view->PROPERTY, $prop);
         $this->assertEqual($view->getTemplateVar("property"), $prop);
     }
+}
+
+class TestClassWithForTemplate {
+	public $templateInfo;
+
+	public function forTemplate() {
+		return $this->templateInfo;
+	}
 }
 
 class TestViewClassMethod extends ViewAccessableData {
