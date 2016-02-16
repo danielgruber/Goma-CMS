@@ -73,7 +73,7 @@
 .tabs > ul li a:hover, .tabs > ul li .tab:hover {
 	color: #444;
 }
-.tabs > ul li input.active, .tabs > ul li input.active {
+.tabs > ul li input.active, .tabs > ul li a.active, .tabs > ul li button.active {
 	color: #444;
 	background: #fff;
 	border-bottom: 0;
@@ -81,6 +81,9 @@
 	margin-top: 0;
 	padding-top: 0.63em;
 	padding-bottom: 0.75em;
+}
+.tabs > ul li button.active {
+	padding-bottom: .63em;
 }
 .tabs > ul > li > a.active {
 	color: #444;

@@ -68,7 +68,7 @@ class ObjectRadioButton extends RadioButton
     /**
      * renders the field
      *
-     * @param FormFieldResponse|null $info
+     * @param FormFieldRenderData|null $info
      * @return HTMLNode
      */
     public function field($info = null)
@@ -96,7 +96,7 @@ class ObjectRadioButton extends RadioButton
                 $field = $this->form()->getField($title[1]);
                 $title = $title[0];
 
-                /** @var FormFieldResponse $child */
+                /** @var FormFieldRenderData $child */
                 foreach($info->getChildren() as $child) {
                     if($child->getName() == $field->name) {
                         if($this->form()->isFieldToRender($child->getName())) {
@@ -133,7 +133,7 @@ class ObjectRadioButton extends RadioButton
      *
      * @name exportJSON
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportFieldInfo($fieldErrors = null) {
         $info = $this->exportBasicInfo($fieldErrors);
@@ -146,7 +146,7 @@ class ObjectRadioButton extends RadioButton
 
     /**
      * adds render data.
-     * @param FormFieldResponse $info
+     * @param FormFieldRenderData $info
      */
     public function addRenderData($info)
     {
@@ -157,7 +157,7 @@ class ObjectRadioButton extends RadioButton
 
     /**
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportBasicInfo($fieldErrors = null)
     {

@@ -10,7 +10,7 @@ defined("IN_GOMA") OR die();
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 1.0
  */
-class FormFieldResponse {
+class FormFieldRenderData extends gObject implements IRestResponse {
     /**
      * name.
      *
@@ -104,6 +104,14 @@ class FormFieldResponse {
     protected $hasError;
 
     /**
+     * resources.
+     */
+    protected $renderResources = array(
+        "js"    => array(),
+        "css"   => array()
+    );
+
+    /**
      * constructor.
      * @param string $name
      * @param string $type
@@ -112,6 +120,8 @@ class FormFieldResponse {
      */
     public function __construct($name, $type, $id, $divId)
     {
+        parent::__construct();
+
         $this->name = $name;
         $this->type = $type;
         $this->id = $id;
@@ -123,20 +133,20 @@ class FormFieldResponse {
      * @param string $type
      * @param string $id
      * @param string $divId
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public static function create($name, $type, $id, $divId) {
-        return new FormFieldResponse($name, $type, $id, $divId);
+        return new static($name, $type, $id, $divId);
     }
 
     /**
      * adds a child.
      *
-     * @param FormFieldResponse $child
+     * @param FormFieldRenderData $child
      * @return $this
      */
     public function addChild($child) {
-        if(!is_a($child, "FormFieldResponse")) throw new InvalidArgumentException("Child must be FormFieldResponse.");
+        if(!is_a($child, "FormFieldRenderData")) throw new InvalidArgumentException("Child must be FormFieldResponse.");
 
         $this->children[] = $child;
 
@@ -407,13 +417,38 @@ class FormFieldResponse {
     }
 
     /**
-     * to rest array.
-     * @param bool $includeRendered
+     * @param string $js
+     */
+    public function addJSFile($js) {
+        $this->renderResources["js"][$js] = $js;
+    }
+
+    /**
+     * @param string $css
+     */
+    public function addCSSFile($css) {
+        $this->renderResources["css"][$css] = $css;
+    }
+
+    /**
      * @return array
      */
-    public function ToRestArray($includeRendered = false) {
+    public function getRenderResources()
+    {
+        return $this->renderResources;
+    }
+
+    /**
+     * to rest array.
+     * @param bool $includeRendered
+     * @param bool $includeChildren
+     * @return array
+     */
+    public function ToRestArray($includeRendered = false, $includeChildren = true) {
         $data = array(
+            "class" => $this->classname,
             "name" => $this->name,
+            "title" => $this->title,
             "id" => $this->id,
             "divId" => $this->divId,
             "maxLength" => $this->maxLength,
@@ -423,21 +458,25 @@ class FormFieldResponse {
             "hasRenderData" => $this->renderedField != null,
             "js" => $this->js,
             "disabled"  => $this->isDisabled,
-            "hasError" => $this->hasError
+            "hasError" => $this->hasError,
+            "cssRenderResources" => $this->renderResources["css"],
+            "jsRenderResources" => $this->renderResources["js"]
         );
 
         if($includeRendered) {
             $data["field"] = $this->renderedField != null ? $this->renderedField->__toString() : "";
         }
 
-        if(!empty($this->children)) {
+        if(!empty($this->children) && $includeChildren) {
             $data["children"] = array();
 
-            /** @var FormFieldResponse $child */
+            /** @var FormFieldRenderData $child */
             foreach($this->children as $child) {
                 $data["children"][] = $child->ToRestArray();
             }
         }
+
+        $this->callExtending("exportRESTData");
 
         return $data;
     }

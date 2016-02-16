@@ -803,9 +803,8 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * converts the item to the right format
      *
-     *@name getConverted
-     *@access protected
-     *@param various - data
+     * @param Object|array|mixed $item
+     * @return ViewAccessableData
      */
     public function getConverted($item) {
         if(is_array($item)) {
@@ -817,11 +816,11 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
             $object = $item;
         }
 
-        $object->original = $object->data;
+        if(isset($object->data)) $object->original = $object->data;
 
         $object->dataset =& $this;
 
-        if(is_object($object)) {
+        if(is_object($object) && method_exists($object, "customise")) {
             $object->customise($this->protected_customised);
             return $object;
         } else {
@@ -832,10 +831,10 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
      * generates an object from the offset
      *
-     *@name makeObject
-     *@access public
-     *@param string - offset
-     *@param mixed - data of the offset
+     * @param string $offset
+     * @param mixed $data
+     * @param string|null $cachename
+     * @return gObject
      */
     public function makeObject($offset, $data, $cachename = null) {
         if(parent::__cancall($offset)) {

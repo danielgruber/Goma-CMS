@@ -10,7 +10,7 @@ defined("IN_GOMA") OR die();
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 1.0
  */
-class FormFieldErrorResponse extends FormFieldResponse {
+class FormFieldErrorRenderData extends FormFieldRenderData {
     /**
      * exception.
      *
@@ -49,7 +49,7 @@ class FormFieldErrorResponse extends FormFieldResponse {
         );
 
         if($includeRendered) {
-            $data["field"] = new HTMLNode("div", array("class" => "error"), convert::raw2text($this->name) . ": " . $this->exception->getMessage());
+            $data["field"] = new HTMLNode("div", array("class" => "error"), convert::raw2text($this->name) . ": " . $this->exception->getMessage() . $this->exception->getTraceAsString());
         }
 
         return $data;

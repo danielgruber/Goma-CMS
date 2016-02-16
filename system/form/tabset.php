@@ -21,6 +21,11 @@ class TabSet extends FieldSet
     public $activeTab = null;
 
     /**
+     * @var string
+     */
+    protected $template = "form/tabset.html";
+
+    /**
      * @name __construct
      * @access public
      * @param string - name
@@ -57,21 +62,24 @@ class TabSet extends FieldSet
     }
 
     /**
-     * @param FormFieldResponse $info
+     * @param FormFieldRenderData $info
      * @param bool $notifyField
      */
     public function addRenderData($info, $notifyField = true)
     {
+        $info->addCSSFile("tabs.css");
+        $info->addJSFile("system/libs/tabs/tabs.js");
+
         foreach($info->getChildren() as $child) {
-            /** @var FormFieldResponse $child */
+            /** @var FormFieldRenderData $child */
             if($child->getField()->hidden()) {
                 $info->removeChild($child);
             }
         }
 
-        parent::addRenderData($info, false);
+        $this->markTabActive($info);
 
-        $this->renderTabList($info);
+        parent::addRenderData($info, false);
 
         if($notifyField) {
             $this->callExtending("afterRenderFormResponse", $info);
@@ -79,40 +87,24 @@ class TabSet extends FieldSet
     }
 
     /**
-     * render tab list.
-     *
-     * @param FormFieldResponse $info
+     * @param FormFieldRenderData $info
      */
-    protected function renderTabList($info) {
-        $list = new HTMLNode("ul", array());
-
+    protected function markTabActive($info) {
         $activeTabFound = false;
         $children = $info->getChildren();
-        if(count($children) == 0) {
+
+        if(count($children) == 0)
             return;
-        }
 
         for($i = 0; $i < count($children); $i++) {
-            /** @var FormFieldResponse $child */
+            /** @var TabRenderData $child */
             $child = $children[$i];
-
-            $listItem = new HTMLNode('li', array(), new HTMLNode('input', array(
-                'type' => "submit",
-                'name' => "tabs_" . $child->getName(),
-                "value" => $child->getTitle(),
-                "class" => "tab",
-                "id" => $child->getDivId() . "_tab"
-            )));
-
+            $child->setSubmitName("tabs_" . $child->getName());
             if ((isset($this->form()->post["tabs_" . $child->getName()])) && !$activeTabFound) {
                 $activeTabFound = true;
-                $child->getRenderedField()->addClass("active");
                 setcookie("tabs_" . $this->name, $child->getName(), 0, "/");
-
-                $children[$i]->getRenderedField()->addClass("active");
-                $listItem->getNode(0)->addClass("active");
+                $child->setTabActive(true);
             }
-            $list->append($listItem);
         }
 
         if (!$activeTabFound) {
@@ -120,10 +112,10 @@ class TabSet extends FieldSet
             $active = isset($this->activeTab) ? $this->activeTab : (isset($_COOKIE["tabs_" . $this->name]) ? $_COOKIE["tabs_" . $this->name] : null);
             if (isset($active)) {
                 $i = 0;
-                foreach ($list->content as $item) {
-                    if ($item->getNode(0)->name == "tabs_" . $active) {
-                        $item->getNode(0)->addClass("active");
-                        $children[$i]->getRenderedField()->addClass("active");
+                /** @var TabRenderData $item */
+                foreach ($children as $item) {
+                    if ($item->getName()== "tabs_" . $active) {
+                        $item->setTabActive(true);
                         $activeTabFound = true;
                         break;
                     }
@@ -134,12 +126,9 @@ class TabSet extends FieldSet
 
             if (!$activeTabFound) {
                 // make first tab active
-                $list->getNode(0)->getNode(0)->addClass("active");
-                $children[0]->getRenderedField()->addClass("active");
+                $children[0]->setTabActive(true);
             }
         }
-
-        $info->getRenderedField()->prepend($list);
     }
 
     /**
@@ -150,8 +139,7 @@ class TabSet extends FieldSet
      */
     public function JS()
     {
-        Resources::add("tabs.css");
-        gloader::load("gtabs");
-        return '$(function(){ $("#' . $this->divID() . '").gtabs({"animation": true, "cookiename": "tabs_' . $this->name . '"}); });';
+        return '$(function(){ $("#' . $this->divID() . '").gtabs({"animation": true, "cookiename": "tabs_' . $this->name . '"}); });' .
+            parent::JS();
     }
 }

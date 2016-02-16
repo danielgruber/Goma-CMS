@@ -699,6 +699,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		$name = trim($name);
 
 		$data = $this->getOffsetData($name, $args);
+
 		if($data === null) {
 			if(PROFILE)
 				Profiler::unmark("ViewAccessableData::getOffset");
@@ -872,7 +873,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		} else {
 
             // recursive
-			if(is_object($data)) {
+			if(is_object($data) && method_exists($data, "getTemplateVar")) {
 				return $data->getTemplateVar($remaining);
 			} else if(isset($casting[$currentvar])) {
 				return $this->makeObject($currentvar, $data)->getTemplateVar($remaining);

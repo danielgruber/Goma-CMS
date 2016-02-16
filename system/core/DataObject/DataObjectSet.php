@@ -794,9 +794,8 @@ class DataObjectSet extends DataSet {
 	/**
 	 * converts the item to the right format
 	 *
-	 *@name getConverted
-	 *@access protected
-	 *@param various - data
+	 * @param Object|array|mixed $item
+	 * @return object
 	 */
 	public function getConverted($item) {
 		if(is_array($item)) {
@@ -813,7 +812,7 @@ class DataObjectSet extends DataSet {
 
 		$object->dataset =& $this;
 
-		if(is_object($object) && gObject::method_exists($object, "customise")) {
+		if(is_object($object) && method_exists($object, "customise")) {
 			$object->customise($this->protected_customised);
 			return $object;
 		} else {

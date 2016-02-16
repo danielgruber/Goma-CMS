@@ -24,7 +24,7 @@ class InfoTextField extends Extension {
 	/**
 	 * adds the info to the field.
 	 *
-	 * @param FormFieldResponse $info
+	 * @param FormFieldRenderData $info
 	 */
 	public function afterRenderFormResponse($info) {
 		if(isset($this->owner->info) && $this->owner->info)

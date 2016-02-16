@@ -95,8 +95,19 @@ class FileUpload extends FormField {
 	protected $default_icon = "images/icons/goma/128x128/file.png";
 
 	/**
-	 * @name 	__construct
-	 * @access 	public
+	 * template.
+	 */
+	public $template = "form/FileUpload.html";
+
+	/**
+	 * @param string $name
+	 * @param string $title
+	 * @param array $file_types
+	 * @param string $value
+	 * @param string $collection
+	 * @param Form $form
+	 * @internal param $__construct
+	 * @access    public
 	 */
 	public function __construct($name = null, $title = null, $file_types = null, $value = "", $collection = null, &$form = null) {
 		parent::__construct($name, $title, $value, $form);
@@ -350,6 +361,29 @@ class FileUpload extends FormField {
 	}
 
 	/**
+	 * @param FormFieldRenderData $info
+	 * @param bool $notifyField
+	 */
+	public function addRenderData($info, $notifyField = true)
+	{
+		$info->addCSSFile("font-awsome/font-awesome.css");
+		$info->addJSFile("system/form/FileUpload.js");
+		$info->addCSSFile("FileUpload.less");
+		gloader::load("ajaxupload");
+
+		parent::addRenderData($info, $notifyField);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function js()
+	{
+		return "$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});" .
+		parent::js();
+	}
+
+	/**
 	 * sets the right enctype for the form.
 	 * renders div.
 	 */
@@ -357,11 +391,6 @@ class FileUpload extends FormField {
 		if(PROFILE)
 			Profiler::mark("FormField::field");
 
-		gloader::load("ajaxupload");
-		Resources::add("font-awsome/font-awesome.css", "css");
-		Resources::add("system/form/FileUpload.js", "js", "tpl");
-		Resources::add("FileUpload.less", "css");
-		Resources::addJS("$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});");
 		// modify form for right datatype
 		$this->form()->form->enctype = "multipart/form-data";
 

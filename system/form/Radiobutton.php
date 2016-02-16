@@ -151,7 +151,7 @@ class RadioButton extends FormField
      *
      * @name exportJSON
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportFieldInfo($fieldErrors = null) {
         $info = $this->exportBasicInfo($fieldErrors)
@@ -165,7 +165,7 @@ class RadioButton extends FormField
 
     /**
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportBasicInfo($fieldErrors = null)
     {

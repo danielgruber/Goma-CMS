@@ -7,9 +7,6 @@
  * @version 1.1
  */
 function FileUpload(formelement, url, size, types) {
-	
-	preloadLang(["files.filesize_failure"]);
-	
 	var $this = this;
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);

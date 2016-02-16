@@ -26,7 +26,7 @@ class FormFieldResponseTests extends GomaUnitTest
         $this->unitTestAssignment(123, "blah", "abc", "abc-div", "title");
     }
     protected function unitTestAssignment($name, $type, $id, $divId, $title) {
-        $info = FormFieldResponse::create($name, $type, $id, $divId)
+        $info = FormFieldRenderData::create($name, $type, $id, $divId)
             ->setTitle($title);
 
         $this->assertEqual($info->getName(), $name);

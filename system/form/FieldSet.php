@@ -37,6 +37,16 @@ class FieldSet extends FormField
     public $fields = array();
 
     /**
+     * template.
+     */
+    protected $template = "form/fieldset.html";
+
+    /**
+     * template-view.
+     */
+    protected $templateView;
+
+    /**
      * creates field.
      * @param string $name
      * @param array $fields
@@ -62,6 +72,8 @@ class FieldSet extends FormField
         /* --- */
 
         $this->container->setTag("fieldset");
+
+        $this->templateView = new ViewAccessableData();
 
         if (is_array($fields)) {
             $this->fields = $fields;
@@ -129,19 +141,25 @@ class FieldSet extends FormField
 
     /**
      *
-     * @param FormFieldResponse $info
+     * @param FormFieldRenderData $info
      * @param bool $notifyField
      */
     public function addRenderData($info, $notifyField = true)
     {
         parent::addRenderData($info, false);
 
-        /** @var FormFieldResponse $child */
-        foreach($info->getChildren() as $child) {
-            if($this->form()->isFieldToRender($child->getName())) {
-                $child->getField()->addRenderData($child);
-                $info->getRenderedField()->append($child->getRenderedField());
+        /** @var FormFieldRenderData $child */
+        if($info->getChildren()) {
+            $data = array();
+            foreach ($info->getChildren() as $child) {
+                if ($this->form()->isFieldToRender($child->getName())) {
+                    $child->getField()->addRenderData($child);
+
+                    $data[] = $child->ToRestArray(true, false);
+                }
             }
+
+            $info->getRenderedField()->append($this->templateView->customise(array("fields" => new DataSet($data)))->renderWith($this->template));
         }
 
         if($notifyField) {
@@ -153,7 +171,7 @@ class FieldSet extends FormField
      * exports basic field info.
      *
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportBasicInfo($fieldErrors = null) {
         $data = parent::exportBasicInfo($fieldErrors);

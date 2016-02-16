@@ -465,15 +465,15 @@ class Form extends gObject {
 		$actions = $this->getActionFields();
 		$validators = $this->getValidator($fields, $actions);
 
-		/** @var FormFieldResponse $field */
+		/** @var FormFieldRenderData $field */
 		foreach($fields as $field) {
-			$fieldDataSet->add($field->ToRestArray(true));
+			$fieldDataSet->add($field->ToRestArray(true, false));
 			$jsonData[] = $field->ToRestArray();
 		}
 
-		/** @var FormFieldResponse $action */
+		/** @var FormFieldRenderData $action */
 		foreach($actions as $action) {
-			$actionDataSet->add($action->ToRestArray(true));
+			$actionDataSet->add($action->ToRestArray(true, false));
 			$jsonData[] = $action->ToRestArray();
 		}
 
@@ -569,7 +569,7 @@ class Form extends gObject {
 					$fields[] = $field->exportFieldInfo($fieldErrors);
 				}
 			} catch(Exception $e) {
-				$fields[] = new FormFieldErrorResponse($field->name, $e);
+				$fields[] = new FormFieldErrorRenderData($field->name, $e);
 			}
 		}
 
@@ -584,7 +584,7 @@ class Form extends gObject {
 			try {
 				$actions[] = $action["field"]->exportFieldInfo();
 			} catch(Exception $e) {
-				$actions[] = new FormFieldErrorResponse($action["field"]->name, $e);
+				$actions[] = new FormFieldErrorRenderData($action["field"]->name, $e);
 			}
 		}
 
@@ -603,7 +603,7 @@ class Form extends gObject {
 					$validators[] = $data;
 				}
 			} catch(Exception $e) {
-				$validators[] = new FormFieldErrorResponse($name, $e);
+				$validators[] = new FormFieldErrorRenderData($name, $e);
 			}
 		}
 

@@ -259,7 +259,7 @@ class FormField extends RequestHandler {
      * this function generates some JSON for using client side stuff.
      *
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportFieldInfo($fieldErrors = null) {
         $info = $this->exportBasicInfo($fieldErrors);
@@ -270,7 +270,7 @@ class FormField extends RequestHandler {
     }
 
     /**
-     * @param FormFieldResponse $info
+     * @param FormFieldRenderData $info
      * @param bool $notifyField
      */
     public function addRenderData($info, $notifyField = true) {
@@ -288,20 +288,27 @@ class FormField extends RequestHandler {
      * exports basic field info.
      *
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportBasicInfo($fieldErrors = null) {
         if(isset($fieldErrors[strtolower($this->name)])) {
             $this->errors = $fieldErrors[strtolower($this->name)];
         }
 
-        return FormFieldResponse::create($this->name, $this->classname, $this->ID(), $this->divID())
+        return $this->createsRenderDataClass()
             -> setMaxLength($this->maxLength)
             -> setRegexp($this->regexp)
             -> setTitle($this->title)
             -> setIsDisabled($this->disabled)
             -> setField($this)
             -> setHasError(count($this->errors) > 0);
+    }
+
+    /**
+     * @return FormFieldRenderData
+     */
+    protected function createsRenderDataClass() {
+        return FormFieldRenderData::create($this->name, $this->classname, $this->ID(), $this->divID());
     }
 
     /**

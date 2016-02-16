@@ -61,7 +61,7 @@ class HiddenField extends FormField
 
     /**
      * @param array|null $fieldErrors
-     * @return FormFieldResponse
+     * @return FormFieldRenderData
      */
     public function exportFieldInfo($fieldErrors = null)
     {

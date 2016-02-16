@@ -11,7 +11,7 @@
 		var o = $.extend(defaults, options);
 		this.each(function(){
 			var tabs = $(this);
-			tabs.find(" > ul").find("a, input").click(function(){
+			tabs.find(" > ul").find("a, input, button").click(function(){
 				var oldtab = tabs.find(" > div.active");
 				var id = $(this).attr("id");
 				id = id.substring(0, id.lastIndexOf("_"));

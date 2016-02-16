@@ -144,9 +144,6 @@ class Controller extends RequestHandler
 
     /**
      * if this method returns a title automatic title and breadcrumb will be set
-     *
-     * @name title
-     * @access public
      */
     public function PageTitle()
     {
@@ -316,6 +313,8 @@ class Controller extends RequestHandler
      * @access public
      */
     public function __output($content) {
+        $this->callExtending("handleOutput", $content);
+
         return $content;
     }
 

@@ -76,3 +76,6 @@ gloader::addLoadAble("helpbox", "system/libs/javascript/helpBox.js");
 
 // Breadcrump seperator
 define('BREADCRUMB_SEPERATOR', ' &raquo; ');
+
+// uncomment this line to active REST-Support in Goma.
+//gObject::extend("Controller", "RestControllerExtension");

@@ -150,13 +150,13 @@ class ClusterFormField extends FormField {
 	}
 
 	/**
-	 * @param FormFieldResponse $info
+	 * @param FormFieldRenderData $info
 	 */
 	public function addRenderData($info)
 	{
 		parent::addRenderData($info);
 
-		/** @var FormFieldResponse $child */
+		/** @var FormFieldRenderData $child */
 		$subContainer = new HTMLNode("div");
 		foreach($info->getChildren() as $child) {
             if($this->form()->isFieldToRender($child->getName())) {
@@ -171,7 +171,7 @@ class ClusterFormField extends FormField {
 	 * exports basic field info.
 	 *
 	 * @param array|null $fieldErrors
-	 * @return FormFieldResponse
+	 * @return FormFieldRenderData
 	 */
 	public function exportBasicInfo($fieldErrors = null) {
 		$data = parent::exportBasicInfo($fieldErrors);
