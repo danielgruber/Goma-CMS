@@ -139,7 +139,7 @@ class CKEditorUploadsController extends RequestHandler {
                 return $this->respondToUpload(false, "", "", lang("files.upload_failure"));
             }
 
-        } catch(LogicException $e) {
+        } catch(Exception $e) {
             return $this->respondToUpload(false, "", "", $e->getMessage());
         }
     }
@@ -193,22 +193,23 @@ class CKEditorUploadsController extends RequestHandler {
      * @param array $allowedTypes
      * @param int $allowedSize
      * @return array
+     * @throws FileUploadException
      */
-    protected static function validateUpload($allowedTypes, $allowedSize) {
-        if(!isset($_GET["accessToken"]) ||
-            !file_exists(self::getFileForKey($_GET["accessToken"])) ||
-            file_get_contents(self::getFileForKey($_GET["accessToken"])) != self::FILE_CONTENT) {
+    protected function validateUpload($allowedTypes, $allowedSize) {
+        if(!$this->request->getParam("accessToken") ||
+            !file_exists(self::getFileForKey($this->request->getParam("accessToken"))) ||
+            file_get_contents(self::getFileForKey($this->request->getParam("accessToken"))) != self::FILE_CONTENT) {
             die(0);
         }
 
-        if(isset($_SERVER["HTTP_X_FILE_NAME"]) && !isset($_FILES["upload"])) {
+        if($this->request->getHeader("x-file-name") && !isset($this->request->post_params["upload"])) {
             if(Core::phpInputFile()) {
                 $tmp_name = Core::phpInputFile();
 
-                if(filesize($tmp_name) == $_SERVER["HTTP_X_FILE_SIZE"]) {
-                    $_FILES["upload"] = array(
-                        "name" => $_SERVER["HTTP_X_FILE_NAME"],
-                        "size" => $_SERVER["HTTP_X_FILE_SIZE"],
+                if(filesize($tmp_name) == $this->request->getHeader("x-file-size")) {
+                    $this->request->post_params["upload"] = array(
+                        "name" => $this->request->getHeader("x-file-name"),
+                        "size" => $this->request->getHeader("x-file-size"),
                         "error" => 0,
                         "tmp_name" => $tmp_name
                     );
@@ -217,27 +218,33 @@ class CKEditorUploadsController extends RequestHandler {
             }
         }
 
-        if(isset($_FILES["upload"])) {
-            if($_FILES["upload"]["error"] == UPLOAD_ERR_OK) {
-                if (preg_match('/\.(' . implode("|", $allowedTypes) . ')$/i', $_FILES["upload"]["name"])) {
-                    $filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
-                    if ($_FILES["upload"]["size"] <= $allowedSize) {
-                        return array($filename, $_FILES["upload"]["tmp_name"]);
+        if(isset($this->request->post_params["upload"],
+            $this->request->post_params["upload"]["error"],
+            $this->request->post_params["upload"]["name"],
+            $this->request->post_params["upload"]["tmp_name"],
+            $this->request->post_params["upload"]["size"])
+        ) {
+            $upload = $this->request->post_params["upload"];
+            if($this->request->post_params["upload"]["error"] == UPLOAD_ERR_OK) {
+                if (preg_match('/\.(' . implode("|", $allowedTypes) . ')$/i', $upload["name"])) {
+                    $filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $upload["name"]);
+                    if ($upload["size"] <= $allowedSize) {
+                        return array($filename, $upload["tmp_name"]);
                     } else {
-                        throw new LogicException(lang("files.filesize_failure"));
+                        throw new FileUploadException(lang("files.filesize_failure"));
                     }
                 } else {
-                    throw new LogicException(lang("files.filetype_failure"));
+                    throw new FileUploadException(lang("files.filetype_failure"));
                 }
             } else {
-                if($_FILES["upload"]["error"] == UPLOAD_ERR_INI_SIZE) {
-                    throw new LogicException(lang("files.filesize_failure"));
+                if($upload["error"] == UPLOAD_ERR_INI_SIZE) {
+                    throw new FileUploadException(lang("files.filesize_failure"));
                 } else {
-                    throw new LogicException(lang("files.upload_failure"));
+                    throw new FileUploadException(lang("files.upload_failure"));
                 }
             }
         } else {
-            throw new LogicException(lang("files.upload_failure"));
+            throw new FileUploadException(lang("files.upload_failure"));
         }
     }
 

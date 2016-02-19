@@ -155,7 +155,7 @@ class lost_passwordExtension extends ControllerExtension {
 
         $email = $data["email"];
 
-        $mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, true);
+        $mail = new Mail("noreply@" . $this->request->getServerName(), true, true);
 
         $text = $data->customise(array(
             "key" => $key

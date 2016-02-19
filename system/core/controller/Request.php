@@ -81,13 +81,31 @@ class Request extends gObject {
 	protected $shiftedPart = "";
 
 	/**
+	 * server-name.
+	 * @var string
+	 */
+	protected $serverName;
+
+	/**
+	 * server-port.
+	 * @var int
+	 */
+	protected $serverPort;
+
+	/**
+	 * is-ssl.
+	 * @var bool
+	 */
+	protected $isSSL = false;
+
+	/**
 	 * @param string $method
 	 * @param string $url
 	 * @param array $get_params
 	 * @param array $post_params
 	 * @param array $headers
 	 */
-	public function __construct($method, $url, $get_params = array(), $post_params = array(), $headers = array()) {
+	public function __construct($method, $url, $get_params = array(), $post_params = array(), $headers = array(), $serverName = null, $serverPort = null, $isSSL = false) {
 		parent::__construct();
 
 		$this -> request_method = strtoupper(trim($method));
@@ -96,7 +114,9 @@ class Request extends gObject {
 		$this -> post_params = ArrayLib::map_key("strtolower", $post_params);
 		$this -> headers = ArrayLib::map_key("strtolower", $headers);
 		$this -> url_parts = explode('/', $url);
-
+		$this -> serverName = isset($serverName) ? $serverName : $_SERVER["SERVER_NAME"];
+		$this -> serverPort = isset($serverPort) ? $serverPort : $_SERVER["SERVER_PORT"];
+		$this -> isSSL = $isSSL;
 	}
 
 	/**
@@ -154,13 +174,49 @@ class Request extends gObject {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getServerName() {
+		return $this->serverName;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isSSL()
+	{
+		return $this->isSSL;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getServerPort()
+	{
+		return $this->serverPort;
+	}
+
+	/**
+	 * gets host with dot before, so we can use it for cookies.
+	 *
+	 * @return string
+	 */
+	public function getCookieHost() {
+		if (!preg_match('/^[0-9]+/', $this->serverName) && $this->serverName != "localhost" && strpos($this->serverName, ".") !== false)
+			return "." . $this->serverName;
+
+		return $this->serverName;
+	}
+
+	/**
 	 * array-implementations
 	 */
 
 	/**
 	 * gets a POST or GET-Param
-	 *@name offsetGet
-	 *@access public
+	 * @name offsetGet
+	 * @access public
+	 * @return bool
 	 */
 	public function offsetGet($offset) {
 		if (isset($this -> get_params[$offset]))
@@ -172,8 +228,9 @@ class Request extends gObject {
 
 	/**
 	 * checks if POST or GET param exists
-	 *@name offsetExists
-	 *@access public
+	 * @name offsetExists
+	 * @access public
+	 * @return bool
 	 */
 	public function offsetExists($offset) {
 		if (isset($this -> get_params[$offset]))
@@ -191,8 +248,9 @@ class Request extends gObject {
 
 	/**
 	 * matches the data with the url
-	 *@name match
-	 *@access public
+	 * @name match
+	 * @access public
+	 * @return array
 	 */
 	public function match($pattern, $shiftOnSuccess = false, $class = null) {
 		if (PROFILE)
@@ -445,5 +503,4 @@ class Request extends gObject {
 			}
 		return false;
 	}
-
 }

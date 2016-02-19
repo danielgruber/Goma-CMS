@@ -29,7 +29,7 @@ class ContactController extends PageController
             $from = $this->modelInst()->email;
         }
 
-        $mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"], true, $data["email"]);
+        $mail = new Mail("noreply@" . $this->request->getServerName(), true, $data["email"]);
 
         $model = new ViewAccessableData($data);
 

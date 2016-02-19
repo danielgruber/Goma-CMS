@@ -104,8 +104,6 @@ class Director extends gObject {
         HTTPResponse::output();
 
         Core::callHook("onBeforeShutdown");
-
-        exit ;
     }
 
     /**
@@ -136,7 +134,11 @@ class Director extends gObject {
             $url,
             $_GET,
             array_merge((array)$_POST, (array)$_FILES),
-            getallheaders());
+            getallheaders(),
+            $_SERVER["SERVER_NAME"],
+            $_SERVER["SERVER_PORT"],
+            (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off"
+        );
 
         $ruleMatcher = RuleMatcher::initWithRulesAndRequest(self::getSortedRules(), $request);
         while($nextController = $ruleMatcher->matchNext()) {
@@ -152,10 +154,11 @@ class Director extends gObject {
             /** @var RequestHandler $inst */
             $data = $inst->handleRequest($ruleMatcher->getCurrentRequest());
             if($data !== false) {
-                return self::serve($data);
+                self::serve($data);
+                return;
             }
         }
 
-        return false;
+        return "404";
     }
 }

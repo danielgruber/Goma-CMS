@@ -226,7 +226,7 @@ class FormField extends RequestHandler {
         $this->container->append(new HTMLNode(
             "label",
             array("for" => $this->ID()),
-            $info->getTitle()
+            $this->title
         ));
 
         $this->input->placeholder = $this->title;
@@ -288,6 +288,9 @@ class FormField extends RequestHandler {
                 $this->callExtending("afterRenderFormResponse", $info);
             }
         } catch(Exception $e) {
+            if($info->getRenderedField() == null) {
+                $info->setRenderedField(new HTMLNode("div", array("class" => "form_field")));
+            }
             $info->getRenderedField()->append('<div class="error">' . $e->getMessage() . '</div>');
         }
     }

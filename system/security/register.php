@@ -16,6 +16,8 @@ defined('IN_GOMA') OR die();
  * @author        Goma-Team
  * @license        GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version        2.3
+ *
+ * @method Controller getOwner
  */
 class RegisterExtension extends ControllerExtension
 {
@@ -137,10 +139,11 @@ class RegisterExtension extends ControllerExtension
 	public function resendActivation()
 	{
 		if ($this->getParam("email") && !member::login()) {
-			$data = DataObject::get_one("user", array("email" => $this->getParam("email")));
-			if ($data && $data->status != 1) {
-				$this->sendMail($data);
-				return $this->renderView($data, lang("register_resend"), true);
+			/** @var User $user */
+			$user = DataObject::get_one("user", array("email" => $this->getParam("email")));
+			if ($user && $user->status != 1) {
+				$this->sendMail($user);
+				return $this->renderView($user, lang("register_resend"), true);
 			} else {
 				return "";
 			}
@@ -157,7 +160,7 @@ class RegisterExtension extends ControllerExtension
 	 */
 	public function sendMail($data) {
 		$email = $data->renderWith("mail/register.html");
-		$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+		$mail = new Mail("noreply@" . $this->getOwner()->getRequest()->getServerName());
 		if (!$mail->sendHTML($data["email"], lang("register"), $email)) {
 			throw new Exception("Could not send mail.");
 		}
@@ -184,7 +187,7 @@ class RegisterExtension extends ControllerExtension
 
 			$emails = implode(",", $users->fieldToArray("email"));
 		} else {
-			if (is_array(self::validationMail)) {
+			if (is_array(self::$validateMail)) {
 				$emails = implode(",", self::$validateMail);
 			} else {
 				$emails = self::$validateMail;
@@ -198,7 +201,7 @@ class RegisterExtension extends ControllerExtension
 		$view = $user->customise(array("activateLink" => BASE_URI . BASE_SCRIPT . "profile/activate" . URLEND . "?activate=" . $user["code"]))
 			->renderWith("mail/activate_account_admin.html");
 
-		$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+		$mail = new Mail("noreply@" . $this->getOwner()->getRequest()->getServerName());
 		if (!$mail->sendHTML($emails, lang("user_activate"), $view)) {
 			throw new Exception("Could not send mail.");
 		}
@@ -223,17 +226,15 @@ class RegisterExtension extends ControllerExtension
 				$view = $data->customise()
 					->renderWith("mail/account_activated.html");
 
-				$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+				$mail = new Mail("noreply@" . $this->getOwner()->getRequest()->getServerName());
 				if (!$mail->sendHTML($data->email, lang("user_activated_subject"), $view)) {
 					throw new Exception("Could not send mail.");
 				}
 
-				if ($data->write(false, true)) {
-					AddContent::addSuccess(lang("user_activated_subject"));
-					$this->getOwner()->redirectBack();
-				} else {
-					throw new Exception("Could not save data.");
-				}
+				$data->writeToDB(false, true);
+				AddContent::addSuccess(lang("user_activated_subject"));
+				$this->getOwner()->redirectBack();
+
 			}
 		} else {
 			$this->getOwner()->redirectBack();
