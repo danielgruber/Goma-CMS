@@ -2,13 +2,12 @@
 defined("IN_GOMA") OR die();
 
 /**
- * Describe your class
+ * Render-Info for one Tab.
  *
- * @package Goma
+ * @package Goma\Form
  *
- * @author D
- * @copyright 2016 D
- *
+ * @author 	Goma-Team
+ * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @version 1.0
  */
 class TabRenderData extends FormFieldRenderData

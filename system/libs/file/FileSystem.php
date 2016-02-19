@@ -631,13 +631,9 @@ class FileSystem extends gObject {
 	}
 }
 
-class FileException extends Exception {
+class FileException extends GomaException {
 	protected $standardCode = ExceptionManager::FILE_EXCEPTION;
 	public function __construct($message = "Unknown File-Exception.", $code = null, Exception $previous = null) {
-		if(!isset($code)) {
-			$code =  $this->standardCode;
-		}
-
 		parent::__construct($message, $code, $previous);
 	}
 }
@@ -652,4 +648,7 @@ class FileNotPermittedException extends FileException {
 
 class FileExistsException extends FileException {
 	protected $standardCode = ExceptionManager::FILE_ALREADY_EXISTING;
+}
+class FileCopyException extends FileException {
+	protected $standardCode = ExceptionManager::FILE_COPY_FAIL;
 }

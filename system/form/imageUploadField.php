@@ -44,6 +44,6 @@ class ImageUploadField extends FileUpload
 			$data["thumbHeight"] = $response->thumbHeight;
 		}
 
-		return $response;
+		return $data;
 	}
 }

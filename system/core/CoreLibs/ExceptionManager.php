@@ -128,10 +128,19 @@ class ExceptionManager {
 	const FILE_NOT_PERMITTED = -803;
 	const FILE_NOT_FOUND = -804;
 	const FILE_ALREADY_EXISTING = -810;
+	const FILE_COPY_FAIL = -820;
 
 	/**
 	 * form
 	 */
 	const FORM_INVALID = -900;
 	const FORM_NOT_SUBMITTED = -901;
+
+	/**
+	 * file upload
+	 */
+	const FILEUPLOAD_FAIL = -601;
+	const FILEUPLOAD_SIZE_FAIL = -602;
+	const FILEUPLOAD_TYPE_FAIL = -603;
+	const FILEUPLOAD_DISK_SPACE_FAIL = -604;
 }

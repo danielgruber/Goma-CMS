@@ -97,6 +97,7 @@ class Uploads extends DataObject {
      * @param string $class_name
      * @param boolean $deletable
      * @return Uploads
+     * @throws FileCopyException
      */
     public static function addFile($filename, $realfile, $collectionPath, $class_name = null, $deletable = null) {
         if(!file_exists($realfile) || empty($collectionPath)) {
@@ -124,6 +125,7 @@ class Uploads extends DataObject {
         $file = self::getFileInstance($realfile, $collection, $filename, $deletable);
 
         // now reinit the file-object with maybe guessed class-name.
+        /** @var Uploads $file */
         $file = $file->getClassAs(self::getFileClass($class_name, $filename));
 
         if(copy($realfile, $file->realfile)) {
@@ -132,12 +134,12 @@ class Uploads extends DataObject {
                 $file->forceDeletable = true;
             }
 
-            if($file->writeToDB(true, true)) {
-                return $file;
-            }
+            $file->writeToDB(true, true);
+
+            return $file;
         }
 
-        return null;
+        throw new FileCopyException("Cannot copy {$realfile} to {$file->realfile}.");
     }
 
     /**

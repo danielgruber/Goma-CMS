@@ -6,27 +6,23 @@
  * @package Goma\Form
  * @version 1.1
  */
-function FileUpload(formelement, url, size, types) {
+function FileUpload(formelement, url, size, types, defaultIcon) {
 	var $this = this;
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);
 	this.destInput = $(formelement).find(".FileUploadValue");
+	this.defaultIcon = defaultIcon;
 
 	this.actions = this.formelement.find(".actions");
 	// the info-zone
-	this.actions.prepend('<div class="progress_info"></div>');
-	this.infoZone = this.actions.find(".progress_info");
+	this.infoZone = this.formelement.find(".progress_info");
 	
 	// append fallback for not drag'n'drop-browsers
-	this.actions.append('<input type="button" class="button fileSelect" value="'+lang("files.browse")+'" />');
-	this.browse = this.actions.find(".fileSelect");
+	this.browse = this.formelement.find(".fileSelect");
 
-	this.deleteButton = this.actions.find("button.delete-file");
+	this.deleteButton = this.formelement.find(".delete-file-button");
 	this.deleteButton.click(function(){
-		this.formelement.find("input.FileUploadValue").val("");
-		$($this.element).find("img").attr({"src": "images/icons/goma/128x128/file.png", "alt": "", "height": 128, "height": 128, "style": ""});
-		$($this.element).find("a").removeAttr("href");
-		$($this.element).find("span").html("");
+		this.uploader.updateFile(null);
 		return false;
 	}.bind(this));
 	
@@ -113,7 +109,16 @@ function FileUpload(formelement, url, size, types) {
 		},
 
 		updateFile: function(data) {
-			if(data.status == 0) {
+			if(data == null) {
+				$this.formelement.find("input.FileUploadValue").val("");
+				$($this.element).find("img").attr({
+					"src": $this.defaultIcon,
+					"alt": "",
+					"style": ""
+				});
+				$($this.element).find("a").removeAttr("href");
+				$($this.element).find("span").html("");
+			} else if(data.status == 0) {
 				$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
 			} else {
 				if(data.file["icon128"]) {

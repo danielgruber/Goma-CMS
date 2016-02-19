@@ -82,9 +82,6 @@
 	padding-top: 0.63em;
 	padding-bottom: 0.75em;
 }
-.tabs > ul li button.active {
-	padding-bottom: .63em;
-}
 .tabs > ul > li > a.active {
 	color: #444;
 	background: #fff;

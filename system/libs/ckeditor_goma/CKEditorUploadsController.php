@@ -217,16 +217,24 @@ class CKEditorUploadsController extends RequestHandler {
             }
         }
 
-        if(isset($_FILES["upload"]) && $_FILES["upload"]["error"] == 0) {
-            if(preg_match('/\.('.implode("|", $allowedTypes).')$/i',$_FILES["upload"]["name"])) {
-                $filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
-                if($_FILES["upload"]["size"] <= $allowedSize) {
-                    return array($filename, $_FILES["upload"]["tmp_name"]);
+        if(isset($_FILES["upload"])) {
+            if($_FILES["upload"]["error"] == UPLOAD_ERR_OK) {
+                if (preg_match('/\.(' . implode("|", $allowedTypes) . ')$/i', $_FILES["upload"]["name"])) {
+                    $filename = preg_replace('/[^a-zA-Z0-9_\.]/', '_', $_FILES["upload"]["name"]);
+                    if ($_FILES["upload"]["size"] <= $allowedSize) {
+                        return array($filename, $_FILES["upload"]["tmp_name"]);
+                    } else {
+                        throw new LogicException(lang("files.filesize_failure"));
+                    }
                 } else {
-                    throw new LogicException(lang("files.filesize_failure"));
+                    throw new LogicException(lang("files.filetype_failure"));
                 }
             } else {
-                throw new LogicException(lang("files.filetype_failure"));
+                if($_FILES["upload"]["error"] == UPLOAD_ERR_INI_SIZE) {
+                    throw new LogicException(lang("files.filesize_failure"));
+                } else {
+                    throw new LogicException(lang("files.upload_failure"));
+                }
             }
         } else {
             throw new LogicException(lang("files.upload_failure"));

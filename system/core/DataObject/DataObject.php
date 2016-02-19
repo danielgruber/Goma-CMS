@@ -860,7 +860,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @throws Exception
      * @throws PermissionException
      * @throws SQLException
-     * @return bool
+     * @return void
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {

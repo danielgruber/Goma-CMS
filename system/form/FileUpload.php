@@ -75,14 +75,6 @@ class FileUpload extends FormField {
 	protected $uploadClass = "Uploads";
 
 	/**
-	 * container on the left
-	 *
-	 * @name 	leftContainer
-	 * @access 	public
-	 */
-	public $leftContainer;
-
-	/**
 	 * this field needs to have the full width
 	 *
 	 * @name fullSizedField
@@ -92,12 +84,17 @@ class FileUpload extends FormField {
 	/**
 	 * default-icon.
 	 */
-	protected $default_icon = "images/icons/goma/128x128/file.png";
+	protected $defaultIcon = "images/icons/goma/128x128/file.png";
 
 	/**
 	 * template.
 	 */
 	public $template = "form/FileUpload.html";
+
+	/**
+	 * template-view.
+	 */
+	protected $templateView;
 
 	/**
 	 * @param string $name
@@ -116,54 +113,8 @@ class FileUpload extends FormField {
 
 		if(isset($collection))
 			$this->collection = $collection;
-	}
 
-	/**
-	 * renders the base-structure of the field
-	 *
-	 * @name 	renderAfterSetForm
-	 * @access 	public
-	 */
-	public function renderAfterSetForm() {
-		parent::renderAfterSetForm();
-
-		$this->leftContainer = new HTMLNode("div", array(
-			"style" => "float: left;",
-			"class" => "FileUpload_left"
-		), array(
-			new HTMLNode('div', array(
-				"class" => "icon",
-				"id" => $this->ID() . "_upload"
-			), array($link = new HTMLNode("a", array("target" => "_blank"), array(
-					new HTMLNode("div", array("class" => "img"), array(new HTMLNode("img", array(
-							"src" 			=> $this->getIcon(),
-							"data-retina" 	=> $this->getIcon(true),
-							"alt" 			=> convert::raw2text($this->value ? $this->value->filename : "")
-						)))),
-					new HTMLNode("span", array(), convert::raw2text($this->value ? $this->value->filename : ""))
-				)))),
-
-			new HTMLNode("input", array(
-				"name" => $this->PostName() . "_file",
-				"id" => $this->ID() . "_file_hidden",
-				"type" => "hidden",
-				"value" => $this->value ? $this->value->fieldGet("path") : "",
-				"class" => "FileUploadValue"
-			))
-		));
-
-		if($this->value && $this->value->fieldGet("path") != "") {
-			$link->href = $this->value->raw();
-		}
-	}
-
-	/**
-	 * returns icon.
-	 * @param bool $retina
-	 * @return string
-	 */
-	public function getIcon($retina = false) {
-		return $this->value ? $this->value->getIcon(128, $retina) : $this->default_icon;
+		$this->templateView = new ViewAccessableData();
 	}
 
 	/**
@@ -173,15 +124,11 @@ class FileUpload extends FormField {
 		parent::getValue();
 
 		if(isset($_FILES[$this->PostName()]) && !empty($_FILES[$this->PostName()]["name"])) {
-			if(is_object($value = $this->handleUpload($_FILES[$this->PostName()]))) {
+			try {
+				$value = $this->handleUpload($_FILES[$this->PostName()]);
 				$this->value = $value;
-				return true;
-			} else {
-				if(is_string($value)) {
-					AddContent::addNotice($value);
-				} else {
-					AddContent::addNotice(lang("files.upload_failure"));
-				}
+			} catch(Exception $e) {
+				AddContent::addNotice($e->getCode() . ": " . $e->getMessage());
 			}
 		} else if(isset($this->form()->post[$this->PostName() . "__deletefile"])) {
 			$this->value = "";
@@ -206,8 +153,9 @@ class FileUpload extends FormField {
 	/**
 	 * ajax upload
 	 *
-	 * @name 	ajaxUpload
-	 * @access 	public
+	 * @name    ajaxUpload
+	 * @access    public
+	 * @return string
 	 */
 	public function ajaxUpload() {
 		if(!isset($_SERVER["HTTP_X_FILE_NAME"]))
@@ -234,27 +182,30 @@ class FileUpload extends FormField {
 				"error" => 0,
 				"tmp_name" => $tmp_name
 			);
-			$response = $this->handleUpload($upload);
-			// clean up
-			if(isset($tmp_name))
-				@unlink($tmp_name);
 
-			/** @var Uploads $response */
-			if(is_object($response)) {
-				HTTPResponse::setHeader("Content-Type", "text/x-json");
-				HTTPResponse::sendHeader();
+			try {
+				$response = $this->handleUpload($upload);
+				// clean up
+				if (isset($tmp_name))
+					@unlink($tmp_name);
 
-				echo json_encode(array(
-					"status" => 1,
-					"file" => $this->getFileResponse($response)
-				));
-				exit ;
-			} else if(is_string($response)) {
+				/** @var Uploads $response */
+				if (is_object($response)) {
+					HTTPResponse::setHeader("Content-Type", "text/x-json");
 
-				// we got an string error, so send it via JSON.
-				$this->sendFailureJSON($response);
-			} else {
-				$this->sendFailureJSON();
+					return json_encode(array(
+						"status" => 1,
+						"file" => $this->getFileResponse($response)
+					));
+				} else if (is_string($response)) {
+
+					// we got an string error, so send it via JSON.
+					$this->sendFailureJSON($response);
+				} else {
+					$this->sendFailureJSON();
+				}
+			} catch(Exception $e) {
+				$this->sendFailureJSON($e->getMessage());
 			}
 		} else {
 			$this->sendFailureJSON(lang("files.filetype_failure", "The filetype isn't allowed."));
@@ -272,6 +223,7 @@ class FileUpload extends FormField {
 			"name" => $response->filename,
 			"realpath" => $response->fieldGet("path"),
 			"icon16" => $response->getIcon(16),
+			"icon16@2x"	=> $response->getIcon(16, true),
 			"path" => $response->path,
 			"id" => $response->id,
 			"icon128" => $response->getIcon(128),
@@ -284,8 +236,6 @@ class FileUpload extends FormField {
 	 * sends error with optional status-message in JSON-Format and sets JSON-Header.
 	*/
 	public function sendFailureJSON($error = null) {
-		
-
 		HTTPResponse::setHeader("Content-Type", "text/x-json");
 		
 		$this->printFailureJSON($error);
@@ -293,10 +243,9 @@ class FileUpload extends FormField {
 
 	/**
 	 * prints failure as JSON without JSON-Header.
-	 * @param null $error
+	 * @param null|string $error
 	 */
 	public function printFailureJSON($error = null) {
-
 		HTTPResponse::sendHeader();
 
 		$error = isset($error) ? $error :  lang("files.upload_failure");
@@ -311,25 +260,27 @@ class FileUpload extends FormField {
 	/**
 	 * frame upload
 	 *
-	 *@name frameUpload
-	 *@access public
+	 * @name frameUpload
+	 * @access public
+	 * @return string
 	 */
 	public function frameUpload() {
 		if(isset($_FILES["file"])) {
-			$response = $this->handleUpload($_FILES["file"]);
-			/** @var Uploads $response */
-			if(is_object($response)) {
-				HTTPResponse::sendHeader();
-
-				echo json_encode(array(
-					"status" => 1,
-					"file" => $this->getFileResponse($response)
-				));
-				exit ;
-			} else if(is_string($response)) {
-				$this->printFailureJSON($response);
-			} else {
-				$this->printFailureJSON();
+			try {
+				$response = $this->handleUpload($_FILES["file"]);
+				/** @var Uploads $response */
+				if (is_object($response)) {
+					return json_encode(array(
+						"status" => 1,
+						"file" => $this->getFileResponse($response)
+					));
+				} else if (is_string($response)) {
+					$this->printFailureJSON($response);
+				} else {
+					$this->printFailureJSON();
+				}
+			} catch(Exception $e) {
+				$this->printFailureJSON($e->getMessage());
 			}
 		} else {
 			$this->printFailureJSON();
@@ -379,15 +330,18 @@ class FileUpload extends FormField {
 	 */
 	public function js()
 	{
-		return "$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload($('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});" .
+		return "$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload(
+		$('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).", ".var_export($this->defaultIcon, true).");});" .
 		parent::js();
 	}
 
 	/**
 	 * sets the right enctype for the form.
 	 * renders div.
+	 * @param FileUploadRenderData|null $info
+	 * @return HTMLNode
 	 */
-	public function field() {
+	public function field($info = null) {
 		if(PROFILE)
 			Profiler::mark("FormField::field");
 
@@ -398,39 +352,16 @@ class FileUpload extends FormField {
 
 		$this->setValue();
 
-		$this->container->append(new HTMLNode("label", array(
-			"for" => $this->ID(),
-			"style" => "display: block;"
-		), $this->title));
+		$info->setUpload($this->value);
 
-		$this->container->append($this->leftContainer);
-
-		$nojs = new HTMLNode("div", array("class" => "FileUpload_right"), array(new HTMLNode("div", array("class" => "wrapper"),
-			new HTMLNode('div', array("class" => "actions"), array(
-			new HTMLNode("button", array(
-				"class" => "button show-on-js delete-file red"
-			), new HTMLNode("i", array("class" => "fa fa-trash delete-icon", "type" => "button")))
-		))),
-			new HTMLNode('div', array("class" => "no-js-fallback"), array(
-			new HTMLNode('h3', array(), lang("files.replace")),
-			$this->input
-		))));
-
-		if($this->value && $this->value->realfile)
-			$nojs->append(new HTMLNode('div', array("class" => "delete hide-on-js"), array(
-				new HTMLNode('input', array(
-					"id" => $this->ID() . "__delete",
-					"name" => $this->PostName() . "__deletefile",
-					"type" => "checkbox"
-				)),
-				new HTMLNode('label', array("for" => $this->ID() . "__delete"), lang("files.delete"))
-			)));
-
-		$this->container->append($nojs);
-
-		$this->container->append(new HTMLNode("div", array("class" => "clear")));
-
-		$this->callExtending("afterField");
+		$this->container->append(
+			$this->templateView
+				->customise(array(
+					"defaultIcon" => $this->defaultIcon
+				))
+				->customise($info->ToRestArray(false, false))
+				->renderWith($this->template)
+		);
 
 		if(PROFILE)
 			Profiler::unmark("FormField::field");
@@ -439,15 +370,18 @@ class FileUpload extends FormField {
 	}
 
 	/**
+	 * @return TabRenderData
+	 */
+	protected function createsRenderDataClass() {
+		return FileUploadRenderData::create($this->name, $this->classname, $this->ID(), $this->divID());
+	}
+
+	/**
 	 * handles the upload
 	*/
 	public function handleUpload($upload) {
-		if(!isset($upload["name"])) {
-			return "No Upload defined.";
-		}
-
-		if(GOMA_FREE_SPACE - $upload["size"] < 10 * 1024 * 1024) {
-			return lang("error_disk_space");
+		if(!isset($upload["name"], $upload["size"], $upload["tmp_name"])) {
+			throw new InvalidArgumentException("Upload-Object requires name, size, tmp_name.");
 		}
 
 		if($upload["size"] <= $this->max_filesize || $this->max_filesize == -1) {
@@ -455,7 +389,7 @@ class FileUpload extends FormField {
 			$ext = strtolower(substr($name, strrpos($name, ".") + 1));
 			if($this->allowed_file_types == "*" || in_array($ext, $this->allowed_file_types)) {
 				$name = preg_replace('/[^a-zA-Z0-9_\-\.]/i', '_', $name);
-				if($data = call_user_func_array(array(
+				$data = call_user_func_array(array(
 					$this->uploadClass,
 					"addFile"
 				), array(
@@ -463,18 +397,16 @@ class FileUpload extends FormField {
 					$upload["tmp_name"],
 					$this->collection,
 					$this->uploadClass
-				))) {
-					return $data;
-				} else {
-					return false;
-				}
+				));
+
+				return $data;
 			} else {
 				// not right filetype
-				return lang("files.filetype_failure", "The filetype isn't allowed.");
+				throw new FileUploadException(lang("files.filetype_failure", "The filetype isn't allowed."), ExceptionManager::FILEUPLOAD_TYPE_FAIL);
 			}
 		} else {
 			// file is too big
-			return lang('files.filesize_failure', "The file is too big.");
+			throw new FileUploadException(lang('files.filesize_failure', "The file is too large."), ExceptionManager::FILEUPLOAD_SIZE_FAIL);
 		}
 	}
 

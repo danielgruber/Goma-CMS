@@ -159,7 +159,12 @@ class FieldSet extends FormField
                 }
             }
 
-            $info->getRenderedField()->append($this->templateView->customise(array("fields" => new DataSet($data)))->renderWith($this->template));
+            $info->getRenderedField()->append(
+                $this->templateView
+                    ->customise($info->ToRestArray(false, false))
+                    ->customise(array("fields" => new DataSet($data)))
+                    ->renderWith($this->template)
+            );
         }
 
         if($notifyField) {

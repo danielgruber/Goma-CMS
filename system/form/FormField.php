@@ -210,12 +210,12 @@ class FormField extends RequestHandler {
 
     /**
      * renders the field
-     * @name field
-     * @access public
+     *
+     * @param FormFieldRenderData|null $info
      * @return HTMLNode
      * @internal
      */
-    public function field()
+    public function field($info = null)
     {
         if (PROFILE) Profiler::mark("FormField::field");
 
@@ -226,7 +226,7 @@ class FormField extends RequestHandler {
         $this->container->append(new HTMLNode(
             "label",
             array("for" => $this->ID()),
-            $this->title
+            $info->getTitle()
         ));
 
         $this->input->placeholder = $this->title;
@@ -274,13 +274,21 @@ class FormField extends RequestHandler {
      * @param bool $notifyField
      */
     public function addRenderData($info, $notifyField = true) {
-        $this->form()->registerRendered($info->getName());
+        try {
+            $this->form()->registerRendered($info->getName());
 
-        $info-> setRenderedField($this->field())
-            -> setJs($this->js());
+            $this->callExtending("beforeRender", $info);
 
-        if($notifyField) {
-            $this->callExtending("afterRenderFormResponse", $info);
+            $fieldData = $this->field($info);
+
+            $info->setRenderedField($fieldData)
+                ->setJs($this->js());
+
+            if ($notifyField) {
+                $this->callExtending("afterRenderFormResponse", $info);
+            }
+        } catch(Exception $e) {
+            $info->getRenderedField()->append('<div class="error">' . $e->getMessage() . '</div>');
         }
     }
 

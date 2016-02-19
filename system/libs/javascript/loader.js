@@ -2783,7 +2783,7 @@ if (window.loader === undefined) {
 
 			// scroll fix
 			$(document).on("click", "a", function () {
-				if ($(this).attr("href").substring(0,1) == "#") {
+				if ($(this).attr("href") && $(this).attr("href").substring(0,1) == "#") {
 					scrollToHash($(this).attr("href").substr(1));
 					return false;
 				} else if (typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {
