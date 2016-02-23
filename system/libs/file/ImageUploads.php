@@ -16,6 +16,7 @@
  * @property float thumbTop
  * @property ImageUploads|null sourceImage
  * @property int sourceImageId
+ * @property bool realizedSize
  *
  * @method HasMany_DataObjectSet imageVersions($filter = null, $sort = null, $limit = null)
  *
@@ -38,7 +39,8 @@ class ImageUploads extends Uploads {
         "thumbLeft"			=> "float(8, 5)",
         "thumbTop"			=> "float(8, 5)",
         "thumbWidth"		=> "float(8, 5)",
-        "thumbHeight"		=> "float(8, 5)"
+        "thumbHeight"		=> "float(8, 5)",
+        "realizedSize"      => "int(1)"
     );
 
     /**

@@ -501,10 +501,12 @@ AjaxUpload.prototype = {
 
         var form = $(field).parents("form");
 
-        form.attr("id", "");
+        form.attr("id", "").css("display", "none");
 
         var $this = this;
         if(field.files) {
+            form.remove();
+
             this.hideBrowseHandler();
 
             // we can upload through the file-handler, yeah :)
@@ -546,8 +548,9 @@ AjaxUpload.prototype = {
                 $this._complete(null, this, upload.fileIndex, upload);
                 $this._success(d.body.innerHTML, upload.fileIndex);
 
-                $this.loading = false;
+                form.remove();
 
+                $this.loading = false;
             };
 
             if(getInternetExplorerVersion() === -1) {
@@ -596,7 +599,7 @@ AjaxUpload.prototype = {
 
         // now create the form
         if($("#" + this.id + "_uploadForm").length == 0) {
-            $("body").append('<form id="' + this.id+'_uploadForm" style="position: absolute; left: -500px;z-index: 999;" method="post" action="'+this.url+'" enctype="multipart/form-data"><input name="file" style="font-size: 200px;float: right;" type="file" class="fileSelectInput" /></form>');
+            $("body").append('<form id="' + this.id+'_uploadForm" style="position: absolute; left: -500px;z-index: 900;" method="post" action="'+this.url+'" enctype="multipart/form-data"><input name="file" style="font-size: 200px;float: right;" type="file" class="fileSelectInput" /></form>');
             $("#" + this.id + "_uploadForm").find(".fileSelectInput").change(function(){
                 $this.transportFrame(this);
             });

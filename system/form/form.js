@@ -93,9 +93,9 @@ if(typeof goma == "undefined")
 					}
 
                     if(fields[i]["js"]) {
-                        var method = new Function("field", fields[i]["js"]);
+                        var method = new Function("field", "fieldIndex", fields[i]["js"]);
 
-                        method.call(this, fields[i]);
+                        method.call(this, fields[i], i);
                     }
 
                     if(fields[i]["children"]) {

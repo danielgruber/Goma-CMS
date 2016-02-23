@@ -113,17 +113,18 @@ class ImageUploadsController extends UploadsController {
 	/**
 	 * resizeImageAndOutput
 	 *
-	 * @name 	resizeImage
-	 * @param 	int $width
-	 * @param 	int $height
-	 * @param 	int $thumbLeft
-	 * @param 	int $thumbTop
-	 * @param 	int $thumbWidth
-	 * @param 	int $thumbHeight
-	 * @param 	boolean $output or return image
-	 * @return 	GD
+	 * @param    int $width
+	 * @param    int $height
+	 * @param    int $thumbLeft
+	 * @param    int $thumbTop
+	 * @param    int $thumbWidth
+	 * @param    int $thumbHeight
+	 * @param 	bool $realized
+	 * @param    boolean $output or return image
+	 * @return GD
+	 * @internal param $resizeImage
 	 */
-	public function resizeImage($width, $height, $thumbLeft = 50, $thumbTop = 50, $thumbWidth = 100, $thumbHeight = 100, $output = true) {
+	public function resizeImage($width, $height, $thumbLeft = 50, $thumbTop = 50, $thumbWidth = 100, $thumbHeight = 100, $realized = false, $output = true) {
 		$cacheDir = substr(ROOT . URL,0,strrpos(ROOT . URL, "/"));
 
 		// create
@@ -134,6 +135,11 @@ class ImageUploadsController extends UploadsController {
 			$width = $height / $image->height * $image->width;
 		} else if(!isset($height)) {
 			$height = $width / $image->width * $image->height;
+		}
+
+		if($realized) {
+			$thumbLeft = $thumbTop = 50;
+			$thumbWidth = $thumbHeight = 100;
 		}
 
 		// resize
@@ -159,7 +165,7 @@ class ImageUploadsController extends UploadsController {
 	 */
 	private function checkForSourceResize() {
 		$model = $this->modelInst();
-		if($model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && $model->id != 0) {
+		if($model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && !$model->realizedSize && $model->id != 0) {
 
 			$width = $model->width * $model->thumbWidth / 100;
 			$height = $model->height * $model->thumbHeight / 100;
@@ -171,10 +177,7 @@ class ImageUploadsController extends UploadsController {
 			$newRealFile = $model->realfile . "_" . $model->versionid . $extension;
 			$img->toFile($newRealFile);
 
-			$model->thumbLeft = 0;
-			$model->thumbTop = 0;
-			$model->thumbWidth = 100;
-			$model->thumbHeight = 100;
+			$model->realizedSize = true;
 			$model->width = $width;
 			$model->height = $height;
 			$model->realfile = $newRealFile;
@@ -191,7 +194,7 @@ class ImageUploadsController extends UploadsController {
 	public function setWidth() {
 		$width = (int) $this->getParam("width");
 
-		$this->resizeImage($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+		$this->resizeImage($width, null, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight, $this->modelInst()->realizedSize);
 
 		exit;
 	}
@@ -203,10 +206,9 @@ class ImageUploadsController extends UploadsController {
 	 *@access public
 	 */
 	public function setHeight() {
-
 		$height = (int) $this->getParam("height");
 
-		$this->resizeImage(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+		$this->resizeImage(null, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight, $this->modelInst()->realizedSize);
 
 		exit;
 	}
@@ -218,11 +220,10 @@ class ImageUploadsController extends UploadsController {
 	 *@access public
 	 */
 	public function setSize() {
-
 		$height = (int) $this->getParam("height");
 		$width = (int) $this->getParam("width");
 
-		$this->resizeImage($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight);
+		$this->resizeImage($width, $height, $this->modelInst()->thumbLeft, $this->modelInst()->thumbTop, $this->modelInst()->thumbWidth, $this->modelInst()->thumbHeight, $this->modelInst()->realizedSize);
 
 		exit;
 	}

@@ -19,6 +19,13 @@ class FileUploadRenderData extends FormFieldRenderData {
     protected $upload;
 
     /**
+     * default icon.
+     *
+     * @var string
+     */
+    protected $defaultIcon;
+
+    /**
      * @return null|Uploads
      */
     public function getUpload()
@@ -28,10 +35,30 @@ class FileUploadRenderData extends FormFieldRenderData {
 
     /**
      * @param null|Uploads $upload
+     * @return $this
      */
     public function setUpload($upload)
     {
         $this->upload = $upload;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultIcon()
+    {
+        return $this->defaultIcon;
+    }
+
+    /**
+     * @param string $defaultIcon
+     * @return $this
+     */
+    public function setDefaultIcon($defaultIcon)
+    {
+        $this->defaultIcon = $defaultIcon;
+        return $this;
     }
 
     /**
@@ -55,7 +82,11 @@ class FileUploadRenderData extends FormFieldRenderData {
                 "icon128_2x" => $this->upload->getIcon(128, true),
                 "icon" => $this->upload->getIcon()
             );
+        } else {
+            $data["upload"] = null;
         }
+
+        $data["defaultIcon"] = $this->defaultIcon;
 
         return $data;
     }

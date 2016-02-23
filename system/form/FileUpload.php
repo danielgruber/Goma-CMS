@@ -219,17 +219,14 @@ class FileUpload extends FormField {
 	 * @return array
 	 */
 	protected function getFileResponse($response) {
-		return array(
-			"name" => $response->filename,
-			"realpath" => $response->fieldGet("path"),
-			"icon16" => $response->getIcon(16),
-			"icon16@2x"	=> $response->getIcon(16, true),
-			"path" => $response->path,
-			"id" => $response->id,
-			"icon128" => $response->getIcon(128),
-			"icon128@2x" => $response->getIcon(128, true),
-			"icon" => $response->getIcon()
-		);
+		/** @var FileUploadRenderData $info */
+		$info = $this->exportBasicInfo();
+
+		$info->setUpload($response);
+
+		$data = $info->ToRestArray(false, false);
+
+		return $data["upload"];
 	}
 
 	/**
@@ -330,8 +327,9 @@ class FileUpload extends FormField {
 	 */
 	public function js()
 	{
-		return "$(function(){ window[".var_export($this->jsVar(), true)."] = new FileUpload(
-		$('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).", ".var_export($this->defaultIcon, true).");});" .
+		return "$(function(){ new FileUpload(
+		this, field,
+		$('#" . $this->divID() . "'), '" . $this->externalURL() . "', " . var_export($this->max_filesize, true) . ", ".json_encode($this->allowed_file_types).");});" .
 		parent::js();
 	}
 
@@ -352,14 +350,13 @@ class FileUpload extends FormField {
 
 		$this->setValue();
 
-		$info->setUpload($this->value);
-
 		$this->container->append(
 			$this->templateView
-				->customise(array(
-					"defaultIcon" => $this->defaultIcon
-				))
-				->customise($info->ToRestArray(false, false))
+				->customise(
+					$info->setDefaultIcon($this->defaultIcon)
+						->setUpload($this->value)
+						->ToRestArray(false, false)
+				)
 				->renderWith($this->template)
 		);
 
@@ -398,6 +395,8 @@ class FileUpload extends FormField {
 					$this->collection,
 					$this->uploadClass
 				));
+
+				$this->value = $data;
 
 				return $data;
 			} else {

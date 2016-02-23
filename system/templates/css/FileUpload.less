@@ -243,3 +243,53 @@
 .FileUpload_right .delete {
 	padding: 0.5em 0px;
 }
+
+.image-upload-widget {
+	position: fixed;
+	top: 20%;
+	left: 20%;
+	right: 20%;
+	bottom: 20%;
+	background: #fff;
+	border: 1px solid #eee;
+	border-radius: .25em;
+	z-index: 999;
+
+	> div.widget {
+		height: 100%;
+		width: 100%;
+		overflow: auto;
+		padding: 1em;
+
+		box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+
+		.image {
+			text-align: center;
+		}
+
+		.jcrop-holder {
+			margin: auto;
+		}
+	}
+
+	.loading {
+		text-align: center;
+		padding: 20%;
+	}
+
+	.buttons {
+		padding-top: .5em;
+		text-align: center;
+	}
+}
+
+@media (max-width: 40em) {
+	.image-upload-widget {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
+}

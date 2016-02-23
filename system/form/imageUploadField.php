@@ -23,27 +23,119 @@ class ImageUploadField extends FileUpload
 		"gif",
 		"jpeg"
 	);
+
+	/**
+	 * @var array
+	 */
+	public $allowed_actions = array(
+		"setCropInfo"
+	);
+
 	/**
 	 * upload-class
 	*/
 	protected $uploadClass = "ImageUploads";
 
 	/**
-	 * @param Uploads $response
-	 * @return Uploads
+	 * @var string
 	 */
-	protected function getFileResponse($response)
-	{
-		$data = parent::getFileResponse($response);
+	protected $widgetTemplate = "form/ImageUploadWidget.html";
 
-		/** @var ImageUploads $response */
-		if(is_a($response, "ImageUploads")) {
-			$data["thumbLeft"] = $response->thumbLeft;
-			$data["thumbTop"] = $response->thumbTop;
-			$data["thumbWidth"] = $response->thumbWidth;
-			$data["thumbHeight"] = $response->thumbHeight;
+	/**
+	 * @param FormFieldRenderData $info
+	 * @param bool $notifyField
+	 */
+	public function addRenderData($info, $notifyField = true)
+	{
+		parent::addRenderData($info, $notifyField);
+
+		$info->addJSFile("system/libs/thirdparty/jcrop/jquery.Jcrop.js");
+		$info->addJSFile("system/form/imageUpload.js");
+		$info->addCSSFile("system/libs/thirdparty/jcrop/jquery.Jcrop.css");
+
+		$info->getRenderedField()->append(
+			$this->templateView->renderWith($this->widgetTemplate)
+		);
+	}
+
+	public function js()
+	{
+		return parent::js() . '
+			$(function(){
+				new ImageUploadController(field, '.var_export($this->externalURL() . "/setCropInfo" . URLEND, true).')
+			});
+		';
+	}
+
+	/**
+	 * sets crop-info.
+	 */
+	public function setCropInfo() {
+		HTTPResponse::setHeader("content-type", "text/json");
+
+		if(!$this->request->isPOST()) {
+			throw new BadRequestException("You need to use POST.");
 		}
 
-		return $data;
+		if(!is_a($this->value, "ImageUploads")) {
+			throw new InvalidArgumentException("Value is not ImageUpload.");
+		}
+
+		/** @var ImageUploads $image */
+		$image = $this->value;
+
+		foreach(array("thumbHeight", "thumbWidth", "thumbLeft", "thumbTop") as $key) {
+			if(!RegexpUtil::isDouble($this->getParam($key))) {
+				throw new InvalidArgumentException("Expected Param $key");
+			}
+		}
+
+		if($this->getParam("useSource") && $this->getParam("useSource") != "false") {
+			if(!$image->sourceImage) {
+				throw new InvalidArgumentException("Source Image not defined.");
+			}
+
+			$image = $image->sourceImage;
+		}
+
+		$upload = $image->addImageVersionBySizeInPx($this->getParam("thumbLeft"), $this->getParam("thumbTop"), $this->getParam("thumbWidth"), $this->getParam("thumbHeight"));
+
+		$this->value = $upload;
+
+		return json_encode(array(
+			"status" => 1,
+			"file" => $this->getFileResponse($upload)
+		));
+	}
+
+	/**
+	 * @param Exception $e
+	 * @return string
+	 * @throws Exception
+	 */
+	public function handleException($e) {
+		if(strtolower($this->request->getParam("action")) == "setcropinfo") {
+			if(method_exists($e, "http_status")) {
+				HTTPResponse::setResHeader($e->http_status());
+			} else {
+				HTTPResponse::setResHeader(500);
+			}
+
+			return json_encode(array(
+				"class" => get_class($e),
+				"error" => $e->getMessage(),
+				"code" => $e->getCode()
+			));
+		}
+
+		return parent::handleException($e);
+	}
+
+	/**
+	 * @return FormFieldRenderData
+	 */
+	protected function createsRenderDataClass()
+	{
+		return ImageFileUploadRenderData::create($this->name, $this->classname, $this->ID(), $this->divID());
 	}
 }

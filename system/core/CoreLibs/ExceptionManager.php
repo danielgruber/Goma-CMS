@@ -112,6 +112,7 @@ class ExceptionManager {
 	/**
 	 * data
 	 */
+	const BAD_REQUEST = -400;
 	const DATA_NOT_FOUND = -404;
 
 	/**

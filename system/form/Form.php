@@ -494,7 +494,7 @@ class Form extends gObject {
 		if(PROFILE)
 			Profiler::mark("Form::renderForm::render");
 		$data = $this->form->render();
-		Resources::addJS('$(function(){console.log(new goma.form(' . var_export($this->ID(), true) . ', '.json_encode($jsonData).', '.json_encode($errorSet).')); });');
+		Resources::addJS('$(function(){ console.log(new goma.form(' . var_export($this->ID(), true) . ', '.json_encode($jsonData).', '.json_encode($errorSet).')); });');
 		if(PROFILE)
 			Profiler::unmark("Form::renderForm::render");
 

@@ -1,17 +1,24 @@
 /**
- * The JS for field sets.
+ * The JS for FileUpload-Fields.
  *
  * @author Goma-Team
  * @license GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @package Goma\Form
  * @version 1.1
  */
-function FileUpload(formelement, url, size, types, defaultIcon) {
+function FileUpload(form, field, formelement, url, size, types) {
 	var $this = this;
+
+	this.form = form;
+	this.field = field;
+
+	field.fileUpload = this;
+	this.url = url;
+
 	this.formelement = $(formelement);
 	this.element = $(formelement).find(".icon").get(0);
 	this.destInput = $(formelement).find(".FileUploadValue");
-	this.defaultIcon = defaultIcon;
+	this.defaultIcon = field.defaultIcon;
 
 	this.actions = this.formelement.find(".actions");
 	// the info-zone
@@ -118,9 +125,12 @@ function FileUpload(formelement, url, size, types, defaultIcon) {
 				});
 				$($this.element).find("a").removeAttr("href");
 				$($this.element).find("span").html("");
+
+				$this.field.upload = null;
 			} else if(data.status == 0) {
 				$this.infoZone.html('<div class="error">'+data.errstring+'</div>');
 			} else {
+				$this.field.upload = data.file;
 				if(data.file["icon128"]) {
 					if(window.devicePixelRatio > 1.5 && data.file["icon128@2x"]) {
 						this.updateIcon(data.file["icon128@2x"]);

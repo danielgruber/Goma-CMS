@@ -387,17 +387,7 @@ class RequestHandler extends gObject {
 			return $this -> request -> getParam($param, $useall);
 		}
 
-		if($useall === false) {
-			return null;
-		}
-
-		if (strtolower($useall) != "post" && isset($_GET[$param])) {
-			return $_GET[$param];
-		} else if (strtolower($useall) != "get" && isset($_POST[$param])) {
-			return $_POST[$param];
-		} else {
-			return null;
-		}
+		return null;
 	}
 
 	/**

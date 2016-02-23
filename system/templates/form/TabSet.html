@@ -2,7 +2,7 @@
 <ul>
     <% CONTROL fields() AS $field %>
         <% IF $field.tabActive %>
-            <li class="active"><button type="submit" name="$field.submitName" class="active tab" id="{$field.id}_div_tab">$field.title</button></li>
+            <li class="active"><button type="submit" name="$field.submitName" class="active tab" id="{$field.divid}_tab">$field.title</button></li>
         <% ELSE %>
             <li><button type="submit" name="tabs_$field.name" class="tab" id="{$field.id}_div_tab">$field.title</button></li>
         <% END %>
