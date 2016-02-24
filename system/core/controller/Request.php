@@ -209,47 +209,11 @@ class Request extends gObject {
 	}
 
 	/**
-	 * array-implementations
-	 */
-
-	/**
-	 * gets a POST or GET-Param
-	 * @name offsetGet
-	 * @access public
-	 * @return bool
-	 */
-	public function offsetGet($offset) {
-		if (isset($this -> get_params[$offset]))
-			return $this -> get_params[$offset];
-		if (isset($this -> post_params[$offset]))
-			return $this -> post_params[$offset];
-		return false;
-	}
-
-	/**
-	 * checks if POST or GET param exists
-	 * @name offsetExists
-	 * @access public
-	 * @return bool
-	 */
-	public function offsetExists($offset) {
-		if (isset($this -> get_params[$offset]))
-			return true;
-		if (isset($this -> post_params[$offset]))
-			return true;
-		return false;
-	}
-
-	public function offsetUnset($offset) {
-	}
-
-	public function offsetSet($offset, $value) {
-	}
-
-	/**
 	 * matches the data with the url
-	 * @name match
-	 * @access public
+	 *
+	 * @param string $pattern
+	 * @param bool $shiftOnSuccess
+	 * @param string{null $class
 	 * @return array
 	 */
 	public function match($pattern, $shiftOnSuccess = false, $class = null) {
@@ -293,17 +257,12 @@ class Request extends gObject {
 		$patternParts = explode("/", $pattern);
 
 		$params = array();
-		foreach ($patternParts as $part) {
-			if (isset($i)) {
-				$i++;
-			} else {
-				$i = 0;
-			}
+		for($i = 0; $i < count($patternParts); $i++) {
+			$part = $patternParts[$i];
 
 			// vars
 			if (isset($part{0}) && $part{0} == '$') {
 				if (substr($part, -1) == '!') {
-					$required = true;
 					if (!isset($this -> url_parts[$i]) || $this -> url_parts[$i] == "") {
 						if (PROFILE)
 							Profiler::unmark("request::match");
@@ -311,7 +270,6 @@ class Request extends gObject {
 					}
 					$name = substr($part, 1, -1);
 				} else {
-					$required = false;
 					if (!isset($this -> url_parts[$i])) {
 						continue;
 					}
@@ -328,13 +286,7 @@ class Request extends gObject {
 				$params[strtolower($name)] = $data;
 			} else {
 				// literal parts are important!
-				if (!isset($this -> url_parts[$i])) {
-					if (PROFILE)
-						Profiler::unmark("request::match");
-					return false;
-				}
-
-				if (strtolower($this -> url_parts[$i]) != strtolower($part)) {
+				if (!isset($this -> url_parts[$i]) || strtolower($this -> url_parts[$i]) != strtolower($part)) {
 					if (PROFILE)
 						Profiler::unmark("request::match");
 					return false;
