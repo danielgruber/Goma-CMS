@@ -176,6 +176,13 @@ ImageUploadController.prototype = {
             datatype: "json"
         }).done(function(data){
             $this.super.uploader.updateFile(data);
+        }).fail(function(jqxhr){
+            var data = $.parseJSON(jqxhr.responseText);
+            if(data.error) {
+                alert(data.class + ": " + data.code + " " + data.errstring);
+            } else {
+                alert(jqxhr.responseText);
+            }
         });
 
         return false;

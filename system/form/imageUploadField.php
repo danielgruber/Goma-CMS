@@ -78,7 +78,7 @@ class ImageUploadField extends FileUpload
 		}
 
 		if(!is_a($this->value, "ImageUploads")) {
-			throw new InvalidArgumentException("Value is not ImageUpload.");
+			throw new InvalidArgumentException("Value is not type of ImageUpload.");
 		}
 
 		/** @var ImageUploads $image */
@@ -98,7 +98,11 @@ class ImageUploadField extends FileUpload
 			$image = $image->sourceImage;
 		}
 
-		$upload = $image->addImageVersionBySizeInPx($this->getParam("thumbLeft"), $this->getParam("thumbTop"), $this->getParam("thumbWidth"), $this->getParam("thumbHeight"));
+		if($this->getParam("thumbWidth") == 0 || $this->getParam("thumbHeight") == 0) {
+			$upload = $image;
+		} else {
+			$upload = $image->addImageVersionBySizeInPx($this->getParam("thumbLeft"), $this->getParam("thumbTop"), $this->getParam("thumbWidth"), $this->getParam("thumbHeight"));
+		}
 
 		$this->value = $upload;
 
@@ -123,7 +127,7 @@ class ImageUploadField extends FileUpload
 
 			return json_encode(array(
 				"class" => get_class($e),
-				"error" => $e->getMessage(),
+				"errstring" => $e->getMessage(),
 				"code" => $e->getCode()
 			));
 		}
