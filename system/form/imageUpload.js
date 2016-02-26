@@ -6,7 +6,7 @@
  * @package Goma\Form
  * @version 1.1
  */
-function ImageUploadController(field, updateUrl) {
+function ImageUploadController(field, updateUrl, options) {
     if(field.fileUpload === undefined) {
         throw new Error("Could not initialize ImageUploadController, it depends on fileUpload.");
     }
@@ -25,6 +25,14 @@ function ImageUploadController(field, updateUrl) {
     this.registerEventHandler();
     this.updateCropArea(this.field.upload);
 
+    if(typeof options == "object") {
+        for(var i in options) {
+            if(options.hasOwnProperty(i)) {
+                this[i] = options[i];
+            }
+        }
+    }
+
     return this;
 }
 
@@ -36,6 +44,7 @@ ImageUploadController.prototype = {
     internalHeight: null,
     jcropInstance: null,
     factor: 1,
+    aspectRatio: null,
 
     updateCropArea: function(data) {
         if(data == null) {
@@ -93,12 +102,31 @@ ImageUploadController.prototype = {
 
             $this.factor = size.width / image.width;
 
-            var upload = $this.field.upload;
-            if(upload.thumbLeft != 50 && upload.thumbTop != 50 && upload.thumbWidth != 100 && upload.thumbHeight != 100) {
-                var thumbSelectionW = upload.thumbWidth / 100 * size.width,
-                    thumbSelectionH = upload.thumbHeight / 100 * size.height,
-                    y = (size.height - thumbSelectionH) * upload.thumbTop / 100,
-                    x = (size.width - thumbSelectionW) * upload.thumbLeft / 100;
+            var upload = $this.field.upload, thumbSelectionW = size.width, thumbSelectionH = size.height, y = 0, x = 0;
+
+            if(this.aspectRatio != null) {
+                options.aspectRatio = this.aspectRatio;
+            }
+
+            if(upload.thumbLeft != 50 || upload.thumbTop != 50 || upload.thumbWidth != 100 || upload.thumbHeight != 100) {
+                thumbSelectionW = upload.thumbWidth / 100 * size.width;
+                thumbSelectionH = upload.thumbHeight / 100 * size.height;
+                y = (size.height - thumbSelectionH) * upload.thumbTop / 100;
+                x = (size.width - thumbSelectionW) * upload.thumbLeft / 100;
+
+                options.setSelect = [
+                    x, y, x + thumbSelectionW, y + thumbSelectionH
+                ];
+            }
+
+            if(this.aspectRatio != null && thumbSelectionW / thumbSelectionH != this.aspectRatio) {
+                if(thumbSelectionW / thumbSelectionH > this.aspectRatio) {
+                    x = (size.width - thumbSelectionH * this.aspectRatio) / 2;
+                    thumbSelectionW = thumbSelectionH * this.aspectRatio;
+                } else {
+                    y = (size.height - size.width / this.aspectRatio) / 2;
+                    thumbSelectionH = size.width / this.aspectRatio;
+                }
 
                 options.setSelect = [
                     x, y, x + thumbSelectionW, y + thumbSelectionH

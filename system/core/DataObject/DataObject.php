@@ -1240,8 +1240,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if baseRecord is deleted
      *
-     *@name isDeleted
-     *@access public
+     * @return bool
      */
     public function isDeleted() {
         return (!$this->isPublished() &&
@@ -1254,8 +1253,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * gets the form
-     *@name getForm
-     *@param object - form-object
+     *
+     * @param Form $form
      */
     public function getForm(&$form)
     {
@@ -1264,9 +1263,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * geteditform
-     *@name geteditform
-     *@param object
-     *@param array - data
+     *
+     * @param Form $form
      */
     public function getEditForm(&$form)
     {
@@ -1276,8 +1274,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * gets the form-actions
-     *@name getActions
-     *@param object - form-object
+     *
+     * @param Form $form
+     * @param bool $edit
      */
     public function getActions(&$form, $edit = false)
     {

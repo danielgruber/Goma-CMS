@@ -81,14 +81,14 @@ class ImageUploadField extends FileUpload
 			throw new InvalidArgumentException("Value is not type of ImageUpload.");
 		}
 
-		/** @var ImageUploads $image */
-		$image = $this->value;
-
 		foreach(array("thumbHeight", "thumbWidth", "thumbLeft", "thumbTop") as $key) {
 			if(!RegexpUtil::isDouble($this->getParam($key))) {
 				throw new InvalidArgumentException("Expected Param $key");
 			}
 		}
+
+		/** @var ImageUploads $image */
+		$image = $this->value;
 
 		if($this->getParam("useSource") && $this->getParam("useSource") != "false") {
 			if(!$image->sourceImage) {

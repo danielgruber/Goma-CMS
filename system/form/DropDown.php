@@ -519,7 +519,7 @@ class DropDown extends FormField {
 			$this->value = $this->getParam("value");
 		}
 
-		$this->redirectToFormOrRespond();
+		return $this->redirectToFormOrRespond();
 	}
 
 	/**
@@ -538,7 +538,7 @@ class DropDown extends FormField {
 				$this->value = null;
 		}
 
-		$this->redirectToFormOrRespond();
+		return $this->redirectToFormOrRespond();
 	}
 
 	/**

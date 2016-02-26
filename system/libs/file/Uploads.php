@@ -685,7 +685,7 @@ class Uploads extends DataObject {
      */
     public function checkPermission() {
         $check = true;
-        $this->callExtendig("checkPermission", $check);
+        $this->callExtending("checkPermission", $check);
         return $check;
     }
 
