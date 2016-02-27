@@ -113,6 +113,8 @@ class Core extends gObject {
 
 		StaticsManager::setSaveVars(self::ID);
 
+		self::callHook("beforeInitCore");
+
 		if(isset($_SERVER['HTTP_X_IS_BACKEND']) && $_SERVER['HTTP_X_IS_BACKEND'] == 1) {
 			Resources::addData("goma.ENV.is_backend = true;");
 			define("IS_BACKEND", true);

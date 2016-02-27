@@ -10,6 +10,7 @@ defined("IN_GOMA") OR die();
 
 StaticsManager::addSaveVar("i18n", "languagefiles");
 StaticsManager::addSaveVar("i18n", "defaultLanguagefiles");
+StaticsManager::addSaveVar("i18n", "selectByHttp");
 
 /**
  * Class for localization.
@@ -73,11 +74,11 @@ class i18n extends gObject {
 	 */
 	public static function Init($language) {
 
+		StaticsManager::setSaveVars("i18n");
+
 		if(!self::LangExists($language)) {
 			throw new InvalidArgumentException("Language not found.");
 		}
-
-		StaticsManager::setSaveVars("i18n");
 
 		if(PROFILE)
 			Profiler::mark("i18n::Init");
@@ -154,6 +155,8 @@ class i18n extends gObject {
 	 * @return null|string
 	 */
 	public static function SetSessionLang($lang = null) {
+		StaticsManager::setSaveVars("i18n");
+
 		if(!isset($lang) || !self::LangExists($lang)) {
 			$lang = self::AutoSelectLang();
 		}
@@ -401,8 +404,8 @@ class i18n extends gObject {
 		//    qvalue         = ( "0" [ "." 0*3DIGIT ] )
 		//            | ( "1" [ "." 0*3("0") ] )
 		preg_match_all("/([[:alpha:]]{1,8})(-([[:alpha:]|-]{1,8}))?" .
-				"(\s*;\s*q\s*=\s*(1\.0{0,3}|0\.\d{0,3}))?\s*(,|$)/i",
-				$http_accept_language, $hits, PREG_SET_ORDER);
+			"(\s*;\s*q\s*=\s*(1\.0{0,3}|0\.\d{0,3}))?\s*(,|$)/i",
+			$http_accept_language, $hits, PREG_SET_ORDER);
 
 		// default language (in case of no hits) is the first in the array
 		$bestlang = $available_languages[0];
