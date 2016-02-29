@@ -24,7 +24,7 @@ abstract class gObject
     /**
      * caches
      */
-    static private $method_cache = array(), $cache_extensions = array(), $wakeUpCache = array();
+    static private $method_cache = array(), $cache_extensions = array(), $wakeUpCache = array(), $hook_called = array();
 
     /**
      * Extension methods.
@@ -308,6 +308,7 @@ abstract class gObject
      */
     public static function instance($class)
     {
+
         if (is_object($class)) {
             return clone $class;
         }
@@ -337,7 +338,13 @@ abstract class gObject
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;
         }
 
-        StaticsManager::setSaveVars($this);
+        if(!isset(self::$hook_called[$this->classname])) {
+            if(method_exists($this, "defineStatics")) {
+                $this->defineStatics();
+            }
+
+            $this->callExtending("extendDefineStatics");
+        }
     }
 
     /**
@@ -623,18 +630,8 @@ abstract class gObject
         }
     }
 
-    public function __wakeup()
-    {
-        /*if($this->ext_instances) {
-            foreach ($this->ext_instances as $instance) {*/
-                /** @var Extension $instance */
-                /*$instance->setOwner($this);
-                $instance->__wakeup();
-            }
-        }*/
-
+    public function __wakeup() {
         if(!isset(self::$wakeUpCache[$this->classname])) {
-            StaticsManager::setSaveVars($this);
             self::$wakeUpCache[$this->classname] = true;
         }
     }

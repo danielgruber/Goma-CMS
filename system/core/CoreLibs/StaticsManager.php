@@ -12,10 +12,6 @@ class StaticsManager {
      *@var array
      */
     public static $save_vars;
-    /**
-     * array of classes, which we have already set SaveVars
-     */
-    public static $set_save_vars = array();
 
     /**
      * array of classes, which we already called static hook.
@@ -146,7 +142,21 @@ class StaticsManager {
             $class = ClassManifest::resolveClassName($class);
         }
 
+        if(class_exists($class, false)) {
+            if(!defined("GENERATE_CLASS_INFO")) {
+                if (isset(ClassInfo::$class_info[$class][$variableName])) {
+                    self::setStatic($class, $variableName, ClassInfo::$class_info[$class][$variableName], true);
+                }
+            }
+        } else {
+            die("Class $class must be loaded before adding SaveVars.");
+        }
+
         self::$save_vars[$class][] = $variableName;
+    }
+
+    public static function setSaveVars() {
+
     }
 
     /**
@@ -163,69 +173,5 @@ class StaticsManager {
             return self::$save_vars[$class];
         }
         return array();
-    }
-
-    /**
-     * sets the save_vars
-     * @param $class
-     */
-    public static function setSaveVars($class)
-    {
-        if (PROFILE)  Profiler::mark("ClassInfo::setSaveVars");
-
-        $classname = ClassManifest::resolveClassName($class);
-
-        if(!defined('GENERATE_CLASS_INFO')) {
-            if (!isset(self::$set_save_vars[$classname])) {
-                self::setSaveVarsAndHook($classname);
-
-                self::$set_save_vars[$classname] = true;
-            }
-        }
-
-        if(defined('GENERATE_CLASS_INFO') || !isset(self::$hook_called[$classname])) {
-            if(self::callStaticHook($class)) {
-                self::$hook_called[$classname] = true;
-            }
-        }
-
-        if (PROFILE) Profiler::unmark("ClassInfo::setSaveVars");
-    }
-
-    /**
-     * sets save-vars and calls hook for them.
-     *
-     * @param string $class name of class
-     */
-    protected static function setSaveVarsAndHook($class) {
-        foreach (self::getSaveVars($class) as $var) {
-            if (isset(ClassInfo::$class_info[$class][$var])) {
-                self::setStatic($class, $var, ClassInfo::$class_info[$class][$var], true);
-            }
-        }
-
-        if (ClassInfo::hasInterface($class, "saveVarSetter") && gObject::method_exists($class, "__setSaveVars")) {
-            call_user_func_array(array($class, "__setSaveVars"), array($class));
-        }
-    }
-
-    /**
-     * tries to call defineStatics-Hook.
-     * returns true if it has tried and false if it was not object.
-     *
-     * @param gObject $class
-     * @return bool
-     */
-    public static function callStaticHook($class) {
-        if(is_object($class)) {
-            if(gObject::method_exists(get_class($class), "defineStatics")) {
-                $class->defineStatics();
-            }
-            $class->callExtending("extendDefineStatics");
-
-            return true;
-        }
-
-        return false;
     }
 }

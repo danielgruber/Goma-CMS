@@ -8,12 +8,6 @@
  * @author      Goma-Team
  * @version     2.2.1
  *
- * last modified: 27.07.2015
- */
-
-StaticsManager::addSaveVar("Permission", "providedPermissions");
-
-/**
  * @property int parentid
  * @property string forModel
  * @property int id
@@ -603,5 +597,5 @@ class Permission extends DataObject
         Core::deprecate("2.1", "inheritorid is deprecated, use parentid instead");
         $this->setField("parentid", $parentid);
     }
-
 }
+StaticsManager::addSaveVar("Permission", "providedPermissions");

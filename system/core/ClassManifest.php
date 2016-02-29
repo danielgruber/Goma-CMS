@@ -115,23 +115,6 @@ class ClassManifest {
 	}
 
 	/**
-	 * sets safe-vars for all classes in the file.
-	 *
-	 * @param	string $file Filename
-	 *
-	 * @return	boolean
-	 */
-	public static function setSaveVars($file) {
-		if(count($keys = array_keys(ClassInfo::$files, $file)) > 0) {
-			foreach($keys as $class) {
-				StaticsManager::setSaveVars($class);
-			}
-		}
-
-		return true;
-	}
-
-	/**
 	 * Generates class manifest for all in $directories defined folders.
 	 *
 	 * @param	string &$classes
@@ -309,7 +292,7 @@ class ClassManifest {
             $class = self::resolveClassName($namespace . trim($class));
 
             if(!self::classHasAlreadyBeenIndexed($classes, $class, $file, count($parts[1]) == 1)) {
-                self::generateDefaultClassInfo($class, $file, $parts[3][$key], $classes, $class_info, false);
+                self::generateDefaultClassInfo($class, $file, $parts[3][$key], $classes, $class_info, true);
             }
         }
     }
@@ -355,7 +338,6 @@ class ClassManifest {
      * @param bool $interface
      */
     protected static function generateDefaultClassInfo($class, $file, $parent, &$classes, &$class_info, $interface) {
-
         $classes[$class] = $file;
 
         if(!isset($class_info[$class])) {

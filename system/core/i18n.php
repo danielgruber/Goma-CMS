@@ -73,9 +73,6 @@ class i18n extends gObject {
 	 *@param string - to init special lang
 	 */
 	public static function Init($language) {
-
-		StaticsManager::setSaveVars("i18n");
-
 		if(!self::LangExists($language)) {
 			throw new InvalidArgumentException("Language not found.");
 		}
@@ -155,8 +152,6 @@ class i18n extends gObject {
 	 * @return null|string
 	 */
 	public static function SetSessionLang($lang = null) {
-		StaticsManager::setSaveVars("i18n");
-
 		if(!isset($lang) || !self::LangExists($lang)) {
 			$lang = self::AutoSelectLang();
 		}

@@ -1,16 +1,6 @@
 <?php defined("IN_GOMA") OR die();
 
 /**
- * @package		Goma\Core
- *
- * @author		Goma-Team
- * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
- */
-
-StaticsManager::AddSaveVar(Core::ID, "hooks");
-StaticsManager::AddSaveVar(Core::ID, "cmsVarCallbacks");
-
-/**
  * Goma Core.
  *
  * @package		Goma\Core
@@ -108,10 +98,13 @@ class Core extends gObject {
 	 *
 	 */
 	public static function Init() {
-
 		ob_start();
 
-		StaticsManager::setSaveVars(self::ID);
+		StaticsManager::addSaveVar("gObject", "extensions");
+		StaticsManager::addSaveVar("gObject", "extra_methods");
+		StaticsManager::AddSaveVar(Core::ID, "hooks");
+		StaticsManager::AddSaveVar(Core::ID, "cmsVarCallbacks");
+		StaticsManager::AddSaveVar("Director", "rules");
 
 		self::callHook("beforeInitCore");
 

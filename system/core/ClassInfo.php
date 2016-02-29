@@ -70,15 +70,15 @@ class ClassInfo extends gObject {
 	public static $files = array();
 
 
-    /**
+	/**
 	 * hooks for current execution which are executed when classinfo is generated
 	 *
 	 */
 	public static $ClassInfoHooks = array();
-	
+
 	/**
 	 * list of all known interfaces.
-	*/
+	 */
 	public static $interfaces = array();
 
 	/**
@@ -88,12 +88,12 @@ class ClassInfo extends gObject {
 		return defined(self::GENERATE_CLASS_INFO_KEY);
 	}
 
-    /**
-     * registers a hook on class info loaded
-     *
-     * @param mixed - callback
-     * @return bool
-     */
+	/**
+	 * registers a hook on class info loaded
+	 *
+	 * @param mixed - callback
+	 * @return bool
+	 */
 	public static function onClassInfoLoaded($call) {
 		if(!is_callable($call)) {
 			return false;
@@ -106,12 +106,12 @@ class ClassInfo extends gObject {
 		return true;
 	}
 
-    /**
-     * gets the childs of a class
-     *
-     * @param string - class_name
-     * @return array
-     */
+	/**
+	 * gets the childs of a class
+	 *
+	 * @param string - class_name
+	 * @return array
+	 */
 	public static function getChildren($class) {
 
 		$class = ClassManifest::resolveClassName($class);
@@ -138,17 +138,17 @@ class ClassInfo extends gObject {
 	 */
 	public static function getInterfaces($class) {
 		$class = ClassManifest::resolveClassName($class);
-		
+
 		return isset(self::$class_info[$class]["interfaces"]) ? self::$class_info[$class]["interfaces"] : array();
 	}
 
-    /**
-     * checks if the class has the interface
-     *
-     * @param string - class
-     * @param string - interface
-     * @return bool
-     */
+	/**
+	 * checks if the class has the interface
+	 *
+	 * @param string - class
+	 * @param string - interface
+	 * @return bool
+	 */
 	public static function hasInterface($class, $interface) {
 		$class = ClassManifest::resolveClassName($class);
 
@@ -167,10 +167,10 @@ class ClassInfo extends gObject {
 	}
 
 	/**
-     * gets db-fields of an table
-     * @param string - table
-     * @return array
-     */
+	 * gets db-fields of an table
+	 * @param string - table
+	 * @return array
+	 */
 	public static function getTableFields($table) {
 		return isset(self::$database[$table]) ? self::$database[$table] : array();
 	}
@@ -186,80 +186,80 @@ class ClassInfo extends gObject {
 		return (isset(self::$class_info[strtolower($class)]) || class_exists($class, false));
 	}
 
-    /**
-     * validates that a class can be created and returns classname if it can.
-     *
-     * @param string class
-     * @return string
-     * @throws LogicException
-     */
-    public static function find_creatable_class($class) {
-        $class = self::find_class_name($class);
+	/**
+	 * validates that a class can be created and returns classname if it can.
+	 *
+	 * @param string class
+	 * @return string
+	 * @throws LogicException
+	 */
+	public static function find_creatable_class($class) {
+		$class = self::find_class_name($class);
 
-        if (self::isAbstract($class)) {
-            throw new LogicException("Cannot initiate abstract Class");
-        }
+		if (self::isAbstract($class)) {
+			throw new LogicException("Cannot initiate abstract Class");
+		}
 
-        return $class;
-    }
+		return $class;
+	}
 
-    /**
-     * returns if class exists and is not empty.
-     * it returns correct class-name.
-     *
-     * @param string|gObject class
-     * @return string
-     * @throws LogicException
-     */
-    public static function find_class_name($class) {
-        $class = ClassManifest::resolveClassName($class);
+	/**
+	 * returns if class exists and is not empty.
+	 * it returns correct class-name.
+	 *
+	 * @param string|gObject class
+	 * @return string
+	 * @throws LogicException
+	 */
+	public static function find_class_name($class) {
+		$class = ClassManifest::resolveClassName($class);
 
-        if(!ClassInfo::exists($class) && !class_exists($class, false)) {
-            throw new LogicException("Cannot find unknown class $class");
-        }
+		if(!ClassInfo::exists($class) && !class_exists($class, false)) {
+			throw new LogicException("Cannot find unknown class $class");
+		}
 
-        return $class;
-    }
+		return $class;
+	}
 
 
-    /**
-     * checks if class is abstract
-     *
-     * @param string|gObject $class
-     * @return bool
-     */
+	/**
+	 * checks if class is abstract
+	 *
+	 * @param string|gObject $class
+	 * @return bool
+	 */
 	public static function isAbstract($class) {
-        return self::getSpecificInfo($class, "abstract", false);
+		return self::getSpecificInfo($class, "abstract", false);
 	}
 
-    /**
-     * gets the parent class of a given class
-     *
-     * @param string|gObject $class
-     * @return string
-     */
+	/**
+	 * gets the parent class of a given class
+	 *
+	 * @param string|gObject $class
+	 * @return string
+	 */
 	public static function get_parent_class($class) {
-        return self::getSpecificInfo($class, "parent");
+		return self::getSpecificInfo($class, "parent");
 	}
 
-    /**
-     * gets specific info from class.
-     *
-     * @param string $class
-     * @param string info
-     * @param string default
-     * @return mixed
-     */
-    public static function getSpecificInfo($class, $name, $default = null) {
-        $info = self::getInfo($class);
-        return isset($info[$name]) ? $info[$name] : $default;
-    }
+	/**
+	 * gets specific info from class.
+	 *
+	 * @param string $class
+	 * @param string info
+	 * @param string default
+	 * @return mixed
+	 */
+	public static function getSpecificInfo($class, $name, $default = null) {
+		$info = self::getInfo($class);
+		return isset($info[$name]) ? $info[$name] : $default;
+	}
 
-    /**
-     * gets info to a specific class
-     * @param string|gObject $class
-     * @return array|null
-     */
+	/**
+	 * gets info to a specific class
+	 * @param string|gObject $class
+	 * @return array|null
+	 */
 	public static function getInfo($class) {
 		$class = ClassManifest::resolveClassName($class);
 
@@ -276,19 +276,19 @@ class ClassInfo extends gObject {
 	 */
 	public static function appVersion() {
 		if(isset(self::$appENV["app"]["build"])) {
-            return self::$appENV["app"]["version"] . "-" . self::$appENV["app"]["build"];
-        }
+			return self::$appENV["app"]["version"] . "-" . self::$appENV["app"]["build"];
+		}
 
 		return self::$appENV["app"]["version"];
 	}
 
 	/**
-     * finds a file belonging to a class
-     *
-     * @param string - file
-     * @param string - class
-     * @return bool|string
-     */
+	 * finds a file belonging to a class
+	 *
+	 * @param string - file
+	 * @param string - class
+	 * @return bool|string
+	 */
 	public static function findFile($file, $class) {
 
 		$class = ClassManifest::resolveClassName($class);
@@ -316,13 +316,13 @@ class ClassInfo extends gObject {
 		}
 	}
 
-    /**
-     * finds a file belonging to a class with absolute path
-     *
-     * @param string - file
-     * @param string - class
-     * @return bool|string
-     */
+	/**
+	 * finds a file belonging to a class with absolute path
+	 *
+	 * @param string - file
+	 * @param string - class
+	 * @return bool|string
+	 */
 	public static function findFileAbsolute($file, $class) {
 		if($path = self::findFile($file, $class)) {
 			return realpath($path);
@@ -331,13 +331,13 @@ class ClassInfo extends gObject {
 		}
 	}
 
-    /**
-     * finds a file belonging to a class with relative path
-     *
-     * @param string - file
-     * @param string - class
-     * @return bool|string
-     */
+	/**
+	 * finds a file belonging to a class with relative path
+	 *
+	 * @param string - file
+	 * @param string - class
+	 * @return bool|string
+	 */
 	public static function findFileRelative($file, $class) {
 		if($path = self::findFile($file, $class)) {
 			return self::makePathRelative($path);
@@ -347,8 +347,8 @@ class ClassInfo extends gObject {
 	}
 
 	/**
- 	 * makes a path relative.
-	*/
+	 * makes a path relative.
+	 */
 	public static function makePathRelative($path) {
 		if(substr($path, 0, strlen(ROOT)) == ROOT) {
 			return substr($path, strlen(ROOT));
@@ -363,25 +363,27 @@ class ClassInfo extends gObject {
 	 */
 	public static function getClassTitle($class) {
 		if(StaticsManager::hasStatic($class, "cname")) {
-			return parse_lang(StaticsManager::getStatic($class, "cname"));
+			return parse_lang(StaticsManager::getStatic($class, "cname", true));
 		}
 
 		$c = new $class;
 
 		return parse_lang($c->name);
 	}
-	
+
 	/**
 	 * gets the icon of a class
 	 *
 	 */
 	public static function getClassIcon($class) {
 		if(StaticsManager::hasStatic($class, "icon")) {
-			return ClassInfo::findFileRelative(StaticsManager::getStatic($class, "icon"), $class);
+			return ClassInfo::findFileRelative(StaticsManager::getStatic($class, "icon", true), $class);
 		}
 
 		return null;
 	}
+
+	static $i = 0;
 
 	/**
 	 * loads the classinfo from file
@@ -392,6 +394,7 @@ class ClassInfo extends gObject {
 		self::$database = array();
 		$file = ROOT . CACHE_DIRECTORY . CLASS_INFO_DATAFILE;
 
+		self::$i++;
 		if(((!file_exists($file) || filemtime($file) < filemtime(FRAMEWORK_ROOT . "info.plist") || filemtime($file) < filemtime(ROOT . APPLICATION . "/info.plist") || filemtime($file) + self::$expiringTime < NOW))) {
 			if(PROFILE)
 				Profiler::mark("generate_class_info");
@@ -467,7 +470,7 @@ class ClassInfo extends gObject {
 			self::checkForUpgradeScripts(ROOT . APPLICATION, self::appversion());
 
 			if(isset(self::$appENV["expansion"])) {
-                ClassManifest::tryToInclude("ExpansionManager", 'system/Core/CoreLibs/ExpansionManager.php');
+				ClassManifest::tryToInclude("ExpansionManager", 'system/Core/CoreLibs/ExpansionManager.php');
 				// expansions
 				foreach(self::$appENV["expansion"] as $expansion => $data) {
 					self::checkForUpgradeScripts(ExpansionManager::getExpansionFolder($expansion), ExpansionManager::expVersion($expansion));
@@ -577,7 +580,7 @@ class ClassInfo extends gObject {
 
 				unset($class, $data);
 			}
-			
+
 			foreach(self::$class_info as $class => $data) {
 				if(!ClassInfo::isAbstract($class)) {
 					if(ClassInfo::hasInterface($class, "PermProvider")) {
@@ -593,13 +596,17 @@ class ClassInfo extends gObject {
 
 					unset($c);
 				}
-				
+
+				if(isset($data["interface"])) {
+					self::addInterface($class);
+				}
+
 				if(isset(self::$class_info[$class]["interfaces"])) {
 					foreach(self::$class_info[$class]["interfaces"] as $interface) {
 						self::addInterface($interface);
 					}
 				}
-				
+
 				if(isset(self::$class_info[$class]["child"]) && !empty(self::$class_info[$class]["child"])) {
 					self::$childData[$class] = self::$class_info[$class]["child"];
 					//chmod($f, 0777);
@@ -615,8 +622,8 @@ class ClassInfo extends gObject {
 			// reappend
 			self::$class_info["permission"]["providedPermissions"] = Permission::$providedPermissions;
 
-			
-			
+
+
 			if(PROFILE)
 				Profiler::unmark("classinfo_renderafter");
 
@@ -647,8 +654,6 @@ class ClassInfo extends gObject {
 			define("CLASS_INFO_GENERATED", true);
 
 			gObject::$cache_singleton_classes = array();
-			// object reset
-			StaticsManager::$set_save_vars = array();
 			// class_info reset
 
 			// run hooks
@@ -657,11 +662,11 @@ class ClassInfo extends gObject {
 					call_user_func_array($hook, array());
 				}
 			}
-			
+
 			foreach(self::$class_info as $class => $data) {
 				Core::callHook("loadedClass" . $class);
 			}
-			
+
 			if(PROFILE)
 				Profiler::unmark("generate_class_info");
 		} else {
@@ -734,7 +739,7 @@ class ClassInfo extends gObject {
 		if($info) {
 			$permissionsFalse = array_merge($permissionsFalse, $info);
 		}
-		
+
 
 		// add autoloder-exclude files in temp-folders.
 		if(!file_exists(ROOT . "system/temp/autoloader_exclude")) {
@@ -764,10 +769,10 @@ class ClassInfo extends gObject {
 
 		return true;
 	}
-	
+
 	/**
 	 * checks for basic dependencies and returns string if error has happended.
-	*/
+	 */
 	public static function checkForSoftwareDependencies() {
 		// some global tests for the framework to run
 		if(function_exists("gd_info")) {
@@ -794,7 +799,7 @@ class ClassInfo extends gObject {
 	 *
 	 * @name 	raiseSoftwareError
 	 * @param 	string error
-	*/
+	 */
 	public static function raiseSoftwareError($err) {
 		$error = file_get_contents(ROOT . "system/templates/framework/software_run_fail.html");
 		$error = str_replace('{$error}', $err, $error);
@@ -809,16 +814,16 @@ class ClassInfo extends gObject {
 	 * @param string $interface
 	 */
 	static function addInterface($interface) {
-		
+
 		$interface = strtolower(trim($interface));
-		
+
 		if($interface == "")
 			return;
-		
+
 		if(!isset(self::$interfaces[$interface])) {
 			$parentsi = array_values(class_implements($interface));
 			self::$interfaces[$interface] = isset($parentsi[0]) ? $parentsi[0] : false;
-			
+
 			if(isset($parentsi[0])) {
 				self::addInterface($parentsi[0]);
 			}
@@ -837,14 +842,14 @@ class ClassInfo extends gObject {
 				if(class_exists($class) && is_subclass_of($class, "gObject") || $class == "gobject") {
 					// save vars
 					foreach(StaticsManager::getSaveVars($class) as $value) {
-						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value);
+						self::$class_info[$class][$value] = StaticsManager::getStatic($class, $value, true);
 					}
 					// ci-funcs
 					// that are own function, for generating class-info
-					foreach(StaticsManager::getStatic($class, "ci_funcs") as $name => $func) {
+					foreach(StaticsManager::getStatic($class, "ci_funcs", true) as $name => $func) {
 						self::$class_info[$class][$name] = StaticsManager::callStatic($class, $func);
 					}
-					
+
 					if(isset(self::$class_info[$class]["interfaces"])) {
 						foreach(self::$class_info[$class]["interfaces"] as $interface) {
 							self::addInterface($interface);
@@ -980,11 +985,8 @@ class ClassInfo extends gObject {
 class ClassInfoWriteError extends LogicException {
 	/**
 	 * constructor.
-	*/
+	 */
 	public function __construct($msg, $code = ExceptionManager::CLASSINFO_WRITE_ERROR, $e = null) {
 		parent::__construct($msg, $code, $e);
 	}
 }
-
-StaticsManager::addSaveVar("gObject", "extensions");
-StaticsManager::addSaveVar("gObject", "extra_methods");
