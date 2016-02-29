@@ -18,6 +18,8 @@
  * @property bool active - can be set from outside
  * @property string title
  * @property Permission|null read_permission
+ *
+ * @method HasMany_DataObjectSet children($filter = null)
  */
 
 class Pages extends DataObject implements PermProvider, HistoryData, Notifier

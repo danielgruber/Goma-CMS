@@ -25,6 +25,11 @@ class ContentController extends FrontedController
     public static $activeids = array();
 
     /**
+     * @var Pages
+     */
+    protected $subPage;
+
+    /**
      * default templte of a page
      *
      * @name template
@@ -113,7 +118,8 @@ class ContentController extends FrontedController
         if ($action != "") {
             $path = $action;
             if (preg_match('/^[a-zA-Z0-9_\-\/]+$/Usi', $path)) {
-                if (DataObject::Count("pages", array("path" => array("LIKE", $path), "parentid" => $this->modelInst()->id)) > 0) {
+                $this->subPage = DataObject::get_one("pages", array("path" => array("LIKE", $path), "parentid" => $this->modelInst()->id));
+                if ($this->subPage != null) {
                     return true;
                 }
             }
@@ -199,15 +205,10 @@ class ContentController extends FrontedController
      */
     public function extendHandleAction($action, &$content)
     {
-        if ($content === null && $action != "") {
-            $path = $action;
-            if (preg_match('/^[a-zA-Z0-9_\-\/]+$/Usi', $path)) {
-                if ($data = DataObject::get_one("pages", array("path" => array("LIKE", $path), "parentid" => $this->modelInst()->id))) {
-                    $content = $data->controller()->handleRequest($this->request);
+        if ($content === null && $action != "" && $this->subPage != null) {
+            $content = $this->subPage->controller()->handleRequest($this->request);
 
-                    return true;
-                }
-            }
+            return true;
         }
 
         if ($action == "index") {
