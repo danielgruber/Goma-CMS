@@ -2231,43 +2231,35 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $hasOnes = array();
         $has_one = $this->hasOne();
 
+        $manyManyRelationships = $this->ManyManyRelationships();
         // some specific addons for relations
         if (is_array($query->filter))
         {
             foreach($query->filter as $key => $value)
             {
                 // many-many
-                if (isset(ClassInfo::$class_info[$this->classname]["many_many"][$key]) || isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"][$key]))
+                if (isset($manyManyRelationships[$key]))
                 {
+                    /** @var ModelManyManyRelationShipInfo $relationShip */
+                    $relationShip = $manyManyRelationships[$key];
                     if (is_array($value))
                     {
-                        $object = isset(ClassInfo::$class_info[$this->classname]["many_many"][$key]) ? ClassInfo::$class_info[$this->classname]["many_many"][$key] : ClassInfo::$class_info[$this->classname]["belongs_many_many"][$key];
-                        if ($object)
-                        {
-                            $objectTable = ClassInfo::$class_info[ClassInfo::$class_info[$object]["baseclass"]]["table"];
-                            if (isset(ClassInfo::$class_info[$this->classname]["many_many_tables"][$key]))
-                            {
-                                $table = ClassInfo::$class_info[$this->classname]["many_many_tables"][$key]["table"];
-                                $data = ClassInfo::$class_info[$this->classname]["many_many_tables"][$key];
-                            } else
-                            {
-                                continue;
-                            }
-                            $query->from[] = ' INNER JOIN 
-																			'.DB_PREFIX . $table.' 
-																		AS 
-																			'.$table.' 
-																		ON 
-																			'.$table.'.'.$data["field"]. ' = '.$baseTable.'.id
-																		'; // join many-many-table with BaseTable table
-                            $query->from[] = ' INNER JOIN 
-																			'.DB_PREFIX . $objectTable.' 
-																		AS 
-																			'.$objectTable.' 
-																		ON 
-																			'.$table.'.'. $data["extfield"] . ' = '.$objectTable.'.id 
-																		 '; // join other table with many-many-table
-                        }
+                        $objectTable = $relationShip->getTargetTableName();
+                        $query->from[] = ' INNER JOIN
+                                                                        '.DB_PREFIX . $relationShip->getTableName().'
+                                                                    AS
+                                                                        '.$relationShip->getTableName().'
+                                                                    ON
+                                                                        '.$relationShip->getTableName().'.'.$relationShip->getOwnerField(). ' = '.$baseTable.'.id
+                                                                    '; // join many-many-table with BaseTable table
+                        $query->from[] = ' INNER JOIN
+                                                                        '.DB_PREFIX . $objectTable.'
+                                                                    AS
+                                                                        '.$objectTable.'
+                                                                    ON
+                                                                        '.$relationShip->getTableName().'.'. $relationShip->getTargetField() . ' = '.$objectTable.'.id
+                                                                     '; // join other table with many-many-table
+
                         foreach($value as $field => $val)
                         {
                             if($field == "id") {
@@ -2293,11 +2285,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                             {
                                 continue;
                             }
-                            $query->from[] = ' INNER JOIN 
-																			'.DB_PREFIX . $table.' 
-																		AS 
-																			'.$table.' 
-																	ON  
+                            $query->from[] = ' INNER JOIN
+																			'.DB_PREFIX . $table.'
+																		AS
+																			'.$table.'
+																	ON
 																		 '.$table.'.'.$data["field"] . ' = '.$baseTable.'.id
 																		 '; // join BaseTable with many-many-table
                         }

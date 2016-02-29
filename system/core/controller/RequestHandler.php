@@ -398,6 +398,13 @@ class RequestHandler extends gObject {
 	 * @throws Exception
 	 */
 	public function handleException($e) {
+		$content = null;
+		$this->callExtending("handleException", $e, $content);
+
+		if(isset($content)) {
+			return $content;
+		}
+
 		if(is_a($e, "LogicException")) {
 			throw $e;
 		}
