@@ -180,6 +180,10 @@ class Uploads extends DataObject {
      */
     public static function getFile($path) {
 
+        if(!is_string($path)) {
+            return null;
+        }
+
         if(preg_match('/Uploads\/([^\/]+)\/([a-zA-Z0-9]+)\/([^\/]+)/', $path, $match)) {
             $path = $match[1] . "/" . $match[2] . "/" . $match[3];
         }

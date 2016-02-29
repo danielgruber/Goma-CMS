@@ -661,8 +661,10 @@ class Form extends gObject {
 			if(is_a($e, "FormNotValidException")) {
 				/** @var FormNotValidException $e */
 				$errors = $e->getErrors();
-			} else {
+			} else if(!is_a($e, "FormNotSubmittedException")) {
 				$errors = array($e);
+			} else {
+				$errors = array();
 			}
 
 			$this->state = $data->state;

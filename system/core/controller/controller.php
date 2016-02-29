@@ -126,19 +126,21 @@ class Controller extends RequestHandler
             $this->template = $this->model() . ".html";
         }
 
-        if (StaticsManager::getStatic($this->classname, "live_counter")) {
-            // run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
+        if(!$this->subController) {
+            if (StaticsManager::getStatic($this->classname, "live_counter")) {
+                // run the livecounter (statistics), just if it is activated or the visitor wasn't tracked already
 
-            if (PROFILE) Profiler::mark("livecounter");
-            livecounter::run();
-            if (PROFILE) Profiler::unmark("livecounter");
+                if (PROFILE) Profiler::mark("livecounter");
+                livecounter::run();
+                if (PROFILE) Profiler::unmark("livecounter");
 
-            GlobalSessionManager::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);
-        }
+                GlobalSessionManager::globalSession()->set(livecounter::SESSION_USER_COUNTED, TIME);
+            }
 
-        if ($title = $this->PageTitle()) {
-            Core::setTitle($title);
-            Core::addBreadCrumb($title, $this->namespace . URLEND);
+            if ($title = $this->PageTitle()) {
+                Core::setTitle($title);
+                Core::addBreadCrumb($title, $this->namespace . URLEND);
+            }
         }
     }
 
@@ -164,7 +166,7 @@ class Controller extends RequestHandler
 
     /**
      * sets the model.
-     * @param  RequestHandler|Controller $model
+     * @param  ViewAccessableData $model
      * @param bool $name
      */
     public function setModelInst($model, $name = false)
@@ -174,7 +176,7 @@ class Controller extends RequestHandler
         }
 
         $this->model_inst = $model;
-        $this->model = ($name !== false) ? $name : $model->classname;
+        $this->model = ($name !== false) ? $name : $model->dataClass;
 
         $model->controller = $this;
     }
@@ -182,13 +184,11 @@ class Controller extends RequestHandler
     /**
      * returns the model-object
      *
-     * @name modelInst
-     * @access public
-     * @return RequestHandler|Controller
+     * @param ViewAccessableData|null $model
+     * @return ViewAccessableData
      */
     public function modelInst($model = null)
     {
-
         if (is_object($model) && is_a($model, "ViewAccessableData")) {
             $this->model_inst = $model;
             $this->model = $model->dataClass;
@@ -326,13 +326,7 @@ class Controller extends RequestHandler
     public function index() {
         if ($this->template) {
             $this->tplVars["namespace"] = $this->namespace;
-            if (is_a($this->modelInst(), "DataObject") && $this->modelInst()->controller != $this) {
-                $model = DataObject::Get($this->model(), $this->where);
-                $model->controller = clone $this;
-                return $model->customise($this->tplVars)->renderWith($this->template, $this->inExpansion);
-            } else {
-                return $this->modelInst()->customise($this->tplVars)->renderWith($this->template, $this->inExpansion);
-            }
+            return $this->modelInst()->customise($this->tplVars)->renderWith($this->template, $this->inExpansion);
         } else {
             throw new LogicException("No Template for Controller " . $this->classname . ". Please define \$template to activate the index-method.");
         }
@@ -662,34 +656,23 @@ class Controller extends RequestHandler
     {
         if (PROFILE) Profiler::mark("Controller::save");
 
-        if (PROFILE) Profiler::mark("Controller::save prepare");
-
         $this->callExtending("onBeforeSave", $data, $priority);
 
         /** @var DataObject $model */
         $model = $this->getSafableModel($data, $givenModel);
 
-        if (PROFILE) Profiler::unmark("Controller::save prepare");
+        $model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated);
 
-        if ($model->writeToDB($forceInsert, $forceWrite, $priority, false, true, false, $overrideCreated)) {
+        $this->callExtending("onAfterSave", $model, $priority);
 
-            if (PROFILE) Profiler::mark("Controller::save postproduction");
-
-            $this->callExtending("onAfterSave", $model, $priority);
-
-            if (!isset($givenModel)) {
-                $this->model_inst = $model;
-                $model->controller = clone $this;
-            }
-
-            if (PROFILE) Profiler::unmark("Controller::save postproduction");
-
-            if (PROFILE) Profiler::unmark("Controller::save");
-            return $model;
-        } else {
-            if (PROFILE) Profiler::unmark("Controller::save");
-            return false;
+        if (!isset($givenModel)) {
+            $this->model_inst = $model;
+            $model->controller = clone $this;
         }
+
+        if (PROFILE) Profiler::unmark("Controller::save");
+
+        return $model;
     }
 
     /**

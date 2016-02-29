@@ -123,9 +123,9 @@ class FileUpload extends FormField {
 	public function getValue() {
 		parent::getValue();
 
-		if(isset($_FILES[$this->PostName()]) && !empty($_FILES[$this->PostName()]["name"])) {
+		if(is_array($this->value) && !empty($this->value["name"])) {
 			try {
-				$value = $this->handleUpload($_FILES[$this->PostName()]);
+				$value = $this->handleUpload($this->value);
 				$this->value = $value;
 			} catch(Exception $e) {
 				AddContent::addNotice($e->getCode() . ": " . $e->getMessage());

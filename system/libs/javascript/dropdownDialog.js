@@ -32,7 +32,6 @@ self.dropdownDialogs = [];
 		this.closeButton = true;
 		this.html = "";
 
-		var i;
 		// set options
 		if(typeof options !== "undefined") {
 			for (var i in options) {
@@ -45,7 +44,6 @@ self.dropdownDialogs = [];
 		this.Init();
 
 		this.show(uri);
-
 
 		return this;
 	};
@@ -75,8 +73,7 @@ self.dropdownDialogs = [];
 
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.Init");
 
-			var $this = this,
-				loading;
+			var loading;
 
 			// first validate id
 			if(this.elem.attr("id") === undefined) {
@@ -95,16 +92,20 @@ self.dropdownDialogs = [];
 				});
 
 				var d = function(){
-					$this.definePosition();
-				};
+					if(this.dropdown != null) {
+						this.definePosition();
+					}
+				}.bind(this);
 
 
 				this.dropdown.find(" > div > .content").resize(d);
 				$(window).resize(d);
 
 				$(window).scroll(function(){
-					$this.moveDropdown($this.currentPos);
-				});
+					if(this.dropdown != null) {
+						this.moveDropdown($this.currentPos);
+					}
+				}.bind(this));
 
 				loading = true;
 			} else {
@@ -112,21 +113,19 @@ self.dropdownDialogs = [];
 				loading = false;
 			}
 
-
 			dropdowns[this.dropdown.attr("id")] = this;
 			elems[this.elem.attr("id")] = this;
 			self.dropdownDialogs[this.id] = this;
 
 			// autohide
 			if(!this.elem.hasClass("noAutoHide") && this.autohide != false) {
-				var that = this;
 				CallonDocumentClick(function(){
-					that.hide();
-				}, [this.dropdown, this.elem]);
+					this.hide();
+				}.bind(this), [this.dropdown, this.elem]);
 
 				goma.ui.bindESCAction($("body"), function(){
-					that.hide();
-				});
+					this.hide();
+				}.bind(this));
 			}
 
 			if(this.elem.hasClass("noIEAjax")) {
@@ -150,9 +149,6 @@ self.dropdownDialogs = [];
 		 *@param string - position: if to set this.position
 		 */
 		definePosition: function(position) {
-			if(console.log)
-				console.log("define position");
-
 			//if(typeof profiler != "undefined") profiler.mark("dropdownDialog.definePosition");
 
 			if(position !== null && position !== undefined) {
@@ -201,9 +197,6 @@ self.dropdownDialogs = [];
 			this.moveDropdown(position);
 
 			//if(typeof profiler != "undefined") profiler.unmark("dropdownDialog.definePosition");
-
-			if(console.log)
-				console.log("done: define position");
 		},
 
 		/**
@@ -241,9 +234,6 @@ self.dropdownDialogs = [];
 		 *@name moveDropdown
 		 */
 		moveDropdown: function(position) {
-
-			console.log && console.log("define position");
-
 			if(typeof profiler !== "undefined") profiler.mark("dropdownDialog.moveDropdown");
 
 			this.triangle_position = "center";
@@ -499,6 +489,7 @@ self.dropdownDialogs = [];
 		 */
 		removeHelper: function() {
 			this.dropdown.remove();
+			this.dropdown = null;
 		},
 
 		/**
@@ -508,26 +499,29 @@ self.dropdownDialogs = [];
 		 */
 		remove: function() {
 			// first check if subDropdown is open
-			for(i in this.subDialogs) {
-				if($("#" + this.subDialogs[i]).length > 0 && $("#" + this.subDialogs[i]).css("display") != "none" && !$("#" + this.subDialogs[i]).hasClass("hiding")) {
-					return true;
+			for(var i in this.subDialogs) {
+				if(this.subDialogs.hasOwnProperty(i)) {
+					if ($("#" + this.subDialogs[i]).length > 0 && $("#" + this.subDialogs[i]).css("display") != "none" && !$("#" + this.subDialogs[i]).hasClass("hiding")) {
+						return true;
+					}
 				}
 			}
 
-			// unregister dropdown
-			dropdowns[this.dropdown.attr("id")] = null;
-			elems[this.elem.attr("id")] = null;
-			self.dropdownDialogs[this.id] = null;
-			var that = this;
+			if(this.dropdown != null) {
+				// unregister dropdown
+				dropdowns[this.dropdown.attr("id")] = null;
+				elems[this.elem.attr("id")] = null;
+				self.dropdownDialogs[this.id] = null;
 
-			setTimeout(function(){
-				that.dropdown.addClass("hiding");
-			}, 20);
+				setTimeout(function () {
+					this.dropdown.addClass("hiding");
+				}.bind(this), 20);
 
-			// animate dropdown
-			this.dropdown.fadeOut("fast", function(){
-				that.removeHelper();
-			});
+				// animate dropdown
+				this.dropdown.fadeOut("fast", function () {
+					this.removeHelper();
+				}.bind(this));
+			}
 		},
 
 		/**
@@ -710,7 +704,7 @@ self.dropdownDialogs = [];
 		} else if(typeof self.dropdownDialogs[elem] != "undefined") {
 			return self.dropdownDialogs[elem];
 		} else {
-			return false;
+			return null;
 		}
 	};
 

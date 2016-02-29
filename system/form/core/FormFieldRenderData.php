@@ -458,10 +458,13 @@ class FormFieldRenderData extends gObject implements IRestResponse {
             "hasRenderData" => $this->renderedField != null,
             "js" => $this->js,
             "disabled"  => $this->isDisabled,
-            "hasError" => $this->hasError,
             "cssRenderResources" => $this->renderResources["css"],
             "jsRenderResources" => $this->renderResources["js"]
         );
+
+        if($this->hasError) {
+            $data["hasError"] = $this->hasError;
+        }
 
         if($includeRendered) {
             $data["field"] = $this->renderedField != null ? $this->renderedField->__toString() : "";

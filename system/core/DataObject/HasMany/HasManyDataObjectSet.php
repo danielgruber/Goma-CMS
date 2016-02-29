@@ -58,18 +58,18 @@ class HasMany_DataObjectSet extends DataObjectSet {
         return array("name" => $this->name, "field" => $this->field);
     }
 
-
     /**
      * generates a form
      *
-     * @name form
-     * @access public
      * @param string $name
      * @param bool $edit if edit form
      * @param bool $disabled
+     * @param null $request
+     * @param null $controller
+     * @param null $submission
      * @return Form
      */
-    public function generateForm($name = null, $edit = false, $disabled = false) {
+    public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 
         if(isset($this[$this->field])) {
             $this->dataobject[$this->field] = $this[$this->field];
@@ -77,7 +77,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
             $this->dataobject[$this->field] = $this->filter[$this->field];
         }
 
-        $form = parent::generateForm($name, $edit, $disabled);
+        $form = parent::generateForm($name, $edit, $disabled, $request, $controller, $submission);
 
         if(isset($this[$this->field])) {
             $form->add(new HiddenField($this->field, $this[$this->field]));
@@ -85,34 +85,6 @@ class HasMany_DataObjectSet extends DataObjectSet {
             $form->add(new HiddenField($this->field, $this->filter[$this->field]));
         }
         return $form;
-    }
-
-    /**
-     * sets the has-one-relation when adding to has-many-set
-     *
-     * @param DataObject $record
-     * @param bool $write
-     * @return bool
-     */
-    public function push(DataObject $record, $write = false) {
-        if($this->classname == "hasmany_dataobjectset" && $this->field != null) {
-            if(isset($this[$this->field])) {
-                $record[$this->field] = $this[$this->field];
-            } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
-                $record[$this->field] = $this->filter[$this->field];
-            }
-        }
-
-        $return = parent::push($record);
-        if($write) {
-            $record->writeToDB(false, true);
-        }
-
-        if(isset($this->filter["id"]) && $record->id != 0) {
-            array_push($this->filter["id"], $record->id);
-        }
-
-        return $return;
     }
 
     /**

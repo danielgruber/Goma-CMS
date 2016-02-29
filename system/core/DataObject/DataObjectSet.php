@@ -1000,10 +1000,6 @@ class DataObjectSet extends DataSet {
 		$this->dataobject->getActions($form, $edit);
 		$this->dataobject->callExtending('getActions', $form, $edit);
 
-		if(isset($this->controller) && $this->controller) {
-			$this->controller->model_inst = $this->dataobject;
-		}
-
 		return $form;
 	}
 

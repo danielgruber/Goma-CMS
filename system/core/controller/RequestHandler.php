@@ -57,11 +57,12 @@ class RequestHandler extends gObject {
 
 	/**
 	 * defines if this is a sub-controller.
+	 * by default yes, because then handleRequest was not called.
 	 *
 	 * @access public
 	 * @var bool
 	 */
-	protected $subController;
+	protected $subController = true;
 
 	/**
 	 * the current request
