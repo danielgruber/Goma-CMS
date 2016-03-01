@@ -28,7 +28,7 @@ class Tab extends FieldSet
      * @param string $title
      * @param Form $form
      */
-    public function __construct($name, $fields, $title = null, &$form = null)
+    public function __construct($name = null, $fields = array(), $title = null, &$form = null)
     {
         parent::__construct($name, $fields, $title, $form);
 

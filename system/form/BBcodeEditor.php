@@ -28,7 +28,7 @@ class BBcodeEditor extends Textarea {
 	 *@param options
 	 *@param null|object - form
 	 */
-	public function __construct($name, $title = null, $value = null, $height = null, $width = null, $options = null, &$form = null) {
+	public function __construct($name = null, $title = null, $value = null, $height = null, $width = null, $options = null, &$form = null) {
 		parent::__construct($name, $title, $value, $height, $width, $form);
 
 		if(is_array($options))

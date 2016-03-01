@@ -27,7 +27,7 @@ class CancelButton extends FormAction
      * @param string - optional submission
      * @param object - form
      */
-    public function __construct($name, $value, $redirect = null, $js = "", &$form = null)
+    public function __construct($name = null, $value = null, $redirect = null, $js = "", &$form = null)
     {
         $this->js = $js;
         parent::__construct($name, $value);

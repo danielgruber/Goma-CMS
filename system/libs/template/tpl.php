@@ -119,36 +119,13 @@ class tpl extends gObject
 	}
 
 	/**
-	 * new init method
-	 *
-	 * @name render
-	 * @access public
-	 * @param string - filename
-	 * @param array - for replacement like {$content}
-	 * @param object - class
-	 * @param array - required areas
-	 * @use: parse tpl
-	 */
-	public static function renderAreas($name, $replacement = array(), $class = "", $required_areas, $expansion = null)
-	{
-		Core::deprecated(2.0, "Don't use areas anymore, use render and vars instead");
-		$file = self::getFilename($name, $class, false, $expansion);
-		if ($file !== false) {
-			return self::parser($file, $replacement, realpath($file), $class, $required_areas);
-		} else {
-			HTTPresponse::setResHeader(500);
-			/* an error so show an error ;-) */
-			throw new LogicException("Could not open Template-File '" . $name . "'");
-		}
-	}
-
-	/**
 	 * gets the filename of a given template-name
 	 *
-	 * @name getFilename
-	 * @access public
-	 * @param string - name
-	 * @param use include-folders
+	 * @param string $name
+	 * @param object|string $class
+	 * @param bool $inc
+	 * @param string|null $expansion
+	 * @return bool|string
 	 */
 	public static function getFilename($name, $class = "", $inc = false, $expansion = null)
 	{
@@ -209,10 +186,11 @@ class tpl extends gObject
 	 * gets the filename of a given template-name uncached!
 	 * just returns false
 	 *
-	 * @name getFilenameUncached
-	 * @access public
-	 * @param string - name
-	 * @param use include-folders
+	 * @param string $name
+	 * @param object|string $class
+	 * @param bool $inc use include folder
+	 * @param string $expansion
+	 * @return bool|string
 	 */
 	public static function getFilenameUncached($name, $class = "", $inc = false, $expansion = null)
 	{
@@ -276,11 +254,9 @@ class tpl extends gObject
 	/**
 	 * build all files needed for a template
 	 *
-	 * @name buildFilesForTemplate
-	 * @access public
-	 * @param string - template
-	 * @param string - tmpname
-	 * @param bool - whether use include-paths or not
+	 * @param string $template
+	 * @param string $tmpname
+	 * @return bool|string
 	 */
 	public static function buildFilesForTemplate($template, $tmpname)
 	{
@@ -293,9 +269,9 @@ class tpl extends gObject
 		}
 
 		// caching
-		$t = filemtime($tmpname);
+		$lastModified = filemtime($tmpname);
 
-		$cacher = new tplcacher($tmpname, $t);
+		$cacher = new tplcacher($tmpname, $lastModified);
 		self::$cacheCache[$tmpname] = $cacher;
 		if ($cacher->checkvalid() === true) {
 			if (PROFILE) Profiler::unmark("tpl::buildFilesForTemplate");
@@ -306,10 +282,8 @@ class tpl extends gObject
 
 			array_push(self::$dataStack, array("tpl" => self::$tpl, "areas" => self::$areas, "iAreas" => self::$iAreas));
 
-
 			self::$tpl = $template;
 			$tpldata = self::compile($data);
-
 
 			$olddata = array_pop(self::$dataStack);
 			self::$tpl = $olddata["tpl"];
@@ -396,9 +370,9 @@ class tpl extends gObject
 	/**
 	 * compiles a tpl-file
 	 *
-	 * @name compile
-	 * @access public
-	 * @return mixed
+	 * @param $tpl
+	 * @return string
+	 * @throws TemplateParserException
 	 */
 	public static function compile($tpl)
 	{
@@ -568,9 +542,9 @@ $data = array_pop($dataStack);
 
 		// validate counters
 		if ($controlCount > $endControlCount) {
-			throwError(10, 'Template-Parse-Error.', 'Expected <% ENDCONTROL %> ' . ($controlCount - $endControlCount) . ' more time(s) in ' . self::$tpl . '.');
+			throw new TemplateParserException('Expected <% ENDCONTROL %> ' . ($controlCount - $endControlCount) . ' more time(s) in ' . self::$tpl . '.', self::$tpl);
 		} else if ($endControlCount > $controlCount) {
-			throwError(10, 'Template-Parse-Error.', 'Expected <% CONTROL [method] %> ' . ($endControlCount - $controlCount) . ' more time(s) in ' . self::$tpl . '.');
+			throw new TemplateParserException('Expected <% CONTROL [method] %> ' . ($endControlCount - $controlCount) . ' more time(s) in ' . self::$tpl . '.', self::$tpl);
 		}
 
 		// areas, DEPRECATED!

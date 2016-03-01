@@ -29,7 +29,7 @@ class JavaScriptField extends FormField
 		 *@param string - javascript
 		 *@param null|object - form
 		*/
-		public function __construct($name, $js = null, $form = null)
+		public function __construct($name = null, $js = null, $form = null)
 		{
 				parent::__construct($name, null, null, $form);
 				$this->js = $js;

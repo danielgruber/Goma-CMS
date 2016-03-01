@@ -144,4 +144,5 @@ class ExceptionManager {
 	const FILEUPLOAD_SIZE_FAIL = -602;
 	const FILEUPLOAD_TYPE_FAIL = -603;
 	const FILEUPLOAD_DISK_SPACE_FAIL = -604;
+	const TPL_COMPILE_ERROR = -10;
 }

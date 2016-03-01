@@ -40,7 +40,7 @@ class FormAction extends FormField implements FormActionHandler
      * @param string - optional submission
      * @param object - form
      */
-    public function __construct($name, $value, $submit = null, $classes = null, &$form = null)
+    public function __construct($name = null, $value = null, $submit = null, $classes = null, &$form = null)
     {
         parent::__construct($name, $value);
         if ($submit === null)
@@ -57,7 +57,7 @@ class FormAction extends FormField implements FormActionHandler
                 foreach ($classes as $class)
                     $this->addClass($class);
             else
-                $this->addClass($class);
+                $this->addClass($classes);
     }
 
     /**

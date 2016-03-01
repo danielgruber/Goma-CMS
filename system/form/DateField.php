@@ -18,7 +18,7 @@ class DateField extends FormField
 	 * @param    array $between key 0 for start and key 1 for end and key 2 indicates whether to allow the values given
 	 * @param    object $form
 	 */
-	public function __construct($name, $title = null, $value = null, $between = null, $form = null)
+	public function __construct($name = null, $title = null, $value = null, $between = null, $form = null)
 	{
 		$this->between = $between;
 		parent::__construct($name, $title, $value, $form);

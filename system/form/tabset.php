@@ -23,16 +23,14 @@ class TabSet extends FieldSet
     /**
      * @var string
      */
-    protected $template = "form/tabset.html";
+    protected $template = "form/TabSet.html";
 
     /**
-     * @name __construct
-     * @access public
-     * @param string - name
-     * @param array - fields
-     * @param null|object - form
+     * @param string|null $name
+     * @param array $fields
+     * @param Form|null $form
      */
-    public function __construct($name, $fields, &$form = null)
+    public function __construct($name = null, $fields = array(), &$form = null)
     {
         parent::__construct($name, $fields, null, $form);
 

@@ -36,15 +36,13 @@ class RadioButton extends FormField
     public $hideDisabled = false;
 
     /**
-     * @name __construct
-     * @param string - name
-     * @param string - title
-     * @param array - options
-     * @param string - select
-     * @param object - form
-     * @access public
+     * @param string|null $name
+     * @param string|null $title
+     * @param array $options
+     * @param string|null $selected
+     * @param Form null $form
      */
-    public function __construct($name, $title = null, $options = array(), $selected = null, $form = null)
+    public function __construct($name = null, $title = null, $options = array(), $selected = null, $form = null)
     {
         $this->options = $options;
         parent::__construct($name, $title, $selected, $form);

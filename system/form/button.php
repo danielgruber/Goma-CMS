@@ -17,6 +17,7 @@ class Button extends FormAction {
 	 *@access public
 	 */
 	public $action;
+
 	/**
 	 *@name __construct
 	 *@access public
@@ -25,15 +26,13 @@ class Button extends FormAction {
 	 *@param string - action in JavaScript
 	 *@param object|null - field
 	 */
-	public function __construct($name, $title = null, $action = null, $classes = null, &$form = null) {
+	public function __construct($name = null, $title = null, $action = null, $classes = null, &$form = null) {
 		$this->action = $action;
 		parent::__construct($name, $title, null, $classes, $form);
 	}
 
 	/**
-	 * creates the Node
-	 *@name createNode
-	 *@access public
+	 * creates the Button
 	 */
 	public function createNode() {
 		$node = parent::createNode();

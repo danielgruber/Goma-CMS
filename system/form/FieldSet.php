@@ -39,7 +39,7 @@ class FieldSet extends FormField
     /**
      * template.
      */
-    protected $template = "form/fieldset.html";
+    protected $template = "form/FieldSet.html";
 
     /**
      * template-view.
@@ -65,7 +65,7 @@ class FieldSet extends FormField
      * @param mixed - value
      * @param object - form
      */
-    public function __construct($name = null, $fields, $label = null, &$parent = null)
+    public function __construct($name = null, $fields = array(), $label = null, &$parent = null)
     {
         parent::__construct($name, $label, null, $parent);
 

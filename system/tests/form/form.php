@@ -120,4 +120,23 @@ class FormTest extends GomaUnitTest implements TestAble {
 		self::$testCalled = 2;
 		throw new Exception("Problem");
 	}
+
+	public function testTemplateExists() {
+		foreach(ClassInfo::getChildren("FormField") as $field) {
+			if(!ClassInfo::isAbstract($field)) {
+				$reflectionClass = new ReflectionClass($field);
+				$inst = $reflectionClass->newInstance();
+
+				if($reflectionClass->hasProperty("template")) {
+					$reflectionProp = $reflectionClass->getProperty("template");
+					$reflectionProp->setAccessible(true);
+					$tpl = $reflectionProp->getValue($inst);
+
+					if ($tpl) {
+						$this->assertTrue(tpl::getFilename($tpl), "Template $tpl for class $field %s");
+					}
+				}
+			}
+		}
+	}
 }

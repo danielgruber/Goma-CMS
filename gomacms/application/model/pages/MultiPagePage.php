@@ -60,8 +60,7 @@ class MultiPagePageController extends PageController {
      * @param string $action
      * @return bool
      */
-    public function willHandleWithSubpage($action)
-    {
+    public function willHandleWithSubpage($action) {
         if(isset($this->request->get_params["landing"]) && $this->modelInst()->allowUrlSwitching) {
             if($this->subPage = $this->modelInst()->children(array(
                 "path" => array(

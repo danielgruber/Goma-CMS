@@ -22,7 +22,7 @@ class TemplateSwitcher extends FormField {
 	 *@param string - value
 	 *@param object - form
 	*/
-	public function __construct($name, $title = null, $appname = null, $appversion = null, $frameworkVersion = null, $value = null, $form = null) {
+	public function __construct($name = null, $title = null, $appname = null, $appversion = null, $frameworkVersion = null, $value = null, $form = null) {
 		
 		$this->appname = $appname;
 		$this->appversion = $appversion;

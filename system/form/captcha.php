@@ -17,7 +17,7 @@ class Captcha extends FormField {
 	 *@param string - name
 	 *@param object - parent
 	 */
-	public function __construct($name, &$parent = null) {
+	public function __construct($name = null, &$parent = null) {
 		parent::__construct($name, null, null, $parent);
 		$this->title = lang("captcha", "Captcha");
 	}

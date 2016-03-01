@@ -84,7 +84,7 @@ class ClassInfo extends gObject {
 	/**
 	 * information if class-info has been regenerated in this request.
 	 */
-	public static function ClasssInfoHasBeenRegenerated() {
+	public static function ClassInfoHasBeenRegenerated() {
 		return defined(self::GENERATE_CLASS_INFO_KEY);
 	}
 

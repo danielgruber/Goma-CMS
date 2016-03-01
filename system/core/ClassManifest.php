@@ -201,7 +201,6 @@ class ClassManifest {
      * @param array &$env
      */
 	public static function generate_class_manifest($dir, &$classes, &$class_info, &$env) {
-
         $dir = realpath($dir);
 
         if (self::shouldBeScanned($dir, $classes, $class_info, $env)) {
@@ -287,7 +286,7 @@ class ClassManifest {
         }
 
         // index interfaces too
-        preg_match_all('/interface\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z\\\\0-9_]+))?\s+\{/Usi', $contents, $parts);
+        preg_match_all('/interface\s+([a-zA-Z0-9\\\\_]+)(\s+extends\s+([a-zA-Z\\\\0-9_]+))?\s*\{/Usi', $contents, $parts);
         foreach($parts[1] as $key => $class) {
             $class = self::resolveClassName($namespace . trim($class));
 

@@ -338,12 +338,14 @@ abstract class gObject
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;
         }
 
-        if(!isset(self::$hook_called[$this->classname])) {
+        if(!isset(self::$hook_called[$this->classname]) || ClassInfo::ClassInfoHasBeenRegenerated()) {
             if(method_exists($this, "defineStatics")) {
                 $this->defineStatics();
             }
 
             $this->callExtending("extendDefineStatics");
+
+            self::$hook_called[$this->classname] = true;
         }
     }
 

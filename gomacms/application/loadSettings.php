@@ -13,7 +13,7 @@ defined("IN_GOMA") OR die();
  */
 
 
-if(ClassInfo::ClasssInfoHasBeenRegenerated()) {
+if(ClassInfo::ClassInfoHasBeenRegenerated()) {
     Resources::$gzip = settingsController::get("gzip");
     RegisterExtension::$enabled = settingsController::get("register_enabled");
     RegisterExtension::$validateMail = settingsController::get("register_email");

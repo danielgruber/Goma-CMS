@@ -43,7 +43,7 @@ class Textarea extends FormField
      * @param string - width
      * @param null|object - form
      */
-    public function __construct($name, $title = null, $value = null, $height = null, $width = null, &$form = null)
+    public function __construct($name = null, $title = null, $value = null, $height = null, $width = null, &$form = null)
     {
         if (isset($height))
             $this->height = $height;

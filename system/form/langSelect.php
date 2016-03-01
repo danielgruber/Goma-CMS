@@ -25,7 +25,7 @@ class langSelect extends Select
 	 * @param 	string - select
 	 * @param 	object - form
 	 */
-	public function __construct($name, $title = null, $selected = null, $form = null)
+	public function __construct($name = null, $title = null, $selected = null, $form = null)
 	{
 		parent::__construct($name, $title, $this->options(), $selected, $form);
 	}
