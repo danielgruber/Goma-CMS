@@ -258,12 +258,11 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * returns the first item
-	 * @name first
-	 * @access public
+	 *
+	 * @param bool $forceObject
 	 * @return DataObject|null
 	 */
-	public function first($forceObject = true)
-	{
+	public function first($forceObject = true) {
 		$this->forceData();
 
 		if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
@@ -279,9 +278,9 @@ class DataObjectSet extends DataSet {
 	 * gets a Range of items in a DataSet of this DataSet
 	 * pagination is always ignored
 	 *
-	 *@name getRange
-	 *@access public
-	 *@return DataSet
+	 * @param int $start
+	 * @param int $length
+	 * @return DataSet
 	 */
 	public function getRange($start, $length) {
 		return new DataSet($this->getRecordsByRange($start, $length));
@@ -747,9 +746,9 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * adds a new record to this set
-	 *
-	 *@name add
-	 *@access public
+	 * @param DataObject $record
+	 * @param bool $write
+	 * @return bool|void
 	 */
 	public function push(DataObject $record, $write = false) {
 		foreach((array) $this->defaults as $key => $value) {
@@ -761,11 +760,19 @@ class DataObjectSet extends DataSet {
 			$this->count++;
 		}
 
-		$return = parent::push($record);
+		parent::push($record);
 		if($write) {
-			$record->write(false, true);
+			$record->writeToDB(false, true);
 		}
-		return $return;
+	}
+
+	/**
+	 * alias for push
+	 * @param mixed $item
+	 * @param bool $write
+	 */
+	public function add($item, $write = false) {
+		$this->push($item, $write);
 	}
 
 	/**

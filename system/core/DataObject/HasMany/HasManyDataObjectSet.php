@@ -15,26 +15,23 @@ class HasMany_DataObjectSet extends DataObjectSet {
     /**
      * field for the relation according to this set, for example: pageid or groupid
      *
-     *@name field
-     *@access protected
+     * @var string
      */
     protected $field;
 
     /**
      * name of the relation
      *
-     *@name relationName
-     *@access protected
+     * @var string
      */
     protected $relationName;
 
     /**
      * sets the relation-props
      *
-     *@name setRelationENV
-     *@access public
-     *@param string - name
-     *@param string - field
+     * @param string $name
+     * @param string $field
+     * @param int $id
      */
     public function setRelationENV($name = null, $field = null, $id = null) {
         if(isset($name))
@@ -42,20 +39,22 @@ class HasMany_DataObjectSet extends DataObjectSet {
         if(isset($field))
             $this->field = $field;
 
-        if(isset($id))
-            foreach($this as $record)
+        if(isset($id)) {
+            if(isset($this->dataobject)) {
+                $this->dataobject->{$this->field} = $id;
+            }
+
+            foreach ($this as $record) {
                 $record[$field] = $id;
+            }
+        }
     }
 
     /**
      * get the relation-props
-     *
-     *@name getRelationENV
-     *@access public
-     *@return array
      */
     public function getRelationENV() {
-        return array("name" => $this->name, "field" => $this->field);
+        return array("name" => $this->relationName, "field" => $this->field);
     }
 
     /**
@@ -71,17 +70,18 @@ class HasMany_DataObjectSet extends DataObjectSet {
      */
     public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
 
-        if(isset($this[$this->field])) {
-            $this->dataobject[$this->field] = $this[$this->field];
-        } else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
-            $this->dataobject[$this->field] = $this->filter[$this->field];
+        if($id = $this->getRelationID()) {
+            $this->dataobject[$this->field] = $this->getFirst()->{$this->field};
         }
 
         $form = parent::generateForm($name, $edit, $disabled, $request, $controller, $submission);
 
-        if(isset($this[$this->field])) {
-            $form->add(new HiddenField($this->field, $this[$this->field]));
-        } else if(isset($this->filter[$this->field]) && is_string($this->filter[$this->field]) || is_int($this->filter[$this->field])) {
+        if($id = $this->getRelationID()) {
+            $form->add(new HiddenField($this->field, $id));
+        }
+        if(isset($this->getFirst()->{$this->field})) {
+            $form->add(new HiddenField($this->field, $this->getFirst()->{$this->field}));
+        } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
             $form->add(new HiddenField($this->field, $this->filter[$this->field]));
         }
         return $form;
@@ -109,5 +109,32 @@ class HasMany_DataObjectSet extends DataObjectSet {
             $record->writeToDB(false, true);
         }
         return $record;
+    }
+
+    /**
+     * @param DataObject $record
+     * @param bool $write
+     * @return bool|void
+     */
+    public function push(DataObject $record, $write = false)
+    {
+        if($id = $this->getRelationID()) {
+            $record[$this->field] = $this->getRelationID();
+        }
+
+        parent::push($record, $write);
+    }
+
+    /**
+     * gets id.
+     *
+     * @return null|int
+     */
+    protected function getRelationID() {
+        if(isset($this->getFirst()->{$this->field})) {
+            return $this->getFirst()->{$this->field};
+        } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
+            return $this->filter[$this->field];
+        }
     }
 }

@@ -211,9 +211,6 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
 
     /**
      * adds a item to this set
-     *
-     *@name push
-     *@access public
      */
     public function push($item) {
         if(is_array($this->dataCache))
@@ -222,22 +219,18 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
             $this->dataCache = array($item);
 
 
-        $this->reRenderSet();
-        return true;
     }
 
     /**
      * alias for push
      */
-    public function add($item, $write = false) {
-        return $this->push($item, $write);
+    public function add($item) {
+        $this->push($item);
     }
 
     /**
      * removes the last item of the set and returns it
-     *
-     *@name pop
-     *@access public
+     * @return mixed
      */
     public function pop() {
         $data = array_pop($this->dataCache);

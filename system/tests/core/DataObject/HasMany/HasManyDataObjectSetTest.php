@@ -20,12 +20,11 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
      */
     public $name = "HasManyDataObjectSet";
 
-
     /**
      *
      */
     public function testPush() {
-        $set = new HasMany_DataObjectSet();
+        $set = new HasMany_DataObjectSet("MockWriteEntity");
 
         $set->setData(array());
 
@@ -39,9 +38,19 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
         $newE = clone $oldE;
         $set->push($newE);
 
+        $this->assertEqual($set->getRelationENV(), array(
+            "name" => "test",
+            "field" => "blah"
+        ));
+
         $this->assertNotEqual($e->ToArray(), $oldE->ToArray());
         $this->assertNotEqual($newE->ToArray(), $oldE->toArray());
+        $this->assertEqual($set->getFirst()->blah, 1);
         $this->assertEqual($newE->blah, 1);
         $this->assertEqual($e->blah, 1);
+
+        $set->setData(array());
+
+        $this->assertEqual($set->getFirst()->blah, 1);
     }
 }
