@@ -165,12 +165,13 @@ class ImageUploadsController extends UploadsController {
 	 */
 	private function checkForSourceResize() {
 		$model = $this->modelInst();
-		if($model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && !$model->realizedSize && $model->id != 0) {
+		if(true) {//$model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && !$model->realizedSize && $model->id != 0) {
 
-			$width = $model->width * $model->thumbWidth / 100;
-			$height = $model->height * $model->thumbHeight / 100;
+			$width = $model->sourceImage->width * $model->thumbWidth / 100;
+			$height = $model->sourceImage->height * $model->thumbHeight / 100;
 
-			$image = new RootImage($this->modelInst()->realfile);
+			$image = new RootImage($this->modelInst()->sourceImage->realfile);
+
 			$img = $image->resize($width, $height, true, new Position($model->thumbLeft, $model->thumbTop), new Size($model->thumbWidth, $model->thumbHeight));
 
 			$extension = substr($model->filename, strrpos($model->filename, "."));

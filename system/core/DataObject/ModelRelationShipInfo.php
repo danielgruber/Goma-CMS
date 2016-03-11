@@ -80,7 +80,53 @@ abstract class ModelRelationShipInfo
      * @param string $name
      * @param array $options
      */
-    abstract public function __construct($ownerClass, $name, $options);
+    /**
+     * constructor.
+     *
+     * @param string $ownerClass
+     * @param string $name
+     * @param array|string $options
+     */
+    public function __construct($ownerClass, $name, $options)
+    {
+        $this->owner = $ownerClass;
+        $this->relationShipName = $name;
+
+        if(is_string($options)) {
+            $this->targetClass = strtolower($options);
+        } else {
+            if(isset($options[DataObject::RELATION_TARGET])) {
+                $this->targetClass = $options[DataObject::RELATION_TARGET];
+            } else if(isset($options["class"])) {
+                $this->targetClass = $options["class"];
+            } else {
+                throw new InvalidArgumentException("No Target class defined.");
+            }
+
+            $this->targetClass = strtolower($this->targetClass);
+
+            if(isset($options[DataObject::RELATION_INVERSE])) {
+                $this->inverse = strtolower($options[DataObject::RELATION_INVERSE]);
+            }
+
+            if(isset($options[DataObject::CASCADE_TYPE])) {
+                $this->cascade = $options[DataObject::CASCADE_TYPE];
+            }
+
+            if(isset($options[DataObject::FETCH_TYPE])) {
+                $this->fetchType = $options[DataObject::FETCH_TYPE];
+            }
+        }
+
+        if(!isset($options["validatedInverse"])) {
+            $this->validateAndForceInverse();
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    abstract protected function validateAndForceInverse();
 
     /**
      * @return string

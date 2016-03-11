@@ -82,7 +82,8 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
             return array();
         }
 
-        if(!isset(self::$relationShips[$owner->classname])) {
+        if(!isset(self::$relationShips[$owner->classname]) ||
+            (!self::$relationShips[$owner->classname] && ClassInfo::ClassInfoHasBeenRegenerated())) {
             $has_one = isset(ClassInfo::$class_info[$owner->classname]["has_one"]) ? ClassInfo::$class_info[$owner->classname]["has_one"] : array();
 
             if ($classes = ClassInfo::dataclasses($owner->classname)) {
