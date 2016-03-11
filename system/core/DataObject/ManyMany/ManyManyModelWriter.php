@@ -299,12 +299,13 @@ class ManyManyModelWriter extends Extension {
         $owner = $this->getOwner();
 
         // clean-up-many-many
-        foreach($owner->getModel()->ManyManyTables() as $data) {
-            $manipulation[$data["table"]] = array(
-                "table" 	=> $data["table"],
+        /** @var ModelManyManyRelationShipInfo $relationship */
+        foreach($owner->getModel()->ManyManyRelationships() as $relationship) {
+            $manipulation[$relationship->getTableName()] = array(
+                "table" 	=> $relationship->getTableName(),
                 "command"	=> "delete",
                 "where"		=> array(
-                    $data["field"] => $oldId
+                    $relationship->getOwnerField() => $oldId
                 )
             );
         }

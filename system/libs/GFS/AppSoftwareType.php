@@ -650,11 +650,11 @@ class G_AppSoftwareType extends G_SoftwareType {
 	 * @return bool
 	 */
 	public static function backup($file, $name, $changelog = null) {
-		$tables = array_merge(ModelInfoGenerator::Tables("user"), ModelInfoGenerator::Tables("UserAuthentication"), ModelInfoGenerator::Tables("history"));
+		$tables = array_merge(DBTableManager::Tables("user"), DBTableManager::Tables("UserAuthentication"), DBTableManager::Tables("history"));
 		//$tables = array_merge($tables, ClassInfo::Tables("permission"));
 		if(isset(ClassInfo::$appENV["app"]["excludeModelsFromDistro"])) {
 			foreach(ClassInfo::$appENV["app"]["excludeModelsFromDistro"] as $model) {
-				$tables = array_merge($tables, ModelInfoGenerator::Tables($model));
+				$tables = array_merge($tables, DBTableManager::Tables($model));
 			}
 		}
 
@@ -663,6 +663,52 @@ class G_AppSoftwareType extends G_SoftwareType {
 		Backup::generateBackup($file, $excludeFiles, $tables, '{!#PREFIX}', !isset($_GET["dontIncludeTPL"]), ClassInfo::$appENV["app"]["requireFrameworkVersion"], $changelog);
 
 		return true;
+	}
+
+
+	/**
+	 * returns a list of database-tables that can be referred to the DataObject.
+	 *
+	 * @name 	Tables
+	 * @param 	string class
+	 * @return 	array
+	 */
+	public static function Tables($class) {
+		$class = ClassManifest::resolveClassName($class);
+
+		if (!isset(ClassInfo::$class_info[$class]["baseclass"]))
+			return array();
+
+		if (ClassInfo::$class_info[$class]["baseclass"] == $class) {
+			return self::TablesOfBaseClass($class);
+		} else {
+			return self::TablesOfBaseClass(ClassInfo::$class_info[$class]["baseclass"]);
+		}
+	}
+
+	/**
+	 * gets all referred database-tables for a given baseclass.
+	 * this method does not check for Base-Class.
+	 *
+	 * @param 	string $baseClass
+	 * @return 	array
+	 */
+	protected static function TablesOfBaseClass($baseClass) {
+		if (!isset(ClassInfo::$class_info[$baseClass]["table"]) || empty(ClassInfo::$class_info[$baseClass]["table"])) {
+			return array();
+		}
+
+		$tables = array();
+
+		$tables[$baseClass . "_state"] = $baseClass . "_state";
+
+		$tables = self::fillTableArray($baseClass, $tables);
+
+		foreach (ClassInfo::getChildren($baseClass) as $subclass) {
+			$tables = self::fillTableArray($subclass, $tables);
+		}
+
+		return $tables;
 	}
 
 	/**

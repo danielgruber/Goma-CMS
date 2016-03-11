@@ -1120,7 +1120,8 @@ abstract class Extension extends gObject implements ExtensionModel {
 
 	/**
 	 * gets the owner of class
-	 *@name getOwner
+	 *
+	 * @return gObject
 	 */
 	public function getOwner() {
 		return $this->owner;

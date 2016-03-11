@@ -9,14 +9,14 @@
  * @author      Goma-Team
  *
  * @version    1.0.1
+ *
+ * @method ModelWriter getOwner()
  */
 class HasManyWriter extends Extension {
-
     /**
      * writes has-many-relationships.
      */
     protected function onBeforeWriteData() {
-        /** @var ModelWriter $owner */
         $owner = $this->getOwner();
         $data = $owner->getData();
 
@@ -29,42 +29,25 @@ class HasManyWriter extends Extension {
                         /** @var HasMany_DataObjectSet $hasManyObject */
                         $hasManyObject = $data[$name];
 
-                        $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
+                        if($this->shouldUpdateData($has_many[$name])) {
+                            $hasManyObject->setRelationENV($name, $has_many[$name]->getInverse() . "id", $owner->getModel()->id);
+                            $hasManyObject->writeToDB(false, true, $owner->getWriteType());
 
-                        if($hasManyObject->fieldToArray("id")) {
-                            $this->removeFromRelationShip($class, $key . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"));
-                        }
-
-                        $hasManyObject->setRelationENV($name, $key . "id", $owner->getModel()->id);
-                        $hasManyObject->writeToDB(false, true, $owner->getWriteType());
-                    } else {
-                        if (isset($data[$name]) && !isset($data[$name . "ids"])) {
-                            $data[$name . "ids"] = $data[$name];
-                        }
-
-                        if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
-                            // find field
-                            $key = self::searchForBelongingHasOneRelationship($owner->getModel(), $name, $class);
-
-                            if($data[$name . "ids"]) {
-                                $this->removeFromRelationShip($class, $key . "id", $owner->getModel()->id, $data[$name . "ids"]);
+                            if($hasManyObject->fieldToArray("id")) {
+                                $this->removeFromRelationShip($class, $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"), $this->shouldRemoveData($has_many[$name]));
                             }
-
-                            foreach ($data[$name . "ids"] as $id) {
-                                /** @var DataObject $belongingObject */
-                                $belongingObject = DataObject::get_one($class, array("id" => $id));
-                                $belongingObject[$key . "id"] = $owner->getModel()->id;
-
-                                $writer = $owner->getRepository()->buildWriter(
-                                    $belongingObject,
-                                    -1,
-                                    $owner->getSilent(),
-                                    $owner->getUpdateCreated(),
-                                    $owner->getWriteType(),
-                                    $owner->getDatabaseWriter());
-                                $writer->write();
-                            }
+                        } else {
+                            $data[$name] = $hasManyObject->fieldToArray("id");
                         }
+                    }
+
+                    if (isset($data[$name]) && !isset($data[$name . "ids"]) && is_array($data[$name])) {
+                        $data[$name . "ids"] = $data[$name];
+                    }
+
+                    if (isset($data[$name . "ids"]) && $this->validateIDsData($data[$name . "ids"])) {
+                        $this->removeFromRelationShip($class, $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $data[$name . "ids"], $this->shouldRemoveData($has_many[$name]));
+                        $this->updateRelationship($data[$name . "ids"], $has_many[$name]);
                     }
                 }
             }
@@ -74,24 +57,66 @@ class HasManyWriter extends Extension {
     }
 
     /**
+     * @param ModelHasManyRelationShipInfo $info
+     * @return bool
+     */
+    protected function shouldRemoveData($info) {
+        return (substr($info->getCascade(), 0, 1) == 1);
+    }
+
+    /**
+     * @param ModelHasManyRelationShipInfo $info
+     * @return bool
+     */
+    protected function shouldUpdateData($info) {
+        return (substr($info->getCascade(), 1, 1) == 1);
+    }
+
+    /**
      * set field to 0 for all elements which have at the moment the given id on that field, but
      * the recordid is not in the given array.
      *
      * @param string $class
      * @param string $field
      * @param int $key
-     * @param array $excludeRecordIds
+     * @param int[] $excludeRecordIds
+     * @param bool $removeFromDatabase
      */
-    protected function removeFromRelationShip($class, $field, $key, $excludeRecordIds) {
+    protected function removeFromRelationShip($class, $field, $key, $excludeRecordIds, $removeFromDatabase) {
         /** @var ModelWriter $owner */
         $owner = $this->getOwner();
 
         foreach(DataObject::get($class,
             "$field = '".$key."' AND recordid NOT IN ('".implode("','", $excludeRecordIds)."'')"
         ) as $notExistingElement) {
-            $notExistingElement->$field = 0;
+            if($removeFromDatabase) {
+                $notExistingElement->remove();
+            } else {
+                $notExistingElement->$field = 0;
+                $writer = $owner->getRepository()->buildWriter(
+                    $notExistingElement,
+                    -1,
+                    $owner->getSilent(),
+                    $owner->getUpdateCreated(),
+                    $owner->getWriteType(),
+                    $owner->getDatabaseWriter());
+                $writer->write();
+            }
+        }
+    }
+
+    /**
+     * @param array $ids
+     * @param ModelHasManyRelationShipInfo $relationShip
+     */
+    protected function updateRelationship($ids, $relationShip) {
+        $owner = $this->getOwner();
+
+        /** @var DataObject $record */
+        foreach(DataObject::get($relationShip->getTargetClass(), array("id" => $ids)) as $record) {
+            $record->{$relationShip->getInverse() . "id"} = $this->getOwner()->getModel()->id;
             $writer = $owner->getRepository()->buildWriter(
-                $notExistingElement,
+                $record,
                 -1,
                 $owner->getSilent(),
                 $owner->getUpdateCreated(),
@@ -99,32 +124,6 @@ class HasManyWriter extends Extension {
                 $owner->getDatabaseWriter());
             $writer->write();
         }
-    }
-
-    /**
-     * searches for belonging has-one-relationship.
-     *
-     * @param DataObject $model
-     * @param String $relationShipName
-     * @param String $hasManyTarget
-     * @return mixed
-     */
-    public static function searchForBelongingHasOneRelationship($model, $relationShipName, $hasManyTarget) {
-        $key = array_search($model->classname, ClassInfo::$class_info[$hasManyTarget]["has_one"]);
-        if ($key === false) {
-            $currentClass = $model->classname;
-            while ($currentClass = strtolower(get_parent_class($currentClass))) {
-                if ($key = array_search($currentClass, ClassInfo::$class_info[$hasManyTarget]["has_one"])) {
-                    break;
-                }
-            }
-        }
-
-        if ($key === false) {
-            throw new LogicException("Could not find inverse-relation for " . $relationShipName . " on class $hasManyTarget.");
-        }
-
-        return $key;
     }
 
     /**

@@ -394,16 +394,15 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * simplified version of Permission-Getter for given permissions.
      *
-     * @param 	string name of permission
-     * @param 	string default global permission
-     * @param 	string default superglobal permission group type
-     * @param 	bool if there can be searched for data which is currently published.
-     * @param 	array args for getHasOne
+     * @param 	string $name of permission
+     * @param 	string $default global permission
+     * @param 	string $type superglobal permission group type
+     * @param 	bool $currentCanBeAll if there can be searched for data which is currently published.
+     * @param 	array $args for getHasOne
      * @return 	Permission
      */
     protected function getPermission($name, $default, $type = "admins", $currentCanBeAll = false, $args = array()) {
         array_unshift($args, $name);
-
 
         // search for normal data
         $dataHasOne = call_user_func_array(array($this, "getHasOne"), $args);

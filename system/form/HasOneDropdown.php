@@ -121,11 +121,12 @@ class HasOneDropdown extends SingleSelectDropDown
 
 			// get has-one from result
 			if (is_object($this->form()->result)) {
+				/** @var ModelHasOneRelationshipInfo[] $has_one */
 				$has_one = $this->form()->result->hasOne();
 			}
 
 			if (isset($has_one[$this->relation]) && is_object($has_one[$this->relation])) {
-				$this->_object = $has_one[$this->relation];
+				$this->_object = $has_one[$this->relation]->getTargetClass();
 
 				$this->value = isset(call_user_func_array(array($this->form()->result, $this->relation), array())->id) ? call_user_func_array(array($this->form()->result, $this->relation), array())->id : null;
 				$this->input->value = $this->value;
@@ -133,13 +134,14 @@ class HasOneDropdown extends SingleSelectDropDown
 
 				// get has-one from model
 				if (is_object($this->form()->model)) {
+					/** @var ModelHasOneRelationshipInfo[] $has_one */
 					$has_one = $this->form()->model->hasOne();
 				} else {
 					$has_one = null;
 				}
 
 				if (isset($has_one[$this->relation])) {
-					$this->_object = $has_one[$this->relation];
+					$this->_object = $has_one[$this->relation]->getTargetClass();
 
 
 					$this->value = isset(call_user_func_array(array($this->form()->model, $this->relation), array())->id) ? call_user_func_array(array($this->form()->model, $this->relation), array())->id : null;
@@ -151,22 +153,24 @@ class HasOneDropdown extends SingleSelectDropDown
 		} else {
 			// get has-one from result
 			if (is_object($this->form()->result)) {
+				/** @var ModelHasOneRelationshipInfo[] $has_one */
 				$has_one = $this->form()->result->hasOne();
 			}
 
 			if (is_object($this->form()->result) && isset($has_one[$this->relation])) {
-				$this->_object = $has_one[$this->relation];
+				$this->_object = $has_one[$this->relation]->getTargetClass();
 
 			} else {
 
 				// get has-one from model
 				if (is_object($this->form()->model))
+					/** @var ModelHasOneRelationshipInfo[] $has_one */
 					$has_one = $this->form()->model->hasOne();
 				else
 					$has_one = null;
 
 				if (isset($has_one[$this->relation])) {
-					$this->_object = $has_one[$this->relation];
+					$this->_object = $has_one[$this->relation]->getTargetClass();
 
 
 				} else {

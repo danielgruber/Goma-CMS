@@ -90,7 +90,10 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	/**
 	 * authentications.
 	 */
-	static $has_many = array("authentications"	=> "UserAuthentication");
+	static $has_many = array("authentications" => array(
+		DataObject::RELATION_TARGET => "UserAuthentication",
+		DataObject::RELATION_INVERSE => "user"
+	));
 
 	/**
 	 * every user has one group and an avatar-picture, which is reflected in this relation

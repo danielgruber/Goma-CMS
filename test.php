@@ -11,7 +11,7 @@ class Test {
 
     public function getExtension() {
         if(!isset($this->extension["et"])) {
-            $this->extension["et"] = new Extension();
+            $this->extension["et"] = new ExtensionClass();
             $this->extension["et"]->setOwner($this);
         }
 
@@ -24,7 +24,7 @@ class Test {
     }
 }
 
-class Extension {
+class ExtensionClass {
     protected $owner;
 
     /**

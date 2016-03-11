@@ -126,11 +126,12 @@ class PermissionField extends ClusterFormField {
 	public function getValue() {
 
 		if(is_object($this->orgForm()->result)) {
+			/** @var ModelHasOneRelationshipInfo[] $has_one */
 			$has_one = $this->orgForm()->result->hasOne();
 
 			if(isset($has_one[$this->name])) {
 
-				if(strtolower($has_one[$this->name]) == "permission" || is_subclass_of($has_one[$this->name], "permission")) {
+				if($has_one[$this->name]->getTargetClass() == "permission" || is_subclass_of($has_one[$this->name]->getTargetClass(), "permission")) {
 					$this->byRelation = true;
 
 					if(isset($this->orgForm()->result[$this->name]) && $this->orgForm()->result[$this->name]) {

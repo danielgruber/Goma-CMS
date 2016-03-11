@@ -29,8 +29,8 @@ class DataObjectClassInfo extends Extension
         if (class_exists($class) && class_exists("DataObject") && is_subclass_of($class, "DataObject")) {
             $classInstance = gObject::instance($class);
 
-            $has_one = ModelInfoGenerator::generateHas_one($class);
-            $has_many = ModelInfoGenerator::generateHas_many($class);
+            $has_one = ModelHasOneRelationshipInfo::getClassInfoForClass($class);
+            $has_many = ModelHasManyRelationShipInfo::getClassInfoForClass($class);
 
             // generate table_name
             if (StaticsManager::hasStatic($class, "table")) {
@@ -197,9 +197,9 @@ class DataObjectClassInfo extends Extension
                 }
                 if (strtolower(get_parent_class($_c)) == "dataobject") {
                     ClassInfo::$class_info[$class]["baseclass"] = $_c;
-                } else {
-                    ClassInfo::$class_info[$class]["dataclasses"][] = $_c;
                 }
+
+                ClassInfo::$class_info[$class]["dataclasses"][] = $_c;
 
                 $_c = strtolower(get_parent_class($_c));
             }
@@ -231,7 +231,7 @@ class DataObjectClassInfo extends Extension
      * returns array of ModelManyManyRelationShipInfo
      *
      * @param string|gObject $class
-     * @return array
+     * @return ModelManyManyRelationShipInfo[]
      */
     public static function getManyManyRelationships($class) {
         $class = ClassManifest::resolveClassName($class);

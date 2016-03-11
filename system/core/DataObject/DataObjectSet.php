@@ -110,6 +110,11 @@ class DataObjectSet extends DataSet {
 				$class = $class->dataobject;
 			}
 
+			if(is_a($class, "ModelHasOneRelationshipInfo")) {
+				print_r(debug_backtrace());
+				exit;
+			}
+
 			$this->dataobject = gObject::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
 			$this->dataClass = $this->dataobject->classname;

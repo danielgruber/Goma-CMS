@@ -27,12 +27,29 @@
  * @property    int publishedid
  *
  * @property    User autor
+ *
+ * @method      string[] hasMany($component = null)
+ * @method      ModelHasOneRelationshipInfo[]|ModelHasOneRelationshipInfo hasOne($component = null)
  */
 abstract class DataObject extends ViewAccessableData implements PermProvider
 {
     const VERSION_STATE = "state";
     const VERSION_PUBLISHED = "published";
     const VERSION_GROUP = "group";
+
+    const RELATION_TARGET = "target";
+    const RELATION_INVERSE = "inverse";
+
+    const FETCH_TYPE = "fetch";
+    const FETCH_TYPE_LAZY = "lazy";
+    const FETCH_TYPE_EAGER = "eager";
+
+    const CASCADE_TYPE = "cascade";
+    const CASCADE_TYPE_UPDATE = "01";
+    const CASCADE_TYPE_UPDATEFIELD = "00";
+    const CASCADE_TYPE_REMOVE = "10";
+    const CASCADE_TYPE_UNIQUE = "unique";
+    const CASCADE_TYPE_ALL = "11";
 
     /**
      * default sorting
@@ -149,7 +166,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @name getVersioned
      * @access public
-     * @return array|DataObjectSet
+     * @return array|DataObjectSet|DataObject[]
      */
     public static function get_versioned($class, $version = null, $filter = array(), $sort = array(), $limits = array(), $joins = array(), $group = false, $pagination = false) {
         $data = self::get($class, $filter, $sort, $limits, $joins, $version, $pagination);
@@ -165,7 +182,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @name getVersioned
      * @access public
-     * @return array|DataObjectSet
+     * @return array|DataObjectSet|DataObject[]
      */
     public static function get_version() {
         return call_user_func_array(array("DataObject", "get_Versioned"), func_get_args());
@@ -183,7 +200,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @param array - joins
      * @param null|string|int - version
      * @param bool - pagination
-     * @return DataObjectSet
+     * @return DataObjectSet|DataObject[]
      */
     public static function get($class, $filter = null, $sort = null, $limits = null, $joins = null, $version = null, $pagination = null) {
 
@@ -208,11 +225,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * counts the number of sets we can find for query.
      *
-     * @name count
      * @param String DataObject
-     * @param array $filter
+     * @param array|string $filter
      * @param array $froms joins
-     * @param array $groupby
+     * @param array|string $groupby
      * @return int
      */
     static function count($name = "", $filter = array(), $froms = array(), $groupby = "")
@@ -234,10 +250,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * ATTENTION: it's NOT recommended to use this function if you don't know the exact difference
      * if you use it, sometimes you get results, that are unexpected
      *
-     *@name countRAW
-     *@access public
-     *@param string - DataObject-name
-     *@param array - filter
+     * @param string $name
+     * @param array|string $filter
+     * @return int
+     * @throws MySQLException
      */
     public function countRAW($name, $filter)
     {
@@ -272,8 +288,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @param array $where where-clause
      * @param string $limit optional limit
      * @param boolean $silent if to change last-modified-date
-     *
-     * @return boolean
+     * @return bool
+     * @throws MySQLException
      */
     public static function update($name, $data, $where, $limit = "", $silent = false)
     {
@@ -366,7 +382,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if (PROFILE) Profiler::unmark("DataObject::get_one");
 
         return $output;
-
     }
 
     /**
@@ -449,13 +464,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 gObject::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
                 gObject::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
                 gObject::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-            }
-        }
-
-        if ($has_one = $this->HasOne()) {
-            foreach($has_one as $key => $val) {
-                gObject::LinkMethod($this->classname, $key, array("this", "getHasOne"), true);
-                gObject::LinkMethod($this->classname, "set" . $key, array("this", "setHasOne"), true);
             }
         }
     }
@@ -552,15 +560,11 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * returns if a given record can be written to db
-     *
-     * @name canWrite
-     * @access public
-     * @param  DataObject|null $row
+     * @param DataObject $row
+     * @param string $name
      * @return bool
      */
-    public function canWrite($row = null)
-    {
+    protected function checkPermission($row, $name) {
         $provided = $this->providePerms();
         if (count($provided) == 1) {
             $keys = array_keys($provided);
@@ -576,7 +580,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                         return true;
                 }
 
-                if (preg_match("/write$/i", $key))
+                if (preg_match("/".preg_quote($name, "/")."/i", $key))
                 {
                     if (Permission::check($key))
                         return true;
@@ -593,103 +597,45 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         }
 
         return false;
+    }
+
+    /**
+     * returns if a given record can be written to db
+     *
+     * @param  DataObject|null $row
+     * @return bool
+     */
+    public function canWrite($row)
+    {
+        return $this->checkPermission($row, "write");
     }
 
     /**
      * returns if a given record can deleted in database
      *
-     * @name canDelete
-     * @access public
-     * @param array - reocrd
+     * @param DataObject $row
      * @return bool
      */
-    public function canDelete($row = null)
+    public function canDelete($row)
     {
-        $provided = $this->providePerms();
-        if (count($provided) == 1) {
-            $keys = array_keys($provided);
-
-            if (Permission::check($keys[0]))
-                return true;
-        } else if (count($provided) > 1) {
-            foreach($provided as $key => $arr)
-            {
-                if (preg_match("/all$/i", $key))
-                {
-                    if (Permission::check($key))
-                        return true;
-                }
-
-                if (preg_match("/delete$/i", $key))
-                {
-                    if (Permission::check($key))
-                        return true;
-                }
-            }
-        }
-
-        if (is_object($row) && $row->admin_rights) {
-            return Permission::check($row->admin_rights);
-        }
-
-        if ($this->admin_rights) {
-            return Permission::check($this->admin_rights);
-        }
-
-        return false;
+        return $this->checkPermission($row, "delete");
     }
 
     /**
      * returns if a given record can be inserted in database
      *
-     *@name canInsert
-     *@access public
-     *@param array - reocrd
+     * @param DataObject $row
+     * @return bool
      */
-    public function canInsert($row = null)
+    public function canInsert($row)
     {
-        if ($this->insertRights) {
-            if (Permission::check($this->insertRights))
-                return true;
-        }
-        $provided = $this->providePerms();
-        if (count($provided) == 1) {
-            $keys = array_keys($provided);
-
-            if (Permission::check($keys[0]))
-                return true;
-        } else if (count($provided) > 1) {
-            foreach($provided as $key => $arr)
-            {
-                if (preg_match("/all$/i", $key))
-                {
-                    if (Permission::check($key))
-                        return true;
-                }
-
-                if (preg_match("/insert$/i", $key))
-                {
-                    if (Permission::check($key))
-                        return true;
-                }
-            }
-        }
-
-        if (is_object($row) && $row->admin_rights) {
-            return Permission::check($row->admin_rights);
-        }
-
-        if ($this->admin_rights) {
-            return Permission::check($this->admin_rights);
-        }
-
-        return false;
+        return $this->checkPermission($row, "insert");
     }
 
     /**
      * gets the writeaccess
-     *@name getWriteAccess
-     *@access public
+     *
+     * @return bool
      */
     public function getWriteAccess()
     {
@@ -709,13 +655,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * returns if publish-right is available
      *
-     * @name canPublish
-     * @access public
+     * @param DataObject $record
      * @return bool
      */
-    public function canPublish($record = null) {
-        //TODO: Should this be like this? maybe only when versioning is turned off.
-        return true;
+    public function canPublish($record) {
+        if(self::Versioned($this->classname)) {
+            return $this->checkPermission($record, "publish");
+        }
+
+        return $this->canWrite($record);
     }
 
     /**
@@ -838,8 +786,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false)
     {
         try {
-            return $this->writeToDB($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent);
-
+            $this->writeToDB($forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent);
+            return true;
         } catch(Exception $e) {
             log_exception($e);
             return false;
@@ -864,7 +812,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {
-
         if(!$history) {
             HistoryWriter::disableHistory();
         }
@@ -886,22 +833,19 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         if(!$history) {
             HistoryWriter::enableHistory();
         }
-
-        return true;
     }
 
     /**
      * writes changed data silently, so without chaning last-modified and other stuff than manually changed
      *
-     *@name writeSilent
-     *@access public
-     *@param bool - to force insert (default: false)
-     *@param bool - to force write (default: false)
-     *@param numeric - priority of the snapshop: autosave 0, save 1, publish 2
-     *@param bool - if to force publishing also when not permitted (default: false)
-     *@param bool - whether to track in history (default: true)
-     *@param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
-     *@return bool
+     * @param bool - to force insert (default: false)
+     * @param bool - to force write (default: false)
+     * @param int - priority of the snapshop: autosave 0, save 1, publish 2
+     * @param bool - if to force publishing also when not permitted (default: false)
+     * @param bool - whether to track in history (default: true)
+     * @param bool - whether to write silently, so without chaning anything automatically e.g. last_modified (default: false)
+     * @deprecated
+     * @return bool
      */
     public function writeSilent($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true)
     {
@@ -921,7 +865,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @return int
      */
     protected function getRelationShipIdFromRecord($relationShip, $key, $record, $forceWrite = false, $snap_priority = 2, $history = true) {
-
         // validate versionid
         if(isset($record["versionid"])) {
             $id = $record["versionid"];
@@ -935,7 +878,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             $target = $relationShip->getTarget();
             /** @var DataObject $dataObject */
             $dataObject = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
-            $dataObject->write(true, $forceWrite, $snap_priority, $forceWrite, $history);
+            $dataObject->writeToDB(true, $forceWrite, $snap_priority, $forceWrite, $history);
 
             return $dataObject->versionid;
         } else {
@@ -957,7 +900,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
             // we found many-many-extra which can be updated so write please
             if(isset($databaseRecord)) {
-                $databaseRecord->write(false, $forceWrite, $snap_priority, $forceWrite, $history);
+                $databaseRecord->writeToDB(false, $forceWrite, $snap_priority, $forceWrite, $history);
                 return $databaseRecord->versionid;
             }
 
@@ -1474,8 +1417,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         // get all config
         $has_many = $this->hasMany();
-        $many_many = $this->ManyMany();
-        $belongs_many_many = $this->BelongsManyMany();
+        $manyManyRelationships = $this->ManyManyRelationships();
 
         if (isset($has_many[$relname])) {
             // has-many
@@ -1499,21 +1441,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             } else {
                 return array();
             }
-        } else if (isset($many_many[$relname]) || isset($belongs_many_many[$relname])) {
+        } else if (isset($manyManyRelationships[$relname])) {
 
             if (isset($this->data[$relname . "ids"])) {
                 return $this->data[$relname . "ids"];
             }
 
-            /**
-             * there is the var many_many_tables, which contains data for the table, which stores the relation
-             * for exmaple: array(
-             * "table"	=> "my_many_many_table_generated_by_system",
-             * "field"	=> "myclassid"
-             * )
-             */
-
-            $relationShip = $this->getManyManyInfo($relname);
+            /** @var ModelManyManyRelationShipInfo $relationShip */
+            $relationShip = $manyManyRelationships[$relname];
 
             $query = $this->getManyManyQuery($relationShip, array($relationShip->getTargetField()));
             $query->execute();
@@ -1674,99 +1609,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * gets a has-one-dataobject
-     *
-     * @param string $name name of relationship
-     * @param array $filter
-     * @return DataObject
-     */
-    public function getHasOne($name, $filter = null) {
-
-        $name = strtolower(trim($name));
-
-        if (PROFILE) Profiler::mark("getHasOne");
-
-        $cache = "has_one_{$name}_".var_export($filter, true) . $this[$name . "id"];
-        if (isset($this->viewcache[$cache])) {
-            if (PROFILE) Profiler::unmark("getHasOne", "getHasOne viewcache");
-            return $this->viewcache[$cache];
-        }
-
-        $has_one = $this->hasOne();
-        if (isset($has_one[$name])) {
-            if ($this->isField($name) && is_object($this->fieldGet($name)) && is_a($this->fieldGet($name), $has_one[$name]) && !$filter) {
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return $this->fieldGet($name);
-            }
-
-            if ($this[$name . "id"] == 0) {
-
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return null;
-            }
-
-            $filter["id"] = $this[$name . "id"];
-
-            if (isset(DataObjectQuery::$datacache[$this->baseClass][$cache])) {
-                if (PROFILE) Profiler::unmark("getHasOne", "getHasOne datacache");
-                $this->viewcache[$cache] = clone DataObjectQuery::$datacache[$this->baseClass][$cache];
-                return $this->viewcache[$cache];
-            }
-
-            $response = DataObject::get($has_one[$name], $filter);
-
-            if ($this->queryVersion == DataObject::VERSION_STATE) {
-                $response->setVersion(DataObject::VERSION_STATE);
-            }
-
-            if (($this->viewcache[$cache] = $response->first(false))) {
-                DataObjectQuery::$datacache[$this->baseClass][$cache] = clone $this->viewcache[$cache];
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return $this->viewcache[$cache];
-            } else {
-                if (PROFILE) Profiler::unmark("getHasOne");
-                return null;
-            }
-        } else {
-            throw new InvalidArgumentException("No Has-one-relation '".$name."' on ".$this->classname);
-        }
-    }
-
-    /**
-     * sets has-one.
-     * @param string $name
-     * @param DataObject $value
-     */
-    public function setHasOne($name, $value) {
-        $name = strtolower(trim($name));
-
-        $has_one = $this->hasOne();
-        if (isset($has_one[$name])) {
-            $idField = $name . "id";
-            if(!isset($value)) {
-                $this->$idField = 0;
-            } else if(is_a($value, "DataObject")) {
-                $this->setField($name, $value);
-                $this->$idField = $value->id != 0 ? $value->id : null;
-            } else {
-                if(DEV_MODE) {
-                    $trace = debug_backtrace();
-                    $method = (isset($trace[1]["class"])) ? $trace[1]["class"] . "::" . $trace[1]["function"] : $trace[1]["function"];
-                    $file = isset($trace[1]["file"]) ? $trace[1]["file"] : (isset($trace[2]["file"]) ? $trace[2]["file"] : "Undefined");
-                    $line = isset($trace[1]["line"]) ? $trace[1]["line"] : (isset($trace[2]["line"]) ? $trace[2]["line"] : "Undefined");
-
-                    log_error("SetHasOne called without giving a DataObject in $file on line $line (Method $method).");
-                }
-                $this->setField($name, $value);
-            }
-        } else if(substr($name, 0, 3) == "set") {
-            $this->setHasOne(substr($name, 3), $value);
-        } else {
-            throw new InvalidArgumentException("No Has-one-relation '".$name."' on ".$this->classname);
-        }
-    }
-
-    /**
      * gets many-many-objects
      *
      * @param $name
@@ -1909,34 +1751,32 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
     /**
      * sets many-many-ids
-     *
-     * @name setManyManyIDs
-     * @access public
-     * @return bool|void
+     * @param string $name
+     * @param array $ids
+     * @return void
      */
     public function setManyManyIDs($name, $ids) {
 
         if (!is_array($ids))
-            return false;
+            return;
 
         $name = substr($name, 3, -3);
 
         $name = trim(strtolower($name));
 
         // get config
-        $many_many = $this->ManyMany();
-        $belongs_many_many = $this->BelongsManyMany();
+        $manyManyRelationships = $this->ManyManyRelationships();
 
         // first we get the object for this connection
-        if (!isset($many_many[$name]) && !isset($belongs_many_many[$name])) {
-            throw new LogicException("Many-Many-Relation ".convert::raw2text($name)." does not exist!");
+        if (!isset($manyManyRelationships[$name])) {
+            throw new InvalidArgumentException("Many-Many-Relation ".convert::raw2text($name)." does not exist!");
         }
 
         if (isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "ManyMany_DataObjectSet")) {
             unset($this->data[$name]);
         }
 
-        return $this->setField($name . "ids", $ids);
+        $this->setField($name . "ids", $ids);
     }
 
     /**
@@ -2228,8 +2068,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
         }
 
-        $hasOnes = array();
-        $has_one = $this->hasOne();
 
         $manyManyRelationships = $this->ManyManyRelationships();
         // some specific addons for relations
@@ -2240,7 +2078,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 // many-many
                 if (isset($manyManyRelationships[$key]))
                 {
-                    /** @var ModelManyManyRelationShipInfo $relationShip */
                     $relationShip = $manyManyRelationships[$key];
                     if (is_array($value))
                     {
@@ -2295,35 +2132,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                         }
                         $query->removeFilter($key);
                     }
-                } else if (strpos($key, ".") !== false) {
-                    // has one
-                    $hasOnePrefix = strtolower(substr($key, 0, strpos($key, ".")));
-                    if (isset($has_one[$hasOnePrefix])) {
-                        $hasOnes[$hasOnePrefix] = $hasOnePrefix;
-                    }
                 }
                 unset($key, $value, $table, $data, $__table, $_table);
-            }
-        }
-
-        if (count($hasOnes) > 0) {
-            foreach($hasOnes as $hasOneKey) {
-                $class = $has_one[$hasOneKey];
-                $table = ClassInfo::$class_info[$class]["table"];
-                $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$class]["baseclass"]]["table"]);
-
-                $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $table.'
-												AS
-													'.$hasOneKey.'
-												ON
-												 '.$hasOneKey.'.recordid = '.$this->Table().'.'.$hasOneKey.'id';
-                $query->from[] = ' INNER JOIN
-													'.DB_PREFIX . $hasOneBaseTable.'_state
-												AS
-													'.$hasOneBaseTable.'_state
-												ON
-												 '.$hasOneBaseTable.'_state.publishedid = '.$hasOneKey.'.id';
             }
         }
 
@@ -3104,70 +2914,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * has-one-relations
-     *
-     * @name hasOne
-     * @return array
-     */
-    public function hasOne($component = null) {
-        if ($component === null) {
-            $has_one = (isset(ClassInfo::$class_info[$this->classname]["has_one"]) ? ClassInfo::$class_info[$this->classname]["has_one"] : array());
-
-            if ($classes = ClassInfo::dataclasses($this->classname)) {
-                foreach($classes as $class) {
-                    if (isset(ClassInfo::$class_info[$class]["has_one"]))
-                        $has_one = array_merge(ClassInfo::$class_info[$class]["has_one"], $has_one);
-                }
-            }
-
-            return $has_one;
-        } else {
-            if (isset(ClassInfo::$class_info[$this->classname]["has_one"][$component])) {
-                return ClassInfo::$class_info[$this->classname]["has_one"][$component];
-            }
-        }
-    }
-
-    /**
-     * many-many-relations
-     *
-     *@name ManyMany
-     */
-    public function ManyMany() {
-        $many_many = (isset(ClassInfo::$class_info[$this->classname]["many_many"]) ? ClassInfo::$class_info[$this->classname]["many_many"] : array());
-
-        if ($classes = ClassInfo::dataclasses($this->classname)) {
-            foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["many_many"]))
-                    $many_many = array_merge(ClassInfo::$class_info[$class]["many_many"], $many_many);
-            }
-        }
-
-        return $many_many;
-    }
-
-    /**
-     * many-many-relations belonging to this
-     *
-     * @name BelongsManyMany
-     * @return array
-     */
-    public function BelongsManyMany() {
-        $belongs_many_many = (isset(ClassInfo::$class_info[$this->classname]["belongs_many_many"]) ? ClassInfo::$class_info[$this->classname]["belongs_many_many"] : array());
-
-        if ($classes = ClassInfo::dataclasses($this->classname)) {
-            foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["many_many"]))
-                    $belongs_many_many = array_merge(ClassInfo::$class_info[$class]["belongs_many_many"], $belongs_many_many);
-            }
-        }
-
-        return $belongs_many_many;
-    }
-
-    /**
      * returns casting-values
-     *
      */
     public function casting() {
         $casting = parent::casting();
@@ -3176,34 +2923,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * many-many-tables belonging to this
-     *
-     * @name ManyManyTables
-     * @return array
-     */
-    public function ManyManyTables() {
-        Core::Deprecate(2.0, "DataObject::ManyManyTables");
-        $relationShips = $this->ManyManyRelationships();
-
-        $info = array();
-        foreach($relationShips as $relationShip) {
-            /** @var ModelManyManyRelationShipInfo $relationShip */
-            $relationInfo = array();
-            $relationInfo['table'] = $relationShip->getTableName();
-            $relationInfo['extfield'] = $relationShip->getTargetField();
-            $relationInfo['field'] = $relationShip->getOwnerField();
-            $relationInfo['object'] = $relationShip->getTarget();
-
-            $info[$relationShip->getRelationShipName()] = $relationInfo;
-        }
-
-        return $info;
-    }
-
-    /**
      * returns array of ModelManyManyRelationShipInfo Objects
      *
-     * @return array
+     * @return ModelManyManyRelationShipInfo[]
      */
     public function ManyManyRelationships() {
         return DataObjectClassInfo::getManyManyRelationships($this->classname);

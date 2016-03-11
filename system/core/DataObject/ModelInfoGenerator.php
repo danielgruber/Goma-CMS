@@ -6,9 +6,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-
 class ModelInfoGenerator {
-
     /**
      * combines data from given class-attribute + given extension method
      * @param string|gObject $class
@@ -209,11 +207,7 @@ class ModelInfoGenerator {
      * @return array
      */
     public static function generateHas_many($class, $parents = true) {
-
-        $has_many = self::generate_combined_array($class, "has_many", "has_many", $parents);
-
-        $has_many = array_map("strtolower", $has_many);
-        return $has_many;
+        return self::generate_combined_array($class, "has_many", "has_many", $parents);
     }
 
     /**
@@ -260,6 +254,8 @@ class ModelInfoGenerator {
                 $many_many[$k] = strtolower($v);
             } else if(isset($many_many[$k]["class"])) {
                 $many_many[$k]["class"] = strtolower($v["class"]);
+            }else if(isset($many_many[$k][DataObject::RELATION_TARGET])) {
+                $many_many[$k][DataObject::RELATION_TARGET] = strtolower($v[DataObject::RELATION_TARGET]);
             } else {
                 throw new LogicException("Information in Many-Many must be either array with key class or string. $k is $class wasn't.");
             }
@@ -267,7 +263,6 @@ class ModelInfoGenerator {
 
         return $many_many;
     }
-
 
     /**
      * gets extra-fields for given class and key.
@@ -299,7 +294,6 @@ class ModelInfoGenerator {
 
         return $fields;
     }
-
 
     /**
      * indexes
@@ -343,81 +337,6 @@ class ModelInfoGenerator {
                 }
             }
         }
-    }
-
-    /**
-     * returns a list of database-tables that can be referred to the DataObject.
-     * TODO: Move to Model.
-     *
-     * @name 	Tables
-     * @param 	string class
-     * @return 	array
-     */
-    public static function Tables($class)
-    {
-        $class = ClassManifest::resolveClassName($class);
-
-        if (!isset(ClassInfo::$class_info[$class]["baseclass"]))
-            return array();
-
-        if (ClassInfo::$class_info[$class]["baseclass"] == $class) {
-            return self::TablesOfBaseClass($class);
-        } else {
-            return self::TablesOfBaseClass(ClassInfo::$class_info[$class]["baseclass"]);
-        }
-    }
-
-    /**
-     * gets all referred database-tables for a given baseclass.
-     * this method does not check for Base-Class.
-     *
-     * @param 	string $baseClass
-     * @return 	array
-    */
-    protected static function TablesOfBaseClass($baseClass)
-    {
-        if (!isset(ClassInfo::$class_info[$baseClass]["table"]) || empty(ClassInfo::$class_info[$baseClass]["table"])) {
-            return array();
-        }
-
-        $tables = array();
-
-        $tables[$baseClass . "_state"] = $baseClass . "_state";
-
-        $tables = self::fillTableArray($baseClass, $tables);
-
-        foreach (ClassInfo::getChildren($baseClass) as $subclass) {
-            $tables = self::fillTableArray($subclass, $tables);
-        }
-
-        return $tables;
-    }
-
-    /**
-     * fills an array with key and value the same for tables for given class.
-     *
-     * @param 	string $class
-     * @param 	array $tables
-     * @return 	array
-    */
-    protected static function fillTableArray($class, $tables)
-    {
-        if (isset(ClassInfo::$class_info[$class]["table"])) {
-            $table = ClassInfo::$class_info[$class]["table"];
-
-            if ($table) {
-                $tables[$table] = $table;
-            }
-        }
-
-        if (isset(ClassInfo::$class_info[$class]["many_many_tables"]) && ClassInfo::$class_info[$class]["many_many_tables"]) {
-            foreach (ClassInfo::$class_info[$class]["many_many_tables"] as $data) {
-                $tables[$data["table"]] = $data["table"];
-            }
-        }
-
-        return $tables;
-
     }
 
     /**

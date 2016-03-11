@@ -537,8 +537,8 @@ class ModelManyManyRelationShipInfo {
         if(is_array($value)) {
             if(isset($value["relation"])) {
                 return strtolower($value["relation"]);
-            } else if(isset($value["inverse"])) {
-                return strtolower($value["inverse"]);
+            } else if(isset($value[DataObject::RELATION_INVERSE])) {
+                return strtolower($value[DataObject::RELATION_INVERSE]);
             } else if(count($value) == 2) {
                 $arr = array_values($value);
                 if(isset($arr[1]) && is_string($arr[1])) {
@@ -558,8 +558,8 @@ class ModelManyManyRelationShipInfo {
      */
     protected static function getRelationClass($value) {
         if(is_array($value)) {
-            if(isset($value["class"])) {
-                return $value["class"];
+            if(isset($value[DataObject::RELATION_TARGET])) {
+                return $value[DataObject::RELATION_TARGET];
             }
 
             $array = array_values($value);
@@ -621,5 +621,4 @@ class ModelManyManyRelationShipInfo {
             )
         );
     }
-
 }

@@ -56,6 +56,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 
 	/**
 	 * info about relationship.
+	 * @var ModelManyManyRelationShipInfo
 	*/
 	protected $relationInfo;
 
@@ -102,21 +103,21 @@ class ManyManyDropDown extends MultiSelectDropDown
 		if(!isset($this->dataset)) {
 
 			if(is_object($this->form()->result)) {
-				// get relations from result
-				$many_many_tables = $this->form()->result->ManyManyTables();
+				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
+				$many_many_tables = $this->form()->result->ManyManyRelationships();
 			}
 
 			if(isset($many_many_tables[$this->relation])) {
 
-				$this->_object = $many_many_tables[$this->relation]["object"];
+				$this->_object = $many_many_tables[$this->relation]->getTarget();
 				$this->dataset = call_user_func_array(array($this->form()->result, $this->relation), array())->FieldToArray("versionid");
 				$this->relationInfo = $many_many_tables[$this->relation];
 			} else if(is_object($this->form()->model)) {
-				// get relations from model of form-controller
-				$many_many_tables = $this->form()->model->ManyManyTables();
+				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
+				$many_many_tables = $this->form()->model->ManyManyRelationships();
 
 				if(isset($many_many_tables[$this->relation])) {
-					$this->_object = $many_many_tables[$this->relation]["object"];
+					$this->_object = $many_many_tables[$this->relation]->getTarget();
 					$this->dataset = call_user_func_array(array($this->form()->model, $this->relation), array())->FieldToArray("versionid");
 					$this->relationInfo = $many_many_tables[$this->relation];
 				} else {
@@ -128,20 +129,21 @@ class ManyManyDropDown extends MultiSelectDropDown
 		} else {
 			if(is_object($this->form()->result)) {
 				// get relations from result
-				$many_many_tables = $this->form()->result->ManyManyTables();
+				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
+				$many_many_tables = $this->form()->result->ManyManyRelationships();
 			}
 
 			if(isset($many_many_tables[$this->relation])) {
-
-				$this->_object = $many_many_tables[$this->relation]["object"];
+				$this->_object = $many_many_tables[$this->relation]->getTarget();
 				$this->relationInfo = $many_many_tables[$this->relation];
 			} else if(is_object($this->form()->model)) {
 
 				// get relations from model of form-controller
-				$many_many_tables = $this->form()->model->ManyManyTables();
+				/** @var ModelManyManyRelationShipInfo[] $many_many_tables */
+				$many_many_tables = $this->form()->model->ManyManyRelationships();
 
 				if(isset($many_many_tables[$this->relation])) {
-					$this->_object = $many_many_tables[$this->relation]["object"];
+					$this->_object = $many_many_tables[$this->relation]->getTarget();
 					$this->relationInfo = $many_many_tables[$this->relation];
 				} else {
 					throw new LogicException("{$this->relation} doesn't exist in this form {$this->form()->getName()}.");

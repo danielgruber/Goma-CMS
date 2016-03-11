@@ -31,9 +31,11 @@ class SearchIndex extends DataObjectExtension {
 	 * @return bool
 	 */
 	static function indexRecord($record) {
-		$many_many_data = $record->ManyManyTables();
+		$many_many_data = $record->ManyManyRelationships();
 		
 		if(isset($many_many_data["searchIndex"])) {
+			/** @var ModelManyManyRelationShipInfo $relationship */
+			$relationship = $many_many_data["searchIndex"];
 			// generate words
 			$content = $record->getSearchRepresentation();
 			$wordList = (array) HTMLCacheController::getWordsRated($content);
@@ -50,9 +52,9 @@ class SearchIndex extends DataObjectExtension {
 			);
 			foreach($wordList as $word => $percent) {
 				$manipulation["index"]["fields"][] = array(
-					$many_many_data["searchIndex"]["extField"]	=> Word::requireWord($word),
-					$many_many_data["searchIndex"]["field"]		=> $record->versionid,
-					"relevance"									=> $percent
+					$relationship->getTargetField()	=> Word::requireWord($word),
+					$relationship->getOwnerField()	=> $record->versionid,
+					"relevance"						=> $percent
 				);
 			}
 			

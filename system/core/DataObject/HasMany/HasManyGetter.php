@@ -20,9 +20,16 @@ class HasManyGetter extends Extension {
     /**
      * extra-methods.
      */
-    static $extra_methods = array(
+    public static $extra_methods = array(
         "getHasMany",
         "HasMany"
+    );
+
+    /**
+     * @var array
+     */
+    protected static $relationShips = array(
+
     );
 
     /**
@@ -54,7 +61,6 @@ class HasManyGetter extends Extension {
      * @return HasMany_DataObjectSet
      */
     public function getHasMany($name, $filter = null, $sort = null, $limit = null) {
-
         $name = trim(strtolower($name));
         /** @var DataObject $owner */
         $owner = $this->getOwner();
@@ -91,7 +97,7 @@ class HasManyGetter extends Extension {
     /**
      * generates new has-many-object.
      *
-     * @param array $has_many
+     * @param ModelHasManyRelationShipInfo[] $has_many
      * @param string $name
      * @return HasMany_DataObjectSet
      */
@@ -99,84 +105,57 @@ class HasManyGetter extends Extension {
         /** @var DataObject $owner */
         $owner = $this->getOwner();
 
-        $info = $this->findInverse($name, $has_many[$name]);
-
         $filter = array();
         $ids = $owner->fieldGet($name . "ids");
         if($ids && is_array($ids)) {
             $filter["id"] = $ids;
         } else {
-            $filter[$info->getSecond() . "id"] = $this->getOwner()->id;
+            $filter[$has_many[$name]->getInverse() . "id"] = $this->getOwner()->id;
         }
-        $set = new HasMany_DataObjectSet($info->getFirst(), $filter);
-        $set->setRelationENV($name, $info->getSecond() . "id");
+
+        $set = new HasMany_DataObjectSet($has_many[$name]->getTargetClass(), $filter);
+        $set->setRelationENV($name, $has_many[$name]->getInverse() . "id");
 
         return $set;
     }
 
     /**
-     * finds inverse for has-many-relationship.
-     *
-     * @param string $name
-     * @param string|array $hasMany has-many-relationship
-     * @return Tuple<class,inverse>
-     */
-    protected function findInverse($name, $hasMany) {
-
-        $inverse = null;
-        if(is_array($hasMany) && isset($hasMany["class"])) {
-            $class = $hasMany["class"];
-            if(isset($hasMany["inverse"]) && isset(ClassInfo::$class_info[$class]["has_one"][$hasMany["inverse"]])) {
-                $inverse = $hasMany["inverse"];
-            }
-        } else {
-            $class = $hasMany;
-        }
-
-        if(!isset($inverse)) {
-            $inverse = HasManyWriter::searchForBelongingHasOneRelationship($this->getOwner(), $name, $class);
-        }
-
-        return new Tuple($class, $inverse);
-    }
-
-    /**
-     * returns one or many hasMany-Relations.
+     * returns one or many hasMany-Relationsips.
      *
      * @name hasMany
      * @param string $component name of has-many-relation to give back.
-     * @param boolean $classOnly if to only give back the class or also give the relation to inverse back.
-     * @return array|null
+     * @return ModelHasManyRelationShipInfo[]|ModelHasManyRelationShipInfo
      */
-    public function hasMany($component = null, $classOnly = true) {
+    public function hasMany($component = null) {
         $owner = $this->getOwner();
 
         if(!$owner) {
             return array();
         }
 
-        $has_many = (isset(ClassInfo::$class_info[$owner->classname]["has_many"]) ? ClassInfo::$class_info[$owner->classname]["has_many"] : array());
+        if(!isset(self::$relationShips[$owner->classname])) {
+            $has_many = isset(ClassInfo::$class_info[$owner->classname]["has_many"]) ? ClassInfo::$class_info[$owner->classname]["has_many"] : array();
 
-        if ($classes = ClassInfo::dataclasses($owner->classname)) {
-            foreach($classes as $class) {
-                if (isset(ClassInfo::$class_info[$class]["has_many"])) {
-                    $has_many = array_merge(ClassInfo::$class_info[$class]["has_many"], $has_many);
+            if ($classes = ClassInfo::dataclasses($owner->classname)) {
+                foreach($classes as $class) {
+                    if (isset(ClassInfo::$class_info[$class]["has_many"])) {
+                        $has_many = array_merge(ClassInfo::$class_info[$class]["has_many"], $has_many);
+                    }
                 }
             }
-        }
 
-        if($component !== null) {
-            if($has_many && isset($has_many[strtolower($component)])) {
-                $has_many = $has_many[strtolower($component)];
-            } else {
-                return null;
+            $hasManyClasses = array();
+            foreach($has_many as $name => $value) {
+                $hasManyClasses[$name] = new ModelHasManyRelationShipInfo($owner->classname, $name, $value);
             }
+
+            self::$relationShips[$owner->classname] = $hasManyClasses;
         }
 
-        if($has_many && $classOnly) {
-            return preg_replace('/(.+)?\..+/', '$1', $has_many);
+        if(!isset($component)) {
+            return self::$relationShips[$owner->classname];
         } else {
-            return $has_many ? $has_many : array();
+            return isset(self::$relationShips[$owner->classname][$component]) ? self::$relationShips[$owner->classname][$component] : null;
         }
     }
 
