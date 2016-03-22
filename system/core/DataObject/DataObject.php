@@ -493,6 +493,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @param string|array $permissions name(s) of permission
      * @param DataObject $record optional
      * @return bool
+     *
+     * TODO: Check if this makes sense by only having required one permission to have to be true
      */
     public function can($permissions, $record = null) {
 
@@ -1723,7 +1725,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      *
      * @name setManyMany
      * @access public
-     * @return bool
+     * @return void
      */
     public function setManyMany($name, $value) {
         $name = substr($name, 3);
@@ -1731,22 +1733,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
         $relationShipInfo = $this->getManyManyInfo($name);
 
         if (is_object($value)) {
-            if (is_a($value, "DataObjectSet")) {
-
-                $relationShip = $this->getManyManyInfo($name);
-
+            if (!is_a($value, "ManyMany_DataObjectSet") && is_a($value, "DataObjectSet")) {
                 $instance = new ManyMany_DataObjectSet($relationShipInfo->getTarget());
-                $instance->setRelationEnv($relationShip, $this->versionid);
+                $instance->setRelationEnv($relationShipInfo, $this->versionid);
                 $instance->addMany($value);
                 $this->setField($name, $instance);
-
-                unset($instance);
-                return true;
+                return;
             }
         }
 
         unset($this->data[$name . "ids"]);
-        return $this->setField($name, $value);
+        $this->setField($name, $value);
     }
 
     /**
@@ -2687,7 +2684,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @return bool
      */
     public function canSortBy($field) {
-        $field = strtolower($field);
+        $field = strtolower(trim($field));
         $fields = $this->DataBaseFields(true);
         return isset($fields[$field]);
     }
@@ -2699,6 +2696,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * @return bool
      */
     public function canFilterBy($field) {
+        $field = strtolower(trim($field));
         if (strpos($field, ".") !== false) {
             $has_one = $this->HasOne();
 

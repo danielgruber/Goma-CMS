@@ -293,17 +293,13 @@ class BackupAdmin extends TableView
 
     /**
      * provides permissions
-     *
-     *@name providePerms
-     *@access public
     */
     public function providePerms() {
         return array(
             "ADMIN_BACKUP"	=> array(
                 "title" 	=> '{$_lang_administration}: {$_lang_backups}',
                 "default"	=> array(
-                    "type" 			=> "admins",
-                    "inherit"		=> "ADMIN"
+                    "type" 			=> "admins"
                 ),
                 "category"	=> "ADMIN"
             )

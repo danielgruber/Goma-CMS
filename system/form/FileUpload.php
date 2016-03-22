@@ -103,8 +103,6 @@ class FileUpload extends FormField {
 	 * @param string $value
 	 * @param string $collection
 	 * @param Form $form
-	 * @internal param $__construct
-	 * @access    public
 	 */
 	public function __construct($name = null, $title = null, $file_types = null, $value = "", $collection = null, &$form = null) {
 		parent::__construct($name, $title, $value, $form);

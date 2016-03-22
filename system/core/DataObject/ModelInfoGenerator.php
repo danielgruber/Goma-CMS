@@ -158,8 +158,6 @@ class ModelInfoGenerator {
             $has_one["editor"] = "user";
         }
 
-        $has_one = array_map("strtolower", $has_one);
-
         return $has_one;
     }
 

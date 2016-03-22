@@ -27,26 +27,105 @@ class HasOneWriter extends Extension {
                     /** @var DataObject $record */
                     $record = $data[$key];
 
-                    // check for write
-                    if($owner->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $record->wasChanged()) {
-                        $writer = $owner->getRepository()->buildWriter(
-                            $record,
-                            -1,
-                            $owner->getSilent(),
-                            $owner->getUpdateCreated(),
-                            $owner->getWriteType(),
-                            $owner->getDatabaseWriter());
-                        $writer->write();
-                    }
+                    if($has_one[$key]->getCascade() == DataObject::CASCADE_TYPE_UNIQUE) {
+                        $fields = ArrayLib::map_key("strtolower", StaticsManager::getStatic($has_one[$key]->getTargetClass(), "unique_fields"));
+                        $info = array();
+                        foreach($fields as $field) {
+                            $info[$field] = $record->$field;
+                        }
 
-                    // get id from object
-                    $data[$key . "id"] = $record->id;
-                    unset($data[$key]);
+                        // find object
+                        $record = DataObject::get_one($has_one[$key]->getTargetClass(), $this->getFilterForUnique($has_one[$key], $info));
+                        if(!isset($record)) {
+                            $record = $this->getRecordForUnique($has_one[$key], $info);
+                            $this->writeObject($record);
+                        }
+
+                        $data[$key . "id"] = $record->id;
+                        unset($data[$key]);
+                    } else {
+                        if($this->shouldUpdateData($has_one[$key])) {
+                            if($record->wasChanged()) {
+                                $this->writeObject($record);
+                            }
+                        }
+
+                        if($record->id == 0) {
+                            throw new InvalidArgumentException("You have to Write Has-One-Objects before adding it to a DataObject and writing it.");
+                        }
+                        // get id from object
+                        $data[$key . "id"] = $record->id;
+                        unset($data[$key]);
+                    }
                 }
             }
         }
 
         $owner->setData($data);
     }
+
+    /**
+     * @param ModelHasOneRelationshipInfo $info
+     * @param array $data
+     * @return array
+     */
+    protected function getFilterForUnique($info, $data) {
+        if($info->isUniqueLike()) {
+            foreach($data as $key => $value) {
+                $data[$key] = array("LIKE", trim($value));
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param ModelHasOneRelationshipInfo $info
+     * @param array $data
+     */
+    protected function getRecordForUnique($info, $data) {
+        $target = $info->getTargetClass();
+
+        if($info->isUniqueLike()) {
+            foreach($data as $k => $v) {
+                $data[$k] = trim($v);
+            }
+        }
+
+        return  new $target($info);
+    }
+
+    /**
+     * @param DataObject $record
+     */
+    protected function writeObject($record) {
+        /** @var ModelWriter $owner */
+        $owner = $this->getOwner();
+
+        $writer = $owner->getRepository()->buildWriter(
+            $record,
+            -1,
+            $owner->getSilent(),
+            $owner->getUpdateCreated(),
+            $owner->getWriteType(),
+            $owner->getDatabaseWriter());
+        $writer->write();
+    }
+    /**
+     * @param ModelHasOneRelationshipInfo $info
+     * @return bool
+     */
+    protected function shouldRemoveData($info) {
+        return (substr($info->getCascade(), 0, 1) == 1);
+    }
+
+    /**
+     * @param ModelHasOneRelationshipInfo $info
+     * @return bool
+     */
+    protected function shouldUpdateData($info) {
+        return (substr($info->getCascade(), 1, 1) == 1);
+    }
 }
+
 gObject::extend("ModelWriter", "HasOneWriter");

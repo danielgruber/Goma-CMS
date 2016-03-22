@@ -123,9 +123,9 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      * @return array<DataObject>
      */
     protected function getWritableRecords() {
-        if(count($this->data) > 0) {
+        if(count($this->dataCache) > 0) {
             $arr = array();
-            foreach($this as $record) {
+            foreach($this->dataCache as $record) {
                 if(is_object($record)) {
                     $arr[] = $record;
                 }
@@ -229,6 +229,9 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         $updateLastModified = array();
         $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority, $updateLastModified);
 
+        echo "<pre>";
+        print_r($writeData);
+
         // check if nothing is writable.
         if(empty($writeData) && empty($updateLastModified)) {
             return;
@@ -263,7 +266,8 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     /**
      * writes the many-many-relation immediatly if writing
      *
-     * @name push
+     * @param DataObject $record
+     * @param bool $write
      * @return bool
      */
     public function push($record, $write = false) {

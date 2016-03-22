@@ -71,7 +71,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	public function __construct($name = "", $title = null, $showfield = "title", $where = array(), $value = null, $parent = null)
 	{
 			parent::__construct($name , $title, $value, $parent);
-			$this->dbname = $name . "ids";
+			$this->dbname = $this->dbname . "ids";
 			$this->relation = strtolower($name);
 			$this->showfield = $showfield;
 			$this->where = $where;

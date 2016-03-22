@@ -131,7 +131,7 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
 
         $has_one = $this->hasOne();
         if (isset($has_one[$name])) {
-            if ($owner->isField($name) && is_object($owner->fieldGet($name)) && is_a($owner->fieldGet($name), $has_one[$name]) && !$filter) {
+            if ($owner->isField($name) && is_object($owner->fieldGet($name)) && is_a($owner->fieldGet($name), $has_one[$name]->getTargetClass()) && !$filter) {
                 if (PROFILE) Profiler::unmark("getHasOne");
                 return $owner->fieldGet($name);
             }
@@ -240,13 +240,13 @@ class HasOneGetter extends Extension implements ArgumentsQuery {
                 $table = ClassInfo::$class_info[$relationShip->getTargetClass()]["table"];
                 $hasOneBaseTable = (ClassInfo::$class_info[ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"]]["table"]);
 
-                $query->from[$table] = ' INNER JOIN
+                $query->from[] = ' INNER JOIN
 													'.DB_PREFIX . $table.'
 												AS
 													'.$hasOneKey.'
 												ON
 												 '.$hasOneKey.'.recordid = '.$this->getOwner()->Table().'.'.$hasOneKey.'id';
-                $query->from[$hasOneBaseTable . "_state"] = ' INNER JOIN
+                $query->from[] = ' INNER JOIN
 													'.DB_PREFIX . $hasOneBaseTable.'_state
 												AS
 													'.$hasOneBaseTable.'_state

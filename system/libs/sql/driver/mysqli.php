@@ -729,8 +729,9 @@ class mysqliDriver implements SQLDriver
             $sql .= ' ' . $name . ' ' . $value . ' ';
             if (isset($defaults[$name])) {
                 $sql .= " DEFAULT '" . addslashes($defaults[$name]) . "'";
+            } else {
+                $sql .= " NOT NULL";
             }
-
         }
 
         foreach ($indexes as $key => $data) {

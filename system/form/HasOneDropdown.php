@@ -86,7 +86,7 @@ class HasOneDropdown extends SingleSelectDropDown
 		$this->relation = strtolower($name);
 		$this->showfield = $showfield;
 		$this->where = $where;
-		$this->dbname = $name . "id";
+		$this->dbname = $this->dbname . "id";
 	}
 
 	/**

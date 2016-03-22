@@ -433,8 +433,6 @@ class Permission extends DataObject
                 }
             }
         }
-
-        //logging(print_r($manipulation, true));
     }
 
     /**

@@ -39,4 +39,13 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertIsA($object->first(), "user");
         $this->assertNull($object->first(false));
     }
+
+    public function testcreateFromCode() {
+        $set = new DataObjectSet("user");
+        $set->setData();
+        $set->add(new User());
+        $set->add(new User());
+
+        $this->assertEqual($set->count(), 2);
+    }
 }

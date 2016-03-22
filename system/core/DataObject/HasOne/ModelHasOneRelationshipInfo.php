@@ -18,6 +18,20 @@ class ModelHasOneRelationshipInfo extends ModelRelationShipInfo {
     protected static $modelInfoGeneratorFunction = "generateHas_one";
 
     /**
+     * @var bool
+     */
+    protected $uniqueLike = false;
+
+    public function __construct($ownerClass, $name, $options)
+    {
+        parent::__construct($ownerClass, $name, $options);
+
+        if(isset($options["uniqueLike"])) {
+            $this->uniqueLike = $options["uniqueLike"];
+        }
+    }
+
+    /**
      * forces inverse.
      */
     protected function validateAndForceInverse() {
@@ -35,6 +49,19 @@ class ModelHasOneRelationshipInfo extends ModelRelationShipInfo {
                 throw new InvalidArgumentException("When using Remove-Cascade Versioning must be equal on both objects.");
             }
         }
+
+        if($this->cascade == DataObject::CASCADE_TYPE_UNIQUE &&
+            (!StaticsManager::hasStatic($this->targetClass, "unique_fields") || !is_array(StaticsManager::getStatic($this->targetClass, "unique_fields")))) {
+            throw new InvalidArgumentException("When using UNIQUE-Cascade, Target-Class must define unique_fields.");
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isUniqueLike()
+    {
+        return $this->uniqueLike;
     }
 
     /**

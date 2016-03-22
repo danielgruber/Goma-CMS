@@ -29,13 +29,14 @@ class Backup extends gObject {
 	 *@access public
 	*/
 	public static $fileExcludeList = array("/uploads/d05257d352046561b5bfa2650322d82d","temp", "/backups", "/config.php", "/backup", "version.php");
-	
+
 	/**
 	 * generates a database-backup
 	 *
-	 *@name generateDBBackup
-	 *@access public
-	*/
+	 * @name generateDBBackup
+	 * @access public
+	 * @return string
+	 */
 	public static function generateDBBackup($file, $prefix = DB_PREFIX, $excludeList = array()) {
 		$excludeList = array_merge(StaticsManager::getStatic("Backup", "excludeList"), $excludeList);
 		// force GFS

@@ -783,8 +783,9 @@ class DataObjectSet extends DataSet {
 	/**
 	 * adds a new record to this set
 	 *
-	 *@name addMany
-	 *@access public
+	 * @name addMany
+	 * @access public
+	 * @return array
 	 */
 	public function addMany($data) {
 		$addedIDs = array();
@@ -800,6 +801,7 @@ class DataObjectSet extends DataSet {
 				$addedIDs = $record->ID;
 			}
 		}
+
 		return $addedIDs;
 	}
 
