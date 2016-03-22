@@ -1723,23 +1723,20 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     /**
      * sets many-many-data
      *
-     * @name setManyMany
-     * @access public
-     * @return void
+     * @param string $name
+     * @param array|DataObjectSet|object $value
      */
     public function setManyMany($name, $value) {
         $name = substr($name, 3);
 
         $relationShipInfo = $this->getManyManyInfo($name);
 
-        if (is_object($value)) {
-            if (!is_a($value, "ManyMany_DataObjectSet") && is_a($value, "DataObjectSet")) {
-                $instance = new ManyMany_DataObjectSet($relationShipInfo->getTarget());
-                $instance->setRelationEnv($relationShipInfo, $this->versionid);
-                $instance->addMany($value);
-                $this->setField($name, $instance);
-                return;
-            }
+        if (is_a($value, "DataObjectSet") && !is_a($value, "ManyMany_DataObjectSet")) {
+            $instance = new ManyMany_DataObjectSet($relationShipInfo->getTarget());
+            $instance->setRelationEnv($relationShipInfo, $this->versionid);
+            $instance->addMany($value);
+            $this->setField($name, $instance);
+            return;
         }
 
         unset($this->data[$name . "ids"]);
@@ -1750,24 +1747,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      * sets many-many-ids
      * @param string $name
      * @param array $ids
-     * @return void
      */
     public function setManyManyIDs($name, $ids) {
-
         if (!is_array($ids))
-            return;
+            throw new InvalidArgumentException("IDs for Relationship must be an array.");
 
         $name = substr($name, 3, -3);
 
         $name = trim(strtolower($name));
 
-        // get config
-        $manyManyRelationships = $this->ManyManyRelationships();
-
-        // first we get the object for this connection
-        if (!isset($manyManyRelationships[$name])) {
-            throw new InvalidArgumentException("Many-Many-Relation ".convert::raw2text($name)." does not exist!");
-        }
+        // check for existance of relationship
+        $this->getManyManyInfo($name);
 
         if (isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "ManyMany_DataObjectSet")) {
             unset($this->data[$name]);
@@ -1775,11 +1765,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $this->setField($name . "ids", $ids);
     }
-
-    /**
-     * GETTERS AND SETTERS
-     */
-    //!GETTERS AND SETTERS
 
     /**
      * gets versions of this ordered by time DESC

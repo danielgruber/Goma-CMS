@@ -248,5 +248,4 @@ class Group extends DataObject implements HistoryData, PermProvider
 
         return array("icon" => $icon, "text" => $lang, "relevant" => $relevant);
     }
-
 }
