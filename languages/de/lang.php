@@ -279,7 +279,6 @@ $lang = array(
 	'redirect'										=> "Weiterleitung",
 	'legend'										=> "Legende",
 	'nomainbar'										=> "Kein Men&uuml;punkt",
-	'mainbar'										=> "Mit Men&uuml;punkt",
 	'just_content_page'								=> "Standard-Seite",
 	'PAGETYPE'										=> "Seitentyp",
 	"box_linktype"									=> "Link in der Kopfzeile",
@@ -653,5 +652,7 @@ $lang = array(
 	"validating_submit"			=> "Es wird funktionieren, jetzt sichern.",
 	"smtp_status"				=> "SMTP-Verbindung",
 
-	"useCaptcha"				=> "Sicherheitscode verwenden"
+	"useCaptcha"				=> "Sicherheitscode verwenden",
+
+	"groupAdmin"				=> "Gruppen-Admin"
 );

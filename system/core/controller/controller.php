@@ -752,6 +752,8 @@ class Controller extends RequestHandler
                 $this->redirectback();
                 break;
         }
+
+        throw new InvalidArgumentException("Action $action not supported by actionComplete.");
     }
 
     /**

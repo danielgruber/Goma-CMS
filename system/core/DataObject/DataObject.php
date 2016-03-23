@@ -2060,6 +2060,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                 // many-many
                 if (isset($manyManyRelationships[$key]))
                 {
+                    // TODO: Do this with WHERE EXISTS And Factor out
                     $relationShip = $manyManyRelationships[$key];
                     if (is_array($value))
                     {
@@ -2079,8 +2080,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                                                                         '.$relationShip->getTableName().'.'. $relationShip->getTargetField() . ' = '.$objectTable.'.id
                                                                      '; // join other table with many-many-table
 
-                        foreach($value as $field => $val)
-                        {
+                        if(isset($value[0])) {
+                            $value = array(
+                                "id" => $value
+                            );
+                        }
+                        foreach($value as $field => $val) {
                             if($field == "id") {
                                 $field = "recordid";
                             }
@@ -2094,24 +2099,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
                         $query->removeFilter($key);
                     } else
                     {
-                        if (ClassInfo::$class_info[$this->classname]["many_many"][$key])
-                        {
-                            if (isset(ClassInfo::$class_info[$this->classname]["many_many_tables"][$key]))
-                            {
-                                $table = ClassInfo::$class_info[$this->classname]["many_many_tables"][$key]["table"];
-                                $data = ClassInfo::$class_info[$this->classname]["many_many_tables"][$key];
-                            } else
-                            {
-                                continue;
-                            }
-                            $query->from[] = ' INNER JOIN
-																			'.DB_PREFIX . $table.'
-																		AS
-																			'.$table.'
-																	ON
-																		 '.$table.'.'.$data["field"] . ' = '.$baseTable.'.id
-																		 '; // join BaseTable with many-many-table
-                        }
+                        $query->from[] = ' INNER JOIN
+                                                                        '.DB_PREFIX . $relationShip->getTableName().'
+                                                                    AS
+                                                                        '.$relationShip->getTableName().'
+                                                                ON
+                                                                     '.$relationShip->getTableName().'.'. $relationShip->getOwnerField() . ' = '.$baseTable.'.id
+                                                                     '; // join BaseTable with many-many-table
                         $query->removeFilter($key);
                     }
                 }

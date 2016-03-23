@@ -278,7 +278,6 @@ $lang = array(
 	'redirect'										=> "Weiterleitung",
 	'legend'										=> "Legend",
 	'nomainbar'										=> "No menupoint",
-	'mainbar'										=> "With menupoint",
 	'just_content_page'								=> "Default-Page",
 	'PAGETYPE'										=> "Pagetype",
 	"box_linktype"									=> "link in header",
@@ -660,5 +659,7 @@ $lang = array(
 	"validating_submit"			=> "I know it works, just save.",
 	"smtp_status"				=> "SMTP-Connection",
 
-	"useCaptcha"				=> "Use captcha"
+	"useCaptcha"				=> "Use captcha",
+
+	"groupAdmin"				=> "Group-Admin"
 );

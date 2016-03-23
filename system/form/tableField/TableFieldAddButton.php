@@ -11,13 +11,18 @@
 class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHandler {
 
 	/**
+	 * @var bool
+	 */
+	public $overridePermission = false;
+
+	/**
 	 * provides HTML-fragments
 	 *
 	 * @name provideFragments
 	 * @return array|void
 	 */
 	public function provideFragments($tableField) {
-		if(!$tableField->getData()->dataobject->can("Write")){
+		if(!$this->overridePermission && !$tableField->getData()->dataobject->can("Write")){
 			return;
 		}
 

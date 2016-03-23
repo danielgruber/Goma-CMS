@@ -19,6 +19,7 @@
  * @property int code_has_sent
  * @property int status
  * @property Uploads avatar
+ * @property bool groupadmin
  *
  * @method DataObjectSet<Group> groups() groups($filter, $sort, $limit)
  */
@@ -39,7 +40,8 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 *@name db
 	 *@access public
 	 */
-	static $db = array(	'nickname'		=> 'varchar(200)',
+	static $db = array(
+		'nickname'		=> 'varchar(200)',
 		'name'			=> 'varchar(200)',
 		'email'			=> 'varchar(200)',
 		'password'		=> 'varchar(1000)',
@@ -49,7 +51,9 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		"code"			=> "varchar(200)",
 		"code_has_sent" => "Switch",
 		"timezone"		=> "timezone",
-		"custom_lang"	=> "varchar(10)");
+		"custom_lang"	=> "varchar(10)",
+		"groupAdmin"	=> "Switch"
+	);
 
 
 	/**
@@ -134,41 +138,55 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 	/**
 	 * returns true if you can write
-	 *
-	 * @name canWrite
-	 * @access public
+	 * @param User $data
 	 * @return bool
 	 */
 
-	public function canWrite($data = null)
+	public function canWrite($data)
 	{
 		if($data["id"] == member::$id)
 			return true;
 
+		if(member::$loggedIn->groupadmin) {
+			if($data->groups()->count() == 0) {
+				return false;
+			}
+
+			foreach($data->groups() as $group) {
+				if(member::$loggedIn->groups(array("id" => $group->id))->Count() == 0) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		return Permission::check("USERS_MANAGE");
 	}
 
 	/**
-	 * returns true if you can write
-	 *
-	 * @name canDelete
-	 * @access public
+	 * @param User $record
 	 * @return bool
 	 */
+	public function canPublish($record)
+	{
+		return $this->canWrite($record);
+	}
 
-	public function canDelete($data = null)
+	/**
+	 * @param DataObject $data
+	 * @return bool
+	 */
+	public function canDelete($data)
 	{
 		return Permission::check("USERS_MANAGE");
 	}
 
 	/**
-	 * returns true if the current user can insert a record
-	 *
-	 * @name canInsert
-	 * @access public
+	 * @param DataObject $data
 	 * @return bool
 	 */
-	public function canInsert($data = null)
+	public function canInsert($data)
 	{
 		return true;
 	}
@@ -194,9 +212,19 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 		$mail->info = lang("email_correct_info");
 
-		if(Permission::check("USERS_MANAGE"))
+		if(Permission::check(self::USERS_PERMISSION) || member::$loggedIn->groupadmin)
 		{
-			$form->add(new Manymanydropdown("groups", lang("groups", "Groups"), "name"), null, "general");
+			$groupFilter = Permission::check(self::USERS_PERMISSION) ?
+				array() :
+				array(
+					"id" => member::$loggedIn->groups()->fieldToArray("id")
+				);
+			$form->add(
+				new Manymanydropdown("groups", lang("groups", "Groups"), "name", $groupFilter),
+				null,
+				"general"
+			);
+			$form->add(new CheckBox("groupAdmin", lang("groupAdmin")));
 		}
 
 		if(!member::login())
@@ -226,9 +254,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 *
 	 * @param Form $form
 	 */
-	public function getEditForm(&$form)
-	{
-
+	public function getEditForm(&$form) {
 		unset($form->result["password"]);
 
 		// if a user is not activated by mail, admin should have a option to activate him manually
@@ -246,6 +272,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				new TextField("name",  lang("name", "name")),
 				new TextField("email", lang("email", "email")),
 				new ManyManyDropdown("groups", lang("groups", "Groups"), "name"),
+				new CheckBox("groupAdmin", lang("groupAdmin")),
 				$status,
 				$this->doObject("timezone")->formfield(lang("timezone")),
 				new LangSelect("custom_lang", lang("lang")),
@@ -262,10 +289,11 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		$form->addValidator(new RequiredFields(array("nickname", "groupid", "email")), "requirefields");
 
 		// group selection for admin
-		if($this["id"] == member::$id || !Permission::check("USERS_MANAGE"))
+		if($this["id"] == member::$id || (!Permission::check("USERS_MANAGE") && !member::$loggedIn->groupadmin))
 		{
 			$form->remove("groups");
 			$form->remove("status");
+			$form->remove("groupadmin");
 		}
 
 		// generate actions
@@ -611,7 +639,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	 */
 	public function providePerms() {
 		return array(
-				self::USERS_PERMISSION	=> array(
+			self::USERS_PERMISSION	=> array(
 				"title"		=> '{$_lang_administration}: {$_lang_user}',
 				"default"	=> array(
 					"type"	 	=> "admins",
