@@ -539,7 +539,7 @@ class ModelManyManyRelationShipInfo {
                 return strtolower($value["relation"]);
             } else if(isset($value[DataObject::RELATION_INVERSE])) {
                 return strtolower($value[DataObject::RELATION_INVERSE]);
-            } else if(count($value) == 2) {
+            } else if(count($value) == 2 && !isset($value[DataObject::CASCADE_TYPE]) && !isset($value[DataObject::FETCH_TYPE])) {
                 $arr = array_values($value);
                 if(isset($arr[1]) && is_string($arr[1])) {
                     return $arr[1];
