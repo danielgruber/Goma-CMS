@@ -214,7 +214,6 @@ class HasOneDropdown extends SingleSelectDropDown
 	 */
 	public function getDataFromModel($page = 1)
 	{
-
 		$data = clone $this->model;
 		$data->filter($this->where);
 		$data->activatePagination($page);
@@ -225,8 +224,6 @@ class HasOneDropdown extends SingleSelectDropDown
 
 		$arr = array();
 		foreach ($data as $record) {
-
-
 			$arr[] = array("key" => $record["id"], "value" => convert::raw2text($record[$this->showfield]));
 
 			// check for info-field
@@ -241,7 +238,6 @@ class HasOneDropdown extends SingleSelectDropDown
 		$right = (ceil($data->count() / 10) > $page);
 		$pageInfo = $data->getPageInfo();
 		unset($data);
-
 
 		return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
 	}
@@ -266,12 +262,15 @@ class HasOneDropdown extends SingleSelectDropDown
 		$arr = array();
 		foreach ($data as $record) {
 
-			$arr[] = array("key" => $record["id"], "value" => preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
+			$arr[] = array(
+				"key" => $record->id,
+				"value" => preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]))
+			);
 
 			// check for info-field
 			if (isset($this->info_field)) {
-				if (isset($record[$this->info_field])) {
-					$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+				if (isset($record->{$this->info_field})) {
+					$arr[count($arr) - 1]["smallText"] = convert::raw2text($record->{$this->info_field});
 				}
 			}
 		}
@@ -281,7 +280,14 @@ class HasOneDropdown extends SingleSelectDropDown
 		$pageInfo = $data->getPageInfo();
 		unset($data);
 
-		return array("data" => $arr, "left" => $left, "right" => $right, "showStart" => $pageInfo["start"], "showEnd" => $pageInfo["end"], "whole" => $pageInfo["whole"]);
+		return array(
+			"data" => $arr,
+			"left" => $left,
+			"right" => $right,
+			"showStart" => $pageInfo["start"],
+			"showEnd" => $pageInfo["end"],
+			"whole" => $pageInfo["whole"]
+		);
 	}
 
 	/**
@@ -301,5 +307,18 @@ class HasOneDropdown extends SingleSelectDropDown
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * @param mixed $value
+	 *
+	 * @return bool
+	 */
+	protected function validateValue($value) {
+		$data = clone $this->getModel();
+
+		$data->addFilter(array("id" => $value));
+
+		return $data->count() > 0;
 	}
 }

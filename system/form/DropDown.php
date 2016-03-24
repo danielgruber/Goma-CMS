@@ -17,7 +17,7 @@ class DropDown extends FormField {
 	/**
 	 * url-handlers for controller-part.
 	 *
-	 * @access public
+	 * @var array
 	 */
 	public $url_handlers = array(
 		"nojs/\$page" => "nojs",
@@ -29,7 +29,7 @@ class DropDown extends FormField {
 	/**
 	 * allowed actions for Controller-part.
 	 *
-	 * @access public
+	 * @var array
 	 */
 	public $allowed_actions = array(
 		"getData",
@@ -45,7 +45,6 @@ class DropDown extends FormField {
 	 * it holds the data for a multiselect-dropdown. Maybe this is also a object
 	 * working as an array.
 	 *
-	 * @access public
 	 * @var mixed
 	 */
 	public $dataset;
@@ -53,28 +52,28 @@ class DropDown extends FormField {
 	/**
 	 * options of this dropdown.
 	 *
-	 * @access public
+	 * @var array
 	 */
 	public $options;
 
 	/**
 	 * value.
 	 *
-	 * @access public
+	 * @var string
 	 */
 	public $value = "";
 
 	/**
 	 * this field needs to have the full width.
 	 *
-	 * @access protected
+	 * @var bool
 	 */
 	protected $fullSizedField = true;
 
 	/**
 	 * unique key for this field.
 	 *
-	 * @access protected
+	 * @var string
 	 */
 	protected $key;
 
@@ -82,12 +81,14 @@ class DropDown extends FormField {
 	 * whether multiple values are selectable. This is for subclasses only (@link
 	 * MultiSelectDropDown).
 	 *
-	 * @access protected
+	 * @var bool
 	 */
 	protected $multiselect = false;
 
 	/**
 	 * sortable relationships.
+	 *
+	 * @var bool
 	 */
 	public $sortable = false;
 
@@ -295,16 +296,21 @@ class DropDown extends FormField {
 	 * @access public
 	 * @return mixed it is an array in case of multiselect-field or string in
 	 * single-select-mode.
+	 * @throws FormInvalidDataException
 	 */
 	public function result() {
-
 		$this->getValue();
 
 		if(!$this->disabled) {
 			if ($this->multiselect) {
 				return $this->dataset;
 			} else {
-				return parent::result();
+				$value = parent::result();
+				if($this->validateValue($value)) {
+					return $value;
+				}
+
+				throw new FormInvalidDataException($this->name, "Value in Dropdown not allowed.");
 			}
 		} else {
 			return null;
@@ -507,14 +513,17 @@ class DropDown extends FormField {
 	/**
 	 * responds to a user-request and marks a value as checked.
 	 *
-	 * @access public
 	 * @return string rendered dropdown-input
+	 * @throws FormInvalidDataException
 	 */
 	public function checkValue() {
-
 		if($this->multiselect) {
-			$this->dataset[] = $this->getParam("value");
-			Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			if($this->validateValue($this->getParam("value"))) {
+				$this->dataset[] = $this->getParam("value");
+				Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			} else {
+				throw new FormInvalidDataException($this->name, "Value not allowed.");
+			}
 		} else {
 			$this->value = $this->getParam("value");
 		}
@@ -525,7 +534,6 @@ class DropDown extends FormField {
 	/**
 	 * responds to a user-request and marks a value as unchecked.
 	 *
-	 * @access public
 	 * @return string rendered dropdown-input
 	 */
 	public function uncheckValue() {
@@ -668,5 +676,14 @@ class DropDown extends FormField {
 		}
 
 		return true;
+	}
+
+	/**
+	 * @param mixed $value
+	 *
+	 * @return bool
+	 */
+	protected function validateValue($value) {
+		return isset($this->options[0]) ? in_array($value, $this->options) : isset($this->options[$value]);
 	}
 }

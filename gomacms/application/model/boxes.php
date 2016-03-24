@@ -615,8 +615,9 @@ class boxpage extends Page
 		 * @name 	onAfterWrite
 		 * @access 	public
 		*/
-		public function onAfterWrite()
+		public function onAfterWrite($modelWriter)
 		{
+			parent::onAfterWrite($modelWriter);
 
 			if($this->boxes_seite_id && $this->id != $this->boxes_seite_id) {
 				$data = DataObject::get("boxes", array("seiteid" => $this->boxes_seite_id));

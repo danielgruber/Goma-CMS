@@ -230,58 +230,59 @@ class HTTPResponse
 	*/
 	public static function sendHeader()
 	{
-			if(!self::$XPoweredBy)
-			{
-					self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
-			}
-			
-			HTTPResponse::setHeader("vary", "Accept-Encoding");
-			self::addHeader('X-Powered-By', self::$XPoweredBy);
-			if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
-				self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));
-			
-			if(!self::$response)
-			{
-					self::setResHeader(200);
-			}
+		if(!self::$XPoweredBy)
+		{
+				self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
+		}
 
-			if(self::$cacheable !== false)
-			{
-					HTTPResponse::addHeader("Last-Modified", gmdate('D, d M Y H:i:s', self::$cacheable["last_modfied"]).' GMT');
-					HTTPResponse::addHeader("Expires", gmdate('D, d M Y H:i:s', self::$cacheable["expires"]).' GMT');		
-					if(!isset(self::$headers["cache-control"])) {
-						$age = self::$cacheable["expires"] - NOW;
-						HTTPResponse::addHeader("cache-control", "public; max-age=".$age."");
-						unset($age);
-					}
-			} else {
-				HTTPResponse::addHeader("Last-Modified", gmdate('D, d M Y H:i:s', NOW).' GMT');
-				HTTPResponse::addHeader("Expires", gmdate('D, d M Y H:i:s', NOW - 10).' GMT');
-				HTTPResponse::addHeader("cache-control", "no-store; no-cache");
+		HTTPResponse::setHeader("vary", "Accept-Encoding");
+		self::addHeader('X-Powered-By', self::$XPoweredBy);
+		if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
+			self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));
+
+		if(!self::$response)
+		{
+			self::setResHeader(200);
+		}
+
+
+		if(self::$cacheable !== false)
+		{
+			HTTPResponse::addHeader("Last-Modified", gmdate('D, d M Y H:i:s', self::$cacheable["last_modfied"]).' GMT');
+			HTTPResponse::addHeader("Expires", gmdate('D, d M Y H:i:s', self::$cacheable["expires"]).' GMT');
+			if(!isset(self::$headers["cache-control"])) {
+				$age = self::$cacheable["expires"] - NOW;
+				HTTPResponse::addHeader("cache-control", "public; max-age=".$age."");
+				unset($age);
 			}
+		} else {
+			HTTPResponse::addHeader("Last-Modified", '');
+			HTTPResponse::addHeader("Expires", '0');
+			HTTPResponse::addHeader("cache-control", " no-cache, max-age=0, must-revalidate, no-store");
+		}
 			
-			if(!isset(self::$headers["content-type"])) {
-				self::$headers["content-type"] = "text/html;charset=utf-8";
-			}
-			
-			if(DEV_MODE) {
-				global $start;
-				$time =  microtime(true) - EXEC_START_TIME;
-				self::addHeader("X-Time", $time);
-			}
-			
-			
-			
-			$endWaitTime = microtime(true);
-			defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
-			
-			header('HTTP/1.1 ' . self::$response);
-			foreach(self::$headers as $name => $content)
-			{
-					header($name . ': '. $content);
-			}
-			
-			Core::callHook("sendheader");
+		if(!isset(self::$headers["content-type"])) {
+			self::$headers["content-type"] = "text/html;charset=utf-8";
+		}
+
+		if(DEV_MODE) {
+			global $start;
+			$time =  microtime(true) - EXEC_START_TIME;
+			self::addHeader("X-Time", $time);
+		}
+
+
+
+		$endWaitTime = microtime(true);
+		defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
+
+		header('HTTP/1.1 ' . self::$response);
+		foreach(self::$headers as $name => $content)
+		{
+			header($name . ': '. $content);
+		}
+
+		Core::callHook("sendheader");
 	}
 	
 	/**

@@ -47,6 +47,12 @@ class HistoryWriter extends Extension {
             $writeType = $owner->getWriteType();
 
             History::push($owner->getModel()->classname, $owner->getOldId(), $owner->getModel()->versionid, $owner->getModel()->id, $command, $writeType);
+
+            if(gObject::method_exists($owner->getModel(), "historyCreated")) {
+                $owner->getModel()->historyCreated($history);
+            }
+            $owner->getModel()->callExtending("historyCreated", $history);
+            $owner->callExtending("historyCreated", $history);
         }
         unset($manipulation);
     }

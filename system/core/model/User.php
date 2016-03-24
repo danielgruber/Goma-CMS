@@ -348,6 +348,29 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	}
 
 	/**
+	 * @param History $history
+	 * @param ModelWriter $modelWriter
+	 */
+	public function historyCreated($history, $modelWriter)
+	{
+		$recordInfo = $this->generateHistoryData($history);
+		if($recordInfo && $recordInfo["relevant"]) {
+			if (DataObject::count("group", array("groupnotification" => array("!=", ""))) > 0) {
+				/** @var Group $group */
+				foreach ($this->groups() as $group) {
+					if ($group->groupnotification) {
+						$mail = new Mail("noreply@" . $_SERVER["SERVER_NAME"]);
+						$mail->sendHTML($group->groupnotification, lang("group_user_changed"),
+							$this->customise(array("history" => $history, "recordInfo" => $recordInfo))
+								->renderWith("mail/userChanged.html")
+						);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * validates code for form.
 	 *
 	 * @param FormValidator $obj
@@ -552,12 +575,14 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		}
 
 		$lang = self::getHistoryLang($record);
-		$lang = str_replace('$userUrl', "member/" . $record->newversion()->id . URLEND, $lang);
+		$lang = str_replace('$userUrl', BASE_URI . "member/" . $record->newversion()->id . URLEND, $lang);
 		$lang = str_replace('$euser', convert::Raw2text($record->newversion()->title), $lang);
 
-		return array(   "icon" => self::getHistoryIcon($record),
+		return array(
+			"icon" => self::getHistoryIcon($record),
 			"text" => $lang,
-			"relevant" => !!$record->autor );
+			"relevant" => !!$record->autor
+		);
 	}
 
 	/**
@@ -575,6 +600,13 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 				if($record->autorid == $record->newversion()->id) {
 					return lang("h_profile_update", '$user updated the own profile');
 				} else {
+					if($record->newversion()->status != $record->oldversion()->status) {
+						if($record->newversion()->status == 2) {
+							return lang("h_user_locked", '$user locked the user <a href="$userUrl">$euser</a>');
+						} else {
+							return lang("h_user_unlocked", '$user unlocked the user <a href="$userUrl">$euser</a>');
+						}
+					}
 					// admin changed profile
 					return lang("h_user_update", '$user updated the user <a href="$userUrl">$euser</a>');
 				}

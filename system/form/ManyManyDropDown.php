@@ -13,13 +13,13 @@
  * @version     1.5.1
  */
 class ManyManyDropDown extends MultiSelectDropDown
-{		
+{
 	/**
 	 * the name of the relation of the current field
 	 *
 	 *@name relation
 	 *@access public
-	*/
+	 */
 	public $relation;
 
 	/**
@@ -27,7 +27,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 *
 	 *@name showfield
 	 *@access public
-	*/
+	 */
 	public $showfield;
 
 	/**
@@ -35,7 +35,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 *
 	 *@name where
 	 *@access public
-	*/
+	 */
 	public $where;
 
 	/**
@@ -43,7 +43,7 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 *
 	 *@name info_field
 	 *@access public
-	*/
+	 */
 	public $info_field;
 
 	/**
@@ -51,13 +51,13 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 *
 	 * @name model
 	 * @var DataObjectSet
-	*/
+	 */
 	protected $model;
 
 	/**
 	 * info about relationship.
 	 * @var ModelManyManyRelationShipInfo
-	*/
+	 */
 	protected $relationInfo;
 
 	/**
@@ -70,32 +70,32 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 */
 	public function __construct($name = "", $title = null, $showfield = "title", $where = array(), $value = null, $parent = null)
 	{
-			parent::__construct($name , $title, $value, $parent);
-			$this->dbname = $this->dbname . "ids";
-			$this->relation = strtolower($name);
-			$this->showfield = $showfield;
-			$this->where = $where;
+		parent::__construct($name , $title, $value, $parent);
+		$this->dbname = $this->dbname . "ids";
+		$this->relation = strtolower($name);
+		$this->showfield = $showfield;
+		$this->where = $where;
 	}
 
 	/**
 	 * returns the model.
 	 *
 	 * @return DataObjectSet
-	*/
+	 */
 	public function getModel() {
 		return $this->model;
 	}
 
 	/**
 	 * sets the base-model for queriing DB.
-	*/
+	 */
 	public function setModel(DataObjectSet $model) {
 		$this->model = $model;
 	}
 
 	/**
 	 * sets the value if not set
-	*/
+	 */
 	public function getValue() {
 
 		parent::getValue();
@@ -156,47 +156,45 @@ class ManyManyDropDown extends MultiSelectDropDown
 		if(!isset($this->model))
 			$this->model = DataObject::get($this->_object);
 	}
-		
-    /**
-     * getDataFromModel
-     *
-     * @param int $page
-     * @return array
-     */
-    public function getDataFromModel($page = 1) {
 
-        $data = clone $this->getModel();
-        $data->filter($this->where);
-        $data->activatePagination($page);
+	/**
+	 * getDataFromModel
+	 *
+	 * @param int $page
+	 * @return array
+	 */
+	public function getDataFromModel($page = 1) {
+		$data = clone $this->getModel();
+		$data->filter($this->where);
+		$data->activatePagination($page);
 
-        if($this->form()->useStateData) {
-            $data->setVersion("state");
-        }
+		if($this->form()->useStateData) {
+			$data->setVersion("state");
+		}
 
-        $arr = array();
-        foreach($data as $record) {
-            $arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
-            if(isset($this->info_field)) {
-                if(isset($record[$this->info_field])) {
-                    $arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
-                }
-            }
-        }
-        $left = ($page > 1);
+		$arr = array();
+		foreach($data as $record) {
+			$arr[] = array("value" => convert::raw2text($record[$this->showfield]), "key" => $record["versionid"]);
+			if(isset($this->info_field)) {
+				if(isset($record[$this->info_field])) {
+					$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+				}
+			}
+		}
+		$left = ($page > 1);
 
-        $right = (ceil($data->count() / 10) > $page);
-        return array("data" => $arr, "left" => $left, "right" => $right);
-    }
+		$right = (ceil($data->count() / 10) > $page);
+		return array("data" => $arr, "left" => $left, "right" => $right);
+	}
 
 	/**
 	 * searches data from the optinos
 	 *
-	 * @name searchDataFromModel
-	 * @param numeric - page
+	 * @param int $page
+	 * @param string $search
 	 * @return array
 	 */
 	public function searchDataFromModel($page = 1, $search = "") {
-
 		$data = clone $this->getModel();
 		$data->filter($this->where);
 		$data->search($search);
@@ -207,17 +205,26 @@ class ManyManyDropDown extends MultiSelectDropDown
 		}
 
 		$arr = array();
+		/** @var DataObject $record */
 		foreach($data as $record) {
-			$arr[] = array("key" => $record["versionid"], "value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield])));
+			$arr[] = array(
+				"key" => $record->versionid,
+				"value" => preg_replace('/('.preg_quote($search, "/").')/Usi', "<strong>\\1</strong>", convert::raw2text($record[$this->showfield]))
+			);
+
 			if(isset($this->info_field)) {
-				if(isset($record[$this->info_field])) {
-					$arr[count($arr) - 1]["smallText"] = convert::raw2text($record[$this->info_field]);
+				if(isset($record->{$this->info_field})) {
+					$arr[count($arr) - 1]["smallText"] = convert::raw2text($record->{$this->info_field});
 				}
 			}
 		}
 		$left = ($page > 1);
 		$right = (ceil($data->count() / 10) > $page);
-		return array("data" => $arr, "left" => $left, "right" => $right);
+		return array(
+			"data" => $arr,
+			"left" => $left,
+			"right" => $right
+		);
 	}
 
 	/**
@@ -234,9 +241,8 @@ class ManyManyDropDown extends MultiSelectDropDown
 	 *
 	 * @access protected
 	 * @return array values
-	*/
+	 */
 	protected function getInput() {
-
 		$data = DataObject::get($this->_object, array("versionid" => $this->dataset));
 
 		if($this->form()->useStateData) {
@@ -262,5 +268,18 @@ class ManyManyDropDown extends MultiSelectDropDown
 		} else {
 			return array();
 		}
+	}
+
+	/**
+	 * @param mixed $value
+	 *
+	 * @return bool
+	 */
+	protected function validateValue($value) {
+		$data = clone $this->getModel();
+
+		$data->addFilter(array("versionid" => $value));
+
+		return $data->count() > 0;
 	}
 }

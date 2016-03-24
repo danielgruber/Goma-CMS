@@ -711,8 +711,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function onBeforeWrite($modelWriter)
     {
-        $dummy = null;
-        $this->callExtending("onBeforeWrite", $dummy);
+        $this->callExtending("onBeforeWrite", $modelWriter);
     }
 
     /**
@@ -722,7 +721,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
      */
     public function onAfterWrite($modelWriter)
     {
-
+        $this->callExtending("onBeforeWrite", $modelWriter);
     }
 
 

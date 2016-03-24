@@ -14,6 +14,7 @@ defined('IN_GOMA') OR die();
  * @property    int type
  * @property    string name
  * @property    int usergroup
+ * @property    string groupnotification
  *
  * @package        Goma\Security\Users
  *
@@ -46,9 +47,12 @@ class Group extends DataObject implements HistoryData, PermProvider
      * @access public
      * @var array
      */
-    static $db = array("name"      => 'varchar(100)',
-                       "type"      => 'enum("0", "1", "2")',
-                       "usergroup" => "int(1)");
+    static $db = array(
+        "name"              => 'varchar(100)',
+        "type"              => 'enum("0", "1", "2")',
+        "usergroup"         => "int(1)",
+        "groupnotification" => "varchar(200)"
+    );
 
 
     /**
@@ -97,7 +101,11 @@ class Group extends DataObject implements HistoryData, PermProvider
             new Tab("general", array(
                 new TextField("name", lang("name", "Name")),
                 new Select("type", lang("grouptype"), array(1 => lang("users"), 2 => lang("admins"))),
-                new CheckBox("usergroup", lang("user_defaultgroup"))
+                new CheckBox("usergroup", lang("user_defaultgroup")),
+                InfoTextField::createFieldWithInfo(
+                    new Email("groupnotification", lang("group_notificationmail")),
+                    lang("group_notificationmail_info")
+                )
             ), lang("general", "general information"))
         )));
 
@@ -120,6 +128,10 @@ class Group extends DataObject implements HistoryData, PermProvider
         $form->add($tabs = new TabSet("tabs", array(
             new Tab("general", array(
                 new TextField("name", lang("name", "Name")),
+                InfoTextField::createFieldWithInfo(
+                    new Email("groupnotification", lang("group_notificationmail")),
+                    lang("group_notificationmail_info")
+                ),
                 new CheckBox("usergroup", lang("user_defaultgroup"))
             ), lang("general", "general information"))
         )));

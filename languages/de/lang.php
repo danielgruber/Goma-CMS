@@ -560,6 +560,8 @@ $lang = array(
 	"h_user_create"			=> '$user erstellte den Benutzer <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '<a href="$userUrl">$euser</a> hat sich eingeloggt',
 	"h_user_logout"			=> '<a href="$userUrl">$euser</a> hat sich ausgeloggt',
+	"h_user_locked"			=> '$user sperrte den Benutzer <a href="$userUrl">$euser</a>',
+	"h_user_unlocked"		=> '$user entsperrte den Benutzer <a href="$userUrl">$euser</a>',
 	
 	"h_settings"			=> '$user aktualisierte die <a href="$url">Einstellungen</a>',
 	
@@ -654,5 +656,8 @@ $lang = array(
 
 	"useCaptcha"				=> "Sicherheitscode verwenden",
 
-	"groupAdmin"				=> "Gruppen-Admin"
+	"groupAdmin"				=> "Gruppen-Admin",
+	"group_notificationmail"	=> "E-Mail-Benachrichtigung bei Aktualisierung",
+	"group_notificationmail_info"	=> "Sie werden benachrichtgt, wenn sich Nutzer in der Gruppe verändern. Mehrere E-Mail-Adressen durch Komma trennen.",
+	"group_user_changed"		=> "Ein Nutzer in Ihrer Gruppe wurde verändert."
 );

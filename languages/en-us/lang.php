@@ -566,6 +566,8 @@ $lang = array(
 	"h_user_create"			=> '$user created the user <a href="$userUrl">$euser</a>',
 	"h_user_login"			=> '<a href="$userUrl">$euser</a> logged in',
 	"h_user_logout"			=> '<a href="$userUrl">$euser</a> logged out',
+	"h_user_locked"			=> '$user locked the user <a href="$userUrl">$euser</a>',
+	"h_user_unlocked"		=> '$user unlocked the user <a href="$userUrl">$euser</a>',
 
 	"h_group_update"		=> '$user updated the group <a href="$groupUrl">$group</a>',
 	"h_group_remove"		=> '$user removed the group $group',
@@ -661,5 +663,8 @@ $lang = array(
 
 	"useCaptcha"				=> "Use captcha",
 
-	"groupAdmin"				=> "Group-Admin"
+	"groupAdmin"				=> "Group-Admin",
+	"group_notificationmail"	=> "email-notifications for updates",
+	"group_notificationmail_info"	=> "You are notified when users within the group change. Seperate multiple addresses with comma.",
+	"group_user_changed"		=> "A user in your group has been changed."
 );
