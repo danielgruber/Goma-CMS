@@ -2049,69 +2049,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             }
         }
 
-
-        $manyManyRelationships = $this->ManyManyRelationships();
-        // some specific addons for relations
-        if (is_array($query->filter))
-        {
-            foreach($query->filter as $key => $value)
-            {
-                // many-many
-                if (isset($manyManyRelationships[$key]))
-                {
-                    // TODO: Do this with WHERE EXISTS And Factor out
-                    $relationShip = $manyManyRelationships[$key];
-                    if (is_array($value))
-                    {
-                        $objectTable = $relationShip->getTargetTableName();
-                        $query->from[] = ' INNER JOIN
-                                                                        '.DB_PREFIX . $relationShip->getTableName().'
-                                                                    AS
-                                                                        '.$relationShip->getTableName().'
-                                                                    ON
-                                                                        '.$relationShip->getTableName().'.'.$relationShip->getOwnerField(). ' = '.$baseTable.'.id
-                                                                    '; // join many-many-table with BaseTable table
-                        $query->from[] = ' INNER JOIN
-                                                                        '.DB_PREFIX . $objectTable.'
-                                                                    AS
-                                                                        '.$objectTable.'
-                                                                    ON
-                                                                        '.$relationShip->getTableName().'.'. $relationShip->getTargetField() . ' = '.$objectTable.'.id
-                                                                     '; // join other table with many-many-table
-
-                        if(isset($value[0])) {
-                            $value = array(
-                                "id" => $value
-                            );
-                        }
-                        foreach($value as $field => $val) {
-                            if($field == "id") {
-                                $field = "recordid";
-                            }
-
-                            if($field == "versionid") {
-                                $field = "id";
-                            }
-                            $query->filter[$objectTable . '.' . $field] = $val;
-                        }
-
-                        $query->removeFilter($key);
-                    } else
-                    {
-                        $query->from[] = ' INNER JOIN
-                                                                        '.DB_PREFIX . $relationShip->getTableName().'
-                                                                    AS
-                                                                        '.$relationShip->getTableName().'
-                                                                ON
-                                                                     '.$relationShip->getTableName().'.'. $relationShip->getOwnerField() . ' = '.$baseTable.'.id
-                                                                     '; // join BaseTable with many-many-table
-                        $query->removeFilter($key);
-                    }
-                }
-                unset($key, $value, $table, $data, $__table, $_table);
-            }
-        }
-
         // sort
         if (!empty($sort)) {
             $query->sort($sort);

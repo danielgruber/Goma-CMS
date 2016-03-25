@@ -9,7 +9,6 @@ interface argumentsQuery {
 	 * @param array|string|int $limit
 	 * @param array|string|int $joins
 	 * @param bool $forceClasses if to only get objects of this type of every object from the table
-	 * @return mixed
 	 */
 	public function argumentQuery($query, $version, $filter, $sort, $limit, $joins, $forceClasses);
 }
@@ -23,7 +22,6 @@ interface argumentsSearchQuery {
 	 * @param array|string|int $limit
 	 * @param array|string|int $join
 	 * @param bool $forceClasses if to only get objects of this type of every object from the table
-	 * @return mixed
 	 */
 	public function argumentSearchSQL($query, $searchQuery, $version, $filter, $sort, $limit, $join, $forceClasses);
 }
