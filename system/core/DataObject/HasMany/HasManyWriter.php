@@ -34,7 +34,7 @@ class HasManyWriter extends Extension {
                             $hasManyObject->writeToDB(false, true, $owner->getWriteType());
 
                             if($hasManyObject->fieldToArray("id")) {
-                                $this->removeFromRelationShip($class, $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"), $this->shouldRemoveData($has_many[$name]));
+                                $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"), $this->shouldRemoveData($has_many[$name]));
                             }
                         } else {
                             $data[$name] = $hasManyObject->fieldToArray("id");
@@ -50,7 +50,7 @@ class HasManyWriter extends Extension {
                             throw new InvalidArgumentException("HasMany-Relationship must contain only already written records.");
                         }
 
-                        $this->removeFromRelationShip($class, $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $data[$name . "ids"], $this->shouldRemoveData($has_many[$name]));
+                        $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $data[$name . "ids"], $this->shouldRemoveData($has_many[$name]));
                         $this->updateRelationship($data[$name . "ids"], $has_many[$name]);
                     }
                 }
@@ -91,7 +91,7 @@ class HasManyWriter extends Extension {
         $owner = $this->getOwner();
 
         foreach(DataObject::get($class,
-            "$field = '".$key."' AND recordid NOT IN ('".implode("','", $excludeRecordIds)."'')"
+            "$field = '".$key."' AND recordid NOT IN ('".implode("','", $excludeRecordIds)."')"
         ) as $notExistingElement) {
             if($removeFromDatabase) {
                 $notExistingElement->remove();

@@ -36,6 +36,7 @@ class HasOneWriter extends Extension {
 
                         // find object
                         $record = DataObject::get_one($has_one[$key]->getTargetClass(), $this->getFilterForUnique($has_one[$key], $info));
+                        var_dump($record);
                         if(!isset($record)) {
                             $record = $this->getRecordForUnique($has_one[$key], $info);
                             $this->writeObject($record);
@@ -92,7 +93,7 @@ class HasOneWriter extends Extension {
             }
         }
 
-        return  new $target($info);
+        return new $target($data);
     }
 
     /**

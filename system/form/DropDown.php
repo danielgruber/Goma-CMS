@@ -118,7 +118,6 @@ class DropDown extends FormField {
 	public function getValue() {
 		// if mutliselect, we have to store an array
 		if($this->multiselect) {
-
 			if($this->POST && isset($this->form()->post[$this->PostName()]) && Core::globalSession()->hasKey("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()])) {
 				$dataset = Core::globalSession()->get("dropdown_" . $this->PostName() . "_" . $this->form()->post[$this->PostName()]);
 				if(is_array($dataset)) {
@@ -313,7 +312,7 @@ class DropDown extends FormField {
 				throw new FormInvalidDataException($this->name, "Value in Dropdown not allowed.");
 			}
 		} else {
-			return null;
+			return $this->value;
 		}
 	}
 
@@ -517,15 +516,17 @@ class DropDown extends FormField {
 	 * @throws FormInvalidDataException
 	 */
 	public function checkValue() {
-		if($this->multiselect) {
-			if($this->validateValue($this->getParam("value"))) {
-				$this->dataset[] = $this->getParam("value");
-				Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+		if(!$this->disabled) {
+			if ($this->multiselect) {
+				if ($this->validateValue($this->getParam("value"))) {
+					$this->dataset[] = $this->getParam("value");
+					Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+				} else {
+					throw new FormInvalidDataException($this->name, "Value not allowed.");
+				}
 			} else {
-				throw new FormInvalidDataException($this->name, "Value not allowed.");
+				$this->value = $this->getParam("value");
 			}
-		} else {
-			$this->value = $this->getParam("value");
 		}
 
 		return $this->redirectToFormOrRespond();
@@ -537,13 +538,15 @@ class DropDown extends FormField {
 	 * @return string rendered dropdown-input
 	 */
 	public function uncheckValue() {
-		if($this->multiselect) {
-			$key = array_search($this->getParam("value"), $this->dataset);
-			unset($this->dataset[$key]);
-			Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
-		} else {
-			if($this->value == $this->getParam("value"))
-				$this->value = null;
+		if(!$this->disabled) {
+			if ($this->multiselect) {
+				$key = array_search($this->getParam("value"), $this->dataset);
+				unset($this->dataset[$key]);
+				Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			} else {
+				if ($this->value == $this->getParam("value"))
+					$this->value = null;
+			}
 		}
 
 		return $this->redirectToFormOrRespond();

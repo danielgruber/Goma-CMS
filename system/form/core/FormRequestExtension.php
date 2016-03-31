@@ -16,11 +16,15 @@ class FormRequestExtension extends Extension {
      * @param bool $handleWithMethod
      */
     public function onBeforeHandleAction($action, &$content, &$handleWithMethod) {
-
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 
-        if($action == "forms" && $owner->getRequest()->getParam("id") == "form") {
+        $parts = $owner->getRequest()->getUrlParts();
+        if($action == "forms" && ($owner->getRequest()->getParam("id") == "form" || $parts[0] == "form")) {
+            if($owner->getRequest()->getParam("id") != "form") {
+                $owner->getRequest()->shift(1);
+            }
+
             $handleWithMethod = false;
 
             $externalForm = new ExternalFormController();
@@ -46,7 +50,8 @@ class FormRequestExtension extends Extension {
         /** @var RequestHandler $owner */
         $owner = $this->getOwner();
 
-        if($action == "forms" && $owner->getRequest()->getParam("id") == "form") {
+        $parts = $owner->getRequest()->getUrlParts();
+        if($action == "forms" && ($owner->getRequest()->getParam("id") == "form" || $parts[0] == "form")) {
             $hasAction = true;
         }
     }

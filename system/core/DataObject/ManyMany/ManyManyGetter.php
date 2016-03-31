@@ -42,13 +42,19 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
      */
     protected function factorOutFilter($filterArray, $version, $forceClasses, $relationShips) {
         foreach($filterArray as $key => $value) {
-            if(isset($relationShips[$key])) {
-                $target = $relationShips[$key]->getTarget();
+            if(isset($relationShips[strtolower($key)])) {
+                $relationShip = $relationShips[strtolower($key)];
+                $target = $relationShip->getTarget();
                 /** @var DataObject $targetObject */
                 $targetObject = new $target();
-                $query = $targetObject->buildExtendedQuery($version, $value, array(), array(), array(), $forceClasses);
+                $query = $targetObject->buildExtendedQuery($version, $value, array(), array(), array(
+                    "INNER JOIN " . DB_PREFIX . $relationShip->getTableName() . " AS " . $relationShip->getTableName() .
+                    " ON " . $relationShip->getTableName() . "." . $relationShip->getTargetField() . " = " . $relationShip->getTargetTableName() . ".id"
+                ), $forceClasses);
+                $query->addFilter($relationShip->getTableName()  . "." . $relationShip->getOwnerField() . " = " . $this->getOwner()->baseTable . ".id");
 
-                $filterArray[$key] = " EXISTS ( ".$query->build()." ) ";
+                unset($filterArray[$key]);
+                $filterArray[] = " EXISTS ( ".$query->build()." ) ";
             } else {
                 if (is_array($value)) {
                     $filterArray[$key] = $this->factorOutFilter($filterArray[$key], $version, $forceClasses, $relationShips);
@@ -59,4 +65,4 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
         return $filterArray;
     }
 }
-gObject::extend("DataObject", "HasOneGetter");
+gObject::extend("DataObject", "ManyManyGetter");

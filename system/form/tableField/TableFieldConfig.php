@@ -1,32 +1,32 @@
 <?php
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 22.08.2012
-  * $Version - 1.0
+ *@package goma framework
+ *@link http://goma-cms.org
+ *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+ *@author Goma-Team
+ * last modified: 22.08.2012
+ * $Version - 1.0
  */
- 
+
 defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
 
 class TableFieldConfig extends gObject {
-	
+
 	/**
 	 *
-	 * @return TableFieldConfig 
+	 * @return TableFieldConfig
 	 */
 	public static function create(){
 		return new TableFieldConfig();
 	}
-	
+
 	/**
 	 * contains all the components
 	 *
-	 *@name components 
+	 *@name components
 	 */
 	protected $components = null;
-	
+
 	/**
 	 * constructor
 	 */
@@ -57,25 +57,27 @@ class TableFieldConfig extends gObject {
 	 */
 	public function addComponents() {
 		$components = func_get_args();
-		foreach($components as $component) 
+		foreach($components as $component)
 			$this->addComponent($component);
 		return $this;
 	}
-	
+
 	/**
-	 * @param TableFieldComponent $component 
+	 * @param TableFieldComponent $component
 	 * @return TableFieldConfig $this
 	 */
-	public function removeComponent(TableFieldComponent $component) {
-		foreach($this->components as $k => $c) {
-			if($c == $component) {
-				unset($this->components[$k]);
+	public function removeComponent($component) {
+		if(isset($component)) {
+			foreach($this->components as $k => $c) {
+				if($c == $component) {
+					unset($this->components[$k]);
+				}
 			}
+			$this->components = array_values($this->components);
 		}
-		$this->components = array_values($this->components);
 		return $this;
 	}
-	
+
 	/**
 	 * @param String Class name or interface
 	 * @return TableFieldConfig $this
@@ -87,7 +89,7 @@ class TableFieldConfig extends gObject {
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * @return components as array
 	 */
@@ -97,14 +99,14 @@ class TableFieldConfig extends gObject {
 
 	/**
 	 * Returns all components extending a certain class, or implementing a certain interface.
-	 * 
+	 *
 	 * @param String Class name or interface
 	 * @return ArrayList Of TableFieldComponent
 	 */
 	public function getComponentsByType($type) {
 		$components = array();
 		foreach($this->components as $component) {
-			if($component instanceof $type) 
+			if($component instanceof $type)
 				array_push($components, $component);
 		}
 		return $components;
@@ -112,13 +114,13 @@ class TableFieldConfig extends gObject {
 
 	/**
 	 * Returns the first available component with the given class or interface.
-	 * 
+	 *
 	 * @param String ClassName
 	 * @return TableFieldComponent
 	 */
 	public function getComponentByType($type) {
 		foreach($this->components as $component) {
-			if($component instanceof $type) 
+			if($component instanceof $type)
 				return $component;
 		}
 	}
@@ -144,7 +146,7 @@ class TableFieldConfig_Base extends TableFieldConfig {
 	 */
 	public function __construct($itemsPerPage=null) {
 		parent::__construct();
-		
+
 		$this->addComponent(new TableFieldDataColumns());
 		$this->addComponent(new TableFieldToolbarHeader());
 		$this->addComponent($sort = new TableFieldSortableHeader());
@@ -174,7 +176,7 @@ class TableFieldConfig_Editable extends TableFieldConfig_Base {
 	 */
 	public function __construct($itemsPerPage=null) {
 		parent::__construct($itemsPerPage);
-		
+
 		$this->addComponent(new TableFieldEditButton());
 		$this->addComponent(new TableFieldDeleteButton());
 		$this->addComponent(new TableFieldAddButton());

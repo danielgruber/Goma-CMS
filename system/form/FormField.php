@@ -122,6 +122,13 @@ class FormField extends RequestHandler {
     protected $errors = array();
 
     /**
+     * placeholder.
+     *
+     * @var string
+     */
+    protected $placeholder;
+
+    /**
      * creates field.
      * @param $name
      * @param $title
@@ -131,6 +138,16 @@ class FormField extends RequestHandler {
      */
     public static function create($name, $title, $value = null, $parent = null) {
         return new static($name, $title, $value, $parent);
+    }
+
+    /**
+     * @param FormField $field
+     * @param string $placeholder
+     * @return FormField
+     */
+    public static function addPlaceholder($field, $placeholder) {
+        $field->setPlaceholder($placeholder);
+        return $field;
     }
 
     /**
@@ -150,6 +167,7 @@ class FormField extends RequestHandler {
         $this->name = $name;
         $this->dbname = strtolower(trim($name));
         $this->title = $title;
+        $this->placeholder = $title;
         $this->value = $value;
         $this->parent =& $parent;
         if ($parent) {
@@ -229,7 +247,7 @@ class FormField extends RequestHandler {
             $this->title
         ));
 
-        $this->input->placeholder = $this->title;
+        $this->input->placeholder = $this->placeholder;
 
         $this->container->append($this->input);
 
@@ -246,8 +264,7 @@ class FormField extends RequestHandler {
 
     /**
      * this function generates some JavaScript for this formfield
-     * @name js
-     * @access public
+     *
      * @return string
      */
     public function js()
@@ -345,12 +362,10 @@ class FormField extends RequestHandler {
 
     /**
      * this function returns the result of this field
-     * @name result
-     * @access public
+     *
      * @return mixed
      */
-    public function result()
-    {
+    public function result() {
         if ($this->disabled || $this->form()->disabled || !$this->POST) {
             return $this->value;
         } else {
@@ -592,5 +607,21 @@ class FormField extends RequestHandler {
     public function setErrors($errors)
     {
         $this->errors = $errors;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlaceholder()
+    {
+        return $this->placeholder;
+    }
+
+    /**
+     * @param string $placeholder
+     */
+    public function setPlaceholder($placeholder)
+    {
+        $this->placeholder = $placeholder;
     }
 }

@@ -249,7 +249,9 @@ class Form extends gObject {
 			$this->addAction($action);
 		}
 
-		$this->validators = array_merge($this->validators, (array) $validators);
+		foreach($validators as $key => $value) {
+			$this->addValidator($value, $key);
+		}
 	}
 
 	/**
