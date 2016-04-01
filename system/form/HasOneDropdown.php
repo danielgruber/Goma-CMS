@@ -315,6 +315,9 @@ class HasOneDropdown extends SingleSelectDropDown
 	 * @return bool
 	 */
 	protected function validateValue($value) {
+		if($value == 0)
+			return true;
+
 		$data = clone $this->getModel();
 
 		$data->addFilter(array("id" => $value));

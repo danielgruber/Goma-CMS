@@ -25,10 +25,12 @@ class HTMLParser extends gObject
      * parses HTML-code for links and scripts to get all inline scripts
      * into files and all links working.
      *
-     * @name    parseHTML
-     * @return    string
+     * @param $html
+     * @param bool $parseLinksAndScripts
+     * @param bool $includeResourcesInBody
+     * @return string
      */
-    public static function parseHTML($html, $parseLinksAndScripts = true)
+    public static function parseHTML($html, $parseLinksAndScripts = true, $includeResourcesInBody = true)
     {
         if (PROFILE) Profiler::mark("HTMLParser::parseHTML");
 
@@ -37,7 +39,7 @@ class HTMLParser extends gObject
             $html = self::process_links($html);
         }
 
-        if (!Core::is_ajax()) {
+        if ($includeResourcesInBody) {
 
             // we have everything a normal HTML Page should have.
             if (strpos($html, "</title>") && strpos($html, "</body>")) {

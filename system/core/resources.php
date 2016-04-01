@@ -337,12 +337,17 @@ class Resources extends gObject {
 	 * gets the resources
 	 * @param bool $css
 	 * @param bool $js
+	 * @param bool $asArray
 	 * @return string
 	 */
-	public static function get($css = true, $js = true) {
+	public static function get($css = true, $js = true, $asArray = false) {
 
 		if (Core::is_ajax() || isset($_GET["debug"])) {
 			self::enableDebug();
+		}
+
+		foreach(gloader::$preloaded as $file => $true) {
+			Resources::addData("goma.ui.setLoaded('".$file."');");
 		}
 
 		if (PROFILE) Profiler::mark("Resources::get");
@@ -364,7 +369,7 @@ class Resources extends gObject {
 		if ($css && self::$registeredResources["css"])
 			self::$resources_data[] = "goma.ui.registerResources('css', ".json_encode(array_values(self::$registeredResources["css"])).");";
 
-		if (Core::is_ajax()) {
+		if (Core::is_ajax() || $asArray) {
 			// write data to file
 			if($js) {
 				$datajs = implode("\n", self::$resources_data);
@@ -414,8 +419,6 @@ class Resources extends gObject {
 			if (PROFILE) Profiler::unmark("Resources::get");
 			return $html;
 		}
-
-
 	}
 
 	/**

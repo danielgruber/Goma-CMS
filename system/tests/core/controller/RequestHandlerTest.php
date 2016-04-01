@@ -19,6 +19,7 @@ class RequestHandlerTest extends GomaUnitTest {
 
 	public function testPermissionSystem() {
 		$h = new TestableRequestHandler();
+		$h->Init(new Request("get", ""));
 		$this->assertTrue($h->hasAction("testAction"));
 		$this->assertEqual($h->handleAction("testAction"), $h->content);
 

@@ -106,7 +106,7 @@ class Controller extends RequestHandler
      * @name url_handlers
      */
     public $url_handlers = array(
-        '$Action/$id' => '$Action'
+        '$Action/$id' => '$Action',
     );
 
     /**
@@ -290,12 +290,6 @@ class Controller extends RequestHandler
 
             if ($this->helpArticle()) {
                 Resources::addData("goma.help.initWithParams(" . json_encode($this->helpArticle()) . ");");
-            }
-
-            if (Core::is_ajax() && is_object($data) && gObject::method_exists($data, "render")) {
-                HTTPResponse::setBody($data->render());
-                HTTPResponse::output();
-                exit;
             }
 
             return $data;
@@ -555,7 +549,7 @@ class Controller extends RequestHandler
 
                 $data = clone $toDelete;
                 $toDelete->remove();
-                if (request::isJSResponse() || isset($_GET["dropdownDialog"])) {
+                if ($this->getRequest()->isJSResponse() || isset($this->getRequest()->get_params["dropdownDialog"])) {
                     $response = new AjaxResponse();
                     if ($object !== null)
                         $data = $object->hideDeletedObject($response, $data);

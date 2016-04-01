@@ -78,7 +78,7 @@ class systemController extends Controller {
 			GlobalSessionManager::globalSession()->set(self::ADMIN_AS_USER, true);
 		}
 		
-		HTTPResponse::unsetCachable();
+		HTTPResponse::unsetCacheable();
 		
 		$this->redirectBack();
 	}

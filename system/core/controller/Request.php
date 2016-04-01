@@ -409,8 +409,8 @@ class Request extends gObject {
 	 *
 	 * @return bool
 	 */
-	public static function isJSResponse() {
-		return (Core::is_ajax() && (isset($_GET["ajaxfy"]) || isset($_POST["ajaxfy"])));
+	public function isJSResponse() {
+		return $this->is_ajax() && $this->getParam("ajaxfy");
 	}
 
 	/**
@@ -418,8 +418,8 @@ class Request extends gObject {
 	 *
 	 * @return bool
 	 */
-	public static function is_ajax() {
-		return Core::is_ajax();
+	public function is_ajax() {
+		return $this->getParam("ajax") || (isset($this->headers["x-requested-with"]) && $this->headers["x-requested-with"] == "XMLHttpRequest");
 	}
 
 	/**

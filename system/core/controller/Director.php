@@ -89,16 +89,26 @@ class Director extends gObject {
 
         Core::callHook("serve", $output);
 
-        if(isset(self::$requestController))
-            $output = self::$requestController->serve($output);
+        if(isset(self::$requestController)) {
+            if(is_a($output, "GomaResponse")) {
+                /** @var GomaResponse $output */
+                $output->setBodyString(self::$requestController->serve($output->getResponseBodyString()));
+            } else {
+                $output = self::$requestController->serve($output);
+            }
+        }
 
         if(PROFILE)
             Profiler::unmark("serve");
 
         Core::callHook("onBeforeServe", $output);
 
-        HTTPResponse::setBody($output);
-        HTTPResponse::output();
+        if(!is_a($output, "GomaResponse")) {
+            $output = new GomaResponse(null, $output);
+            $output->getBody()->setIncludeResourcesInBody(!Core::is_ajax());
+        }
+
+        $output->output();
 
         Core::callHook("onBeforeShutdown");
     }

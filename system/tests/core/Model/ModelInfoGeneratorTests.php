@@ -128,11 +128,11 @@ class ModelInfoGeneratorTests extends GomaUnitTest
 
         $localInfo = call_user_func_array(array("ModelInfoGenerator", "generateHas_One"), array("ModelInfoTestDoTestClass", false));
 
-        $this->assertEqual($localInfo, array("test" => "modelinfotestclass", "autor" => "user", "editor" => "user"));
+        $this->assertEqual($localInfo, array("test" => "ModelInfoTestClass", "autor" => "user", "editor" => "user"));
 
         $parentInfo = call_user_func_array(array("ModelInfoGenerator", "generateHas_One"), array("ModelInfoTestDoTestClass", true));
 
-        $this->assertEqual($parentInfo, array("test" => "modelinfotestclass", "autor" => "user", "editor" => "user"));
+        $this->assertEqual($parentInfo, array("test" => "ModelInfoTestClass", "autor" => "user", "editor" => "user"));
     }
 
     public function unittestGeneration($name, $base, $child, $extension, $method, $parents, $useClass, $expected) {

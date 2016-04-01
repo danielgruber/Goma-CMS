@@ -9,7 +9,7 @@ defined("IN_GOMA") OR die();
  * @package	Goma\Form
  * @version	2.1.9
  */
-class AjaxResponse
+class AjaxResponse extends GomaResponse
 {
     /**
      * this array contains each action
@@ -19,29 +19,27 @@ class AjaxResponse
      */
     protected $actions = array();
 
-    public function __construct()
+    public function setDefaultHeader()
     {
+        parent::setDefaultHeader();
+
+        $this->setHeader("content-type", "text/javascript");
     }
 
     /**
      * adds war js to the actions
-     * @name exec
-     * @access public
-     * @param string - js
+     *
+     * @param string $js
      * @return int
      */
     public function exec($js)
     {
         if (is_object($js)) {
-            $js = $js->render();
+            $js = (string) $js;
         }
         $this->actions[] = $js;
         return count($this->actions) - 1;
     }
-
-    /**
-     * actions
-     */
 
     /**
      * this function replaces html in a given node
@@ -100,7 +98,6 @@ class AjaxResponse
      */
     public function render()
     {
-        HTTPResponse::AddHeader("content-type", "text/javascript");
         return implode("\n", $this->actions);
     }
 
@@ -114,9 +111,6 @@ class AjaxResponse
 
     /**
      * slides a node up (hide)
-     *
-     * @name slideUp
-     * @access public
      */
     public function slideUp($node, $duration = "200", $exec, $exec = "")
     {
@@ -132,9 +126,6 @@ class AjaxResponse
 
     /**
      * slides a node down (show)
-     *
-     * @name slideUp
-     * @access public
      */
     public function slideDown($node, $duration = "200", $exec = "")
     {
@@ -145,6 +136,16 @@ class AjaxResponse
         $this->exec('$("' . convert::raw2js($node) . '").slideDown(' . var_export($duration, true) . ', function(){
 				' . $exec . '
 			});');
+    }
+
+    public function output()
+    {
+        $data = Resources::get(true, true, true);
+        $this->setHeader("X-JavaScript-Load", implode(";", $data["js"]));
+        $this->setHeader("X-CSS-Load", implode(";", $data["css"]));
+
+
+        parent::output();
     }
 
     public function __toString()

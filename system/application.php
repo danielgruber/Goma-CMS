@@ -244,7 +244,7 @@ define("SYSTEM_TPL_PATH", "system/templates");
 // set timezone for security
 date_default_timezone_set(DEFAULT_TIMEZONE);
 
-parseUrl();
+define("URL", parseUrl());
 
 if (!file_exists(ROOT . ".htaccess") && !file_exists(ROOT . "web.config")) {
 	writeServerConfig();
@@ -475,10 +475,11 @@ function parseUrl() {
 
 			$get .= urlencode($k) . "=" . urlencode($v);
 		}
+
 		if ($get) {
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND . "?" . $get);
+			header("Location: " . BASE_URI . BASE_SCRIPT . $url . URLEND . "?" . $get);
 		} else {
-			HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . $url . URLEND);
+			header("Location: " . BASE_URI . BASE_SCRIPT . $url . URLEND);
 		}
 		exit ;
 	}
@@ -490,5 +491,5 @@ function parseUrl() {
 		exit;
 	}
 
-	define("URL", $url);
+	return $url;
 }

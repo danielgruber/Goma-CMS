@@ -1,22 +1,30 @@
 <?php
+defined("IN_GOMA") OR die();
+
 /**
-  * Goma Test-Framework
-  *@package goma
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 25.12.2010
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Tree-Server.
+ *
+ * @package Goma
+ *
+ * @author Goma-Team
+ * @copyright 2016 Goma-Team
+ *
+ * @version 1.0
+ */
 class TreeServer extends RequestHandler {
+
+	/**
+	 * @var array
+	 */
 	public $url_handlers = array(
 		"setCollapsed/\$name!/\$id!" 	=> "setCollapsed",
 		"setExpanded/\$name!/\$id!" 		=> "setExpanded",
 		"getSubTree/\$name!/\$id!"		=> "getSubTree"
 	);
-	
+
+	/**
+	 * @var array
+	 */
 	public $allowed_actions = array(
 		"setCollapsed",
 		"setExpanded",
@@ -31,12 +39,11 @@ class TreeServer extends RequestHandler {
 		$name = $this->getParam("name");
 
 		GlobalSessionManager::globalSession()->set("treestatus_" . $name . "_" . $id, false);
-		if(Core::is_ajax()) {
+		if($this->getRequest()->is_ajax()) {
 			return ROOT_PATH . "treeserver/setExpanded/".$name."/".$id."/?redirect=".urlencode(Core::activeURL());
 		} else {
-			HTTPResponse::redirect($_GET["redirect"]);
+			return GomaResponse::redirect($this->getRequest()->get_params["redirect"]);
 		}
-		
 	}
 	
 	/**
@@ -47,12 +54,11 @@ class TreeServer extends RequestHandler {
 		$name = $this->getParam("name");
 
 		GlobalSessionManager::globalSession()->set("treestatus_" . $name . "_" . $id, true);
-		if(Core::is_ajax()) {
+		if($this->getRequest()->is_ajax()) {
 			return ROOT_PATH . "treeserver/setCollapsed/".$name."/".$id."/?redirect=".urlencode(Core::activeURL());;
 		} else {
-			HTTPResponse::redirect($_GET["redirect"]);
+			return GomaResponse::redirect($this->getRequest()->get_params["redirect"]);
 		}
-		
 	}
 	
 	/**

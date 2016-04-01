@@ -17,12 +17,7 @@ class RestControllerExtension extends Extension {
      * @param mixed $content
      */
     public function handleOutput(&$content) {
-        if(is_a($content, "IRestResponse")) {
-            HTTPResponse::setHeader("content-type", "text/json");
-
-            /** @var IRestResponse $content */
-            $content = json_encode($content->ToRestArray());
-        }
+        $content = new JSONResponseBody($content);
     }
 
     /**

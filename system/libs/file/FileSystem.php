@@ -405,8 +405,6 @@ class FileSystem extends gObject {
      * @return bool
      */
 	public static function readfile_chunked($filename) {
-		  
-	
 		$range = 0; 
 		$size = filesize($filename); 
 	
@@ -448,8 +446,6 @@ class FileSystem extends gObject {
     /**
      * sends a specified file to the browser through the file-sender
      *
-     * @name sendFile
-     * @access public
      * @param string $file
      * @param string $filename
      * @return bool

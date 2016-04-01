@@ -6,7 +6,7 @@
  * @version 2.0.6 
  */
 
-Core::addRules(array(
+Director::addRules(array(
 	'dev' 							=> 'dev',
 	'admin//$item' 					=> 'adminController',
 
@@ -36,7 +36,7 @@ Core::addRules(array(
 	'system//ck_imageuploader'		=> 'CKEditorUploadsController'
 ), 10);
 
-Core::addRules(array('system' => 'SystemController', ), 9);
+Director::addRules(array('system' => 'SystemController', ), 9);
 
 // gloader
 gloader::addLoadAble("dialog", "system/libs/javascript/bluebox.min.js", array("draggable"));

@@ -112,9 +112,7 @@ class LeftAndMain extends AdminItem {
 	public function serve($content) {
 
 		if(Core::is_ajax()) {
-			HTTPResponse::setBody($content);
-			HTTPResponse::output();
-			exit;
+			return $content;
 		}
 		
 		// add resources
@@ -363,22 +361,23 @@ class LeftAndMain extends AdminItem {
 		$response->exec("reloadTree(function(){ goma.ui.ajax(undefined, {url: '".$this->originalNamespace."'}); });");
 		return $response;
 	}
-	
+
 	/**
 	 * publishes data for editing a site via ajax
-	 *
-	 *@name ajaxSave
-	 *@access public
-	 *@param array - data
-	 *@param object - response
-	*/
+	 * @param array $data
+	 * @param AjaxResponse $response
+	 * @param null $form
+	 * @param null $controller
+	 * @param bool $overrideCreated
+	 * @return AjaxResponse
+	 */
 	public function ajaxPublish($data, $response, $form = null, $controller = null, $overrideCreated = false) {
-		
 		if($model = $this->save($data, 2, false, false, $overrideCreated)) {
 			// notify the user
 			Notification::notify($model->classname, lang("successful_published", "The data was successfully published!"), lang("published"));
 			
 			$response->exec("var href = '".BASE_URI . $this->adminURI()."record/".$model->id."/edit".URLEND."'; if(getInternetExplorerVersion() <= 9 && getInternetExplorerVersion() != -1) { if(location.href == href) location.reload(); else location.href = href; } else {reloadTree(function(){ goma.ui.ajax(undefined, {url: href, pushToHistory: true});}, ".$model->id."); }");
+
 			return $response;
 		} else {
 			$response->exec('alert('.var_export(lang("less_rights"), true).');');

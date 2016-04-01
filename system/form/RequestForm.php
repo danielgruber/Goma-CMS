@@ -71,6 +71,11 @@ class RequestForm extends gObject {
 	public $controller;
 
 	/**
+	 * @var string
+	 */
+	protected $btnokay;
+
+	/**
 	 * constructing the form
 	 *
 	 *@name __construct
@@ -138,7 +143,7 @@ class RequestForm extends gObject {
 		$redirect = isset($this->redirect) ? $this->redirect : getredirect();
 
 		// get the submit-button
-		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
+		if($this->controller->getRequest()->isJSResponse() || isset($this->controller->getRequest()->get_params["dropdownDialog"])) {
 			$cancel = new CancelButton("cancel", lang("cancel", "Cancel"), $redirect, $this->dialog->getcloseJS() . "return false;");
 			if(isset($_GET["dropdownDialog"]))
 				$submit = new AjaxSubmitButton("submit", $this->btnokay, array($this, "ajaxDialog"), array($this, "submit"), array("green"));
@@ -166,7 +171,7 @@ class RequestForm extends gObject {
 
 		$this->dialog->closeButton = false;
 
-		if(request::isJSResponse() || isset($_GET["dropdownDialog"])) {
+		if($this->controller->getRequest()->isJSResponse() || isset($this->controller->getRequest()->get_params["dropdownDialog"])) {
 			$this->dialog->content = $data;
 			$response = new AjaxResponse();
 			$response->exec($this->dialog);

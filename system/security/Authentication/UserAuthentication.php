@@ -5,6 +5,8 @@
  *
  * @property    string token
  * @property    User user
+ * @method      User user()
+ *
  * @package		Goma\Security\Users
  *
  * @author		Goma-Team

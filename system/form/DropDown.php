@@ -465,15 +465,13 @@ class DropDown extends FormField {
 		//print_r($this);
 		$value = ($this->multiselect) ? array_values($this->dataset) : array($this->value);
 
-		HTTPResponse::addHeader("content-type", "text/x-json");
-
 		if(empty($value) || $value[0] === null) {
 			$value = array();
 		} else {
 			$value = array_flip($value);
 		}
 
-		$return = array(
+		$response = array(
 			"data" => $arr,
 			"left" => (isset($data["left"])) ? $data["left"] : false,
 			"right" => (isset($data["right"])) ? $data["right"] : false,
@@ -482,16 +480,16 @@ class DropDown extends FormField {
 		);
 
 		if(isset($data["showStart"], $data["showEnd"])) {
-			$return["showStart"] = $data["showStart"];
-			$return["showEnd"] = $data["showEnd"];
+			$response["showStart"] = $data["showStart"];
+			$response["showEnd"] = $data["showEnd"];
 		}
 
 		if(isset($data["whole"])) {
-			$return["whole"] = $data["whole"];
+			$response["whole"] = $data["whole"];
 		}
 
 		// left and right is pagination (left arrow and right)
-		return json_encode($return);
+		return new JSONResponseBody($response);
 	}
 
 	/**
@@ -687,6 +685,6 @@ class DropDown extends FormField {
 	 * @return bool
 	 */
 	protected function validateValue($value) {
-		return isset($this->options[0]) ? in_array($value, $this->options) : isset($this->options[$value]);
+		return $value === null || isset($this->options[0]) ? in_array($value, $this->options) : isset($this->options[$value]);
 	}
 }

@@ -226,9 +226,6 @@ class Core extends gObject {
 		Resources::add("default.css", "css", "main");
 		Resources::add("goma_default.css", "css", "main");
 
-		HTTPResponse::setHeader("x-base-uri", BASE_URI);
-		HTTPResponse::setHeader("x-root-path", ROOT_PATH);
-        
 		if(isset($_GET["debug"])) {
 			Resources::enableDebug();
 		}
@@ -577,7 +574,6 @@ class Core extends gObject {
 		}
 
 		return $_SERVER["REQUEST_URI"];
-
 	}
 
 	/**
@@ -613,9 +609,9 @@ class Core extends gObject {
 
 	/**
 	 * renders the page
+	 * @param string $url
 	 */
 	public function render($url) {
-
 		self::InitResources();
 
 		Director::direct($url);

@@ -33,11 +33,8 @@ class ProfileController extends FrontedController {
 	
 	/**
 	 * tabs
-	 *
-	 *@name tabs
-	 *@access public
 	*/
-	public $tabs;
+	protected $tabs;
 	
 	/**
 	 * define right model.	
@@ -118,24 +115,23 @@ class ProfileController extends FrontedController {
 
 		Core::addBreadCrumb(lang("login"), "profile/login/");
 		Core::setTitle(lang("login"), "profile/login/");
-
 		
 		// if login and a user want's to login as someone else, we should log him out
-		if(member::login() && isset($_POST["pwd"]))
+		if(member::login() && isset($this->getRequest()->post_params["pwd"]))
 		{
 			AuthenticationService::doLogout();
 		// if a user goes to login and is logged in, we redirect him home
 		} else if(member::login()) {
-			HTTPResponse::redirect(getRedirect(true));
+			return GomaResponse::redirect(getRedirect(true));
 		}
 			
 		// if no login and pwd and username isset, we login
-		if(isset($_POST['user'], $_POST['pwd']))
+		if(isset($this->getRequest()->post_params["user"], $this->getRequest()->post_params["pwd"]))
 		{
-				if(member::doLogin($_POST['user'], $_POST['pwd']))
-				{
-						HTTPResponse::redirect(getRedirect(true));
-				}
+			if(member::doLogin($this->getRequest()->post_params["user"], $this->getRequest()->post_params["pwd"]))
+			{
+				return GomaResponse::redirect(getRedirect(true));
+			}
 		}
 		
 		// else we show template
@@ -157,10 +153,10 @@ class ProfileController extends FrontedController {
 	*/
 	public function	logout()
 	{
-		if(isset($_POST["logout"])) {
+		if(isset($this->getRequest()->post_params["logout"])) {
 			AuthenticationService::doLogout();
 		}
 
-		HTTPResponse::redirect(getRedirect(true));
+		return GomaResponse::redirect(getRedirect(true));
 	}
 }

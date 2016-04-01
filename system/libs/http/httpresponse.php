@@ -1,15 +1,10 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma framework
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 05.04.2014
-  * $Version: 2.1.8
-*/
-
-defined('IN_GOMA') OR die('<!-- restricted access -->'); // silence is golden ;)
-
+ * Class HTTPResponse
+ *
+ * @deprecated
+ */
 class HTTPResponse
 {
 	/**
@@ -18,78 +13,27 @@ class HTTPResponse
 	 * default is that is parses.
 	 *
 	 * @name 	disabledparsing
+	 * @deprecated
 	 * @var 	bool
 	*/
 	public static $disabledparsing = false;
 
 	/**
-	 * responsetypes
-	 *@name restypes
-	 *@var array
-	*/
-	public static $restypes = array(
-			200 	=> 'OK',
-			201		=> 'Created',
-			202		=> 'Accepted',
-			204 	=> 'No Content',
-			206 	=> 'Partial Content',
-			301		=> 'Moved Permanently',
-			302  	=> 'Moved Temporarily',
-			304		=> 'Not Modified',
-			307 	=> 'Temporary Redirect',
-			400		=> 'Bad Request',
-			401		=> 'Unauthorized',
-			403		=> 'Forbidden',	
-			404 	=> 'Not Found',
-			405		=> 'Method not Allowed',
-			406 	=> "Not acceptable",
-			410		=> 'Gone',
-			500		=> 'Internal Server Error',	
-			501		=> 'Not Implemented',
-			503		=> 'Service Unavailable',
-			505		=> 'HTTP Version Not Supported'
-	);
+	 * @var GomaResponse
+	 */
+	private static $gomaResponse;
 
 	/**
-	 * this array contains headers.
-	 *
-	 * @access 	public
-	 * @var 	array
-	*/
-	public static $headers = array();
+	 * GomaResponse.
+	 * @deprecated
+	 */
+	public static function gomaResponse() {
+		if(!isset(self::$gomaResponse)) {
+			self::$gomaResponse = new GomaResponse(null, new GomaResponseBody());
+		}
 
-	/**
-	 * if is cacheable.
-	 *
-	 * @name 	cacheable
-	 * @var 	bool
-	*/
-	public static $cacheable = false;
-
-	/**
-	 * response.
-	 *
-	 * @name 	response
-	 * @access 	priavte
-	*/
-	private static $response;
-
-	/**
-	 * X-Powered-By.
-	 *
-	 * @name 	X-Powered-By
-	 * @access 	public
-	 * @var 	string
-	*/
-	public static $XPoweredBy;
-
-	/**
-	 * the body of the response.
-	 *
-	 * @access 	private
-	 * @var 	string
-	*/
-	static private $body = "";
+		return self::$gomaResponse;
+	}
 
 	/**
 	  * add header
@@ -97,18 +41,20 @@ class HTTPResponse
 	  * @access public
 	  * @param 	string - name
 	  * @param 	string - content
-	*/		
+	 * @deprecated
+	 */
 	public static function addHeader($name, $content)
 	{
-		self::$headers[strtolower($name)] = $content;
+		self::gomaResponse()->setHeader($name, $content);
 	}
 
 	/**
 	  * synonym for @link addHeader
-	*/		
+	 * @deprecated
+	 */
 	public static function setHeader($name, $content)
 	{
-		self::$headers[strtolower($name)] = $content;
+		self::gomaResponse()->setHeader($name, $content);
 	}
 
 	/**
@@ -117,10 +63,11 @@ class HTTPResponse
 	 * @name 	removeHeader
 	 * @access 	public
 	 * @param 	string - name
-	*/
+	 * @deprecated
+	 */
 	public static function removeHeader($name)
 	{
-		unset(self::$headers[strtolower($name)]);
+		self::gomaResponse()->removeHeader($name);
 	}
 
 	/**
@@ -129,10 +76,11 @@ class HTTPResponse
 	 * @name 	setBody
 	 * @access 	public
 	 * @return 	null
-	*/
+	 * @deprecated
+	 */
 	public static function setBody($body)
 	{
-			self::$body = $body;
+		self::gomaResponse()->getBody()->setBody($body);
 	}
 
 	/**
@@ -140,7 +88,8 @@ class HTTPResponse
 	 *
 	 * @name 	disableParsing
 	 * @access 	public
-	*/
+	 * @deprecated
+	 */
 	public function disableParsing() {
 		self::$disabledparsing = true;
 	}
@@ -149,145 +98,32 @@ class HTTPResponse
 	 *
 	 *@name enableParsing
 	 *@access public
-	*/
+	 * @deprecated
+	 */
 	public function enableParsing() {
 		self::$disabledparsing = false;
 	}
-	/**
-	 * get body
-	 *@name getBody
-	 *@access public
-	 *@return string
-	*/
-	public static function getBody()
-	{
-			if(PROFILE) Profiler::mark("getBody");
-			$body = self::$body;
-			
-			// gloader
-			foreach(gloader::$preloaded as $file => $true) {
-				Resources::addData("goma.ui.setLoaded('".$file."');");
-			}
-			
-			
-			if((!isset(self::$headers["content-type"]) || preg_match("/html/i",self::$headers["content-type"])) && !self::$disabledparsing)
-			{
-					$body = str_replace('{$_queries}',sql::$queries,$body);
-					
-					$html = new htmlparser();
-					$body = $html->parseHTML($body);
-					
-			} else if((isset(self::$headers["content-type"]) && preg_match("/json/",self::$headers["content-type"])) && is_array($body))
-				{
-					$body = json_encode($body);
-				}				
-			if(Core::is_ajax()) {
-				$data = Resources::get();
-				self::addHeader("X-JavaScript-Load", implode(";", $data["js"]));
-				self::addHeader("X-CSS-Load", implode(";", $data["css"]));
-			}
-			
-			if(PROFILE) Profiler::unmark("getBody");
 
-			return $body;
-	}
 	/**
 	 * shows the body with headers
-	 *@name output
-	 *@access public
-	 *@return null
-	*/
+	 *
+	 * @deprecated
+	 */
 	public static function output($body = null)
 	{
-			if(isset($body))
-				self::setBody($body);
-			
-			$body = self::getBody();
-			
-			self::sendHeader();
-			Core::callHook("onbeforeoutput");
-			
-			$data = ob_get_contents();
-			ob_end_clean();
-			
-			ob_start("ob_gzhandler");
-			
-			if(PROFILE) Profiler::mark("sendDataToClient");
-			echo $body;
-			echo $data;
-			if(PROFILE) Profiler::unmark("sendDataToClient");
-			
-			ob_end_flush();
-			
-			Core::callHook("onafteroutput");
-			
+		if(isset($body))
+			self::setBody($body);
+
+		self::gomaResponse()->getBody()->setParseHTML(!self::$disabledparsing);
+		self::gomaResponse()->getBody()->setIncludeResourcesInBody(!core::is_ajax());
+
+		self::gomaResponse()->output();
 	}
-	/**
-	 * sends the headers
-	 *@name sendHeader
-	 *@access public
-	 *@return null
-	*/
-	public static function sendHeader()
-	{
-		if(!self::$XPoweredBy)
-		{
-				self::$XPoweredBy	= "Goma ".strtok(GOMA_VERSION, ".")." with PHP " . PHP_MAIOR_VERSION;
-		}
 
-		HTTPResponse::setHeader("vary", "Accept-Encoding");
-		self::addHeader('X-Powered-By', self::$XPoweredBy);
-		if(isset(ClassInfo::$appENV["app"]["name"]) && defined("APPLICATION_VERSION"))
-			self::addHeader('X-GOMA-APP', ClassInfo::$appENV["app"]["name"] . " " . strtok(APPLICATION_VERSION, "."));
-
-		if(!self::$response)
-		{
-			self::setResHeader(200);
-		}
-
-
-		if(self::$cacheable !== false)
-		{
-			HTTPResponse::addHeader("Last-Modified", gmdate('D, d M Y H:i:s', self::$cacheable["last_modfied"]).' GMT');
-			HTTPResponse::addHeader("Expires", gmdate('D, d M Y H:i:s', self::$cacheable["expires"]).' GMT');
-			if(!isset(self::$headers["cache-control"])) {
-				$age = self::$cacheable["expires"] - NOW;
-				HTTPResponse::addHeader("cache-control", "public; max-age=".$age."");
-				unset($age);
-			}
-		} else {
-			HTTPResponse::addHeader("Last-Modified", '');
-			HTTPResponse::addHeader("Expires", '0');
-			HTTPResponse::addHeader("cache-control", " no-cache, max-age=0, must-revalidate, no-store");
-		}
-			
-		if(!isset(self::$headers["content-type"])) {
-			self::$headers["content-type"] = "text/html;charset=utf-8";
-		}
-
-		if(DEV_MODE) {
-			global $start;
-			$time =  microtime(true) - EXEC_START_TIME;
-			self::addHeader("X-Time", $time);
-		}
-
-
-
-		$endWaitTime = microtime(true);
-		defined("END_WAIT_TIME") OR define("END_WAIT_TIME", $endWaitTime);
-
-		header('HTTP/1.1 ' . self::$response);
-		foreach(self::$headers as $name => $content)
-		{
-			header($name . ': '. $content);
-		}
-
-		Core::callHook("sendheader");
-	}
-	
 	/**
 	 * sets current document cacheable.
 	 *
+	 * @deprecated
 	 * @name 	setCacheable
 	 * @access 	public
 	 * @param 	timestamp - expires
@@ -295,35 +131,9 @@ class HTTPResponse
 	*/
 	public static function setCachable($expires, $last_modfied, $full = false)
 	{
-		self::$cacheable = array
-		(
-			"expires"		=> $expires,
-			"last_modfied"	=> $last_modfied
-		);
-		if($full) {
-			HTTPResponse::addHeader("Pragma", "public");
-		} else {
-			HTTPResponse::addHeader("Pragma", "no-cache");
-		}
+		self::gomaResponse()->setCacheHeader($expires, $last_modfied, $full);
 	}
-	/**
-	 * if cacheable this function moves last_modfied to the given timestamp if the current last modfied is past the given
-	 *@name addLastModfied
-	 *@access public
-	 *@param timestamp
-	*/
-	public static function addLastModfied($m)
-	{
-			if(isset(self::$cacheable["last_modfied"]))
-			{
-					if(self::$cacheable["last_modfied"] < $m)
-					{
-							self::$cacheable["last_modfied"] = $m;
-							
-					}
-			}
-			return true;
-	}
+
 	/**
 	 * turns browser-cache off
 	 *@name unsetCacheable
@@ -331,86 +141,41 @@ class HTTPResponse
 	*/
 	public static function unsetCacheable()
 	{
-			self::$cacheable = false;
-			HTTPResponse::addHeader("Pragma", "no-cache");
+		self::gomaResponse()->forceNoCache();
 	}
-	/**
-	 * turns browser-cache off
-	 *@name unsetCachable
-	 *@access public
-	*/
-	public static function unsetCachable()
-	{
-			self::$cacheable = false;
-			HTTPResponse::addHeader("Pragma", "no-cache");
-	}
+
 	/**
 	 * sets the response-header, e.g 200
-	 *@name setresHeader
-	 *@access public
-	 *@param numeric - errortype
-	 *@return bool
-	*/
+	 *
+	 * @deprecated
+	 * @param int $type
+	 */
 	public static function setResHeader($type)
 	{
-			if(isset(self::$restypes[$type]))
-			{
-					self::$response = $type . " " . self::$restypes[$type];
-			} else
-			{
-					return false;
-			}
+		self::gomaResponse()->setStatus($type);
 	}
-	/**
-	 * file upload
-	 *@name sendFile
-	 *@access public
-	 *@param string - filename
-	*/
-	public static function sendFile($file)
-	{
-			self::addHeader('content-type', 'application/octed-stream');
-			self::addHeader('Content-Disposition', 'attachment; filename="'.basename($file).'"');
-			self::addHeader('Content-Transfer-Encoding','binary');
-			self::addHeader('Cache-Control','post-check=0, pre-check=0');
-			self::addHeader('Content-Length', filesize($file));
+
+	public static function sendHeader() {
+		self::gomaResponse()->sendHeader();
 	}
 
 	/**
 	 * redirects back.
 	 *
-	 * @param $url
-	 * @param bool|false $_301
+	 * @deprecated
+	 * @param string $url
+	 * @param bool $permanent
 	 */
-	public static function redirect($url, $_301 = false) {
-		Core::callHook("beforeRedirect", $url, $_301);
-
-		self::setResHeader($_301 ? 301 : 302);
+	public static function redirect($url, $permanent = false) {
+		$response = GomaResponse::redirect($url, $permanent);
 		if(Core::is_ajax())
 		{
-			if(Request::isJSResponse() || isset($_GET["dropdownDialog"])) {
-				self::setResHeader(200);
-				$response = new AjaxResponse();
-				$response->exec("window.location.href = " . var_export($url, true) . ";");
-				$output = $response->render();
-				self::sendHeader();
-				echo $output;
-				exit;
-			}
-
-			if(preg_match('/\?/', $url))
-			{
-					$url .= "&ajax=1";
-			} else
-			{
-					$url .= "?ajax=1";
+			if(isset($_GET["ajaxfy"]) || isset($_GET["dropdownDialog"])) {
+				$response->redirectByJavaScript($url);
 			}
 		}
 
-		self::addHeader('Location', $url);
-		self::sendheader();
-		echo '<script type="text/javascript">location.href = "'.addSlashes($url).'";</script><br /> Redirecting to: <a href="'.addSlashes($url).'">'.convert::raw2text($url).'</a>';
-
+		$response->output();
 		Core::callHook("onBeforeShutdown");
 		exit;
 	}

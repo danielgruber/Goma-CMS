@@ -49,7 +49,7 @@ class Notification extends gObject {
 			PushController::triggerToUser("notification", array($class, parse_lang($title), $icon, $text));
 		} else {
 			// other types are unsupported right now
-			throwError(6, "PHP-Error", "Unsupported notification type " . $type);
+			throw new InvalidArgumentException("Not supported notification-type.");
 		}
 	}
 }

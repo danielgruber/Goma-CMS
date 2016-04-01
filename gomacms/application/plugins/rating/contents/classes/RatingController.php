@@ -30,22 +30,20 @@ class RatingController extends Controller
             $ratingRecord->rating += $rate;
             $ratingRecord->rators = serialize(array_merge(array($_SERVER["REMOTE_ADDR"]), (array)unserialize($ratingRecord->rators)));
 
-            if (request::isJSResponse()) {
-                HTTPResponse::addHeader("content-type", "text/javascript");
+            if ($this->getRequest()->isJSResponse()) {
                 $response = new AjaxResponse;
                 $response->exec('$("#rating_' . $name . '").html("' . convert::raw2js($ratingRecord->stars) . '<div class=\"message\">' . lang("exp_gomacms_rating.thanks_for_voting") . '</div>");');
 
-                return $response->render();
+                return $response;
             } else {
                 $this->redirectback();
             }
         } else {
-            if (request::isJSResponse()) {
-                HTTPResponse::addHeader("content-type", "text/javascript");
+            if ($this->getRequest()->isJSResponse()) {
                 $response = new AjaxResponse;
                 $response->exec("alert('" . lang("exp_gomacms_rating.already_rated") . "');");
 
-                return $response->render();
+                return $response;
             } else {
                 GlobalSessionManager::globalSession()->set("rating_message." . $name, lang("exp_gomacms_rating.already_rated"));
                 $this->redirectback();
