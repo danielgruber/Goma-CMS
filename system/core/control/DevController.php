@@ -51,7 +51,7 @@ class Dev extends RequestHandler {
 		}
 
 		GlobalSessionManager::globalSession()->set(self::SESSION_DEV_WITHOUT_PERM, true);
-		HTTPResponse::redirect(BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
+		header("Location: " . BASE_URI . BASE_SCRIPT . "/dev?redirect=" . getredirect(false));
 		exit ;
 	}
 
@@ -205,7 +205,7 @@ class Dev extends RequestHandler {
 		// redirect if needed
 		if(isset($_GET["redirect"])) {
 			GlobalSessionManager::globalSession()->remove(self::SESSION_DEV_WITHOUT_PERM);
-			HTTPResponse::redirect($_GET["redirect"]);
+			header("Location: " . $_GET["redirect"]);
 			exit ;
 		}
 
