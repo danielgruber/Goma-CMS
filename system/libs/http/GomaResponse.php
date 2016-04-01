@@ -327,6 +327,11 @@ class GomaResponse extends gObject {
      */
     public function sendHeader()
     {
+        if(DEV_MODE) {
+            $time =  microtime(true) - EXEC_START_TIME;
+            $this->setHeader("X-Time", $time);
+        }
+
         header('HTTP/1.1 ' . $this->status . " " . self::$http_status_types[$this->status]);
         foreach($this->header as $key => $value) {
             header($key . ": " . $value);
