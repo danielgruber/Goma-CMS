@@ -18,40 +18,36 @@ class RequestHandler extends gObject {
 
 	/**
 	 * url-handlers
-	 * @name 	url_handlers
-	 * @access 	public
+	 *
+	 * @var array
 	 */
 	public $url_handlers = array('$Action' => '$Action');
 
 	/**
 	 * requests, key is name of the request and value the function for it
 	 *
-	 * @name 	allowed_actions
-	 * @access 	public
 	 * @var 	array
 	 */
-	public $allowed_actions = array();
+	public $allowed_actions = array("index");
 
 	/**
 	 * the url base-path of this controller
 	 *
-	 * @name 	namespace
-	 * @access 	public
+	 * @var string
 	 */
 	public $namespace;
 
 	/**
 	 * defines whether shift on success or not
 	 *
-	 * @name 	shiftOnSuccess
-	 * @access 	protected
+	 * @var bool
 	 */
 	protected $shiftOnSuccess = true;
 
 	/**
 	 * original namespace, so always from first controller
 	 *
-	 * @name 	originalNamespace
+	 * @var string
 	 */
 	public $originalNamespace;
 
@@ -59,7 +55,6 @@ class RequestHandler extends gObject {
 	 * defines if this is a sub-controller.
 	 * by default yes, because then handleRequest was not called.
 	 *
-	 * @access public
 	 * @var bool
 	 */
 	protected $subController = true;
@@ -137,7 +132,6 @@ class RequestHandler extends gObject {
 	 * @throws Exception
 	 */
 	public function handleRequest($request, $subController = false) {
-
 		if ($this -> classname == "") {
 			throw new LogicException('Class ' . get_class($this) . ' has no class_name. Please make sure you call <code>parent::__construct();</code> ');
 		}
@@ -183,9 +177,9 @@ class RequestHandler extends gObject {
 	/**
 	 * matches a rule and returns result of action covered by the rule.
 	 *
-	 * @param string rule
-	 * @param string action
-	 * @param Request request optional
+	 * @param string $rule
+	 * @param string $action
+	 * @param Request $request optional
 	 * @return string
 	 */
 	public function matchRuleWithResult($rule, $action, $request = null) {
@@ -218,7 +212,7 @@ class RequestHandler extends gObject {
 	/**
 	 * in the end this function is called to do last modifications
 	 *
-	 * @param   string content
+	 * @param   string $content
 	 * @return  string
 	 */
 	public function serve($content) {

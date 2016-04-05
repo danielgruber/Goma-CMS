@@ -302,9 +302,8 @@ class Controller extends RequestHandler
 
     /**
      * output-layer
-     *
-     * @name __output
-     * @access public
+     * @param string|GomaResponse $content
+     * @return string|GomaResponse
      */
     public function __output($content) {
         $this->callExtending("handleOutput", $content);

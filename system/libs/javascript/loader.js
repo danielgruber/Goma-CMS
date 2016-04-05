@@ -1057,7 +1057,7 @@ if (window.loader === undefined) {
 					url: $this.attr("href"),
 					data: {"ui-ajax": true}
 				}).done(function () {
-					$this.removeC^lass("loading");
+					$this.removeClass("loading");
 				});
 				return false;
 			});
@@ -1069,7 +1069,7 @@ if (window.loader === undefined) {
 				goma.ui.loadAsync("dropdownDialog").done(function () {
 
 					var options = {
-						uri: $this.attr("href")
+						uri: $this.attr("data-href") ? $this.attr("data-href") : $this.attr("href")
 					};
 					if ($this.attr("rel") == "dropdownDialog[fixed]" || $this.hasClass("dropdownDialog-fixed"))
 						options.position = "fixed";
@@ -1127,7 +1127,7 @@ if (window.loader === undefined) {
 
 			// scroll fix
 			$(document).on("click", "a", function () {
-				if ($(this).attr("href").substring(0,1) == "#") {
+				if ($(this).attr("href") && $(this).attr("href").substring(0,1) == "#") {
 					scrollToHash($(this).attr("href").substr(1));
 					return false;
 				} else if (typeof $(this).attr("data-anchor") == "string" && $(this).attr("data-anchor") != "") {

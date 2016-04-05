@@ -2406,6 +2406,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
 
         $query->fields = array($groupField);
 
+        $query->groupby($groupField);
         $this->tryToBuild($query);
 
         $query->execute();

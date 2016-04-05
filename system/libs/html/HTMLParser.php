@@ -116,7 +116,7 @@ class HTMLParser extends gObject
     public static function process_links($html, $base = BASE_SCRIPT, $root = ROOT_PATH, $prependBase = "")
     {
         if (PROFILE) Profiler::mark("HTMLParser::process_links");
-        preg_match_all('/<a([^>]+)href="([^">]+)"([^>]*)>/Usi', $html, $links);
+        preg_match_all('/<a([^>]+)\shref="([^">]+)"([^>]*)>/Usi', $html, $links);
         foreach ($links[2] as $key => $href) {
             $newlink = self::parseLink($href, '<a' . $links[1][$key] . 'href=', $links[3][$key] . '>', $base, $root, $prependBase);
 
@@ -125,7 +125,7 @@ class HTMLParser extends gObject
             }
         }
 
-        preg_match_all('/<iframe([^>]+)src="([^">]+)"([^>]*)>/Usi', $html, $frames);
+        preg_match_all('/<iframe([^>]+)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $frames);
         foreach ($frames[2] as $key => $href) {
             $newlink = self::parseLink($href, '<iframe' . $frames[1][$key] . 'src=', $frames[3][$key] . '>', $base, $root, $prependBase);
 
@@ -134,7 +134,7 @@ class HTMLParser extends gObject
             }
         }
 
-        preg_match_all('/<img([^>]+)src="([^">]+)"([^>]*)>/Usi', $html, $images);
+        preg_match_all('/<img([^>]+)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $images);
         foreach ($images[2] as $key => $href) {
             if (strtolower(substr($href, 0, 17)) == "images/resampled/") {
                 $href = BASE_SCRIPT . $href;
