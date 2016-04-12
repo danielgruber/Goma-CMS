@@ -108,40 +108,41 @@ class HTMLParser extends gObject
      * processes links to work also on servers where Mod Rewrite is not enabled.
      * it adds the BASE_SCRIPT before all links. BASE_SCRIPT normally contains index.php/.
      *
-     * @name    process_links
-     * @access public
-     * @param    string - html
+     * @param string $html
+     * @param string $base
+     * @param string $root
+     * @param string $prependBase - html
      * @return mixed
      */
     public static function process_links($html, $base = BASE_SCRIPT, $root = ROOT_PATH, $prependBase = "")
     {
         if (PROFILE) Profiler::mark("HTMLParser::process_links");
-        preg_match_all('/<a([^>]+)\shref="([^">]+)"([^>]*)>/Usi', $html, $links);
+        preg_match_all('/<a([^>]*)\shref="([^">]+)"([^>]*)>/Usi', $html, $links);
         foreach ($links[2] as $key => $href) {
-            $newlink = self::parseLink($href, '<a' . $links[1][$key] . 'href=', $links[3][$key] . '>', $base, $root, $prependBase);
+            $newlink = self::parseLink($href, '<a' . $links[1][$key] . ' href=', $links[3][$key] . '>', $base, $root, $prependBase);
 
             if ($newlink) {
                 $html = str_replace($links[0][$key], $newlink, $html);
             }
         }
 
-        preg_match_all('/<iframe([^>]+)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $frames);
+        preg_match_all('/<iframe([^>]*)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $frames);
         foreach ($frames[2] as $key => $href) {
-            $newlink = self::parseLink($href, '<iframe' . $frames[1][$key] . 'src=', $frames[3][$key] . '>', $base, $root, $prependBase);
+            $newlink = self::parseLink($href, '<iframe' . $frames[1][$key] . ' src=', $frames[3][$key] . '>', $base, $root, $prependBase);
 
             if ($newlink) {
                 $html = str_replace($frames[0][$key], $newlink, $html);
             }
         }
 
-        preg_match_all('/<img([^>]+)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $images);
+        preg_match_all('/<img([^>]*)\ssrc="([^">]+)"([^>]*)>/Usi', $html, $images);
         foreach ($images[2] as $key => $href) {
             if (strtolower(substr($href, 0, 17)) == "images/resampled/") {
                 $href = BASE_SCRIPT . $href;
             }
 
             $href = $prependBase . $href;
-            $newframes = '<img' . $images[1][$key] . 'src="' . $href . '"' . $images[3][$key] . ' />';
+            $newframes = '<img' . $images[1][$key] . ' src="' . $href . '"' . $images[3][$key] . ' />';
             $html = str_replace($images[0][$key], $newframes, $html);
         }
 
@@ -154,16 +155,19 @@ class HTMLParser extends gObject
      * parses an url and generates a new string with the link, some code before, then some maybe
      * generated attributes and some code after.
      *
-     * @param    href link
+     * 
+     * @param string $href link
+     * @param string $beforeHref
+     * @param string $afterHref
+     * @param string $base
+     * @param string $root
+     * @param string $prependBase
      *
-     * @param    HTML before link
-     * @param    HTML after link
      * @return bool|string
      */
     public static function parseLink($href, $beforeHref, $afterHref, $base = BASE_SCRIPT, $root = ROOT_PATH, $prependBase = "")
     {
         $attrs = "";
-
         // check for prefixes.
         foreach (self::$allowedPrefixes as $prefix) {
             if (substr(strtolower($href), 0, strlen($prefix)) == $prefix) {

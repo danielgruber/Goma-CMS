@@ -3,12 +3,12 @@
 /**
  * inspiration by Silverstripe 3.0 GridField
  *
- * @package goma framework
- * @link http://goma-cms.org
- * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
- * @author Goma-Team
- * last modified: 12.08.2013
- * $Version - 1.1
+ * @package     Goma\Form\TableField
+ *
+ * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
+ * @author      Goma-Team
+ *
+ * @version     2.0
  */
 class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider, TableField_ColumnProvider
 {
@@ -16,6 +16,22 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
      * here are some special filters defined if TableFieldDataColumns casts some values to other values.
      */
     public $valueCasting = array();
+
+    /**
+     * callback to filter correctly by given data.
+     */
+    protected $valueCallback = array();
+
+    /**
+     * sets a value-callback.
+     * it can also unset the callback by providing null as callback.
+     *
+     * @param string $name
+     * @param Callback|null $callback
+     */
+    public function setValueCallback($name, $callback) {
+        $this->valueCallback[strtolower($name)] = $callback;
+    }
 
     /**
      * provides HTML-fragments
@@ -117,24 +133,31 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
 
         $filterArguments = $state->columns->toArray();
         foreach ($filterArguments as $columnName => $value) {
-            if ($data->canFilterBy($columnName) && $value) {
-                if (isset($this->valueCasting[$columnName])) {
-                    $values = array();
-                    foreach ($this->valueCasting[$columnName] as $key => $orgValue) {
-                        if (preg_match('/' . preg_quote($value, "/") . '/i', $key)) {
-                            $values[] = $orgValue;
+            if(isset($this->valueCallback[strtolower($columnName)])) {
+                call_user_func_array($this->valueCallback[strtolower($columnName)], array($filterArguments, $data));
+            } else
+                if ($data->canFilterBy($columnName) && $value) {
+                    if (isset($this->valueCasting[$columnName])) {
+                        $values = array();
+                        foreach ($this->valueCasting[$columnName] as $key => $orgValue) {
+                            if (preg_match('/' . preg_quote($value, "/") . '/i', $key)) {
+                                if(is_array($orgValue)) {
+                                    $values = array_merge($values, $orgValue);
+                                } else {
+                                    $values[] = $orgValue;
+                                }
+                            }
                         }
-                    }
 
-                    if (is_array($values) && count($values) > 0) {
-                        $data->AddFilter(array($columnName => $values));
+                        if (is_array($values) && count($values) > 0) {
+                            $data->AddFilter(array($columnName => $values));
+                        } else {
+                            $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
+                        }
                     } else {
                         $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
                     }
-                } else {
-                    $data->AddFilter(array($columnName => array("LIKE", "%" . $value . "%")));
                 }
-            }
         }
 
         return $data;
@@ -262,8 +285,8 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     /**
      * Which columns are handled by this component
      *
-     * @param type $tableField
-     * @return type
+     * @param TableField $tableField
+     * @return array
      */
     public function getColumnsHandled($tableField)
     {
@@ -286,9 +309,20 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
      */
     public function addCastedValues($field, $values)
     {
-        if (!isset($this->valueCasting[$field]))
+        if (!isset($this->valueCasting[$field])) {
             $this->valueCasting[$field] = $values;
-        else
+        } else {
             $this->valueCasting[$field] = array_merge($this->valueCasting[$field], $values);
+        }
+    }
+
+    /**
+     * sets casted values for field.
+     *
+     * @param string $field
+     * @param array $values
+     */
+    public function setCastedValues($field, $values) {
+        $this->valueCasting[$field] = $values;
     }
 }

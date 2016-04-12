@@ -104,7 +104,11 @@ class Director extends gObject {
         Core::callHook("onBeforeServe", $output);
 
         if(!is_a($output, "GomaResponse")) {
-            $output = new GomaResponse(null, $output);
+            $output = new GomaResponse(HTTPResponse::gomaResponse()->getHeader(), $output);
+            if(HTTPResponse::gomaResponse()->getStatus() != 200) {
+                $output->setStatus(HTTPResponse::gomaResponse()->getStatus());
+            }
+
             $output->getBody()->setIncludeResourcesInBody(!Core::is_ajax());
         }
 

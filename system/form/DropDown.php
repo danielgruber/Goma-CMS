@@ -52,16 +52,25 @@ class DropDown extends FormField {
 	/**
 	 * options of this dropdown.
 	 *
-	 * @var array
+	 * @var array|DataObjectSet
 	 */
 	public $options;
 
 	/**
-	 * value.
+	 * field to show in dropdown
 	 *
-	 * @var string
+	 * @name showfield
+	 * @access public
 	 */
-	public $value = "";
+	public $showfield = "title";
+
+	/**
+	 * info-field
+	 *
+	 *@name info_field
+	 *@access public
+	 */
+	public $info_field;
 
 	/**
 	 * this field needs to have the full width.
@@ -234,7 +243,30 @@ class DropDown extends FormField {
 		} else {
 			$this->widget->addClass("single-value");
 		}
+	}
 
+	/**
+	 * @return string|DataObject|DataObjectSet
+	 */
+	protected function getDataFromValue() {
+		if(is_a($this->options, "DataObjectSet")) {
+			$info = clone $this->options;
+			if($this->multiselect) {
+				$info->addFilter(array("id" => $this->dataset));
+
+				return $info;
+			} else {
+				$info->addFilter(array("id" => $this->value));
+
+				return $info->first(false);
+			}
+		} else {
+			if($this->multiselect) {
+				return $this->dataset;
+			} else {
+				return $this->value;
+			}
+		}
 	}
 
 	/**
@@ -277,16 +309,18 @@ class DropDown extends FormField {
 	protected function getInput() {
 		if($this->multiselect) {
 			$data = array();
-			foreach($this->dataset as $id) {
-				$data[$id] = isset($this->options[$id]) ? $this->options[$id] : $id;
+			foreach($this->getDataFromValue() as $id) {
+				$data[$this->getKeyFromKey($id)] = $this->getIdentifierFromKey($id);
 			}
 			return $data;
 
-		} else if($this->value == "") {
-			return array();
-		} else {
-			return isset($this->options[$this->value]) ? array($this->options[$this->value]) : array($this->value);
 		}
+
+		if($record = $this->getDataFromValue()) {
+			return array($this->getIdentifierFromValue($record));
+		}
+
+		return array();
 	}
 
 	/**
@@ -301,16 +335,7 @@ class DropDown extends FormField {
 		$this->getValue();
 
 		if(!$this->disabled) {
-			if ($this->multiselect) {
-				return $this->dataset;
-			} else {
-				$value = parent::result();
-				if($this->validateValue($value)) {
-					return $value;
-				}
-
-				throw new FormInvalidDataException($this->name, "Value in Dropdown not allowed.");
-			}
+			return $this->getDataFromValue();
 		} else {
 			return $this->value;
 		}
@@ -377,7 +402,7 @@ class DropDown extends FormField {
 	 * information about paginating.
 	 */
 	public function getDataFromModel($page = 1) {
-		return $this->getResultFromData($page, $this->options);
+		return $this->getResultFromData($page, clone $this->options);
 	}
 
 	/**
@@ -393,10 +418,15 @@ class DropDown extends FormField {
 	public function searchDataFromModel($page = 1, $search = "") {
 		// first get result
 		$result = array();
-		foreach($this->options as $key => $val) {
-			if(preg_match('/' . preg_quote($search, '/') . '/i', $val)) {
-				$result[$key] = preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
+		if(is_array($this->options)) {
+			foreach ($this->options as $key => $val) {
+				if (preg_match('/' . preg_quote($search, '/') . '/i', $val)) {
+					$result[$key] = preg_replace('/(' . preg_quote($search, "/") . ')/Usi', "<strong>\\1</strong>", convert::raw2text($val));
+				}
 			}
+		} else if(is_a($this->options, "DataObjectSet")) {
+			$result = clone $this->options;
+			$result->search($search);
 		}
 
 		return $this->getResultFromData($page, $result);
@@ -406,10 +436,10 @@ class DropDown extends FormField {
 	 * creates result out of data.
 	 *
 	 * @param int $page
-	 * @param array $result
+	 * @param array $dataSource
 	 * @return array
 	 */
-	protected function getResultFromData($page, $result) {
+	protected function getResultFromData($page, $dataSource) {
 		// generate paging-data
 		$start = ($page * 10) - 10;
 		$end = $start + 9;
@@ -418,7 +448,7 @@ class DropDown extends FormField {
 		$right = false;
 		$arr = array();
 
-		foreach($result as $key => $value) {
+		foreach($dataSource as $key => $value) {
 			if($i < $start) {
 				$i++;
 				continue;
@@ -428,8 +458,9 @@ class DropDown extends FormField {
 				break;
 			}
 			$arr[] = array(
-				"key" => isset($result[0]) ? $value : $key,
-				"value" => convert::raw2text($value)
+				"key" => $this->getKeyFromInfo($dataSource, $key, $value),
+				"value" => $this->getIdentifierFromValue($value),
+				"smallText" => $this->getInfoFromValue($value)
 			);
 			$i++;
 		}
@@ -441,8 +472,102 @@ class DropDown extends FormField {
 			"left" => $left,
 			"showStart" => $start,
 			"showEnd" => $end,
-			"whole" => count($result)
+			"whole" => count($dataSource)
 		);
+	}
+
+	/**
+	 * @param array|DataObjectSet $dataSource
+	 * @param mixed $key
+	 * @param mixed $value
+	 * @return string
+	 */
+	protected function getKeyFromInfo($dataSource, $key, $value) {
+		if(is_a($dataSource, "DataObjectSet")) {
+			return $value->id;
+		}
+
+		if(!isset($result[0])) {
+			if(is_array($value) && isset($value[$this->showfield])) {
+				return convert::raw2text($value[$this->showfield]);
+			} else if(is_string($value)) {
+				return $value;
+			}
+		}
+
+		return $key;
+	}
+
+	/**
+	 * @param string|DataObject|array $value
+	 * @return string
+	 */
+	protected function getIdentifierFromValue($value)
+	{
+		if(is_string($value) || is_int($value)) {
+			return convert::raw2text($value);
+		}
+
+		if(is_array($value)) {
+			if(isset($value[$this->showfield])) {
+				return convert::raw2text($value[$this->showfield]);
+			} else {
+				return "Unnamed Record " . convert::raw2text(print_r($value, true));
+			}
+		}
+
+		if(is_object($value)) {
+			if($value->{$this->showfield}) {
+				return convert::raw2text($value->{$this->showfield});
+			} else if(gObject::method_exists($value, "__toString")) {
+				return (string) $value;
+			}
+		}
+
+		throw new InvalidArgumentException("Option must have correct DataType: Array, Object or String.");
+	}
+
+	/**
+	 * @param $id
+	 * @return string|void
+	 */
+	protected function getIdentifierFromKey($id)
+	{
+		if(is_array($this->options) && isset($this->options[$id])) {
+			$id = $this->options[$id];
+		}
+
+		return $this->getIdentifierFromValue($id);
+	}
+
+	/**
+	 * @param DataObject|string $id
+	 * @return string
+	 */
+	protected function getKeyFromKey($id) {
+		if(is_a($id, "DataObject")) {
+			return $id->id;
+		}
+
+		return $id;
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return null|string
+	 */
+	protected function getInfoFromValue($value) {
+		if(isset($this->info_field)) {
+			if(is_array($value) && isset($value[$this->info_field])) {
+				return $value[$this->info_field];
+			}
+
+			if(is_object($value)) {
+				return $value->{$this->info_field};
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -515,15 +640,17 @@ class DropDown extends FormField {
 	 */
 	public function checkValue() {
 		if(!$this->disabled) {
-			if ($this->multiselect) {
-				if ($this->validateValue($this->getParam("value"))) {
-					$this->dataset[] = $this->getParam("value");
-					Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+			if ($this->validateValue($this->getParam("value"))) {
+				if ($this->multiselect) {
+					if ($this->validateValue($this->getParam("value"))) {
+						$this->dataset[] = $this->getParam("value");
+						Core::globalSession()->set("dropdown_" . $this->PostName() . "_" . $this->key, $this->dataset);
+					} else {
+						throw new FormInvalidDataException($this->name, "Value not allowed.");
+					}
 				} else {
-					throw new FormInvalidDataException($this->name, "Value not allowed.");
+					$this->value = $this->getParam("value");
 				}
-			} else {
-				$this->value = $this->getParam("value");
 			}
 		}
 
@@ -671,7 +798,11 @@ class DropDown extends FormField {
 	 */
 	public function validate($value) {
 		if(!$this->multiselect && $this->options) {
-			if(!isset($this->options[$value])) {
+			if(is_a($value, "DataObject")) {
+				$value = $value->id;
+			}
+
+			if(!$this->validateValue($value)) {
 				return false;
 			}
 		}
@@ -685,6 +816,12 @@ class DropDown extends FormField {
 	 * @return bool
 	 */
 	protected function validateValue($value) {
+		if(is_a($this->options, "DataObjectSet")) {
+			$result = clone $this->options;
+			$result->addFilter(array("id" => $value));
+			return $result->count() > 0;
+		}
+
 		return $value === null || isset($this->options[0]) ? in_array($value, $this->options) : isset($this->options[$value]);
 	}
 }

@@ -39,9 +39,11 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 
 	/**
 	 * Inits the Component.
+	 * @param TableField $tableField
 	 */
 	public function Init($tableField)
 	{
+		/** @var TableFieldFilterHeader $filter */
 		if ($filter = $tableField->getConfig()->getComponentByType('TableFieldFilterHeader')) {
 			foreach ($this->fieldFormatting as $field => $values) {
 				$filter->addCastedValues($field, array_flip((array)$values));
@@ -209,7 +211,7 @@ class TableFieldDataColumns implements TableField_ColumnProvider
 			$title = $fields[$columnName]["title"];
 		}
 		return array(
-				"title" => $title
+			"title" => $title
 		);
 	}
 

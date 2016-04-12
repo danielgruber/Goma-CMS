@@ -507,8 +507,8 @@ class Resources extends gObject {
 		if($css) {
 			// css
 
-			if (isset(self::$resources_css["default"])) {
-				$css_files = array_merge($css_files, self::$resources_css["default"]);
+			if (isset(self::$resources_css["default"]["files"])) {
+				$css_files = array_merge($css_files, self::$resources_css["default"]["files"]);
 			}
 			// normal combines
 			if (isset(self::$resources_css["combine"])) {

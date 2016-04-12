@@ -40,12 +40,30 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertNull($object->first(false));
     }
 
-    public function testcreateFromCode() {
+    public function testcreateFromCode()
+    {
         $set = new DataObjectSet("user");
         $set->setData();
         $set->add(new User());
         $set->add(new User());
 
         $this->assertEqual($set->count(), 2);
+    }
+
+    public function testSearch() {
+        $data = DataObject::get("user");
+        $clone = clone $data;
+
+        $count = $data->count();
+        $first = $data->first();
+
+        // TODO: Test with foreach
+
+        $data->search("123");
+        $this->assertNotEqual($count, $data->count());
+        $this->assertIsA($data->first(), "DataObject");
+        $this->assertEqual($clone->count(), $count);
+
+        $this->assertEqual($clone->first(), $first);
     }
 }

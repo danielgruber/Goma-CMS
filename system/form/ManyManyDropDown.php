@@ -23,28 +23,12 @@ class ManyManyDropDown extends MultiSelectDropDown
 	public $relation;
 
 	/**
-	 * field to show in dropdown
-	 *
-	 *@name showfield
-	 *@access public
-	 */
-	public $showfield;
-
-	/**
 	 * where clause to filter result in dropdown
 	 *
 	 *@name where
 	 *@access public
 	 */
 	public $where;
-
-	/**
-	 * info-field
-	 *
-	 *@name info_field
-	 *@access public
-	 */
-	public $info_field;
 
 	/**
 	 * base-model for querying DataBase.
