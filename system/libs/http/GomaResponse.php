@@ -16,7 +16,7 @@ class GomaResponse extends gObject {
      * responsetypes
      *
      * @var array
-    */
+     */
     public static $http_status_types = array(
         200 => 'OK',
         201 => 'Created',
@@ -142,15 +142,15 @@ class GomaResponse extends gObject {
      */
     public function setBody($body)
     {
-       if(is_a($body, "GomaResponseBody")) {
-           $this->body = $body;
-       } else {
-           if(!isset($this->body)) {
-               $this->body = new GomaResponseBody($body);
-           } else {
-               $this->body->setBody($body);
-           }
-       }
+        if(is_a($body, "GomaResponseBody")) {
+            $this->body = $body;
+        } else {
+            if(!isset($this->body)) {
+                $this->body = new GomaResponseBody($body);
+            } else {
+                $this->body->setBody($body);
+            }
+        }
     }
 
     /**
@@ -217,7 +217,8 @@ class GomaResponse extends gObject {
      */
     public static function redirect($url, $permanent = false)
     {
-        return (new GomaResponse())->redirectRequest($url, $permanent);
+        $response = new GomaResponse();
+        return $response->redirectRequest($url, $permanent);
     }
 
     /**
@@ -274,7 +275,8 @@ class GomaResponse extends gObject {
      */
     public function render() {
         if(!is_a($this->body, "GomaResponseBody")) {
-            return (new GomaResponseBody($this->body))->toServableBody($this);
+            $body = new GomaResponseBody($this->body);
+            return $body->toServableBody($this);
         }
 
         return $this->body->toServableBody($this);

@@ -1,15 +1,14 @@
-<?php
+<?php defined("IN_GOMA") OR die();
+
 /**
-  *@package goma cms
-  *@link http://goma-cms.org
-  *@license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
-  *@author Goma-Team
-  * last modified: 17.08.2011
-  * $Version 2.0.0 - 001
+  * @package goma cms
+  * @link http://goma-cms.org
+  * @license: LGPL http://www.gnu.org/copyleft/lesser.html see 'license.txt'
+  * @author Goma-Team
 */
 
-Core::addRules(array(
-	'rate/\$name/\$rate'			=> 'ratingController',
+Director::addRules(array(
+	'rate/$name/$rate'			=> 'ratingController',
 	'search'						=> 'searchController',
 	'boxes_new'						=> 'boxesController',
 	'sitemap.xml'					=> 'SitemapController',
@@ -18,7 +17,7 @@ Core::addRules(array(
 
 
 
-Core::addRules(array(
+Director::addRules(array(
 	'' => 'HomePageController',
 	'$path!//$Action/$id/$otherid' => 'SiteController'
 ), 1);

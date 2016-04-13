@@ -25,6 +25,7 @@ class RatingDataObjectExtension extends DataObjectExtension
 
     /**
      * appends rating
+     * @param HTMLNode $content
      */
     public function appendContent(&$content)
     {
@@ -34,6 +35,7 @@ class RatingDataObjectExtension extends DataObjectExtension
 
     /**
      * renders the field in the form
+     * @param Form $form
      */
     public function getForm(&$form)
     {

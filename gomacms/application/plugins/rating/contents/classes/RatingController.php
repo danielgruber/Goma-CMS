@@ -29,6 +29,7 @@ class RatingController extends Controller
             $ratingRecord->rates++;
             $ratingRecord->rating += $rate;
             $ratingRecord->rators = serialize(array_merge(array($_SERVER["REMOTE_ADDR"]), (array)unserialize($ratingRecord->rators)));
+            $ratingRecord->writeToDB(false, true);
 
             if ($this->getRequest()->isJSResponse()) {
                 $response = new AjaxResponse;
@@ -51,3 +52,5 @@ class RatingController extends Controller
         }
     }
 }
+
+

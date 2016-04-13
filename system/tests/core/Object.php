@@ -184,6 +184,37 @@ class ObjectTest extends GomaUnitTest implements TestAble {
 		$this->assertIsA($data->getInstance("TestObjectExtension"), "TestObjectExtension");
 		$this->assertEqual($data->getInstance("TestObjectExtension")->getOwner(), $data);
 	}
+
+	public function testCheckWakeup() {
+
+		$wakeUpCacheProp = new ReflectionProperty("gObject", "wakeUpCache");
+		$wakeUpCacheProp->setAccessible(true);
+		$wakeUpCacheProp->setValue(array());
+
+		$object = new TestCheckWakeup();
+		$this->assertEqual($object->wokeup, false);
+		$this->assertEqual($object->checked, true);
+
+		$wakeUpCacheProp->setValue(array());
+
+		$new = unserialize(serialize($object));
+
+		$this->assertEqual($new->wokeup, true);
+		$this->assertEqual($new->checked, true);
+
+		$new->wokeup = $new->checked = false;
+
+		$this->assertEqual($new->wokeup, false);
+		$this->assertEqual($new->checked, false);
+
+		$wakeUpCacheProp->setValue(array());
+
+		$newer = unserialize(serialize($object));
+
+		$this->assertEqual($newer->wokeup, true);
+		$this->assertEqual($newer->checked, true);
+
+	}
 }
 
 class DummyMethodTest extends gObject {
@@ -248,4 +279,25 @@ gObject::extend("testObject", "TestExtensionWithArgs('a', 12, array(23))");
 
 function testObjectExtFunction() {
 	return "test";
+}
+
+class TestCheckWakeup extends gObject {
+
+	public $checked = false;
+	public $wokeup = false;
+
+	public function checkDefineStatics()
+	{
+		$this->checked = true;
+
+		parent::checkDefineStatics();
+	}
+
+	public function __wakeup()
+	{
+		$this->wokeup = true;
+		$this->checked = false;
+
+		parent::__wakeup();
+	}
 }

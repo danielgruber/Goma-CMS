@@ -36,11 +36,6 @@
 		border: 1px solid #ccc;
 		margin: 0.25em;
 	    
-		-webkit-transition: all 0.2s linear;
-	    -moz-transition: all 0.2s linear;
-	    -o-transition: all 0.2s linear;
-	    -ms-transition: all 0.2s linear;
-	    
 	    background: #eee;
 		max-width: 95%;
 		display: block;

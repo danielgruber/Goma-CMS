@@ -338,6 +338,13 @@ abstract class gObject
             $this->inExpansion = ClassInfo::$class_info[$this->classname]["inExpansion"];;
         }
 
+        $this->checkDefineStatics();
+    }
+
+    /**
+     * checks if defineStatics has been called.
+     */
+    protected function checkDefineStatics() {
         if(!isset(self::$hook_called[$this->classname]) || ClassInfo::ClassInfoHasBeenRegenerated()) {
             if(method_exists($this, "defineStatics")) {
                 $this->defineStatics();
@@ -635,6 +642,8 @@ abstract class gObject
     public function __wakeup() {
         if(!isset(self::$wakeUpCache[$this->classname])) {
             self::$wakeUpCache[$this->classname] = true;
+
+            $this->checkDefineStatics();
         }
     }
 

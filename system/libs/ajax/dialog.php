@@ -122,7 +122,8 @@ class Dialog extends AjaxResponse
             }
             $array["closeButton"] = $this->closeButton;
 
-            return (new JSONResponseBody($array))->toServableBody($this);
+            $response = new JSONResponseBody($array);
+            return $response->toServableBody($this);
         } else {
             return 'gloader.load("dialog");
 $("body").append("' . convert::raw2js($this->renderHTML()) . '");
@@ -187,5 +188,4 @@ self.' . $this->key . ' = new ExistingBluebox("dialog_' . $this->key . '");' . $
     {
         return "getblueboxbyid(" . $id . ").close();";
     }
-
 }
