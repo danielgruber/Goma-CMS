@@ -1642,21 +1642,14 @@ class tplCaller extends gObject implements ArrayAccess
 
 	/**
 	 * adds URL-param to URL
-	 *
-	 * @addParamToURL
-	 * @access public
+	 * @param string $url
+	 * @param string $param
+	 * @param string $value
+	 * @return string
 	 */
 	public function addParamToUrl($url, $param, $value)
 	{
-		if (!strpos($url, "?")) {
-			$modified = $url . "?" . $param . "=" . urlencode($value);
-		} else {
-			$url = preg_replace('/' . preg_quote($param, "/") . '\=([^\&]+)\&/Usi', "", $url);
-			$url = preg_replace('/' . preg_quote($param, "/") . '\=([^\&]+)$/Usi', "", $url);
-			$modified = str_replace(array("?&", "&&"), array('?', "&"), $url . "&" . $param . "=" . urlencode($value));
-		}
-
-		return convert::raw2text($modified);
+		return Controller::addParamToUrl($url, $param, $value);
 	}
 
 	/**

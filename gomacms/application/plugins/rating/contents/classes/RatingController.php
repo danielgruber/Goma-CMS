@@ -35,7 +35,7 @@ class RatingController extends Controller
 
                 return $response;
             } else {
-                $this->redirectback();
+                return $this->redirectback();
             }
         } else {
             if ($this->getRequest()->isJSResponse()) {
@@ -45,7 +45,7 @@ class RatingController extends Controller
                 return $response;
             } else {
                 GlobalSessionManager::globalSession()->set("rating_message." . $name, lang("exp_gomacms_rating.already_rated"));
-                $this->redirectback();
+                return $this->redirectback();
             }
         }
     }

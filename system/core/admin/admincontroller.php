@@ -201,8 +201,7 @@ class adminController extends Controller
 
             if (!Core::is_ajax()) {
                 AddContent::addSuccess(lang("flush_log_success"));
-                $this->redirectBack();
-                exit;
+                return $this->redirectBack();
             } else {
                 HTTPResponse::setHeader("content-type", "text/x-json");
                 HTTPResponse::sendHeader();

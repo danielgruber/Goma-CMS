@@ -132,7 +132,7 @@ class userAdmin extends adminItem {
 			}
 		}
 
-		$this->redirectBack();
+		return $this->redirectBack();
 	}
 
 	/**
@@ -150,20 +150,17 @@ class userAdmin extends adminItem {
 	public function actionComplete($action, $record = null) {
 		if($action == "publish_success") {
 			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-			$this->redirectback();
-			return true;
+			return $this->redirectback();
 		}
 
 		if($action == "unlock_user") {
 			AddContent::addSuccess(lang("user_unlocked", "The account has been unlocked."));
-			$this->redirectback();
-			return true;
+			return $this->redirectback();
 		}
 
 		if($action == "lock_user") {
 			AddContent::addSuccess(lang("user_locked", "The user has been locked."));
-			$this->redirectback();
-			return true;
+			return $this->redirectback();
 		}
 		
 		return parent::actionComplete($action, $record);

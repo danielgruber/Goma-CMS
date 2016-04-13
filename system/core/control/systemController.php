@@ -52,9 +52,6 @@ class systemController extends Controller {
 
 	/**
 	 * sets the user view
-	 *
-	 *@name setUserView
-	 *@access public
 	*/
 	public function setUserView() {
 		if($this->getParam("bool") == 1) {
@@ -62,14 +59,11 @@ class systemController extends Controller {
 		} else {
 			GlobalSessionManager::globalSession()->remove(self::ADMIN_AS_USER);
 		}
-		$this->redirectback();
+		return $this->redirectback();
 	}
 
 	/**
 	 * switches the view
-	 *
-	 *@name switchView
-	 *@access public
 	*/
 	public function switchView() {
 		if(GlobalSessionManager::globalSession()->hasKey(self::ADMIN_AS_USER)) {
@@ -80,7 +74,7 @@ class systemController extends Controller {
 		
 		HTTPResponse::unsetCacheable();
 		
-		$this->redirectBack();
+		return $this->redirectBack();
 	}
 	
 	/**

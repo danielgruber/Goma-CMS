@@ -163,7 +163,7 @@ class TableView extends AdminItem
                 if ($record = DataObject::get_one($this->model(), array("id" => $key)))
                     $record->remove();
             }
-            $this->redirectBack();
+            return $this->redirectBack();
         }
     }
 

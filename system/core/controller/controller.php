@@ -510,7 +510,7 @@ class Controller extends RequestHandler
                 }
             } else {
                 log_error("Warning: Param ID for Action edit is not an integer: " . print_r($this->request, true));
-                $this->redirectBack();
+                return $this->redirectBack();
             }
         } else {
             throw new InvalidArgumentException("Controller::Edit should be called if you just have one Record or a given ID in URL.");
@@ -575,7 +575,7 @@ class Controller extends RequestHandler
                 }
             } else {
                 log_error("Warning: Param ID for Action delete is not an integer: " . print_r($this->request, true));
-                $this->redirectBack();
+                return $this->redirectBack();
             }
         }
     }
@@ -731,19 +731,14 @@ class Controller extends RequestHandler
         switch ($action) {
             case "publish_success":
                 AddContent::addSuccess(lang("successful_published", "The entry was successfully published."));
-                $this->redirectback();
-                break;
+                return $this->redirectback();
             case "save_success":
                 AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-                $this->redirectback();
-                break;
+                return $this->redirectback();
             case "less_rights":
-
                 return '<div class="error">' . lang("less_rights", "You are not allowed to visit this page or perform this action.") . '</div>';
-                break;
             case "delete_success":
-                $this->redirectback();
-                break;
+                return $this->redirectback();
         }
 
         throw new InvalidArgumentException("Action $action not supported by actionComplete.");
@@ -758,22 +753,23 @@ class Controller extends RequestHandler
      * @access    public
      * @param    string $param get-parameter
      * @param    string $value value of the get-parameter
+     * @return GomaResponse
      */
     public function redirectback($param = null, $value = null)
     {
 
-        if (isset($_GET["redirect"])) {
-            $redirect = $_GET["redirect"];
-        } else if (isset($_POST["redirect"])) {
-            $redirect = $_POST["redirect"];
+        if (isset($this->request->get_params["redirect"])) {
+            $redirect = $this->request->get_params["redirect"];
+        } else if (isset($this->request->post_params["redirect"])) {
+            $redirect = $this->request->post_params["redirect"];
         } else {
             $redirect = BASE_URI . BASE_SCRIPT . $this->originalNamespace;
         }
 
         if (isset($param) && isset($value))
-            $redirect = TPLCaller::addParamToURL($redirect, $param, $value);
+            $redirect = self::addParamToURL($redirect, $param, $value);
 
-        HTTPResponse::redirect($redirect);
+        return GomaResponse::redirect($redirect);
     }
 
     /**
@@ -912,5 +908,26 @@ class Controller extends RequestHandler
         }
 
         return array();
+    }
+
+    /**
+     * adds a get-param to the query-string of given url.
+     *
+     * @param string $url
+     * @param string $param
+     * @param string $value
+     * @return string
+     */
+    public static function addParamToUrl($url, $param, $value)
+    {
+        if (!strpos($url, "?")) {
+            $modified = $url . "?" . $param . "=" . urlencode($value);
+        } else {
+            $url = preg_replace('/' . preg_quote($param, "/") . '\=([^\&]+)\&/Usi', "", $url);
+            $url = preg_replace('/' . preg_quote($param, "/") . '\=([^\&]+)$/Usi', "", $url);
+            $modified = str_replace(array("?&", "&&"), array('?', "&"), $url . "&" . $param . "=" . urlencode($value));
+        }
+
+        return convert::raw2text($modified);
     }
 }

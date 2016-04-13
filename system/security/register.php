@@ -148,7 +148,7 @@ class RegisterExtension extends ControllerExtension
 				return "";
 			}
 		} else {
-			$this->redirectBack();
+			return $this->redirectBack();
 		}
 	}
 
@@ -233,11 +233,11 @@ class RegisterExtension extends ControllerExtension
 
 				$data->writeToDB(false, true);
 				AddContent::addSuccess(lang("user_activated_subject"));
-				$this->getOwner()->redirectBack();
+				return $this->getOwner()->redirectBack();
 
 			}
 		} else {
-			$this->getOwner()->redirectBack();
+			return $this->getOwner()->redirectBack();
 		}
 	}
 

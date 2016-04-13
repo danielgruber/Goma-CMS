@@ -176,25 +176,26 @@ class BackupAdmin extends TableView
         }
 
         if(rename($data["file"]->realfile, BackupModel::BACKUP_PATH . "/" . basename($file))) {
-            $this->redirectBack();
+            return $this->redirectBack();
         } else {
             AddContent::addError(lang("backup_write_error"));
-            $this->redirectBack();
+            return $this->redirectBack();
         }
     }
 
     /**
      * creates a db-backup
      *
-     *@name add_db
-    */
+     * @name add_db
+     * @return GomaResponse
+     */
     public function add_db() {
         Backup::generateDBBackup(BackupModel::BACKUP_PATH . "/" . $this->getFileFromSession(self::SESSION_VAR_DB_FILE, "sql", "sgfs"));
 
         GlobalSessionManager::globalSession()->remove(self::SESSION_VAR_DB_FILE);
 
         BackupModel::forceSyncFolder();
-        $this->redirectBack();
+        return $this->redirectBack();
     }
 
     /**
@@ -229,7 +230,7 @@ class BackupAdmin extends TableView
         GlobalSessionManager::globalSession()->remove(self::SESSION_VAR_COMPLETE);
 
         BackupModel::forceSyncFolder();
-        $this->redirectBack();
+        return $this->redirectBack();
     }
 
     /**

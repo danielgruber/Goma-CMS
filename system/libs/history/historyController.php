@@ -175,23 +175,22 @@ class HistoryController extends Controller {
 			
 			if($this->confirm(lang("restore_confirm"), null, null, $description)) {
 				if($version->canWrite($version)) {
-					$version->write(false, true, 1);
+					$version->writeToDB(false, true, 1);
 				} else {
-					$version->write(false, true, 2);
+					$version->writeToDB(false, true, 2);
 				}
-				$this->redirectBack();
+				return $this->redirectBack();
 			}
 		} else {
 			return lang("less_rights");
 		}
 	}
-	
+
 	/**
 	 * compares two versions
 	 *
-	 *@name compareVersion
-	 *@access public
-	*/
+	 * @return string
+	 */
 	public function compareVersion() {
 		$oldversion = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("id")));
 		$newversion = DataObject::get_one($this->getParam("class"), array("versionid" => $this->getParam("nid")));
@@ -222,17 +221,18 @@ class HistoryController extends Controller {
 			
 			return $view->customise(array("fields" => $fieldset, "css" => $this->buildEditorCSS()))->renderWith("history/compare.html");
 		} else {
-			throwError(6, "Implementation Error", "No fields for version-comparing for class ".$oldversion->classname.". Please create method ".$oldversion->classname."::getVersionedFields with array as return-value.");
+			throw new LogicException("No fields for version-comparing for class ".$oldversion->classname.". Please create method ".$oldversion->classname."::getVersionedFields with array as return-value.");
 		}
 	}
-	
+
 	/**
 	 * gets correct data from versions
 	 *
-	 *@name getDataFromVersion
-	 *@param string - field
-	 *@param object - version
-	*/
+	 * @name getDataFromVersion
+	 * @param string $field
+	 * @param object $version
+	 * @return null|string
+	 */
 	public function getDataFromVersion($field, $version) {
 		if(strpos($field, ".")) {
 			$tmpItem = clone $version;
@@ -253,15 +253,16 @@ class HistoryController extends Controller {
 		if(isset($version[$field])) {
 			return $version[$field];
 		}
-		
-		throwError(6, "Invalid-Data-Error", "$field doesn't exist on version of type ".$version->classname." with id ".$version->versionid."");
+
+		throw new InvalidArgumentException("$field doesn't exist on version of type ".$version->classname." with id ".$version->versionid);
 	}
-	
+
 	/**
 	 * converts diff to HTML
 	 *
-	 *@name diffToHTML
-	*/
+	 * @name diffToHTML
+	 * @return mixed|string
+	 */
 	public function diffToHTML($diffs) {
 		$html = array ();
 		$blockElements = "p|h1|h2|h3|h4|h5|h6|div|blockquote|noscript|form|fieldset|adress|li|ul";
@@ -391,12 +392,13 @@ class HistoryController extends Controller {
 		
 		return $output;
 	}
-	
+
 	/**
 	 * builds editor.css
 	 *
-	 *@name buildEditorCSS
-	*/
+	 * @name buildEditorCSS
+	 * @return bool|string
+	 */
 	public function buildEditorCSS() {
 		$cache = ROOT . CACHE_DIRECTORY . "/editor_compare_" . Core::GetTheme() . ".css";
 		if((!file_exists($cache) || filemtime($cache) < TIME + 300) && file_exists("tpl/" . Core::getTheme() . "/editor.css")) {
@@ -411,12 +413,13 @@ class HistoryController extends Controller {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * interprets the CSS
 	 *
-	 *@name interpretCSS
-	*/
+	 * @name interpretCSS
+	 * @return string
+	 */
 	public static function interpretCSS($matches) {
 		if(preg_match('/^(body|html)?,?\s*(html|body)?$/i', trim($matches[1]))) {
 			return "\n.compareView .content {";
@@ -429,13 +432,14 @@ class HistoryController extends Controller {
 			return $out . " { ";
 		}
 	}
-	
+
 	/**
 	 * gets a consolidated CSS-File, where imports are merged with original file
 	 *
-	 *@name importCSS
-	 *@param string - file
-	*/
+	 * @name importCSS
+	 * @param string - file
+	 * @return mixed|string
+	 */
 	public static function importCSS($file) {
 		if(file_exists($file)) {
 			$css = file_get_contents($file);

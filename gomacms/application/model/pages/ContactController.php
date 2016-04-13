@@ -41,6 +41,7 @@ class ContactController extends PageController
     /**
      * @param array $data
      * @param string $from
+     * @return GomaResponse
      */
     public function submitAndSend($data, $from = null) {
         try {
@@ -52,6 +53,6 @@ class ContactController extends PageController
             AddContent::addError($e->getMessage());
         }
 
-        $this->redirectback();
+        return $this->redirectback();
     }
 }

@@ -20,17 +20,16 @@ class userController extends Controller
 	{
 		return DataObject::get_one($this, array('id' => $id));
 	}
-	
+
 	/**
 	 * saves the user-pwd
-	 *@access public
-	 *@name savepwd
-	*/
+	 * @return GomaResponse
+	 */
 	public function pwdsave($result)
 	{
 		AddContent::add('<div class="success">'.lang("edit_password_ok", "The password were successfully changed!").'</div>');
 		DataObject::update("user", array("password" => Hash::getHashFromDefaultFunction($result["password"])), array('recordid' => $result["id"]));
-		$this->redirectback();
+		return $this->redirectback();
 	}
 
 	/**
@@ -48,8 +47,7 @@ class userController extends Controller
 	public function actionComplete($action, $record = null) {
 		if($action == "publish_success") {
 			AddContent::addSuccess(lang("successful_saved", "The data was successfully saved."));
-			$this->redirectback();
-			return true;
+			return $this->redirectback();
 		}
 		
 		return parent::actionComplete($action, $record);
