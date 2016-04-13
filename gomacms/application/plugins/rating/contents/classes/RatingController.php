@@ -17,18 +17,16 @@ class RatingController extends Controller
      */
     public function handleRequest($request, $subController = false)
     {
-        $this->request = $request;
-
-        $this->Init();
+        $this->Init($request);
 
         $name = strtolower($request->getParam("name"));
         $rate = $request->getParam("rate");
 
         $ratingRecord = Rating::getRatingByName($name);
-        if(!$ratingRecord->hasAlreadyVoted($_SERVER["REMOTE_ADDR"])) {
+        if(!$ratingRecord->hasAlreadyVoted($this->request->getRemoteAddr())) {
             $ratingRecord->rates++;
             $ratingRecord->rating += $rate;
-            $ratingRecord->rators = serialize(array_merge(array($_SERVER["REMOTE_ADDR"]), (array)unserialize($ratingRecord->rators)));
+            $ratingRecord->rators = serialize(array_merge(array($this->request->getRemoteAddr()), (array)unserialize($ratingRecord->rators)));
             $ratingRecord->writeToDB(false, true);
 
             if ($this->getRequest()->isJSResponse()) {
@@ -52,5 +50,3 @@ class RatingController extends Controller
         }
     }
 }
-
-

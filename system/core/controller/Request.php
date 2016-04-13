@@ -99,13 +99,25 @@ class Request extends gObject {
 	protected $isSSL = false;
 
 	/**
+	 * remote-addr.
+	 */
+	protected $remoteAddr;
+
+	/**
 	 * @param string $method
 	 * @param string $url
 	 * @param array $get_params
 	 * @param array $post_params
 	 * @param array $headers
+	 * @param string $serverName
+	 * @param int $serverPort
+	 * @param bool $isSSL
+	 * @param string $remoteAddr
 	 */
-	public function __construct($method, $url, $get_params = array(), $post_params = array(), $headers = array(), $serverName = null, $serverPort = null, $isSSL = false) {
+	public function __construct(
+		$method, $url, $get_params = array(), $post_params = array(), $headers = array(),
+		$serverName = null, $serverPort = null, $isSSL = false, $remoteAddr = null
+	) {
 		parent::__construct();
 
 		$this -> request_method = strtoupper(trim($method));
@@ -116,6 +128,8 @@ class Request extends gObject {
 		$this -> url_parts = explode('/', $url);
 		$this -> serverName = isset($serverName) ? $serverName : $_SERVER["SERVER_NAME"];
 		$this -> serverPort = isset($serverPort) ? $serverPort : $_SERVER["SERVER_PORT"];
+		$this -> remoteAddr = isset($remoteAddr) ? $remoteAddr :
+			(isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : "");
 		$this -> isSSL = $isSSL;
 	}
 
@@ -194,6 +208,14 @@ class Request extends gObject {
 	public function getServerPort()
 	{
 		return $this->serverPort;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getRemoteAddr()
+	{
+		return $this->remoteAddr;
 	}
 
 	/**

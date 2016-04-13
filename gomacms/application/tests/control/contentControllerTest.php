@@ -7,7 +7,7 @@
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-class contentControllerTest extends GomaUnitTest implements TestAble
+class contentControllerTest extends GomaUnitTest
 {
 
 

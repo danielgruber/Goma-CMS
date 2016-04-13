@@ -148,7 +148,8 @@ class Director extends gObject {
             getallheaders(),
             $_SERVER["SERVER_NAME"],
             $_SERVER["SERVER_PORT"],
-            (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off"
+            (isset($_SERVER["HTTPS"])) && $_SERVER["HTTPS"] != "off",
+            isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : ""
         );
 
         $ruleMatcher = RuleMatcher::initWithRulesAndRequest(self::getSortedRules(), $request);
