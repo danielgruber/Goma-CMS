@@ -355,7 +355,7 @@ class Controller extends RequestHandler
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
-                $controller = $data->controller();
+                $controller = $data->controller(gObject::instance($this));
                 return $controller->handleRequest($this->request);
             } else {
                 return $this->index();
@@ -380,7 +380,7 @@ class Controller extends RequestHandler
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
-                return $data->controller()->handleRequest($this->request);
+                return $data->controller(gObject::instance($this))->handleRequest($this->request);
             } else {
                 return $this->index();
             }

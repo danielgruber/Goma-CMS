@@ -15,7 +15,7 @@ class ImageUploadField extends FileUpload
 	 * all allowed file-extensions
 	 *@name allowed_file_types
 	 *@access public
-	*/
+	 */
 	public $allowed_file_types = array(
 		"jpg",
 		"png",
@@ -33,7 +33,7 @@ class ImageUploadField extends FileUpload
 
 	/**
 	 * upload-class
-	*/
+	 */
 	protected $uploadClass = "ImageUploads";
 
 	/**
@@ -71,8 +71,6 @@ class ImageUploadField extends FileUpload
 	 * sets crop-info.
 	 */
 	public function setCropInfo() {
-		HTTPResponse::setHeader("content-type", "text/json");
-
 		if(!$this->request->isPOST()) {
 			throw new BadRequestException("You need to use POST.");
 		}
@@ -81,9 +79,10 @@ class ImageUploadField extends FileUpload
 			throw new InvalidArgumentException("Value is not type of ImageUpload.");
 		}
 
+		$crop = true;
 		foreach(array("thumbHeight", "thumbWidth", "thumbLeft", "thumbTop") as $key) {
 			if(!RegexpUtil::isDouble($this->getParam($key))) {
-				throw new InvalidArgumentException("Expected Param $key");
+				$crop = false;
 			}
 		}
 
@@ -98,7 +97,7 @@ class ImageUploadField extends FileUpload
 			$image = $image->sourceImage;
 		}
 
-		if($this->getParam("thumbWidth") == 0 || $this->getParam("thumbHeight") == 0) {
+		if($this->getParam("thumbWidth") == 0 || $this->getParam("thumbHeight") == 0 || !$crop) {
 			$upload = $image;
 		} else {
 			$upload = $image->addImageVersionBySizeInPx($this->getParam("thumbLeft"), $this->getParam("thumbTop"), $this->getParam("thumbWidth"), $this->getParam("thumbHeight"));
@@ -106,7 +105,7 @@ class ImageUploadField extends FileUpload
 
 		$this->value = $upload;
 
-		return json_encode(array(
+		return new JSONResponseBody(array(
 			"status" => 1,
 			"file" => $this->getFileResponse($upload)
 		));

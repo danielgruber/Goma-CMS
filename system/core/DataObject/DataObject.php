@@ -31,7 +31,7 @@
  * @method      string[] hasMany($component = null)
  * @method      ModelHasOneRelationshipInfo[]|ModelHasOneRelationshipInfo hasOne($component = null)
  */
-abstract class DataObject extends ViewAccessableData implements PermProvider
+abstract class DataObject extends ViewAccessableData implements PermProvider, IDataObjectSetDataSource
 {
     const VERSION_STATE = "state";
     const VERSION_PUBLISHED = "published";
@@ -1100,17 +1100,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
     }
 
     /**
-     * disconnects from relation
-     *
-     *@name disconnect
-     *@access public
+     * disconnects from relationship
+     * @param null $val
      */
     public function disconnect($val = null) {
         if (isset($this->dataset)) {
             $this->dataset->removeRecord($this->dataSetPosition);
-            if (isset($val))
-                $val->removeRecord($this->dataSetPosition);
         }
+
+        if (isset($val))
+            $val->removeRecord($this->dataSetPosition);
     }
 
     //!Current Data-State
@@ -2950,17 +2949,17 @@ abstract class DataObject extends ViewAccessableData implements PermProvider
             // force table
             $log .= SQL::requireTable(	$this->baseTable . "_state",
                 array(	"id" => "int(10) PRIMARY KEY auto_increment",
-                    "stateid" => "int(10)",
-                    "publishedid" => "int(10)"
+                          "stateid" => "int(10)",
+                          "publishedid" => "int(10)"
                 ),
                 array(	"publishedid" => array(	"name" => "publishedid",
-                    "fields" => array("publishedid"),
-                    "type" => "index"
+                                                     "fields" => array("publishedid"),
+                                                     "type" => "index"
                 ),
-                    "stateid" => array(	"name" => "stateid",
-                        "fields" => array("stateid"),
-                        "type" => "index"
-                    )
+                          "stateid" => array(	"name" => "stateid",
+                                                 "fields" => array("stateid"),
+                                                 "type" => "index"
+                          )
                 ),
                 array(),
                 $prefix

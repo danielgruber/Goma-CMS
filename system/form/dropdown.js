@@ -6,7 +6,7 @@
  * @package Goma\Form
  * @version 1.1
  */
-var DropDown = function(id, url, multiple, sortable) {
+var DropDown = function(form, field, id, url, multiple, sortable) {
 	this.url = url;
 	this.multiple = multiple;
 	this.widget = $("#" + id + "_widget");
@@ -16,6 +16,13 @@ var DropDown = function(id, url, multiple, sortable) {
 	this.timeout = "";
 	this.sortable = !!sortable;
 	this.id = id;
+	this.form = form;
+	this.field = field;
+
+	field.dropdown = this;
+
+	field.getValue = this.getValue.bind(this);
+
 	this.init();
 	return this;
 };
@@ -26,33 +33,37 @@ DropDown.prototype = {
 	currentRequest: null,
 	inSort: false,
 
+	getValue: function() {
+		return this.input.val();
+	},
+
 	/**
 	 * inits the dropdown-events
 	 *
 	 *@name init
-	*/
+	 */
 	init: function() {
 		var that = this;
 
-			
+
 		this.widget.disableSelection();
 		this.widget.find(" > .field").css("cursor", "pointer");
-		
+
 		this.widget.find(" > .field").click(function(){
 			if(!that.inSort) {
 				that.toggleDropDown();
 			}
 			return false;
 		});
-		
+
 		this.widget.find(" > input").css("display", "none");
 		this.widget.find(" > .field").css("margin-top", 0);
 		// make document-click to close the dropdown
 		CallonDocumentClick(function(){
 			that.hideDropDown();
 		}, [this.widget.find(" > .dropdown"), this.widget.find(" > .field"), this.widget.parent().parent().find(" > label")]);
-		
-		
+
+
 		// pagination
 		this.widget.find(" > .dropdown > .header > .pagination > span > a").click(function(){
 			if(!$(this).hasClass("disabled")) {
@@ -65,11 +76,11 @@ DropDown.prototype = {
 				that.reloadData();
 			}
 		});
-		
+
 		this.widget.find(" > .dropdown").click(function(){
 			that.widget.find(" > .dropdown > .header > .search").focus();
 		});
-		
+
 		this.widget.find(" > .dropdown > .header > .search").keyup(function(e){
 			var code = e.keyCode ? e.keyCode : e.which;
 			if ((code < 37 || code > 40) && code != 13 && code != 91) {
@@ -77,39 +88,39 @@ DropDown.prototype = {
 				that.reloadData();
 			} else {
 				if (code == 37) {
-	       	 		that.widget.find(" > .dropdown > .header > .pagination > span > a.left").click();
-	       	 		return false;
-	       	 	} else if(code == 39) {
-		       	 	that.widget.find(" > .dropdown > .header > .pagination > span > a.right").click();
-		       	 	return false;
-	       	 	} else if(code == 38 && !that.multiple) {
-		       	 	// check for marked
-		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
-			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").length > 0) {
-			       	 		var id = that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").find("a").attr("id").substring(10 + that.id.length);
-				       	 	that.check(id, false);
-			       	 	}
-		       	 	} else {
-		       	 		var id = that.widget.find(" > .dropdown > .content a:last-child").attr("id").substring(10 + that.id.length);
-			       	 	that.check(id, false);
-		       	 	}
-	       	 	} else if(code == 40 && !that.multiple) {
-		       	 	if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
-			       	 	if(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").length > 0) {
-			       	 		var id = that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id").substring(10 + that.id.length);
-				       	 	that.check(id, false);
-			       	 	}
-		       	 	} else {
-		       	 		var id = that.widget.find(" > .dropdown > .content a:first-child").attr("id").substring(10 + that.id.length);
-			       	 	that.check(id, false);
-		       	 	}
-	       	 	}
+					that.widget.find(" > .dropdown > .header > .pagination > span > a.left").click();
+					return false;
+				} else if(code == 39) {
+					that.widget.find(" > .dropdown > .header > .pagination > span > a.right").click();
+					return false;
+				} else if(code == 38 && !that.multiple) {
+					// check for marked
+					if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
+						if(that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").length > 0) {
+							var id = that.widget.find(" > .dropdown > .content a.checked").parent().prev("li").find("a").attr("id").substring(10 + that.id.length);
+							that.check(id, false);
+						}
+					} else {
+						var id = that.widget.find(" > .dropdown > .content a:last-child").attr("id").substring(10 + that.id.length);
+						that.check(id, false);
+					}
+				} else if(code == 40 && !that.multiple) {
+					if(that.widget.find(" > .dropdown > .content a.checked").length > 0) {
+						if(that.widget.find(" > .dropdown > .content a.checked").parent().next("li").length > 0) {
+							var id = that.widget.find(" > .dropdown > .content a.checked").parent().next("li").find("a").attr("id").substring(10 + that.id.length);
+							that.check(id, false);
+						}
+					} else {
+						var id = that.widget.find(" > .dropdown > .content a:first-child").attr("id").substring(10 + that.id.length);
+						that.check(id, false);
+					}
+				}
 			}
 		});
-		
+
 		// preload some lang to improve performance
 		preloadLang(["loading", "search", "no_result"]);
-		
+
 		unbindFromFormSubmit(this.widget.find(" > .dropdown > .header > .search"));
 		this.widget.find(" > .dropdown > .header > .cancel").click(function(){
 			that.widget.find(" > .dropdown > .header > .search").val("");
@@ -117,7 +128,7 @@ DropDown.prototype = {
 			that.reloadData();
 			that.widget.find(" > .dropdown > .header > .search").focus();
 		});
-		
+
 		// register on label
 		this.widget.parent().parent().find(" > label").click(function(){
 			if(!that.inSort) {
@@ -125,7 +136,7 @@ DropDown.prototype = {
 			}
 			return false;
 		});
-		
+
 		goma.ui.bindESCAction($("body"), function() {
 			that.hideDropDown();
 		});
@@ -137,7 +148,7 @@ DropDown.prototype = {
 	 *
 	 *@name setField
 	 *@param string - content
-	*/
+	 */
 	setField: function(content, setHeight) {
 		if(setHeight === true) {
 			this.widget.find(" > .field").css("height", this.widget.find(" > .field").height());
@@ -149,34 +160,34 @@ DropDown.prototype = {
 		this.bindFieldEvents();
 		this.updateDropdownPosition();
 	},
-	
+
 	/**
 	 * sets the content of the dropdown
 	 *
 	 *@name setContent
 	 *@param string - content
-	*/
+	 */
 	setContent: function(content) {
 		this.widget.find(" > .dropdown > .content").html('<div class="animationwrapper">' + content + '</div>');
 	},
-	
+
 	/**
 	 * shows the dropdown
 	 *
 	 *@name showDropDown
-	*/
+	 */
 	showDropDown: function() {
 		if(this.widget.find(" > .dropdown").css("display") == "none") {
 			this.widget.find(" > .field").addClass("active");
 			// set correct position
 			this.updateDropdownPosition();
-			
+
 			var oldFieldHTML = this.widget.find(" > .field").html();
-			
+
 			// show loading
 			this.setFieldLoading();
 			var $this = this;
-			
+
 			// load data
 			this.reloadData(function(){
 				//$this.widget.find(" > .field").css({height: ""});
@@ -194,23 +205,23 @@ DropDown.prototype = {
 	updateDropdownPosition: function() {
 		this.widget.find(" > .dropdown").css({top: this.widget.find(" > .field").outerHeight() - 2});
 	},
-	
+
 	/**
 	 * hides the dropdown
 	 *
 	 *@name showDropDown
-	*/
-	hideDropDown: function() {	
+	 */
+	hideDropDown: function() {
 		clearTimeout(this.timeout);
 		this.widget.find(" > .dropdown").fadeOut(200);
 		this.widget.find(" > .field").removeClass("active");
 	},
-	
+
 	/**
 	 * toggles the dropdown
 	 *
 	 *@name toggleDropDown
-	*/
+	 */
 	toggleDropDown: function() {
 		if(this.widget.find(" > .dropdown").css("display") == "none") {
 			this.showDropDown();
@@ -218,21 +229,21 @@ DropDown.prototype = {
 			this.hideDropDown();
 		}
 	},
-	
+
 	/**
 	 * gets data from the server to set the content of the dropdown
 	 * it uses current pid and search-query
 	 *
 	 *@name reloadData
-	*/
+	 */
 	reloadData: function(fn) {
 		var onfinish = fn;
 		var that = this;
 		var search = this.widget.find(" > .dropdown > .header > .search").val();
-		
+
 		this.setContent("<div class=\"loading\" style=\"text-align: center;\"><img src=\"images/16x16/loading.gif\" alt=\"loading\" /> "+lang("loading", "loading...")+"</div>");
 		clearTimeout(this.timeout);
-		
+
 		// we limit the request, so just send if in the last 200 milliseconds no edit in search was done
 		if(search != "" && search != lang("search", "search...")) {
 			this.widget.find(" > .dropdown > .header > .cancel").fadeIn(100);
@@ -241,12 +252,12 @@ DropDown.prototype = {
 			this.widget.find(" > .dropdown > .header > .cancel").fadeOut(100);
 			var timeout = 0;
 		}
-		
+
 		var makeAjax = function(){
 			if(that.currentRequest !== null) {
 				that.currentRequest.abort();
 			}
-			
+
 			that.currentRequest = $.ajax({
 				url: that.url + "/getData/" + that.page + "/",
 				type: "post",
@@ -272,13 +283,13 @@ DropDown.prototype = {
 
 					if(!data || data == "")
 						that.setContent("No data given, Your Session might have timed out.");
-						
+
 					if(data.right) {
 						that.widget.find(".dropdown > .header > .pagination > span > .right").removeClass("disabled");
 					} else {
 						that.widget.find(".dropdown > .header > .pagination > span > .right").addClass("disabled");
 					}
-					
+
 					if(data.left) {
 						that.widget.find(".dropdown > .header > .pagination > span > .left").removeClass("disabled");
 					} else {
@@ -292,47 +303,47 @@ DropDown.prototype = {
 						i = -1;
 						for(i in data.data) {
 							var val = data.data[i];
-							
+
 							content += "<li>";
-							
+
 							if(data.value[val.key] || data.value[val.key] === 0)
 								content += "<a href=\"javascript:;\" class=\"checked\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
 							else
 								content += "<a href=\"javascript:;\" id=\"dropdown_"+that.id+"_"+val.key+"\"><span title=\""+val.value.replace('"', '\\"')+"\">"+val.value+"</span></a>";
-								
+
 							if(typeof val.smallText == "string") {
 								content += "<span class=\"record_info\">"+val.smallText+"</span>";
 							}
-							
+
 							content += "</li>";
 						}
-						
+
 						content += "</ul>";
-						if(i == -1) 
+						if(i == -1)
 							content = '<div class="no_data">' + lang("no_result", "There is no data to show.") + '</div>';
-						that.setContent(content);					
+						that.setContent(content);
 						that.bindContentEvents();
 					}
-					
+
 					if(onfinish != null) {
 						onfinish();
 					}
-					
+
 				}.bind(search)
 			});
 		};
-		
+
 		if(timeout == 0)
 			makeAjax();
 		else
 			this.timeout = setTimeout(makeAjax, timeout);
 	},
-	
+
 	/**
 	 * binds the clicks on values to set/unset a value.
 	 *
 	 * @access public
-	*/
+	 */
 	bindContentEvents: function() {
 		var that = this;
 		this.widget.find(" > .dropdown > .content ul li a").click(function(){
@@ -349,12 +360,12 @@ DropDown.prototype = {
 			return false;
 		});
 	},
-	
+
 	/**
 	 * binds the events to the displayed values in the field-area.
 	 *
 	 * @access public
-	*/
+	 */
 	bindFieldEvents: function() {
 		var $this = this;
 		this.widget.find(" > .field").find(".value-holder .value .value-remove").click(function(){
@@ -393,13 +404,13 @@ DropDown.prototype = {
 			this.widget.find(" > .field > .value-holder").removeClass("sortable");
 		}
 	},
-	
+
 	/**
 	 * checks a node
 	 *
 	 *@name check
 	 *@param id
-	*/
+	 */
 	check: function(id, hide) {
 		var _this = this;
 		var shouldHide = hide;
@@ -407,7 +418,7 @@ DropDown.prototype = {
 			this.widget.find(" > .dropdown > .content ul li a.checked").removeClass("checked");
 			this.input.val(id);
 		}
-			
+
 		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
 		$(document.getElementById("dropdown_" + this.id + "_" + id)).addClass("checked");
 
@@ -438,11 +449,11 @@ DropDown.prototype = {
 	 *
 	 *@name check
 	 *@param id
-	*/
+	 */
 	uncheck: function(id) {
 		// we use document.getElementById, cause of possible dots in the id https://github.com/danielgruber/Goma-CMS/issues/120
 		$(document.getElementById("dropdown_" + this.id + "_" + id)).removeClass("checked");
-		
+
 		this.setFieldLoading();
 		$.ajax({
 			url: this.url + "/uncheckValue/",
@@ -450,7 +461,7 @@ DropDown.prototype = {
 			data: {"value": id},
 			error: function() {
 				alert("Failed to uncheck Node. Please check your Internet-Connection");
-			}, 
+			},
 			success: function(html) {
 				// everything is fine
 				this.setField(html);

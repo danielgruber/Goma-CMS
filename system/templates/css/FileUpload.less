@@ -12,7 +12,7 @@
 	border-spacing: 0;
 	border-bottom: 1px solid #ccc;
 	border-top: 1px solid #ccc;
-	margin: 0.25em 0; 
+	margin: 0.25em 0;
 }
 .fileuploadset .filetable.dragInDoc, .fileuploadset .filetable.dragInDoc tbody tr {
 	background: #eee;
@@ -59,7 +59,7 @@
 	padding: 0.5em;
 }
 .fileuploadset .filetable tbody {
-	
+
 }
 .fileuploadset .filetable tbody tr th.empty {
 	padding: 0.5em;
@@ -212,18 +212,18 @@
 		line-height: 1em;
 	}
 	> .actions {
-	  text-align: center;
-	  padding: 0.5em;
-	  width: 100%;
+		text-align: center;
+		padding: 0.5em;
+		width: 100%;
 
-	  box-sizing: border-box;
-	  -moz-box-sizing: border-box;
-	  -webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
 
-	  .delete-file {
-		padding: 0.40em 0.75em;
-	  }
-  }
+		.delete-file {
+			padding: 0.40em 0.75em;
+		}
+	}
 }
 
 .FileUpload_right {
@@ -244,7 +244,11 @@
 	padding: 0.5em 0px;
 }
 
-.image-upload-widget {
+.form-field-has-error .FileUpload_left .icon {
+	border-color: @system-red;
+}
+
+.image-upload-widget, .extended-image-upload-widget {
 	position: fixed;
 	top: 20%;
 	left: 20%;
@@ -286,7 +290,7 @@
 }
 
 @media (max-width: 40em) {
-	.image-upload-widget {
+	.image-upload-widget, .extended-image-upload-widget {
 		position: fixed;
 		top: 0;
 		left: 0;

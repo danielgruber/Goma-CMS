@@ -229,9 +229,6 @@ class ManyMany_DataObjectSet extends DataObjectSet {
         $updateLastModified = array();
         $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority, $updateLastModified);
 
-        echo "<pre>";
-        print_r($writeData);
-
         // check if nothing is writable.
         if(empty($writeData) && empty($updateLastModified)) {
             return;

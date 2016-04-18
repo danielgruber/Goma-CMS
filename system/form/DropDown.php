@@ -362,8 +362,6 @@ class DropDown extends FormField {
 		if($this->disabled) {
 			$this->field->disabled = "disabled";
 			$this->container->addClass("disabled", "disabled");
-		} else {
-			Resources::addJS("$(function(){ var ".$this->javascriptVariable()." = new DropDown('" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });");
 		}
 
 		$this->container->append(new HTMLNode("label", array("for" => $this->ID()), $this->title));
@@ -382,6 +380,14 @@ class DropDown extends FormField {
 			Profiler::unmark("FormField::field");
 
 		return $this->container;
+	}
+
+	public function JS() {
+		if($this->disabled) {
+			return parent::JS();
+		}
+
+		return "$(function(){ var ".$this->javascriptVariable()." = new DropDown(this, field, '" . $this->ID() . "', " . var_export($this->externalURL(), true) . ", " . var_export($this->multiselect, true) . ", ".var_export($this->sortable, true)."); });" . parent::JS();
 	}
 
 	/**

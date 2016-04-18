@@ -218,6 +218,10 @@ class ImageUploads extends Uploads {
             throw new InvalidArgumentException("You can't use the thumbnail when not cropping.");
         }
 
+        if(!$this->path) {
+            return "";
+        }
+
         // get action
         $action = ($noCrop === true) ? "NoCrop" : (($useThumb === false) ? "Org" : "");
         if($desiredWidth == -1 && $desiredHeight == -1) {
@@ -576,12 +580,10 @@ class ImageUploads extends Uploads {
      * returns width
      * @return int
      * @throws Exception
-     * @internal param $width
-     * @access public
      */
     public function width() {
         try {
-            return $this->getSize("width");
+            return $this->getSize("width") * $this->thumbWidth / 100;
         } catch(Exception $e) {
             if ($e instanceof FileException OR $e instanceof GDException) {
                 return -1;
@@ -596,12 +598,10 @@ class ImageUploads extends Uploads {
      * returns height
      * @return int
      * @throws Exception
-     * @internal param $height
-     * @access public
      */
     public function height() {
         try {
-            return $this->getSize("height");
+            return $this->getSize("height") * $this->thumbHeight / 100;
         } catch(Exception $e) {
             if ($e instanceof FileException OR $e instanceof GDException) {
                 return -1;

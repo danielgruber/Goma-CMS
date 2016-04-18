@@ -165,7 +165,7 @@ class ImageUploadsController extends UploadsController {
 	 */
 	private function checkForSourceResize() {
 		$model = $this->modelInst();
-		if(true) {//$model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && !$model->realizedSize && $model->id != 0) {
+		if($model->sourceImage && ($model->thumbLeft != 50 || $model->thumbTop != 50 || $model->thumbWidth != 100 || $model->thumbHeight != 100) && !$model->realizedSize && $model->id != 0) {
 
 			$width = $model->sourceImage->width * $model->thumbWidth / 100;
 			$height = $model->sourceImage->height * $model->thumbHeight / 100;
@@ -182,6 +182,7 @@ class ImageUploadsController extends UploadsController {
 			$model->width = $width;
 			$model->height = $height;
 			$model->realfile = $newRealFile;
+			$model->md5 = md5_file($newRealFile);
 			$model->writeToDB(false, true);
 		}
 	}

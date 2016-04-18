@@ -525,6 +525,7 @@ class Resources extends gObject {
 				// javascript
 				$resources_js = self::$resources_js;
 
+				$raw_js = self::$raw_js;
 
 				if(isset($resources_js["main"]["files"])) {
 					$js_files = array_merge(array_values(self::$resources_js["main"]["files"]), $js_files);
@@ -536,10 +537,10 @@ class Resources extends gObject {
 
 				// raw
 				if(isset($resources_js["default"]["raw"])) {
-					self::$raw_js = array_merge(self::$raw_js, self::$resources_js["default"]["raw"]);
+					$raw_js = array_merge($raw_js, self::$resources_js["default"]["raw"]);
 				}
 				if(isset($resources_js["main"]["raw"])) {
-					self::$raw_js = array_merge(self::$raw_js, self::$resources_js["main"]["raw"]);
+					$raw_js = array_merge($raw_js, self::$resources_js["main"]["raw"]);
 				}
 
 
@@ -553,7 +554,7 @@ class Resources extends gObject {
 					}
 
 					if(isset($data["raw"])) {
-						self::$raw_js = array_merge(self::$raw_js, $data["raw"]);
+						$raw_js = array_merge($raw_js, $data["raw"]);
 					}
 				}
 
@@ -567,11 +568,11 @@ class Resources extends gObject {
 
 				if(PROFILE) Profiler::mark("Resources::get");
 				// we have to make raw-file
-				if(count(self::$raw_js) > 0) {
-					$file = self::getFilename(CACHE_DIRECTORY . "/raw_".md5(implode("", self::$raw_js)).".js");
+				if(count($raw_js) > 0) {
+					$file = self::getFilename(CACHE_DIRECTORY . "/raw_".md5(implode("", $raw_js)).".js");
 					if(!is_file(ROOT . $file)) {
 						$js = "";
-						foreach(self::$raw_js as $code) {
+						foreach($raw_js as $code) {
 							$js .= "/* RAW */\n\n";
 							$js .= self::jsMin($code) . "\n\n";
 						}

@@ -171,6 +171,11 @@ class ManyManyModelWriter extends Extension {
      */
     public static function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
 
+        $mani_delete = array(
+            "table_name"	=> $relationShip->getTableName(),
+            "command"   	=> "delete",
+            "where"		    => array()
+        );
         $mani_insert = array(
             "table_name"	=> $relationShip->getTableName(),
             "command"   	=> "insert",
@@ -187,6 +192,15 @@ class ManyManyModelWriter extends Extension {
                     $existing[$id][$relationShip->getTargetSortField()] :
                     ++$maxTargetSort;
 
+                if(count($mani_delete["where"]) > 0) {
+                    $mani_delete["where"][] = "OR";
+                }
+
+                $mani_delete["where"][] = array(
+                    $relationShip->getOwnerField() 		=> $ownerModel->versionid,
+                    $relationShip->getTargetField() 	=> $id
+                );
+
                 $mani_insert["fields"][$id] = array(
                     $relationShip->getOwnerField() 		=> $ownerModel->versionid,
                     $relationShip->getTargetField() 	=> $id,
@@ -195,6 +209,7 @@ class ManyManyModelWriter extends Extension {
                 );
 
                 foreach($relationShip->getExtraFields() as $field => $type) {
+                    var_dump($field);
                     if(isset($info[$field])) {
                         $mani_insert["fields"][$id][$field] = $info[$field];
                     }
@@ -215,6 +230,11 @@ class ManyManyModelWriter extends Extension {
         $mani_insert["fields"] = array_values($mani_insert["fields"]);
 
         $table = $relationShip->getTableName();
+
+        if(count($mani_delete["where"]) > 0) {
+            $manipulation[$table . "_delete"] = $mani_delete;
+        }
+
         if(isset($manipulation[$table . "_insert"])) {
             $manipulation[$table . "_insert"]["fields"] = array_merge($manipulation[$table . "_insert"]["fields"], $mani_insert["fields"]);
         } else {

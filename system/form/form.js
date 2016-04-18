@@ -14,33 +14,33 @@ if(typeof goma == "undefined")
 		if(!this instanceof goma.form)
 			return new goma.form(id, fields);
 
-        goma.form.garbageCollect();
+		goma.form.garbageCollect();
 
 		var that = this;
 
-        this.fields = fields;
+		this.fields = fields;
 		this.errors = errors;
 
-        this.id = id;
+		this.id = id;
 		this.form = $("#" + id);
 		this.form.removeClass("leave_check");
-		
+
 		this.form.bind("formsubmit",function(){
 			that.form.addClass("leave_check");
 		});
-		
+
 		var button = false;
 		this.form.find("button[type=submit], input[type=submit]").click(function(){
 			button = true;
 			that.form.removeClass("leave_check");
 		});
-		
+
 		this.form.submit(function(){
-            that.form.find(".err").slideUp();
+			that.form.find(".err").slideUp();
 
 			if(button == false) {
 				setTimeout(function(){
-                    that.form.find(".default_submit").click();
+					that.form.find(".default_submit").click();
 				}, 100);
 				return false;
 			}
@@ -49,21 +49,21 @@ if(typeof goma == "undefined")
 			if ( eventb.result === false ) {
 				return false;
 			}
-			
+
 			var event = jQuery.Event("formsubmit");
 			that.form.trigger(event);
 			if ( event.result === false ) {
 				return false;
 			}
-			
+
 			that.form.removeClass("leave_check");
 			button = false;
 		});
-		
+
 		this.form.find("select, input, textarea").change(function(){
 			that.form.addClass("leave_check");
 		});
-		
+
 		$("#"+id+" input.default_submit").click(function(){
 			$("#"+id+" > .actions  button[type=submit]").each(function(){
 				if($(this).attr("name") != "cancel" && !$(this).hasClass("cancel")) {
@@ -73,37 +73,37 @@ if(typeof goma == "undefined")
 			});
 			return false;
 		});
-		
+
 		goma.ui.bindUnloadEvent(this.form, function(){
 			return that.unloadEvent();
 		});
 
-        this.runScripts(fields);
+		this.runScripts(fields);
 
 		goma.form._list[id.toLowerCase()] = this;
 		return this;
 	};
-	
+
 	goma.form.prototype = {
-        runScripts: function (fields, parent) {
-            for(var i in fields) {
-                if(fields.hasOwnProperty(i)) {
+		runScripts: function (fields, parent) {
+			for(var i in fields) {
+				if(fields.hasOwnProperty(i)) {
 					if(parent != null) {
 						fields[i]["parent"] = parent;
 					}
 
-                    if(fields[i]["js"]) {
-                        var method = new Function("field", "fieldIndex", fields[i]["js"]);
+					if(fields[i]["js"]) {
+						var method = new Function("field", "fieldIndex", "form", fields[i]["js"]);
 
-                        method.call(this, fields[i], i);
-                    }
+						method.call(this, fields[i], i, this);
+					}
 
-                    if(fields[i]["children"]) {
-                        this.runScripts(fields[i]["children"], fields[i]);
-                    }
-                }
-            }
-        },
+					if(fields[i]["children"]) {
+						this.runScripts(fields[i]["children"], fields[i]);
+					}
+				}
+			}
+		},
 
 		setLeaveCheck: function(bool) {
 			if(bool)
@@ -111,29 +111,50 @@ if(typeof goma == "undefined")
 			else
 				this.form.removeClass("leave_check");
 		},
-		
+
 		unloadEvent: function() {
 			if(this.form.hasClass("leave_check")) {
 				return lang("unload_not_saved").replace('\n', "\n");
 			}
-			
+
 			return true;
+		},
+
+		findFieldByName: function(name, fields) {
+			fields = fields !== undefined ? fields : this.fields;
+
+			for(var i in fields) {
+				if(fields.hasOwnProperty(i)) {
+					if(fields[i].name == name) {
+						return fields[i];
+					}
+
+					if(fields[i].children !== undefined) {
+						var fieldInChildren = this.findFieldByName(name, fields[i].children);
+						if(fieldInChildren != null) {
+							return fieldInChildren;
+						}
+					}
+				}
+			}
+
+			return null;
 		}
 	};
-	
+
 	goma.form._list = {};
 	goma.form.garbageCollect = function() {
 		for(var i in goma.form._list) {
-            if(goma.form._list.hasOwnProperty(i)) {
-                if($("#" + goma.form._list[i].id).length == 0) {
-                    delete goma.form._list[i];
-                }
-            }
+			if(goma.form._list.hasOwnProperty(i)) {
+				if($("#" + goma.form._list[i].id).length == 0) {
+					delete goma.form._list[i];
+				}
+			}
 		}
 	};
-	
+
 	$.fn.gForm = function() {
-        goma.form.garbageCollect();
+		goma.form.garbageCollect();
 
 		if(this.get(0).tagName.toLowerCase() == "form") {
 			if(typeof goma.form._list[this.attr("id").toLowerCase()] != "undefined") {
@@ -142,7 +163,7 @@ if(typeof goma == "undefined")
 				return new goma.form(this.attr("id").toLowerCase());
 			}
 		}
-		
+
 		return false;
 	};
 })(jQuery);

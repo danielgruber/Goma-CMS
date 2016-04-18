@@ -14,7 +14,7 @@ function ImageUploadController(field, updateUrl, options) {
     this.updateUrl = updateUrl;
     this.field = field;
 
-    field.imageUplaod = this;
+    field.imageUpload = this;
 
     this.widget = $("#" + this.field.id + "_widget");
     this.widget.find(".buttons .cancel").click(this.hideCrop.bind(this));
