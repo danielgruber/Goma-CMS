@@ -10,7 +10,9 @@
  * - sort
  * - exclude
  * - limit
- * - getReange
+ * - getRange
+ *
+ * all other functions work in-place.
  *
  * @package		Goma\Model
  *
@@ -68,28 +70,6 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 	
 	/**
-	 * returns a nested array of this and subobjects
-	*/
-	public function ToNestedArray() {
-		$arr = array();
-		foreach($this->items as $item) {
-			if(is_object($item)) {
-				if(gObject::method_exists($item, "toNestedArray")) {
-					$arr[] = $item->ToNestedArray();
-				} else if(gObject::method_exists($item, "toMap")) {
-					$arr[] = $item->ToMap();
-				} else if(gObject::method_exists($item, "toArray")) {
-					$arr[] = $item->ToArray();
-				} else {
-					$arr[] = (array) $item;
-				}
-			} else {
-				$arr[] = $item;
-			}
-		}
-	}
-	
-	/**
 	 * pushes a new object or array to the end of the list.
 	 *
 	  *@param 	array|gObject $item item
@@ -144,12 +124,13 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function add($item) {
 		$this->push($item);
 	}
-	
+
 	/**
 	 * inserts a item after a specefied item. if specified item does not exist it inserts it to the end of the list.
 	 *
-	 *@name insertAfter
-	*/
+	 * @param gObject $item
+	 * @param gObject $after
+	 */
 	public function insertAfter($item, $after) {
 		$new = array();
 		$insert = false;
@@ -166,12 +147,12 @@ class ArrayList extends ViewAccessableData implements Countable {
 		
 		$this->items = $new;
 	}
-	
+
 	/**
-	 * inserts a item before a specefied item. if specified item does not exist it inserts it to the end of the list.
-	 *
-	 *@name insertBefore
-	*/
+	 * inserts a item before a specified item. if specified item does not exist it inserts it to the end of the list.
+	 * @param gObject $item
+	 * @param gObject $before
+	 */
 	public function insertBefore($item, $before) {
 		$new = array();
 		$insert = false;
@@ -188,40 +169,36 @@ class ArrayList extends ViewAccessableData implements Countable {
 		
 		$this->items = $new;
 	}
-	
+
 	/**
 	 * replaces a item.
 	 *
-	 * @param 	gObject|array $item item
-	 * @param	gObject|array $with new item
-	*/
+	 * @param    gObject|array $item item
+	 * @param    gObject|array $with new item
+	 */
 	public function replace($item, $with) {
 		foreach($this->items as $key => $record) {
 			if($record == $item) {
 				$this->items[$key] = $with;
-				return true;
+				return;
 			}
 		}
 		
-		return false;
+		throw new InvalidArgumentException("Item to replace was not found in the list.");
 	}
-	
+
 	/**
 	 * removes a specific item or item-index.
-	 * 
-	 *@param gObject|array item
-	*/
+	 *
+	 * @param mixed item
+	 * @return bool
+	 */
 	public function remove($item) {
-		if(!is_array($item) && !is_object($item))
-			return false;
-		
 		foreach($this->items as $key => $record)
 			if($item == $record)
 				unset($this->items[$key]);
 		
 		$this->items = array_values($this->items);
-		
-		return true;
 	}
 	
 	/**
@@ -233,10 +210,11 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function removeDuplicates($field = "id") {
 		$data = array();
 		foreach($this->items as $key => $record) {
-			if(in_array($this->getItemProp($record, $field), $data)) {
+			$propValue = self::getItemProp($record, $field);
+			if(in_array($propValue, $data)) {
 				unset($this->items[$key]);
 			} else {
-				array_push($data, $record[$field]);
+				array_push($data, $propValue);
 			}
 		}
 		
@@ -260,19 +238,34 @@ class ArrayList extends ViewAccessableData implements Countable {
 		
 		return $list;
 	}
-	
+
 	/**
 	 * returns the current position of a given item.
 	 *
-	 * @param 	array|gObject $item item
-	 * @return 	int|boolean integer for position of item, boolean false if not found
-	*/
+	 * 
+	 * @param    array|gObject $item item
+	 * @return int integer for position of item, boolean false if not found
+	 * @throws ItemNotFoundException
+	 */
 	public function getItemIndex($item) {
 		foreach($this->items as $key => $record) {
 			if($record == $item)
 				return $key;
 		}
 		
+		throw new ItemNotFoundException("Item not found.");
+	}
+
+	/**
+	 * @param mixed $item
+	 * @return bool
+	 */
+	public function itemExists($item) {
+		foreach($this->items as $key => $record) {
+			if($record == $item)
+				return true;
+		}
+
 		return false;
 	}
 	
@@ -345,17 +338,19 @@ class ArrayList extends ViewAccessableData implements Countable {
 
 		return $newItems;
 	}
-	
+
 	/**
 	 * helper method to analyze if a item matches to a filter.
 	 *
-	 * @param 	gObject|array $item item
-	 * @param 	array $filter
-	*/
+	 * @param    gObject|array $item item
+	 * @param    array $filter
+	 * @return bool
+	 */
 	static function itemMatchesFilter($item, $filter) {
 		foreach($filter as $column => $value) {
+			$columnProp = self::getItemProp($item, $column);
 			if(!is_array($value)) {
-				if($this->getItemProp($item, $column) != $value) {
+				if($columnProp != $value) {
 					return false;
 				}
 				
@@ -369,27 +364,27 @@ class ArrayList extends ViewAccessableData implements Countable {
 						$value[1] = str_replace('\\.*', "%", $value[1]);
 						$value[1] = str_replace('\\.', "_", $value[1]);
 						
-						if(!preg_match("/" . $value[1] . "/i", $item[$column]))
+						if(!preg_match("/" . $value[1] . "/i", $columnProp))
 							return false;
 					break;
 					case "<":
-						if(strcmp($value[1], $item[$column]) == 0)
+						if(strcmp($value[1], $columnProp) == 0)
 							return false;
 							
 					case "<=":
-						if(strcmp($value[1], $item[$column]) == -1)
+						if(strcmp($value[1], $columnProp) == -1)
 							return false;
 					break;
 					case ">":
-						if(strcmp($value[1], $item[$column]) == 0)
+						if(strcmp($value[1], $columnProp) == 0)
 							return false;
 					case ">=":
-						if(strcmp($value[1], $item[$column]) == 1)
+						if(strcmp($value[1], $columnProp) == 1)
 							return false;
 					break;
 					case "<>":
 					case "!=":
-						if($value[1] == $item[$column])
+						if($value[1] == $columnProp)
 							return false;
 					break;
 				}
@@ -397,7 +392,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 				if(isset($value[0])) {
 					$found = false;
 					foreach($value as $data) {
-						if($this->getItemProp($item, $column) == $data) {
+						if($columnProp == $data) {
 							$found = true;
 						}
 					}
@@ -430,6 +425,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function sort() {
 		$args = func_get_args();
 
+		$columnsToSort = array();
 		if(count($args)==0){
 			return $this;
 		}
@@ -466,7 +462,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 			$sortDirection[$column] = $direction;
 			// We need to subtract every value into a temporary array for sorting
 			foreach($this->items as $index => $item) {
-				$values[$column][] = $this->extractValue($item, $column);
+				$values[$column][] = self::getItemProp($item, $column);
 			}
 			// PHP 5.3 requires below arguments to be reference when using array_multisort together 
 			// with call_user_func_array
@@ -477,67 +473,76 @@ class ArrayList extends ViewAccessableData implements Countable {
 		}
 
 		$list = clone $this;
-		
-		
+
 		// As the last argument we pass in a reference to the items that all the sorting will be applied upon
 		$multisortArgs[] = &$list->items;
 		call_user_func_array('array_multisort', $multisortArgs);
 		return $list;
 	}
-	
+
 	/**
 	 * moves specific item to another position.
+	 * this is working in-place.
 	 *
-	 * @param 	array|gObject $item item
-	 * @param 	int $to destination position 
-	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
-	*/
+	 * @param    array|gObject $item item
+	 * @param    int $to destination position
+	 * @param    boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
+	 * @return bool
+	 */
 	public function move($item, $to, $insertIfNotExisting = false) {
-		if($insertIfNotExisting || $this->getItemIndex($item) !== false) {
+		$inserted = false;
+		if(isset($this->items[$to]) || $insertIfNotExisting) {
 			$new = array();
-			foreach($this->items as $key => $val) {
-				if($key == $to) {
+			foreach ($this->items as $key => $val) {
+				if ($key == $to) {
 					$new[] = $item;
+					$inserted = true;
 				}
-				
-				if($val != $item) {
+
+				if ($val != $item) {
 					$new[] = $val;
 				}
 			}
+
+			if(!$inserted) {
+				$new[] = $item;
+			}
+
 			$this->items = $new;
-			return $this;
 		}
-		
-		return false;
+
+		return $inserted;
 	}
-	
+
 	/**
 	 * moves specific item before another item.
 	 *
-	 * @param 	array|gObject $item item
-	 * @param 	array|gObject $before destination object
-	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
-	*/
-	public function moveBefore($item, $before, $insertIfNotExisting = false) {
-		if(($index = $this->getItemIndex($before)) === false)
-			return false;
+	 * @param    array|gObject $item item
+	 * @param    array|gObject $before destination object
+	 * @param bool $insertIfNotExists
+	 * @return bool
+	 * @throws ItemNotFoundException
+	 */
+	public function moveBefore($item, $before, $insertIfNotExists = false) {
+		$index = $this->getItemIndex($before);
 		
-		return $this->move($item, $index, $insertIfNotExisting);
+		return $this->move($item, $index, $insertIfNotExists);
 	}
-	
+
 	/**
 	 * moves specific item behind another item.
 	 *
-	 * @param 	array|gObject $item item
-	 * @param 	array|gObject $behind destination object
-	 * @param	boolean $insertIfNotExisting if set to true it is not relevant if item exists, it it does not the list inserts item at given position.
-	*/
-	public function moveBehind($item, $behind, $insertIfNotExisting = false) {
-		if(($index = $this->getItemIndex($behind)) === false)
-			return false;
+	 * @param    array|gObject $item item
+	 * @param    array|gObject $behind destination object
+	 * @param bool $insertIfNotExists
+	 * @return bool
+	 * @throws ItemNotFoundException
+	 */
+	public function moveBehind($item, $behind, $insertIfNotExists = false) {
+		$index = $this->getItemIndex($behind);
 		
 		$index++;
-		return $this->move($item, $index, $insertIfNotExisting);
+		return $this->move($item, $index, $insertIfNotExists);
 	}
 	
 	/**
@@ -553,20 +558,21 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function canFilterBy($column) {
 		return true;
 	}
-	
+
 	/**
 	 * Returns the first item in the list where the key field is equal to the
 	 * value.
 	 *
 	 * @param  string $key
 	 * @param  mixed $value
+	 * @param 	bool $caseInsensitive
 	 * @return mixed
 	 */
 	public function find($key, $value, $caseInsensitive = false) {
 		foreach($this->items as $record) {
-			if($caseInsensitive && strtolower($this->getItemProp($record, $key)) == strtolower($value)) {
+			if($caseInsensitive && strtolower(self::getItemProp($record, $key)) == strtolower($value)) {
 				return $record;
-			} else if($this->getItemProp($record, $key) == $value) {
+			} else if(self::getItemProp($record, $key) == $value) {
 				return $record;
 			}
 		}
@@ -599,22 +605,20 @@ class ArrayList extends ViewAccessableData implements Countable {
 		
 		return null;
 	}
-	
+
 	/**
 	 * Attribute-setter-API. it replaces element at specified position.
 	 *
-	 * @param 	int $offset offset
-	 * @parma 	string $value value
-	*/
+	 * @param  int $offset offset
+	 * @param  mixed $value
+	 * @return bool|void
+	 */
 	public function __set($offset, $value) {
 		if(isset($this->items[$offset])) {
 			$this->items[$offset] = $value;
-			return true;
 		}
 		
 		$this->$offset = $value;
-		
-		return false;
 	}
 	
 	/**
@@ -636,33 +640,39 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function offsetExists($offset) {
 		return isset($this->items[$offset]);
 	}
-	
+
 	/**
 	 * returns a property of a given Item in the List.
 	 *
-	 * @param 	array|gObject $item item
-	 * @param 	string $prop property
-	*/
-	public function getItemProp($item, $prop) {
+	 * @param  array|gObject $item item
+	 * @param  string $prop property
+	 * @return null
+	 */
+	static function getItemProp($item, $prop) {
 		if(is_array($item))
 			return isset($item[$prop]) ? $item[$prop] : null;
 		
-		if(is_object($item) && is_a($item, "ArrayAccess") && isset($item[$prop])) {
-			return $item[$prop];
+		if(is_object($item)) {
+			if(is_a($item, "ArrayAccess") && isset($item[$prop])) {
+				return $item[$prop];
+			}
+
+			return $item->{$prop};
 		}
 		
 		return property_exists($item, $prop) ? $item->$prop : null;
 	}
-	
+
 	/**
 	 * returns an array of all the items of a specific column.
 	 *
-	 * @param 	string $column default: id
-	*/
+	 * @param  string $column default: id
+	 * @return array
+	 */
 	public function column($column = "id") {
 		$data = array();
 		foreach($this as $record) {
-			$data[] = $record[$column];
+			$data[] = self::getItemProp($record, $column);
 		}
 		
 		return $data;
@@ -713,5 +723,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function current() {
 		return $this->items[$this->position];
 	}
+}
+
+class ItemNotFoundException extends GomaException {
 
 }
