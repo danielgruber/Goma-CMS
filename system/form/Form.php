@@ -206,7 +206,7 @@ class Form extends gObject {
 	 * @param array $validators
 	 * @param Request|null $request
 	 * @param ViewAccessableData|null $model
-     */
+	 */
 	public function __construct($controller, $name, $fields = array(), $actions = array(), $validators = array(), $request = null, $model = null) {
 
 		parent::__construct();
@@ -714,6 +714,7 @@ class Form extends gObject {
 		}
 	}
 
+
 	/**
 	 * @return array|mixed
 	 * @throws FormNotValidException
@@ -721,18 +722,7 @@ class Form extends gObject {
 	public function gatherResultForSubmit() {
 		$this->callExtending("beforeSubmit");
 
-		$allowed_result = array();
-		$this->result = array();
-		// reset result
-
-		// get data
-		/** @var FormField $field */
-		foreach($this->fields as $field) {
-			$result = $field->result();
-
-			$this->result[$field->dbname] = $result;
-			$allowed_result[$field->dbname] = true;
-		}
+		$this->result = $result = $this->fetchResultWithDataHandlers();
 
 		// validation
 		$errors = array();
@@ -747,10 +737,33 @@ class Form extends gObject {
 			}
 		}
 
-		$result = $this->result;
-		if(is_object($result) && is_subclass_of($result, "dataobject")) {
-			$result = $result->to_array();
+		if(count($errors) > 0) {
+			throw new FormNotValidException($errors);
+		}
 
+		$this->callExtending("afterSubmit", $result);
+
+		return $result;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function fetchResultWithDataHandlers() {
+		$allowed_result = array();
+		$result = array();
+
+		// get data
+		/** @var FormField $field */
+		foreach($this->fields as $field) {
+			$fieldResult = $field->result();
+
+			$result[$field->dbname] = $fieldResult;
+			$allowed_result[$field->dbname] = true;
+		}
+
+		if(is_object($result) && method_exists($result, "to_array")) {
+			$result = $result->to_array();
 		}
 
 		// validate result
@@ -764,20 +777,11 @@ class Form extends gObject {
 
 		$this->callExtending("getResult", $realresult);
 
-		$result = $realresult;
-		unset($realresult, $allowed_result);
-
 		foreach($this->getDataHandlers() as $callback) {
-			$result = call_user_func_array($callback, array($result, $this));
+			$realresult = call_user_func_array($callback, array($realresult, $this));
 		}
 
-		if(count($errors) > 0) {
-			throw new FormNotValidException($errors);
-		}
-
-		$this->callExtending("afterSubmit", $result);
-
-		return $result;
+		return $realresult;
 	}
 
 	/**
@@ -847,12 +851,12 @@ class Form extends gObject {
 		return $this->submission;
 	}
 
-    /**
-     * returns name.
-     */
-    public function getName() {
-        return $this->name;
-    }
+	/**
+	 * returns name.
+	 */
+	public function getName() {
+		return $this->name;
+	}
 
 	/**
 	 * @return RequestHandler
@@ -1116,17 +1120,17 @@ class Form extends gObject {
 		unset($this->renderedFields[strtolower($name)]);
 	}
 
-    /**
-     * unregisters a field.
-     *
-     * @param string name
-     * @return void
-     */
-    public function unregisterField($name) {
-        if(isset($this->fields[$name])) {
-            unset($this->fields[$name]);
-        }
-    }
+	/**
+	 * unregisters a field.
+	 *
+	 * @param string name
+	 * @return void
+	 */
+	public function unregisterField($name) {
+		if(isset($this->fields[$name])) {
+			unset($this->fields[$name]);
+		}
+	}
 
 	//!Overloading
 	/**
@@ -1137,9 +1141,6 @@ class Form extends gObject {
 	 * returns a field in this form by name
 	 * it's not relevant how deep the field is in this form if the field is *not*
 	 * within a ClusterFormField
-	 *
-	 *@name __get
-	 *@access public
 	 */
 	public function __get($offset) {
 		return $this->getField($offset);
@@ -1167,9 +1168,6 @@ class Form extends gObject {
 
 	/**
 	 * removes a field from this form
-	 *
-	 *@name __unset
-	 *@access public
 	 */
 	public function __unset($offset) {
 		unset($this->fields[$offset]);
@@ -1185,9 +1183,6 @@ class Form extends gObject {
 
 	/**
 	 * external url of this form
-	 *
-	 *@name externalURL
-	 *@access public
 	 */
 	public function externalURL() {
 		if(isset($this->controller->originalNamespace) && $this->controller->originalNamespace) {
@@ -1199,8 +1194,6 @@ class Form extends gObject {
 
 	/**
 	 * sorts the items
-	 *@name sort
-	 *@access public
 	 */
 	public function sort($a, $b) {
 		if($this->fieldSort[$a->name] == $this->fieldSort[$b->name]) {
@@ -1212,10 +1205,8 @@ class Form extends gObject {
 
 	/**
 	 * returns the current real form-object
-	 *@name form
-	 *@access public
 	 */
-	public function & form() {
+	public function &form() {
 		return $this;
 	}
 
@@ -1223,8 +1214,6 @@ class Form extends gObject {
 
 	/**
 	 * genrates an id for this form
-	 *@name ID
-	 *@access public
 	 */
 	public function ID() {
 		return "form_" . md5($this->name);
@@ -1232,39 +1221,8 @@ class Form extends gObject {
 
 	/**
 	 * generates an name for this form
-	 *@name name
-	 *@access public
 	 */
 	public function name() {
 		return $this->name;
-	}
-
-	public function __wakeup() {
-		parent::__wakeup();
-		
-		/*foreach($this->fields as $f) {
-			if(is_object($f)) {
-				$f->__wakeup();
-			}
-		}
-		
-		foreach($this->actions as $f) {
-			if(is_object($f)) {
-				$f->__wakeup();
-			}
-			
-		}
-		
-		foreach($this->validators as $v) {
-			if(is_object($f)) {
-				$v->__wakeup();
-			}
-		}
-		
-		if($this->controller) {
-			if(is_object($this->controller)) {
-				$this->controller->__wakeup();
-			}
-		}*/
 	}
 }

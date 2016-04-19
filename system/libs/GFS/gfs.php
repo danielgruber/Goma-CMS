@@ -316,7 +316,7 @@ class GFS {
 				throw new LogicException("Could not open GFS " . $filename . ". FileSystem returns an error.");
 			}
 		} else {
-			$this->pointer = fopen($filename, "wb+");
+			$this->pointer = fopen($this->file, "wb+");
 			fwrite($this->pointer, "!GFS;V".self::VERSION."\n\n\n\n[]\n2");
 			$this->db = array();
 			$this->position = strlen("!GFS;V".self::VERSION."\n\n");
@@ -449,7 +449,8 @@ class GFS {
 	 * adds an file to archive.
 	 *
 	 * @name addFileToArchiveWithoutChecks
-	*/
+	 * @return bool|int
+	 */
 	protected function addFileToArchiveWithoutChecks($file, $path) {
 		if(file_exists($file)) {
 			if(filesize($file) > FILESIZE_SAVE_IN_DB) {
@@ -492,8 +493,8 @@ class GFS {
 	/**
 	 * adds content to archive.
 	 *
-	 * @name addContentToArchiveWithoutChecks
-	*/
+	 * @return bool
+	 */
 	protected function addContentToArchiveWithoutChecks($content, $path, $lastModified = null) {
 
 		if(!isset($lastModified)) {
@@ -553,14 +554,13 @@ class GFS {
 		
 		return true;
 	}
-	
+
 	/**
 	 * adds a Directory
 	 *
-	 *@name addDir
-	 *@access public
-	 *@param string - path
-	*/
+	 * @param string $path
+	 * @return bool|int
+	 */
 	public function addDir($path) {
 		
 		$this->checkValidOrThrow();
@@ -1244,9 +1244,10 @@ class GFS {
 	/**
 	 * returns if this archive is signed
 	 *
-	 *@name isSigned
-	 *@access public
-	*/
+	 * @name isSigned
+	 * @access public
+	 * @return bool
+	 */
 	public function isSigned($publicKey) {
 		$this->checkValidOrThrow();
 		

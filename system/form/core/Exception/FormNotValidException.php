@@ -43,7 +43,7 @@ class FormNotValidException extends GomaException
     }
 
     /**
-     * @return array
+     * @return Exception[]
      */
     public function getErrors()
     {

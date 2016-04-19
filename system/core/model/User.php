@@ -26,6 +26,8 @@
 class User extends DataObject implements HistoryData, PermProvider, Notifier
 {
 	const USERS_PERMISSION = "USERS_MANAGE";
+	const ID = "User";
+
 	/**
 	 * the name of this dataobject
 	 *
@@ -125,6 +127,13 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	);
 
 	/**
+	 * if to automatically use email as nickname.
+	 *
+	 * @var bool
+	 */
+	static $useEmailAsNickname = false;
+
+	/**
 	 * gets all groups if a object
 	 *
 	 *@name getAllGroups
@@ -203,16 +212,22 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 			$general = new Tab("general",array(
 				new TextField("nickname", lang("USERNAME")),
 				new TextField("name", lang("NAME")),
-				$mail = new EMail("email", lang("EMAIL")),
+				InfoTextField::createFieldWithInfo(
+					new EMail("email", lang("EMAIL")),
+					lang("email_correct_info")
+				),
 				new PasswordField("password", lang("PASSWORD"), ""),
 				new PasswordField("repeat", lang("REPEAT"), ""),
 				new langSelect("custom_lang", lang("lang"), Core::$lang)
 			), lang("GENERAL"))
 		)));
 
-		$mail->info = lang("email_correct_info");
+		if(self::$useEmailAsNickname) {
+			$form->remove("nickname");
+			$form->addDataHandler(array($this, "generateNickNameFromEmail"));
+		}
 
-		if(Permission::check(self::USERS_PERMISSION) || member::$loggedIn->groupadmin)
+		if(Permission::check(self::USERS_PERMISSION) || (member::$loggedIn && member::$loggedIn->groupadmin))
 		{
 			$groupFilter = Permission::check(self::USERS_PERMISSION) ?
 				array() :
@@ -348,6 +363,16 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 	}
 
 	/**
+	 * generates nickname -> uses mail as nickname.
+	 * @param array $result
+	 * @return array
+	 */
+	public function generateNickNameFromEmail($result) {
+		$result["nickname"] = $result["email"];
+		return $result;
+	}
+
+	/**
 	 * @param History $history
 	 * @param ModelWriter $modelWriter
 	 */
@@ -411,6 +436,7 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 
 	/**
 	 * sets the password with md5
+	 * @param string $value
 	 */
 	public function setPassword($value)
 	{
@@ -721,3 +747,5 @@ class User extends DataObject implements HistoryData, PermProvider, Notifier
 		return md5($this->id . "_" . $this->nickname . "_" . $this->password . "_" . $this->last_modified);
 	}
 }
+
+StaticsManager::AddSaveVar(User::ID, "useEmailAsNickname");

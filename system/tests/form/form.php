@@ -111,6 +111,99 @@ class FormTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual(self::$testCalled, 2);
 	}
 
+	protected $fieldValue1;
+	protected $fieldValue2;
+	protected $handlerCalled;
+	protected $validationCalled;
+
+	public function testDataHandlerAndValidation() {
+		$this->unittestDataHandlerAndValidation("123", "456");
+		$this->unittestDataHandlerAndValidation(null, null);
+		$this->unittestDataHandlerAndValidation("abc", "efg");
+	}
+
+	public function unittestDataHandlerAndValidation($fieldValue1, $fieldValue2) {
+		$this->fieldValue1 = $fieldValue1;
+		$this->fieldValue2 = $fieldValue2;
+
+		$form = new Form(new Controller(), "testData", array(
+			new TextField("field1", "123"),
+			new TextField("field2", "123")
+		));
+
+		$form->addDataHandler(array($this, "transformFields"));
+		$form->addValidator(new FormValidator(array($this, "validateFieldsActive")), "validate");
+
+		$this->validationCalled = $this->handlerCalled = false;
+
+		$form->post = array(
+			"field1" => $this->fieldValue1,
+			"field2" => $this->fieldValue2
+		);
+
+		$this->assertEqual($form->gatherResultForSubmit(), array(
+			"field1" => $this->fieldValue2,
+			"field2" => $this->fieldValue2,
+			"field3" => $this->fieldValue1
+		));
+
+		$this->assertTrue($this->handlerCalled);
+		$this->assertTrue($this->validationCalled);
+	}
+
+	/**
+	 * @param FormValidator $obj
+     */
+	public function validateFieldsActive($obj) {
+		$this->validationCalled = true;
+		$result = $obj->getForm()->result;
+
+		$this->assertEqual($result["field1"], $this->fieldValue2);
+		$this->assertEqual($result["field2"], $this->fieldValue2);
+		$this->assertEqual($result["field3"], $this->fieldValue1);
+	}
+
+	public function transformFields($result) {
+		$this->handlerCalled = true;
+
+		$data = $result["field1"];
+		$result["field1"] = $result["field2"];
+		$result["field3"] = $data;
+		return $result;
+	}
+
+	public function testValidationError() {
+		$form = new Form(new Controller(), "testData", array(
+			new TextField("field1", "123")
+		));
+
+		$form->addValidator(new FormValidator(array($this, "validateAndThrow")), "validate");
+
+		$form->post = array(
+			"field1" => "123"
+		);
+
+		/** @var FormNotValidException $e */
+		try {
+			$form->gatherResultForSubmit();
+
+			$this->assertFalse(true);
+		} catch(Exception $e) {
+			$this->assertIsA($e, "FormNotValidException");
+
+			$errors = $e->getErrors();
+			$this->assertIsA($errors[0], "Exception");
+			$this->assertEqual($errors[0]->getMessage(), "problem");
+		}
+	}
+
+	public function validateAndThrow() {
+		throw new Exception("problem");
+	}
+
+	/**
+	 * @param $data
+	 */
 	public function _testNull($data) {
 		self::$testCalled = 1;
 		$this->assertNull($data["test"]);

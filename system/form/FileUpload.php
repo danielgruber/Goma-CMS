@@ -97,6 +97,19 @@ class FileUpload extends FormField {
 	protected $templateView;
 
 	/**
+	 * creates field.
+	 * @param string $name
+	 * @param string $title
+	 * @param null|array $file_types
+	 * @param Uploads $value
+	 * @param null $parent
+	 * @return static
+	 */
+	public static function create($name, $title, $file_types = null, $value = null, $parent = null) {
+		return new static($name, $title, $file_types, $value, $parent);
+	}
+
+	/**
 	 * @param string $name
 	 * @param string $title
 	 * @param array $file_types
