@@ -12,6 +12,8 @@
  */
 class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_DataManipulator, TableField_ActionProvider, TableField_ColumnProvider
 {
+    const ID = "TableFieldFilterHeader";
+
     /**
      * here are some special filters defined if TableFieldDataColumns casts some values to other values.
      */
@@ -23,14 +25,37 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
     protected $valueCallback = array();
 
     /**
+     * select-list for filter.
+     */
+    protected $selectList;
+
+    /**
      * sets a value-callback.
      * it can also unset the callback by providing null as callback.
      *
      * @param string $name
      * @param Callback|null $callback
+     * @return $this
      */
     public function setValueCallback($name, $callback) {
         $this->valueCallback[strtolower($name)] = $callback;
+        return $this;
+    }
+
+    /**
+     * set select lists.
+     * @param array $selectList
+     * @return $this
+     */
+    public function setSelectLists($selectList) {
+        foreach($selectList as $list) {
+            if(!is_array($list)) {
+                throw new InvalidArgumentException("You have to use arrays for SelectLists.");
+            }
+        }
+
+        $this->selectList = $selectList;
+        return $this;
     }
 
     /**
@@ -61,11 +86,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
                 if (isset($filterArguments[$columnField])) {
                     $value = $filterArguments[$columnField];
                 }
-                $searchField = new TextField('filter[' . $columnField . ']', '', $value);
-                $searchField->addExtraClass('tablefield-filter');
-                $searchField->addExtraClass('no-change-track');
-
-                $searchField->input->attr('placeholder', lang("form_tablefield.filterBy") . $title);
+                $searchField = $this->getFilterField($columnField, $value, $title);
 
                 if ($value != "") {
                     $searchAction = new TableField_FormAction($tableField, "resetFields" . str_replace(".", "_", $columnField), '<i title="' . lang("form_tablefield.reset") . '" class="fa fa-times"></i>', "resetFields", $columnField);
@@ -109,6 +130,31 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         return array(
             'header' => $forTemplate->customise(array("fields" => $fields, "visible" => $state->visible))->renderWith("form/tableField/filterHeader.html")
         );
+    }
+
+    /**
+     * @param string $columnField
+     * @param string $value
+     * @param string $title
+     * @return TextField
+     */
+    protected function getFilterField($columnField, $value, $title) {
+        if(isset($this->selectList[$columnField])) {
+            $searchField = new Select(
+                "filter[" . $columnField . "]",
+                "",
+                array("" => "-") + $this->selectList[$columnField],
+                $value
+            );
+        } else {
+            $searchField = new TextField('filter[' . $columnField . ']', '', $value);
+            $searchField->setPlaceholder(lang("form_tablefield.filterBy") . $title);
+        }
+
+        $searchField->addExtraClass('tablefield-filter');
+        $searchField->addExtraClass('no-change-track');
+
+        return $searchField;
     }
 
     /**

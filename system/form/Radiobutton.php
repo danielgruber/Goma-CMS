@@ -132,7 +132,7 @@ class RadioButton extends FormField
                 $this->PostName(),
                 $value,
                 $title,
-                $value == $this->value,
+                $this->valueMatches($value, $this->value),
                 $this->disabled || isset($this->disabledNodes[$value])
             ));
         }
@@ -248,5 +248,24 @@ class RadioButton extends FormField
         }
 
         return true;
+    }
+
+    /**
+     * resolves edge-case with 0 and "".
+     *
+     * @param mixed $value
+     * @param mixed $compare
+     * @return bool
+     */
+    private function valueMatches($value, $compare) {
+        if($value === 0 && $compare === "") {
+            return false;
+        }
+
+        if($compare === 0 && $value === "") {
+            return false;
+        }
+
+        return $value == $compare;
     }
 }
