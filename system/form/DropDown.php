@@ -408,7 +408,8 @@ class DropDown extends FormField {
 	 * information about paginating.
 	 */
 	public function getDataFromModel($page = 1) {
-		return $this->getResultFromData($page, clone $this->options);
+		$cloned = is_object($this->options) ? clone $this->options : array();
+		return $this->getResultFromData($page, $cloned);
 	}
 
 	/**
@@ -493,7 +494,7 @@ class DropDown extends FormField {
 			return $value->id;
 		}
 
-		if(!isset($result[0])) {
+		if(isset($result[0])) {
 			if(is_array($value) && isset($value[$this->showfield])) {
 				return convert::raw2text($value[$this->showfield]);
 			} else if(is_string($value)) {

@@ -145,4 +145,9 @@ class ExceptionManager {
 	const FILEUPLOAD_TYPE_FAIL = -603;
 	const FILEUPLOAD_DISK_SPACE_FAIL = -604;
 	const TPL_COMPILE_ERROR = -10;
+
+	/**
+	 * lists
+	 */
+	const ITEM_NOT_FOUND = -944;
 }

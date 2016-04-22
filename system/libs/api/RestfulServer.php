@@ -299,7 +299,7 @@ class RestfulServer extends RequestHandler
 						}
 						
 						$i = 0;
-						$arr = array("class_name" => $this->ClassName, "pages" => $data->pages, "whole"	=> $data->_count(), "data" => array());
+						$arr = array("class_name" => $this->ClassName, "pages" => $data->pages, "whole"	=> $data->count(), "data" => array());
 						foreach($data as $record)
 						{
 								$arr["data"][$i] = $record->to_array();

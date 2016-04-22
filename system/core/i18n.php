@@ -378,7 +378,7 @@ class i18n extends gObject {
 	 * @name getLangCodes
 	 * @return array
 	 */
-	public function getLangCodes($code) {
+	public static function getLangCodes($code) {
 		$data = self::getLangInfo(self::selectLang($code));
 		if(isset($data["langCodes"]))
 			return array_merge($data["areaCodes"], array($code));

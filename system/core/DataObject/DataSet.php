@@ -12,10 +12,6 @@
  */
 class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     /**
-     * pagination-attributes
-     */
-
-    /**
      * if to use pages in this dataset
      * @var bool
      */
@@ -33,29 +29,21 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
      *
      * @var int|null
      */
-    public $page = null;
+    protected $page = null;
 
     /**
      * data cache, we will store all information here, too
      *
-     *@name dataCache
-     *@access protected
+     * @var ArrayList
      */
     protected $dataCache = array();
 
     /**
      * protected customised data
      *
-     *@name protected_customised
+     * @var array
      */
     protected $protected_customised = array();
-
-    /**
-     * current sort field
-     *
-     *@access protected
-     */
-    protected $sortField;
 
     /**
      * construction

@@ -429,7 +429,6 @@ class tableField extends FormField {
 		if($total > 0) {
 			$rows = array();
 			foreach($data as $id => $record) {
-				
 				$rowContent = "";
 				foreach($this->getColumns() as $column) {
 					$colContent = $this->getColumnContent($record, $column);

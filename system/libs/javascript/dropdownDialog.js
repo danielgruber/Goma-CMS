@@ -539,7 +539,7 @@ self.dropdownDialogs = [];
 		 *@name play_html
 		 */
 		player_html: function(uri) {
-			this.setContent($(uri));
+			this.setContent($(uri).html());
 		},
 
 		/**

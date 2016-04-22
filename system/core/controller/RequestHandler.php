@@ -104,23 +104,21 @@ class RequestHandler extends gObject {
 	 * @param   Request $request The Request Object
 	 */
 	public function Init($request = null) {
-		if (isset($request))
-			$this -> request = clone $request;
-
-		if (isset($this -> request)) {
-			$this->originalNamespace = $this->namespace;
-			$this->namespace = $this->request->getShiftedPart();
-
-			if(!isset($this->originalNamespace)) $this->originalNamespace = $this->namespace;
-		} else {
-			throw new InvalidArgumentException("RequestHandler" . $this -> classname . " has no request-instance.");
+		if (!isset($request)) {
+			throw new InvalidArgumentException("RequestHandler" . $this->classname . " has no request-instance.");
 		}
+
+		$this->request = $request;
+		$this->originalNamespace = $this->namespace;
+		$this->namespace = $this->request->getShiftedPart();
+
+		if(!isset($this->originalNamespace)) $this->originalNamespace = $this->namespace;
 
 		if (!isset($this -> subController) || !$this -> subController) {
 			Director::$requestController = $this;
 			Director::$controller[] = $this;
 		}
-		$this -> requestHandlerKey = count(Director::$controller);
+		$this->requestHandlerKey = count(Director::$controller);
 	}
 
 	/**

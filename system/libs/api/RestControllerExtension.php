@@ -26,20 +26,23 @@ class RestControllerExtension extends Extension {
      * @return string
      */
     public function handleException($e, $content) {
-        HTTPResponse::setHeader("content-type", "text/json");
-
-        if(Object::method_exists($e, "http_status")) {
-            HTTPResponse::setResHeader($e->http_status());
+        $response = new GomaResponse();
+        if(gObject::method_exists($e, "http_status")) {
+            $response->setStatus($e->http_status());
         } else {
-            HTTPResponse::setResHeader(500);
+            $response->setStatus(500);
         }
 
-        if(Object::method_exists($e, "extra_info")) {
+        if(gObject::method_exists($e, "extra_info")) {
             $extra_info = $e->extra_info();
         } else {
             $extra_info = array();
         }
 
-        $content = json_encode(array_merge($extra_info, array("error" => $e->getCode(), "type" => get_class($e), "message" => $e->getMessage())));
+        $response->setBody(
+            new JSONResponseBody(array_merge($extra_info, array("error" => $e->getCode(), "type" => get_class($e), "message" => $e->getMessage())))
+        );
+
+        $content = $response;
     }
 }

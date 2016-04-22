@@ -10,6 +10,8 @@
  * @author      Goma-Team
  *
  * @version     1.5.2
+ *
+ * TODO: Add Interface for $this->dataobject and add something like "default" model.
  */
 class DataObjectSet extends DataSet {
 
@@ -70,7 +72,7 @@ class DataObjectSet extends DataSet {
 	/**
 	 * dataobject for this DataObjectSet
 	 *
-	 * @var DataObject
+	 * @var IDataObjectSetDataSource
 	 */
 	public $dataobject;
 
@@ -97,9 +99,13 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * constructor
-	 *
-	 *@name __construct
-	 *@access public
+	 * @param string|IDataObjectSetDataSource $class
+	 * @param string|array $filter
+	 * @param string|array $sort
+	 * @param int|array $limit
+	 * @param array $join
+	 * @param string|array $search
+	 * @param string|null $version
 	 */
 	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
 		parent::__construct(null);
@@ -110,14 +116,12 @@ class DataObjectSet extends DataSet {
 				$class = $class->dataobject;
 			}
 
-			if(is_a($class, "ModelHasOneRelationshipInfo")) {
-				print_r(debug_backtrace());
-				exit;
+			if(!is_string($class) && !is_a($class, "IDataObjectSetDataSource")) {
+				throw new InvalidArgumentException("\$class must be either String or IDataObjectSetDataSource.");
 			}
 
 			$this->dataobject = gObject::instance($class);
 			$this->inExpansion = $this->dataobject->inExpansion;
-			$this->dataClass = $this->dataobject->classname;
 
 			$this->filter($filter);
 			$this->sort = (isset($sort) && !empty($sort)) ? $sort : StaticsManager::getStatic($class, "default_sort");
@@ -128,6 +132,14 @@ class DataObjectSet extends DataSet {
 
 			$this->protected_customised = $this->customised;
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function DataClass()
+	{
+		return $this->dataobject->classname;
 	}
 
 	/**
@@ -152,6 +164,7 @@ class DataObjectSet extends DataSet {
 	{
 		$data = array();
 		foreach((array) $this->data as $record) {
+			/** @var DataObject $record */
 			if(is_object($record)) {
 				$data[] = $record->toArray($additional_fields);
 			} else {
@@ -169,15 +182,6 @@ class DataObjectSet extends DataSet {
 	 */
 	public function queryVersion() {
 		return $this->version;
-	}
-
-	/**
-	 * returns table_name of current dataobject
-	 */
-	public function getTable_Name() {
-		if(!isset($this->dataobject))
-			return null;
-		return $this->dataobject->Table();
 	}
 
 	/**
@@ -324,6 +328,25 @@ class DataObjectSet extends DataSet {
 			} else {
 				return 0;
 			}
+		}
+	}
+
+	/**
+	 * @param string $field
+	 * @return int
+	 */
+	public function CountDistinct($field) {
+		if(!preg_match('/^[a-zA-Z\.0-9_\-]+$/', $field)) {
+			throw new InvalidArgumentException("Field must have only letters, numbers and underscore.");
+		}
+
+		// TODO: GetAggregate MUST have more information about the field, to be parsed by HasOne or HasMany or ManyMany to add JOINs.
+		$data = $this->dataobject->getAggregate($this->version, 'count(distinct '.$field.') as count', $this->filter, array(), $this->limit, $this->join, $this->search);
+		if(isset($data[0]["count"])) {
+			$this->count = (int) $data[0]["count"];
+			return $this->count;
+		} else {
+			return 0;
 		}
 	}
 
@@ -480,9 +503,9 @@ class DataObjectSet extends DataSet {
 			if(!$this->pagination) {
 				$this->dataCache = $this->dataobject->getRecords($this->version, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
 			}
-			$this->reRenderSet();
 		}
 
+		$this->reRenderSet();
 
 		return $this;
 	}
@@ -550,9 +573,8 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * adds a join
-	 *
-	 *@name addJoin
-	 *@access public
+	 * @param string $join
+	 * @return $this
 	 */
 	public function addJoin($join) {
 		$this->join = array_merge((array)$this->join, (array)$join);
@@ -562,9 +584,8 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * removes a join by given key
-	 *
-	 *@name removeJoin
-	 *@access public
+	 * @param string|int $key key in array
+	 * @return $this
 	 */
 	public function removeJoin($key) {
 		unset($this->join[$key]);
@@ -574,13 +595,12 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * sets the variable join
-	 *
-	 *@name join
-	 *@access public
+	 * @param array $join
+	 * @return $this
 	 */
 	public function join($join) {
 		if(isset($join)) {
-			$this->join = $join;
+			$this->join = (array) $join;
 			$this->purgeData();
 		}
 		return $this;
@@ -588,9 +608,8 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * sets limits
-	 *
-	 *@name limit
-	 *@access public
+	 * @param array|string $limit
+	 * @return $this
 	 */
 	public function limit($limit) {
 

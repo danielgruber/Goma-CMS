@@ -726,5 +726,5 @@ class ArrayList extends ViewAccessableData implements Countable {
 }
 
 class ItemNotFoundException extends GomaException {
-
+	protected $standardCode = ExceptionManager::ITEM_NOT_FOUND;
 }
