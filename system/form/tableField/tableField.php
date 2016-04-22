@@ -165,9 +165,7 @@ class tableField extends FormField {
     /**
      * gets all columns
      *
-     * @name getColumns
-     * @access public
-     * @return array
+     * @return string[]
      */
 	public function getColumns() {
 		$columns = array();

@@ -666,5 +666,7 @@ $lang = array(
 	"groupAdmin"				=> "Group-Admin",
 	"group_notificationmail"	=> "email-notifications for updates",
 	"group_notificationmail_info"	=> "You are notified when users within the group change. Seperate multiple addresses with comma.",
-	"group_user_changed"		=> "A user in your group has been changed."
+	"group_user_changed"		=> "A user in your group has been changed.",
+
+	"export_to_csv"				=> "Download CSV"
 );

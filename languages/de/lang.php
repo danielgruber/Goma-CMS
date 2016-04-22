@@ -659,5 +659,7 @@ $lang = array(
 	"groupAdmin"				=> "Gruppen-Admin",
 	"group_notificationmail"	=> "E-Mail-Benachrichtigung bei Aktualisierung",
 	"group_notificationmail_info"	=> "Sie werden benachrichtgt, wenn sich Nutzer in der Gruppe verändern. Mehrere E-Mail-Adressen durch Komma trennen.",
-	"group_user_changed"		=> "Ein Nutzer in Ihrer Gruppe wurde verändert."
+	"group_user_changed"		=> "Ein Nutzer in Ihrer Gruppe wurde verändert.",
+
+	"export_to_csv"				=> "CSV herunterladen"
 );
