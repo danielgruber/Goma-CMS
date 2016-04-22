@@ -104,11 +104,11 @@ class RequestHandler extends gObject {
 	 * @param   Request $request The Request Object
 	 */
 	public function Init($request = null) {
-		if (!isset($request)) {
+		if (!isset($request) && !isset($this->request)) {
 			throw new InvalidArgumentException("RequestHandler" . $this->classname . " has no request-instance.");
 		}
 
-		$this->request = $request;
+		$this->request = isset($request) ? $request : $this->request;
 		$this->originalNamespace = $this->namespace;
 		$this->namespace = $this->request->getShiftedPart();
 

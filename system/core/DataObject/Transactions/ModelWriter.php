@@ -211,7 +211,7 @@ class ModelWriter extends gObject {
      *
      * @return DataObject
      */
-    protected function getObjectToUpdate() {
+    public function getObjectToUpdate() {
         return $this->updatableModel;
     }
 

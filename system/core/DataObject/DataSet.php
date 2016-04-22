@@ -46,6 +46,11 @@ class DataSet extends ViewAccessAbleData implements CountAble, Iterator {
     protected $protected_customised = array();
 
     /**
+     * @var string
+     */
+    protected $sortField;
+
+    /**
      * construction
      *
      *@name __construct
