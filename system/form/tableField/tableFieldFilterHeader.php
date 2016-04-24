@@ -148,7 +148,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
             );
         } else {
             $searchField = new TextField('filter[' . $columnField . ']', '', $value);
-            $searchField->setPlaceholder(lang("form_tablefield.filterBy") . $title);
+            $searchField->setPlaceholder($title);
         }
 
         $searchField->addExtraClass('tablefield-filter');
@@ -182,7 +182,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
             if(isset($this->valueCallback[strtolower($columnName)])) {
                 call_user_func_array($this->valueCallback[strtolower($columnName)], array($filterArguments, $data));
             } else
-                if ($data->canFilterBy($columnName) && $value) {
+                if ($data->canFilterBy($columnName) && $this->isValueValid($value)) {
                     if (isset($this->valueCasting[$columnName])) {
                         $values = array();
                         foreach ($this->valueCasting[$columnName] as $key => $orgValue) {
@@ -277,7 +277,7 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
         if (isset($tableField->form()->post['filter']) && !$state->reset) {
             $hasValue = false;
             foreach ($tableField->form()->post['filter'] as $key => $filter) {
-                if($filter && $state->resetColumn != $key) {
+                if($this->isValueValid($filter) && $state->resetColumn != $key) {
                     $hasValue = true;
                     $state->columns->$key = $filter;
                 } else if($state->columns->$key || $state->resetColumn == $key) {
@@ -370,5 +370,13 @@ class TableFieldFilterHeader implements TableField_HTMLProvider, TableField_Data
      */
     public function setCastedValues($field, $values) {
         $this->valueCasting[$field] = $values;
+    }
+
+    /**
+     * @param string|int $value
+     * @return bool
+     */
+    protected function isValueValid($value) {
+        return $value || $value === 0 || $value === "0";
     }
 }

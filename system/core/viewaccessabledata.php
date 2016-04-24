@@ -66,25 +66,11 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	public $customised = array();
 
 	/**
-	 * dataset-position when this object is in a specific dataset.
-	 *
-	 * @access public
-	 */
-	public $dataSetPosition = 0;
-
-	/**
 	 * indicates whether the data was changes or not.
 	 *
 	 * @access public
 	 */
 	protected $changed = false;
-
-	/**
-	 * dataset in which this Object is.
-	 *
-	 * @access public
-	 */
-	public $dataset;
 
 	/**
 	 * dataClass contains the class for which this data is, if it's not the same as
@@ -172,72 +158,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	 */
 	public function bool() {
 		return (count($this->data) > 0);
-	}
-
-	/**
-	 * returns if this is the first entry or not
-	 */
-	public function first() {
-		return ($this->dataSetPosition === 0);
-	}
-
-	/**
-	 * returns if this is the last entry or not
-	 */
-	public function last() {
-
-		if(!isset($this->dataset)) {
-			return false;
-		}
-
-		return ($this->dataSetPosition + 1 == $this->dataset->count());
-	}
-
-	/**
-	 * returns current position
-	 */
-	public function position() {
-		return $this->dataSetPosition;
-	}
-
-	/**
-	 * returns if this is a highlighted one
-	 *
-	 */
-	public function highlight() {
-		$r = ($this->dataSetPosition + 1) % 2;
-		return ($r == 0);
-	}
-
-	/**
-	 * returns if this is a white one
-	 *
-	 */
-	public function white() {
-		return (!$this->highlight());
-	}
-
-	/**
-	 * make the functions on top to variables, for example $this.white
-	 */
-	public function getWhite() {
-		return $this->white();
-	}
-
-	public function getHighlight() {
-		return $this->highlight();
-	}
-
-	public function isFirst() {
-		return $this->first();
-	}
-
-	public function isLast() {
-		return $this->last();
-	}
-
-	public function getPosition() {
-		return $this->dataSetPosition;
 	}
 
 	/**

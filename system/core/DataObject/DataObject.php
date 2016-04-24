@@ -715,6 +715,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     }
 
     /**
+     * @param ModelWriter $modelWriter
+     */
+    public function onBeforeDBWriter($modelWriter)
+    {
+        $this->callExtending("onBeforeDBWriter", $modelWriter);
+    }
+
+    /**
      * will be called after write
      *
      * @param ModelWriter $modelWriter

@@ -152,7 +152,6 @@ class DataObjectSet extends DataSet {
 		$this->dataCache = $data;
 		$this->data = (array) $data;
 		$this->count = count($data);
-		$this->reRenderSet();
 	}
 
 	/**
@@ -500,12 +499,10 @@ class DataObjectSet extends DataSet {
 	public function forceData() {
 
 		if(!isset($this->dataCache) && isset($this->dataobject)) {
-			if(!$this->pagination) {
+			if($this->page !== null) {
 				$this->dataCache = $this->dataobject->getRecords($this->version, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
 			}
 		}
-
-		$this->reRenderSet();
 
 		return $this;
 	}
@@ -966,7 +963,7 @@ class DataObjectSet extends DataSet {
 	 *@param bool - if cancel on error, or resume
 	 *@param bool - if force to delete versions, too
 	 */
-	private function remove($force = false, $forceAll = false) {
+	public function remove($force = false, $forceAll = false) {
 		foreach($this as $key => $record) {
 			if($record->remove($force, $forceAll)) {
 				unset($this->data[$key]);

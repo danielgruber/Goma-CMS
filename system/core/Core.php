@@ -125,9 +125,10 @@ class Core extends gObject {
 			
 		// init language-support
 		i18n::Init(i18n::SetSessionLang());
-		
+
 		if(defined("SQL_LOADUP"))
 			member::Init();
+
 
 		if(PROFILE)
 			Profiler::mark("Core::Init");

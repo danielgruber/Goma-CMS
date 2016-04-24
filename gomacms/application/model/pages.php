@@ -39,7 +39,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
     /**
      * parent type set in this object.
      */
-    public $parentSet;
+    protected $parentSet;
 
     /**
      * the db-fields
