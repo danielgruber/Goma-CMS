@@ -132,6 +132,61 @@ class DataSetTests extends GomaUnitTest {
         }
     }
 
+    /**
+     * tests pagination abilities.
+     */
+    public function testPagination() {
+        $set = new DataSet($org = array(
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian
+        ));
+
+        $set->activatePagination(1, 5);
+        $this->assertTrue($set->isPagination());
+
+        $this->assertEqual($set->getPageCount(), 4);
+        $this->assertEqual($set->count(), 5);
+
+        $set->setPage(2);
+
+        $this->assertEqual($set->getPageCount(), 4);
+        $this->assertEqual($set->count(), 5);
+        $this->assertEqual($set->pageBefore(), 1);
+        $this->assertEqual($set->nextPage(), 3);
+
+        $set->setPage(4);
+        $this->assertFalse($set->isNextPage());
+        $this->assertTrue($set->isPageBefore());
+        $this->assertEqual($set->last(), $this->julian);
+
+        $set->filter("name", "Patrick");
+
+        $this->assertEqual($set->getPage(), 1);
+        $this->assertEqual($set->last(), $this->patrick);
+
+        $set->filter();
+
+        $this->assertEqual($set->getPage(), 4);
+    }
+
     public function testFilter() {
         $list = new DataSet($orgArray = array(
             $this->daniel,

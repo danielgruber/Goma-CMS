@@ -149,10 +149,11 @@ class DataSet extends ArrayList implements CountAble, Iterator {
         $source = $this->filteredAndSortedDataSource;
 
         if(isset($page)) {
-            $start = $page * $perPage - $perPage;
-            while($source->count() < $start) {
-                $start -= $perPage;
+            $pages = max(ceil($this->filteredAndSortedDataSource->Count() / $this->perPage), 1);
+            if($page > $pages) {
+                $page = $pages;
             }
+            $start = $page * $perPage - $perPage;
 
             $source = $source->getRange($start, $perPage);
         }
@@ -665,5 +666,18 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     public function getPerPage()
     {
         return $this->perPage;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getPage()
+    {
+        $pages = max(ceil($this->filteredAndSortedDataSource->Count() / $this->perPage), 1);
+        if($pages < $this->page) {
+            return $pages;
+        }
+
+        return $this->page;
     }
 }
