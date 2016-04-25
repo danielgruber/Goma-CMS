@@ -209,7 +209,6 @@ class ManyManyModelWriter extends Extension {
                 );
 
                 foreach($relationShip->getExtraFields() as $field => $type) {
-                    var_dump($field);
                     if(isset($info[$field])) {
                         $mani_insert["fields"][$id][$field] = $info[$field];
                     }
