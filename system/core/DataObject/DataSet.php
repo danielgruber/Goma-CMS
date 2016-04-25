@@ -8,9 +8,9 @@
  * @license     GNU Lesser General Public License, version 3; see "LICENSE.txt"
  * @author      Goma-Team
  *
- * @version     1.5.9
+ * @version     2.0
  */
-class DataSet extends ArrayList implements CountAble, Iterator {
+class DataSet extends ArrayList {
     /**
      * how many items per page
      *

@@ -36,6 +36,7 @@ class DataSetTests extends GomaUnitTest {
         $list = new DataSet();
 
         $this->assertEqual($list->count(), 0);
+        $this->assertEqual(count($list), 0);
         $this->assertEqual($list->DataClass(), null);
         $this->assertEqual($list->first(), null);
     }
@@ -48,6 +49,7 @@ class DataSetTests extends GomaUnitTest {
         ));
 
         $this->assertEqual($list->count(), 3);
+        $this->assertEqual(count($list), 3);
         $this->assertEqual($list->first(), $this->daniel);
         $this->assertEqual($list[1], $this->kathi);
         $this->assertEqual($list[2], $this->patrick);
