@@ -9,7 +9,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 class DataSetTests extends GomaUnitTest {
-    static $area = "Model";
+    static $area = "NModel";
     /**
      * name
      */
@@ -249,5 +249,64 @@ class DataSetTests extends GomaUnitTest {
 
         $list->moveBefore($this->daniel, $this->janine, true);
         $this->assertEqual($list[1], $this->daniel);
+    }
+
+    public function testMoveSort() {
+        $this->unittestMoveSort(true);
+        $this->unittestMoveSort(false);
+    }
+
+    public function unittestMoveSort($activePagination) {
+        $list = new DataSet($orgArray = array(
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian
+        ));
+
+        if($activePagination) {
+            $list->activatePagination();
+        }
+
+        $list->sort("age", "DESC");
+
+        $list->moveBefore($list->find("name", "Patrick"), $list->find("name", "Kathi"));
+
+        $this->assertEqual($list->first(), $this->patrick);
+        $this->assertEqual($list[1], $this->kathi);
+        $this->assertEqual($list[2], $this->daniel);
+        $this->assertEqual($list[3], $this->julian);
+
+        $list->filter("age", array(">", 0));
+
+        $this->assertEqual($list->first(), $this->patrick);
+        $this->assertEqual($list[1], $this->kathi);
+        $this->assertEqual($list[2], $this->daniel);
+        $this->assertEqual($list[3], $this->julian);
+    }
+
+    public function testCustomised() {
+        $set = new DataSet();
+
+        $set->customise(array(
+            "blub" => "abc"
+        ));
+
+        $this->assertEqual($set->blub, "abc");
+
+        // test if you can override customise
+        $set->blub = 123;
+
+        $this->assertEqual($set->blub, "abc");
+
+        $set->add(array(
+            "tada" => 123
+        ));
+
+        foreach($set as $record) {
+            $this->assertEqual($record->blub, "abc");
+            $this->assertEqual($record->tada, 123);
+        }
     }
 }

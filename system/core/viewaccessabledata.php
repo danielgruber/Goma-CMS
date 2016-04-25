@@ -126,9 +126,7 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	//!Init
 	/**
 	 * Constructor.
-	 *
-	 * @access public
-	 * @param array $data data to start with
+	 * @param array|null $data
 	 */
 	public function __construct($data = null) {
 		parent::__construct();

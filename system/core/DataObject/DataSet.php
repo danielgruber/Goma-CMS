@@ -33,7 +33,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     /**
      * @var ArrayList
      */
-    protected $filteredAndSortedDataSource;
+    protected $filteredDataSource;
 
     /**
      * protected customised data
@@ -45,18 +45,11 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     /**
      * @var array|string
      */
-    protected $sort;
-
-    /**
-     * @var array|string
-     */
     protected $filter;
 
     /**
      * construction
-     *
-     *@name __construct
-     *@access public
+     * @param array $set
      */
     public function __construct($set = array()) {
         parent::__construct($set);
@@ -64,7 +57,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
         /* --- */
 
         $this->dataSource = new ArrayList($set);
-        $this->filteredAndSortedDataSource  = new ArrayList($set);
+        $this->filteredDataSource  = new ArrayList($set);
     }
 
     /**
@@ -86,8 +79,11 @@ class DataSet extends ArrayList implements CountAble, Iterator {
 
         return $set;
     }
+
     /**
      * getGroupedSet
+     * @param string $field
+     * @return DataSet
      */
     public function getGroupedSet($field) {
         return new DataSet($this->groupBy($field));
@@ -98,8 +94,9 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      */
     public function sort()
     {
-        $this->updateSet($this->filter, func_get_args(), $this->page, $this->perPage);
-        $this->sort = func_get_args();
+        $this->dataSource = call_user_func_array(array($this->dataSource, "sort"), func_get_args());
+
+        $this->updateSet($this->filter, $this->page, $this->perPage);
 
         return $this;
     }
@@ -109,7 +106,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      */
     public function filter()
     {
-        $this->updateSet(array(func_get_args()), $this->sort, $this->page, $this->perPage);
+        $this->updateSet(array(func_get_args()), $this->page, $this->perPage);
         $this->filter = array(func_get_args());
 
         return $this;
@@ -117,12 +114,11 @@ class DataSet extends ArrayList implements CountAble, Iterator {
 
     /**
      * @param array $filter
-     * @param array $sort
      * @param int|null $page
      * @param int $perPage
      * @return ArrayList|mixed
      */
-    protected function updateSet($filter, $sort, $page, $perPage) {
+    protected function updateSet($filter, $page, $perPage) {
         /** @var ArrayList $source */
         $source = $this->dataSource;
 
@@ -132,11 +128,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
             }
         }
 
-        if(isset($sort)) {
-            $source = call_user_func_array(array($source, "sort"), $sort);
-        }
-
-        $this->filteredAndSortedDataSource = $source;
+        $this->filteredDataSource = $source;
 
         $this->updatePagination($page, $perPage);
     }
@@ -146,10 +138,10 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      * @param int $perPage
      */
     protected function updatePagination($page, $perPage) {
-        $source = $this->filteredAndSortedDataSource;
+        $source = $this->filteredDataSource;
 
         if(isset($page)) {
-            $pages = max(ceil($this->filteredAndSortedDataSource->Count() / $this->perPage), 1);
+            $pages = max(ceil($this->filteredDataSource->Count() / $this->perPage), 1);
             if($page > $pages) {
                 $page = $pages;
             }
@@ -200,7 +192,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     public function push($item) {
         $this->dataSource->push($item);
 
-        $this->updateSet($this->filter, $this->sort, $this->page, $this->perPage);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
     }
 
     /**
@@ -218,7 +210,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     public function pop() {
         $return = $this->dataSource->pop();
 
-        $this->updateSet($this->filter, $this->sort, $this->page, $this->perPage);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
 
         return $return;
     }
@@ -229,7 +221,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     public function shift() {
         $return = $this->dataSource->shift();
 
-        $this->updateSet($this->filter, $this->sort, $this->page, $this->perPage);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
 
         return $return;
     }
@@ -241,7 +233,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     {
         $this->dataSource->unshift($item);
 
-        $this->updateSet($this->filter, $this->sort, $this->page, $this->perPage);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
     }
 
     /**
@@ -334,7 +326,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
 
         if(isset($page) && RegexpUtil::isNumber($page) && $page > 0) {
             // first validate the data
-            $pages = max(ceil($this->filteredAndSortedDataSource->Count() / $this->perPage), 1);
+            $pages = max(ceil($this->filteredDataSource->Count() / $this->perPage), 1);
             if($pages < $page) {
                 $page = $pages;
             }
@@ -412,7 +404,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      * @return int
      */
     public function getPageCount() {
-        return ceil($this->filteredAndSortedDataSource->Count() / $this->perPage);
+        return ceil($this->filteredDataSource->Count() / $this->perPage);
     }
 
     /**
@@ -430,7 +422,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      * @return int
      */
     public function countWithoutPagination() {
-        return $this->filteredAndSortedDataSource->count();
+        return $this->filteredDataSource->count();
     }
 
     /**
@@ -621,7 +613,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     {
         $removed = $this->dataSource->remove($item);
 
-        $this->updateSet($this->filter, $this->sort, $this->page, $this->perPage);
+        $this->updateSet($this->filter, $this->page, $this->perPage);
 
         return $removed;
     }
@@ -634,7 +626,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      */
     public function find($key, $value, $caseInsensitive = false)
     {
-        return $this->filteredAndSortedDataSource->find($key, $value, $caseInsensitive);
+        return $this->filteredDataSource->find($key, $value, $caseInsensitive);
     }
 
     /**
@@ -652,13 +644,31 @@ class DataSet extends ArrayList implements CountAble, Iterator {
     }
 
     /**
+     * @param array|gObject $item
+     * @param int $to
+     * @param bool $insertIfNotExisting
+     * @return bool
+     */
+    public function move($item, $to, $insertIfNotExisting = false)
+    {
+        $this->dataSource->move($item, $to, $insertIfNotExisting);
+
+        if($this->isPagination()) {
+            $this->updateSet($this->filter, $this->page, $this->perPage);
+        } else {
+            parent::move($item, $to, $insertIfNotExisting);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return boolean
      */
     public function isPagination()
     {
         return $this->page !== null;
     }
-
 
     /**
      * @return int
@@ -673,7 +683,7 @@ class DataSet extends ArrayList implements CountAble, Iterator {
      */
     public function getPage()
     {
-        $pages = max(ceil($this->filteredAndSortedDataSource->Count() / $this->perPage), 1);
+        $pages = max(ceil($this->filteredDataSource->Count() / $this->perPage), 1);
         if($pages < $this->page) {
             return $pages;
         }
