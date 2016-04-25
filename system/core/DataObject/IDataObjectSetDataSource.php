@@ -13,4 +13,14 @@ defined("IN_GOMA") OR die();
  */
 interface IDataObjectSetDataSource {
     public function getRecords($version, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array());
+    public function getAggregate($version, $aggregate, $aggregateField = "*", $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array(), $groupby = array());
+    public function getGroupedRecords($version, $groupField, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array());
+    public function canFilterBy($field);
+    public function canSortBy($field);
+}
+
+interface IDataObjectSetModelSource {
+    public function createNew();
+    public function getForm(&$form);
+    public function getEditForm(&$form);
 }
