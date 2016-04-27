@@ -22,12 +22,16 @@
  * @method HasMany_DataObjectSet children($filter = null)
  */
 
-class Pages extends DataObject implements PermProvider, HistoryData, Notifier
-{
+class Pages extends DataObject implements PermProvider, HistoryData, Notifier {
     /**
      * name
      */
     static $cname = '{$_lang_content}';
+
+    /**
+     * @var string
+     */
+    static $controller = "contentController";
 
     /**
      * activate versions
@@ -1283,23 +1287,6 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      */
     public static function NotifySettings() {
         return array("title" => lang("content"), "icon" => "images/icons/other/content.png");
-    }
-
-    /**
-     * gets controller
-     *
-     * @name controller
-     * @access public
-     * @return bool|gObject|string
-     */
-    public function controller($controller = null) {
-        if(parent::controller($controller)) {
-            return parent::controller($controller);
-        } else {
-            $this->controller = gObject::instance("contentController");
-            $this->controller->model_inst = $this;
-            return $this->controller;
-        }
     }
 
     /**

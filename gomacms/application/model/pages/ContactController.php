@@ -18,14 +18,47 @@ class ContactController extends PageController
     public $mailTemplate = "contact/mail.html";
 
     /**
+     * index.
+     */
+    public function index() {
+        $form = new Form($this, "mailer", array(
+            new TextField('name', lang("name")),
+            new TextField('subject', lang("subject")),
+            new email("email", lang("email")),
+            new textarea("text", lang("text"), null, "300px"),
+           // new captcha("captcha")
+        ),
+            array(
+                new FormAction("submit", lang("lp_submit"))
+            ));
+
+
+        $form->setSubmission("submitAndSend");
+        if ($this->modelInst()->requireEmailField) {
+            $form->addValidator(new RequiredFields(array("name", "text", "email")), "Required Fields");
+        } else {
+            $form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
+        }
+
+        $response = $form->render();
+        if(is_string($response)) {
+            $this->tplVars["content"] = $this->modelInst()->data . $response;
+            return parent::index();
+        }
+
+        return $response;
+    }
+
+    /**
      * sends out the mail
      * @param array $data
      * @param string $from
+     * @return GomaResponse
      * @throws Exception
      */
     public function send($data, $from = null)
     {
-        if(!isset($from)) {
+        if(!isset($from) || !is_string($from)) {
             $from = $this->modelInst()->email;
         }
 
