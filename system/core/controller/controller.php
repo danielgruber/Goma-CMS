@@ -110,6 +110,17 @@ class Controller extends RequestHandler
     );
 
     /**
+     * @param ViewAccessableData $model
+     * @return static
+     */
+    public static function InitWithModel($model) {
+        $controller = new static();
+        $controller->setModelInst($model);
+
+        return $controller;
+    }
+
+    /**
      * inits the controller:
      * - determining and loading model
      * - checking template

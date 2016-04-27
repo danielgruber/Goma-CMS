@@ -24,10 +24,6 @@ class DataValidator extends FormValidator
 
 	/**
 	 * validates the data
-	 *
-	 * @name valdiate
-	 * @access public
-	 * @return bool|string
 	 */
 	public function validate()
 	{

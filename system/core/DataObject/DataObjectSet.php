@@ -345,6 +345,15 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
+	 * @deprecated
+	 * @return DataObject|null
+	 */
+	public function getFirst() {
+		Core::Deprecate(2.0, "first");
+		return $this->first();
+	}
+
+	/**
 	 * returns last item.
 	 *
 	 * @return DataObject|null
@@ -1196,16 +1205,16 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$name = $this->getModelSource()->DataClass() . "_dataobjectset_new";
 		}
 
-		$form = new Form($controller, $name, array(), array(), array(), $request, $this->createNewModel());
+		$form = new Form($controller, $name, array(), array(), array(), $request, $model = $this->createNewModel());
 		if($disabled)
 			$form->disable();
 
 		// default submission
 		$form->setSubmission(isset($submission) ? $submission : "submit_form");
 
-		$form->addValidator(new DataValidator($this->modelSource()->DataClass()), "datavalidator");
+		$form->addValidator(new DataValidator($model), "datavalidator");
 
-		$form->add(new HiddenField("class_name", $this->modelSource()->DataClass()));
+		$form->add(new HiddenField("class_name", $model->DataClass()));
 
 		foreach($this->defaults as $key => $value) {
 			$form->add(new HiddenField($key, $value));
@@ -1288,7 +1297,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * @param array $data
-	 * @return mixed
+	 * @return ViewAccessableData
 	 */
 	protected function createNewModel($data = array())
 	{

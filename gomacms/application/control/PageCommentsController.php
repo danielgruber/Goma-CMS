@@ -68,7 +68,7 @@ class PageCommentsControllerExtension extends ControllerExtension {
     public function pagecomments()
     {
         if ($this->getOwner()->modelInst()->showcomments)
-            return $this->getOwner()->modelInst()->comments()->controller()->handleRequest($this->getOwner()->request);
+            return ControllerResolver::instanceForModel($this->getOwner()->modelInst()->comments())->handleRequest($this->getOwner()->request);
 
         return "";
     }
