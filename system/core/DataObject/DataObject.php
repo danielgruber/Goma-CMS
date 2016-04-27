@@ -3279,10 +3279,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     public function getInExpansion() {
         return $this->inExpansion;
     }
-
-    public function createNew($data = array()) {
-        return new $this($data);
-    }
 }
 
 class DBFieldNotValidException extends Exception {

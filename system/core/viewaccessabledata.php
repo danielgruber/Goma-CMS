@@ -22,6 +22,9 @@ defined("IN_GOMA") OR die();
  * @version		2.3.4
  */
 class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
+
+	const ID = "ViewAccessableData";
+
 	/**
 	 * default datatype for casting.
 	 *
@@ -1018,6 +1021,18 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		}
 
 		return property_exists($item, $prop) ? $item->$prop : null;
+	}
+
+	/**
+	 * @param array $data
+	 * @return ViewAccessableData
+	 */
+	public function createNew($data = array()) {
+		if(isset($data["class_name"])) {
+			return new $data["class_name"]($data);
+		}
+
+		return new $this($data);
 	}
 }
 

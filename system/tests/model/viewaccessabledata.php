@@ -13,7 +13,7 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 	/**
 	 * area
 	*/
-	static $area = "viewmodel";
+	static $area = "NModel";
 
 	/**
 	 * internal name.
@@ -161,7 +161,6 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual((string) $view->htmltext(), convert::raw2text($htmlText));
 
 		// this is not last viewmodel of dataobjectset.
-		$this->assertFalse($view->last());
 		$this->assertEqual($view->this(), $view);
 
 		$this->assertEqual($view->_server_request_uri, $_SERVER["REQUEST_URI"]);
@@ -218,6 +217,33 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
         $this->assertEqual($view->PROPERTY, $prop);
         $this->assertEqual($view->getTemplateVar("property"), $prop);
     }
+
+	/**
+	 *
+	 */
+	public function testCreateNew() {
+		$view = new ViewAccessableData();
+		$this->assertEqual($view->createNew(array(123)), new ViewAccessableData(array(123)));
+		$this->assertEqual($view->createNew(array(
+			"class_name" => "VMTestGeneration"
+		)), new VMTestGeneration(array(
+			"class_name" => "VMTestGeneration"
+		)));
+		$this->assertEqual($view->createNew(array(
+			"classname" => "VMTestGeneration"
+		)), new ViewAccessableData(array(
+			"classname" => "VMTestGeneration"
+		)));
+	}
+}
+
+class VMTestGeneration {
+	public $data;
+
+	public function __construct($data = array())
+	{
+		$this->data = $data;
+	}
 }
 
 class TestClassWithForTemplate {

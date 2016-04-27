@@ -643,9 +643,11 @@ class Controller extends RequestHandler
      * @param    integer $priority Defines what type of save it is: 0 = autosave, 1 = save, 2 = publish
      * @param    boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
      * @param    boolean $forceWrite forces the database to write without involving permissions
+     * @param bool $overrideCreated
+     * @param null|DataObject $givenModel
      * @return bool|DataObject
      */
-    public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null)
+    public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, $givenModel = null)
     {
         if (PROFILE) Profiler::mark("Controller::save");
 

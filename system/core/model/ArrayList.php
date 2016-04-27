@@ -34,7 +34,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function __construct($items = array()) {
 		parent::__construct();
 
-		$this->items = $items;
+		$this->items = (array) $items;
 	}
 	
 	/**

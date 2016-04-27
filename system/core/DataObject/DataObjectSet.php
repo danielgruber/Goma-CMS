@@ -80,7 +80,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected $fetchMode;
 
 	/**
-	 * @var DataSet
+	 * @var ArrayList
 	 */
 	protected $staging;
 
@@ -132,7 +132,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$this->setVersion($version);
 		}
 
-		$this->staging = new DataSet();
+		$this->staging = new ArrayList();
 		$this->protected_customised = $this->customised;
 		$this->fetchMode = self::FETCH_MODE_EDIT;
 	}
@@ -282,21 +282,12 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * this function returns the data as an array
-	 * @param array $additional_fields
+	 *
 	 * @return array
 	 */
-	public function ToArray($additional_fields = array())
+	public function ToArray()
 	{
-		$data = array();
-		foreach($this as $record) {
-			/** @var DataObject $record */
-			if(is_object($record)) {
-				$data[] = $record->toArray($additional_fields);
-			} else {
-				$data[] = $record;
-			}
-		}
-		return $data;
+		return array_merge((array) $this->items, $this->staging->ToArray());
 	}
 
 	/**
@@ -764,27 +755,49 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	protected function getRecordsByRange($start, $length)
 	{
+		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
+			return $this->staging->getRange($start, $length);
+		}
+
+		$result = $this->getResultFromCache($start, $length);
+		if ($result === null) {
+			$result = $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search);
+		}
+
+		if (count($result) < $length) {
+			$missing = $length - count($result);
+
+			return array_merge($result, $this->staging->getRange(0, $missing)->ToArray());
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param int $start
+	 * @param int $length
+	 * @return array|null
+	 */
+	protected function getResultFromCache($start, $length) {
 		if($this->items !== null) {
-			if($this->page === null) {
+			if ($this->page === null) {
 				return array_slice($this->items, $start, $length);
 			} else {
 				$starting = $this->page * $this->perPage - $this->perPage;
 				$pre = $start - $starting;
 
-				if(count($this->items) > $pre + $length) {
+				if (count($this->items) < $this->perPage || count($this->items) > $pre + $length) {
 					return array_slice($this->items, $pre, $length);
 				}
 			}
 		}
 
-		return $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search);
+		return null;
 	}
 
 	/**
 	 * search
 	 *
-	 * @name search
-	 * @access public
 	 * @return $this
 	 */
 	public function search($search) {
@@ -801,20 +814,17 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @param bool $write
 	 * @return $this
 	 */
-	public function push(DataObject $record, $write = false) {
+	public function push($record, $write = false) {
 		foreach((array) $this->defaults as $key => $value) {
-			if(empty($record[$key]))
-				$record[$key] = $value;
+			if(empty($record->{$key}))
+				$record->{$key} = $value;
 		}
 
 		if($this->count !== null) {
 			$this->count++;
 		}
 
-		parent::push($record);
-		if($write) {
-			$record->writeToDB(false, true);
-		}
+		$this->staging->add($record);
 
 		return $this;
 	}
@@ -862,11 +872,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function getConverted($item) {
 		if(is_array($item)) {
-			if(isset($item["class_name"]) && ClassInfo::exists($item["class_name"])) {
-				$object = new $item["class_name"]($item);
-			} else {
-				$object = new $this->dataobject->classname ($item);
-			}
+			$object = $this->modelSource()->createNew($item);
 		} else {
 			$object = $item;
 		}
@@ -1004,9 +1010,9 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		// default submission
 		$form->setSubmission(isset($submission) ? $submission : "submit_form");
 
-		$form->addValidator(new DataValidator($this->getModelSource()->DataClass()), "datavalidator");
+		$form->addValidator(new DataValidator($this->modelSource()->DataClass()), "datavalidator");
 
-		$form->add(new HiddenField("class_name", $this->getModelSource()->DataClass()));
+		$form->add(new HiddenField("class_name", $this->modelSource()->DataClass()));
 
 		foreach($this->defaults as $key => $value) {
 			$form->add(new HiddenField($key, $value));
@@ -1014,18 +1020,29 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		// render form
 		if($edit) {
-			$this->getModelSource()->getEditForm($form);
+			$this->modelSource()->getEditForm($form);
 		} else {
-			$this->getModelSource()->getForm($form);
+			$this->modelSource()->getForm($form);
 		}
 
 		//$this->getModelSource()->callExtending('getForm', $form, $edit);
-		$this->getModelSource()->getActions($form, $edit);
+		$this->modelSource()->getActions($form, $edit);
 		//$this->dataobject->callExtending('getActions', $form, $edit);
 
 		return $form;
 	}
 
+	/**
+	 * @return DataSet
+	 */
+	public function toDataSet() {
+		return new DataSet($this->forceData()->ToArray());
+	}
+
+	/**
+	 * @param string $offset
+	 * @return bool
+	 */
 	public function __cancall($offset) {
 		$loweroffset = trim(strtolower($offset));
 		if($loweroffset == "current")
@@ -1047,6 +1064,17 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
+	 * @return IDataObjectSetModelSource
+	 */
+	protected function modelSource() {
+		if(!isset($this->modelSource)) {
+			throw new InvalidArgumentException("This DataObjectSet has no bound ModelSource. It can't be used for creating new Models or converting arrays.");
+		}
+
+		return $this->modelSource;
+	}
+
+	/**
 	 * creates new model and adds it with data.
 	 * @param array $data
 	 * @return DataObjectSet
@@ -1061,6 +1089,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	protected function createNewModel($data = array())
 	{
-		return $this->getModelSource()->createNew($data);
+		return $this->modelSource()->createNew($data);
 	}
 }

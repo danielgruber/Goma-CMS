@@ -569,10 +569,7 @@ class DataSet extends ArrayList {
      */
     public function getConverted($item) {
         if(is_array($item)) {
-            if(isset($item["class_name"]) && ClassInfo::exists($item["class_name"]))
-                $object = new $item["class_name"]($item);
-            else
-                $object = new ViewAccessableData($item);
+            $object = gObject::instance(ViewAccessableData::ID)->createNew($item);
         } else {
             $object = $item;
         }
