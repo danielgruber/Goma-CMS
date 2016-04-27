@@ -395,7 +395,7 @@ class DataSet extends ArrayList {
      * @return array
      */
     public function getPages() {
-        return $this->renderPages($this->getPageCount(), $this->page);
+        return self::renderPages($this->getPageCount(), $this->page);
     }
 
     /**
@@ -471,53 +471,6 @@ class DataSet extends ArrayList {
             return $this->page - 1;
         } else {
             return 1;
-        }
-    }
-
-    /**
-     * get an array of pages by given pagecount
-     *
-     * @name renderPages
-     * @access public
-     * @param int $pagecount
-     * @param int $currentpage
-     * @return array
-     */
-    protected function renderPages($pagecount, $currentpage = 1) {
-        if($pagecount < 2) {
-            return array(1 => array(
-                "page" 	=> 1,
-                "black"	=> true
-            ));
-        } else {
-            $data = array();
-            if($pagecount < 8) {
-                for($i = 1; $i <= $pagecount; $i++) {
-                    $data[$i] = array(
-                        "page" 	=> ($i),
-                        "black"	=> ($i == $currentpage)
-                    );
-                }
-            } else {
-
-                $lastDots = false;
-                for($i = 1; $i <= $pagecount; $i++) {
-                    if($i < 3 || ($i > $currentpage - 3 && $i < $currentpage + 3) || $i > $pagecount - 3) {
-                        $data[$i] = array(
-                            "page" 	=> ($i),
-                            "black"	=> ($i == $currentpage)
-                        );
-                        $lastDots = false;
-                    } else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
-                        $data[$i] = array(
-                            "page" 	=> "...",
-                            "black" => true
-                        );
-                        $lastDots = true;
-                    }
-                }
-            }
-            return $data;
         }
     }
 

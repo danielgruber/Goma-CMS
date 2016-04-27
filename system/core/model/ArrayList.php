@@ -193,14 +193,20 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * removes a specific item or item-index.
 	 *
-	 * @param mixed item
+	 * @param mixed $item
 	 * @return bool
 	 */
 	public function remove($item) {
-		foreach($this->items as $key => $record)
-			if($item == $record)
+		foreach($this->items as $key => $record) {
+			if ($item == $record) {
+				if($key <= $this->position) {
+					$this->position--;
+				}
+
 				unset($this->items[$key]);
-		
+			}
+		}
+
 		$this->items = array_values($this->items);
 	}
 	

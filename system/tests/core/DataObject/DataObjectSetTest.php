@@ -200,4 +200,9 @@ class MockIModelSource implements IDataObjectSetModelSource {
     {
         return $this->_dataClass;
     }
+
+    public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
+    {
+        // TODO: Implement callExtending() method.
+    }
 }

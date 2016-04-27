@@ -43,4 +43,5 @@ interface IDataObjectSetModelSource {
     public function getEditForm(&$form);
     public function getActions(&$form);
     public function DataClass();
+    public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null);
 }

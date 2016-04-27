@@ -150,4 +150,9 @@ class ExceptionManager {
 	 * lists
 	 */
 	const ITEM_NOT_FOUND = -944;
+
+	/**
+	 * model.
+	 */
+	const DATAOBJECTSET_COMMIT = -1105;
 }

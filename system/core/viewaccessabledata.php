@@ -1034,6 +1034,51 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 		return new $this($data);
 	}
+
+	/**
+	 * get an array of pages by given pagecount
+	 *
+	 * @param int $pagecount
+	 * @param int $currentpage
+	 * @return array
+	 */
+	protected static function renderPages($pagecount, $currentpage = 1) {
+		if($pagecount < 2) {
+			return array(1 => array(
+				"page" 	=> 1,
+				"black"	=> true
+			));
+		} else {
+			$data = array();
+			if($pagecount < 8) {
+				for($i = 1; $i <= $pagecount; $i++) {
+					$data[$i] = array(
+						"page" 	=> ($i),
+						"black"	=> ($i == $currentpage)
+					);
+				}
+			} else {
+
+				$lastDots = false;
+				for($i = 1; $i <= $pagecount; $i++) {
+					if($i < 3 || ($i > $currentpage - 3 && $i < $currentpage + 3) || $i > $pagecount - 3) {
+						$data[$i] = array(
+							"page" 	=> ($i),
+							"black"	=> ($i == $currentpage)
+						);
+						$lastDots = false;
+					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
+						$data[$i] = array(
+							"page" 	=> "...",
+							"black" => true
+						);
+						$lastDots = true;
+					}
+				}
+			}
+			return $data;
+		}
+	}
 }
 
 

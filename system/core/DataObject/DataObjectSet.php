@@ -250,6 +250,14 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		Core::Deprecate("2.0", "setFetchMode");
 		if($data === array()) {
 			$this->setFetchMode(self::FETCH_MODE_CREATE_NEW);
+		} else {
+			foreach($data as $record) {
+				if(is_array($record)) {
+					$this->staging->add($record);
+				} else {
+					throw new InvalidArgumentException("setData requires array of arrays. And It's marked as Deprecated.");
+				}
+			}
 		}
 	}
 
@@ -407,11 +415,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		return $this->dbDataSource()->getAggregate(
 			$this->version, "count", $field, true,
 			$this->filter, array(), $this->limit,
-			$this->join, $this->search);
+			$this->join, $this->search) + $this->staging->count();
 	}
 
 	/**
 	 * gets the maximum value of given field in this set.
+	 *
+	 * Attention: Does not support staging.
 	 *
 	 * @param string $field
 	 * @return null|int
@@ -426,6 +436,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * gets the maximum value of given field in this set + returns a count of all fields in this set as a
 	 * comma-seperated-string. this is for use in caching.
+	 *
+	 * Attention: Does not support staging.
 	 *
 	 * @param string $field
 	 * @return null|string
@@ -442,6 +454,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * gets the minimum value of given field in this set.
 	 *
+	 * Attention: Does not support staging.
+	 *
 	 * @param string $field
 	 * @return null
 	 */
@@ -454,6 +468,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * gets the sum value of given field in this set.
+	 *
+	 * Attention: Does not support staging.
 	 *
 	 * @name sum
 	 * @access public
@@ -526,13 +542,19 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
 				$this->items = $this->staging->ToArray();
 			} else {
-				$limit = $this->limit;
+				$limit = (array) $this->limit;
 				if ($this->page !== null) {
 					$startIndex = $this->page * $this->perPage - $this->perPage;
-					$limit[0] = $limit[0] + $startIndex;
+					$limit[0] = isset($limit[0]) ? $limit[0] + $startIndex : $startIndex;
+				} else {
+					$limit[0] = isset($limit[0]) ? $limit[0] : 0;
 				}
 
-				$this->items = $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, $limit, $this->join, $this->search);
+				if(!isset($limit[1])) {
+					$limit[1] = PHP_INT_MAX;
+				}
+
+				$this->items = $this->getRecordsByRange($limit[0], $limit[1]);
 
 				if ($this->page === null) {
 					$this->count = count($this->items);
@@ -815,6 +837,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return $this
 	 */
 	public function push($record, $write = false) {
+		if(!gObject::method_exists($record, "writeToDB")) {
+			throw new InvalidArgumentException("DataObjectSet::push requires DataObject as first argument.");
+		}
+
 		foreach((array) $this->defaults as $key => $value) {
 			if(empty($record->{$key}))
 				$record->{$key} = $value;
@@ -825,6 +851,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		}
 
 		$this->staging->add($record);
+
+		if($this->page === null || count($this->items) < $this->perPage) {
+			$this->items[] = $record;
+		}
+
+		if($write)
+			$this->commitStaging();
 
 		return $this;
 	}
@@ -922,39 +955,47 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @param bool $forceInsert
 	 * @param bool $forceWrite
 	 * @param int $snap_priority
-	 * @deprecated
-	 * @return bool
+	 * @throws Exception
 	 */
-	public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
-		try {
-			$this->writeToDB($forceInsert, $forceWrite, $snap_priority);
-			return true;
-		} catch(Exception $e) {
-			log_exception($e);
-			return false;
+	public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+		$exceptions = array();
+		$errorRecords = array();
+
+		/** @var DataObject $record */
+		foreach($this->staging as $record) {
+			if(is_array($record)) {
+				$record = $this->getConverted($record);
+			}
+
+			try {
+				$record->writeToDB($forceInsert, $forceWrite, $snap_priority);
+
+				$this->staging->remove($record);
+			} catch(Exception $e) {
+				$exceptions[] = $e;
+				$errorRecords[] = $record;
+			}
+		}
+
+		if(count($exceptions) > 0) {
+			throw new DataObjectSetCommitException($exceptions, $errorRecords);
 		}
 	}
 
 	/**
-	 * write to DB
-	 * @param bool $forceInsert
-	 * @param bool $forceWrite
-	 * @param int $snap_priority
-	 * @throws Exception
+	 * remove from stage.
+	 * @param DataObject $record
 	 */
-	public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
-		$writtenIDs = array();
-		if(count($this->data) > 0) {
-			/** @var DataObject $record */
-			foreach($this->data as $record) {
-				if(is_object($record) && (!isset($writtenIDs[$record->id]) || $record->id == 0)) {
-					$writtenIDs[$record->id] = true;
-					$record->writeToDB($forceInsert, $forceWrite, $snap_priority);
-				}
-			}
-		} else if($this->dataobject->hasChanged()) {
-			$this->dataobject->writeToDB();
-		}
+	public function removeFromStage($record) {
+		$this->staging->remove($record);
+	}
+
+	/**
+	 * @return ArrayList
+	 */
+	public function getStaging()
+	{
+		return $this->staging;
 	}
 
 	/**
@@ -1025,11 +1066,21 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$this->modelSource()->getForm($form);
 		}
 
-		//$this->getModelSource()->callExtending('getForm', $form, $edit);
+		$this->modelSource()->callExtending('getForm', $form, $edit);
 		$this->modelSource()->getActions($form, $edit);
-		//$this->dataobject->callExtending('getActions', $form, $edit);
+		$this->modelSource()->callExtending('getActions', $form, $edit);
 
 		return $form;
+	}
+
+
+	/**
+	 * gets available pages as array to render it in good pagination-style.
+	 *
+	 * @return array
+	 */
+	public function getPages() {
+		return self::renderPages($this->getPageCount(), $this->page);
 	}
 
 	/**
@@ -1090,5 +1141,37 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected function createNewModel($data = array())
 	{
 		return $this->modelSource()->createNew($data);
+	}
+}
+
+class DataObjectSetCommitException extends GomaException {
+	/**
+	 * exceptions.
+	 *
+	 * @var Exception[]
+	 */
+	public $exceptions;
+
+	/**
+	 * @var DataObject[]
+	 */
+	public $records;
+
+	protected $standardCode = ExceptionManager::DATAOBJECTSET_COMMIT;
+
+	/**
+	 * DataObjectSetCommitException constructor.
+	 * @param Exception[] $exceptions
+	 * @param DataObject[] $records
+	 * @param string $message
+	 * @param null|int $code
+	 * @param null|Exception $previous
+	 */
+	public function __construct($exceptions, $records, $message = "", $code = null, $previous = null)
+	{
+		parent::__construct($message, $code, $previous);
+
+		$this->exceptions = $exceptions;
+		$this->records = $records;
 	}
 }

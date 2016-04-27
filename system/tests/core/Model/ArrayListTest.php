@@ -10,7 +10,7 @@
 class ArrayListTest extends GomaUnitTest
 {
 
-    static $area = "Model";
+    static $area = "NModel";
     /**
      * name
      */
@@ -188,6 +188,77 @@ class ArrayListTest extends GomaUnitTest
 
         $list->moveBefore($this->daniel, $this->janine, true);
         $this->assertEqual($list[1], $this->daniel);
+    }
+
+    /**
+     * tests iterator with delete.
+     */
+    public function testIterator() {
+        $data = array(
+            $this->daniel,
+            $this->janine,
+            $this->kathi,
+            $this->julian,
+            $this->patrick
+        );
+        $this->unittestIterator($data, 0);
+        $this->unittestIterator($data, 1);
+        $this->unittestIterator($data, 2);
+        $this->unittestIterator($data, 3);
+        $this->unittestIterator($data, 4);
+    }
+
+    /**
+     * @param array $data
+     * @param int $removePosition
+     */
+    public function unittestIterator($data, $removePosition) {
+        $list = new ArrayList($data);
+
+        $i = 0;
+        foreach($list as $record) {
+            if($i == $removePosition) {
+                $list->remove($record);
+            }
+            $this->assertEqual($data[$i], $record);
+
+            $i++;
+        }
+
+        $i = 0;
+        foreach($list as $record) {
+            if($i >= $removePosition) {
+                $this->assertEqual($data[$i + 1], $record);
+            } else {
+                $this->assertEqual($data[$i], $record);
+            }
+
+            $i++;
+        }
+    }
+
+    /**
+     * tests multi iterator with delete.
+     */
+    public function testMultiIterator() {
+        $data = array(
+            $this->daniel,
+            $this->janine,
+            $this->daniel,
+            $this->janine
+        );
+
+        $i = 0;
+        $list = new ArrayList($data);
+        foreach($list as $record) {
+            if($i == 0) {
+                $i++;
+                $list->remove($record);
+                $this->assertEqual($record, $this->daniel);
+            } else {
+                $this->assertEqual($record, $this->janine);
+            }
+        }
     }
 }
 

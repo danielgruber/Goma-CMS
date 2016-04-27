@@ -393,7 +393,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     {
         if (PROFILE) Profiler::mark("DataObject::get_one");
 
-        $output = self::get($dataClass, $filter, $sort, array(1), $joins)->first(false);
+        $output = self::get($dataClass, $filter, $sort, array(1), $joins)->first();
 
         if (PROFILE) Profiler::unmark("DataObject::get_one");
 
@@ -2549,6 +2549,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      *
      * @param Controller|null $controller
      * @return Controller|null
+     * @deprecated
      */
     public function controller($controller = null)
     {
