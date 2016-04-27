@@ -26,7 +26,7 @@ class ContactController extends PageController
             new TextField('subject', lang("subject")),
             new email("email", lang("email")),
             new textarea("text", lang("text"), null, "300px"),
-           // new captcha("captcha")
+            new captcha("captcha")
         ),
             array(
                 new FormAction("submit", lang("lp_submit"))
@@ -86,6 +86,6 @@ class ContactController extends PageController
             AddContent::addError($e->getMessage());
         }
 
-        return $this->redirectback();
+        return GomaResponse::redirect($this->namespace);
     }
 }
