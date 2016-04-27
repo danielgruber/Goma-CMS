@@ -17,6 +17,23 @@ class DataObjectSetTests extends GomaUnitTest
      */
     public $name = "DataObjectSet";
 
+    protected $daniel;
+    protected $kathi;
+    protected $patrick;
+    protected $janine;
+    protected $nik;
+    protected $julian;
+
+    public function setUp()
+    {
+        $this->daniel =  new DumpDBElementPerson("Daniel", 20, "M");
+        $this->kathi = new DumpDBElementPerson("Kathi", 22, "W");
+        $this->patrick = new DumpDBElementPerson("Patrick", 16, "M");
+        $this->janine = new DumpDBElementPerson("Janine", 19, "W");
+        $this->nik = new DumpDBElementPerson("Nik", 21, "M");
+        $this->julian = new DumpDBElementPerson("Julian", 20, "M");
+    }
+
     /**
      * relationship env.
      */
@@ -32,6 +49,27 @@ class DataObjectSetTests extends GomaUnitTest
         $this->unittestDataClass("123");
         $this->unittestDataClass("blub");
         $this->unittestDataClass(null);
+    }
+
+    public function testAssignFields() {
+        $this->unittestAssignFields("MockDataObjectForDataObjectSet");
+        $this->unittestAssignFields(new MockDataObjectForDataObjectSet());
+        $this->unittestAssignFields(new MockIDataObjectSetDataSource("User"));
+        $set = $this->unittestAssignFields(array($source = new MockIDataObjectSetDataSource(), $model = new MockIModelSource()));
+        $this->assertEqual($set->getDbDataSource(), $source);
+        $this->assertEqual($set->getModelSource(), $model);
+
+        $set = $this->unittestAssignFields("DumpDBElementPerson");
+        $this->assertIsA($set->getDbDataSource(), "MockIDataObjectSetDataSource");
+        $this->assertIsA($set->getModelSource(), "MockIModelSource");
+    }
+
+    public function unittestAssignFields($object) {
+        $set = new DataObjectSet($object);
+        $this->assertIsA($set->getModelSource(), "IDataObjectSetModelSource");
+        $this->assertIsA($set->getDbDataSource(), "IdataObjectSetDataSource");
+
+        return $set;
     }
 
     public function unittestDataClass($class) {
@@ -99,6 +137,138 @@ class DataObjectSetTests extends GomaUnitTest
 
         $this->assertEqual($clone->first(), $first);
     }
+
+    public function testFirstLast() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+        $source->records = array(
+            $this->janine,
+            $this->daniel
+        );
+
+        $this->assertEqual($set->first(), $this->janine);
+        $this->assertEqual($set->last(), $this->daniel);
+        $this->assertEqual($set->forceData()->count(), 2);
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine
+        );
+
+        $this->assertEqual($set->first(), $this->janine);
+        $this->assertEqual($set->last(), $this->daniel);
+        $set->filter(array("name" => "blah"));
+        $this->assertEqual($set->first(), null);
+        $this->assertEqual($set->last(), null);
+
+        $set->filter(array());
+
+        $this->assertEqual($set->first(), $this->julian);
+        $this->assertEqual($set->last(), $this->janine);
+
+        $this->assertEqual($set[1], $this->daniel);
+        $this->assertEqual($set[2], $this->janine);
+        $this->assertEqual($set[3], null);
+    }
+
+    public function testPagination() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi,
+            $this->patrick,
+            $this->nik
+        );
+
+        $set->activatePagination(null, 2);
+        $this->assertEqual($set->first(), $this->julian);
+        $this->assertEqual($set->last(), $this->daniel);
+
+        $set->activatePagination(2);
+        $this->assertEqual($set->getPage(), 2);
+
+        $this->assertEqual($set->first(), $this->janine);
+        $this->assertEqual($set->last(), $this->kathi);
+
+        $set->activatePagination(3);
+        $this->assertEqual($set->getPage(), 3);
+
+        $this->assertEqual($set->first(), $this->patrick);
+        $this->assertEqual($set->last(), $this->nik);
+        $this->assertEqual($set[1], $this->nik);
+
+        $set->disablePagination();
+
+        $this->assertEqual($set[4], $this->patrick);
+    }
+
+    public function testStaging() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertEqual($set->count(), 4);
+        $set->add($this->patrick);
+
+        $this->assertEqual($set->count(), 5);
+        $this->assertEqual($set[4], $this->patrick);
+        $this->assertEqual($set->last(), $this->patrick);
+
+        try {
+            $set->commitStaging();
+        } catch(Exception $e) {
+            $this->assertIsA($e, "DataObjectSetCommitException");
+            $this->assertEqual($set->getStaging()->find("name", "patrick", true), $this->patrick);
+        }
+
+        $set->removeFromStage($this->patrick);
+        $this->assertEqual($set[4], null);
+        $this->assertEqual($set->last(), $this->kathi);
+    }
+
+    public function testStagingMulti() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertEqual($set->count(), 4);
+        $set->add($this->patrick);
+        $set->add($this->nik);
+
+        $this->assertEqual($set->count(), 6);
+        $this->assertEqual($set[4], $this->patrick);
+        $this->assertEqual($set->last(), $this->nik);
+        $this->assertEqual($set[3], $this->kathi);
+
+        $set->removeFromStage($this->patrick);
+        $this->assertEqual($set[4], $this->nik);
+        $this->assertEqual($set->count(), 5);
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
@@ -111,9 +281,31 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     public $_dataClass;
     public $inExpansion;
 
+    public function __construct($dataClass = "")
+    {
+        $this->_dataClass = $dataClass;
+    }
+
+    protected function getListBy($records, $filter, $sort, $limit) {
+        $list = new ArrayList($records);
+        if($filter) {
+            $list = $list->filter($filter);
+        }
+
+        if($sort) {
+            $list = $list->sort($sort);
+        }
+
+        if(isset($limit[0], $limit[1])) {
+            $list = $list->getRange($limit[0], $limit[1]);
+        }
+
+        return $list;
+    }
+
     public function getRecords($version, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array())
     {
-        return $this->records;
+        return $this->getListBy($this->records, $filter, $sort, $limit)->ToArray();
     }
 
     /**
@@ -133,12 +325,16 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
      */
     public function getAggregate($version, $aggregate, $aggregateField = "*", $distinct = false, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array(), $groupby = array())
     {
+        if(strtolower($aggregate) == "count" && !isset($this->aggregate)) {
+            return $this->getListBy($this->records, $filter, $sort, $limit)->count();
+        }
+
         return $this->aggregate;
     }
 
     public function getGroupedRecords($version, $groupField, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array())
     {
-        return $this->group;
+        return $this->getListBy($this->group, $filter, $sort, $limit)->ToArray();
     }
 
     public function canFilterBy($field)
@@ -169,6 +365,11 @@ class MockIModelSource implements IDataObjectSetModelSource {
     public $getEditFormCallback;
     public $getActionsCallback;
     public $_dataClass;
+
+    public function __construct($dataClass = "")
+    {
+        $this->_dataClass = $dataClass;
+    }
 
     public function createNew($data = array())
     {
@@ -204,5 +405,55 @@ class MockIModelSource implements IDataObjectSetModelSource {
     public function callExtending($method, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null, &$p7 = null)
     {
         // TODO: Implement callExtending() method.
+    }
+}
+
+class MockDataObjectForDataObjectSet extends DataObject {}
+
+class DumpDBElementPerson extends DataObject {
+
+    public static function getDbDataSource($class)
+    {
+        return new MockIDataObjectSetDataSource($class);
+    }
+
+    public static function getModelDataSource($class)
+    {
+        return new MockIModelSource($class);
+    }
+
+    /**
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @var int
+     */
+    public $age;
+
+    /**
+     * @var string 'M' or 'W'
+     */
+    public $gender;
+
+    /**
+     * DumpElementPerson constructor.
+     * @param string $name
+     * @param int $age
+     * @param string $gender 'M' or 'W'
+     */
+    public function __construct($name, $age, $gender)
+    {
+        parent::__construct();
+
+        $this->name = $name;
+        $this->age = $age;
+        $this->gender = $gender;
+    }
+
+    public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
+    {
+        throw new Exception("Should not be written.");
     }
 }

@@ -104,6 +104,18 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected $items;
 
 	/**
+	 * first-cache.
+	 *
+	 * @var ViewAccessableData
+	 */
+	private $firstCache;
+
+	/**
+	 * @var ViewAccessableData
+	 */
+	private $lastCache;
+
+	/**
 	 * @var int
 	 */
 	protected $position = 0;
@@ -143,6 +155,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected function clearCache() {
 		$this->items = null;
 		$this->count = null;
+		$this->firstCache = null;
+		$this->lastCache = null;
 	}
 
 	/**
@@ -155,11 +169,21 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			/** @var DataObjectSet $class */
 			$this->dbDataSource = $class->getDbDataSource();
 			$this->modelSource = $class->getModelSource();
-		} else
+		} else if(is_object($class)) {
+			if(is_a($class, "IDataObjectSetDataSource")) {
+				$this->dbDataSource = $class;
+			}
 
-		if(is_a($class, "IDataObjectSetDataSource")) {
-			$this->dbDataSource = $class;
-		} else
+			if(is_a($class, "IDataObjectSetModelSource")) {
+				$this->modelSource = $class;
+			}
+
+			if(method_exists($class, "DataClass") && ClassInfo::exists($class->DataClass())) {
+				$class = $class->DataClass();
+			} else {
+				return;
+			}
+		}
 
 		if(is_array($class) && count($class) == 2) {
 			if(is_a($class[0], "IDataObjectSetDataSource")) {
@@ -173,11 +197,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		if(is_string($class)) {
 			if(ClassInfo::exists($class)) {
-				if(method_exists($class, "getDbDataSource")) {
+				if(method_exists($class, "getDbDataSource") && !isset($this->dbDataSource)) {
 					$this->dbDataSource = call_user_func_array(array($class, "getDbDataSource"), array($class));
 				}
 
-				if(method_exists($class, "getModelDataSource")) {
+				if(method_exists($class, "getModelDataSource") && !isset($this->modelSource)) {
 					$this->modelSource = call_user_func_array(array($class, "getModelDataSource"), array($class));
 				}
 
@@ -311,9 +335,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return DataObject|null
 	 */
 	public function first() {
-		$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
-		$range = $this->getRange($start, 1);
-		return $range->first();
+		if(!isset($this->firstCache)) {
+			$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
+			$range = $this->getRange($start, 1);
+			$this->firstCache = $range->first();
+		}
+
+		return $this->firstCache;
 	}
 
 	/**
@@ -322,13 +350,18 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return DataObject|null
 	 */
 	public function last() {
-		if($this->page === null) {
-			return $this->getRange($this->count() - 1, 1);
+		if(!isset($this->lastCache)) {
+			if($this->count() == 0) {
+				$this->lastCache = null;
+			} else if($this->page === null || $this->page == $this->getPageCount()) {
+				$this->lastCache = $this->getRange($this->countWholeSet() - 1, 1)->first();
+			} else {
+				$index = $this->page * $this->perPage - 1;
+				$this->lastCache = $this->getRange($index, 1)->first();
+			}
 		}
 
-		if($this->page < $this->getPageCount()) {
-
-		}
+		return $this->lastCache;
 	}
 
 	/**
@@ -671,14 +704,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return $this
 	 */
 	public function activatePagination($page = null, $perPage = null) {
-
 		$this->clearCache();
 		if(isset($perPage) && $perPage > 0)
 			$this->perPage = $perPage;
 
 		if(isset($page) && RegexpUtil::isNumber($page) && $page > 0) {
 			// first validate the data
-			$pages = max(ceil($this->Count() / $this->perPage), 1);
+			$pages = max(ceil($this->countWholeSet() / $this->perPage), 1);
 			if($pages < $page) {
 				$page = $pages;
 			}
@@ -689,6 +721,17 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($this->page)) {
 			$this->page = 1;
 		}
+
+		return $this;
+	}
+
+	/**
+	 * disables pagination.
+	 */
+	public function disablePagination() {
+		$this->clearCache();
+		$this->page = null;
+		return $this;
 	}
 
 	/**
@@ -853,7 +896,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		$this->staging->add($record);
 
 		if($this->page === null || count($this->items) < $this->perPage) {
-			$this->items[] = $record;
+			if($this->items != null) {
+				$this->items[] = $record;
+			}
+
+			$this->lastCache = $record;
 		}
 
 		if($write)
@@ -977,6 +1024,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			}
 		}
 
+		$this->clearCache();
+
 		if(count($exceptions) > 0) {
 			throw new DataObjectSetCommitException($exceptions, $errorRecords);
 		}
@@ -988,6 +1037,28 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function removeFromStage($record) {
 		$this->staging->remove($record);
+
+		if(isset($this->items)) {
+			foreach ($this->items as $key => $item) {
+				if ($item == $record) {
+					unset($this->items[$key]);
+				}
+			}
+
+			$this->items = array_values($this->items);
+		}
+
+		if($this->firstCache == $record) {
+			$this->firstCache = null;
+		}
+
+		if($this->lastCache == $record) {
+			$this->lastCache = null;
+		}
+
+		if(isset($this->count)) {
+			$this->count--;
+		}
 	}
 
 	/**
@@ -996,6 +1067,30 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function getStaging()
 	{
 		return $this->staging;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getPage()
+	{
+		return $this->page;
+	}
+
+	/**
+	 * @param int $page
+	 * @return DataObjectSet
+	 */
+	public function setPage($page) {
+		return $this->activatePagination($page);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPerPage()
+	{
+		return $this->perPage;
 	}
 
 	/**
