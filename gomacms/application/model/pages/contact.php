@@ -40,7 +40,7 @@ class Contact extends Page
      * @access public
      * @param object - FORM
      */
-    public function getForm(Form &$form)
+    public function getForm(&$form)
     {
         parent::getForm($form);
 

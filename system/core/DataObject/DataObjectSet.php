@@ -10,96 +10,107 @@
  * @author      Goma-Team
  *
  * @version     1.5.2
- *
- * TODO: Add Interface for $this->dataobject and add something like "default" model.
  */
-class DataObjectSet extends DataSet {
+class DataObjectSet extends ViewAccessableData implements Countable {
+
+	const FETCH_MODE_CREATE_NEW = "fetch_create_new";
+	const FETCH_MODE_EDIT = "fetch_mode_edit";
 
 	/**
-	 * some other props
-	 */
-	/**
-	 * filter for this dataset
+	 * how many items per page
 	 *
-	 *@name filter
-	 *@access protected
+	 * @var int
 	 */
-	protected $filter = array();
+	protected $perPage = 10;
+
+	/**
+	 * the current page of this dataset
+	 *
+	 * @var int|null
+	 */
+	protected $page = null;
+
 	/**
 	 * sorting
-	 *
-	 *@name sort
-	 *@access protected
 	 */
 	protected $sort;
-	/**
-	 * limits
-	 *
-	 *@name limit
-	 *@access protected
-	 */
-	protected $limit;
-	/**
-	 * joins
-	 *
-	 *@name join
-	 *@access protected
-	 */
-	protected $join;
-	/**
-	 * for search
-	 *
-	 *@name search
-	 *@access protected
-	 */
-	protected $search = array();
-	/**
-	 * versioning
-	 *
-	 *@name version
-	 *@access protected
-	 */
-	protected $version;
 
 	/**
-	 *  of the data in this set
-	 *
-	 *@name count
-	 *@access protected
+	 * limits
 	 */
-	protected $count;
+	protected $limit;
+
+	/**
+	 * joins
+	 */
+	protected $join;
+
+	/**
+	 * filter
+	 */
+	protected $filter;
+
+	/**
+	 * for search
+	 */
+	protected $search = array();
+
+	/**
+	 * versioning
+	 */
+	protected $version;
 
 	/**
 	 * dataobject for this DataObjectSet
 	 *
 	 * @var IDataObjectSetDataSource
 	 */
-	public $dataobject;
+	protected $dbDataSource;
 
 	/**
-	 * data
+	 * model source.
 	 *
-	 *@name data
-	 *@access public
+	 * @var IDataObjectSetModelSource
 	 */
-	public $data = null;
+	protected $modelSource;
 
 	/**
-	 * controller of this dataobjectset
+	 * fetch-mode.
+	 */
+	protected $fetchMode;
+
+	/**
+	 * @var DataSet
+	 */
+	protected $staging;
+
+	/**
+	 * @var array
+	 */
+	protected $protected_customised;
+
+	/**
+	 * cache for count.
 	 *
-	 * @var Controller|String|null
+	 * @var int|null
 	 */
-	public $controller = "";
+	protected $count;
 
 	/**
-	 * sort by ids.
+	 * items.
+	 *
+	 * @var array|null
 	 */
-	protected $sortByIds = null;
-	protected $idField = null;
+	protected $items;
+
+	/**
+	 * @var int
+	 */
+	protected $position = 0;
 
 	/**
 	 * constructor
-	 * @param string|IDataObjectSetDataSource $class
+	 * @param string|IDataObjectSetDataSource|IDataObjectSetModelSource|array $class
 	 * @param string|array $filter
 	 * @param string|array $sort
 	 * @param int|array $limit
@@ -108,30 +119,120 @@ class DataObjectSet extends DataSet {
 	 * @param string|null $version
 	 */
 	public function __construct($class = null, $filter = null, $sort = null, $limit = null, $join = null, $search = null, $version = null) {
-		parent::__construct(null);
+		parent::__construct();
 
 		if(isset($class)) {
-			if(is_a($class, "DataObjectSet")) {
-				/** @var DataObjectSet $class */
-				$class = $class->dataobject;
-			}
-
-			if(!is_string($class) && !is_a($class, "IDataObjectSetDataSource")) {
-				throw new InvalidArgumentException("\$class must be either String or IDataObjectSetDataSource.");
-			}
-
-			$this->dataobject = gObject::instance($class);
-			$this->inExpansion = $this->dataobject->inExpansion;
+			$this->resolveSources($class);
 
 			$this->filter($filter);
-			$this->sort = (isset($sort) && !empty($sort)) ? $sort : StaticsManager::getStatic($class, "default_sort");
+			$this->sort = (isset($sort) && !empty($sort)) ? $sort : null;
 			$this->limit($limit);
 			$this->join($join);
 			$this->search($search);
 			$this->setVersion($version);
-
-			$this->protected_customised = $this->customised;
 		}
+
+		$this->staging = new DataSet();
+		$this->protected_customised = $this->customised;
+		$this->fetchMode = self::FETCH_MODE_EDIT;
+	}
+
+	/**
+	 * clears cache.
+	 */
+	protected function clearCache() {
+		$this->items = null;
+		$this->count = null;
+	}
+
+	/**
+	 * resolved sources.
+	 *
+	 * @param string|IDataObjectSetDataSource|IDataObjectSetModelSource|array $class
+	 */
+	protected function resolveSources($class) {
+		if(is_a($class, "DataObjectSet")) {
+			/** @var DataObjectSet $class */
+			$this->dbDataSource = $class->getDbDataSource();
+			$this->modelSource = $class->getModelSource();
+		} else
+
+		if(is_a($class, "IDataObjectSetDataSource")) {
+			$this->dbDataSource = $class;
+		} else
+
+		if(is_array($class) && count($class) == 2) {
+			if(is_a($class[0], "IDataObjectSetDataSource")) {
+				$this->dbDataSource = $class[0];
+			}
+
+			if(is_a($class[1], "IDataObjectSetModelSource")) {
+				$this->modelSource = $class[1];
+			}
+		} else
+
+		if(is_string($class)) {
+			if(ClassInfo::exists($class)) {
+				if(method_exists($class, "getDbDataSource")) {
+					$this->dbDataSource = call_user_func_array(array($class, "getDbDataSource"), array($class));
+				}
+
+				if(method_exists($class, "getModelDataSource")) {
+					$this->modelSource = call_user_func_array(array($class, "getModelDataSource"), array($class));
+				}
+
+				if(!isset($this->dbDataSource) && !isset($this->modelSource)) {
+					throw new InvalidArgumentException("Class " . $class . " does not integrate method getDbDataSource or getModelDataSource.");
+				}
+			} else {
+				throw new InvalidArgumentException("Class " . $class . " does not exist.");
+			}
+		} else {
+			throw new InvalidArgumentException("\$class must be either String or IDataObjectSetDataSource or IDataObjectSetModelSource or array of both.");
+		}
+	}
+
+	/**
+	 * @param IDataObjectSetDataSource $source
+	 * @return $this
+	 */
+	public function setDbDataSource($source) {
+		if(!is_a($source, "IDataObjectSetDataSource")) {
+			throw new InvalidArgumentException("Argument must be type of IDataObjectSetDataSource.");
+		}
+
+		$this->dbDataSource = $source;
+		$this->inExpansion = $source->getInExpansion();
+		return $this;
+	}
+
+	/**
+	 * @param IDataObjectSetModelSource $modelSource
+	 * @return $this
+	 */
+	public function setModelSource($modelSource) {
+		if(!is_a($modelSource, "IDataObjectSetModelSource")) {
+			throw new InvalidArgumentException("Argument must be type of IDataObjectSetModelSource.");
+		}
+
+		$this->modelSource = $modelSource;
+		return $this;
+	}
+
+	/**
+	 * @return IDataObjectSetDataSource
+	 */
+	public function getDbDataSource()
+	{
+		return $this->dbDataSource;
+	}
+
+	/**
+	 * @return IDataObjectSetModelSource
+	 */
+	public function getModelSource()
+	{
+		return $this->modelSource;
 	}
 
 	/**
@@ -139,19 +240,44 @@ class DataObjectSet extends DataSet {
 	 */
 	public function DataClass()
 	{
-		return $this->dataobject->classname;
+		return isset($this->dbDataSource) ? $this->dbDataSource->DataClass() : (isset($this->modelSource) ? $this->modelSource->DataClass() : null);
 	}
 
 	/**
 	 * sets the data and datacache of this set
-	 *
-	 *@name setData
-	 *@access public
 	 */
 	public function setData($data = array()) {
-		$this->dataCache = $data;
-		$this->data = (array) $data;
-		$this->count = count($data);
+		Core::Deprecate("2.0", "setFetchMode");
+		if($data === array()) {
+			$this->setFetchMode(self::FETCH_MODE_CREATE_NEW);
+		}
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getFetchMode()
+	{
+		return $this->fetchMode;
+	}
+
+	/**
+	 * @param string $fetchMode
+	 * @return $this
+	 */
+	public function setFetchMode($fetchMode)
+	{
+		if($fetchMode == self::FETCH_MODE_EDIT || $fetchMode == self::FETCH_MODE_CREATE_NEW) {
+			$this->fetchMode = $fetchMode;
+
+			if($fetchMode == self::FETCH_MODE_CREATE_NEW) {
+				$this->count = $this->staging->count();
+			}
+		} else {
+			throw new InvalidArgumentException("Invalid fetchmode for DataObjectSet.");
+		}
+
+		return $this;
 	}
 
 	/**
@@ -162,7 +288,7 @@ class DataObjectSet extends DataSet {
 	public function ToArray($additional_fields = array())
 	{
 		$data = array();
-		foreach((array) $this->data as $record) {
+		foreach($this as $record) {
 			/** @var DataObject $record */
 			if(is_object($record)) {
 				$data[] = $record->toArray($additional_fields);
@@ -175,111 +301,42 @@ class DataObjectSet extends DataSet {
 
 	/**
 	 * gets query-version
-	 *
-	 *@name queryVersion
-	 *@access public
 	 */
 	public function queryVersion() {
 		return $this->version;
 	}
 
 	/**
-	 * queries the db for records by given range
-	 * the data will be stored in the data-var and given back
+	 * returns the first item
 	 *
-	 *@name getRecordsByRange
-	 *@access protected
-	 *@param int - start
-	 *@param int - length
-	 *@return array
+	 * @return DataObject|null
 	 */
-	protected function getRecordsByRange($start, $length) {
-		if(PROFILE) Profiler::mark("DataObjectSet::getRecordsByRange");
-
-		if(isset($this->limit[0], $this->limit[1])) {
-			if(($this->limit[0] + $this->limit[1]) <= $start) {
-				if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
-				return array();
-			} else if(($this->limit[0] + $this->limit[1]) < ($start + $length)) {
-				$length = ($this->limit[0] + $this->limit[1]) - $start;
-			}
-		}
-
-		$data = array();
-		for($i = $start; $i < ($start + $length); $i++) {
-			if(isset($this->dataCache[$i])) {
-				$data[$i] =& $this->dataCache[$i];
-			} else {
-				$start = $i;
-				$length = $length - $i + $start;
-				break;
-			}
-		}
-
-		if($length > 0) {
-			$count = $start;
-			foreach($this->dataobject->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search) as $record) {
-				if(!isset($data[$count]))
-					$data[$count] = $record;
-				$count++;
-				unset($record);
-			}
-
-			$this->dataCache = $this->dataCache + $data;
-
-			if($this->sortByIds) {
-				$data = $this->sortByIds($data, $this->sortByIds, $this->idField);
-			}
-
-			if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
-			return $data;
-		} else {
-
-			if($this->sortByIds) {
-				$data = $this->sortByIds($data, $this->sortByIds, $this->idField);
-			}
-
-			if(PROFILE) Profiler::unmark("DataObjectSet::getRecordsByRange");
-			return $data;
-		}
-	}
-
-	public function sortByIds($data, $ids, $idField) {
-		$newData = array();
-		foreach($ids as $id) {
-			foreach($data as $k => $r) {
-				if(is_object($r) && $r[$idField] == $id) {
-					$newData[$k] = $r;
-					$data[$k] = null;
-					break;
-				}
-			}
-		}
-
-		foreach($data as $k => $v) {
-			if($v !== null) {
-				$newData[$k] = $v;
-			}
-		}
-		return $newData;
+	public function first() {
+		$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
+		$range = $this->getRange($start, 1);
+		return $range->first();
 	}
 
 	/**
-	 * returns the first item
+	 * returns last item.
 	 *
-	 * @param bool $forceObject
 	 * @return DataObject|null
 	 */
-	public function first($forceObject = true) {
-		$this->forceData();
-
-		if(is_array($this->data) && count($this->data) > 0 && isset($this->data[key($this->data)])) {
-			return $this->current(key($this->data));
-		} else if($forceObject) {
-			return $this->dataobject;
-		} else {
-			return null;
+	public function last() {
+		if($this->page === null) {
+			return $this->getRange($this->count() - 1, 1);
 		}
+
+		if($this->page < $this->getPageCount()) {
+
+		}
+	}
+
+	/**
+	 * @return DataObject|null
+	 */
+	public function firstOrDefault() {
+		return $this->first() ? $this->first() : $this->modelSource->createNew();
 	}
 
 	/**
@@ -297,13 +354,36 @@ class DataObjectSet extends DataSet {
 	/**
 	 * gets a Range of items as array of this DataSet
 	 * pagination is always ignored
-	 *
-	 *@name getArrayRange
-	 *@access public
-	 *@return array
+	 * @param int $start
+	 * @param int $length
+	 * @return array
 	 */
 	public function getArrayRange($start, $length) {
 		return $this->getRecordsByRange($start, $length);
+	}
+
+	/**
+	 * returns page-count.
+	 *
+	 * @return int
+	 */
+	public function getPageCount() {
+		return ceil($this->countWholeSet() / $this->perPage);
+	}
+
+	/**
+	 * returns count in set.
+	 */
+	public function count() {
+		if($this->page === null) {
+			return $this->countWholeSet();
+		}
+
+		if($this->page < $this->getPageCount()) {
+			return $this->perPage;
+		}
+
+		return $this->countWholeSet() - ($this->getPageCount() - 1)  * $this->perPage;
 	}
 
 	/**
@@ -313,21 +393,15 @@ class DataObjectSet extends DataSet {
 	 * @access public
 	 * @return int
 	 */
-	public function Count() {
-		if(isset($this->count)) {
-			return $this->count;
-		} else if(count($this->data) > 0 && (($this->page == 1 && count($this->data) < $this->perPage) || !$this->pagination)) {
-			$this->count = count($this->data);
-			return $this->count;
-		} else {
-			$data = $this->dataobject->getAggregate($this->version, 'count(*) as count', $this->filter, array(), $this->limit, $this->join, $this->search);
-			if(isset($data[0]["count"])) {
-				$this->count = (int) $data[0]["count"];
-				return $this->count;
-			} else {
-				return 0;
-			}
+	public function countWholeSet() {
+		if(!isset($this->count)) {
+			$this->count = $this->dbDataSource()->getAggregate(
+				$this->version, "count", "*", false,
+				$this->filter, array(), $this->limit,
+				$this->join, $this->search);
 		}
+
+		return $this->count;
 	}
 
 	/**
@@ -339,76 +413,52 @@ class DataObjectSet extends DataSet {
 			throw new InvalidArgumentException("Field must have only letters, numbers and underscore.");
 		}
 
-		// TODO: GetAggregate MUST have more information about the field, to be parsed by HasOne or HasMany or ManyMany to add JOINs.
-		$data = $this->dataobject->getAggregate($this->version, 'count(distinct '.$field.') as count', $this->filter, array(), $this->limit, $this->join, $this->search);
-		if(isset($data[0]["count"])) {
-			$this->count = (int) $data[0]["count"];
-			return $this->count;
-		} else {
-			return 0;
-		}
+		return $this->dbDataSource()->getAggregate(
+			$this->version, "count", $field, true,
+			$this->filter, array(), $this->limit,
+			$this->join, $this->search);
 	}
 
 	/**
 	 * gets the maximum value of given field in this set.
 	 *
-	 * @name max
-	 * @access public
 	 * @param string $field
 	 * @return null|int
 	 */
 	public function Max($field) {
-		$field = $this->getFieldWithTable($field);
-
-		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max', $this->filter, array(), $this->limit, $this->join, $this->search);
-
-		if(isset($data[0]["max"])) {
-			return $data[0]["max"];
-		} else {
-			return null;
-		}
+		return $this->dbDataSource()->getAggregate(
+			$this->version, "max", $field, false,
+			$this->filter, array(), $this->limit,
+			$this->join, $this->search);
 	}
 
 	/**
 	 * gets the maximum value of given field in this set + returns a count of all fields in this set as a
 	 * comma-seperated-string. this is for use in caching.
 	 *
-	 * @name maxCount
-	 * @access public
 	 * @param string $field
 	 * @return null|string
 	 */
 	public function MaxCount($field) {
-		$field = $this->getFieldWithTable($field);
+		$data = $this->dbDataSource()->getAggregate(
+			$this->version, array("max", "count"), $field, false,
+			$this->filter, array(), $this->limit,
+			$this->join, $this->search);
 
-		$data = $this->dataobject->getAggregate($this->version, 'max('.convert::raw2sql($field).') as max, count(*) AS count', $this->filter, array(), $this->limit, $this->join, $this->search);
-
-		if(isset($data[0]["max"])) {
-			return $data[0]["max"]  . "," . $data[0]["count"];
-		} else {
-			return null;
-		}
+		return $data["max"] . "," . $data["count"];
 	}
 
 	/**
 	 * gets the minimum value of given field in this set.
 	 *
-	 * @name min
-	 * @access public
 	 * @param string $field
 	 * @return null
 	 */
 	public function Min($field) {
-
-		$field = $this->getFieldWithTable($field);
-
-		$data = $this->dataobject->getAggregate($this->version, 'min('.convert::raw2sql($field).') as min', $this->filter, array(), $this->limit, $this->join, $this->search);
-
-		if(isset($data[0]["min"])) {
-			return $data[0]["min"];
-		} else {
-			return null;
-		}
+		return $this->dbDataSource()->getAggregate(
+			$this->version, "min", $field, false,
+			$this->filter, array(), $this->limit,
+			$this->join, $this->search);
 	}
 
 	/**
@@ -420,41 +470,18 @@ class DataObjectSet extends DataSet {
 	 * @return null
 	 */
 	public function Sum($field) {
-
-		$field = $this->getFieldWithTable($field);
-
-		$data = $this->dataobject->getAggregate($this->version, 'sum('.convert::raw2sql($field).') as sum', $this->filter, array(), $this->limit, $this->join, $this->search);
-
-		if(isset($data[0]["sum"])) {
-			return $data[0]["sum"];
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * gets field name correctly.
-	 *
-	 * @param string $field
-	 * @return string
-	 */
-	protected function getFieldWithTable($field) {
-		if(isset(ClassInfo::$database[$this->dataobject->table()][strtolower($field)])) {
-			return $this->dataobject->table() . "." . $field;
-		}
-
-		return $field;
+		return $this->dbDataSource()->getAggregate(
+			$this->version, "Sum", $field, false,
+			$this->filter, array(), $this->limit,
+			$this->join, $this->search);
 	}
 
 	/**
 	 * rewind
-	 *
-	 *@name rewind
-	 *@access public
 	 */
 	public function rewind() {
 		$this->forceData();
-		parent::rewind();
+		$this->position = 0;
 	}
 
 	/**
@@ -468,28 +495,35 @@ class DataObjectSet extends DataSet {
 		if(!isset($position))
 			$position = $this->position;
 
-		$this->forceData();
-		if(isset($this->data[$position]))
-			$data = $this->data[$position];
-		else {
-			// get next range
-			$this->data = $this->getRecordsByRange($position, $this->perPage);
-			$data = $this->data[$position];
-		}
-
-		$data = $this->getConverted($data);
-
-		if(is_object($data) && is_a($data, "viewaccessabledata"))
-			$data->dataSetPosition = $position;
+		$data = $this->getConverted($this->items[$position]);
 
 		if(is_a($data, "DataObject")) {
 			/** @var DataObject $data */
 			$data->queryVersion = $this->version;
 		}
 
-		$this->data[$position] = $data;
-
 		return $data;
+	}
+
+	/**
+	 * check if data exists
+	 */
+	public function valid()
+	{
+		return isset($this->items[$this->position]);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function key()
+	{
+		return $this->position;
+	}
+
+	public function next()
+	{
+		$this->position++;
 	}
 
 	/**
@@ -497,75 +531,58 @@ class DataObjectSet extends DataSet {
 	 * @return $this
 	 */
 	public function forceData() {
+		if(!isset($this->items)) {
+			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
+				$this->items = $this->staging->ToArray();
+			} else {
+				$limit = $this->limit;
+				if ($this->page !== null) {
+					$startIndex = $this->page * $this->perPage - $this->perPage;
+					$limit[0] = $limit[0] + $startIndex;
+				}
 
-		if(!isset($this->dataCache) && isset($this->dataobject)) {
-			if($this->page !== null) {
-				$this->dataCache = $this->dataobject->getRecords($this->version, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
+				$this->items = $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, $limit, $this->join, $this->search);
+
+				if ($this->page === null) {
+					$this->count = count($this->items);
+				}
 			}
 		}
 
 		return $this;
 	}
 
-
-	/**
-	 * check if data exists
-	 *@name valid
-	 */
-	public function valid()
-	{
-		$this->forceData();
-		return parent::valid();
-	}
-
 	/**
 	 * filters the data
-	 *
-	 *@name filter
-	 *@access public
+	 * @param array $filter
+	 * @return $this
 	 */
 	public function filter($filter) {
 		if(isset($filter) && $this->filter != $filter) {
 			$this->filter = $filter;
-			$this->purgeData();
+			$this->clearCache();
 		}
 		return $this;
 	}
 
 	/**
 	 * adds a filter
-	 *
-	 *@name addFilter
-	 *@access public
 	 */
 	public function addFilter($filter) {
 		if(isset($filter)) {
 			$this->filter = array_merge((array) $this->filter, (array) $filter);
-			$this->purgeData();
+			$this->clearCache();
 		}
 		return $this;
 	}
 
 	/**
 	 * group by a specific field
-	 *
-	 *@name groupBy
-	 *@access public
+	 * @param  string $field
+	 * @return array
 	 */
 	public function groupBy($field) {
-		return $this->dataobject->getGroupedRecords($this->version, $field, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
-	}
-
-	/**
-	 * purges current data from this set
-	 *
-	 *@name purgeData
-	 *@access protected
-	 */
-	protected function purgeData() {
-		$this->data = null;
-		$this->count = null;
-		$this->dataCache = null;
+		return $this->dbDataSource()->getGroupedRecords($this->version, $field, $this->filter, $this->sort, $this->limit, $this->join, $this->search);
 	}
 
 	/**
@@ -575,7 +592,7 @@ class DataObjectSet extends DataSet {
 	 */
 	public function addJoin($join) {
 		$this->join = array_merge((array)$this->join, (array)$join);
-		$this->purgeData();
+		$this->clearCache();
 		return $this;
 	}
 
@@ -586,7 +603,7 @@ class DataObjectSet extends DataSet {
 	 */
 	public function removeJoin($key) {
 		unset($this->join[$key]);
-		$this->purgeData();
+		$this->clearCache();
 		return $this;
 	}
 
@@ -598,7 +615,7 @@ class DataObjectSet extends DataSet {
 	public function join($join) {
 		if(isset($join)) {
 			$this->join = (array) $join;
-			$this->purgeData();
+			$this->clearCache();
 		}
 		return $this;
 	}
@@ -609,7 +626,6 @@ class DataObjectSet extends DataSet {
 	 * @return $this
 	 */
 	public function limit($limit) {
-
 		if((is_string($limit) && preg_match('/^[0-9]+$/', $limit)) || is_int($limit)) {
 			$limit = array((int) $limit);
 		}
@@ -621,18 +637,16 @@ class DataObjectSet extends DataSet {
 			$limit = array_values($limit);
 			if(isset($limit[0], $limit[1])) {
 				$this->limit = $limit;
-			} else if($limit[0]) {
+			} else if(isset($limit[0])) {
 				$this->limit = array(0, $limit[0]);
 			} else {
-				return $this;
+				throw new InvalidArgumentException("Invalid arguments for limit.");
 			}
-		} else if($this->limit) {
-			$this->limit = array(0, $limit[0]);
 		} else {
-			return $this;
+			throw new InvalidArgumentException("Invalid arguments for limit.");
 		}
 
-		$this->purgeData();
+		$this->clearCache();
 		return $this;
 	}
 
@@ -645,17 +659,23 @@ class DataObjectSet extends DataSet {
 	 */
 	public function activatePagination($page = null, $perPage = null) {
 
-		$this->purgeData();
-		return parent::activatePagination($page, $perPage);
-	}
+		$this->clearCache();
+		if(isset($perPage) && $perPage > 0)
+			$this->perPage = $perPage;
 
-	/**
-	 * sorts with callback.
-	 *
-	 * @param $callback
-	 */
-	public function sortWithCallback($callback) {
-		usort($this->dataCache, $callback);
+		if(isset($page) && RegexpUtil::isNumber($page) && $page > 0) {
+			// first validate the data
+			$pages = max(ceil($this->Count() / $this->perPage), 1);
+			if($pages < $page) {
+				$page = $pages;
+			}
+
+			$this->page = $page;
+		}
+
+		if(!isset($this->page)) {
+			$this->page = 1;
+		}
 	}
 
 	/**
@@ -668,36 +688,23 @@ class DataObjectSet extends DataSet {
 	 * @return $this
 	 */
 	public function sort($column, $type = "") {
-
-		if(is_array($column)) {
-			$this->sortByIds = $column;
-			$this->sort = null;
-
-			if($type && strtolower($type) != "asc") {
-				$this->idField = $type;
-			} else {
-				$this->idField = "id";
-			}
-
-			return $this;
-		}
-
-		$this->sortByIds = null;
-		$this->idField = null;
-
 		if(!isset($column))
 			return $this;
 
 		if(!$this->canSortBy($column))
 			return $this;
 
-		switch(strtolower($type)) {
-			case "desc":
-				$type = "DESC";
-				break;
-			default:
-				$type = "ASC";
-				break;
+		if(is_string($type) || is_null($type)) {
+			switch (strtolower($type)) {
+				case "desc":
+					$type = "DESC";
+					break;
+				default:
+					$type = "ASC";
+					break;
+			}
+		} else if(!is_array($type)) {
+			throw new InvalidArgumentException("Unknown type for \$type in function sort()");
 		}
 
 		if(isset($this->sort["field"]) && $this->sort["field"] == $column && $this->sort["type"] == $type) {
@@ -705,7 +712,7 @@ class DataObjectSet extends DataSet {
 		}
 
 		$this->sort = array("field" => $column, "type" => $type);
-		$this->purgeData();
+		$this->clearCache();
 
 		return $this;
 	}
@@ -716,7 +723,7 @@ class DataObjectSet extends DataSet {
 	 *@name canSortBy
 	 */
 	public function canSortBy($field) {
-		return $this->dataobject->canSortBy($field);
+		return $this->dbDataSource()->canSortBy($field);
 	}
 
 	/**
@@ -725,18 +732,18 @@ class DataObjectSet extends DataSet {
 	 *@name canSortBy
 	 */
 	public function canFilterBy($field) {
-		return $this->dataobject->canFilterBy($field); //! TODO: Implement Filter in DataObjectSet
+		return $this->dbDataSource()->canFilterBy($field);
 	}
 
 	/**
 	 * sets version-type.
 	 *
-	 * @param	mixed $version type: "published"/"state"/"grouped"/false (get all records not grouped by recordid)/integer
+	 * @param    mixed $version type: "published"/"state"/"grouped"/false (get all records not grouped by recordid)/integer
+	 * @return $this
 	 */
 	public function setVersion($version) {
 		$this->version = $version;
-		$this->dataobject->queryVersion = $version;
-		$this->purgeData();
+		$this->clearCache();
 		return $this;
 	}
 
@@ -751,6 +758,29 @@ class DataObjectSet extends DataSet {
 	}
 
 	/**
+	 * @param int $start
+	 * @param int $length
+	 * @return array
+	 */
+	protected function getRecordsByRange($start, $length)
+	{
+		if($this->items !== null) {
+			if($this->page === null) {
+				return array_slice($this->items, $start, $length);
+			} else {
+				$starting = $this->page * $this->perPage - $this->perPage;
+				$pre = $start - $starting;
+
+				if(count($this->items) > $pre + $length) {
+					return array_slice($this->items, $pre, $length);
+				}
+			}
+		}
+
+		return $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search);
+	}
+
+	/**
 	 * search
 	 *
 	 * @name search
@@ -760,7 +790,7 @@ class DataObjectSet extends DataSet {
 	public function search($search) {
 		if(isset($search)) {
 			$this->search = $search;
-			$this->purgeData();
+			$this->clearCache();
 		}
 		return $this;
 	}
@@ -769,7 +799,7 @@ class DataObjectSet extends DataSet {
 	 * adds a new record to this set
 	 * @param DataObject $record
 	 * @param bool $write
-	 * @return bool|void
+	 * @return $this
 	 */
 	public function push(DataObject $record, $write = false) {
 		foreach((array) $this->defaults as $key => $value) {
@@ -785,15 +815,18 @@ class DataObjectSet extends DataSet {
 		if($write) {
 			$record->writeToDB(false, true);
 		}
+
+		return $this;
 	}
 
 	/**
 	 * alias for push
 	 * @param mixed $item
 	 * @param bool $write
+	 * @return DataObjectSet
 	 */
 	public function add($item, $write = false) {
-		$this->push($item, $write);
+		return $this->push($item, $write);
 	}
 
 	/**
@@ -840,52 +873,12 @@ class DataObjectSet extends DataSet {
 
 		$object->original = $object->data;
 
-		$object->dataset =& $this;
-
 		if(is_object($object) && method_exists($object, "customise")) {
 			$object->customise($this->protected_customised);
 			return $object;
 		} else {
 			return $object;
 		}
-	}
-
-
-	/**
-	 * gets the controller
-	 *
-	 * @return Controller
-	 */
-	public function controller($controller = null) {
-
-		if(is_object($controller)) {
-			$this->controller = clone $controller;
-			$this->controller->setModelInst($this, $this->dataobject->classname);
-			return $this->controller;
-		}
-
-		if(is_object($this->controller))
-		{
-			return $this->controller;
-		}
-
-		/* --- */
-
-		if($this->controller != "")
-		{
-			$this->controller = new $this->controller();
-			$this->controller->setModelInst($this, $this->dataobject->classname);
-			return $this->controller;
-		} else {
-			/** @var Controller $controller */
-			$controller = $this->dataobject->controller();
-			if($controller) {
-				$controller->setModelInst($this, $this->dataobject->classname);
-				return $controller;
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -911,7 +904,11 @@ class DataObjectSet extends DataSet {
 	 */
 	public function fieldToArray($field) {
 		$this->forceData();
-		return parent::fieldToArray($field);
+		$arr = array();
+		foreach((array)$this->items as $record) {
+			$arr[] = self::getItemProp($record, $field);
+		}
+		return $arr;
 	}
 
 	/**
@@ -955,29 +952,30 @@ class DataObjectSet extends DataSet {
 	}
 
 	/**
-	 * deletes the records in stack
-	 *
-	 *@name remove
-	 *@access public
-	 *@param bool - force delete
-	 *@param bool - if cancel on error, or resume
-	 *@param bool - if force to delete versions, too
+	 * @param string|int $offset
+	 * @return mixed
 	 */
-	public function remove($force = false, $forceAll = false) {
-		foreach($this as $key => $record) {
-			if($record->remove($force, $forceAll)) {
-				unset($this->data[$key]);
-				unset($this->dataCache[$key]);
-			}
+	public function offsetGet($offset)
+	{
+		if(RegexpUtil::isNumber($offset)) {
+			$this->forceData();
+
+			return isset($this->items[$offset]) ? $this->items[$offset] : null;
 		}
-		return true;
+		return parent::offsetGet($offset);
 	}
 
 	/**
-	 * public removal
+	 * @param string $offset
+	 * @return bool
 	 */
-	public function getRemove() {
-		throw new BadMethodCallException("Method remove is not allowed anymore and DataObjectSet, please select a single DataObject");
+	public function offsetExists($offset)
+	{
+		if(RegexpUtil::isNumber($offset)) {
+			return ($offset < $this->count());
+		}
+
+		return parent::offsetExists($offset);
 	}
 
 	/**
@@ -994,26 +992,21 @@ class DataObjectSet extends DataSet {
 	 * @return Form
 	 */
 	public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
-
 		// if name is not set, we generate a name from this model
 		if(!isset($name)) {
-			$name = $this->dataobject->classname . "_" . $this->dataobject->versionid . "_" . $this->dataobject->id;
+			$name = $this->getModelSource()->DataClass() . "_dataobjectset_new";
 		}
 
-		$form = new Form($controller, $name, array(), array(), array(), $request, $this->dataobject);
+		$form = new Form($controller, $name, array(), array(), array(), $request, $this->createNewModel());
 		if($disabled)
 			$form->disable();
 
 		// default submission
 		$form->setSubmission(isset($submission) ? $submission : "submit_form");
 
-		$form->addValidator(new DataValidator($this->dataobject), "datavalidator");
+		$form->addValidator(new DataValidator($this->getModelSource()->DataClass()), "datavalidator");
 
-		if(is_object($this->dataobject)) {
-			$form->setResult(clone $this->dataobject);
-		}
-
-		$form->add(new HiddenField("class_name", $this->dataobject->classname));
+		$form->add(new HiddenField("class_name", $this->getModelSource()->DataClass()));
 
 		foreach($this->defaults as $key => $value) {
 			$form->add(new HiddenField($key, $value));
@@ -1021,14 +1014,14 @@ class DataObjectSet extends DataSet {
 
 		// render form
 		if($edit) {
-			$this->dataobject->getEditForm($form, array());
+			$this->getModelSource()->getEditForm($form);
 		} else {
-			$this->dataobject->getForm($form, array());
+			$this->getModelSource()->getForm($form);
 		}
 
-		$this->dataobject->callExtending('getForm', $form, $edit);
-		$this->dataobject->getActions($form, $edit);
-		$this->dataobject->callExtending('getActions', $form, $edit);
+		//$this->getModelSource()->callExtending('getForm', $form, $edit);
+		$this->getModelSource()->getActions($form, $edit);
+		//$this->dataobject->callExtending('getActions', $form, $edit);
 
 		return $form;
 	}
@@ -1041,17 +1034,33 @@ class DataObjectSet extends DataSet {
 		return parent::__cancall($offset);
 	}
 
-	// some API patches
-	public function isDeleted() {
-		Core::Deprecate(2.0, "first->isDeleted");
-		return $this->first()->isDeleted();
+	/**
+	 * @return IDataObjectSetDataSource
+	 */
+	protected function dbDataSource()
+	{
+		if(!isset($this->dbDataSource)) {
+			throw new InvalidArgumentException("This DataObjectSet has no bound DataSource. It can't be used for queries.");
+		}
+
+		return $this->dbDataSource;
 	}
-	public function isPublished() {
-		Core::Deprecate(2.0, "first->isPublished");
-		return $this->first()->isPublished();
+
+	/**
+	 * creates new model and adds it with data.
+	 * @param array $data
+	 * @return DataObjectSet
+	 */
+	public function createNewModelAndAdd($data = array()) {
+		return $this->add($this->createNewModel($data));
 	}
-	public function everPublished() {
-		Core::Deprecate(2.0, "first->everPublished");
-		return $this->first()->everPublished();
+
+	/**
+	 * @param array $data
+	 * @return mixed
+	 */
+	protected function createNewModel($data = array())
+	{
+		return $this->getModelSource()->createNew($data);
 	}
 }

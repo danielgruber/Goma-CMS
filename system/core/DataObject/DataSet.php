@@ -414,14 +414,14 @@ class DataSet extends ArrayList {
      *@access public
      */
     public function goToLastPage() {
-        $pages = ceil($this->countWithoutPagination() / $this->perPage);
+        $pages = ceil($this->countWholeSet() / $this->perPage);
         $this->setPage($pages);
     }
 
     /**
      * @return int
      */
-    public function countWithoutPagination() {
+    public function countWholeSet() {
         return $this->filteredDataSource->count();
     }
 
@@ -444,7 +444,7 @@ class DataSet extends ArrayList {
      * @return bool
      */
     public function isNextPage() {
-        $pages = ceil($this->countWithoutPagination() / $this->perPage);
+        $pages = ceil($this->countWholeSet() / $this->perPage);
         return ($this->page < $pages);
     }
 
@@ -454,7 +454,7 @@ class DataSet extends ArrayList {
      * @return int
      */
     public function nextPage() {
-        $pages = ceil($this->countWithoutPagination() / $this->perPage);
+        $pages = ceil($this->countWholeSet() / $this->perPage);
         if($this->page < $pages) {
             return $this->page + 1;
         } else {

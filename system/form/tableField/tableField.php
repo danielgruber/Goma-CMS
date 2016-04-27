@@ -112,10 +112,10 @@ class tableField extends FormField {
     /**
      * sets the data
      *
-     * @param DataSet $data
+     * @param ArrayList|DataObjectSet $data
      * @return $this
      */
-	public function setData(DataSet $data) {
+	public function setData($data) {
 		$this->data = $data;
 		return $this;
 	}

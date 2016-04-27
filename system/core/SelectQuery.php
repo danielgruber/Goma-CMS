@@ -182,6 +182,12 @@ class SelectQuery {
 			}
 	}
 
+	/**
+	 * @param string $field
+	 * @param string|array $type
+	 * @param int $order
+	 * @return $this
+	 */
 	public function sort($field, $type = "ASC", $order = 0) {
 
 		$collate = null;
@@ -204,7 +210,7 @@ class SelectQuery {
 			} else {
 				foreach($field as $fieldName => $type) {
 					if(is_string($fieldName) && !RegexpUtil::isNumber($fieldName)) {
-						if(in_array(strtolower($type), array("desc", "asc"))) {
+						if(is_array($type) || in_array(strtolower($type), array("desc", "asc"))) {
 							$this->sort($fieldName, $type);
 						} else if(is_bool($type)) {
 							$this->sort($fieldName, $type ? "asc" : "desc");
@@ -226,10 +232,14 @@ class SelectQuery {
 		if($field == "")
 			return $this;
 
-		if(strtolower(trim($type)) == "desc") {
-			$type = "DESC";
+		if(is_string($type)) {
+			if (strtolower(trim($type)) == "desc") {
+				$type = "DESC";
+			} else {
+				$type = "ASC";
+			}
 		} else {
-			$type = "ASC";
+			throw new InvalidArgumentException("Type not supported for sort.");
 		}
 
 		$order = ($order == 0) ? count($this->orderby) : $order;
@@ -244,7 +254,8 @@ class SelectQuery {
 	/**
 	 * adds group-by
 	 *
-	 *@param string|array fields
+	 * @param string|array fields
+	 * @return $this
 	 */
 	public function groupby($fields, $prepend = false) {
 		if($prepend) {
@@ -566,12 +577,16 @@ class SelectQuery {
 					$sql .= ",";
 				}
 
-				$collate = isset($data[2]) ? " COLLATE " . $data[2] : "";
-
-				if(isset($DBFields[$data[0]])) {
-					$sql .= $DBFields[$data[0]] . "." . $data[0] . $collate . " " . $data[1];
+				if(is_array($data[1])) {
+					$sql .= "FIELD('.$data[0].', '".implode("','", $data[1])."')";
 				} else {
-					$sql .= $data[0] . $collate . " " . $data[1];
+					$collate = isset($data[2]) ? " COLLATE " . $data[2] : "";
+
+					if (isset($DBFields[$data[0]])) {
+						$sql .= $DBFields[$data[0]] . "." . $data[0] . $collate . " " . $data[1];
+					} else {
+						$sql .= $data[0] . $collate . " " . $data[1];
+					}
 				}
 			}
 		}

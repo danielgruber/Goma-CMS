@@ -9,12 +9,6 @@
  * $Version 1.0.3
  */
 class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHandler {
-
-	/**
-	 * @var bool
-	 */
-	public $overridePermission = false;
-
 	/**
 	 * provides HTML-fragments
 	 *
@@ -22,10 +16,6 @@ class TableFieldAddButton implements TableField_HTMLProvider, TableField_URLHand
 	 * @return array|void
 	 */
 	public function provideFragments($tableField) {
-		if(!$this->overridePermission && !$tableField->getData()->dataobject->can("Write")){
-			return;
-		}
-
 		$view = new ViewAccessableData();
 		if($tableField->getConfig()->getComponentByType('TableFieldPaginator')) {
 			return array(

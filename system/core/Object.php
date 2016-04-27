@@ -308,7 +308,6 @@ abstract class gObject
      */
     public static function instance($class)
     {
-
         if (is_object($class)) {
             return clone $class;
         }

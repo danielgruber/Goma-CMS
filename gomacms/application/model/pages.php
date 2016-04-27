@@ -714,7 +714,7 @@ class Pages extends DataObject implements PermProvider, HistoryData, Notifier
      *@access public
      *@param object - form
      */
-    public function getForm(Form &$form)
+    public function getForm(&$form)
     {
 
         parent::getForm($form);

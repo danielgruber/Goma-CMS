@@ -31,7 +31,7 @@
  * @method      string[] hasMany($component = null)
  * @method      ModelHasOneRelationshipInfo[]|ModelHasOneRelationshipInfo hasOne($component = null)
  */
-abstract class DataObject extends ViewAccessableData implements PermProvider, IDataObjectSetDataSource
+abstract class DataObject extends ViewAccessableData implements PermProvider, IDataObjectSetDataSource, IDataObjectSetModelSource
 {
     const VERSION_STATE = "state";
     const VERSION_PUBLISHED = "published";
@@ -160,6 +160,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     /**
      * STATIC METHODS
      */
+
+    /**
+     * @param string $class
+     * @return DataObject
+     */
+    public static function getModelDataSource($class) {
+        return gObject::instance($class);
+    }
+
+    /**
+     * @param string $class
+     * @return DataObject
+     */
+    public static function getDbDataSource($class) {
+        return gObject::instance($class);
+    }
 
     /**
      * gets a DataObject versioned
@@ -2243,32 +2259,35 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         }
         return $query;
     }
+
     /**
      * local argument sql
-     *
-     *@name argumentQuery
-     *@access public
+     * @param SelectQuery $query
      */
-
-    public function argumentQuery(&$query) {
+    protected function argumentQuery(&$query) {
 
     }
+
     /**
-     * builds an SQL-Query and arguments it through extensions
-     *
-     *@name buildQuery
-     *@access public
-     *@param string|int|false - version
-     *@param array - filter
-     *@param array - sort
-     *@param array - limit
-     *@param array - joins
-     *@param bool - to force recordclass is part of this class or a subclass
-     *@return SelectQuery-Object
+     * @param SelectQuery $query
+     * @param string $aggregateField
+     * @param string $aggregate
+     */
+    protected function extendAggregate(&$query, &$aggregateField, &$aggregate) {
+
+    }
+
+    /**
+     * @param string $version
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $joins
+     * @param bool $forceClasses
+     * @return SelectQuery
      */
     public function buildExtendedQuery($version, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $forceClasses = true)
     {
-
         if (PROFILE) Profiler::mark("DataObject::buildExtendedQuery");
         $query = $this->buildQuery($version, $filter, $sort, $limit, $joins, $forceClasses);
         foreach($this->getextensions() as $ext)
@@ -2288,15 +2307,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     }
 
     /**
-     * gets all the records of one query as an array
-     *@name getRecords
-     *@param string|int|false - version
-     *@param array - filter
-     *@param array - sort
-     *@param array - limit
-     *@param array - joins
-     *@param array - search
-     *@return array
+     * @param string $version
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $joins
+     * @param array $search
+     * @return array
+     * @throws SQLException
      */
     public function getRecords($version, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array())
     {
@@ -2381,18 +2399,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     }
 
     /**
-     * gets records grouped
-     *
-     * @name getGroupedRecords
-     * @access public
-     * @param int|false|string - version
-     * @param string - field to group
-     * @param array - filter
-     * @param array - sort
-     * @param array - limits
-     * @param array - joins
-     * @param array - search
+     * @param string $version
+     * @param string $groupField
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $joins
+     * @param array $search
      * @return array
+     * @throws SQLException
      */
     public function getGroupedRecords($version, $groupField, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array()) {
         if (!isset(ClassInfo::$class_info[$this->baseClass]["table"]) || !ClassInfo::$class_info[$this->baseClass]["table"] || !defined("SQL_LOADUP"))
@@ -2413,6 +2428,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         $query->fields = array($groupField);
 
+        // TODO: Extendable field
         $query->groupby($groupField);
         $this->tryToBuild($query);
 
@@ -2437,23 +2453,24 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         return $data;
     }
 
+
     /**
-     * this is the most flexible method of all the methods, but you need to know much
-     * you can define here fields and groupby at once and get an array as result back
+     * gets specific aggegrate.
      *
-     * @name getAggregate
-     * @access public
-     * @param false|int|string - version
-     * @param string|array - fields
-     * @param array - filter
-     * @param array - sort
-     * @param array - limits
-     * @param array - joins
-     * @param array - search
-     * @param array - groupby
+     * @param string $version
+     * @param string $aggregate
+     * @param string $aggregateField
+     * @param bool $distinct
+     * @param array $filter
+     * @param array $sort
+     * @param array $limit
+     * @param array $joins
+     * @param array $search
+     * @param array $groupby
      * @return array
+     * @throws SQLException
      */
-    public function getAggregate($version, $aggregate, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array(), $groupby = array()) {
+    public function getAggregate($version, $aggregate, $aggregateField = "*", $distinct = false, $filter = array(), $sort = array(), $limit = array(), $joins = array(), $search = array(), $groupby = array()) {
         if (!isset(ClassInfo::$class_info[$this->baseClass]["table"]) || !ClassInfo::$class_info[$this->baseClass]["table"] || !defined("SQL_LOADUP"))
             return array();
 
@@ -2470,16 +2487,37 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $this->tryToBuild($query);
         $query->groupby($groupby);
 
-        if ($query->execute($aggregate)) {
+        $aggregates = (array) $aggregate;
 
-            while($row = $query->fetch_assoc()) {
-                $data[] = $row;
+        $this->extendAggregate($query, $aggregateField, $aggregates);
+        $this->callExtending("extendAggregate", $query, $aggregateField, $aggregates);
+
+        $distinctSQL = $distinct ? "distinct" : "";
+
+        $aggregateSQL = "";
+        $i = 0;
+        foreach($aggregates as $singleAggregate) {
+            if($i == 0) $i++;
+            else $aggregateSQL .= ",";
+
+            $aggregateSQL .= $singleAggregate . "( " . $distinctSQL . " " . $aggregateField . ") as " . strtolower($singleAggregate);
+        }
+
+        if ($query->execute($aggregateSQL)) {
+            if($row = $query->fetch_assoc()) {
+                $data = $row;
                 unset($row);
+            } else {
+                $data = null;
             }
-
         }
 
         if (PROFILE) Profiler::unmark("DataObject::getAggregate");
+
+        if(count($data) == 1) {
+            $values = array_values($data);
+            return $values[0];
+        }
 
         return $data;
     }
@@ -3236,6 +3274,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                 'id'			=> 'INT(10) AUTO_INCREMENT  PRIMARY KEY'
             );
         }
+    }
+
+    public function getInExpansion() {
+        return $this->inExpansion;
+    }
+
+    public function createNew($data = array()) {
+        return new $this($data);
     }
 }
 

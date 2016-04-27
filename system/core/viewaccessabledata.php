@@ -73,14 +73,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	protected $changed = false;
 
 	/**
-	 * dataClass contains the class for which this data is, if it's not the same as
-	 * the class, which it contains.
-	 *
-	 * @access public
-	 */
-	public $dataClass;
-
-	/**
 	 * default values for specfic fields.
 	 *
 	 * @access public
@@ -131,8 +123,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	public function __construct($data = null) {
 		parent::__construct();
 
-		$this->dataClass = $this->classname;
-
 		/* --- */
 
 		if(isset($data)) {
@@ -147,6 +137,13 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 			self::$_get = ArrayLib::map_key("strtolower", $_GET);
 			self::$_post = ArrayLib::map_key("strtolower", $_POST);
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function DataClass() {
+		return $this->classname;
 	}
 
 	//!Setters and Getters
@@ -1000,6 +997,28 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		// do nothing
 	}
 
+
+	/**
+	 * returns a property of a given Item in the List.
+	 *
+	 * @param  array|gObject $item item
+	 * @param  string $prop property
+	 * @return null
+	 */
+	static function getItemProp($item, $prop) {
+		if(is_array($item))
+			return isset($item[$prop]) ? $item[$prop] : null;
+
+		if(is_object($item)) {
+			if(is_a($item, "ArrayAccess") && isset($item[$prop])) {
+				return $item[$prop];
+			}
+
+			return $item->{$prop};
+		}
+
+		return property_exists($item, $prop) ? $item->$prop : null;
+	}
 }
 
 

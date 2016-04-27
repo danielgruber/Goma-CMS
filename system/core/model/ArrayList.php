@@ -644,28 +644,6 @@ class ArrayList extends ViewAccessableData implements Countable {
 	}
 
 	/**
-	 * returns a property of a given Item in the List.
-	 *
-	 * @param  array|gObject $item item
-	 * @param  string $prop property
-	 * @return null
-	 */
-	static function getItemProp($item, $prop) {
-		if(is_array($item))
-			return isset($item[$prop]) ? $item[$prop] : null;
-		
-		if(is_object($item)) {
-			if(is_a($item, "ArrayAccess") && isset($item[$prop])) {
-				return $item[$prop];
-			}
-
-			return $item->{$prop};
-		}
-		
-		return property_exists($item, $prop) ? $item->$prop : null;
-	}
-
-	/**
 	 * returns an array of all the items of a specific column.
 	 *
 	 * @param  string $column default: id

@@ -21,12 +21,16 @@ class DataObjectSetTests extends GomaUnitTest
      * relationship env.
      */
     public function testCount() {
+        $data = DataObject::get("user");
+        $count = $data->count();
 
+        $data->add(new User());
+        $this->assertEqual($data->count(), $count + 1);
     }
 
     public function setDataTest() {
         $object = new HasMany_DataObjectSet("user");
-        $object->setData(array());
+        $object->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
         $this->assertEqual($object->count(), 0);
     }
 
@@ -35,15 +39,14 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertNull($object->first());
 
         $object = new HasMany_DataObjectSet("user");
-        $object->setData(array());
-        $this->assertIsA($object->first(), "user");
-        $this->assertNull($object->first(false));
+        $object->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        $this->assertNull($object->first());
     }
 
     public function testcreateFromCode()
     {
         $set = new DataObjectSet("user");
-        $set->setData();
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
         $set->add(new User());
         $set->add(new User());
 
