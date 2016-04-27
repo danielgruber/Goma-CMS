@@ -1094,6 +1094,65 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
+	 * sets pointer to last page
+	 */
+	public function goToLastPage() {
+		$this->setPage($this->getPageCount());
+		return $this;
+	}
+
+	/**
+	 * returns if it has a page before
+	 *
+	 * @return bool
+	 */
+	public function isPageBefore() {
+		return ($this->page > 1);
+	}
+
+	/**
+	 * checks if there is a next page
+	 *
+	 * @return bool
+	 */
+	public function isNextPage() {
+		return ($this->page < $this->getPageCount());
+	}
+
+	/**
+	 * returns the page-number of the next page
+	 *
+	 * @return int
+	 */
+	public function nextPage() {
+		if($this->page < $this->getPageCount()) {
+			return $this->page + 1;
+		} else {
+			return $this->getPageCount();
+		}
+	}
+
+	/**
+	 * returns the page before
+	 * @return int|null
+	 */
+	public function pageBefore() {
+		if($this->page > 1) {
+			return $this->page - 1;
+		} else {
+			return 1;
+		}
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function isPagination()
+	{
+		return $this->page !== null;
+	}
+
+	/**
 	 * @param string|int $offset
 	 * @return mixed
 	 */
@@ -1123,8 +1182,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * generates a form
 	 *
-	 * @name form
-	 * @access public
 	 * @param string $name
 	 * @param bool $edit
 	 * @param bool $disabled

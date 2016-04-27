@@ -437,9 +437,9 @@ class tableField extends FormField {
 				}
 				
 				$classes = array('tablefield-item');
-				if ($record->first()) $classes[] = 'first';
-				if ($record->last()) $classes[] = 'last';
-				$classes[] = ($record->white()) ? 'even' : 'odd';
+				if ($record == $data->first()) $classes[] = 'first';
+				if ($record == $data->last()) $classes[] = 'last';
+				$classes[] = $id % 2 == 0 ? 'even' : 'odd';
 				
 				$row = new HTMLNode(
 					'tr',

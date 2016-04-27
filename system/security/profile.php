@@ -60,7 +60,7 @@ class ProfileController extends FrontedController {
 		Core::setTitle(lang("edit_profile"));
 		
 		$userdata = DataObject::get("user", array("id" => member::$id))->first();
-		$controller = $this->getWithModel($userdata);
+		$controller = ControllerResolver::instanceForModel($userdata);
 
 		return '<h1>'.lang("edit_profile").'</h1>' . $controller->edit();
 	}

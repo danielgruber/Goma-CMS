@@ -409,13 +409,12 @@ class DataSet extends ArrayList {
 
     /**
      * sets pointer to last page
-     *
-     *@name goToLastPage
-     *@access public
+     * @return $this
      */
     public function goToLastPage() {
         $pages = ceil($this->countWholeSet() / $this->perPage);
         $this->setPage($pages);
+        return $this;
     }
 
     /**
@@ -428,8 +427,6 @@ class DataSet extends ArrayList {
     /**
      * returns if it has a page before
      *
-     * @name isPageBefore
-     * @access public
      * @return bool
      */
     public function isPageBefore() {
@@ -439,8 +436,6 @@ class DataSet extends ArrayList {
     /**
      * checks if there is a next page
      *
-     * @name isPageNext
-     * @access public
      * @return bool
      */
     public function isNextPage() {
