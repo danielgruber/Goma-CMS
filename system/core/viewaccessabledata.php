@@ -22,6 +22,9 @@ defined("IN_GOMA") OR die();
  * @version		2.3.4
  */
 class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
+
+	const ID = "ViewAccessableData";
+
 	/**
 	 * default datatype for casting.
 	 *
@@ -66,33 +69,11 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	public $customised = array();
 
 	/**
-	 * dataset-position when this object is in a specific dataset.
-	 *
-	 * @access public
-	 */
-	public $dataSetPosition = 0;
-
-	/**
 	 * indicates whether the data was changes or not.
 	 *
 	 * @access public
 	 */
 	protected $changed = false;
-
-	/**
-	 * dataset in which this Object is.
-	 *
-	 * @access public
-	 */
-	public $dataset;
-
-	/**
-	 * dataClass contains the class for which this data is, if it's not the same as
-	 * the class, which it contains.
-	 *
-	 * @access public
-	 */
-	public $dataClass;
 
 	/**
 	 * default values for specfic fields.
@@ -140,14 +121,10 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	//!Init
 	/**
 	 * Constructor.
-	 *
-	 * @access public
-	 * @param array $data data to start with
+	 * @param array|null $data
 	 */
 	public function __construct($data = null) {
 		parent::__construct();
-
-		$this->dataClass = $this->classname;
 
 		/* --- */
 
@@ -165,6 +142,13 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 		}
 	}
 
+	/**
+	 * @return string
+	 */
+	public function DataClass() {
+		return $this->classname;
+	}
+
 	//!Setters and Getters
 	/**
 	 * bool - for IF in template
@@ -172,72 +156,6 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	 */
 	public function bool() {
 		return (count($this->data) > 0);
-	}
-
-	/**
-	 * returns if this is the first entry or not
-	 */
-	public function first() {
-		return ($this->dataSetPosition === 0);
-	}
-
-	/**
-	 * returns if this is the last entry or not
-	 */
-	public function last() {
-
-		if(!isset($this->dataset)) {
-			return false;
-		}
-
-		return ($this->dataSetPosition + 1 == $this->dataset->count());
-	}
-
-	/**
-	 * returns current position
-	 */
-	public function position() {
-		return $this->dataSetPosition;
-	}
-
-	/**
-	 * returns if this is a highlighted one
-	 *
-	 */
-	public function highlight() {
-		$r = ($this->dataSetPosition + 1) % 2;
-		return ($r == 0);
-	}
-
-	/**
-	 * returns if this is a white one
-	 *
-	 */
-	public function white() {
-		return (!$this->highlight());
-	}
-
-	/**
-	 * make the functions on top to variables, for example $this.white
-	 */
-	public function getWhite() {
-		return $this->white();
-	}
-
-	public function getHighlight() {
-		return $this->highlight();
-	}
-
-	public function isFirst() {
-		return $this->first();
-	}
-
-	public function isLast() {
-		return $this->last();
-	}
-
-	public function getPosition() {
-		return $this->dataSetPosition;
 	}
 
 	/**
@@ -1037,7 +955,8 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * checks if a method "set" . $offset exists
-	 *@param string - offset
+	 * @param string $offset
+	 * @return bool
 	 */
 	public function isSetMethod($offset) {
 		return (self::method_exists($this, "set" . $offset) && !in_array(strtolower("set" . $offset), self::$notViewableMethods));
@@ -1045,8 +964,9 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * calls a method "set" . $offset
-	 *@param string - offset
-	 *@param mixed - value
+	 * @param string $offset
+	 * @param mixed $value
+	 * @return mixed
 	 */
 	public function callSetMethod($offset, $value) {
 		$func = "set" . $offset;
@@ -1076,12 +996,100 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	/**
 	 * unsets a offset
 	 * in this object it do nothing
-	 *@name offsetUnset
+	 * @param string $offset
 	 */
 	public function offsetUnset($offset) {
-		// do nothing
+		if(isset($this->data[$offset])) {
+			unset($this->data[$offset]);
+		}
 	}
 
+	/**
+	 * @param $name
+	 */
+	public function __unset($name)
+	{
+		return $this->offsetUnset($name);
+	}
+
+	/**
+	 * returns a property of a given Item in the List.
+	 *
+	 * @param  array|gObject $item item
+	 * @param  string $prop property
+	 * @return null
+	 */
+	static function getItemProp($item, $prop) {
+		if(is_array($item))
+			return isset($item[$prop]) ? $item[$prop] : null;
+
+		if(is_object($item)) {
+			if(is_a($item, "ArrayAccess") && isset($item[$prop])) {
+				return $item[$prop];
+			}
+
+			return $item->{$prop};
+		}
+
+		return property_exists($item, $prop) ? $item->$prop : null;
+	}
+
+	/**
+	 * @param array $data
+	 * @return ViewAccessableData
+	 */
+	public function createNew($data = array()) {
+		if(isset($data["class_name"])) {
+			return new $data["class_name"]($data);
+		}
+
+		return new $this($data);
+	}
+
+	/**
+	 * get an array of pages by given pagecount
+	 *
+	 * @param int $pagecount
+	 * @param int $currentpage
+	 * @return array
+	 */
+	protected static function renderPages($pagecount, $currentpage = 1) {
+		if($pagecount < 2) {
+			return array(1 => array(
+				"page" 	=> 1,
+				"black"	=> true
+			));
+		} else {
+			$data = array();
+			if($pagecount < 8) {
+				for($i = 1; $i <= $pagecount; $i++) {
+					$data[$i] = array(
+						"page" 	=> ($i),
+						"black"	=> ($i == $currentpage)
+					);
+				}
+			} else {
+
+				$lastDots = false;
+				for($i = 1; $i <= $pagecount; $i++) {
+					if($i < 3 || ($i > $currentpage - 3 && $i < $currentpage + 3) || $i > $pagecount - 3) {
+						$data[$i] = array(
+							"page" 	=> ($i),
+							"black"	=> ($i == $currentpage)
+						);
+						$lastDots = false;
+					} else if(!$lastDots && (($i > 2 && $i < ($currentpage - 2)) || ($i < ($pagecount - 2) && $i > ($currentpage + 2)))) {
+						$data[$i] = array(
+							"page" 	=> "...",
+							"black" => true
+						);
+						$lastDots = true;
+					}
+				}
+			}
+			return $data;
+		}
+	}
 }
 
 

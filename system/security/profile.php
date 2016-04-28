@@ -60,9 +60,9 @@ class ProfileController extends FrontedController {
 		Core::setTitle(lang("edit_profile"));
 		
 		$userdata = DataObject::get("user", array("id" => member::$id))->first();
-		$c = $userdata->controller();
+		$controller = ControllerResolver::instanceForModel($userdata);
 
-		return '<h1>'.lang("edit_profile").'</h1>' . $c->edit();
+		return '<h1>'.lang("edit_profile").'</h1>' . $controller->edit();
 	}
 
 	/**
@@ -95,7 +95,7 @@ class ProfileController extends FrontedController {
 		}
 		
 		// get info-tab
-		$userdata = DataObject::get("user", array("id" => $id));	
+		$userdata = DataObject::get_one("user", array("id" => $id));
 		$userdata->editable = ((isset(member::$id) && $id == member::$id)) ? true : false;
 		$info = $userdata->renderWith("profile/info.html");
 		$this->tabs->addTab(lang("general", "General Information"), $info, "info");

@@ -178,10 +178,8 @@ class ContentController extends FrontedController
     /**
      * for validating the password
      *
-     * @name validatePassword
-     * @access public
-     * @param object - validator
-     * @param string - password
+     * @param FormValidator $obj
+     * @param array $passwords
      * @return bool|string
      */
     public function validatePassword($obj, $passwords)
@@ -206,7 +204,7 @@ class ContentController extends FrontedController
     public function extendHandleAction($action, &$content)
     {
         if ($content === null && $action != "" && $this->subPage != null) {
-            $content = $this->subPage->controller()->handleRequest($this->request);
+            $content = ControllerResolver::instanceForModel($this->subPage)->handleRequest($this->request);
 
             return true;
         }

@@ -11,7 +11,6 @@
  * @version     1.2
  */
 class ManyMany_DataObjectSet extends DataObjectSet {
-
     /**
      * value of $ownField
      *
@@ -52,7 +51,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             }
 
             $this->join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
-                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dataobject->table() . ".id AND " .
+                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
                 $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->ownValue . "'";
         }
     }
@@ -112,7 +111,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
                 }
             }
 
-            $this->purgeData();
+            $this->clearCache();
         }
         return $this;
     }

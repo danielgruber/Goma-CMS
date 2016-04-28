@@ -40,7 +40,7 @@ class Contact extends Page
      * @access public
      * @param object - FORM
      */
-    public function getForm(Form &$form)
+    public function getForm(&$form)
     {
         parent::getForm($form);
 
@@ -49,33 +49,5 @@ class Contact extends Page
         $form->add(new HTMLEditor('data', lang("text")), null, "content");
 
         $email->info = lang("email_info", "e-mail-info");
-    }
-
-    /**
-     * gets the content of this page
-     *
-     * @return string
-     */
-    public function getContent()
-    {
-        $form = new Form($this->controller(), "mailer", array(
-            new TextField('name', lang("name")),
-            new TextField('subject', lang("subject")),
-            new email("email", lang("email")),
-            new textarea("text", lang("text"), null, "300px"),
-            new captcha("captcha")
-        ),
-            array(
-                new FormAction("submit", lang("lp_submit"))
-            ));
-
-
-        $form->setSubmission("send");
-        if ($this->requireEmailField) {
-            $form->addValidator(new RequiredFields(array("name", "text", "email")), "Required Fields");
-        } else {
-            $form->addValidator(new RequiredFields(array("name", "text")), "Required Fields");
-        }
-        return $this->data["data"] . $form->render();
     }
 }

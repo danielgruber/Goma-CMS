@@ -40,14 +40,24 @@
       }
     }
 
-    .filter-header {
+    .tablefield-deletebutton button {
+      margin-left: .5em;
+      margin-right: .5em;
+      padding-left: 0;
+      padding-right: 0;
+    }
 
+    .actionLink {
+      margin: 0 .5em;
+    }
+
+    .filter-header {
       .select {
         .select-wrapper {
           min-width: auto;
           select {
             min-width: auto;
-            max-width: 10em;
+            max-width: 8em;
           }
         }
       }
@@ -71,7 +81,7 @@
 
           .tablefield-button-resetFields {
             position: absolute;
-            right: -.625em;
+            right: -.75em;
             top: 0;
           }
         }
@@ -120,8 +130,8 @@
 
           input[type=text] {
             width: 99% !important;
-            margin: .25em .125em;
-            padding: .25em .5em;
+            margin: 0;
+            padding: .75em .5em;
             background: #fff;
             border: 1px solid #ddd;
             min-width: 0 !important;
@@ -300,21 +310,5 @@
 
   .tablefield-table .sortable-header td .tablefield-sortable input {
     background: none;
-  }
-}
-
-;
-
-/* here goes some retina-stuff */
-@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (   min--moz-device-pixel-ratio: 2), only screen and (     -o-min-device-pixel-ratio: 2/1) {
-
-  .tablefield-table .filter-header td fieldset .tablefield-button-filter input, .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
-    background-image: url(images/loope@2x.png) x;
-    background-size: 16px 16px;
-  }
-
-  .tablefield-table .filter-header td fieldset .tablefield-button-reset input, .tablefield-table .filter-header td fieldset .tablefield-button-resetFields input {
-    background-image: url(images/delete@2x.png);
-    background-size: 16px 16px;
   }
 }

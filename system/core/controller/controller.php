@@ -63,7 +63,7 @@ class Controller extends RequestHandler
     /**
      * instance of the model
      *
-     * @var RequestHandler|Controller
+     * @var ViewAccessableData
      */
     public $model_inst = false;
 
@@ -108,6 +108,17 @@ class Controller extends RequestHandler
     public $url_handlers = array(
         '$Action/$id' => '$Action',
     );
+
+    /**
+     * @param ViewAccessableData $model
+     * @return static
+     */
+    public static function InitWithModel($model) {
+        $controller = new static();
+        $controller->setModelInst($model);
+
+        return $controller;
+    }
 
     /**
      * inits the controller:
@@ -166,8 +177,9 @@ class Controller extends RequestHandler
 
     /**
      * sets the model.
-     * @param  ViewAccessableData $model
+     * @param ViewAccessableData $model
      * @param bool $name
+     * @return $this
      */
     public function setModelInst($model, $name = false)
     {
@@ -176,9 +188,9 @@ class Controller extends RequestHandler
         }
 
         $this->model_inst = $model;
-        $this->model = ($name !== false) ? $name : $model->dataClass;
+        $this->model = ($name !== false) ? $name : $model->DataClass();
 
-        $model->controller = $this;
+        return $this;
     }
 
     /**
@@ -209,7 +221,7 @@ class Controller extends RequestHandler
                 }
             }
         } else if (!isset($this->model)) {
-            $this->model = $this->model_inst->dataClass;
+            $this->model = $this->model_inst->DataClass();
         }
 
         if (isset($this->model_inst) && is_object($this->model_inst) && is_a($this->model_inst, "DataSet") && !$this->model_inst->isPagination() && $this->pages && $this->perPage) {
@@ -245,7 +257,7 @@ class Controller extends RequestHandler
                     $this->model = $model;
                 }
             } else {
-                $this->model = $this->model_inst->dataClass;
+                $this->model = $this->model_inst->DataClass();
             }
         }
 
@@ -341,6 +353,19 @@ class Controller extends RequestHandler
     }
 
     /**
+     * gets this class with new model inst.
+     * @param ViewAccessableData $model
+     * @return Controller
+     */
+    public function getWithModel($model) {
+        $class = clone $this;
+        $class->model_inst = $model;
+        $class->model = $model->DataClass();
+
+        return $class;
+    }
+
+    /**
      * handles a request with a given record in it's controller
      *
      * @name record
@@ -355,8 +380,7 @@ class Controller extends RequestHandler
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
-                $controller = $data->controller(gObject::instance($this));
-                return $controller->handleRequest($this->request);
+                return $this->getWithModel($data)->handleRequest($this->request);
             } else {
                 return $this->index();
             }
@@ -380,7 +404,7 @@ class Controller extends RequestHandler
             $this->callExtending("decorateRecord", $model);
             $this->decorateRecord($data);
             if ($data) {
-                return $data->controller(gObject::instance($this))->handleRequest($this->request);
+                return $this->getWithModel($data)->handleRequest($this->request);
             } else {
                 return $this->index();
             }
@@ -643,9 +667,11 @@ class Controller extends RequestHandler
      * @param    integer $priority Defines what type of save it is: 0 = autosave, 1 = save, 2 = publish
      * @param    boolean $forceInsert forces the database to insert a new record of this data and neglect permissions
      * @param    boolean $forceWrite forces the database to write without involving permissions
+     * @param bool $overrideCreated
+     * @param null|DataObject $givenModel
      * @return bool|DataObject
      */
-    public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, DataObject $givenModel = null)
+    public function save($data, $priority = 1, $forceInsert = false, $forceWrite = false, $overrideCreated = false, $givenModel = null)
     {
         if (PROFILE) Profiler::mark("Controller::save");
 

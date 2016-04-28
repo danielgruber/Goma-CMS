@@ -302,7 +302,7 @@ class BoxesController extends FrontedController {
 	{
 		$data = DataObject::get("boxes", array("seiteid" => $id));
 
-		return $data->controller()->render($id, $count);
+		return gObject::instance("boxesController")->setModelInst($data)->render($id, $count);
 	}
 
 	/**

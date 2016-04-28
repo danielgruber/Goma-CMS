@@ -10,7 +10,7 @@
  */
 class DataObjectTests extends GomaUnitTest
 {
-    static $area = "Model";
+    static $area = "NModel";
     /**
      * name
      */
@@ -55,6 +55,33 @@ class DataObjectTests extends GomaUnitTest
         $this->assertFalse(gObject::instance("MockWriteExtendedEntity")->hasTable());
         $this->assertTrue(gObject::instance("MockWriteEntity")->hasTable());
         $this->assertFalse(gObject::instance("MockWriteExtendedEntityWithFieldsInParent")->hasTable());
+    }
+
+    public function testArrayMerge() {
+        $array1 = array(1, 2, 3);
+        $array2 = array(4, 5, 6);
+
+        $this->assertEqual(array_merge($array1, $array2), array(1, 2, 3, 4, 5, 6));
+    }
+
+    /**
+     *
+     */
+    public function testPropExists() {
+        $model = new MockWriteEntityWithFields(array(
+            "test" => 1233
+        ));
+        $emptyModel = new MockWriteEntityWithFields(array(
+            "test" => ""
+        ));
+        $this->assertFalse(property_exists($model, "test"));
+        $this->assertTrue(isset($model->test));
+        $this->assertTrue(isset($model["test"]));
+        $this->assertFalse(isset($model->test2));
+        $this->assertFalse(empty($model->test));
+        $this->assertTrue(empty($emptyModel->test));
+        $this->assertTrue(isset($emptyModel->test));
+        $this->assertNotNull($model->test);
     }
 }
 

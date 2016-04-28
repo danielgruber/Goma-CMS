@@ -34,20 +34,23 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function __construct($items = array()) {
 		parent::__construct();
 
-		$this->items = $items;
+		$this->items = (array) $items;
 	}
 	
 	/**
 	 * returns data-class of the first item
 	*/
 	public function DataClass() {
-		if(count($this->items) > 0) return get_class($this->items[0]);
+		if(count($this->items) > 0)
+			return get_class($this->items[0]);
+
+		return null;
 	}
 	
 	/**
 	 * Return the number of items in this list
 	 *
-	 *@return int
+	 * @return int
 	 */
 	public function count() {
 		return count($this->items);
@@ -190,14 +193,20 @@ class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * removes a specific item or item-index.
 	 *
-	 * @param mixed item
+	 * @param mixed $item
 	 * @return bool
 	 */
 	public function remove($item) {
-		foreach($this->items as $key => $record)
-			if($item == $record)
+		foreach($this->items as $key => $record) {
+			if ($item == $record) {
+				if($key <= $this->position) {
+					$this->position--;
+				}
+
 				unset($this->items[$key]);
-		
+			}
+		}
+
 		$this->items = array_values($this->items);
 	}
 	
@@ -600,10 +609,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 		if(isset($this->items[$offset]))
 			return $this->items[$offset];
 		
-		if(property_exists($this, $offset))
-			return $this->$offset;
-		
-		return null;
+		return parent::__get($offset);
 	}
 
 	/**
@@ -618,7 +624,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 			$this->items[$offset] = $value;
 		}
 		
-		$this->$offset = $value;
+		parent::__set($offset, $value);
 	}
 	
 	/**
@@ -629,6 +635,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function offsetUnset($offset) {
 		if(isset($this->items[$offset]))
 			unset($this->items[$offset]);
+
+		return parent::offsetUnset($offset);
 	}
 	
 	/**
@@ -638,29 +646,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @return	boolean
 	 */
 	public function offsetExists($offset) {
-		return isset($this->items[$offset]);
-	}
-
-	/**
-	 * returns a property of a given Item in the List.
-	 *
-	 * @param  array|gObject $item item
-	 * @param  string $prop property
-	 * @return null
-	 */
-	static function getItemProp($item, $prop) {
-		if(is_array($item))
-			return isset($item[$prop]) ? $item[$prop] : null;
-		
-		if(is_object($item)) {
-			if(is_a($item, "ArrayAccess") && isset($item[$prop])) {
-				return $item[$prop];
-			}
-
-			return $item->{$prop};
-		}
-		
-		return property_exists($item, $prop) ? $item->$prop : null;
+		return isset($this->items[$offset]) || parent::offsetExists($offset);
 	}
 
 	/**
@@ -683,10 +669,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * this extends this dataobject to use foreach on it
 	 * @link http://php.net/manual/en/class.iterator.php
 	 */
-	/**
-	 * this var is the current position
-	 */
-	private $position = 0;
+	protected $position = 0;
 	
 	/**
 	 * rewind $position to 0.

@@ -268,9 +268,9 @@ class LeftAndMain extends AdminItem {
 		$treeRenderer->mark($this->getParam("id"));
 		
 		// check for logical opened tree-items.
-		if(isset($_GET["edit_id"])) {
+		if(isset($this->getRequest()->get_params["edit_id"])) {
 			// here we check for Ajax-Opening. It is given to the leftandmain-js-api.
-			if($current = DataObject::get_versioned("pages", "state", array("id" => $_GET["edit_id"]))->first()) {
+			if($current = DataObject::get_versioned("pages", "state", array("id" => $this->getRequest()->get_params["edit_id"]))->first()) {
 				$treeRenderer->setExpanded($current->id);
 				while($current->parent) {
 					$current = $current->parent;

@@ -231,9 +231,9 @@ class adminItem extends AdminController implements PermProvider {
 		}
 		
 		// get
-		if(isset($_GET["model"]))
-			if(isset($this->modelInstances[$_GET["model"]])) {
-				return $this->selectModel($_GET["model"], $onThis);
+		if(isset($this->request->get_params["model"]))
+			if(isset($this->modelInstances[$this->request->get_params["model"]])) {
+				return $this->selectModel($this->request->get_params["model"], $onThis);
 			}
 			
 		
@@ -261,7 +261,7 @@ class adminItem extends AdminController implements PermProvider {
 		
 		// pagination-support
 		if(is_object($model) && is_a($model, "DataSet") && !$model->isPagination() && $this->pages) {
-			$page = isset($_GET["pa"]) ? $_GET["pa"] : null;
+			$page = isset($this->request->get_params["pa"]) ? $this->request->get_params["pa"] : null;
 			if($this->perPage)
 				$model->activatePagination($page, $this->perPage);
 			else
@@ -271,7 +271,6 @@ class adminItem extends AdminController implements PermProvider {
 		// controller
 		$controller->model_inst = $model;
 		$controller->model = null;
-		$model->controller = $controller;
 		return $model;
 	}
 
@@ -401,23 +400,7 @@ class adminItem extends AdminController implements PermProvider {
 	 */
 	public function getControllerInst() {
 		if(!isset($this->controllerInst)) {
-
-			// preserve controller
-			$controller = $this->modelInst()->controller;
-
-			// try to get controller from default model. at the moment adminItem is the controller.
-			$this->model_inst->controller = gObject::instance($this->model())->controller;
-			if($currentController = $this->model_inst->controller()) {
-
-				// set Model-Inst.
-				$currentController->setModelInst(clone $this->model_inst, null);
-
-				// adminItem should be always the owner of its own model-inst.
-				$this->model_inst->controller = $controller;
-				$this->controllerInst = $currentController;
-			} else {
-				return false;
-			}
+			$this->controllerInst = ControllerResolver::instanceForModel($this->modelInst());
 		}
 		
 		return $this->controllerInst;

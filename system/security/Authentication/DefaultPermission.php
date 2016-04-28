@@ -32,21 +32,22 @@ class DefaultPermission {
                 $group->type = 2;
                 $group->permissions()->add(Permission::forceExisting("superadmin"));
                 $group->permissions()->write(false, true, 2);
-                $group->write(true, true, 2, false, false);
+                $group->writeToDB(true, true, 2, false, false);
             }
 
             if(DataObject::count("group", array("type" => 1)) === 0) {
                 $group = new Group();
                 $group->name = lang("user", "users");
                 $group->type = 1;
-                $group->write(true, true, 2, false, false);
+                $group->writeToDB(true, true, 2, false, false);
             }
+
 
             if(isset(Member::$default_admin) && DataObject::count("user") === 0) {
                 $user = new User();
                 $user->nickname = Member::$default_admin["nickname"];
                 $user->password = Member::$default_admin["password"];
-                $user->write(true, true);
+                $user->writeToDB(true, true);
                 $user->groups()->add(DataObject::get_one("group", array("type" => 2)));
                 $user->groups()->write(false, true);
             }

@@ -418,6 +418,7 @@ class ModelWriter extends gObject {
         $changes = $this->checkForChanges();
         if ($this->getCommandType() == ModelRepository::COMMAND_TYPE_INSERT || $changes || $this->isNotActiveRecord($this->model)) {
             if ($changes || $this->writeType != IModelRepository::WRITE_TYPE_PUBLISH) {
+                $this->model->onBeforeDBWriter($this);
                 $this->callExtending("onBeforeDBWriter");
 
                 $this->updateStatusFields();

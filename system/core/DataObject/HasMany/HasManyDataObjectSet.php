@@ -27,6 +27,11 @@ class HasMany_DataObjectSet extends DataObjectSet {
     protected $relationName;
 
     /**
+     * @var int
+     */
+    protected $value;
+
+    /**
      * sets the relation-props
      *
      * @param string $name
@@ -40,9 +45,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
             $this->field = $field;
 
         if(isset($id)) {
-            if(isset($this->dataobject)) {
-                $this->dataobject->{$this->field} = $id;
-            }
+            $this->value = $id;
 
             foreach ($this as $record) {
                 $record[$field] = $id;
@@ -54,7 +57,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
      * get the relation-props
      */
     public function getRelationENV() {
-        return array("name" => $this->relationName, "field" => $this->field);
+        return array("name" => $this->relationName, "field" => $this->field, "value" => $this->value);
     }
 
     /**
@@ -69,60 +72,40 @@ class HasMany_DataObjectSet extends DataObjectSet {
      * @return Form
      */
     public function generateForm($name = null, $edit = false, $disabled = false, $request = null, $controller = null, $submission = null) {
-
-        if($id = $this->getRelationID()) {
-            $this->dataobject[$this->field] = $this->getFirst()->{$this->field};
-        }
-
         $form = parent::generateForm($name, $edit, $disabled, $request, $controller, $submission);
 
         if($id = $this->getRelationID()) {
             $form->add(new HiddenField($this->field, $id));
         }
-        if(isset($this->getFirst()->{$this->field})) {
-            $form->add(new HiddenField($this->field, $this->getFirst()->{$this->field}));
-        } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
-            $form->add(new HiddenField($this->field, $this->filter[$this->field]));
-        }
+
         return $form;
     }
 
     /**
-     * removes the relation on writing
-     *
      * @param DataObject $record
      * @param bool $write
-     * @return DataObject record
-     * @internal param $removeRecord
-     */
-    public function removeRecord($record, $write = false) {
-        /** @var DataObject $record */
-        $record = parent::removeRecord($record);
-
-        if(isset($this->filter["id"]) && is_array($this->filter["id"]) && $record->id != 0) {
-            $key = array_search($record->id, $this->filter["id"]);
-            unset($this->filter["id"][$key]);
-        }
-
-        if($write) {
-            $record[$this->field] = 0;
-            $record->writeToDB(false, true);
-        }
-        return $record;
-    }
-
-    /**
-     * @param DataObject $record
-     * @param bool $write
-     * @return bool|void
+     * @return DataObjectSet
      */
     public function push(DataObject $record, $write = false)
     {
         if($id = $this->getRelationID()) {
-            $record[$this->field] = $this->getRelationID();
+            $record->{$this->field} = $this->getRelationID();
         }
 
-        parent::push($record, $write);
+        return parent::push($record, $write);
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function createNewModel($data = array())
+    {
+        $record = parent::createNewModel($data);
+
+        $record->{$this->field} = $this->getRelationID();
+
+        return $record;
     }
 
     /**
@@ -131,8 +114,10 @@ class HasMany_DataObjectSet extends DataObjectSet {
      * @return null|int
      */
     protected function getRelationID() {
-        if(isset($this->getFirst()->{$this->field})) {
-            return $this->getFirst()->{$this->field};
+        if(isset($this->value)) {
+            return $this->value;
+        } else if(isset($this->first()->{$this->field})) {
+            return $this->first()->{$this->field};
         } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
             return $this->filter[$this->field];
         }

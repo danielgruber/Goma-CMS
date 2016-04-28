@@ -144,7 +144,7 @@ class siteController extends Controller
             $data = DataObject::get_one("pages", array("path" => array("LIKE", $path), "parentid" => 0));
 
             if ($data) {
-                return $data->controller()->handleRequest($this->request);
+                return ControllerResolver::instanceForModel($data)->handleRequest($this->request);
             } else {
 
                 unset($data, $path);
@@ -211,7 +211,7 @@ class HomePageController extends SiteController
         }
 
         if ($data = DataObject::get_one("pages", array("parentid" => 0))) {
-            return $data->controller()->handleRequest($this->request);
+            return ControllerResolver::instanceForModel($data)->handleRequest($this->request);
         } else {
             return false;
         }

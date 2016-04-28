@@ -473,13 +473,14 @@ class DropDown extends FormField {
 		}
 		unset($i);
 
+		/** @var DataSet|DataObjectSet $dataSource */
 		return array(
 			"data" => $arr,
 			"right" => $right,
 			"left" => $left,
 			"showStart" => $start,
 			"showEnd" => $end,
-			"whole" => count($dataSource)
+			"whole" => is_array($dataSource) ? count($dataSource) : $dataSource->countWholeSet()
 		);
 	}
 

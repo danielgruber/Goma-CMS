@@ -1,7 +1,9 @@
 <?php defined("IN_GOMA") OR die();
+
 /**
  * Unit-Tests for AdminItem.
  *
+ * @property 	AdminItem item
  * @package		Goma\Test
  *
  * @author		Goma-Team
@@ -44,9 +46,6 @@ class AdminItemTest extends GomaUnitTest implements TestAble {
 	public function testModelControllerSystem() {
 		$this->assertIsA($this->item->getControllerInst(), "Controller");
 		$this->assertEqual($this->item->model(), "uploads");
-
-		// adminItem should be always the controller of its model-inst.
-		$this->assertIsA($this->item->modelInst()->controller(), "adminItem");
 
 		$this->assertNotNull($this->item->modelInst()->adminURI);
 

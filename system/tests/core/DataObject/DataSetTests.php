@@ -1,20 +1,19 @@
 <?php defined("IN_GOMA") OR die();
+
 /**
- * Unit-Tests for ArrayList.
+ * Unit-Tests for DataObject-Class.
  *
  * @package		Goma\Test
  *
  * @author		Goma-Team
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
-class ArrayListTest extends GomaUnitTest
-{
-
+class DataSetTests extends GomaUnitTest {
     static $area = "NModel";
     /**
      * name
      */
-    public $name = "ArrayList";
+    public $name = "DataSet";
 
     protected $daniel;
     protected $kathi;
@@ -34,28 +33,30 @@ class ArrayListTest extends GomaUnitTest
     }
 
     public function testCreate() {
-        $list = new ArrayList();
+        $list = new DataSet();
 
         $this->assertEqual($list->count(), 0);
+        $this->assertEqual(count($list), 0);
         $this->assertEqual($list->DataClass(), null);
         $this->assertEqual($list->first(), null);
     }
 
     public function testCreateWithElements() {
-        $list = new ArrayList(array(
+        $list = new DataSet(array(
             $this->daniel,
             $this->kathi,
             $this->patrick
         ));
 
         $this->assertEqual($list->count(), 3);
+        $this->assertEqual(count($list), 3);
         $this->assertEqual($list->first(), $this->daniel);
         $this->assertEqual($list[1], $this->kathi);
         $this->assertEqual($list[2], $this->patrick);
     }
 
     public function testRemoveAdd() {
-        $list = new ArrayList(array(
+        $list = new DataSet(array(
             $this->daniel,
             $this->kathi,
             $this->patrick
@@ -82,7 +83,7 @@ class ArrayListTest extends GomaUnitTest
     }
 
     public function testRemoveDuplicates() {
-        $list = new ArrayList(array(
+        $list = new DataSet(array(
             $this->daniel,
             $this->kathi,
             $this->kathi,
@@ -96,7 +97,7 @@ class ArrayListTest extends GomaUnitTest
     }
 
     public function testSort() {
-        $list = new ArrayList($orgArray = array(
+        $list = new DataSet($orgArray = array(
             $this->daniel,
             $this->kathi,
             $this->janine,
@@ -113,7 +114,7 @@ class ArrayListTest extends GomaUnitTest
             $age = $person->age;
         }
 
-        $this->assertEqual($list->ToArray(), $orgArray);
+        $this->assertNotEqual($list->ToArray(), $orgArray);
         $this->assertEqual($list->count(), $sortedList->count());
 
         $sortByGenderAndName = $list->sort(array("gender" => "asc", "age" => "asc"));
@@ -133,8 +134,63 @@ class ArrayListTest extends GomaUnitTest
         }
     }
 
+    /**
+     * tests pagination abilities.
+     */
+    public function testPagination() {
+        $set = new DataSet($org = array(
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian,
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian
+        ));
+
+        $set->activatePagination(1, 5);
+        $this->assertTrue($set->isPagination());
+
+        $this->assertEqual($set->getPageCount(), 4);
+        $this->assertEqual($set->count(), 5);
+
+        $set->setPage(2);
+
+        $this->assertEqual($set->getPageCount(), 4);
+        $this->assertEqual($set->count(), 5);
+        $this->assertEqual($set->pageBefore(), 1);
+        $this->assertEqual($set->nextPage(), 3);
+
+        $set->setPage(4);
+        $this->assertFalse($set->isNextPage());
+        $this->assertTrue($set->isPageBefore());
+        $this->assertEqual($set->last(), $this->julian);
+
+        $set->filter("name", "Patrick");
+
+        $this->assertEqual($set->getPage(), 1);
+        $this->assertEqual($set->last(), $this->patrick);
+
+        $set->filter();
+
+        $this->assertEqual($set->getPage(), 4);
+    }
+
     public function testFilter() {
-        $list = new ArrayList($orgArray = array(
+        $list = new DataSet($orgArray = array(
             $this->daniel,
             $this->kathi,
             $this->janine,
@@ -148,6 +204,9 @@ class ArrayListTest extends GomaUnitTest
 
         $this->assertEqual($list->filter(array("name" => "janine"))->count(), 0);
 
+        $this->assertEqual($list->first(), null);
+        // reset filter
+        $list->filter();
         $this->assertEqual($list->first(), $this->daniel);
 
         $advancedFilter = $list->filter(array("age" => array(">=", 20)));
@@ -155,12 +214,16 @@ class ArrayListTest extends GomaUnitTest
             $this->assertFalse($person->age < 20);
         }
 
+        $this->assertEqual($list->find("name", "patrick", true), null);
+
+        // reset filter
+        $list->filter();
         $this->assertEqual($list->find("name", "patrick", true), $this->patrick);
         $this->assertNull($list->find("name", "patrick"));
     }
 
     public function testMove() {
-        $list = new ArrayList($orgArray = array(
+        $list = new DataSet($orgArray = array(
             $this->daniel,
             $this->kathi,
             $this->janine,
@@ -189,6 +252,108 @@ class ArrayListTest extends GomaUnitTest
         $list->moveBefore($this->daniel, $this->janine, true);
         $this->assertEqual($list[1], $this->daniel);
     }
+
+    public function testMoveSort() {
+        $this->unittestMoveSort(true);
+        $this->unittestMoveSort(false);
+    }
+
+    public function unittestMoveSort($activePagination) {
+        $list = new DataSet($orgArray = array(
+            $this->daniel,
+            $this->kathi,
+            $this->janine,
+            $this->patrick,
+            $this->julian
+        ));
+
+        if($activePagination) {
+            $list->activatePagination();
+        }
+
+        $list->sort("age", "DESC");
+
+        $list->moveBefore($list->find("name", "Patrick"), $list->find("name", "Kathi"));
+
+        $this->assertEqual($list->first(), $this->patrick);
+        $this->assertEqual($list[1], $this->kathi);
+        $this->assertEqual($list[2], $this->daniel);
+        $this->assertEqual($list[3], $this->julian);
+
+        $list->filter("age", array(">", 0));
+
+        $this->assertEqual($list->first(), $this->patrick);
+        $this->assertEqual($list[1], $this->kathi);
+        $this->assertEqual($list[2], $this->daniel);
+        $this->assertEqual($list[3], $this->julian);
+    }
+
+    public function testCustomised() {
+        $set = new DataSet();
+
+        $set->customise(array(
+            "blub" => "abc"
+        ));
+
+        $this->assertEqual($set->blub, "abc");
+
+        // test if you can override customise
+        $set->blub = 123;
+
+        $this->assertEqual($set->blub, "abc");
+
+        $set->add(array(
+            "tada" => 123
+        ));
+
+        $this->assertEqual($set[0]->blub, "abc");
+
+        foreach($set as $record) {
+            $this->assertEqual($record->blub, "abc");
+            $this->assertEqual($record->tada, 123);
+        }
+
+        foreach($set->getObjectWithoutCustomisation() as $record) {
+            $this->assertEqual($record->blub, null);
+            $this->assertEqual($record->tada, 123);
+        }
+    }
+
+    public function testCustomiseByMySelf() {
+        $set = new DataSet(array(
+            array("test" => 123),
+            array("test" => 345)
+        ));
+
+        $set->customise(array(
+            "blub" => 123
+        ));
+
+        foreach($set as $record) {
+            $this->assertEqual($record->blub, 123);
+            $record->customise(array(
+                "blah" => $record->test
+            ));
+            $this->assertEqual($record->blah, $record->test);
+        }
+
+        $objectWithoutCust = $set->getObjectWithoutCustomisation();
+        foreach($objectWithoutCust as $record) {
+            $this->assertEqual($record->blub, null);
+            $this->assertEqual($record->blah, $record->test);
+        }
+
+        $set[1]->customise(array(
+            "blah" => 123
+        ));
+
+        foreach($set as $record) {
+            if($record->test == 345) {
+                $this->assertEqual($record->blah, 123);
+            }
+        }
+    }
+
 
     /**
      * tests iterator with delete.
@@ -260,35 +425,6 @@ class ArrayListTest extends GomaUnitTest
             }
         }
     }
-}
 
-class DumpElementPerson {
-
-    /**
-     * @var string
-     */
-    public $name;
-
-    /**
-     * @var int
-     */
-    public $age;
-
-    /**
-     * @var string 'M' or 'W'
-     */
-    public $gender;
-
-    /**
-     * DumpElementPerson constructor.
-     * @param string $name
-     * @param int $age
-     * @param string $gender 'M' or 'W'
-     */
-    public function __construct($name, $age, $gender)
-    {
-        $this->name = $name;
-        $this->age = $age;
-        $this->gender = $gender;
-    }
+    // TODO: Add Test for count vs. countInSet
 }
