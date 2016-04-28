@@ -174,6 +174,13 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertEqual($set[3], null);
     }
 
+    /**
+     *
+     */
+    public function testFirstLastWithPersistence() {
+
+    }
+
     public function testPagination() {
         $set = new DataObjectSet("DumpDBElementPerson");
 
@@ -269,6 +276,34 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertEqual($set[4], $this->nik);
         $this->assertEqual($set->count(), 5);
     }
+
+    public function testCustomised() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $set->customise(array(
+            "blub" => 123
+        ));
+
+        foreach($set as $record) {
+            $this->assertEqual($record->blub, 123);
+        }
+
+        $this->assertEqual($set->blub, 123);
+        $this->assertEqual($set[3]->blub, 123);
+
+        $objectWithoutCustomisation = $set->getObjectWithoutCustomisation();
+        $this->assertEqual($objectWithoutCustomisation[3]->blub, null);
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
@@ -287,7 +322,12 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     }
 
     protected function getListBy($records, $filter, $sort, $limit) {
-        $list = new ArrayList($records);
+        $copyRecords = array();
+        foreach($records as $record) {
+            $copyRecords[] = is_object($record) ? clone $record : $record;
+        }
+
+        $list = new ArrayList($copyRecords);
         if($filter) {
             $list = $list->filter($filter);
         }

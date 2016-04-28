@@ -1,7 +1,7 @@
 <% INCLUDE_CSS "boxes.css" %>
 
 <% IF $cache %>
-	<% IF can("write") AND NOT adminAsUser() %>
+	<% IF $this.first().can("write") AND NOT adminAsUser() %>
 		<% GLOAD("sortable") %>
 		<% GLOAD("resizable") %>
 		<% GLOAD("dropdownDialog") %>

@@ -460,7 +460,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     public function __construct($record = null) {
         parent::__construct();
 
-        $this->data = array_merge(array(
+        $this->data = $this->original = array_merge(array(
             "class_name"	=> $this->classname,
             "last_modified"	=> time(),
             "created"		=> time(),

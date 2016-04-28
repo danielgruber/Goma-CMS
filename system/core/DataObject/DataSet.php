@@ -242,7 +242,8 @@ class DataSet extends ArrayList {
     public function last()
     {
         if(count($this->items) > 0) {
-            return $this->getConverted($this->items[count($this->items) - 1]);
+            $this->items[count($this->items) - 1] = $this->getConverted($this->items[count($this->items) - 1]);
+            return $this->items[count($this->items) - 1];
         }
 
         return null;
@@ -254,7 +255,12 @@ class DataSet extends ArrayList {
      */
     public function first()
     {
-        return isset($this->items[0]) ? $this->getConverted($this->items[0]) : null;
+        if(isset($this->items[0])) {
+            $this->items[0] = $this->getConverted($this->items[0]);
+            return $this->items[0];
+        }
+
+        return null;
     }
 
     /**
@@ -276,7 +282,9 @@ class DataSet extends ArrayList {
      * @return mixed|ViewAccessableData
      */
     public function current() {
-        return $this->getConverted(parent::current());
+        $this->items[$this->position] = $this->getConverted(parent::current());
+
+        return $this->items[$this->position];
     }
 
     /**
@@ -489,6 +497,23 @@ class DataSet extends ArrayList {
         }
     }
 
+    /**
+     * @param string $offset
+     * @return null|string
+     */
+    public function offsetGet($offset)
+    {
+        if(RegexpUtil::isNumber($offset)) {
+            if(isset($this->items[$offset])) {
+                $this->items[$offset] = $this->getConverted($this->items[$offset]);
+                return $this->items[$offset];
+            }
+            return null;
+        }
+
+        return parent::getOffset($offset);
+    }
+
     public function this() {
         return $this;
     }
@@ -521,8 +546,6 @@ class DataSet extends ArrayList {
         } else {
             $object = $item;
         }
-
-        if(isset($object->data)) $object->original = $object->data;
 
         if(is_object($object) && method_exists($object, "customise")) {
             $object->customise($this->protected_customised);
@@ -634,5 +657,27 @@ class DataSet extends ArrayList {
         }
 
         return $this->page;
+    }
+
+    /**
+     * @return DataSet
+     */
+    public function getObjectWithoutCustomisation()
+    {
+        /** @var DataSet $object */
+        $object = parent::getObjectWithoutCustomisation();
+        $object->protected_customised = array();
+
+        foreach($this->protected_customised as $key => $value) {
+            /** @var ViewAccessableData $item */
+            foreach($object->items as $id => $item) {
+                if(is_object($item) && isset($item->customised) && isset($item->customised[$key]) && $item->customised[$key] == $value) {
+                    $object->items[$id] = clone $item;
+                    unset($object->items[$id]->customised[$key]);
+                }
+            }
+        }
+
+        return $object;
     }
 }

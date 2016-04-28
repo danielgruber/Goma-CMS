@@ -244,6 +244,17 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
+	 * @param array $loops
+	 * @return $this
+	 */
+	public function customise($loops = array())
+	{
+		$this->protected_customised = $loops;
+
+		return parent::customise($loops);
+	}
+
+	/**
 	 * @return IDataObjectSetDataSource
 	 */
 	public function getDbDataSource()
@@ -338,7 +349,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($this->firstCache)) {
 			$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
 			$range = $this->getRange($start, 1);
-			$this->firstCache = $range->first();
+			$this->firstCache = $this->getConverted($range->first());
 		}
 
 		return $this->firstCache;
@@ -363,10 +374,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			if($this->count() == 0) {
 				$this->lastCache = null;
 			} else if($this->page === null || $this->page == $this->getPageCount()) {
-				$this->lastCache = $this->getRange($this->countWholeSet() - 1, 1)->first();
+				$this->lastCache = $this->getConverted($this->getRange($this->countWholeSet() - 1, 1)->first());
 			} else {
 				$index = $this->page * $this->perPage - 1;
-				$this->lastCache = $this->getRange($index, 1)->first();
+				$this->lastCache = $this->getConverted($this->getRange($index, 1)->first());
 			}
 		}
 
@@ -374,9 +385,9 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	}
 
 	/**
-	 * @return DataObject|null
+	 * @return DataObject
 	 */
-	public function firstOrDefault() {
+	public function firstOrNew() {
 		return $this->first() ? $this->first() : $this->modelSource->createNew();
 	}
 
@@ -544,14 +555,14 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($position))
 			$position = $this->position;
 
-		$data = $this->getConverted($this->items[$position]);
+		$this->items[$position] = $this->getConverted($this->items[$position]);
 
-		if(is_a($data, "DataObject")) {
+		if(is_a($this->items[$position], "DataObject")) {
 			/** @var DataObject $data */
-			$data->queryVersion = $this->version;
+			$this->items[$position]->queryVersion = $this->version;
 		}
 
-		return $data;
+		return $this->items[$position];
 	}
 
 	/**
@@ -596,7 +607,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 					$limit[1] = PHP_INT_MAX;
 				}
 
+				if(isset($this->firstCache)) $limit[0]++;
 				$this->items = $this->getRecordsByRange($limit[0], $limit[1]);
+				if(isset($this->firstCache)) array_unshift($this->items, $this->firstCache);
+				if(isset($this->lastCache)) $this->items[count($this->items) - 1] = $this->lastCache;
 
 				if ($this->page === null) {
 					$this->count = count($this->items);
@@ -962,11 +976,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function getConverted($item) {
 		if(is_array($item)) {
 			$object = $this->modelSource()->createNew($item);
-		} else {
+		} else if(is_object($item)) {
 			$object = $item;
+		} else if(is_null($item)) {
+			return null;
+		} else {
+			throw new InvalidArgumentException("\$item for getConverted must be either array or object.");
 		}
-
-		$object->original = $object->data;
 
 		if(is_object($object) && method_exists($object, "customise")) {
 			$object->customise($this->protected_customised);
@@ -1170,8 +1186,13 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(RegexpUtil::isNumber($offset)) {
 			$this->forceData();
 
-			return isset($this->items[$offset]) ? $this->items[$offset] : null;
+			if(isset($this->items[$offset])) {
+				$this->items[$offset] = $this->getConverted($this->items[$offset]);
+				return $this->items[$offset];
+			}
+			return null;
 		}
+
 		return parent::offsetGet($offset);
 	}
 
@@ -1302,6 +1323,34 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected function createNewModel($data = array())
 	{
 		return $this->modelSource()->createNew($data);
+	}
+
+	/**
+	 * @return DataObjectSet
+	 */
+	public function getObjectWithoutCustomisation()
+	{
+		/** @var DataObjectSet $object */
+		$object = parent::getObjectWithoutCustomisation();
+		$object->protected_customised = array();
+
+		$data = array_merge(array("firstCache" => $this->firstCache, "lastCache" => $this->lastCache), (array) $this->items);
+		/** @var ViewAccessableData $record */
+		foreach($this->protected_customised as $key => $val) {
+			foreach ($data as $id => $record) {
+				if ($record !== null && isset($record->customised) && isset($record->customised[$key]) && $record->customised[$key] == $val) {
+					if(is_string($id)) {
+						$object->{$id} = clone $record;
+						unset($object->{$id}->customised[$key]);
+					} else {
+						$object->items[$id] = clone $record;
+						unset($object->items[$id]->customised[$key]);
+					}
+				}
+			}
+		}
+
+		return $object;
 	}
 }
 

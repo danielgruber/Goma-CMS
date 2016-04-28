@@ -955,7 +955,8 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * checks if a method "set" . $offset exists
-	 *@param string - offset
+	 * @param string $offset
+	 * @return bool
 	 */
 	public function isSetMethod($offset) {
 		return (self::method_exists($this, "set" . $offset) && !in_array(strtolower("set" . $offset), self::$notViewableMethods));
@@ -963,8 +964,9 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 
 	/**
 	 * calls a method "set" . $offset
-	 *@param string - offset
-	 *@param mixed - value
+	 * @param string $offset
+	 * @param mixed $value
+	 * @return mixed
 	 */
 	public function callSetMethod($offset, $value) {
 		$func = "set" . $offset;
@@ -994,12 +996,21 @@ class ViewAccessableData extends gObject implements Iterator, ArrayAccess {
 	/**
 	 * unsets a offset
 	 * in this object it do nothing
-	 *@name offsetUnset
+	 * @param string $offset
 	 */
 	public function offsetUnset($offset) {
-		// do nothing
+		if(isset($this->data[$offset])) {
+			unset($this->data[$offset]);
+		}
 	}
 
+	/**
+	 * @param $name
+	 */
+	public function __unset($name)
+	{
+		return $this->offsetUnset($name);
+	}
 
 	/**
 	 * returns a property of a given Item in the List.

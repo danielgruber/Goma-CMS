@@ -173,9 +173,16 @@ class ViewAccessableDataTest extends GomaUnitTest implements TestAble {
 		$this->assertEqual($view->haha, 1);
 		$this->assertEqual($view->getCustomisation(), $cust);
 
-		$c = $view->getObjectWithoutCustomisation();
-		$this->assertEqual($c->blub, 1);
+		$objectWithoutCustomisation = $view->getObjectWithoutCustomisation();
+		$this->assertEqual($objectWithoutCustomisation->blub, 1);
 		$this->assertEqual($view->blub, 3);
+
+		// it is customised
+		unset($view->blub);
+		$this->assertEqual($view->blub, 3);
+
+		unset($objectWithoutCustomisation->blub);
+		$this->assertEqual($objectWithoutCustomisation->blub, null);
 
 		$testClass = new TestViewClassMethod(array("blub" => 2));
 		$this->assertEqual($testClass->blub, 2);

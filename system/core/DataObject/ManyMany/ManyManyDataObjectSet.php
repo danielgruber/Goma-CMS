@@ -11,7 +11,6 @@
  * @version     1.2
  */
 class ManyMany_DataObjectSet extends DataObjectSet {
-
     /**
      * value of $ownField
      *
@@ -112,7 +111,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
                 }
             }
 
-            $this->purgeData();
+            $this->clearCache();
         }
         return $this;
     }

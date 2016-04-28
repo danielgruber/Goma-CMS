@@ -306,9 +306,51 @@ class DataSetTests extends GomaUnitTest {
             "tada" => 123
         ));
 
+        $this->assertEqual($set[0]->blub, "abc");
+
         foreach($set as $record) {
             $this->assertEqual($record->blub, "abc");
             $this->assertEqual($record->tada, 123);
+        }
+
+        foreach($set->getObjectWithoutCustomisation() as $record) {
+            $this->assertEqual($record->blub, null);
+            $this->assertEqual($record->tada, 123);
+        }
+    }
+
+    public function testCustomiseByMySelf() {
+        $set = new DataSet(array(
+            array("test" => 123),
+            array("test" => 345)
+        ));
+
+        $set->customise(array(
+            "blub" => 123
+        ));
+
+        foreach($set as $record) {
+            $this->assertEqual($record->blub, 123);
+            $record->customise(array(
+                "blah" => $record->test
+            ));
+            $this->assertEqual($record->blah, $record->test);
+        }
+
+        $objectWithoutCust = $set->getObjectWithoutCustomisation();
+        foreach($objectWithoutCust as $record) {
+            $this->assertEqual($record->blub, null);
+            $this->assertEqual($record->blah, $record->test);
+        }
+
+        $set[1]->customise(array(
+            "blah" => 123
+        ));
+
+        foreach($set as $record) {
+            if($record->test == 345) {
+                $this->assertEqual($record->blah, 123);
+            }
         }
     }
 
