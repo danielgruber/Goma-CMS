@@ -47,9 +47,6 @@ class AdminItemTest extends GomaUnitTest implements TestAble {
 		$this->assertIsA($this->item->getControllerInst(), "Controller");
 		$this->assertEqual($this->item->model(), "uploads");
 
-		// adminItem should be always the controller of its model-inst.
-		$this->assertIsA($this->item->modelInst()->controller(), "adminItem");
-
 		$this->assertNotNull($this->item->modelInst()->adminURI);
 
 		// check if we can call controller functions

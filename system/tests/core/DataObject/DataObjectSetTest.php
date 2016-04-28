@@ -197,8 +197,17 @@ class DataObjectSetTests extends GomaUnitTest
         );
 
         $set->activatePagination(null, 2);
+        $this->assertEqual($set->count(), 2);
         $this->assertEqual($set->first(), $this->julian);
         $this->assertEqual($set->last(), $this->daniel);
+
+        $i = 0;
+        foreach($set as $record) {
+            $this->assertEqual($source->records[$i]->ToArray(), $record->ToArray());
+            $i++;
+        }
+
+        $this->assertEqual($i, 2);
 
         $set->activatePagination(2);
         $this->assertEqual($set->getPage(), 2);

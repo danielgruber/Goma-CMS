@@ -219,7 +219,7 @@ class HasOneDropdown extends SingleSelectDropDown
 		}
 		$left = ($page > 1);
 
-		$right = (ceil($data->count() / 10) > $page);
+		$right = (ceil($data->countWholeSet() / 10) > $page);
 		$pageInfo = $data->getPageInfo();
 		unset($data);
 
@@ -259,7 +259,7 @@ class HasOneDropdown extends SingleSelectDropDown
 			}
 		}
 		$left = ($page > 1);
-		$right = (ceil($data->count() / 10) > $page);
+		$right = (ceil($data->countWholeSet() / 10) > $page);
 
 		$pageInfo = $data->getPageInfo();
 		unset($data);

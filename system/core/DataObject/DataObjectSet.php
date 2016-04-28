@@ -586,6 +586,12 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		$this->position++;
 	}
 
+	public function reset()
+	{
+		$this->position = 0;
+		$this->forceData();
+	}
+
 	/**
 	 * forces to have the data from the database
 	 * @return $this
@@ -599,6 +605,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 				if ($this->page !== null) {
 					$startIndex = $this->page * $this->perPage - $this->perPage;
 					$limit[0] = isset($limit[0]) ? $limit[0] + $startIndex : $startIndex;
+					$limit[1] = isset($limit[1]) && $limit[1] < $this->perPage ? $limit[1] : $this->perPage;
 				} else {
 					$limit[0] = isset($limit[0]) ? $limit[0] : 0;
 				}
@@ -607,7 +614,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 					$limit[1] = PHP_INT_MAX;
 				}
 
-				if(isset($this->firstCache)) $limit[0]++;
+				if(isset($this->firstCache)) {
+					$limit[0]++;
+					$limit[1]--;
+				}
 				$this->items = $this->getRecordsByRange($limit[0], $limit[1]);
 				if(isset($this->firstCache)) array_unshift($this->items, $this->firstCache);
 				if(isset($this->lastCache)) $this->items[count($this->items) - 1] = $this->lastCache;

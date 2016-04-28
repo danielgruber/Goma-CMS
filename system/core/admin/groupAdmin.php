@@ -40,9 +40,8 @@ class groupAdmin extends adminItem {
 	/**
 	 * history-url
 	 *
-	 *@name historyURL
-	 *@access public
-	*/
+	 * @return string
+	 */
 	public function historyURL() {
 		return "admin/history/group";
 	}
@@ -59,7 +58,7 @@ class groupAdmin extends adminItem {
 			"name"		=> lang("name")
 		));
 		$config->removeComponent($config->getComponentByType("TableFieldToolbarHeader"));
-		$config->getComponentByType("TableFieldPaginator")->perPage = 20;
+		$config->getComponentByType("TableFieldPaginator")->perPage = 5;
 		
 		$form = new Form($this, "form", array(
 			new TableField("groupTable", lang("groups"), $this->modelInst(), $config)

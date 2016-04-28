@@ -43,7 +43,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 	public function provideFragments($tableField) {
 		$state = $tableField->state->tableFieldPaginator;
 		$page = is_int($state->page) ? $state->page : 1;
-		$whole = $tableField->getData()->Count();
+		$whole = $tableField->getData()->CountWholeSet();
 		if($whole <= $this->perPage) {
 			$page = 1;
 			$state->page = 1;
@@ -76,7 +76,9 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 	/**
 	 * manipulates the dataobjectset
 	 *
-	 *@name manipulate
+	 * @param $tableField
+	 * @param DataObjectSet|DataSet $data
+	 * @return DataObjectSet|DataSet
 	 */
 	public function manipulate($tableField, $data) {
 		$state = $tableField->state->tableFieldPaginator;
@@ -91,8 +93,7 @@ class TableFieldPaginator implements TableField_HTMLProvider, TableField_DataMan
 	/**
 	 * provide some actions of this tablefield
 	 *
-	 *@name getActions
-	 *@access public
+	 * @return array
 	 */
 	public function getActions($tableField) {
 		return array("setPage");

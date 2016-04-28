@@ -271,7 +271,6 @@ class adminItem extends AdminController implements PermProvider {
 		// controller
 		$controller->model_inst = $model;
 		$controller->model = null;
-		$model->controller = $controller;
 		return $model;
 	}
 
