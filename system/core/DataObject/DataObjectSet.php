@@ -428,11 +428,11 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function count() {
 		if($this->page === null) {
-			return $this->countWholeSet();
+			return (int) $this->countWholeSet();
 		}
 
 		if($this->page < $this->getPageCount()) {
-			return $this->perPage;
+			return (int) $this->perPage;
 		}
 
 		return $this->countWholeSet() - ($this->getPageCount() - 1)  * $this->perPage;
@@ -447,7 +447,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function countWholeSet() {
 		if(!isset($this->count)) {
-			$this->count = $this->dbDataSource()->getAggregate(
+			$this->count = (int) $this->dbDataSource()->getAggregate(
 				$this->version, "count", "*", false,
 				$this->filter, array(), $this->limit,
 				$this->join, $this->search);
@@ -465,7 +465,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			throw new InvalidArgumentException("Field must have only letters, numbers and underscore.");
 		}
 
-		return $this->dbDataSource()->getAggregate(
+		return (int) $this->dbDataSource()->getAggregate(
 			$this->version, "count", $field, true,
 			$this->filter, array(), $this->limit,
 			$this->join, $this->search) + $this->staging->count();
@@ -480,7 +480,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return null|int
 	 */
 	public function Max($field) {
-		return $this->dbDataSource()->getAggregate(
+		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "max", $field, false,
 			$this->filter, array(), $this->limit,
 			$this->join, $this->search);
@@ -513,7 +513,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return null
 	 */
 	public function Min($field) {
-		return $this->dbDataSource()->getAggregate(
+		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "min", $field, false,
 			$this->filter, array(), $this->limit,
 			$this->join, $this->search);
@@ -530,7 +530,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @return null
 	 */
 	public function Sum($field) {
-		return $this->dbDataSource()->getAggregate(
+		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "Sum", $field, false,
 			$this->filter, array(), $this->limit,
 			$this->join, $this->search);
