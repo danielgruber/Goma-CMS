@@ -63,7 +63,7 @@ class ManyManyModelWriter extends Extension {
         /** @var ManyMany_DataObjectSet $object */
         foreach($this->many_many_objects as $key => $object) {
             $object->setRelationENV($this->many_many_relationships[$key], $owner->getModel()->versionid);
-            $object->writeToDB(false, true, $owner->getWriteType());
+            $object->commitStaging(false, true, $owner->getWriteType());
             unset($data[$key . "ids"]);
         }
 

@@ -31,7 +31,7 @@ class HasManyWriter extends Extension {
 
                         if($this->shouldUpdateData($has_many[$name])) {
                             $hasManyObject->setRelationENV($name, $has_many[$name]->getInverse() . "id", $owner->getModel()->id);
-                            $hasManyObject->writeToDB(false, true, $owner->getWriteType());
+                            $hasManyObject->commitStaging(false, true, $owner->getWriteType());
 
                             if($hasManyObject->fieldToArray("id")) {
                                 $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"), $this->shouldRemoveData($has_many[$name]));

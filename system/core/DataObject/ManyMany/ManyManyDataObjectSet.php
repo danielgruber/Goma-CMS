@@ -223,7 +223,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
      * @return void
      * @throws Exception
      */
-    public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
 
         $updateLastModified = array();
         $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority, $updateLastModified);

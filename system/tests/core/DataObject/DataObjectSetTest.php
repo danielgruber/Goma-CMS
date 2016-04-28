@@ -346,6 +346,61 @@ class DataObjectSetTests extends GomaUnitTest
         $this->assertIsA($set->getRange(0, 1)->ToArray(), "array");
         $this->assertIsA($set->getArrayRange(0, 1), "array");
     }
+
+    public function testObjectPersistence() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertTrue($set[0] === $set->first());
+        $this->assertTrue($set[3] === $set->last());
+
+        $this->assertTrue($set->first() === $set[0]);
+        $this->assertTrue($set->last() === $set[3]);
+
+        $i = 0;
+        foreach($set as $record) {
+            if($i == 0) {
+                $this->assertTrue($record === $set->first());
+            } else {
+                $this->assertFalse($record === $set->first());
+            }
+
+            if($i == 3) {
+                $this->assertTrue($record === $set->last());
+            } else {
+                $this->assertFalse($record === $set->last());
+            }
+            $i++;
+        }
+
+        $set->activatePagination(1, 2);
+        $this->assertEqual($set[1], $this->daniel);
+        $this->assertEqual($set->last(), $this->daniel);
+        $i = 0;
+        foreach($set as $record) {
+            if($i == 0) {
+                $this->assertTrue($record === $set->first());
+            } else {
+                $this->assertFalse($record === $set->first());
+            }
+
+            if($i == 1) {
+                $this->assertTrue($record === $set->last());
+            } else {
+                $this->assertFalse($record === $set->last());
+            }
+            $i++;
+        }
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {

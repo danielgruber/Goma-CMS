@@ -884,7 +884,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 				$starting = $this->page * $this->perPage - $this->perPage;
 				$pre = $start - $starting;
 
-				if (count($this->items) < $this->perPage || count($this->items) > $pre + $length) {
+				if (count($this->items) < $this->perPage || count($this->items) >= $pre + $length) {
 					return array_slice($this->items, $pre, $length);
 				}
 			}
