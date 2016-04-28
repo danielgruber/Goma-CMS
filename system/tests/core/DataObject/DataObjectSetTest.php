@@ -304,6 +304,39 @@ class DataObjectSetTests extends GomaUnitTest
         $objectWithoutCustomisation = $set->getObjectWithoutCustomisation();
         $this->assertEqual($objectWithoutCustomisation[3]->blub, null);
     }
+
+    public function testRanges() {
+        $set = new DataObjectSet("DumpDBElementPerson");
+
+        /** @var MockIDataObjectSetDataSource $source */
+        $source = $set->getDbDataSource();
+
+        $source->records = array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        );
+
+        $this->assertIsA($set->getRange(0, 1), "DataSet");
+        $this->assertIsA($set->getRange(0, 1)->ToArray(), "array");
+        $this->assertIsA($set->getArrayRange(0, 1), "array");
+    }
+
+    public function testRangesNew() {
+        $set = new DataObjectSet();
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+
+        $this->assertIsA($set->getRange(0, 1), "DataSet");
+        $this->assertIsA($set->getRange(0, 1)->ToArray(), "array");
+        $this->assertIsA($set->getArrayRange(0, 1), "array");
+
+        $set->add($this->janine);
+
+        $this->assertIsA($set->getRange(0, 1), "DataSet");
+        $this->assertIsA($set->getRange(0, 1)->ToArray(), "array");
+        $this->assertIsA($set->getArrayRange(0, 1), "array");
+    }
 }
 
 class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
@@ -315,6 +348,7 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     public $canSortBy = true;
     public $_dataClass;
     public $inExpansion;
+    public $table;
 
     public function __construct($dataClass = "")
     {
@@ -395,6 +429,14 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     public function getInExpansion()
     {
         return $this->inExpansion;
+    }
+
+    /**
+     * @return string
+     */
+    public function table()
+    {
+        return $this->table;
     }
 }
 

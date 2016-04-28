@@ -1,7 +1,9 @@
 <?php defined("IN_GOMA") OR die();
+
 /**
  * Unit-Tests for AdminItem.
  *
+ * @property 	AdminItem item
  * @package		Goma\Test
  *
  * @author		Goma-Team

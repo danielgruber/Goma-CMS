@@ -26,7 +26,7 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
     public function testPush() {
         $set = new HasMany_DataObjectSet("MockWriteEntity");
 
-        $set->setData(array());
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
 
         $e = new MockWriteEntity();
         $oldE = clone $e;
@@ -35,22 +35,25 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
         $this->assertEqual($e->ToArray(), $oldE->ToArray());
 
         $set->setRelationENV("test", "blah", 1);
+
         $newE = clone $oldE;
         $set->push($newE);
 
         $this->assertEqual($set->getRelationENV(), array(
             "name" => "test",
-            "field" => "blah"
+            "field" => "blah",
+            "value" => 1
         ));
+
 
         $this->assertNotEqual($e->ToArray(), $oldE->ToArray());
         $this->assertNotEqual($newE->ToArray(), $oldE->toArray());
-        $this->assertEqual($set->getFirst()->blah, 1);
+        $this->assertEqual($set->first()->blah, 1);
         $this->assertEqual($newE->blah, 1);
         $this->assertEqual($e->blah, 1);
 
-        $set->setData(array());
+        $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
 
-        $this->assertEqual($set->getFirst()->blah, 1);
+        $this->assertEqual($set->first()->blah, 1);
     }
 }

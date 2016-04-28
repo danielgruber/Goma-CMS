@@ -844,7 +844,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected function getRecordsByRange($start, $length)
 	{
 		if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
-			return $this->staging->getRange($start, $length);
+			return $this->staging->getRange($start, $length)->ToArray();
 		}
 
 		$result = $this->getResultFromCache($start, $length);

@@ -51,7 +51,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
             }
 
             $this->join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
-                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dataobject->table() . ".id AND " .
+                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
                 $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->ownValue . "'";
         }
     }

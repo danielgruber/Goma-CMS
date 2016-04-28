@@ -76,6 +76,11 @@ interface IDataObjectSetDataSource {
      * @return string
      */
     public function getInExpansion();
+
+    /**
+     * @return string
+     */
+    public function table();
 }
 
 interface IDataObjectSetModelSource {

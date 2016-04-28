@@ -401,7 +401,7 @@ class adminItem extends AdminController implements PermProvider {
 	 */
 	public function getControllerInst() {
 		if(!isset($this->controllerInst)) {
-			$this->controllerInst = ControllerResolver::controllerClassForModel($this->modelInst());
+			$this->controllerInst = ControllerResolver::instanceForModel($this->modelInst());
 		}
 		
 		return $this->controllerInst;
