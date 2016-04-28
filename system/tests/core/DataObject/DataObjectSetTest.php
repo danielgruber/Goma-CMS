@@ -348,23 +348,36 @@ class DataObjectSetTests extends GomaUnitTest
     }
 
     public function testObjectPersistence() {
+        $this->unittestObjectPersistence(array(
+            $this->julian,
+            $this->daniel,
+            $this->janine,
+            $this->kathi
+        ));
+        $this->unittestObjectPersistence(array(
+            array("name" => "janine"),
+            array("name" => "daniel"),
+            array("name" => "julian"),
+            array("name" => "kathi"),
+        ));
+    }
+
+    public function unittestObjectPersistence($records) {
         $set = new DataObjectSet("DumpDBElementPerson");
 
         /** @var MockIDataObjectSetDataSource $source */
         $source = $set->getDbDataSource();
 
-        $source->records = array(
-            $this->julian,
-            $this->daniel,
-            $this->janine,
-            $this->kathi
-        );
+        $source->records = $records;
+
+        $cacheMethod = new ReflectionMethod("DataObjectSet", "clearCache");
+        $cacheMethod->setAccessible(true);
 
         $this->assertTrue($set[0] === $set->first());
-        $this->assertTrue($set[3] === $set->last());
+        $this->assertTrue($set[count($records) - 1] === $set->last());
 
         $this->assertTrue($set->first() === $set[0]);
-        $this->assertTrue($set->last() === $set[3]);
+        $this->assertTrue($set->last() === $set[count($records) - 1]);
 
         $i = 0;
         foreach($set as $record) {
@@ -374,7 +387,7 @@ class DataObjectSetTests extends GomaUnitTest
                 $this->assertFalse($record === $set->first());
             }
 
-            if($i == 3) {
+            if($i == count($records) - 1) {
                 $this->assertTrue($record === $set->last());
             } else {
                 $this->assertFalse($record === $set->last());
@@ -383,8 +396,31 @@ class DataObjectSetTests extends GomaUnitTest
         }
 
         $set->activatePagination(1, 2);
-        $this->assertEqual($set[1], $this->daniel);
-        $this->assertEqual($set->last(), $this->daniel);
+
+        if(is_array($records[1])) {
+            $this->assertEqual($set[1]->ToArray(), $records[1]);
+            $this->assertEqual($set->last()->ToArray(), $records[1]);
+        } else {
+            $this->assertEqual($set[1], $records[1]);
+            $this->assertEqual($set->last(), $records[1]);
+        }
+        $i = 0;
+        foreach($set as $record) {
+            if($i == 0) {
+                $this->assertTrue($record === $set->first());
+            } else {
+                $this->assertFalse($record === $set->first());
+            }
+
+            if($i == 1) {
+                $this->assertTrue($record === $set->last());
+            } else {
+                $this->assertFalse($record === $set->last());
+            }
+            $i++;
+        }
+
+        $cacheMethod->invoke($set);
         $i = 0;
         foreach($set as $record) {
             if($i == 0) {
@@ -519,7 +555,7 @@ class MockIModelSource implements IDataObjectSetModelSource {
 
     public function createNew($data = array())
     {
-        return $this->model;
+        return isset($this->model) ? $this->model : new ViewAccessableData($data);
     }
 
     public function getForm(&$form)

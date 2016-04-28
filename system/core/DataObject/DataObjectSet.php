@@ -555,6 +555,16 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($position))
 			$position = $this->position;
 
+		$this->forceData();
+
+		if($position == 0 && $this->firstCache !== null) {
+			$this->items[$position] = $this->firstCache;
+		}
+
+		if($position == count($this->items) - 1 && $this->lastCache !== null) {
+			$this->items[$position] = $this->lastCache;
+		}
+
 		$this->items[$position] = $this->getConverted($this->items[$position]);
 
 		if(is_a($this->items[$position], "DataObject")) {
