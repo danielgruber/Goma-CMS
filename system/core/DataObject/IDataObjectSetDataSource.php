@@ -81,6 +81,11 @@ interface IDataObjectSetDataSource {
      * @return string
      */
     public function table();
+
+    /**
+     * @return string
+     */
+    public function baseTable();
 }
 
 interface IDataObjectSetModelSource {

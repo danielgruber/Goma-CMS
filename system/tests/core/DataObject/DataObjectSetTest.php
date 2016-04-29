@@ -538,6 +538,14 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     {
         return $this->table;
     }
+
+    /**
+     * @return string
+     */
+    public function baseTable()
+    {
+        return $this->table;
+    }
 }
 
 class MockIModelSource implements IDataObjectSetModelSource {

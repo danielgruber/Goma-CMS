@@ -706,6 +706,21 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function current() {
 		return $this->items[$this->position];
 	}
+
+
+	/**
+	 * generates an array, where the value is a given field
+	 *
+	 * @param string $field
+	 * @return array
+	 */
+	public function fieldToArray($field) {
+		$arr = array();
+		foreach((array)$this->items as $record) {
+			$arr[] = $this->getItemProp($record, $field);
+		}
+		return $arr;
+	}
 }
 
 class ItemNotFoundException extends GomaException {

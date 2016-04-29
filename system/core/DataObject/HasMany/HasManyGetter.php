@@ -114,7 +114,7 @@ class HasManyGetter extends Extension {
         }
 
         $set = new HasMany_DataObjectSet($has_many[$name]->getTargetClass(), $filter);
-        $set->setRelationENV($name, $has_many[$name]->getInverse() . "id");
+        $set->setRelationENV($has_many[$name], $this->getOwner()->id);
 
         return $set;
     }

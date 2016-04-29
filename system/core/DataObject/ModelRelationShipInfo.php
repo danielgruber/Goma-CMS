@@ -169,6 +169,20 @@ abstract class ModelRelationShipInfo
     }
 
     /**
+     * @return bool
+     */
+    public function shouldRemoveData() {
+        return (substr($this->getCascade(), 0, 1) == 1);
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldUpdateData() {
+        return (substr($this->getCascade(), 1, 1) == 1);
+    }
+
+    /**
      * ToClassInfo.
      *
      * @return array

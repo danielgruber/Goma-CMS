@@ -321,7 +321,6 @@ class ModelWriter extends gObject {
      */
     public function checkForChangeInRelationship($relationShips, $useIds = true, $useObject = null) {
         foreach ($relationShips as $name) {
-
             if ($useIds && (isset($this->data[$name . "ids"]) && is_array($this->data[$name . "ids"]))) {
                 return true;
             }

@@ -29,16 +29,8 @@ class HasManyWriter extends Extension {
                         /** @var HasMany_DataObjectSet $hasManyObject */
                         $hasManyObject = $data[$name];
 
-                        if($this->shouldUpdateData($has_many[$name])) {
-                            $hasManyObject->setRelationENV($name, $has_many[$name]->getInverse() . "id", $owner->getModel()->id);
-                            $hasManyObject->commitStaging(false, true, $owner->getWriteType());
-
-                            if($hasManyObject->fieldToArray("id")) {
-                                $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $hasManyObject->fieldToArray("id"), $this->shouldRemoveData($has_many[$name]));
-                            }
-                        } else {
-                            $data[$name] = $hasManyObject->fieldToArray("id");
-                        }
+                        $hasManyObject->setRelationENV($has_many[$name], $owner->getModel()->id);
+                        $hasManyObject->commitStaging(false, true, $owner->getWriteType());
                     }
 
                     if (isset($data[$name]) && !isset($data[$name . "ids"]) && is_array($data[$name])) {
@@ -50,7 +42,7 @@ class HasManyWriter extends Extension {
                             throw new InvalidArgumentException("HasMany-Relationship must contain only already written records.");
                         }
 
-                        $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $data[$name . "ids"], $this->shouldRemoveData($has_many[$name]));
+                        $this->removeFromRelationShip($class->getTargetClass(), $has_many[$name]->getInverse() . "id", $owner->getModel()->id, $data[$name . "ids"], $has_many[$name]->shouldRemoveData());
                         $this->updateRelationship($data[$name . "ids"], $has_many[$name]);
                     }
                 }
@@ -58,22 +50,6 @@ class HasManyWriter extends Extension {
         }
 
         $owner->setData($data);
-    }
-
-    /**
-     * @param ModelHasManyRelationShipInfo $info
-     * @return bool
-     */
-    protected function shouldRemoveData($info) {
-        return (substr($info->getCascade(), 0, 1) == 1);
-    }
-
-    /**
-     * @param ModelHasManyRelationShipInfo $info
-     * @return bool
-     */
-    protected function shouldUpdateData($info) {
-        return (substr($info->getCascade(), 1, 1) == 1);
     }
 
     /**
@@ -161,7 +137,7 @@ class HasManyWriter extends Extension {
         if($extensionInstance = $owner->getModel()->getInstance(HasManyGetter::ID)) {
             // has-many
             if ($has_many = $extensionInstance->hasMany()) {
-                if ($owner->checkForChangeInRelationship(array_keys($has_many), true, true)) {
+                if ($owner->checkForChangeInRelationship(array_keys($has_many), true, "HasMany_DataObjectSet")) {
                     $changed = true;
 
                     return;

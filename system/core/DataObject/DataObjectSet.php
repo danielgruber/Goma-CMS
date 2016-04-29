@@ -869,7 +869,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		$result = $this->getResultFromCache($start, $length);
 		if ($result === null) {
-			$result = $this->dbDataSource()->getRecords($this->version, $this->filter, $this->sort, array($start, $length), $this->join, $this->search);
+			$result = $this->dbDataSource()->getRecords($this->version, $this->getFilterForQuery(), $this->getSortForQuery(), array($start, $length), $this->getJoinForQuery(), $this->search);
 		}
 
 		if (count($result) < $length) {
@@ -1371,6 +1371,28 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		}
 
 		return $object;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getFilterForQuery()
+	{
+		return $this->filter;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getSortForQuery() {
+		return $this->sort;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getJoinForQuery() {
+		return $this->join;
 	}
 }
 

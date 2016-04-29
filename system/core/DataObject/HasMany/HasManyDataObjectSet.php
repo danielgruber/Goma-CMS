@@ -10,46 +10,38 @@
  *
  * @version     1.2.1
  */
-class HasMany_DataObjectSet extends DataObjectSet {
+class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
     /**
-     * field for the relation according to this set, for example: pageid or groupid
+     * field for the relationship-info.
      *
-     * @var string
+     * @var ModelHasManyRelationShipInfo
      */
-    protected $field;
-
-    /**
-     * name of the relation
-     *
-     * @var string
-     */
-    protected $relationName;
+    protected $relationShipInfo;
 
     /**
      * @var int
      */
-    protected $value;
+    protected $relationShipValue;
+
+    /**
+     * @var string
+     */
+    protected $relationShipField;
 
     /**
      * sets the relation-props
      *
-     * @param string $name
-     * @param string $field
-     * @param int $id
+     * @param ModelHasManyRelationShipInfo $relationShipInfo
+     * @param int $value
      */
-    public function setRelationENV($name = null, $field = null, $id = null) {
-        if(isset($name))
-            $this->relationName = $name;
-        if(isset($field))
-            $this->field = $field;
+    public function setRelationENV($relationShipInfo, $value) {
+        $this->relationShipInfo = $relationShipInfo;
+        $this->relationShipValue = $value;
+        $this->relationShipField = $relationShipInfo->getRelationShipName() . "id";
 
-        if(isset($id)) {
-            $this->value = $id;
-
-            foreach ($this as $record) {
-                $record[$field] = $id;
-            }
+        if($this->getFetchMode() != self::FETCH_MODE_CREATE_NEW && $this->first()->{$this->relationShipField} != $this->relationShipValue) {
+            throw new InvalidArgumentException("You cannot move HasManyRelationship to another object. Please copy data by yourself.");
         }
     }
 
@@ -57,7 +49,7 @@ class HasMany_DataObjectSet extends DataObjectSet {
      * get the relation-props
      */
     public function getRelationENV() {
-        return array("name" => $this->relationName, "field" => $this->field, "value" => $this->value);
+        return array("info" => $this->relationShipInfo, "value" => $this->relationShipValue);
     }
 
     /**
@@ -75,24 +67,27 @@ class HasMany_DataObjectSet extends DataObjectSet {
         $form = parent::generateForm($name, $edit, $disabled, $request, $controller, $submission);
 
         if($id = $this->getRelationID()) {
-            $form->add(new HiddenField($this->field, $id));
+            $form->add(new HiddenField($this->relationShipField, $id));
         }
 
         return $form;
     }
 
     /**
-     * @param DataObject $record
-     * @param bool $write
-     * @return DataObjectSet
+     * @param bool $forceInsert
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @throws DataObjectSetCommitException
      */
-    public function push(DataObject $record, $write = false)
+    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2)
     {
         if($id = $this->getRelationID()) {
-            $record->{$this->field} = $this->getRelationID();
+            foreach($this->staging as $record) {
+                $record->{$this->relationShipField} = $this->getRelationID();
+            }
         }
 
-        return parent::push($record, $write);
+        parent::commitStaging($forceInsert, $forceWrite, $snap_priority);
     }
 
     /**
@@ -103,7 +98,9 @@ class HasMany_DataObjectSet extends DataObjectSet {
     {
         $record = parent::createNewModel($data);
 
-        $record->{$this->field} = $this->getRelationID();
+        if($this->relationShipField) {
+            $record->{$this->relationShipField} = $this->getRelationID();
+        }
 
         return $record;
     }
@@ -114,12 +111,57 @@ class HasMany_DataObjectSet extends DataObjectSet {
      * @return null|int
      */
     protected function getRelationID() {
-        if(isset($this->value)) {
-            return $this->value;
-        } else if(isset($this->first()->{$this->field})) {
-            return $this->first()->{$this->field};
-        } else if(isset($this->filter[$this->field]) && (is_string($this->filter[$this->field]) || is_int($this->filter[$this->field]))) {
-            return $this->filter[$this->field];
+        if(isset($this->relationShipValue)) {
+            return $this->relationShipValue;
+        } else if(isset($this->first()->{$this->relationShipField})) {
+            return $this->first()->{$this->relationShipField};
+        } else if(isset($this->filter[$this->relationShipField]) && (is_string($this->filter[$this->relationShipField]) || is_int($this->filter[$this->relationShipField]))) {
+            return $this->filter[$this->relationShipField];
         }
+    }
+
+    /**
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @return mixed
+     * @throws MySQLException
+     */
+    public function commitRemoveStaging($forceWrite = false, $snap_priority = 2) {
+        /** @var DataObject $item */
+        foreach ($this->removeStaging as $item) {
+            if($this->relationShipInfo()->shouldRemoveData()) {
+                $item->remove($forceWrite);
+            } else {
+                $item->{$this->relationShipField} = 0;
+                $item->writeToDB(false, $forceWrite, $snap_priority);
+            }
+        }
+    }
+
+    /**
+     * @param $filter
+     * @return array
+     */
+    protected function argumentFilterForHidingRemovedStageForQuery($filter)
+    {
+        if(!is_array($filter)) {
+            $filter = (array) $filter;
+        }
+
+        $filter[] = " id NOT IN ('".implode("','", $this->removeStaging->fieldToArray("id"))."') ";
+
+        return $filter;
+    }
+
+    /**
+     * @return ModelHasManyRelationShipInfo
+     */
+    protected function relationShipInfo()
+    {
+        if(!isset($this->relationShipInfo)) {
+            throw new InvalidArgumentException("You have to set RelationshipInfo if you want to make changes on this relationship.");
+        }
+
+        return $this->relationShipInfo;
     }
 }

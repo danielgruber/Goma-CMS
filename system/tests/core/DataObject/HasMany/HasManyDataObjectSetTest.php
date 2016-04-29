@@ -34,14 +34,13 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
 
         $this->assertEqual($e->ToArray(), $oldE->ToArray());
 
-        $set->setRelationENV("test", "blah", 1);
+        $set->setRelationENV($info = new ModelHasManyRelationShipInfo("myclass", "blah", array()), 1);
 
         $newE = clone $oldE;
         $set->push($newE);
 
         $this->assertEqual($set->getRelationENV(), array(
-            "name" => "test",
-            "field" => "blah",
+            "info" => $info,
             "value" => 1
         ));
 

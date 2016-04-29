@@ -172,20 +172,6 @@ class DataSet extends ArrayList {
     }
 
     /**
-     * generates an array, where the value is a given field
-     *
-     * @param string $field
-     * @return array
-     */
-    public function fieldToArray($field) {
-        $arr = array();
-        foreach((array)$this->items as $record) {
-            $arr[] = $this->getItemProp($record, $field);
-        }
-        return $arr;
-    }
-
-    /**
      * adds a item to this set
      * @param array|gObject $item
      */
