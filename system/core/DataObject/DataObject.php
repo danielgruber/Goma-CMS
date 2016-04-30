@@ -1468,16 +1468,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
              * where
              * fields
              */
+            /** @var HasMany_DataObjectSet $data */
             if ($data = $this->getHasMany($relname)) {
-
-                // then get all data in one array with key - id pairs
-
-                $arr = array();
-                foreach($data->ToArray() as $key => $value)
-                {
-                    $arr[] = $value["id"];
-                }
-                return $arr;
+                return $data->fieldToArray("id");
             } else {
                 return array();
             }

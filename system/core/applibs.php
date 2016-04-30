@@ -699,6 +699,9 @@ function Goma_ErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
 	return true;
 }
 
+/**
+ * @param Exception $exception
+ */
 function Goma_ExceptionHandler($exception) {
 	if(isset($exception->isIgnorable) && $exception->isIgnorable) {
 		return;
@@ -706,11 +709,17 @@ function Goma_ExceptionHandler($exception) {
 
 	log_exception($exception);
 
+	$details = $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">" . $exception->getTraceAsString() . "</textarea>";
+	$current = $exception;
+	while($current = $current->getPrevious()) {
+		$details .= $current->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">" . $current->getTraceAsString() . "</textarea>";
+	}
+
 	$content = file_get_contents(ROOT . "system/templates/framework/phperror.html");
 	$content = str_replace('{BASE_URI}', BASE_URI, $content);
 	$content = str_replace('{$errcode}', $exception->getCode(), $content);
 	$content = str_replace('{$errname}', get_class($exception), $content);
-	$content = str_replace('{$errdetails}', $exception->getMessage() . "\n<br />\n<br />\n<textarea style=\"width: 100%; height: 300px;\">" . $exception->getTraceAsString() . "</textarea>", $content);
+	$content = str_replace('{$errdetails}', $details, $content);
 	$content = str_replace('$uri', $_SERVER["REQUEST_URI"], $content);
 
 	if(gObject::method_exists($exception, "http_status")) {

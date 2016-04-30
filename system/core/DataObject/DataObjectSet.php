@@ -973,7 +973,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		$addedIDs = array();
 		foreach($data as $record) {
 			if(is_integer($record)) {
-				$_data = DataObject::get_one($this->dataobject, array("id" => $record));
+				$_data = DataObject::get_one($this->DataClass(), array("id" => $record));
 				if($_data) {
 					$this->add($_data);
 					$addedIDs = $record;

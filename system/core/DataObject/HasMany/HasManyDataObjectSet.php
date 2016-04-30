@@ -38,7 +38,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     public function setRelationENV($relationShipInfo, $value) {
         $this->relationShipInfo = $relationShipInfo;
         $this->relationShipValue = $value;
-        $this->relationShipField = $relationShipInfo->getRelationShipName() . "id";
+        $this->relationShipField = $relationShipInfo->getInverse() . "id";
 
         if($this->getFetchMode() != self::FETCH_MODE_CREATE_NEW && $this->first() && $this->first()->{$this->relationShipField} != $this->relationShipValue) {
             throw new InvalidArgumentException("You cannot move HasManyRelationship to another object. Please copy data by yourself.");
@@ -85,6 +85,17 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
      */
     public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null)
     {
+        if($this->fetchMode == DataObjectSet::FETCH_MODE_CREATE_NEW) {
+            $records = $this->dbDataSource()->getRecords($this->version, array(
+                $this->relationShipField => $this->relationShipValue,
+                "recordid NOT in (".array_merge($this->staging->fieldToArray("id"), $this->removeStaging->fieldToArray("id")).")"
+            ));
+
+            foreach($records as $record) {
+                $this->removeStaging->add($record);
+            }
+        }
+
         if($id = $this->getRelationID()) {
             foreach($this->staging as $record) {
                 $record->{$this->relationShipField} = $this->getRelationID();
@@ -155,6 +166,22 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
                 $item->writeToDBInRepo($repository, false, $forceWrite, $snap_priority);
             }
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilterForQuery()
+    {
+        $filter = parent::getFilterForQuery();
+
+        if($id = $this->getRelationID()) {
+            $filter[$this->relationShipField] = $id;
+        } else {
+            throw new InvalidArgumentException("HasMany_DataObjectSet needs relationship-info for query.");
+        }
+
+        return $filter;
     }
 
     /**

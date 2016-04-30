@@ -49,6 +49,15 @@ class HasManyGetter extends Extension {
                 }), true);
 
                 gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
+                gObject::LinkMethod($this->getOwner()->classname, "set" . $key . "ids", function($instance) use($key) {
+                    $args = func_get_args();
+                    $args[0] = $key;
+                    try {
+                        return call_user_func_array(array($instance, "setHasManyIDs"), $args);
+                    } catch(InvalidArgumentException $e) {
+                        throw new LogicException("Something got wrong wiring the HasMany-Relationship.", 0, $e);
+                    }
+                }, true);
             }
         }
     }
@@ -102,18 +111,7 @@ class HasManyGetter extends Extension {
      * @return HasMany_DataObjectSet
      */
     protected function getNewHasManyObject($has_many, $name) {
-        /** @var DataObject $owner */
-        $owner = $this->getOwner();
-
-        $filter = array();
-        $ids = $owner->fieldGet($name . "ids");
-        if($ids && is_array($ids)) {
-            $filter["id"] = $ids;
-        } else {
-            $filter[$has_many[$name]->getInverse() . "id"] = $this->getOwner()->id;
-        }
-
-        $set = new HasMany_DataObjectSet($has_many[$name]->getTargetClass(), $filter);
+        $set = new HasMany_DataObjectSet($has_many[$name]->getTargetClass());
         $set->setRelationENV($has_many[$name], $this->getOwner()->id);
 
         return $set;
@@ -156,6 +154,19 @@ class HasManyGetter extends Extension {
             return self::$relationShips[$owner->classname];
         } else {
             return isset(self::$relationShips[$owner->classname][$component]) ? self::$relationShips[$owner->classname][$component] : null;
+        }
+    }
+
+    /**
+     * sets has-many-ids.
+     * @param string $name
+     * @param array $ids
+     */
+    public function setHasManyIDs($name, $ids) {
+        $this->getHasMany($name)->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+        /** @var DataObject $record */
+        foreach(DataObject::get($this->getOwner(), array("id" => $ids)) as $record) {
+            $this->getHasMany($name)->add($record);
         }
     }
 
