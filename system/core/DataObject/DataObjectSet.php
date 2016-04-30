@@ -1047,11 +1047,14 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 * @param bool $forceInsert
 	 * @param bool $forceWrite
 	 * @param int $snap_priority
-	 * @throws Exception
+	 * @param null|IModelRepository $repository
+	 * @throws DataObjectSetCommitException
 	 */
-	public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+	public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null) {
 		$exceptions = array();
 		$errorRecords = array();
+
+		$repository = isset($repository) ? $repository : Core::repository();
 
 		/** @var DataObject $record */
 		foreach($this->staging as $record) {
@@ -1060,7 +1063,19 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			}
 
 			try {
-				$record->writeToDB($forceInsert, $forceWrite, $snap_priority);
+				if($snap_priority > 1) {
+					if($forceInsert) {
+						$repository->add($record, $forceWrite);
+					} else {
+						$repository->write($record, $forceWrite);
+					}
+				} else {
+					if($forceInsert) {
+						$repository->addState($record, $forceWrite);
+					} else {
+						$repository->writeState($record, $forceWrite);
+					}
+				}
 
 				$this->staging->remove($record);
 			} catch(Exception $e) {

@@ -34,7 +34,11 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
 
         $this->assertEqual($e->ToArray(), $oldE->ToArray());
 
-        $set->setRelationENV($info = new ModelHasManyRelationShipInfo("myclass", "blah", array()), 1);
+        $set->setRelationENV($info = new ModelHasManyRelationShipInfo("myclass", "blah", array(
+            "target" => "User",
+            "inverse"   => "blub",
+            "validatedInverse"  => true
+        )), 1);
 
         $newE = clone $oldE;
         $set->push($newE);
@@ -44,15 +48,14 @@ class HasManyDataObjectSetTest extends GomaUnitTest implements TestAble
             "value" => 1
         ));
 
-
         $this->assertNotEqual($e->ToArray(), $oldE->ToArray());
         $this->assertNotEqual($newE->ToArray(), $oldE->toArray());
-        $this->assertEqual($set->first()->blah, 1);
-        $this->assertEqual($newE->blah, 1);
-        $this->assertEqual($e->blah, 1);
+        $this->assertEqual($set->first()->blahid, 1);
+        $this->assertEqual($newE->blahid, 1);
+        $this->assertEqual($e->blahid, 1);
 
         $set->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
 
-        $this->assertEqual($set->first()->blah, 1);
+        $this->assertEqual($set->first()->blahid, 1);
     }
 }

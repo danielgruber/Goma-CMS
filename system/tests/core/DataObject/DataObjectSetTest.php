@@ -633,13 +633,28 @@ class DumpDBElementPerson extends DataObject {
      * @param int $age
      * @param string $gender 'M' or 'W'
      */
-    public function __construct($name, $age, $gender)
+    public function __construct($name = null, $age = null, $gender = null)
     {
         parent::__construct();
+
+        if(is_array($name)) {
+            $this->name = isset($name["name"]) ? $name["name"] : null;
+            $this->age = isset($name["age"]) ? $name["age"] : null;
+            $this->gender = isset($name["gender"]) ? $name["gender"] : null;
+        }
 
         $this->name = $name;
         $this->age = $age;
         $this->gender = $gender;
+    }
+
+    public function ToArray($additional_fields = array())
+    {
+        return array_merge(parent::ToArray($additional_fields), array(
+            "name"      => $this->name,
+            "age"       => $this->age,
+            "gender"    => $this->gender
+        ));
     }
 
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)

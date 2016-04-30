@@ -40,8 +40,12 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
         $this->relationShipValue = $value;
         $this->relationShipField = $relationShipInfo->getRelationShipName() . "id";
 
-        if($this->getFetchMode() != self::FETCH_MODE_CREATE_NEW && $this->first()->{$this->relationShipField} != $this->relationShipValue) {
+        if($this->getFetchMode() != self::FETCH_MODE_CREATE_NEW && $this->first() && $this->first()->{$this->relationShipField} != $this->relationShipValue) {
             throw new InvalidArgumentException("You cannot move HasManyRelationship to another object. Please copy data by yourself.");
+        }
+
+        foreach($this->staging as $record) {
+            $record->{$this->relationShipField} = $this->relationShipValue;
         }
     }
 
@@ -77,9 +81,9 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
      * @param bool $forceInsert
      * @param bool $forceWrite
      * @param int $snap_priority
-     * @throws DataObjectSetCommitException
+     * @param null|IModelRepository $repository
      */
-    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2)
+    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null)
     {
         if($id = $this->getRelationID()) {
             foreach($this->staging as $record) {
@@ -87,7 +91,7 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
             }
         }
 
-        parent::commitStaging($forceInsert, $forceWrite, $snap_priority);
+        parent::commitStaging($forceInsert, $forceWrite, $snap_priority, $repository);
     }
 
     /**
@@ -106,6 +110,20 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
+     * @param DataObject $record
+     * @param bool $write
+     * @return $this
+     */
+    public function push($record, $write = false)
+    {
+        if($id = $this->getRelationID()) {
+            $record->{$this->relationShipField} = $id;
+        }
+
+        return parent::push($record, $write);
+    }
+
+    /**
      * gets id.
      *
      * @return null|int
@@ -121,34 +139,36 @@ class HasMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
+     * @param null|IModelRepository $repository
      * @param bool $forceWrite
      * @param int $snap_priority
      * @return mixed
      * @throws MySQLException
      */
-    public function commitRemoveStaging($forceWrite = false, $snap_priority = 2) {
+    public function commitRemoveStaging($repository, $forceWrite = false, $snap_priority = 2) {
         /** @var DataObject $item */
         foreach ($this->removeStaging as $item) {
             if($this->relationShipInfo()->shouldRemoveData()) {
                 $item->remove($forceWrite);
             } else {
                 $item->{$this->relationShipField} = 0;
-                $item->writeToDB(false, $forceWrite, $snap_priority);
+                $item->writeToDBInRepo($repository, false, $forceWrite, $snap_priority);
             }
         }
     }
 
     /**
-     * @param $filter
+     * @param array|string $filter
      * @return array
      */
-    protected function argumentFilterForHidingRemovedStageForQuery($filter)
-    {
-        if(!is_array($filter)) {
-            $filter = (array) $filter;
-        }
+    protected function argumentFilterForHidingRemovedStageForQuery($filter) {
+        if($ids = $this->removeStaging->fieldToArray("id")) {
+            if (!is_array($filter)) {
+                $filter = (array)$filter;
+            }
 
-        $filter[] = " id NOT IN ('".implode("','", $this->removeStaging->fieldToArray("id"))."') ";
+            $filter[] = $this->dbDataSource()->table() . ".recordid NOT IN ('" . implode("','", $this->removeStaging->fieldToArray("id")) . "') ";
+        }
 
         return $filter;
     }

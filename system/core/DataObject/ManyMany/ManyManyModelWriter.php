@@ -9,6 +9,8 @@
  * @author      Goma-Team
  *
  * @version    1.0
+ *
+ * @method ModelWriter getOwner()
  */
 class ManyManyModelWriter extends Extension {
 
@@ -26,16 +28,13 @@ class ManyManyModelWriter extends Extension {
      * on before write.
      */
     public function gatherDataToWrite() {
-
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-        $data = $owner->getData();
+        $data = $this->getOwner()->getData();
 
         $this->many_many_objects = array();
         $this->many_many_relationships = array();
 
         // here the magic for many-many happens
-        if ($many_many = $owner->getModel()->ManyManyRelationships()) {
+        if ($many_many = $this->getOwner()->getModel()->ManyManyRelationships()) {
             foreach($many_many as $key => $value) {
                 if (isset($data[$key]) && is_object($data[$key]) && is_a($data[$key], "ManyMany_DataObjectSet")) {
                     $this->many_many_objects[$key] = $data[$key];
@@ -46,7 +45,7 @@ class ManyManyModelWriter extends Extension {
             }
         }
 
-        $owner->setData($data);
+        $this->getOwner()->setData($data);
     }
 
     /**
@@ -55,42 +54,38 @@ class ManyManyModelWriter extends Extension {
      * @param array $manipulation
      */
     public function onBeforeWriteData(&$manipulation) {
-
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-        $data = $owner->getData();
+        $data = $this->getOwner()->getData();
 
         /** @var ManyMany_DataObjectSet $object */
         foreach($this->many_many_objects as $key => $object) {
-            $object->setRelationENV($this->many_many_relationships[$key], $owner->getModel()->versionid);
-            $object->commitStaging(false, true, $owner->getWriteType());
+            $object->setRelationENV($this->many_many_relationships[$key], $this->getOwner()->getModel()->versionid);
+            $object->commitStaging(false, true, $this->getOwner()->getWriteType());
             unset($data[$key . "ids"]);
         }
 
-        $many_many = $owner->getModel()->ManyManyRelationships();
+        $many_many = $this->getOwner()->getModel()->ManyManyRelationships();
 
         // many-many
         if ($many_many) {
             /** @var ModelManyManyRelationshipInfo $relationShip */
             foreach($many_many as $name => $relationShip)
             {
-
                 /** @var ModelManyManyRelationShipInfo $relationShip */
-                $relationShip = $owner->getModel()->getManyManyInfo($name);
+                $relationShip = $this->getOwner()->getModel()->getManyManyInfo($name);
 
                 // it is supported to have extra-fields in this array
                 if(isset($data[$name]) && is_array($data[$name])) {
                     $manipulation = self::set_many_many_manipulation(
-                        $owner->getModel(), $manipulation,
+                        $this->getOwner()->getModel(), $manipulation,
                         $relationShip, $data[$name],
-                        true, $owner->getWriteType()
+                        true, $this->getOwner()->getWriteType()
                     );
                 } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
                 {
                     $manipulation = self::set_many_many_manipulation(
-                        $owner->getModel(), $manipulation,
+                        $this->getOwner()->getModel(), $manipulation,
                         $relationShip, $data[$name . "ids"],
-                        true, $owner->getWriteType()
+                        true, $this->getOwner()->getWriteType()
                     );
                 }
 
@@ -98,11 +93,11 @@ class ManyManyModelWriter extends Extension {
         }
 
         // add some manipulation to existing many-many-connection, which are not reflected with belongs_many_many
-        if ($owner->getOldId() != 0) {
-            $manipulation = $this->moveManyManyExtra($manipulation, $owner->getOldId());
+        if ($this->getOwner()->getOldId() != 0) {
+            $manipulation = $this->moveManyManyExtra($manipulation, $this->getOwner()->getOldId());
         }
 
-        $owner->setData($data);
+        $this->getOwner()->setData($data);
     }
 
     /**
@@ -117,8 +112,10 @@ class ManyManyModelWriter extends Extension {
      * @return array
      * @throws PermissionException
      */
-    public static function set_many_many_manipulation($ownerModel, $manipulation, $relationShip,
-                                                      $data, $forceWrite = false, $snap_priority = 2)
+    public static function set_many_many_manipulation(
+        $ownerModel, $manipulation, $relationShip,
+        $data, $forceWrite = false, $snap_priority = 2
+    )
     {
         $existing = $ownerModel->getManyManyRelationShipData($relationShip);
 
@@ -170,7 +167,6 @@ class ManyManyModelWriter extends Extension {
      * @return array
      */
     public static function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
-
         $mani_delete = array(
             "table_name"	=> $relationShip->getTableName(),
             "command"   	=> "delete",
@@ -252,13 +248,9 @@ class ManyManyModelWriter extends Extension {
      * @throws SQLException
      */
     protected function moveManyManyExtra($manipulation, $oldId) {
-
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-
         $dataClasses = array_merge(
-            array($owner->getModel()->BaseClass()),
-            ClassInfo::DataClasses($owner->getModel()->classname)
+            array($this->getOwner()->getModel()->BaseClass()),
+            ClassInfo::DataClasses($this->getOwner()->getModel()->classname)
         );
 
         foreach($dataClasses as $dataClass) {
@@ -281,13 +273,9 @@ class ManyManyModelWriter extends Extension {
      * @return array
      */
     protected function moveManyManyExtraForRelationShip($manipulation, $oldId, $info) {
-
-        /** @var ModelWriter $owner */
-        $owner = $this->getOwner();
-
         /** @var ModelManyManyRelationShipInfo $relationShip */
-        $relationShip = $owner->getModel()->getManyManyInfo($info[1], $info[0])->getInverted();
-        $existingData = $owner->getModel()->getManyManyRelationShipData($relationShip, null, $oldId);
+        $relationShip = $this->getOwner()->getModel()->getManyManyInfo($info[1], $info[0])->getInverted();
+        $existingData = $this->getOwner()->getModel()->getManyManyRelationShipData($relationShip, null, $oldId);
 
         if(!empty($existingData)) {
             $manipulation[$relationShip->getTableName()] = array(
@@ -299,7 +287,7 @@ class ManyManyModelWriter extends Extension {
 
             foreach ($existingData as $data) {
                 $newRecord = $data;
-                $newRecord[$relationShip->getOwnerField()] = $owner->getModel()->versionid;
+                $newRecord[$relationShip->getOwnerField()] = $this->getOwner()->getModel()->versionid;
                 $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
 
                 unset($newRecord["versionid"], $newRecord["relationShipId"]);
@@ -312,6 +300,8 @@ class ManyManyModelWriter extends Extension {
 
     /**
      * delete old versions.
+     * @param array $manipulation
+     * @param int $oldId
      */
     public function deleteOldVersions(&$manipulation, $oldId) {
         /** @var ModelWriter $owner */

@@ -10,7 +10,7 @@
  *
  * @version     1.2
  */
-class ManyMany_DataObjectSet extends DataObjectSet {
+class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     /**
      * value of $ownField
      *
@@ -40,20 +40,6 @@ class ManyMany_DataObjectSet extends DataObjectSet {
 
         $this->relationShip = $relationShip;
         $this->ownValue = $ownValue;
-
-        if($this->relationShip->getExtraFields() && $this->ownValue != 0) {
-            $relationTable = $this->relationShip->getTableName();
-            // search second join
-            foreach((array) $this->join as $table => $data) {
-                if(strpos($data, $relationTable)) {
-                    unset($this->join[$table]);
-                }
-            }
-
-            $this->join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
-                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
-                $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->ownValue . "'";
-        }
     }
 
     /**
@@ -80,9 +66,7 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     /**
      * converts the item to the right format
      *
-     * @name getConverted
-     * @access protected
-     * @param various - data
+     * @param mixed $item
      * @return ViewAccessableData
      */
     public function getConverted($item) {
@@ -96,134 +80,15 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     }
 
     /**
-     * sets the variable join
-     *
-     * @name join
-     * @access public
-     * @return $this
-     */
-    public function join($join) {
-        if(isset($join)) {
-            $this->join = $join;
-            if(isset($this->relationShip)) {
-                if ($this->relationShip->getExtraFields()) {
-                    $this->join[$this->relationShip->getTableName()] = "";
-                }
-            }
-
-            $this->clearCache();
-        }
-        return $this;
-    }
-
-    /**
-     * returns all Records that can be written.
-     *
-     * @return array<DataObject>
-     */
-    protected function getWritableRecords() {
-        if(count($this->dataCache) > 0) {
-            $arr = array();
-            foreach($this->dataCache as $record) {
-                if(is_object($record)) {
-                    $arr[] = $record;
-                }
-            }
-
-            return $arr;
-        } else if(is_object($this->dataobject) && $this->dataobject->wasChanged()) {
-            return array($this->dataobject);
-        } else {
-            return array();
-        }
-    }
-
-    /**
-     * writes changed records and returns many-many-table-information to insert.
-     *
-     * @param bool $forceInsert
-     * @param bool $forceWrite
-     * @param int $snap_priority
-     * @param array $updateLastModifiedIDs
-     * @return array
-     */
-    protected function writeChangedRecords($forceInsert, $forceWrite, $snap_priority, &$updateLastModifiedIDs) {
-        $writeFields = array();
-
-        $records = $this->getWritableRecords();
-
-        if(empty($records)) {
-            return array();
-        }
-
-        /** @var DataObject $record */
-        foreach($records as $record) {
-            if(!isset($writeFields[$record->versionid]) || $record->id == 0) {
-                // write
-                if($record->hasChanged()) {
-                    $record->writeToDB($forceInsert, $forceWrite, $snap_priority);
-                } else {
-                    $updateLastModifiedIDs[] = $record->versionid;
-                }
-
-                $this->createWriteFieldInfo($writeFields, $this->relationShip, $record);
-            }
-        }
-
-        return $writeFields;
-    }
-
-    /**
-     * creates write-field information.
-     *
-     * @param array $writeFields
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param DataObject $record
-     */
-    protected function createWriteFieldInfo(&$writeFields, $relationShip, $record) {
-        $writeFields[$record->versionid] = array(
-            "versionid" => $record->versionid
-        );
-
-        // add extra fields
-        if($extraFields = $relationShip->getExtraFields()) {
-            foreach ($extraFields as $field => $char) {
-                if (isset($record[$field])) {
-                    $writeFields[$record->versionid][$field] = $record->$field;
-                }
-            }
-        }
-    }
-
-    /**
-     *  writes to db without throwing exceptions. it returns true or false.
-     *
-     * @param bool $forceInsert to force insert
-     * @param bool $forceWrite to force write
-     * @param int $snap_priority of the snapshop: autosave 0, save 1, publish 2
-     * @deprecated
-     * @return bool
-     */
-    public function write($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
-        try {
-            $this->writeToDB($forceInsert, $forceWrite, $snap_priority);
-            return true;
-        } catch(Exception $e) {
-            log_exception($e);
-            return false;
-        }
-    }
-
-    /**
      * write to DB
      *
      * @param bool $forceInsert to force insert
      * @param bool $forceWrite to force write
      * @param int $snap_priority of the snapshop: autosave 0, save 1, publish 2
-     * @return void
-     * @throws Exception
+     * @param null|IModelRepository $repository
+     * @throws MySQLException
      */
-    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2) {
+    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null) {
 
         $updateLastModified = array();
         $writeData = $this->writeChangedRecords($forceInsert, $forceWrite, $snap_priority, $updateLastModified);
@@ -260,37 +125,56 @@ class ManyMany_DataObjectSet extends DataObjectSet {
     }
 
     /**
-     * writes the many-many-relation immediatly if writing
-     *
-     * @param DataObject $record
-     * @param bool $write
-     * @return bool
+     * joins stuff.
      */
-    public function push($record, $write = false) {
-        if(!$record instanceof DataObject) {
-            throw new InvalidArgumentException("Argument 1 of ManyMany_DataObjectSet must be instance of DataObject.");
+    public function getJoinForQuery()
+    {
+        $join = parent::getJoinForQuery();
+
+        if($this->relationShip->getExtraFields() && $this->ownValue != 0) {
+            $relationTable = $this->relationShip->getTableName();
+            // search second join
+            foreach((array) $join as $table => $data) {
+                if(strpos($data, $relationTable)) {
+                    unset($join[$table]);
+                }
+            }
+
+            $join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
+                $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
+                $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->ownValue . "'";
         }
 
-        $return = parent::push($record);
-        if($write) {
-            $this->writeToDB(false, true);
-        }
-        return $return;
+        return $join;
     }
 
     /**
-     * removes the relation on writing
-     *
-     * @param DataObject $record
-     * @param bool $write
-     * @return DataObject record
+     * @param null|IModelRepository $repository
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @return mixed
      */
-    public function removeRecord($record, $write = false) {
-        /** @var DataObject $record */
-        $record = parent::removeRecord($record);
-        if($write) {
-            $this->writeToDB(false, true);
+    public function commitRemoveStaging($repository, $forceWrite = false, $snap_priority = 2)
+    {
+        foreach($this->removeStaging as $record) {
+            //if($this->relationShip->)
         }
-        return $record;
+    }
+
+    /**
+     * @param $filter
+     * @return array
+     */
+    protected function argumentFilterForHidingRemovedStageForQuery($filter)
+    {
+        if($ids = $this->removeStaging->fieldToArray("id")) {
+            if (!is_array($filter)) {
+                $filter = (array)$filter;
+            }
+
+            $filter[] = $this->dbDataSource()->table() . ".recordid NOT IN ('" . implode("','", $this->removeStaging->fieldToArray("id")) . "') ";
+        }
+
+        return $filter;
     }
 }

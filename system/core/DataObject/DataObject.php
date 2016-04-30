@@ -837,21 +837,37 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      */
     public function writeToDB($forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false)
     {
+        $this->writeToDBInRepo(Core::repository(), $forceInsert, $forceWrite, $snap_priority, $forcePublish, $history, $silent, $overrideCreated);
+    }
+
+    /**
+     * writes changed data and throws exceptions.
+     *
+     * @param IModelRepository $repository
+     * @param bool $forceInsert
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @param bool $forcePublish
+     * @param bool $history
+     * @param bool $silent
+     * @param bool $overrideCreated
+     */
+    public function writeToDBInRepo($repository, $forceInsert = false, $forceWrite = false, $snap_priority = 2, $forcePublish = false, $history = true, $silent = false, $overrideCreated = false) {
         if(!$history) {
             HistoryWriter::disableHistory();
         }
 
         if($snap_priority > 1) {
             if($forceInsert) {
-                Core::repository()->add($this, $forceWrite, $silent, $overrideCreated);
+                $repository->add($this, $forceWrite, $silent, $overrideCreated);
             } else {
-                Core::repository()->write($this, $forceWrite, $silent, $overrideCreated);
+                $repository->write($this, $forceWrite, $silent, $overrideCreated);
             }
         } else {
             if($forceInsert) {
-                Core::repository()->addState($this, $forceWrite, $silent, $overrideCreated);
+                $repository->addState($this, $forceWrite, $silent, $overrideCreated);
             } else {
-                Core::repository()->writeState($this, $forceWrite, $silent, $overrideCreated);
+                $repository->writeState($this, $forceWrite, $silent, $overrideCreated);
             }
         }
 
