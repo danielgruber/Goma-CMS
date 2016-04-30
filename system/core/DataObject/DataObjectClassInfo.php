@@ -149,7 +149,7 @@ class DataObjectClassInfo extends Extension
 
                     if($relationShip->getBelongingName() == null) {
 
-                        ClassInfo::$class_info[$relationShip->getTarget()]["many_many_relations_extra"][] = array(
+                        ClassInfo::$class_info[$relationShip->getTargetClass()]["many_many_relations_extra"][] = array(
                             $class, $relationShip->getRelationShipName()
                         );
                     }

@@ -114,7 +114,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
         );
 
         // update not written records to indicate changes
-        $baseClassTarget = ClassInfo::$class_info[$this->relationShip->getTarget()]["baseclass"];
+        $baseClassTarget = ClassInfo::$class_info[$this->relationShip->getTargetClass()]["baseclass"];
         DataObject::update($baseClassTarget, array("last_modified" => NOW), array("id" => $updateLastModified));
 
         $this->dataobject->onBeforeManipulateManyMany($manipulation, $this, $writeData);

@@ -909,14 +909,14 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         // validate versionid
         if(isset($record["versionid"])) {
             $id = $record["versionid"];
-        } else if(DataObject::count($relationShip->getTarget(), array("versionid" => $key)) > 0) {
+        } else if(DataObject::count($relationShip->getTargetClass(), array("versionid" => $key)) > 0) {
             $id = $key;
         }
 
         // did not find versionid, so generate one
         if(!isset($id) || $id == 0) {
 
-            $target = $relationShip->getTarget();
+            $target = $relationShip->getTargetClass();
             /** @var DataObject $dataObject */
             $dataObject = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
             $dataObject->writeToDB(true, $forceWrite, $snap_priority, $forceWrite, $history);
@@ -926,13 +926,13 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
             // we want to update many-many-extra
             $databaseRecord = null;
-            $db = gObject::instance($relationShip->getTarget())->DataBaseFields(true);
+            $db = gObject::instance($relationShip->getTargetClass())->DataBaseFields(true);
 
             // just find out if we may be update the record given.
             foreach($record as $field => $v) {
                 if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
                     if(!isset($databaseRecord)) {
-                        $databaseRecord = DataObject::get_one($relationShip->getTarget(), array("versionid" => $id));
+                        $databaseRecord = DataObject::get_one($relationShip->getTargetClass(), array("versionid" => $id));
                     }
 
                     $databaseRecord[$field] = $v;
@@ -1530,9 +1530,9 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         // just that some errros are not happening.
         if ($extTable && (
-                ClassManifest::isSameClass($relationShip->getTarget(), $this->classname) ||
-                is_subclass_of($relationShip->getTarget(), $this->classname) ||
-                is_subclass_of($this->classname, $relationShip->getTarget())
+                ClassManifest::isSameClass($relationShip->getTargetClass(), $this->classname) ||
+                is_subclass_of($relationShip->getTargetClass(), $this->classname) ||
+                is_subclass_of($this->classname, $relationShip->getTargetClass())
             )
         ) {
             // filter for not existing records
@@ -1677,7 +1677,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         {
             $where["versionid"] = $this->data[$name . "ids"];
             // this relation was modfied, so we use the data from the datacache
-            $instance = new ManyMany_DataObjectSet($relationShip->getTarget(), $where, $sort, $limit);
+            $instance = new ManyMany_DataObjectSet($relationShip->getTargetClass(), $where, $sort, $limit);
             $instance->setRelationEnv($relationShip, $this->versionid);
 
             if(!$sort) {
@@ -1698,7 +1698,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $where[$relationShip->getTableName() . "." . $relationShip->getOwnerField()] = $this["versionid"];
         $sort = $this->getManyManySort($relationShip, $sort);
 
-        $instance = new ManyMany_DataObjectSet($relationShip->getTarget(), $where, $sort, $limit, array(
+        $instance = new ManyMany_DataObjectSet($relationShip->getTargetClass(), $where, $sort, $limit, array(
             ' INNER JOIN '.DB_PREFIX . $relationShip->getTableName().' AS '.$relationShip->getTableName().
             ' ON '.$relationShip->getTableName().'.'. $relationShip->getTargetField() . ' = '. $relationShip->getTargetTableName().'.id ' // Join other Table with many-many-table
         ));
@@ -1770,7 +1770,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         $relationShipInfo = $this->getManyManyInfo($name);
 
         if (is_a($value, "DataObjectSet") && !is_a($value, "ManyMany_DataObjectSet")) {
-            $instance = new ManyMany_DataObjectSet($relationShipInfo->getTarget());
+            $instance = new ManyMany_DataObjectSet($relationShipInfo->getTargetClass());
             $instance->setRelationEnv($relationShipInfo, $this->versionid);
             $instance->addMany($value);
             $this->setField($name, $instance);
@@ -3249,8 +3249,8 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                     $log .= 'Failed to clean-up Many-Many-Table '. $relationShip->getTableName() . "\n";
                 }
 
-                if(isset(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"])) {
-                    $extBaseTable = ModelInfoGenerator::ClassTable(ClassInfo::$class_info[$relationShip->getTarget()]["baseclass"]);
+                if(isset(ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"])) {
+                    $extBaseTable = ModelInfoGenerator::ClassTable(ClassInfo::$class_info[$relationShip->getTargetClass()]["baseclass"]);
                     $sql = "DELETE FROM ". DB_PREFIX . $relationShip->getTableName() ." WHERE ". $relationShip->getOwnerField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $this->baseTable.") OR ". $relationShip->getTargetField() ." NOT IN (SELECT id FROM ".DB_PREFIX . $extBaseTable.")";
                     register_shutdown_function(array("sql", "queryAfterDie"), $sql);
                 }

@@ -7,20 +7,7 @@
  * @license		GNU Lesser General Public License, version 3; see "LICENSE.txt"
  */
 
-class ModelManyManyRelationShipInfo {
-    /**
-     * class owning this relationship.
-     *
-     * @var string
-     */
-    protected $owner;
-
-    /**
-     * class to which this relationship points.
-     *
-     * @var string
-     */
-    protected $target;
+class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
 
     /**
      * local relationship name,
@@ -28,13 +15,6 @@ class ModelManyManyRelationShipInfo {
      * @var string
      */
     protected $relationShipName;
-
-    /**
-     * belonging relationship name.
-     *
-     * @var string
-     */
-    protected $belongingName;
 
     /**
      * table-name.
@@ -59,34 +39,76 @@ class ModelManyManyRelationShipInfo {
     protected $controlling;
 
     /**
-     * constructor.
+     * ModelManyManyRelationShipInfo constructor.
+     * @param string $ownerClass
+     * @param string $name
+     * @param array|string $options
+     * @param bool $isMain
      */
-    protected function __construct() {
+    public function __construct($ownerClass, $name, $options, $isMain)
+    {
+        if(is_array($options) && count($options) == 2 && !isset($options[DataObject::CASCADE_TYPE]) && !isset($options[DataObject::FETCH_TYPE])) {
+            Core::Deprecate("2.1", "Use Constants instead of 2 count array for ManyMany-inverse.");
+            $options = array_values($options);
+            $options = array(
+                DataObject::RELATION_TARGET => $options[0],
+                DataObject::RELATION_INVERSE => $options[1]
+            );
+        }
 
+        if(isset($options["belonging"])) {
+            $options["inverse"] = $options["belonging"];
+        }
+
+        $this->controlling = !!$isMain;
+
+        parent::__construct($ownerClass, $name, $options);
+
+        if(isset($options["ef"])) {
+            $this->extraFields = $options["ef"];
+        } else {
+            $this->extraFields = ModelInfoGenerator::get_many_many_extraFields($this->owner, $name);
+            $belongingExtra = ModelInfoGenerator::get_many_many_extraFields($this->targetClass, $this->inverse);
+            foreach ($belongingExtra as $key => $value) {
+                if (isset($this->extraFields[$key]) && $this->extraFields[$key] != $value) {
+                    throw new InvalidArgumentException("Multiple definitions of same Extra-Field in relationship-pairs in {$this->relationShipName} on class {$this->owner}.");
+                }
+
+                $this->extraFields[$key] = $value;
+            }
+        }
+
+        if(isset($options["table"])) {
+            $this->tableName = $options["table"];
+        } else {
+            $this->tableName = $this->generateTableName();
+        }
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getOwner()
+    protected function validateAndForceInverse()
     {
-        return $this->owner;
-    }
+        if(!ClassInfo::exists($this->targetClass)) {
+            throw new InvalidArgumentException("Target {$this->targetClass} must exist.");
+        }
 
-    /**
-     * @return string
-     */
-    public function getTarget()
-    {
-        return $this->target;
-    }
+        $relationships = (!$this->isControlling()) ?
+            ModelInfoGenerator::generateMany_many($this->targetClass, true) :
+            ModelInfoGenerator::generateBelongs_many_many($this->targetClass, true);
 
-    /**
-     * @return string
-     */
-    public function getRelationShipName()
-    {
-        return $this->relationShipName;
+        if(isset($this->inverse)) {
+            if(!isset($relationships[$this->inverse])) {
+                throw new InvalidArgumentException("Defined Inverse-Relationship {$this->inverse} not found on class {$this->targetClass} defined in class {$this->owner} relationship {$this->relationShipName}");
+            }
+        } else {
+            $this->inverse = $this->findInverseRelationshipsWithoutHint($relationships, $this->relationShipName, $this->owner);
+
+            if(!$this->controlling && !$this->inverse) {
+                throw new InvalidArgumentException("No Inverse relationship for Relationship for {$this->relationShipName} found in class {$this->targetClass}. Base-Class " . $this->owner, ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
+            }
+        }
     }
 
     /**
@@ -94,7 +116,7 @@ class ModelManyManyRelationShipInfo {
      */
     public function getBelongingName()
     {
-        return $this->belongingName;
+        return $this->inverse;
     }
 
     /**
@@ -128,7 +150,7 @@ class ModelManyManyRelationShipInfo {
      */
     public function isBidirectional()
     {
-        return ClassManifest::classesRelated($this->owner, $this->target);
+        return ClassManifest::classesRelated($this->owner, $this->targetClass);
     }
 
     /**
@@ -137,11 +159,18 @@ class ModelManyManyRelationShipInfo {
      * @return string
      */
     public function getOwnerField() {
-        if(!$this->controlling && ClassManifest::classesRelated($this->owner, $this->target)) {
+        if(!$this->controlling && ClassManifest::classesRelated($this->owner, $this->targetClass)) {
             return $this->owner . "_" . $this->owner . "id";
         }
 
         return $this->owner . "id";
+    }
+
+    /**
+     * @return string
+     */
+    public function getOwnerRecordField() {
+        return $this->getOwnerField() . "_record";
     }
 
     /**
@@ -150,11 +179,18 @@ class ModelManyManyRelationShipInfo {
      * @return string
      */
     public function getTargetField() {
-        if($this->controlling && ClassManifest::classesRelated($this->owner, $this->target)) {
-            return $this->target . "_" . $this->target . "id";
+        if($this->controlling && ClassManifest::classesRelated($this->owner, $this->targetClass)) {
+            return $this->targetClass . "_" . $this->targetClass . "id";
         }
 
-        return $this->target . "id";
+        return $this->targetClass . "id";
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetRecordField() {
+        return $this->getTargetField() . "_record";
     }
 
     /**
@@ -172,7 +208,7 @@ class ModelManyManyRelationShipInfo {
      * @return string
      */
     public function getTargetSortField() {
-        return $this->target . "_sort";
+        return $this->targetClass . "_sort";
     }
 
     /**
@@ -180,52 +216,7 @@ class ModelManyManyRelationShipInfo {
      */
     public function getTargetTableName()
     {
-        return isset(ClassInfo::$class_info[$this->target]["table"]) ? ClassInfo::$class_info[$this->target]["table"] : null;
-    }
-
-    /**
-     * @param string $owner
-     */
-    protected function setOwner($owner)
-    {
-        if($owner) {
-            $this->owner = $owner;
-        } else if(!$this->owner) {
-            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires an owner. Owner can't be null.");
-        }
-    }
-
-    /**
-     * @param string $target
-     */
-    protected function setTarget($target)
-    {
-        if($target) {
-            $this->target = $target;
-        } else if(!$this->target) {
-            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires a target. target can't be null.");
-        }
-    }
-
-    /**
-     * @param string $relationShipName
-     */
-    protected function setRelationShipName($relationShipName)
-    {
-        if($relationShipName) {
-            $this->relationShipName = $relationShipName;
-        } else if(!$this->relationShipName) {
-            throw new InvalidArgumentException("ModelManyManyRelationShipInfo requires a relationship-name. name can't be null.");
-        }
-
-    }
-
-    /**
-     * @param string $belongingName
-     */
-    protected function setBelongingName($belongingName)
-    {
-        $this->belongingName = $belongingName;
+        return isset(ClassInfo::$class_info[$this->targetClass]["table"]) ? ClassInfo::$class_info[$this->targetClass]["table"] : null;
     }
 
     /**
@@ -262,14 +253,11 @@ class ModelManyManyRelationShipInfo {
      * @return string
      */
     protected function generateTableName() {
-
-
         if(SQL::getFieldsOfTable($this->getOldTableName())) {
             return $this->getOldTableName();
         }
 
         return $this->getNewTableName();
-
     }
 
     /**
@@ -281,7 +269,7 @@ class ModelManyManyRelationShipInfo {
         if($this->controlling) {
             return "many_" . $this->owner . "_" . $this->relationShipName;
         } else {
-            return "many_" . $this->target . "_" . $this->belongingName;
+            return "many_" . $this->targetClass . "_" . $this->inverse;
         }
     }
 
@@ -292,9 +280,9 @@ class ModelManyManyRelationShipInfo {
      */
     protected function getOldTableName() {
         if($this->controlling) {
-            return "many_many_" . $this->owner . "_" . $this->relationShipName . "_" . $this->target;
+            return "many_many_" . $this->owner . "_" . $this->relationShipName . "_" . $this->targetClass;
         } else {
-            return "many_many_" . $this->target . "_" . $this->belongingName . "_" . $this->owner;
+            return "many_many_" . $this->targetClass . "_" . $this->inverse . "_" . $this->owner;
         }
     }
 
@@ -305,11 +293,12 @@ class ModelManyManyRelationShipInfo {
      */
     public function toClassInfo() {
         return array(
-            "table"         => $this->tableName,
-            "ef"            => $this->extraFields,
-            "target"        => $this->target,
-            "belonging"     => $this->belongingName,
-            "isMain"        => $this->controlling
+            "table"             => $this->tableName,
+            "ef"                => $this->extraFields,
+            "target"            => $this->targetClass,
+            "inverse"           => $this->inverse,
+            "isMain"            => $this->controlling,
+            "validatedInverse"  => true
         );
     }
 
@@ -329,11 +318,11 @@ class ModelManyManyRelationShipInfo {
      */
     public function getInverted() {
         $inverted = clone $this;
-        $inverted->owner = $this->target;
-        $inverted->target = $this->owner;
+        $inverted->owner = $this->targetClass;
+        $inverted->targetClass = $this->owner;
         $inverted->controlling = !$this->controlling;
-        $inverted->relationShipName = $this->belongingName;
-        $inverted->belongingName = $this->relationShipName;
+        $inverted->relationShipName = $this->inverse;
+        $inverted->inverse = $this->relationShipName;
 
         return $inverted;
     }
@@ -343,7 +332,7 @@ class ModelManyManyRelationShipInfo {
      *
      * @param string $class
      * @param array $info
-     * @return array<ModelManyManyRelationShipInfo>
+     * @return ModelManyManyRelationShipInfo[]
      */
     public static function generateFromClassInfo($class, $info) {
         $relationShips = array();
@@ -351,15 +340,7 @@ class ModelManyManyRelationShipInfo {
         $class = ClassManifest::resolveClassName($class);
 
         foreach($info as $name => $record) {
-            $relationShip = new ModelManyManyRelationShipInfo();
-            $relationShip->setOwner($class);
-
-            $relationShip->setRelationShipName($name);
-            $relationShip->setBelongingName($record["belonging"]);
-            $relationShip->setControlling($record["isMain"]);
-            $relationShip->setExtraFields($record["ef"]);
-            $relationShip->setTableName($record["table"]);
-            $relationShip->setTarget($record["target"]);
+            $relationShip = new ModelManyManyRelationShipInfo($class, $name, $record, $record["isMain"]);
 
             $relationShips[$name] = $relationShip;
         }
@@ -372,10 +353,9 @@ class ModelManyManyRelationShipInfo {
      *
      * @param string $class
      * @param bool $parents
-     * @return array <ModelManyManyRelationShipInfo>
+     * @return ModelManyManyRelationShipInfo[]
      */
     public static function generateFromClass($class, $parents = false) {
-
         $class = ClassManifest::resolveClassName($class);
 
         $relationShips = array();
@@ -409,66 +389,9 @@ class ModelManyManyRelationShipInfo {
      * @return ModelManyManyRelationShipInfo
      */
     protected static function generateRelationShipInfo($class, $name, $value, $belonging) {
-        $relationShip = new ModelManyManyRelationShipInfo();
-        $relationShip->relationShipName = $name;
-        $relationShip->owner = $class;
-
-        $info = self::getRelationInfoWithInverse($value);
-
-        $relationShip->target = $info[0];
-        $relationShip->belongingName = self::findInverseManyManyRelationship($name, $class, $info, $belonging);
-
-        $relationShip->extraFields = ModelInfoGenerator::get_many_many_extraFields($class, $name);
-        $belongingExtra = ModelInfoGenerator::get_many_many_extraFields($relationShip->target, $relationShip->belongingName);
-        foreach($belongingExtra as $key => $value) {
-            if(isset($relationShip->extraFields[$key]) && $relationShip->extraFields[$key] != $value) {
-                throw new LogicException("Extra-Fields should not be different on belonging relationship.");
-            }
-
-            $relationShip->extraFields[$key] = $value;
-        }
-
-        $relationShip->controlling = !$belonging;
-
-        $relationShip->tableName = $relationShip->generateTableName();
+        $relationShip = new ModelManyManyRelationShipInfo($class, $name, $value, !$belonging);
 
         return $relationShip;
-    }
-
-    /**
-     * searches for inverse relationships on other class.
-     *
-     * @param string $relationName of this relationship
-     * @param string $class name of class which holds relationship
-     * @param array $info from getRelationInfoWithInverse
-     * @param bool $belonging if class stores it in belongs or normal many-many
-     * @return string
-     */
-    public static function findInverseManyManyRelationship($relationName, $class, $info, $belonging = false)
-    {
-        $relationships = ($belonging) ? ModelInfoGenerator::generateMany_many($info[0], true) : ModelInfoGenerator::generateBelongs_many_many($info[0], true);
-
-        // if inverse is set in value of relationship, just validate inverse
-        if (isset($info[1])) {
-            $inverseName = strtolower(trim($info[1]));
-            if(isset($relationships[$inverseName])) {
-                if (self::isInverseValid($relationships[$inverseName], $relationName, $class)) {
-                    return $inverseName;
-                }
-            } else {
-                throw new LogicException("Defined Inverse-Relationship {$inverseName} not found on class {$info[0]} defined in class $class relationship $relationName");
-            }
-        } else {
-            // find relationship on other class
-            return self::findInverseRelationshipsWithoutHint($relationships, $relationName, $class);
-        }
-
-        if ($belonging) {
-            throw new LogicException("No Inverse relationship for Relationship for $relationName found in class $class. Searched in class " . $info[0], ExceptionManager::RELATIONSHIP_INVERSE_REQUIRED);
-        } else {
-            return null;
-        }
-
     }
 
     /**
@@ -587,15 +510,22 @@ class ModelManyManyRelationShipInfo {
      *
      * @return array
      */
-    public function getPlannedTableLayout() {
+    public function getPlannedTableLayout()
+    {
         $fields = array(
-            "id"                        => "int(10) PRIMARY KEY auto_increment",
-            $this->getTargetField()     => "int(10)",
-            $this->getOwnerField()      => "int(10)",
+            "id"                          => "int(10) PRIMARY KEY auto_increment",
+
+            // versionid
+            $this->getTargetField()       => "int(10)",
+            $this->getOwnerField()        => "int(10)",
+
+            // id
+            $this->getOwnerRecordField()  => "int(10)",
+            $this->getTargetRecordField() => "int(10)",
 
             // sort
-            $this->getOwnerSortField()  => "int(10)",
-            $this->getTargetSortField() => "int(10)"
+            $this->getOwnerSortField()    => "int(10)",
+            $this->getTargetSortField()   => "int(10)"
         );
 
         return array_merge($fields, $this->extraFields);
@@ -618,6 +548,16 @@ class ModelManyManyRelationShipInfo {
                 "name"		=> "dataindexunique",
                 "type"		=> "UNIQUE",
                 "fields"	=> array($this->getTargetField(), $this->getOwnerField())
+            ),
+            "recordindex"   => array(
+                "name"  => "recordindex",
+                "type"  => "INDEX",
+                "fields"=> array($this->getTargetRecordField(), $this->getOwnerRecordField())
+            ),
+            "recordindex_reverse"   => array(
+                "name"  => "recordindex_reverse",
+                "type"  => "INDEX",
+                "fields"=> array($this->getOwnerRecordField(), $this->getTargetRecordField())
             )
         );
     }

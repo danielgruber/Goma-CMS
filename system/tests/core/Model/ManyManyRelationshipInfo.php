@@ -21,16 +21,16 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      * test table-name styles.
      */
     public function testTableNameStyle() {
-        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", true, true, "many_many_test_testName_target");
-        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", true, false, "many_test_testName");
+        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", true, true, "many_many_test_testname_target");
+        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", true, false, "many_test_testname");
 
-        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, true, "many_many_target_targetName_test");
-        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, false, "many_target_targetName");
+        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, true, "many_many_target_targetname_test");
+        $this->unitTestTableNameStyle("test", "testName", "target", "targetName", false, false, "many_target_targetname");
 
-        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, false, "many_test_testName");
-        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, false, "many_test_testReverse");
-        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, true, "many_many_test_testReverse_test");
-        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, true, "many_many_test_testName_test");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, false, "many_test_testname");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, false, "many_test_testreverse");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", false, true, "many_many_test_testreverse_test");
+        $this->unitTestTableNameStyle("test", "testName", "test", "testReverse", true, true, "many_many_test_testname_test");
     }
 
     /**
@@ -45,11 +45,12 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
     public function unitTestTableNameStyle($owner, $relationshipName, $target, $targetRelationName, $controlling, $useOld, $expected) {
         $relationShips = ModelManyManyRelationShipInfo::generateFromClassInfo($owner, array(
             $relationshipName => array(
-                "table"         => null,
-                "ef"            => array(),
-                "target"        => $target,
-                "belonging"     => $targetRelationName,
-                "isMain"        => $controlling
+                "table"             => null,
+                "ef"                => array(),
+                "target"            => $target,
+                "inverse"           => $targetRelationName,
+                "isMain"            => $controlling,
+                "validatedInverse"  => true
             )
         ));
 
@@ -72,12 +73,12 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
      */
     public function testFindInverseManyManyRelationship() {
         $this->unitFindInverseManyManyRelationship(
-            "mains", "ManyManyRelationshipTestBelonging", array("ManyManyRelationshipTest"), true,
+            "mains", "ManyManyRelationshipTestBelonging", "ManyManyRelationshipTest", true,
             "belongs"
         );
 
         $this->unitFindInverseManyManyRelationship(
-            "belongs", "ManyManyRelationshipTest", array("ManyManyRelationshipTestBelonging"), false,
+            "belongs", "ManyManyRelationshipTest", "ManyManyRelationshipTestBelonging", false,
             "mains"
         );
 
@@ -97,7 +98,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         }, "LogicException");
 
         $this->unitFindInverseManyManyRelationship(
-            "tests", "ManyManyRelationshipTest", array("ManyManyTestObject"), false,
+            "tests", "ManyManyRelationshipTest", "ManyManyTestObject", false,
             null
         );
 
@@ -113,9 +114,9 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
     }
 
     public function unitFindInverseManyManyRelationship($relationName, $class, $info, $belonging, $expected) {
-        $data = ModelManyManyRelationShipInfo::findInverseManyManyRelationship($relationName, $class, $info, $belonging);
+        $model = new ModelManyManyRelationShipInfo($class, $relationName, $info, !$belonging);
 
-        $this->assertEqual($data, $expected);
+        $this->assertEqual($model->getInverse(), $expected);
     }
 
     public function testGenerateFromClass() {
@@ -125,22 +126,22 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         foreach($relationShips as $name => $relationShip) {
             if($name == "tests") {
                 $this->assertTrue($relationShip->isControlling());
-                $this->assertNull($relationShip->getBelongingName(), null);
-                $this->assertEqual($relationShip->getTarget(), "manymanytestobject");
+                $this->assertNull($relationShip->getInverse(), null);
+                $this->assertEqual($relationShip->getTargetClass(), "manymanytestobject");
                 $this->assertEqual($relationShip->getExtraFields(), array());
                 $this->assertNotNull($relationShip->getOwnerSortField());
 
             } else if($name == "belongs") {
-                $this->assertEqual($relationShip->getBelongingName(), "mains");
-                $this->assertEqual($relationShip->getTarget(), strtolower("ManyManyRelationshipTestBelonging"));
+                $this->assertEqual($relationShip->getInverse(), "mains");
+                $this->assertEqual($relationShip->getTargetClass(), strtolower("ManyManyRelationshipTestBelonging"));
                 $this->assertEqual($relationShip->getExtraFields(), ManyManyRelationshipTest::$many_many_extra_fields["belongs"]);
             }
 
             $this->assertNull($relationShip->getTargetTableName());
 
-            ClassInfo::$class_info[$relationShip->getTarget()]["table"] = $relationShip->getTarget() . "table";
+            ClassInfo::$class_info[$relationShip->getTargetClass()]["table"] = $relationShip->getTargetClass() . "table";
 
-            $this->assertEqual($relationShip->getTargetTableName(), $relationShip->getTarget() . "table");
+            $this->assertEqual($relationShip->getTargetTableName(), $relationShip->getTargetClass() . "table");
         }
     }
 
@@ -155,8 +156,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             $inverted = $relationShip->getInverted();
 
             $this->assertEqual($inverted->isControlling(), !$relationShip->isControlling());
-            $this->assertEqual($inverted->getTarget(), $relationShip->getOwner());
-            $this->assertEqual($inverted->getOwner(), $relationShip->getTarget());
+            $this->assertEqual($inverted->getTargetClass(), $relationShip->getOwner());
+            $this->assertEqual($inverted->getOwner(), $relationShip->getTargetClass());
 
             $this->assertEqual($inverted->getTargetField(), $relationShip->getOwnerField());
             $this->assertEqual($inverted->getTargetSortField(), $relationShip->getOwnerSortField());
@@ -164,8 +165,8 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
             $this->assertEqual($inverted->getOwnerField(), $relationShip->getTargetField());
             $this->assertEqual($inverted->getOwnerSortField(), $relationShip->getTargetSortField());
 
-            $this->assertEqual($inverted->getRelationShipName(), $relationShip->getBelongingName());
-            $this->assertEqual($inverted->getBelongingName(), $relationShip->getRelationShipName());
+            $this->assertEqual($inverted->getRelationShipName(), $relationShip->getInverse());
+            $this->assertEqual($inverted->getInverse(), $relationShip->getRelationShipName());
 
             $this->assertNotIdentical($inverted, $relationShip);
         }
@@ -181,11 +182,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "table" => "",
                     "ef" => array(),
                     "target" => "test",
-                    "belonging" => "",
+                    "inverse" => "",
                     "isMain" => ""
                 )
             ));
-        }, "LogicException");
+        }, "InvalidArgumentException");
 
         $this->assertThrows(function() {
             ModelManyManyRelationShipInfo::generateFromClassInfo("test", array(
@@ -193,11 +194,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "table" => "",
                     "ef" => array(),
                     "target" => "",
-                    "belonging" => "",
+                    "inverse" => "",
                     "isMain" => ""
                 )
             ));
-        }, "LogicException");
+        }, "InvalidArgumentException");
 
         $this->assertThrows(function(){
             ModelManyManyRelationShipInfo::generateFromClassInfo("", array(
@@ -205,11 +206,11 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                     "table"         => "",
                     "ef"            => array(),
                     "target"        => "test",
-                    "belonging"     => "",
+                    "inverse"     => "",
                     "isMain"        => ""
                 )
             ));
-        }, "LogicException");
+        }, "InvalidArgumentException");
     }
 
     /**
@@ -218,7 +219,7 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
     public function testAssignMent() {
         $this->unittestAssignMent("test", "test_many", array("test" => 1), "blub", "blah", "myrelation", true);
         $this->unittestAssignMent("test", "test_many", array(), "blub", "blah", "myrelation", false);
-        $this->unittestAssignMent(randomString(10), randomString(10), null, randomString(10), randomString(10), randomString(10), false);
+        $this->unittestAssignMent(randomString(10), randomString(10), array(), randomString(10), randomString(10), randomString(10), false);
     }
 
     /**
@@ -237,8 +238,9 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
                 "table"         => $table,
                 "ef"            => $extraFields,
                 "target"        => $target,
-                "belonging"     => $targetRelationName,
-                "isMain"        => $controlling
+                "inverse"       => $targetRelationName,
+                "isMain"        => $controlling,
+                "validatedInverse"  => true
             )
         ));
 
@@ -248,12 +250,10 @@ class ManyManyRelationShipInfoTests extends GomaUnitTest
         $relation = $relationShips[$relationshipName];
         $this->assertEqual($relation->getTableName(), $table);
 
-        if($extraFields == null) {
-            $this->assertEqual($relation->getExtraFields(), array());
-        }
-        $this->assertEqual($relation->getTarget(), $target);
-        $this->assertEqual($relation->getRelationShipName(), $relationshipName);
-        $this->assertEqual($relation->getBelongingName(), $targetRelationName);
+        $this->assertEqual($relation->getExtraFields(), $extraFields);
+        $this->assertEqual($relation->getTargetClass(), strtolower($target));
+        $this->assertEqual($relation->getRelationShipName(), strtolower($relationshipName));
+        $this->assertEqual($relation->getInverse(), strtolower($targetRelationName));
         $this->assertEqual($relation->isControlling(), $controlling);
     }
 

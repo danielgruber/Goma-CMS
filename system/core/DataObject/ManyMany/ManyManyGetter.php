@@ -44,7 +44,7 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
         foreach($filterArray as $key => $value) {
             if(isset($relationShips[strtolower($key)])) {
                 $relationShip = $relationShips[strtolower($key)];
-                $target = $relationShip->getTarget();
+                $target = $relationShip->getTargetClass();
                 /** @var DataObject $targetObject */
                 $targetObject = new $target();
                 $query = $targetObject->buildExtendedQuery($version, $value, array(), array(), array(

@@ -175,7 +175,7 @@ class FileUploadSet extends FormField
             /** @var DataObject $object */
             $object = $this->form()->result;
             $relationShip = $object->getManyManyInfo($this->name);
-            $this->uploadClass = $relationShip->getTarget();
+            $this->uploadClass = $relationShip->getTargetClass();
         }
 
         if (isset($this->form()->post[$this->PostName() . "__key"]) && Core::globalSession()->hasKey("FileUploadSet_" . $this->form()->post[$this->PostName() . "__key"])) {

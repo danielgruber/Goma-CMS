@@ -134,7 +134,7 @@ class ManyManyModelWriter extends Extension {
         );
 
         // if owner and target are the same we have to put everything twice in inverted order
-        if(ClassManifest::classesRelated($relationShip->getTarget(), $relationShip->getOwner())) {
+        if(ClassManifest::classesRelated($relationShip->getTargetClass(), $relationShip->getOwner())) {
             $invertedRelationship = $relationShip->getInverted();
             $invertedExisting = $ownerModel->getManyManyRelationShipData($invertedRelationship);
 
@@ -332,7 +332,7 @@ class ManyManyModelWriter extends Extension {
 
         // first check if records are up 2 date.
         /** @var DataObject $targetObject */
-        $targetObject = gObject::instance($relationShip->getTarget());
+        $targetObject = gObject::instance($relationShip->getTargetClass());
         $selectQuery = new SelectQuery($targetObject->BaseTable(),
             array(
                 $targetObject->BaseTable() . ".recordid",

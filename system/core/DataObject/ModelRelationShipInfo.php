@@ -46,6 +46,8 @@ abstract class ModelRelationShipInfo
 
     /**
      * owner-class.
+     *
+     * @var string
      */
     protected $owner;
 
@@ -75,11 +77,13 @@ abstract class ModelRelationShipInfo
     }
 
     /**
-     * ModelRelationShipInfo constructor.
-     * @param string $ownerClass
-     * @param string $name
-     * @param array $options
+     * @return string
      */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
     /**
      * constructor.
      *
@@ -89,8 +93,8 @@ abstract class ModelRelationShipInfo
      */
     public function __construct($ownerClass, $name, $options)
     {
-        $this->owner = $ownerClass;
-        $this->relationShipName = $name;
+        $this->owner = strtolower(trim($ownerClass));
+        $this->relationShipName = strtolower(trim($name));
 
         if(is_string($options)) {
             $this->targetClass = strtolower($options);
@@ -103,10 +107,10 @@ abstract class ModelRelationShipInfo
                 throw new InvalidArgumentException("No Target class defined.");
             }
 
-            $this->targetClass = strtolower($this->targetClass);
+            $this->targetClass = strtolower(trim($this->targetClass));
 
             if(isset($options[DataObject::RELATION_INVERSE])) {
-                $this->inverse = strtolower($options[DataObject::RELATION_INVERSE]);
+                $this->inverse = strtolower(trim($options[DataObject::RELATION_INVERSE]));
             }
 
             if(isset($options[DataObject::CASCADE_TYPE])) {
