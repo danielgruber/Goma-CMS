@@ -79,32 +79,40 @@ class BackupModel extends DataObject {
 			foreach($files as $file) {
 				if($data->filter(array("name" => $file))->Count() == 0 && preg_match('/\.(gfs|sgfs)$/i', $file)) {
 					$object = new BackupModel(array("name" => $file));
-					$gfs = new GFS(self::BACKUP_PATH . "/" . $file);
-					$info = $gfs->parsePlist("info.plist");
-					if(isset($info["created"])) {
-						$object->create_date = $info["created"];
-						$object->size = filesize(self::BACKUP_PATH . "/" . $file);
-						
-						if($info["backuptype"] == "SQLBackup") {
-							$object->type = "SQL";
-						} else {
-							$object->type = "full";
+					try {
+						$gfs = new GFS(self::BACKUP_PATH . "/" . $file);
+						$info = $gfs->parsePlist("info.plist");
+						if (isset($info["created"])) {
+							$object->create_date = $info["created"];
+							$object->size = filesize(self::BACKUP_PATH . "/" . $file);
+
+							if ($info["backuptype"] == "SQLBackup") {
+								$object->type = "SQL";
+							} else {
+								$object->type = "full";
+							}
+
+							$object->writeToDB(false, true);
 						}
-						
-						$object->write(false, true);
+					} catch(Exception $e) {
+						log_exception($e);
 					}
 				} else if($data->filter(array("name" => $file))->first()->type == null) {
 					$object = $data->filter(array("name" => $file))->first();
-					$gfs = new GFS(self::BACKUP_PATH . "/" . $file);
-					$info = $gfs->parsePlist("info.plist");
-					
-					if(isset($info["backuptype"])) {
-						if($info["backuptype"] == "SQLBackup") {
-							$object->type = "SQL";
-						} else {
-							$object->type = "full";
+					try {
+						$gfs = new GFS(self::BACKUP_PATH . "/" . $file);
+						$info = $gfs->parsePlist("info.plist");
+
+						if (isset($info["backuptype"])) {
+							if ($info["backuptype"] == "SQLBackup") {
+								$object->type = "SQL";
+							} else {
+								$object->type = "full";
+							}
+							$object->writeToDB(false, true);
 						}
-						$object->write(false, true);
+					} catch(Exception $e) {
+						log_exception($e);
 					}
 				}
 			}

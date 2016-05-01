@@ -252,15 +252,6 @@ class ModelWriter extends gObject {
 
         if($objectForUpdate) {
             $this->data = array_merge($objectForUpdate->ToArray(), $this->data);
-
-            // copy many-many-relations
-            foreach($this->model->ManyManyRelationships() as $name => $relationShip) {
-                if (!isset($this->data[$name . "ids"]) && !isset($this->data[$name])) {
-                    $this->data[$name] = $this->model->getRelationData($name);
-                } else if (!isset($this->data[$name . "ids"]) && is_array($this->data[$name])) {
-                    unset($this->data[$name . "ids"]);
-                }
-            }
         } else {
             $this->data = $this->model->toArray();
         }

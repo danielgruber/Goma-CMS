@@ -198,7 +198,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function remove($item) {
 		foreach($this->items as $key => $record) {
-			if ($item == $record) {
+			if ($item === $record) {
 				if($key <= $this->position) {
 					$this->position--;
 				}

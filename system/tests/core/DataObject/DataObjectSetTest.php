@@ -546,6 +546,34 @@ class MockIDataObjectSetDataSource implements IDataObjectSetDataSource {
     {
         return $this->table;
     }
+
+    /**
+     * @param array $manipulation
+     * @param ManyMany_DataObjectSet $set
+     * @param array $writeData array of versionid => boolean
+     * @return mixed
+     */
+    public function onBeforeManipulateManyMany(&$manipulation, $set, $writeData)
+    {
+        // TODO: Implement onBeforeManipulateManyMany() method.
+    }
+
+    /**
+     * @return void
+     */
+    public function clearCache()
+    {
+        // TODO: Implement clearCache() method.
+    }
+
+    /**
+     * @param array $manipulation
+     * @return bool
+     */
+    public function manipulate($manipulation)
+    {
+        // TODO: Implement manipulate() method.
+    }
 }
 
 class MockIModelSource implements IDataObjectSetModelSource {

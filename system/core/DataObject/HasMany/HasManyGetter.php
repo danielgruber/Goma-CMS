@@ -9,6 +9,7 @@
  * @author      Goma-Team
  *
  * @version    1.0.2
+ * @method DataObject getOwner()
  */
 class HasManyGetter extends Extension {
 
@@ -49,7 +50,7 @@ class HasManyGetter extends Extension {
                 }), true);
 
                 gObject::LinkMethod($this->getOwner()->classname, $key . "ids", array("this", "getRelationIDs"), true);
-                gObject::LinkMethod($this->getOwner()->classname, "set" . $key . "ids", function($instance) use($key) {
+                gObject::LinkMethod($this->getOwner()->classname, "set" . $key . "ids", array("HasManyGetter", function($instance) use($key) {
                     $args = func_get_args();
                     $args[0] = $key;
                     try {
@@ -57,7 +58,7 @@ class HasManyGetter extends Extension {
                     } catch(InvalidArgumentException $e) {
                         throw new LogicException("Something got wrong wiring the HasMany-Relationship.", 0, $e);
                     }
-                }, true);
+                }), true);
             }
         }
     }
@@ -82,8 +83,10 @@ class HasManyGetter extends Extension {
 
         /** @var HasMany_DataObjectSet $hasManyObject */
         $hasManyObject = $owner->fieldGet($name);
-        if(!$hasManyObject || !is_a($hasManyObject, "DataObjectSet")) {
-            $hasManyObject = $this->getNewHasManyObject($has_many, $name);
+        if(!$hasManyObject || !is_a($hasManyObject, "HasMany_DataObjectSet")) {
+            $hasManyObject = new HasMany_DataObjectSet($has_many[$name]->getTargetClass());
+            $hasManyObject->setRelationENV($has_many[$name], $this->getOwner()->id);
+
             $owner->setField($name, $hasManyObject);
 
             if ($owner->queryVersion == DataObject::VERSION_STATE) {
@@ -101,20 +104,6 @@ class HasManyGetter extends Extension {
         $objectToFilter->limit($limit);
 
         return $objectToFilter;
-    }
-
-    /**
-     * generates new has-many-object.
-     *
-     * @param ModelHasManyRelationShipInfo[] $has_many
-     * @param string $name
-     * @return HasMany_DataObjectSet
-     */
-    protected function getNewHasManyObject($has_many, $name) {
-        $set = new HasMany_DataObjectSet($has_many[$name]->getTargetClass());
-        $set->setRelationENV($has_many[$name], $this->getOwner()->id);
-
-        return $set;
     }
 
     /**

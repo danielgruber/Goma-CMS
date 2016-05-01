@@ -51,6 +51,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     const CASCADE_TYPE_UNIQUE = "unique";
     const CASCADE_TYPE_ALL = "11";
 
+    const MANY_MANY_VERSION_MODE = "versionMode";
+    const VERSION_MODE_CURRENT_VERSION = "current";
+    const VERSION_MODE_LATEST_VERSION = "latest";
+
     /**
      * default sorting
      *
@@ -258,43 +262,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     }
 
     /**
-     * counts with given where on given table with raw-sql, so you just get back the result for exactly this where
-     * if you use count, goma gets just results from given dataobject, so if you want to know, if just the id in an given dataobject exists,
-     * but the record is not connected exactly with given dataobject, but with other child of base-DataObject, count give back 0, because of not linked exactly with the right DataObject
-     * if you use this function instead, goma don't interpret the data, so you get all results from the table with given where and don't habe comfort
-     *
-     * ATTENTION: it's NOT recommended to use this function if you don't know the exact difference
-     * if you use it, sometimes you get results, that are unexpected
-     *
-     * @param string $name
-     * @param array|string $filter
-     * @return int
-     * @throws MySQLException
-     */
-    public function countRAW($name, $filter)
-    {
-        $dataobject = gObject::instance($name);
-
-        $table_name = $dataobject->Table();
-
-        $where = SQL::ExtractToWhere($filter);
-
-        $sql = "SELECT 
-						count(*) as count
-					FROM 
-						".DB_PREFIX.$table_name."
-					".$where;
-        if ($result = SQL::Query($sql))
-        {
-            $row = SQL::fetch_object($result);
-            return $row->count;
-        } else
-        {
-            throw new MySQLException();
-        }
-    }
-
-    /**
      * updates data raw in the table and has not version-managment or multi-table-managment.
      *
      * You have to be familiar with the structure of goma when you use this method. It is much faster than all the other methods of writing, but also more complex.
@@ -387,7 +354,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
      * @param array $filter
      * @param array $sort
      * @param array $joins
-     * @return DataObject
+     * @return DataObject|null
      */
     public static function get_one($dataClass, $filter = array(), $sort = array(), $joins = array())
     {
@@ -403,12 +370,10 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     /**
      * gets a record by id
      *
-     * @name get_by_id
-     * @access public
-     * @param string - name
-     * @param numeric - id
-     * @param array - joins
-     * @return DataObject
+     * @param string $class
+     * @param int $id
+     * @param array $joins
+     * @return DataObject|null
      */
     public static function get_by_id($class, $id, $joins = array()) {
         return self::get_one($class, array("id" => $id), array(), $joins);
@@ -466,22 +431,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             "created"		=> time(),
             "autorid"		=> member::$id
         ), (array) $this->defaults, ArrayLib::map_key("strtolower", (array) $record));
+
+        $this->initValues();
     }
 
     /**
-     * defines the methods.
-     *
-     * @access protected
+     * inits values.
      */
-    public function defineStatics() {
-        if ($many_many_relationships = $this->ManyManyRelationships()) {
-            foreach ($many_many_relationships as $key => $val) {
-                gObject::LinkMethod($this->classname, $key, array("this", "getManyMany"), true);
-                gObject::LinkMethod($this->classname, $key . "ids", array("this", "getRelationIDs"), true);
-                gObject::LinkMethod($this->classname, "set" . $key, array("this", "setManyMany"), true);
-                gObject::LinkMethod($this->classname, "set" . $key . "ids", array("this", "setManyManyIDs"), true);
-            }
-        }
+    public function initValues() {
+        $this->callExtending("initValues");
     }
 
     //!Permissions
@@ -894,62 +852,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
     }
 
     /**
-     * returns versionid from given relationship-info-array. it creates new record if no one can be found.
-     * it also updates the record.
-     *
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param int $key
-     * @param array $record
-     * @param bool $forceWrite
-     * @param int $snap_priority
-     * @param bool $history
-     * @return int
-     */
-    protected function getRelationShipIdFromRecord($relationShip, $key, $record, $forceWrite = false, $snap_priority = 2, $history = true) {
-        // validate versionid
-        if(isset($record["versionid"])) {
-            $id = $record["versionid"];
-        } else if(DataObject::count($relationShip->getTargetClass(), array("versionid" => $key)) > 0) {
-            $id = $key;
-        }
-
-        // did not find versionid, so generate one
-        if(!isset($id) || $id == 0) {
-
-            $target = $relationShip->getTargetClass();
-            /** @var DataObject $dataObject */
-            $dataObject = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
-            $dataObject->writeToDB(true, $forceWrite, $snap_priority, $forceWrite, $history);
-
-            return $dataObject->versionid;
-        } else {
-
-            // we want to update many-many-extra
-            $databaseRecord = null;
-            $db = gObject::instance($relationShip->getTargetClass())->DataBaseFields(true);
-
-            // just find out if we may be update the record given.
-            foreach($record as $field => $v) {
-                if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
-                    if(!isset($databaseRecord)) {
-                        $databaseRecord = DataObject::get_one($relationShip->getTargetClass(), array("versionid" => $id));
-                    }
-
-                    $databaseRecord[$field] = $v;
-                }
-            }
-
-            // we found many-many-extra which can be updated so write please
-            if(isset($databaseRecord)) {
-                $databaseRecord->writeToDB(false, $forceWrite, $snap_priority, $forceWrite, $history);
-                return $databaseRecord->versionid;
-            }
-
-            return $id;
-        }
-    }
-
-    /**
      * returns maximum target-sort.
      *
      * @param ModelManyManyRelationShipInfo $relationShip
@@ -1120,7 +1022,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
         $this->disconnect();
 
-        DataObjectQuery::$datacache[$this->caseClass] = array();
+        DataObjectQuery::clearCache($this->baseClass);
 
         $this->onBeforeRemove($manipulation);
         $this->callExtending("onBeforeRemove", $manipulation);
@@ -1369,9 +1271,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * gets a list of all fields with according titles of this object
-     *
-     *@name summaryFields
-     *@access public
      */
     public function summaryFields() {
         $f = ArrayLib::key_value(array_keys($this->DataBaseFields()));
@@ -1475,71 +1374,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
                 return array();
             }
         } else if (isset($manyManyRelationships[$relname])) {
-
-            if (isset($this->data[$relname . "ids"])) {
-                return $this->data[$relname . "ids"];
-            }
-
-            /** @var ModelManyManyRelationShipInfo $relationShip */
-            $relationShip = $manyManyRelationships[$relname];
-
-            $query = $this->getManyManyQuery($relationShip, array($relationShip->getTargetField()));
-            $query->execute();
-
-            $arr = array();
-            while($row = $query->fetch_assoc())
-            {
-                if($row[$relationShip->getTargetField()] != $this->versionid) {
-                    $arr[] = $row[$relationShip->getTargetField()];
-                }
-            }
-
-            $this->data[$relname . "ids"] = $arr;
-            return $arr;
+            /** @var ManyMany_DataObjectSet $set */
+            $set = $this->getManyMany($relname);
+            return $set->getRelationshipIDs();
         } else {
             return false;
         }
-    }
-
-    /**
-     * creates many-many-sql-query for getting specific field-info.
-     *
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param array$fields
-     * @param string $fieldInTable
-     * @param int $versionId
-     * @return SelectQuery
-     */
-    protected function getManyManyQuery($relationShip, $fields, $fieldInTable = null, $versionId = null) {
-        $extTable = $relationShip->getTargetTableName();
-
-        $versionId = isset($versionId) ? $versionId : $this->versionid;
-
-        if(!isset($fieldInTable)) {
-            $fieldInTable = $relationShip->getTargetField();
-        }
-
-        $query = new SelectQuery($relationShip->getTableName(), $fields, array($relationShip->getOwnerField() => $versionId));
-
-        // just that some errros are not happening.
-        if ($extTable && (
-                ClassManifest::isSameClass($relationShip->getTargetClass(), $this->classname) ||
-                is_subclass_of($relationShip->getTargetClass(), $this->classname) ||
-                is_subclass_of($this->classname, $relationShip->getTargetClass())
-            )
-        ) {
-            // filter for not existing records
-            $query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .
-                ' ON ' . $extTable . '.id = '.$relationShip->getTableName().'.' . $fieldInTable . ' AND '.$extTable.'.recordid != "'.$this["id"].'"';
-        } else if($extTable) {
-            // filter for not existing records
-            $query->from[] = ' INNER JOIN ' . DB_PREFIX . $extTable . ' AS '. $extTable .
-                ' ON ' . $extTable . '.id = '. $relationShip->getTableName() .'.' . $fieldInTable;
-        }
-
-        $query->sort($this->getManyManySort($relationShip));
-
-        return $query;
     }
 
     /**
@@ -1556,175 +1396,15 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             $relname = substr($relname, 0, -3);
         }
 
-        // get all config
-        $has_many = $this->hasMany();
         $relationShips = $this->ManyManyRelationships();
 
-        if (isset($has_many[$relname])) {
-            // has-many
-            /**
-             * getMany returns a DataObject
-             * parameters:
-             * name of relation
-             * where
-             * fields
-             */
-            if ($relationShip = $this->getHasMany($relname)) {
-
-                // then get all data in one array with key - id pairs
-
-                $arr = array();
-                foreach($relationShip->ToArray() as $key => $value)
-                {
-                    $arr[] = $value["id"];
-                }
-                return $arr;
-            } else {
-                return array();
-            }
-        } else if (isset($relationShips[$relname])) {
-            if (isset($this->data[$relname . "_data"])) {
-                return $this->data[$relname . "_data"];
-            }
-
-            /**
-             * there is the var many_many_tables, which contains data for the table, which stores the relation
-             * for exmaple: array(
-             * "table"	=> "my_many_many_table_generated_by_system",
-             * "field"	=> "myclassid"
-             * )
-             */
-
-            $relationShip = $relationShips[$relname];
-
-            $data = $this->getManyManyRelationShipData($relationShip);
-
-            $this->data[$relname . "_data"] = $data;
-            return $data;
+        if (isset($relationShips[$relname])) {
+            /** @var ManyMany_DataObjectSet $set */
+            $set = $this->getManyMany($relname);
+            return $set->getRelationshipData();
         } else {
-            return false;
+            return $this->getRelationIDs($relname);
         }
-    }
-
-    /**
-     * queries database for existing Relationship-data for many-many-connections.
-     *
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param string $fieldInTable
-     * @param int $versionId
-     * @return array
-     */
-    protected function getManyManyRelationShipData($relationShip, $fieldInTable = null, $versionId = null) {
-
-        $query = $this->getManyManyQuery($relationShip, array("*"), $fieldInTable, $versionId);
-
-        $query->execute();
-
-        $arr = array();
-        while($row = $query->fetch_assoc()) {
-
-            $id = $row[$relationShip->getTargetField()];
-            $arr[$id] = array(
-                "versionid"                     => $id,
-                "relationShipId"                => $row["id"],
-                $relationShip->getOwnerField()  => $row[$relationShip->getOwnerField()]
-            );
-
-            $arr[$id][$relationShip->getOwnerSortField()] = $row[$relationShip->getOwnerSortField()];
-            $arr[$id][$relationShip->getTargetSortField()] = $row[$relationShip->getTargetSortField()];
-
-            foreach ($relationShip->getExtraFields() as $field => $pattern) {
-                $arr[$id][$field] = $row[$field];
-            }
-        }
-
-        return $arr;
-    }
-
-    /**
-     * gets many-many-objects
-     *
-     * @param $name
-     * @param array|string $filter
-     * @param array|string $sort
-     * @param array|int $limit
-     * @return ManyMany_DataObjectSet
-     *
-     */
-    public function getManyMany($name, $filter = null, $sort = null, $limit = null) {
-
-        $name = trim(strtolower($name));
-
-        // first a little bit of caching ;)
-        $cache = "many_many_".$name."_".md5(var_export($filter, true))."_".md5(var_export($sort, true))."_".md5(var_export($limit, true))."";
-        if (isset($this->viewcache[$cache])) {
-            return $this->viewcache[$cache];
-        }
-
-        // get info
-        $relationShip = $this->getManyManyInfo($name);
-
-        $where = (array) $filter;
-        // if we know the ids
-        if (isset($this->data[$name . "ids"]))
-        {
-            $where["versionid"] = $this->data[$name . "ids"];
-            // this relation was modfied, so we use the data from the datacache
-            $instance = new ManyMany_DataObjectSet($relationShip->getTargetClass(), $where, $sort, $limit);
-            $instance->setRelationEnv($relationShip, $this->versionid);
-
-            if(!$sort) {
-                $instance->sort($this->data[$name . "ids"], "versionid");
-            }
-
-            if ($this->queryVersion == DataObject::VERSION_STATE) {
-                $instance->setVersion(DataObject::VERSION_STATE);
-            } else {
-                $instance->setVersion(DataObject::VERSION_PUBLISHED);
-            }
-
-            $this->viewcache[$cache] =& $instance;
-
-            return $instance;
-        }
-
-        $where[$relationShip->getTableName() . "." . $relationShip->getOwnerField()] = $this["versionid"];
-        $sort = $this->getManyManySort($relationShip, $sort);
-
-        $instance = new ManyMany_DataObjectSet($relationShip->getTargetClass(), $where, $sort, $limit, array(
-            ' INNER JOIN '.DB_PREFIX . $relationShip->getTableName().' AS '.$relationShip->getTableName().
-            ' ON '.$relationShip->getTableName().'.'. $relationShip->getTargetField() . ' = '. $relationShip->getTargetTableName().'.id ' // Join other Table with many-many-table
-        ));
-
-        $instance->setRelationEnv($relationShip, $this->versionid);
-        if ($this->queryVersion == DataObject::VERSION_STATE) {
-            $instance->setVersion(DataObject::VERSION_STATE);
-        }
-
-        $this->viewcache[$cache] = $instance;
-
-        return $instance;
-    }
-
-    /**
-     * returns many-many-sort.
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param array|string $sort
-     * @return string
-     */
-    protected function getManyManySort($relationShip, $sort = null) {
-        if(!isset($sort) || !$sort) {
-            $name = $relationShip->getRelationShipName();
-            $sorts = ArrayLib::map_key("strtolower", StaticsManager::getStatic($this->classname, "many_many_sort"));
-            if(isset($sorts[$name]) && $sorts[$name]) {
-                return $sorts[$name];
-            } else {
-                return $relationShip->getTableName() . ".".$relationShip->getOwnerSortField()." ASC , " .
-                $relationShip->getTableName() . ".id ASC";
-            }
-        }
-
-        return $sort;
     }
 
     /**
@@ -1749,52 +1429,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
         }
 
         return $many_many[$name];
-    }
-
-    /**
-     * sets many-many-data
-     *
-     * @param string $name
-     * @param array|DataObjectSet|object $value
-     */
-    public function setManyMany($name, $value) {
-        $name = substr($name, 3);
-
-        $relationShipInfo = $this->getManyManyInfo($name);
-
-        if (is_a($value, "DataObjectSet") && !is_a($value, "ManyMany_DataObjectSet")) {
-            $instance = new ManyMany_DataObjectSet($relationShipInfo->getTargetClass());
-            $instance->setRelationEnv($relationShipInfo, $this->versionid);
-            $instance->addMany($value);
-            $this->setField($name, $instance);
-            return;
-        }
-
-        unset($this->data[$name . "ids"]);
-        $this->setField($name, $value);
-    }
-
-    /**
-     * sets many-many-ids
-     * @param string $name
-     * @param array $ids
-     */
-    public function setManyManyIDs($name, $ids) {
-        if (!is_array($ids))
-            throw new InvalidArgumentException("IDs for Relationship must be an array.");
-
-        $name = substr($name, 3, -3);
-
-        $name = trim(strtolower($name));
-
-        // check for existance of relationship
-        $this->getManyManyInfo($name);
-
-        if (isset($this->data[$name]) && is_object($this->data[$name]) && is_a($this->data[$name], "ManyMany_DataObjectSet")) {
-            unset($this->data[$name]);
-        }
-
-        $this->setField($name . "ids", $ids);
     }
 
     /**
@@ -1857,8 +1491,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * gets the versionid
-     *@name getVersionId
-     *@access public
      */
     public function VersionId()
     {
@@ -1900,9 +1532,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * returns the representation of this record
-     *
-     *@name generateResprensentation
-     *@access public
      */
     public function generateRepresentation($link = false) {
         if ($this->title)
@@ -1991,8 +1620,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             }
 
             self::$query_cache[$this->baseClass] = $query;
-
-
         }
 
         /** @var SelectQuery $query */
@@ -2017,7 +1644,7 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             }
 
             if (isset($_GET[$baseClass . "_state"]) && $this->memberCanViewVersions($version)) {
-                $version =DataObject::VERSION_STATE;
+                $version = DataObject::VERSION_STATE;
             }
         }
 
@@ -2070,14 +1697,16 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 							SELECT max(where_'.$baseTable.'.id) FROM '.DB_PREFIX . $baseTable.' AS where_'.$baseTable.' WHERE where_'.$baseTable.'.recordid = '.$baseTable.'.recordid GROUP BY where_'.$baseTable.'.recordid
 						)');
 
-                    // unmerge deleted records
+                    // integrate state-table
                     $query->leftJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
+
+                    $query->db_fields["id"] = $baseTable . ".record";
                 }
             } else {
-                // if we make no versioning, we just get all records matching state-table.id to table.recordid
+                // if we make no versioning, we just merge state-table-information
                 // unmerge deleted records
                 $query->leftJoin($baseTable . "_state", " ".$baseTable."_state.id = ".$baseTable.".recordid");
-                $query->db_fields["id"] = $baseTable . "_state";
+                $query->db_fields["id"] = $baseTable;
             }
         }
 
@@ -2509,6 +2138,12 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
             if($i == 0) $i++;
             else $aggregateSQL .= ",";
 
+            $aggregateField = trim(strtolower($aggregateField));
+            // TODO: do better ambigious selection
+            if(isset($query->db_fields[$aggregateField]))  {
+                $aggregateField = $query->db_fields[$aggregateField] . "." . $aggregateField;
+            }
+
             $aggregateSQL .= $singleAggregate . "( " . $distinctSQL . " " . $aggregateField . ") as " . strtolower($singleAggregate);
         }
 
@@ -2924,9 +2559,6 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     /**
      * gets the base-table
-     *
-     *@name getBaseTable
-     *@access public
      */
     public function BaseTable() {
         return (ClassInfo::$class_info[ClassInfo::$class_info[$this->classname]["baseclass"]]["table"]);
@@ -3281,6 +2913,22 @@ abstract class DataObject extends ViewAccessableData implements PermProvider, ID
 
     public function getInExpansion() {
         return $this->inExpansion;
+    }
+
+    /**
+     * @return void
+     */
+    public function clearCache() {
+        DataObjectQuery::clearCache($this->baseClass);
+    }
+
+
+    /**
+     * @param array $manipulation
+     * @return bool
+     */
+    public function manipulate($manipulation) {
+        return SQL::manipulate($manipulation);
     }
 }
 

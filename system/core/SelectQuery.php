@@ -214,6 +214,8 @@ class SelectQuery {
 							$this->sort($fieldName, $type);
 						} else if(is_bool($type)) {
 							$this->sort($fieldName, $type ? "asc" : "desc");
+						} else if(is_array($type)) {
+							$this->sort($field, $type);
 						}
 					}
 				}
@@ -238,7 +240,7 @@ class SelectQuery {
 			} else {
 				$type = "ASC";
 			}
-		} else {
+		} else if(!is_array($type)) {
 			throw new InvalidArgumentException("Type not supported for sort.");
 		}
 

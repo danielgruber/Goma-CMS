@@ -39,6 +39,13 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
     protected $controlling;
 
     /**
+     * source-version.
+     * latest or current.
+     * @var string
+     */
+    protected $sourceVersion;
+
+    /**
      * ModelManyManyRelationShipInfo constructor.
      * @param string $ownerClass
      * @param string $name
@@ -48,7 +55,7 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
     public function __construct($ownerClass, $name, $options, $isMain)
     {
         if(is_array($options) && count($options) == 2 && !isset($options[DataObject::CASCADE_TYPE]) && !isset($options[DataObject::FETCH_TYPE])) {
-            Core::Deprecate("2.1", "Use Constants instead of 2 count array for ManyMany-inverse.");
+            Core::Deprecate("2.0", "Use Constants instead of 2 count array for ManyMany-inverse.");
             $options = array_values($options);
             $options = array(
                 DataObject::RELATION_TARGET => $options[0],
@@ -63,6 +70,8 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
         $this->controlling = !!$isMain;
 
         parent::__construct($ownerClass, $name, $options);
+
+        $this->sourceVersion = isset($options[DataObject::MANY_MANY_VERSION_MODE]) ? $options[DataObject::MANY_MANY_VERSION_MODE] : DataObject::VERSION_MODE_LATEST_VERSION;
 
         if(isset($options["ef"])) {
             $this->extraFields = $options["ef"];
@@ -167,13 +176,6 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
     }
 
     /**
-     * @return string
-     */
-    public function getOwnerRecordField() {
-        return $this->getOwnerField() . "_record";
-    }
-
-    /**
      * returns field which belongs to the target.
      *
      * @return string
@@ -184,13 +186,6 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
         }
 
         return $this->targetClass . "id";
-    }
-
-    /**
-     * @return string
-     */
-    public function getTargetRecordField() {
-        return $this->getTargetField() . "_record";
     }
 
     /**
@@ -217,6 +212,19 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
     public function getTargetTableName()
     {
         return isset(ClassInfo::$class_info[$this->targetClass]["table"]) ? ClassInfo::$class_info[$this->targetClass]["table"] : null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetBaseTableName()
+    {
+        if(!isset(ClassInfo::$class_info[$this->getTargetClass()]["baseclass"])) {
+            throw new LogicException("Target Relationship seems not to have valid ClassInfo.");
+        }
+
+        return isset(ClassInfo::$class_info[ClassInfo::$class_info[$this->getTargetClass()]["baseclass"]]["table"]) ?
+            ClassInfo::$class_info[ClassInfo::$class_info[$this->getTargetClass()]["baseclass"]]["table"] : null;
     }
 
     /**
@@ -291,14 +299,16 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
      *
      * @return array
      */
-    public function toClassInfo() {
+    public function toClassInfo()
+    {
         return array(
-            "table"             => $this->tableName,
-            "ef"                => $this->extraFields,
-            "target"            => $this->targetClass,
-            "inverse"           => $this->inverse,
-            "isMain"            => $this->controlling,
-            "validatedInverse"  => true
+            "table"                            => $this->tableName,
+            "ef"                               => $this->extraFields,
+            DataObject::RELATION_TARGET        => $this->targetClass,
+            DataObject::RELATION_INVERSE       => $this->inverse,
+            DataObject::MANY_MANY_VERSION_MODE => $this->sourceVersion,
+            "isMain"                           => $this->controlling,
+            "validatedInverse"                 => true
         );
     }
 
@@ -519,10 +529,6 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
             $this->getTargetField()       => "int(10)",
             $this->getOwnerField()        => "int(10)",
 
-            // id
-            $this->getOwnerRecordField()  => "int(10)",
-            $this->getTargetRecordField() => "int(10)",
-
             // sort
             $this->getOwnerSortField()    => "int(10)",
             $this->getTargetSortField()   => "int(10)"
@@ -548,16 +554,6 @@ class ModelManyManyRelationShipInfo extends ModelRelationShipInfo {
                 "name"		=> "dataindexunique",
                 "type"		=> "UNIQUE",
                 "fields"	=> array($this->getTargetField(), $this->getOwnerField())
-            ),
-            "recordindex"   => array(
-                "name"  => "recordindex",
-                "type"  => "INDEX",
-                "fields"=> array($this->getTargetRecordField(), $this->getOwnerRecordField())
-            ),
-            "recordindex_reverse"   => array(
-                "name"  => "recordindex_reverse",
-                "type"  => "INDEX",
-                "fields"=> array($this->getOwnerRecordField(), $this->getTargetRecordField())
             )
         );
     }

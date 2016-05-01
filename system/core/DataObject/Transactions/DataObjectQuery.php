@@ -16,8 +16,14 @@ class DataObjectQuery {
 
     /**
      * clears cache.
+     *
+     * @param string|null $class
      */
-    public static function clearCache() {
-        self::$datacache = array();
+    public static function clearCache($class = null) {
+        if(isset($class)) {
+            self::$datacache[$class] = array();
+        } else {
+            self::$datacache = array();
+        }
     }
 }

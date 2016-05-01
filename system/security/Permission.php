@@ -410,11 +410,12 @@ class Permission extends DataObject
      * @param array $manipulation
      * @param ManyMany_DataObjectSet $dataset
      * @param array $writeData
-     * @internal param $onBeforeManipulateManyMany
      * @access public
+     * @return mixed|void
      */
     public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writeData)
     {
+        // TODO: Update!
         $ownValue = $dataset->getRelationOwnValue();
         $relationShip = $dataset->getRelationShip();
 

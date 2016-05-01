@@ -449,8 +449,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($this->count)) {
 			$this->count = (int) $this->dbDataSource()->getAggregate(
 				$this->version, "count", "*", false,
-				$this->filter, array(), $this->limit,
-				$this->join, $this->search);
+				$this->getFilterForQuery(), array(), $this->limit,
+				$this->getJoinForQuery(), $this->search);
 		}
 
 		return $this->count;
@@ -467,8 +467,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		return (int) $this->dbDataSource()->getAggregate(
 			$this->version, "count", $field, true,
-			$this->filter, array(), $this->limit,
-			$this->join, $this->search) + $this->staging->count();
+			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getJoinForQuery(), $this->search) + $this->staging->count();
 	}
 
 	/**
@@ -482,8 +482,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Max($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "max", $field, false,
-			$this->filter, array(), $this->limit,
-			$this->join, $this->search);
+			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getJoinForQuery(), $this->search);
 	}
 
 	/**
@@ -498,8 +498,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function MaxCount($field) {
 		$data = $this->dbDataSource()->getAggregate(
 			$this->version, array("max", "count"), $field, false,
-			$this->filter, array(), $this->limit,
-			$this->join, $this->search);
+			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getJoinForQuery(), $this->search);
 
 		return $data["max"] . "," . $data["count"];
 	}
@@ -515,8 +515,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Min($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "min", $field, false,
-			$this->filter, array(), $this->limit,
-			$this->join, $this->search);
+			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getJoinForQuery(), $this->search);
 	}
 
 	/**
@@ -532,8 +532,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	public function Sum($field) {
 		return (double) $this->dbDataSource()->getAggregate(
 			$this->version, "Sum", $field, false,
-			$this->filter, array(), $this->limit,
-			$this->join, $this->search);
+			$this->getFilterForQuery(), array(), $this->limit,
+			$this->getJoinForQuery(), $this->search);
 	}
 
 	/**
@@ -819,7 +819,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * checks if we can sort by a specefied field
 	 *
-	 *@name canSortBy
+	 * @name canSortBy
+	 * @return bool
 	 */
 	public function canSortBy($field) {
 		return $this->dbDataSource()->canSortBy($field);
@@ -828,7 +829,8 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	/**
 	 * checks if we can sort by a specefied field
 	 *
-	 *@name canSortBy
+	 * @name canSortBy
+	 * @return bool
 	 */
 	public function canFilterBy($field) {
 		return $this->dbDataSource()->canFilterBy($field);
@@ -1087,8 +1089,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		$this->clearCache();
 
 		if(count($exceptions) > 0) {
-			throw new DataObjectSetCommitException($exceptions, $errorRecords);
+			throw new DataObjectSetCommitException($exceptions, $errorRecords, count($errorRecords) . " could not be written.");
 		}
+
+		$this->dbDataSource()->clearCache();
 	}
 
 	/**

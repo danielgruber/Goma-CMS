@@ -77,15 +77,16 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
      * @param bool $forceWrite
      * @param int $snap_priority
      * @param null $repository
+     * @param bool $callRemove
      * @throws DataObjectSetCommitException
      */
-    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null)
+    public function commitStaging($forceInsert = false, $forceWrite = false, $snap_priority = 2, $repository = null, $callRemove = true)
     {
         $repository = isset($repository) ? $repository : Core::repository();
 
         parent::commitStaging($forceInsert, $forceWrite, $snap_priority, $repository);
 
-        $this->commitRemoveStaging($repository, $forceWrite, $snap_priority);
+        if($callRemove) $this->commitRemoveStaging($repository, $forceWrite, $snap_priority, $repository);
     }
 
     /**
@@ -100,9 +101,10 @@ abstract class RemoveStagingDataObjectSet extends DataObjectSet {
      * @param null|IModelRepository $repository
      * @param bool $forceWrite
      * @param int $snap_priority
+     * @param IModelRepository $repository
      * @return mixed
      */
-    abstract public function commitRemoveStaging($repository, $forceWrite = false, $snap_priority = 2);
+    abstract public function commitRemoveStaging($repository, $forceWrite = false, $snap_priority = 2, $repository = null);
 
     /**
      * @param array|string $filter

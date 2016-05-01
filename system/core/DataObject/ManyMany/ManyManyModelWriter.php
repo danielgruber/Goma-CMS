@@ -40,6 +40,10 @@ class ManyManyModelWriter extends Extension {
                     $this->many_many_objects[$key] = $data[$key];
                     $this->many_many_relationships[$key] = $value;
                     unset($data[$key]);
+                } else if(isset($data[$key]) && is_array($this->data[$key])) {
+                    unset($data[$key . "ids"]);
+                } else {
+                    $data[$key] = $this->getOwner()->getModel()->getRelationData($key);
                 }
                 unset($key, $value);
             }
@@ -58,7 +62,7 @@ class ManyManyModelWriter extends Extension {
 
         /** @var ManyMany_DataObjectSet $object */
         foreach($this->many_many_objects as $key => $object) {
-            $object->setRelationENV($this->many_many_relationships[$key], $this->getOwner()->getModel()->versionid);
+            $object->setRelationENV($this->many_many_relationships[$key], $this->getOwner()->getModel());
             $object->commitStaging(false, true, $this->getOwner()->getWriteType());
             unset($data[$key . "ids"]);
         }
@@ -73,20 +77,16 @@ class ManyManyModelWriter extends Extension {
                 /** @var ModelManyManyRelationShipInfo $relationShip */
                 $relationShip = $this->getOwner()->getModel()->getManyManyInfo($name);
 
+                $set = new ManyMany_DataObjectSet($relationShip->getTargetClass());
+                $set->setRelationENV($relationShip, $this->getOwner()->getModel());
                 // it is supported to have extra-fields in this array
                 if(isset($data[$name]) && is_array($data[$name])) {
-                    $manipulation = self::set_many_many_manipulation(
-                        $this->getOwner()->getModel(), $manipulation,
-                        $relationShip, $data[$name],
-                        true, $this->getOwner()->getWriteType()
-                    );
+                    $set->setSourceData($data[$name]);
+                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository());
                 } else if (isset($data[$name . "ids"]) && is_array($data[$name . "ids"]))
                 {
-                    $manipulation = self::set_many_many_manipulation(
-                        $this->getOwner()->getModel(), $manipulation,
-                        $relationShip, $data[$name . "ids"],
-                        true, $this->getOwner()->getWriteType()
-                    );
+                    $set->setSourceData($data[$name . "ids"]);
+                    $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository());
                 }
 
             }
@@ -109,12 +109,12 @@ class ManyManyModelWriter extends Extension {
      * @param array $data ids to write
      * @param bool $forceWrite
      * @param int $snap_priority
+     * @param null|IModelRepository $repository
      * @return array
-     * @throws PermissionException
      */
     public static function set_many_many_manipulation(
         $ownerModel, $manipulation, $relationShip,
-        $data, $forceWrite = false, $snap_priority = 2
+        $data, $forceWrite = false, $snap_priority = 2, $repository = null
     )
     {
         $existing = $ownerModel->getManyManyRelationShipData($relationShip);
@@ -130,7 +130,8 @@ class ManyManyModelWriter extends Extension {
             $forceWrite,
             $snap_priority,
             $existing,
-            $maxTargetSort
+            $maxTargetSort,
+            $repository
         );
 
         // if owner and target are the same we have to put everything twice in inverted order
@@ -146,7 +147,8 @@ class ManyManyModelWriter extends Extension {
                 $forceWrite,
                 $snap_priority,
                 $invertedExisting,
-                $maxTargetSort
+                $maxTargetSort,
+                $repository
             );
         }
 
@@ -164,9 +166,10 @@ class ManyManyModelWriter extends Extension {
      * @param int $snap_priority
      * @param array $existing
      * @param int $maxTargetSort
+     * @param IModelRepository|null $repository
      * @return array
      */
-    public static function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort) {
+    public static function createManyManyManipulation($manipulation, $data, $ownerModel, $relationShip, $forceWrite, $snap_priority, $existing, $maxTargetSort, $repository = null) {
         $mani_delete = array(
             "table_name"	=> $relationShip->getTableName(),
             "command"   	=> "delete",
@@ -182,7 +185,7 @@ class ManyManyModelWriter extends Extension {
         $i = 0;
         foreach($data as $key => $info) {
             if(is_array($info)) {
-                $id = $ownerModel->getRelationShipIdFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority);
+                $id = self::getRelationShipRecordFromRecord($relationShip, $key, $info, $forceWrite, $snap_priority, true, $repository);
 
                 $targetSort = isset($existing[$id][$relationShip->getTargetSortField()]) ?
                     $existing[$id][$relationShip->getTargetSortField()] :
@@ -237,6 +240,65 @@ class ManyManyModelWriter extends Extension {
         }
 
         return $manipulation;
+    }
+
+    /**
+     * returns versionid from given relationship-info-array. it creates new record if no one can be found.
+     * it also updates the record.
+     *
+     * @param ModelManyManyRelationShipInfo $relationShip
+     * @param int $key
+     * @param array $record
+     * @param bool $forceWrite
+     * @param int $snap_priority
+     * @param bool $history
+     * @param IModelRepository|null $repository
+     * @return int
+     */
+    protected static function getRelationShipRecordFromRecord($relationShip, $key, $record, $forceWrite = false, $snap_priority = 2, $history = true, $repository = null) {
+        $repository = isset($repository) ? $repository : Core::repository();
+
+        // validate versionid
+        if(isset($record["versionid"])) {
+            $id = $record["versionid"];
+        } else if(DataObject::count($relationShip->getTargetClass(), array("versionid" => $key)) > 0) {
+            $id = $key;
+        }
+
+        // did not find versionid, so generate one
+        if(!isset($id) || $id == 0) {
+
+            $target = $relationShip->getTargetClass();
+            /** @var DataObject $dataObject */
+            $dataObject = new $target(array_merge($record, array("id" => 0, "versionid" => 0)));
+            $dataObject->writeToDBInRepo($repository, true, $forceWrite, $snap_priority, $forceWrite, $history);
+
+            return $dataObject->versionid;
+        } else {
+
+            // we want to update many-many-extra
+            $databaseRecord = null;
+            $db = gObject::instance($relationShip->getTargetClass())->DataBaseFields(true);
+
+            // just find out if we may be update the record given.
+            foreach($record as $field => $v) {
+                if(isset($db[strtolower($field)]) && !in_array(strtolower($field), array("versionid", "id", "recordid"))) {
+                    if(!isset($databaseRecord)) {
+                        $databaseRecord = DataObject::get_one($relationShip->getTargetClass(), array("versionid" => $id));
+                    }
+
+                    $databaseRecord[$field] = $v;
+                }
+            }
+
+            // we found many-many-extra which can be updated so write please
+            if(isset($databaseRecord)) {
+                $databaseRecord->writeToDBInRepo($repository, false, $forceWrite, $snap_priority, $forceWrite, $history);
+                return $databaseRecord->versionid;
+            }
+
+            return $id;
+        }
     }
 
     /**
@@ -318,44 +380,6 @@ class ManyManyModelWriter extends Extension {
                 )
             );
         }
-    }
-
-    /**
-     * translates versionids to active versionids.
-     *
-     * @param ModelManyManyRelationShipInfo $relationShip
-     * @param array $ids
-     * @return array
-     */
-    public function translateVersionIDs($relationShip, $ids) {
-        $newIds = array();
-
-        // first check if records are up 2 date.
-        /** @var DataObject $targetObject */
-        $targetObject = gObject::instance($relationShip->getTargetClass());
-        $selectQuery = new SelectQuery($targetObject->BaseTable(),
-            array(
-                $targetObject->BaseTable() . ".recordid",
-                $targetObject->BaseTable() . ".id",
-                $targetObject->BaseTable() . ".snap_priority",
-                $targetObject->BaseClass() . "_state.id AS stateid"
-            ),
-            array(
-                $targetObject->BaseTable() . ".id" => $ids
-            )
-        );
-
-        // left join state table so we see what kind of version it is or was not.
-        $selectQuery->leftJoin($targetObject->BaseClass() . "_state",
-            ' ON (s.publishedid = ' . $targetObject->BaseTable() . '.id ' .
-            'AND ' . $targetObject->BaseTable() . '.snap_priority = 2) OR ' .
-            '(s.stateid = ' . $targetObject->BaseTable() . '.id ' .
-            'AND ' . $targetObject->BaseTable() . '.snap_priority < 2)', "s");
-
-        print_r($selectQuery->build());
-        exit;
-
-        return $newIds;
     }
 }
 

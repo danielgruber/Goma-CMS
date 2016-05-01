@@ -31,24 +31,21 @@ class Uploads extends DataObject {
     /**
      * max-filesize for md5
      *
-     *@name FILESIZE_MD5
-     *@access public
+     * @var int
      */
     const FILESIZE_MD5 = 52428800; // 50 MB
 
     /**
      * max cache lifetime
      *
-     *@name cacheLifeTime
-     *@access public
+     * @var int
      */
     static $cache_life_time = 5356800; // 62 days = 5356800
 
     /**
      * database-table
      *
-     *@name db
-     *@access public
+     * @var array
      */
     static $db = array(
         "filename"	=> "varchar(300)",
@@ -62,16 +59,12 @@ class Uploads extends DataObject {
     /**
      * extensions in this files are by default handled by this class
      *
-     *@name file_extensions
-     *@access public
+     * @var array
      */
     static $file_extensions = array();
 
     /**
      * relations
-     *
-     *@name has_one
-     *@access public
      */
     static $has_one = array(
         "collection"		=> "Uploads"
