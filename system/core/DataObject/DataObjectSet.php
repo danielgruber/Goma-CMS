@@ -723,10 +723,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 	/**
 	 * sets limits
-	 * @param array|string $limit
+	 * @param array|string|null $limit
 	 * @return $this
 	 */
-	public function limit($limit) {
+	public function limit($limit = null) {
 		if((is_string($limit) && preg_match('/^[0-9]+$/', $limit)) || is_int($limit)) {
 			$limit = array((int) $limit);
 		}
@@ -734,9 +734,7 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 		if(!isset($limit) || count($limit) == 0) {
 			$this->limit = null;
 			return $this;
-		}
-
-		if(is_array($limit)) {
+		} else if(is_array($limit)) {
 			$limit = array_values($limit);
 			if(isset($limit[0], $limit[1])) {
 				$this->limit = $limit;
@@ -1426,6 +1424,20 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	protected function getJoinForQuery() {
 		return $this->join;
+	}
+
+	/**
+	 * returns starting item-count, ending item-count and page
+	 */
+	public function getPageInfo() {
+		if($this->page !== null) {
+			$end = $this->page * $this->perPage;
+			if($this->count() < $end) {
+				$end = $this->count();
+			}
+			return array("start" => $this->page * $this->perPage - $this->perPage, "end" => $end, "whole" => $this->countWholeSet());
+		}
+		return false;
 	}
 }
 

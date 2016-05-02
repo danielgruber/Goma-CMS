@@ -260,6 +260,8 @@ class ArrayListTest extends GomaUnitTest
             }
         }
     }
+
+    // TODO: Create insert test
 }
 
 class DumpElementPerson {

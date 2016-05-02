@@ -23,30 +23,30 @@
 class ArrayList extends ViewAccessableData implements Countable {
 	/**
 	 * items in this list.
-	*/
+	 */
 	protected $items = array();
-	
+
 	/**
-	 * constructor. 
+	 * constructor.
 	 *
 	 * @param 	array $items items to start
-	*/
+	 */
 	public function __construct($items = array()) {
 		parent::__construct();
 
 		$this->items = (array) $items;
 	}
-	
+
 	/**
 	 * returns data-class of the first item
-	*/
+	 */
 	public function DataClass() {
 		if(count($this->items) > 0)
 			return get_class($this->items[0]);
 
 		return null;
 	}
-	
+
 	/**
 	 * Return the number of items in this list
 	 *
@@ -55,62 +55,62 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function count() {
 		return count($this->items);
 	}
-	
+
 	/**
 	 * Returns true if this list has items
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function bool() {
 		return (bool) count($this);
 	}
-	
+
 	/**
 	 * returns an array of this
-	*/
+	 */
 	public function ToArray() {
 		return $this->items;
 	}
-	
+
 	/**
 	 * pushes a new object or array to the end of the list.
 	 *
-	  *@param 	array|gObject $item item
-	*/
+	 *@param 	array|gObject $item item
+	 */
 	public function push($item) {
 		$this->items[] = $item;
 	}
-	
+
 	/**
 	 * removes a item from the end of the list.
 	 *
 	 * @return 	array|gObject item
-	*/
+	 */
 	public function pop() {
 		return array_pop($this->items);
 	}
-	
+
 	/**
 	 * unshifts a new object or array to the beginning of the list.
 	 *
 	 * @param 	array|gObject $item item
-	*/
+	 */
 	public function unshift($item) {
 		array_unshift($this->items, $item);
 	}
-	
+
 	/**
 	 * shifts a item from the beginning of the list.
 	 *
 	 * @return 	array|gObject the removed item
-	*/
+	 */
 	public function shift() {
 		return array_shift($this->items);
 	}
-	
+
 	/**
 	 * revereses an ArrayList and gives the new back.
-	*/ 
+	 */
 	public function reverse() {
 		$list = new ArrayList();
 		foreach($this as $record) {
@@ -118,14 +118,37 @@ class ArrayList extends ViewAccessableData implements Countable {
 		}
 		return $list;
 	}
-	
+
 	/**
 	 * adds a item to the list making no guerantee where it will appear.
 	 *
 	 *@name add
-	*/
+	 */
 	public function add($item) {
 		$this->push($item);
+	}
+
+	/**
+	 * @param gObject $item
+	 * @param gObject $by
+	 * @param bool $after
+	 */
+	protected function insert($item, $by, $after = false) {
+		$new = array();
+		$insert = false;
+		foreach($this->items as $key => $data) {
+			if($after) $new[] = $data;
+			if(!$insert && $data == $after) {
+				$new[] = $item;
+				$insert = true;
+			}
+			if(!$after) $new[] = $data;
+		}
+
+		if(!$insert)
+			$new[] = $item;
+
+		$this->items = $new;
 	}
 
 	/**
@@ -135,20 +158,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @param gObject $after
 	 */
 	public function insertAfter($item, $after) {
-		$new = array();
-		$insert = false;
-		foreach($this->items as $key => $data) {
-			$new[] = $data;
-			if(!$insert && $data == $after) {
-				$new[] = $item;
-				$insert = true;
-			}
-		}
-		
-		if(!$insert)
-			$new[] = $item;
-		
-		$this->items = $new;
+		$this->insert($item, $after, true);
 	}
 
 	/**
@@ -157,20 +167,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 * @param gObject $before
 	 */
 	public function insertBefore($item, $before) {
-		$new = array();
-		$insert = false;
-		foreach($this->items as $key => $data) {
-			if(!$insert && $data == $before) {
-				$new[] = $item;
-				$insert = true;
-			}
-			$new[] = $data;
-		}
-		
-		if(!$insert)	
-			$new[] = $item;
-		
-		$this->items = $new;
+		$this->insert($item, $before, false);
 	}
 
 	/**
@@ -186,7 +183,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 				return;
 			}
 		}
-		
+
 		throw new InvalidArgumentException("Item to replace was not found in the list.");
 	}
 
@@ -209,13 +206,13 @@ class ArrayList extends ViewAccessableData implements Countable {
 
 		$this->items = array_values($this->items);
 	}
-	
+
 	/**
 	 * removes all dupilicated from the list by given field. it modifies this list directly.
 	 *
 	 * @param 	string $field field for checking duplicated
-	 * @return 	void 
-	*/
+	 * @return 	void
+	 */
 	public function removeDuplicates($field = "id") {
 		$data = array();
 		foreach($this->items as $key => $record) {
@@ -226,25 +223,25 @@ class ArrayList extends ViewAccessableData implements Countable {
 				array_push($data, $propValue);
 			}
 		}
-		
+
 		$this->items = array_values($this->items);
 	}
-	
+
 	/**
 	 * returns a specific range of this set of data.
 	 *
 	 * @param 	int $start element to start
 	 * @param 	int $length length
-	 * 
+	 *
 	 * @return ArrayList
-	*/
+	 */
 	public function getRange($start, $length) {
 		$list = new ArrayList();
 		for($i = $start; $i < count($this->items) && $i < $start + $length; $i++) {
 			if(isset($i))
 				$list->push($this->items[$i]);
 		}
-		
+
 		return $list;
 	}
 
@@ -261,7 +258,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 			if($record == $item)
 				return $key;
 		}
-		
+
 		throw new ItemNotFoundException("Item not found.");
 	}
 
@@ -277,45 +274,45 @@ class ArrayList extends ViewAccessableData implements Countable {
 
 		return false;
 	}
-	
+
 	/**
 	 * returns a specific range of this set of data.
 	 *
 	 * @param 	int $start element to start
 	 * @param 	int $length length default: 1
-	 * 
+	 *
 	 * @return ArrayList
-	*/
+	 */
 	public function limit($start, $length = 1) {
 		return $this->getRange($start, $length);
 	}
-	
+
 	/**
 	 * returns the first element of the list.
-	*/
+	 */
 	public function first() {
 		return isset($this->items[0]) ? $this->items[0] : null;
 	}
-	
+
 	/**
 	 * returns the last element of the list.
-	*/
+	 */
 	public function last() {
 		if(count($this) > 0)
 			return $this->items[count($this) - 1];
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Filter the list to include items with these charactaristics.
-	 * 
+	 *
 	 * @return ArrayList
 	 * @example $list->filter('Name', 'bob'); // only bob in the list
 	 * @example $list->filter('Name', array('aziz', 'bob'); // aziz and bob in list
 	 * @example $list->filter(array('Name'=>'bob, 'Age'=>21)); // bob with the Age 21 in list
 	 * @example $list->filter(array('Name'=>'bob, 'Age'=>array(21, 43))); // bob with the Age 21 or 43
-	 * @example $list->filter(array('Name'=>array('aziz','bob'), 'Age'=>array(21, 43))); 
+	 * @example $list->filter(array('Name'=>array('aziz','bob'), 'Age'=>array(21, 43)));
 	 * @example $list->filter(array('Name'=>array('LIKE','bob'))) // all records with name bob, case-insensitive and comparable to the SQL-LIKE
 	 * @example $list->filter(array('Age' => array("<", 40))) // everybody with age lower 40
 	 *          // aziz with the age 21 or 43 and bob with the Age 21 or 43
@@ -362,8 +359,8 @@ class ArrayList extends ViewAccessableData implements Countable {
 				if($columnProp != $value) {
 					return false;
 				}
-				
-				
+
+
 			} else if(isset($value[0], $value[1]) && count($value) == 2 && ($value[0] == "LIKE" || $value[0] == ">" || $value[0] == "<" || $value[0] == "!=" || $value[0] == "<=" || $value[0] == ">=" || $value[0] == "<>")) {
 				switch($value[0]) {
 					case "LIKE":
@@ -372,30 +369,30 @@ class ArrayList extends ViewAccessableData implements Countable {
 						$value[1] = str_replace('_', '.', $value[1]);
 						$value[1] = str_replace('\\.*', "%", $value[1]);
 						$value[1] = str_replace('\\.', "_", $value[1]);
-						
+
 						if(!preg_match("/" . $value[1] . "/i", $columnProp))
 							return false;
-					break;
+						break;
 					case "<":
 						if(strcmp($value[1], $columnProp) == 0)
 							return false;
-							
+
 					case "<=":
 						if(strcmp($value[1], $columnProp) == -1)
 							return false;
-					break;
+						break;
 					case ">":
 						if(strcmp($value[1], $columnProp) == 0)
 							return false;
 					case ">=":
 						if(strcmp($value[1], $columnProp) == 1)
 							return false;
-					break;
+						break;
 					case "<>":
 					case "!=":
 						if($value[1] == $columnProp)
 							return false;
-					break;
+						break;
 				}
 			} else {
 				if(isset($value[0])) {
@@ -405,7 +402,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 							$found = true;
 						}
 					}
-					
+
 					if(!$found)
 						return false;
 				} else {
@@ -415,10 +412,10 @@ class ArrayList extends ViewAccessableData implements Countable {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Sorts this list by one or more fields. You can either pass in a single
 	 * field name and direction, or a map of field names to sort directions.
@@ -534,7 +531,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function moveBefore($item, $before, $insertIfNotExists = false) {
 		$index = $this->getItemIndex($before);
-		
+
 		return $this->move($item, $index, $insertIfNotExists);
 	}
 
@@ -549,21 +546,21 @@ class ArrayList extends ViewAccessableData implements Countable {
 	 */
 	public function moveBehind($item, $behind, $insertIfNotExists = false) {
 		$index = $this->getItemIndex($behind);
-		
+
 		$index++;
 		return $this->move($item, $index, $insertIfNotExists);
 	}
-	
+
 	/**
 	 * returns if we can sort the ArrayList by a given column.
-	*/
+	 */
 	public function canSortBy($column) {
 		return true;
 	}
-	
+
 	/**
 	 * returns if we can filter the ArrayList by a given column.
-	*/
+	 */
 	public function canFilterBy($column) {
 		return true;
 	}
@@ -585,10 +582,10 @@ class ArrayList extends ViewAccessableData implements Countable {
 				return $record;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Merges with another array or list by pushing all the items in it onto the
 	 * end of this list.
@@ -598,17 +595,17 @@ class ArrayList extends ViewAccessableData implements Countable {
 	public function merge($with) {
 		foreach ($with as $item) $this->push($item);
 	}
-	
+
 	/**
 	 * Attribute-getter-API. it gets an element of the list at a specified position.
 	 *
 	 * @param 	int $offset offset
 	 * @return 	array|gObject
-	*/
+	 */
 	public function __get($offset) {
 		if(isset($this->items[$offset]))
 			return $this->items[$offset];
-		
+
 		return parent::__get($offset);
 	}
 
@@ -623,10 +620,10 @@ class ArrayList extends ViewAccessableData implements Countable {
 		if(isset($this->items[$offset])) {
 			$this->items[$offset] = $value;
 		}
-		
+
 		parent::__set($offset, $value);
 	}
-	
+
 	/**
 	 * unsets an item with given offset.
 	 *
@@ -638,7 +635,7 @@ class ArrayList extends ViewAccessableData implements Countable {
 
 		return parent::offsetUnset($offset);
 	}
-	
+
 	/**
 	 * returns whether an item is set.
 	 *
@@ -660,17 +657,17 @@ class ArrayList extends ViewAccessableData implements Countable {
 		foreach($this as $record) {
 			$data[] = self::getItemProp($record, $column);
 		}
-		
+
 		return $data;
 	}
-	
+
 	/**
 	 * iterator
 	 * this extends this dataobject to use foreach on it
 	 * @link http://php.net/manual/en/class.iterator.php
 	 */
 	protected $position = 0;
-	
+
 	/**
 	 * rewind $position to 0.
 	 */

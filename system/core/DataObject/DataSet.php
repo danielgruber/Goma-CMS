@@ -367,7 +367,7 @@ class DataSet extends ArrayList {
             if($this->dataSource->count() < $end) {
                 $end = $this->dataSource->count();
             }
-            return array("start" => $this->page * $this->perPage - $this->perPage, "end" => $end, "whole" => $this->filteredAndSortedDataSource->count());
+            return array("start" => $this->page * $this->perPage - $this->perPage, "end" => $end, "whole" => $this->filteredDataSource->count());
         }
 
         return false;

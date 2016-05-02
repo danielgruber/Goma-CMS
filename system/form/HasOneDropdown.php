@@ -183,8 +183,8 @@ class HasOneDropdown extends SingleSelectDropDown
 			$data->setVersion(DataObject::VERSION_PUBLISHED);
 		}
 
-		if ($data && $data->count() > 0) {
-			return array($data->id => $data[$this->showfield]);
+		if ($record = $data->first()) {
+			return array($record->id => $record->{$this->showfield});
 		} else {
 			return array();
 		}
