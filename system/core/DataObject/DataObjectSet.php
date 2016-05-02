@@ -347,6 +347,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function first() {
 		if(!isset($this->firstCache)) {
+			if($this->getPageCount() < $this->page) {
+				$this->page = $this->getPageCount();
+			}
+
 			$start = $this->page === null ? 0 : $this->page * $this->perPage - $this->perPage;
 			$range = $this->getRange($start, 1);
 			$this->firstCache = $this->getConverted($range->first());
@@ -371,6 +375,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	 */
 	public function last() {
 		if(!isset($this->lastCache)) {
+			if($this->getPageCount() < $this->page) {
+				$this->page = $this->getPageCount();
+			}
+
 			if($this->count() == 0) {
 				$this->lastCache = null;
 			} else if($this->page === null || $this->page == $this->getPageCount()) {
@@ -611,6 +619,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			if($this->fetchMode == self::FETCH_MODE_CREATE_NEW) {
 				$this->items = $this->staging->ToArray();
 			} else {
+				if($this->getPageCount() < $this->page) {
+					$this->page = $this->getPageCount();
+				}
+
 				$limit = (array) $this->limit;
 				if ($this->page !== null) {
 					$startIndex = $this->page * $this->perPage - $this->perPage;
@@ -719,8 +731,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			$limit = array((int) $limit);
 		}
 
-		if(!isset($limit) || count($limit) == 0)
+		if(!isset($limit) || count($limit) == 0) {
+			$this->limit = null;
 			return $this;
+		}
 
 		if(is_array($limit)) {
 			$limit = array_values($limit);

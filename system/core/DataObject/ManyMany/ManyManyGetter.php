@@ -167,11 +167,15 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
     public function setManyMany($name, $value) {
         $relationShipInfo = $this->getOwner()->getManyManyInfo($name);
 
-        if (is_a($value, "DataObjectSet") && !is_a($value, "ManyMany_DataObjectSet")) {
-            $instance = new ManyMany_DataObjectSet($relationShipInfo->getTargetClass());
-            $instance->setRelationEnv($relationShipInfo, $this->getOwner());
-            $instance->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
-            $instance->addMany($value);
+        if (is_a($value, "DataObjectSet")) {
+            if(!is_a($value, "ManyMany_DataObjectSet")) {
+                $instance = new ManyMany_DataObjectSet($relationShipInfo->getTargetClass());
+                $instance->setRelationEnv($relationShipInfo, $this->getOwner());
+                $instance->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
+                $instance->addMany($value);
+            } else {
+                $instance = $value;
+            }
 
             $this->getOwner()->setField($name, $instance);
 
@@ -187,7 +191,11 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
      * @param array $ids
      */
     public function setManyManyIDs($name, $ids) {
-        $this->getManyMany($name)->setSourceData($ids);
+        if(is_a($ids, "DataObjectSet")) {
+            $this->setManyMany($name, $ids);
+        } else {
+            $this->getManyMany($name)->setSourceData($ids);
+        }
     }
 }
 gObject::extend("DataObject", "ManyManyGetter");

@@ -135,7 +135,13 @@ class TableFieldEditButton implements TableField_ColumnProvider, TableField_URLH
 			if($tableField->form()->getRequest())
 				$tableField->form()->getRequest()->post_params = $_POST;
 
-			$content = $data->first()->controller($tableField->form()->controller)->edit();
+			$controller = $tableField->form()->controller;
+			if(is_a($controller, "controller")) {
+				/** @var Controller $controller */
+				$content = $controller->getWithModel($data->first())->edit();
+			} else {
+				$content = ControllerResolver::instanceForModel($data->first())->edit();
+			}
 		} else {
 			$tableField->Form()->redirectToForm();
 			exit;

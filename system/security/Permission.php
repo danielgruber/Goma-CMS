@@ -345,7 +345,6 @@ class Permission extends DataObject
     {
         if ($this->id != 0 && $job == "write") {
             $subversions = $this->getAllChildVersionIDs();
-
             if (count($subversions) > 0) {
 
                 if ($this->type == "groups") {
@@ -366,9 +365,7 @@ class Permission extends DataObject
                         "fields" => array()
                     );
 
-
                     if ($this->groupsids && count($this->groupsids) > 0) {
-
                         $i = 10000;
                         foreach ($subversions as $version) {
                             foreach ($this->groupsids as $groupid) {
@@ -415,7 +412,6 @@ class Permission extends DataObject
      */
     public function onBeforeManipulateManyMany(&$manipulation, $dataset, $writeData)
     {
-        // TODO: Update!
         $ownValue = $dataset->getRelationOwnValue();
         $relationShip = $dataset->getRelationShip();
 
@@ -423,7 +419,7 @@ class Permission extends DataObject
         foreach ($writeData as $id => $bool) {
             if ($data = DataObject::get_one("Permission", array("versionid" => $id))) {
                 foreach ($data->getAllChildVersionIDs() as $childVersionId) {
-                    $manipulation["many_many_permission_groups_group_insert"]["fields"][$childVersionId] = array(
+                    $manipulation[ManyMany_DataObjectSet::MANIPULATION_INSERT_NEW]["fields"][$childVersionId] = array(
                         $relationShip->getOwnerField() => $ownValue,
                         $relationShip->getTargetField() => $childVersionId,
                         $relationShip->getOwnerSortField()  => $i,

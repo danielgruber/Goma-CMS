@@ -244,6 +244,16 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
+     * @param null $oldId
+     * @return int|null
+     */
+    protected function getQueryVersionID($oldId = null) {
+        return $this->dataSourceVersion != DataObject::VERSION_MODE_CURRENT_VERSION ?
+            ($this->queryVersion() == DataObject::VERSION_STATE ? $this->ownRecord->stateid : $this->ownRecord->publishedid) :
+            ($oldId != null ? $oldId : $this->ownRecord->versionid);
+    }
+
+    /**
      * returns current relationship data.
      */
     public function getRelationshipData() {
@@ -282,10 +292,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
         $recordIdQuerySQL = $this->getRecordIdQuery($oldId)->build("distinct recordid");
 
-        $versionId = $this->dataSourceVersion != DataObject::VERSION_MODE_CURRENT_VERSION ?
-            ($this->queryVersion() == DataObject::VERSION_STATE ? $this->ownRecord->stateid : $this->ownRecord->publishedid) :
-            ($oldId != null ? $oldId : $this->ownRecord->versionid);
-
         $baseTable = $this->relationShip->getTargetBaseTableName();
 
         $query = new SelectQuery($baseTable, $fields, "recordid IN (".$recordIdQuerySQL.")");
@@ -294,7 +300,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
         // filter for not existing records
         $query->from[$this->relationShip->getTableName()] = ' LEFT JOIN ' . DB_PREFIX . $this->relationShip->getTableName() . ' AS '. $this->relationShip->getTableName() .
             ' ON ' . $baseTable . '.id = '. $this->relationShip->getTableName() .'.' . $this->relationShip->getTargetField() .
-            ' AND ' . $this->relationShip->getTableName().'.' . $this->relationShip->getOwnerField() . ' = \'' . $versionId . '\'';
+            ' AND ' . $this->relationShip->getTableName().'.' . $this->relationShip->getOwnerField() . ' = \'' . $this->getQueryVersionID($oldId) . '\'';
 
         $query->from[] = " INNER JOIN " . DB_PREFIX . $baseTable . "_state AS {$baseTable}_state ON {$baseTable}_state.publishedid = {$baseTable}.id";
 
@@ -313,13 +319,9 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
             throw new LogicException("Target-Relationship needs at least basetable.");
         }
 
-        $versionId = $this->dataSourceVersion != DataObject::VERSION_MODE_CURRENT_VERSION ?
-            ($this->queryVersion() == DataObject::VERSION_STATE ? $this->ownRecord->stateid : $this->ownRecord->publishedid) :
-            ($oldId != null ? $oldId : $this->ownRecord->versionid);
-
         $recordIdQuery = new SelectQuery($this->relationShip->getTargetBaseTableName(), array());
         $recordIdQuery->innerJoin($this->relationShip->getTableName(), " {$this->relationShip->getTableName()}.{$this->relationShip->getTargetField()} =" .
-            "{$this->relationShip->getTargetBaseTableName()}.id AND {$this->relationShip->getOwnerField()} = '{$versionId}'");
+            "{$this->relationShip->getTargetBaseTableName()}.id AND {$this->relationShip->getOwnerField()} = '{$this->getQueryVersionID($oldId)}'");
 
         if (ClassManifest::isSameClass($this->relationShip->getTargetClass(), $this->ownRecord->DataClass()) ||
             is_subclass_of($this->relationShip->getTargetClass(), $this->ownRecord->DataClass()) ||
@@ -444,19 +446,8 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
                     );
 
                     foreach ($relationData as $id => $record) {
-                        $newRecord = array(
-                            $this->relationShip->getOwnerField()        => $this->ownRecord->versionid,
-                            $this->relationShip->getTargetField()       => $id,
-                            $this->relationShip->getTargetSortField()   => isset($record[$this->relationShip->getTargetSortField()]) ?
-                                $record[$this->relationShip->getTargetSortField()] : 0,
-                            $this->relationShip->getOwnerSortField()    => $sort
-                        );
-
-                        foreach($this->relationShip->getExtraFields() as $field => $type) {
-                            $newRecord[$field] = isset($record[$field]) ? $record[$field] : "";
-                        }
-
-                        $manipulation[self::MANIPULATION_INSERT_NEW]["fields"][] = $newRecord;
+                        $manipulation[self::MANIPULATION_INSERT_NEW]["fields"][$this->ownRecord->versionid . "_" . $id] =
+                            $this->getRecordFromRelationData($id, $sort, $record);
 
                         $addedRecords[$id] = false;
                         $sort++;
@@ -470,18 +461,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
 
         /** @var DataObject $record */
         foreach($copyOfAddStage as $record) {
-            $newRecord = array(
-                $this->relationShip->getOwnerField()        => $this->ownRecord->versionid,
-                $this->relationShip->getTargetField()       => $record->versionid,
-                $this->relationShip->getTargetSortField()   => isset($record->{$this->relationShip->getTargetSortField()}) ?
-                    $record->{$this->relationShip->getTargetSortField()} : 0,
-                $this->relationShip->getOwnerSortField()    => $sort
-            );
-
-            foreach($this->relationShip->getExtraFields() as $field => $type) {
-                $newRecord[$field] = isset($record->{$field}) ? $record->{$field} : "";
-            }
-
             if(!isset($manipulation[self::MANIPULATION_INSERT_NEW])) {
                 $manipulation[self::MANIPULATION_INSERT_NEW] = array(
                     "command"       => "insert",
@@ -490,7 +469,8 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
                 );
             }
 
-            $manipulation[self::MANIPULATION_INSERT_NEW]["fields"][] = $newRecord;
+            $manipulation[self::MANIPULATION_INSERT_NEW]["fields"][$this->ownRecord->versionid . "_" . $record->versionid] =
+                $this->getRecordFromRelationData($record->versionid, $sort, $record->ToArray());
 
             $addedRecords[$record->versionid] = true;
             $sort++;
@@ -518,6 +498,29 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
     }
 
     /**
+     * gets record from relationdata.
+     * @param int $id
+     * @param int $sort
+     * @param array $record
+     * @return array
+     */
+    protected function getRecordFromRelationData($id, $sort, $record) {
+        $newRecord = array(
+            $this->relationShip->getOwnerField()        => $this->ownRecord->versionid,
+            $this->relationShip->getTargetField()       => $id,
+            $this->relationShip->getTargetSortField()   => isset($record[$this->relationShip->getTargetSortField()]) ?
+                $record[$this->relationShip->getTargetSortField()] : 0,
+            $this->relationShip->getOwnerSortField()    => $sort
+        );
+
+        foreach($this->relationShip->getExtraFields() as $field => $type) {
+            $newRecord[$field] = isset($record[$field]) ? $record[$field] : "";
+        }
+
+        return $newRecord;
+    }
+
+    /**
      * @return array
      */
     public function getSortForQuery()
@@ -539,7 +542,7 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      */
     public function getFilterForQuery()
     {
-        $filter = (array) parent::getFilterForQuery();
+        $filter = parent::getFilterForQuery();
 
         if(isset($this->manyManyData)) {
             $filter[] = $this->relationShip->getTargetBaseTableName() . ".id IN ('".implode("','", array_keys($this->manyManyData))."') ";
@@ -566,13 +569,9 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
             }
         }
 
-        $versionId = $this->dataSourceVersion != DataObject::VERSION_MODE_CURRENT_VERSION ?
-            ($this->queryVersion() == DataObject::VERSION_STATE ? $this->ownRecord->stateid : $this->ownRecord->publishedid) :
-            $this->ownRecord->versionid;
-
         $join[$relationTable] = " INNER JOIN " . DB_PREFIX . $relationTable . " AS " .
             $relationTable . " ON " . $relationTable . "." . $this->relationShip->getTargetField() . " = " . $this->dbDataSource()->table() . ".id AND " .
-            $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $versionId . "'";
+            $relationTable . "." . $this->relationShip->getOwnerField() . " = '" . $this->getQueryVersionID() . "'";
 
         return $join;
     }
@@ -617,6 +616,6 @@ class ManyMany_DataObjectSet extends RemoveStagingDataObjectSet {
      */
     protected function argumentFilterForHidingRemovedStageForQuery($filter)
     {
-
+        return $filter;
     }
 }

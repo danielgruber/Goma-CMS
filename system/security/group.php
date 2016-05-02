@@ -95,8 +95,7 @@ class Group extends DataObject implements HistoryData, PermProvider
      * @name getForm
      * @access public
      */
-    public function getForm(&$form)
-    {
+    public function getForm(&$form) {
         $form->add(new TabSet("tabs", array(
             new Tab("general", array(
                 new TextField("name", lang("name", "Name")),
@@ -108,7 +107,6 @@ class Group extends DataObject implements HistoryData, PermProvider
                 )
             ), lang("general", "general information"))
         )));
-
 
         $form->addValidator(new RequiredFields(array("name")), "valdiator");
         $form->addAction(new Button("cancel", lang("cancel", "cancel"), "LoadTreeItem(0);"));

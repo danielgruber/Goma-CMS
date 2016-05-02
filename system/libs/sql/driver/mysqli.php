@@ -888,27 +888,23 @@ class mysqliDriver implements SQLDriver
                                     $id = $data["id"];
 
                                     $sql .= " WHERE id = '" . convert::raw2sql($id) . "'";
+                                    unset($id);
                                 } else if (isset($data["where"])) {
                                     $where = $data["where"];
                                     $where = SQL::extractToWhere($where);
                                     $sql .= $where;
                                     unset($where);
                                 } else {
-                                    return false;
+                                    throw new InvalidArgumentException("Update requires id or WHERE-Clause.");
                                 }
 
-                                if (SQL::query($sql)) {
-                                    unset($id);
-                                    // everything is fine
-                                } else {
-                                    throw new MySQLException();
-                                }
+                                $manipulation[$class]["sql"] = $sql;
                             }
                         }
                     }
                     break;
                 case "insert":
-                    $this->manipulateInsert($data, $class);
+                    $manipulation[$class]["sql"] = $this->manipulateInsert($data, $class);
                     break;
                 case "delete":
                     if (!isset($data["where"]) && isset($data["id"]))
@@ -924,21 +920,24 @@ class mysqliDriver implements SQLDriver
 
                             $sql = "DELETE FROM " . DB_PREFIX . $table_name . $where;
 
-                            if (sql::query($sql)) {
-                                // everything is fine
-                            } else {
-                                throw new MySQLException();
-                            }
+                            $manipulation[$class]["sql"] = $sql;
                         }
                     }
 
                     break;
                 default:
                     if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
-                    return false;
+                    throw new InvalidArgumentException("Manipulation requires valid command: INSERT, DELETE or UPDATE. " . print_r($manipulation, true));
                     break;
             }
         }
+
+        foreach($manipulation as $info) {
+            if(isset($info["sql"])) {
+                SQL::query($info["sql"]);
+            }
+        }
+
         if (PROFILE) Profiler::unmark("MySQLi::writeManipulation");
         return true;
     }
@@ -947,7 +946,8 @@ class mysqliDriver implements SQLDriver
      * creates insert operation out of manipulation.
      *
      * @param $data
-     * @throws MySQLException, InvalidArgumentException
+     * @return string
+     * @throws InvalidArgumentException
      */
     private function manipulateInsert($data, $class)
     {
@@ -967,12 +967,7 @@ class mysqliDriver implements SQLDriver
 
                 $sql .= $this->getValuesSQL($data, $fields, $table_name);
 
-                if (sql::query($sql)) {
-                    unset($fields, $values);
-                    // everything is fine
-                } else {
-                    throw new MySQLException();
-                }
+                return $sql;
             }
         }
     }
@@ -1034,12 +1029,9 @@ class mysqliDriver implements SQLDriver
      */
     private function getRecords($data) {
         $records = $data["fields"];
-        if(!isset($records[0])) {
+        $values = array_values($records);
+        if(!is_array($values[0])) {
             $records = array($records);
-        }
-
-        if(!is_array($records[0])) {
-            throw new InvalidArgumentException("You have to either put a dictionary or an array of dictionaries.");
         }
 
         return array_values($records);

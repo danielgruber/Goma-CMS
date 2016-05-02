@@ -20,8 +20,15 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
      */
     public $name = "ManyManyIntegrationTest";
 
-    protected   $ones = array(),
-                $twos = array(),
+    /**
+     * @var ManyManyTestObjectOne[]
+     */
+    protected   $ones = array();
+
+    /**
+     * @var ManyManyTestObjectTwo[]
+     */
+    protected   $twos = array(),
                 $createdSet = 0;
 
     public function setUp()
@@ -172,6 +179,13 @@ class ManyManyIntegrationTest extends GomaUnitTest implements TestAble
             $this->assertEqual($two->versionid, $ids[$i]);
             $i++;
         }
+    }
+
+    public function testFilter() {
+        $firstOne = DataObject::get_one("ManyManyTestObjectOne");
+
+        $this->assertEqual($firstOne->twos(array("two" => $this->twos[0]->two))->count(), 1);
+        $this->assertEqual($firstOne->twos()->filter(array("two" => $this->twos[0]->two))->count(), 1);
     }
 }
 
