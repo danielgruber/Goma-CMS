@@ -575,11 +575,6 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		$this->items[$position] = $this->getConverted($this->items[$position]);
 
-		if(is_a($this->items[$position], "DataObject")) {
-			/** @var DataObject $data */
-			$this->items[$position]->queryVersion = $this->version;
-		}
-
 		return $this->items[$position];
 	}
 
@@ -1016,6 +1011,10 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 			return null;
 		} else {
 			throw new InvalidArgumentException("\$item for getConverted must be either array or object.");
+		}
+
+		if(is_a($object, "DataObject")) {
+			$object->queryVersion = $this->queryVersion();
 		}
 
 		if(is_object($object) && method_exists($object, "customise")) {

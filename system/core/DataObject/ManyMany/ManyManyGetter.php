@@ -170,6 +170,7 @@ class ManyManyGetter extends Extension implements ArgumentsQuery
         if (is_a($value, "DataObjectSet")) {
             if(!is_a($value, "ManyMany_DataObjectSet")) {
                 $instance = new ManyMany_DataObjectSet($relationShipInfo->getTargetClass());
+                $instance->setVersion($this->getOwner()->queryVersion);
                 $instance->setRelationEnv($relationShipInfo, $this->getOwner());
                 $instance->setFetchMode(DataObjectSet::FETCH_MODE_CREATE_NEW);
                 $instance->addMany($value);

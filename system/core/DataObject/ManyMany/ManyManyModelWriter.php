@@ -56,7 +56,7 @@ class ManyManyModelWriter extends Extension {
 
         // add some manipulation to existing many-many-connection, which are not reflected with belongs_many_many
         if ($this->getOwner()->getOldId() != 0) {
-            $manipulation = $this->moveManyManyExtra($manipulation, $this->getOwner()->getOldId());
+            $this->moveManyManyExtra($this->getOwner()->getOldId());
         }
 
         $this->getOwner()->setData($data);
@@ -65,12 +65,11 @@ class ManyManyModelWriter extends Extension {
     /**
      * moves extra many-many-relations.
      *
-     * @param array $manipulation
      * @param int $oldId
      * @return array
      * @throws SQLException
      */
-    protected function moveManyManyExtra($manipulation, $oldId) {
+    protected function moveManyManyExtra($oldId) {
         $dataClasses = array_merge(
             array($this->getOwner()->getModel()->BaseClass()),
             ClassInfo::DataClasses($this->getOwner()->getModel()->classname)
@@ -79,46 +78,28 @@ class ManyManyModelWriter extends Extension {
         foreach($dataClasses as $dataClass) {
             if (isset(ClassInfo::$class_info[$dataClass]["many_many_relations_extra"])) {
                 foreach(ClassInfo::$class_info[$dataClass]["many_many_relations_extra"] as $info) {
-                    $manipulation = $this->moveManyManyExtraForRelationShip($manipulation, $oldId, $info);
+                    $this->moveManyManyExtraForRelationShip($oldId, $info);
                 }
             }
         }
-
-        return $manipulation;
     }
 
     /**
      * moves many-many-extra for a specific class.
      *
-     * @param array $manipulation
      * @param int $oldId
      * @param array $info
      * @return array
      */
-    protected function moveManyManyExtraForRelationShip($manipulation, $oldId, $info) {
+    protected function moveManyManyExtraForRelationShip($oldId, $info) {
         /** @var ModelManyManyRelationShipInfo $relationShip */
         $relationShip = $this->getOwner()->getModel()->getManyManyInfo($info[1], $info[0])->getInverted();
-        $existingData = $this->getOwner()->getModel()->getManyManyRelationShipData($relationShip, null, $oldId);
 
-        if(!empty($existingData)) {
-            $manipulation[$relationShip->getTableName()] = array(
-                "command"   => "insert",
-                "ignore"	=> true,
-                "table_name"=> $relationShip->getTableName(),
-                "fields"    => array()
-            );
+        $set = new ManyMany_DataObjectSet($relationShip->getTargetClass());
+        $set->setVersion($this->getOwner()->getModel()->queryVersion);
+        $set->setRelationENV($relationShip, $this->getOwner()->getModel());
 
-            foreach ($existingData as $data) {
-                $newRecord = $data;
-                $newRecord[$relationShip->getOwnerField()] = $this->getOwner()->getModel()->versionid;
-                $newRecord[$relationShip->getTargetField()] = $newRecord["versionid"];
-
-                unset($newRecord["versionid"], $newRecord["relationShipId"]);
-                $manipulation[$relationShip->getTableName()]["fields"][] = $newRecord;
-            }
-        }
-
-        return $manipulation;
+        $set->commitStaging(false, true, $this->getOwner()->getWriteType(), $this->getOwner()->getRepository(), $oldId);
     }
 
     /**
