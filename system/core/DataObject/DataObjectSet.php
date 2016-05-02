@@ -167,15 +167,15 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 	protected function resolveSources($class) {
 		if(is_a($class, "DataObjectSet")) {
 			/** @var DataObjectSet $class */
-			$this->dbDataSource = $class->getDbDataSource();
-			$this->modelSource = $class->getModelSource();
+			$this->setDbDataSource($class->getDbDataSource());
+			$this->setModelSource($class->getModelSource());
 		} else if(is_object($class)) {
 			if(is_a($class, "IDataObjectSetDataSource")) {
-				$this->dbDataSource = $class;
+				$this->setDbDataSource($class);
 			}
 
 			if(is_a($class, "IDataObjectSetModelSource")) {
-				$this->modelSource = $class;
+				$this->setModelSource($class);
 			}
 
 			if(method_exists($class, "DataClass") && ClassInfo::exists($class->DataClass())) {
@@ -187,33 +187,33 @@ class DataObjectSet extends ViewAccessableData implements Countable {
 
 		if(is_array($class) && count($class) == 2) {
 			if(is_a($class[0], "IDataObjectSetDataSource")) {
-				$this->dbDataSource = $class[0];
+				$this->setDbDataSource($class[0]);
 			}
 
 			if(is_a($class[1], "IDataObjectSetModelSource")) {
-				$this->modelSource = $class[1];
+				$this->setModelSource($class[1]);
 			}
 		} else
 
-		if(is_string($class)) {
-			if(ClassInfo::exists($class)) {
-				if(method_exists($class, "getDbDataSource") && !isset($this->dbDataSource)) {
-					$this->dbDataSource = call_user_func_array(array($class, "getDbDataSource"), array($class));
-				}
+			if(is_string($class)) {
+				if(ClassInfo::exists($class)) {
+					if(method_exists($class, "getDbDataSource") && !isset($this->dbDataSource)) {
+						$this->setDbDataSource(call_user_func_array(array($class, "getDbDataSource"), array($class)));
+					}
 
-				if(method_exists($class, "getModelDataSource") && !isset($this->modelSource)) {
-					$this->modelSource = call_user_func_array(array($class, "getModelDataSource"), array($class));
-				}
+					if(method_exists($class, "getModelDataSource") && !isset($this->modelSource)) {
+						$this->setModelSource(call_user_func_array(array($class, "getModelDataSource"), array($class)));
+					}
 
-				if(!isset($this->dbDataSource) && !isset($this->modelSource)) {
-					throw new InvalidArgumentException("Class " . $class . " does not integrate method getDbDataSource or getModelDataSource.");
+					if(!isset($this->dbDataSource) && !isset($this->modelSource)) {
+						throw new InvalidArgumentException("Class " . $class . " does not integrate method getDbDataSource or getModelDataSource.");
+					}
+				} else {
+					throw new InvalidArgumentException("Class " . $class . " does not exist.");
 				}
 			} else {
-				throw new InvalidArgumentException("Class " . $class . " does not exist.");
+				throw new InvalidArgumentException("\$class must be either String or IDataObjectSetDataSource or IDataObjectSetModelSource or array of both.");
 			}
-		} else {
-			throw new InvalidArgumentException("\$class must be either String or IDataObjectSetDataSource or IDataObjectSetModelSource or array of both.");
-		}
 	}
 
 	/**
